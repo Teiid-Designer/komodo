@@ -22,7 +22,7 @@ import org.komodo.utils.ArgCheck;
  */
 public abstract class FunctionImpl extends AbstractProcedureImpl implements Function {
 
-    protected enum StandardOptions {
+    private enum StandardOption {
 
         AGGREGATE( "AGGREGATE" ), //$NON-NLS-1$
         ALLOWS_DISTINCT( "ALLOWS-DISTINCT" ), //$NON-NLS-1$
@@ -34,9 +34,39 @@ public abstract class FunctionImpl extends AbstractProcedureImpl implements Func
         USES_DISTINCT_ROWS( "USES-DISTINCT-ROWS" ), //$NON-NLS-1$
         VARARGS( "VARARGS" ); //$NON-NLS-1$
 
+        /**
+         * @param name
+         *        the name being checked (can be <code>null</code>)
+         * @return <code>true</code> if the name is the name of a standard option
+         */
+        static boolean isValid( final String name ) {
+            for ( final StandardOption option : values() ) {
+                if ( option.name().equals( name ) ) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /**
+         * @return the names of all the options (never <code>null</code> or empty)
+         */
+        static String[] names() {
+            final StandardOption[] options = values();
+            final String[] result = new String[ options.length ];
+            int i = 0;
+
+            for ( final StandardOption option : options ) {
+                result[i++] = option.name();
+            }
+
+            return result;
+        }
+
         private final String name;
 
-        private StandardOptions( final String optionName ) {
+        private StandardOption( final String optionName ) {
             this.name = optionName;
         }
 
@@ -80,7 +110,7 @@ public abstract class FunctionImpl extends AbstractProcedureImpl implements Func
             final List< StatementOption > temp = new ArrayList<>( superOptions.length );
 
             for ( final StatementOption option : superOptions ) {
-                if ( StandardOptions.valueOf( option.getName( transaction ) ) == null ) {
+                if ( !isStandardOption( option.getName( transaction ) ) ) {
                     temp.add( option );
                 }
             }
@@ -100,13 +130,31 @@ public abstract class FunctionImpl extends AbstractProcedureImpl implements Func
      */
     @Override
     public Determinism getDeterminism( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.DETERMINISM.getName() );
+        final String option = OptionContainerUtils.getOption( transaction, this, StandardOption.DETERMINISM.getName() );
 
         if (option == null) {
             return Determinism.DEFAULT_VALUE;
         }
 
-        return Determinism.valueOf( option.getOption( transaction ) );
+        return Determinism.valueOf( option );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.model.OptionContainer#getStandardOptionNames()
+     */
+    @Override
+    public String[] getStandardOptionNames() {
+        final String[] superNames = super.getStandardOptionNames();
+        final String[] names = StandardOption.names();
+
+        // combine
+        final String[] result = new String[ superNames.length + names.length ];
+        System.arraycopy( superNames, 0, result, 0, superNames.length );
+        System.arraycopy( names, 0, result, superNames.length, names.length );
+
+        return result;
     }
 
     /**
@@ -116,13 +164,13 @@ public abstract class FunctionImpl extends AbstractProcedureImpl implements Func
      */
     @Override
     public boolean isAggregate( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.AGGREGATE.getName() );
+        final String option = OptionContainerUtils.getOption( transaction, this, StandardOption.AGGREGATE.getName() );
 
         if (option == null) {
             return Function.DEFAULT_AGGREGATE;
         }
 
-        return Boolean.parseBoolean( option.getOption( transaction ) );
+        return Boolean.parseBoolean( option );
     }
 
     /**
@@ -132,13 +180,13 @@ public abstract class FunctionImpl extends AbstractProcedureImpl implements Func
      */
     @Override
     public boolean isAllowsDistinct( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.ALLOWS_DISTINCT.getName() );
+        final String option = OptionContainerUtils.getOption( transaction, this, StandardOption.ALLOWS_DISTINCT.getName() );
 
         if (option == null) {
             return Function.DEFAULT_ALLOWS_DISTINCT;
         }
 
-        return Boolean.parseBoolean( option.getOption( transaction ) );
+        return Boolean.parseBoolean( option );
     }
 
     /**
@@ -148,13 +196,13 @@ public abstract class FunctionImpl extends AbstractProcedureImpl implements Func
      */
     @Override
     public boolean isAllowsOrderBy( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.ALLOWS_ORDERBY.getName() );
+        final String option = OptionContainerUtils.getOption( transaction, this, StandardOption.ALLOWS_ORDERBY.getName() );
 
         if (option == null) {
             return Function.DEFAULT_ALLOWS_ORDER_BY;
         }
 
-        return Boolean.parseBoolean( option.getOption( transaction ) );
+        return Boolean.parseBoolean( option );
     }
 
     /**
@@ -164,13 +212,13 @@ public abstract class FunctionImpl extends AbstractProcedureImpl implements Func
      */
     @Override
     public boolean isAnalytic( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.ANALYTIC.getName() );
+        final String option = OptionContainerUtils.getOption( transaction, this, StandardOption.ANALYTIC.getName() );
 
         if (option == null) {
             return Function.DEFAULT_ANALYTIC;
         }
 
-        return Boolean.parseBoolean( option.getOption( transaction ) );
+        return Boolean.parseBoolean( option );
     }
 
     /**
@@ -180,13 +228,13 @@ public abstract class FunctionImpl extends AbstractProcedureImpl implements Func
      */
     @Override
     public boolean isDecomposable( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.DECOMPOSABLE.getName() );
+        final String option = OptionContainerUtils.getOption( transaction, this, StandardOption.DECOMPOSABLE.getName() );
 
         if (option == null) {
             return Function.DEFAULT_DECOMPOSABLE;
         }
 
-        return Boolean.parseBoolean( option.getOption( transaction ) );
+        return Boolean.parseBoolean( option );
     }
 
     /**
@@ -196,13 +244,23 @@ public abstract class FunctionImpl extends AbstractProcedureImpl implements Func
      */
     @Override
     public boolean isNullOnNull( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.NULL_ON_NULL.getName() );
+        final String option = OptionContainerUtils.getOption( transaction, this, StandardOption.NULL_ON_NULL.getName() );
 
         if (option == null) {
             return Function.DEFAULT_NULL_ON_NULL;
         }
 
-        return Boolean.parseBoolean( option.getOption( transaction ) );
+        return Boolean.parseBoolean( option );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.model.OptionContainer#isStandardOption(java.lang.String)
+     */
+    @Override
+    public boolean isStandardOption( final String name ) {
+        return ( super.isStandardOption( name ) || StandardOption.isValid( name ) );
     }
 
     /**
@@ -212,13 +270,13 @@ public abstract class FunctionImpl extends AbstractProcedureImpl implements Func
      */
     @Override
     public boolean isUsesDistinctRows( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.USES_DISTINCT_ROWS.getName() );
+        final String option = OptionContainerUtils.getOption( transaction, this, StandardOption.USES_DISTINCT_ROWS.getName() );
 
         if (option == null) {
             return Function.DEFAULT_USES_DISTINCT_ROWS;
         }
 
-        return Boolean.parseBoolean( option.getOption( transaction ) );
+        return Boolean.parseBoolean( option );
     }
 
     /**
@@ -228,13 +286,13 @@ public abstract class FunctionImpl extends AbstractProcedureImpl implements Func
      */
     @Override
     public boolean isVarArgs( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.VARARGS.getName() );
+        final String option = OptionContainerUtils.getOption( transaction, this, StandardOption.VARARGS.getName() );
 
         if (option == null) {
             return Function.DEFAULT_VARARGS;
         }
 
-        return Boolean.parseBoolean( option.getOption( transaction ) );
+        return Boolean.parseBoolean( option );
     }
 
     /**
@@ -245,7 +303,7 @@ public abstract class FunctionImpl extends AbstractProcedureImpl implements Func
     @Override
     public void setAggregate( final UnitOfWork transaction,
                               final boolean newAggregate ) throws KException {
-        setStatementOption( transaction, StandardOptions.AGGREGATE.getName(), Boolean.toString( newAggregate ) );
+        setStatementOption( transaction, StandardOption.AGGREGATE.getName(), Boolean.toString( newAggregate ) );
     }
 
     /**
@@ -256,7 +314,7 @@ public abstract class FunctionImpl extends AbstractProcedureImpl implements Func
     @Override
     public void setAllowsDistinct( final UnitOfWork transaction,
                                    final boolean newAllowsDistinct ) throws KException {
-        setStatementOption( transaction, StandardOptions.ALLOWS_DISTINCT.getName(), Boolean.toString( newAllowsDistinct ) );
+        setStatementOption( transaction, StandardOption.ALLOWS_DISTINCT.getName(), Boolean.toString( newAllowsDistinct ) );
     }
 
     /**
@@ -267,7 +325,7 @@ public abstract class FunctionImpl extends AbstractProcedureImpl implements Func
     @Override
     public void setAllowsOrderBy( final UnitOfWork transaction,
                                   final boolean newAllowsOrderBy ) throws KException {
-        setStatementOption( transaction, StandardOptions.ALLOWS_ORDERBY.getName(), Boolean.toString( newAllowsOrderBy ) );
+        setStatementOption( transaction, StandardOption.ALLOWS_ORDERBY.getName(), Boolean.toString( newAllowsOrderBy ) );
     }
 
     /**
@@ -278,7 +336,7 @@ public abstract class FunctionImpl extends AbstractProcedureImpl implements Func
     @Override
     public void setAnalytic( final UnitOfWork transaction,
                              final boolean newIsAnalytic ) throws KException {
-        setStatementOption( transaction, StandardOptions.ANALYTIC.getName(), Boolean.toString( newIsAnalytic ) );
+        setStatementOption( transaction, StandardOption.ANALYTIC.getName(), Boolean.toString( newIsAnalytic ) );
     }
 
     /**
@@ -289,7 +347,7 @@ public abstract class FunctionImpl extends AbstractProcedureImpl implements Func
     @Override
     public void setDecomposable( final UnitOfWork transaction,
                                  final boolean newDecomposable ) throws KException {
-        setStatementOption( transaction, StandardOptions.DECOMPOSABLE.getName(), Boolean.toString( newDecomposable ) );
+        setStatementOption( transaction, StandardOption.DECOMPOSABLE.getName(), Boolean.toString( newDecomposable ) );
     }
 
     /**
@@ -302,7 +360,7 @@ public abstract class FunctionImpl extends AbstractProcedureImpl implements Func
     public void setDeterminism( final UnitOfWork transaction,
                                 final Determinism newDeterminism ) throws KException {
         final String value = ( ( newDeterminism == null ) ? Determinism.DEFAULT_VALUE.toString() : newDeterminism.name() );
-        setStatementOption( transaction, StandardOptions.DETERMINISM.getName(), value );
+        setStatementOption( transaction, StandardOption.DETERMINISM.getName(), value );
     }
 
     /**
@@ -313,7 +371,7 @@ public abstract class FunctionImpl extends AbstractProcedureImpl implements Func
     @Override
     public void setNullOnNull( final UnitOfWork transaction,
                                final boolean newNullOnNull ) throws KException {
-        setStatementOption( transaction, StandardOptions.NULL_ON_NULL.getName(), Boolean.toString( newNullOnNull ) );
+        setStatementOption( transaction, StandardOption.NULL_ON_NULL.getName(), Boolean.toString( newNullOnNull ) );
     }
 
     /**
@@ -324,7 +382,7 @@ public abstract class FunctionImpl extends AbstractProcedureImpl implements Func
     @Override
     public void setUsesDistinctRows( final UnitOfWork transaction,
                                      final boolean newUsesDistinctRows ) throws KException {
-        setStatementOption( transaction, StandardOptions.USES_DISTINCT_ROWS.getName(), Boolean.toString( newUsesDistinctRows ) );
+        setStatementOption( transaction, StandardOption.USES_DISTINCT_ROWS.getName(), Boolean.toString( newUsesDistinctRows ) );
     }
 
     /**
@@ -335,7 +393,7 @@ public abstract class FunctionImpl extends AbstractProcedureImpl implements Func
     @Override
     public void setVarArgs( final UnitOfWork transaction,
                             final boolean newVarArgs ) throws KException {
-        setStatementOption( transaction, StandardOptions.VARARGS.getName(), Boolean.toString( newVarArgs ) );
+        setStatementOption( transaction, StandardOption.VARARGS.getName(), Boolean.toString( newVarArgs ) );
     }
 
 }

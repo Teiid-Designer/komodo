@@ -10,13 +10,14 @@ package org.komodo.relational.model;
 import org.komodo.relational.RelationalObject;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 
 /**
  * Represents a DDL statement option from a relational model.
  */
-public interface StatementOption extends RelationalObject {
+public interface StatementOption extends Property, RelationalObject {
 
     /**
      * Identifier of this object

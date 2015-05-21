@@ -7,10 +7,6 @@
  */
 package org.komodo.relational.model.internal;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.komodo.relational.Messages;
-import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalConstants;
 import org.komodo.relational.RelationalConstants.Nullable;
 import org.komodo.relational.RelationalProperties;
@@ -23,8 +19,12 @@ import org.komodo.relational.model.Parameter;
 import org.komodo.relational.model.StatementOption;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
+import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.Descriptor;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.Property;
+import org.komodo.spi.repository.PropertyDescriptor;
 import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -125,19 +125,14 @@ public final class ParameterImpl extends RelationalChildRestrictedObject impleme
         super( uow, repository, workspacePath );
     }
 
-    @Override
-    public KomodoType getTypeIdentifier( UnitOfWork uow ) {
-        return RESOLVER.identifier();
-    }
-
     /**
      * {@inheritDoc}
      *
      * @see org.komodo.relational.model.OptionContainer#getCustomOptions(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public StatementOption[] getCustomOptions( final UnitOfWork transaction ) {
-        return StatementOption.NO_OPTIONS;
+    public StatementOption[] getCustomOptions( final UnitOfWork transaction ) throws KException {
+        return OptionContainerUtils.getCustomOptions( transaction, this );
     }
 
     /**
@@ -239,6 +234,53 @@ public final class ParameterImpl extends RelationalChildRestrictedObject impleme
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.repository.ObjectImpl#getPrimaryType(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public Descriptor getPrimaryType( final UnitOfWork transaction ) throws KException {
+        return OptionContainerUtils.createPrimaryType(transaction, this, super.getPrimaryType( transaction ));
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#getProperty(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String)
+     */
+    @Override
+    public Property getProperty( final UnitOfWork transaction,
+                                 final String name ) throws KException {
+        return OptionContainerUtils.getProperty( transaction, this, name, super.getProperty( transaction, name ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#getPropertyDescriptor(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String)
+     */
+    @Override
+    public PropertyDescriptor getPropertyDescriptor( final UnitOfWork transaction,
+                                                     final String propName ) throws KException {
+        return OptionContainerUtils.getPropertyDescriptor( transaction,
+                                                           this,
+                                                           propName,
+                                                           super.getPropertyDescriptor( transaction, propName ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#getPropertyNames(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public String[] getPropertyNames( final UnitOfWork transaction ) throws KException {
+        return OptionContainerUtils.getPropertyNames( transaction, this, super.getPropertyNames( transaction ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.relational.model.Parameter#getScale(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
@@ -256,26 +298,31 @@ public final class ParameterImpl extends RelationalChildRestrictedObject impleme
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.relational.model.OptionContainer#getStandardOptionNames()
+     */
+    @Override
+    public String[] getStandardOptionNames() {
+        return StringConstants.EMPTY_ARRAY; // there are no standard options
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.model.OptionContainer#getStatementOptionNames(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public String[] getStatementOptionNames( final UnitOfWork transaction ) throws KException {
+        return OptionContainerUtils.getOptionNames( transaction, this );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.relational.model.OptionContainer#getStatementOptions(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
     public StatementOption[] getStatementOptions( final UnitOfWork transaction ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-
-        final KomodoObject same = new ObjectImpl( getRepository(), getAbsolutePath(), getIndex() );
-        final List< StatementOption > result = new ArrayList< StatementOption >();
-
-        for ( final KomodoObject kobject : same.getChildrenOfType( transaction, StandardDdlLexicon.TYPE_STATEMENT_OPTION ) ) {
-            final StatementOption option = new StatementOptionImpl( transaction, getRepository(), kobject.getAbsolutePath() );
-            result.add( option );
-        }
-
-        if ( result.isEmpty() ) {
-            return StatementOption.NO_OPTIONS;
-        }
-
-        return result.toArray( new StatementOption[ result.size() ] );
+        return OptionContainerUtils.getOptions( transaction, this );
     }
 
     /**
@@ -286,6 +333,50 @@ public final class ParameterImpl extends RelationalChildRestrictedObject impleme
     @Override
     public int getTypeId() {
         return TYPE_ID;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.repository.ObjectImpl#getTypeIdentifier(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public KomodoType getTypeIdentifier( final UnitOfWork uow ) {
+        return RESOLVER.identifier();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.repository.ObjectImpl#hasProperties(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public boolean hasProperties( final UnitOfWork transaction ) throws KException {
+        return OptionContainerUtils.hasProperties( transaction, this, super.hasProperties( transaction ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#hasProperty(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String)
+     */
+    @Override
+    public boolean hasProperty( final UnitOfWork transaction,
+                                final String name ) throws KException {
+        return OptionContainerUtils.hasProperty( transaction, this, name, super.hasProperty( transaction, name ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.model.OptionContainer#isCustomOption(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String)
+     */
+    @Override
+    public boolean isCustomOption( final UnitOfWork transaction,
+                                   final String name ) throws KException {
+        return OptionContainerUtils.hasCustomOption( transaction, this, name );
     }
 
     /**
@@ -308,32 +399,24 @@ public final class ParameterImpl extends RelationalChildRestrictedObject impleme
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.relational.model.OptionContainer#isStandardOption(java.lang.String)
+     */
+    @Override
+    public boolean isStandardOption( final String name ) {
+        ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
+        return false; // there are no standard options
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.relational.model.OptionContainer#removeStatementOption(org.komodo.spi.repository.Repository.UnitOfWork,
      *      java.lang.String)
      */
     @Override
     public void removeStatementOption( final UnitOfWork transaction,
                                        final String optionToRemove ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( optionToRemove, "optionToRemove" ); //$NON-NLS-1$
-
-        boolean found = false;
-        final StatementOption[] options = getStatementOptions( transaction );
-
-        if ( options.length != 0 ) {
-            for ( final StatementOption option : options ) {
-                if ( optionToRemove.equals( option.getName( transaction ) ) ) {
-                    option.remove( transaction );
-                    found = true;
-                    break;
-                }
-            }
-        }
-
-        if ( !found ) {
-            throw new KException( Messages.getString( Relational.STATEMENT_OPTION_NOT_FOUND_TO_REMOVE, optionToRemove ) );
-        }
+        OptionContainerUtils.removeOption( transaction, this, optionToRemove );
     }
 
     /**
@@ -413,6 +496,22 @@ public final class ParameterImpl extends RelationalChildRestrictedObject impleme
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.repository.ObjectImpl#setProperty(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String,
+     *      java.lang.Object[])
+     */
+    @Override
+    public void setProperty( final UnitOfWork transaction,
+                             final String propertyName,
+                             final Object... values ) throws KException {
+        // if an option was not set then set a property
+        if ( !OptionContainerUtils.setProperty( transaction, this, propertyName, values ) ) {
+            super.setProperty( transaction, propertyName, values );
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.relational.model.Parameter#setResult(org.komodo.spi.repository.Repository.UnitOfWork, boolean)
      */
     @Override
@@ -442,29 +541,7 @@ public final class ParameterImpl extends RelationalChildRestrictedObject impleme
     public StatementOption setStatementOption( final UnitOfWork transaction,
                                                final String optionName,
                                                final String optionValue ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( optionName, "optionName" ); //$NON-NLS-1$
-
-        StatementOption result = null;
-
-        if ( StringUtils.isBlank( optionValue ) ) {
-            removeStatementOption( transaction, optionName );
-        } else {
-            result = Utils.getOption( transaction, this, optionName );
-
-            if ( result == null ) {
-                result = RelationalModelFactory.createStatementOption( transaction,
-                                                                       getRepository(),
-                                                                       this,
-                                                                       optionName,
-                                                                       optionValue );
-            } else {
-                result.setOption( transaction, optionValue );
-            }
-        }
-
-        return result;
+        return OptionContainerUtils.setOption( transaction, this, optionName, optionValue );
     }
 
 }

@@ -7,10 +7,6 @@
  */
 package org.komodo.relational.model.internal;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.komodo.relational.Messages;
-import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalConstants;
 import org.komodo.relational.RelationalConstants.Nullable;
 import org.komodo.relational.RelationalProperties;
@@ -23,13 +19,15 @@ import org.komodo.relational.model.StatementOption;
 import org.komodo.relational.model.Table;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.Descriptor;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.Property;
+import org.komodo.spi.repository.PropertyDescriptor;
 import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
-import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateTable;
@@ -39,7 +37,7 @@ import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateTable;
  */
 public final class ColumnImpl extends RelationalChildRestrictedObject implements Column {
 
-    private enum StandardOptions {
+    private enum StandardOption {
 
         ANNOTATION,
         CASE_SENSITIVE,
@@ -57,7 +55,37 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
         SELECTABLE,
         SIGNED,
         UPDATABLE,
-        UUID
+        UUID;
+
+        /**
+         * @param name
+         *        the name being checked (can be <code>null</code>)
+         * @return <code>true</code> if the name is the name of a standard option
+         */
+        static boolean isValid( final String name ) {
+            for ( final StandardOption option : values() ) {
+                if ( option.name().equals( name ) ) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /**
+         * @return the names of all the options (never <code>null</code> or empty)
+         */
+        static String[] names() {
+            final StandardOption[] options = values();
+            final String[] result = new String[ options.length ];
+            int i = 0;
+
+            for ( final StandardOption option : options ) {
+                result[i++] = option.name();
+            }
+
+            return result;
+        }
 
     }
 
@@ -143,12 +171,7 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
     public ColumnImpl( final UnitOfWork uow,
                        final Repository repository,
                        final String workspacePath ) throws KException {
-        super(uow, repository, workspacePath);
-    }
-
-    @Override
-    public KomodoType getTypeIdentifier(UnitOfWork uow) {
-        return RESOLVER.identifier();
+        super( uow, repository, workspacePath );
     }
 
     /**
@@ -158,13 +181,13 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
      */
     @Override
     public int getCharOctetLength( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.CHAR_OCTET_LENGTH.name());
+        final String option = OptionContainerUtils.getOption( transaction, this, StandardOption.CHAR_OCTET_LENGTH.name() );
 
-        if (option == null) {
+        if ( option == null ) {
             return Column.DEFAULT_CHAR_OCTET_LENGTH;
         }
 
-        return Integer.parseInt(option.getOption(transaction));
+        return Integer.parseInt( option );
     }
 
     /**
@@ -174,8 +197,8 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
      */
     @Override
     public String getCollationName( final UnitOfWork uow ) throws KException {
-        return getObjectProperty(uow, PropertyValueType.STRING, "getCollationName", //$NON-NLS-1$
-                                 StandardDdlLexicon.COLLATION_NAME);
+        return getObjectProperty( uow, PropertyValueType.STRING, "getCollationName", //$NON-NLS-1$
+                                  StandardDdlLexicon.COLLATION_NAME );
     }
 
     /**
@@ -185,24 +208,7 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
      */
     @Override
     public StatementOption[] getCustomOptions( final UnitOfWork transaction ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-
-        StatementOption[] result = getStatementOptions( transaction );
-
-        if ( result.length != 0 ) {
-            final List< StatementOption > temp = new ArrayList<>( result.length );
-
-            for ( final StatementOption option : result ) {
-                if ( StandardOptions.valueOf( option.getName( transaction ) ) == null ) {
-                    temp.add( option );
-                }
-            }
-
-            result = temp.toArray( new StatementOption[ temp.size() ] );
-        }
-
-        return result;
+        return OptionContainerUtils.getCustomOptions( transaction, this );
     }
 
     /**
@@ -212,10 +218,10 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
      */
     @Override
     public String getDatatypeName( final UnitOfWork uow ) throws KException {
-        final String value = getObjectProperty(uow, PropertyValueType.STRING, "getDatatypeName", //$NON-NLS-1$
-                                               StandardDdlLexicon.DATATYPE_NAME);
+        final String value = getObjectProperty( uow, PropertyValueType.STRING, "getDatatypeName", //$NON-NLS-1$
+                                                StandardDdlLexicon.DATATYPE_NAME );
 
-        if (StringUtils.isBlank(value)) {
+        if ( StringUtils.isBlank( value ) ) {
             return RelationalConstants.DEFAULT_DATATYPE_NAME;
         }
 
@@ -229,8 +235,8 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
      */
     @Override
     public String getDefaultValue( final UnitOfWork uow ) throws KException {
-        return getObjectProperty(uow, PropertyValueType.STRING, "getDefaultValue", //$NON-NLS-1$
-                                 StandardDdlLexicon.DEFAULT_VALUE);
+        return getObjectProperty( uow, PropertyValueType.STRING, "getDefaultValue", //$NON-NLS-1$
+                                  StandardDdlLexicon.DEFAULT_VALUE );
     }
 
     /**
@@ -240,13 +246,7 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
      */
     @Override
     public String getDescription( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.ANNOTATION.name());
-
-        if (option == null) {
-            return null;
-        }
-
-        return option.getOption(transaction);
+        return OptionContainerUtils.getOption( transaction, this, StandardOption.ANNOTATION.name() );
     }
 
     /**
@@ -256,13 +256,13 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
      */
     @Override
     public long getDistinctValues( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.DISTINCT_VALUES.name());
+        final String option = OptionContainerUtils.getOption( transaction, this, StandardOption.DISTINCT_VALUES.name() );
 
-        if (option == null) {
+        if ( option == null ) {
             return Column.DEFAULT_DISTINCT_VALUES;
         }
 
-        return Long.parseLong(option.getOption(transaction));
+        return Long.parseLong( option );
     }
 
     /**
@@ -272,10 +272,10 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
      */
     @Override
     public long getLength( final UnitOfWork uow ) throws KException {
-        final Long value = getObjectProperty(uow, PropertyValueType.LONG, "getLength", //$NON-NLS-1$
-                                             StandardDdlLexicon.DATATYPE_LENGTH);
+        final Long value = getObjectProperty( uow, PropertyValueType.LONG, "getLength", //$NON-NLS-1$
+                                              StandardDdlLexicon.DATATYPE_LENGTH );
 
-        if (value == null) {
+        if ( value == null ) {
             return RelationalConstants.DEFAULT_LENGTH;
         }
 
@@ -289,13 +289,7 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
      */
     @Override
     public String getMaxValue( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.MAX_VALUE.name());
-
-        if (option == null) {
-            return null;
-        }
-
-        return option.getOption(transaction);
+        return OptionContainerUtils.getOption( transaction, this, StandardOption.MAX_VALUE.name() );
     }
 
     /**
@@ -305,13 +299,7 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
      */
     @Override
     public String getMinValue( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.MIN_VALUE.name());
-
-        if (option == null) {
-            return null;
-        }
-
-        return option.getOption(transaction);
+        return OptionContainerUtils.getOption( transaction, this, StandardOption.MIN_VALUE.name() );
     }
 
     /**
@@ -321,13 +309,7 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
      */
     @Override
     public String getNameInSource( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.NAMEINSOURCE.name());
-
-        if (option == null) {
-            return null;
-        }
-
-        return option.getOption(transaction);
+        return OptionContainerUtils.getOption( transaction, this, StandardOption.NAMEINSOURCE.name() );
     }
 
     /**
@@ -337,13 +319,7 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
      */
     @Override
     public String getNativeType( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.NATIVE_TYPE.name());
-
-        if (option == null) {
-            return null;
-        }
-
-        return option.getOption(transaction);
+        return OptionContainerUtils.getOption( transaction, this, StandardOption.NATIVE_TYPE.name() );
     }
 
     /**
@@ -353,14 +329,14 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
      */
     @Override
     public Nullable getNullable( final UnitOfWork uow ) throws KException {
-        final String value = getObjectProperty(uow, PropertyValueType.STRING, "getNullable", //$NON-NLS-1$
-                                               StandardDdlLexicon.NULLABLE);
+        final String value = getObjectProperty( uow, PropertyValueType.STRING, "getNullable", //$NON-NLS-1$
+                                                StandardDdlLexicon.NULLABLE );
 
-        if (StringUtils.isBlank(value)) {
+        if ( StringUtils.isBlank( value ) ) {
             return Nullable.DEFAULT_VALUE;
         }
 
-        return Nullable.fromValue(value);
+        return Nullable.fromValue( value );
     }
 
     /**
@@ -370,13 +346,13 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
      */
     @Override
     public long getNullValueCount( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.NULL_VALUE_COUNT.name());
+        final String option = OptionContainerUtils.getOption( transaction, this, StandardOption.NULL_VALUE_COUNT.name() );
 
-        if (option == null) {
+        if ( option == null ) {
             return Column.DEFAULT_NULL_VALUE_COUNT;
         }
 
-        return Long.parseLong(option.getOption(transaction));
+        return Long.parseLong( option );
     }
 
     /**
@@ -386,10 +362,10 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
      */
     @Override
     public int getPrecision( final UnitOfWork uow ) throws KException {
-        final Integer value = getObjectProperty(uow, PropertyValueType.INTEGER, "getPrecision", //$NON-NLS-1$
-                                                StandardDdlLexicon.DATATYPE_PRECISION);
+        final Integer value = getObjectProperty( uow, PropertyValueType.INTEGER, "getPrecision", //$NON-NLS-1$
+                                                 StandardDdlLexicon.DATATYPE_PRECISION );
 
-        if (value == null) {
+        if ( value == null ) {
             return RelationalConstants.DEFAULT_PRECISION;
         }
 
@@ -399,17 +375,64 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.repository.ObjectImpl#getPrimaryType(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public Descriptor getPrimaryType( final UnitOfWork transaction ) throws KException {
+        return OptionContainerUtils.createPrimaryType(transaction, this, super.getPrimaryType( transaction ));
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#getProperty(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String)
+     */
+    @Override
+    public Property getProperty( final UnitOfWork transaction,
+                                 final String name ) throws KException {
+        return OptionContainerUtils.getProperty( transaction, this, name, super.getProperty( transaction, name ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#getPropertyDescriptor(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String)
+     */
+    @Override
+    public PropertyDescriptor getPropertyDescriptor( final UnitOfWork transaction,
+                                                     final String propName ) throws KException {
+        return OptionContainerUtils.getPropertyDescriptor( transaction,
+                                                           this,
+                                                           propName,
+                                                           super.getPropertyDescriptor( transaction, propName ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#getPropertyNames(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public String[] getPropertyNames( final UnitOfWork transaction ) throws KException {
+        return OptionContainerUtils.getPropertyNames( transaction, this, super.getPropertyNames( transaction ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.relational.model.Column#getRadix(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
     public int getRadix( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.RADIX.name());
+        final String option = OptionContainerUtils.getOption( transaction, this, StandardOption.RADIX.name() );
 
-        if (option == null) {
+        if ( option == null ) {
             return Column.DEFAULT_RADIX;
         }
 
-        return Integer.parseInt(option.getOption(transaction));
+        return Integer.parseInt( option );
     }
 
     /**
@@ -419,10 +442,10 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
      */
     @Override
     public int getScale( final UnitOfWork uow ) throws KException {
-        final Integer value = getObjectProperty(uow, PropertyValueType.INTEGER, "getScale", //$NON-NLS-1$
-                                                StandardDdlLexicon.DATATYPE_SCALE);
+        final Integer value = getObjectProperty( uow, PropertyValueType.INTEGER, "getScale", //$NON-NLS-1$
+                                                 StandardDdlLexicon.DATATYPE_SCALE );
 
-        if (value == null) {
+        if ( value == null ) {
             return RelationalConstants.DEFAULT_SCALE;
         }
 
@@ -436,13 +459,33 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
      */
     @Override
     public Searchable getSearchable( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.SEARCHABLE.name());
+        final String option = OptionContainerUtils.getOption( transaction, this, StandardOption.SEARCHABLE.name() );
 
-        if (option == null) {
+        if ( option == null ) {
             return Searchable.DEFAULT_VALUE;
         }
 
-        return Searchable.valueOf(option.getOption(transaction));
+        return Searchable.valueOf( option );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.model.OptionContainer#getStandardOptionNames()
+     */
+    @Override
+    public String[] getStandardOptionNames() {
+        return StandardOption.names();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.model.OptionContainer#getStatementOptionNames(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public String[] getStatementOptionNames( final UnitOfWork transaction ) throws KException {
+        return OptionContainerUtils.getOptionNames( transaction, this );
     }
 
     /**
@@ -452,22 +495,7 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
      */
     @Override
     public StatementOption[] getStatementOptions( final UnitOfWork transaction ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-
-        final KomodoObject same = new ObjectImpl( getRepository(), getAbsolutePath(), getIndex() );
-        final List< StatementOption > result = new ArrayList< StatementOption >();
-
-        for ( final KomodoObject kobject : same.getChildrenOfType( transaction, StandardDdlLexicon.TYPE_STATEMENT_OPTION ) ) {
-            final StatementOption option = new StatementOptionImpl( transaction, getRepository(), kobject.getAbsolutePath() );
-            result.add( option );
-        }
-
-        if ( result.isEmpty() ) {
-            return StatementOption.NO_OPTIONS;
-        }
-
-        return result.toArray( new StatementOption[ result.size() ] );
+        return OptionContainerUtils.getOptions( transaction, this );
     }
 
     /**
@@ -483,17 +511,43 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.repository.ObjectImpl#getTypeIdentifier(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public KomodoType getTypeIdentifier( final UnitOfWork uow ) {
+        return RESOLVER.identifier();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.relational.model.Column#getUuid(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
     public String getUuid( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.UUID.name() );
+        return OptionContainerUtils.getOption( transaction, this, StandardOption.UUID.name() );
+    }
 
-        if (option == null) {
-            return null;
-        }
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.repository.ObjectImpl#hasProperties(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public boolean hasProperties( final UnitOfWork transaction ) throws KException {
+        return OptionContainerUtils.hasProperties( transaction, this, super.hasProperties( transaction ) );
+    }
 
-        return option.getOption( transaction );
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#hasProperty(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String)
+     */
+    @Override
+    public boolean hasProperty( final UnitOfWork transaction,
+                                final String name ) throws KException {
+        return OptionContainerUtils.hasProperty( transaction, this, name, super.hasProperty( transaction, name ) );
     }
 
     /**
@@ -503,10 +557,10 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
      */
     @Override
     public boolean isAutoIncremented( final UnitOfWork uow ) throws KException {
-        final Boolean value = getObjectProperty(uow, PropertyValueType.BOOLEAN, "isAutoIncremented", //$NON-NLS-1$
-                                                CreateTable.AUTO_INCREMENT);
+        final Boolean value = getObjectProperty( uow, PropertyValueType.BOOLEAN, "isAutoIncremented", //$NON-NLS-1$
+                                                 CreateTable.AUTO_INCREMENT );
 
-        if (value == null) {
+        if ( value == null ) {
             return Column.DEFAULT_AUTO_INCREMENTED;
         }
 
@@ -520,13 +574,13 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
      */
     @Override
     public boolean isCaseSensitive( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.CASE_SENSITIVE.name());
+        final String option = OptionContainerUtils.getOption( transaction, this, StandardOption.CASE_SENSITIVE.name() );
 
-        if (option == null) {
+        if ( option == null ) {
             return Column.DEFAULT_CASE_SENSITIVE;
         }
 
-        return Boolean.parseBoolean(option.getOption(transaction));
+        return Boolean.parseBoolean( option );
     }
 
     /**
@@ -536,13 +590,25 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
      */
     @Override
     public boolean isCurrency( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.CURRENCY.name());
+        final String option = OptionContainerUtils.getOption( transaction, this, StandardOption.CURRENCY.name() );
 
-        if (option == null) {
+        if ( option == null ) {
             return Column.DEFAULT_CURRENCY;
         }
 
-        return Boolean.parseBoolean(option.getOption(transaction));
+        return Boolean.parseBoolean( option );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.model.OptionContainer#isCustomOption(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String)
+     */
+    @Override
+    public boolean isCustomOption( final UnitOfWork transaction,
+                                   final String name ) throws KException {
+        return OptionContainerUtils.hasCustomOption( transaction, this, name );
     }
 
     /**
@@ -552,13 +618,13 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
      */
     @Override
     public boolean isFixedLength( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.FIXED_LENGTH.name());
+        final String option = OptionContainerUtils.getOption( transaction, this, StandardOption.FIXED_LENGTH.name() );
 
-        if (option == null) {
+        if ( option == null ) {
             return Column.DEFAULT_FIXED_LENGTH;
         }
 
-        return Boolean.parseBoolean(option.getOption(transaction));
+        return Boolean.parseBoolean( option );
     }
 
     /**
@@ -568,13 +634,13 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
      */
     @Override
     public boolean isSelectable( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.SELECTABLE.name());
+        final String option = OptionContainerUtils.getOption( transaction, this, StandardOption.SELECTABLE.name() );
 
-        if (option == null) {
+        if ( option == null ) {
             return Column.DEFAULT_SELECTABLE;
         }
 
-        return Boolean.parseBoolean(option.getOption(transaction));
+        return Boolean.parseBoolean( option );
     }
 
     /**
@@ -584,13 +650,23 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
      */
     @Override
     public boolean isSigned( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.SIGNED.name());
+        final String option = OptionContainerUtils.getOption( transaction, this, StandardOption.SIGNED.name() );
 
-        if (option == null) {
+        if ( option == null ) {
             return Column.DEFAULT_SIGNED;
         }
 
-        return Boolean.parseBoolean(option.getOption(transaction));
+        return Boolean.parseBoolean( option );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.model.OptionContainer#isStandardOption(java.lang.String)
+     */
+    @Override
+    public boolean isStandardOption( final String name ) {
+        return StandardOption.isValid( name );
     }
 
     /**
@@ -600,13 +676,13 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
      */
     @Override
     public boolean isUpdatable( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption(transaction, this, StandardOptions.UPDATABLE.name());
+        final String option = OptionContainerUtils.getOption( transaction, this, StandardOption.UPDATABLE.name() );
 
-        if (option == null) {
+        if ( option == null ) {
             return Column.DEFAULT_UPDATABLE;
         }
 
-        return Boolean.parseBoolean(option.getOption(transaction));
+        return Boolean.parseBoolean( option );
     }
 
     /**
@@ -618,26 +694,7 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
     @Override
     public void removeStatementOption( final UnitOfWork transaction,
                                        final String optionToRemove ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( optionToRemove, "optionToRemove" ); //$NON-NLS-1$
-
-        boolean found = false;
-        final StatementOption[] options = getStatementOptions( transaction );
-
-        if ( options.length != 0 ) {
-            for ( final StatementOption option : options ) {
-                if ( optionToRemove.equals( option.getName( transaction ) ) ) {
-                    option.remove( transaction );
-                    found = true;
-                    break;
-                }
-            }
-        }
-
-        if ( !found ) {
-            throw new KException( Messages.getString( Relational.STATEMENT_OPTION_NOT_FOUND_TO_REMOVE, optionToRemove ) );
-        }
+        OptionContainerUtils.removeOption( transaction, this, optionToRemove );
     }
 
     /**
@@ -648,7 +705,7 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
     @Override
     public void setAutoIncremented( final UnitOfWork uow,
                                     final boolean newAutoIncremented ) throws KException {
-        setObjectProperty(uow, "setAutoIncremented", CreateTable.AUTO_INCREMENT, newAutoIncremented); //$NON-NLS-1$
+        setObjectProperty( uow, "setAutoIncremented", CreateTable.AUTO_INCREMENT, newAutoIncremented ); //$NON-NLS-1$
     }
 
     /**
@@ -659,7 +716,7 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
     @Override
     public void setCaseSensitive( final UnitOfWork transaction,
                                   final boolean newCaseSensitive ) throws KException {
-        setStatementOption(transaction, StandardOptions.CASE_SENSITIVE.name(), Boolean.toString(newCaseSensitive));
+        setStatementOption( transaction, StandardOption.CASE_SENSITIVE.name(), Boolean.toString( newCaseSensitive ) );
     }
 
     /**
@@ -670,7 +727,7 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
     @Override
     public void setCharOctetLength( final UnitOfWork transaction,
                                     final int newCharOctetLength ) throws KException {
-        setStatementOption(transaction, StandardOptions.CHAR_OCTET_LENGTH.name(), Integer.toString(newCharOctetLength));
+        setStatementOption( transaction, StandardOption.CHAR_OCTET_LENGTH.name(), Integer.toString( newCharOctetLength ) );
     }
 
     /**
@@ -681,7 +738,7 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
     @Override
     public void setCollationName( final UnitOfWork uow,
                                   final String newCollationName ) throws KException {
-        setObjectProperty(uow, "setCollationName", StandardDdlLexicon.COLLATION_NAME, newCollationName); //$NON-NLS-1$
+        setObjectProperty( uow, "setCollationName", StandardDdlLexicon.COLLATION_NAME, newCollationName ); //$NON-NLS-1$
     }
 
     /**
@@ -692,7 +749,7 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
     @Override
     public void setCurrency( final UnitOfWork transaction,
                              final boolean newCurrency ) throws KException {
-        setStatementOption(transaction, StandardOptions.CURRENCY.name(), Boolean.toString(newCurrency));
+        setStatementOption( transaction, StandardOption.CURRENCY.name(), Boolean.toString( newCurrency ) );
     }
 
     /**
@@ -703,7 +760,7 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
     @Override
     public void setDatatypeName( final UnitOfWork uow,
                                  final String newTypeName ) throws KException {
-        setObjectProperty(uow, "setDatatypeName", StandardDdlLexicon.DATATYPE_NAME, newTypeName); //$NON-NLS-1$
+        setObjectProperty( uow, "setDatatypeName", StandardDdlLexicon.DATATYPE_NAME, newTypeName ); //$NON-NLS-1$
     }
 
     /**
@@ -714,7 +771,7 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
     @Override
     public void setDefaultValue( final UnitOfWork uow,
                                  final String newDefaultValue ) throws KException {
-        setObjectProperty(uow, "setDefaultValue", StandardDdlLexicon.DEFAULT_VALUE, newDefaultValue); //$NON-NLS-1$
+        setObjectProperty( uow, "setDefaultValue", StandardDdlLexicon.DEFAULT_VALUE, newDefaultValue ); //$NON-NLS-1$
     }
 
     /**
@@ -725,13 +782,13 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
     @Override
     public void setDescription( final UnitOfWork transaction,
                                 final String newDescription ) throws KException {
-        setStatementOption(transaction, StandardOptions.ANNOTATION.name(), newDescription);
+        setStatementOption( transaction, StandardOption.ANNOTATION.name(), newDescription );
     }
 
     @Override
     public void setDistinctValues( final UnitOfWork transaction,
                                    final long newDistinctValues ) throws KException {
-        setStatementOption(transaction, StandardOptions.DISTINCT_VALUES.name(), Long.toString(newDistinctValues));
+        setStatementOption( transaction, StandardOption.DISTINCT_VALUES.name(), Long.toString( newDistinctValues ) );
     }
 
     /**
@@ -742,7 +799,7 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
     @Override
     public void setFixedLength( final UnitOfWork transaction,
                                 final boolean newFixedLength ) throws KException {
-        setStatementOption(transaction, StandardOptions.FIXED_LENGTH.name(), Boolean.toString(newFixedLength));
+        setStatementOption( transaction, StandardOption.FIXED_LENGTH.name(), Boolean.toString( newFixedLength ) );
     }
 
     /**
@@ -753,7 +810,7 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
     @Override
     public void setLength( final UnitOfWork uow,
                            final long newLength ) throws KException {
-        setObjectProperty(uow, "setLength", StandardDdlLexicon.DATATYPE_LENGTH, newLength); //$NON-NLS-1$
+        setObjectProperty( uow, "setLength", StandardDdlLexicon.DATATYPE_LENGTH, newLength ); //$NON-NLS-1$
     }
 
     /**
@@ -764,7 +821,7 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
     @Override
     public void setMaxValue( final UnitOfWork transaction,
                              final String newMaxValue ) throws KException {
-        setStatementOption(transaction, StandardOptions.MAX_VALUE.name(), newMaxValue);
+        setStatementOption( transaction, StandardOption.MAX_VALUE.name(), newMaxValue );
     }
 
     /**
@@ -775,7 +832,7 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
     @Override
     public void setMinValue( final UnitOfWork transaction,
                              final String newMinValue ) throws KException {
-        setStatementOption(transaction, StandardOptions.MIN_VALUE.name(), newMinValue);
+        setStatementOption( transaction, StandardOption.MIN_VALUE.name(), newMinValue );
     }
 
     /**
@@ -786,7 +843,7 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
     @Override
     public void setNameInSource( final UnitOfWork transaction,
                                  final String newNameInSource ) throws KException {
-        setStatementOption(transaction, StandardOptions.NAMEINSOURCE.name(), newNameInSource);
+        setStatementOption( transaction, StandardOption.NAMEINSOURCE.name(), newNameInSource );
     }
 
     /**
@@ -797,7 +854,7 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
     @Override
     public void setNativeType( final UnitOfWork transaction,
                                final String newNativeType ) throws KException {
-        setStatementOption(transaction, StandardOptions.NATIVE_TYPE.name(), newNativeType);
+        setStatementOption( transaction, StandardOption.NATIVE_TYPE.name(), newNativeType );
     }
 
     /**
@@ -809,9 +866,9 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
     @Override
     public void setNullable( final UnitOfWork uow,
                              final Nullable newNullable ) throws KException {
-        setObjectProperty(uow, "setNullable", //$NON-NLS-1$
-                          StandardDdlLexicon.NULLABLE,
-                          (newNullable == null) ? Nullable.DEFAULT_VALUE.toValue() : newNullable.toValue());
+        setObjectProperty( uow, "setNullable", //$NON-NLS-1$
+                           StandardDdlLexicon.NULLABLE,
+                           ( newNullable == null ) ? Nullable.DEFAULT_VALUE.toValue() : newNullable.toValue() );
     }
 
     /**
@@ -822,7 +879,7 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
     @Override
     public void setNullValueCount( final UnitOfWork transaction,
                                    final long newNullValueCount ) throws KException {
-        setStatementOption(transaction, StandardOptions.NULL_VALUE_COUNT.name(), Long.toString(newNullValueCount));
+        setStatementOption( transaction, StandardOption.NULL_VALUE_COUNT.name(), Long.toString( newNullValueCount ) );
     }
 
     /**
@@ -833,7 +890,23 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
     @Override
     public void setPrecision( final UnitOfWork uow,
                               final int newPrecision ) throws KException {
-        setObjectProperty(uow, "setPrecision", StandardDdlLexicon.DATATYPE_PRECISION, newPrecision); //$NON-NLS-1$
+        setObjectProperty( uow, "setPrecision", StandardDdlLexicon.DATATYPE_PRECISION, newPrecision ); //$NON-NLS-1$
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.repository.ObjectImpl#setProperty(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String,
+     *      java.lang.Object[])
+     */
+    @Override
+    public void setProperty( final UnitOfWork transaction,
+                             final String propertyName,
+                             final Object... values ) throws KException {
+        // if an option was not set then set a property
+        if ( !OptionContainerUtils.setProperty( transaction, this, propertyName, values ) ) {
+            super.setProperty( transaction, propertyName, values );
+        }
     }
 
     /**
@@ -844,7 +917,7 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
     @Override
     public void setRadix( final UnitOfWork transaction,
                           final int newRadix ) throws KException {
-        setStatementOption(transaction, StandardOptions.RADIX.name(), Integer.toString(newRadix));
+        setStatementOption( transaction, StandardOption.RADIX.name(), Integer.toString( newRadix ) );
     }
 
     /**
@@ -855,7 +928,7 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
     @Override
     public void setScale( final UnitOfWork uow,
                           final int newScale ) throws KException {
-        setObjectProperty(uow, "setScale", StandardDdlLexicon.DATATYPE_SCALE, newScale); //$NON-NLS-1$
+        setObjectProperty( uow, "setScale", StandardDdlLexicon.DATATYPE_SCALE, newScale ); //$NON-NLS-1$
     }
 
     /**
@@ -867,8 +940,8 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
     @Override
     public void setSearchable( final UnitOfWork transaction,
                                final Searchable newSearchable ) throws KException {
-        final String value = ((newSearchable == null) ? Searchable.DEFAULT_VALUE.toString() : newSearchable.toString());
-        setStatementOption(transaction, StandardOptions.SEARCHABLE.name(), value);
+        final String value = ( ( newSearchable == null ) ? Searchable.DEFAULT_VALUE.toString() : newSearchable.toString() );
+        setStatementOption( transaction, StandardOption.SEARCHABLE.name(), value );
     }
 
     /**
@@ -879,7 +952,7 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
     @Override
     public void setSelectable( final UnitOfWork transaction,
                                final boolean newSelectable ) throws KException {
-        setStatementOption(transaction, StandardOptions.SELECTABLE.name(), Boolean.toString(newSelectable));
+        setStatementOption( transaction, StandardOption.SELECTABLE.name(), Boolean.toString( newSelectable ) );
     }
 
     /**
@@ -890,7 +963,7 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
     @Override
     public void setSigned( final UnitOfWork transaction,
                            final boolean newSigned ) throws KException {
-        setStatementOption(transaction, StandardOptions.SIGNED.name(), Boolean.toString(newSigned));
+        setStatementOption( transaction, StandardOption.SIGNED.name(), Boolean.toString( newSigned ) );
     }
 
     /**
@@ -903,29 +976,7 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
     public StatementOption setStatementOption( final UnitOfWork transaction,
                                                final String optionName,
                                                final String optionValue ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( optionName, "optionName" ); //$NON-NLS-1$
-
-        StatementOption result = null;
-
-        if ( StringUtils.isBlank( optionValue ) ) {
-            removeStatementOption( transaction, optionName );
-        } else {
-            result = Utils.getOption( transaction, this, optionName );
-
-            if ( result == null ) {
-                result = RelationalModelFactory.createStatementOption( transaction,
-                                                                       getRepository(),
-                                                                       this,
-                                                                       optionName,
-                                                                       optionValue );
-            } else {
-                result.setOption( transaction, optionValue );
-            }
-        }
-
-        return result;
+        return OptionContainerUtils.setOption( transaction, this, optionName, optionValue );
     }
 
     /**
@@ -936,7 +987,7 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
     @Override
     public void setUpdatable( final UnitOfWork transaction,
                               final boolean newUpdatable ) throws KException {
-        setStatementOption(transaction, StandardOptions.UPDATABLE.name(), Boolean.toString(newUpdatable));
+        setStatementOption( transaction, StandardOption.UPDATABLE.name(), Boolean.toString( newUpdatable ) );
     }
 
     /**
@@ -947,7 +998,7 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
     @Override
     public void setUuid( final UnitOfWork transaction,
                          final String newUuid ) throws KException {
-        setStatementOption( transaction, StandardOptions.UUID.name(), newUuid );
+        setStatementOption( transaction, StandardOption.UUID.name(), newUuid );
     }
 
 }

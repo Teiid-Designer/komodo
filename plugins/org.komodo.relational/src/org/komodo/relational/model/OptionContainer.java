@@ -8,74 +8,69 @@
 package org.komodo.relational.model;
 
 import org.komodo.spi.KException;
-import org.komodo.spi.repository.KNode;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
-import org.komodo.utils.ArgCheck;
 
 /**
  * Indicates the implementing class may have {@link StatementOption options}.
  */
-public interface OptionContainer extends KNode {
-
-    /**
-     * Common utilities for {@link OptionContainer}s.
-     */
-    class Utils {
-
-        /**
-         * @param transaction
-         *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-         * @param container
-         *        the option container whose statement option is being requested (cannot be <code>null</code>)
-         * @param name
-         *        the name of the statement option being requested (cannot be empty)
-         * @return the statement option or <code>null</code> if not found
-         * @throws KException
-         *         if an error occurs
-         */
-        public static StatementOption getOption( final UnitOfWork transaction,
-                                                 final OptionContainer container,
-                                                 final String name ) throws KException {
-            ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-            ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-            ArgCheck.isNotNull( container, "container" ); //$NON-NLS-1$
-            ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
-
-            StatementOption result = null;
-            final StatementOption[] options = container.getStatementOptions( transaction );
-
-            if ( options.length != 0 ) {
-                for ( final StatementOption option : options ) {
-                    if ( name.equals( option.getName( transaction ) ) ) {
-                        result = option;
-                        break;
-                    }
-                }
-            }
-
-            return result;
-        }
-
-    }
+public interface OptionContainer extends KomodoObject {
 
     /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @return the user-defined, built-in, and any other non-standard statement options (never <code>null</code> but can be empty)
+     * @return the user-defined and any other non-standard statement options (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
      */
     StatementOption[] getCustomOptions( final UnitOfWork transaction ) throws KException;
 
     /**
+     * @return the names of the standard options that this object may have (never <code>null</code> but can be empty)
+     */
+    String[] getStandardOptionNames();
+
+    /**
+     * This result includes both the standard statement options and any custom options that have been set.
+     *
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
+     * @return the statement option names for this object (never <code>null</code> but can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    String[] getStatementOptionNames( final UnitOfWork transaction ) throws KException;
+
+    /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @return the statement options (never <code>null</code> but can be empty)
+     * @return the statement options that have been set (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
      */
     StatementOption[] getStatementOptions( final UnitOfWork transaction ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param name
+     *        the name of the option being checked (cannot be empty)
+     * @return <code>true</code> if the custom option exists
+     * @throws KException
+     *         if an error occurs
+     */
+    boolean isCustomOption( final UnitOfWork transaction,
+                            final String name ) throws KException;
+
+    /**
+     * A standard option is a statement option that is built-in/well known.
+     *
+     * @param name
+     *        the name of the option being checked (cannot be empty)
+     * @return <code>true</code> if a standard option
+     */
+    boolean isStandardOption( final String name );
 
     /**
      * @param transaction

@@ -149,11 +149,6 @@ public interface KomodoObject extends KNode {
     Descriptor[] getDescriptors( final UnitOfWork transaction ) throws KException;
 
     /**
-     * @return the object's zero-based index relative to any other same-name-siblings or -1 if there is no same-name-siblings
-     */
-    int getIndex();
-
-    /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
      * @return this object's primary type descriptor (never <code>null</code>)
@@ -450,5 +445,10 @@ public interface KomodoObject extends KNode {
      */
     void visit( final UnitOfWork transaction,
                 final KomodoObjectVisitor visitor ) throws Exception;
+
+    /**
+     * @return the object's zero-based index relative to any other same-name-siblings or -1 if there is no same-name-siblings
+     */
+    int getIndex();
 
 }

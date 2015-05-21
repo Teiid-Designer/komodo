@@ -78,6 +78,12 @@ public class Messages implements StringConstants {
         FUNCTION_NOT_FOUND_TO_REMOVE,
 
         /**
+         * An error message indicating the proposed statement option value is invalid. Most likely this is a multi-valued value
+         * which is not supported.
+         */
+        INVALID_STATEMENT_OPTION_VALUE,
+
+        /**
          * An error message indicating a mapped role name could not be removed.
          */
         MAPPED_ROLE_NOT_FOUND_TO_REMOVE,

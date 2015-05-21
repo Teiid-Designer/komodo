@@ -38,6 +38,7 @@ import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.PropertyDescriptor;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 
@@ -489,6 +490,195 @@ public final class TableImplTest extends RelationalModelTest {
     public void shouldHaveSchemaElementTypePropertyDefaultValueAfterConstruction() throws Exception {
         assertThat( this.table.getSchemaElementType( this.uow ), is( SchemaElementType.DEFAULT_VALUE ) );
         assertThat( this.table.hasProperty( this.uow, StandardDdlLexicon.DEFAULT_VALUE ), is( false ) );
+    }
+
+    @Test
+    public void shouldIncludeCustomOptionsWithPropertyDescriptors() throws Exception {
+        final String customName = "blah";
+        this.table.setStatementOption( this.uow, customName, "elvis" );
+
+        final PropertyDescriptor[] propDescriptors = this.table.getPropertyDescriptors( this.uow );
+        boolean found = false;
+
+        for ( final PropertyDescriptor descriptor : propDescriptors ) {
+            if ( customName.equals( descriptor.getName() ) ) {
+                found = true;
+                break;
+            }
+        }
+
+        if ( !found ) {
+            fail( "Custom option '" + customName + "'was not included in the property descriptors" );
+        }
+    }
+
+    @Test
+    public void shouldIncludeOptionsWithPropertyNames() throws Exception {
+        final String custom = "blah";
+        this.table.setStatementOption( this.uow, custom, "sledge" );
+        boolean customFound = false;
+
+        final String standard = this.table.getStandardOptionNames()[0];
+        this.table.setStatementOption( this.uow, standard, "hammer" );
+        boolean standardFound = false;
+
+        for ( final String prop : this.table.getPropertyNames( this.uow ) ) {
+            if ( custom.equals( prop ) ) {
+                if ( customFound ) {
+                    fail( "Custom option included multiple times in property names" );
+                }
+
+                customFound = true;
+            } else if ( standard.equals( prop ) ) {
+                if ( standardFound ) {
+                    fail( "Standard option included multiple times in property names" );
+                }
+
+                standardFound = true;
+            }
+
+            if ( customFound && standardFound ) {
+                break;
+            }
+        }
+
+        if ( !customFound ) {
+            fail( "Custom option not included in property names" );
+        }
+
+        if ( !standardFound ) {
+            fail( "Standard option not included in property names" );
+        }
+    }
+
+    @Test
+    public void shouldIncludeStandardOptionsWithPrimaryTypePropertyDescriptors() throws Exception {
+        final String[] optionNames = this.table.getStandardOptionNames();
+        final PropertyDescriptor[] propDescriptors = this.table.getPrimaryType( this.uow ).getPropertyDescriptors( this.uow );
+
+        for ( final String optionName : optionNames ) {
+            boolean found = false;
+
+            for ( final PropertyDescriptor descriptor : propDescriptors ) {
+                if ( optionName.equals( descriptor.getName() ) ) {
+                    found = true;
+                    break;
+                }
+            }
+
+            if ( !found ) {
+                fail( "Option '" + optionName + "'was not included in the primary type property descriptors" );
+            }
+        }
+    }
+
+    @Test
+    public void shouldIncludeStandardOptionsWithPropertyDescriptors() throws Exception {
+        final String[] optionNames = this.table.getStandardOptionNames();
+        final PropertyDescriptor[] propDescriptors = this.table.getPropertyDescriptors( this.uow );
+
+        for ( final String optionName : optionNames ) {
+            boolean found = false;
+
+            for ( final PropertyDescriptor descriptor : propDescriptors ) {
+                if ( optionName.equals( descriptor.getName() ) ) {
+                    found = true;
+                    break;
+                }
+            }
+
+            if ( !found ) {
+                fail( "Option '" + optionName + "'was not included in the property descriptors" );
+            }
+        }
+    }
+
+    @Test
+    public void shouldObtainCustomOptions() throws Exception {
+        final String sledge = "sledge";
+        this.table.setStatementOption( this.uow, sledge, "hammer" );
+
+        final String elvis = "elvis";
+        this.table.setStatementOption( this.uow, elvis, "presley" );
+
+        assertThat( this.table.getCustomOptions( this.uow ).length, is( 2 ) );
+        assertThat( Arrays.asList( this.table.getStatementOptionNames( this.uow ) ), hasItems( sledge, elvis ) );
+    }
+
+    @Test
+    public void shouldObtainPropertyDescriptorOfCustomOption() throws Exception {
+        final String custom = "sledge";
+        this.table.setStatementOption( this.uow, custom, "hammer" );
+
+        assertThat( this.table.getPropertyDescriptor( this.uow, custom ), is( notNullValue() ) );
+        assertThat( this.table.getPropertyDescriptor( this.uow, custom ).getName(), is( custom ) );
+    }
+
+    @Test
+    public void shouldObtainPropertyDescriptorOfStandardOption() throws Exception {
+        final String standard = this.table.getStandardOptionNames()[0];
+        this.table.setStatementOption( this.uow, standard, "blah" );
+
+        assertThat( this.table.getPropertyDescriptor( this.uow, standard ), is( notNullValue() ) );
+        assertThat( this.table.getPropertyDescriptor( this.uow, standard ).getName(), is( standard ) );
+    }
+
+    @Test
+    public void shouldObtainStatementOptionNames() throws Exception {
+        final String custom = "blah";
+        this.table.setStatementOption( this.uow, custom, "sledge" );
+
+        final String standard = this.table.getStandardOptionNames()[0];
+        this.table.setStatementOption( this.uow, standard, "hammer" );
+
+        assertThat( this.table.getStatementOptionNames( this.uow ).length, is( 2 ) );
+        assertThat( Arrays.asList( this.table.getStatementOptionNames( this.uow ) ), hasItems( custom, standard ) );
+    }
+
+    @Test
+    public void shouldRemoveStandardOptionAsIfProperty() throws Exception {
+        final String option = this.table.getStandardOptionNames()[0];
+        final String value = "newValue";
+        this.table.setProperty( this.uow, option, value ); // add
+        this.table.setProperty( this.uow, option, (Object)null ); // remove
+        assertThat( this.table.hasProperty( this.uow, option ), is( false ) );
+        assertThat( this.table.hasChild( this.uow, option ), is( false ) );
+    }
+
+    @Test
+    public void shouldSetCustomOptionAsIfProperty() throws Exception {
+        final String option = "blah";
+        this.table.setStatementOption( this.uow, option, "initialValue" );
+
+        final String value = "newValue";
+        this.table.setProperty( this.uow, option, value );
+
+        assertThat( this.table.hasProperty( this.uow, option ), is( true ) );
+        assertThat( this.table.getProperty( this.uow, option ), is( instanceOf( StatementOption.class ) ) );
+        assertThat( this.table.getStatementOptions( this.uow ).length, is( 1 ) );
+        assertThat( this.table.isCustomOption( this.uow, option ), is( true ) );
+
+        final StatementOption statementOption = this.table.getStatementOptions( this.uow )[0];
+        assertThat( statementOption.getName( this.uow ), is( option ) );
+        assertThat( statementOption.getValue( this.uow ), is( ( Object )value ) );
+    }
+
+    @Test
+    public void shouldSetStandardOptionAsIfProperty() throws Exception {
+        final String option = this.table.getStandardOptionNames()[0];
+        this.table.setStatementOption( this.uow, option, "initialValue" );
+
+        final String value = "newValue";
+        this.table.setProperty( this.uow, option, value );
+
+        assertThat( this.table.hasProperty( this.uow, option ), is( true ) );
+        assertThat( this.table.getProperty( this.uow, option ), is( instanceOf( StatementOption.class ) ) );
+        assertThat( this.table.isCustomOption( this.uow, option ), is( false ) );
+        assertThat( this.table.getStatementOptions( this.uow ).length, is( 1 ) );
+
+        final StatementOption statementOption = this.table.getStatementOptions( this.uow )[0];
+        assertThat( statementOption.getName( this.uow ), is( option ) );
+        assertThat( statementOption.getValue( this.uow ), is( ( Object )value ) );
     }
 
     @Test

@@ -7,14 +7,11 @@
  */
 package org.komodo.relational.model.internal;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.model.Model;
-import org.komodo.relational.model.StatementOption;
 import org.komodo.relational.model.UserDefinedFunction;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
@@ -23,7 +20,6 @@ import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
-import org.komodo.utils.ArgCheck;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.SchemaElement;
 
@@ -32,11 +28,41 @@ import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.SchemaElement;
  */
 public final class UserDefinedFunctionImpl extends FunctionImpl implements UserDefinedFunction {
 
-    private enum StandardOptions {
+    private enum StandardOption {
 
         CATEGORY,
         JAVA_CLASS,
         JAVA_METHOD;
+
+        /**
+         * @param name
+         *        the name being checked (can be <code>null</code>)
+         * @return <code>true</code> if the name is the name of a standard option
+         */
+        static boolean isValid( final String name ) {
+            for ( final StandardOption option : values() ) {
+                if ( option.name().equals( name ) ) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /**
+         * @return the names of all the options (never <code>null</code> or empty)
+         */
+        static String[] names() {
+            final StandardOption[] options = values();
+            final String[] result = new String[ options.length ];
+            int i = 0;
+
+            for ( final StandardOption option : options ) {
+                result[i++] = option.name();
+            }
+
+            return result;
+        }
 
     }
 
@@ -137,44 +163,7 @@ public final class UserDefinedFunctionImpl extends FunctionImpl implements UserD
      */
     @Override
     public String getCategory( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.CATEGORY.name() );
-
-        if (option == null) {
-            return null;
-        }
-
-        return option.getOption( transaction );
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.model.OptionContainer#getCustomOptions(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    public StatementOption[] getCustomOptions( final UnitOfWork transaction ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-
-        // get super custom options then delete any subclass standard options
-        final StatementOption[] superOptions = super.getCustomOptions( transaction );
-        StatementOption[] result = StatementOption.NO_OPTIONS;
-
-        if ( superOptions.length != 0 ) {
-            final List< StatementOption > temp = new ArrayList<>( superOptions.length );
-
-            for ( final StatementOption option : superOptions ) {
-                if ( StandardOptions.valueOf( option.getName( transaction ) ) == null ) {
-                    temp.add( option );
-                }
-            }
-
-            if ( !temp.isEmpty() ) {
-                result = temp.toArray( new StatementOption[ temp.size() ] );
-            }
-        }
-
-        return result;
+        return OptionContainerUtils.getOption( transaction, this, StandardOption.CATEGORY.name() );
     }
 
     /**
@@ -184,13 +173,7 @@ public final class UserDefinedFunctionImpl extends FunctionImpl implements UserD
      */
     @Override
     public String getJavaClass( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.JAVA_CLASS.name() );
-
-        if (option == null) {
-            return null;
-        }
-
-        return option.getOption( transaction );
+        return OptionContainerUtils.getOption( transaction, this, StandardOption.JAVA_CLASS.name() );
     }
 
     /**
@@ -200,13 +183,25 @@ public final class UserDefinedFunctionImpl extends FunctionImpl implements UserD
      */
     @Override
     public String getJavaMethod( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.JAVA_METHOD.name() );
+        return OptionContainerUtils.getOption( transaction, this, StandardOption.JAVA_METHOD.name() );
+    }
 
-        if (option == null) {
-            return null;
-        }
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.model.OptionContainer#getStandardOptionNames()
+     */
+    @Override
+    public String[] getStandardOptionNames() {
+        final String[] superNames = super.getStandardOptionNames();
+        final String[] names = StandardOption.names();
 
-        return option.getOption( transaction );
+        // combine
+        final String[] result = new String[ superNames.length + names.length ];
+        System.arraycopy( superNames, 0, result, 0, superNames.length );
+        System.arraycopy( names, 0, result, superNames.length, names.length );
+
+        return result;
     }
 
     /**
@@ -232,13 +227,23 @@ public final class UserDefinedFunctionImpl extends FunctionImpl implements UserD
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.relational.model.OptionContainer#isStandardOption(java.lang.String)
+     */
+    @Override
+    public boolean isStandardOption( final String name ) {
+        return ( super.isStandardOption( name ) || StandardOption.isValid( name ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.relational.model.UserDefinedFunction#setCategory(org.komodo.spi.repository.Repository.UnitOfWork,
      *      java.lang.String)
      */
     @Override
     public void setCategory( final UnitOfWork transaction,
                              final String newCategory ) throws KException {
-        setStatementOption( transaction, StandardOptions.CATEGORY.name(), newCategory );
+        setStatementOption( transaction, StandardOption.CATEGORY.name(), newCategory );
     }
 
     /**
@@ -250,7 +255,7 @@ public final class UserDefinedFunctionImpl extends FunctionImpl implements UserD
     @Override
     public void setJavaClass( final UnitOfWork transaction,
                               final String newJavaClass ) throws KException {
-        setStatementOption( transaction, StandardOptions.JAVA_CLASS.name(), newJavaClass );
+        setStatementOption( transaction, StandardOption.JAVA_CLASS.name(), newJavaClass );
     }
 
     /**
@@ -262,7 +267,7 @@ public final class UserDefinedFunctionImpl extends FunctionImpl implements UserD
     @Override
     public void setJavaMethod( final UnitOfWork transaction,
                                final String newJavaMethod ) throws KException {
-        setStatementOption( transaction, StandardOptions.JAVA_METHOD.name(), newJavaMethod );
+        setStatementOption( transaction, StandardOption.JAVA_METHOD.name(), newJavaMethod );
     }
 
 }

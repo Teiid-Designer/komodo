@@ -8,26 +8,31 @@
 package org.komodo.relational.model.internal;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
+import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalConstants;
 import org.komodo.relational.RelationalConstants.Nullable;
-import org.komodo.relational.RelationalObject.Filter;
 import org.komodo.relational.RelationalModelTest;
+import org.komodo.relational.RelationalObject.Filter;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.ResultSetColumn;
+import org.komodo.relational.model.StatementOption;
 import org.komodo.relational.model.StoredProcedure;
 import org.komodo.relational.model.TabularResultSet;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.PropertyDescriptor;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 
 @SuppressWarnings( { "javadoc", "nls" } )
@@ -269,6 +274,195 @@ public final class ResultSetColumnImplTest extends RelationalModelTest {
         final String value = "uuid";
         this.column.setUuid( this.uow, value );
         assertThat( this.column.getUuid( this.uow ), is( value ) );
+    }
+
+    @Test
+    public void shouldIncludeCustomOptionsWithPropertyDescriptors() throws Exception {
+        final String customName = "blah";
+        this.column.setStatementOption( this.uow, customName, "elvis" );
+
+        final PropertyDescriptor[] propDescriptors = this.column.getPropertyDescriptors( this.uow );
+        boolean found = false;
+
+        for ( final PropertyDescriptor descriptor : propDescriptors ) {
+            if ( customName.equals( descriptor.getName() ) ) {
+                found = true;
+                break;
+            }
+        }
+
+        if ( !found ) {
+            fail( "Custom option '" + customName + "'was not included in the property descriptors" );
+        }
+    }
+
+    @Test
+    public void shouldIncludeOptionsWithPropertyNames() throws Exception {
+        final String custom = "blah";
+        this.column.setStatementOption( this.uow, custom, "sledge" );
+        boolean customFound = false;
+
+        final String standard = this.column.getStandardOptionNames()[0];
+        this.column.setStatementOption( this.uow, standard, "hammer" );
+        boolean standardFound = false;
+
+        for ( final String prop : this.column.getPropertyNames( this.uow ) ) {
+            if ( custom.equals( prop ) ) {
+                if ( customFound ) {
+                    fail( "Custom option included multiple times in property names" );
+                }
+
+                customFound = true;
+            } else if ( standard.equals( prop ) ) {
+                if ( standardFound ) {
+                    fail( "Standard option included multiple times in property names" );
+                }
+
+                standardFound = true;
+            }
+
+            if ( customFound && standardFound ) {
+                break;
+            }
+        }
+
+        if ( !customFound ) {
+            fail( "Custom option not included in property names" );
+        }
+
+        if ( !standardFound ) {
+            fail( "Standard option not included in property names" );
+        }
+    }
+
+    @Test
+    public void shouldIncludeStandardOptionsWithPrimaryTypePropertyDescriptors() throws Exception {
+        final String[] optionNames = this.column.getStandardOptionNames();
+        final PropertyDescriptor[] propDescriptors = this.column.getPrimaryType( this.uow ).getPropertyDescriptors( this.uow );
+
+        for ( final String optionName : optionNames ) {
+            boolean found = false;
+
+            for ( final PropertyDescriptor descriptor : propDescriptors ) {
+                if ( optionName.equals( descriptor.getName() ) ) {
+                    found = true;
+                    break;
+                }
+            }
+
+            if ( !found ) {
+                fail( "Option '" + optionName + "'was not included in the primary type property descriptors" );
+            }
+        }
+    }
+
+    @Test
+    public void shouldIncludeStandardOptionsWithPropertyDescriptors() throws Exception {
+        final String[] optionNames = this.column.getStandardOptionNames();
+        final PropertyDescriptor[] propDescriptors = this.column.getPropertyDescriptors( this.uow );
+
+        for ( final String optionName : optionNames ) {
+            boolean found = false;
+
+            for ( final PropertyDescriptor descriptor : propDescriptors ) {
+                if ( optionName.equals( descriptor.getName() ) ) {
+                    found = true;
+                    break;
+                }
+            }
+
+            if ( !found ) {
+                fail( "Option '" + optionName + "'was not included in the property descriptors" );
+            }
+        }
+    }
+
+    @Test
+    public void shouldObtainCustomOptions() throws Exception {
+        final String sledge = "sledge";
+        this.column.setStatementOption( this.uow, sledge, "hammer" );
+
+        final String elvis = "elvis";
+        this.column.setStatementOption( this.uow, elvis, "presley" );
+
+        assertThat( this.column.getCustomOptions( this.uow ).length, is( 2 ) );
+        assertThat( Arrays.asList( this.column.getStatementOptionNames( this.uow ) ), hasItems( sledge, elvis ) );
+    }
+
+    @Test
+    public void shouldObtainPropertyDescriptorOfCustomOption() throws Exception {
+        final String custom = "sledge";
+        this.column.setStatementOption( this.uow, custom, "hammer" );
+
+        assertThat( this.column.getPropertyDescriptor( this.uow, custom ), is( notNullValue() ) );
+        assertThat( this.column.getPropertyDescriptor( this.uow, custom ).getName(), is( custom ) );
+    }
+
+    @Test
+    public void shouldObtainPropertyDescriptorOfStandardOption() throws Exception {
+        final String standard = this.column.getStandardOptionNames()[0];
+        this.column.setStatementOption( this.uow, standard, "blah" );
+
+        assertThat( this.column.getPropertyDescriptor( this.uow, standard ), is( notNullValue() ) );
+        assertThat( this.column.getPropertyDescriptor( this.uow, standard ).getName(), is( standard ) );
+    }
+
+    @Test
+    public void shouldObtainStatementOptionNames() throws Exception {
+        final String custom = "blah";
+        this.column.setStatementOption( this.uow, custom, "sledge" );
+
+        final String standard = this.column.getStandardOptionNames()[0];
+        this.column.setStatementOption( this.uow, standard, "hammer" );
+
+        assertThat( this.column.getStatementOptionNames( this.uow ).length, is( 2 ) );
+        assertThat( Arrays.asList( this.column.getStatementOptionNames( this.uow ) ), hasItems( custom, standard ) );
+    }
+
+    @Test
+    public void shouldRemoveStandardOptionAsIfProperty() throws Exception {
+        final String option = this.column.getStandardOptionNames()[0];
+        final String value = "newValue";
+        this.column.setProperty( this.uow, option, value ); // add
+        this.column.setProperty( this.uow, option, (Object)null ); // remove
+        assertThat( this.column.hasProperty( this.uow, option ), is( false ) );
+        assertThat( this.column.hasChild( this.uow, option ), is( false ) );
+    }
+
+    @Test
+    public void shouldSetCustomOptionAsIfProperty() throws Exception {
+        final String option = "blah";
+        this.column.setStatementOption( this.uow, option, "initialValue" );
+
+        final String value = "newValue";
+        this.column.setProperty( this.uow, option, value );
+
+        assertThat( this.column.hasProperty( this.uow, option ), is( true ) );
+        assertThat( this.column.getProperty( this.uow, option ), is( instanceOf( StatementOption.class ) ) );
+        assertThat( this.column.getStatementOptions( this.uow ).length, is( 1 ) );
+        assertThat( this.column.isCustomOption( this.uow, option ), is( true ) );
+
+        final StatementOption statementOption = this.column.getStatementOptions( this.uow )[0];
+        assertThat( statementOption.getName( this.uow ), is( option ) );
+        assertThat( statementOption.getValue( this.uow ), is( ( Object )value ) );
+    }
+
+    @Test
+    public void shouldSetStandardOptionAsIfProperty() throws Exception {
+        final String option = this.column.getStandardOptionNames()[0];
+        this.column.setStatementOption( this.uow, option, "initialValue" );
+
+        final String value = "newValue";
+        this.column.setProperty( this.uow, option, value );
+
+        assertThat( this.column.hasProperty( this.uow, option ), is( true ) );
+        assertThat( this.column.getProperty( this.uow, option ), is( instanceOf( StatementOption.class ) ) );
+        assertThat( this.column.isCustomOption( this.uow, option ), is( false ) );
+        assertThat( this.column.getStatementOptions( this.uow ).length, is( 1 ) );
+
+        final StatementOption statementOption = this.column.getStatementOptions( this.uow )[0];
+        assertThat( statementOption.getName( this.uow ), is( option ) );
+        assertThat( statementOption.getValue( this.uow ), is( ( Object )value ) );
     }
 
 }

@@ -22,8 +22,11 @@ import org.komodo.relational.model.StoredProcedure;
 import org.komodo.relational.model.UserDefinedFunction;
 import org.komodo.relational.model.VirtualProcedure;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.Descriptor;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.Property;
+import org.komodo.spi.repository.PropertyDescriptor;
 import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -63,12 +66,42 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
         return clazz;
     }
 
-    protected enum StandardOptions {
+    private enum StandardOption {
 
         ANNOTATION,
         NAMEINSOURCE,
         UPDATECOUNT,
         UUID;
+
+        /**
+         * @param name
+         *        the name being checked (can be <code>null</code>)
+         * @return <code>true</code> if the name is the name of a standard option
+         */
+        static boolean isValid( final String name ) {
+            for ( final StandardOption option : values() ) {
+                if ( option.name().equals( name ) ) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /**
+         * @return the names of all the options (never <code>null</code> or empty)
+         */
+        static String[] names() {
+            final StandardOption[] options = values();
+            final String[] result = new String[ options.length ];
+            int i = 0;
+
+            for ( final StandardOption option : options ) {
+                result[i++] = option.name();
+            }
+
+            return result;
+        }
 
     }
 
@@ -155,24 +188,7 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
      */
     @Override
     public StatementOption[] getCustomOptions( final UnitOfWork transaction ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-
-        StatementOption[] result = getStatementOptions( transaction );
-
-        if ( result.length != 0 ) {
-            final List< StatementOption > temp = new ArrayList<>( result.length );
-
-            for ( final StatementOption option : result ) {
-                if ( StandardOptions.valueOf( option.getName( transaction ) ) == null ) {
-                    temp.add( option );
-                }
-            }
-
-            result = temp.toArray( new StatementOption[ temp.size() ] );
-        }
-
-        return result;
+        return OptionContainerUtils.getCustomOptions( transaction, this );
     }
 
     /**
@@ -182,13 +198,7 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
      */
     @Override
     public String getDescription( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.ANNOTATION.name() );
-
-        if (option == null) {
-            return null;
-        }
-
-        return option.getOption( transaction );
+        return OptionContainerUtils.getOption( transaction, this, StandardOption.ANNOTATION.name() );
     }
 
     /**
@@ -198,13 +208,7 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
      */
     @Override
     public String getNameInSource( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.NAMEINSOURCE.name() );
-
-        if (option == null) {
-            return null;
-        }
-
-        return option.getOption( transaction );
+        return OptionContainerUtils.getOption( transaction, this, StandardOption.NAMEINSOURCE.name() );
     }
 
     /**
@@ -254,6 +258,53 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.repository.ObjectImpl#getPrimaryType(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public Descriptor getPrimaryType( final UnitOfWork transaction ) throws KException {
+        return OptionContainerUtils.createPrimaryType(transaction, this, super.getPrimaryType( transaction ));
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#getProperty(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String)
+     */
+    @Override
+    public Property getProperty( final UnitOfWork transaction,
+                                 final String name ) throws KException {
+        return OptionContainerUtils.getProperty( transaction, this, name, super.getProperty( transaction, name ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#getPropertyDescriptor(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String)
+     */
+    @Override
+    public PropertyDescriptor getPropertyDescriptor( final UnitOfWork transaction,
+                                                     final String propName ) throws KException {
+        return OptionContainerUtils.getPropertyDescriptor( transaction,
+                                                           this,
+                                                           propName,
+                                                           super.getPropertyDescriptor( transaction, propName ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#getPropertyNames(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public String[] getPropertyNames( final UnitOfWork transaction ) throws KException {
+        return OptionContainerUtils.getPropertyNames( transaction, this, super.getPropertyNames( transaction ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.relational.model.SchemaElement#getSchemaElementType(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
@@ -271,25 +322,31 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.relational.model.OptionContainer#getStandardOptionNames()
+     */
+    @Override
+    public String[] getStandardOptionNames() {
+        return StandardOption.names();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.model.OptionContainer#getStatementOptionNames(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public String[] getStatementOptionNames( final UnitOfWork transaction ) throws KException {
+        return OptionContainerUtils.getOptionNames( transaction, this );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.relational.model.OptionContainer#getStatementOptions(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
     public StatementOption[] getStatementOptions( final UnitOfWork transaction ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-
-        final List< StatementOption > result = new ArrayList< StatementOption >();
-
-        for ( final KomodoObject kobject : super.getChildrenOfType( transaction, StandardDdlLexicon.TYPE_STATEMENT_OPTION ) ) {
-            final StatementOption option = new StatementOptionImpl( transaction, getRepository(), kobject.getAbsolutePath() );
-            result.add( option );
-        }
-
-        if ( result.isEmpty() ) {
-            return StatementOption.NO_OPTIONS;
-        }
-
-        return result.toArray( new StatementOption[ result.size() ] );
+        return OptionContainerUtils.getOptions( transaction, this );
     }
 
     /**
@@ -299,13 +356,13 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
      */
     @Override
     public int getUpdateCount( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.UPDATECOUNT.name() );
+        final String option = OptionContainerUtils.getOption( transaction, this, StandardOption.UPDATECOUNT.name() );
 
-        if (option == null) {
+        if ( option == null ) {
             return AbstractProcedure.DEFAULT_UPDATE_COUNT;
         }
 
-        return Integer.parseInt( option.getOption( transaction ) );
+        return Integer.parseInt( option );
     }
 
     /**
@@ -315,13 +372,52 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
      */
     @Override
     public String getUuid( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.UUID.name() );
+        return OptionContainerUtils.getOption( transaction, this, StandardOption.UUID.name() );
+    }
 
-        if (option == null) {
-            return null;
-        }
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.repository.ObjectImpl#hasProperties(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public boolean hasProperties( final UnitOfWork transaction ) throws KException {
+        return OptionContainerUtils.hasProperties( transaction, this, super.hasProperties( transaction ) );
+    }
 
-        return option.getOption( transaction );
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#hasProperty(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String)
+     */
+    @Override
+    public boolean hasProperty( final UnitOfWork transaction,
+                                final String name ) throws KException {
+        return OptionContainerUtils.hasProperty( transaction, this, name, super.hasProperty( transaction, name ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.model.OptionContainer#isCustomOption(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String)
+     */
+    @Override
+    public boolean isCustomOption( final UnitOfWork transaction,
+                                   final String name ) throws KException {
+        return OptionContainerUtils.hasCustomOption( transaction, this, name );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.model.OptionContainer#isStandardOption(java.lang.String)
+     */
+    @Override
+    public boolean isStandardOption( final String name ) {
+        ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
+        return StandardOption.isValid( name );
     }
 
     /**
@@ -364,26 +460,7 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
     @Override
     public void removeStatementOption( final UnitOfWork transaction,
                                        final String optionToRemove ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( optionToRemove, "optionToRemove" ); //$NON-NLS-1$
-
-        boolean found = false;
-        final StatementOption[] options = getStatementOptions( transaction );
-
-        if ( options.length != 0 ) {
-            for ( final StatementOption option : options ) {
-                if ( optionToRemove.equals( option.getName( transaction ) ) ) {
-                    option.remove( transaction );
-                    found = true;
-                    break;
-                }
-            }
-        }
-
-        if ( !found ) {
-            throw new KException( Messages.getString( Relational.STATEMENT_OPTION_NOT_FOUND_TO_REMOVE, optionToRemove ) );
-        }
+        OptionContainerUtils.removeOption( transaction, this, optionToRemove );
     }
 
     /**
@@ -395,7 +472,7 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
     @Override
     public void setDescription( final UnitOfWork transaction,
                                 final String newDescription ) throws KException {
-        setStatementOption( transaction, StandardOptions.ANNOTATION.name(), newDescription );
+        setStatementOption( transaction, StandardOption.ANNOTATION.name(), newDescription );
     }
 
     /**
@@ -407,7 +484,23 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
     @Override
     public void setNameInSource( final UnitOfWork transaction,
                                  final String newNameInSource ) throws KException {
-        setStatementOption( transaction, StandardOptions.NAMEINSOURCE.name(), newNameInSource );
+        setStatementOption( transaction, StandardOption.NAMEINSOURCE.name(), newNameInSource );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.repository.ObjectImpl#setProperty(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String,
+     *      java.lang.Object[])
+     */
+    @Override
+    public void setProperty( final UnitOfWork transaction,
+                             final String propertyName,
+                             final Object... values ) throws KException {
+        // if an option was not set then set a property
+        if ( !OptionContainerUtils.setProperty( transaction, this, propertyName, values ) ) {
+            super.setProperty( transaction, propertyName, values );
+        }
     }
 
     /**
@@ -433,29 +526,7 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
     public StatementOption setStatementOption( final UnitOfWork transaction,
                                                final String optionName,
                                                final String optionValue ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( optionName, "optionName" ); //$NON-NLS-1$
-
-        StatementOption result = null;
-
-        if ( StringUtils.isBlank( optionValue ) ) {
-            removeStatementOption( transaction, optionName );
-        } else {
-            result = Utils.getOption( transaction, this, optionName );
-
-            if ( result == null ) {
-                result = RelationalModelFactory.createStatementOption( transaction,
-                                                                       getRepository(),
-                                                                       this,
-                                                                       optionName,
-                                                                       optionValue );
-            } else {
-                result.setOption( transaction, optionValue );
-            }
-        }
-
-        return result;
+        return OptionContainerUtils.setOption( transaction, this, optionName, optionValue );
     }
 
     /**
@@ -466,7 +537,7 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
     @Override
     public void setUpdateCount( final UnitOfWork transaction,
                                 final int newUpdateCount ) throws KException {
-        setStatementOption( transaction, StandardOptions.UPDATECOUNT.name(), Integer.toString( newUpdateCount ) );
+        setStatementOption( transaction, StandardOption.UPDATECOUNT.name(), Integer.toString( newUpdateCount ) );
     }
 
     /**
@@ -478,7 +549,7 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
     @Override
     public void setUuid( final UnitOfWork transaction,
                          final String newUuid ) throws KException {
-        setStatementOption( transaction, StandardOptions.UUID.name(), newUuid );
+        setStatementOption( transaction, StandardOption.UUID.name(), newUuid );
     }
 
 }
