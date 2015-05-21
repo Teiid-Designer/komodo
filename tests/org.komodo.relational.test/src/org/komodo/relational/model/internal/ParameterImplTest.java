@@ -8,27 +8,31 @@
 package org.komodo.relational.model.internal;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsCollectionContaining.hasItem;
+import static org.hamcrest.core.IsCollectionContaining.hasItems;
+import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
+import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalConstants;
 import org.komodo.relational.RelationalConstants.Nullable;
-import org.komodo.relational.RelationalObject.Filter;
 import org.komodo.relational.RelationalModelTest;
+import org.komodo.relational.RelationalObject.Filter;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.AbstractProcedure;
 import org.komodo.relational.model.Model;
-import org.komodo.relational.model.OptionContainer;
 import org.komodo.relational.model.Parameter;
 import org.komodo.relational.model.Parameter.Direction;
 import org.komodo.relational.model.StatementOption;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.PropertyDescriptor;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
@@ -246,14 +250,14 @@ public final class ParameterImplTest extends RelationalModelTest {
         final String name = "blah";
         this.parameter.setStatementOption( this.uow, name, "blah" );
         this.parameter.setStatementOption( this.uow, name, StringConstants.EMPTY_STRING );
-        assertThat( OptionContainer.Utils.getOption( this.uow, this.parameter, name ), is( nullValue() ) );
+        assertThat( this.parameter.getProperty( this.uow, name ), is( nullValue() ) );
     }
 
     public void shouldRemoveOptionWithNullStatementOptionValue() throws Exception {
         final String name = "blah";
         this.parameter.setStatementOption( this.uow, name, "blah" );
         this.parameter.setStatementOption( this.uow, name, null );
-        assertThat( OptionContainer.Utils.getOption( this.uow, this.parameter, name ), is( nullValue() ) );
+        assertThat( this.parameter.getProperty( this.uow, name ), is( nullValue() ) );
     }
 
     @Test
@@ -332,6 +336,101 @@ public final class ParameterImplTest extends RelationalModelTest {
         final boolean value = !Parameter.DEFAULT_RESULT;
         this.parameter.setResult( this.uow, value );
         assertThat( this.parameter.isResult( this.uow ), is( value ) );
+    }
+
+    @Test
+    public void shouldIncludeCustomOptionsWithPropertyDescriptors() throws Exception {
+        final String customName = "blah";
+        this.parameter.setStatementOption( this.uow, customName, "elvis" );
+
+        final PropertyDescriptor[] propDescriptors = this.parameter.getPropertyDescriptors( this.uow );
+        boolean found = false;
+
+        for ( final PropertyDescriptor descriptor : propDescriptors ) {
+            if ( customName.equals( descriptor.getName() ) ) {
+                found = true;
+                break;
+            }
+        }
+
+        if ( !found ) {
+            fail( "Custom option '" + customName + "'was not included in the property descriptors" );
+        }
+    }
+
+    @Test
+    public void shouldIncludeCustomOptionsWithPropertyNames() throws Exception {
+        final String custom = "blah";
+        this.parameter.setStatementOption( this.uow, custom, "sledge" );
+        boolean customFound = false;
+
+        for ( final String prop : this.parameter.getPropertyNames( this.uow ) ) {
+            if ( custom.equals( prop ) ) {
+                if ( customFound ) {
+                    fail( "Custom option included multiple times in property names" );
+                }
+
+                customFound = true;
+                break;
+            }
+        }
+
+        if ( !customFound ) {
+            fail( "Custom option not included in property names" );
+        }
+    }
+
+    @Test
+    public void shouldObtainCustomOptions() throws Exception {
+        final String sledge = "sledge";
+        this.parameter.setStatementOption( this.uow, sledge, "hammer" );
+
+        final String elvis = "elvis";
+        this.parameter.setStatementOption( this.uow, elvis, "presley" );
+
+        assertThat( this.parameter.getCustomOptions( this.uow ).length, is( 2 ) );
+        assertThat( Arrays.asList( this.parameter.getStatementOptionNames( this.uow ) ), hasItems( sledge, elvis ) );
+    }
+
+    @Test
+    public void shouldObtainPropertyDescriptorOfCustomOption() throws Exception {
+        final String custom = "sledge";
+        this.parameter.setStatementOption( this.uow, custom, "hammer" );
+
+        assertThat( this.parameter.getPropertyDescriptor( this.uow, custom ), is( notNullValue() ) );
+        assertThat( this.parameter.getPropertyDescriptor( this.uow, custom ).getName(), is( custom ) );
+    }
+
+    @Test
+    public void shouldObtainStatementOptionNames() throws Exception {
+        final String custom = "blah";
+        this.parameter.setStatementOption( this.uow, custom, "sledge" );
+
+        assertThat( this.parameter.getStatementOptionNames( this.uow ).length, is( 1 ) );
+        assertThat( Arrays.asList( this.parameter.getStatementOptionNames( this.uow ) ), hasItem( custom ) );
+    }
+
+    @Test
+    public void shouldSetCustomOptionAsIfProperty() throws Exception {
+        final String option = "blah";
+        this.parameter.setStatementOption( this.uow, option, "initialValue" );
+
+        final String value = "newValue";
+        this.parameter.setProperty( this.uow, option, value );
+
+        assertThat( this.parameter.hasProperty( this.uow, option ), is( true ) );
+        assertThat( this.parameter.getProperty( this.uow, option ), is( instanceOf( StatementOption.class ) ) );
+        assertThat( this.parameter.getStatementOptions( this.uow ).length, is( 1 ) );
+        assertThat( this.parameter.isCustomOption( this.uow, option ), is( true ) );
+
+        final StatementOption statementOption = this.parameter.getStatementOptions( this.uow )[0];
+        assertThat( statementOption.getName( this.uow ), is( option ) );
+        assertThat( statementOption.getValue( this.uow ), is( ( Object )value ) );
+    }
+
+    @Test
+    public void shouldNotHaveStandardOptionNames() throws Exception {
+        assertThat( this.parameter.getStandardOptionNames().length, is( 0 ) );
     }
 
 }

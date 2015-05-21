@@ -7,8 +7,6 @@
  */
 package org.komodo.relational.model.internal;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalProperties;
@@ -18,7 +16,6 @@ import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.model.DataTypeResultSet;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.ProcedureResultSet;
-import org.komodo.relational.model.StatementOption;
 import org.komodo.relational.model.StoredProcedure;
 import org.komodo.relational.model.TabularResultSet;
 import org.komodo.repository.ObjectImpl;
@@ -37,14 +34,44 @@ import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.SchemaElement;
  */
 public final class StoredProcedureImpl extends AbstractProcedureImpl implements StoredProcedure {
 
-    private enum StandardOptions {
+    private enum StandardOption {
 
         NATIVE_QUERY( "native-query" ), //$NON-NLS-1$
         NON_PREPARED( "non-prepared" ); //$NON-NLS-1$
 
+        /**
+         * @param name
+         *        the name being checked (can be <code>null</code>)
+         * @return <code>true</code> if the name is the name of a standard option
+         */
+        static boolean isValid( final String name ) {
+            for ( final StandardOption option : values() ) {
+                if ( option.name().equals( name ) ) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /**
+         * @return the names of all the options (never <code>null</code> or empty)
+         */
+        static String[] names() {
+            final StandardOption[] options = values();
+            final String[] result = new String[ options.length ];
+            int i = 0;
+
+            for ( final StandardOption option : options ) {
+                result[i++] = option.name();
+            }
+
+            return result;
+        }
+
         private final String name;
 
-        private StandardOptions( final String optionName ) {
+        private StandardOption( final String optionName ) {
             this.name = optionName;
         }
 
@@ -147,48 +174,11 @@ public final class StoredProcedureImpl extends AbstractProcedureImpl implements 
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.OptionContainer#getCustomOptions(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    public StatementOption[] getCustomOptions( final UnitOfWork transaction ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-
-        // get super custom options then delete any subclass standard options
-        final StatementOption[] superOptions = super.getCustomOptions( transaction );
-        StatementOption[] result = StatementOption.NO_OPTIONS;
-
-        if ( superOptions.length != 0 ) {
-            final List< StatementOption > temp = new ArrayList<>( superOptions.length );
-
-            for ( final StatementOption option : superOptions ) {
-                if ( StandardOptions.valueOf( option.getName( transaction ) ) == null ) {
-                    temp.add( option );
-                }
-            }
-
-            if ( !temp.isEmpty() ) {
-                result = temp.toArray( new StatementOption[ temp.size() ] );
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
      * @see org.komodo.relational.model.StoredProcedure#getNativeQuery(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
     public String getNativeQuery( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.NATIVE_QUERY.getName() );
-
-        if (option == null) {
-            return null;
-        }
-
-        return option.getOption( transaction );
+        return OptionContainerUtils.getOption( transaction, this, StandardOption.NATIVE_QUERY.getName() );
     }
 
     /**
@@ -221,17 +211,45 @@ public final class StoredProcedureImpl extends AbstractProcedureImpl implements 
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.relational.model.OptionContainer#getStandardOptionNames()
+     */
+    @Override
+    public String[] getStandardOptionNames() {
+        final String[] superNames = super.getStandardOptionNames();
+        final String[] names = StandardOption.names();
+
+        // combine
+        final String[] result = new String[superNames.length + StandardOption.values().length];
+        System.arraycopy( superNames, 0, result, 0, superNames.length );
+        System.arraycopy( names, 0, result, superNames.length, names.length );
+
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.relational.model.StoredProcedure#isNonPrepared(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
     public boolean isNonPrepared( final UnitOfWork transaction ) throws KException {
-        final StatementOption option = Utils.getOption( transaction, this, StandardOptions.NON_PREPARED.getName() );
+        final String option = OptionContainerUtils.getOption( transaction, this, StandardOption.NON_PREPARED.getName() );
 
-        if (option == null) {
+        if ( option == null ) {
             return DEFAULT_NON_PREPARED;
         }
 
-        return Boolean.parseBoolean( option.getOption( transaction ) );
+        return Boolean.parseBoolean( option );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.model.OptionContainer#isStandardOption(java.lang.String)
+     */
+    @Override
+    public boolean isStandardOption( final String name ) {
+        return ( super.isStandardOption( name ) || StandardOption.isValid( name ) );
     }
 
     /**
@@ -263,7 +281,7 @@ public final class StoredProcedureImpl extends AbstractProcedureImpl implements 
     @Override
     public void setNativeQuery( final UnitOfWork transaction,
                                 final String newNativeQuery ) throws KException {
-        setStatementOption( transaction, StandardOptions.NATIVE_QUERY.getName(), newNativeQuery );
+        setStatementOption( transaction, StandardOption.NATIVE_QUERY.getName(), newNativeQuery );
     }
 
     /**
@@ -274,7 +292,7 @@ public final class StoredProcedureImpl extends AbstractProcedureImpl implements 
     @Override
     public void setNonPrepared( final UnitOfWork transaction,
                                 final boolean newNonPrepared ) throws KException {
-        setStatementOption( transaction, StandardOptions.NON_PREPARED.getName(), Boolean.toString( newNonPrepared ) );
+        setStatementOption( transaction, StandardOption.NON_PREPARED.getName(), Boolean.toString( newNonPrepared ) );
     }
 
     /**

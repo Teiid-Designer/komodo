@@ -649,7 +649,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.KomodoObject#getIndex()
+     * @see org.komodo.spi.repository.KNode#getIndex()
      */
     @Override
     public int getIndex() {
