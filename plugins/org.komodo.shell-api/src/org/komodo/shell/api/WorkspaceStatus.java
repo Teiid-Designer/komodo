@@ -49,16 +49,16 @@ public interface WorkspaceStatus extends StringConstants {
     @SuppressWarnings("javadoc")
 	public static final String EXPORT_DEFAULT_DIR_KEY = "EXPORT_DEFAULT_DIR"; //$NON-NLS-1$
     @SuppressWarnings("javadoc")
-    public static final List<String> GLOBAL_PROP_KEYS = 
-    		Arrays.asList(RECORDING_FILE_KEY, IMPORT_DEFAULT_DIR_KEY, EXPORT_DEFAULT_DIR_KEY);    
-    
+    public static final List<String> GLOBAL_PROP_KEYS =
+    		Arrays.asList(RECORDING_FILE_KEY, IMPORT_DEFAULT_DIR_KEY, EXPORT_DEFAULT_DIR_KEY);
+
 	/**
 	 * Sets the specified global property value
 	 * @param propKey the property key
 	 * @param propValue the property value
 	 */
 	void setProperty(String propKey, String propValue);
-	
+
 	/**
 	 * Sets global workspace properties on startup
 	 * @param props the properties
@@ -148,12 +148,22 @@ public interface WorkspaceStatus extends StringConstants {
     KEngine getEngine();
 
     /**
-     * Commit 
+     * Commit
      * @param source identifier for commit
-     * @throws Exception 
+     * @throws Exception
      */
     void commit(String source) throws Exception;
-    
+
+    /**
+     * Rolls back any unsaved changes.
+     *
+     * @param source
+     *        the identifier used to name the transaction created after the rollback (cannot be empty)
+     * @throws Exception
+     *         if an error occurs
+     */
+    void rollback( final String source ) throws Exception;
+
     /**
      * @return the current transaction (never <code>null</code>)
      */
