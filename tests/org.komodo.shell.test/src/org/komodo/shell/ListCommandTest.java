@@ -45,10 +45,10 @@ public class ListCommandTest extends AbstractCommandTest {
 
     	execute();
 
-    	String expectedOutput = INDENT+"No children for WORKSPACE[tko:workspace].\n"; //$NON-NLS-1$
+    	String expectedOutput = INDENT+"No children for WORKSPACE[workspace].\n"; //$NON-NLS-1$
     	String writerOutput = getCommandOutput();
     	assertEquals(expectedOutput,writerOutput);
-    	assertEquals("/tko:workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
 
     @Test
@@ -62,7 +62,7 @@ public class ListCommandTest extends AbstractCommandTest {
     			                INDENT+"Model3 ["+KomodoType.MODEL.name()+"]\n"; //$NON-NLS-1$ //$NON-NLS-2$
     	String writerOutput = getCommandOutput();
     	assertEquals(expectedOutput,writerOutput);
-    	assertEquals("/tko:workspace/MyVdb", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/workspace/MyVdb", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
 
     @Test
@@ -71,7 +71,7 @@ public class ListCommandTest extends AbstractCommandTest {
 
     	execute();
 
-    	assertEquals("/tko:workspace/MyVdb/Model1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/workspace/MyVdb/Model1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
 
     	String expectedOutput = INDENT+"Table1 ["+KomodoType.TABLE.name()+"]\n"; //$NON-NLS-1$ //$NON-NLS-2$
     	String writerOutput = getCommandOutput();

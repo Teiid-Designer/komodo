@@ -37,7 +37,6 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Descriptor;
 import org.komodo.spi.repository.KomodoObject;
-import org.komodo.spi.repository.Repository;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
@@ -87,7 +86,7 @@ public class DeployCommand extends BuiltInShellCommand implements StringConstant
 
         WorkspaceManager wkspManager = wsStatus.getCurrentContext().getWorkspaceManager();
 
-        Vdb vdb = wkspManager.resolve(null, vdbToDeploy, Vdb.class);
+        Vdb vdb = wkspManager.resolve(wsStatus.getTransaction(), vdbToDeploy, Vdb.class);
         if (vdb == null)
             throw new InvalidCommandArgumentException(0, Messages.getString("DeployCommand.InvalidCommand")); //$NON-NLS-1$
 
@@ -106,14 +105,14 @@ public class DeployCommand extends BuiltInShellCommand implements StringConstant
             return false;
         }
 
-        String vdbXml = vdb.export(null, null);
+        String vdbXml = vdb.export(wsStatus.getTransaction(), null);
         if (vdbXml == null || vdbXml.isEmpty()) {
             print(CompletionConstants.MESSAGE_INDENT, Messages.getString("DeployCommand.exportFailure")); //$NON-NLS-1$
             return false;
         }
 
         InputStream stream = new ByteArrayInputStream(vdbXml.getBytes());
-        teiidInstance.deployDynamicVdb(vdb.getName(null), stream);
+        teiidInstance.deployDynamicVdb(vdb.getName(wsStatus.getTransaction()), stream);
 
         return true;
     }

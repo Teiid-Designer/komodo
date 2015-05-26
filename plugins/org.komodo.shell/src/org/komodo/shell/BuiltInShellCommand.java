@@ -28,6 +28,8 @@ import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.KomodoType;
+import org.komodo.utils.StringNameValidator;
 import org.komodo.utils.StringUtils;
 
 /**
@@ -39,6 +41,8 @@ import org.komodo.utils.StringUtils;
  */
 public abstract class BuiltInShellCommand extends AbstractShellCommand {
 
+	private StringNameValidator nameValidator = new StringNameValidator();
+	
     /**
      * Constructor
 	 * @param commandName the command name
@@ -117,6 +121,21 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
     	}
     }
     
+    /**
+     * Validate whether the supplied name is valid for the supplied type
+     * @param name the name
+     * @param kType the komodo object type
+     * @return 'true' if valid, 'false' if not.
+     */
+    protected boolean validateObjectName(String name, KomodoType kType) {
+    	boolean isValid = nameValidator.isValidName(name);
+    	if(!isValid) {
+            print(CompletionConstants.MESSAGE_INDENT,Messages.getString("BuiltInShellCommand.objectNameNotValid",name)); //$NON-NLS-1$
+    		return false;
+    	}
+        return true;
+    }
+    
 	/**
 	 * Validates whether the supplied path is valid.  If the path is relative this takes into account the 
 	 * current context.  If invalid an error message is printed out.
@@ -146,9 +165,24 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
 	 * @param objType the object type
 	 * @param context the workspace context
 	 * @return 'true' if the child type is valid for the context, 'false' if not.
+	 * @exception Exception the exception
 	 */
-	public boolean validateChildType(String objType, WorkspaceContext context) {
-		// TODO: add logic to test
+	public boolean validateChildType(String objType, WorkspaceContext context) throws Exception {
+		List<String> allowableChildTypes = context.getAllowableChildTypes();
+		String contextObjType = context.getType().toLowerCase();
+		if(contextObjType.equals(KomodoType.TABLE.getType().toLowerCase())) {
+			allowableChildTypes.add(KomodoType.PRIMARY_KEY.getType().toLowerCase());
+		} else if(contextObjType.equals(KomodoType.STORED_PROCEDURE.getType().toLowerCase())) {
+			allowableChildTypes.add(KomodoType.TABULAR_RESULT_SET.getType().toLowerCase());
+			allowableChildTypes.add(KomodoType.DATA_TYPE_RESULT_SET.getType().toLowerCase());
+		} else if(contextObjType.equals(KomodoType.PUSHDOWN_FUNCTION.getType().toLowerCase())) {
+			allowableChildTypes.add(KomodoType.TABULAR_RESULT_SET.getType().toLowerCase());
+			allowableChildTypes.add(KomodoType.DATA_TYPE_RESULT_SET.getType().toLowerCase());
+		}
+		if(!allowableChildTypes.contains(objType.toLowerCase())) {
+            print(CompletionConstants.MESSAGE_INDENT,Messages.getString("BuiltInShellCommand.typeArg_childTypeNotAllowed", objType, context.getFullName())); //$NON-NLS-1$
+			return false;
+		}
 		return true;
 	}
 	
@@ -261,9 +295,9 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
     		if( lastArgument.startsWith(ContextUtils.PATH_SEPARATOR) ) {
     			// If not the full absolute root, then provide it
     			if(!ContextUtils.isAbsolutePath(lastArgument)) {
-    				potentialsList.add(ContextUtils.PATH_SEPARATOR+ContextUtils.WORKSPACE_CONTEXT_NAME+ContextUtils.PATH_SEPARATOR);
+    				potentialsList.add(ContextUtils.PATH_SEPARATOR+WorkspaceContext.WORKSPACE_ROOT_DISPLAY_NAME+ContextUtils.PATH_SEPARATOR);
     				updateCandidates(candidates,potentialsList,lastArgument);
-    				// Starts with correct root - provide next option
+    		    // Starts with correct root - provide next option
     			} else {
     				String relativePath = ContextUtils.convertAbsolutePathToRootRelative(lastArgument);
     				WorkspaceContext deepestMatchingContext = ContextUtils.getDeepestMatchingContextRelative(getWorkspaceStatus().getWorkspaceContext(), relativePath);

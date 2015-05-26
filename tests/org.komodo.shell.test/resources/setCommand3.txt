@@ -2,4 +2,4 @@
 create Model MyModel
 create Table MyTable ./MyModel
 #
-set Property ddl:length 99 /tko:workspace/MyModel/MyTable
+set Property ddl:length 99 /workspace/MyModel/MyTable

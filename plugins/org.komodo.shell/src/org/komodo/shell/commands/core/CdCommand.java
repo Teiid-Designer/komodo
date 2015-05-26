@@ -38,13 +38,14 @@ import org.komodo.spi.constants.StringConstants;
  */
 public class CdCommand extends BuiltInShellCommand implements StringConstants {
 	
+    private static final String CD = "cd"; //$NON-NLS-1$
+
     /**
 	 * Constructor
-	 * @param name the command name
 	 * @param wsStatus the workspace status
 	 */
-	public CdCommand(String name, WorkspaceStatus wsStatus) {
-		super(name,wsStatus);
+	public CdCommand(WorkspaceStatus wsStatus) {
+		super(CD,wsStatus);
 	}
 
 	/**

@@ -76,6 +76,10 @@ public class SetCommand extends BuiltInShellCommand {
         		// Set the property
         		setProperty(context,propNameArg, propValueArg);
 
+                // Commit transaction
+                getWorkspaceStatus().commit("SetCommand"); //$NON-NLS-1$
+                
+                // Print message
         		print(CompletionConstants.MESSAGE_INDENT, Messages.getString("SetCommand.PropertySet", propNameArg)); //$NON-NLS-1$
         		if (getWorkspaceStatus().getRecordingStatus())
         			recordCommand(getArguments());
@@ -324,7 +328,7 @@ public class SetCommand extends BuiltInShellCommand {
     @Override
     public void printUsage(int indent) {
     	// Print out the subcmd-specific usage (if possible)
-    	if(getArguments().size()>=1) {
+    	if(getArguments()!=null && getArguments().size()>=1) {
     		String subCmd = getArguments().get(0);
     		if(subCmd.equalsIgnoreCase(SUBCMD_PROPERTY)) {
         		print(indent,Messages.getString(getClass().getSimpleName() + ".propUsage")); //$NON-NLS-1$

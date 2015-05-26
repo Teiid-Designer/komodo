@@ -25,13 +25,16 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.repository.KomodoTypeRegistry;
 import org.komodo.repository.RepositoryTools;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceContextVisitor;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 
@@ -107,7 +110,12 @@ public class WorkspaceContextImpl implements WorkspaceContext {
      */
     @Override
     public String getName() throws Exception {
-        return this.repoObject.getName(this.wsStatus.getTransaction());
+    	String name = this.repoObject.getName(this.wsStatus.getTransaction());
+    	KomodoType nodeType = this.repoObject.getTypeIdentifier(this.wsStatus.getTransaction());
+    	if(nodeType==KomodoType.WORKSPACE) {
+    		name = WORKSPACE_ROOT_DISPLAY_NAME;
+    	}
+    	return name;
     }
 
     /* (non-Javadoc)
@@ -205,7 +213,10 @@ public class WorkspaceContextImpl implements WorkspaceContext {
      */
     @Override
     public WorkspaceContext getChild(String name, String type) throws Exception {
-        KomodoObject[] children = repoObject.getChildrenOfType(this.wsStatus.getTransaction(), type);
+    	KomodoType kType = KomodoType.getKomodoType(type);
+    	String lexiconType = KomodoTypeRegistry.getInstance().getIdentifier(kType).getLexiconType();
+    	
+        KomodoObject[] children = repoObject.getChildrenOfType(this.wsStatus.getTransaction(), lexiconType);
 
         for (KomodoObject child : children) {
             String childName = child.getName(this.wsStatus.getTransaction());
@@ -217,6 +228,19 @@ public class WorkspaceContextImpl implements WorkspaceContext {
         return null;
     }
 
+	/* (non-Javadoc)
+	 * @see org.komodo.shell.api.WorkspaceContext#getAllowableChildTypes()
+	 */
+	@Override
+	public List<String> getAllowableChildTypes() {
+		List<String> allowableTypes = new ArrayList<String>();
+		KomodoType[] kTypes = repoObject.getChildTypes();
+		for(KomodoType kType : kTypes) {
+			allowableTypes.add(kType.getType().toLowerCase());
+		}
+		return allowableTypes;
+	}
+	
     /* (non-Javadoc)
      * @see org.komodo.shell.api.WorkspaceContext#getPropertyNameValueMap()
      */
@@ -293,4 +317,5 @@ public class WorkspaceContextImpl implements WorkspaceContext {
 	public WorkspaceManager getWorkspaceManager() throws Exception {
         return WorkspaceManager.getInstance(getRepository());
 	}
+
 }

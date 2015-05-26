@@ -1,41 +1,41 @@
 # -----------------------------------------------
 # Create all relational objects 
 # -----------------------------------------------
-create Schema MySchema /tko:workspace
+#create Schema MySchema /workspace
 #
-create Model MyModel /tko:workspace
+create Model MyModel /workspace
 #
-create Table MyTable1 /tko:workspace/MyModel
-create Table MyTable2 /tko:workspace/MyModel
+create Table MyTable1 /workspace/MyModel
+create Table MyTable2 /workspace/MyModel
 #
-create View MyView /tko:workspace/MyModel
+create View MyView /workspace/MyModel
 #
-create UserDefinedFunction MyUdf /tko:workspace/MyModel
+create UserDefinedFunction MyUdf /workspace/MyModel
 #
-create PushdownFunction MyPushdownFunc /tko:workspace/MyModel
+create PushdownFunction MyPushdownFunc /workspace/MyModel
 #
-create StoredProcedure MyStoredProc /tko:workspace/MyModel
+create StoredProcedure MyStoredProc /workspace/MyModel
 #
-create VirtualProcedure MyVirtualProc /tko:workspace/MyModel
+create VirtualProcedure MyVirtualProc /workspace/MyModel
 #
-create Column MyCol1 /tko:workspace/MyModel/MyTable1
-create Column MyCol2 /tko:workspace/MyModel/MyTable1
-create Column MyCol3 /tko:workspace/MyModel/MyTable1
+create Column MyCol1 /workspace/MyModel/MyTable1
+create Column MyCol2 /workspace/MyModel/MyTable1
+create Column MyCol3 /workspace/MyModel/MyTable1
 #
-create PrimaryKey MyPk /tko:workspace/MyModel/MyTable1
+create PrimaryKey MyPk /workspace/MyModel/MyTable1
 #
-create AccessPattern MyAp /tko:workspace/MyModel/MyTable1
+create AccessPattern MyAp /workspace/MyModel/MyTable1
 #
-create UniqueConstraint MyUc /tko:workspace/MyModel/MyTable1
+create UniqueConstraint MyUc /workspace/MyModel/MyTable1
 #
-create ForeignKey MyFk /tko:workspace/MyModel/MyTable1 /tko:workspace/MyModel/MyTable2
+create ForeignKey MyFk /workspace/MyModel/MyTable1 /workspace/MyModel/MyTable2
 #
-create DataTypeResultSet MyDataTypeResultSet /tko:workspace/MyModel/MyStoredProc
+#create DataTypeResultSet MyDataTypeResultSet /workspace/MyModel/MyStoredProc
 #
-create TabularResultSet MyTabResultSet /tko:workspace/MyModel/MyVirtualProc
+#create TabularResultSet MyTabResultSet /workspace/MyModel/MyPushdownFunc
 #
-create ResultSetColumn MyResultSetCol /tko:workspace/MyModel/MyVirtualProc/resultSet
+#create ResultSetColumn MyResultSetCol /workspace/MyModel/MyVirtualProc/resultSet
 #
-create Parameter MyParam /tko:workspace/MyModel/MyVirtualProc
+create Parameter MyParam /workspace/MyModel/MyVirtualProc
 #
-create Index MyIndx /tko:workspace/MyModel/MyTable2
+create Index MyIndx /workspace/MyModel/MyTable2

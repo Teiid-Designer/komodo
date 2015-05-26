@@ -1,4 +1,4 @@
 #cd into workspace
-cd /tko:workspace/
+cd /workspace/
 
 

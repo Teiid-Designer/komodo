@@ -11,7 +11,6 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
-import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
@@ -43,7 +42,11 @@ public class DeleteCommand extends BuiltInShellCommand implements StringConstant
 		}
 		
         try {
+        	// Delete
             delete(objPathArg);
+            // Commit transaction
+            getWorkspaceStatus().commit("DeleteCommand"); //$NON-NLS-1$
+            // Print message
             print(CompletionConstants.MESSAGE_INDENT, Messages.getString("DeleteCommand.ObjectDeleted", objPathArg)); //$NON-NLS-1$
             if (getWorkspaceStatus().getRecordingStatus())
                 recordCommand(getArguments());
@@ -58,14 +61,14 @@ public class DeleteCommand extends BuiltInShellCommand implements StringConstant
 	protected boolean validate(String... args) throws Exception {
 		String pathArg = args[0];
 		
-		// Validate path is a valid absolute or relative path
-		if (!validatePath(pathArg)) {
-			return false;
-		}
-		
 		// Requested context to delete
 		WorkspaceContext contextToDelete = ContextUtils.getContextForPath(getWorkspaceStatus(), pathArg);
-		
+		// Error if could not locate context
+		if (contextToDelete==null) {
+            print(CompletionConstants.MESSAGE_INDENT,Messages.getString("DeleteCommand.cannotDelete_objectDoesNotExist", pathArg)); //$NON-NLS-1$
+			return false;
+		}
+				
 		int contextLevel = ContextUtils.getContextLevel(contextToDelete);
 		// Cannot delete the workspace!
 		if(contextLevel<=0) {

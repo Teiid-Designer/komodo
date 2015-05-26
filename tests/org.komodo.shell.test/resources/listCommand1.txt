@@ -1,5 +1,5 @@
 #List at the root
-cd /tko:workspace
+cd /workspace
 list
 
 

@@ -18,12 +18,10 @@ import org.komodo.utils.StringUtils;
 public class ContextUtils {
 	
 	@SuppressWarnings("javadoc")
-	public static final String WORKSPACE_CONTEXT_NAME = "tko:workspace"; //$NON-NLS-1$
-	@SuppressWarnings("javadoc")
 	public static final String PATH_SEPARATOR = "/"; //$NON-NLS-1$
 
 	private static final String ROOT_OPT1 = PATH_SEPARATOR;
-	private static final String ROOT_OPT2 = ROOT_OPT1 + ContextUtils.WORKSPACE_CONTEXT_NAME;
+	private static final String ROOT_OPT2 = ROOT_OPT1 + WorkspaceContext.WORKSPACE_ROOT_DISPLAY_NAME;
 	private static final String ROOT_OPT3 = ROOT_OPT2 + PATH_SEPARATOR;
 
 	/**
@@ -209,7 +207,7 @@ public class ContextUtils {
 	 * @return true if path is absolute, false if not
 	 */
 	public static boolean isAbsolutePath(String path) {
-		if(path.startsWith(PATH_SEPARATOR + WORKSPACE_CONTEXT_NAME + PATH_SEPARATOR)) {
+		if(path.startsWith(PATH_SEPARATOR + WorkspaceContext.WORKSPACE_ROOT_DISPLAY_NAME + PATH_SEPARATOR)) {
 			return true;
 		}
 		return false;
@@ -221,8 +219,8 @@ public class ContextUtils {
 	 * @return the path relative to the root context
 	 */
 	public static String convertAbsolutePathToRootRelative(String absolutePath) {
-		if(absolutePath.startsWith(PATH_SEPARATOR + WORKSPACE_CONTEXT_NAME + PATH_SEPARATOR)) {
-			return absolutePath.substring( (PATH_SEPARATOR+WORKSPACE_CONTEXT_NAME+PATH_SEPARATOR).length() );
+		if(absolutePath.startsWith(PATH_SEPARATOR + WorkspaceContext.WORKSPACE_ROOT_DISPLAY_NAME + PATH_SEPARATOR)) {
+			return absolutePath.substring( (PATH_SEPARATOR+WorkspaceContext.WORKSPACE_ROOT_DISPLAY_NAME+PATH_SEPARATOR).length() );
 		}
 		return null;
 	}

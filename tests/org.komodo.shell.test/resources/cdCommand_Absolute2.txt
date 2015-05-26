@@ -1,7 +1,7 @@
 #create a vdb and a model, then cd into MyVdb with absolute path
-cd /tko:workspace
+cd /workspace
 create vdb MyVdb
 cd MyVdb
 create model MyModel
 cd MyModel
-cd /tko:workspace/MyVdb
+cd /workspace/MyVdb
