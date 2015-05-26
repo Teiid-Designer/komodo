@@ -62,7 +62,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
 
     private UnitOfWork uow; // the current transaction
     private SynchronousCallback callback;
-    
+
     private int count = 0; // commit count
 
     private WorkspaceContext currentContext;
@@ -98,10 +98,8 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     }
 
     private void init( final UnitOfWork transaction ) throws Exception {
-        Repository repo = getEngine().getDefaultRepository();
-
         if ( transaction == null ) {
-        	createTransaction(repo);
+        	createTransaction("init"); //$NON-NLS-1$
         } else {
             this.uow = transaction;
             Repository.UnitOfWorkListener uowListener = transaction.getCallback();
@@ -110,6 +108,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
             }
         }
 
+        final Repository repo = getEngine().getDefaultRepository();
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(repo);
 
         wsContext = new WorkspaceContextImpl(this,null,wkspMgr);
@@ -117,15 +116,12 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
 
         currentContext = wsContext;
     }
-    
-    /**
-     * Creates the callback and transaction
-     * @param repo the repository 
-     * @throws Exception exception if fail
-     */
-    private void createTransaction(Repository repo) throws Exception {
+
+    private void createTransaction(final String source ) throws Exception {
+        final Repository repo = getEngine().getDefaultRepository();
         this.callback = new SynchronousCallback();
-        this.uow = repo.createTransaction( getClass().getSimpleName() + ".createTransaction()", false, callback ); //$NON-NLS-1$
+        this.uow = repo.createTransaction( ( getClass().getSimpleName() + ':' + source + '-' + this.count++ ), false, callback );
+        KLog.getLogger().debug( "WorkspaceStatusImpl.createTransaction: " + this.uow.getName() ); //$NON-NLS-1$
     }
 
     @Override
@@ -188,9 +184,34 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         }
 
         // create new transaction
-        final String name = ( source + '.' + this.count );
-        KLog.getLogger().debug( "WorkspaceStatusImpl new transaction: " + name ); //$NON-NLS-1$
-        createTransaction(getEngine().getDefaultRepository());
+        createTransaction(source);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.WorkspaceStatus#rollback(java.lang.String)
+     */
+    @Override
+    public void rollback( final String source ) throws Exception {
+        final String txName = this.uow.getName();
+        this.uow.rollback();
+
+        final boolean success = this.callback.await( 3, TimeUnit.MINUTES );
+
+        if ( success ) {
+            final KException error = uow.getError();
+            final State txState = this.uow.getState();
+
+            if ( ( error != null ) || !State.ROLLED_BACK.equals( txState ) ) {
+                throw new KException( Messages.getString( SHELL.TRANSACTION_ROLLBACK_ERROR, txName ), error );
+            }
+        } else {
+            throw new KException( Messages.getString( SHELL.TRANSACTION_TIMEOUT, txName ) );
+        }
+
+        // create new transaction
+        createTransaction(source);
     }
 
     @Override

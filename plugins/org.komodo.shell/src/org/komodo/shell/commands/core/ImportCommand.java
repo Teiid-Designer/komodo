@@ -10,7 +10,6 @@ package org.komodo.shell.commands.core;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
-
 import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
 import org.komodo.importer.ImportOptions.OptionKeys;
@@ -18,7 +17,6 @@ import org.komodo.importer.ImportType;
 import org.komodo.importer.ddl.DdlImporter;
 import org.komodo.importer.vdb.VdbImporter;
 import org.komodo.relational.vdb.Vdb;
-import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
@@ -31,20 +29,20 @@ import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 
 /**
- * Import Command 
+ * Import Command
  */
 public class ImportCommand extends BuiltInShellCommand {
 
     private static final String IMPORT = "import"; //$NON-NLS-1$
-    
+
     private static final String SUBCMD_DDL = "ddl"; //$NON-NLS-1$
     private static final String SUBCMD_VDB = "vdb"; //$NON-NLS-1$
-    //private static final List<String> SUBCMDS = 
-    //		Arrays.asList(SUBCMD_VDB, SUBCMD_DDL);    
-    private static final List<String> SUBCMDS = Arrays.asList(SUBCMD_VDB);    
+    //private static final List<String> SUBCMDS =
+    //		Arrays.asList(SUBCMD_VDB, SUBCMD_DDL);
+    private static final List<String> SUBCMDS = Arrays.asList(SUBCMD_VDB);
 
     private ImportMessages importMessages = null;
-    
+
     /**
      * Constructor.
      * @param wsStatus the workspace status
@@ -65,11 +63,11 @@ public class ImportCommand extends BuiltInShellCommand {
         if (SUBCMD_DDL.equalsIgnoreCase(subcmdArg)) {
         	// TODO: Currently not supported.  Importer needs work
             throw new InvalidCommandArgumentException(0, Messages.getString("ImportCommand.InvalidSubCommand")); //$NON-NLS-1$
-        	
+
 //            // Check required args
 //            String fileNameArg = requiredArgument(1, Messages.getString("ImportCommand.InvalidArgMsg_FileName")); //$NON-NLS-1$
 //            String modelPathArg = optionalArgument(2);
-//            
+//
 //            // Validate fileName
 //            if(!validateFileName(fileNameArg)) {
 //            	return false;
@@ -111,32 +109,28 @@ public class ImportCommand extends BuiltInShellCommand {
             }
 
             KomodoObject vdbObject = importVdb(fileNameArg,parentContextPath);
-            
+
             if(vdbObject!=null && !importMessages.hasError()) {
             	Vdb theVdb = (Vdb)vdbObject;
             	String vdbName = theVdb.getVdbName(wsStatus.getTransaction());
-            	
+
             	// Check for already existing vdb with same name
             	WorkspaceContext parentContext = ContextUtils.getContextForPath(wsStatus, parentContextPath);
             	boolean okToImport = validateNotDuplicate(vdbName, KomodoType.VDB, parentContext);
             	// OK to keep VDB - rename it to vdbName
             	if(okToImport) {
             		vdbObject.rename(wsStatus.getTransaction(), vdbName);
-            	// Has Duplicate VDB - delete it.
+                    wsStatus.commit("ImportCommand"); //$NON-NLS-1$
+
+                    print(CompletionConstants.MESSAGE_INDENT, Messages.getString("ImportCommand.VdbImportSuccessMsg", fileNameArg)); //$NON-NLS-1$
+
+                    if (wsStatus.getRecordingStatus())
+                        recordCommand(getArguments());
+
+                    success = true;
             	} else {
-                    WorkspaceManager wkspManager = wsStatus.getCurrentContext().getWorkspaceManager();
-                    wkspManager.delete(getWorkspaceStatus().getTransaction(), vdbObject);
+                    wsStatus.rollback("ImportCommand"); //$NON-NLS-1$
             	}
-                               
-                // Commit transaction
-                getWorkspaceStatus().commit("ImportCommand"); //$NON-NLS-1$
-                
-                if(okToImport) {
-                	print(CompletionConstants.MESSAGE_INDENT, Messages.getString("ImportCommand.VdbImportSuccessMsg", fileNameArg)); //$NON-NLS-1$
-                	if (getWorkspaceStatus().getRecordingStatus())
-                		recordCommand(getArguments());
-                }
-                success = true;
             } else {
                 print(CompletionConstants.MESSAGE_INDENT, Messages.getString("ImportCommand.ImportFailedMsg", fileNameArg)); //$NON-NLS-1$
                 print(CompletionConstants.MESSAGE_INDENT, importMessages.errorMessagesToString());
@@ -147,7 +141,7 @@ public class ImportCommand extends BuiltInShellCommand {
 
         return success;
     }
-    
+
     /**
      * Validate the supplied fileName
      * @param fileName the file name
@@ -157,7 +151,7 @@ public class ImportCommand extends BuiltInShellCommand {
     	//TODO: Ensure valid file path is entered
         return true;
     }
-    
+
     /**
      * Validates whether the type of object can be created as a child of the parent path
      * @param parentPath the model parent path
@@ -173,7 +167,7 @@ public class ImportCommand extends BuiltInShellCommand {
     	}
     	return true;
     }
-       
+
     /**
      * Validates whether another child of the same name and type already exists
      * @param objName the name of the object
@@ -184,7 +178,7 @@ public class ImportCommand extends BuiltInShellCommand {
     private boolean validateNotDuplicate(String objName, KomodoType kType, WorkspaceContext parentContext) throws Exception {
     	// Attempt to get child
     	WorkspaceContext child = parentContext.getChild(objName,kType.getType());
-    	
+
     	// If child exists, print message and return false
     	if(child!=null) {
     		print(CompletionConstants.MESSAGE_INDENT,Messages.getString("ImportCommand.cannotImport_wouldCreateDuplicate", objName, kType.getType())); //$NON-NLS-1$
@@ -192,7 +186,7 @@ public class ImportCommand extends BuiltInShellCommand {
     	}
         return true;
     }
-    
+
     /**
      * Import ddl from file and add objects to the current model
      * @param ddlFile the file containing the DDL
@@ -203,7 +197,7 @@ public class ImportCommand extends BuiltInShellCommand {
         // Reset ImportMessages
         importMessages = new ImportMessages();
         String modelName = null;
-        
+
         WorkspaceContext currentContext = getWorkspaceStatus().getCurrentContext();
         Repository repository = null;
         try {
@@ -233,7 +227,7 @@ public class ImportCommand extends BuiltInShellCommand {
     private KomodoObject importVdb(String vdbFile, String vdbParentPath) {
         // Reset ImportMessages
         importMessages = new ImportMessages();
-        
+
         WorkspaceContext parentContext = ContextUtils.getContextForPath(getWorkspaceStatus(), vdbParentPath);
         Repository repository = null;
         try {
@@ -285,5 +279,5 @@ public class ImportCommand extends BuiltInShellCommand {
     	}
     	return -1;
     }
-    
+
 }

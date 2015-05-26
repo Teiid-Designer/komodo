@@ -40,6 +40,7 @@ public class Messages implements StringConstants {
     @SuppressWarnings( "javadoc" )
     public enum SHELL {
         TRANSACTION_COMMIT_ERROR,
+        TRANSACTION_ROLLBACK_ERROR,
         TRANSACTION_TIMEOUT,
         COMPONENT_STARTED,
         COMPONENT_FAILED,
