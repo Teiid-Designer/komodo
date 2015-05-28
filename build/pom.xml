@@ -6,8 +6,8 @@
   </parent>
 
   <groupId>org.jboss.tools</groupId>
-  <artifactId>komodo.build</artifactId>
-  <name>Komodo Build</name>
+  <artifactId>vdbuilder.build</artifactId>
+  <name>VDBuilder Build</name>
 
   <modelVersion>4.0.0</modelVersion>
 
