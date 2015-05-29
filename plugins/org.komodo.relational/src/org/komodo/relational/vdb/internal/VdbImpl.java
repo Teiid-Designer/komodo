@@ -176,7 +176,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
             }
 
             // Create an XML Document from the filled writer
-            this.xml = writer.toString();
+            this.xml = writer.toString().trim();
 
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("VdbImpl#VdbManifestImpl: transaction = {0}, xml = {1}", //$NON-NLS-1$
@@ -310,7 +310,6 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
                     final Repository repository,
                     final String workspacePath ) throws KException {
         super(uow, repository, workspacePath);
-        setVdbName(uow, getName(uow));
     }
 
     @Override

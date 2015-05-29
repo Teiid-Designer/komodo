@@ -9,7 +9,9 @@ package org.komodo.relational.model.internal;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import org.komodo.core.KomodoLexicon;
+import org.komodo.modeshape.visitor.DdlNodeVisitor;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.internal.AdapterFactory;
@@ -39,6 +41,7 @@ import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
+import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.utils.ArgCheck;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateTable;
@@ -711,4 +714,40 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
         setObjectProperty( uow, "setModelType", CoreLexicon.JcrId.MODEL_TYPE, modelType.name() ); //$NON-NLS-1$
     }
 
+    private String exportDdl(UnitOfWork transaction, Properties exportProperties) throws Exception {
+        DdlNodeVisitor visitor = new DdlNodeVisitor(TeiidVersionProvider.getInstance().getTeiidVersion(), false);
+        visitor.visit(node(transaction));
+
+        String result = visitor.getDdl();
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.Exportable#export(org.komodo.spi.repository.Repository.UnitOfWork, java.util.Properties)
+     */
+    @Override
+    public String export( final UnitOfWork transaction , Properties exportProperties) throws KException {
+        ArgCheck.isNotNull(transaction);
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("modelimpl-export: transaction = {0}", transaction.getName()); //$NON-NLS-1$
+        }
+
+        try {
+            String result = exportDdl(transaction, exportProperties);
+
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("ModelImpl: transaction = {0}, xml = {1}", //$NON-NLS-1$
+                             transaction.getName(),
+                             result);
+            }
+
+            return result;
+
+        } catch (final Exception e) {
+            throw handleError(e);
+        }
+    }
 }

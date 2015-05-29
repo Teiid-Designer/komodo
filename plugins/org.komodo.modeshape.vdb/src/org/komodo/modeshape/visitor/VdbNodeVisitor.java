@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-
 import javax.jcr.Node;
 import javax.jcr.PathNotFoundException;
 import javax.jcr.Property;
@@ -34,10 +33,8 @@ import javax.jcr.PropertyIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.Value;
 import javax.jcr.nodetype.NodeType;
-import javax.lang.model.element.ElementVisitor;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
-
 import org.komodo.modeshape.AbstractNodeVisitor;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.runtime.version.TeiidVersion;
@@ -138,7 +135,8 @@ public class VdbNodeVisitor extends AbstractNodeVisitor implements StringConstan
             return UNKNOWN;
         }
     }
-    
+
+    @SuppressWarnings( "unused" )
     private interface ElementTabValue {
         int VIRTUAL_DATABASE = 0;
         int VDB_PROPERTY = 1;
@@ -190,6 +188,11 @@ public class VdbNodeVisitor extends AbstractNodeVisitor implements StringConstan
         return UNDEFINED;
     }
     
+    /**
+     * Set to true to show tabs
+     *
+     * @param showTabs showTabs flags
+     */
     public void setShowTabs(boolean showTabs) {
     	this.showTabs = showTabs;
     }
@@ -252,11 +255,11 @@ public class VdbNodeVisitor extends AbstractNodeVisitor implements StringConstan
         return nodeTypeName.getId().equals(nodeType.getName());
     }
 
-    private void properties(Node node, int numTabs, Properties exportableProps) throws XMLStreamException, RepositoryException {
+    private void properties(Node node, int numTabs, Properties exportableProps) throws XMLStreamException {
 
         for( Object key : exportableProps.keySet() ) {
         	String name = (String)key;
-            String value = (String)exportableProps.getProperty(name);
+            String value = exportableProps.getProperty(name);
 
             writeTab(numTabs);
             writeStartElement(VdbLexicon.ManifestIds.PROPERTY);
@@ -673,10 +676,12 @@ public class VdbNodeVisitor extends AbstractNodeVisitor implements StringConstan
     }
 
 
+    @Override
     public void visit(Property property) {
         // Not required
     }
     
+    @Override
     protected void visitChild(Node node, String relNodePath) throws PathNotFoundException, RepositoryException {
         try {
         	if (node.hasNode(relNodePath)) {

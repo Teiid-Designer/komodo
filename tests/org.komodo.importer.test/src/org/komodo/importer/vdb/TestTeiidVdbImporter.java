@@ -49,6 +49,7 @@ import org.komodo.repository.SynchronousCallback;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.test.utils.TestUtilities;
 import org.komodo.utils.KLog;
 import org.modeshape.jcr.api.JcrConstants;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
@@ -62,11 +63,7 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 @SuppressWarnings({"nls", "javadoc"})
 public class TestTeiidVdbImporter extends AbstractImporterTest {
 
-    private static final String TWEET_EXAMPLE = "tweet-example-vdb.xml";
-
     private static final String TWEET_EXAMPLE_REIMPORT = "tweet-example-vdb-reimport.xml";
-
-    private static final String ALL_ELEMENTS_EXAMPLE_NAME = "teiid-vdb-all-elements.xml";
 
     private static final String BOOKS_EXAMPLE_FULL = "books.xml";
     private static final String BOOKS_EXAMPLE_PROPS_ONLY = "books_props_only.xml";
@@ -147,7 +144,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
      */
     @Test
     public void testUnreadableVdbFile() throws Exception {
-        InputStream vdbStream = setup(TWEET_EXAMPLE);
+        InputStream vdbStream = TestUtilities.tweetExample();
         File tmpFile = File.createTempFile("unreadableFile", ".xml");
         Files.copy(vdbStream, tmpFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
         tmpFile.deleteOnExit();
@@ -230,7 +227,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
          *      @vdb:description=Shows how to call Web Services
          *      @UseConnectorMetadata=cached
          */
-        verify(tweetNode.getParent(this.uow), TWEET_EXAMPLE, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        verify(tweetNode.getParent(this.uow), TestUtilities.TWEET_EXAMPLE_NAME, VdbLexicon.Vdb.VIRTUAL_DATABASE);
         verifyMixinType(tweetNode, "mix:referenceable");
         verifyProperty(tweetNode, VdbLexicon.Vdb.NAME, "twitter");
         verifyProperty(tweetNode, VdbLexicon.Vdb.DESCRIPTION, "Shows how to call Web Services");
@@ -322,11 +319,11 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
     @Test
     public void testBasicVdbImport() throws Exception {
-        InputStream vdbStream = setup(TWEET_EXAMPLE);
+        InputStream vdbStream = TestUtilities.tweetExample();
 
         // Options for the import (default)
         ImportOptions importOptions = new ImportOptions();
-        importOptions.setOption(OptionKeys.NAME, TWEET_EXAMPLE);
+        importOptions.setOption(OptionKeys.NAME, TestUtilities.TWEET_EXAMPLE_NAME);
 
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
@@ -371,7 +368,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
         KLog.getLogger().debug("\n\n=== Editing tweet example ===");
 
-        KomodoObject vdbNode = _repo.getFromWorkspace(uow, TWEET_EXAMPLE);
+        KomodoObject vdbNode = _repo.getFromWorkspace(uow, TestUtilities.TWEET_EXAMPLE_NAME);
         assertNotNull(vdbNode);
         WorkspaceManager wkspManager = WorkspaceManager.getInstance(_repo);
 
@@ -415,7 +412,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
         KLog.getLogger().debug("\n\n=== Editing tweet example ===");
 
-        KomodoObject vdbNode = _repo.getFromWorkspace(uow, TWEET_EXAMPLE);
+        KomodoObject vdbNode = _repo.getFromWorkspace(uow, TestUtilities.TWEET_EXAMPLE_NAME);
         assertNotNull(vdbNode);
 
         KomodoObject twitterView = vdbNode.getChild(uow, TWITTER_VIEW_MODEL);
@@ -460,14 +457,16 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         KLog.getLogger().debug("\n\n=== Reimporting edited tweet example ===");
 
         // Set up the vdb reimport stream
-        InputStream vdbStream = setup(TWEET_EXAMPLE_REIMPORT);
+        InputStream vdbStream = TestUtilities.getResourceAsStream(getClass(),
+                                                                                                       DATA_DIRECTORY,
+                                                                                                       TWEET_EXAMPLE_REIMPORT); 
 
         // Options for the import (default)
         //
         // Handling existing node set to OVERWRITE by default
         //
         ImportOptions importOptions = new ImportOptions();
-        importOptions.setOption(OptionKeys.NAME, TWEET_EXAMPLE);
+        importOptions.setOption(OptionKeys.NAME, TestUtilities.TWEET_EXAMPLE_NAME);
 
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
@@ -504,7 +503,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
          *      @vdb-property=vdb-value
          */
         KomodoObject myVdbExample = verify(allElementsNode.getParent(this.uow),
-                                                                    ALL_ELEMENTS_EXAMPLE_NAME,
+                                                                    TestUtilities.ALL_ELEMENTS_EXAMPLE_NAME + TestUtilities.ALL_ELEMENTS_EXAMPLE_SUFFIX,
                                                                     VdbLexicon.Vdb.VIRTUAL_DATABASE,
                                                                     "mix:referenceable");
         assertEquals(allElementsNode, myVdbExample);
@@ -725,11 +724,12 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
     @Test
     public void testAllElementsVdbImport() throws Exception {
-        InputStream vdbStream = setup(ALL_ELEMENTS_EXAMPLE_NAME);
+        InputStream vdbStream = TestUtilities.allElementsExample();
 
         // Options for the import (default)
         ImportOptions importOptions = new ImportOptions();
-        importOptions.setOption(OptionKeys.NAME, ALL_ELEMENTS_EXAMPLE_NAME);
+        importOptions.setOption(OptionKeys.NAME,
+                                               TestUtilities.ALL_ELEMENTS_EXAMPLE_NAME + TestUtilities.ALL_ELEMENTS_EXAMPLE_SUFFIX);
 
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
@@ -751,7 +751,8 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
     @Test
     @Ignore("This will not succeed until MODE-2464 has been fixed")
     public void testBooksExample_Full_Vdb() throws Exception {
-        InputStream vdbStream = setup(BOOKS_EXAMPLE_FULL);
+        InputStream vdbStream = TestUtilities.getResourceAsStream(getClass(),
+                                                                  DATA_DIRECTORY, BOOKS_EXAMPLE_FULL);
 
         // Options for the import (default)
         ImportOptions importOptions = new ImportOptions();
@@ -813,7 +814,8 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
     @Test
     public void testBooksExample_Vdb_Properties_Only() throws Exception {
         //File vdbFile = setupWithFile(BOOKS_EXAMPLE);
-        InputStream vdbStream = setup(BOOKS_EXAMPLE_PROPS_ONLY);
+        InputStream vdbStream = TestUtilities.getResourceAsStream(getClass(),
+                                                                  DATA_DIRECTORY, BOOKS_EXAMPLE_PROPS_ONLY);
 
         // Options for the import (default)
         ImportOptions importOptions = new ImportOptions();
@@ -866,8 +868,8 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
     @Test
     public void testBooksExample_Source_Model_Only() throws Exception {
-        //File vdbFile = setupWithFile(BOOKS_EXAMPLE);
-        InputStream vdbStream = setup(BOOKS_EXAMPLE_SOURCE_MODEL_ONLY);
+        InputStream vdbStream = TestUtilities.getResourceAsStream(getClass(),
+                                                                  DATA_DIRECTORY, BOOKS_EXAMPLE_SOURCE_MODEL_ONLY);
 
         // Options for the import (default)
         ImportOptions importOptions = new ImportOptions();
@@ -902,8 +904,8 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
     @Test
     public void testBooksExample_Source_Model_With_Roles() throws Exception {
-        //File vdbFile = setupWithFile(BOOKS_EXAMPLE);
-        InputStream vdbStream = setup(BOOKS_EXAMPLE_SOURCE_WITH_ROLES);
+        InputStream vdbStream = TestUtilities.getResourceAsStream(getClass(),
+                                                                  DATA_DIRECTORY, BOOKS_EXAMPLE_SOURCE_WITH_ROLES);
 
         // Options for the import (default)
         ImportOptions importOptions = new ImportOptions();
@@ -974,8 +976,8 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
     @Test
     public void testBooksExample_Virtual_Model_Only() throws Exception {
-        //File vdbFile = setupWithFile(BOOKS_EXAMPLE);
-        InputStream vdbStream = setup(BOOKS_EXAMPLE_VIRTUAL_MODEL_ONLY);
+        InputStream vdbStream = TestUtilities.getResourceAsStream(getClass(),
+                                                                  DATA_DIRECTORY, BOOKS_EXAMPLE_VIRTUAL_MODEL_ONLY);
 
         // Options for the import (default)
         ImportOptions importOptions = new ImportOptions();
@@ -1012,8 +1014,8 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
     @Test
     public void testBooksExample_Translator_Only() throws Exception {
-        //File vdbFile = setupWithFile(BOOKS_EXAMPLE);
-        InputStream vdbStream = setup(BOOKS_EXAMPLE_TRANSLATORS_ONLY);
+        InputStream vdbStream = TestUtilities.getResourceAsStream(getClass(),
+                                                                  DATA_DIRECTORY, BOOKS_EXAMPLE_TRANSLATORS_ONLY);
 
         // Options for the import (default)
         ImportOptions importOptions = new ImportOptions();

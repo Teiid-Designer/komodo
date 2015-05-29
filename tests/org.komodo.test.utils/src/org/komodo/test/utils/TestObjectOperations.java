@@ -64,8 +64,6 @@ public class TestObjectOperations implements StringConstants {
 
     private static final String BOOKS_EXAMPLE_FULL = "books.xml";
 
-    private static final String TWEET_EXAMPLE = "tweet-example-vdb.xml";
-
     /**
      * Default location of the configuration of the test repository
      */
@@ -319,7 +317,7 @@ public class TestObjectOperations implements StringConstants {
         //
         assertTrue(bigContent.getBytes().length > 4096);
 
-        InputStream tweetStream = getClass().getResourceAsStream(TWEET_EXAMPLE);
+        InputStream tweetStream = TestUtilities.tweetExample();
         assertNotNull(tweetStream);
 
         String littleContent = toString(tweetStream);

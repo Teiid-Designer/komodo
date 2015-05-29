@@ -6,7 +6,8 @@ import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Properties;
-
+import org.komodo.relational.model.Model;
+import org.komodo.relational.model.Schema;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.BuiltInShellCommand;
@@ -27,8 +28,8 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
  *
  */
 public class ExportCommand extends BuiltInShellCommand implements StringConstants {
+
     private static final String EXPORT = "export"; //$NON-NLS-1$
-	private static final String XML_EXT = "xml"; //$NON-NLS-1$
 	
     /**
      * Constructor.
@@ -56,9 +57,9 @@ public class ExportCommand extends BuiltInShellCommand implements StringConstant
         try {
         	export(objPathArg, filePathArg);
         	
-            print(CompletionConstants.MESSAGE_INDENT, Messages.getString("ExportCommand.ObjectExported", objPathArg, filePathArg)); //$NON-NLS-1$
             if (getWorkspaceStatus().getRecordingStatus())
                 recordCommand(getArguments());
+
         } catch (Exception e) {
             print(CompletionConstants.MESSAGE_INDENT, Messages.getString("ExportCommand.Failure", objPathArg)); //$NON-NLS-1$
             print(CompletionConstants.MESSAGE_INDENT, TAB + e.getMessage());
@@ -92,6 +93,9 @@ public class ExportCommand extends BuiltInShellCommand implements StringConstant
 
         // Get the context for export
         WorkspaceContext contextToExport = ContextUtils.getContextForPath(wsStatus, objPath);
+        if (contextToExport == null)
+            throw new Exception(Messages.getString("ExportCommand.cannotExport_objectDoesNotExist", objPath)); //$NON-NLS-1$
+
         KomodoObject objToExport = contextToExport.getKomodoObj();
          
         if( objToExport == null ) {
@@ -105,40 +109,61 @@ public class ExportCommand extends BuiltInShellCommand implements StringConstant
         }
         
         // Check object type
-        if( objToExport.getTypeIdentifier(transaction).equals(KomodoType.VDB)) {
-        	Vdb vdb = wkspManager.resolve(transaction, objToExport, Vdb.class);
-        	if( vdb == null ) {
-        		throw new Exception(" Could not resolve the VDB"); //$NON-NLS-1$
-        	}
-			Properties props = new Properties();
-			props.put( ExportConstants.USE_TABS_PROP_KEY, true);
+        String output = null;
+        String fileExtension = null;
 
-			String ddlXmlString = vdb.export(transaction, props);
-			if (ddlXmlString == null || ddlXmlString .isEmpty()) {
-				throw new Exception(Messages.getString("ExportCommand.cannotExport_problemWithVdb")); //$NON-NLS-1$
-			}
-			
-			handleExport(ddlXmlString, fileNameAndLocation);
-        	
-        } else if( objToExport.getTypeIdentifier(transaction).equals(KomodoType.MODEL)) {
-        	 // IF Model, then export as xyz.ddl file
-        	throw new Exception(" EXPORT MODEL not yet implemented"); //$NON-NLS-1$
+        KomodoType typeIdentifier = objToExport.getTypeIdentifier(transaction);
+        Properties properties = new Properties();
+        properties.put( ExportConstants.USE_TABS_PROP_KEY, true);
+
+        if( typeIdentifier.equals(KomodoType.VDB)) {
+
+            Vdb vdb = wkspManager.resolve(transaction, objToExport, Vdb.class);
+            if( vdb == null ) {
+                throw new Exception(Messages.getString(Messages.ExportCommand.CannotExportProblemWithVdb)); 
+            }
+
+            output = vdb.export(transaction, properties);
+            fileExtension = XML;
+
+        } else if (typeIdentifier.equals(KomodoType.MODEL)) {
+            Model model = wkspManager.resolve(transaction, objToExport, Model.class);
+            if( model == null ) {
+                throw new Exception(Messages.getString(Messages.ExportCommand.CannotExportProblemWithModel)); 
+            }
+
+            output = model.export(transaction, properties);
+            fileExtension = DDL;
+
+        } else if (typeIdentifier.equals(KomodoType.SCHEMA)) {
+            Schema schema = wkspManager.resolve(transaction, objToExport, Schema.class);
+            if( schema == null )
+                throw new Exception(Messages.getString(Messages.ExportCommand.CannotExportProblemWithSchema)); 
+
+            output = schema.export(transaction, properties);
+            fileExtension = DDL;
         }
-       
 
+        if ( output == null ||  output.isEmpty()) {
+            print(CompletionConstants.MESSAGE_INDENT, Messages.getString(Messages.ExportCommand.NoContentExported, objPath));
+            return;
+        }
+
+        handleExport( output, fileNameAndLocation, fileExtension);
+        print(CompletionConstants.MESSAGE_INDENT, Messages.getString(Messages.ExportCommand.ObjectExported, objPath, fileNameAndLocation));
     }
     
     /**
      * Export the current string content of the sql display to a user-selected file
      */
-    private File handleExport(String contents, String fileName) {
+    private void handleExport(String contents, String fileName, String fileExtension) throws Exception {
 
-    	String fileExtension = XML_EXT;
-    	String fileNameString = fileName;
-    			
+        fileExtension = fileExtension == null ? XML : fileExtension;
+        String fileNameString = fileName;
+
         // If there is no file extension, add .xml
-        if (fileNameString.indexOf('.') == -1 && fileExtension != null) {
-        	fileNameString = fileNameString + "." + fileExtension; //$NON-NLS-1$
+        if (fileNameString.indexOf(DOT) == -1 && fileExtension != null) {
+            fileNameString = fileNameString + DOT + fileExtension;
         }
 
         FileWriter fileWriter = null;
@@ -149,22 +174,20 @@ public class ExportCommand extends BuiltInShellCommand implements StringConstant
             outputBufferWriter = new BufferedWriter(fileWriter);
             printWriter = new PrintWriter(outputBufferWriter);
             printWriter.write(contents);
-        } catch (Exception e) {
-            // TODO: log...
-        }
-
-        finally {
+        } finally {
             // Clean up writers & buffers
-            if (printWriter != null) {
-                printWriter.close();
+            try {
+                if (printWriter != null)
+                    printWriter.close();
+            } finally {
+                // Do nothing
             }
 
             try {
-                if (outputBufferWriter != null) {
+                if (outputBufferWriter != null)
                     outputBufferWriter.close();
-                }
-            } catch (java.io.IOException e) {
-            	// do nothing
+            } finally {
+                // Do nothing
             }
 
             try {
@@ -172,10 +195,9 @@ public class ExportCommand extends BuiltInShellCommand implements StringConstant
                     fileWriter.close();
                 }
             } catch (java.io.IOException e) {
-            	// do nothing
+                // Do nothing
             }
         }
-        return new File(fileNameString);
     }
     
     /**

@@ -49,13 +49,6 @@ public abstract class AbstractImporterTest extends AbstractLocalRepositoryTest {
 
     protected static final String DATA_DIRECTORY = File.separator + "data"; //$NON-NLS-1$
 
-    protected InputStream setup(String fileName) {
-        String fullFilePath = DATA_DIRECTORY + File.separator + fileName;
-        InputStream stream = getClass().getResourceAsStream(fullFilePath);
-        assertNotNull(stream);
-        return stream;
-    }
-
     protected File setupWithFile(String fileName) {
     	String fullFilePath = DATA_DIRECTORY + File.separator + fileName;
         File file = new File(fullFilePath);

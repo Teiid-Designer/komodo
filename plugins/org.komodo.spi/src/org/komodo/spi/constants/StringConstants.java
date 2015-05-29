@@ -149,6 +149,11 @@ public interface StringConstants {
     String XML = "xml"; //$NON-NLS-1$
 
     /**
+     * ddl extension
+     */
+    String DDL = "ddl"; //$NON-NLS-1$
+
+    /**
      * The name of the System property that specifies the string that should be used to separate lines. This property is a standard
      * environment property that is usually set automatically.
      */
