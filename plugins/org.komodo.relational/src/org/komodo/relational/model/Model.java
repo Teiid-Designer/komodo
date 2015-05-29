@@ -10,6 +10,7 @@ package org.komodo.relational.model;
 import org.komodo.relational.RelationalObject;
 import org.komodo.relational.vdb.ModelSource;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.Exportable;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
@@ -17,7 +18,7 @@ import org.komodo.spi.repository.Repository.UnitOfWork.State;
 /**
  * Represents a relational model.
  */
-public interface Model extends RelationalObject {
+public interface Model extends Exportable, RelationalObject {
 
     /**
      * The type identifier.

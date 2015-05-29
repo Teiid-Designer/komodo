@@ -38,6 +38,7 @@ import org.komodo.importer.ImportOptions.OptionKeys;
 import org.komodo.importer.ImportType;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
+import org.komodo.test.utils.TestUtilities;
 import org.modeshape.jcr.api.JcrConstants;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
@@ -101,7 +102,8 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
      */
     @Test
     public void testUnreadableDdlFile() throws Exception {
-    	InputStream ddlStream = setup(TEIID_MYSQL_ACCTS);
+        InputStream ddlStream = TestUtilities.getResourceAsStream(getClass(),
+                                                                  DATA_DIRECTORY, TEIID_MYSQL_ACCTS);
 
     	File tmpFile = File.createTempFile("unreadableFile", ".ddl");
     	Files.copy(ddlStream, tmpFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -254,7 +256,8 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
      */
     @Test
     public void testDdlImport_MySQLAcctsAsModel() throws Exception {
-        InputStream ddlStream = setup(TEIID_MYSQL_ACCTS);
+        InputStream ddlStream = TestUtilities.getResourceAsStream(getClass(),
+                                                                  DATA_DIRECTORY, TEIID_MYSQL_ACCTS);
 
     	// Options for the import (default)
     	ImportOptions importOptions = new ImportOptions();
@@ -280,7 +283,8 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
 
     @Test
     public void testDdlImport_MySQLAcctsAsSchema() throws Exception {
-        InputStream ddlStream = setup(TEIID_MYSQL_ACCTS);
+        InputStream ddlStream = TestUtilities.getResourceAsStream(getClass(),
+                                                                  DATA_DIRECTORY, TEIID_MYSQL_ACCTS);
 
         ImportOptions importOptions = new ImportOptions();
         importOptions.setOption(OptionKeys.NAME, TEIID_MYSQL_ACCTS);
@@ -342,7 +346,8 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
      */
     @Test
     public void testDdlImport_FlatFileAsModel() throws Exception {
-    	InputStream ddlStream = setup(TEIID_FLATFILE);
+        InputStream ddlStream = TestUtilities.getResourceAsStream(getClass(),
+                                                                  DATA_DIRECTORY, TEIID_FLATFILE);
 
     	// Options for the import (default)
     	ImportOptions importOptions = new ImportOptions();
@@ -369,7 +374,8 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
 
     @Test
     public void testDdlImport_FlatFileAsSchema() throws Exception {
-        InputStream ddlStream = setup(TEIID_FLATFILE);
+        InputStream ddlStream = TestUtilities.getResourceAsStream(getClass(),
+                                                                  DATA_DIRECTORY, TEIID_FLATFILE);
 
         // Options for the import
         ImportOptions importOptions = new ImportOptions();

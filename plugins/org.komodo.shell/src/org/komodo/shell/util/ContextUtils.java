@@ -9,16 +9,17 @@ package org.komodo.shell.util;
 
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.utils.StringUtils;
 
 
 /**
  * Helper methods for working with paths
  */
-public class ContextUtils {
+public class ContextUtils implements StringConstants {
 	
 	@SuppressWarnings("javadoc")
-	public static final String PATH_SEPARATOR = "/"; //$NON-NLS-1$
+	public static final String PATH_SEPARATOR = FORWARD_SLASH; 
 
 	private static final String ROOT_OPT1 = PATH_SEPARATOR;
 	private static final String ROOT_OPT2 = ROOT_OPT1 + WorkspaceContext.WORKSPACE_ROOT_DISPLAY_NAME;
@@ -249,7 +250,7 @@ public class ContextUtils {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Breaks the path apart into its segments, using the path separator
 	 * @param path the supplied path

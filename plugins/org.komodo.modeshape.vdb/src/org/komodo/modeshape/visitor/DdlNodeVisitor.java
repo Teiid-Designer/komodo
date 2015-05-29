@@ -264,7 +264,12 @@ public class DdlNodeVisitor extends AbstractNodeVisitor
      * @return the complete visited ddl string
      */
     public String getDdl() {
-        return ddlBuffer.toString();
+        String ddl = ddlBuffer.toString();
+
+        if (ddl.trim().isEmpty())
+            return EMPTY_STRING;
+
+        return ddl;
     }
 
     @Override

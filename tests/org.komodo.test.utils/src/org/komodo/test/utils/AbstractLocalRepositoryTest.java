@@ -254,7 +254,13 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest im
         traverse(session.getRootNode());
     }
 
-    protected String toString(Property property) throws Exception {
+    /**
+     * @param property
+     * @return String representation of property and its values
+     * @throws Exception
+     */
+    @SuppressWarnings( "unused" )
+    private String toString(Property property) throws Exception {
         StringBuilder sb = new StringBuilder();
         try {
             sb.append(property.getName(this.uow)).append('=');

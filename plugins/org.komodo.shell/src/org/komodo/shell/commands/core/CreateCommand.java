@@ -183,7 +183,7 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
                 try {
                     refType = KomodoType.getKomodoType(tableContext.getType());
                 } catch (Exception ex) {
-                    // TODO??
+                    // Do nothing
                 }
                 if(refType ==null || refType!=KomodoType.TABLE) {
                     print(CompletionConstants.MESSAGE_INDENT,Messages.getString("CreateCommand.FKTableRefPath_NotATable", tableRefPath)); //$NON-NLS-1$

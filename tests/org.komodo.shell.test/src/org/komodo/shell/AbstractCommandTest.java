@@ -2,6 +2,7 @@ package org.komodo.shell;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -96,7 +97,13 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
 		this.testedCommandClass = commandClass;
 
     	try {
-    		String commandFilePath = "./resources/" + commandFile; //$NON-NLS-1$
+    	    File cmdFile = new File(commandFile);
+    	    String commandFilePath = null;
+    	    if (cmdFile.isAbsolute())
+    	        commandFilePath = commandFile;
+    	    else
+    	        commandFilePath = "./resources/" + commandFile; //$NON-NLS-1$
+
     		String[] args = new String[]{"-f", commandFilePath}; //$NON-NLS-1$
 
     		// Create the FileReader
@@ -120,6 +127,9 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
 	@Override
 	protected void commit() throws Exception {
 	    super.commit();
+	    if (wsStatus == null)
+	        return;
+
 	    this.wsStatus.setTransaction( this.uow );
 	}
 
