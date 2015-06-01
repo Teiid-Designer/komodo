@@ -297,10 +297,6 @@ public class DefaultKomodoShell implements KomodoShell {
      * Displays a welcome message to the user.
      */
     private void displayWelcomeMessage() {
-        displayMessage(
-                       "**********************************************************************\n" + //$NON-NLS-1$
-                       "  Welcome to Komodo Shell\n" + //$NON-NLS-1$
-                       "**********************************************************************\n" //$NON-NLS-1$
-        );
+        displayMessage(Messages.getString(SHELL.WelcomeMessage));
     }
 }

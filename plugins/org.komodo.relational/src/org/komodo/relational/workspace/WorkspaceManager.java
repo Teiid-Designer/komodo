@@ -68,6 +68,11 @@ public class WorkspaceManager extends RelationalObjectImpl {
      */
     private static final KomodoType[] CHILD_TYPES = new KomodoType[] { Vdb.IDENTIFIER, Model.IDENTIFIER };
 
+    /**
+     * The type identifier.
+     */
+    public static final int TYPE_ID = WorkspaceManager.class.hashCode();
+
     private static final String FIND_QUERY_PATTERN = "SELECT [jcr:path] FROM [%s] WHERE ISDESCENDANTNODE('" //$NON-NLS-1$
                                                      + RepositoryImpl.WORKSPACE_ROOT + "') ORDER BY [jcr:name] ASC"; //$NON-NLS-1$
 
@@ -116,6 +121,16 @@ public class WorkspaceManager extends RelationalObjectImpl {
     @Override
     public KomodoType[] getChildTypes() {
         return CHILD_TYPES;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.repository.ObjectImpl#getTypeId()
+     */
+    @Override
+    public int getTypeId() {
+        return TYPE_ID;
     }
 
     @Override
