@@ -184,8 +184,8 @@ public interface KomodoObject extends KNode {
     /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
-     * @return the property descriptors from the primary type descriptor and the mixin descriptors (can be <code>null</code> if
-     *         not found)
+     * @return the property descriptors from the primary type descriptor and the mixin descriptors (never <code>null</code> but
+     *         can be empty)
      * @throws KException
      *         if an error occurs
      */
