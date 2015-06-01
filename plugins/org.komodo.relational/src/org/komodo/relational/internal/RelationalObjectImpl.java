@@ -327,6 +327,29 @@ public abstract class RelationalObjectImpl extends ObjectImpl implements Relatio
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.repository.ObjectImpl#getPropertyDescriptors(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public PropertyDescriptor[] getPropertyDescriptors( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        final PropertyDescriptor[] descriptors = super.getPropertyDescriptors( transaction );
+        final List< PropertyDescriptor > result = new ArrayList<>( descriptors.length );
+
+        for ( final PropertyDescriptor descriptor : descriptors ) {
+            if ( !isPropertyFiltered( descriptor.getName() ) ) {
+                result.add( descriptor );
+            }
+
+        }
+
+        return result.toArray( new PropertyDescriptor[ result.size() ] );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.repository.ObjectImpl#getPropertyNames(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override

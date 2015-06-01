@@ -10,6 +10,7 @@ package org.komodo.relational;
 import org.komodo.spi.repository.Descriptor;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.PropertyDescriptor;
+import org.komodo.utils.ArgCheck;
 import org.modeshape.jcr.JcrLexicon;
 import org.modeshape.jcr.JcrMixLexicon;
 import org.modeshape.jcr.JcrNtLexicon;
@@ -67,9 +68,40 @@ public interface RelationalObject extends KomodoObject {
     Filter NT_FILTER = new ExcludeNamespaceFilter( JcrNtLexicon.Namespace.PREFIX, JcrNtLexicon.Namespace.URI );
 
     /**
+     * A filter to exclude residual properties and type descriptors.
+     */
+    Filter RESIDUAL_FILTER = new Filter() {
+
+        private String NAME = "*"; //$NON-NLS-1$
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.RelationalObject.Filter#rejectProperty(java.lang.String)
+         */
+        @Override
+        public boolean rejectProperty( final String propName ) {
+            ArgCheck.isNotEmpty( propName, "propName" ); //$NON-NLS-1$
+            return NAME.equals( propName );
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.RelationalObject.Filter#rejectDescriptor(java.lang.String)
+         */
+        @Override
+        public boolean rejectDescriptor( final String descriptorName ) {
+            ArgCheck.isNotEmpty( descriptorName, "descriptorName" ); //$NON-NLS-1$
+            return NAME.equals( descriptorName );
+        }
+
+    };
+
+    /**
      * The default set of filters for restricting which properties and descriptors apply to relational objects.
      */
-    Filter[] DEFAULT_FILTERS = new Filter[] { JCR_FILTER, MIX_FILTER, MODE_FILTER, NT_FILTER };
+    Filter[] DEFAULT_FILTERS = new Filter[] { JCR_FILTER, MIX_FILTER, MODE_FILTER, NT_FILTER, RESIDUAL_FILTER };
 
     /**
      * @return the filters to use when deciding which {@link PropertyDescriptor properties} and {@link Descriptor descriptors} are
