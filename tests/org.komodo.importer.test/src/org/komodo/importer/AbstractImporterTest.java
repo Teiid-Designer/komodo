@@ -49,12 +49,11 @@ public abstract class AbstractImporterTest extends AbstractLocalRepositoryTest {
 
     protected static final String DATA_DIRECTORY = File.separator + "data"; //$NON-NLS-1$
 
-    protected File setupWithFile(String fileName) {
-    	String fullFilePath = DATA_DIRECTORY + File.separator + fileName;
-        File file = new File(fullFilePath);
-        assertTrue(file.exists());
-        return file;
-    }
+    protected static final String VDB_DIRECTORY = DATA_DIRECTORY + File.separator + "vdb"; //$NON-NLS-1$
+
+    protected static final String BOOKS_DIRECTORY = DATA_DIRECTORY + File.separator + "books"; //$NON-NLS-1$
+
+    protected static final String DDL_DIRECTORY = DATA_DIRECTORY + File.separator + "ddl"; //$NON-NLS-1$
 
     protected abstract KomodoObject runImporter(Repository repository,
                                                 InputStream inputStream,
