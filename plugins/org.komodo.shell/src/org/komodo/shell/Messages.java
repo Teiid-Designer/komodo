@@ -75,7 +75,8 @@ public class Messages implements StringConstants {
     	InvalidArgMsg_property_not_correct_format,
     	InvalidArgMsg_propertiesFile_error_reading,
     	InvalidArgMsg_propertiesFile_error_reading_line,
-    	FileShellCommandReader_NoConsole;
+        FileShellCommandReader_NoConsole,
+        WelcomeMessage;
 
     	@Override
     	public String toString() {
