@@ -374,7 +374,7 @@ public class KSequencers implements SQLConstants, EventListener, KSequencerContr
             if (eventUserData == null || ! eventUserData.startsWith(listener.id()))
                 continue; // Listener is not listening for this event
 
-            KLog.getLogger().error("KSequencers error. Notifying ", listener + " of exception " + exception); //$NON-NLS-1$ //$NON-NLS-2$
+            KLog.getLogger().error("KSequencers error. Notifying " + listener + " of exception", exception); //$NON-NLS-1$ //$NON-NLS-2$
             listener.sequencingError(exception);
         }
     }

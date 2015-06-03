@@ -13,7 +13,7 @@
     <packaging>eclipse-plugin</packaging>
 
     <properties>
-        <modeshape.version>4.2.0.Final</modeshape.version>
+        <modeshape.version>4.3.0.Final</modeshape.version>
         <!-- Should be the same as specified in the modeshape bom. Cannot pick it up directly -->
         <logback.version>1.0.9</logback.version>
         <infinispan.version>6.0.2.Final</infinispan.version>
