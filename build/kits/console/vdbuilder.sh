@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CLASSPATH="lib/*:komodo/*"
+CLASSPATH="lib/*:vdbuilder/*"
 MAINCLASS="org.komodo.shell.DefaultKomodoShell"
 
 # Uncomment these JPDA settings for remote socket debugging
