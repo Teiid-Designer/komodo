@@ -1,10 +1,6 @@
 #!/bin/bash
 
-<<<<<<< HEAD:build/kits/console/vdbbuilder.sh
 CLASSPATH="lib/*:vdbbuilder/*"
-=======
-CLASSPATH="lib/*:vdbuilder/*"
->>>>>>> I made the following changes to the shell::build/kits/console/vdbuilder.sh
 MAINCLASS="org.komodo.shell.DefaultKomodoShell"
 
 # Uncomment these JPDA settings for remote socket debugging
