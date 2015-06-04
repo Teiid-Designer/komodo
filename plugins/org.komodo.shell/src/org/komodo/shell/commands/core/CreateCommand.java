@@ -9,7 +9,6 @@ package org.komodo.shell.commands.core;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.komodo.relational.RelationalProperty;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.BuiltInShellCommand;
@@ -34,7 +33,7 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 public class CreateCommand extends BuiltInShellCommand implements StringConstants {
 
     private static final String CREATE = "create"; //$NON-NLS-1$
-    
+
     /**
      * Constructor.
      * @param wsStatus the workspace status
@@ -48,9 +47,9 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
      */
     @Override
     public boolean execute() throws Exception {
-        
+
         // TODO: DataTypeResultSet - doesnt use the name - autonames 'resultSet'
-        
+
         // --------------------------------------------------
         // Make sure the correct number of args are present
         // --------------------------------------------------
@@ -65,7 +64,7 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
         } else {
             pathArg = optionalArgument(2);
         }
-        
+
         // Some types require a fourth arg
         String fourthArg = null;
         if(requiresFourthArg(typeArg)) {
@@ -83,7 +82,7 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
         if (!validate(typeArg,objNameArg,pathArg,fourthArg)) {
             return false;
         }
-        
+
         // ---------------------------
         // Get context for the create
         // ---------------------------
@@ -125,41 +124,41 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
                 return false;
             }
         }
-        
+
         // Get the context for object create.  otherwise use current context
         WorkspaceContext context = getWorkspaceStatus().getCurrentContext();
         if (!StringUtils.isEmpty(pathArg)) {
             context = ContextUtils.getContextForPath(getWorkspaceStatus(), pathArg);
         }
-        
+
         // Validate the type is valid for the context
         if (!validateChildType(typeArg,context)) {
             return false;
         }
-        
+
         // Validate the name
         KomodoType kType = KomodoType.getKomodoType(typeArg);
         if (!validateObjectName(objNameArg,kType)) {
             return false;
         }
-        
+
         // Validate fourth arg if it's required
         if(requiresFourthArg(typeArg)) {
             if (!validateFourthArg(typeArg,context,fourthArg)) {
                 return false;
             }
         }
-        
+
         // Check for existing object type with requested name.  dont allow a duplicate
         WorkspaceContext childContext = context.getChild(objNameArg, typeArg);
         if(childContext!=null) {
             print(CompletionConstants.MESSAGE_INDENT,Messages.getString("CreateCommand.noDuplicateAllowed", objNameArg, typeArg)); //$NON-NLS-1$
             return false;
         }
-        
+
         return true;
     }
-    
+
     /**
      * Validate the fourth arg.  Not all creates require this arg.  Validiation is specific to the type.
      * @param objType the object type
@@ -169,7 +168,7 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
      */
     private boolean validateFourthArg(String objType, WorkspaceContext context, String fourthArg) {
         KomodoType kType = KomodoType.getKomodoType(objType);
-        
+
         // For foreign keys, the fourth arg is a table reference
         if(kType == KomodoType.FOREIGN_KEY) {
             String tableRefPath = fourthArg;
@@ -191,10 +190,10 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
                 }
             }
         }
-        
+
         return true;
     }
-    
+
     /**
      * Create an object of the supplied type and name, at the specified context
      * @param objType the object type
@@ -265,7 +264,7 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
                 String name = requiredArgument(1, Messages.getString("CreateCommand.parameterNameRequired")); //$NON-NLS-1$
                 wkspManager.create(uow, parent, objName, kType, new RelationalProperty(TeiidDdlLexicon.CreateProcedure.PARAMETER, name));
             } break;
-            
+
             case UNKNOWN:
                 throw new Exception(Messages.getString("CreateCommand.notValidType", objType)); //$NON-NLS-1$
             default:
@@ -286,7 +285,7 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
         	for(KomodoType kType : validTypes) {
         		validChildren.add(kType.getType());
         	}
-        	
+
             // --------------------------------------------------------------
             // No arg - offer subcommands
             // --------------------------------------------------------------
@@ -317,7 +316,7 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
         }
         return -1;
     }
-    
+
     /**
      * Determine if the type requires the context path arg
      * @param objType the type name
@@ -328,7 +327,7 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
         if(kType == KomodoType.FOREIGN_KEY) {
             return true;
         }
-        
+
         return false;
     }
 
@@ -342,10 +341,10 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
         if(kType == KomodoType.FOREIGN_KEY) {
             return true;
         }
-        
+
         return false;
     }
-    
+
     /**
      * @see org.komodo.shell.api.ShellCommand#printUsage(int indent)
      */
@@ -365,7 +364,7 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
                 print(indent,Messages.getString(getClass().getSimpleName() + ".usage")); //$NON-NLS-1$
             }
         } else {
-            print(indent,Messages.getString(getClass().getSimpleName() + ".usage")); //$NON-NLS-1$
+            super.printUsage( indent );
         }
     }
 

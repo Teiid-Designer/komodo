@@ -15,6 +15,7 @@ import org.modeshape.jcr.JcrLexicon;
 import org.modeshape.jcr.JcrMixLexicon;
 import org.modeshape.jcr.JcrNtLexicon;
 import org.modeshape.jcr.ModeShapeLexicon;
+import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 
 /**
  * A {@link KomodoObject} related to a relational model.
@@ -41,6 +42,16 @@ public interface RelationalObject extends KomodoObject {
         boolean rejectProperty( final String propName );
 
     }
+
+    /**
+     * A filter to exclude specific DDL-namespaced properties and type descriptors.
+     */
+    Filter DDL_QNAMES_FILTER = new ExcludeQNamesFilter( StandardDdlLexicon.DDL_EXPRESSION,
+                                                        StandardDdlLexicon.DDL_LENGTH,
+                                                        StandardDdlLexicon.DDL_ORIGINAL_EXPRESSION,
+                                                        StandardDdlLexicon.DDL_START_CHAR_INDEX,
+                                                        StandardDdlLexicon.DDL_START_COLUMN_NUMBER,
+                                                        StandardDdlLexicon.DDL_START_LINE_NUMBER );
 
     /**
      * A filter to exclude JCR-namespaced properties and type descriptors.
@@ -101,7 +112,7 @@ public interface RelationalObject extends KomodoObject {
     /**
      * The default set of filters for restricting which properties and descriptors apply to relational objects.
      */
-    Filter[] DEFAULT_FILTERS = new Filter[] { JCR_FILTER, MIX_FILTER, MODE_FILTER, NT_FILTER, RESIDUAL_FILTER };
+    Filter[] DEFAULT_FILTERS = new Filter[] { DDL_QNAMES_FILTER, JCR_FILTER, MIX_FILTER, MODE_FILTER, NT_FILTER, RESIDUAL_FILTER };
 
     /**
      * @return the filters to use when deciding which {@link PropertyDescriptor properties} and {@link Descriptor descriptors} are

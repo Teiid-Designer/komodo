@@ -31,48 +31,32 @@ import org.komodo.spi.constants.StringConstants;
 
 /**
  * Implements the 'help' command.
- * 
+ *
  * This class adapted from https://github.com/Governance/s-ramp/blob/master/s-ramp-shell
  * - altered generated help messages
  * - altered to use different Messages class
- * 
+ *
  * @author eric.wittmann@redhat.com
  */
 public class HelpCommand extends BuiltInShellCommand {
 
+    /**
+     * The command name.
+     */
+    public static String NAME = "help"; //$NON-NLS-1$
+
 	private static final int CMDS_PER_LINE = 4;
-	
+
 	private final Map<String, ShellCommand> commands;
 
 	/**
 	 * Constructor.
-	 * @param name the command name
 	 * @param wsStatus the workspace status
 	 * @param commands the commands
 	 */
-	public HelpCommand(String name, WorkspaceStatus wsStatus, Map<String, ShellCommand> commands) {
-		super(name,wsStatus);
+	public HelpCommand(WorkspaceStatus wsStatus, Map<String, ShellCommand> commands) {
+		super(NAME, wsStatus);
 		this.commands = commands;
-	}
-
-	/**
-	 * Prints the usage.
-	 *
-	 * @see org.komodo.shell.api.ShellCommand#printUsage(int indent)
-	 */
-	@Override
-	public void printUsage(int indent) {
-	    // Nothing to do
-	}
-
-	/**
-	 * Prints the help.
-	 *
-	 * @see org.komodo.shell.api.ShellCommand#printHelp(int indent)
-	 */
-	@Override
-	public void printHelp(int indent) {
-	    // Nothing to do
 	}
 
 	/**
@@ -97,8 +81,8 @@ public class HelpCommand extends BuiltInShellCommand {
 	 * Prints the generic help - all commands for this workspace context
 	 */
 	private void printHelpAll() throws Exception {
-		print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.Help_COMMAND_LIST_MSG)); 
-		
+		print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.Help_COMMAND_LIST_MSG));
+
 		// Determine the current Workspace Context type
 		WorkspaceStatus wsStatus = getWorkspaceStatus();
 		WorkspaceContext currentContext = wsStatus.getCurrentContext();
@@ -108,7 +92,7 @@ public class HelpCommand extends BuiltInShellCommand {
 		for(int i=0; i<CompletionConstants.MESSAGE_INDENT; i++) {
 			indentBuffer.append(StringConstants.SPACE);
 		}
-		
+
 		int colCount = 0;
 		StringBuilder builder = new StringBuilder();
 		for (Entry<String,ShellCommand> entry : this.commands.entrySet()) {
@@ -126,9 +110,9 @@ public class HelpCommand extends BuiltInShellCommand {
 		}
 		print(CompletionConstants.MESSAGE_INDENT,builder.toString());
 		if(colCount!=0) print(CompletionConstants.MESSAGE_INDENT,"\n"); //$NON-NLS-1$
-		print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.Help_GET_HELP_1)); 
+		print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.Help_GET_HELP_1));
 		print(CompletionConstants.MESSAGE_INDENT,""); //$NON-NLS-1$
-		print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.Help_GET_HELP_2)); 
+		print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.Help_GET_HELP_2));
 		print(CompletionConstants.MESSAGE_INDENT,""); //$NON-NLS-1$
 	}
 
@@ -140,12 +124,15 @@ public class HelpCommand extends BuiltInShellCommand {
 	 */
 	private void printHelpForCommand(String cmdName) throws Exception {
 		ShellCommand command = this.commands.get(cmdName);
-		if (command == null) {
-			print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.Help_INVALID_COMMAND)); 
-		} else {
+        if ( command == null ) {
+            if ( NAME.equals( cmdName ) ) {
+                printHelp( CompletionConstants.MESSAGE_INDENT );
+            } else {
+                print( CompletionConstants.MESSAGE_INDENT, Messages.getString( SHELL.Help_INVALID_COMMAND ) );
+            }
+        } else {
 			command.setOutput(getWorkspaceStatus().getShell().getCommandOutput());
-			command.printUsage(0);
-			command.printHelp(0);
+			command.printHelp(CompletionConstants.MESSAGE_INDENT);
 			print(CompletionConstants.MESSAGE_INDENT,""); //$NON-NLS-1$
 		}
 	}
@@ -182,7 +169,7 @@ public class HelpCommand extends BuiltInShellCommand {
 	private Collection<String> generateHelpCandidates() {
 		TreeSet<String> candidates = new TreeSet<String>();
 		for (String key : this.commands.keySet()) {
-			String candidate = key; 
+			String candidate = key;
 			candidates.add(candidate);
 		}
 		return candidates;

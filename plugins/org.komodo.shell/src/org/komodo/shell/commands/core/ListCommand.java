@@ -21,12 +21,11 @@
  ************************************************************************************/
 package org.komodo.shell.commands.core;
 
-import java.util.List;
+import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import org.komodo.shell.BuiltInShellCommand;
-import org.komodo.shell.CompletionConstants;
-import org.komodo.shell.Messages;
-import org.komodo.shell.api.WorkspaceContext;
+import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.spi.constants.StringConstants;
 
 /**
  * Displays a summary of the current status, including what repository the
@@ -36,7 +35,7 @@ import org.komodo.shell.api.WorkspaceStatus;
 public class ListCommand extends BuiltInShellCommand {
 
     private static final String LIST = "list"; //$NON-NLS-1$
-    
+
 	/**
 	 * Constructor.
 	 * @param wsStatus the workspace status
@@ -49,29 +48,15 @@ public class ListCommand extends BuiltInShellCommand {
 	 * @see org.komodo.shell.api.ShellCommand#execute()
 	 */
 	@Override
-	public boolean execute() throws Exception {
-		WorkspaceStatus wsStatus = getWorkspaceStatus();
-		
-		WorkspaceContext currentContext = wsStatus.getCurrentContext();
-		
-		List<WorkspaceContext> children = currentContext.getChildren();
-		if(children.isEmpty()) { 
-			String cType = getWorkspaceStatus().getCurrentContext().getType().toString();
-			String name = getWorkspaceStatus().getCurrentContext().getName();
-			
-			String noChildrenMsg = Messages.getString("ListCommand.noChildrenMsg",cType,name); //$NON-NLS-1$
-			print(CompletionConstants.MESSAGE_INDENT,noChildrenMsg); 
-		}
+    public boolean execute() throws Exception {
+        print(MESSAGE_INDENT, StringConstants.EMPTY_STRING);
 
-		for(WorkspaceContext childContext : children) {
-			String childName = childContext.getName();
-			String childType = childContext.getType();
-			print(CompletionConstants.MESSAGE_INDENT, childName+" ["+childType+"]"); //$NON-NLS-1$ //$NON-NLS-2$ 
-		}
-		
-		if(wsStatus.getRecordingStatus()) recordCommand(getArguments());
+        final ShowCommand showCmd = new ShowCommand( getWorkspaceStatus() );
+        final Arguments args = new Arguments( ShowCommand.SUBCMD_CHILDREN );
+        showCmd.setArguments( args );
+        showCmd.setOutput( getWriter() );
 
-		return true;
-	}
+        return showCmd.execute();
+    }
 
 }

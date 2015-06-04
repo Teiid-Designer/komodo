@@ -28,9 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.TreeMap;
-
 import javax.xml.namespace.QName;
-
 import org.komodo.core.KEngine;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandProvider;
@@ -49,23 +47,23 @@ import org.komodo.shell.commands.core.PlayCommand;
 import org.komodo.shell.commands.core.RenameCommand;
 import org.komodo.shell.commands.core.SetCommand;
 import org.komodo.shell.commands.core.ShowCommand;
+import org.komodo.shell.commands.core.UnsetPropertyCommand;
 import org.komodo.utils.FileUtils;
 
 /**
  * Factory used to create shell commands.
- * 
+ *
  * This class adapted from https://github.com/Governance/s-ramp/blob/master/s-ramp-shell
  * - altered to use WorkspaceStatus.  additional methods added
  * - altered map usage to to change from Shell Context usage
- * 
+ *
  * @author eric.wittmann@redhat.com
  */
 public class ShellCommandFactory {
 
-	private static String HELP_CMD_NAME = "help"; //$NON-NLS-1$ 
-	private static String EXIT_CMD_NAME = "exit"; //$NON-NLS-1$ 
-	private static String QUIT_CMD_NAME = "quit"; //$NON-NLS-1$ 
-	
+	private static String EXIT_CMD_NAME = "exit"; //$NON-NLS-1$
+	private static String QUIT_CMD_NAME = "quit"; //$NON-NLS-1$
+
 	private WorkspaceStatus wsStatus;
 	private Map<String, ShellCommand> commandMap;
 
@@ -87,19 +85,19 @@ public class ShellCommandFactory {
 		// commands
 		List<String> allList = new ArrayList<String>(1);
 		allList.add(WorkspaceContext.ALL_TYPES);
-		
+
 		ListCommand listCommand = new ListCommand(this.wsStatus);
-		commandMap.put(listCommand.getName().toLowerCase(), listCommand);  
+		commandMap.put(listCommand.getName().toLowerCase(), listCommand);
 
 		CdCommand cdCommand = new CdCommand(this.wsStatus);
-		commandMap.put(cdCommand.getName().toLowerCase(), cdCommand); 
+		commandMap.put(cdCommand.getName().toLowerCase(), cdCommand);
 
 		SetCommand setCommand = new SetCommand(this.wsStatus);
 		commandMap.put(setCommand.getName().toLowerCase(), setCommand);
 
 		CreateCommand createCommand = new CreateCommand(this.wsStatus);
 		commandMap.put(createCommand.getName().toLowerCase(), createCommand);
-		
+
 		DeleteCommand deleteCommand = new DeleteCommand(this.wsStatus);
 		commandMap.put(deleteCommand.getName().toLowerCase(), deleteCommand);
 
@@ -114,7 +112,7 @@ public class ShellCommandFactory {
 
 //        NavigateCommand traverseCommand = new NavigateCommand(this.wsStatus);
 //        commandMap.put(traverseCommand.getName().toLowerCase(), traverseCommand);
-        
+
         ShowCommand showCommand = new ShowCommand(this.wsStatus);
         commandMap.put(showCommand.getName().toLowerCase(), showCommand);
 
@@ -123,6 +121,9 @@ public class ShellCommandFactory {
 
         PlayCommand playCommand = new PlayCommand(this.wsStatus);
         commandMap.put(playCommand.getName().toLowerCase(), playCommand);
+
+        UnsetPropertyCommand unsetCommand = new UnsetPropertyCommand(this.wsStatus);
+        commandMap.put(unsetCommand.getName().toLowerCase(), unsetCommand);
 
 		discoverContributedCommands();
 	}
@@ -190,8 +191,8 @@ public class ShellCommandFactory {
 	 */
 	public ShellCommand getCommand(String commandName) throws Exception {
 		ShellCommand command = null;
-		if (commandName.toLowerCase().equals(HELP_CMD_NAME.toLowerCase())) {
-            command = new HelpCommand(HELP_CMD_NAME, this.wsStatus, getCommands());
+		if (commandName.toLowerCase().equals(HelpCommand.NAME.toLowerCase())) {
+            command = new HelpCommand(this.wsStatus, getCommands());
 		} else if (commandName.toLowerCase().equals(QUIT_CMD_NAME.toLowerCase())) {
 			command = new ExitCommand(EXIT_CMD_NAME,this.wsStatus);
 		} else if (commandName.toLowerCase().equals(EXIT_CMD_NAME.toLowerCase())) {
@@ -203,7 +204,7 @@ public class ShellCommandFactory {
 		}
 		return command;
 	}
-	
+
 	/**
 	 * Get valid command names for the current context
 	 * @return List<String> list of commands for current context
@@ -234,19 +235,19 @@ public class ShellCommandFactory {
 		treeMap.putAll(this.commandMap);
 		return treeMap;
 	}
-	
+
     /**
-     * Returns fileArray {@code ArrayList} of {@code File} objects that match a pattern in the specified directory. 
+     * Returns fileArray {@code ArrayList} of {@code File} objects that match a pattern in the specified directory.
      * @param folderToScan The path to look for the matching files
      * @param startWith The beginning portion of the file name
      * @param endsWith The ending portion of the file name (i.e. ".jar")
-     * @return fileArray An ArrayList of 
+     * @return fileArray An ArrayList of
      */
     public final static ArrayList<File> getFilesForPattern(File folderToScan, String startWith, String endsWith) {
 	    String target_file ;  // fileThatYouWantToFilter
 		File[] listOfFiles = folderToScan.listFiles();
 		ArrayList<File> list = new ArrayList<File>();
-		
+
 		for (File file:listOfFiles) {
 	        if (file.isFile()) {
 	            target_file = file.getName();
@@ -256,8 +257,8 @@ public class ShellCommandFactory {
 		        }
 		    }
 		 }
-		
-		return list;    
+
+		return list;
     }
 
 }

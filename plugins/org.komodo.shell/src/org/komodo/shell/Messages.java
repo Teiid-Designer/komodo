@@ -39,6 +39,11 @@ public class Messages implements StringConstants {
 
     @SuppressWarnings( "javadoc" )
     public enum SHELL {
+        CHILD_NAME_HEADER,
+        CHILD_TYPE_HEADER,
+        PROPERTY_NAME_HEADER,
+        PROPERTY_VALUE_HEADER,
+        NO_PROPERTY_VALUE,
         TRANSACTION_COMMIT_ERROR,
         TRANSACTION_ROLLBACK_ERROR,
         TRANSACTION_TIMEOUT,
@@ -76,6 +81,10 @@ public class Messages implements StringConstants {
     	InvalidArgMsg_propertiesFile_error_reading,
     	InvalidArgMsg_propertiesFile_error_reading_line,
         FileShellCommandReader_NoConsole,
+        HelpUsageHeading,
+        HelpDescription,
+        HelpDescriptionHeading,
+        HelpExamplesHeading,
         WelcomeMessage;
 
     	@Override

@@ -20,11 +20,11 @@ import java.util.List;
 
 /**
  * Interface implemented by all shell commands.
- * 
+ *
  * This class adapted from classes at https://github.com/Governance/s-ramp/blob/master/s-ramp-shell-api
  * - altered to use WorkspaceStatus
  * - added methods
- * 
+ *
  * @author eric.wittmann@redhat.com
  */
 public interface ShellCommand {
@@ -34,13 +34,13 @@ public interface ShellCommand {
 	 * @return the command name
 	 */
 	public String getName();
-	
+
 	/**
 	 * Set the name of the command.
 	 * @param name the command name
 	 */
 	public void setName(String name);
-	
+
 	/**
 	 * Sets the arguments that can be used by this command.
 	 * @param arguments the args
@@ -52,6 +52,11 @@ public interface ShellCommand {
 	 * @param output the writer
 	 */
 	public void setOutput(Writer output);
+
+	/**
+	 * @return the stream writer (can be <code>null</code> if not set)
+	 */
+	Writer getWriter();
 
 	/**
 	 * Set the workspace status
@@ -70,7 +75,7 @@ public interface ShellCommand {
 	 * @return 'true' if valid, 'false' if not.
 	 */
 	public boolean isValidForWsContext(String contextType);
-	
+
 	/**
 	 * Called to execute the command.
 	 * @return execution status
@@ -89,13 +94,13 @@ public interface ShellCommand {
 	 * @param indent number of spaces to indent
 	 */
 	public void printHelp(int indent);
-	
+
 	/**
 	 * Record the command to the current record output
 	 * @param args the command args
 	 */
 	public void recordCommand(Arguments args);
-	
+
 	/**
 	 * Record the comment to the current record output
 	 * @param comment the comment

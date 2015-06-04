@@ -34,14 +34,15 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
 import org.komodo.core.KEngine;
 import org.komodo.shell.Messages.SHELL;
+import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.InvalidCommandArgumentException;
 import org.komodo.shell.api.KomodoShell;
 import org.komodo.shell.api.KomodoShellParent;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.shell.commands.HelpCommand;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Repository;
@@ -49,12 +50,12 @@ import org.komodo.spi.repository.RepositoryObserver;
 
 /**
  * An interactive shell for working with komodo.
- * 
+ *
  * This class adapted from https://github.com/Governance/s-ramp/blob/master/s-ramp-shell
  * - altered to use WorkspaceStatus
  * - altered display message
  * - utilizing different Messages class
- * 
+ *
  */
 public class DefaultKomodoShell implements KomodoShell {
 
@@ -154,7 +155,7 @@ public class DefaultKomodoShell implements KomodoShell {
     public PrintStream getOutputStream() {
         return outStream;
     }
-    
+
     @Override
 	public Writer getCommandOutput() {
     	return commandOutput;
@@ -194,6 +195,13 @@ public class DefaultKomodoShell implements KomodoShell {
         reader.open();
 
         displayWelcomeMessage();
+
+        // run help command
+        final ShellCommand helpCmd = factory.getCommand( HelpCommand.NAME );
+        helpCmd.setArguments( new Arguments( EMPTY_STRING ) );
+        helpCmd.setOutput( getCommandOutput() );
+        helpCmd.execute();
+
         boolean done = false;
         while (!done && !shutdown) {
             ShellCommand command = null;

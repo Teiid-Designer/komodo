@@ -21,24 +21,30 @@
  ************************************************************************************/
 package org.komodo.shell.commands.core;
 
-import java.util.ArrayList;
+import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
-
+import java.util.TreeMap;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
+import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.InvalidCommandArgumentException;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.Repository;
 import org.komodo.spi.runtime.ExecutionAdmin.ConnectivityType;
 import org.komodo.spi.runtime.TeiidInstance;
+import org.komodo.utils.KLog;
 
 /**
  * Show Command.  Has various acceptable args.
@@ -48,15 +54,21 @@ import org.komodo.spi.runtime.TeiidInstance;
 public class ShowCommand extends BuiltInShellCommand implements StringConstants {
 
     private static final String SHOW = "show"; //$NON-NLS-1$
-    
+    private static final int DEFAULT_WIDTH = 25;
+
     private static final String SUBCMD_PROPERTIES = "properties"; //$NON-NLS-1$
-    private static final String SUBCMD_CHILDREN = "children"; //$NON-NLS-1$
+
+    /**
+     * The sub-command for showing children of the current context.
+     */
+    public static final String SUBCMD_CHILDREN = "children"; //$NON-NLS-1$
+
     private static final String SUBCMD_STATUS = "status"; //$NON-NLS-1$
     private static final String SUBCMD_GLOBAL = "global"; //$NON-NLS-1$
     private static final String SUBCMD_PROPERTY = "property"; //$NON-NLS-1$
     private static final String SUBCMD_SUMMARY = "summary"; //$NON-NLS-1$
-    private static final List<String> SUBCMDS = 
-    		Arrays.asList(SUBCMD_PROPERTIES, SUBCMD_CHILDREN, SUBCMD_STATUS, SUBCMD_GLOBAL, SUBCMD_PROPERTY, SUBCMD_SUMMARY);    
+    private static final List<String> SUBCMDS =
+    		Arrays.asList(SUBCMD_PROPERTIES, SUBCMD_CHILDREN, SUBCMD_STATUS, SUBCMD_GLOBAL, SUBCMD_PROPERTY, SUBCMD_SUMMARY);
 	/**
 	 * Constructor.
 	 * @param wsStatus the workspace status
@@ -77,10 +89,10 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
         if (!validate(getArguments())) {
 			return false;
 		}
-        
+
         WorkspaceStatus wsStatus = getWorkspaceStatus();
 		WorkspaceContext context = wsStatus.getCurrentContext();
-		
+
         try {
         	// Sub-command which shows all properties
         	if (SUBCMD_PROPERTIES.equalsIgnoreCase(subcmdArg)) {
@@ -89,7 +101,7 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
 
         		// Print properties for the context
         		printProperties(theContext);
-        		
+
                 // Echo command if recording on
         		recordCommand();
         	} else if (SUBCMD_CHILDREN.equalsIgnoreCase(subcmdArg)) {
@@ -97,24 +109,24 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
 		        WorkspaceContext theContext = ContextUtils.getContextForPath(wsStatus, pathArg);
 
         		printChildren(theContext);
-        		
+
                 // Echo command if recording on
                 recordCommand();
             } else if (SUBCMD_STATUS.equalsIgnoreCase(subcmdArg)) {
             	printStatus( );
-            	
+
                 // Echo command if recording on
                 recordCommand();
             } else if (SUBCMD_GLOBAL.equalsIgnoreCase(subcmdArg)) {
         		printGlobal( );
-        		
+
                 // Echo command if recording on
                 recordCommand();
             } else if (SUBCMD_PROPERTY.equalsIgnoreCase(subcmdArg)) {
                 String propName = requiredArgument(1, Messages.getString("ShowCommand.InvalidArgMsg_PropertyName")); //$NON-NLS-1$
-            	
+
             	printProperty(context,propName);
-            	
+
                 // Echo command if recording on
                 recordCommand();
             } else if (SUBCMD_SUMMARY.equalsIgnoreCase(subcmdArg)) {
@@ -131,52 +143,95 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
         } catch (InvalidCommandArgumentException e) {
             throw e;
         } catch (Exception e) {
-            print(CompletionConstants.MESSAGE_INDENT, Messages.getString("ShowCommand.Failure")); //$NON-NLS-1$
-            print(CompletionConstants.MESSAGE_INDENT, "\t" + e.getMessage()); //$NON-NLS-1$
+            print(MESSAGE_INDENT, Messages.getString("ShowCommand.Failure")); //$NON-NLS-1$
+            print(MESSAGE_INDENT, "\t" + e.getMessage()); //$NON-NLS-1$
             return false;
         }
         return true;
     }
-	
+
 	/**
 	 * Shows the status at the current workspace context
 	 * @throws Exception
 	 */
-	private void printProperties(WorkspaceContext context) throws Exception {
-		List<String> currentProps = context.getProperties();  // All properties
-		String objType = context.getType();  // current object type
-		String objFullName = context.getFullName();  // current object name
+    private void printProperties( WorkspaceContext context ) throws Exception {
+        final List< String > props = context.getProperties(); // All properties
 
-		// Sort the properties by name
-		List<String> sortedPropNames = new ArrayList<String>(currentProps);
-		Collections.sort(sortedPropNames);
+        final Map< String, String > sorted = new TreeMap<>();
+        int maxWidth = DEFAULT_WIDTH;
 
-		// Print properties header
-		String propListHeader = Messages.getString("ShowCommand.PropertiesHeader", objType, objFullName); //$NON-NLS-1$
-		print(CompletionConstants.MESSAGE_INDENT, propListHeader);
-		print(CompletionConstants.MESSAGE_INDENT, String.format("%-25s%-25s", "Name           ", "Value          ")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		print(CompletionConstants.MESSAGE_INDENT, String.format("%-25s%-25s", "---------------", "---------------")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        // loop through properties getting value, removing namespace prefix if necessary, finding widest property name
+        for ( int i = 0, size = props.size(); i < size; ++i ) {
+            String name = props.get( i );
+            final String value = context.getPropertyValue( name );
 
-		// Print all properties
-		for (String pName : sortedPropNames) {
-			print(CompletionConstants.MESSAGE_INDENT, String.format("%-25s%-25s", pName, context.getPropertyValue(pName))); //$NON-NLS-1$
-		}
-	}
-	
+            if ( !isShowingPropertyNamePrefixes() ) {
+                name = removePrefix( props.get( i ) );
+
+                if ( maxWidth < name.length() ) {
+                    maxWidth = name.length();
+                }
+            }
+
+            sorted.put( name, value );
+        }
+
+        // Print properties header
+        final String objType = context.getType(); // current object type
+        final String objFullName = context.getFullName(); // current object name
+        final String propListHeader = Messages.getString( "ShowCommand.PropertiesHeader", objType, objFullName ); //$NON-NLS-1$
+        print( MESSAGE_INDENT, propListHeader );
+
+        final String format = getFormat( maxWidth );
+        final String headerDelimiter = getHeaderDelimiter( maxWidth );
+        print( MESSAGE_INDENT,
+               String.format( format,
+                              Messages.getString( SHELL.PROPERTY_NAME_HEADER ),
+                              Messages.getString( SHELL.PROPERTY_VALUE_HEADER ) ) );
+        print( MESSAGE_INDENT, String.format( format, headerDelimiter, headerDelimiter ) );
+
+        // print property name and value
+        for ( final Entry< String, String > entry : sorted.entrySet() ) {
+            print( MESSAGE_INDENT, String.format( format, entry.getKey(), entry.getValue() ) );
+        }
+
+        print( MESSAGE_INDENT, EMPTY_STRING );
+    }
+
+    private String getFormat( final int width ) {
+        final int columnWidth = ( width + 5 );
+        final StringBuilder result = new StringBuilder();
+        result.append( "%-" ).append( columnWidth ).append( "s%-" ).append( columnWidth ).append( 's' ); //$NON-NLS-1$ //$NON-NLS-2$
+        return result.toString();
+    }
+
+    private String getHeaderDelimiter( final int width ) {
+        final StringBuilder dashes = new StringBuilder();
+
+        for ( int i = 0; i < ( width ); ++i ) {
+            dashes.append( HYPHEN );
+        }
+
+        return dashes.toString();
+    }
+
 	/**
 	 * Shows the status at the current workspace context
 	 * @throws Exception
 	 */
 	private void printStatus( ) throws Exception {
-		WorkspaceStatus wsStatus = getWorkspaceStatus();
-		// Repo info
-		String currentRepo = "local Repository"; //$NON-NLS-1$
-		print(CompletionConstants.MESSAGE_INDENT,Messages.getString("ShowCommand.CurrentRepo", currentRepo)); //$NON-NLS-1$
+        WorkspaceStatus wsStatus = getWorkspaceStatus();
+        WorkspaceContext context = wsStatus.getCurrentContext();
+
+        // Repo info
+        final Repository.Id repoId = context.getRepository().getId();
+		print(MESSAGE_INDENT,
+		      Messages.getString("ShowCommand.CurrentRepo", repoId.getUrl(), repoId.getWorkspaceName())); //$NON-NLS-1$
 
 		// Teiid Instance info
 		Teiid teiid = wsStatus.getTeiid();
 		if (teiid == null)
-			print(CompletionConstants.MESSAGE_INDENT, Messages.getString("ShowCommand.NoCurrentTeiid")); //$NON-NLS-1$
+			print(MESSAGE_INDENT, Messages.getString("ShowCommand.NoCurrentTeiid")); //$NON-NLS-1$
 		else {
 			TeiidInstance teiidInstance = teiid.getTeiidInstance();
 			String teiidUrl = teiidInstance.getUrl();
@@ -191,108 +246,171 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
 
 			String currentTeiidInst = OPEN_SQUARE_BRACKET + teiidUrl + " : " + teiidConnected + CLOSE_SQUARE_BRACKET; //$NON-NLS-1$
 			String currentTeiidJdbc = OPEN_SQUARE_BRACKET + teiidJdbcUrl + " : " + teiidJdbcConnected + CLOSE_SQUARE_BRACKET; //$NON-NLS-1$
-			print(CompletionConstants.MESSAGE_INDENT, Messages.getString("ShowCommand.CurrentTeiid", currentTeiidInst)); //$NON-NLS-1$
-			print(CompletionConstants.MESSAGE_INDENT, Messages.getString("ShowCommand.CurrentTeiidJdbc", currentTeiidJdbc)); //$NON-NLS-1$
+			print(MESSAGE_INDENT, Messages.getString("ShowCommand.CurrentTeiid", currentTeiidInst)); //$NON-NLS-1$
+			print(MESSAGE_INDENT, Messages.getString("ShowCommand.CurrentTeiidJdbc", currentTeiidJdbc)); //$NON-NLS-1$
 		}
 
 		// Current Context
 		WorkspaceContext currentContext = wsStatus.getCurrentContext();
-		print(CompletionConstants.MESSAGE_INDENT, Messages.getString("ShowCommand.CurrentContext", currentContext.getFullName())); //$NON-NLS-1$
+		print(MESSAGE_INDENT, Messages.getString("ShowCommand.CurrentContext", currentContext.getFullName())); //$NON-NLS-1$
 	}
-	
-	/**
-	 * Shows the children of the specified komodo object
-	 * @throws Exception
-	 */
-	private void printChildren(WorkspaceContext context) throws Exception {
-		List<WorkspaceContext> children = context.getChildren();
-		if(children.isEmpty()) { 
-			String noChildrenMsg = Messages.getString("ShowCommand.noChildrenMsg",context.getType(),context.getFullName()); //$NON-NLS-1$
-			print(CompletionConstants.MESSAGE_INDENT,noChildrenMsg); 
-			return;
-		}
 
-		// Print children header
-		String childrenHeader = Messages.getString("ShowCommand.ChildrenHeader", context.getType(), context.getFullName()); //$NON-NLS-1$
-		print(CompletionConstants.MESSAGE_INDENT, childrenHeader);
-		print(CompletionConstants.MESSAGE_INDENT, String.format("%-25s", "---------------")); //$NON-NLS-1$ //$NON-NLS-2$
+    private void printChildren( final WorkspaceContext context ) throws Exception {
+        final List< WorkspaceContext > children = context.getChildren();
 
-		// Print each child
-		for(WorkspaceContext childContext : children) {
-			String childName = childContext.getName();
-			String childType = childContext.getType();
-			print(CompletionConstants.MESSAGE_INDENT, childName+" ["+childType+"]"); //$NON-NLS-1$ //$NON-NLS-2$ 
-		}
-	}
-	
+        if ( children.isEmpty() ) {
+            String noChildrenMsg = Messages.getString( "ShowCommand.noChildrenMsg", context.getType(), context.getFullName() ); //$NON-NLS-1$
+            print( MESSAGE_INDENT, noChildrenMsg );
+            return;
+        }
+
+        int maxWidth = DEFAULT_WIDTH;
+
+        // loop through children getting name, type, and finding widest child name
+        for ( int i = 0, size = children.size(); i < size; ++i ) {
+            final String name = children.get( i ).getName();
+
+            if ( maxWidth < name.length() ) {
+                maxWidth = name.length();
+            }
+        }
+
+        // sort
+        final Comparator< WorkspaceContext > sorter = new Comparator< WorkspaceContext >() {
+
+            /**
+             * {@inheritDoc}
+             *
+             * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+             */
+            @Override
+            public int compare( final WorkspaceContext thisContext,
+                                final WorkspaceContext thatContext ) {
+                try {
+                    final String thisType = thisContext.getType();
+                    int result = thisType.compareTo( thatContext.getType() );
+
+                    if ( result == 0 ) {
+                        return thisContext.getName().compareTo( thatContext.getName() );
+                    }
+
+                    return result;
+                } catch ( final Exception e ) {
+                    KLog.getLogger().error( "Error comparing WorkspaceContext objects", e ); //$NON-NLS-1$
+                    return 0;
+                }
+            }
+
+        };
+        Collections.sort( children, sorter );
+
+        // Print children header
+        final String childrenHeader = Messages.getString( "ShowCommand.ChildrenHeader", context.getType(), context.getFullName() ); //$NON-NLS-1$
+        print( MESSAGE_INDENT, childrenHeader );
+
+        final String format = getFormat( maxWidth );
+        final String headerDelimiter = getHeaderDelimiter( maxWidth );
+        print( MESSAGE_INDENT,
+               String.format( format, Messages.getString( SHELL.CHILD_NAME_HEADER ), Messages.getString( SHELL.CHILD_TYPE_HEADER ) ) );
+        print( MESSAGE_INDENT, String.format( format, headerDelimiter, headerDelimiter ) );
+
+        // Print each child
+        for ( final WorkspaceContext childContext : children ) {
+            final String childName = childContext.getName();
+            final String childType = childContext.getType();
+            print( MESSAGE_INDENT, String.format( format, childName, childType ) );
+        }
+
+        print( MESSAGE_INDENT, EMPTY_STRING );
+    }
+
 	/**
 	 * Shows the komodo shell global properties
 	 * @throws Exception
 	 */
-	private void printGlobal( ) throws Exception {
-		Properties globalProps = getWorkspaceStatus().getProperties();  // All properties
+    private void printGlobal() throws Exception {
+        final Properties globalProps = getWorkspaceStatus().getProperties(); // All properties
+        final Map< String, String > sorted = new TreeMap<>();
+        int maxWidth = DEFAULT_WIDTH;
 
-		List<String> propNames = new ArrayList<String>();
-		for(Object key : globalProps.keySet()) {
-			propNames.add((String)key);
-		}
-		// Sort the properties by name
-		List<String> sortedPropNames = new ArrayList<String>(propNames);
-		Collections.sort(sortedPropNames);
+        for ( Entry< ?, ? > entry : globalProps.entrySet() ) {
+            final String propName = ( String )entry.getKey();
 
-		// Print properties header
-		String globalPropsHeader = Messages.getString("ShowCommand.GlobalPropertiesHeader"); //$NON-NLS-1$
-		print(CompletionConstants.MESSAGE_INDENT, globalPropsHeader);
-		print(CompletionConstants.MESSAGE_INDENT, String.format("%-25s%-25s", "Name           ", "Value          ")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		print(CompletionConstants.MESSAGE_INDENT, String.format("%-25s%-25s", "---------------", "---------------")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+            if ( maxWidth < propName.length() ) {
+                maxWidth = propName.length();
+            }
 
-		// Print all properties
-		for (String pName : sortedPropNames) {
-			print(CompletionConstants.MESSAGE_INDENT, String.format("%-25s%-25s", pName, globalProps.getProperty(pName) ) ); //$NON-NLS-1$
-		}
-	}
-	
+            sorted.put( propName, ( String )entry.getValue() );
+        }
+
+        // Print properties header
+        final String globalPropsHeader = Messages.getString( "ShowCommand.GlobalPropertiesHeader" ); //$NON-NLS-1$
+        print( MESSAGE_INDENT, globalPropsHeader );
+
+        final String format = getFormat( maxWidth );
+        final String headerDelimiter = getHeaderDelimiter( maxWidth );
+        print( MESSAGE_INDENT,
+               String.format( format,
+                              Messages.getString( SHELL.PROPERTY_NAME_HEADER ),
+                              Messages.getString( SHELL.PROPERTY_VALUE_HEADER ) ) );
+        print( MESSAGE_INDENT, String.format( format, headerDelimiter, headerDelimiter ) );
+
+        // print property name and value
+        for ( final Entry< String, String > entry : sorted.entrySet() ) {
+            print( MESSAGE_INDENT, String.format( format, entry.getKey(), entry.getValue() ) );
+        }
+
+        print( MESSAGE_INDENT, EMPTY_STRING );
+    }
+
 	/**
 	 * Shows the komodo object property with the specified name
 	 * @throws Exception
 	 */
-	private void printProperty(WorkspaceContext context,String propertyName) throws Exception {
-		// Get the value for the supplied property
-		String propValue = context.getPropertyValue(propertyName);
+    private void printProperty( WorkspaceContext context,
+                                String name ) throws Exception {
+        final String propertyName = attachPrefix( context, name );
 
-		// Print properties header
-		String propListHeader = Messages.getString("ShowCommand.PropertyHeader", context.getType(), context.getFullName()); //$NON-NLS-1$
-		print(CompletionConstants.MESSAGE_INDENT, propListHeader);
-		print(CompletionConstants.MESSAGE_INDENT, String.format("%-25s%-25s", "Name           ", "Value          ")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		print(CompletionConstants.MESSAGE_INDENT, String.format("%-25s%-25s", "---------------", "---------------")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        // Get the value for the supplied property
+        String propValue = context.getPropertyValue( propertyName );
+        int maxWidth = Math.max( DEFAULT_WIDTH, propValue.length() );
+        final String format = getFormat( maxWidth );
+        final String headerDelimiter = getHeaderDelimiter( maxWidth );
 
-		print(CompletionConstants.MESSAGE_INDENT, String.format("%-25s%-25s", propertyName, propValue)); //$NON-NLS-1$
-	}
+        // Print properties header
+        String propListHeader = Messages.getString( "ShowCommand.PropertyHeader", context.getType(), context.getFullName() ); //$NON-NLS-1$
+        print( MESSAGE_INDENT, propListHeader );
+        print( MESSAGE_INDENT,
+               String.format( format,
+                              Messages.getString( SHELL.PROPERTY_NAME_HEADER ),
+                              Messages.getString( SHELL.PROPERTY_VALUE_HEADER ) ) );
+        print( MESSAGE_INDENT, String.format( format, headerDelimiter, headerDelimiter ) );
+
+        print( MESSAGE_INDENT, String.format( format, name, propValue ) );
+        print( MESSAGE_INDENT, EMPTY_STRING );
+    }
 
 	/**
 	 * Print a summary of the specified komodo object
 	 * @throws Exception
 	 */
 	private void printSummary(WorkspaceContext context) throws Exception {
-		// print the context name
-        print(CompletionConstants.MESSAGE_INDENT, Messages.getString("ShowCommand.SummaryObject", context.getType(), context.getFullName())); //$NON-NLS-1$
-        
         // print the properties
-		print(CompletionConstants.MESSAGE_INDENT, EMPTY_STRING);
+		print(MESSAGE_INDENT, EMPTY_STRING);
         printProperties(context);
-        
+
         // print the children
-		print(CompletionConstants.MESSAGE_INDENT, EMPTY_STRING);
+		print(MESSAGE_INDENT, EMPTY_STRING);
         printChildren(context);
 	}
-	
+
 	/**
 	 * Records the command if recording status is 'on'
 	 */
 	private void recordCommand() {
         if (getWorkspaceStatus().getRecordingStatus()) recordCommand(getArguments());
 	}
-	
+
 	protected boolean validate(Arguments allArgs) throws Exception {
 		// Validate the sub-command
 		String subCmd = allArgs.get(0).trim().toLowerCase();
@@ -313,16 +431,16 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
 			} else if(subCmd.equals(SUBCMD_PROPERTY)) {
 				// Second required arg is the property name.  Verify that it is valid for the current object
 		        String propName = requiredArgument(1, Messages.getString("ShowCommand.InvalidArgMsg_PropertyName")); //$NON-NLS-1$
-				WorkspaceContext context = getWorkspaceStatus().getCurrentContext();
+				WorkspaceContext context = getContext();
 				if(!validatePropertyName(context, propName)) {
 					return false;
 				}
 			}
 		}
-		
+
 		return true;
 	}
-	
+
 	/**
 	 * Validate the sub-command
 	 * @param subCmd
@@ -330,21 +448,23 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
 	private boolean validateSubCmd(String subCmd) {
 		// Validate the sub-command
 		if (subCmd.length()==0) {
-			print(CompletionConstants.MESSAGE_INDENT,Messages.getString("ShowCommand.InvalidArgMsg_SubCommand")); //$NON-NLS-1$
+			print(MESSAGE_INDENT,Messages.getString("ShowCommand.InvalidArgMsg_SubCommand")); //$NON-NLS-1$
 			return false;
 		}
 		if(!SUBCMDS.contains(subCmd)) {
-			print(CompletionConstants.MESSAGE_INDENT,Messages.getString("ShowCommand.InvalidSubCommand")); //$NON-NLS-1$
+			print(MESSAGE_INDENT,Messages.getString("ShowCommand.InvalidSubCommand")); //$NON-NLS-1$
 			return false;
 		}
 		return true;
 	}
-	
+
     /**
      * @see org.komodo.shell.api.AbstractShellCommand#tabCompletion(java.lang.String, java.util.List)
      */
     @Override
     public int tabCompletion(String lastArgument, List<CharSequence> candidates) throws Exception {
+        // TODO needs to work with properties without their prefix
+
     	if (getArguments().isEmpty()) {
     		// --------------------------------------------------------------
     		// No arg - offer subcommands
@@ -367,13 +487,13 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
     		// Tab completion for "properties", "children", "summary" - expects a path arg
     		if(SUBCMD_PROPERTIES.equals(cmdArgLower) || SUBCMD_CHILDREN.equals(cmdArgLower) || SUBCMD_SUMMARY.equals(cmdArgLower)) {
     			// The arg is expected to be a path
-    			updateTabCompleteCandidatesForPath(candidates, getWorkspaceStatus().getCurrentContext(), true, lastArgument);
+    			updateTabCompleteCandidatesForPath(candidates, getContext(), true, lastArgument);
 
     			// Do not put space after it - may want to append more to the path
     			return CompletionConstants.NO_APPEND_SEPARATOR;
     			// Tab completion for "property" - expects a valid property for the current context.
     		} else if(SUBCMD_PROPERTY.equals(cmdArgLower)) {
-    		    updateTabCompleteCandidatesForProperty(candidates, getWorkspaceStatus().getCurrentContext(), lastArgument);
+    		    updateTabCompleteCandidatesForProperty(candidates, getContext(), lastArgument);
 
     			return 0;
     		}
