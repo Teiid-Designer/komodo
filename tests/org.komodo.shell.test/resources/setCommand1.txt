@@ -3,4 +3,4 @@ create Model MyModel
 create Table MyTable ./MyModel
 cd MyModel/MyTable
 #
-set Property ddl:length 99
+set Property ANNOTATION mydescription

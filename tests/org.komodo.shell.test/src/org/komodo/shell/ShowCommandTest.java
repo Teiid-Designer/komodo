@@ -16,6 +16,7 @@
 package org.komodo.shell;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.komodo.shell.commands.core.ShowCommand;
 
@@ -23,7 +24,7 @@ import org.komodo.shell.commands.core.ShowCommand;
  * Test Class to test ShowCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings({"javadoc", "nls"})
 public class ShowCommandTest extends AbstractCommandTest {
 
 	private static final String SHOW_STATUS1 = "showStatus1.txt"; //$NON-NLS-1$
@@ -45,12 +46,13 @@ public class ShowCommandTest extends AbstractCommandTest {
 
     	execute();
 
-    	String expectedOutput = INDENT+"Current Repo    : local Repository\n"+ //$NON-NLS-1$
-                                        INDENT+"Current Teiid Instance  : None set\n"+ //$NON-NLS-1$
-                                        INDENT+"Current Context : [/workspace]\n"; //$NON-NLS-1$
-
+    	// make sure repository URL and workspace appear, no Teiid is set, and current context path
     	String writerOutput = getCommandOutput();
-    	assertEquals(expectedOutput,writerOutput);
+        assertTrue(writerOutput.contains("test-local-repository-in-memory-config.json"));
+        assertTrue(writerOutput.contains("Workspace : komodoLocalWorkspace"));
+        assertTrue(writerOutput.contains("None set"));
+        assertTrue(writerOutput.contains("/workspace"));
+
     	assertEquals("/workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
 
@@ -60,12 +62,14 @@ public class ShowCommandTest extends AbstractCommandTest {
 
     	execute();
 
-    	String expectedOutput = INDENT+"Current Repo    : local Repository\n"+ //$NON-NLS-1$
-                                INDENT+"Current Teiid Instance  : None set\n"+ //$NON-NLS-1$
-    	                        INDENT+"Current Context : [/workspace/MyVdb/MyModel]\n"; //$NON-NLS-1$
-    	String writerOutput = getCommandOutput();
-    	assertEquals(expectedOutput,writerOutput);
-    	assertEquals("/workspace/MyVdb/MyModel", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+        // make sure repository URL and workspace appear, no Teiid is set, and current context path
+        String writerOutput = getCommandOutput();
+        assertTrue(writerOutput.contains("test-local-repository-in-memory-config.json"));
+        assertTrue(writerOutput.contains("Workspace : komodoLocalWorkspace"));
+        assertTrue(writerOutput.contains("None set"));
+        assertTrue(writerOutput.contains("/workspace/MyVdb/MyModel"));
+
+        assertEquals("/workspace/MyVdb/MyModel", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
 
     @Test
@@ -87,15 +91,14 @@ public class ShowCommandTest extends AbstractCommandTest {
 
     	execute();
 
-    	String expectedOutput = INDENT+"Children for VDB \"/workspace/MyVdb\"\n"+ //$NON-NLS-1$
-                                INDENT+"---------------          \n"+ //$NON-NLS-1$
-    	                        INDENT+"Model1 [MODEL]\n"+ //$NON-NLS-1$
-    	                        INDENT+"Model2 [MODEL]\n"+ //$NON-NLS-1$
-    	                        INDENT+"Model3 [MODEL]\n"; //$NON-NLS-1$
+        // make sure model names and model type appear in output
+        String writerOutput = getCommandOutput();
+        assertTrue( writerOutput.contains( "Model1" ) );
+        assertTrue( writerOutput.contains( "Model2" ) );
+        assertTrue( writerOutput.contains( "Model3" ) );
+        assertTrue( writerOutput.contains( "MODEL" ) );
 
-    	String writerOutput = getCommandOutput();
-    	assertEquals(expectedOutput,writerOutput);
-    	assertEquals("/workspace/MyVdb", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+        assertEquals("/workspace/MyVdb", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
 
 }
