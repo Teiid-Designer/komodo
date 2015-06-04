@@ -41,7 +41,9 @@ import org.komodo.importer.ImportType;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Symbol;
 import org.komodo.relational.model.Model;
+import org.komodo.relational.model.Model.Type;
 import org.komodo.relational.vdb.DataRole;
+import org.komodo.relational.vdb.ModelSource;
 import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
@@ -64,6 +66,56 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 public class TestTeiidVdbImporter extends AbstractImporterTest {
 
     private static final String TWEET_EXAMPLE_REIMPORT = "tweet-example-vdb-reimport.xml";
+
+    private static final String DYNAMIC_CUSTOMER_VDB = "dynamic-customer-vdb.xml";
+    private static final String DYNAMIC_CUSTOMER_VDB_NAME = "DynamicCustomer";
+
+    private static final String PARTS_DYNAMIC_VDB = "parts_dynamic-vdb.xml";
+    private static final String PARTS_DYNAMIC_VDB_NAME = "MyPartsVDB_Dynamic";
+    private static final String PARTS_DYNAMIC_PARTSVIEW_DDL = EMPTY_STRING +
+                              "CREATE VIEW PartsSummary ( " +
+                              "PART_ID string(50) NOT NULL OPTIONS (SEARCHABLE 'Searchable'), " +
+                              "PART_NAME string(255) OPTIONS (SEARCHABLE 'Searchable'), " +
+                              "PART_COLOR string(30) OPTIONS (SEARCHABLE 'Searchable'), " +
+                              "PART_WEIGHT string(255) OPTIONS (SEARCHABLE 'Searchable'), " +
+                              "SUPPLIER_ID string(10) NOT NULL OPTIONS (SEARCHABLE 'Searchable'), " +
+                              "QUANTITY bigdecimal(3) OPTIONS (FIXED_LENGTH TRUE, SEARCHABLE 'All_Except_Like'), " +
+                              "SHIPPER_ID bigdecimal(2) OPTIONS (FIXED_LENGTH TRUE, SEARCHABLE 'All_Except_Like')" + NEW_LINE +
+                              ") OPTIONS (UPDATABLE TRUE)" + NEW_LINE +
+                              "AS" + NEW_LINE +
+                              "SELECT PartsSS.PARTS.PART_ID, PartsSS.PARTS.PART_NAME, PartsSS.PARTS.PART_COLOR, PartsSS.PARTS.PART_WEIGHT, PartsSS.SUPPLIER_PARTS.SUPPLIER_ID, PartsSS.SUPPLIER_PARTS.QUANTITY, PartsSS.SUPPLIER_PARTS.SHIPPER_ID FROM PartsSS.PARTS, PartsSS.SUPPLIER_PARTS WHERE PartsSS.PARTS.PART_ID = PartsSS.SUPPLIER_PARTS.PART_ID;";
+
+    private static final String PARTS_DYNAMIC_PARTSS_DDL = EMPTY_STRING +
+                            "CREATE FOREIGN TABLE PARTS ( " +
+                            "PART_ID string(50) NOT NULL OPTIONS (NAMEINSOURCE '\"PART_ID\"', SEARCHABLE 'Searchable', NATIVE_TYPE 'varchar'), " +
+                            "PART_NAME string(255) OPTIONS (NAMEINSOURCE '\"PART_NAME\"', SEARCHABLE 'Searchable', NATIVE_TYPE 'varchar'), " +
+                            "PART_COLOR string(30) OPTIONS (NAMEINSOURCE '\"PART_COLOR\"', SEARCHABLE 'Searchable', NATIVE_TYPE 'varchar'), " +
+                            "PART_WEIGHT string(255) OPTIONS (NAMEINSOURCE '\"PART_WEIGHT\"', SEARCHABLE 'Searchable', NATIVE_TYPE 'varchar')" + NEW_LINE +
+                            ") OPTIONS (NAMEINSOURCE '\"partssupplier\".\"dbo\".\"PARTS\"', UPDATABLE TRUE); " +
+                            "CREATE FOREIGN TABLE SHIP_VIA ( " +
+                                "SHIPPER_ID bigdecimal(2) NOT NULL OPTIONS (NAMEINSOURCE '\"SHIPPER_ID\"', FIXED_LENGTH TRUE, SEARCHABLE 'All_Except_Like', NATIVE_TYPE 'numeric'), " +
+                                "SHIPPER_NAME string(30) OPTIONS (NAMEINSOURCE '\"SHIPPER_NAME\"', SEARCHABLE 'Searchable', NATIVE_TYPE 'varchar')" + NEW_LINE +
+                            ") OPTIONS (NAMEINSOURCE '\"partssupplier\".\"dbo\".\"SHIP_VIA\"', UPDATABLE TRUE); " +
+                            "CREATE FOREIGN TABLE STATUS ( " +
+                                "STATUS_ID bigdecimal(2) NOT NULL OPTIONS (NAMEINSOURCE '\"STATUS_ID\"', FIXED_LENGTH TRUE, SEARCHABLE 'All_Except_Like', NATIVE_TYPE 'numeric'), " +
+                                "STATUS_NAME string(30) OPTIONS (NAMEINSOURCE '\"STATUS_NAME\"', SEARCHABLE 'Searchable', NATIVE_TYPE 'varchar')" + NEW_LINE +
+                            ") OPTIONS (NAMEINSOURCE '\"partssupplier\".\"dbo\".\"STATUS\"', UPDATABLE TRUE); " +
+                            "CREATE FOREIGN TABLE SUPPLIER ( " +
+                                "SUPPLIER_ID string(10) NOT NULL OPTIONS (NAMEINSOURCE '\"SUPPLIER_ID\"', SEARCHABLE 'Searchable', NATIVE_TYPE 'varchar'), " +
+                                "SUPPLIER_NAME string(30) OPTIONS (NAMEINSOURCE '\"SUPPLIER_NAME\"', SEARCHABLE 'Searchable', NATIVE_TYPE 'varchar'), " +
+                                "SUPPLIER_STATUS bigdecimal(2) OPTIONS (NAMEINSOURCE '\"SUPPLIER_STATUS\"', FIXED_LENGTH TRUE, SEARCHABLE 'All_Except_Like', NATIVE_TYPE 'numeric'), " +
+                                "SUPPLIER_CITY string(30) OPTIONS (NAMEINSOURCE '\"SUPPLIER_CITY\"', SEARCHABLE 'Searchable', NATIVE_TYPE 'varchar'), " +
+                                "SUPPLIER_STATE string(2) OPTIONS (NAMEINSOURCE '\"SUPPLIER_STATE\"', SEARCHABLE 'Searchable', NATIVE_TYPE 'varchar')" + NEW_LINE +
+                            ") OPTIONS (NAMEINSOURCE '\"partssupplier\".\"dbo\".\"SUPPLIER\"', UPDATABLE TRUE); " +
+                            "CREATE FOREIGN TABLE SUPPLIER_PARTS ( " +
+                                "SUPPLIER_ID string(10) NOT NULL OPTIONS (NAMEINSOURCE '\"SUPPLIER_ID\"', SEARCHABLE 'Searchable', NATIVE_TYPE 'varchar'), " +
+                                "PART_ID string(50) NOT NULL OPTIONS (NAMEINSOURCE '\"PART_ID\"', SEARCHABLE 'Searchable', NATIVE_TYPE 'varchar'), " +
+                                "QUANTITY bigdecimal(3) OPTIONS ( NAMEINSOURCE '\"QUANTITY\"', FIXED_LENGTH TRUE, SEARCHABLE 'All_Except_Like', NATIVE_TYPE 'numeric'), " +
+                                "SHIPPER_ID bigdecimal(2) OPTIONS (NAMEINSOURCE '\"SHIPPER_ID\"', FIXED_LENGTH TRUE, SEARCHABLE 'All_Except_Like', NATIVE_TYPE 'numeric')" + NEW_LINE +
+                            ") OPTIONS (NAMEINSOURCE '\"partssupplier\".\"dbo\".\"SUPPLIER_PARTS\"', UPDATABLE TRUE);";
+
+    private static final String PORTFOLIO_VDB = "portfolio-vdb.xml";
+    private static final String PORTFOLIO_VDB_NAME = "Portfolio";
 
     private static final String BOOKS_EXAMPLE_FULL = "books.xml";
     private static final String BOOKS_EXAMPLE_PROPS_ONLY = "books_props_only.xml";
@@ -458,7 +510,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
         // Set up the vdb reimport stream
         InputStream vdbStream = TestUtilities.getResourceAsStream(getClass(),
-                                                                                                       DATA_DIRECTORY,
+                                                                                                       VDB_DIRECTORY,
                                                                                                        TWEET_EXAMPLE_REIMPORT); 
 
         // Options for the import (default)
@@ -752,7 +804,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
     @Ignore("This will not succeed until MODE-2464 has been fixed")
     public void testBooksExample_Full_Vdb() throws Exception {
         InputStream vdbStream = TestUtilities.getResourceAsStream(getClass(),
-                                                                  DATA_DIRECTORY, BOOKS_EXAMPLE_FULL);
+                                                                  BOOKS_DIRECTORY, BOOKS_EXAMPLE_FULL);
 
         // Options for the import (default)
         ImportOptions importOptions = new ImportOptions();
@@ -815,7 +867,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
     public void testBooksExample_Vdb_Properties_Only() throws Exception {
         //File vdbFile = setupWithFile(BOOKS_EXAMPLE);
         InputStream vdbStream = TestUtilities.getResourceAsStream(getClass(),
-                                                                  DATA_DIRECTORY, BOOKS_EXAMPLE_PROPS_ONLY);
+                                                                  BOOKS_DIRECTORY, BOOKS_EXAMPLE_PROPS_ONLY);
 
         // Options for the import (default)
         ImportOptions importOptions = new ImportOptions();
@@ -869,7 +921,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
     @Test
     public void testBooksExample_Source_Model_Only() throws Exception {
         InputStream vdbStream = TestUtilities.getResourceAsStream(getClass(),
-                                                                  DATA_DIRECTORY, BOOKS_EXAMPLE_SOURCE_MODEL_ONLY);
+                                                                  BOOKS_DIRECTORY, BOOKS_EXAMPLE_SOURCE_MODEL_ONLY);
 
         // Options for the import (default)
         ImportOptions importOptions = new ImportOptions();
@@ -905,7 +957,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
     @Test
     public void testBooksExample_Source_Model_With_Roles() throws Exception {
         InputStream vdbStream = TestUtilities.getResourceAsStream(getClass(),
-                                                                  DATA_DIRECTORY, BOOKS_EXAMPLE_SOURCE_WITH_ROLES);
+                                                                  BOOKS_DIRECTORY, BOOKS_EXAMPLE_SOURCE_WITH_ROLES);
 
         // Options for the import (default)
         ImportOptions importOptions = new ImportOptions();
@@ -977,7 +1029,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
     @Test
     public void testBooksExample_Virtual_Model_Only() throws Exception {
         InputStream vdbStream = TestUtilities.getResourceAsStream(getClass(),
-                                                                  DATA_DIRECTORY, BOOKS_EXAMPLE_VIRTUAL_MODEL_ONLY);
+                                                                  BOOKS_DIRECTORY, BOOKS_EXAMPLE_VIRTUAL_MODEL_ONLY);
 
         // Options for the import (default)
         ImportOptions importOptions = new ImportOptions();
@@ -1015,7 +1067,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
     @Test
     public void testBooksExample_Translator_Only() throws Exception {
         InputStream vdbStream = TestUtilities.getResourceAsStream(getClass(),
-                                                                  DATA_DIRECTORY, BOOKS_EXAMPLE_TRANSLATORS_ONLY);
+                                                                  BOOKS_DIRECTORY, BOOKS_EXAMPLE_TRANSLATORS_ONLY);
 
         // Options for the import (default)
         ImportOptions importOptions = new ImportOptions();
@@ -1063,5 +1115,148 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         assertNotNull(translator.getProperty(this.uow, "MaxDependentInPredicates"));
         assertEquals("25", translator.getProperty(this.uow, "MaxDependentInPredicates").getValue(this.uow).toString());
 
+    }
+
+    @Test
+    public void testDynamicCustomerVdb() throws Exception {
+        InputStream vdbStream = TestUtilities.getResourceAsStream(getClass(),
+                                                                  VDB_DIRECTORY, DYNAMIC_CUSTOMER_VDB);
+
+        // Options for the import (default)
+        ImportOptions importOptions = new ImportOptions();
+        importOptions.setOption(OptionKeys.NAME, DYNAMIC_CUSTOMER_VDB_NAME);
+
+        // Saves Messages during import
+        ImportMessages importMessages = new ImportMessages();
+
+        KomodoObject vdbNode = executeImporter(vdbStream, ImportType.VDB, importOptions,
+                                                                           importMessages);
+
+        // Test that a vdb was created
+        assertNotNull("Failed - No Vdb Created ", vdbNode);
+
+        // Test vdb name
+        String vdbName = vdbNode.getName(uow);
+        assertEquals(importOptions.getOption(OptionKeys.NAME), vdbName);
+
+        assertNotNull(vdbNode);
+
+        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(uow, vdbNode, Vdb.class);
+
+        assertNotNull(vdb);
+        String desc = vdb.getDescription(uow);
+        assertEquals("Customer Dynamic VDB", desc);
+
+        assertNotNull(vdb.getProperty(this.uow, "UseConnectorMetadata"));
+        assertEquals("true", vdb.getProperty(this.uow, "UseConnectorMetadata").getValue(this.uow).toString());
+
+        Model[] models = vdb.getModels(uow);
+        assertEquals(1, models.length);
+        Model model = models[0];
+        assertEquals("ProductsMySQL_Dynamic", model.getName(uow));
+
+        ModelSource[] sources = model.getSources(uow);
+        assertEquals(1, sources.length);
+        ModelSource source = sources[0];
+        assertEquals("CustomerAccounts", source.getName(uow));
+        assertEquals("mysql", source.getTranslatorName(uow));
+        assertEquals("java:/CustomerAccounts", source.getJndiName(uow));
+    }
+
+    @Test
+    public void testPartsDynamicVdb() throws Exception {
+        InputStream vdbStream = TestUtilities.getResourceAsStream(getClass(),
+                                                                  VDB_DIRECTORY, PARTS_DYNAMIC_VDB);
+
+        // Options for the import (default)
+        ImportOptions importOptions = new ImportOptions();
+        importOptions.setOption(OptionKeys.NAME, PARTS_DYNAMIC_VDB_NAME);
+
+        // Saves Messages during import
+        ImportMessages importMessages = new ImportMessages();
+
+        KomodoObject vdbNode = executeImporter(vdbStream, ImportType.VDB, importOptions,
+                                                                           importMessages);
+
+        // Test that a vdb was created
+        assertNotNull("Failed - No Vdb Created ", vdbNode);
+
+        // Test vdb name
+        String vdbName = vdbNode.getName(uow);
+        assertEquals(importOptions.getOption(OptionKeys.NAME), vdbName);
+
+        assertNotNull(vdbNode);
+
+        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(uow, vdbNode, Vdb.class);
+
+        assertNotNull(vdb);
+        String connType = vdb.getConnectionType(uow);
+        assertEquals("BY_VERSION", connType);
+
+        Model[] models = vdb.getModels(uow);
+        assertEquals(2, models.length);
+        for (Model model : models) {
+            verifyProperty(model, VdbLexicon.Model.METADATA_TYPE, "DDL");
+
+            if ("PartsViewModel".equals(model.getName(uow))) {
+                assertEquals(Type.VIRTUAL, model.getModelType(uow));
+                assertEquals(PARTS_DYNAMIC_PARTSVIEW_DDL, model.getModelDefinition(uow));
+
+                // Ddl Sequenced
+                verify(model, "PartsSummary", JcrConstants.NT_UNSTRUCTURED, TeiidDdlLexicon.CreateTable.VIEW_STATEMENT);
+
+            } else if ("PartsSS".equals(model.getName(uow))) {
+                assertEquals(Type.PHYSICAL, model.getModelType(uow));
+                assertEquals(PARTS_DYNAMIC_PARTSS_DDL, model.getModelDefinition(uow));
+
+                // Ddl Sequenced
+                verify(model, "PARTS", JcrConstants.NT_UNSTRUCTURED, TeiidDdlLexicon.CreateTable.TABLE_STATEMENT);
+            }
+        }
+    }
+
+    @Test
+    public void testPorfolioVdb() throws Exception {
+        InputStream vdbStream = TestUtilities.getResourceAsStream(getClass(),
+                                                                  VDB_DIRECTORY, PORTFOLIO_VDB);
+
+        // Options for the import (default)
+        ImportOptions importOptions = new ImportOptions();
+        importOptions.setOption(OptionKeys.NAME, PORTFOLIO_VDB_NAME);
+
+        // Saves Messages during import
+        ImportMessages importMessages = new ImportMessages();
+
+        KomodoObject vdbNode = executeImporter(vdbStream, ImportType.VDB, importOptions,
+                                                                           importMessages);
+
+        // Test that a vdb was created
+        assertNotNull("Failed - No Vdb Created ", vdbNode);
+
+        // Test vdb name
+        String vdbName = vdbNode.getName(uow);
+        assertEquals(importOptions.getOption(OptionKeys.NAME), vdbName);
+
+        assertNotNull(vdbNode);
+
+        WorkspaceManager manager = WorkspaceManager.getInstance(_repo);
+        Vdb vdb = manager.resolve(uow, vdbNode, Vdb.class);
+
+        assertNotNull(vdb);
+        String desc = vdb.getDescription(uow);
+        assertEquals("The Portfolio Dynamic VDB", desc);
+
+        assertNotNull(vdb.getProperty(this.uow, "UseConnectorMetadata"));
+        assertEquals("true", vdb.getProperty(this.uow, "UseConnectorMetadata").getValue(this.uow).toString());
+
+        Model[] models = vdb.getModels(uow);
+        assertEquals(5, models.length);
+
+        Model model = manager.resolve(uow, vdb.getChild(uow, "StocksMatModel"), Model.class);
+        verifyProperty(model, VdbLexicon.Model.METADATA_TYPE, "DDL");
+        assertEquals(Type.VIRTUAL, model.getModelType(uow));
+
+        // Ddl Sequenced
+        verify(model, "stockPricesMatView", JcrConstants.NT_UNSTRUCTURED, TeiidDdlLexicon.CreateTable.VIEW_STATEMENT);
     }
 }

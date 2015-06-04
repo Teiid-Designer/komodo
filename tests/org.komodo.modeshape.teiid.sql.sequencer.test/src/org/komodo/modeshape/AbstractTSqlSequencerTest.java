@@ -75,7 +75,9 @@ public abstract class AbstractTSqlSequencerTest extends AbstractSequencerTest {
     @Override
     protected void verifyBaseProperties( Node node, String primaryType, String mixinType) throws RepositoryException {
         super.verifyBaseProperties(node, primaryType, mixinType);
-        verifyVersionType(node);
+
+        if (mixinType != null && mixinType.startsWith(TeiidSqlLexicon.Namespace.PREFIX))
+            verifyVersionType(node);
     }
     
     protected String deriveProcPrefix(boolean useNewLine) {
