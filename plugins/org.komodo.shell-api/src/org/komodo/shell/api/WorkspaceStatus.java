@@ -48,9 +48,18 @@ public interface WorkspaceStatus extends StringConstants {
 	public static final String IMPORT_DEFAULT_DIR_KEY = "IMPORT_DEFAULT_DIR"; //$NON-NLS-1$
     @SuppressWarnings("javadoc")
 	public static final String EXPORT_DEFAULT_DIR_KEY = "EXPORT_DEFAULT_DIR"; //$NON-NLS-1$
-    @SuppressWarnings("javadoc")
-    public static final List<String> GLOBAL_PROP_KEYS =
-    		Arrays.asList(RECORDING_FILE_KEY, IMPORT_DEFAULT_DIR_KEY, EXPORT_DEFAULT_DIR_KEY);
+
+    /**
+     * Set to <code>true</code> if property namespace prefixes should be shown.
+     */
+    public static final String SHOW_PROP_NAME_PREFIX_KEY = "SHOW_PROP_NAME_PREFIX"; //$NON-NLS-1$
+
+    /**
+     * A collection of the valid global property names.
+     */
+    public static final List< String > GLOBAL_PROP_KEYS = Arrays.asList( RECORDING_FILE_KEY,
+                                                                         IMPORT_DEFAULT_DIR_KEY,
+                                                                         EXPORT_DEFAULT_DIR_KEY );
 
 	/**
 	 * Sets the specified global property value
@@ -107,6 +116,11 @@ public interface WorkspaceStatus extends StringConstants {
 	 * @return the output file
 	 */
 	File getRecordingOutputFile();
+
+    /**
+     * @return <code>true</code> if property namespace prefixes should be shown
+     */
+    boolean isShowingPropertyNamePrefixes();
 
 	/**
      * @return current teiid model

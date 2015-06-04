@@ -26,10 +26,10 @@ import org.komodo.utils.ArgCheck;
 
 /**
  * Base class for shell commands.
- * 
+ *
  * This class adapted from classes at https://github.com/Governance/s-ramp/blob/master/s-ramp-shell-api
  * - altered to use WorkspaceStatus
- * 
+ *
  * @author eric.wittmann@redhat.com
  */
 public abstract class AbstractShellCommand implements ShellCommand {
@@ -53,7 +53,7 @@ public abstract class AbstractShellCommand implements ShellCommand {
 	public String getName() {
 		return this.name;
 	}
-	
+
 	/**
 	 * @see org.komodo.shell.api.ShellCommand#setName(String)
 	 */
@@ -61,7 +61,7 @@ public abstract class AbstractShellCommand implements ShellCommand {
 	public void setName(String name) {
 		this.name=name;
 	}
-	
+
 	/**
 	 * @see org.komodo.shell.api.ShellCommand#initValidWsContextTypes()
 	 */
@@ -79,7 +79,7 @@ public abstract class AbstractShellCommand implements ShellCommand {
 	public List<String> getValidWsContextTypes( ) {
 		return this.validWsContextTypes;
 	}
-	
+
 	/**
 	 * @see org.komodo.shell.api.ShellCommand#isValidForWsContext(String)
 	 */
@@ -100,7 +100,7 @@ public abstract class AbstractShellCommand implements ShellCommand {
 
 		return false;
 	}
-	
+
 	/**
 	 * @see org.komodo.shell.api.ShellCommand#setWorkspaceStatus(org.komodo.shell.api.WorkspaceStatus)
 	 */
@@ -166,13 +166,13 @@ public abstract class AbstractShellCommand implements ShellCommand {
 		}
 		return getArguments().get(argIndex);
 	}
-	
+
 	/**
 	 * @see org.komodo.shell.api.ShellCommand#print(int,java.lang.String, java.lang.Object[])
 	 */
 	@Override
 	public void print(int indent,String formattedMessage, Object... params) {
-		ArgCheck.isNonNegative(indent, Messages.getString(SHELLAPI.negative_indent_supplied)); 
+		ArgCheck.isNonNegative(indent, Messages.getString(SHELLAPI.negative_indent_supplied));
 		StringBuffer sb = new StringBuffer();
 		for(int i=0; i<indent; i++) {
 			sb.append(StringConstants.SPACE);
@@ -198,6 +198,16 @@ public abstract class AbstractShellCommand implements ShellCommand {
 	@Override
 	public void setOutput(Writer output) {
 		this.writer = output;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see org.komodo.shell.api.ShellCommand#getWriter()
+	 */
+	@Override
+	public Writer getWriter() {
+	    return this.writer;
 	}
 
 	/**

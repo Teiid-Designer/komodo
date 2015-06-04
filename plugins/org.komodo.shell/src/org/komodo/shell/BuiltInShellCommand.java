@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
+import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.AbstractShellCommand;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.WorkspaceContext;
@@ -29,20 +29,64 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringNameValidator;
 import org.komodo.utils.StringUtils;
 
 /**
  * Abstract base class for all built-in shell commands.
- * 
+ *
  * This class adapted from https://github.com/Governance/s-ramp/blob/master/s-ramp-shell
  * - altered to use different Messages class
- * 
+ *
  */
 public abstract class BuiltInShellCommand extends AbstractShellCommand {
 
+    /**
+     * @param context
+     *        the associated context (cannot be null)
+     * @param propertyName
+     *        the name whose namespace prefix is being attached (cannot be empty)
+     * @return the property name with the namespace prefix attached (never empty)
+     * @throws Exception
+     *         if an error occurs
+     */
+    protected static String attachPrefix( final WorkspaceContext context,
+                                          final String propertyName ) throws Exception {
+        ArgCheck.isNotNull( context, "context" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( propertyName, "propertyName" ); //$NON-NLS-1$
+
+        for ( final String name : context.getProperties() ) {
+            if ( propertyName.equals( removePrefix( name ) ) ) {
+                return name;
+            }
+        }
+
+        return propertyName;
+    }
+
+    /**
+     * @param propertyName
+     *        the property name whose namespace prefix is being removed (cannot be empty)
+     * @return the name without the namespace prefix (never empty)
+     */
+    protected static String removePrefix( final String propertyName ) {
+        ArgCheck.isNotEmpty( propertyName, "qname" ); //$NON-NLS-1$
+        final int index = propertyName.indexOf( ':' );
+
+        if ( index == -1 ) {
+            return propertyName;
+        }
+
+        if ( index < propertyName.length() ) {
+            return propertyName.substring( index + 1 );
+        }
+
+        return propertyName;
+    }
+
 	private StringNameValidator nameValidator = new StringNameValidator();
-	
+
     /**
      * Constructor
 	 * @param commandName the command name
@@ -55,22 +99,46 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
 		initValidWsContextTypes();
 	}
 
-	/**
+	protected WorkspaceContext getContext() {
+	    return getWorkspaceStatus().getCurrentContext();
+	}
+
+	protected boolean isShowingPropertyNamePrefixes() {
+	    return getWorkspaceStatus().isShowingPropertyNamePrefixes();
+	}
+
+    /**
      * @see org.komodo.shell.api.ShellCommand#printUsage(int indent)
      */
     @Override
-    public void printUsage(int indent) {
-        print(indent,Messages.getString(getClass().getSimpleName() + ".usage")); //$NON-NLS-1$
+    public void printUsage( final int indent ) {
+        print( indent, Messages.getString( SHELL.HelpUsageHeading ) );
+        print( indent, '\t' + Messages.getString( getClass().getSimpleName() + ".usage" ) ); //$NON-NLS-1$
+        print( 0, StringConstants.EMPTY_STRING );
     }
 
     /**
      * @see org.komodo.shell.api.ShellCommand#printHelp(int indent)
      */
     @Override
-    public void printHelp(int indent) {
-        print(indent,Messages.getString(getClass().getSimpleName() + ".help")); //$NON-NLS-1$
+    public void printHelp( final int indent ) {
+        print( 0, StringConstants.EMPTY_STRING );
+
+        // description
+        print( indent, Messages.getString( SHELL.HelpDescriptionHeading ) );
+        print( indent,
+               Messages.getString( SHELL.HelpDescription, getName(), Messages.getString( getClass().getSimpleName() + ".help" ) ) ); //$NON-NLS-1$
+        print( 0, StringConstants.EMPTY_STRING );
+
+        // usage
+        printUsage( indent );
+
+        // examples
+        print( indent, Messages.getString( SHELL.HelpExamplesHeading ) );
+        print( indent, Messages.getString( getClass().getSimpleName() + ".examples" ) ); //$NON-NLS-1$
+        print( 0, StringConstants.EMPTY_STRING );
     }
-    
+
     /**
      * @see org.komodo.shell.api.ShellCommand#recordCommand(Arguments)
      */
@@ -82,15 +150,15 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
     	}
     	recordToFile(buff.toString());
     }
-    
+
     /**
      * @see org.komodo.shell.api.ShellCommand#recordComment(String)
      */
     @Override
-    public void recordComment(String comment) {   
+    public void recordComment(String comment) {
     	recordToFile("# "+comment);  //$NON-NLS-1$
     }
-    
+
     /**
      * Write the supplied line to the recording output file.
      * @param line the line to output
@@ -103,7 +171,7 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
     			// Create file if it doesnt exist
             	outputFile.createNewFile();
 				recordingFileWriter = new FileWriter(outputFile,true);
-				recordingFileWriter.write(line+"\n"); //$NON-NLS-1$ 
+				recordingFileWriter.write(line+"\n"); //$NON-NLS-1$
 				recordingFileWriter.flush();
 			} catch (IOException ex) {
 	            print(0,"*** Could not create or write to the specifed recording file - "+outputFile); //$NON-NLS-1$
@@ -120,7 +188,7 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
             print(0,"*** Recording file not defined in startup properties"); //$NON-NLS-1$
     	}
     }
-    
+
     /**
      * Validate whether the supplied name is valid for the supplied type
      * @param name the name
@@ -135,9 +203,9 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
     	}
         return true;
     }
-    
+
 	/**
-	 * Validates whether the supplied path is valid.  If the path is relative this takes into account the 
+	 * Validates whether the supplied path is valid.  If the path is relative this takes into account the
 	 * current context.  If invalid an error message is printed out.
 	 * @param pathArg the path to test
 	 * @return 'true' if the path is valid, 'false' if not.
@@ -151,16 +219,16 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
 
 		WorkspaceStatus wsStatus = getWorkspaceStatus();
 		WorkspaceContext newContext = ContextUtils.getContextForPath(wsStatus, pathArg);
-				
+
 		if(newContext==null) {
             print(CompletionConstants.MESSAGE_INDENT,Messages.getString("BuiltInShellCommand.locationArg_noContextWithThisName", path)); //$NON-NLS-1$
 			return false;
 		}
 		return true;
 	}
-	
+
 	/**
-	 * Validates whether the supplied object type is a valid child for the supplied context. 
+	 * Validates whether the supplied object type is a valid child for the supplied context.
 	 * If invalid an error message is printed out.
 	 * @param objType the object type
 	 * @param context the workspace context
@@ -185,26 +253,31 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
 		}
 		return true;
 	}
-	
+
 	/**
-	 * Validates whether the supplied property is a valid property for the supplied context. 
+	 * Validates whether the supplied property is a valid property for the supplied context.
 	 * If invalid an error message is printed out.
 	 * @param propName the property name
 	 * @param context the workspace context
 	 * @return 'true' if the property is valid for the context, 'false' if not.
 	 * @exception Exception the exception
 	 */
-	public boolean validateProperty(String propName, WorkspaceContext context) throws Exception {
-		if(!StringUtils.isEmpty(propName)) {
-			// Get properties for this object
-			List<String> propNames = context.getProperties();
-			return propNames.contains(propName) ? true : false;
-		}
-		return false;
+    public boolean validateProperty( final String propName,
+                                     final WorkspaceContext context ) throws Exception {
+        if ( !StringUtils.isEmpty( propName ) ) {
+            final List< String > propNames = context.getProperties();
+
+            if ( propNames.contains( propName )
+                 || ( !isShowingPropertyNamePrefixes() && propNames.contains( attachPrefix( context, propName ) ) ) ) {
+                return true;
+            }
+        }
+
+        return false;
 	}
-	
+
 	/**
-	 * Validates whether the supplied property value is valid for the property 
+	 * Validates whether the supplied property value is valid for the property
 	 * If invalid an error message is printed out.
 	 * @param propName the property name
 	 * @param propValue the property value
@@ -215,7 +288,7 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
 		// TODO: add logic to test
 		return true;
 	}
-	
+
 	/**
 	 * Validate whether the supplied propName is valid for the supplied context.  If invalid, a message is printed out.
 	 * @param context the context
@@ -234,9 +307,9 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
 		}
 		return true;
 	}
-	
+
 	/**
-	 * Validates whether the supplied property value is valid for the specified global property 
+	 * Validates whether the supplied property value is valid for the specified global property
 	 * If invalid an error message is printed out.
 	 * @param propName the property name
 	 * @param propValue the property value
@@ -246,7 +319,7 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
 		// TODO: add logic to test
 		return true;
 	}
-	
+
 	/**
 	 * Validate whether the supplied propName is a valid global property.  If invalid, a message is printed out.
 	 * @param propName the property name
@@ -259,7 +332,7 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
 		}
 		return false;
 	}
-	
+
     /**
      * Updates the candidates for tab completion, given the currentContext and path
      * @param candidates the candidates list
@@ -339,10 +412,10 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
     			}
     			updateCandidates(candidates, potentialsList, lastArgument);
     		}
-    
+
     	}
     }
-    
+
     /**
      * Updates the candidates for tab completion, given the context and property Arg
      * @param candidates the candidates list
@@ -352,21 +425,29 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
      */
     public void updateTabCompleteCandidatesForProperty(List<CharSequence> candidates, WorkspaceContext context, String propArg) throws Exception {
 		// List of potentials completions
-		List<String> potentialsList = new ArrayList<String>();
+		List<String> potentials = null;
 
 		// Context properties
-		List<String> currentProps = context.getProperties();  // All properties
+		final List<String> propNames = context.getProperties();  // All properties
 
-		// Sort the properties by name
-		List<String> sortedPropNames = new ArrayList<String>(currentProps);
-		Collections.sort(sortedPropNames);
+        if ( isShowingPropertyNamePrefixes() ) {
+            potentials = propNames;
+        } else {
+            potentials = new ArrayList<>( propNames.size() );
 
-		potentialsList.addAll(sortedPropNames);
-		if(StringUtils.isEmpty(propArg)) {
-			candidates.addAll(potentialsList);
-		} else {
-			updateCandidates(candidates, potentialsList, propArg);
-		}
+            // strip off prefix
+            for ( final String name : propNames ) {
+                potentials.add( removePrefix( name ) );
+            }
+        }
+
+        Collections.sort( potentials );
+
+        if ( StringUtils.isEmpty( propArg ) ) {
+            candidates.addAll( potentials );
+        } else {
+            updateCandidates( candidates, potentials, propArg );
+        }
     }
 
     /**

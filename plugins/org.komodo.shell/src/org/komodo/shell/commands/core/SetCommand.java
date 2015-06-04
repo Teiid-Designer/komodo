@@ -11,7 +11,6 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
@@ -22,22 +21,22 @@ import org.komodo.shell.util.ContextUtils;
 import org.komodo.utils.StringUtils;
 
 /**
- *
+ * A command to set a property value, a global property value, or to turn on recording.
  */
 public class SetCommand extends BuiltInShellCommand {
 
-	private static String SET = "set"; //$NON-NLS-1$ 
-	
+	private static String SET = "set"; //$NON-NLS-1$
+
     private static final String SUBCMD_PROPERTY = "property"; //$NON-NLS-1$
     private static final String SUBCMD_GLOBAL = "global"; //$NON-NLS-1$
     private static final String SUBCMD_RECORD = "record"; //$NON-NLS-1$
-    private static final List<String> SUBCMDS = 
-    		Arrays.asList(SUBCMD_PROPERTY, SUBCMD_GLOBAL, SUBCMD_RECORD);    
+    private static final List<String> SUBCMDS =
+    		Arrays.asList(SUBCMD_PROPERTY, SUBCMD_GLOBAL, SUBCMD_RECORD);
 
     private static final String ON = "on"; //$NON-NLS-1$
 	private static final String OFF = "off"; //$NON-NLS-1$
-    private static final List<String> RECORD_CMDS = 
-    		Arrays.asList(ON, OFF);    
+    private static final List<String> RECORD_CMDS =
+    		Arrays.asList(ON, OFF);
 
     /**
      * Constructor.
@@ -62,23 +61,22 @@ public class SetCommand extends BuiltInShellCommand {
         		String propValueArg = requiredArgument(2, Messages.getString("SetCommand.InvalidArgMsg_PropertyValue")); //$NON-NLS-1$
         		// path is optional.  if path is not included, current context is assumed.
         		String pathArg = optionalArgument(3);
-        		
+
                 // Validates SET PROPERTY args
                 if (!validateSetProperty(propNameArg,propValueArg,pathArg)) {
         			return false;
         		}
 
-        		WorkspaceContext context = getWorkspaceStatus().getCurrentContext();
-        		if(!StringUtils.isEmpty(pathArg)) {
-        			context = ContextUtils.getContextForPath(getWorkspaceStatus(), pathArg);
-        		}
+                final WorkspaceContext context = StringUtils.isEmpty( pathArg ) ? getContext()
+                                                                               : ContextUtils.getContextForPath( getWorkspaceStatus(),
+                                                                                                                 pathArg );
 
         		// Set the property
         		setProperty(context,propNameArg, propValueArg);
 
                 // Commit transaction
                 getWorkspaceStatus().commit("SetCommand"); //$NON-NLS-1$
-                
+
                 // Print message
         		print(CompletionConstants.MESSAGE_INDENT, Messages.getString("SetCommand.PropertySet", propNameArg)); //$NON-NLS-1$
         		if (getWorkspaceStatus().getRecordingStatus())
@@ -108,21 +106,21 @@ public class SetCommand extends BuiltInShellCommand {
         		}
 
         		WorkspaceStatus wsStatus = getWorkspaceStatus();
-        		if(onOffArg.equalsIgnoreCase(ON)) { 
+        		if(onOffArg.equalsIgnoreCase(ON)) {
         			wsStatus.setRecordingStatus(true);
-        		} else if(onOffArg.equalsIgnoreCase(OFF)) { 
+        		} else if(onOffArg.equalsIgnoreCase(OFF)) {
         			wsStatus.setRecordingStatus(false);
         		}
-        		
+
         		Date d = new Date();
-        		String rState = wsStatus.getRecordingStatus() ? ON : OFF; 
+        		String rState = wsStatus.getRecordingStatus() ? ON : OFF;
         		String rFile = wsStatus.getRecordingOutputFile().getCanonicalPath();
         		String stateChangedMsg = Messages.getString("SetCommand.setRecordingStateMsg",rState,d.toString(),rFile); //$NON-NLS-1$
-        		
-                print(CompletionConstants.MESSAGE_INDENT,stateChangedMsg);  
+
+                print(CompletionConstants.MESSAGE_INDENT,stateChangedMsg);
 
                 recordComment("====== "+stateChangedMsg+" ======"); //$NON-NLS-1$ //$NON-NLS-2$
-                
+
                 return true;
         	} else {
         		throw new InvalidCommandArgumentException(0, Messages.getString("SetCommand.InvalidSubCommand")); //$NON-NLS-1$
@@ -147,31 +145,30 @@ public class SetCommand extends BuiltInShellCommand {
      */
 	protected boolean validateSetProperty(String propName, String propValue, String contextPath) throws Exception {
 		// Get the context for object.  otherwise use current context
-		WorkspaceContext context = getWorkspaceStatus().getCurrentContext();
-		if (!StringUtils.isEmpty(contextPath)) {
-			context = ContextUtils.getContextForPath(getWorkspaceStatus(), contextPath);
-		}
-		
+        final WorkspaceContext context = StringUtils.isEmpty( contextPath ) ? getContext()
+                                                                           : ContextUtils.getContextForPath( getWorkspaceStatus(),
+                                                                                                             contextPath );
+
 		// Validate the type is valid for the context
 		if (!validateProperty(propName,context)) {
 			return false;
 		}
-		
+
 		// Validate the property value
 		if (!validatePropertyValue(propName,propValue,context)) {
 			return false;
 		}
-		
+
 		// Validate the path if supplied
 		if(!StringUtils.isEmpty(contextPath)) {
 			if (!validatePath(contextPath)) {
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
-	
+
     /**
      * Validate the SET GLOBAL args
      * @param propName the global property name
@@ -184,15 +181,15 @@ public class SetCommand extends BuiltInShellCommand {
 		if (!validateGlobalProperty(propName)) {
 			return false;
 		}
-		
+
 		// Validate the value for this global property
 		if (!validateGlobalPropertyValue(propName,propValue)) {
 			return false;
 		}
-		
+
 		return true;
 	}
-	
+
     /**
      * Validate the SET RECORD args
      * @param onOffArg the on / off arg
@@ -204,13 +201,13 @@ public class SetCommand extends BuiltInShellCommand {
             print(CompletionConstants.MESSAGE_INDENT,Messages.getString("SetCommand.onOffArg_empty")); //$NON-NLS-1$
 			return false;
 		}
-		
+
 		// Check for invalid arg
-		if(!onOffArg.equalsIgnoreCase(ON) && !onOffArg.equalsIgnoreCase(OFF)) { 
+		if(!onOffArg.equalsIgnoreCase(ON) && !onOffArg.equalsIgnoreCase(OFF)) {
             print(CompletionConstants.MESSAGE_INDENT,Messages.getString("SetCommand.onOffArg_invalid")); //$NON-NLS-1$
 			return false;
 		}
-		
+
 		// If verify that global file var was set.
 		String recordingFileStr = getWorkspaceStatus().getProperties().getProperty(WorkspaceStatus.RECORDING_FILE_KEY);
 		if(StringUtils.isEmpty(recordingFileStr)) {
@@ -225,26 +222,22 @@ public class SetCommand extends BuiltInShellCommand {
 				}
 			}
 		}
-		
+
 		return true;
 	}
-	
-    /**
-     * Sets a property on the KomodoObject
-     * @param context the object context
-     * @param propName the property name
-     * @param propValue the property value
-     * @throws Exception the exception
-     */
-    private void setProperty(WorkspaceContext context, String propName, String propValue) throws Exception {
-        context.setPropertyValue(propName, propValue);
+
+    private void setProperty( final WorkspaceContext context,
+                              final String name,
+                              final String propValue ) throws Exception {
+        final String propertyName = ( !isShowingPropertyNamePrefixes() ? attachPrefix( context, name ) : name );
+        context.setPropertyValue( propertyName, propValue );
     }
 
     /**
      * Sets a global workspace property
      * @param propName the global property name
      * @param propValue the property value
-     * @throws Exception the excpetion
+     * @throws Exception the exception
      */
     private void setGlobalProperty(String propName, String propValue) throws Exception {
         WorkspaceStatus wsStatus = getWorkspaceStatus();
@@ -281,30 +274,33 @@ public class SetCommand extends BuiltInShellCommand {
     				}
     			}
     		// Set property and global options
-    		} else {
-    			String subCmd = getArguments().get(0).toLowerCase();
-    			List<String> potentials = null;
-    			if(subCmd.equals(SUBCMD_PROPERTY)) {
-        			// Property name completion options
-    				potentials = getWorkspaceStatus().getCurrentContext().getProperties();
-    			} else if(subCmd.equals(SUBCMD_GLOBAL)) {
-        			// Global property completion options
-    				potentials = WorkspaceStatus.GLOBAL_PROP_KEYS;
-    			}
-    			if(lastArgument==null) {
-    				candidates.addAll(potentials);
-    			} else {
-    				for (String name : potentials) {
-    					if (name.toUpperCase().startsWith(lastArgument.toUpperCase())) {
-    						candidates.add(name);
-    					}
-    				}
-    			}
-    		}
+            } else {
+                final String subCmd = getArguments().get( 0 ).toLowerCase();
+
+                if ( subCmd.equals( SUBCMD_PROPERTY ) ) {
+                    updateTabCompleteCandidatesForProperty( candidates, getContext(), lastArgument );
+                } else if ( subCmd.equals( SUBCMD_GLOBAL ) ) {
+                    // Global property completion options
+                    final List< String > potentials = WorkspaceStatus.GLOBAL_PROP_KEYS;
+
+                    if ( lastArgument == null ) {
+                        candidates.addAll( potentials );
+                    } else {
+                        for ( final String name : potentials ) {
+                            if ( name.toUpperCase().startsWith( lastArgument.toUpperCase() ) ) {
+                                candidates.add( name );
+                            }
+                        }
+                    }
+                } else {
+                    return -1; // invalid subcmd
+                }
+            }
+
     		return 0;
     	} else if (getArguments().size()==2) {
     		if(getArguments().get(0).toLowerCase().equals(SUBCMD_RECORD)) return 0;
-    		
+
     		// Property value completion options
     		if(lastArgument==null) {
     			candidates.add("propertyValue"); //$NON-NLS-1$
@@ -312,16 +308,17 @@ public class SetCommand extends BuiltInShellCommand {
     		return 0;
     	} else if (getArguments().size()==3) {
     		if(getArguments().get(0).toLowerCase().equals(SUBCMD_RECORD)) return 0;
-    		
+
     		// The arg is expected to be a path
-    		updateTabCompleteCandidatesForPath(candidates, getWorkspaceStatus().getCurrentContext(), true, lastArgument);
+    		updateTabCompleteCandidatesForPath(candidates, getContext(), true, lastArgument);
 
     		// Do not put space after it - may want to append more to the path
     		return CompletionConstants.NO_APPEND_SEPARATOR;
     	}
+
     	return -1;
     }
-    
+
 	/**
      * @see org.komodo.shell.api.ShellCommand#printUsage(int indent)
      */
@@ -340,8 +337,8 @@ public class SetCommand extends BuiltInShellCommand {
         		print(indent,Messages.getString(getClass().getSimpleName() + ".usage")); //$NON-NLS-1$
     		}
     	} else {
-    		print(indent,Messages.getString(getClass().getSimpleName() + ".usage")); //$NON-NLS-1$
+    		super.printUsage( indent );
     	}
     }
-   
+
 }

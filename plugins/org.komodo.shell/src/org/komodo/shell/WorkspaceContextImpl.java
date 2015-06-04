@@ -25,18 +25,20 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.KomodoTypeRegistry;
 import org.komodo.repository.RepositoryTools;
+import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceContextVisitor;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
+import org.komodo.spi.repository.PropertyDescriptor;
 import org.komodo.spi.repository.Repository;
+import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
  * The WorkspaceContext
@@ -48,6 +50,7 @@ public class WorkspaceContextImpl implements WorkspaceContext {
         KomodoLexicon.Vdb.NODE_TYPE,
         KomodoLexicon.VdbModel.NODE_TYPE
     };
+
     private static List<String> relationalTypes = Arrays.asList(RELATIONAL_TYPES);
 
     private final WorkspaceStatus wsStatus;
@@ -215,7 +218,7 @@ public class WorkspaceContextImpl implements WorkspaceContext {
     public WorkspaceContext getChild(String name, String type) throws Exception {
     	KomodoType kType = KomodoType.getKomodoType(type);
     	String lexiconType = KomodoTypeRegistry.getInstance().getIdentifier(kType).getLexiconType();
-    	
+
         KomodoObject[] children = repoObject.getChildrenOfType(this.wsStatus.getTransaction(), lexiconType);
 
         for (KomodoObject child : children) {
@@ -240,30 +243,43 @@ public class WorkspaceContextImpl implements WorkspaceContext {
 		}
 		return allowableTypes;
 	}
-	
-    /* (non-Javadoc)
-     * @see org.komodo.shell.api.WorkspaceContext#getPropertyNameValueMap()
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.WorkspaceContext#getProperties()
      */
     @Override
-    public List<String> getProperties() throws Exception {
-////        if (getType().equals(WorkspaceContext.Type.ROOT)) {
-////            propNameValues.put(WorkspaceStatus.RECORDING_FILE_KEY, getWorkspaceStatus().getRecordingOutputFile().toString());
+    public List< String > getProperties() throws Exception {
+        final KomodoObject relObj = getKomodoObj();
+        final UnitOfWork transaction = this.wsStatus.getTransaction();
+        final List< String > props = new ArrayList<>( Arrays.asList( relObj.getPropertyNames( transaction ) ) ); // props with values
+        final PropertyDescriptor[] descriptors = relObj.getPropertyDescriptors( transaction );
 
-        KomodoObject relObj = getKomodoObj();
-        String[] props = relObj.getPropertyNames(this.wsStatus.getTransaction());
-        return Arrays.asList(props);
+        if ( descriptors.length != 0 ) {
+            for ( final PropertyDescriptor descriptor : descriptors ) {
+                final String name = descriptor.getName();
+
+                if ( !props.contains( name ) ) {
+                    props.add( name );
+                }
+            }
+        }
+
+        return props;
     }
 
     @Override
-    public String getPropertyValue(String propertyName) throws Exception {
-        KomodoObject relObj = getKomodoObj();
-        Property property = relObj.getProperty(this.wsStatus.getTransaction(), propertyName);
-        // Null means the property with that name wasn't found
-        if(property==null) {
-        	return null;
-        } else {
-        	return RepositoryTools.getDisplayValue(this.wsStatus.getTransaction(), property);
+    public String getPropertyValue( final String propertyName ) throws Exception {
+        final KomodoObject relObj = getKomodoObj();
+        final UnitOfWork transaction = this.wsStatus.getTransaction();
+
+        if ( relObj.hasProperty( transaction, propertyName ) ) {
+            final Property property = relObj.getProperty( transaction, propertyName );
+            return RepositoryTools.getDisplayValue( transaction, property );
         }
+
+        return Messages.getString( SHELL.NO_PROPERTY_VALUE );
     }
 
     @Override

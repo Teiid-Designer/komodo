@@ -338,6 +338,22 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         return new File(filePath);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.WorkspaceStatus#isShowingPropertyNamePrefixes()
+     */
+    @Override
+    public boolean isShowingPropertyNamePrefixes() {
+        final String show = this.wsProperties.getProperty( WorkspaceStatus.SHOW_PROP_NAME_PREFIX_KEY );
+
+        if ( StringUtils.isEmpty( show ) ) {
+            return false;
+        }
+
+        return new Boolean( show );
+    }
+
     /* (non-Javadoc)
      * @see org.komodo.shell.api.WorkspaceStatus#setProperty(java.lang.String, java.lang.String)
      */
