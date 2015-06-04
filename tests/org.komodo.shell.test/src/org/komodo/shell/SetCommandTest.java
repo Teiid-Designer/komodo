@@ -2,9 +2,7 @@ package org.komodo.shell;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-
 import java.io.File;
-
 import org.junit.Test;
 import org.komodo.relational.model.Table;
 import org.komodo.shell.api.WorkspaceContext;
@@ -13,14 +11,13 @@ import org.komodo.shell.commands.core.SetCommand;
 import org.komodo.shell.util.ContextUtils;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
-import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
  * SetCommand - allows setting of properties, global properties, recording state, etc.
- * 
+ *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings({"javadoc", "nls"})
 public class SetCommandTest extends AbstractCommandTest {
 
 	private static final String SET_COMMAND_1 = "setCommand1.txt"; //$NON-NLS-1$
@@ -28,14 +25,14 @@ public class SetCommandTest extends AbstractCommandTest {
 	private static final String SET_COMMAND_3 = "setCommand3.txt"; //$NON-NLS-1$
 	private static final String SET_COMMAND_4 = "setCommand4.txt"; //$NON-NLS-1$
 	private static final String SET_COMMAND_5 = "setCommand5.txt"; //$NON-NLS-1$
-	
+
 	/**
 	 * Test for SetCommand
 	 */
 	public SetCommandTest( ) {
 		super();
 	}
-	
+
     @Test
     public void testSetProperty1() throws Exception {
     	setup(SET_COMMAND_1, SetCommand.class);
@@ -43,18 +40,16 @@ public class SetCommandTest extends AbstractCommandTest {
     	execute();
 
     	assertEquals("/workspace/MyModel/MyTable", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
-    	
+
     	KomodoObject ko = wsStatus.getCurrentContext().getKomodoObj();
     	UnitOfWork trans = wsStatus.getTransaction();
      	// Verify the komodo class is a Table and is TABLE type
     	assertEquals(KomodoType.TABLE.name(), ko.getTypeIdentifier(trans).name());
-    	
+
     	Table table = (Table)resolveType(trans, ko, Table.class);
-    	Property prop = table.getProperty(trans, "ddl:length"); //$NON-NLS-1$
-    	
-    	assertEquals(99L, prop.getValue(trans));
+    	assertEquals("mydescription", table.getDescription( trans ));
     }
-    
+
     @Test
     public void testSetProperty2() throws Exception {
     	setup(SET_COMMAND_2, SetCommand.class);
@@ -62,7 +57,7 @@ public class SetCommandTest extends AbstractCommandTest {
     	execute();
 
     	assertEquals("/workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
-    	
+
     	WorkspaceContext tableContext = ContextUtils.getContextForPath(wsStatus, "/workspace/MyModel/MyTable"); //$NON-NLS-1$
     	assertNotNull(tableContext);
 
@@ -70,13 +65,11 @@ public class SetCommandTest extends AbstractCommandTest {
     	UnitOfWork trans = wsStatus.getTransaction();
     	// Verify the komodo class is a Table and is TABLE type
     	assertEquals(KomodoType.TABLE.name(), ko.getTypeIdentifier(trans).name());
-    	
+
     	Table table = (Table)resolveType(trans, ko, Table.class);
-    	Property prop = table.getProperty(trans, "ddl:length"); //$NON-NLS-1$
-    	
-    	assertEquals(99L, prop.getValue(trans));
+    	assertEquals("mydescription", table.getDescription( trans ));
     }
-    
+
     @Test
     public void testSetProperty3() throws Exception {
     	setup(SET_COMMAND_3, SetCommand.class);
@@ -84,7 +77,7 @@ public class SetCommandTest extends AbstractCommandTest {
     	execute();
 
     	assertEquals("/workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
-    	
+
     	WorkspaceContext tableContext = ContextUtils.getContextForPath(wsStatus, "/workspace/MyModel/MyTable"); //$NON-NLS-1$
         assertNotNull(tableContext);
 
@@ -92,13 +85,11 @@ public class SetCommandTest extends AbstractCommandTest {
     	UnitOfWork trans = wsStatus.getTransaction();
     	// Verify the komodo class is a Table and is TABLE type
     	assertEquals(KomodoType.TABLE.name(), ko.getTypeIdentifier(trans).name());
-    	
+
     	Table table = (Table)resolveType(trans, ko, Table.class);
-    	Property prop = table.getProperty(trans, "ddl:length"); //$NON-NLS-1$
-    	
-    	assertEquals(99L, prop.getValue(trans));
+    	assertEquals(5, table.getCardinality(trans));
     }
-    
+
     @Test
     public void testSetGlobal() throws Exception {
     	setup(SET_COMMAND_4, SetCommand.class);
@@ -108,7 +99,7 @@ public class SetCommandTest extends AbstractCommandTest {
     	File recordFile = wsStatus.getRecordingOutputFile();
     	assertEquals("BogusFile.txt", recordFile.getName()); //$NON-NLS-1$
     }
-    
+
     @Test
     public void testSetRecord() throws Exception {
     	setup(SET_COMMAND_5, SetCommand.class);
@@ -118,5 +109,5 @@ public class SetCommandTest extends AbstractCommandTest {
 
     	assertEquals(true, wsStatus.getRecordingStatus());
     }
-    
+
 }

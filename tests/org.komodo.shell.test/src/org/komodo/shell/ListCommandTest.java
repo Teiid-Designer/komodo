@@ -16,21 +16,20 @@
 package org.komodo.shell;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.komodo.shell.commands.core.ListCommand;
-import org.komodo.spi.repository.KomodoType;
 
 /**
  * Test Class to test ListCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings({"javadoc", "nls"})
 public class ListCommandTest extends AbstractCommandTest {
 
 	private static final String LIST_COMMAND1 = "listCommand1.txt"; //$NON-NLS-1$
 	private static final String LIST_COMMAND2 = "listCommand2.txt"; //$NON-NLS-1$
 	private static final String LIST_COMMAND3 = "listCommand3.txt"; //$NON-NLS-1$
-	private static final String INDENT = getIndentStr();
 
 	/**
 	 * Test for ListCommand
@@ -45,10 +44,12 @@ public class ListCommandTest extends AbstractCommandTest {
 
     	execute();
 
-    	String expectedOutput = INDENT+"No children for WORKSPACE[workspace].\n"; //$NON-NLS-1$
+        // make sure no children and path appear in output
     	String writerOutput = getCommandOutput();
-    	assertEquals(expectedOutput,writerOutput);
-    	assertEquals("/workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+        assertTrue( writerOutput.contains( "No children" ) );
+        assertTrue( writerOutput.contains( "WORKSPACE \"/workspace\"" ) );
+
+        assertEquals("/workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
 
     @Test
@@ -57,11 +58,13 @@ public class ListCommandTest extends AbstractCommandTest {
 
     	execute();
 
-    	String expectedOutput = INDENT+"Model1 ["+KomodoType.MODEL.name()+"]\n"+ //$NON-NLS-1$ //$NON-NLS-2$
-    			                INDENT+"Model2 ["+KomodoType.MODEL.name()+"]\n"+ //$NON-NLS-1$ //$NON-NLS-2$
-    			                INDENT+"Model3 ["+KomodoType.MODEL.name()+"]\n"; //$NON-NLS-1$ //$NON-NLS-2$
-    	String writerOutput = getCommandOutput();
-    	assertEquals(expectedOutput,writerOutput);
+        // make sure model names and model type appear in output
+        String writerOutput = getCommandOutput();
+        assertTrue( writerOutput.contains( "Model1" ) );
+        assertTrue( writerOutput.contains( "Model2" ) );
+        assertTrue( writerOutput.contains( "Model3" ) );
+        assertTrue( writerOutput.contains( "MODEL" ) );
+
     	assertEquals("/workspace/MyVdb", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
 
@@ -71,12 +74,12 @@ public class ListCommandTest extends AbstractCommandTest {
 
     	execute();
 
-    	assertEquals("/workspace/MyVdb/Model1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+        // make sure table name and table type appear in output
+        String writerOutput = getCommandOutput();
+        assertTrue( writerOutput.contains( "Table1" ) );
+        assertTrue( writerOutput.contains( "TABLE" ) );
 
-    	String expectedOutput = INDENT+"Table1 ["+KomodoType.TABLE.name()+"]\n"; //$NON-NLS-1$ //$NON-NLS-2$
-    	String writerOutput = getCommandOutput();
-    	assertEquals(expectedOutput,writerOutput);
-
+        assertEquals("/workspace/MyVdb/Model1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
 
 }
