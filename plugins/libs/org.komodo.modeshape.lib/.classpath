@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry exported="true" kind="lib" path="lib/jboss-marshalling-osgi.jar" sourcepath="libsrc/jboss-marshalling-osgi-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/guava.jar" sourcepath="libsrc/guava-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/hawtjni-runtime.jar" sourcepath="libsrc/runtime-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/infinispan-cachestore-leveldb.jar" sourcepath="libsrc/leveldb-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/infinispan-commons.jar" sourcepath="libsrc/commons-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/infinispan-core.jar" sourcepath="libsrc/core-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jboss-logging.jar" sourcepath="libsrc/logging-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jboss-marshalling-river.jar" sourcepath="libsrc/river-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jboss-marshalling.jar" sourcepath="libsrc/marshalling-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jboss-transaction-api_1.1_spec.jar" sourcepath="libsrc/spec-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jcommander.jar" sourcepath="libsrc/jcommander-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jcr.jar" sourcepath="libsrc/jcr-sources.jar"/>
