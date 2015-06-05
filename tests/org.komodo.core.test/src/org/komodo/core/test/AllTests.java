@@ -27,6 +27,7 @@ import org.junit.runners.Suite;
 import org.komodo.repository.search.TestObjectSearcher;
 import org.komodo.repository.test.ObjectImplTest;
 import org.komodo.repository.test.TestLocalRepository;
+import org.komodo.repository.test.TestLocalRepositoryPersistence;
 import org.komodo.repository.validation.ValidationManagerImplTest;
 
 @SuppressWarnings( "javadoc" )
@@ -35,7 +36,7 @@ import org.komodo.repository.validation.ValidationManagerImplTest;
     ObjectImplTest.class,
     TestLocalRepository.class,
     TestObjectSearcher.class,
-//    TestLocalRepositoryPersistence.class,
+    TestLocalRepositoryPersistence.class,
     ValidationManagerImplTest.class,
     } )
 public class AllTests {
