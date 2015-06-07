@@ -21,6 +21,12 @@
  */
 package org.komodo.repository.internal;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.Iterator;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Future;
@@ -29,6 +35,10 @@ import java.util.concurrent.TimeUnit;
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.Session;
+import org.infinispan.commons.util.FileLookupFactory;
+import org.infinispan.commons.util.StringPropertyReplacer;
+import org.infinispan.schematic.document.EditableDocument;
+import org.infinispan.schematic.document.Editor;
 import org.komodo.core.KEngine;
 import org.komodo.core.KomodoLexicon.Komodo;
 import org.komodo.repository.KSequencerController;
@@ -44,6 +54,7 @@ import org.modeshape.common.collection.Problems;
 import org.modeshape.jcr.JcrRepository;
 import org.modeshape.jcr.ModeShapeEngine;
 import org.modeshape.jcr.RepositoryConfiguration;
+import org.modeshape.jcr.RepositoryConfiguration.FieldName;
 
 /**
  * The thread the ModeShape engine uses for local repositories.
@@ -355,6 +366,81 @@ public class ModeshapeEngineThread extends Thread implements StringConstants {
         }
     }
 
+    /**
+     * Initialise the repository configuration.
+     *
+     * Works around [ISPN-5527] / [MODE-2471] where java system properties are not
+     * replaced for the expiration property of the leveldb cache store configuration.
+     *
+     * @param configuration
+     * @return the repository configuration
+     */
+    private RepositoryConfiguration initialiseRepositoryConfiguration(URL configUrl) throws Exception {
+        RepositoryConfiguration config = RepositoryConfiguration.read(configUrl);
+        if (config.getCacheConfiguration() == null)
+            return config; // No cache configuration specified so nothing to do
+
+        InputStream cacheConfigStream = FileLookupFactory.newInstance().lookupFileStrict(config.getCacheConfiguration(), Thread.currentThread().getContextClassLoader());
+        if (cacheConfigStream == null)
+            return config; // Cannot find the file so not much point in going further
+
+        //
+        // * Read the contents of the cache configuration stream
+        // * While reading each line, check for the syntax ${xxx} and if found
+        // *           replace with the associated java system property
+        // * Write the new configuration out to a temporary file
+        // * Set the cache configuration property to point to the temporary file instead
+        // * Return a new configuration based on the edited value
+        //
+        BufferedReader reader = null;
+        FileWriter writer = null;
+        try {
+            // Read the cache configuration stream
+            reader = new BufferedReader(new InputStreamReader(cacheConfigStream));
+
+            StringBuilder builder = new StringBuilder();
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+                // No need to replace properties if line does not contain any
+                if (line.contains(DOLLAR_SIGN + OPEN_BRACE)) {
+                    //
+                    // Calls infinispan function that SHOULD have already been called
+                    //
+                    line = StringPropertyReplacer.replaceProperties(line);
+                }
+
+                builder.append(line);
+                builder.append(NEW_LINE);
+            }
+
+            // Create a new temporary file for new configuration
+            String configFilePrefix = "replacement-" + config.getName(); //$NON-NLS-1$
+            File tempConfigFile = File.createTempFile(configFilePrefix, DOT + XML);
+            tempConfigFile.deleteOnExit();
+            writer = new FileWriter(tempConfigFile);
+            writer.write(builder.toString());
+
+            //
+            // Fetch the editable version of the current config and update the
+            // cache configuration path to point to the temporary file
+            //
+            Editor editor = config.edit();
+            EditableDocument storageDoc = editor.getDocument(FieldName.STORAGE);
+            storageDoc.setString(FieldName.CACHE_CONFIGURATION, tempConfigFile.getAbsolutePath());
+
+            // Create a new repository configuration based on the original
+            config = new RepositoryConfiguration(editor, configFilePrefix);
+        } finally {
+            if (reader != null)
+                reader.close();
+            if (writer != null)
+                writer.close();
+        }
+
+        return config;
+    }
+
     private synchronized void startEngine(Request request) {
         if (ModeshapeUtils.isEngineRunning(msEngine))
             return;
@@ -364,7 +450,7 @@ public class ModeshapeEngineThread extends Thread implements StringConstants {
             msEngine.start();
 
             // start the local repository
-            final RepositoryConfiguration config = RepositoryConfiguration.read(this.repoId.getConfiguration());
+            final RepositoryConfiguration config = initialiseRepositoryConfiguration(this.repoId.getConfiguration());
 
             //
             // Validate the configuration for any errors

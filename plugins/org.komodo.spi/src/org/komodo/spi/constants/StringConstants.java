@@ -109,6 +109,11 @@ public interface StringConstants {
     char DOT_CHAR = DOT.charAt(0);
 
     /**
+     * A Dollar Sign.
+     */
+    String DOLLAR_SIGN = "$"; //$NON-NLS-1$
+
+    /**
      * A Speech mark.
      */
     String SPEECH_MARK = "\""; //$NON-NLS-1$
