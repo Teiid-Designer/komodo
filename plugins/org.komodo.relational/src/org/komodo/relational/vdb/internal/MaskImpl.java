@@ -120,7 +120,7 @@ public final class MaskImpl extends RelationalChildRestrictedObject implements M
 
     @Override
     public KomodoType getTypeIdentifier(UnitOfWork uow) {
-        return KomodoType.VDB_MASK;
+        return RESOLVER.identifier();
     }
 
     /**

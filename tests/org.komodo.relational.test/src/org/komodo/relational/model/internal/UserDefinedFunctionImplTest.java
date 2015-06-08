@@ -28,6 +28,7 @@ import org.komodo.relational.model.StatementOption;
 import org.komodo.relational.model.UserDefinedFunction;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyDescriptor;
 
 @SuppressWarnings( { "javadoc", "nls" } )
@@ -56,6 +57,11 @@ public final class UserDefinedFunctionImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveCorrectSchemaElementType() throws Exception {
         assertThat( this.function.getSchemaElementType( this.uow ), is( SchemaElementType.VIRTUAL ) );
+    }
+
+    @Test
+    public void shouldHaveCorrectTypeIdentifier() throws Exception {
+        assertThat(this.function.getTypeIdentifier( this.uow ), is(KomodoType.USER_DEFINED_FUNCTION));
     }
 
     @Test

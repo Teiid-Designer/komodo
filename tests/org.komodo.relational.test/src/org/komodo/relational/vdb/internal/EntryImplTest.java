@@ -23,6 +23,7 @@ import org.komodo.relational.vdb.Entry;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.KomodoType;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 @SuppressWarnings( { "javadoc", "nls" } )
@@ -58,6 +59,11 @@ public final class EntryImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveCorrectPrimaryType() throws Exception {
         assertThat( this.entry.getPrimaryType( this.uow ).getName(), is( VdbLexicon.Entry.ENTRY ) );
+    }
+
+    @Test
+    public void shouldHaveCorrectTypeIdentifier() throws Exception {
+        assertThat(this.entry.getTypeIdentifier( this.uow ), is(KomodoType.VDB_ENTRY));
     }
 
     @Test

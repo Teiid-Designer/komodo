@@ -117,7 +117,7 @@ public final class ModelSourceImpl extends RelationalChildRestrictedObject imple
 
     @Override
     public KomodoType getTypeIdentifier( UnitOfWork uow ) {
-        return KomodoType.VDB_MODEL_SOURCE;
+        return RESOLVER.identifier();
     }
 
     /**

@@ -38,6 +38,7 @@ import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyDescriptor;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
@@ -456,6 +457,11 @@ public final class TableImplTest extends RelationalModelTest {
                               Index.IDENTIFIER,
                               UniqueConstraint.IDENTIFIER ) );
         assertThat( this.table.getChildTypes().length, is( 5 ) );
+    }
+
+    @Test
+    public void shouldHaveCorrectTypeIdentifier() throws Exception {
+        assertThat(this.table.getTypeIdentifier( this.uow ), is(KomodoType.TABLE));
     }
 
     @Test

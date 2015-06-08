@@ -119,7 +119,7 @@ public final class TranslatorImpl extends RelationalChildRestrictedObject implem
 
     @Override
     public KomodoType getTypeIdentifier(UnitOfWork uow) {
-        return KomodoType.VDB_TRANSLATOR;
+        return RESOLVER.identifier();
     }
 
     /**

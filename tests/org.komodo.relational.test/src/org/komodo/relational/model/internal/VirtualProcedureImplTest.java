@@ -23,6 +23,7 @@ import org.komodo.relational.model.VirtualProcedure;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.KomodoType;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 
 @SuppressWarnings( { "javadoc", "nls" } )
@@ -69,6 +70,11 @@ public final class VirtualProcedureImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveCorrectSchemaElementType() throws Exception {
         assertThat( this.procedure.getSchemaElementType( this.uow ), is( SchemaElementType.VIRTUAL ) );
+    }
+
+    @Test
+    public void shouldHaveCorrectTypeIdentifier() throws Exception {
+        assertThat(this.procedure.getTypeIdentifier( this.uow ), is(KomodoType.VIRTUAL_PROCEDURE));
     }
 
     @Test

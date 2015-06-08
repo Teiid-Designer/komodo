@@ -35,6 +35,7 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoType;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class ModelImplTest extends RelationalModelTest {
@@ -370,6 +371,11 @@ public final class ModelImplTest extends RelationalModelTest {
                               View.IDENTIFIER,
                               VirtualProcedure.IDENTIFIER ) );
         assertThat( this.model.getChildTypes().length, is( 7 ) );
+    }
+
+    @Test
+    public void shouldHaveCorrectTypeIdentifier() throws Exception {
+        assertThat(this.model.getTypeIdentifier( this.uow ), is(KomodoType.MODEL));
     }
 
     @Test

@@ -117,7 +117,7 @@ public class VdbImportImpl extends RelationalChildRestrictedObject implements Vd
 
     @Override
     public KomodoType getTypeIdentifier(UnitOfWork uow) {
-        return KomodoType.VDB_IMPORT;
+        return RESOLVER.identifier();
     }
 
     /**

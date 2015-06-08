@@ -27,6 +27,7 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.SynchronousCallback;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
 @SuppressWarnings( {"javadoc", "nls"} )
@@ -132,6 +133,11 @@ public class SchemaImplTest extends RelationalModelTest {
         assertThat(fragment, is(notNullValue()));
         assertThat(fragment.isEmpty(), is(false));
         assertEquals(DDL_VIEW, fragment);
+    }
+
+    @Test
+    public void shouldHaveCorrectTypeIdentifier() throws Exception {
+        assertThat(this.schema.getTypeIdentifier( this.uow ), is(KomodoType.SCHEMA));
     }
 
     @Test

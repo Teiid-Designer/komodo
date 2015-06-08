@@ -23,6 +23,7 @@ import org.komodo.relational.model.PrimaryKey;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.TableConstraint;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoType;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 
 @SuppressWarnings( { "javadoc", "nls" } )
@@ -72,6 +73,11 @@ public final class PrimaryKeyImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveCorrectName() throws Exception {
         assertThat( this.primaryKey.getName( this.uow ), is( NAME ) );
+    }
+
+    @Test
+    public void shouldHaveCorrectTypeIdentifier() throws Exception {
+        assertThat(this.primaryKey.getTypeIdentifier( this.uow ), is(KomodoType.PRIMARY_KEY));
     }
 
     @Test

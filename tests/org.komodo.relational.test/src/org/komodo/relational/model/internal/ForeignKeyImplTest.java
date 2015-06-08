@@ -27,6 +27,7 @@ import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.TableConstraint;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoType;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.Constraint;
 
@@ -98,6 +99,11 @@ public final class ForeignKeyImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveCorrectDescriptor() throws Exception {
         assertThat( this.foreignKey.hasDescriptor( this.uow, Constraint.FOREIGN_KEY_CONSTRAINT ), is( true ) );
+    }
+
+    @Test
+    public void shouldHaveCorrectTypeIdentifier() throws Exception {
+        assertThat(this.foreignKey.getTypeIdentifier( this.uow ), is(KomodoType.FOREIGN_KEY));
     }
 
     @Test

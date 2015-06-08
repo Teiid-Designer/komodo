@@ -23,6 +23,7 @@ import org.komodo.relational.model.DataTypeResultSet.Type;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.StoredProcedure;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoType;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
 
@@ -73,6 +74,11 @@ public final class DataTypeResultSetImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveCorrectName() throws Exception {
         assertThat( this.resultSet.getName( this.uow ), is( CreateProcedure.RESULT_SET ) );
+    }
+
+    @Test
+    public void shouldHaveCorrectTypeIdentifier() throws Exception {
+        assertThat(this.resultSet.getTypeIdentifier( this.uow ), is(KomodoType.DATA_TYPE_RESULT_SET));
     }
 
     @Test

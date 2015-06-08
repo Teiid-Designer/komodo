@@ -31,6 +31,7 @@ import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyDescriptor;
 
 @SuppressWarnings( { "javadoc", "nls" } )
@@ -90,6 +91,11 @@ public final class StoredProcedureImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveCorrectSchemaElementType() throws Exception {
         assertThat( this.procedure.getSchemaElementType( this.uow ), is( SchemaElementType.FOREIGN ) );
+    }
+
+    @Test
+    public void shouldHaveCorrectTypeIdentifier() throws Exception {
+        assertThat(this.procedure.getTypeIdentifier( this.uow ), is(KomodoType.STORED_PROCEDURE));
     }
 
     @Test

@@ -28,6 +28,7 @@ import org.komodo.relational.model.Table;
 import org.komodo.relational.model.TableConstraint;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.KomodoType;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 
 @SuppressWarnings( { "javadoc", "nls" } )
@@ -93,6 +94,11 @@ public final class IndexImplTest extends RelationalModelTest {
         assertThat( this.index.getConstraintType(), is( TableConstraint.ConstraintType.INDEX ) );
         assertThat( this.index.getProperty( this.uow, TeiidDdlLexicon.Constraint.TYPE ).getStringValue( this.uow ),
                     is( TableConstraint.ConstraintType.INDEX.toValue() ) );
+    }
+
+    @Test
+    public void shouldHaveCorrectTypeIdentifier() throws Exception {
+        assertThat(this.index.getTypeIdentifier( this.uow ), is(KomodoType.INDEX));
     }
 
     @Test

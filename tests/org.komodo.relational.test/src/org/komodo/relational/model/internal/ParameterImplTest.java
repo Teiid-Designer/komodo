@@ -32,6 +32,7 @@ import org.komodo.relational.model.Parameter.Direction;
 import org.komodo.relational.model.StatementOption;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyDescriptor;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
@@ -158,6 +159,11 @@ public final class ParameterImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveCorrectDescriptor() throws Exception {
         assertThat( this.parameter.hasDescriptor( this.uow, CreateProcedure.PARAMETER ), is( true ) );
+    }
+
+    @Test
+    public void shouldHaveCorrectTypeIdentifier() throws Exception {
+        assertThat(this.parameter.getTypeIdentifier( this.uow ), is(KomodoType.PARAMETER));
     }
 
     @Test

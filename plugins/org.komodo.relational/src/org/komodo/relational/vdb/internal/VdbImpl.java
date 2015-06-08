@@ -60,7 +60,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
      */
     private static final KomodoType[] CHILD_TYPES = new KomodoType[] { DataRole.IDENTIFIER, Entry.IDENTIFIER, Model.IDENTIFIER,
                                                                       Translator.IDENTIFIER, VdbImport.IDENTIFIER };
-    
+
 	/**
 	 * Include the special properties into the primary type descriptor.
 	 *
@@ -314,7 +314,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
 
     @Override
     public KomodoType getTypeIdentifier(UnitOfWork uow) {
-        return KomodoType.VDB;
+        return RESOLVER.identifier();
     }
 
     /**
