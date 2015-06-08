@@ -20,6 +20,7 @@ import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.VdbImport;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoType;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 @SuppressWarnings( { "javadoc", "nls" } )
@@ -55,6 +56,11 @@ public final class VdbImportImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveCorrectPrimaryType() throws Exception {
         assertThat( this.vdbImport.getPrimaryType( this.uow ).getName(), is( VdbLexicon.ImportVdb.IMPORT_VDB ) );
+    }
+
+    @Test
+    public void shouldHaveCorrectTypeIdentifier() throws Exception {
+        assertThat(this.vdbImport.getTypeIdentifier( this.uow ), is(KomodoType.VDB_IMPORT));
     }
 
     @Test

@@ -23,6 +23,7 @@ import org.komodo.relational.vdb.ModelSource;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.KomodoType;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 @SuppressWarnings( { "javadoc", "nls" } )
@@ -86,6 +87,11 @@ public final class ModelSourceImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveCorrectPrimaryType() throws Exception {
         assertThat( this.source.getPrimaryType( this.uow ).getName(), is( VdbLexicon.Source.SOURCE ) );
+    }
+
+    @Test
+    public void shouldHaveCorrectTypeIdentifier() throws Exception {
+        assertThat(this.source.getTypeIdentifier( this.uow ), is(KomodoType.VDB_MODEL_SOURCE));
     }
 
     @Test

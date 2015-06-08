@@ -21,6 +21,7 @@ import org.komodo.relational.model.OptionContainer;
 import org.komodo.relational.model.StatementOption;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.KomodoType;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 
 @SuppressWarnings( { "javadoc", "nls" } )
@@ -60,6 +61,11 @@ public final class StatementOptionImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveCorrectDescriptor() throws Exception {
         assertThat( this.option.hasDescriptor( this.uow, StandardDdlLexicon.TYPE_STATEMENT_OPTION ), is( true ) );
+    }
+
+    @Test
+    public void shouldHaveCorrectTypeIdentifier() throws Exception {
+        assertThat(this.option.getTypeIdentifier( this.uow ), is(KomodoType.STATEMENT_OPTION));
     }
 
     @Test

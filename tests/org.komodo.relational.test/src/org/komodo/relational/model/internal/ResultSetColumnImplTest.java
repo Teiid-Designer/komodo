@@ -32,6 +32,7 @@ import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyDescriptor;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 
@@ -111,6 +112,11 @@ public final class ResultSetColumnImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveCorrectName() throws Exception {
         assertThat( this.column.getName( this.uow ), is( NAME ) );
+    }
+
+    @Test
+    public void shouldHaveCorrectTypeIdentifier() throws Exception {
+        assertThat(this.column.getTypeIdentifier( this.uow ), is(KomodoType.RESULT_SET_COLUMN));
     }
 
     @Test

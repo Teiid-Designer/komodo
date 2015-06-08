@@ -23,6 +23,7 @@ import org.komodo.relational.vdb.Mask;
 import org.komodo.relational.vdb.Permission;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoType;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 @SuppressWarnings( { "javadoc", "nls" } )
@@ -62,6 +63,11 @@ public final class MaskImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveCorrectPrimaryType() throws Exception {
         assertThat( this.mask.getPrimaryType( this.uow ).getName(), is( VdbLexicon.DataRole.Permission.Mask.MASK ) );
+    }
+
+    @Test
+    public void shouldHaveCorrectTypeIdentifier() throws Exception {
+        assertThat(this.mask.getTypeIdentifier( this.uow ), is(KomodoType.VDB_MASK));
     }
 
     @Test

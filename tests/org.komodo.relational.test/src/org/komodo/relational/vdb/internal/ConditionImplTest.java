@@ -22,6 +22,7 @@ import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Permission;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoType;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 @SuppressWarnings( { "javadoc", "nls" } )
@@ -66,6 +67,11 @@ public final class ConditionImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveCorrectPrimaryType() throws Exception {
         assertThat( this.condition.getPrimaryType( this.uow ).getName(), is( VdbLexicon.DataRole.Permission.Condition.CONDITION ) );
+    }
+
+    @Test
+    public void shouldHaveCorrectTypeIdentifier() throws Exception {
+        assertThat(this.condition.getTypeIdentifier( this.uow ), is(KomodoType.VDB_CONDITION));
     }
 
     @Test

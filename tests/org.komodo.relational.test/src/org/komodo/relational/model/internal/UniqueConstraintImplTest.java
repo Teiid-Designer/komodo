@@ -23,6 +23,7 @@ import org.komodo.relational.model.Table;
 import org.komodo.relational.model.TableConstraint;
 import org.komodo.relational.model.UniqueConstraint;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoType;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 
 @SuppressWarnings( { "javadoc", "nls" } )
@@ -67,6 +68,11 @@ public final class UniqueConstraintImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveCorrectDescriptor() throws Exception {
         assertThat( this.uniqueConstraint.hasDescriptor( this.uow, TeiidDdlLexicon.Constraint.TABLE_ELEMENT ), is( true ) );
+    }
+
+    @Test
+    public void shouldHaveCorrectTypeIdentifier() throws Exception {
+        assertThat(this.uniqueConstraint.getTypeIdentifier( this.uow ), is(KomodoType.UNIQUE_CONSTRAINT));
     }
 
     @Test

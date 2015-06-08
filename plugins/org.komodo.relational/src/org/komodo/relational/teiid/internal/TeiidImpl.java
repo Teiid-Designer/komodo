@@ -458,7 +458,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
 
     @Override
     public KomodoType getTypeIdentifier(UnitOfWork uow) {
-        return KomodoType.TEIID;
+        return RESOLVER.identifier();
     }
 
     @Override

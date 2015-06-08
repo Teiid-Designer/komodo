@@ -24,6 +24,7 @@ import org.komodo.relational.model.View;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoType;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class ViewImplTest extends RelationalModelTest {
@@ -74,6 +75,11 @@ public final class ViewImplTest extends RelationalModelTest {
     @Test( expected = UnsupportedOperationException.class )
     public void shouldFailWhenSettingPrimaryKey() throws KException {
         this.view.setPrimaryKey( this.uow, "blah" );
+    }
+
+    @Test
+    public void shouldHaveCorrectTypeIdentifier() throws Exception {
+        assertThat(this.view.getTypeIdentifier( this.uow ), is(KomodoType.VIEW));
     }
 
     @Test

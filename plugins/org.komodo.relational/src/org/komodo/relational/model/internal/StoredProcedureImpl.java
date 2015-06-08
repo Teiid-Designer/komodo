@@ -229,6 +229,16 @@ public final class StoredProcedureImpl extends AbstractProcedureImpl implements 
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.repository.ObjectImpl#getTypeIdentifier(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public KomodoType getTypeIdentifier( final UnitOfWork transaction ) {
+        return RESOLVER.identifier();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.relational.model.StoredProcedure#isNonPrepared(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override

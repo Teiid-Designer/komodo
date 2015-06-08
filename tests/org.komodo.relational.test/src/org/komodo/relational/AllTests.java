@@ -13,6 +13,7 @@ import org.komodo.relational.model.internal.ModelImplTest;
 import org.komodo.relational.model.internal.ParameterImplTest;
 import org.komodo.relational.model.internal.PrimaryKeyImplTest;
 import org.komodo.relational.model.internal.PushdownFunctionImplTest;
+import org.komodo.relational.model.internal.RelationalObjectImplTest;
 import org.komodo.relational.model.internal.ResultSetColumnImplTest;
 import org.komodo.relational.model.internal.SchemaImplTest;
 import org.komodo.relational.model.internal.StatementOptionImplTest;
@@ -41,6 +42,8 @@ import org.komodo.relational.workspace.WorkspaceManagerTest;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
+    RelationalObjectImplTest.class,
+
     // Model
     AbstractProcedureImplTest.class,
 	AccessPatternImplTest.class,

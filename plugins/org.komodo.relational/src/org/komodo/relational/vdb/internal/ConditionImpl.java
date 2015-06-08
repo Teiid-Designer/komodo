@@ -120,7 +120,7 @@ public final class ConditionImpl extends RelationalChildRestrictedObject impleme
 
     @Override
     public KomodoType getTypeIdentifier(UnitOfWork uow) {
-        return KomodoType.VDB_CONDITION;
+        return RESOLVER.identifier();
     }
 
     /**

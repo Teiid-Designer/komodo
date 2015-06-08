@@ -27,6 +27,7 @@ import org.komodo.relational.model.SchemaElement.SchemaElementType;
 import org.komodo.relational.model.TabularResultSet;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoType;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class PushdownFunctionImplTest extends RelationalModelTest {
@@ -73,6 +74,11 @@ public final class PushdownFunctionImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveCorrectSchemaElementType() throws Exception {
         assertThat( this.function.getSchemaElementType( this.uow ), is( SchemaElementType.FOREIGN ) );
+    }
+
+    @Test
+    public void shouldHaveCorrectTypeIdentifier() throws Exception {
+        assertThat(this.function.getTypeIdentifier( this.uow ), is(KomodoType.PUSHDOWN_FUNCTION));
     }
 
     @Test

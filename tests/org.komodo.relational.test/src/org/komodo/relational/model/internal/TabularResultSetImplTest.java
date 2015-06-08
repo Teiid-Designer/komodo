@@ -25,6 +25,7 @@ import org.komodo.relational.model.StoredProcedure;
 import org.komodo.relational.model.TabularResultSet;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoType;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class TabularResultSetImplTest extends RelationalModelTest {
@@ -66,6 +67,11 @@ public final class TabularResultSetImplTest extends RelationalModelTest {
     public void shouldHaveCorrectChildTypes() {
         assertThat( Arrays.asList( this.resultSet.getChildTypes() ), hasItem( ResultSetColumn.IDENTIFIER ) );
         assertThat( this.resultSet.getChildTypes().length, is( 1 ) );
+    }
+
+    @Test
+    public void shouldHaveCorrectTypeIdentifier() throws Exception {
+        assertThat(this.resultSet.getTypeIdentifier( this.uow ), is(KomodoType.TABULAR_RESULT_SET));
     }
 
     @Test

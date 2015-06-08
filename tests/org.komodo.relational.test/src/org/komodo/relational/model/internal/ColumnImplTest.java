@@ -32,6 +32,7 @@ import org.komodo.relational.model.Table;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyDescriptor;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
@@ -151,6 +152,11 @@ public final class ColumnImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveCorrectName() throws Exception {
         assertThat( this.column.getName( this.uow ), is( NAME ) );
+    }
+
+    @Test
+    public void shouldHaveCorrectTypeIdentifier() throws Exception {
+        assertThat(this.column.getTypeIdentifier( this.uow ), is(KomodoType.COLUMN));
     }
 
     @Test
