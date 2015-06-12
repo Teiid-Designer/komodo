@@ -104,6 +104,11 @@ public final class DataTypeResultSetImplTest extends RelationalModelTest {
         this.resultSet.addChild( this.uow, "blah", null );
     }
 
+    @Test( expected = UnsupportedOperationException.class )
+    public void shouldNotAllowRename() throws Exception {
+        this.resultSet.rename( this.uow, "newName" );
+    }
+
     @Test
     public void shouldNotBeAnArrayAfterConstruction() throws Exception {
         assertThat( this.resultSet.isArray( this.uow ), is( false ) );

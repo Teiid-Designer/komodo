@@ -144,6 +144,11 @@ public class Messages implements StringConstants {
         REFERENCED_TABLE_NOT_FOUND,
 
         /**
+         * An error message indicating the object rename is not allowed.
+         */
+        RENAME_NOT_ALLOWED,
+
+        /**
          * An error message indicating a result set could not be removed.
          */
         RESULT_SET_NOT_FOUND_TO_REMOVE,

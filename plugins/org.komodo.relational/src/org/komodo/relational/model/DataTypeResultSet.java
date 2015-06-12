@@ -105,6 +105,17 @@ public interface DataTypeResultSet extends ProcedureResultSet {
     boolean isArray( final UnitOfWork transaction ) throws KException;
 
     /**
+     * <p>
+     * <strong><em>Rename is not allowed!!</em></strong>
+     *
+     * @see org.komodo.spi.repository.KomodoObject#rename(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     * @throws UnsupportedOperationException if called
+     */
+    @Override
+    public void rename( final UnitOfWork transaction,
+                        final String newName ) throws UnsupportedOperationException;
+
+    /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newArray

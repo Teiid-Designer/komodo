@@ -7,6 +7,8 @@
  */
 package org.komodo.relational.model.internal;
 
+import org.komodo.relational.Messages;
+import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalConstants;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.internal.AdapterFactory;
@@ -219,6 +221,17 @@ public final class DataTypeResultSetImpl extends RelationalChildRestrictedObject
         }
 
         return ( value.indexOf( ARRAY_SUFFIX ) != -1 );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.repository.ObjectImpl#rename(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     */
+    @Override
+    public final void rename( final UnitOfWork transaction,
+                              final String newName ) throws UnsupportedOperationException {
+        throw new UnsupportedOperationException( Messages.getString( Relational.RENAME_NOT_ALLOWED, getAbsolutePath() ) );
     }
 
     /**

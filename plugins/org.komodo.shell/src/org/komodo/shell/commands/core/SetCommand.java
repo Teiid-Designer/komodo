@@ -11,6 +11,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.StringTokenizer;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
@@ -18,6 +19,10 @@ import org.komodo.shell.api.InvalidCommandArgumentException;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
+import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.Property;
+import org.komodo.spi.repository.PropertyDescriptor;
+import org.komodo.spi.repository.PropertyDescriptor.Type;
 import org.komodo.utils.StringUtils;
 
 /**
@@ -136,6 +141,37 @@ public class SetCommand extends BuiltInShellCommand {
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#validatePropertyValue(java.lang.String, java.lang.String,
+     *      org.komodo.shell.api.WorkspaceContext)
+     */
+    @Override
+    public boolean validatePropertyValue( final String propName,
+                                          final String propValue,
+                                          final WorkspaceContext context ) {
+        if ( !StringUtils.isBlank( propValue ) ) {
+            try {
+                // make sure multi-valued property value parses
+                if ( isMultiValuedProperty( context, propName ) ) {
+                    final String[] multiValues = parseMultiValues( propValue );
+                    return ( multiValues.length != 0 );
+                }
+
+                // make sure descriptor validates value
+                final PropertyDescriptor descriptor = context.getKomodoObj().getPropertyDescriptor( getWorkspaceStatus().getTransaction(),
+                                                                                                    propName );
+                return ( ( descriptor == null ) ? true : descriptor.isValid( propValue ) );
+            } catch ( final Exception e ) {
+                return false;
+            }
+        }
+
+        // let super validate
+        return super.validatePropertyValue( propName, propValue, context );
+    }
+
+    /**
      * Validate the SET PROPERTY args
      * @param propName the property name
      * @param propValue the property value
@@ -226,11 +262,104 @@ public class SetCommand extends BuiltInShellCommand {
 		return true;
 	}
 
+    private Object[] getPossibleValues( final WorkspaceContext context,
+                                        final String name ) throws Exception {
+        final String propertyName = isShowingPropertyNamePrefixes() ? name : attachPrefix( context, name );
+        final PropertyDescriptor descriptor = context.getKomodoObj().getPropertyDescriptor( getWorkspaceStatus().getTransaction(),
+                                                                                            propertyName );
+        if ( descriptor == null ) {
+            return StringConstants.EMPTY_ARRAY;
+        }
+
+        if ( Type.BOOLEAN == descriptor.getType() ) {
+            return new String[] { Boolean.TRUE.toString(), Boolean.FALSE.toString() };
+        }
+
+        return descriptor.getDefaultValues();
+    }
+
+    private boolean isMultiValuedProperty( final WorkspaceContext context,
+                                           final String name ) throws Exception {
+        final String propertyName = isShowingPropertyNamePrefixes() ? name : attachPrefix( context, name );
+        final PropertyDescriptor descriptor = context.getKomodoObj().getPropertyDescriptor( getWorkspaceStatus().getTransaction(),
+                                                                                            propertyName );
+        return ( ( descriptor == null ) ? false : descriptor.isMultiple() );
+    }
+
+    private String concatMultiValues( final WorkspaceContext context,
+                                      final String name ) throws Exception {
+        // TODO need to account for escaped values
+        assert isMultiValuedProperty( context, name );
+
+        final String propertyName = isShowingPropertyNamePrefixes() ? name : attachPrefix( context, name );
+        final Property property = context.getKomodoObj().getProperty( getWorkspaceStatus().getTransaction(), propertyName );
+        final StringBuilder result = new StringBuilder();
+        boolean quoted = false;
+        boolean firstTime = true;
+
+        for ( final Object value : property.getValues( getWorkspaceStatus().getTransaction() ) ) {
+            if ( !firstTime ) {
+                result.append( ',' );
+            } else {
+                firstTime = false;
+            }
+
+            final String valueAsText = value.toString();
+
+            if ( ( valueAsText.indexOf( ' ' ) != -1 ) && !quoted ) {
+                quoted = true;
+                result.insert( 0, '"' );
+            }
+
+            result.append( valueAsText );
+        }
+
+        if ( quoted ) {
+            result.append( '"' );
+        }
+
+        return result.toString();
+    }
+
+    private String[] parseMultiValues( final String valuesString ) {
+        // TODO need to account for escaped values
+        assert !StringUtils.isBlank( valuesString );
+        String multiValues = null;
+
+        // strip off leading and trailing quotes if necessary
+        if ( valuesString.startsWith( "\"" ) && valuesString.endsWith( "\"" ) ) { //$NON-NLS-1$ //$NON-NLS-2$
+            if ( valuesString.length() == 2 ) {
+                return StringConstants.EMPTY_ARRAY;
+            }
+
+            multiValues = valuesString.substring( 1, valuesString.length() - 1 );
+        } else {
+            multiValues = valuesString;
+        }
+
+        final StringTokenizer parser = new StringTokenizer( multiValues, "," ); //$NON-NLS-1$
+        final String[] result = new String[ parser.countTokens() ];
+        int i = 0;
+
+        while ( parser.hasMoreTokens() ) {
+            final String value = parser.nextToken();
+            result[i++] = value;
+        }
+
+        return result;
+    }
+
     private void setProperty( final WorkspaceContext context,
                               final String name,
                               final String propValue ) throws Exception {
-        final String propertyName = ( !isShowingPropertyNamePrefixes() ? attachPrefix( context, name ) : name );
-        context.setPropertyValue( propertyName, propValue );
+        final String propertyName = isShowingPropertyNamePrefixes() ? name : attachPrefix( context, name );
+
+        if ( !StringUtils.isBlank( propValue ) && isMultiValuedProperty( context, propertyName ) ) {
+            final String[] values = parseMultiValues( propValue );
+            context.getKomodoObj().setProperty( getWorkspaceStatus().getTransaction(), propertyName, ( Object[] )values );
+        } else {
+            context.setPropertyValue( propertyName, propValue );
+        }
     }
 
     /**
@@ -298,15 +427,37 @@ public class SetCommand extends BuiltInShellCommand {
             }
 
     		return 0;
-    	} else if (getArguments().size()==2) {
-    		if(getArguments().get(0).toLowerCase().equals(SUBCMD_RECORD)) return 0;
+        } else if ( getArguments().size() == 2 ) {
+            if ( getArguments().get( 0 ).toLowerCase().equals( SUBCMD_RECORD ) ) return 0;
 
-    		// Property value completion options
-    		if(lastArgument==null) {
-    			candidates.add("propertyValue"); //$NON-NLS-1$
-    		}
-    		return 0;
-    	} else if (getArguments().size()==3) {
+            if ( getArguments().get( 0 ).toLowerCase().equals( SUBCMD_PROPERTY ) ) {
+                final WorkspaceContext context = getContext();
+
+                final String propName = getArguments().get( 1 );
+
+                if ( isMultiValuedProperty( context, propName ) ) {
+                    // concat current multi-values as a string
+                    final String value = concatMultiValues( context, propName );
+                    candidates.add( value );
+                } else {
+                    final Object[] possibleValues = getPossibleValues( context, propName );
+
+                    if ( possibleValues.length != 0 ) {
+                        final boolean hasLastArgument = !StringUtils.isBlank( lastArgument );
+
+                        for ( final Object value : possibleValues ) {
+                            if ( ( hasLastArgument && value.toString().startsWith( lastArgument ) ) || !hasLastArgument ) {
+                                candidates.add( value.toString() );
+                            }
+                        }
+                    } else if ( lastArgument == null ) {
+                        candidates.add( "propertyValue" ); //$NON-NLS-1$
+                    }
+                }
+
+                return 0;
+            }
+        } else if (getArguments().size()==3) {
     		if(getArguments().get(0).toLowerCase().equals(SUBCMD_RECORD)) return 0;
 
     		// The arg is expected to be a path
@@ -319,7 +470,7 @@ public class SetCommand extends BuiltInShellCommand {
     	return -1;
     }
 
-	/**
+    /**
      * @see org.komodo.shell.api.ShellCommand#printUsage(int indent)
      */
     @Override

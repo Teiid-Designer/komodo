@@ -10,13 +10,9 @@ package org.komodo.relational.model.internal;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.util.Properties;
-import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
@@ -24,11 +20,9 @@ import org.komodo.relational.RelationalObject.Filter;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Schema;
 import org.komodo.relational.workspace.WorkspaceManager;
-import org.komodo.repository.SynchronousCallback;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
-import org.komodo.spi.repository.Repository.UnitOfWork;
 
 @SuppressWarnings( {"javadoc", "nls"} )
 public class SchemaImplTest extends RelationalModelTest {
@@ -54,24 +48,11 @@ public class SchemaImplTest extends RelationalModelTest {
         commit();
     }
 
-    private void setRenditionValueAwaitSequencing(String value) throws Exception {
-        SynchronousCallback callback = new SynchronousCallback();
-        UnitOfWork transaction = _repo.createTransaction("schematests-setrendition-value", false, callback);
+    private void setRenditionValueAwaitSequencing( final String value ) throws Exception {
+        this.schema.setRendition( this.uow, value );
+        commit();
 
-        assertNotNull(transaction);
-
-        this.schema.setRendition(transaction, value);
-
-        //
-        // Commit the transaction and await the response of the callback
-        //
-        transaction.commit();
-
-        // Wait for the sequencing of the repository or timeout of 3 minutes
-        assertTrue(callback.await(TIME_TO_WAIT, TimeUnit.MINUTES));
-        assertFalse(callback.hasError());
-
-        traverse(_repo.createTransaction("traverse-schema", true, null), schema.getAbsolutePath());
+        traverse( this.uow, this.schema.getAbsolutePath() );
     }
 
     @Test

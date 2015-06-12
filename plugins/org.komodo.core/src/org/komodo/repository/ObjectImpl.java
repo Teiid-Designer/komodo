@@ -226,16 +226,15 @@ public class ObjectImpl implements KomodoObject, StringConstants {
                                                                   getAbsolutePath() ) );
                     }
                 } else {
-                    // only one value so set property
-                    if ( multiple ) {
-                        setMultiValuedProperty( session, node, factory, name, values, type );
+                    // remove if value is null or empty string
+                    if ( ( values[0] == null )
+                         || ( ( values[0] instanceof String ) && StringUtils.isBlank( ( String )values[0] ) ) ) {
+                        node.getProperty( name ).remove();
                     } else {
-                        // remove if value is null or empty string
-                        if ( ( values[0] == null )
-                             || ( ( values[0] instanceof String ) && StringUtils.isBlank( ( String )values[0] ) ) ) {
-                            node.getProperty( name ).remove();
+                        if ( multiple ) {
+                            setMultiValuedProperty( session, node, factory, name, values, type );
                         } else {
-                            node.setProperty( name, PropertyImpl.createValue( factory, values[0] ) );
+                            node.setProperty( name, PropertyImpl.createValue( factory, values[0], type ) );
                         }
                     }
                 }
@@ -649,7 +648,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.KNode#getIndex()
+     * @see org.komodo.spi.repository.KomodoObject#getIndex()
      */
     @Override
     public int getIndex() {

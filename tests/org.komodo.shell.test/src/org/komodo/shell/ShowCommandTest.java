@@ -78,7 +78,7 @@ public class ShowCommandTest extends AbstractCommandTest {
 
     	execute();
 
-    	String expectedOutput = INDENT+"No children for WORKSPACE \"/workspace\".\n"; //$NON-NLS-1$
+    	String expectedOutput = INDENT+"There are no children for Workspace \"/workspace\".\n"; //$NON-NLS-1$
 
     	String writerOutput = getCommandOutput();
     	assertEquals(expectedOutput,writerOutput);
@@ -96,7 +96,6 @@ public class ShowCommandTest extends AbstractCommandTest {
         assertTrue( writerOutput.contains( "Model1" ) );
         assertTrue( writerOutput.contains( "Model2" ) );
         assertTrue( writerOutput.contains( "Model3" ) );
-        assertTrue( writerOutput.contains( "MODEL" ) );
 
         assertEquals("/workspace/MyVdb", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }

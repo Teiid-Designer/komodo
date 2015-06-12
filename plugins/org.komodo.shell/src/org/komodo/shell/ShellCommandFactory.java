@@ -41,6 +41,7 @@ import org.komodo.shell.commands.core.CdCommand;
 import org.komodo.shell.commands.core.CreateCommand;
 import org.komodo.shell.commands.core.DeleteCommand;
 import org.komodo.shell.commands.core.ExportCommand;
+import org.komodo.shell.commands.core.FindCommand;
 import org.komodo.shell.commands.core.ImportCommand;
 import org.komodo.shell.commands.core.ListCommand;
 import org.komodo.shell.commands.core.PlayCommand;
@@ -124,6 +125,9 @@ public class ShellCommandFactory {
 
         UnsetPropertyCommand unsetCommand = new UnsetPropertyCommand(this.wsStatus);
         commandMap.put(unsetCommand.getName().toLowerCase(), unsetCommand);
+
+        FindCommand findCommand = new FindCommand(this.wsStatus);
+        commandMap.put(findCommand.getName().toLowerCase(), findCommand);
 
 		discoverContributedCommands();
 	}

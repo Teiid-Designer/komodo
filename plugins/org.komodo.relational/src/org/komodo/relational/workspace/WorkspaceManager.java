@@ -341,8 +341,18 @@ public class WorkspaceManager extends RelationalObjectImpl {
         }
     }
 
-    private String[] findByType( final UnitOfWork transaction,
-                                 final String type ) throws KException {
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> and must have a state of
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param type
+     *        the lexicon node type name of objects being found
+     * @return the paths of all the objects in the workspaces with the specified type (never <code>null</code> but can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    public String[] findByType( final UnitOfWork transaction,
+                                final String type ) throws KException {
         String[] result = null;
 
         try {
@@ -484,6 +494,18 @@ public class WorkspaceManager extends RelationalObjectImpl {
         }
 
         return result;
+    }
+
+    /**
+     * <strong><em>Rename is not allowed!!</em></strong>
+     *
+     * @see org.komodo.spi.repository.KomodoObject#rename(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     * @throws UnsupportedOperationException if called
+     */
+    @Override
+    public final void rename( final UnitOfWork transaction,
+                              final String newName ) throws UnsupportedOperationException {
+        throw new UnsupportedOperationException( Messages.getString( Relational.RENAME_NOT_ALLOWED, getAbsolutePath() ) );
     }
 
     /**

@@ -21,11 +21,9 @@
  ************************************************************************************/
 package org.komodo.shell.commands.core;
 
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.spi.constants.StringConstants;
 
 /**
  * Displays a summary of the current status, including what repository the
@@ -49,8 +47,6 @@ public class ListCommand extends BuiltInShellCommand {
 	 */
 	@Override
     public boolean execute() throws Exception {
-        print(MESSAGE_INDENT, StringConstants.EMPTY_STRING);
-
         final ShowCommand showCmd = new ShowCommand( getWorkspaceStatus() );
         final Arguments args = new Arguments( ShowCommand.SUBCMD_CHILDREN );
         showCmd.setArguments( args );

@@ -225,4 +225,15 @@ public final class TabularResultSetImpl extends RelationalObjectImpl implements 
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.repository.ObjectImpl#rename(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     */
+    @Override
+    public final void rename( final UnitOfWork transaction,
+                              final String newName ) throws UnsupportedOperationException {
+        throw new UnsupportedOperationException( Messages.getString( Relational.RENAME_NOT_ALLOWED, getAbsolutePath() ) );
+    }
+
 }

@@ -126,7 +126,7 @@ public class WorkspaceContextImpl implements WorkspaceContext {
      */
     @Override
     public String getType() throws Exception {
-        return this.repoObject.getTypeIdentifier(this.wsStatus.getTransaction()).name();
+        return this.repoObject.getTypeIdentifier( this.wsStatus.getTransaction() ).getType();
     }
 
     /* (non-Javadoc)

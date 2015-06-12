@@ -81,6 +81,11 @@ public final class TabularResultSetImplTest extends RelationalModelTest {
         assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
     }
 
+    @Test( expected = UnsupportedOperationException.class )
+    public void shouldNotAllowRename() throws Exception {
+        this.resultSet.rename( this.uow, "newName" );
+    }
+
     @Test
     public void shouldNotContainFilteredProperties() throws Exception {
         final String[] filteredProps = this.resultSet.getPropertyNames( this.uow );
