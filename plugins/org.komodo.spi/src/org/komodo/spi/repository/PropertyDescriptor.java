@@ -147,10 +147,4 @@ public interface PropertyDescriptor {
      */
     boolean isMultiple();
 
-    /**
-     * @param proposedValue the value being checked (can be <code>null</code>)
-     * @return <code>true</code> if there are no value constraints or if the value passes at least one value constraint
-     */
-    boolean isValid( final Object proposedValue );
-
 }

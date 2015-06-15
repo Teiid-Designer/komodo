@@ -157,11 +157,6 @@ public class SetCommand extends BuiltInShellCommand {
                     final String[] multiValues = parseMultiValues( propValue );
                     return ( multiValues.length != 0 );
                 }
-
-                // make sure descriptor validates value
-                final PropertyDescriptor descriptor = context.getKomodoObj().getPropertyDescriptor( getWorkspaceStatus().getTransaction(),
-                                                                                                    propName );
-                return ( ( descriptor == null ) ? true : descriptor.isValid( propValue ) );
             } catch ( final Exception e ) {
                 return false;
             }

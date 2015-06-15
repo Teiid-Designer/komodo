@@ -144,7 +144,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
 
         PropertyDescriptor getDescriptor() throws KException {
             final Type type = ( this == QUERY_TIMEOUT ) ? Type.LONG : Type.STRING;
-            return new PropertyDescriptorImpl( false, true, false, toTeiidName(), type, null, null );
+            return new PropertyDescriptorImpl( false, true, false, toTeiidName(), type, null );
         }
 
         String toTeiidName() {

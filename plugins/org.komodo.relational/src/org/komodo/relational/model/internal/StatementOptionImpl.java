@@ -106,16 +106,6 @@ public final class StatementOptionImpl extends RelationalChildRestrictedObject i
             return false;
         }
 
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.spi.repository.PropertyDescriptor#isValid(java.lang.Object)
-         */
-        @Override
-        public boolean isValid( final Object proposedValue ) {
-            return ( ( proposedValue == null ) || ( proposedValue instanceof String ) );
-        }
-
     }
 
     /**

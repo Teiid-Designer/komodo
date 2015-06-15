@@ -69,7 +69,6 @@ public class PropertyDescriptorImpl implements PropertyDescriptor {
         return PropertyType.UNDEFINED;
     }
 
-    private final String[] constraints;
     private final Object[] defaultValues;
     private final boolean mandatory;
     private final boolean modifiable;
@@ -91,7 +90,6 @@ public class PropertyDescriptorImpl implements PropertyDescriptor {
         this.multiple = propDefn.isMultiple();
         this.name = propDefn.getName();
         this.type = convert(propDefn.getRequiredType());
-        this.constraints = propDefn.getValueConstraints();
 
         final Value[] values = propDefn.getDefaultValues();
 
@@ -121,8 +119,6 @@ public class PropertyDescriptorImpl implements PropertyDescriptor {
      *        the property type (cannot be <code>null</code>)
      * @param values
      *        the default values (can be <code>null</code> or empty)
-     * @param constraints
-     *        the value constraints (can be <code>null</code> or empty)
      * @throws KException
      *         if an error occurs
      */
@@ -131,8 +127,7 @@ public class PropertyDescriptorImpl implements PropertyDescriptor {
                                    final boolean multiple,
                                    final String name,
                                    final Type type,
-                                   final Object[] values,
-                                   final String[] constraints ) throws KException {
+                                   final Object[] values ) throws KException {
         ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
         ArgCheck.isNotNull( type, "type" ); //$NON-NLS-1$
 
@@ -141,7 +136,6 @@ public class PropertyDescriptorImpl implements PropertyDescriptor {
         this.multiple = multiple;
         this.name = name;
         this.type = type;
-        this.constraints = constraints;
 
         if ( ( values == null ) || ( values.length == 0 ) ) {
             this.defaultValues = NO_VALUES;
@@ -213,44 +207,6 @@ public class PropertyDescriptorImpl implements PropertyDescriptor {
     @Override
     public boolean isMultiple() {
         return this.multiple;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.spi.repository.PropertyDescriptor#isValid(java.lang.Object)
-     */
-    @Override
-    public boolean isValid( final Object proposedValue ) {
-        if ( ( this.constraints != null ) && ( this.constraints.length != 0 ) ) {
-            if ( Type.STRING == this.type ) {
-                String value = null;
-
-                if ( proposedValue instanceof String ) {
-                    value = ( String )proposedValue;
-                } else if ( proposedValue instanceof Value ) {
-                    try {
-                        value = ( ( Value )proposedValue ).getString();
-                    } catch ( final Exception e ) {
-                        return false;
-                    }
-                } else {
-                    value = proposedValue.toString();
-                }
-
-                for ( final String pattern : this.constraints ) {
-                    if ( value.matches( pattern ) ) {
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-
-            // TODO implement other type validation
-        }
-
-        return true;
     }
 
 }
