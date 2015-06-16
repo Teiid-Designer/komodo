@@ -2,7 +2,6 @@ package org.komodo.shell.commands.core;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
@@ -14,14 +13,14 @@ import org.komodo.spi.repository.KomodoType;
 
 /**
  * renames the referenced node
- * 
+ *
  * @author blafond
  *
  */
 public class RenameCommand extends BuiltInShellCommand implements StringConstants {
 
     private static final String RENAME = "rename"; //$NON-NLS-1$
-    
+
     /**
      * Constructor.
      * @param wsStatus the workspace status
@@ -48,12 +47,12 @@ public class RenameCommand extends BuiltInShellCommand implements StringConstant
         if (!validateObjectName(newName,kType)) {
             return false;
         }
-        
+
         // Validate that the rename would not create a duplicate of same type
         if (!validateNotDuplicateType(objNameArg,newName,getWorkspaceStatus().getCurrentContext())) {
             return false;
         }
-        
+
         try {
         	// Rename
             rename(objNameArg, newName);
@@ -61,8 +60,6 @@ public class RenameCommand extends BuiltInShellCommand implements StringConstant
             getWorkspaceStatus().commit("RenameCommand"); //$NON-NLS-1$
             // Print message
             print(CompletionConstants.MESSAGE_INDENT, Messages.getString("RenameCommand.ObjectRenamed", objNameArg, newName)); //$NON-NLS-1$
-            if (getWorkspaceStatus().getRecordingStatus())
-                recordCommand(getArguments());
         } catch (Exception e) {
             print(CompletionConstants.MESSAGE_INDENT, Messages.getString("RenameCommand.Failure", objNameArg)); //$NON-NLS-1$
             print(CompletionConstants.MESSAGE_INDENT, TAB + e.getMessage());
@@ -85,7 +82,7 @@ public class RenameCommand extends BuiltInShellCommand implements StringConstant
     	}
         return true;
     }
-    
+
     /**
      * Validates whether another child of the same name and type already exists
      * @param oldName the name of the object being renamed
@@ -107,12 +104,12 @@ public class RenameCommand extends BuiltInShellCommand implements StringConstant
     	}
         return true;
     }
-    
+
     private void rename(String objName, String newName) throws Exception {
         WorkspaceStatus wsStatus = getWorkspaceStatus();
 
         KomodoObject parent = wsStatus.getCurrentContext().getKomodoObj();
-        
+
         KomodoObject child = parent.getChild(wsStatus.getTransaction(), objName);
         if( child != null ) {
         	child.rename(wsStatus.getTransaction(), newName);
@@ -120,7 +117,7 @@ public class RenameCommand extends BuiltInShellCommand implements StringConstant
         	throw new Exception(Messages.getString("RenameCommand.cannotRename_objectDoesNotExist", objName)); //$NON-NLS-1$
         }
     }
-    
+
     /**
      * @see org.komodo.shell.api.AbstractShellCommand#tabCompletion(java.lang.String, java.util.List)
      */

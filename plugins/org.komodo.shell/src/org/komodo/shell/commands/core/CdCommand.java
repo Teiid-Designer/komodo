@@ -22,7 +22,6 @@
 package org.komodo.shell.commands.core;
 
 import java.util.List;
-
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
@@ -37,7 +36,7 @@ import org.komodo.spi.constants.StringConstants;
  *
  */
 public class CdCommand extends BuiltInShellCommand implements StringConstants {
-	
+
     private static final String CD = "cd"; //$NON-NLS-1$
 
     /**
@@ -53,8 +52,8 @@ public class CdCommand extends BuiltInShellCommand implements StringConstants {
 	 */
 	@Override
 	public boolean execute() throws Exception {
-		String locationArg = requiredArgument(0, Messages.getString(SHELL.InvalidArgMsg_EntryPath)); 
-		
+		String locationArg = requiredArgument(0, Messages.getString(SHELL.InvalidArgMsg_EntryPath));
+
 		if (!this.validate(locationArg)) {
 			return false;
 		}
@@ -62,16 +61,15 @@ public class CdCommand extends BuiltInShellCommand implements StringConstants {
 		String locArg = locationArg.trim();
 		WorkspaceStatus wsStatus = getWorkspaceStatus();
 		WorkspaceContext newContext = ContextUtils.getContextForPath(wsStatus, locArg);
-		
+
 		if(newContext!=null) {
 			getWorkspaceStatus().setCurrentContext(newContext);
-			if(wsStatus.getRecordingStatus()) recordCommand(getArguments());
 			return true;
 		}
-		
+
 		return false;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 *
@@ -85,7 +83,7 @@ public class CdCommand extends BuiltInShellCommand implements StringConstants {
 		}
 		return true;
 	}
-	
+
 	/**
 	 * @see org.komodo.shell.api.AbstractShellCommand#tabCompletion(java.lang.String, java.util.List)
 	 */
@@ -93,7 +91,7 @@ public class CdCommand extends BuiltInShellCommand implements StringConstants {
 	public int tabCompletion(String lastArgument, List<CharSequence> candidates) throws Exception {
 		if (getArguments().isEmpty()) {
 			WorkspaceContext currentContext = getWorkspaceStatus().getCurrentContext();
-			
+
 			// The arg is expected to be a path
 			updateTabCompleteCandidatesForPath(candidates, currentContext, true, lastArgument);
 
@@ -102,5 +100,5 @@ public class CdCommand extends BuiltInShellCommand implements StringConstants {
 		}
 		return -1;
 	}
-	
+
 }

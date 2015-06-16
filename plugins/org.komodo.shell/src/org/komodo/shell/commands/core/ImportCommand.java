@@ -124,9 +124,6 @@ public class ImportCommand extends BuiltInShellCommand {
 
                     print(CompletionConstants.MESSAGE_INDENT, Messages.getString("ImportCommand.VdbImportSuccessMsg", fileNameArg)); //$NON-NLS-1$
 
-                    if (wsStatus.getRecordingStatus())
-                        recordCommand(getArguments());
-
                     success = true;
             	} else {
                     wsStatus.rollback("ImportCommand"); //$NON-NLS-1$

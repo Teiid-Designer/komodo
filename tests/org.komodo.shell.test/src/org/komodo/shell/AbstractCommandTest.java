@@ -139,12 +139,15 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
 	 */
 	@After
 	public void teardown( ) throws Exception {
-		try {
-			this.reader.close();
-		} catch (IOException e) {
-		    Assert.fail(e.getLocalizedMessage());
-		}
-		reader = null;
+        if ( this.reader != null ) {
+            try {
+                this.reader.close();
+            } catch ( IOException e ) {
+                Assert.fail( e.getLocalizedMessage() );
+            }
+        }
+
+        reader = null;
 		this.factory = null;
 		this.writer = null;
 		this.commandWriter = null;

@@ -41,11 +41,16 @@ public interface ShellCommand {
 	 */
 	public void setName(String name);
 
-	/**
-	 * Sets the arguments that can be used by this command.
-	 * @param arguments the args
-	 */
-	public void setArguments(Arguments arguments);
+    /**
+     * @return the command arguments (can be <code>null</code>)
+     */
+    public Arguments getArguments();
+
+    /**
+     * Sets the arguments that can be used by this command.
+     * @param arguments the args
+     */
+    public void setArguments(Arguments arguments);
 
 	/**
 	 * Configure the command's output.
@@ -95,11 +100,10 @@ public interface ShellCommand {
 	 */
 	public void printHelp(int indent);
 
-	/**
-	 * Record the command to the current record output
-	 * @param args the command args
-	 */
-	public void recordCommand(Arguments args);
+    /**
+     * Records the command to the recording output destination.
+     */
+    public void record();
 
 	/**
 	 * Record the comment to the current record output

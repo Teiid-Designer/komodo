@@ -221,6 +221,11 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
     }
 
     @Test( expected = UnsupportedOperationException.class )
+    public void shouldNotAllowRemove() throws Exception {
+        this.wsMgr.remove( this.uow );
+    }
+
+    @Test( expected = UnsupportedOperationException.class )
     public void shouldNotAllowRename() throws Exception {
         this.wsMgr.rename( this.uow, "newName" );
     }

@@ -73,11 +73,6 @@ public final class FindCommand extends BuiltInShellCommand {
 
             // print results
             printResults( queryType, foundObjectPaths );
-
-            // record if necessary
-            if ( getWorkspaceStatus().getRecordingStatus() ) {
-                recordCommand( getArguments() );
-            }
         } catch ( final Exception e ) {
             print( MESSAGE_INDENT, Messages.getString( "FindCommand.Failure" ) ); //$NON-NLS-1$
             print( MESSAGE_INDENT, "\t" + e.getMessage() ); //$NON-NLS-1$

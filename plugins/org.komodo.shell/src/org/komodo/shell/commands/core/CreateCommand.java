@@ -98,8 +98,6 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
             getWorkspaceStatus().commit("CreateCommand"); //$NON-NLS-1$
             // Print message
             print(CompletionConstants.MESSAGE_INDENT, Messages.getString("CreateCommand.ObjectCreated", typeArg, objNameArg)); //$NON-NLS-1$
-            if (getWorkspaceStatus().getRecordingStatus())
-                recordCommand(getArguments());
         } catch (Exception e) {
             print(CompletionConstants.MESSAGE_INDENT, Messages.getString("CreateCommand.Failure", typeArg)); //$NON-NLS-1$
             print(CompletionConstants.MESSAGE_INDENT, TAB + e.getMessage());

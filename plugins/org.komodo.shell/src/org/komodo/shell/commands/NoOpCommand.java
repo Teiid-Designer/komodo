@@ -16,14 +16,13 @@
 package org.komodo.shell.commands;
 
 import org.komodo.shell.api.AbstractShellCommand;
-import org.komodo.shell.api.Arguments;
 
 /**
  * The command about nothing.  The Seinfeld command.
- * 
+ *
  * This class adapted from https://github.com/Governance/s-ramp/blob/master/s-ramp-shell
  * - no changes currently
- * 
+ *
  * @author eric.wittmann@redhat.com
  */
 public class NoOpCommand extends AbstractShellCommand {
@@ -60,11 +59,13 @@ public class NoOpCommand extends AbstractShellCommand {
         return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.komodo.shell.api.ShellCommand#recordCommand(org.komodo.shell.api.Arguments)
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see org.komodo.shell.api.ShellCommand#record()
 	 */
 	@Override
-	public void recordCommand(Arguments args) {
+	public void record() {
 	    // Nothing to do
 	}
 
