@@ -49,7 +49,7 @@ public class UnsetPropertyCommand extends BuiltInShellCommand {
             context.setPropertyValue( propertyName, null );
 
             // Commit transaction
-            getWorkspaceStatus().commit( "SetCommand" ); //$NON-NLS-1$
+            getWorkspaceStatus().commit( getClass().getSimpleName() );
 
             // Print message
             print( MESSAGE_INDENT, getString( "propertyUnset", propNameArg ) ); //$NON-NLS-1$
@@ -62,7 +62,7 @@ public class UnsetPropertyCommand extends BuiltInShellCommand {
         } catch ( final InvalidCommandArgumentException e ) {
             throw e;
         } catch ( final Exception e ) {
-            print( MESSAGE_INDENT, getString( "Failure" ) ); //$NON-NLS-1$
+            print( MESSAGE_INDENT, getString( "error" ) ); //$NON-NLS-1$
             print( MESSAGE_INDENT, "\t" + e.getMessage() ); //$NON-NLS-1$
             return false;
         }

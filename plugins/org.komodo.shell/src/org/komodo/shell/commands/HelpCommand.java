@@ -113,7 +113,6 @@ public class HelpCommand extends BuiltInShellCommand {
 		print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.Help_GET_HELP_1));
 		print(CompletionConstants.MESSAGE_INDENT,""); //$NON-NLS-1$
 		print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.Help_GET_HELP_2));
-		print(CompletionConstants.MESSAGE_INDENT,""); //$NON-NLS-1$
 	}
 
 	/**
@@ -133,7 +132,6 @@ public class HelpCommand extends BuiltInShellCommand {
         } else {
 			command.setOutput(getWorkspaceStatus().getShell().getCommandOutput());
 			command.printHelp(CompletionConstants.MESSAGE_INDENT);
-			print(CompletionConstants.MESSAGE_INDENT,""); //$NON-NLS-1$
 		}
 	}
 

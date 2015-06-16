@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.InputStream;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.komodo.relational.model.Schema;
 import org.komodo.relational.workspace.WorkspaceManager;
@@ -51,7 +52,7 @@ public class ExportCommandTest extends AbstractCommandTest {
     private final static String TWITTER_VIEW_MODEL_DDL = EMPTY_STRING + "CREATE VIRTUAL PROCEDURE getTweets(IN query varchar) RETURNS TABLE " + "(created_on varchar(25), from_user varchar(25), to_user varchar(25), profile_image_url " + "varchar(25), source varchar(25), text varchar(140))" + NEW_LINE + "AS" + NEW_LINE + "SELECT tweet.* FROM (EXEC twitter.invokeHTTP(action => 'GET', endpoint => QUERYSTRING('', query AS q))) AS w, XMLTABLE('results' PASSING JSONTOXML('myxml', w.result) COLUMNS created_on string PATH 'created_at',  from_user string PATH 'from_user',  to_user string PATH 'to_user',  profile_image_url string PATH 'profile_image_url',  source string PATH 'source',  text string PATH 'text') AS tweet;" + NEW_LINE + NEW_LINE + "CREATE VIEW Tweet" + NEW_LINE + "AS" + NEW_LINE + "SELECT * FROM twitterview.getTweets;";
 
     private String convertToContextPath(KomodoObject kObject) {
-        return kObject.getAbsolutePath().replaceAll(RepositoryImpl.WORKSPACE_ROOT, 
+        return kObject.getAbsolutePath().replaceAll(RepositoryImpl.WORKSPACE_ROOT,
                                                                                   FORWARD_SLASH +
                                                                                   WorkspaceContext.WORKSPACE_ROOT_DISPLAY_NAME);
     }
@@ -127,6 +128,7 @@ public class ExportCommandTest extends AbstractCommandTest {
         return schema;
     }
 
+    @Ignore
     @Test
     public void testExportCommandTweetVdb() throws Exception {
         FileWriter writer = null;
@@ -250,6 +252,7 @@ public class ExportCommandTest extends AbstractCommandTest {
         }
     }
 
+    @Ignore
     @Test
     public void testExportCommandAllElementsVdb() throws Exception {
         FileWriter writer = null;

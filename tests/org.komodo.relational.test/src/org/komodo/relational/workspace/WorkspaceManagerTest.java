@@ -220,6 +220,11 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
         this.wsMgr.createVdb(this.uow, null, null, "externalFilePath");
     }
 
+    @Test( expected = UnsupportedOperationException.class )
+    public void shouldNotAllowRename() throws Exception {
+        this.wsMgr.rename( this.uow, "newName" );
+    }
+
     @Test
     public void shouldNotFindModelsWhenWorkspaceIsEmpty() throws Exception {
         assertThat(this.wsMgr.findModels(this.uow).length, is(0));

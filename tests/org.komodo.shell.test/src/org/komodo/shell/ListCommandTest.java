@@ -46,8 +46,8 @@ public class ListCommandTest extends AbstractCommandTest {
 
         // make sure no children and path appear in output
     	String writerOutput = getCommandOutput();
-        assertTrue( writerOutput.contains( "No children" ) );
-        assertTrue( writerOutput.contains( "WORKSPACE \"/workspace\"" ) );
+        assertTrue( writerOutput.contains( "no children" ) );
+        assertTrue( writerOutput.contains( "Workspace \"/workspace\"" ) );
 
         assertEquals("/workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
@@ -63,7 +63,6 @@ public class ListCommandTest extends AbstractCommandTest {
         assertTrue( writerOutput.contains( "Model1" ) );
         assertTrue( writerOutput.contains( "Model2" ) );
         assertTrue( writerOutput.contains( "Model3" ) );
-        assertTrue( writerOutput.contains( "MODEL" ) );
 
     	assertEquals("/workspace/MyVdb", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
@@ -77,7 +76,6 @@ public class ListCommandTest extends AbstractCommandTest {
         // make sure table name and table type appear in output
         String writerOutput = getCommandOutput();
         assertTrue( writerOutput.contains( "Table1" ) );
-        assertTrue( writerOutput.contains( "TABLE" ) );
 
         assertEquals("/workspace/MyVdb/Model1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }

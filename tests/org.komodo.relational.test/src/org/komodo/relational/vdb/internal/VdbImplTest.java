@@ -562,6 +562,12 @@ public final class VdbImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldSetPreviewValueWithStringValue() throws Exception {
+        this.vdb.setProperty( this.uow, VdbLexicon.Vdb.PREVIEW, "blah" );
+        assertThat( this.vdb.isPreview( this.uow ), is( false ) );
+    }
+
+    @Test
     public void shouldSetQueryTimeout() throws Exception {
         final int newValue = 10;
         this.vdb.setQueryTimeout( this.uow, newValue );

@@ -67,8 +67,13 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
     private static final String SUBCMD_GLOBAL = "global"; //$NON-NLS-1$
     private static final String SUBCMD_PROPERTY = "property"; //$NON-NLS-1$
     private static final String SUBCMD_SUMMARY = "summary"; //$NON-NLS-1$
-    private static final List<String> SUBCMDS =
-    		Arrays.asList(SUBCMD_PROPERTIES, SUBCMD_CHILDREN, SUBCMD_STATUS, SUBCMD_GLOBAL, SUBCMD_PROPERTY, SUBCMD_SUMMARY);
+    private static final List< String > SUBCMDS = Arrays.asList( SUBCMD_PROPERTIES,
+                                                                 SUBCMD_CHILDREN,
+                                                                 SUBCMD_STATUS,
+                                                                 SUBCMD_GLOBAL,
+                                                                 SUBCMD_PROPERTY,
+                                                                 SUBCMD_SUMMARY );
+
 	/**
 	 * Constructor.
 	 * @param wsStatus the workspace status
@@ -157,6 +162,12 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
     private void printProperties( WorkspaceContext context ) throws Exception {
         final List< String > props = context.getProperties(); // All properties
 
+        if ( props.isEmpty() ) {
+            final String noPropsMsg = Messages.getString( "ShowCommand.NoPropertiesMsg", context.getType(), context.getFullName() ); //$NON-NLS-1$
+            print( MESSAGE_INDENT, noPropsMsg );
+            return;
+        }
+
         final Map< String, String > sorted = new TreeMap<>();
         int maxWidth = DEFAULT_WIDTH;
 
@@ -194,8 +205,6 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
         for ( final Entry< String, String > entry : sorted.entrySet() ) {
             print( MESSAGE_INDENT, String.format( format, entry.getKey(), entry.getValue() ) );
         }
-
-        print( MESSAGE_INDENT, EMPTY_STRING );
     }
 
     private String getFormat( final int width ) {
@@ -320,8 +329,6 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
             final String childType = childContext.getType();
             print( MESSAGE_INDENT, String.format( format, childName, childType ) );
         }
-
-        print( MESSAGE_INDENT, EMPTY_STRING );
     }
 
 	/**
@@ -330,6 +337,14 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
 	 */
     private void printGlobal() throws Exception {
         final Properties globalProps = getWorkspaceStatus().getProperties(); // All properties
+
+        // make sure the standard global properties are shown
+        for ( final String prop : WorkspaceStatus.GLOBAL_PROP_KEYS ) {
+            if ( !globalProps.containsKey( prop ) ) {
+                globalProps.put( prop, Messages.getString( SHELL.NO_PROPERTY_VALUE ) );
+            }
+        }
+
         final Map< String, String > sorted = new TreeMap<>();
         int maxWidth = DEFAULT_WIDTH;
 
@@ -359,8 +374,6 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
         for ( final Entry< String, String > entry : sorted.entrySet() ) {
             print( MESSAGE_INDENT, String.format( format, entry.getKey(), entry.getValue() ) );
         }
-
-        print( MESSAGE_INDENT, EMPTY_STRING );
     }
 
 	/**
@@ -387,7 +400,7 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
         print( MESSAGE_INDENT, String.format( format, headerDelimiter, headerDelimiter ) );
 
         print( MESSAGE_INDENT, String.format( format, name, propValue ) );
-        print( MESSAGE_INDENT, EMPTY_STRING );
+        print();
     }
 
 	/**
@@ -395,12 +408,7 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
 	 * @throws Exception
 	 */
 	private void printSummary(WorkspaceContext context) throws Exception {
-        // print the properties
-		print(MESSAGE_INDENT, EMPTY_STRING);
         printProperties(context);
-
-        // print the children
-		print(MESSAGE_INDENT, EMPTY_STRING);
         printChildren(context);
 	}
 
@@ -496,7 +504,7 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
     		    updateTabCompleteCandidatesForProperty(candidates, getContext(), lastArgument);
 
     			return 0;
-    		}
+            }
     	}
     	return -1;
     }

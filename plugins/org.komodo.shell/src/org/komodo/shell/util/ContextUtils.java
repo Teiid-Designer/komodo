@@ -17,13 +17,17 @@ import org.komodo.utils.StringUtils;
  * Helper methods for working with paths
  */
 public class ContextUtils implements StringConstants {
-	
+
 	@SuppressWarnings("javadoc")
-	public static final String PATH_SEPARATOR = FORWARD_SLASH; 
+	public static final String PATH_SEPARATOR = FORWARD_SLASH;
 
 	private static final String ROOT_OPT1 = PATH_SEPARATOR;
 	private static final String ROOT_OPT2 = ROOT_OPT1 + WorkspaceContext.WORKSPACE_ROOT_DISPLAY_NAME;
-	private static final String ROOT_OPT3 = ROOT_OPT2 + PATH_SEPARATOR;
+
+	/**
+	 * The shell root prompt. Value is {@value}.
+	 */
+	public static final String ROOT_OPT3 = ROOT_OPT2 + PATH_SEPARATOR;
 
 	/**
 	 * Get the workspace context for the specified path.  The path can be either an absolute path, or relative
@@ -35,12 +39,12 @@ public class ContextUtils implements StringConstants {
 	 */
 	public static WorkspaceContext getContextForPath(WorkspaceStatus workspaceStatus, String path) {
 		if(StringUtils.isBlank(path)) return workspaceStatus.getCurrentContext();
-		
+
 		// check path for cd into root options
-		if( path.equalsIgnoreCase(ROOT_OPT1) || path.equalsIgnoreCase(ROOT_OPT2) || path.equalsIgnoreCase(ROOT_OPT3)) { 
+		if( path.equalsIgnoreCase(ROOT_OPT1) || path.equalsIgnoreCase(ROOT_OPT2) || path.equalsIgnoreCase(ROOT_OPT3)) {
 			return workspaceStatus.getWorkspaceContext();
 		}
-		
+
 		// Location supplied as absolute path
 		if(ContextUtils.isAbsolutePath(path)) {
 			return ContextUtils.getContextForAbsolutePath(workspaceStatus.getWorkspaceContext(), path);
@@ -49,7 +53,7 @@ public class ContextUtils implements StringConstants {
 			return ContextUtils.getRelativeContext(workspaceStatus.getCurrentContext(), path);
 		}
 	}
-	
+
 	/**
 	 * Get the context relative to the current context at the specified path.  The path could be multi-level,
 	 * separated by the PATH_SEPARATOR, for example 'table1/col1'.  or it could be single path.
@@ -59,14 +63,14 @@ public class ContextUtils implements StringConstants {
 	 */
 	private static WorkspaceContext getRelativeContext(WorkspaceContext currentContext, String relativePath) {
 		WorkspaceContext resultContext = null;
-		
+
 		// Get the path segments
 		String[] pathSegments = ContextUtils.getPathSegments(relativePath);
-		
+
 		// Walk thru path as far as possible, getting child contexts
 		for(String segment : pathSegments) {
 			WorkspaceContext theContext = getContext(currentContext,segment);
-			
+
 			// Child context found, update and keep going
 			if(theContext!=null) {
 				currentContext = theContext;
@@ -77,13 +81,13 @@ public class ContextUtils implements StringConstants {
 				break;
 			}
 		}
-		
+
 		return resultContext;
 	}
-	
+
 	/**
 	 * Determine if the second context is above the first.
-	 * 
+	 *
 	 * @param context1 the first context
 	 * @param context2 the second context
 	 * @return 'true' if context2 is above(closer to root) than context1
@@ -91,13 +95,13 @@ public class ContextUtils implements StringConstants {
 	public static boolean isContextAbove(WorkspaceContext context1, WorkspaceContext context2) {
 		int context1Level = getContextLevel(context1);
 		int context2Level = getContextLevel(context2);
-		
+
 		return (context2Level < context1Level) ? true : false;
 	}
-	
+
 	/**
 	 * Determine if the second context is below the first.
-	 * 
+	 *
 	 * @param context1 the first context
 	 * @param context2 the second context
 	 * @return 'true' if context2 is below(further from root) than context1
@@ -105,32 +109,32 @@ public class ContextUtils implements StringConstants {
 	public static boolean isContextBelow(WorkspaceContext context1, WorkspaceContext context2) {
 		int context1Level = getContextLevel(context1);
 		int context2Level = getContextLevel(context2);
-		
+
 		return (context2Level > context1Level) ? true : false;
 	}
-	
+
 	/**
 	 * Get the context level, relative to the root context.
 	 * Examples:
 	 * tko.komodo = 0
 	 * tko.komodo-tko.workspace = 1
 	 * tko.komodo-tko.workspace-MyVdb = 2
-	 * 
+	 *
 	 * @param context the supplied context
 	 * @return the context level relative to the root.
 	 */
 	public static int getContextLevel(WorkspaceContext context) {
 		int contextLevel = 0;
-		
+
 		WorkspaceContext parent = context.getParent();
 		while(parent!=null) {
 			contextLevel++;
 			parent = parent.getParent();
 		}
-		
+
 		return contextLevel;
 	}
-	
+
 	/**
 	 * Get a context child (or parent) of the current context, based on provided segment name.  Returns null if a child of supplied name
 	 * does not exist.  The supplied segment can only represent a change of one level above or below the currentContext.
@@ -167,15 +171,15 @@ public class ContextUtils implements StringConstants {
 	 */
 	private static WorkspaceContext getContextForAbsolutePath(WorkspaceContext rootContext, String absolutePath) {
 		WorkspaceContext resultContext = null;
-		
+
 		if(isAbsolutePath(absolutePath)) {
 			String relativePath = ContextUtils.convertAbsolutePathToRootRelative(absolutePath);
 			resultContext = ContextUtils.getRelativeContext(rootContext, relativePath);
 		}
-		
+
 		return resultContext;
 	}
-	
+
 	/**
 	 * Get the deepest matching context along the supplied relative path.  If there is no such context, the current context is returned.
 	 * @param currentContext the current context
@@ -184,7 +188,7 @@ public class ContextUtils implements StringConstants {
 	 */
 	public static WorkspaceContext getDeepestMatchingContextRelative(WorkspaceContext currentContext, String relativePath) {
 		WorkspaceContext resultContext = currentContext;
-		
+
 		if(!StringUtils.isEmpty(relativePath)) {
 			String[] segments = getPathSegments(relativePath);
 			for(String segment : segments) {
@@ -213,7 +217,7 @@ public class ContextUtils implements StringConstants {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * convert the supplied absolute path to a path relative to the workspace context
 	 * @param absolutePath the supplied absolute path
@@ -225,7 +229,7 @@ public class ContextUtils implements StringConstants {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * convert the supplied absolute path to a path relative to the supplied context
 	 * @param context the context
@@ -259,5 +263,5 @@ public class ContextUtils implements StringConstants {
 	private static String[] getPathSegments(String path) {
 		return path.split(PATH_SEPARATOR);
 	}
-	
+
 }

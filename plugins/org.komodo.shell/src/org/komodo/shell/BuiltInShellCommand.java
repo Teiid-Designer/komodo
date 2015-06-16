@@ -113,8 +113,7 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
     @Override
     public void printUsage( final int indent ) {
         print( indent, Messages.getString( SHELL.HelpUsageHeading ) );
-        print( indent, '\t' + Messages.getString( getClass().getSimpleName() + ".usage" ) ); //$NON-NLS-1$
-        print( 0, StringConstants.EMPTY_STRING );
+        printHelpUsage( 2 * indent );
     }
 
     /**
@@ -122,20 +121,34 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
      */
     @Override
     public void printHelp( final int indent ) {
-        print( 0, StringConstants.EMPTY_STRING );
-
         // description
         print( indent, Messages.getString( SHELL.HelpDescriptionHeading ) );
-        print( indent,
-               Messages.getString( SHELL.HelpDescription, getName(), Messages.getString( getClass().getSimpleName() + ".help" ) ) ); //$NON-NLS-1$
-        print( 0, StringConstants.EMPTY_STRING );
+        printHelpDescription( indent );
+        print();
 
         // usage
         printUsage( indent );
+        print();
 
         // examples
         print( indent, Messages.getString( SHELL.HelpExamplesHeading ) );
+        printHelpExamples( indent );
+    }
+
+    protected void printHelpDescription( final int indent ) {
+        print( indent,
+               Messages.getString( SHELL.HelpDescription, getName(), Messages.getString( getClass().getSimpleName() + ".help" ) ) ); //$NON-NLS-1$
+    }
+
+    protected void printHelpExamples( final int indent ) {
         print( indent, Messages.getString( getClass().getSimpleName() + ".examples" ) ); //$NON-NLS-1$
+    }
+
+    protected void printHelpUsage( final int indent ) {
+        print( indent, Messages.getString( getClass().getSimpleName() + ".usage" ) ); //$NON-NLS-1$
+    }
+
+    protected void print() {
         print( 0, StringConstants.EMPTY_STRING );
     }
 
@@ -271,6 +284,9 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
                  || ( !isShowingPropertyNamePrefixes() && propNames.contains( attachPrefix( context, propName ) ) ) ) {
                 return true;
             }
+
+            print( CompletionConstants.MESSAGE_INDENT,
+                   Messages.getString( "BuiltInShellCommand.propertyArg_noPropertyWithThisName", propName ) ); //$NON-NLS-1$
         }
 
         return false;
