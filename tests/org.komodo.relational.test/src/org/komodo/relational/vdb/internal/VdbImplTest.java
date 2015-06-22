@@ -22,7 +22,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalObject.Filter;
-import org.komodo.relational.internal.RelationalModelFactory;
+import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.RelationalProperty;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.vdb.DataRole;
@@ -33,6 +34,7 @@ import org.komodo.relational.vdb.Vdb.VdbManifest;
 import org.komodo.relational.vdb.VdbImport;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyDescriptor;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
@@ -41,14 +43,13 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 public final class VdbImplTest extends RelationalModelTest {
 
     private static final String PATH = "/Users/sledge/hammer/MyVdb.vdb";
+    private static final String VDB_NAME = "vdb";
 
     protected Vdb vdb;
-    private String vdbName;
 
     @Before
     public void init() throws Exception {
-        this.vdbName = "vdb";
-        this.vdb = RelationalModelFactory.createVdb( this.uow, _repo, null, this.vdbName, PATH );
+        this.vdb = createVdb( VDB_NAME, PATH );
     }
 
     @Test
@@ -226,7 +227,7 @@ public final class VdbImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveCorrectName() throws Exception {
-        assertThat( this.vdb.getName( this.uow ), is( this.vdbName ) );
+        assertThat( this.vdb.getName( this.uow ), is( VDB_NAME ) );
     }
 
     @Test
@@ -593,6 +594,25 @@ public final class VdbImplTest extends RelationalModelTest {
         final int newValue = ( Vdb.DEFAULT_VERSION + 10 );
         this.vdb.setVersion( this.uow, newValue );
         assertThat( this.vdb.getVersion( this.uow ), is( newValue ) );
+    }
+
+    /*
+     * ********************************************************************
+     * *****                  Resolver Tests                          *****
+     * ********************************************************************
+     */
+
+    @Test
+    public void shouldCreateUsingResolver() throws Exception {
+        final String name = "blah";
+
+        final RelationalProperties props = new RelationalProperties();
+        props.add( new RelationalProperty( VdbLexicon.Vdb.ORIGINAL_FILE, "/my/path/vdb.vdb" ) );
+
+        final KomodoObject kobject = VdbImpl.RESOLVER.create( this.uow, _repo, null, name, props );
+        assertThat( kobject, is( notNullValue() ) );
+        assertThat( kobject, is( instanceOf( Vdb.class ) ) );
+        assertThat( kobject.getName( this.uow ), is( name ) );
     }
 
 }

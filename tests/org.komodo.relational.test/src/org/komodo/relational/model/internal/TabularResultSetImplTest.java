@@ -10,6 +10,7 @@ package org.komodo.relational.model.internal;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsCollectionContaining.hasItem;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
+import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import java.util.Arrays;
@@ -17,15 +18,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalObject.Filter;
-import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.ResultSetColumn;
 import org.komodo.relational.model.StoredProcedure;
 import org.komodo.relational.model.TabularResultSet;
-import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
+import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class TabularResultSetImplTest extends RelationalModelTest {
@@ -35,10 +36,9 @@ public final class TabularResultSetImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        final Vdb vdb = RelationalModelFactory.createVdb( this.uow, _repo, null, "vdb", "externalFilePath" );
-        final Model model = RelationalModelFactory.createModel( this.uow, _repo, vdb, "model" );
-        this.procedure = RelationalModelFactory.createStoredProcedure( this.uow, _repo, model, "procedure" );
-        this.resultSet = RelationalModelFactory.createTabularResultSet( this.uow, _repo, this.procedure );
+        final Model model = createModel();
+        this.procedure = model.addStoredProcedure( this.uow, "procedure" );
+        this.resultSet = this.procedure.setResultSet( this.uow, TabularResultSet.class );
         commit();
     }
 
@@ -103,6 +103,26 @@ public final class TabularResultSetImplTest extends RelationalModelTest {
         this.resultSet.addColumn( this.uow, "resultSetColumn" );
         assertThat( this.resultSet.getChildren( this.uow ).length, is( 1 ) );
         assertThat( this.resultSet.getChildren( this.uow )[0], is( instanceOf( ResultSetColumn.class ) ) );
+    }
+
+    /*
+     * ********************************************************************
+     * *****                  Resolver Tests                          *****
+     * ********************************************************************
+     */
+
+    @Test
+    public void shouldCreateUsingResolver() throws Exception {
+        final KomodoObject kobject = TabularResultSetImpl.RESOLVER.create( this.uow, _repo, this.procedure, "blah", null );
+        assertThat( kobject, is( notNullValue() ) );
+        assertThat( kobject, is( instanceOf( TabularResultSet.class ) ) );
+        assertThat( kobject.getName( this.uow ), is( CreateProcedure.RESULT_SET ) );
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
+        final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
+        TabularResultSetImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
     }
 
 }

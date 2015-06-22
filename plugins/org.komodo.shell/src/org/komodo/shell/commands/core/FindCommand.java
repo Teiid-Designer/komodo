@@ -39,7 +39,11 @@ import org.komodo.spi.repository.KomodoType;
  */
 public final class FindCommand extends BuiltInShellCommand {
 
-    private static final String NAME = "find"; //$NON-NLS-1$
+    /**
+     * The command name.
+     */
+    public static final String NAME = "find"; //$NON-NLS-1$
+
     private static final List< KomodoType > NOT_APPLICABLE_TYPES = Arrays.asList( new KomodoType[] { KomodoType.UNKNOWN,
                                                                                                     KomodoType.WORKSPACE } );
     private static final String REPO_WS_ROOT_PATH = ( RepositoryImpl.WORKSPACE_ROOT + StringConstants.FORWARD_SLASH );
@@ -49,7 +53,7 @@ public final class FindCommand extends BuiltInShellCommand {
      *        the workspace status (cannot be <code>null</code>)
      */
     public FindCommand( final WorkspaceStatus status ) {
-        super( NAME, status );
+        super( status, NAME );
     }
 
     /**
@@ -142,21 +146,44 @@ public final class FindCommand extends BuiltInShellCommand {
             final int indent = ( 2 * MESSAGE_INDENT );
 
             for ( final String absolutePath : foundObjectPaths ) {
-                String path = absolutePath;
-
-                // should always start with the absolute repository path but check just in case
-                if ( path.startsWith( REPO_WS_ROOT_PATH ) ) {
-                    path = ( ContextUtils.ROOT_OPT3 + path.substring( REPO_WS_ROOT_PATH.length() ) );
-                }
-
-                print( indent, path );
+                print( indent, absolutePath );
             }
         }
     }
 
-    private String[] query( final KomodoType queryType ) throws Exception {
+    /**
+     * @param queryType
+     *        the type of object being searched for (cannot be <code>null</code>)
+     * @return the paths of the workspace objects with the matching type (never <code>null</code> but can be empty)
+     * @throws Exception
+     *         if an error occurs
+     */
+    protected String[] query( final KomodoType queryType ) throws Exception {
         final String lexiconType = KomodoTypeRegistry.getInstance().getIdentifier( queryType ).getLexiconType();
-        return getContext().getWorkspaceManager().findByType( getWorkspaceStatus().getTransaction(), lexiconType );
+        final String[] searchResults = getContext().getWorkspaceManager().findByType( getWorkspaceStatus().getTransaction(),
+                                                                                      lexiconType );
+
+        if ( searchResults.length == 0 ) {
+            return searchResults;
+        }
+
+        final String[] result = new String[ searchResults.length ];
+        int i = 0;
+
+        for ( final String absolutePath : searchResults ) {
+            String path = absolutePath;
+
+            // should always start with the absolute repository path but check just in case
+            if ( path.startsWith( REPO_WS_ROOT_PATH ) ) {
+                result[i] = ( ContextUtils.ROOT_OPT3 + path.substring( REPO_WS_ROOT_PATH.length() ) );
+            } else {
+                result[i] = path;
+            }
+
+            ++i;
+        }
+
+        return result;
     }
 
     /**

@@ -1,7 +1,9 @@
 package org.komodo.shell;
 
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import java.io.File;
 import org.junit.Test;
 import org.komodo.relational.model.Table;
@@ -24,7 +26,7 @@ public class SetCommandTest extends AbstractCommandTest {
 	private static final String SET_COMMAND_2 = "setCommand2.txt"; //$NON-NLS-1$
 	private static final String SET_COMMAND_3 = "setCommand3.txt"; //$NON-NLS-1$
 	private static final String SET_COMMAND_4 = "setCommand4.txt"; //$NON-NLS-1$
-	private static final String SET_COMMAND_5 = "setCommand5.txt"; //$NON-NLS-1$
+    private static final String SET_COMMAND_5 = "setCommand5.txt"; //$NON-NLS-1$
 
 	/**
 	 * Test for SetCommand
@@ -39,7 +41,7 @@ public class SetCommandTest extends AbstractCommandTest {
 
     	execute();
 
-    	assertEquals("/workspace/MyModel/MyTable", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/workspace/MyVdb/MyModel/MyTable", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
 
     	KomodoObject ko = wsStatus.getCurrentContext().getKomodoObj();
     	UnitOfWork trans = wsStatus.getTransaction();
@@ -58,7 +60,7 @@ public class SetCommandTest extends AbstractCommandTest {
 
     	assertEquals("/workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
 
-    	WorkspaceContext tableContext = ContextUtils.getContextForPath(wsStatus, "/workspace/MyModel/MyTable"); //$NON-NLS-1$
+    	WorkspaceContext tableContext = ContextUtils.getContextForPath(wsStatus, "/workspace/MyVdb/MyModel/MyTable"); //$NON-NLS-1$
     	assertNotNull(tableContext);
 
     	KomodoObject ko = tableContext.getKomodoObj();
@@ -78,7 +80,7 @@ public class SetCommandTest extends AbstractCommandTest {
 
     	assertEquals("/workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
 
-    	WorkspaceContext tableContext = ContextUtils.getContextForPath(wsStatus, "/workspace/MyModel/MyTable"); //$NON-NLS-1$
+    	WorkspaceContext tableContext = ContextUtils.getContextForPath(wsStatus, "/workspace/MyVdb/MyModel/MyTable"); //$NON-NLS-1$
         assertNotNull(tableContext);
 
     	KomodoObject ko = tableContext.getKomodoObj();
@@ -102,12 +104,37 @@ public class SetCommandTest extends AbstractCommandTest {
 
     @Test
     public void testSetRecord() throws Exception {
-    	setup(SET_COMMAND_5, SetCommand.class);
-    	wsStatus.setProperty(WorkspaceStatus.RECORDING_FILE_KEY, "/tmp/recordingFile"); //$NON-NLS-1$
+        setup(SET_COMMAND_5, SetCommand.class);
+        wsStatus.setProperty(WorkspaceStatus.RECORDING_FILE_KEY, "/tmp/recordingFile"); //$NON-NLS-1$
 
-    	execute();
+        execute();
 
-    	assertEquals(true, wsStatus.getRecordingStatus());
+        assertEquals(true, wsStatus.getRecordingStatus());
     }
+
+    @Test
+    public void testResetGlobalProperties() throws Exception {
+        setup( "setCommandResetGlobalProps.txt", SetCommand.class );
+        execute();
+
+        for ( final String propName : WorkspaceStatus.GLOBAL_PROPS.keySet() ) {
+            assertThat( this.wsStatus.getProperties().getProperty( propName ), is( WorkspaceStatus.GLOBAL_PROPS.get( propName ) ) );
+        }
+    }
+
+    @Test
+    public void testSetGlobalProperties() throws Exception {
+        setup( "setCommandGlobalProps.txt", SetCommand.class );
+        execute();
+        assertThat( this.wsStatus.getProperties().getProperty( WorkspaceStatus.EXPORT_DEFAULT_DIR_KEY ), is( "/export/directory" ) );
+        assertThat( this.wsStatus.getProperties().getProperty( WorkspaceStatus.IMPORT_DEFAULT_DIR_KEY ), is( "/import/directory" ) );
+        assertThat( this.wsStatus.getRecordingOutputFile().getAbsolutePath(), is( "/recording/file.txt" ) );
+        assertThat( this.wsStatus.isShowingFullPathInPrompt(), is( true ) );
+        assertThat( this.wsStatus.isShowingFullPathInPrompt(), is( true ) );
+        assertThat( this.wsStatus.isShowingHiddenProperties(), is( true ) );
+        assertThat( this.wsStatus.isShowingPropertyNamePrefixes(), is( true ) );
+        assertThat( this.wsStatus.isShowingTypeInPrompt(), is( false ) );
+    }
+
 
 }

@@ -18,7 +18,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalObject.Filter;
-import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.vdb.Condition;
 import org.komodo.relational.vdb.DataRole;
@@ -27,21 +26,20 @@ import org.komodo.relational.vdb.Permission;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class PermissionImplTest extends RelationalModelTest {
 
-    private DataRole dataRole;
     private Permission permission;
-    private Vdb vdb;
 
     @Before
     public void init() throws Exception {
-        this.vdb = RelationalModelFactory.createVdb( this.uow, _repo, null, "vdb", "/Users/sledge/hammer/MyVdb.vdb" );
-        this.dataRole = RelationalModelFactory.createDataRole( this.uow, _repo, this.vdb, "dataRole" );
-        this.permission = RelationalModelFactory.createPermission( this.uow, _repo, this.dataRole, "permission" );
+        final Vdb vdb = createVdb();
+        final DataRole dataRole = vdb.addDataRole( this.uow, "dataRole" );
+        this.permission = dataRole.addPermission( this.uow, "permission" );
         commit();
     }
 
@@ -86,7 +84,7 @@ public final class PermissionImplTest extends RelationalModelTest {
     public void shouldFailConstructionIfNotPermission() {
         if ( RelationalObjectImpl.VALIDATE_INITIAL_STATE ) {
             try {
-                new PermissionImpl( this.uow, _repo, this.vdb.getAbsolutePath() );
+                new PermissionImpl( this.uow, _repo, this.permission.getParent( this.uow ).getAbsolutePath() );
                 fail();
             } catch ( final KException e ) {
                 // expected
@@ -274,6 +272,31 @@ public final class PermissionImplTest extends RelationalModelTest {
         final boolean newValue = !Permission.DEFAULT_ALLOW_UPDATE;
         this.permission.setAllowUpdate( this.uow, newValue );
         assertThat( this.permission.isAllowUpdate( this.uow ), is( newValue ) );
+    }
+
+    /*
+     * ********************************************************************
+     * *****                  Resolver Tests                          *****
+     * ********************************************************************
+     */
+
+    @Test
+    public void shouldCreateUsingResolver() throws Exception {
+        final String name = "blah";
+        final KomodoObject kobject = PermissionImpl.RESOLVER.create( this.uow,
+                                                                     _repo,
+                                                                     this.permission.getParent( this.uow ),
+                                                                     name,
+                                                                     null );
+        assertThat( kobject, is( notNullValue() ) );
+        assertThat( kobject, is( instanceOf( Permission.class ) ) );
+        assertThat( kobject.getName( this.uow ), is( name ) );
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
+        final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
+        PermissionImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
     }
 
 }

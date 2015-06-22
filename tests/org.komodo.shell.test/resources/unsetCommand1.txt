@@ -1,5 +1,6 @@
 # Tests the UnsetPropertyCommand for single value property
-create Model MyModel
-cd MyModel
+create Vdb MyVdb
+create Model MyModel ./MyVdb
+cd MyVdb/MyModel
 set property vdb:description "new description"
 unset vdb:description

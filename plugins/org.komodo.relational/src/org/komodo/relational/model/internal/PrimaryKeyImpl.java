@@ -7,9 +7,10 @@
  */
 package org.komodo.relational.model.internal;
 
+import org.komodo.relational.Messages;
+import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.internal.AdapterFactory;
-import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.model.PrimaryKey;
 import org.komodo.relational.model.Table;
@@ -47,7 +48,14 @@ public final class PrimaryKeyImpl extends TableConstraintImpl implements Primary
                                   final RelationalProperties properties ) throws KException {
             final AdapterFactory adapter = new AdapterFactory( repository );
             final Table parentTable = adapter.adapt( transaction, parent, Table.class );
-            return RelationalModelFactory.createPrimaryKey( transaction, repository, parentTable, id );
+
+            if ( parentTable == null ) {
+                throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
+                                                          parent.getAbsolutePath(),
+                                                          PrimaryKey.class.getSimpleName() ) );
+            }
+
+            return parentTable.setPrimaryKey( transaction, id );
         }
 
         /**

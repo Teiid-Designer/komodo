@@ -7,9 +7,10 @@
  */
 package org.komodo.relational.model.internal;
 
+import org.komodo.relational.Messages;
+import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.internal.AdapterFactory;
-import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.UniqueConstraint;
@@ -47,7 +48,14 @@ public final class UniqueConstraintImpl extends TableConstraintImpl implements U
                                         final RelationalProperties properties ) throws KException {
             AdapterFactory adapter = new AdapterFactory( repository );
             Table parentTable = adapter.adapt( transaction, parent, Table.class );
-            return RelationalModelFactory.createUniqueConstraint( transaction, repository, parentTable, id );
+
+            if ( parentTable == null ) {
+                throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
+                                                          parent.getAbsolutePath(),
+                                                          UniqueConstraint.class.getSimpleName() ) );
+            }
+
+            return parentTable.addUniqueConstraint( transaction, id );
         }
 
         /**

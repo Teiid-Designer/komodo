@@ -451,18 +451,12 @@ public final class RelationalModelFactory {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( vdb, "vdb" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( modelName, "modelName" ); //$NON-NLS-1$
 
-        KomodoObject kobject = null;
-
-        if ( vdb == null ) {
-            final KomodoObject workspace = repository.komodoWorkspace( transaction );
-            kobject = workspace.addChild( transaction, modelName, VdbLexicon.Vdb.DECLARATIVE_MODEL );
-        } else {
-            kobject = vdb.addChild( transaction, modelName, VdbLexicon.Vdb.DECLARATIVE_MODEL );
-        }
-
+        final KomodoObject kobject = vdb.addChild( transaction, modelName, VdbLexicon.Vdb.DECLARATIVE_MODEL );
         final Model result = new ModelImpl( transaction, repository, kobject.getAbsolutePath() );
+
         return result;
     }
 

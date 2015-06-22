@@ -19,14 +19,17 @@ import org.komodo.spi.repository.KomodoType;
  */
 public class RenameCommand extends BuiltInShellCommand implements StringConstants {
 
-    private static final String RENAME = "rename"; //$NON-NLS-1$
+    /**
+     * The command name.
+     */
+    public static final String NAME = "rename"; //$NON-NLS-1$
 
     /**
-     * Constructor.
-     * @param wsStatus the workspace status
+     * @param wsStatus
+     *        the workspace status (cannot be <code>null</code>)
      */
-    public RenameCommand(WorkspaceStatus wsStatus) {
-        super(RENAME, wsStatus);
+    public RenameCommand( final WorkspaceStatus wsStatus ) {
+        super( wsStatus, NAME, "mv" ); //$NON-NLS-1$
     }
 
     /**

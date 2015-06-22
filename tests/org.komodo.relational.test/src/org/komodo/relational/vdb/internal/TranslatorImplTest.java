@@ -17,12 +17,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalObject.Filter;
-import org.komodo.relational.internal.RelationalModelFactory;
+import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.RelationalProperty;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
@@ -30,12 +32,11 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 public final class TranslatorImplTest extends RelationalModelTest {
 
     private Translator translator;
-    private Vdb vdb;
 
     @Before
     public void init() throws Exception {
-        this.vdb = RelationalModelFactory.createVdb( this.uow, _repo, null, "vdb", "/Users/sledge/hammer/MyVdb.vdb" );
-        this.translator = RelationalModelFactory.createTranslator( this.uow, _repo, this.vdb, "translator", "type" );
+        final Vdb vdb = createVdb();
+        this.translator = vdb.addTranslator( this.uow, "translator", "type" );
         commit();
     }
 
@@ -48,7 +49,7 @@ public final class TranslatorImplTest extends RelationalModelTest {
     public void shouldFailConstructionIfNotTranslator() {
         if ( RelationalObjectImpl.VALIDATE_INITIAL_STATE ) {
             try {
-                new TranslatorImpl( this.uow, _repo, this.vdb.getAbsolutePath() );
+                new TranslatorImpl( this.uow, _repo, this.translator.getParent( this.uow ).getAbsolutePath() );
                 fail();
             } catch ( final KException e ) {
                 // expected
@@ -137,6 +138,35 @@ public final class TranslatorImplTest extends RelationalModelTest {
         final String newValue = "newType";
         this.translator.setType( this.uow, newValue );
         assertThat( this.translator.getType( this.uow ), is( newValue ) );
+    }
+
+    /*
+     * ********************************************************************
+     * *****                  Resolver Tests                          *****
+     * ********************************************************************
+     */
+
+    @Test
+    public void shouldCreateUsingResolver() throws Exception {
+        final String name = "blah";
+
+        final RelationalProperties props = new RelationalProperties();
+        props.add( new RelationalProperty( VdbLexicon.Translator.TYPE, "oracle" ) );
+
+        final KomodoObject kobject = TranslatorImpl.RESOLVER.create( this.uow,
+                                                                     _repo,
+                                                                     this.translator.getParent( this.uow ),
+                                                                     name,
+                                                                     props );
+        assertThat( kobject, is( notNullValue() ) );
+        assertThat( kobject, is( instanceOf( Translator.class ) ) );
+        assertThat( kobject.getName( this.uow ), is( name ) );
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
+        final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
+        TranslatorImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", new RelationalProperties() );
     }
 
 }

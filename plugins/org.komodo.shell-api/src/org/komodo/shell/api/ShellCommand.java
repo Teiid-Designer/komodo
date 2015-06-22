@@ -29,17 +29,15 @@ import java.util.List;
  */
 public interface ShellCommand {
 
-	/**
-	 * Get the name of the command.
-	 * @return the command name
-	 */
-	public String getName();
+    /**
+     * @return the command name (never empty)
+     */
+    public String getName();
 
 	/**
-	 * Set the name of the command.
-	 * @param name the command name
+	 * @return the command name aliases (never <code>null</code> but can be empty)
 	 */
-	public void setName(String name);
+	public String[] getAliases();
 
     /**
      * @return the command arguments (can be <code>null</code>)
@@ -62,12 +60,6 @@ public interface ShellCommand {
 	 * @return the stream writer (can be <code>null</code> if not set)
 	 */
 	Writer getWriter();
-
-	/**
-	 * Set the workspace status
-	 * @param wsStatus the workspace status
-	 */
-	public void setWorkspaceStatus(WorkspaceStatus wsStatus);
 
 	/**
 	 * Init Valid workspace context types for this command

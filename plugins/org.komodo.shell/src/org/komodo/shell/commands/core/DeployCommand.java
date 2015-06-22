@@ -23,7 +23,6 @@ package org.komodo.shell.commands.core;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
@@ -45,17 +44,21 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
  */
 public class DeployCommand extends BuiltInShellCommand implements StringConstants {
 
-    private static final String DEPLOY = "deploy"; //$NON-NLS-1$
+    /**
+     * The command name.
+     */
+    public static final String NAME = "deploy"; //$NON-NLS-1$
 
     private static final String VDB_TYPE = VdbLexicon.Vdb.VIRTUAL_DATABASE;
 
     /**
-     * @param wsStatus a workspace status (cannot be <code>null</code>)
+     * @param wsStatus
+     *        a workspace status (cannot be <code>null</code>)
      */
-    public DeployCommand(WorkspaceStatus wsStatus) {
-        super(DEPLOY, wsStatus);
+    public DeployCommand( final WorkspaceStatus wsStatus ) {
+        super( wsStatus, NAME );
     }
-    
+
     @Override
     public boolean execute() throws Exception {
         WorkspaceStatus wsStatus = getWorkspaceStatus();

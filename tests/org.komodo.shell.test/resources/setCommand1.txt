@@ -1,6 +1,7 @@
 # Tests the Set Property command without optional context path
-create Model MyModel
-create Table MyTable ./MyModel
-cd MyModel/MyTable
+create Vdb MyVdb
+create Model MyModel ./MyVdb
+create Table MyTable ./MyVdb/MyModel
+cd MyVdb/MyModel/MyTable
 #
 set Property ANNOTATION mydescription

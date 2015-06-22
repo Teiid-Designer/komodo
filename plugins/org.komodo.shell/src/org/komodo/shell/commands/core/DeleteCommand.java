@@ -20,14 +20,17 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
  */
 public class DeleteCommand extends BuiltInShellCommand implements StringConstants {
 
-    private static final String DELETE = "delete"; //$NON-NLS-1$
+    /**
+     * The command name.
+     */
+    public static final String NAME = "delete"; //$NON-NLS-1$
 
     /**
-     * Constructor.
-     * @param wsStatus the workspace status
+     * @param wsStatus
+     *        the workspace status (cannot be <code>null</code>)
      */
-    public DeleteCommand(WorkspaceStatus wsStatus) {
-        super(DELETE, wsStatus);
+    public DeleteCommand( final WorkspaceStatus wsStatus ) {
+        super( wsStatus, NAME, "rm" ); //$NON-NLS-1$
     }
 
     /**

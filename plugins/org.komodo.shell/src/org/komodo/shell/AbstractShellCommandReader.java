@@ -36,10 +36,10 @@ import org.komodo.shell.commands.NoOpCommand;
 
 /**
  * Abstract class for all shell command readers.
- * 
+ *
  * This class adapted from https://github.com/Governance/s-ramp/blob/master/s-ramp-shell
  * - altered to use WorkspaceStatus
- * 
+ *
  * @author eric.wittmann@redhat.com
  */
 public abstract class AbstractShellCommandReader implements ShellCommandReader {
@@ -103,7 +103,7 @@ public abstract class AbstractShellCommandReader implements ShellCommandReader {
         line = filterLine(line, properties);
 		Arguments arguments = new Arguments(line);
 		if (arguments.isEmpty()) {
-			return new NoOpCommand("NoOp"); //$NON-NLS-1$
+            return new NoOpCommand( this.wsStatus );
 		}
 
 		// The first argument is the command name.
@@ -213,4 +213,23 @@ public abstract class AbstractShellCommandReader implements ShellCommandReader {
 	    return false;
 	}
 
+    protected String getPrompt() throws Exception {
+        // see if full path should be displayed
+        String path = null;
+
+        if ( getWorkspaceStatus().isShowingFullPathInPrompt() ) {
+            path = getWorkspaceStatus().getCurrentContext().getFullName();
+        } else {
+            path = getWorkspaceStatus().getCurrentContext().getName();
+        }
+
+        assert ( path != null );
+
+        // see if type should be displayed
+        if ( getWorkspaceStatus().isShowingTypeInPrompt() ) {
+            return Messages.getString( Messages.SHELL.PROMPT_WITH_TYPE, path, getWorkspaceStatus().getCurrentContext().getType() );
+        }
+
+        return Messages.getString( Messages.SHELL.PROMPT, path );
+    }
 }

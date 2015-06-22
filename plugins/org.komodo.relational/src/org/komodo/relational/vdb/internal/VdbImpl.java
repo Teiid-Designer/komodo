@@ -30,6 +30,7 @@ import org.komodo.relational.vdb.Entry;
 import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.VdbImport;
+import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.DescriptorImpl;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.repository.PropertyDescriptorImpl;
@@ -246,8 +247,8 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
                            final RelationalProperties properties ) throws KException {
             final Object origFilePathValue = properties.getValue( VdbLexicon.Vdb.ORIGINAL_FILE );
             final String origFilePath = origFilePathValue == null ? null : origFilePathValue.toString();
-            final String workspacePath = ( ( parent == null ) ? null : parent.getAbsolutePath() );
-            return RelationalModelFactory.createVdb( transaction, repository, workspacePath, id, origFilePath );
+            final WorkspaceManager mgr = WorkspaceManager.getInstance( repository );
+            return mgr.createVdb( transaction, parent, id, origFilePath );
         }
 
         /**
@@ -325,11 +326,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
     @Override
     public DataRole addDataRole( final UnitOfWork transaction,
                                  final String dataRoleName ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-
-        final DataRole result = RelationalModelFactory.createDataRole( transaction, getRepository(), this, dataRoleName );
-        return result;
+        return RelationalModelFactory.createDataRole( transaction, getRepository(), this, dataRoleName );
     }
 
     /**
@@ -342,11 +339,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
     public Entry addEntry( final UnitOfWork transaction,
                            final String entryName,
                            final String entryPath ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-
-        final Entry result = RelationalModelFactory.createEntry( transaction, getRepository(), this, entryName, entryPath );
-        return result;
+        return RelationalModelFactory.createEntry( transaction, getRepository(), this, entryName, entryPath );
     }
 
     /**
@@ -357,11 +350,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
     @Override
     public VdbImport addImport( final UnitOfWork transaction,
                                 final String vdbName ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-
-        final VdbImport result = RelationalModelFactory.createVdbImport( transaction, getRepository(), this, vdbName );
-        return result;
+        return RelationalModelFactory.createVdbImport( transaction, getRepository(), this, vdbName );
     }
 
     /**
@@ -372,11 +361,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
     @Override
     public Model addModel( final UnitOfWork transaction,
                            final String modelName ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-
-        final Model result = RelationalModelFactory.createModel( transaction, getRepository(), this, modelName );
-        return result;
+        return RelationalModelFactory.createModel( transaction, getRepository(), this, modelName );
     }
 
     /**
@@ -389,15 +374,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
     public Translator addTranslator( final UnitOfWork transaction,
                                      final String translatorName,
                                      final String translatorType ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-
-        final Translator result = RelationalModelFactory.createTranslator( transaction,
-                                                                           getRepository(),
-                                                                           this,
-                                                                           translatorName,
-                                                                           translatorType );
-        return result;
+        return RelationalModelFactory.createTranslator( transaction, getRepository(), this, translatorName, translatorType );
     }
 
     /**

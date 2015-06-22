@@ -1,0 +1,7 @@
+set global EXPORT_DEFAULT_DIR /export/directory
+set global IMPORT_DEFAULT_DIR /import/directory
+set global RECORDING_FILE /recording/file.txt
+set global SHOW_FULL_PATH_IN_PROMPT true
+set global SHOW_HIDDEN_PROPERTIES true
+set global SHOW_PROP_NAME_PREFIX true
+set global SHOW_TYPE_IN_PROMPT false

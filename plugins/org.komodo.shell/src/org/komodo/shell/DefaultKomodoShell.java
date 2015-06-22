@@ -156,6 +156,17 @@ public class DefaultKomodoShell implements KomodoShell {
         return outStream;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.KomodoShell#getShellDataLocation()
+     */
+    @Override
+    public String getShellDataLocation() {
+        final String userHome = System.getProperty( "user.home", "/" ); //$NON-NLS-1$ //$NON-NLS-2$
+        return ( userHome + "/.komodo" ); //$NON-NLS-1$
+    }
+
     @Override
 	public Writer getCommandOutput() {
     	return commandOutput;
@@ -289,17 +300,35 @@ public class DefaultKomodoShell implements KomodoShell {
      * Shuts down the shell.
      */
     public void shutdown() {
-        if (shutdown)
+        if ( this.shutdown ) {
             return; // avoid shutting down twice
-
-        outStream.print(msgIndentStr + Messages.getString(SHELL.SHUTTING_DOWN));
-        try {
-            shutdown = true;
-            this.reader.close();
-        } catch (IOException e) {
-            // ignore
         }
-        outStream.println(msgIndentStr + Messages.getString(SHELL.DONE));
+
+        // workspace status must be saved before engine is stopped
+        try {
+            this.wsStatus.save();
+        } catch ( final Exception e ) {
+            displayMessage( "Error during shutdown saving workspace status: " + e.getLocalizedMessage() ); //$NON-NLS-1$
+        }
+
+        try {
+            if ( this.kEngine != null ) {
+                this.kEngine.shutdownAndWait();
+            }
+        } catch ( final Exception e ) {
+            displayMessage( "Error during shutdown shutting down KEngine: " + e.getLocalizedMessage() ); //$NON-NLS-1$
+        }
+
+        outStream.print( msgIndentStr + Messages.getString( SHELL.SHUTTING_DOWN ) );
+        shutdown = true;
+
+        try {
+            this.reader.close();
+        } catch ( final IOException e ) {
+            displayMessage( "Error during shutdown closing shell reader: " + e.getLocalizedMessage() ); //$NON-NLS-1$
+        }
+
+        outStream.println( msgIndentStr + Messages.getString( SHELL.DONE ) );
     }
 
     private void displayMessage(String message) {

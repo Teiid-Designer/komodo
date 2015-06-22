@@ -21,14 +21,12 @@ import org.komodo.relational.RelationalConstants;
 import org.komodo.relational.RelationalConstants.Nullable;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalObject.Filter;
-import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.ResultSetColumn;
 import org.komodo.relational.model.StatementOption;
 import org.komodo.relational.model.StoredProcedure;
 import org.komodo.relational.model.TabularResultSet;
-import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
@@ -46,11 +44,10 @@ public final class ResultSetColumnImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        final Vdb vdb = RelationalModelFactory.createVdb( this.uow, _repo, null, "vdb", "path" );
-        final Model model = RelationalModelFactory.createModel( this.uow, _repo, vdb, "model" );
-        final StoredProcedure procedure = RelationalModelFactory.createStoredProcedure( this.uow, _repo, model, "procedure" );
-        this.resultSet = RelationalModelFactory.createTabularResultSet( this.uow, _repo, procedure );
-        this.column = RelationalModelFactory.createResultSetColumn( this.uow, _repo, this.resultSet, NAME );
+        final Model model = createModel();
+        final StoredProcedure procedure = model.addStoredProcedure( this.uow, "procedure" );
+        this.resultSet = procedure.setResultSet( this.uow, TabularResultSet.class );
+        this.column = this.resultSet.addColumn( this.uow, NAME );
         commit();
     }
 
@@ -469,6 +466,27 @@ public final class ResultSetColumnImplTest extends RelationalModelTest {
         final StatementOption statementOption = this.column.getStatementOptions( this.uow )[0];
         assertThat( statementOption.getName( this.uow ), is( option ) );
         assertThat( statementOption.getValue( this.uow ), is( ( Object )value ) );
+    }
+
+    /*
+     * ********************************************************************
+     * *****                  Resolver Tests                          *****
+     * ********************************************************************
+     */
+
+    @Test
+    public void shouldCreateUsingResolver() throws Exception {
+        final String name = "blah";
+        final KomodoObject kobject = ResultSetColumnImpl.RESOLVER.create( this.uow, _repo, this.resultSet, name, null );
+        assertThat( kobject, is( notNullValue() ) );
+        assertThat( kobject, is( instanceOf( ResultSetColumn.class ) ) );
+        assertThat( kobject.getName( this.uow ), is( name ) );
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
+        final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
+        ResultSetColumnImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
     }
 
 }

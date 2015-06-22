@@ -14,13 +14,11 @@ import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
 import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalObject.Filter;
-import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.SchemaElement.SchemaElementType;
@@ -28,6 +26,7 @@ import org.komodo.relational.model.StatementOption;
 import org.komodo.relational.model.UserDefinedFunction;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyDescriptor;
 
@@ -38,7 +37,8 @@ public final class UserDefinedFunctionImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        this.function = RelationalModelFactory.createUserDefinedFunction( this.uow, _repo, mock( Model.class ), "function" );
+        final Model model = createModel();
+        this.function = model.addUserDefinedFunction( this.uow, "function" );
         commit();
     }
 
@@ -382,6 +382,31 @@ public final class UserDefinedFunctionImplTest extends RelationalModelTest {
         final StatementOption statementOption = this.function.getStatementOptions( this.uow )[0];
         assertThat( statementOption.getName( this.uow ), is( option ) );
         assertThat( statementOption.getValue( this.uow ), is( ( Object )value ) );
+    }
+
+    /*
+     * ********************************************************************
+     * *****                  Resolver Tests                          *****
+     * ********************************************************************
+     */
+
+    @Test
+    public void shouldCreateUsingResolver() throws Exception {
+        final String name = "blah";
+        final KomodoObject kobject = UserDefinedFunctionImpl.RESOLVER.create( this.uow,
+                                                                              _repo,
+                                                                              this.function.getParent( this.uow ),
+                                                                              name,
+                                                                              null );
+        assertThat( kobject, is( notNullValue() ) );
+        assertThat( kobject, is( instanceOf( UserDefinedFunction.class ) ) );
+        assertThat( kobject.getName( this.uow ), is( name ) );
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
+        final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
+        UserDefinedFunctionImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
     }
 
 }

@@ -16,6 +16,7 @@
 package org.komodo.shell.commands;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -43,23 +44,29 @@ public class HelpCommand extends BuiltInShellCommand {
     /**
      * The command name.
      */
-    public static String NAME = "help"; //$NON-NLS-1$
+    public static final String NAME = "help"; //$NON-NLS-1$
 
 	private static final int CMDS_PER_LINE = 4;
 
-	private final Map<String, ShellCommand> commands;
+	private Map<String, ShellCommand> commands = Collections.< String, ShellCommand >emptyMap();
 
-	/**
-	 * Constructor.
-	 * @param wsStatus the workspace status
-	 * @param commands the commands
-	 */
-	public HelpCommand(WorkspaceStatus wsStatus, Map<String, ShellCommand> commands) {
-		super(NAME, wsStatus);
-		this.commands = commands;
-	}
+    /**
+     * @param wsStatus
+     *        the workspace status (cannot be <code>null</code>)
+     */
+    public HelpCommand( final WorkspaceStatus wsStatus ) {
+        super( wsStatus, NAME, "man" ); //$NON-NLS-1$
+    }
 
-	/**
+    /**
+     * @param commands
+     *        the commands the commands applicable for the current context (can be <code>null</code> or empty)
+     */
+    public void setCommands(final Map< String, ShellCommand > commands) {
+        this.commands = ( ( commands == null ) ? Collections.< String, ShellCommand >emptyMap() : commands );
+    }
+
+    /**
 	 * Execute.
 	 *
 	 * @return true, if successful
@@ -115,25 +122,32 @@ public class HelpCommand extends BuiltInShellCommand {
 		print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.Help_GET_HELP_2));
 	}
 
-	/**
-	 * Prints the help for a single command.
-	 *
-	 * @param cmdName the cmd name
-	 * @throws Exception the exception
-	 */
-	private void printHelpForCommand(String cmdName) throws Exception {
-		ShellCommand command = this.commands.get(cmdName);
+    private void printHelpForCommand( final String cmdName ) throws Exception {
+        ShellCommand command = this.commands.get( cmdName );
+
         if ( command == null ) {
-            if ( NAME.equals( cmdName ) ) {
-                printHelp( CompletionConstants.MESSAGE_INDENT );
-            } else {
-                print( CompletionConstants.MESSAGE_INDENT, Messages.getString( SHELL.Help_INVALID_COMMAND ) );
+            // see if an alias
+            for ( final ShellCommand cmd : this.commands.values() ) {
+                final String[] aliases = cmd.getAliases();
+
+                if ( aliases.length != 0 ) {
+                    for ( final String alias : aliases ) {
+                        if ( alias.equals( cmdName ) ) {
+                            command = cmd;
+                            break;
+                        }
+                    }
+                }
             }
+        }
+
+        if (command == null) {
+            print( CompletionConstants.MESSAGE_INDENT, Messages.getString( SHELL.Help_INVALID_COMMAND, cmdName ) );
         } else {
-			command.setOutput(getWorkspaceStatus().getShell().getCommandOutput());
-			command.printHelp(CompletionConstants.MESSAGE_INDENT);
-		}
-	}
+            command.setOutput( getWorkspaceStatus().getShell().getCommandOutput() );
+            command.printHelp( CompletionConstants.MESSAGE_INDENT );
+        }
+    }
 
 	/**
 	 * Tab completion.

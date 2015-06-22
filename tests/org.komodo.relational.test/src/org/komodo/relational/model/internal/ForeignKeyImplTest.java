@@ -19,6 +19,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalObject.Filter;
+import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.RelationalProperty;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Column;
@@ -26,7 +28,9 @@ import org.komodo.relational.model.ForeignKey;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.TableConstraint;
+import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.Constraint;
@@ -42,9 +46,14 @@ public final class ForeignKeyImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        this.parentTable = RelationalModelFactory.createTable( this.uow, _repo, mock( Model.class ), "parentTable" );
-        this.refTable = RelationalModelFactory.createTable( this.uow, _repo, mock( Model.class ), "refTable" );
-        this.foreignKey = RelationalModelFactory.createForeignKey( this.uow, _repo, this.parentTable, NAME, this.refTable );
+        final Vdb vdb = createVdb();
+        final Model model = createModel();
+        this.parentTable = model.addTable( this.uow, "parentTable" );
+
+        final Model refModel = vdb.addModel( this.uow, "refModel" );
+        this.refTable = refModel.addTable( this.uow, "refTable" );
+
+        this.foreignKey = this.parentTable.addForeignKey( this.uow, NAME, this.refTable );
         commit();
     }
 
@@ -175,6 +184,36 @@ public final class ForeignKeyImplTest extends RelationalModelTest {
         commit(); // must commit so that query used in next method will work
 
         assertThat( this.foreignKey.getReferencesTable( this.uow ), is( newTable ) );
+    }
+
+    /*
+     * ********************************************************************
+     * *****                  Resolver Tests                          *****
+     * ********************************************************************
+     */
+
+    @Test
+    public void shouldCreateUsingResolver() throws Exception {
+        final String name = "blah";
+        final Table keyRefTable = createTable( "anotherVdb", "/different/path/another.vdb", "anotherModel", "referencedTable" );
+
+        final RelationalProperties props = new RelationalProperties();
+        props.add( new RelationalProperty( Constraint.FOREIGN_KEY_CONSTRAINT, keyRefTable ) );
+
+        final KomodoObject kobject = ForeignKeyImpl.RESOLVER.create( this.uow,
+                                                                     _repo,
+                                                                     this.parentTable,
+                                                                     name,
+                                                                     props );
+        assertThat( kobject, is( notNullValue() ) );
+        assertThat( kobject, is( instanceOf( ForeignKey.class ) ) );
+        assertThat( kobject.getName( this.uow ), is( name ) );
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
+        final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
+        ForeignKeyImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", new RelationalProperties() );
     }
 
 }

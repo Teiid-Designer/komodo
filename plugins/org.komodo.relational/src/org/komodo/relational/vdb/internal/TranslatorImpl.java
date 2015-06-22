@@ -7,10 +7,11 @@
  */
 package org.komodo.relational.vdb.internal;
 
+import org.komodo.relational.Messages;
+import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.internal.RelationalChildRestrictedObject;
-import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
@@ -52,7 +53,14 @@ public final class TranslatorImpl extends RelationalChildRestrictedObject implem
             final String transType = transTypeValue == null ? null : transTypeValue.toString();
             final AdapterFactory adapter = new AdapterFactory( parent.getRepository() );
             final Vdb parentVdb = adapter.adapt( transaction, parent, Vdb.class );
-            return RelationalModelFactory.createTranslator( transaction, parent.getRepository(), parentVdb, id, transType );
+
+            if ( parentVdb == null ) {
+                throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
+                                                          parent.getAbsolutePath(),
+                                                          Translator.class.getSimpleName() ) );
+            }
+
+            return parentVdb.addTranslator( transaction, id, transType );
         }
 
         /**

@@ -11,7 +11,6 @@ import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.internal.AdapterFactory;
-import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.ForeignKey;
@@ -54,8 +53,15 @@ public final class ForeignKeyImpl extends TableConstraintImpl implements Foreign
             final AdapterFactory adapter = new AdapterFactory( repository );
             final Table parentTable = adapter.adapt( transaction, parent, Table.class );
             final Object keyRefValue = properties.getValue( Constraint.FOREIGN_KEY_CONSTRAINT );
-            final Table keyRef = adapter.adapt( transaction, keyRefValue, Table.class );
-            return RelationalModelFactory.createForeignKey( transaction, repository, parentTable, id, keyRef );
+            final Table keyRefTable = adapter.adapt( transaction, keyRefValue, Table.class );
+
+            if ( parentTable == null ) {
+                throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
+                                                          parent.getAbsolutePath(),
+                                                          ForeignKey.class.getSimpleName() ) );
+            }
+
+            return parentTable.addForeignKey( transaction, id, keyRefTable );
         }
 
         /**

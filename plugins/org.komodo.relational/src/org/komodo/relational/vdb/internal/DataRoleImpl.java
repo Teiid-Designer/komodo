@@ -62,7 +62,14 @@ public final class DataRoleImpl extends RelationalObjectImpl implements DataRole
                                 final RelationalProperties properties ) throws KException {
             final AdapterFactory adapter = new AdapterFactory( repository );
             final Vdb parentVdb = adapter.adapt( transaction, parent, Vdb.class );
-            return RelationalModelFactory.createDataRole( transaction, repository, parentVdb, id );
+
+            if ( parentVdb == null ) {
+                throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
+                                                          parent.getAbsolutePath(),
+                                                          DataRole.class.getSimpleName() ) );
+            }
+
+            return parentVdb.addDataRole( transaction, id );
         }
 
         /**
@@ -178,12 +185,7 @@ public final class DataRoleImpl extends RelationalObjectImpl implements DataRole
     @Override
     public Permission addPermission( final UnitOfWork transaction,
                                      final String permissionName ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( permissionName, "permissionName" ); //$NON-NLS-1$
-
-        final Permission result = RelationalModelFactory.createPermission( transaction, getRepository(), this, permissionName );
-        return result;
+        return RelationalModelFactory.createPermission( transaction, getRepository(), this, permissionName );
     }
 
     /**

@@ -10,6 +10,7 @@ package org.komodo.relational.model.internal;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
+import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -23,11 +24,11 @@ import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.Index;
-import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.TableConstraint;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 
@@ -41,8 +42,8 @@ public final class IndexImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        this.table = RelationalModelFactory.createTable( this.uow, _repo, mock( Model.class ), "table" );
-        this.index = RelationalModelFactory.createIndex( this.uow, _repo, this.table, NAME );
+        this.table = createTable();
+        this.index = this.table.addIndex( this.uow, NAME );
         commit();
     }
 
@@ -156,6 +157,27 @@ public final class IndexImplTest extends RelationalModelTest {
         final String value = "expression";
         this.index.setExpression( this.uow, value );
         assertThat( this.index.getExpression( this.uow ), is( value ) );
+    }
+
+    /*
+     * ********************************************************************
+     * *****                  Resolver Tests                          *****
+     * ********************************************************************
+     */
+
+    @Test
+    public void shouldCreateUsingResolver() throws Exception {
+        final String name = "blah";
+        final KomodoObject kobject = IndexImpl.RESOLVER.create( this.uow, _repo, this.table, name, null );
+        assertThat( kobject, is( notNullValue() ) );
+        assertThat( kobject, is( instanceOf( Index.class ) ) );
+        assertThat( kobject.getName( this.uow ), is( name ) );
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
+        final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
+        IndexImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
     }
 
 }

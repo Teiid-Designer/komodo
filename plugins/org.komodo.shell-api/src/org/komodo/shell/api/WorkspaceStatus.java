@@ -24,8 +24,9 @@ package org.komodo.shell.api;
 import java.io.File;
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.util.Arrays;
-import java.util.List;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import org.komodo.core.KEngine;
 import org.komodo.relational.teiid.Teiid;
@@ -50,41 +51,104 @@ public interface WorkspaceStatus extends StringConstants {
 	public static final String EXPORT_DEFAULT_DIR_KEY = "EXPORT_DEFAULT_DIR"; //$NON-NLS-1$
 
     /**
-     * Set to <code>true</code> if property namespace prefixes should be shown.
+     * Set to <code>true</code> if the full path of the current context object should be displayed in the prompt.
      */
-    public static final String SHOW_PROP_NAME_PREFIX_KEY = "SHOW_PROP_NAME_PREFIX"; //$NON-NLS-1$
+    String SHOW_FULL_PATH_IN_PROMPT_KEY = "SHOW_FULL_PATH_IN_PROMPT"; //$NON-NLS-1$
 
     /**
-     * A collection of the valid global property names.
+     * Set to <code>true</code> if the hidden properties should also be displayed.
      */
-    public static final List< String > GLOBAL_PROP_KEYS = Arrays.asList( RECORDING_FILE_KEY,
-                                                                         IMPORT_DEFAULT_DIR_KEY,
-                                                                         EXPORT_DEFAULT_DIR_KEY );
+    String SHOW_HIDDEN_PROPERTIES_KEY = "SHOW_HIDDEN_PROPERTIES"; //$NON-NLS-1$
+
+    /**
+     * Set to <code>true</code> if property namespace prefixes should be shown.
+     */
+    String SHOW_PROP_NAME_PREFIX_KEY = "SHOW_PROP_NAME_PREFIX"; //$NON-NLS-1$
+
+    /**
+     * Set to <code>true</code> if the type of the current context object should be displayed in the prompt.
+     */
+    String SHOW_TYPE_IN_PROMPT_KEY = "SHOW_TYPE_IN_PROMPT"; //$NON-NLS-1$
+
+    /**
+     * An unmodifiable collection of the valid global property names and their non-<code>null</code> default values.
+     */
+    Map< String, String > GLOBAL_PROPS = Collections.unmodifiableMap( new HashMap< String, String >() {
+
+        private static final long serialVersionUID = 1L;
+
+        // add default values for EVERY property
+        {
+            put( EXPORT_DEFAULT_DIR_KEY, StringConstants.EMPTY_STRING );
+            put( IMPORT_DEFAULT_DIR_KEY, StringConstants.EMPTY_STRING );
+            put( RECORDING_FILE_KEY, StringConstants.EMPTY_STRING );
+            put( SHOW_FULL_PATH_IN_PROMPT_KEY, Boolean.FALSE.toString() );
+            put( SHOW_HIDDEN_PROPERTIES_KEY, Boolean.FALSE.toString() );
+            put( SHOW_PROP_NAME_PREFIX_KEY, Boolean.FALSE.toString() );
+            put( SHOW_TYPE_IN_PROMPT_KEY, Boolean.TRUE.toString() );
+        }
+    } );
+
+    /**
+     * Sets the specified global property value.
+     *
+     * @param propKey
+     *        the property key (cannot be empty)
+     * @param propValue
+     *        the property value (can be empty when changing to the default value)
+     */
+    void setProperty( final String propKey,
+                      final String propValue );
+
+    /**
+     * Sets global workspace properties on startup
+     *
+     * @param props
+     *        the properties (can be <code>null</code> or empty if resetting to default values)
+     */
+    void setProperties( final Properties props );
 
 	/**
-	 * Sets the specified global property value
-	 * @param propKey the property key
-	 * @param propValue the property value
+	 * Set all properties back to their default values.
 	 */
-	void setProperty(String propKey, String propValue);
+	void resetProperties();
 
-	/**
-	 * Sets global workspace properties on startup
-	 * @param props the properties
-	 */
-	void setProperties(Properties props);
+    /**
+     * Gets a copy of the global workspace properties.
+     *
+     * @return the global workspace properties (never <code>null</code> or empty)
+     * @see #setProperty(String, String)
+     */
+    Properties getProperties();
 
-	/**
-	 * Gets global workspace properties
-	 * @return the global workspace properties
-	 */
-	Properties getProperties();
+    /**
+     * @param propertyName the name of the property being checked (cannot be empty)
+     * @return <code>true</code> if a known boolean property
+     */
+    boolean isBooleanProperty( final String propertyName );
+
+    /**
+     * @param propertyName
+     *        the name of the property being checked (cannot be empty)
+     * @param proposedValue
+     *        the proposed value (can be empty if removing or resetting to the default value)
+     * @return an error message or <code>null</code> if name and proposed value are valid
+     */
+    String validateGlobalPropertyValue( final String propertyName,
+                                        final String proposedValue );
 
 	/**
 	 * Get the workspace context
 	 * @return the workspace context
 	 */
 	WorkspaceContext getWorkspaceContext();
+
+    /**
+     * Saves data needed to restore next session (preferences, settings, configuration, etc.).
+     *
+     * @throws Exception
+     */
+    void save() throws Exception;
 
 	/**
 	 * Set the current workspace context
@@ -118,9 +182,28 @@ public interface WorkspaceStatus extends StringConstants {
 	File getRecordingOutputFile();
 
     /**
+     * @return <code>true</code> if the full object path is being displayed in the prompt
+     * @see #SHOW_FULL_PATH_IN_PROMPT_KEY
+     */
+    boolean isShowingFullPathInPrompt();
+
+    /**
+     * @return <code>true</code> if hidden properties are being displayed
+     * @see #SHOW_HIDDEN_PROPERTIES_KEY
+     */
+    boolean isShowingHiddenProperties();
+
+    /**
      * @return <code>true</code> if property namespace prefixes should be shown
+     * @see #SHOW_PROP_NAME_PREFIX_KEY
      */
     boolean isShowingPropertyNamePrefixes();
+
+    /**
+     * @return <code>true</code> if property namespace prefixes should be shown
+     * @see #SHOW_TYPE_IN_PROMPT_KEY
+     */
+    boolean isShowingTypeInPrompt();
 
 	/**
      * @return current teiid model

@@ -25,9 +25,9 @@ import org.komodo.core.KEngine;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.internal.RelationalChildRestrictedObject;
-import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.teiid.Teiid;
+import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
@@ -73,8 +73,8 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
                              final KomodoObject parent,
                              final String id,
                              final RelationalProperties properties ) throws KException {
-            final String workspacePath = ( ( parent == null ) ? null : parent.getAbsolutePath() );
-            return RelationalModelFactory.createTeiid( transaction, repository, workspacePath, id );
+            final WorkspaceManager mgr = WorkspaceManager.getInstance( repository );
+            return mgr.createTeiid( transaction, parent, id );
         }
 
         /**

@@ -7,9 +7,10 @@
  */
 package org.komodo.relational.model.internal;
 
+import org.komodo.relational.Messages;
+import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.internal.AdapterFactory;
-import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.VirtualProcedure;
@@ -49,7 +50,14 @@ public final class VirtualProcedureImpl extends AbstractProcedureImpl implements
                                         final RelationalProperties properties ) throws KException {
             final AdapterFactory adapter = new AdapterFactory( repository );
             final Model parentModel = adapter.adapt( transaction, parent, Model.class );
-            return RelationalModelFactory.createVirtualProcedure( transaction, repository, parentModel, id );
+
+            if ( parentModel == null ) {
+                throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
+                                                          parent.getAbsolutePath(),
+                                                          VirtualProcedure.class.getSimpleName() ) );
+            }
+
+            return parentModel.addVirtualProcedure( transaction, id );
         }
 
         /**

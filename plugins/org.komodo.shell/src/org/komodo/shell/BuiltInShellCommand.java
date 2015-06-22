@@ -85,23 +85,70 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
         return propertyName;
     }
 
-	private StringNameValidator nameValidator = new StringNameValidator();
+	private final StringNameValidator nameValidator = new StringNameValidator();
+    private final String name;
+    private final String[] aliases;
 
     /**
-     * Constructor
-	 * @param commandName the command name
-	 * @param wsStatus workspace status
-	 */
-	public BuiltInShellCommand(String commandName, WorkspaceStatus wsStatus) {
-		super();
-		setName(commandName);
-		setWorkspaceStatus(wsStatus);
-		initValidWsContextTypes();
+     * Constructs a command.
+     *
+     * @param status
+     *        the workspace status (cannot be <code>null</code>)
+     * @param names
+     *        the command name and then any aliases (cannot be <code>null</code>, empty, or have a <code>null</code> first
+     *        element)
+     */
+	public BuiltInShellCommand(final WorkspaceStatus status,
+	                           final String... names ) {
+		super(status);
+
+		ArgCheck.isNotEmpty( names, "names" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( names[0], "names[0]" ); //$NON-NLS-1$
+
+        this.name = names[0];
+
+        // save aliases if necessary
+        if ( names.length == 1 ) {
+            this.aliases = StringConstants.EMPTY_ARRAY;
+        } else {
+            this.aliases = new String[ names.length - 1 ];
+            boolean firstTime = true;
+            int i = 0;
+
+            for ( final String alias : names ) {
+                if (firstTime) {
+                    firstTime = false;
+                    continue;
+                }
+
+                this.aliases[i++] = alias;
+            }
+        }
+
+        initValidWsContextTypes();
 	}
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommand#getAliases()
+     */
+    @Override
+    public final String[] getAliases() {
+        return this.aliases;
+    }
 
 	protected WorkspaceContext getContext() {
 	    return getWorkspaceStatus().getCurrentContext();
 	}
+
+    /**
+     * @see org.komodo.shell.api.ShellCommand#getName()
+     */
+    @Override
+    public final String getName() {
+        return this.name;
+    }
 
 	protected boolean isShowingPropertyNamePrefixes() {
 	    return getWorkspaceStatus().isShowingPropertyNamePrefixes();
@@ -116,6 +163,30 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
         printHelpUsage( 2 * indent );
     }
 
+    private void printAliases( final int indent ) {
+        final int twoIndents = ( 2 * indent );
+        final String[] aliases = getAliases();
+
+        if ( aliases.length == 0 ) {
+            print( twoIndents, Messages.getString( SHELL.HelpNoAliases ) );
+        } else {
+            final StringBuilder builder = new StringBuilder();
+            boolean firstTime = true;
+
+            for ( final String alias : aliases ) {
+                if ( firstTime ) {
+                    firstTime = false;
+                } else {
+                    builder.append( ", " ); //$NON-NLS-1$
+                }
+
+                builder.append( alias );
+            }
+
+            print( twoIndents, builder.toString() );
+        }
+    }
+
     /**
      * @see org.komodo.shell.api.ShellCommand#printHelp(int indent)
      */
@@ -124,6 +195,11 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
         // description
         print( indent, Messages.getString( SHELL.HelpDescriptionHeading ) );
         printHelpDescription( indent );
+        print();
+
+        // aliases
+        print( indent, Messages.getString( SHELL.HelpAliasesHeading ) );
+        printAliases( indent );
         print();
 
         // usage
@@ -325,31 +401,6 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
 			return false;
 		}
 		return true;
-	}
-
-	/**
-	 * Validates whether the supplied property value is valid for the specified global property
-	 * If invalid an error message is printed out.
-	 * @param propName the property name
-	 * @param propValue the property value
-	 * @return 'true' if the property is valid for the context, 'false' if not.
-	 */
-	public boolean validateGlobalPropertyValue(String propName, String propValue) {
-		// TODO: add logic to test
-		return true;
-	}
-
-	/**
-	 * Validate whether the supplied propName is a valid global property.  If invalid, a message is printed out.
-	 * @param propName the property name
-	 * @return 'true' if valid, 'false' if not.
-	 * @throws Exception exception if problem getting the value.
-	 */
-	public boolean validateGlobalProperty(String propName) throws Exception {
-		if(WorkspaceStatus.GLOBAL_PROP_KEYS.contains(propName.toUpperCase())) {
-			return true;
-		}
-		return false;
 	}
 
     /**

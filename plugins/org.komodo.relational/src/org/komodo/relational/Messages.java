@@ -78,6 +78,11 @@ public class Messages implements StringConstants {
         FUNCTION_NOT_FOUND_TO_REMOVE,
 
         /**
+         * An error message indicating the type of the parent object is invalid.
+         */
+        INVALID_PARENT_TYPE,
+
+        /**
          * An error message indicating the proposed statement option value is invalid. Most likely this is a multi-valued value
          * which is not supported.
          */

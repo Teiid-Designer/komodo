@@ -15,7 +15,6 @@ import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
 import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,7 +22,6 @@ import org.komodo.relational.RelationalConstants;
 import org.komodo.relational.RelationalConstants.Nullable;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalObject.Filter;
-import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.AbstractProcedure;
 import org.komodo.relational.model.Model;
@@ -32,6 +30,7 @@ import org.komodo.relational.model.Parameter.Direction;
 import org.komodo.relational.model.StatementOption;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyDescriptor;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
@@ -48,8 +47,9 @@ public final class ParameterImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        this.procedure = RelationalModelFactory.createVirtualProcedure( this.uow, _repo, mock( Model.class ), "procedure" );
-        this.parameter = RelationalModelFactory.createParameter( this.uow, _repo, this.procedure, NAME );
+        final Model model = createModel();
+        this.procedure = model.addVirtualProcedure( this.uow, "procedure" );
+        this.parameter = this.procedure.addParameter( this.uow, NAME );
         commit();
     }
 
@@ -437,6 +437,27 @@ public final class ParameterImplTest extends RelationalModelTest {
     @Test
     public void shouldNotHaveStandardOptionNames() throws Exception {
         assertThat( this.parameter.getStandardOptionNames().length, is( 0 ) );
+    }
+
+    /*
+     * ********************************************************************
+     * *****                  Resolver Tests                          *****
+     * ********************************************************************
+     */
+
+    @Test
+    public void shouldCreateUsingResolver() throws Exception {
+        final String name = "blah";
+        final KomodoObject kobject = ParameterImpl.RESOLVER.create( this.uow, _repo, this.procedure, name, null );
+        assertThat( kobject, is( notNullValue() ) );
+        assertThat( kobject, is( instanceOf( Parameter.class ) ) );
+        assertThat( kobject.getName( this.uow ), is( name ) );
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
+        final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
+        ParameterImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
     }
 
 }

@@ -17,12 +17,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalObject.Filter;
-import org.komodo.relational.internal.RelationalModelFactory;
+import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.RelationalProperty;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.vdb.Entry;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
@@ -30,12 +32,11 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 public final class EntryImplTest extends RelationalModelTest {
 
     private Entry entry;
-    private Vdb vdb;
 
     @Before
     public void init() throws Exception {
-        this.vdb = RelationalModelFactory.createVdb( this.uow, _repo, null, "vdb", "/Users/sledge/hammer/MyVdb.vdb" );
-        this.entry = RelationalModelFactory.createEntry( this.uow, _repo, this.vdb, "entry", "path" );
+        final Vdb vdb = createVdb();
+        this.entry = vdb.addEntry( this.uow, "entry", "path" );
         commit();
     }
 
@@ -48,7 +49,7 @@ public final class EntryImplTest extends RelationalModelTest {
     public void shouldFailConstructionIfNotEntry() {
         if ( RelationalObjectImpl.VALIDATE_INITIAL_STATE ) {
             try {
-                new EntryImpl( this.uow, _repo, this.vdb.getAbsolutePath() );
+                new EntryImpl( this.uow, _repo, this.entry.getParent( this.uow ).getAbsolutePath() );
                 fail();
             } catch ( final KException e ) {
                 // expected
@@ -127,6 +128,31 @@ public final class EntryImplTest extends RelationalModelTest {
         final String newValue = "newPath";
         this.entry.setPath( this.uow, newValue );
         assertThat( this.entry.getPath( this.uow ), is( newValue ) );
+    }
+
+    /*
+     * ********************************************************************
+     * *****                  Resolver Tests                          *****
+     * ********************************************************************
+     */
+
+    @Test
+    public void shouldCreateUsingResolver() throws Exception {
+        final String name = "blah";
+
+        final RelationalProperties props = new RelationalProperties();
+        props.add( new RelationalProperty( VdbLexicon.Entry.PATH, "entryPath" ) );
+
+        final KomodoObject kobject = EntryImpl.RESOLVER.create( this.uow, _repo, this.entry.getParent( this.uow ), name, props );
+        assertThat( kobject, is( notNullValue() ) );
+        assertThat( kobject, is( instanceOf( Entry.class ) ) );
+        assertThat( kobject.getName( this.uow ), is( name ) );
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
+        final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
+        EntryImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", new RelationalProperties() );
     }
 
 }

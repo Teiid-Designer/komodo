@@ -22,11 +22,16 @@
 package org.komodo.shell;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -39,6 +44,7 @@ import org.komodo.shell.api.KomodoShell;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.api.WorkspaceStatusEventHandler;
+import org.komodo.shell.util.ContextUtils;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -51,6 +57,10 @@ import org.komodo.utils.StringUtils;
  * Test implementation of WorkspaceStatus
  */
 public class WorkspaceStatusImpl implements WorkspaceStatus {
+
+    private static final String PROPERTIES_FILE_NAME = "vdbbuilder.properties"; //$NON-NLS-1$
+    private static final String SAVED_CONTEXT_PATH = "SAVED_CONTEXT_PATH"; //$NON-NLS-1$
+    private static final List< String > HIDDEN_PROPS = Arrays.asList( new String[] { SAVED_CONTEXT_PATH } );
 
     private final KomodoShell shell;
 
@@ -68,7 +78,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     private WorkspaceContext currentContext;
     private Set<WorkspaceStatusEventHandler> eventHandlers = new HashSet<WorkspaceStatusEventHandler>();
 
-    private Properties wsProperties = new Properties();
+    private Properties wsProperties;
 
     private boolean recordingStatus = false;
 
@@ -115,6 +125,20 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         contextCache.put( wkspMgr.getAbsolutePath(), wsContext );
 
         currentContext = wsContext;
+
+        // load saved state
+        this.wsProperties = new Properties();
+        loadProperties();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.WorkspaceStatus#save()
+     */
+    @Override
+    public void save() throws Exception {
+        saveProperties();
     }
 
     private void createTransaction(final String source ) throws Exception {
@@ -341,50 +365,195 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.shell.api.WorkspaceStatus#isBooleanProperty(java.lang.String)
+     */
+    @Override
+    public boolean isBooleanProperty( final String name ) {
+        ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
+        final String propertyName = name.toUpperCase();
+        return propertyName.equals( SHOW_FULL_PATH_IN_PROMPT_KEY ) || propertyName.equals( SHOW_HIDDEN_PROPERTIES_KEY )
+               || propertyName.equals( SHOW_PROP_NAME_PREFIX_KEY ) || propertyName.equals( SHOW_TYPE_IN_PROMPT_KEY );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.WorkspaceStatus#isShowingFullPathInPrompt()
+     */
+    @Override
+    public boolean isShowingFullPathInPrompt() {
+        assert ( this.wsProperties.containsKey( SHOW_FULL_PATH_IN_PROMPT_KEY ) );
+        return Boolean.parseBoolean( this.wsProperties.getProperty( WorkspaceStatus.SHOW_FULL_PATH_IN_PROMPT_KEY ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.WorkspaceStatus#isShowingHiddenProperties()
+     */
+    @Override
+    public boolean isShowingHiddenProperties() {
+        assert (this.wsProperties.containsKey( SHOW_HIDDEN_PROPERTIES_KEY ));
+        return Boolean.parseBoolean( this.wsProperties.getProperty( WorkspaceStatus.SHOW_HIDDEN_PROPERTIES_KEY ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.shell.api.WorkspaceStatus#isShowingPropertyNamePrefixes()
      */
     @Override
     public boolean isShowingPropertyNamePrefixes() {
-        final String show = this.wsProperties.getProperty( WorkspaceStatus.SHOW_PROP_NAME_PREFIX_KEY );
-
-        if ( StringUtils.isEmpty( show ) ) {
-            return false;
-        }
-
-        return new Boolean( show );
+        assert (this.wsProperties.containsKey( SHOW_PROP_NAME_PREFIX_KEY ));
+        return Boolean.parseBoolean( this.wsProperties.getProperty( WorkspaceStatus.SHOW_PROP_NAME_PREFIX_KEY ) );
     }
 
-    /* (non-Javadoc)
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.WorkspaceStatus#isShowingTypeInPrompt()
+     */
+    @Override
+    public boolean isShowingTypeInPrompt() {
+        assert (this.wsProperties.containsKey( SHOW_TYPE_IN_PROMPT_KEY ));
+        return Boolean.parseBoolean( this.wsProperties.getProperty( WorkspaceStatus.SHOW_TYPE_IN_PROMPT_KEY ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.WorkspaceStatus#validateGlobalPropertyValue(java.lang.String, java.lang.String)
+     */
+    @Override
+    public String validateGlobalPropertyValue( final String propertyName,
+                                               final String proposedValue ) {
+        ArgCheck.isNotEmpty( propertyName, "propertyName" ); //$NON-NLS-1$
+
+        if ( !GLOBAL_PROPS.containsKey( propertyName.toUpperCase() ) ) {
+            return Messages.getString( SHELL.INVALID_GLOBAL_PROPERTY_NAME, propertyName );
+        }
+
+        // empty value means they want to remove or reset to default value
+        if ( StringUtils.isEmpty( proposedValue ) ) {
+            return null; // name and value are valid
+        }
+
+        if ( isBooleanProperty( propertyName ) ) {
+            if ( Boolean.parseBoolean( proposedValue ) || "false".equalsIgnoreCase( ( proposedValue ) ) ) { //$NON-NLS-1$
+                return null;
+            }
+
+            return Messages.getString( SHELL.INVALID_BOOLEAN_GLOBAL_PROPERTY_VALUE, propertyName, proposedValue );
+        }
+
+        return null; // name and value are valid
+    }
+
+    private void loadProperties() throws Exception {
+        final String propFileName = this.shell.getShellDataLocation();
+        final File propFile = new File( propFileName, PROPERTIES_FILE_NAME );
+
+        if ( propFile.exists() ) {
+            this.wsProperties.load( new FileInputStream( propFile.getAbsolutePath() ) );
+        }
+
+        // make sure all non-hidden global properties exist
+        for ( final Entry< String, String > entry : GLOBAL_PROPS.entrySet() ) {
+            if ( !this.wsProperties.containsKey( entry.getKey() ) ) {
+                setProperty( entry.getKey(), entry.getValue() );
+            }
+        }
+
+        // set current context to saved context
+        final String savedPath = this.wsProperties.getProperty( SAVED_CONTEXT_PATH );
+
+        if (!StringUtils.isBlank( savedPath )) {
+            this.currentContext = ContextUtils.getContextForPath( this, savedPath );
+        }
+    }
+
+    private void saveProperties() throws Exception {
+        final String propFileName = this.shell.getShellDataLocation();
+        final File propFile = new File( propFileName, PROPERTIES_FILE_NAME );
+
+        // save current context path
+        this.wsProperties.setProperty( SAVED_CONTEXT_PATH, this.currentContext.getFullName() );
+
+        // save
+        this.wsProperties.store( new FileOutputStream( propFile.getAbsolutePath() ), null );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.WorkspaceStatus#resetProperties()
+     */
+    @Override
+    public void resetProperties() {
+        for ( final Entry< String, String > entry : GLOBAL_PROPS.entrySet() ) {
+            setProperty( entry.getKey(), entry.getValue() );
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.shell.api.WorkspaceStatus#setProperty(java.lang.String, java.lang.String)
      */
     @Override
-    public void setProperty(String propKey, String propValue) {
-    	if(!StringUtils.isEmpty(propKey)) {
-    		if(WorkspaceStatus.GLOBAL_PROP_KEYS.contains(propKey.toUpperCase())) {
-    			this.wsProperties.put(propKey, propValue);
-    		}
-    	}
+    public void setProperty( final String name,
+                             final String value ) {
+        ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
+
+        if ( !HIDDEN_PROPS.contains( name ) && WorkspaceStatus.GLOBAL_PROPS.containsKey( name.toUpperCase() ) ) {
+            // if empty value reset to default value
+            if ( StringUtils.isEmpty( value ) ) {
+                this.wsProperties.setProperty( name, GLOBAL_PROPS.get( name ) );
+            } else {
+                // validate new value
+                if ( StringUtils.isEmpty( validateGlobalPropertyValue( name, value ) ) ) {
+                    this.wsProperties.setProperty( name.toUpperCase(), value );
+                } else {
+                    // reset to default value if value is invalid
+                    setProperty( name, null );
+                }
+            }
+        }
     }
 
-    /* (non-Javadoc)
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.shell.api.WorkspaceStatus#setProperties(java.util.Properties)
      */
     @Override
-    public void setProperties(Properties props) {
-    	this.wsProperties.clear();
-    	for (final String name : props.stringPropertyNames()) {
-    		if(WorkspaceStatus.GLOBAL_PROP_KEYS.contains(name.toUpperCase())) {
-    			this.wsProperties.put(name, props.getProperty(name));
-    		}
-    	}
+    public void setProperties( final Properties props ) {
+        resetProperties();
+
+        if ( ( props != null ) && !props.isEmpty() ) {
+            for ( final String name : props.stringPropertyNames() ) {
+                setProperty( name, props.getProperty( name ) );
+            }
+        }
     }
 
-    /* (non-Javadoc)
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.shell.api.WorkspaceStatus#getProperties()
      */
     @Override
-	public Properties getProperties() {
-    	return this.wsProperties;
+    public Properties getProperties() {
+        final Properties result = new Properties(); // just provide a copy
+
+        // remove hidden properties
+        for ( final String propName : this.wsProperties.stringPropertyNames() ) {
+            if ( !HIDDEN_PROPS.contains( propName ) ) {
+                result.setProperty( propName, this.wsProperties.getProperty( propName ) );
+            }
+        }
+
+        return result;
     }
 
 }

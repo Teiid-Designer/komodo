@@ -130,12 +130,7 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
     @Override
     public Parameter addParameter( final UnitOfWork transaction,
                                    final String parameterName ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( parameterName, "parameterName" ); //$NON-NLS-1$
-
-        final Parameter result = RelationalModelFactory.createParameter( transaction, getRepository(), this, parameterName );
-        return result;
+        return RelationalModelFactory.createParameter( transaction, getRepository(), this, parameterName );
     }
 
     /**

@@ -38,7 +38,9 @@ public class CdCommandTest extends AbstractCommandTest {
 	private static final String CD_COMMAND_ABS3 = "cdCommand_Absolute3.txt"; //$NON-NLS-1$
 	private static final String CD_COMMAND_ABS4 = "cdCommand_Absolute4.txt"; //$NON-NLS-1$
 
-	/**
+    private static final String ALIAS_TEST = "cdCommand_aliases.txt"; //$NON-NLS-1$
+
+    /**
 	 * Test for CdCommand
 	 */
 	public CdCommandTest( ) {
@@ -138,12 +140,22 @@ public class CdCommandTest extends AbstractCommandTest {
 
     @Test
     public void testCdAbsolute4() throws Exception {
-    	setup(CD_COMMAND_ABS4, CdCommand.class);
+        setup(CD_COMMAND_ABS4, CdCommand.class);
 
-    	execute();
+        execute();
 
-    	// Check WorkspaceContext
-    	assertEquals("/workspace/MyVdb/MyModel/Table1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+        // Check WorkspaceContext
+        assertEquals("/workspace/MyVdb/MyModel/Table1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    }
+
+    @Test
+    public void testAliases() throws Exception {
+        setup(ALIAS_TEST, CdCommand.class);
+
+        execute();
+
+        // Check WorkspaceContext
+        assertEquals("/workspace/MyVdb", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
 
 }

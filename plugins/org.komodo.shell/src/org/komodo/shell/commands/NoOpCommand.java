@@ -16,6 +16,8 @@
 package org.komodo.shell.commands;
 
 import org.komodo.shell.api.AbstractShellCommand;
+import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.spi.constants.StringConstants;
 
 /**
  * The command about nothing.  The Seinfeld command.
@@ -27,13 +29,36 @@ import org.komodo.shell.api.AbstractShellCommand;
  */
 public class NoOpCommand extends AbstractShellCommand {
 
-	/**
-	 * Constructor.
-	 * @param name the command name
-	 */
-	public NoOpCommand(String name) {
-		setName(name);
-	}
+    /**
+     * The command name.
+     */
+    public static final String NAME = "NoOp"; //$NON-NLS-1$
+
+    /**
+     * @param wsStatus
+     *        the workspace status (cannot be <code>null</code>)
+     */
+    public NoOpCommand( final WorkspaceStatus wsStatus ) {
+        super( wsStatus );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommand#getAliases()
+     */
+    @Override
+    public final String[] getAliases() {
+        return StringConstants.EMPTY_ARRAY;
+    }
+
+    /**
+     * @see org.komodo.shell.api.ShellCommand#getName()
+     */
+    @Override
+    public final String getName() {
+        return NAME;
+    }
 
 	/**
 	 * @see org.komodo.shell.api.ShellCommand#printUsage(int indent)

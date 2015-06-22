@@ -34,7 +34,6 @@ import org.komodo.relational.model.Table;
 import org.komodo.relational.model.Table.OnCommit;
 import org.komodo.relational.model.Table.TemporaryType;
 import org.komodo.relational.model.UniqueConstraint;
-import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
@@ -53,9 +52,8 @@ public final class TableImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        final Vdb vdb = RelationalModelFactory.createVdb( this.uow, _repo, null, "vdb", "path" );
-        this.model = RelationalModelFactory.createModel( this.uow, _repo, vdb, "model" );
-        this.table = RelationalModelFactory.createTable( this.uow, _repo, this.model, NAME );
+        this.model = createModel();
+        this.table = model.addTable( this.uow, NAME );
         commit();
     }
 
@@ -455,8 +453,9 @@ public final class TableImplTest extends RelationalModelTest {
                               Column.IDENTIFIER,
                               ForeignKey.IDENTIFIER,
                               Index.IDENTIFIER,
+                              PrimaryKey.IDENTIFIER,
                               UniqueConstraint.IDENTIFIER ) );
-        assertThat( this.table.getChildTypes().length, is( 5 ) );
+        assertThat( this.table.getChildTypes().length, is( 6 ) );
     }
 
     @Test
@@ -877,6 +876,27 @@ public final class TableImplTest extends RelationalModelTest {
         final String value = "uuid";
         this.table.setUuid( this.uow, value );
         assertThat( this.table.getUuid( this.uow ), is( value ) );
+    }
+
+    /*
+     * ********************************************************************
+     * *****                  Resolver Tests                          *****
+     * ********************************************************************
+     */
+
+    @Test
+    public void shouldCreateUsingResolver() throws Exception {
+        final String name = "blah";
+        final KomodoObject kobject = TableImpl.RESOLVER.create( this.uow, _repo, this.model, name, null );
+        assertThat( kobject, is( notNullValue() ) );
+        assertThat( kobject, is( instanceOf( Table.class ) ) );
+        assertThat( kobject.getName( this.uow ), is( name ) );
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
+        final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
+        TableImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
     }
 
 }

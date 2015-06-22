@@ -27,10 +27,10 @@ import org.komodo.shell.commands.CommandNotFoundCommand;
 
 /**
  * Implements tab completion for the interactive
- * 
+ *
  * This class adapted from https://github.com/Governance/s-ramp/blob/master/s-ramp-shell
  * - altered complete method due to removal of shell context
- * 
+ *
  * @author eric.wittmann@redhat.com
  */
 public class TabCompleter implements Completion {

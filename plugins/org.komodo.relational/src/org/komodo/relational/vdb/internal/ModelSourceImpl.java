@@ -7,10 +7,11 @@
  */
 package org.komodo.relational.vdb.internal;
 
+import org.komodo.relational.Messages;
+import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.internal.RelationalChildRestrictedObject;
-import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.vdb.ModelSource;
@@ -50,7 +51,14 @@ public final class ModelSourceImpl extends RelationalChildRestrictedObject imple
                                    final RelationalProperties properties ) throws KException {
             final AdapterFactory adapter = new AdapterFactory( repository );
             final Model parentModel = adapter.adapt( transaction, parent, Model.class );
-            return RelationalModelFactory.createModelSource( transaction, repository, parentModel, id );
+
+            if ( parentModel == null ) {
+                throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
+                                                          parent.getAbsolutePath(),
+                                                          ModelSource.class.getSimpleName() ) );
+            }
+
+            return parentModel.addSource( transaction, id );
         }
 
         /**

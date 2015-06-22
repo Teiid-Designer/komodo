@@ -35,6 +35,7 @@ import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
 import org.komodo.shell.Messages.SHELL;
+import org.komodo.shell.WorkspaceContextImpl;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.InvalidCommandArgumentException;
 import org.komodo.shell.api.WorkspaceContext;
@@ -45,6 +46,7 @@ import org.komodo.spi.repository.Repository;
 import org.komodo.spi.runtime.ExecutionAdmin.ConnectivityType;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.utils.KLog;
+import org.komodo.utils.StringUtils;
 
 /**
  * Show Command.  Has various acceptable args.
@@ -53,9 +55,12 @@ import org.komodo.utils.KLog;
  */
 public class ShowCommand extends BuiltInShellCommand implements StringConstants {
 
-    private static final String SHOW = "show"; //$NON-NLS-1$
-    private static final int DEFAULT_WIDTH = 25;
+    /**
+     * The command name.
+     */
+    public static final String NAME = "show"; //$NON-NLS-1$
 
+    private static final int DEFAULT_WIDTH = 25;
     private static final String SUBCMD_PROPERTIES = "properties"; //$NON-NLS-1$
 
     /**
@@ -74,13 +79,13 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
                                                                  SUBCMD_PROPERTY,
                                                                  SUBCMD_SUMMARY );
 
-	/**
-	 * Constructor.
-	 * @param wsStatus the workspace status
-	 */
-	public ShowCommand(WorkspaceStatus wsStatus) {
-		super(SHOW,wsStatus);
-	}
+    /**
+     * @param wsStatus
+     *        the workspace status (cannot be <code>null</code>)
+     */
+    public ShowCommand( final WorkspaceStatus wsStatus ) {
+        super( wsStatus, NAME );
+    }
 
 	/**
 	 * @see org.komodo.shell.api.ShellCommand#execute()
@@ -141,8 +146,15 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
 	 * Shows the status at the current workspace context
 	 * @throws Exception
 	 */
-    private void printProperties( WorkspaceContext context ) throws Exception {
-        final List< String > props = context.getProperties(); // All properties
+    private void printProperties( final WorkspaceContext context ) throws Exception {
+        // show unfiltered properties if necessary
+        List< String > props = null;
+
+        if ( getWorkspaceStatus().isShowingHiddenProperties() ) {
+            props = ( ( WorkspaceContextImpl )context ).getUnfilteredProperties();
+        } else {
+            props = context.getProperties();
+        }
 
         if ( props.isEmpty() ) {
             final String noPropsMsg = Messages.getString( "ShowCommand.NoPropertiesMsg", context.getType(), context.getFullName() ); //$NON-NLS-1$
@@ -156,7 +168,13 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
         // loop through properties getting value, removing namespace prefix if necessary, finding widest property name
         for ( int i = 0, size = props.size(); i < size; ++i ) {
             String name = props.get( i );
-            final String value = context.getPropertyValue( name );
+            String value = null;
+
+            if ( getWorkspaceStatus().isShowingHiddenProperties() ) {
+                value = ( ( WorkspaceContextImpl )context ).getUnfilteredPropertyValue( name );
+            } else {
+                value = context.getPropertyValue( name );
+            }
 
             if ( !isShowingPropertyNamePrefixes() ) {
                 name = removePrefix( props.get( i ) );
@@ -318,26 +336,22 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
 	 * @throws Exception
 	 */
     private void printGlobal() throws Exception {
-        final Properties globalProps = getWorkspaceStatus().getProperties(); // All properties
-
-        // make sure the standard global properties are shown
-        for ( final String prop : WorkspaceStatus.GLOBAL_PROP_KEYS ) {
-            if ( !globalProps.containsKey( prop ) ) {
-                globalProps.put( prop, Messages.getString( SHELL.NO_PROPERTY_VALUE ) );
-            }
-        }
-
+        final Properties globalProperties = getWorkspaceStatus().getProperties();
         final Map< String, String > sorted = new TreeMap<>();
         int maxWidth = DEFAULT_WIDTH;
 
-        for ( Entry< ?, ? > entry : globalProps.entrySet() ) {
-            final String propName = ( String )entry.getKey();
-
+        for ( final String propName : globalProperties.stringPropertyNames() ) {
             if ( maxWidth < propName.length() ) {
                 maxWidth = propName.length();
             }
 
-            sorted.put( propName, ( String )entry.getValue() );
+            String value = globalProperties.getProperty( propName );
+
+            if ( StringUtils.isBlank( value ) ) {
+                value = Messages.getString( SHELL.NO_PROPERTY_VALUE );
+            }
+
+            sorted.put( propName, value.toString() );
         }
 
         // Print properties header
@@ -391,6 +405,7 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
 	 */
 	private void printSummary(WorkspaceContext context) throws Exception {
         printProperties(context);
+        print();
         printChildren(context);
 	}
 

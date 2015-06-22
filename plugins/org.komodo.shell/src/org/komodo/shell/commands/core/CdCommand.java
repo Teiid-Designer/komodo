@@ -37,15 +37,18 @@ import org.komodo.spi.constants.StringConstants;
  */
 public class CdCommand extends BuiltInShellCommand implements StringConstants {
 
-    private static final String CD = "cd"; //$NON-NLS-1$
+    /**
+     * The command name.
+     */
+    public static final String NAME = "cd"; //$NON-NLS-1$
 
     /**
-	 * Constructor
-	 * @param wsStatus the workspace status
-	 */
-	public CdCommand(WorkspaceStatus wsStatus) {
-		super(CD,wsStatus);
-	}
+     * @param wsStatus
+     *        the workspace status (cannot be <code>null</code>)
+     */
+    public CdCommand( final WorkspaceStatus wsStatus ) {
+        super( wsStatus, NAME, "edit", "goto" ); //$NON-NLS-1$ //$NON-NLS-2$
+    }
 
 	/**
 	 * @see org.komodo.shell.api.ShellCommand#execute()

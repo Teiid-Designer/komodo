@@ -29,7 +29,9 @@ public class ListCommandTest extends AbstractCommandTest {
 
 	private static final String LIST_COMMAND1 = "listCommand1.txt"; //$NON-NLS-1$
 	private static final String LIST_COMMAND2 = "listCommand2.txt"; //$NON-NLS-1$
-	private static final String LIST_COMMAND3 = "listCommand3.txt"; //$NON-NLS-1$
+    private static final String LIST_COMMAND3 = "listCommand3.txt"; //$NON-NLS-1$
+    private static final String LIST_COMMAND4 = "listCommand4.txt"; //$NON-NLS-1$
+    private static final String LIST_COMMAND5 = "listCommand5.txt"; //$NON-NLS-1$
 
 	/**
 	 * Test for ListCommand
@@ -69,9 +71,35 @@ public class ListCommandTest extends AbstractCommandTest {
 
     @Test
     public void testList3() throws Exception {
-    	setup(LIST_COMMAND3, ListCommand.class);
+        setup(LIST_COMMAND3, ListCommand.class);
 
-    	execute();
+        execute();
+
+        // make sure table name and table type appear in output
+        String writerOutput = getCommandOutput();
+        assertTrue( writerOutput.contains( "Table1" ) );
+
+        assertEquals("/workspace/MyVdb/Model1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    }
+
+    @Test
+    public void testListLsAlias() throws Exception {
+        setup(LIST_COMMAND4, ListCommand.class);
+
+        execute();
+
+        // make sure table name and table type appear in output
+        String writerOutput = getCommandOutput();
+        assertTrue( writerOutput.contains( "Table1" ) );
+
+        assertEquals("/workspace/MyVdb/Model1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    }
+
+    @Test
+    public void testListLlAlias() throws Exception {
+        setup(LIST_COMMAND5, ListCommand.class);
+
+        execute();
 
         // make sure table name and table type appear in output
         String writerOutput = getCommandOutput();

@@ -7,12 +7,13 @@
  */
 package org.komodo.relational.model.internal;
 
+import org.komodo.relational.Messages;
+import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalConstants;
 import org.komodo.relational.RelationalConstants.Nullable;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.internal.RelationalChildRestrictedObject;
-import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.model.AbstractProcedure;
 import org.komodo.relational.model.Parameter;
@@ -60,7 +61,14 @@ public final class ParameterImpl extends RelationalChildRestrictedObject impleme
             final Class< ? extends AbstractProcedure > clazz = AbstractProcedureImpl.getProcedureType( transaction, parent );
             final AdapterFactory adapter = new AdapterFactory( repository );
             final AbstractProcedure parentProc = adapter.adapt( transaction, parent, clazz );
-            return RelationalModelFactory.createParameter( transaction, repository, parentProc, id );
+
+            if ( parentProc == null ) {
+                throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
+                                                          parent.getAbsolutePath(),
+                                                          Parameter.class.getSimpleName() ) );
+            }
+
+            return parentProc.addParameter( transaction, id );
         }
 
         /**

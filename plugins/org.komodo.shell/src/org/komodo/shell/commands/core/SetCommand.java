@@ -7,13 +7,15 @@
 */
 package org.komodo.shell.commands.core;
 
+import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+import static org.komodo.shell.CompletionConstants.NO_APPEND_SEPARATOR;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.StringTokenizer;
 import org.komodo.shell.BuiltInShellCommand;
-import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
 import org.komodo.shell.api.InvalidCommandArgumentException;
 import org.komodo.shell.api.WorkspaceContext;
@@ -30,25 +32,28 @@ import org.komodo.utils.StringUtils;
  */
 public class SetCommand extends BuiltInShellCommand {
 
-	private static String SET = "set"; //$NON-NLS-1$
+    /**
+     * The command name.
+     */
+    public static final String NAME = "set"; //$NON-NLS-1$
 
     private static final String SUBCMD_PROPERTY = "property"; //$NON-NLS-1$
     private static final String SUBCMD_GLOBAL = "global"; //$NON-NLS-1$
     private static final String SUBCMD_RECORD = "record"; //$NON-NLS-1$
-    private static final List<String> SUBCMDS =
-    		Arrays.asList(SUBCMD_PROPERTY, SUBCMD_GLOBAL, SUBCMD_RECORD);
+    private static final List<String> SUBCMDS = Arrays.asList(SUBCMD_PROPERTY, SUBCMD_GLOBAL, SUBCMD_RECORD);
 
     private static final String ON = "on"; //$NON-NLS-1$
 	private static final String OFF = "off"; //$NON-NLS-1$
-    private static final List<String> RECORD_CMDS =
-    		Arrays.asList(ON, OFF);
+    private static final List<String> RECORD_CMDS = Arrays.asList(ON, OFF);
+
+    private static final String RESET_GLOBAL = "--reset"; //$NON-NLS-1$
 
     /**
-     * Constructor.
-     * @param wsStatus the workspace status
+     * @param wsStatus
+     *        the workspace status (cannot be <code>null</code>)
      */
-    public SetCommand(WorkspaceStatus wsStatus) {
-        super(SET, wsStatus);
+    public SetCommand( final WorkspaceStatus wsStatus ) {
+        super( wsStatus, NAME );
     }
 
     /**
@@ -83,21 +88,30 @@ public class SetCommand extends BuiltInShellCommand {
                 getWorkspaceStatus().commit("SetCommand"); //$NON-NLS-1$
 
                 // Print message
-        		print(CompletionConstants.MESSAGE_INDENT, Messages.getString("SetCommand.PropertySet", propNameArg)); //$NON-NLS-1$
+        		print(MESSAGE_INDENT, Messages.getString("SetCommand.PropertySet", propNameArg)); //$NON-NLS-1$
         	} else if (SUBCMD_GLOBAL.equalsIgnoreCase(subcmdArg)) {
         		// property name and value are required
         		String propNameArg = requiredArgument(1, Messages.getString("SetCommand.InvalidArgMsg_GlobalPropertyName")); //$NON-NLS-1$
-        		String propValueArg = requiredArgument(2, Messages.getString("SetCommand.InvalidArgMsg_PropertyValue")); //$NON-NLS-1$
+        		String propValueArg = null;
 
-                // Validates SET GLOBAL args
-                if (!validateSetGlobal(propNameArg,propValueArg)) {
-        			return false;
-        		}
+                if ( RESET_GLOBAL.equals( propNameArg ) ) {
+                    getWorkspaceStatus().resetProperties();
+                    print( MESSAGE_INDENT, Messages.getString( "SetCommand.resetGlobalProperties" ) ); //$NON-NLS-1$
+                } else {
+                    propValueArg = requiredArgument( 2, Messages.getString( "SetCommand.InvalidArgMsg_PropertyValue" ) ); //$NON-NLS-1$
 
-        		// Set the property
-        		setGlobalProperty(propNameArg, propValueArg);
+                    // validate global property name and value
+                    final String errorMsg = getWorkspaceStatus().validateGlobalPropertyValue( propNameArg, propValueArg );
 
-        		print(CompletionConstants.MESSAGE_INDENT, Messages.getString("SetCommand.GlobalPropertySet", propNameArg)); //$NON-NLS-1$
+                    if ( !StringUtils.isEmpty( errorMsg ) ) {
+                        print( MESSAGE_INDENT, Messages.getString( "SetCommand.InvalidGlobalProperty", errorMsg ) ); //$NON-NLS-1$
+                        return false;
+                    }
+
+                    // Set the property
+                    setGlobalProperty( propNameArg, propValueArg );
+                    print( MESSAGE_INDENT, Messages.getString( "SetCommand.GlobalPropertySet", propNameArg ) ); //$NON-NLS-1$
+                }
         	} else if (SUBCMD_RECORD.equalsIgnoreCase(subcmdArg)) {
         		String onOffArg = requiredArgument(1, Messages.getString("SetCommand.onOffArg_empty")); //$NON-NLS-1$
 
@@ -117,7 +131,7 @@ public class SetCommand extends BuiltInShellCommand {
         		String rFile = wsStatus.getRecordingOutputFile().getCanonicalPath();
         		String stateChangedMsg = Messages.getString("SetCommand.setRecordingStateMsg",rState,d.toString(),rFile); //$NON-NLS-1$
 
-                print(CompletionConstants.MESSAGE_INDENT,stateChangedMsg);
+                print(MESSAGE_INDENT,stateChangedMsg);
 
                 recordComment("====== "+stateChangedMsg+" ======"); //$NON-NLS-1$ //$NON-NLS-2$
 
@@ -128,8 +142,8 @@ public class SetCommand extends BuiltInShellCommand {
         } catch (InvalidCommandArgumentException e) {
             throw e;
         } catch (Exception e) {
-            print(CompletionConstants.MESSAGE_INDENT, Messages.getString("SetCommand.Failure")); //$NON-NLS-1$
-            print(CompletionConstants.MESSAGE_INDENT, "\t" + e.getMessage()); //$NON-NLS-1$
+            print(MESSAGE_INDENT, Messages.getString("SetCommand.Failure")); //$NON-NLS-1$
+            print(MESSAGE_INDENT, "\t" + e.getMessage()); //$NON-NLS-1$
             return false;
         }
         return true;
@@ -196,27 +210,6 @@ public class SetCommand extends BuiltInShellCommand {
 	}
 
     /**
-     * Validate the SET GLOBAL args
-     * @param propName the global property name
-     * @param propValue the property value
-     * @return 'true' if valid, 'false' if not.
-     * @throws Exception
-     */
-	protected boolean validateSetGlobal(String propName, String propValue) throws Exception {
-		// Validate the supplied name is a valid global property
-		if (!validateGlobalProperty(propName)) {
-			return false;
-		}
-
-		// Validate the value for this global property
-		if (!validateGlobalPropertyValue(propName,propValue)) {
-			return false;
-		}
-
-		return true;
-	}
-
-    /**
      * Validate the SET RECORD args
      * @param onOffArg the on / off arg
      * @return 'true' if valid, 'false' if not.
@@ -224,26 +217,26 @@ public class SetCommand extends BuiltInShellCommand {
 	protected boolean validateRecord(String onOffArg) {
 		// Check for empty arg
 		if(StringUtils.isEmpty(onOffArg)) {
-            print(CompletionConstants.MESSAGE_INDENT,Messages.getString("SetCommand.onOffArg_empty")); //$NON-NLS-1$
+            print(MESSAGE_INDENT,Messages.getString("SetCommand.onOffArg_empty")); //$NON-NLS-1$
 			return false;
 		}
 
 		// Check for invalid arg
 		if(!onOffArg.equalsIgnoreCase(ON) && !onOffArg.equalsIgnoreCase(OFF)) {
-            print(CompletionConstants.MESSAGE_INDENT,Messages.getString("SetCommand.onOffArg_invalid")); //$NON-NLS-1$
+            print(MESSAGE_INDENT,Messages.getString("SetCommand.onOffArg_invalid")); //$NON-NLS-1$
 			return false;
 		}
 
 		// If verify that global file var was set.
 		String recordingFileStr = getWorkspaceStatus().getProperties().getProperty(WorkspaceStatus.RECORDING_FILE_KEY);
 		if(StringUtils.isEmpty(recordingFileStr)) {
-			print(CompletionConstants.MESSAGE_INDENT,Messages.getString("SetCommand.recordingFileNotSet")); //$NON-NLS-1$
+			print(MESSAGE_INDENT,Messages.getString("SetCommand.recordingFileNotSet")); //$NON-NLS-1$
 			return false;
 		} else {
 			File recordingFile = getWorkspaceStatus().getRecordingOutputFile();
 			if(recordingFile!=null && recordingFile.exists()) {
 				if(!recordingFile.canWrite()) {
-					print(CompletionConstants.MESSAGE_INDENT,Messages.getString("SetCommand.recordingFileNotWriteable",recordingFile)); //$NON-NLS-1$
+					print(MESSAGE_INDENT,Messages.getString("SetCommand.recordingFileNotWriteable",recordingFile)); //$NON-NLS-1$
 					return false;
 				}
 			}
@@ -400,7 +393,7 @@ public class SetCommand extends BuiltInShellCommand {
                     updateTabCompleteCandidatesForProperty( candidates, getContext(), lastArgument );
                 } else if ( subCmd.equals( SUBCMD_GLOBAL ) ) {
                     // Global property completion options
-                    final List< String > potentials = WorkspaceStatus.GLOBAL_PROP_KEYS;
+                    final Set< String > potentials = WorkspaceStatus.GLOBAL_PROPS.keySet();
 
                     if ( lastArgument == null ) {
                         candidates.addAll( potentials );
@@ -447,6 +440,23 @@ public class SetCommand extends BuiltInShellCommand {
 
                 return 0;
             }
+
+            if ( getArguments().get( 0 ).toLowerCase().equals( SUBCMD_GLOBAL ) ) {
+                final String propName = getArguments().get( 1 );
+
+                if ( getWorkspaceStatus().isBooleanProperty( propName ) ) {
+                    if ( StringUtils.isBlank( lastArgument ) ) {
+                        candidates.add( Boolean.TRUE.toString() );
+                        candidates.add( Boolean.FALSE.toString() );
+                    } else if ( Boolean.TRUE.toString().startsWith( lastArgument ) ) {
+                        candidates.add( Boolean.TRUE.toString() );
+                    } else if ( Boolean.FALSE.toString().startsWith( lastArgument ) ) {
+                        candidates.add( Boolean.FALSE.toString() );
+                    }
+                }
+
+                return 0;
+            }
         } else if (getArguments().size()==3) {
     		if(getArguments().get(0).toLowerCase().equals(SUBCMD_RECORD)) return 0;
 
@@ -454,32 +464,10 @@ public class SetCommand extends BuiltInShellCommand {
     		updateTabCompleteCandidatesForPath(candidates, getContext(), true, lastArgument);
 
     		// Do not put space after it - may want to append more to the path
-    		return CompletionConstants.NO_APPEND_SEPARATOR;
+    		return NO_APPEND_SEPARATOR;
     	}
 
     	return -1;
-    }
-
-    /**
-     * @see org.komodo.shell.api.ShellCommand#printUsage(int indent)
-     */
-    @Override
-    public void printUsage(int indent) {
-    	// Print out the subcmd-specific usage (if possible)
-    	if(getArguments()!=null && getArguments().size()>=1) {
-    		String subCmd = getArguments().get(0);
-    		if(subCmd.equalsIgnoreCase(SUBCMD_PROPERTY)) {
-        		print(indent,Messages.getString(getClass().getSimpleName() + ".propUsage")); //$NON-NLS-1$
-    		} else if (subCmd.equalsIgnoreCase(SUBCMD_GLOBAL)) {
-        		print(indent,Messages.getString(getClass().getSimpleName() + ".globalUsage")); //$NON-NLS-1$
-    		} else if (subCmd.equalsIgnoreCase(SUBCMD_RECORD)) {
-        		print(indent,Messages.getString(getClass().getSimpleName() + ".recordUsage")); //$NON-NLS-1$
-    		} else {
-        		print(indent,Messages.getString(getClass().getSimpleName() + ".usage")); //$NON-NLS-1$
-    		}
-    	} else {
-    		super.printUsage( indent );
-    	}
     }
 
 }

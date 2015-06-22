@@ -17,6 +17,7 @@ package org.komodo.shell;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -24,24 +25,27 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
+import java.util.Set;
 import java.util.TreeMap;
 import javax.xml.namespace.QName;
 import org.komodo.core.KEngine;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandProvider;
-import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.CommandNotFoundCommand;
 import org.komodo.shell.commands.ExitCommand;
 import org.komodo.shell.commands.HelpCommand;
+import org.komodo.shell.commands.core.AddConstraintColumnCommand;
 import org.komodo.shell.commands.core.CdCommand;
 import org.komodo.shell.commands.core.CreateCommand;
 import org.komodo.shell.commands.core.DeleteCommand;
 import org.komodo.shell.commands.core.ExportCommand;
 import org.komodo.shell.commands.core.FindCommand;
+import org.komodo.shell.commands.core.HomeCommand;
 import org.komodo.shell.commands.core.ImportCommand;
 import org.komodo.shell.commands.core.ListCommand;
 import org.komodo.shell.commands.core.PlayCommand;
@@ -49,7 +53,9 @@ import org.komodo.shell.commands.core.RenameCommand;
 import org.komodo.shell.commands.core.SetCommand;
 import org.komodo.shell.commands.core.ShowCommand;
 import org.komodo.shell.commands.core.UnsetPropertyCommand;
+import org.komodo.utils.ArgCheck;
 import org.komodo.utils.FileUtils;
+import org.komodo.utils.StringUtils;
 
 /**
  * Factory used to create shell commands.
@@ -62,75 +68,56 @@ import org.komodo.utils.FileUtils;
  */
 public class ShellCommandFactory {
 
-	private static String EXIT_CMD_NAME = "exit"; //$NON-NLS-1$
-	private static String QUIT_CMD_NAME = "quit"; //$NON-NLS-1$
+	private final WorkspaceStatus wsStatus;
+    private final Map<String, ShellCommand> commandMap;
+    private final Map<String, ShellCommand> aliasMap; // separate from commandMap so HelpCommand only shows command names
 
-	private WorkspaceStatus wsStatus;
-	private Map<String, ShellCommand> commandMap;
-
-	/**
-	 * Constructor.
-     * @param wsStatus the workspace context
-	 */
-	public ShellCommandFactory(WorkspaceStatus wsStatus) {
-		this.wsStatus = wsStatus;
-		registerCommands();
-	}
+    /**
+     * @param wsStatus
+     *        the workspace context (cannot be <code>null</code>)
+     * @throws Exception
+     *         if a built-in command cannot be created or if an error occurs
+     */
+    public ShellCommandFactory( final WorkspaceStatus wsStatus ) throws Exception {
+        ArgCheck.isNotNull( wsStatus, "wsStatus" ); //$NON-NLS-1$
+        this.wsStatus = wsStatus;
+        this.commandMap = new HashMap< String, ShellCommand >();
+        this.aliasMap = new HashMap< String, ShellCommand >();
+        registerCommands();
+    }
 
 	/**
 	 * Registers all known commands.
 	 */
-	private void registerCommands() {
-		commandMap = new HashMap<String, ShellCommand>();
+    private void registerCommands() throws Exception {
+        // register built-in commands
+        final Set< Class< ? extends ShellCommand >> builtInCommands = new HashSet<>();
+        builtInCommands.add( AddConstraintColumnCommand.class );
+        builtInCommands.add( CdCommand.class );
+        builtInCommands.add( CreateCommand.class );
+        builtInCommands.add( DeleteCommand.class );
+        builtInCommands.add( ExitCommand.class );
+        builtInCommands.add( ExportCommand.class );
+        builtInCommands.add( FindCommand.class );
+        builtInCommands.add( HelpCommand.class );
+        builtInCommands.add( HomeCommand.class );
+        builtInCommands.add( ImportCommand.class );
+        builtInCommands.add( ListCommand.class );
+        // builtInCommands.add( NavigateCommand.class );
+        builtInCommands.add( PlayCommand.class );
+        builtInCommands.add( RenameCommand.class );
+        builtInCommands.add( SetCommand.class );
+        builtInCommands.add( ShowCommand.class );
+        builtInCommands.add( UnsetPropertyCommand.class );
+        // builtInCommands.add( UseTeiidCommand.class );
 
-		// commands
-		List<String> allList = new ArrayList<String>(1);
-		allList.add(WorkspaceContext.ALL_TYPES);
+        for ( final Class< ? extends ShellCommand > commandClass : builtInCommands ) {
+            registerCommand( commandClass );
+        }
 
-		ListCommand listCommand = new ListCommand(this.wsStatus);
-		commandMap.put(listCommand.getName().toLowerCase(), listCommand);
-
-		CdCommand cdCommand = new CdCommand(this.wsStatus);
-		commandMap.put(cdCommand.getName().toLowerCase(), cdCommand);
-
-		SetCommand setCommand = new SetCommand(this.wsStatus);
-		commandMap.put(setCommand.getName().toLowerCase(), setCommand);
-
-		CreateCommand createCommand = new CreateCommand(this.wsStatus);
-		commandMap.put(createCommand.getName().toLowerCase(), createCommand);
-
-		DeleteCommand deleteCommand = new DeleteCommand(this.wsStatus);
-		commandMap.put(deleteCommand.getName().toLowerCase(), deleteCommand);
-
-		ImportCommand importCommand = new ImportCommand(this.wsStatus);
-		commandMap.put(importCommand.getName().toLowerCase(), importCommand);
-
-		ExportCommand exportCommand = new ExportCommand(this.wsStatus);
-		commandMap.put(exportCommand.getName().toLowerCase(), exportCommand);
-
-//		UseTeiidCommand connCommand = new UseTeiidCommand(this.wsStatus);
-//        commandMap.put(connCommand.getName().toLowerCase(), connCommand);
-
-//        NavigateCommand traverseCommand = new NavigateCommand(this.wsStatus);
-//        commandMap.put(traverseCommand.getName().toLowerCase(), traverseCommand);
-
-        ShowCommand showCommand = new ShowCommand(this.wsStatus);
-        commandMap.put(showCommand.getName().toLowerCase(), showCommand);
-
-        RenameCommand renameCommand = new RenameCommand(this.wsStatus);
-        commandMap.put(renameCommand.getName().toLowerCase(), renameCommand);
-
-        PlayCommand playCommand = new PlayCommand(this.wsStatus);
-        commandMap.put(playCommand.getName().toLowerCase(), playCommand);
-
-        UnsetPropertyCommand unsetCommand = new UnsetPropertyCommand(this.wsStatus);
-        commandMap.put(unsetCommand.getName().toLowerCase(), unsetCommand);
-
-        FindCommand findCommand = new FindCommand(this.wsStatus);
-        commandMap.put(findCommand.getName().toLowerCase(), findCommand);
-
-		discoverContributedCommands();
-	}
+        // register any commands contributed by command providers
+        discoverContributedCommands();
+    }
 
     /**
      * Discover any contributed commands, both on the classpath and registered
@@ -169,15 +156,13 @@ public class ShellCommandFactory {
         for (ClassLoader classLoader : commandClassloaders) {
             for (ShellCommandProvider provider : ServiceLoader.load(ShellCommandProvider.class, classLoader)) {
                 Map<String, Class<? extends ShellCommand>> commands = provider.provideCommands();
+
                 for (Map.Entry<String, Class<? extends ShellCommand>> entry : commands.entrySet()) {
                 	Class<? extends ShellCommand> commandClass = entry.getValue();
-        			if (commandClass != null) {
-        				ShellCommand command;
-						try {
-							command = commandClass.newInstance();
-	        				command.initValidWsContextTypes();
-	        				command.setWorkspaceStatus(this.wsStatus);
-	            			commandMap.put(entry.getKey(), command);
+
+                	if (commandClass != null) {
+        				try {
+                            registerCommand( commandClass );
 						} catch (Exception e) {
 						    KEngine.getInstance().getErrorHandler().error(e);
 						}
@@ -187,27 +172,49 @@ public class ShellCommandFactory {
         }
     }
 
-	/**
-	 * Called to create a shell command.
-	 * @param commandName the name of the command
-	 * @return the command
-	 * @throws Exception the exception
-	 */
-	public ShellCommand getCommand(String commandName) throws Exception {
-		ShellCommand command = null;
-		if (commandName.toLowerCase().equals(HelpCommand.NAME.toLowerCase())) {
-            command = new HelpCommand(this.wsStatus, getCommands());
-		} else if (commandName.toLowerCase().equals(QUIT_CMD_NAME.toLowerCase())) {
-			command = new ExitCommand(EXIT_CMD_NAME,this.wsStatus);
-		} else if (commandName.toLowerCase().equals(EXIT_CMD_NAME.toLowerCase())) {
-			command = new ExitCommand(EXIT_CMD_NAME,this.wsStatus);
-		} else {
-			command = commandMap.get(commandName.toLowerCase());
-			if (command == null)
-				return new CommandNotFoundCommand("NotFound"); //$NON-NLS-1$
-		}
-		return command;
-	}
+    private void registerCommand( final Class< ? extends ShellCommand > commandClass ) throws Exception {
+        final Constructor< ? extends ShellCommand > constructor = commandClass.getConstructor( WorkspaceStatus.class );
+        final ShellCommand command = constructor.newInstance( this.wsStatus );
+        command.initValidWsContextTypes();
+        this.commandMap.put( command.getName().toLowerCase(), command );
+
+        // add aliases
+        final String[] aliases = command.getAliases();
+
+        if ( ( aliases != null ) && ( aliases.length != 0 ) ) {
+            for ( final String alias : aliases ) {
+                if ( !StringUtils.isBlank( alias ) ) {
+                    this.aliasMap.put( alias.toLowerCase(), command );
+                }
+            }
+        }
+    }
+
+    /**
+     * @param commandName
+     *        the name of the command being requested (cannot be empty)
+     * @return the command or a {@link CommandNotFoundCommand} (never <code>null</code>)
+     */
+    public ShellCommand getCommand( final String commandName ) {
+        ArgCheck.isNotEmpty( commandName, "commandName" ); //$NON-NLS-1$
+        ShellCommand command = this.commandMap.get( commandName.toLowerCase() );
+
+        if ( command == null ) {
+            // see if alias
+            command = this.aliasMap.get( commandName.toLowerCase() );
+
+            // if still not found the command can't be found
+            if ( command == null ) {
+                return new CommandNotFoundCommand( commandName, this.wsStatus );
+            }
+        }
+
+        if ( command instanceof HelpCommand ) {
+            ( ( HelpCommand )command ).setCommands( getCommands() );
+        }
+
+        return command;
+    }
 
 	/**
 	 * Get valid command names for the current context

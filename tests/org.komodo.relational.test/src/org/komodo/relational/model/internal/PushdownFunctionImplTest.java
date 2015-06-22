@@ -13,12 +13,10 @@ import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalObject.Filter;
-import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.DataTypeResultSet;
 import org.komodo.relational.model.Model;
@@ -36,7 +34,8 @@ public final class PushdownFunctionImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        this.function = RelationalModelFactory.createPushdownFunction( this.uow, _repo, mock( Model.class ), "function" );
+        final Model model = createModel();
+        this.function = model.addPushdownFunction( this.uow, "function" );
         commit();
     }
 
@@ -129,6 +128,31 @@ public final class PushdownFunctionImplTest extends RelationalModelTest {
     public void shouldSetTabularResultSet() throws Exception {
         assertThat( this.function.setResultSet( this.uow, TabularResultSet.class ), is( notNullValue() ) );
         assertThat( this.function.getResultSet( this.uow ), is( instanceOf( TabularResultSet.class ) ) );
+    }
+
+    /*
+     * ********************************************************************
+     * *****                  Resolver Tests                          *****
+     * ********************************************************************
+     */
+
+    @Test
+    public void shouldCreateUsingResolver() throws Exception {
+        final String name = "blah";
+        final KomodoObject kobject = PushdownFunctionImpl.RESOLVER.create( this.uow,
+                                                                           _repo,
+                                                                           this.function.getParent( this.uow ),
+                                                                           name,
+                                                                           null );
+        assertThat( kobject, is( notNullValue() ) );
+        assertThat( kobject, is( instanceOf( PushdownFunction.class ) ) );
+        assertThat( kobject.getName( this.uow ), is( name ) );
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
+        final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
+        PushdownFunctionImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
     }
 
 }

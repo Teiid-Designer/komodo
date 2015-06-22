@@ -19,7 +19,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalObject.Filter;
-import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Model.Type;
@@ -30,8 +29,6 @@ import org.komodo.relational.model.UserDefinedFunction;
 import org.komodo.relational.model.View;
 import org.komodo.relational.model.VirtualProcedure;
 import org.komodo.relational.vdb.ModelSource;
-import org.komodo.relational.vdb.Vdb;
-import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
@@ -40,16 +37,11 @@ import org.komodo.spi.repository.KomodoType;
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class ModelImplTest extends RelationalModelTest {
 
-    private static final String NAME = "model";
-
     private Model model;
 
     @Before
     public void init() throws Exception {
-        final WorkspaceManager wsMgr = WorkspaceManager.getInstance( _repo );
-        final KomodoObject workspace = _repo.komodoWorkspace( this.uow );
-        final Vdb vdb = RelationalModelFactory.createVdb( this.uow, _repo, workspace.getAbsolutePath(), "parentVdb", "/test1" );
-        this.model = wsMgr.createModel( this.uow, vdb, NAME );
+        this.model = createModel();
         commit();
     }
 
@@ -543,6 +535,27 @@ public final class ModelImplTest extends RelationalModelTest {
         final Type value = Type.VIRTUAL;
         this.model.setModelType( this.uow, value );
         assertThat( this.model.getModelType( this.uow ), is( value ) );
+    }
+
+    /*
+     * ********************************************************************
+     * *****                  Resolver Tests                          *****
+     * ********************************************************************
+     */
+
+    @Test
+    public void shouldCreateUsingResolver() throws Exception {
+        final String name = "blah";
+        final KomodoObject kobject = ModelImpl.RESOLVER.create( this.uow, _repo, this.model.getParent( this.uow ), name, null );
+        assertThat( kobject, is( notNullValue() ) );
+        assertThat( kobject, is( instanceOf( Model.class ) ) );
+        assertThat( kobject.getName( this.uow ), is( name ) );
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
+        final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
+        ModelImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
     }
 
 }

@@ -24,10 +24,10 @@ import org.komodo.shell.api.WorkspaceStatus;
 /**
  * An implementation of the {@link ShellCommandReader} that uses standard input
  * to read commands typed in by the user.
- * 
+ *
  * This class adapted from https://github.com/Governance/s-ramp/blob/master/s-ramp-shell
  * - altered to use WorkspaceStatus
- * 
+ *
  * @author eric.wittmann@redhat.com
  */
 public class StdInShellCommandReader extends AbstractShellCommandReader {
@@ -73,8 +73,7 @@ public class StdInShellCommandReader extends AbstractShellCommandReader {
 	@Override
 	protected String readLine() throws Exception {
 		if (!stdinReader.ready()) {
-			String prompt = "["+getWorkspaceStatus().getCurrentContext().getName()+"] > "; //$NON-NLS-1$ //$NON-NLS-2$
-			getOutputStream().print(prompt);
+			getOutputStream().print(getPrompt() + " > "); //$NON-NLS-1$
 		}
 		return stdinReader.readLine();
 	}

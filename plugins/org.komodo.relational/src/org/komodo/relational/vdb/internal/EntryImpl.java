@@ -7,10 +7,11 @@
  */
 package org.komodo.relational.vdb.internal;
 
+import org.komodo.relational.Messages;
+import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.internal.RelationalChildRestrictedObject;
-import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.vdb.Entry;
 import org.komodo.relational.vdb.Vdb;
@@ -52,7 +53,14 @@ public final class EntryImpl extends RelationalChildRestrictedObject implements 
             final String entryPath = entryPathValue == null ? null : entryPathValue.toString();
             final AdapterFactory adapter = new AdapterFactory( repository );
             final Vdb parentVdb = adapter.adapt( transaction, parent, Vdb.class );
-            return RelationalModelFactory.createEntry( transaction, repository, parentVdb, id, entryPath );
+
+            if ( parentVdb == null ) {
+                throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
+                                                          parent.getAbsolutePath(),
+                                                          Entry.class.getSimpleName() ) );
+            }
+
+            return parentVdb.addEntry( transaction, id, entryPath );
         }
 
         /**
