@@ -9,20 +9,19 @@ package org.komodo.relational.model.internal;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
+import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalObject.Filter;
-import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
-import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.TableConstraint;
 import org.komodo.relational.model.UniqueConstraint;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 
@@ -36,8 +35,8 @@ public final class UniqueConstraintImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        this.table = RelationalModelFactory.createTable( this.uow, _repo, mock( Model.class ), "table" );
-        this.uniqueConstraint = RelationalModelFactory.createUniqueConstraint( this.uow, _repo, this.table, NAME );
+        this.table = createTable();
+        this.uniqueConstraint = this.table.addUniqueConstraint( this.uow, NAME );
         commit();
     }
 
@@ -103,6 +102,27 @@ public final class UniqueConstraintImplTest extends RelationalModelTest {
                 assertThat( filter.rejectProperty( name ), is( false ) );
             }
         }
+    }
+
+    /*
+     * ********************************************************************
+     * *****                  Resolver Tests                          *****
+     * ********************************************************************
+     */
+
+    @Test
+    public void shouldCreateUsingResolver() throws Exception {
+        final String name = "blah";
+        final KomodoObject kobject = UniqueConstraintImpl.RESOLVER.create( this.uow, _repo, this.table, name, null );
+        assertThat( kobject, is( notNullValue() ) );
+        assertThat( kobject, is( instanceOf( UniqueConstraint.class ) ) );
+        assertThat( kobject.getName( this.uow ), is( name ) );
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
+        final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
+        UniqueConstraintImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
     }
 
 }

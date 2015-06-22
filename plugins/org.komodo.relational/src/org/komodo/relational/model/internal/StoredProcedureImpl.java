@@ -101,7 +101,14 @@ public final class StoredProcedureImpl extends AbstractProcedureImpl implements 
                                        final RelationalProperties properties ) throws KException {
             final AdapterFactory adapter = new AdapterFactory( repository );
             final Model parentModel = adapter.adapt( transaction, parent, Model.class );
-            return RelationalModelFactory.createStoredProcedure( transaction, repository, parentModel, id );
+
+            if ( parentModel == null ) {
+                throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
+                                                          parent.getAbsolutePath(),
+                                                          StoredProcedure.class.getSimpleName() ) );
+            }
+
+            return parentModel.addStoredProcedure( transaction, id );
         }
 
         /**

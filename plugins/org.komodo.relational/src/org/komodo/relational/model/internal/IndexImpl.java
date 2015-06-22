@@ -7,9 +7,10 @@
  */
 package org.komodo.relational.model.internal;
 
+import org.komodo.relational.Messages;
+import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.internal.AdapterFactory;
-import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.model.Index;
 import org.komodo.relational.model.Table;
@@ -48,7 +49,14 @@ public final class IndexImpl extends TableConstraintImpl implements Index {
                              final RelationalProperties properties ) throws KException {
             final AdapterFactory adapter = new AdapterFactory( repository );
             final Table parentTable = adapter.adapt( transaction, parent, Table.class );
-            return RelationalModelFactory.createIndex( transaction, repository, parentTable, id );
+
+            if ( parentTable == null ) {
+                throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
+                                                          parent.getAbsolutePath(),
+                                                          Index.class.getSimpleName() ) );
+            }
+
+            return parentTable.addIndex( transaction, id );
         }
 
         /**

@@ -9,19 +9,20 @@ package org.komodo.relational.vdb.internal;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
+import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalObject.Filter;
-import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.vdb.Condition;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Permission;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
@@ -29,16 +30,13 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 public final class ConditionImplTest extends RelationalModelTest {
 
     private Condition condition;
-    private DataRole dataRole;
-    private Permission permission;
-    private Vdb vdb;
 
     @Before
     public void init() throws Exception {
-        this.vdb = RelationalModelFactory.createVdb( this.uow, _repo, null, "vdb", "/Users/sledge/hammer/MyVdb.vdb" );
-        this.dataRole = RelationalModelFactory.createDataRole( this.uow, _repo, this.vdb, "dataRole" );
-        this.permission = RelationalModelFactory.createPermission( this.uow, _repo, this.dataRole, "permission" );
-        this.condition = RelationalModelFactory.createCondition( this.uow, _repo, this.permission, "condition" );
+        final Vdb vdb = createVdb();
+        final DataRole dataRole = vdb.addDataRole( this.uow, "dataRole" );
+        final Permission permission = dataRole.addPermission( this.uow, "permission" );
+        this.condition = permission.addCondition( this.uow, "condition" );
         commit();
     }
 
@@ -51,7 +49,7 @@ public final class ConditionImplTest extends RelationalModelTest {
     public void shouldFailConstructionIfNotCondition() {
         if ( RelationalObjectImpl.VALIDATE_INITIAL_STATE ) {
             try {
-                new ConditionImpl( this.uow, _repo, this.vdb.getAbsolutePath() );
+                new ConditionImpl( this.uow, _repo, this.condition.getParent( this.uow ).getAbsolutePath() );
                 fail();
             } catch ( final KException e ) {
                 // expected
@@ -108,6 +106,31 @@ public final class ConditionImplTest extends RelationalModelTest {
         final boolean newValue = !Condition.DEFAULT_CONSTRAINT;
         this.condition.setConstraint( this.uow, newValue );
         assertThat( this.condition.isConstraint( this.uow ), is( newValue ) );
+    }
+
+    /*
+     * ********************************************************************
+     * *****                  Resolver Tests                          *****
+     * ********************************************************************
+     */
+
+    @Test
+    public void shouldCreateUsingResolver() throws Exception {
+        final String name = "blah";
+        final KomodoObject kobject = ConditionImpl.RESOLVER.create( this.uow,
+                                                                    _repo,
+                                                                    this.condition.getParent( this.uow ),
+                                                                    name,
+                                                                    null );
+        assertThat( kobject, is( notNullValue() ) );
+        assertThat( kobject, is( instanceOf( Condition.class ) ) );
+        assertThat( kobject.getName( this.uow ), is( name ) );
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
+        final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
+        ConditionImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
     }
 
 }

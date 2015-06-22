@@ -34,33 +34,21 @@ import org.komodo.utils.ArgCheck;
  */
 public abstract class AbstractShellCommand implements ShellCommand {
 
-	private WorkspaceStatus wsStatus;
+	private final WorkspaceStatus wsStatus;
 	private Arguments arguments;
 	private Writer writer;
 	protected List<String> validWsContextTypes = Collections.emptyList();
-	private String name;
 
-	/**
-	 * Constructor.
-	 */
-	public AbstractShellCommand() {
-	}
-
-	/**
-	 * @see org.komodo.shell.api.ShellCommand#getName()
-	 */
-	@Override
-	public String getName() {
-		return this.name;
-	}
-
-	/**
-	 * @see org.komodo.shell.api.ShellCommand#setName(String)
-	 */
-	@Override
-	public void setName(String name) {
-		this.name=name;
-	}
+    /**
+     * Constructs a command.
+     *
+     * @param status
+     *        the workspace status (cannot be <code>null</code>)
+     */
+    public AbstractShellCommand( final WorkspaceStatus status ) {
+        ArgCheck.isNotNull( status, "status" ); //$NON-NLS-1$
+        this.wsStatus = status;
+    }
 
 	/**
 	 * @see org.komodo.shell.api.ShellCommand#initValidWsContextTypes()
@@ -99,14 +87,6 @@ public abstract class AbstractShellCommand implements ShellCommand {
 		}
 
 		return false;
-	}
-
-	/**
-	 * @see org.komodo.shell.api.ShellCommand#setWorkspaceStatus(org.komodo.shell.api.WorkspaceStatus)
-	 */
-	@Override
-	public void setWorkspaceStatus(WorkspaceStatus wsStatus) {
-		this.wsStatus = wsStatus;
 	}
 
 	/**

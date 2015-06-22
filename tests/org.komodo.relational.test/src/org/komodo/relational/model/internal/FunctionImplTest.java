@@ -13,13 +13,11 @@ import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
 import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalObject.Filter;
-import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.model.Function;
 import org.komodo.relational.model.Function.Determinism;
 import org.komodo.relational.model.Model;
@@ -35,7 +33,8 @@ public final class FunctionImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        this.function = RelationalModelFactory.createPushdownFunction( this.uow, _repo, mock( Model.class ), NAME );
+        final Model model = createModel();
+        this.function = model.addPushdownFunction( this.uow, NAME );
         commit();
     }
 

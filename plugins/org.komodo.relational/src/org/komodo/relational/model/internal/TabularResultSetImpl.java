@@ -17,7 +17,9 @@ import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.model.AbstractProcedure;
+import org.komodo.relational.model.PushdownFunction;
 import org.komodo.relational.model.ResultSetColumn;
+import org.komodo.relational.model.StoredProcedure;
 import org.komodo.relational.model.TabularResultSet;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
@@ -60,7 +62,22 @@ public final class TabularResultSetImpl extends RelationalObjectImpl implements 
             final Class< ? extends AbstractProcedure > clazz = AbstractProcedureImpl.getProcedureType( transaction, parent );
             final AdapterFactory adapter = new AdapterFactory( repository );
             final AbstractProcedure parentProc = adapter.adapt( transaction, parent, clazz );
-            return RelationalModelFactory.createTabularResultSet( transaction, repository, parentProc );
+
+            if ( parentProc == null ) {
+                throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
+                                                          parent.getAbsolutePath(),
+                                                          TabularResultSet.class.getSimpleName() ) );
+            }
+
+            if ( parentProc instanceof StoredProcedure ) {
+                return ( ( StoredProcedure )parentProc ).setResultSet( transaction, TabularResultSet.class );
+            }
+
+            if ( parentProc instanceof PushdownFunction ) {
+                return ( ( PushdownFunction )parentProc ).setResultSet( transaction, TabularResultSet.class );
+            }
+
+            throw new KException( Messages.getString( Relational.UNEXPECTED_RESULT_SET_TYPE, clazz.getName() ) );
         }
 
         /**
@@ -139,15 +156,7 @@ public final class TabularResultSetImpl extends RelationalObjectImpl implements 
     @Override
     public ResultSetColumn addColumn( final UnitOfWork transaction,
                                       final String columnName ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( columnName, "columnName" ); //$NON-NLS-1$
-
-        final ResultSetColumn result = RelationalModelFactory.createResultSetColumn( transaction,
-                                                                                     getRepository(),
-                                                                                     this,
-                                                                                     columnName );
-        return result;
+        return RelationalModelFactory.createResultSetColumn( transaction, getRepository(), this, columnName );
     }
 
     /**

@@ -39,6 +39,10 @@ public class Messages implements StringConstants {
 
     @SuppressWarnings( "javadoc" )
     public enum SHELL {
+        INVALID_GLOBAL_PROPERTY_NAME,
+        INVALID_BOOLEAN_GLOBAL_PROPERTY_VALUE,
+        PROMPT,
+        PROMPT_WITH_TYPE,
         CHILD_NAME_HEADER,
         CHILD_TYPE_HEADER,
         PROPERTY_NAME_HEADER,
@@ -81,6 +85,8 @@ public class Messages implements StringConstants {
     	InvalidArgMsg_propertiesFile_error_reading,
     	InvalidArgMsg_propertiesFile_error_reading_line,
         FileShellCommandReader_NoConsole,
+        HelpNoAliases,
+        HelpAliasesHeading,
         HelpUsageHeading,
         HelpDescription,
         HelpDescriptionHeading,

@@ -8,21 +8,22 @@
 package org.komodo.relational.model.internal;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsInstanceOf.instanceOf;
+import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalConstants;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalObject.Filter;
-import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.DataTypeResultSet;
 import org.komodo.relational.model.DataTypeResultSet.Type;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.StoredProcedure;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
@@ -35,8 +36,9 @@ public final class DataTypeResultSetImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        this.procedure = RelationalModelFactory.createStoredProcedure( this.uow, _repo, mock( Model.class ), "procedure" );
-        this.resultSet = RelationalModelFactory.createDataTypeResultSet( this.uow, _repo, this.procedure );
+        final Model model = createModel();
+        this.procedure = model.addStoredProcedure( this.uow, "procedure" );
+        this.resultSet = this.procedure.setResultSet( this.uow, DataTypeResultSet.class );
         commit();
     }
 
@@ -153,6 +155,26 @@ public final class DataTypeResultSetImplTest extends RelationalModelTest {
         this.resultSet.setType( this.uow, Type.BIGDECIMAL );
         this.resultSet.setType( this.uow, null );
         assertThat( this.resultSet.getType( this.uow ), is( Type.DEFAULT_VALUE ) );
+    }
+
+    /*
+     * ********************************************************************
+     * *****                  Resolver Tests                          *****
+     * ********************************************************************
+     */
+
+    @Test
+    public void shouldCreateUsingResolver() throws Exception {
+        final KomodoObject kobject = DataTypeResultSetImpl.RESOLVER.create( this.uow, _repo, this.procedure, "blah", null );
+        assertThat( kobject, is( notNullValue() ) );
+        assertThat( kobject, is( instanceOf( DataTypeResultSet.class ) ) );
+        assertThat( kobject.getName( this.uow ), is( CreateProcedure.RESULT_SET ) );
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
+        final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
+        DataTypeResultSetImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
     }
 
 }

@@ -7,10 +7,11 @@
  */
 package org.komodo.relational.vdb.internal;
 
+import org.komodo.relational.Messages;
+import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.internal.RelationalChildRestrictedObject;
-import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.vdb.Condition;
 import org.komodo.relational.vdb.Permission;
@@ -50,7 +51,14 @@ public final class ConditionImpl extends RelationalChildRestrictedObject impleme
                                  final RelationalProperties properties ) throws KException {
             final AdapterFactory adapter = new AdapterFactory( repository );
             final Permission parentPerm = adapter.adapt( transaction, parent, Permission.class );
-            return RelationalModelFactory.createCondition( transaction, repository, parentPerm, id );
+
+            if ( parentPerm == null ) {
+                throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
+                                                          parent.getAbsolutePath(),
+                                                          Condition.class.getSimpleName() ) );
+            }
+
+            return parentPerm.addCondition( transaction, id );
         }
 
         /**

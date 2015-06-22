@@ -33,7 +33,10 @@ import org.komodo.spi.repository.Repository;
  */
 public class ImportCommand extends BuiltInShellCommand {
 
-    private static final String IMPORT = "import"; //$NON-NLS-1$
+    /**
+     * The command name.
+     */
+    public static final String NAME = "import"; //$NON-NLS-1$
 
     private static final String SUBCMD_DDL = "ddl"; //$NON-NLS-1$
     private static final String SUBCMD_VDB = "vdb"; //$NON-NLS-1$
@@ -44,11 +47,11 @@ public class ImportCommand extends BuiltInShellCommand {
     private ImportMessages importMessages = null;
 
     /**
-     * Constructor.
-     * @param wsStatus the workspace status
+     * @param wsStatus
+     *        the workspace status (cannot be <code>null</code>)
      */
-    public ImportCommand(WorkspaceStatus wsStatus) {
-        super(IMPORT, wsStatus);
+    public ImportCommand( final WorkspaceStatus wsStatus ) {
+        super( wsStatus, NAME );
     }
 
     /**

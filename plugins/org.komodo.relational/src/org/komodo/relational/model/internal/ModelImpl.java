@@ -81,8 +81,15 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
                              final String id,
                              final RelationalProperties properties ) throws KException {
             final AdapterFactory adapter = new AdapterFactory( repository );
-            final Vdb parentVdb = ( ( parent == null ) ? null : adapter.adapt( transaction, parent, Vdb.class ) );
-            return RelationalModelFactory.createModel( transaction, repository, parentVdb, id );
+            final Vdb parentVdb = adapter.adapt( transaction, parent, Vdb.class );
+
+            if ( parentVdb == null ) {
+                throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
+                                                          parent.getAbsolutePath(),
+                                                          Model.class.getSimpleName() ) );
+            }
+
+            return parentVdb.addModel( transaction, id );
         }
 
         /**
@@ -161,15 +168,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
     @Override
     public PushdownFunction addPushdownFunction( final UnitOfWork transaction,
                                                  final String functionName ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( functionName, "functionName" ); //$NON-NLS-1$
-
-        final PushdownFunction result = RelationalModelFactory.createPushdownFunction( transaction,
-                                                                                       getRepository(),
-                                                                                       this,
-                                                                                       functionName );
-        return result;
+        return RelationalModelFactory.createPushdownFunction( transaction, getRepository(), this, functionName );
     }
 
     /**
@@ -181,15 +180,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
     @Override
     public UserDefinedFunction addUserDefinedFunction( final UnitOfWork transaction,
                                                        final String functionName ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( functionName, "functionName" ); //$NON-NLS-1$
-
-        final UserDefinedFunction result = RelationalModelFactory.createUserDefinedFunction( transaction,
-                                                                                             getRepository(),
-                                                                                             this,
-                                                                                             functionName );
-        return result;
+        return RelationalModelFactory.createUserDefinedFunction( transaction, getRepository(), this, functionName );
     }
 
     /**
@@ -201,15 +192,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
     @Override
     public StoredProcedure addStoredProcedure( final UnitOfWork transaction,
                                                final String procedureName ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( procedureName, "procedureName" ); //$NON-NLS-1$
-
-        final StoredProcedure result = RelationalModelFactory.createStoredProcedure( transaction,
-                                                                                     getRepository(),
-                                                                                     this,
-                                                                                     procedureName );
-        return result;
+        return RelationalModelFactory.createStoredProcedure( transaction, getRepository(), this, procedureName );
     }
 
     /**
@@ -221,15 +204,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
     @Override
     public VirtualProcedure addVirtualProcedure( final UnitOfWork transaction,
                                                  final String procedureName ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( procedureName, "procedureName" ); //$NON-NLS-1$
-
-        final VirtualProcedure result = RelationalModelFactory.createVirtualProcedure( transaction,
-                                                                                       getRepository(),
-                                                                                       this,
-                                                                                       procedureName );
-        return result;
+        return RelationalModelFactory.createVirtualProcedure( transaction, getRepository(), this, procedureName );
     }
 
     /**
@@ -240,12 +215,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
     @Override
     public ModelSource addSource( final UnitOfWork transaction,
                                   final String sourceName ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( sourceName, "sourceName" ); //$NON-NLS-1$
-
-        final ModelSource result = RelationalModelFactory.createModelSource( transaction, getRepository(), this, sourceName );
-        return result;
+        return RelationalModelFactory.createModelSource( transaction, getRepository(), this, sourceName );
     }
 
     /**
@@ -256,12 +226,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
     @Override
     public Table addTable( final UnitOfWork transaction,
                            final String tableName ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( tableName, "tableName" ); //$NON-NLS-1$
-
-        final Table result = RelationalModelFactory.createTable( transaction, getRepository(), this, tableName );
-        return result;
+        return RelationalModelFactory.createTable( transaction, getRepository(), this, tableName );
     }
 
     /**
@@ -272,12 +237,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
     @Override
     public View addView( final UnitOfWork transaction,
                          final String viewName ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( viewName, "viewName" ); //$NON-NLS-1$
-
-        final View result = RelationalModelFactory.createView( transaction, getRepository(), this, viewName );
-        return result;
+        return RelationalModelFactory.createView( transaction, getRepository(), this, viewName );
     }
 
     /**

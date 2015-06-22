@@ -1,0 +1,11 @@
+# create three models within workspace.
+create vdb MyVdb
+# cd into the vdb
+cd MyVdb
+create model Model1
+# cd into the model
+cd Model1
+create table Table1
+#Listing of table
+ll
+

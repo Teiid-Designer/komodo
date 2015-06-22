@@ -26,10 +26,10 @@ import javax.jcr.Node;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.modeshape.visitor.DdlNodeVisitor;
 import org.komodo.relational.RelationalProperties;
-import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.model.Schema;
+import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
@@ -64,8 +64,8 @@ public class SchemaImpl extends RelationalObjectImpl implements Schema {
                               final KomodoObject parent,
                               final String id,
                               final RelationalProperties properties ) throws KException {
-            final String parentPath = ( ( parent == null ) ? null : parent.getAbsolutePath() );
-            return RelationalModelFactory.createSchema( transaction, repository, parentPath, id );
+            final WorkspaceManager mgr = WorkspaceManager.getInstance( repository );
+            return mgr.createSchema( transaction, parent, id );
         }
 
         /**

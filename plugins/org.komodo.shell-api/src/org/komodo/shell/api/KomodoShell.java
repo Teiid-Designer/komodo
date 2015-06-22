@@ -24,7 +24,6 @@ package org.komodo.shell.api;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.Writer;
-
 import org.komodo.core.KEngine;
 import org.komodo.spi.constants.StringConstants;
 
@@ -47,9 +46,17 @@ public interface KomodoShell extends StringConstants {
      * @return the shell's output stream
      */
     PrintStream getOutputStream();
-    
+
     /**
-     * 
+     * The directory where the shell saves user settings, preferences, or any other data needed to restore a user session.The
+     * <code>${user.home}/.komodo</code> directory is the default location.
+     *
+     * @return the shell's workspace directory (never empty)
+     */
+    String getShellDataLocation();
+
+    /**
+     *
      * @return the command output writer
      */
     Writer getCommandOutput();
@@ -58,6 +65,6 @@ public interface KomodoShell extends StringConstants {
      * Exit the shell
      */
     void exit();
-    
+
 
 }

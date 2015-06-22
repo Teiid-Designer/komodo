@@ -8,19 +8,23 @@
 package org.komodo.relational.model.internal;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsInstanceOf.instanceOf;
+import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalObject.Filter;
+import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.RelationalProperty;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
-import org.komodo.relational.model.OptionContainer;
 import org.komodo.relational.model.StatementOption;
+import org.komodo.relational.model.Table;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 
@@ -33,11 +37,8 @@ public final class StatementOptionImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        this.option = RelationalModelFactory.createStatementOption( this.uow,
-                                                                    _repo,
-                                                                    mock( OptionContainer.class ),
-                                                                    NAME,
-                                                                    "initialValue" );
+        final Table table = createTable();
+        this.option = RelationalModelFactory.createStatementOption( this.uow, _repo, table, NAME, "initialValue" );
         commit();
     }
 
@@ -113,6 +114,35 @@ public final class StatementOptionImplTest extends RelationalModelTest {
         this.option.setOption( this.uow, value );
         assertThat( this.option.getOption( this.uow ), is( value ) );
         assertThat( this.option.getProperty( this.uow, StandardDdlLexicon.VALUE ).getStringValue( this.uow ), is( value ) );
+    }
+
+    /*
+     * ********************************************************************
+     * *****                  Resolver Tests                          *****
+     * ********************************************************************
+     */
+
+    @Test
+    public void shouldCreateUsingResolver() throws Exception {
+        final String name = "blah";
+
+        final RelationalProperties props = new RelationalProperties();
+        props.add( new RelationalProperty( StandardDdlLexicon.VALUE, "optionValue" ) );
+
+        final KomodoObject kobject = StatementOptionImpl.RESOLVER.create( this.uow,
+                                                                          _repo,
+                                                                          this.option.getParent( this.uow ),
+                                                                          name,
+                                                                          props );
+        assertThat( kobject, is( notNullValue() ) );
+        assertThat( kobject, is( instanceOf( StatementOption.class ) ) );
+        assertThat( kobject.getName( this.uow ), is( name ) );
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
+        final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
+        StatementOptionImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", new RelationalProperties() );
     }
 
 }

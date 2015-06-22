@@ -12,9 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalObject;
-import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
-import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Descriptor;
 import org.komodo.spi.repository.KomodoObject;
@@ -42,8 +40,7 @@ public final class RelationalObjectImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        final Vdb vdb = RelationalModelFactory.createVdb( this.uow, _repo, null, "vdb", "/my/vdb" );
-        final KomodoObject model = RelationalModelFactory.createModel( this.uow, _repo, vdb, "robject" );
+        final KomodoObject model = createModel();
         this.robject = new RelationalTestObject( this.uow, model.getRepository(), model.getAbsolutePath() );
         commit();
     }

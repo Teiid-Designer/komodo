@@ -20,14 +20,17 @@ import org.komodo.shell.api.WorkspaceStatus;
  */
 public class UnsetPropertyCommand extends BuiltInShellCommand {
 
-    private static String NAME = "unset"; //$NON-NLS-1$
+    /**
+     * The command name.
+     */
+    public static final String NAME = "unset"; //$NON-NLS-1$
 
     /**
      * @param status
      *        the workspace status (cannot be <code>null</code>)
      */
     public UnsetPropertyCommand( final WorkspaceStatus status ) {
-        super( NAME, status );
+        super( status, NAME );
     }
 
     /**

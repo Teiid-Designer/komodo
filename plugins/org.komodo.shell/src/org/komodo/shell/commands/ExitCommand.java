@@ -15,7 +15,6 @@
  */
 package org.komodo.shell.commands;
 
-import org.komodo.core.KEngine;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
@@ -24,39 +23,26 @@ import org.komodo.shell.api.WorkspaceStatus;
 
 /**
  * Implements the 'exit' command.
- * 
+ *
  * This class adapted from https://github.com/Governance/s-ramp/blob/master/s-ramp-shell
  * - altered to use different Message class
- * 
+ *
  * @author eric.wittmann@redhat.com
  */
 public class ExitCommand extends BuiltInShellCommand {
 
-	
-	/**
-	 * Constructor.
-	 * @param name the command name
-	 * @param wsStatus the workspace status
-	 */
-	public ExitCommand(String name, WorkspaceStatus wsStatus) {
-		super(name,wsStatus);
-	}
+    /**
+     * The command name.
+     */
+    public static final String NAME = "exit"; //$NON-NLS-1$
 
-	/**
-	 * @see org.komodo.shell.api.ShellCommand#printUsage(int indent)
-	 */
-	@Override
-	public void printUsage(int indent) {
-		print(indent,"exit"); //$NON-NLS-1$
-	}
-
-	/**
-	 * @see org.komodo.shell.api.ShellCommand#printHelp(int indent)
-	 */
-	@Override
-	public void printHelp(int indent) {
-	    printUsage(indent);
-	}
+    /**
+     * @param wsStatus
+     *        the workspace status (cannot be <code>null</code>)
+     */
+    public ExitCommand( final WorkspaceStatus wsStatus ) {
+        super( wsStatus, NAME, "quit" ); //$NON-NLS-1$
+    }
 
 	/**
 	 * @see org.komodo.shell.api.ShellCommand#execute()
@@ -64,14 +50,7 @@ public class ExitCommand extends BuiltInShellCommand {
 	@Override
 	public boolean execute() throws Exception {
 		print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.GOOD_BYE));
-
-		KEngine engine = this.getWorkspaceStatus().getEngine();
-		if (engine != null) {
-		    engine.shutdownAndWait();
-		}
-
 		getWorkspaceStatus().getShell().exit();
-
         return true;
 	}
 

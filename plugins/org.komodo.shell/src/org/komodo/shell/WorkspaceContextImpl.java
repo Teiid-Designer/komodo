@@ -269,6 +269,30 @@ public class WorkspaceContextImpl implements WorkspaceContext {
         return props;
     }
 
+    /**
+     * @return the names of the unfiltered properties that have values (includes those that have not been set yet)
+     * @throws Exception
+     *         if an error occurs
+     */
+    public List< String > getUnfilteredProperties() throws Exception {
+        final KomodoObject relObj = getKomodoObj();
+        final UnitOfWork transaction = this.wsStatus.getTransaction();
+        final List< String > props = new ArrayList<>( Arrays.asList( relObj.getRawPropertyNames( transaction ) ) ); // props with values
+        final PropertyDescriptor[] descriptors = relObj.getRawPropertyDescriptors( transaction );
+
+        if ( descriptors.length != 0 ) {
+            for ( final PropertyDescriptor descriptor : descriptors ) {
+                final String name = descriptor.getName();
+
+                if ( !props.contains( name ) ) {
+                    props.add( name );
+                }
+            }
+        }
+
+        return props;
+    }
+
     @Override
     public String getPropertyValue( final String propertyName ) throws Exception {
         final KomodoObject relObj = getKomodoObj();
@@ -276,6 +300,25 @@ public class WorkspaceContextImpl implements WorkspaceContext {
 
         if ( relObj.hasProperty( transaction, propertyName ) ) {
             final Property property = relObj.getProperty( transaction, propertyName );
+            return RepositoryTools.getDisplayValue( transaction, property );
+        }
+
+        return Messages.getString( SHELL.NO_PROPERTY_VALUE );
+    }
+
+    /**
+     * @param propertyName
+     *        the name of the unfiltered being requested (cannot be empty)
+     * @return the property value (never empty)
+     * @throws Exception
+     *         if an error occurs
+     */
+    public String getUnfilteredPropertyValue( final String propertyName ) throws Exception {
+        final KomodoObject relObj = getKomodoObj();
+        final UnitOfWork transaction = this.wsStatus.getTransaction();
+
+        if ( relObj.hasRawProperty( transaction, propertyName ) ) {
+            final Property property = relObj.getRawProperty( transaction, propertyName );
             return RepositoryTools.getDisplayValue( transaction, property );
         }
 

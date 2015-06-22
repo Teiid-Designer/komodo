@@ -29,14 +29,17 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
  */
 public class ExportCommand extends BuiltInShellCommand implements StringConstants {
 
-    private static final String EXPORT = "export"; //$NON-NLS-1$
+    /**
+     * The command name.
+     */
+    public static final String NAME = "export"; //$NON-NLS-1$
 
     /**
-     * Constructor.
-     * @param wsStatus the workspace status
+     * @param wsStatus
+     *        the workspace status
      */
-    public ExportCommand(WorkspaceStatus wsStatus) {
-        super(EXPORT, wsStatus);
+    public ExportCommand( final WorkspaceStatus wsStatus ) {
+        super( wsStatus, NAME );
     }
 
     /**
@@ -162,37 +165,10 @@ public class ExportCommand extends BuiltInShellCommand implements StringConstant
             fileNameString = fileNameString + DOT + fileExtension;
         }
 
-        FileWriter fileWriter = null;
-        BufferedWriter outputBufferWriter = null;
-        PrintWriter printWriter = null;
-        try {
-            fileWriter = new FileWriter(fileNameString);
-            outputBufferWriter = new BufferedWriter(fileWriter);
-            printWriter = new PrintWriter(outputBufferWriter);
-            printWriter.write(contents);
-        } finally {
-            // Clean up writers & buffers
-            try {
-                if (printWriter != null)
-                    printWriter.close();
-            } finally {
-                // Do nothing
-            }
-
-            try {
-                if (outputBufferWriter != null)
-                    outputBufferWriter.close();
-            } finally {
-                // Do nothing
-            }
-
-            try {
-                if (fileWriter != null) {
-                    fileWriter.close();
-                }
-            } catch (java.io.IOException e) {
-                // Do nothing
-            }
+        try ( final FileWriter fileWriter = new FileWriter( fileNameString );
+              final BufferedWriter outputBufferWriter = new BufferedWriter( fileWriter );
+              final PrintWriter printWriter = new PrintWriter( outputBufferWriter ) ) {
+            printWriter.write( contents );
         }
     }
 

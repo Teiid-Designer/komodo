@@ -1,41 +1,42 @@
 # -----------------------------------------------
 # Create all relational objects 
 # -----------------------------------------------
-#create Schema MySchema /workspace
+create Schema MySchema /workspace
 #
-create Model MyModel /workspace
+create Vdb MyVdb /workspace
+create Model MyModel /workspace/MyVdb
 #
-create Table MyTable1 /workspace/MyModel
-create Table MyTable2 /workspace/MyModel
+create Table MyTable1 /workspace/MyVdb/MyModel
+create Table MyTable2 /workspace/MyVdb/MyModel
 #
-create View MyView /workspace/MyModel
+create View MyView /workspace/MyVdb/MyModel
 #
-create UserDefinedFunction MyUdf /workspace/MyModel
+create UserDefinedFunction MyUdf /workspace/MyVdb/MyModel
 #
-create PushdownFunction MyPushdownFunc /workspace/MyModel
+create PushdownFunction MyPushdownFunc /workspace/MyVdb/MyModel
 #
-create StoredProcedure MyStoredProc /workspace/MyModel
+create StoredProcedure MyStoredProc /workspace/MyVdb/MyModel
 #
-create VirtualProcedure MyVirtualProc /workspace/MyModel
+create VirtualProcedure MyVirtualProc /workspace/MyVdb/MyModel
 #
-create Column MyCol1 /workspace/MyModel/MyTable1
-create Column MyCol2 /workspace/MyModel/MyTable1
-create Column MyCol3 /workspace/MyModel/MyTable1
+create Column MyCol1 /workspace/MyVdb/MyModel/MyTable1
+create Column MyCol2 /workspace/MyVdb/MyModel/MyTable1
+create Column MyCol3 /workspace/MyVdb/MyModel/MyTable1
 #
-create PrimaryKey MyPk /workspace/MyModel/MyTable1
+create PrimaryKey MyPk /workspace/MyVdb/MyModel/MyTable1
 #
-create AccessPattern MyAp /workspace/MyModel/MyTable1
+create AccessPattern MyAp /workspace/MyVdb/MyModel/MyTable1
 #
-create UniqueConstraint MyUc /workspace/MyModel/MyTable1
+create UniqueConstraint MyUc /workspace/MyVdb/MyModel/MyTable1
 #
-create ForeignKey MyFk /workspace/MyModel/MyTable1 /workspace/MyModel/MyTable2
+create ForeignKey MyFk /workspace/MyVdb/MyModel/MyTable1 /workspace/MyVdb/MyModel/MyTable2
 #
-#create DataTypeResultSet MyDataTypeResultSet /workspace/MyModel/MyStoredProc
+#create DataTypeResultSet MyDataTypeResultSet /workspace/MyVdb/MyModel/MyStoredProc
 #
-#create TabularResultSet MyTabResultSet /workspace/MyModel/MyPushdownFunc
+#create TabularResultSet MyTabResultSet /workspace/MyVdb/MyModel/MyPushdownFunc
 #
-#create ResultSetColumn MyResultSetCol /workspace/MyModel/MyVirtualProc/resultSet
+#create ResultSetColumn MyResultSetCol /workspace/MyVdb/MyModel/MyVirtualProc/resultSet
 #
-create Parameter MyParam /workspace/MyModel/MyVirtualProc
+create Parameter MyParam /workspace/MyVdb/MyModel/MyVirtualProc
 #
-create Index MyIndx /workspace/MyModel/MyTable2
+create Index MyIndx /workspace/MyVdb/MyModel/MyTable2

@@ -1,5 +1,6 @@
 # Tests the Set Property command using absolute context path
-create Model MyModel
-create Table MyTable ./MyModel
+create Vdb MyVdb
+create Model MyModel ./MyVdb
+create Table MyTable ./MyVdb/MyModel
 #
-set Property CARDINALITY 5 /workspace/MyModel/MyTable
+set Property CARDINALITY 5 /workspace/MyVdb/MyModel/MyTable

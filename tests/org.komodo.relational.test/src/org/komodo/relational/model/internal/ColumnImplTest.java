@@ -14,7 +14,6 @@ import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
 import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,11 +21,9 @@ import org.komodo.relational.RelationalConstants;
 import org.komodo.relational.RelationalConstants.Nullable;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalObject.Filter;
-import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.Column.Searchable;
-import org.komodo.relational.model.Model;
 import org.komodo.relational.model.StatementOption;
 import org.komodo.relational.model.Table;
 import org.komodo.spi.KException;
@@ -47,8 +44,8 @@ public final class ColumnImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        this.table = RelationalModelFactory.createTable( this.uow, _repo, mock( Model.class ), "table" );
-        this.column = RelationalModelFactory.createColumn( this.uow, _repo, this.table, NAME );
+        this.table = createTable();
+        this.column = this.table.addColumn( this.uow, NAME );
         commit();
     }
 
@@ -707,6 +704,27 @@ public final class ColumnImplTest extends RelationalModelTest {
         final StatementOption statementOption = this.column.getStatementOptions( this.uow )[0];
         assertThat( statementOption.getName( this.uow ), is( option ) );
         assertThat( statementOption.getValue( this.uow ), is( ( Object )value ) );
+    }
+
+    /*
+     * ********************************************************************
+     * *****                  Resolver Tests                          *****
+     * ********************************************************************
+     */
+
+    @Test
+    public void shouldCreateUsingResolver() throws Exception {
+        final String name = "blah";
+        final KomodoObject kobject = ColumnImpl.RESOLVER.create( this.uow, _repo, this.table, name, null );
+        assertThat( kobject, is( notNullValue() ) );
+        assertThat( kobject, is( instanceOf( Column.class ) ) );
+        assertThat( kobject.getName( this.uow ), is( name ) );
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
+        final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
+        ColumnImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
     }
 
 }

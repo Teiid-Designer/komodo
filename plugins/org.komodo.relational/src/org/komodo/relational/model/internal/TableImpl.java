@@ -54,7 +54,7 @@ public class TableImpl extends RelationalObjectImpl implements Table {
      */
     private static final KomodoType[] CHILD_TYPES = new KomodoType[] { AccessPattern.IDENTIFIER, Column.IDENTIFIER,
                                                                       ForeignKey.IDENTIFIER, Index.IDENTIFIER,
-                                                                      UniqueConstraint.IDENTIFIER };
+                                                                      PrimaryKey.IDENTIFIER, UniqueConstraint.IDENTIFIER };
 
     private enum StandardOption {
 
@@ -118,7 +118,14 @@ public class TableImpl extends RelationalObjectImpl implements Table {
                              final RelationalProperties properties ) throws KException {
             final AdapterFactory adapter = new AdapterFactory( repository );
             final Model parentModel = adapter.adapt( transaction, parent, Model.class );
-            return RelationalModelFactory.createTable( transaction, repository, parentModel, id );
+
+            if ( parentModel == null ) {
+                throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
+                                                          parent.getAbsolutePath(),
+                                                          Table.class.getSimpleName() ) );
+            }
+
+            return parentModel.addTable( transaction, id );
         }
 
         /**
@@ -191,15 +198,7 @@ public class TableImpl extends RelationalObjectImpl implements Table {
     @Override
     public AccessPattern addAccessPattern( final UnitOfWork transaction,
                                            final String accessPatternName ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( accessPatternName, "accessPatternName" ); //$NON-NLS-1$
-
-        final AccessPattern result = RelationalModelFactory.createAccessPattern( transaction,
-                                                                                 getRepository(),
-                                                                                 this,
-                                                                                 accessPatternName );
-        return result;
+        return RelationalModelFactory.createAccessPattern( transaction, getRepository(), this, accessPatternName );
     }
 
     /**
@@ -210,12 +209,7 @@ public class TableImpl extends RelationalObjectImpl implements Table {
     @Override
     public Column addColumn( final UnitOfWork transaction,
                              final String columnName ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( columnName, "columnName" ); //$NON-NLS-1$
-
-        final Column result = RelationalModelFactory.createColumn( transaction, getRepository(), this, columnName );
-        return result;
+        return RelationalModelFactory.createColumn( transaction, getRepository(), this, columnName );
     }
 
     /**
@@ -251,12 +245,7 @@ public class TableImpl extends RelationalObjectImpl implements Table {
     @Override
     public Index addIndex( final UnitOfWork transaction,
                            final String indexName ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( indexName, "indexName" ); //$NON-NLS-1$
-
-        final Index result = RelationalModelFactory.createIndex( transaction, getRepository(), this, indexName );
-        return result;
+        return RelationalModelFactory.createIndex( transaction, getRepository(), this, indexName );
     }
 
     /**
@@ -268,15 +257,7 @@ public class TableImpl extends RelationalObjectImpl implements Table {
     @Override
     public UniqueConstraint addUniqueConstraint( final UnitOfWork transaction,
                                                  final String constraintName ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( constraintName, "constraintName" ); //$NON-NLS-1$
-
-        final UniqueConstraint result = RelationalModelFactory.createUniqueConstraint( transaction,
-                                                                                       getRepository(),
-                                                                                       this,
-                                                                                       constraintName );
-        return result;
+        return RelationalModelFactory.createUniqueConstraint( transaction, getRepository(), this, constraintName );
     }
 
     /**
@@ -494,9 +475,6 @@ public class TableImpl extends RelationalObjectImpl implements Table {
      */
     @Override
     public PrimaryKey getPrimaryKey( final UnitOfWork transaction ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-
         PrimaryKey result = null;
 
         for ( final KomodoObject kobject : getChildrenOfType( transaction, Constraint.TABLE_ELEMENT ) ) {
@@ -1038,10 +1016,6 @@ public class TableImpl extends RelationalObjectImpl implements Table {
     @Override
     public PrimaryKey setPrimaryKey( final UnitOfWork transaction,
                                      final String newPrimaryKeyName ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( newPrimaryKeyName, "newPrimaryKeyName" ); //$NON-NLS-1$
-
         // delete existing primary key (don't call removePrimaryKey as it throws exception if one does not exist)
         final PrimaryKey primaryKey = getPrimaryKey( transaction );
 

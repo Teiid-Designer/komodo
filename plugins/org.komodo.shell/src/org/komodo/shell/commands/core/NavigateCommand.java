@@ -32,15 +32,18 @@ import org.komodo.shell.api.WorkspaceStatus;
  */
 public class NavigateCommand extends BuiltInShellCommand {
 
-    private static final String NAVIGATE = "navigate"; //$NON-NLS-1$
+    /**
+     * The command name.
+     */
+    public static final String NAME = "navigate"; //$NON-NLS-1$
 
-	/**
-	 * Constructor.
-	 * @param wsStatus the workspace status
-	 */
-	public NavigateCommand(WorkspaceStatus wsStatus) {
-		super(NAVIGATE,wsStatus);
-	}
+    /**
+     * @param wsStatus
+     *        the workspace status (cannot be <code>null</code>)
+     */
+    public NavigateCommand( final WorkspaceStatus wsStatus ) {
+        super( wsStatus, NAME );
+    }
 
 	/**
 	 * @see org.komodo.shell.api.ShellCommand#execute()
@@ -48,7 +51,7 @@ public class NavigateCommand extends BuiltInShellCommand {
 	@Override
 	public boolean execute() throws Exception {
 		WorkspaceStatus wsStatus = getWorkspaceStatus();
-		
+
 		WorkspaceContext currentContext = wsStatus.getCurrentContext();
 		TraverseWorkspaceVisitor visitor = new TraverseWorkspaceVisitor();
         Object pathway = currentContext.visit(visitor);

@@ -239,6 +239,16 @@ public interface KomodoObject extends KNode {
                              final String name ) throws KException;
 
     /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
+     * @return the unfiltered property descriptors from the primary type descriptor and the mixin descriptors (never <code>null</code> but
+     *         can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    PropertyDescriptor[] getRawPropertyDescriptors( final UnitOfWork transaction ) throws KException;
+
+    /**
      * Subclasses may implement {@link #getPropertyNames(UnitOfWork)} in such a way that it does not represent the actual set of
      * properties. This method obtains the actual, physical set of property names.
      *
@@ -337,6 +347,18 @@ public interface KomodoObject extends KNode {
      */
     boolean hasProperty( final UnitOfWork transaction,
                          final String name ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
+     * @param name
+     *        the name the property, filtered or unfiltered, whose existence is being checked (cannot be empty)
+     * @return <code>true</code> if a property with the supplied name exists
+     * @throws KException
+     *         if an error occurs
+     */
+    boolean hasRawProperty( final UnitOfWork transaction,
+                            final String name ) throws KException;
 
     /**
      * The implementing class is responsible for enforcing this restriction.

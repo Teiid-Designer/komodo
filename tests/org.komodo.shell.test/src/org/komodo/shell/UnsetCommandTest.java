@@ -26,7 +26,7 @@ public final class UnsetCommandTest extends AbstractCommandTest {
     public void testUnsetSingleValueProperty() throws Exception {
         setup( "unsetCommand1.txt", UnsetPropertyCommand.class );
         execute();
-        assertThat( this.wsStatus.getCurrentContext().getFullName(), is( "/workspace/MyModel" ) );
+        assertThat( this.wsStatus.getCurrentContext().getFullName(), is( "/workspace/MyVdb/MyModel" ) );
 
         final KomodoObject kobject = this.wsStatus.getCurrentContext().getKomodoObj();
         assertThat( kobject.getProperty( this.wsStatus.getTransaction(), VdbLexicon.Vdb.DESCRIPTION ), is( nullValue() ) );

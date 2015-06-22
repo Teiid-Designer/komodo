@@ -22,7 +22,6 @@
 package org.komodo.shell.commands.core;
 
 import java.util.List;
-
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.BuiltInShellCommand;
@@ -38,13 +37,17 @@ import org.komodo.spi.runtime.TeiidInstance;
  */
 public class UseTeiidCommand extends BuiltInShellCommand implements StringConstants {
 
-    private static final String USE_TEIID = "useTeiid"; //$NON-NLS-1$
+    /**
+     * The command name.
+     */
+    public static final String NAME = "useTeiid"; //$NON-NLS-1$
 
     /**
-     * @param wsStatus a workspace status (cannot be <code>null</code>)
+     * @param wsStatus
+     *        a workspace status (cannot be <code>null</code>)
      */
-    public UseTeiidCommand(WorkspaceStatus wsStatus) {
-        super(USE_TEIID, wsStatus);
+    public UseTeiidCommand( final WorkspaceStatus wsStatus ) {
+        super( wsStatus, NAME );
     }
 
     @Override

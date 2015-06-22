@@ -19,6 +19,9 @@ import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
 import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.AbstractShellCommand;
+import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.spi.constants.StringConstants;
+import org.komodo.utils.ArgCheck;
 
 /**
  * The command used when a command does not exist for a given command name.
@@ -30,14 +33,38 @@ import org.komodo.shell.api.AbstractShellCommand;
  */
 public class CommandNotFoundCommand extends AbstractShellCommand {
 
-	/**
-	 * Constructor.
-	 * @param name the command name
-	 */
-	public CommandNotFoundCommand(String name) {
-		super();
-		setName(name);
-	}
+    private final String name;
+
+    /**
+     * @param name
+     *        the command name that was not found (cannot be empty)
+     * @param wsStatus
+     *        the workspace status (cannot be <code>null</code>)
+     */
+    public CommandNotFoundCommand( final String name,
+                                   final WorkspaceStatus wsStatus ) {
+        super( wsStatus );
+        ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
+        this.name = name;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommand#getAliases()
+     */
+    @Override
+    public final String[] getAliases() {
+        return StringConstants.EMPTY_ARRAY;
+    }
+
+    /**
+     * @see org.komodo.shell.api.ShellCommand#getName()
+     */
+    @Override
+    public final String getName() {
+        return this.name;
+    }
 
 	/**
      * @see org.komodo.shell.api.ShellCommand#printUsage(int indent)

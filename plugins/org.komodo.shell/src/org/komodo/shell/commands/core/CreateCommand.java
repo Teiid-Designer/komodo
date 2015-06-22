@@ -32,14 +32,17 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
  */
 public class CreateCommand extends BuiltInShellCommand implements StringConstants {
 
-    private static final String CREATE = "create"; //$NON-NLS-1$
+    /**
+     * The command name.
+     */
+    public static final String NAME = "create"; //$NON-NLS-1$
 
     /**
-     * Constructor.
-     * @param wsStatus the workspace status
+     * @param wsStatus
+     *        the workspace status (cannot be <code>null</code>)
      */
-    public CreateCommand(WorkspaceStatus wsStatus) {
-        super(CREATE, wsStatus);
+    public CreateCommand( final WorkspaceStatus wsStatus ) {
+        super( wsStatus, NAME );
     }
 
     /**

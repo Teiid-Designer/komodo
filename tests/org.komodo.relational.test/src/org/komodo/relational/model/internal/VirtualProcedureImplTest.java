@@ -8,6 +8,8 @@
 package org.komodo.relational.model.internal;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsInstanceOf.instanceOf;
+import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -15,14 +17,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalObject.Filter;
-import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.SchemaElement.SchemaElementType;
 import org.komodo.relational.model.VirtualProcedure;
-import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 
@@ -35,9 +36,8 @@ public final class VirtualProcedureImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        final Vdb vdb = RelationalModelFactory.createVdb( this.uow, _repo, null, "vdb", "externalFilePath" );
-        final Model model = RelationalModelFactory.createModel( this.uow, _repo, vdb, "model" );
-        this.procedure = RelationalModelFactory.createVirtualProcedure( this.uow, _repo, model, "myProcedure" );
+        final Model model = createModel();
+        this.procedure = model.addVirtualProcedure( this.uow, "myProcedure" );
         commit();
     }
 
@@ -115,6 +115,31 @@ public final class VirtualProcedureImplTest extends RelationalModelTest {
         assertThat( this.procedure.getAsClauseStatement( this.uow ), is( value ) );
         assertThat( this.procedure.getProperty( this.uow, TeiidDdlLexicon.CreateProcedure.STATEMENT ).getStringValue( this.uow ),
                     is( value ) );
+    }
+
+    /*
+     * ********************************************************************
+     * *****                  Resolver Tests                          *****
+     * ********************************************************************
+     */
+
+    @Test
+    public void shouldCreateUsingResolver() throws Exception {
+        final String name = "blah";
+        final KomodoObject kobject = VirtualProcedureImpl.RESOLVER.create( this.uow,
+                                                                           _repo,
+                                                                           this.procedure.getParent( this.uow ),
+                                                                           name,
+                                                                           null );
+        assertThat( kobject, is( notNullValue() ) );
+        assertThat( kobject, is( instanceOf( VirtualProcedure.class ) ) );
+        assertThat( kobject.getName( this.uow ), is( name ) );
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
+        final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
+        VirtualProcedureImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
     }
 
 }

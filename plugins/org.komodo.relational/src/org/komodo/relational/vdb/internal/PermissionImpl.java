@@ -61,7 +61,14 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
                                   final RelationalProperties properties ) throws KException {
             final AdapterFactory adapter = new AdapterFactory( repository );
             final DataRole parentDataRole = adapter.adapt( transaction, parent, DataRole.class );
-            return RelationalModelFactory.createPermission( transaction, repository, parentDataRole, id );
+
+            if ( parentDataRole == null ) {
+                throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
+                                                          parent.getAbsolutePath(),
+                                                          Permission.class.getSimpleName() ) );
+            }
+
+            return parentDataRole.addPermission( transaction, id );
         }
 
         /**
@@ -142,12 +149,7 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
     @Override
     public Condition addCondition( final UnitOfWork transaction,
                                    final String conditionName ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( conditionName, "conditionName" ); //$NON-NLS-1$
-
-        final Condition result = RelationalModelFactory.createCondition( transaction, getRepository(), this, conditionName );
-        return result;
+        return RelationalModelFactory.createCondition( transaction, getRepository(), this, conditionName );
     }
 
     /**
@@ -158,12 +160,7 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
     @Override
     public Mask addMask( final UnitOfWork transaction,
                          final String maskName ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( maskName, "maskName" ); //$NON-NLS-1$
-
-        final Mask result = RelationalModelFactory.createMask( transaction, getRepository(), this, maskName );
-        return result;
+        return RelationalModelFactory.createMask( transaction, getRepository(), this, maskName );
     }
 
     /**

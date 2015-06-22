@@ -822,16 +822,8 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      */
     @Override
     public PropertyDescriptor[] getPropertyDescriptors( final UnitOfWork transaction ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-
-        final List< PropertyDescriptor > result = new ArrayList<>();
-
-        for ( final Descriptor descriptor : getAllDescriptors( transaction, this ) ) {
-            result.addAll( Arrays.asList( descriptor.getPropertyDescriptors( transaction ) ) );
-        }
-
-        return result.toArray( new PropertyDescriptor[ result.size() ] );
+        final PropertyDescriptor[] result = getRawPropertyDescriptors( transaction );
+        return result;
     }
 
     /**
@@ -841,9 +833,6 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      */
     @Override
     public String[] getPropertyNames( final UnitOfWork transaction ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-
         final String[] result = getRawPropertyNames( transaction );
         return result;
     }
@@ -919,6 +908,25 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         } catch ( final Exception e ) {
             throw handleError( e );
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KomodoObject#getRawPropertyDescriptors(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public PropertyDescriptor[] getRawPropertyDescriptors( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        final List< PropertyDescriptor > result = new ArrayList<>();
+
+        for ( final Descriptor descriptor : getAllDescriptors( transaction, this ) ) {
+            result.addAll( Arrays.asList( descriptor.getPropertyDescriptors( transaction ) ) );
+        }
+
+        return result.toArray( new PropertyDescriptor[ result.size() ] );
     }
 
     /**
@@ -1154,6 +1162,18 @@ public class ObjectImpl implements KomodoObject, StringConstants {
     @Override
     public boolean hasProperty( final UnitOfWork transaction,
                                 final String name ) throws KException {
+        return hasRawProperty( transaction, name );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KomodoObject#hasRawProperty(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String)
+     */
+    @Override
+    public boolean hasRawProperty( final UnitOfWork transaction,
+                                   final String name ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty(name, "name"); //$NON-NLS-1$

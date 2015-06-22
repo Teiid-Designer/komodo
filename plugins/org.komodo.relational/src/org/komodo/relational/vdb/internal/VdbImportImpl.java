@@ -7,10 +7,11 @@
  */
 package org.komodo.relational.vdb.internal;
 
+import org.komodo.relational.Messages;
+import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.internal.RelationalChildRestrictedObject;
-import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.VdbImport;
@@ -50,7 +51,14 @@ public class VdbImportImpl extends RelationalChildRestrictedObject implements Vd
                                  final RelationalProperties properties ) throws KException {
             final AdapterFactory adapter = new AdapterFactory( repository );
             final Vdb parentVdb = adapter.adapt( transaction, parent, Vdb.class );
-            return RelationalModelFactory.createVdbImport( transaction, repository, parentVdb, id );
+
+            if ( parentVdb == null ) {
+                throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
+                                                          parent.getAbsolutePath(),
+                                                          VdbImport.class.getSimpleName() ) );
+            }
+
+            return parentVdb.addImport( transaction, id );
         }
 
         /**

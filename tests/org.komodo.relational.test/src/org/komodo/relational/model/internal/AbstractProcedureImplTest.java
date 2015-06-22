@@ -18,13 +18,11 @@ import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
-import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.model.AbstractProcedure;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Parameter;
 import org.komodo.relational.model.SchemaElement.SchemaElementType;
 import org.komodo.relational.model.StatementOption;
-import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.PropertyDescriptor;
@@ -38,9 +36,8 @@ public final class AbstractProcedureImplTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        final Vdb vdb = RelationalModelFactory.createVdb( this.uow, _repo, null, "vdb", "externalFilePath" );
-        final Model model = RelationalModelFactory.createModel( this.uow, _repo, vdb, "model" );
-        this.procedure = RelationalModelFactory.createVirtualProcedure( this.uow, _repo, model, "procedure" );
+        final Model model = createModel();
+        this.procedure = model.addVirtualProcedure( this.uow, "procedure" );
         commit();
     }
 

@@ -30,6 +30,7 @@ import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.RelationalProperty;
 import org.komodo.relational.internal.AdapterFactory;
+import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.internal.TypeResolverRegistry;
@@ -66,7 +67,7 @@ public class WorkspaceManager extends RelationalObjectImpl {
     /**
      * The allowed child types.
      */
-    private static final KomodoType[] CHILD_TYPES = new KomodoType[] { Vdb.IDENTIFIER, Model.IDENTIFIER };
+    private static final KomodoType[] CHILD_TYPES = new KomodoType[] { Vdb.IDENTIFIER, Schema.IDENTIFIER };
 
     /**
      * The type identifier.
@@ -169,22 +170,18 @@ public class WorkspaceManager extends RelationalObjectImpl {
      * @param uow
      *        the transaction (cannot be <code>null</code> or have a state that is not
      *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
-     * @param parent
-     *        the parent of the model object being created (can be <code>null</code> if creating at workspace root)
+     * @param vdb
+     *        the parent of the model object being created (cannot be <code>null</code>)
      * @param modelName
      *        the name of the model to create (cannot be empty)
      * @return the model object (never <code>null</code>)
      * @throws KException
      *         if an error occurs
      */
-    public Model createModel( UnitOfWork uow,
-                              KomodoObject parent,
-                              String modelName ) throws KException {
-        KomodoObject kobject = create(uow, parent, modelName, KomodoType.MODEL);
-        if (! (kobject instanceof Model))
-           return null;
-
-        return (Model) kobject;
+    public Model createModel( final UnitOfWork uow,
+                              final Vdb vdb,
+                              final String modelName ) throws KException {
+        return RelationalModelFactory.createModel( uow, getRepository(), vdb, modelName );
     }
 
     /**
@@ -192,24 +189,19 @@ public class WorkspaceManager extends RelationalObjectImpl {
      *        the transaction (cannot be <code>null</code> or have a state that is not
      *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @param parent
-     *        the parent of the schema object being created (cannot be <code>null</code>)
+     *        the parent of the schema object being created (can be <code>null</code>)
      * @param schemaName
      *        the name of the schema to create (cannot be empty)
      * @return the schema object (never <code>null</code>)
      * @throws KException
      *         if an error occurs
      */
-    public Schema createSchema( UnitOfWork uow,
-                                KomodoObject parent,
-                                String schemaName ) throws KException {
-        if (parent == null)
-            parent = getRepository().komodoWorkspace(uow);
-
-        KomodoObject kobject = create(uow, parent, schemaName, KomodoType.SCHEMA);
-        if (! (kobject instanceof Schema))
-           return null;
-
-        return (Schema) kobject;
+    public Schema createSchema( final UnitOfWork uow,
+                                final KomodoObject parent,
+                                final String schemaName ) throws KException {
+        final String path = ( ( parent == null ) ? getRepository().komodoWorkspace( uow ).getAbsolutePath()
+                                                 : parent.getAbsolutePath() );
+         return RelationalModelFactory.createSchema( uow, getRepository(), path, schemaName );
     }
 
     /**
@@ -224,17 +216,12 @@ public class WorkspaceManager extends RelationalObjectImpl {
      * @throws KException
      *         if an error occurs
      */
-    public Teiid createTeiid( UnitOfWork uow,
-                              KomodoObject parent,
-                              String id ) throws KException {
-        if (parent == null)
-            parent = getRepository().komodoWorkspace(uow);
-
-        KomodoObject kobject = create(uow, parent, id, KomodoType.TEIID);
-        if (! (kobject instanceof Teiid))
-           return null;
-
-        return (Teiid) kobject;
+    public Teiid createTeiid( final UnitOfWork uow,
+                              final KomodoObject parent,
+                              final String id ) throws KException {
+        final String path = ( ( parent == null ) ? getRepository().komodoWorkspace( uow ).getAbsolutePath()
+                                                : parent.getAbsolutePath() );
+        return RelationalModelFactory.createTeiid( uow, getRepository(), path, id );
     }
 
     /**
@@ -253,21 +240,12 @@ public class WorkspaceManager extends RelationalObjectImpl {
      *         if an error occurs
      */
     public Vdb createVdb( final UnitOfWork uow,
-                          KomodoObject parent,
+                          final KomodoObject parent,
                           final String vdbName,
                           final String externalFilePath ) throws KException {
-        ArgCheck.isNotNull(externalFilePath, "externalFilePath"); //$NON-NLS-1$
-
-        RelationalProperty filePathProperty = new RelationalProperty( VdbLexicon.Vdb.ORIGINAL_FILE, externalFilePath );
-
-        if (parent == null)
-            parent = getRepository().komodoWorkspace(uow);
-
-        KomodoObject kobject = create(uow, parent, vdbName, KomodoType.VDB, filePathProperty);
-        if (! (kobject instanceof Vdb))
-           return null;
-
-        return (Vdb) kobject;
+        final String path = ( ( parent == null ) ? getRepository().komodoWorkspace( uow ).getAbsolutePath()
+                                                : parent.getAbsolutePath() );
+        return RelationalModelFactory.createVdb( uow, getRepository(), path, vdbName, externalFilePath );
     }
 
     /**

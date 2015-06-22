@@ -7,12 +7,13 @@
  */
 package org.komodo.relational.model.internal;
 
+import org.komodo.relational.Messages;
+import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalConstants;
 import org.komodo.relational.RelationalConstants.Nullable;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.internal.RelationalChildRestrictedObject;
-import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.model.ResultSetColumn;
 import org.komodo.relational.model.StatementOption;
@@ -95,7 +96,14 @@ public final class ResultSetColumnImpl extends RelationalChildRestrictedObject i
                                        final RelationalProperties properties ) throws KException {
             final AdapterFactory adapter = new AdapterFactory( repository );
             final TabularResultSet parentResultSet = adapter.adapt( transaction, parent, TabularResultSet.class );
-            return RelationalModelFactory.createResultSetColumn( transaction, repository, parentResultSet, id );
+
+            if ( parentResultSet == null ) {
+                throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
+                                                          parent.getAbsolutePath(),
+                                                          ResultSetColumn.class.getSimpleName() ) );
+            }
+
+            return parentResultSet.addColumn( transaction, id );
         }
 
         /**

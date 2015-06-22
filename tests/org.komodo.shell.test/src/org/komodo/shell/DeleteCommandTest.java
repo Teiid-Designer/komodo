@@ -13,7 +13,8 @@ public class DeleteCommandTest  extends AbstractCommandTest {
 	private static final String DELETE_COMMAND_2 = "deleteCommand2.txt"; //$NON-NLS-1$
 	private static final String DELETE_COMMAND_3 = "deleteCommand3.txt"; //$NON-NLS-1$
 	private static final String DELETE_COMMAND_4 = "deleteCommand4.txt"; //$NON-NLS-1$
-	private static final String DELETE_COMMAND_5 = "deleteCommand5.txt"; //$NON-NLS-1$
+    private static final String DELETE_COMMAND_5 = "deleteCommand5.txt"; //$NON-NLS-1$
+    private static final String DELETE_COMMAND_6 = "deleteCommand6.txt"; //$NON-NLS-1$
 
     @Test
     public void testDeleteVdb() throws Exception {
@@ -45,7 +46,7 @@ public class DeleteCommandTest  extends AbstractCommandTest {
     	assertEquals("/workspace/vdb_test_1/model_1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     	assertEquals(0, wsStatus.getCurrentContext().getKomodoObj().getChildren(wsStatus.getTransaction()).length);
     }
-    
+
     @Test
     public void testDeleteAbsolutePath1() throws Exception {
     	setup(DELETE_COMMAND_4, DeleteCommand.class);
@@ -53,23 +54,36 @@ public class DeleteCommandTest  extends AbstractCommandTest {
     	execute();
 
     	assertEquals("/workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
-    	
+
     	// Model child table was deleted
     	WorkspaceContext context = ContextUtils.getContextForPath(wsStatus, "/workspace/vdb_test_1/model_1"); //$NON-NLS-1$
     	assertEquals(0, context.getKomodoObj().getChildren(wsStatus.getTransaction()).length);
     }
-    
+
     @Test
     public void testDeleteAbsolutePath2() throws Exception {
-    	setup(DELETE_COMMAND_5, DeleteCommand.class);
+        setup(DELETE_COMMAND_5, DeleteCommand.class);
 
-    	execute();
+        execute();
 
-    	assertEquals("/workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
-    	
-    	// VDB child model was deleted
-    	WorkspaceContext context = ContextUtils.getContextForPath(wsStatus, "/workspace/vdb_test_1"); //$NON-NLS-1$
-    	assertEquals(0, context.getKomodoObj().getChildren(wsStatus.getTransaction()).length);
+        assertEquals("/workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+
+        // VDB child model was deleted
+        WorkspaceContext context = ContextUtils.getContextForPath(wsStatus, "/workspace/vdb_test_1"); //$NON-NLS-1$
+        assertEquals(0, context.getKomodoObj().getChildren(wsStatus.getTransaction()).length);
+    }
+
+    @Test
+    public void testDeleteRmAlias() throws Exception {
+        setup(DELETE_COMMAND_6, DeleteCommand.class);
+
+        execute();
+
+        assertEquals("/workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+
+        // VDB child model was deleted
+        WorkspaceContext context = ContextUtils.getContextForPath(wsStatus, "/workspace/vdb_test_1"); //$NON-NLS-1$
+        assertEquals(0, context.getKomodoObj().getChildren(wsStatus.getTransaction()).length);
     }
 
 }

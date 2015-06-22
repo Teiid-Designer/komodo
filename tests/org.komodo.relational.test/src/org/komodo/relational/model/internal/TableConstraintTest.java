@@ -16,7 +16,6 @@ import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalObject.Filter;
 import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.model.Column;
-import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.TableConstraint;
 import org.komodo.spi.KException;
@@ -32,8 +31,8 @@ public final class TableConstraintTest extends RelationalModelTest {
 
     @Before
     public void init() throws Exception {
-        this.table = RelationalModelFactory.createTable( this.uow, _repo, mock( Model.class ), "table" );
-        this.constraint = RelationalModelFactory.createAccessPattern( this.uow, _repo, this.table, NAME );
+        this.table = createTable();
+        this.constraint = this.table.addAccessPattern( this.uow, NAME );
         commit();
     }
 

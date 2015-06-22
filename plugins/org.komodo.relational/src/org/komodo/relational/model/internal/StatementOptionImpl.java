@@ -12,13 +12,13 @@ import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import org.komodo.relational.Messages;
+import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.internal.RelationalChildRestrictedObject;
-import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.TypeResolver;
+import org.komodo.relational.model.OptionContainer;
 import org.komodo.relational.model.StatementOption;
-import org.komodo.relational.model.Table;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
@@ -129,8 +129,15 @@ public final class StatementOptionImpl extends RelationalChildRestrictedObject i
             final AdapterFactory adapter = new AdapterFactory( repository );
             final Object optionValueValue = properties.getValue( StandardDdlLexicon.VALUE );
             final String optionValue = optionValueValue == null ? null : optionValueValue.toString();
-            final Table parentTable = adapter.adapt( transaction, parent, Table.class );
-            return RelationalModelFactory.createStatementOption( transaction, repository, parentTable, id, optionValue );
+            final OptionContainer parentContainer = adapter.adapt( transaction, parent, OptionContainer.class );
+
+            if ( parentContainer == null ) {
+                throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
+                                                          parent.getAbsolutePath(),
+                                                          StatementOption.class.getSimpleName() ) );
+            }
+
+            return parentContainer.setStatementOption( transaction, id, optionValue );
         }
 
         /**

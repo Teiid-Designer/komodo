@@ -26,23 +26,21 @@ import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.WorkspaceStatus;
 
 /**
- * Displays a summary of the current status, including what repository the
- * user is currently connected to (if any).
- *
+ * Changes the context to the workspace root.
  */
-public class ListCommand extends BuiltInShellCommand {
+public class HomeCommand extends BuiltInShellCommand {
 
     /**
      * The command name.
      */
-    public static final String NAME = "list"; //$NON-NLS-1$
+    public static final String NAME = "home"; //$NON-NLS-1$
 
     /**
      * @param wsStatus
      *        the workspace status (cannot be <code>null</code>)
      */
-    public ListCommand( final WorkspaceStatus wsStatus ) {
-        super( wsStatus, NAME, "ls", "ll" ); //$NON-NLS-1$ //$NON-NLS-2$
+    public HomeCommand( final WorkspaceStatus wsStatus ) {
+        super( wsStatus, NAME );
     }
 
 	/**
@@ -50,12 +48,12 @@ public class ListCommand extends BuiltInShellCommand {
 	 */
 	@Override
     public boolean execute() throws Exception {
-        final ShowCommand showCmd = new ShowCommand( getWorkspaceStatus() );
-        final Arguments args = new Arguments( ShowCommand.SUBCMD_CHILDREN );
-        showCmd.setArguments( args );
-        showCmd.setOutput( getWriter() );
+        final CdCommand cdCmd = new CdCommand( getWorkspaceStatus() );
+        final Arguments args = new Arguments( "/" ); //$NON-NLS-1$
+        cdCmd.setArguments( args );
+        cdCmd.setOutput( getWriter() );
 
-        return showCmd.execute();
+        return cdCmd.execute();
     }
 
 }

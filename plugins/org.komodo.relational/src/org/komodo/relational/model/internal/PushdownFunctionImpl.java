@@ -54,7 +54,14 @@ public final class PushdownFunctionImpl extends FunctionImpl implements Pushdown
                                         final RelationalProperties properties ) throws KException {
             final AdapterFactory adapter = new AdapterFactory( repository );
             final Model parentModel = adapter.adapt( transaction, parent, Model.class );
-            return RelationalModelFactory.createPushdownFunction( transaction, repository, parentModel, id );
+
+            if ( parentModel == null ) {
+                throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
+                                                          parent.getAbsolutePath(),
+                                                          PushdownFunction.class.getSimpleName() ) );
+            }
+
+            return parentModel.addPushdownFunction( transaction, id );
         }
 
         /**
