@@ -214,7 +214,12 @@ public class DefaultKomodoShell implements KomodoShell {
                     done = true;
                 } else {
                     boolean success = command.execute();
-                    if (!success && reader.isBatch()) {
+
+                    if ( success ) {
+                        if ( this.wsStatus.getRecordingStatus() ) {
+                            command.record();
+                        }
+                    } else if ( this.reader.isBatch() ) {
                         shutdown();
                     }
                 }

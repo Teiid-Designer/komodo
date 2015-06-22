@@ -497,6 +497,16 @@ public class WorkspaceManager extends RelationalObjectImpl {
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.repository.ObjectImpl#remove(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public void remove( final UnitOfWork transaction ) {
+        throw new UnsupportedOperationException( Messages.getString( Relational.REMOVE_NOT_ALLOWED, getAbsolutePath() ) );
+    }
+
+    /**
      * <strong><em>Rename is not allowed!!</em></strong>
      *
      * @see org.komodo.spi.repository.KomodoObject#rename(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)

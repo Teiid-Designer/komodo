@@ -54,10 +54,6 @@ public class UnsetPropertyCommand extends BuiltInShellCommand {
             // Print message
             print( MESSAGE_INDENT, getString( "propertyUnset", propNameArg ) ); //$NON-NLS-1$
 
-            if ( getWorkspaceStatus().getRecordingStatus() ) {
-                recordCommand( getArguments() );
-            }
-
             return true;
         } catch ( final InvalidCommandArgumentException e ) {
             throw e;

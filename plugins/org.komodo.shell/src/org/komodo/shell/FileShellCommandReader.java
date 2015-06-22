@@ -24,17 +24,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Map;
-
 import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.WorkspaceStatus;
 
 /**
  * An implementation of the {@link ShellCommandReader} that reads data from
  * a file.
- * 
+ *
  * This class adapted from https://github.com/Governance/s-ramp/blob/master/s-ramp-shell
  * - altered to use WorkspaceStatus
- * 
+ *
  * @author eric.wittmann@redhat.com
  */
 public class FileShellCommandReader extends AbstractShellCommandReader {
@@ -80,9 +79,9 @@ public class FileShellCommandReader extends AbstractShellCommandReader {
 		if (!file.isFile()) {
 			throw new FileNotFoundException(filePath);
 		}
-		
+
 		InputStream inputStream = new FileInputStream(file);
-		
+
 		this.fileReader = new BufferedReader(new InputStreamReader(inputStream));
 	}
 
@@ -112,7 +111,9 @@ public class FileShellCommandReader extends AbstractShellCommandReader {
 	 */
 	@Override
 	public void close() throws IOException {
-		fileReader.close();
+        if ( this.fileReader != null ) {
+            fileReader.close();
+        }
 	}
 
 	/**

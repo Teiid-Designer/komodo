@@ -149,6 +149,11 @@ public class Messages implements StringConstants {
         RENAME_NOT_ALLOWED,
 
         /**
+         * An error message indicating removing (deleting) the object is not allowed.
+         */
+        REMOVE_NOT_ALLOWED,
+
+        /**
          * An error message indicating a result set could not be removed.
          */
         RESULT_SET_NOT_FOUND_TO_REMOVE,

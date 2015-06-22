@@ -153,10 +153,13 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
     }
 
     /**
-     * @see org.komodo.shell.api.ShellCommand#recordCommand(Arguments)
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommand#record()
      */
     @Override
-    public void recordCommand(Arguments args) {
+    public void record() {
+        final Arguments args = getArguments();
     	StringBuffer buff = new StringBuffer(getName());
     	for(int i=0; i<args.size(); i++) {
     		buff.append(" "+args.get(i)); //$NON-NLS-1$

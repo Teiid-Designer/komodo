@@ -84,9 +84,6 @@ public class SetCommand extends BuiltInShellCommand {
 
                 // Print message
         		print(CompletionConstants.MESSAGE_INDENT, Messages.getString("SetCommand.PropertySet", propNameArg)); //$NON-NLS-1$
-        		if (getWorkspaceStatus().getRecordingStatus())
-        			recordCommand(getArguments());
-        		// Set global property
         	} else if (SUBCMD_GLOBAL.equalsIgnoreCase(subcmdArg)) {
         		// property name and value are required
         		String propNameArg = requiredArgument(1, Messages.getString("SetCommand.InvalidArgMsg_GlobalPropertyName")); //$NON-NLS-1$
@@ -101,8 +98,6 @@ public class SetCommand extends BuiltInShellCommand {
         		setGlobalProperty(propNameArg, propValueArg);
 
         		print(CompletionConstants.MESSAGE_INDENT, Messages.getString("SetCommand.GlobalPropertySet", propNameArg)); //$NON-NLS-1$
-        		if (getWorkspaceStatus().getRecordingStatus())
-        			recordCommand(getArguments());
         	} else if (SUBCMD_RECORD.equalsIgnoreCase(subcmdArg)) {
         		String onOffArg = requiredArgument(1, Messages.getString("SetCommand.onOffArg_empty")); //$NON-NLS-1$
 

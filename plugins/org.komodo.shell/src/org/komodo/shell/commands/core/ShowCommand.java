@@ -106,42 +106,24 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
 
         		// Print properties for the context
         		printProperties(theContext);
-
-                // Echo command if recording on
-        		recordCommand();
         	} else if (SUBCMD_CHILDREN.equalsIgnoreCase(subcmdArg)) {
 		        String pathArg = optionalArgument(1);
 		        WorkspaceContext theContext = ContextUtils.getContextForPath(wsStatus, pathArg);
 
         		printChildren(theContext);
-
-                // Echo command if recording on
-                recordCommand();
             } else if (SUBCMD_STATUS.equalsIgnoreCase(subcmdArg)) {
             	printStatus( );
-
-                // Echo command if recording on
-                recordCommand();
             } else if (SUBCMD_GLOBAL.equalsIgnoreCase(subcmdArg)) {
         		printGlobal( );
-
-                // Echo command if recording on
-                recordCommand();
             } else if (SUBCMD_PROPERTY.equalsIgnoreCase(subcmdArg)) {
                 String propName = requiredArgument(1, Messages.getString("ShowCommand.InvalidArgMsg_PropertyName")); //$NON-NLS-1$
 
             	printProperty(context,propName);
-
-                // Echo command if recording on
-                recordCommand();
             } else if (SUBCMD_SUMMARY.equalsIgnoreCase(subcmdArg)) {
 		        String pathArg = optionalArgument(1);
 		        WorkspaceContext theContext = ContextUtils.getContextForPath(wsStatus, pathArg);
 
             	printSummary(theContext);
-
-            	// Echo command if recording on
-                recordCommand();
             } else {
                 throw new InvalidCommandArgumentException(0, Messages.getString("ShowCommand.InvalidSubCommand")); //$NON-NLS-1$
             }
@@ -410,13 +392,6 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
 	private void printSummary(WorkspaceContext context) throws Exception {
         printProperties(context);
         printChildren(context);
-	}
-
-	/**
-	 * Records the command if recording status is 'on'
-	 */
-	private void recordCommand() {
-        if (getWorkspaceStatus().getRecordingStatus()) recordCommand(getArguments());
 	}
 
 	protected boolean validate(Arguments allArgs) throws Exception {

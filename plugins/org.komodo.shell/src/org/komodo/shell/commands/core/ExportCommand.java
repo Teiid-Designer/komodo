@@ -30,7 +30,7 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 public class ExportCommand extends BuiltInShellCommand implements StringConstants {
 
     private static final String EXPORT = "export"; //$NON-NLS-1$
-	
+
     /**
      * Constructor.
      * @param wsStatus the workspace status
@@ -53,13 +53,9 @@ public class ExportCommand extends BuiltInShellCommand implements StringConstant
         if(!validateFileName(filePathArg)) {
         	return false;
         }
-        
+
         try {
         	export(objPathArg, filePathArg);
-        	
-            if (getWorkspaceStatus().getRecordingStatus())
-                recordCommand(getArguments());
-
         } catch (Exception e) {
             print(CompletionConstants.MESSAGE_INDENT, Messages.getString("ExportCommand.Failure", objPathArg)); //$NON-NLS-1$
             print(CompletionConstants.MESSAGE_INDENT, TAB + e.getMessage());
@@ -67,7 +63,7 @@ public class ExportCommand extends BuiltInShellCommand implements StringConstant
         }
         return true;
     }
-    
+
     /**
      * Validate the supplied context path
      * @param objPath the objPath
@@ -76,7 +72,7 @@ public class ExportCommand extends BuiltInShellCommand implements StringConstant
     private boolean validateObjectPath(String objPath) {
         return true;
     }
-    
+
     /**
      * Validate the supplied fileName
      * @param fileName the file name
@@ -85,7 +81,7 @@ public class ExportCommand extends BuiltInShellCommand implements StringConstant
     private boolean validateFileName(String fileName) {
         return true;
     }
-    
+
     private void export(String objPath, String fileNameAndLocation) throws Exception {
     	WorkspaceStatus wsStatus = getWorkspaceStatus();
         WorkspaceManager wkspManager = wsStatus.getCurrentContext().getWorkspaceManager();
@@ -97,17 +93,17 @@ public class ExportCommand extends BuiltInShellCommand implements StringConstant
             throw new Exception(Messages.getString("ExportCommand.cannotExport_objectDoesNotExist", objPath)); //$NON-NLS-1$
 
         KomodoObject objToExport = contextToExport.getKomodoObj();
-         
+
         if( objToExport == null ) {
         	throw new Exception(Messages.getString("ExportCommand.cannotExport_objectDoesNotExist", objPath)); //$NON-NLS-1$
         }
-        
+
         // Check for file location and name
         File theFile = new File(fileNameAndLocation);
         if( theFile.exists()) {
         	throw new Exception(Messages.getString("ExportCommand.cannotExport_fileAlreadyExists", fileNameAndLocation)); //$NON-NLS-1$
         }
-        
+
         // Check object type
         String output = null;
         String fileExtension = null;
@@ -120,7 +116,7 @@ public class ExportCommand extends BuiltInShellCommand implements StringConstant
 
             Vdb vdb = wkspManager.resolve(transaction, objToExport, Vdb.class);
             if( vdb == null ) {
-                throw new Exception(Messages.getString(Messages.ExportCommand.CannotExportProblemWithVdb)); 
+                throw new Exception(Messages.getString(Messages.ExportCommand.CannotExportProblemWithVdb));
             }
 
             output = vdb.export(transaction, properties);
@@ -129,7 +125,7 @@ public class ExportCommand extends BuiltInShellCommand implements StringConstant
         } else if (typeIdentifier.equals(KomodoType.MODEL)) {
             Model model = wkspManager.resolve(transaction, objToExport, Model.class);
             if( model == null ) {
-                throw new Exception(Messages.getString(Messages.ExportCommand.CannotExportProblemWithModel)); 
+                throw new Exception(Messages.getString(Messages.ExportCommand.CannotExportProblemWithModel));
             }
 
             output = model.export(transaction, properties);
@@ -138,7 +134,7 @@ public class ExportCommand extends BuiltInShellCommand implements StringConstant
         } else if (typeIdentifier.equals(KomodoType.SCHEMA)) {
             Schema schema = wkspManager.resolve(transaction, objToExport, Schema.class);
             if( schema == null )
-                throw new Exception(Messages.getString(Messages.ExportCommand.CannotExportProblemWithSchema)); 
+                throw new Exception(Messages.getString(Messages.ExportCommand.CannotExportProblemWithSchema));
 
             output = schema.export(transaction, properties);
             fileExtension = DDL;
@@ -152,7 +148,7 @@ public class ExportCommand extends BuiltInShellCommand implements StringConstant
         handleExport( output, fileNameAndLocation, fileExtension);
         print(CompletionConstants.MESSAGE_INDENT, Messages.getString(Messages.ExportCommand.ObjectExported, objPath, fileNameAndLocation));
     }
-    
+
     /**
      * Export the current string content of the sql display to a user-selected file
      */
@@ -199,7 +195,7 @@ public class ExportCommand extends BuiltInShellCommand implements StringConstant
             }
         }
     }
-    
+
     /**
      * @see org.komodo.shell.api.AbstractShellCommand#tabCompletion(java.lang.String, java.util.List)
      */

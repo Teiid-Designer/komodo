@@ -8,7 +8,8 @@ import org.junit.runners.Suite;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses( { CdCommandTest.class, CreateCommandTest.class, DeleteCommandTest.class, ExportCommandTest.class,
-                      ListCommandTest.class, SetCommandTest.class, ShowCommandTest.class, UnsetCommandTest.class } )
+                      PlayCommandTest.class, ListCommandTest.class, SetCommandTest.class, ShowCommandTest.class,
+                      UnsetCommandTest.class } )
 public class AllTests {
     // nothing to do
 }

@@ -125,9 +125,12 @@ public abstract class AbstractShellCommand implements ShellCommand {
 	}
 
 	/**
-	 * Gets the command's arguments.
+	 * {@inheritDoc}
+	 *
+	 * @see org.komodo.shell.api.ShellCommand#getArguments()
 	 */
-	protected Arguments getArguments() {
+	@Override
+    public Arguments getArguments() {
 		return this.arguments;
 	}
 

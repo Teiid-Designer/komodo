@@ -19,14 +19,13 @@ import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
 import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.AbstractShellCommand;
-import org.komodo.shell.api.Arguments;
 
 /**
  * The command used when a command does not exist for a given command name.
- * 
+ *
  * This class adapted from https://github.com/Governance/s-ramp/blob/master/s-ramp-shell
  * - altered to use different Messages class
- * 
+ *
  * @author eric.wittmann@redhat.com
  */
 public class CommandNotFoundCommand extends AbstractShellCommand {
@@ -57,10 +56,12 @@ public class CommandNotFoundCommand extends AbstractShellCommand {
     }
 
     /**
-     * @see org.komodo.shell.api.ShellCommand#recordCommand(Arguments)
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommand#record()
      */
     @Override
-    public void recordCommand(Arguments args) {
+    public void record() {
         // Nothing to do
     }
 
