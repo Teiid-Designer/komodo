@@ -32,6 +32,7 @@ public final class PlayCommandTest extends AbstractCommandTest {
     @Test( expected = AssertionError.class )
     public void shouldFailToPlayNonExistentFile() throws Exception {
         setup( "bogus.txt", PlayCommand.class );
+        execute();
     }
 
 }

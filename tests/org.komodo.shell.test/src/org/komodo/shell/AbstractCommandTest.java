@@ -3,7 +3,6 @@ package org.komodo.shell;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import java.io.File;
-import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.concurrent.TimeUnit;
@@ -13,10 +12,11 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.komodo.core.KEngine;
 import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.InvalidCommandArgumentException;
 import org.komodo.shell.api.KomodoShell;
 import org.komodo.shell.api.ShellCommand;
-import org.komodo.shell.commands.ExitCommand;
+import org.komodo.shell.commands.core.PlayCommand;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
@@ -34,13 +34,11 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
 
     private static KEngine kEngine = KEngine.getInstance();
 
-	private ShellCommandFactory factory;
-	private ShellCommandReader reader;
 	private Writer writer;
 	private Writer commandWriter;
+	private PlayCommand playCmd;
 	private Class< ? extends ShellCommand > testedCommandClass;
     protected WorkspaceStatusImpl wsStatus;
-
 
     /**
      * @param kEngine
@@ -79,45 +77,42 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
 
 	/**
 	 * Setup the test
-	 * @param commandFile the file containing the command
+	 * @param commandFilePath the path to the file containing the command (cannot be empty)
 	 * @param commandClass the command being tested
 	 * @throws Exception
 	 */
-	public void setup(String commandFile, Class< ? extends ShellCommand > commandClass) throws Exception {
-	    assertEquals(RepositoryClient.State.STARTED, kEngine.getState());
-        assertEquals(Repository.State.REACHABLE, kEngine.getDefaultRepository().getState());
+    protected void setup( final String commandFilePath,
+                          final Class< ? extends ShellCommand > commandClass ) throws Exception {
+        assertEquals( RepositoryClient.State.STARTED, kEngine.getState() );
+        assertEquals( Repository.State.REACHABLE, kEngine.getDefaultRepository().getState() );
 
-        KomodoShell komodoShell = Mockito.mock(KomodoShell.class);
-        Mockito.when(komodoShell.getEngine()).thenReturn(kEngine);
-        Mockito.when(komodoShell.getInputStream()).thenReturn(System.in);
-        Mockito.when(komodoShell.getOutputStream()).thenReturn(System.out);
+        KomodoShell komodoShell = Mockito.mock( KomodoShell.class );
+        Mockito.when( komodoShell.getEngine() ).thenReturn( kEngine );
+        Mockito.when( komodoShell.getInputStream() ).thenReturn( System.in );
+        Mockito.when( komodoShell.getOutputStream() ).thenReturn( System.out );
 
-        wsStatus = new WorkspaceStatusImpl(this.uow, komodoShell);
-		this.factory = new ShellCommandFactory(wsStatus);
-		this.testedCommandClass = commandClass;
+        this.wsStatus = new WorkspaceStatusImpl( this.uow, komodoShell );
+        this.testedCommandClass = commandClass;
 
-    	try {
-    	    File cmdFile = new File(commandFile);
-    	    String commandFilePath = null;
-    	    if (cmdFile.isAbsolute())
-    	        commandFilePath = commandFile;
-    	    else
-    	        commandFilePath = "./resources/" + commandFile; //$NON-NLS-1$
+        try {
+            // create writers to store the output
+            this.writer = new StringWriter();
+            this.commandWriter = new StringWriter();
 
-    		String[] args = new String[]{"-f", commandFilePath}; //$NON-NLS-1$
+            // setup arguments for play command
+            final String filePath = ( new File( commandFilePath ).isAbsolute() ) ? commandFilePath
+                                                                                : ( "./resources/" + commandFilePath );
+            final Arguments args = new Arguments( filePath );
 
-    		// Create the FileReader
-			reader = ShellCommandReaderFactory.createCommandReader(args, factory, wsStatus);
-	        reader.open();
-
-	        // Writer to store the output
-	        writer = new StringWriter();
-	        commandWriter = new StringWriter();
-
-		} catch (Exception e) {
-			Assert.fail("Failed - setup error: "+e.getMessage()); //$NON-NLS-1$
-		}
-	}
+            // construct play command
+            this.playCmd = new PlayCommand( this.wsStatus );
+            this.playCmd.setArguments( args );
+            this.playCmd.setOutput( this.writer );
+            this.playCmd.setCommandOutput( this.commandWriter );
+        } catch ( Exception e ) {
+            Assert.fail( "Failed - setup error: " + e.getMessage() ); //$NON-NLS-1$
+        }
+    }
 
 	/**
 	 * {@inheritDoc}
@@ -133,61 +128,33 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
 	    this.wsStatus.setTransaction( this.uow );
 	}
 
-    /**
-	 * Teardown the test
-     * @throws Exception
-	 */
 	@After
-	public void teardown( ) throws Exception {
-        if ( this.reader != null ) {
-            try {
-                this.reader.close();
-            } catch ( IOException e ) {
-                Assert.fail( e.getLocalizedMessage() );
-            }
-        }
-
-        reader = null;
-		this.factory = null;
-		this.writer = null;
-		this.commandWriter = null;
+	public void teardown( ) {
+        this.commandWriter = null;
+        this.writer = null;
+        this.playCmd = null;
 	}
 
 	/**
-	 * Executes the command file, putting the result output into writer
+	 * Executes the command file, putting the result output into writer.
 	 */
-	public void execute( ) {
-		boolean done = false;
-		while (!done) {
-			ShellCommand command = null;
-			try {
-				command = this.reader.read();
-				if(command==null || command instanceof ExitCommand) break;
-
-				if(command.getClass().getName().equals(testedCommandClass.getName())) {
-					command.setOutput(this.commandWriter);
-				} else {
-					command.setOutput(this.writer);
-				}
-
-				boolean success = command.execute();
-
-				if (!success && reader.isBatch()) {
-					Assert.fail("Command " + command.getName() + " execution failed"); //$NON-NLS-1$ //$NON-NLS-2$
-				}
-			} catch (InvalidCommandArgumentException e) {
-				Assert.fail("Failed - invalid command: "+e.getMessage()); //$NON-NLS-1$
-			} catch (Exception e) {
-				Assert.fail("Failed : "+e.getMessage()); //$NON-NLS-1$
-			}
-		}
-	}
+    protected void execute() {
+        try {
+            if ( !this.playCmd.execute() ) {
+                Assert.fail( "Command " + this.testedCommandClass.getName() + " execution failed.\n" + this.writer.toString() ); //$NON-NLS-1$ //$NON-NLS-2$
+            }
+        } catch ( InvalidCommandArgumentException e ) {
+            Assert.fail( "Failed - invalid command: " + e.getMessage() ); //$NON-NLS-1$
+        } catch ( Exception e ) {
+            Assert.fail( "Failed : " + e.getMessage() ); //$NON-NLS-1$
+        }
+    }
 
 	/**
 	 * Get command output.  Contains only the output of the command being tested.
 	 * @return the output
 	 */
-	public String getCommandOutput() {
+	protected String getCommandOutput() {
 		return this.commandWriter.toString();
 	}
 
@@ -195,7 +162,7 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
 	 * Get the message indent string
 	 * @return the indent string
 	 */
-	public static String getIndentStr() {
+	protected static String getIndentStr() {
 		int indent = CompletionConstants.MESSAGE_INDENT;
 		StringBuffer sb = new StringBuffer();
 		for(int i=0; i<indent; i++) {
@@ -204,9 +171,9 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
 		return sb.toString();
 	}
 
-	public static < T extends KomodoObject > KomodoObject resolveType( final UnitOfWork transaction,
-	                                                                   final KomodoObject ko,
-	                                                                   final Class< T > resolvedClass) {
+    protected static < T extends KomodoObject > KomodoObject resolveType( final UnitOfWork transaction,
+                                                                          final KomodoObject ko,
+                                                                          final Class< T > resolvedClass ) {
 		try {
 			return WorkspaceManager.getInstance(_repo).resolve(transaction, ko, resolvedClass);
 		} catch ( KException ke) {
@@ -215,6 +182,5 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
 
 		return null;
 	}
-
 
 }
