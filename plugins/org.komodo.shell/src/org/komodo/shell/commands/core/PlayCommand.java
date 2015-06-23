@@ -1,5 +1,6 @@
 package org.komodo.shell.commands.core;
 
+import java.io.Writer;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
@@ -23,6 +24,8 @@ public class PlayCommand  extends BuiltInShellCommand implements StringConstants
      * The command name.
      */
     public static final String NAME = "play"; //$NON-NLS-1$
+
+    private Writer commandWriter;
 
     /**
      * @param wsStatus
@@ -51,11 +54,7 @@ public class PlayCommand  extends BuiltInShellCommand implements StringConstants
 	}
 
 	private void playFile(String commandFile ) throws Exception {
-
 		WorkspaceStatus wsStatus = getWorkspaceStatus();
-
-
-		//String commandFilePath = UnitTestUtil.getTestDataPath() + "../resources" + commandFile;
 		String[] args = new String[]{"-f", commandFile}; //$NON-NLS-1$
 
 		ShellCommandFactory factory = new ShellCommandFactory(wsStatus);
@@ -66,19 +65,29 @@ public class PlayCommand  extends BuiltInShellCommand implements StringConstants
 	}
 
 	private void runCommands(ShellCommandReader reader) throws Exception {
-		boolean done = false;
-		while (!done) {
-			ShellCommand command = reader.read();
+        while ( true ) {
+			final ShellCommand command = reader.read();
 
-			if(command==null || command instanceof ExitCommand) break;
+            if ( ( command == null ) || ( command instanceof ExitCommand ) ) {
+                break;
+            }
 
-			boolean success = command.execute();
+            command.setOutput( this.commandWriter );
 
-			if (!success && reader.isBatch()) {
-				throw new Exception(Messages.getString("PlayCommand.CommandFailure", command.getName())); //$NON-NLS-1$
-			}
+			final boolean success = command.execute();
 
+            if ( !success && reader.isBatch() ) {
+                throw new Exception( Messages.getString( "PlayCommand.CommandFailure", command.getName() ) ); //$NON-NLS-1$
+            }
 		}
 	}
+
+    /**
+     * @param commandWriter
+     *        the writer the commands being played should use (cannot be <code>null</code>)
+     */
+    public void setCommandOutput( final Writer commandWriter ) {
+        this.commandWriter = commandWriter;
+    }
 
 }
