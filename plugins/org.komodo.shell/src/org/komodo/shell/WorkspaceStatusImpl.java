@@ -443,7 +443,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
                 return null;
             }
 
-            return Messages.getString( SHELL.INVALID_BOOLEAN_GLOBAL_PROPERTY_VALUE, propertyName, proposedValue );
+            return Messages.getString( SHELL.INVALID_BOOLEAN_GLOBAL_PROPERTY_VALUE, proposedValue, propertyName.toUpperCase() );
         }
 
         return null; // name and value are valid

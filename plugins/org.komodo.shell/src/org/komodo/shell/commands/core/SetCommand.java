@@ -94,7 +94,7 @@ public class SetCommand extends BuiltInShellCommand {
         		String propNameArg = requiredArgument(1, Messages.getString("SetCommand.InvalidArgMsg_GlobalPropertyName")); //$NON-NLS-1$
         		String propValueArg = null;
 
-                if ( RESET_GLOBAL.equals( propNameArg ) ) {
+                if ( RESET_GLOBAL.equals( propNameArg.toLowerCase() ) ) {
                     getWorkspaceStatus().resetProperties();
                     print( MESSAGE_INDENT, Messages.getString( "SetCommand.resetGlobalProperties" ) ); //$NON-NLS-1$
                 } else {
@@ -397,11 +397,16 @@ public class SetCommand extends BuiltInShellCommand {
 
                     if ( lastArgument == null ) {
                         candidates.addAll( potentials );
+                        candidates.add( RESET_GLOBAL );
                     } else {
                         for ( final String name : potentials ) {
                             if ( name.toUpperCase().startsWith( lastArgument.toUpperCase() ) ) {
                                 candidates.add( name );
                             }
+                        }
+
+                        if ( RESET_GLOBAL.startsWith( lastArgument.toLowerCase() ) ) {
+                            candidates.add( RESET_GLOBAL );
                         }
                     }
                 } else {
