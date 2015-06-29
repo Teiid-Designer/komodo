@@ -39,9 +39,12 @@ import org.junit.Rule;
 import org.junit.rules.TestName;
 import org.komodo.repository.LocalRepository;
 import org.komodo.repository.LocalRepository.LocalRepositoryId;
+import org.komodo.repository.ObjectImpl;
+import org.komodo.repository.RepositoryImpl;
 import org.komodo.repository.RepositoryImpl.UnitOfWorkImpl;
 import org.komodo.repository.SynchronousCallback;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository.State;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -98,6 +101,30 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest im
         // Wait for the starting of the repository or timeout of 1 minute
         if (!_repoObserver.getLatch().await(1, TimeUnit.MINUTES)) {
             throw new RuntimeException("Local repository did not start");
+        }
+
+        { // verify initial content (see initialContent.xml)
+            UnitOfWork transaction = null;
+
+            try {
+                final KomodoObject workspace = new ObjectImpl( _repo, RepositoryImpl.WORKSPACE_ROOT, 0 );
+                transaction = _repo.createTransaction( "verifyInitialRepositoryContent", true, null );
+
+                { // TODO should not need this when GitHub Issue 184 is resolved
+                  // make sure workspace node and environment node exists
+                    _repo.komodoEnvironment( transaction );
+                    _repo.komodoWorkspace( transaction );
+                }
+
+                workspace.getName( transaction );
+                transaction.commit();
+            } catch ( final Exception e ) {
+                throw new Exception( "Failed verifying initial workspace content: " + e.getLocalizedMessage(), e );
+            } finally {
+                if ( transaction != null ) {
+                    transaction.commit();
+                }
+            }
         }
     }
 

@@ -469,6 +469,11 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
 
         if (!StringUtils.isBlank( savedPath )) {
             this.currentContext = ContextUtils.getContextForPath( this, savedPath );
+
+            // saved path no longer exists so set context to workspace root
+            if ( this.currentContext == null ) {
+                this.currentContext = getWorkspaceContext();
+            }
         }
     }
 
