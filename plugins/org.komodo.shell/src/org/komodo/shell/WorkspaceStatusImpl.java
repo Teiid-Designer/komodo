@@ -26,6 +26,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -478,14 +481,22 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     }
 
     private void saveProperties() throws Exception {
-        final String propFileName = this.shell.getShellDataLocation();
-        final File propFile = new File( propFileName, PROPERTIES_FILE_NAME );
+        final String shellDataDir = this.shell.getShellDataLocation();
+        final Path propFile = Paths.get( shellDataDir, PROPERTIES_FILE_NAME );
+
+        if ( !Files.exists( propFile ) ) {
+            if ( !Files.exists( propFile.getParent() ) ) {
+                Files.createDirectories( propFile.getParent() );
+            }
+
+            Files.createFile( propFile );
+        }
 
         // save current context path
         this.wsProperties.setProperty( SAVED_CONTEXT_PATH, this.currentContext.getFullName() );
 
         // save
-        this.wsProperties.store( new FileOutputStream( propFile.getAbsolutePath() ), null );
+        this.wsProperties.store( new FileOutputStream( propFile.toString() ), null );
     }
 
     /**

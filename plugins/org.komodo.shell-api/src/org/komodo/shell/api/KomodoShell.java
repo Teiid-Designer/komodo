@@ -26,6 +26,7 @@ import java.io.PrintStream;
 import java.io.Writer;
 import org.komodo.core.KEngine;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.constants.SystemConstants;
 
 /**
  *
@@ -48,12 +49,21 @@ public interface KomodoShell extends StringConstants {
     PrintStream getOutputStream();
 
     /**
-     * The directory where the shell saves user settings, preferences, or any other data needed to restore a user session.The
-     * <code>${user.home}/.komodo</code> directory is the default location.
+     * The directory where the shell saves user settings, preferences, or any other data needed to restore a user session.
      *
      * @return the shell's workspace directory (never empty)
+     * @see SystemConstants#VDB_BUILDER_DATA_DIR
      */
     String getShellDataLocation();
+
+    /**
+     * Must be called before the shell is running.
+     *
+     * @param dataDirectory
+     *        the directory where the shell can persist preferences, settings, etc. (can be empty if the default location should
+     *        be used)
+     */
+    void setShellDataLocation( final String dataDirectory );
 
     /**
      *

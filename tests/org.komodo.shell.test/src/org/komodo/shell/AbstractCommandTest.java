@@ -5,6 +5,8 @@ import static org.junit.Assert.assertNotNull;
 import java.io.File;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -19,11 +21,13 @@ import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.commands.core.PlayCommand;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.constants.SystemConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.RepositoryClient;
 import org.komodo.test.utils.AbstractLocalRepositoryTest;
+import org.komodo.utils.FileUtils;
 import org.mockito.Mockito;
 
 /**
@@ -33,6 +37,7 @@ import org.mockito.Mockito;
 public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
 
     private static KEngine kEngine = KEngine.getInstance();
+    protected static Path _shellDataDirectory;
 
 	private Writer writer;
 	private Writer commandWriter;
@@ -48,6 +53,10 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
     public static void startKEngine() throws Exception {
         assertNotNull(_repo);
 
+        // create data directory for shell
+        _shellDataDirectory = Files.createTempDirectory( "VdbBuilderDataDir" );
+        System.setProperty( SystemConstants.VDB_BUILDER_DATA_DIR, _shellDataDirectory.toString() );
+
         kEngine.setDefaultRepository(_repo);
         kEngine.start();
 
@@ -61,6 +70,9 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
     @AfterClass
     public static void stopKEngine() throws Exception {
         assertNotNull(kEngine);
+
+        // delete data directory
+        FileUtils.removeDirectoryAndChildren( _shellDataDirectory.toFile() );
 
         // Reset the latch to signal when repo has been shutdown
         _repoObserver.resetLatch();
@@ -90,6 +102,7 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
         Mockito.when( komodoShell.getEngine() ).thenReturn( kEngine );
         Mockito.when( komodoShell.getInputStream() ).thenReturn( System.in );
         Mockito.when( komodoShell.getOutputStream() ).thenReturn( System.out );
+        Mockito.when( komodoShell.getShellDataLocation() ).thenReturn( getLoggingDirectory().toString() );
 
         this.wsStatus = new WorkspaceStatusImpl( this.uow, komodoShell );
         this.testedCommandClass = commandClass;

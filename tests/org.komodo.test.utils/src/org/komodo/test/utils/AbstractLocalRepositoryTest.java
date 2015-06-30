@@ -311,4 +311,5 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest im
 
         return sb.toString();
     }
+
 }

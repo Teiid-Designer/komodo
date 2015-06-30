@@ -12,8 +12,8 @@
             <persistence passivation="false">
                 <leveldb-store xmlns="urn:infinispan:config:store:leveldb:7.2"
                     purge="false"
-                    path="${user.home}/.komodo/db/data">
-                    <expiration path="${user.home}/.komodo/db/expired"/>
+                    path="${komodo.dataDir}/db/data">
+                    <expiration path="${komodo.dataDir}/db/expired"/>
                     <implementation type="JAVA"/>
                 </leveldb-store>
             </persistence>

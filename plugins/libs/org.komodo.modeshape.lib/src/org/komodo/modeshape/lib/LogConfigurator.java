@@ -22,6 +22,9 @@
 package org.komodo.modeshape.lib;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.logging.Level;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -67,7 +70,7 @@ public class LogConfigurator {
 
     private static final String REF = "ref"; //$NON-NLS-1$
 
-    private String logPath = System.getProperty("user.home") + File.separator + ".komodo" + File.separator + "komodo.log"; //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+    private String logPath;
 
     private String level = "INFO"; //$NON-NLS-1$
 
@@ -87,6 +90,24 @@ public class LogConfigurator {
     }
 
     private void initContext() throws Exception {
+        // get default log file path if necessary
+        if ( ( this.logPath == null ) || this.logPath.isEmpty() ) {
+            String tempPath = System.getProperty( "komodo.dataDir" ); //$NON-NLS-1$
+            tempPath += File.separator + "komodo.log"; //$NON-NLS-1$
+            this.logPath = tempPath;
+        }
+
+        // make sure log file exists
+        final Path logFilePath = Paths.get( this.logPath );
+
+        if ( !Files.exists( logFilePath ) ) {
+            if ( !Files.exists( logFilePath.getParent() ) ) {
+                Files.createDirectories( logFilePath.getParent() );
+            }
+
+            Files.createFile( logFilePath );
+        }
+
         ILoggerFactory factory = LoggerFactory.getILoggerFactory();
         if (factory instanceof LoggerContext) {
             LoggerContext context = (LoggerContext)LoggerFactory.getILoggerFactory();

@@ -3,17 +3,17 @@
  * See the COPYRIGHT.txt file distributed with this work for information
  * regarding copyright ownership.  Some portions may be licensed
  * to Red Hat, Inc. under one or more contributor license agreements.
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
@@ -29,9 +29,15 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.komodo.spi.constants.SystemConstants;
+import org.komodo.utils.FileUtils;
 import org.komodo.utils.KLog;
 
 /**
@@ -39,6 +45,20 @@ import org.komodo.utils.KLog;
  */
 @SuppressWarnings( {"javadoc", "nls"} )
 public class TestKLog {
+
+    private static Path _dataDirectory;
+
+    @BeforeClass
+    public static void initDataDirectory() throws Exception {
+        // create data directory for engine logging
+        _dataDirectory = Files.createTempDirectory( "KomodoEngineDataDir" );
+        System.setProperty( SystemConstants.ENGINE_DATA_DIR, _dataDirectory.toString() );
+    }
+
+    @AfterClass
+    public static void removeDataDirectory() throws Exception {
+        FileUtils.removeDirectoryAndChildren( _dataDirectory.toFile() );
+    }
 
     private KLog logger;
 
@@ -72,9 +92,7 @@ public class TestKLog {
     }
 
     private String retrieveLogContents(File newLogFile) throws Exception {
-        BufferedReader reader = null;
-        try {
-            reader = new BufferedReader(new FileReader(newLogFile));
+        try ( BufferedReader reader = new BufferedReader( new FileReader( newLogFile ) ) ) {
             StringBuilder builder = new StringBuilder();
             String line;
             while((line = reader.readLine()) != null) {
@@ -83,9 +101,6 @@ public class TestKLog {
             }
 
             return builder.toString();
-        } finally {
-            if (reader != null)
-                reader.close();
         }
     }
 
