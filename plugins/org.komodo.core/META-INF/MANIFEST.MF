@@ -16,3 +16,5 @@ Require-Bundle: org.komodo.spi;bundle-version="0.0.1",
  org.komodo.modeshape.teiid.sql.sequencer;bundle-version="0.0.1",
  org.komodo.utils;bundle-version="0.0.1"
 Eclipse-RegisterBuddy: org.komodo.modeshape.lib
+Bundle-ClassPath: resources/,
+ .

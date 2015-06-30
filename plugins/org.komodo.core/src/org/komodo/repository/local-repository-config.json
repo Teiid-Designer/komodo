@@ -26,14 +26,14 @@
         "binaryStorage" : {
             "minimumBinarySizeInBytes" : 4096,
             "minimumStringSize" : 4096,
-            "directory": "${user.home}/.komodo/storage/content/binaries",
+            "directory": "${komodo.dataDir}/storage/content/binaries",
             "type" : "file"
         }
     },
     "indexProviders" : {
         "local" : {
             "classname" : "org.modeshape.jcr.index.local.LocalIndexProvider",
-            "directory" : "${user.home}/.komodo/indexes"
+            "directory" : "${komodo.dataDir}/indexes"
         }
     },
     "indexes" : {

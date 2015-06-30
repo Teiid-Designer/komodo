@@ -36,11 +36,13 @@ import org.komodo.repository.LocalRepository;
 import org.komodo.spi.KErrorHandler;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.constants.SystemConstants;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.RepositoryClient;
 import org.komodo.spi.repository.RepositoryClientEvent;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.KLog;
+import org.komodo.utils.StringUtils;
 
 /**
  * The Komodo engine. It is responsible for persisting and retriever user session data and Teiid artifacts.
@@ -72,6 +74,12 @@ public final class KEngine implements RepositoryClient, StringConstants {
     private KomodoErrorHandler errorHandler = new KomodoErrorHandler();
 
     private KEngine() {
+        // Initialize default data directory system property if necessary
+        if ( StringUtils.isBlank( System.getProperty( SystemConstants.ENGINE_DATA_DIR ) ) ) {
+            final String defaultValue = ( System.getProperty( "user.home", "/" ) + "/.komodo" ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+            System.setProperty( SystemConstants.ENGINE_DATA_DIR, defaultValue );
+        }
+
         // Initialise the logging system
         try {
             LogConfigurator.getInstance();
@@ -105,7 +113,7 @@ public final class KEngine implements RepositoryClient, StringConstants {
      * 1. Call this with a valid repository before calling {{@link #start()}
      * 2. When tests are completed, shutdown the engine
      * 3. Call this again with a value of null to clear the default repository field
-     * 
+     *
      * @param repository the default repository
      * @throws Exception if an error occurs
      */

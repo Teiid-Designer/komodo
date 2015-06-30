@@ -79,9 +79,9 @@ public interface WorkspaceStatus extends StringConstants {
 
         // add default values for EVERY property
         {
-            put( EXPORT_DEFAULT_DIR_KEY, StringConstants.EMPTY_STRING );
-            put( IMPORT_DEFAULT_DIR_KEY, StringConstants.EMPTY_STRING );
-            put( RECORDING_FILE_KEY, StringConstants.EMPTY_STRING );
+            put( EXPORT_DEFAULT_DIR_KEY, "." ); //$NON-NLS-1$
+            put( IMPORT_DEFAULT_DIR_KEY, "." ); //$NON-NLS-1$
+            put( RECORDING_FILE_KEY, "./commandOutput.txt" ); //$NON-NLS-1$
             put( SHOW_FULL_PATH_IN_PROMPT_KEY, Boolean.FALSE.toString() );
             put( SHOW_HIDDEN_PROPERTIES_KEY, Boolean.FALSE.toString() );
             put( SHOW_PROP_NAME_PREFIX_KEY, Boolean.FALSE.toString() );

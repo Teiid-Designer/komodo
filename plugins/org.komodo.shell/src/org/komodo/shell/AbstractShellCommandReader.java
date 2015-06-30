@@ -29,6 +29,7 @@ import java.io.Writer;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
@@ -217,10 +218,17 @@ public abstract class AbstractShellCommandReader implements ShellCommandReader {
         // see if full path should be displayed
         String path = null;
 
-        if ( getWorkspaceStatus().isShowingFullPathInPrompt() ) {
-            path = getWorkspaceStatus().getCurrentContext().getFullName();
-        } else {
-            path = getWorkspaceStatus().getCurrentContext().getName();
+        try {
+            if ( getWorkspaceStatus().isShowingFullPathInPrompt() ) {
+                path = getWorkspaceStatus().getCurrentContext().getFullName();
+            } else {
+                path = getWorkspaceStatus().getCurrentContext().getName();
+            }
+        } catch ( final Exception e ) {
+            // problem getting context name
+            path = Messages.getString( SHELL.PATH_NOT_FOUND,
+                                       getWorkspaceStatus().getCurrentContext().getKomodoObj().getAbsolutePath() );
+            return Messages.getString( Messages.SHELL.PROMPT, path );
         }
 
         assert ( path != null );

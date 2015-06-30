@@ -23,6 +23,9 @@ package org.komodo.utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.ServiceLoader;
 import java.util.logging.FileHandler;
@@ -30,6 +33,7 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.constants.SystemConstants;
 import org.komodo.spi.logging.KLogger;
 
 /**
@@ -41,8 +45,7 @@ public class KLog implements KLogger {
 
         private final Logger logger;
 
-        private String logPath = System.getProperty("user.home") + //$NON-NLS-1$
-                                                        File.separator + DOT_KOMODO + File.separator + KOMODO + DOT + LOG;
+        private String logPath;
 
         private FileHandler logPathHandler;
 
@@ -60,6 +63,23 @@ public class KLog implements KLogger {
         }
 
         private void initLogger() throws IOException {
+            // construct default log file path if necessary
+            if ( StringUtils.isBlank( this.logPath ) ) {
+                this.logPath = System.getProperty( SystemConstants.ENGINE_DATA_DIR );
+                this.logPath += File.separator + SystemConstants.LOG_FILE_NAME;
+            }
+
+            // make sure log file exists
+            final Path logFilePath = Paths.get( this.logPath );
+
+            if ( !Files.exists( logFilePath ) ) {
+                if ( !Files.exists( logFilePath.getParent() ) ) {
+                    Files.createDirectories( logFilePath.getParent() );
+                }
+
+                Files.createFile( logFilePath );
+            }
+
             dispose();
 
             //

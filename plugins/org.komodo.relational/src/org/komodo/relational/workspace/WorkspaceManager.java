@@ -42,7 +42,6 @@ import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.teiid.internal.TeiidImpl;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.internal.VdbImpl;
-import org.komodo.repository.LocalRepository;
 import org.komodo.repository.RepositoryImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
@@ -104,7 +103,7 @@ public class WorkspaceManager extends RelationalObjectImpl {
         if ( instance == null ) {
             // We must create a transaction here so that it can be passed on to the constructor. Since the
             // node associated with the WorkspaceManager always exists we don't have to create it.
-            final UnitOfWork uow = repository.createTransaction( "createWorkspaceManager", true, null ); //$NON-NLS-1$
+            final UnitOfWork uow = repository.createTransaction( "createWorkspaceManager", false, null ); //$NON-NLS-1$
             instance = new WorkspaceManager( uow, repository );
             uow.commit();
 
@@ -140,12 +139,11 @@ public class WorkspaceManager extends RelationalObjectImpl {
     }
 
     /**
-     * Primarily used in tests to remove the workspace manager instance
-     * from the instances cache.
+     * Primarily used in tests to remove the workspace manager instance from the instances cache.
      *
      * @param repository remove instance with given repository
      */
-    public static void uncacheInstance(LocalRepository repository) {
+    public static void uncacheInstance(final Repository repository) {
         if (repository == null)
             return;
 
@@ -154,6 +152,13 @@ public class WorkspaceManager extends RelationalObjectImpl {
 
     private WorkspaceManager(UnitOfWork uow, Repository repository ) throws KException {
         super(uow, repository, RepositoryImpl.WORKSPACE_ROOT);
+
+        { // TODO should not need this when GitHub Issue 184 is resolved
+          // make sure workspace node and environment node exists
+            repository.komodoEnvironment( uow );
+            repository.komodoWorkspace( uow );
+        }
+
         repository.addObserver(new RepositoryObserver() {
 
             @Override

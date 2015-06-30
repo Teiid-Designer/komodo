@@ -20,7 +20,7 @@
     "indexProviders" : {
         "local" : {
             "classname" : "org.modeshape.jcr.index.local.LocalIndexProvider",
-            "directory" : "${user.home}/.komodo/indexes"
+            "directory" : "${komodo.dataDir}/indexes"
         }
     },
     "indexes" : {

@@ -45,6 +45,7 @@ public class Messages implements StringConstants {
         PROMPT_WITH_TYPE,
         CHILD_NAME_HEADER,
         CHILD_TYPE_HEADER,
+        PATH_NOT_FOUND,
         PROPERTY_NAME_HEADER,
         PROPERTY_VALUE_HEADER,
         NO_PROPERTY_VALUE,

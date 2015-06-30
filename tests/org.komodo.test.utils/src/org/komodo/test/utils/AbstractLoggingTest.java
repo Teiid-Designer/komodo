@@ -23,8 +23,13 @@ package org.komodo.test.utils;
 
 import static org.junit.Assert.assertEquals;
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.komodo.modeshape.lib.LogConfigurator;
+import org.komodo.spi.constants.SystemConstants;
+import org.komodo.utils.FileUtils;
 import org.komodo.utils.KLog;
 
 /**
@@ -33,6 +38,8 @@ import org.komodo.utils.KLog;
  */
 @SuppressWarnings( {"nls", "javadoc"} )
 public abstract class AbstractLoggingTest {
+
+    private static Path _dataDirectory;
 
     private static File configureLogPath(KLog logger) throws Exception {
         File newLogFile = File.createTempFile("TestKLog", ".log");
@@ -44,6 +51,10 @@ public abstract class AbstractLoggingTest {
         assertEquals(newLogFile.getAbsolutePath(), logger.getLogPath());
 
         return newLogFile;
+    }
+
+    protected static Path getLoggingDirectory() {
+        return _dataDirectory;
     }
 
     /**
@@ -58,8 +69,19 @@ public abstract class AbstractLoggingTest {
 
     @BeforeClass
     public static void initLogging() throws Exception {
+        // create data directory for engine logging
+        _dataDirectory = Files.createTempDirectory( "KomodoEngineDataDir" );
+        System.setProperty( SystemConstants.ENGINE_DATA_DIR, _dataDirectory.toString() );
+
         // Initialises logging and reduces modeshape logging from DEBUG to INFO
         LogConfigurator.getInstance();
         configureLogPath(KLog.getLogger());
     }
+
+    @AfterClass
+    public static void shutdown() throws Exception {
+        FileUtils.removeDirectoryAndChildren( _dataDirectory.toFile() );
+    }
+
 }
+

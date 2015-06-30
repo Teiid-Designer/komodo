@@ -49,8 +49,8 @@ public class ExitCommand extends BuiltInShellCommand {
 	 */
 	@Override
 	public boolean execute() throws Exception {
-		print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.GOOD_BYE));
 		getWorkspaceStatus().getShell().exit();
+        print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.GOOD_BYE));
         return true;
 	}
 
