@@ -1,0 +1,4 @@
+# import VDB AzureService-vdb.xml
+#
+import vdb ./resources/vdbs/AzureService-vdb.xml
+show children
