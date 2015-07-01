@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+  <vdb name="SvcSourceVdb_SalesforceDS" version="1">
+  <description>VDB for: SvcSourceVdb_SalesforceDS, Version: 1</description>
+  <connection-type>BY_VERSION</connection-type>
+  <model name="SalesforceDS" type="PHYSICAL" visible="true">
+    <source name="SalesforceDS" translator-name="salesforce" connection-jndi-name="java:/SalesforceDS"/>
+  </model>
+</vdb>
