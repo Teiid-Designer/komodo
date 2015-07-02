@@ -22,12 +22,18 @@
 package org.komodo.shell;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Locale;
+import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
@@ -60,6 +66,7 @@ import org.komodo.utils.StringUtils;
 public class DefaultKomodoShell implements KomodoShell {
 
     private static final String LOCALE_PROPERTY = "komodo.shell.locale"; //$NON-NLS-1$
+    private static final String PROPERTIES_FILE_NAME = "vdbbuilder.properties"; //$NON-NLS-1$
     private String msgIndentStr = StringConstants.EMPTY_STRING;
 
     /**
@@ -222,19 +229,26 @@ public class DefaultKomodoShell implements KomodoShell {
 
         wsStatus = new WorkspaceStatusImpl(this);
         factory = new ShellCommandFactory(wsStatus);
-//
-//        File startupPropertiesFile = new File(STARTUP_PROPERTIES_FILEPATH);
-//        if (startupPropertiesFile.exists() && startupPropertiesFile.isFile() && startupPropertiesFile.canRead()) {
-//            Properties props = new Properties();
-//
-//            try {
-//                props.load(new FileInputStream(startupPropertiesFile));
-//            } catch (Exception e) {
-//                // ignore
-//            }
-//            wsStatus.setProperties(props);
-//        }
-//
+
+        // load shell properties if they exist
+        final String dataDir = getShellDataLocation();
+        final File startupPropertiesFile = new File( dataDir, PROPERTIES_FILE_NAME );
+
+        if ( startupPropertiesFile.exists() && startupPropertiesFile.isFile() && startupPropertiesFile.canRead() ) {
+            Properties props = new Properties();
+
+            try {
+                props.load( new FileInputStream( startupPropertiesFile ) );
+            } catch ( final Exception e ) {
+                this.outStream.println( this.msgIndentStr
+                                        + Messages.getString( SHELL.ERROR_LOADING_PROPERTIES,
+                                                              startupPropertiesFile.getAbsolutePath(),
+                                                              e.getMessage() ) );
+            }
+
+            this.wsStatus.setProperties( props );
+        }
+
         reader = ShellCommandReaderFactory.createCommandReader(args, factory, wsStatus);
         reader.open();
 
@@ -340,9 +354,20 @@ public class DefaultKomodoShell implements KomodoShell {
         displayMessage( this.msgIndentStr + Messages.getString( SHELL.SHUTTING_DOWN ) );
         this.shutdown = true;
 
-        // workspace status must be saved before engine is stopped
+        // save properties
         try {
-            this.wsStatus.save();
+            final String shellDataDir = getShellDataLocation();
+            final Path propFile = Paths.get( shellDataDir, PROPERTIES_FILE_NAME );
+
+            if ( !Files.exists( propFile ) ) {
+                if ( !Files.exists( propFile.getParent() ) ) {
+                    Files.createDirectories( propFile.getParent() );
+                }
+
+                Files.createFile( propFile );
+            }
+
+            this.wsStatus.getProperties().store( new FileOutputStream( propFile.toString() ), null );
         } catch ( final Exception e ) {
             displayMessage( "Error during shutdown saving workspace status: " + e.getLocalizedMessage() ); //$NON-NLS-1$
         }

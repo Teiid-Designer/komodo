@@ -22,13 +22,8 @@
 package org.komodo.shell;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -61,7 +56,6 @@ import org.komodo.utils.StringUtils;
  */
 public class WorkspaceStatusImpl implements WorkspaceStatus {
 
-    private static final String PROPERTIES_FILE_NAME = "vdbbuilder.properties"; //$NON-NLS-1$
     private static final String SAVED_CONTEXT_PATH = "SAVED_CONTEXT_PATH"; //$NON-NLS-1$
     private static final List< String > HIDDEN_PROPS = Arrays.asList( new String[] { SAVED_CONTEXT_PATH } );
 
@@ -131,17 +125,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
 
         // load saved state
         this.wsProperties = new Properties();
-        loadProperties();
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.WorkspaceStatus#save()
-     */
-    @Override
-    public void save() throws Exception {
-        saveProperties();
+        resetProperties();
     }
 
     private void createTransaction(final String source ) throws Exception {
@@ -288,6 +272,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     @Override
     public void setCurrentContext(WorkspaceContext context) throws Exception {
         currentContext = context;
+        this.wsProperties.setProperty( SAVED_CONTEXT_PATH, this.currentContext.getFullName() );
         fireContextChangeEvent();
     }
 
@@ -452,53 +437,6 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         return null; // name and value are valid
     }
 
-    private void loadProperties() throws Exception {
-        final String propFileName = this.shell.getShellDataLocation();
-        final File propFile = new File( propFileName, PROPERTIES_FILE_NAME );
-
-        if ( propFile.exists() ) {
-            this.wsProperties.load( new FileInputStream( propFile.getAbsolutePath() ) );
-        }
-
-        // make sure all non-hidden global properties exist
-        for ( final Entry< String, String > entry : GLOBAL_PROPS.entrySet() ) {
-            if ( !this.wsProperties.containsKey( entry.getKey() ) ) {
-                setProperty( entry.getKey(), entry.getValue() );
-            }
-        }
-
-        // set current context to saved context
-        final String savedPath = this.wsProperties.getProperty( SAVED_CONTEXT_PATH );
-
-        if (!StringUtils.isBlank( savedPath )) {
-            this.currentContext = ContextUtils.getContextForPath( this, savedPath );
-
-            // saved path no longer exists so set context to workspace root
-            if ( this.currentContext == null ) {
-                this.currentContext = getWorkspaceContext();
-            }
-        }
-    }
-
-    private void saveProperties() throws Exception {
-        final String shellDataDir = this.shell.getShellDataLocation();
-        final Path propFile = Paths.get( shellDataDir, PROPERTIES_FILE_NAME );
-
-        if ( !Files.exists( propFile ) ) {
-            if ( !Files.exists( propFile.getParent() ) ) {
-                Files.createDirectories( propFile.getParent() );
-            }
-
-            Files.createFile( propFile );
-        }
-
-        // save current context path
-        this.wsProperties.setProperty( SAVED_CONTEXT_PATH, this.currentContext.getFullName() );
-
-        // save
-        this.wsProperties.store( new FileOutputStream( propFile.toString() ), null );
-    }
-
     /**
      * {@inheritDoc}
      *
@@ -543,12 +481,26 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
      * @see org.komodo.shell.api.WorkspaceStatus#setProperties(java.util.Properties)
      */
     @Override
-    public void setProperties( final Properties props ) {
+    public void setProperties( final Properties props ) throws Exception {
         resetProperties();
 
         if ( ( props != null ) && !props.isEmpty() ) {
             for ( final String name : props.stringPropertyNames() ) {
                 setProperty( name, props.getProperty( name ) );
+            }
+
+            // set current context to saved context if necessary
+            final String savedPath = props.getProperty( SAVED_CONTEXT_PATH );
+
+            if ( !StringUtils.isBlank( savedPath ) ) {
+                WorkspaceContext context = ContextUtils.getContextForPath( this, savedPath );
+
+                // saved path no longer exists so set context to workspace root
+                if ( context == null ) {
+                    context = getWorkspaceContext();
+                }
+
+                setCurrentContext( context );
             }
         }
     }
@@ -560,16 +512,13 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
      */
     @Override
     public Properties getProperties() {
-        final Properties result = new Properties(); // just provide a copy
+        final Properties copy = new Properties(); // just provide a copy
 
-        // remove hidden properties
         for ( final String propName : this.wsProperties.stringPropertyNames() ) {
-            if ( !HIDDEN_PROPS.contains( propName ) ) {
-                result.setProperty( propName, this.wsProperties.getProperty( propName ) );
-            }
+            copy.setProperty( propName, this.wsProperties.getProperty( propName ) );
         }
 
-        return result;
+        return copy;
     }
 
 }

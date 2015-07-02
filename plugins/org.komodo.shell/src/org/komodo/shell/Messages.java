@@ -39,6 +39,7 @@ public class Messages implements StringConstants {
 
     @SuppressWarnings( "javadoc" )
     public enum SHELL {
+        ERROR_LOADING_PROPERTIES,
         INVALID_GLOBAL_PROPERTY_NAME,
         INVALID_BOOLEAN_GLOBAL_PROPERTY_VALUE,
         PROMPT,

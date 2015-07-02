@@ -105,8 +105,10 @@ public interface WorkspaceStatus extends StringConstants {
      *
      * @param props
      *        the properties (can be <code>null</code> or empty if resetting to default values)
+     * @throws Exception
+     *         if an error occurs
      */
-    void setProperties( final Properties props );
+    void setProperties( final Properties props ) throws Exception;
 
 	/**
 	 * Set all properties back to their default values.
@@ -142,13 +144,6 @@ public interface WorkspaceStatus extends StringConstants {
 	 * @return the workspace context
 	 */
 	WorkspaceContext getWorkspaceContext();
-
-    /**
-     * Saves data needed to restore next session (preferences, settings, configuration, etc.).
-     *
-     * @throws Exception
-     */
-    void save() throws Exception;
 
 	/**
 	 * Set the current workspace context
