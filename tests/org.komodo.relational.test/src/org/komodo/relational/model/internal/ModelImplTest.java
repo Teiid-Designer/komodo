@@ -136,6 +136,14 @@ public final class ModelImplTest extends RelationalModelTest {
         assertThat( this.model.getModelType( this.uow ), is( Type.DEFAULT_VALUE ) );
     }
 
+    @Test
+    public void shouldClearMetadataTypeWhenClearingModelDefinition() throws Exception {
+        this.model.setMetadataType( this.uow, "blah" );
+        this.model.setModelDefinition( this.uow, "blah blah blah" );
+        this.model.setModelDefinition( this.uow, EMPTY_STRING );
+        assertThat( this.model.getMetadataType( this.uow ), is( EMPTY_STRING ) );
+    }
+
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingEmptyPushdownFunctionName() throws Exception {
         this.model.addPushdownFunction( this.uow, EMPTY_STRING );
@@ -531,10 +539,31 @@ public final class ModelImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldSetMetadataType() throws Exception {
+        final String value = "metadataType";
+        this.model.setMetadataType( this.uow, value );
+        assertThat( this.model.getMetadataType( this.uow ), is( value ) );
+    }
+
+    @Test
+    public void shouldSetMetadataTypeToDefaultWhenSettingModelDefinition() throws Exception {
+        this.model.setMetadataType( this.uow, EMPTY_STRING );
+        this.model.setModelDefinition( this.uow, "blah blah blah" );
+        assertThat( this.model.getMetadataType( this.uow ), is( Model.DEFAULT_METADATA_TYPE ) );
+    }
+
+    @Test
     public void shouldSetModelType() throws Exception {
         final Type value = Type.VIRTUAL;
         this.model.setModelType( this.uow, value );
         assertThat( this.model.getModelType( this.uow ), is( value ) );
+    }
+
+    @Test
+    public void shouldSetVisible() throws Exception {
+        final boolean value = !Model.DEFAULT_VISIBLE;
+        this.model.setVisible( this.uow, value );
+        assertThat( this.model.isVisible( this.uow ), is( value ) );
     }
 
     /*
