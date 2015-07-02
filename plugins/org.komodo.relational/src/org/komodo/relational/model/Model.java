@@ -21,6 +21,16 @@ import org.komodo.spi.repository.Repository.UnitOfWork.State;
 public interface Model extends Exportable, RelationalObject {
 
     /**
+     * The default value for the <code>metadataType</code> property. Value is {@value} .
+     */
+    String DEFAULT_METADATA_TYPE = "DDL"; //$NON-NLS-1$
+
+    /**
+     * The default value for the <code>is visible</code> property. Value is {@value} .
+     */
+    boolean DEFAULT_VISIBLE = true;
+
+    /**
      * The type identifier.
      */
     int TYPE_ID = Model.class.hashCode();
@@ -156,8 +166,18 @@ public interface Model extends Exportable, RelationalObject {
 
     /**
      * @param transaction
+     *        the transaction (cannot be <code>null</code> and its state must be {@link State#NOT_STARTED})
+     * @return the metadata type (can be empty if there is no model definition)
+     * @throws KException
+     *         if error occurs
+     * @see #DEFAULT_METADATA_TYPE
+     */
+    String getMetadataType( final UnitOfWork transaction ) throws KException;
+
+    /**
+     * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @return model definition of this model
+     * @return the model definition of this model (can be empty)
      * @throws KException
      *         if error occurs
      */
@@ -210,6 +230,16 @@ public interface Model extends Exportable, RelationalObject {
      *         if an error occurs
      */
     View[] getViews( final UnitOfWork transaction ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> and its state must be {@link State#NOT_STARTED})
+     * @return <code>true</code> if this model is visible
+     * @throws KException
+     *         if an error occurs
+     * @see #DEFAULT_VISIBLE
+     */
+    boolean isVisible( final UnitOfWork transaction ) throws KException;
 
     /**
      * @param transaction
@@ -279,14 +309,25 @@ public interface Model extends Exportable, RelationalObject {
 
     /**
      * @param transaction
+     *        the transaction (cannot be <code>null</code> and must have a state of {@link State#NOT_STARTED})
+     * @param newMetadataType
+     *        the new value of the <code>metadataType</code> property (can be empty)
+     * @throws KException
+     *         if error occurs
+     */
+    void setMetadataType( final UnitOfWork transaction,
+                          final String newMetadataType ) throws KException;
+
+    /**
+     * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param modelDefinition
      *        the model definition, eg. a string of ddl
      * @throws KException
      *         if error occurs
      */
-    void setModelDefinition( UnitOfWork transaction,
-                             String modelDefinition ) throws KException;
+    void setModelDefinition( final UnitOfWork transaction,
+                             final String modelDefinition ) throws KException;
 
     /**
      * @param transaction
@@ -299,5 +340,17 @@ public interface Model extends Exportable, RelationalObject {
      */
     void setModelType( final UnitOfWork transaction,
                        final Type newModelType ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> and must have a state of {@link State#NOT_STARTED})
+     * @param newVisible
+     *        the new value for the <code>visible</code> property
+     * @throws KException
+     *         if an error occurs
+     * @see #DEFAULT_VISIBLE
+     */
+    void setVisible( final UnitOfWork transaction,
+                     final boolean newVisible ) throws KException;
 
 }

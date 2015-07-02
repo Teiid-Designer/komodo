@@ -10,7 +10,6 @@ package org.komodo.relational.model.internal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import org.komodo.core.KomodoLexicon;
 import org.komodo.modeshape.visitor.DdlNodeVisitor;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalProperties;
@@ -43,6 +42,7 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.utils.ArgCheck;
+import org.komodo.utils.StringUtils;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateTable;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.SchemaElement;
@@ -342,12 +342,29 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.relational.model.Model#getMetadataType(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public String getMetadataType( final UnitOfWork transaction ) throws KException {
+        final String result = getObjectProperty( transaction, PropertyValueType.STRING, "getMetadataType", //$NON-NLS-1$
+                                                 VdbLexicon.Model.METADATA_TYPE );
+        // if no metadata type return default value if there is a model definition
+        if ( StringUtils.isBlank( result ) ) {
+            return StringUtils.isBlank( getModelDefinition( transaction ) ) ? EMPTY_STRING : DEFAULT_METADATA_TYPE;
+        }
+
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.relational.model.Model#getModelDefinition(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
     public String getModelDefinition( final UnitOfWork uow ) throws KException {
         final String modelDefn = getObjectProperty( uow, PropertyValueType.STRING, "getModelDefinition", //$NON-NLS-1$
-                                                    KomodoLexicon.VdbModel.MODEL_DEFINITION );
+                                                    VdbLexicon.Model.MODEL_DEFINITION );
         return modelDefn == null ? EMPTY_STRING : modelDefn;
     }
 
@@ -485,6 +502,22 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
         }
 
         return result.toArray( new View[ result.size() ] );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.model.Model#isVisible(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public boolean isVisible( final UnitOfWork transaction ) throws KException {
+        final Boolean value = getObjectProperty( transaction, PropertyValueType.BOOLEAN, "isVisible", VdbLexicon.Model.VISIBLE ); //$NON-NLS-1$
+
+        if ( value == null ) {
+            return DEFAULT_VISIBLE;
+        }
+
+        return value;
     }
 
     /**
@@ -652,13 +685,42 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.relational.model.Model#setMetadataType(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     */
+    @Override
+    public void setMetadataType( final UnitOfWork transaction,
+                                 final String newMetadataType ) throws KException {
+        String value = newMetadataType;
+
+        if ( StringUtils.isBlank( newMetadataType ) ) {
+            value = ( StringUtils.isBlank( getModelDefinition( transaction ) ) ? value : DEFAULT_METADATA_TYPE );
+        }
+
+        setObjectProperty( transaction, "setMetadataType", VdbLexicon.Model.METADATA_TYPE, value ); //$NON-NLS-1$
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.relational.model.Model#setModelDefinition(org.komodo.spi.repository.Repository.UnitOfWork,
      *      java.lang.String)
      */
     @Override
     public void setModelDefinition( final UnitOfWork uow,
                                     final String modelDefinition ) throws KException {
-        setObjectProperty( uow, "setModelDefinition", KomodoLexicon.VdbModel.MODEL_DEFINITION, modelDefinition ); //$NON-NLS-1$
+        setObjectProperty( uow, "setModelDefinition", VdbLexicon.Model.MODEL_DEFINITION, modelDefinition ); //$NON-NLS-1$
+
+        if ( StringUtils.isBlank( modelDefinition ) ) {
+            // if no model definition make sure there isn't a metadata type
+            if ( !StringUtils.isBlank( getMetadataType( uow ) ) ) {
+                setMetadataType( uow, EMPTY_STRING );
+            }
+        } else {
+            // if there is a model definition make sure there is a metadata type
+            if ( StringUtils.isBlank( getMetadataType( uow ) ) ) {
+                setMetadataType( uow, DEFAULT_METADATA_TYPE );
+            }
+        }
     }
 
     /**
@@ -672,6 +734,17 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
                               final Type newModelType ) throws KException {
         final Type modelType = ( ( newModelType == null ) ? Type.DEFAULT_VALUE : newModelType );
         setObjectProperty( uow, "setModelType", CoreLexicon.JcrId.MODEL_TYPE, modelType.name() ); //$NON-NLS-1$
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.model.Model#setVisible(org.komodo.spi.repository.Repository.UnitOfWork, boolean)
+     */
+    @Override
+    public void setVisible( final UnitOfWork transaction,
+                            final boolean newVisible ) throws KException {
+        setObjectProperty( transaction, "setVisible", VdbLexicon.Model.VISIBLE, newVisible ); //$NON-NLS-1$
     }
 
     private String exportDdl(UnitOfWork transaction, Properties exportProperties) throws Exception {
