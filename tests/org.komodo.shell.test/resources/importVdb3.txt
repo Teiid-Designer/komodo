@@ -1,0 +1,5 @@
+# import VDB SvcSourceVdb_ODataNorthwind-vdb.xml
+# SvcSourceVdb_ODataNorthwind-vdb has a single physical model - odata translator and jndi definition
+#
+import vdb ./resources/vdbs/SvcSourceVdb_ODataNorthwind-vdb.xml
+show children

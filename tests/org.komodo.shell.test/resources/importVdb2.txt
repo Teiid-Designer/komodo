@@ -1,0 +1,5 @@
+# import VDB myService-vdb.xml
+# myService-vdb.xml has a single virtual model and two import vdbs.  The view model DDL is a join between the two sources.
+#
+import vdb ./resources/vdbs/myService-vdb.xml
+show children
