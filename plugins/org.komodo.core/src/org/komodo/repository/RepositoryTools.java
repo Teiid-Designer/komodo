@@ -27,8 +27,11 @@ import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoObjectVisitor;
 import org.komodo.spi.repository.Property;
+import org.komodo.spi.repository.PropertyDescriptor.Type;
+import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.ArgCheck;
+import org.komodo.utils.StringUtils;
 import org.modeshape.jcr.api.JcrConstants;
 import org.modeshape.jcr.api.JcrTools;
 
@@ -122,6 +125,18 @@ public class RepositoryTools implements StringConstants {
         return findOrCreate(transaction, parent, name, komodoObjectType, komodoObjectType);
     }
 
+    private static String findPathOfReference( final UnitOfWork transaction,
+                                               final Repository repository,
+                                               final String id ) throws Exception {
+        final KomodoObject kobject = repository.getUsingId( transaction, id );
+
+        if ( kobject == null ) {
+            return null;
+        }
+
+        return kobject.getAbsolutePath();
+    }
+
     /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not
@@ -159,12 +174,23 @@ public class RepositoryTools implements StringConstants {
     public static String getDisplayValue(UnitOfWork transaction,
                                          Property property) throws Exception {
     	StringBuilder sb = new StringBuilder();
+        final Type type = property.getDescriptor( transaction ).getType();
+        final boolean propIsReference = ( ( Type.REFERENCE == type ) || ( Type.WEAKREFERENCE == type ) );
 
     	if (property.isMultiple(transaction)) {
     		sb.append('[');
     		Object[] values = property.getValues(transaction);
     		for (int i = 0; i < values.length; ++i) {
     			Object value = values[i];
+
+                if ( propIsReference ) {
+                    final String path = findPathOfReference( transaction, property.getRepository(), value.toString() );
+
+                    if (!StringUtils.isBlank( path )) {
+                        value = path;
+                    }
+                }
+
     			sb.append(value);
     			if ((i + 1) < values.length)
     				sb.append(',');
@@ -172,7 +198,16 @@ public class RepositoryTools implements StringConstants {
     		sb.append(']');
     	} else {
     		Object value = property.getValue(transaction);
-    		sb.append(value);
+
+            if ( propIsReference ) {
+                final String path = findPathOfReference( transaction, property.getRepository(), value.toString() );
+
+                if (!StringUtils.isBlank( path )) {
+                    value = path;
+                }
+            }
+
+            sb.append(value);
     	}
 
     	return sb.toString();

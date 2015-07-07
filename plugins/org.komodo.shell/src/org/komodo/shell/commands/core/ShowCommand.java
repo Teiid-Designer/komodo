@@ -163,7 +163,8 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
         }
 
         final Map< String, String > sorted = new TreeMap<>();
-        int maxWidth = DEFAULT_WIDTH;
+        int maxNameWidth = DEFAULT_WIDTH;
+        int maxValueWidth = DEFAULT_WIDTH;
 
         // loop through properties getting value, removing namespace prefix if necessary, finding widest property name
         for ( int i = 0, size = props.size(); i < size; ++i ) {
@@ -178,10 +179,14 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
 
             if ( !isShowingPropertyNamePrefixes() ) {
                 name = removePrefix( props.get( i ) );
+            }
 
-                if ( maxWidth < name.length() ) {
-                    maxWidth = name.length();
-                }
+            if ( maxNameWidth < name.length() ) {
+                maxNameWidth = name.length();
+            }
+
+            if ( maxValueWidth < value.length() ) {
+                maxValueWidth = value.length();
             }
 
             sorted.put( name, value );
@@ -193,13 +198,12 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
         final String propListHeader = Messages.getString( "ShowCommand.PropertiesHeader", objType, objFullName ); //$NON-NLS-1$
         print( MESSAGE_INDENT, propListHeader );
 
-        final String format = getFormat( maxWidth );
-        final String headerDelimiter = getHeaderDelimiter( maxWidth );
+        final String format = getFormat( maxNameWidth, maxValueWidth );
         print( MESSAGE_INDENT,
                String.format( format,
                               Messages.getString( SHELL.PROPERTY_NAME_HEADER ),
                               Messages.getString( SHELL.PROPERTY_VALUE_HEADER ) ) );
-        print( MESSAGE_INDENT, String.format( format, headerDelimiter, headerDelimiter ) );
+        print( MESSAGE_INDENT, String.format( format, getHeaderDelimiter( maxNameWidth ), getHeaderDelimiter( maxValueWidth ) ) );
 
         // print property name and value
         for ( final Entry< String, String > entry : sorted.entrySet() ) {
@@ -207,10 +211,10 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
         }
     }
 
-    private String getFormat( final int width ) {
-        final int columnWidth = ( width + 5 );
+    private String getFormat( final int column1Width,
+                              final int column2Width ) {
         final StringBuilder result = new StringBuilder();
-        result.append( "%-" ).append( columnWidth ).append( "s%-" ).append( columnWidth ).append( 's' ); //$NON-NLS-1$ //$NON-NLS-2$
+        result.append( "%-" ).append( column1Width + 5 ).append( "s%-" ).append( column2Width + 5 ).append( 's' ); //$NON-NLS-1$ //$NON-NLS-2$
         return result.toString();
     }
 
@@ -273,14 +277,21 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
             return;
         }
 
-        int maxWidth = DEFAULT_WIDTH;
+        int maxNameWidth = DEFAULT_WIDTH;
+        int maxTypeWidth = DEFAULT_WIDTH;
 
         // loop through children getting name, type, and finding widest child name
         for ( int i = 0, size = children.size(); i < size; ++i ) {
             final String name = children.get( i ).getName();
 
-            if ( maxWidth < name.length() ) {
-                maxWidth = name.length();
+            if ( maxNameWidth < name.length() ) {
+                maxNameWidth = name.length();
+            }
+
+            final String type = children.get( i ).getType();
+
+            if ( maxTypeWidth < type.length() ) {
+                maxTypeWidth = type.length();
             }
         }
 
@@ -317,11 +328,10 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
         final String childrenHeader = Messages.getString( "ShowCommand.ChildrenHeader", context.getType(), context.getFullName() ); //$NON-NLS-1$
         print( MESSAGE_INDENT, childrenHeader );
 
-        final String format = getFormat( maxWidth );
-        final String headerDelimiter = getHeaderDelimiter( maxWidth );
+        final String format = getFormat( maxNameWidth, maxTypeWidth );
         print( MESSAGE_INDENT,
                String.format( format, Messages.getString( SHELL.CHILD_NAME_HEADER ), Messages.getString( SHELL.CHILD_TYPE_HEADER ) ) );
-        print( MESSAGE_INDENT, String.format( format, headerDelimiter, headerDelimiter ) );
+        print( MESSAGE_INDENT, String.format( format, getHeaderDelimiter( maxNameWidth ), getHeaderDelimiter( maxTypeWidth ) ) );
 
         // Print each child
         for ( final WorkspaceContext childContext : children ) {
@@ -338,17 +348,22 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
     private void printGlobal() throws Exception {
         final Properties globalProperties = getWorkspaceStatus().getProperties();
         final Map< String, String > sorted = new TreeMap<>();
-        int maxWidth = DEFAULT_WIDTH;
+        int maxNameWidth = DEFAULT_WIDTH;
+        int maxValueWidth = DEFAULT_WIDTH;
 
         for ( final String propName : globalProperties.stringPropertyNames() ) {
-            if ( maxWidth < propName.length() ) {
-                maxWidth = propName.length();
+            if ( maxNameWidth < propName.length() ) {
+                maxNameWidth = propName.length();
             }
 
             String value = globalProperties.getProperty( propName );
 
             if ( StringUtils.isBlank( value ) ) {
                 value = Messages.getString( SHELL.NO_PROPERTY_VALUE );
+            }
+
+            if ( maxValueWidth < value.length() ) {
+                maxValueWidth = value.length();
             }
 
             sorted.put( propName, value.toString() );
@@ -358,13 +373,12 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
         final String globalPropsHeader = Messages.getString( "ShowCommand.GlobalPropertiesHeader" ); //$NON-NLS-1$
         print( MESSAGE_INDENT, globalPropsHeader );
 
-        final String format = getFormat( maxWidth );
-        final String headerDelimiter = getHeaderDelimiter( maxWidth );
+        final String format = getFormat( maxNameWidth, maxValueWidth );
         print( MESSAGE_INDENT,
                String.format( format,
                               Messages.getString( SHELL.PROPERTY_NAME_HEADER ),
                               Messages.getString( SHELL.PROPERTY_VALUE_HEADER ) ) );
-        print( MESSAGE_INDENT, String.format( format, headerDelimiter, headerDelimiter ) );
+        print( MESSAGE_INDENT, String.format( format, getHeaderDelimiter( maxNameWidth ), getHeaderDelimiter( maxValueWidth ) ) );
 
         // print property name and value
         for ( final Entry< String, String > entry : sorted.entrySet() ) {
@@ -379,12 +393,12 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
     private void printProperty( WorkspaceContext context,
                                 String name ) throws Exception {
         final String propertyName = attachPrefix( context, name );
+        final int maxNameWidth = Math.max( DEFAULT_WIDTH, propertyName.length() );
 
         // Get the value for the supplied property
-        String propValue = context.getPropertyValue( propertyName );
-        int maxWidth = Math.max( DEFAULT_WIDTH, propValue.length() );
-        final String format = getFormat( maxWidth );
-        final String headerDelimiter = getHeaderDelimiter( maxWidth );
+        final String propValue = context.getPropertyValue( propertyName );
+        final int maxValueWidth = Math.max( DEFAULT_WIDTH, propValue.length() );
+        final String format = getFormat( maxNameWidth, maxValueWidth );
 
         // Print properties header
         String propListHeader = Messages.getString( "ShowCommand.PropertyHeader", context.getType(), context.getFullName() ); //$NON-NLS-1$
@@ -393,7 +407,7 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
                String.format( format,
                               Messages.getString( SHELL.PROPERTY_NAME_HEADER ),
                               Messages.getString( SHELL.PROPERTY_VALUE_HEADER ) ) );
-        print( MESSAGE_INDENT, String.format( format, headerDelimiter, headerDelimiter ) );
+        print( MESSAGE_INDENT, String.format( format, getHeaderDelimiter( maxNameWidth ), getHeaderDelimiter( maxValueWidth ) ) );
 
         print( MESSAGE_INDENT, String.format( format, name, propValue ) );
         print();

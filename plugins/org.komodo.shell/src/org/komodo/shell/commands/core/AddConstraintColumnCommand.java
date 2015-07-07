@@ -93,8 +93,12 @@ public final class AddConstraintColumnCommand extends BuiltInShellCommand {
                 final TableConstraint constraint = ( TableConstraint )kobject;
                 constraint.addColumn( getWorkspaceStatus().getTransaction(), ( Column )column );
 
+                // Commit transaction
+                getWorkspaceStatus().commit("SetCommand"); //$NON-NLS-1$
+
                 print( MESSAGE_INDENT,
                        Messages.getString( "AddConstraintColumnCommand.columnRefAdded", columnPathArg, getContext().getFullName() ) ); //$NON-NLS-1$
+
                 return true;
             } else {
                 print( MESSAGE_INDENT, Messages.getString( "AddConstraintColumnCommand.invalidColumnPath", columnPathArg ) ); //$NON-NLS-1$

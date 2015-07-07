@@ -33,10 +33,12 @@ import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceContextVisitor;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.shell.util.ContextUtils;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.PropertyDescriptor;
+import org.komodo.spi.repository.PropertyDescriptor.Type;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
@@ -300,7 +302,16 @@ public class WorkspaceContextImpl implements WorkspaceContext {
 
         if ( relObj.hasProperty( transaction, propertyName ) ) {
             final Property property = relObj.getProperty( transaction, propertyName );
-            return RepositoryTools.getDisplayValue( transaction, property );
+            final Type type = property.getDescriptor( transaction ).getType();
+            final boolean propIsReference = ( ( Type.REFERENCE == type ) || ( Type.WEAKREFERENCE == type ) );
+            final String displayValue = RepositoryTools.getDisplayValue( transaction, property );
+
+            if ( propIsReference ) {
+                // hide the root komodo directory
+                return displayValue.replaceAll( WorkspaceContext.REPO_WS_ROOT_PATH, ContextUtils.ROOT_OPT3 );
+            }
+
+            return displayValue;
         }
 
         return Messages.getString( SHELL.NO_PROPERTY_VALUE );

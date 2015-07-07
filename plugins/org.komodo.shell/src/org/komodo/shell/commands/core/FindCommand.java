@@ -26,12 +26,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.komodo.repository.KomodoTypeRegistry;
-import org.komodo.repository.RepositoryImpl;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.Messages;
+import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
-import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoType;
 
 /**
@@ -46,7 +45,6 @@ public final class FindCommand extends BuiltInShellCommand {
 
     private static final List< KomodoType > NOT_APPLICABLE_TYPES = Arrays.asList( new KomodoType[] { KomodoType.UNKNOWN,
                                                                                                     KomodoType.WORKSPACE } );
-    private static final String REPO_WS_ROOT_PATH = ( RepositoryImpl.WORKSPACE_ROOT + StringConstants.FORWARD_SLASH );
 
     /**
      * @param status
@@ -174,8 +172,8 @@ public final class FindCommand extends BuiltInShellCommand {
             String path = absolutePath;
 
             // should always start with the absolute repository path but check just in case
-            if ( path.startsWith( REPO_WS_ROOT_PATH ) ) {
-                result[i] = ( ContextUtils.ROOT_OPT3 + path.substring( REPO_WS_ROOT_PATH.length() ) );
+            if ( path.startsWith( WorkspaceContext.REPO_WS_ROOT_PATH ) ) {
+                result[i] = ( ContextUtils.ROOT_OPT3 + path.substring( WorkspaceContext.REPO_WS_ROOT_PATH.length() ) );
             } else {
                 result[i] = path;
             }

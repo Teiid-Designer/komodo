@@ -66,7 +66,7 @@ public class PropertyImpl implements Property {
                 case PropertyType.DECIMAL:
                     return value.getDecimal();
                 default:
-                    return value.toString();
+                    return value.getString();
             }
         } catch (final Exception e) {
             throw new KException(Messages.getString(Komodo.UNABLE_TO_CONVERT_VALUE, propertyType), e);

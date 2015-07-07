@@ -22,8 +22,9 @@
 package org.komodo.shell.api;
 
 import java.util.List;
-
 import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.repository.RepositoryImpl;
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 
@@ -33,8 +34,13 @@ import org.komodo.spi.repository.Repository;
 public interface WorkspaceContext {
 
 	@SuppressWarnings("javadoc")
-	public static final String WORKSPACE_ROOT_DISPLAY_NAME = "workspace"; //$NON-NLS-1$
-	
+	String WORKSPACE_ROOT_DISPLAY_NAME = "workspace"; //$NON-NLS-1$
+
+    /**
+     * The repository workspace root path ending with a slash. Value is {@value} .
+     */
+    String REPO_WS_ROOT_PATH = ( RepositoryImpl.WORKSPACE_ROOT + StringConstants.FORWARD_SLASH );
+
     /**
      * Represents all komodo object types
      */
@@ -72,7 +78,7 @@ public interface WorkspaceContext {
 	 * @throws Exception if error occurs
 	 */
 	WorkspaceManager getWorkspaceManager() throws Exception;
-	
+
 	/**
 	 * Get the parent context
 	 * @return the parent

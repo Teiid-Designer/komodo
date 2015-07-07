@@ -1,0 +1,20 @@
+# create three models within workspace.
+create vdb MyVdb
+cd MyVdb
+
+create model MyModel
+cd MyModel
+
+create table MyTable
+cd MyTable
+
+create column colA
+create column colB
+
+create primarykey pk
+cd pk
+
+add-column ../colA
+add-column ../colB
+
+show property teiidddl:tableElementRefs
