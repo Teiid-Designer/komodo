@@ -17,13 +17,16 @@ import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalObject.Filter;
 import org.komodo.relational.internal.RelationalObjectImpl;
+import org.komodo.relational.model.Column;
 import org.komodo.relational.model.PrimaryKey;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.TableConstraint;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
+import org.modeshape.jcr.JcrLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
+import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.Constraint;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class PrimaryKeyImplTest extends RelationalModelTest {
@@ -38,6 +41,19 @@ public final class PrimaryKeyImplTest extends RelationalModelTest {
         this.table = createTable();
         this.primaryKey = this.table.setPrimaryKey( this.uow, NAME );
         commit();
+    }
+
+    @Test
+    public void shouldAddColumnReference() throws Exception {
+        final Column column = this.table.addColumn( this.uow, "MyColumn" );
+        this.primaryKey.addColumn( this.uow, column );
+        commit();
+
+        assertThat( this.primaryKey.getColumns( this.uow ).length, is( 1 ) );
+        assertThat( this.primaryKey.getColumns( this.uow )[0], is( column ) );
+        assertThat( this.primaryKey.getProperty( this.uow, Constraint.REFERENCES ).getValues( this.uow ).length, is( 1 ) );
+        assertThat( this.primaryKey.getProperty( this.uow, Constraint.REFERENCES ).getValues( this.uow )[0].toString(),
+                    is( column.getRawProperty( this.uow, JcrLexicon.UUID.getString() ).getStringValue( this.uow ) ) );
     }
 
     @Test

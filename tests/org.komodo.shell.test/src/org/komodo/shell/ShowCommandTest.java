@@ -15,7 +15,9 @@
  */
 package org.komodo.shell;
 
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.komodo.shell.commands.core.ShowCommand;
@@ -27,11 +29,13 @@ import org.komodo.shell.commands.core.ShowCommand;
 @SuppressWarnings({"javadoc", "nls"})
 public class ShowCommandTest extends AbstractCommandTest {
 
-	private static final String SHOW_STATUS1 = "showStatus1.txt"; //$NON-NLS-1$
-	private static final String SHOW_STATUS2 = "showStatus2.txt"; //$NON-NLS-1$
-	private static final String SHOW_CHILDREN1 = "showChildren1.txt"; //$NON-NLS-1$
-	private static final String SHOW_CHILDREN2 = "showChildren2.txt"; //$NON-NLS-1$
-	private static final String INDENT = getIndentStr();
+    private static final String SHOW_STATUS1 = "showStatus1.txt";
+    private static final String SHOW_STATUS2 = "showStatus2.txt";
+    private static final String SHOW_CHILDREN1 = "showChildren1.txt";
+    private static final String SHOW_CHILDREN2 = "showChildren2.txt";
+    private static final String SHOW_REFS = "showReferences.txt";
+
+    private static final String INDENT = getIndentStr();
 
 	/**
 	 * Test for StatusCommand
@@ -87,9 +91,9 @@ public class ShowCommandTest extends AbstractCommandTest {
 
     @Test
     public void testShowChildren2() throws Exception {
-    	setup(SHOW_CHILDREN2, ShowCommand.class);
+        setup(SHOW_CHILDREN2, ShowCommand.class);
 
-    	execute();
+        execute();
 
         // make sure model names and model type appear in output
         String writerOutput = getCommandOutput();
@@ -98,6 +102,18 @@ public class ShowCommandTest extends AbstractCommandTest {
         assertTrue( writerOutput.contains( "Model3" ) );
 
         assertEquals("/workspace/MyVdb", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    }
+
+    @Test
+    public void shouldShowPathsForReferences() throws Exception {
+        setup( SHOW_REFS, ShowCommand.class );
+
+        execute();
+
+        final String writerOutput = getCommandOutput();
+        assertThat( writerOutput.contains( "[/workspace/MyVdb/MyModel/MyTable/colA,/workspace/MyVdb/MyModel/MyTable/colB]" ),
+                    is( true ) );
+        assertThat( wsStatus.getCurrentContext().getFullName(), is( "/workspace/MyVdb/MyModel/MyTable/pk" ) ); //$NON-NLS-1$
     }
 
 }
