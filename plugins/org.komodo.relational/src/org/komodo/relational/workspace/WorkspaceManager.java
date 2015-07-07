@@ -153,12 +153,6 @@ public class WorkspaceManager extends RelationalObjectImpl {
     private WorkspaceManager(UnitOfWork uow, Repository repository ) throws KException {
         super(uow, repository, RepositoryImpl.WORKSPACE_ROOT);
 
-        { // TODO should not need this when GitHub Issue 184 is resolved
-          // make sure workspace node and environment node exists
-            repository.komodoEnvironment( uow );
-            repository.komodoWorkspace( uow );
-        }
-
         repository.addObserver(new RepositoryObserver() {
 
             @Override

@@ -109,13 +109,6 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest im
             try {
                 final KomodoObject workspace = new ObjectImpl( _repo, RepositoryImpl.WORKSPACE_ROOT, 0 );
                 transaction = _repo.createTransaction( "verifyInitialRepositoryContent", true, null );
-
-                { // TODO should not need this when GitHub Issue 184 is resolved
-                  // make sure workspace node and environment node exists
-                    _repo.komodoEnvironment( transaction );
-                    _repo.komodoWorkspace( transaction );
-                }
-
                 workspace.getName( transaction );
                 transaction.commit();
             } catch ( final Exception e ) {
