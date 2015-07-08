@@ -1,0 +1,19 @@
+create vdb MyVdb
+cd MyVdb
+
+create model MyModel
+cd MyModel
+
+create table MyTable
+cd MyTable
+
+create column column_1
+create column column_2
+
+create primarykey pk
+cd pk
+
+add-column ../column_1
+add-column ../column_2
+
+remove-column ../column_1

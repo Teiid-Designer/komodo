@@ -27,8 +27,9 @@ import java.util.ResourceBundle;
 import org.komodo.spi.constants.StringConstants;
 
 /**
- *
+ * Localized messages for the Shell plugin.
  */
+@SuppressWarnings( "javadoc" )
 public class Messages implements StringConstants {
 
     private static final String BUNDLE_NAME = Messages.class.getPackage().getName()
@@ -37,7 +38,6 @@ public class Messages implements StringConstants {
 
     private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME);
 
-    @SuppressWarnings( "javadoc" )
     public enum SHELL {
         ERROR_LOADING_PROPERTIES,
         INVALID_GLOBAL_PROPERTY_NAME,
@@ -101,7 +101,6 @@ public class Messages implements StringConstants {
     	}
     }
 
-    @SuppressWarnings( "javadoc" )
     public enum StatusCommand {
         Separator,
         Connected,
@@ -115,7 +114,6 @@ public class Messages implements StringConstants {
         }
     }
 
-    @SuppressWarnings( "javadoc" )
     public enum ShowCommand {
         Separator,
         Connected,
@@ -129,7 +127,6 @@ public class Messages implements StringConstants {
         }
     }
 
-    @SuppressWarnings( "javadoc" )
     public enum ExportCommand {
         InvalidArgMsgObjectName,
         InvalidArgMsgOutputFileName,
@@ -145,6 +142,29 @@ public class Messages implements StringConstants {
         public String toString() {
             return getEnumName(this) + DOT + name();
         }
+    }
+
+    /**
+     * Localized messages of the {@link RemoveConstraintColumnCommand}.
+     */
+    public enum RemoveConstraintColumnCommand {
+
+        COLUMN_REF_REMOVED,
+        COLUMN_PATH_NOT_FOUND,
+        ERROR,
+        INVALID_COLUMN_PATH,
+        MISSING_COLUMN_PATH_ARG;
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see java.lang.Enum#toString()
+         */
+        @Override
+        public String toString() {
+            return getEnumName( this ) + DOT + name();
+        }
+
     }
 
     private static String getEnumName(Enum<?> enumValue) {

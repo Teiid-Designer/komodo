@@ -219,6 +219,11 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest im
                                         callback );
     }
 
+    protected UnitOfWork createTransaction( final String name ) throws Exception {
+        this.callback = new SynchronousCallback();
+        return createTransaction( name, this.callback );
+    }
+
     protected UnitOfWork createTransaction(SynchronousCallback callback) throws Exception {
         return this.createTransaction( this.name.getMethodName() + '-' + this.txCount++, callback );
     }
