@@ -25,11 +25,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
-import java.util.Set;
 import java.util.TreeMap;
 import javax.xml.namespace.QName;
 import org.komodo.core.KEngine;
@@ -49,6 +47,7 @@ import org.komodo.shell.commands.core.HomeCommand;
 import org.komodo.shell.commands.core.ImportCommand;
 import org.komodo.shell.commands.core.ListCommand;
 import org.komodo.shell.commands.core.PlayCommand;
+import org.komodo.shell.commands.core.RemoveConstraintColumnCommand;
 import org.komodo.shell.commands.core.RenameCommand;
 import org.komodo.shell.commands.core.SetCommand;
 import org.komodo.shell.commands.core.ShowCommand;
@@ -91,29 +90,25 @@ public class ShellCommandFactory {
 	 */
     private void registerCommands() throws Exception {
         // register built-in commands
-        final Set< Class< ? extends ShellCommand >> builtInCommands = new HashSet<>();
-        builtInCommands.add( AddConstraintColumnCommand.class );
-        builtInCommands.add( CdCommand.class );
-        builtInCommands.add( CreateCommand.class );
-        builtInCommands.add( DeleteCommand.class );
-        builtInCommands.add( ExitCommand.class );
-        builtInCommands.add( ExportCommand.class );
-        builtInCommands.add( FindCommand.class );
-        builtInCommands.add( HelpCommand.class );
-        builtInCommands.add( HomeCommand.class );
-        builtInCommands.add( ImportCommand.class );
-        builtInCommands.add( ListCommand.class );
-        // builtInCommands.add( NavigateCommand.class );
-        builtInCommands.add( PlayCommand.class );
-        builtInCommands.add( RenameCommand.class );
-        builtInCommands.add( SetCommand.class );
-        builtInCommands.add( ShowCommand.class );
-        builtInCommands.add( UnsetPropertyCommand.class );
-        // builtInCommands.add( UseTeiidCommand.class );
-
-        for ( final Class< ? extends ShellCommand > commandClass : builtInCommands ) {
-            registerCommand( commandClass );
-        }
+        registerCommand( AddConstraintColumnCommand.class );
+        registerCommand( CdCommand.class );
+        registerCommand( CreateCommand.class );
+        registerCommand( DeleteCommand.class );
+        registerCommand( ExitCommand.class );
+        registerCommand( ExportCommand.class );
+        registerCommand( FindCommand.class );
+        registerCommand( HelpCommand.class );
+        registerCommand( HomeCommand.class );
+        registerCommand( ImportCommand.class );
+        registerCommand( ListCommand.class );
+        // registerCommand( NavigateCommand.class );
+        registerCommand( PlayCommand.class );
+        registerCommand( RemoveConstraintColumnCommand.class );
+        registerCommand( RenameCommand.class );
+        registerCommand( SetCommand.class );
+        registerCommand( ShowCommand.class );
+        registerCommand( UnsetPropertyCommand.class );
+        // registerCommand( UseTeiidCommand.class );
 
         // register any commands contributed by command providers
         discoverContributedCommands();

@@ -25,6 +25,7 @@ import org.komodo.spi.constants.SystemConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.spi.repository.RepositoryClient;
 import org.komodo.test.utils.AbstractLocalRepositoryTest;
 import org.komodo.utils.FileUtils;
@@ -155,6 +156,11 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
         try {
             if ( !this.playCmd.execute() ) {
                 Assert.fail( "Command " + this.testedCommandClass.getName() + " execution failed.\n" + this.writer.toString() ); //$NON-NLS-1$ //$NON-NLS-2$
+            }
+
+            // make a transaction available to tests after the playback is over
+            if ( this.uow.getState() == State.COMMITTED ) {
+                this.uow = createTransaction( "postPlaybackExecute" );
             }
         } catch ( InvalidCommandArgumentException e ) {
             Assert.fail( "Failed - invalid command: " + e.getMessage() ); //$NON-NLS-1$

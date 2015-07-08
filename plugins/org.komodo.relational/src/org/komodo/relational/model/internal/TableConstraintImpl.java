@@ -146,20 +146,20 @@ abstract class TableConstraintImpl extends RelationalChildRestrictedObject imple
         }
 
         boolean found = false;
-        final Column[] updated = new Column[ current.length - 1 ];
+        final String[] updatedRefs = new String[ current.length - 1 ];
         int i = 0;
 
         for ( final Column column : current ) {
             if ( column.equals( columnToRemove ) ) {
                 found = true;
             } else {
-                updated[i] = column;
+                updatedRefs[i] = column.getRawProperty( transaction, JcrLexicon.UUID.getString() ).getStringValue( transaction );
                 ++i;
             }
         }
 
         if ( found ) {
-            setProperty( transaction, Constraint.REFERENCES, ( Object[] )updated );
+            setProperty( transaction, Constraint.REFERENCES, ( Object[] )updatedRefs );
         } else {
             throw new KException( Messages.getString( Relational.REFERENCED_COLUMN_NOT_FOUND, columnId ) );
         }

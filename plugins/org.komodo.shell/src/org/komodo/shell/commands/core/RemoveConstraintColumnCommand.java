@@ -22,6 +22,11 @@
 package org.komodo.shell.commands.core;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+import static org.komodo.shell.Messages.RemoveConstraintColumnCommand.COLUMN_PATH_NOT_FOUND;
+import static org.komodo.shell.Messages.RemoveConstraintColumnCommand.COLUMN_REF_REMOVED;
+import static org.komodo.shell.Messages.RemoveConstraintColumnCommand.ERROR;
+import static org.komodo.shell.Messages.RemoveConstraintColumnCommand.INVALID_COLUMN_PATH;
+import static org.komodo.shell.Messages.RemoveConstraintColumnCommand.MISSING_COLUMN_PATH_ARG;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -29,40 +34,28 @@ import org.komodo.relational.model.Column;
 import org.komodo.relational.model.TableConstraint;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.Messages;
-import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
-import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 
 /**
- * Adds a {@link Column column reference} to a {@link TableConstraint table constraint}.
+ * Removes a {@link Column column reference} from a {@link TableConstraint table constraint}.
  */
-public final class AddConstraintColumnCommand extends BuiltInShellCommand {
+public final class RemoveConstraintColumnCommand extends BuiltInShellCommand {
 
     /**
      * The command name.
      */
-    public static final String NAME = "add-column"; //$NON-NLS-1$
-
-    private final FindCommand findCommand;
+    public static final String NAME = "remove-column"; //$NON-NLS-1$
 
     /**
      * @param status
      *        the workspace status (cannot be <code>null</code>)
      */
-    public AddConstraintColumnCommand( final WorkspaceStatus status ) {
+    public RemoveConstraintColumnCommand( final WorkspaceStatus status ) {
         super( status, NAME );
-        this.findCommand = new FindCommand( status );
-        this.findCommand.setOutput( getWriter() );
-
-        try {
-            this.findCommand.setArguments( new Arguments( StringConstants.EMPTY_STRING ) );
-        } catch ( final Exception e ) {
-            // only occurs on parsing error of arguments and we have no arguments
-        }
     }
 
     /**
@@ -73,42 +66,43 @@ public final class AddConstraintColumnCommand extends BuiltInShellCommand {
     @Override
     public boolean execute() throws Exception {
         try {
-            final String columnPathArg = requiredArgument( 0,
-                                                           Messages.getString( "AddConstraintColumnCommand.missingColumnPathArg" ) ); //$NON-NLS-1$
+            final String columnPathArg = requiredArgument( 0, Messages.getString( MISSING_COLUMN_PATH_ARG ) );
 
-            // get reference of the column at the specified path
+            // get selected column and remove
             final WorkspaceContext columnContext = ContextUtils.getContextForPath( getWorkspaceStatus(), columnPathArg );
 
             if ( columnContext == null ) {
-                print( MESSAGE_INDENT, Messages.getString( "AddConstraintColumnCommand.columnPathNotFound", columnPathArg ) ); //$NON-NLS-1$
+                print( MESSAGE_INDENT, Messages.getString( COLUMN_PATH_NOT_FOUND, columnPathArg ) );
                 return false;
             }
 
             final KomodoObject column = columnContext.getKomodoObj();
 
             if ( column instanceof Column ) {
-                // initValidWsContextTypes() method assures execute is called only if current context is a TableConstraint
-                final KomodoObject kobject = getContext().getKomodoObj();
-                assert ( kobject instanceof TableConstraint );
-                final TableConstraint constraint = ( TableConstraint )kobject;
-                constraint.addColumn( getWorkspaceStatus().getTransaction(), ( Column )column );
+                final TableConstraint constraint = getTableConstraint();
+                constraint.removeColumn( getWorkspaceStatus().getTransaction(), ( Column )column );
 
                 // Commit transaction
-                getWorkspaceStatus().commit("AddConstraintColumnCommand"); //$NON-NLS-1$
+                getWorkspaceStatus().commit( RemoveConstraintColumnCommand.class.getSimpleName() );
 
-                print( MESSAGE_INDENT,
-                       Messages.getString( "AddConstraintColumnCommand.columnRefAdded", columnPathArg, getContext().getFullName() ) ); //$NON-NLS-1$
-
+                print( MESSAGE_INDENT, Messages.getString( COLUMN_REF_REMOVED, columnPathArg, getContext().getFullName() ) );
                 return true;
             } else {
-                print( MESSAGE_INDENT, Messages.getString( "AddConstraintColumnCommand.invalidColumnPath", columnPathArg ) ); //$NON-NLS-1$
+                print( MESSAGE_INDENT, Messages.getString( INVALID_COLUMN_PATH, columnPathArg ) );
                 return false;
             }
         } catch ( final Exception e ) {
-            print( MESSAGE_INDENT, Messages.getString( "AddConstraintColumnCommand.error" ) ); //$NON-NLS-1$
+            print( MESSAGE_INDENT, Messages.getString( ERROR ) );
             print( MESSAGE_INDENT, "\t" + e.getLocalizedMessage() ); //$NON-NLS-1$
             return false;
         }
+    }
+
+    private TableConstraint getTableConstraint() {
+        // initValidWsContextTypes() method assures execute is called only if current context is a TableConstraint
+        final KomodoObject kobject = getContext().getKomodoObj();
+        assert ( kobject instanceof TableConstraint );
+        return ( TableConstraint )kobject;
     }
 
     /**
@@ -137,16 +131,20 @@ public final class AddConstraintColumnCommand extends BuiltInShellCommand {
     public int tabCompletion( final String lastArgument,
                               final List< CharSequence > candidates ) throws Exception {
         if ( getArguments().isEmpty() ) {
-            final boolean noLastArg = ( lastArgument == null );
+            final TableConstraint constraint = getTableConstraint();
+            final Column[] refCols = constraint.getColumns( getWorkspaceStatus().getTransaction() );
 
-            // find columns in workspace
-            final String[] columnPaths = this.findCommand.query( KomodoType.COLUMN );
-
-            if ( columnPaths.length == 0 ) {
+            // no tab-completion if no columns to remove
+            if ( refCols.length == 0 ) {
                 return -1;
             }
 
-            for ( final String path : columnPaths ) {
+            // add matching paths of referenced columns
+            final boolean noLastArg = ( lastArgument == null );
+
+            for ( final Column column : refCols ) {
+                final String path = column.getAbsolutePath();
+
                 if ( ( noLastArg ) || ( path.toUpperCase().startsWith( lastArgument.toUpperCase() ) ) ) {
                     candidates.add( path );
                 }
