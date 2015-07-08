@@ -8,6 +8,7 @@ import static org.junit.Assert.assertThat;
 import org.junit.Test;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.vdb.ModelSource;
+import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.VdbImport;
 import org.komodo.shell.api.WorkspaceContext;
@@ -30,6 +31,7 @@ public class ImportCommandTest extends AbstractCommandTest {
 	private static final String IMPORT_VDB3 = "importVdb3.txt"; 
 	private static final String IMPORT_VDB4 = "importVdb4.txt"; 
 	private static final String IMPORT_VDB5 = "importVdb5.txt"; 
+	private static final String IMPORT_VDB6 = "importVdb6.txt"; 
 
 	/**
 	 * Test for CreateCommand
@@ -276,12 +278,80 @@ public class ImportCommandTest extends AbstractCommandTest {
     }
 
     /**
-     * Import VDB5 - s-vdb.xml
+     * Import VDB5 - importProps-vdb.xml
      * @throws Exception
      */
     @Test
     public void testImportVdb5() throws Exception {
     	setup(IMPORT_VDB5, ImportCommand.class);
+
+    	execute();
+
+    	assertEquals("/workspace", wsStatus.getCurrentContext().getFullName()); 
+
+    	WorkspaceContext vdbContext = ContextUtils.getContextForPath(wsStatus, "/workspace/importProps"); 
+    	assertNotNull(vdbContext);
+
+    	KomodoObject ko = vdbContext.getKomodoObj();
+    	UnitOfWork trans = wsStatus.getTransaction();
+    	
+    	// Verify the komodo class is a Vdb and is VDB type
+    	assertEquals(KomodoType.VDB.name(), ko.getTypeIdentifier(trans).name());
+
+    	Vdb vdb = (Vdb)resolveType(trans, ko, Vdb.class);
+    	
+        // Check VDB version
+        assertThat(vdb.getVersion(trans), is(4));
+
+    	// Check VDB connectionType property
+    	Property prop = vdb.getProperty(trans, "vdb:connectionType");
+    	String connectionValue = prop.getStringValue(trans);
+        assertEquals("BY_VERSION", connectionValue);
+
+		{ // Check model
+			final Model[] models = vdb.getModels(trans);
+			assertThat(models.length, is(1));
+			
+			final Model theModel = models[0];
+			assertThat(theModel.getName(trans), is("postgresql"));
+			assertThat(theModel.getModelType(trans), is(Model.Type.PHYSICAL));
+			
+			// Check model source
+			ModelSource[] modelSources = theModel.getSources(trans);
+			assertThat(modelSources.length, is(1));
+			ModelSource theModelSource = modelSources[0];
+			assertThat(theModelSource.getTranslatorName(trans), is("postgresql-override"));
+			assertThat(theModelSource.getJndiName(trans), is("java:/postgresql"));
+		}
+		
+		{ // Check translator
+			final Translator[] translators = vdb.getTranslators(trans);
+			assertThat(translators.length, is(1));
+			
+			final Translator theTranslator = translators[0];
+			assertThat(theTranslator.getName(trans), is("postgresql-override"));
+			assertThat(theTranslator.getType(trans), is("postgresql"));
+
+			String propNames[] = theTranslator.getPropertyNames(trans);
+			assertThat(propNames.length, is(3));
+			
+	    	Property transProp = theTranslator.getProperty(trans, "MaxInCriteriaSize");
+	    	Long maxInCriteriaSize = transProp.getLongValue(trans);
+	    	assertThat(maxInCriteriaSize, is(Long.valueOf(100)));
+
+	    	transProp = theTranslator.getProperty(trans, "MaxDependentInPredicates");
+	    	Long maxDependentInPredicates = transProp.getLongValue(trans);
+	    	assertThat(maxDependentInPredicates, is(Long.valueOf(100)));
+		}
+    }
+    
+    /**
+     * Import VDB6 - s-vdb.xml
+     * @throws Exception
+     */
+    @Test
+    public void testImportVdb6() throws Exception {
+    	setup(IMPORT_VDB6, ImportCommand.class);
 
 //    	execute();
 //
