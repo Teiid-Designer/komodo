@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  */
-package org.komodo.test.utils;
+package org.komodo.core.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -46,6 +46,8 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.test.utils.MultiUseAbstractTest;
+import org.komodo.test.utils.TestUtilities;
 import org.komodo.utils.KLog;
 import org.modeshape.common.collection.Problem;
 import org.modeshape.common.collection.Problems;
@@ -73,8 +75,12 @@ public class TestObjectOperations implements StringConstants {
 
     private JcrRepository repository;
 
+    private InputStream getResource(String resource) {
+        return MultiUseAbstractTest.class.getResourceAsStream(resource);
+    }
+
     private InputStream getTestConfiguration() {
-        return getClass().getResourceAsStream(DEFAULT_TEST_REPOSITORY_CONFIG);
+        return getResource(DEFAULT_TEST_REPOSITORY_CONFIG);
     }
 
     private void startEngine() throws Exception {
@@ -209,7 +215,6 @@ public class TestObjectOperations implements StringConstants {
     }
 
     @Test
-    @Ignore("Mapping issue MODE-2463 - a remove then a re-add cannot be conducted in the same transaction")
     public void testRemoveThenAdd() throws Exception {
         String name = "testNode";
 
@@ -236,46 +241,52 @@ public class TestObjectOperations implements StringConstants {
             // Exception thrown good to continue
         }
 
-        @SuppressWarnings( "unused" )
         Node newTestNode = rootNode.addNode(name);
 
         /*
          * ISSUE #1
          *
-         * This will fail with:
+         * In Modeshape 4.2, this will fail with:
          * testNodePath = /testNode
          * testNode.getPath() = /testNode[2]
+         *
+         * FIXED in Modeshape 4.3
          */
-//        assertEquals(testNodePath, newTestNode.getPath());        // Uncomment to view failure
+        assertEquals(testNodePath, newTestNode.getPath());
 
         /*
          * ISSUE #2
          *
-         * The path of newTestNode is alledgedly /testNode[2] so should
-         * be able to find it from session2, except this throws a PathNotFoundException
+         * In Modeshape 4.2, the path of newTestNode is alledgedly
+         * /testNode[2] so should be able to find it from session2,
+         * except this throws a PathNotFoundException
+         *
+         * NO LONGER AN ISSUE in Modeshape 4.3
          */
-        try {
-            session2.getNode(testNodePath + "[2]"); //$NON-NLS-1$
-        } catch (PathNotFoundException ex) {
-            // The path of newTestNode is reported as /testNode[2] but in fact there is no node there!
-//            fail(ex.getMessage());                                                    // Uncomment to view failure
-        }
+//        try {
+//            session2.getNode(testNodePath + "[2]"); //$NON-NLS-1$
+//        } catch (PathNotFoundException ex) {
+//            // The path of newTestNode is reported as /testNode[2] but in fact there is no node there!
+//            fail(ex.getMessage());
+//        }
 
         /*
          * ISSUE #3
          *
-         * Despite newTestNode claiming its path is /testNode[2], session2
+         * In Modeshape 4.2, despite newTestNode claiming its path is /testNode[2], session2
          * cannot find it so where is newTestNode?
          *
          * Turns out that its been added to /testNode which is the correct
          * path but not what is being reported by newTestNode.getPath()
          *
          * Conclusion: bug in node.getPath(), returning incorrect absolute path
+         *
+         * FIXED IN Modeshape 4.3
          */
         try {
             Node node = session2.getNode(testNodePath);
+            assertNotNull(node);
             assertEquals("Node path should equal " + testNodePath, testNodePath, node.getPath()); //$NON-NLS-1$
-            fail("This should still throw a PathNotFoundException since /testNode[2] is the path of newTestNode"); //$NON-NLS-1$
         } catch (PathNotFoundException ex) {
             // No node found at testNodePath which should be correct
         }
@@ -303,7 +314,7 @@ public class TestObjectOperations implements StringConstants {
      */
     @Test
     public void testDemonstratingPropertyValueConversion()  throws Exception {
-        InputStream bookStream = getClass().getResourceAsStream(BOOKS_EXAMPLE_FULL);
+        InputStream bookStream = getResource(BOOKS_EXAMPLE_FULL);
         assertNotNull(bookStream);
 
         String bigContent = toString(bookStream);

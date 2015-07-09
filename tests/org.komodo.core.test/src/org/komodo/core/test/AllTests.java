@@ -38,6 +38,7 @@ import org.komodo.repository.validation.ValidationManagerImplTest;
     TestObjectSearcher.class,
     TestLocalRepositoryPersistence.class,
     ValidationManagerImplTest.class,
+    TestObjectOperations.class
     } )
 public class AllTests {
     // nothing to do

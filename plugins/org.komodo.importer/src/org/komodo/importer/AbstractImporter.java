@@ -40,6 +40,8 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.FileUtils;
 import org.komodo.utils.StringUtils;
+import org.modeshape.common.text.Position;
+import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlParsingException;
 
 /**
  *
@@ -151,17 +153,12 @@ public abstract class AbstractImporter implements StringConstants {
                 importMessages.addErrorMessage(Messages.getString(Messages.IMPORTER.nodeExistsReturn));
                 return false;
             case CREATE_NEW:
-                String newName = determineNewName(nodeName);
+                String newName = determineNewName(transaction, nodeName);
                 importMessages.addProgressMessage(Messages.getString(Messages.IMPORTER.nodeExistCreateNew, nodeName, newName));
                 importOptions.setOption(OptionKeys.NAME, newName);
                 break;
             case OVERWRITE:
                 KomodoObject oldNode = getWorkspace(transaction).getChild(transaction, nodeName);
-                //
-                // Have to use a different transaction at this point
-                // due to MODE-2463. Does mean that we cannot
-                // rollback the transaction until this is fixed
-                //
                 oldNode.remove(transaction);
         }
 
@@ -183,20 +180,9 @@ public abstract class AbstractImporter implements StringConstants {
         ArgCheck.isNotNull(importType);
 
         SynchronousCallback callback = new SynchronousCallback();
-        UnitOfWork transaction = getRepository().createTransaction(EXISTING_TRANSACTION_NAME, false, callback);
+        UnitOfWork transaction = getRepository().createTransaction(IMPORT_TRANSACTION_NAME, false, callback);
 
         boolean doImport = handleExistingNode(transaction, importOptions, importMessages);
-
-        //
-        // Commit the operations performed in handling existing node
-        //
-        transaction.commit();
-
-        //
-        // Wait for the sequencers to do something if anything
-        //
-        callback.await(3, TimeUnit.MINUTES);
-
         if (! doImport) {
             // Handling existing node advises not to continue
             return null;
@@ -205,9 +191,6 @@ public abstract class AbstractImporter implements StringConstants {
         //
         // Create object in workspace
         //
-        callback = new SynchronousCallback();
-        transaction = getRepository().createTransaction(IMPORT_TRANSACTION_NAME, false, callback);
-
         KomodoObject resultNode = executeImport(transaction, content, importOptions, importMessages);
 
         //
@@ -220,14 +203,57 @@ public abstract class AbstractImporter implements StringConstants {
         //
         callback.await(3, TimeUnit.MINUTES);
 
+        //
+        // Ensure that the result node has really been created in the repository
+        //
+        if (resultNode != null) {
+            transaction = getRepository().createTransaction(IMPORT_TRANSACTION_NAME, true, null);
+            KomodoObject node = null;
+            try {
+                node = getRepository().getFromWorkspace(transaction, resultNode.getAbsolutePath());
+                if (node != null)
+                    importMessages.addProgressMessage(Messages.getString(Messages.IMPORTER.nodeCreated));    
+            } finally {
+                transaction.commit();
+            }
+        } else {
+            importMessages.addErrorMessage(Messages.getString(Messages.IMPORTER.nodeCreationFailed));
+        }
+
+        //
+        // Check whether the transaction or sequencers produced an error
+        //
+        if (callback.hasError()) {
+            Throwable exception = callback.error();
+            while (exception.getCause() != null) {
+                //
+                // Zero down to the root cause of the exception
+                //
+                exception = exception.getCause();
+            }
+
+            String message = exception.getLocalizedMessage();
+            if (exception instanceof TeiidDdlParsingException) {
+                TeiidDdlParsingException teiidEx = (TeiidDdlParsingException) exception;
+                Position position = teiidEx.getPosition();
+
+                message = Messages.getString(Messages.IMPORTER.teiidParserException,
+                                                                   teiidEx.getMessage(),
+                                                                   position.getLine(),
+                                                                   position.getColumn());
+            }
+
+            importMessages.addErrorMessage(message);
+        }
+
         return resultNode;
     }
 
-    protected String determineNewName(String nodeName) throws KException {
-        KomodoObject workspace = getWorkspace(null);
+    protected String determineNewName(UnitOfWork transaction, String nodeName) throws KException {
+        KomodoObject workspace = getWorkspace(transaction);
         for (int i = 0; i < 1000; ++i) {
             String newName = nodeName + UNDERSCORE + i;
-            if (! workspace.hasChild(null, newName))
+            if (! workspace.hasChild(transaction, newName))
                 return newName;
         }
 

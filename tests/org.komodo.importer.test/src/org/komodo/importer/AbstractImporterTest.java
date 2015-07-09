@@ -92,7 +92,7 @@ public abstract class AbstractImporterTest extends AbstractLocalRepositoryTest {
         KomodoObject kObject = runImporter(_repo, content, importType, importOptions, importMessages);
         if (importMessages.hasError()) {
             KLog.getLogger().debug(importMessages.errorMessagesToString());
-            return null;
+            return kObject;
         }
 
         traverse(_repo.createTransaction("traverse-imported-nodes", true, null), kObject.getAbsolutePath());

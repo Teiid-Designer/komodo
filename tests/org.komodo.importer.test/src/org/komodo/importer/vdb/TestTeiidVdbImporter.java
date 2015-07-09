@@ -30,14 +30,16 @@ import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.komodo.importer.AbstractImporterTest;
 import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
+import org.komodo.importer.ImportOptions.ExistingNodeOptions;
 import org.komodo.importer.ImportOptions.OptionKeys;
 import org.komodo.importer.ImportType;
+import org.komodo.importer.Messages;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Symbol;
 import org.komodo.relational.model.Model;
@@ -66,6 +68,8 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 public class TestTeiidVdbImporter extends AbstractImporterTest {
 
     private static final String TWEET_EXAMPLE_REIMPORT = "tweet-example-vdb-reimport.xml";
+
+    private static final String INVALID_VDB = "invalid-vdb.xml";
 
     private static final String DYNAMIC_CUSTOMER_VDB = "dynamic-customer-vdb.xml";
     private static final String DYNAMIC_CUSTOMER_VDB_NAME = "DynamicCustomer";
@@ -385,12 +389,88 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
         // Test that a vdb was created
         assertNotNull("Failed - No Vdb Created ", vdbNode);
+        assertTrue(vdbNode instanceof Vdb);
 
         // Test vdb name
         String vdbName = vdbNode.getName(this.uow);
         assertEquals(importOptions.getOption(OptionKeys.NAME), vdbName);
 
         verifyTweetExampleNode(vdbNode, TWITTER_MODEL, TWITTER_VIEW_MODEL, TWEET_EXAMPLE_DDL);
+    }
+
+    @Test
+    public void testBasicVdbImportCannotCreateVdb() throws Exception {
+        // Import the original vdb import first
+        testBasicVdbImport();
+        commit();
+
+        InputStream vdbStream = TestUtilities.tweetExample();
+
+        // Options for the import
+        ImportOptions importOptions = new ImportOptions();
+        importOptions.setOption(OptionKeys.NAME, TestUtilities.TWEET_EXAMPLE_NAME);
+        // Use return so imported bails on encountering existing node
+        importOptions.setOption(OptionKeys.HANDLE_EXISTING, ExistingNodeOptions.RETURN);
+
+        // Saves Messages during import
+        ImportMessages importMessages = new ImportMessages();
+
+        KomodoObject vdbNode = executeImporter(vdbStream, ImportType.VDB, importOptions,
+                                                                           importMessages);
+        //
+        // Test that a vdb was not created
+        //
+        assertNull(vdbNode);
+
+        //
+        // Error messages
+        //
+        List<String> errorMessages = importMessages.getErrorMessages();
+        assertEquals(1, errorMessages.size());
+        assertEquals(Messages.getString(Messages.IMPORTER.nodeExistsReturn), errorMessages.get(0));
+    }
+
+    @Test
+    public void testBasicVdbImportInvalidVdbSequencerError() throws Exception {
+        InputStream vdbStream =  TestUtilities.getResourceAsStream(getClass(),
+                                                                   VDB_DIRECTORY,
+                                                                   INVALID_VDB);
+
+        // Options for the import (default)
+        ImportOptions importOptions = new ImportOptions();
+        importOptions.setOption(OptionKeys.NAME, TestUtilities.TWEET_EXAMPLE_NAME);
+
+        // Saves Messages during import
+        ImportMessages importMessages = new ImportMessages();
+
+        KomodoObject vdbNode = executeImporter(vdbStream, ImportType.VDB, importOptions,
+                                                                           importMessages);
+        //
+        // Test that a vdb was created
+        // The invalid xml means the vdb can be created
+        // but the sequencers will fail
+        //
+        assertNotNull(vdbNode);
+
+        //
+        // Confirmation that vdb was created ok
+        //
+        List<String> progressMessages = importMessages.getProgressMessages();
+        assertEquals(1, progressMessages.size());
+        assertEquals(Messages.getString(Messages.IMPORTER.nodeCreated), progressMessages.get(0));
+
+        //
+        // Error messages
+        //
+        List<String> errorMessages = importMessages.getErrorMessages();
+        assertEquals(1, errorMessages.size());
+
+        String expErrorMsg = "java.lang.RuntimeException: Error reading VDB file " +
+                                          "\"/tko:komodo/tko:workspace/tweet-example-vdb/jcr:content/jcr:data\": " +
+                                          "ParseError at [row,col]:[8,9]" + NEW_LINE +
+                                          "Message: Element type \"model\" must be followed by either attribute " +
+                                          "specifications, \">\" or \"/>\".";
+        assertEquals(expErrorMsg, errorMessages.get(0));
     }
 
     private void setModelDefinitionAwaitSequencing(Model model, String defn) throws Exception {
@@ -801,7 +881,6 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
 
     @Test
-    @Ignore("This will not succeed until MODE-2464 has been fixed")
     public void testBooksExample_Full_Vdb() throws Exception {
         InputStream vdbStream = TestUtilities.getResourceAsStream(getClass(),
                                                                   BOOKS_DIRECTORY, BOOKS_EXAMPLE_FULL);
