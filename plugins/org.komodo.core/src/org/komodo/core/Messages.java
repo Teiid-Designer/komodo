@@ -50,7 +50,22 @@ public class Messages implements StringConstants {
         Removed_Repository,
         Removed_Repository_Failure,
         Startup_Failure,
-        Shutdown_Failure;
+        Shutdown_Failure,
+
+        KSequencers_Unknown_Message,
+        KSequencers_Problem_Message;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum KSequencers {
+
+        Unknown_Message,
+        Problem_Message;
 
         @Override
         public String toString() {

@@ -23,19 +23,25 @@ package org.komodo.modeshape.lib.sequencer;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
+import javax.jcr.Binary;
 import javax.jcr.NamespaceRegistry;
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.Property;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import org.modeshape.common.text.ParsingException;
+import org.modeshape.common.util.IoUtil;
 import org.modeshape.jcr.api.nodetype.NodeTypeManager;
 import org.modeshape.sequencer.ddl.DdlParser;
 import org.modeshape.sequencer.ddl.DdlSequencer;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlParser;
+import org.modeshape.sequencer.ddl.node.AstNode;
+import org.modeshape.sequencer.ddl.node.AstNodeFactory;
 
 /**
  * Subclass of {@link DdlSequencer} that only allows the
@@ -59,8 +65,31 @@ public class KDdlSequencer extends DdlSequencer {
 
     @Override
     public boolean execute(Property inputProperty, Node outputNode, Context context) throws Exception {
-        if (! super.execute(inputProperty, outputNode, context))
+        if (! super.execute(inputProperty, outputNode, context)) {
+
+            //
+            // We know the sequencer failed to execute but unforunately the parsing exception
+            // are handled and simply pushed to the logger. We want to throw them back up to
+            // the calling transaction so they get some visibility
+            //
+
+            AstNodeFactory nodeFactory = new AstNodeFactory();
+            final AstNode tempNode = nodeFactory.node(StandardDdlLexicon.STATEMENTS_CONTAINER);
+            Binary ddlContent = inputProperty.getBinary();
+
+            try (InputStream stream = ddlContent.getStream()) {
+                teiidParser.parse(IoUtil.read(stream), tempNode, null);
+            } catch (ParsingException e) {
+                throw new Exception(e);
+            } catch (IOException e) {
+                throw new Exception(e);
+            }
+
+            //
+            // Something went wrong but clearly not a parsing exception
+            //
             return false;
+        }
 
         if (! outputNode.hasNode(StandardDdlLexicon.STATEMENTS_CONTAINER))
             return false;

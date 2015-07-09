@@ -22,6 +22,7 @@
 package org.komodo.repository.internal;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -30,11 +31,13 @@ import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.Property;
 import javax.jcr.RepositoryException;
+import javax.jcr.nodetype.NodeType;
 import javax.jcr.observation.Event;
 import javax.jcr.observation.EventIterator;
 import javax.jcr.observation.EventListener;
 import javax.jcr.observation.ObservationManager;
 import org.komodo.core.KomodoLexicon;
+import org.komodo.core.Messages;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.repository.KSequencerController;
 import org.komodo.repository.KSequencerListener;
@@ -42,6 +45,7 @@ import org.komodo.spi.query.sql.SQLConstants;
 import org.komodo.utils.KLog;
 import org.modeshape.jcr.api.JcrConstants;
 import org.modeshape.jcr.api.Session;
+import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
@@ -282,6 +286,42 @@ public class KSequencers implements SQLConstants, EventListener, KSequencerContr
         }
     }
 
+    private void analyseDdlNodes(Node node) throws Exception {
+        if (node == null)
+            return;
+
+        List<NodeType> types = new ArrayList<NodeType>();
+        types.add(node.getPrimaryNodeType());
+        types.addAll(Arrays.asList(node.getMixinNodeTypes()));
+
+        for (NodeType type : types) {
+            if (StandardDdlLexicon.TYPE_UNKNOWN_STATEMENT.equals(type.getName())) {
+                Property property = node.getProperty(StandardDdlLexicon.DDL_EXPRESSION);
+                String invalidDdl = property.getString();
+                throw new Exception(Messages.getString(Messages.KSequencers.Unknown_Message) + NEW_LINE + invalidDdl); 
+            }
+
+            if (StandardDdlLexicon.TYPE_PROBLEM.equals(type.getName())) {
+                Property problemLevel = node.getProperty(StandardDdlLexicon.PROBLEM_LEVEL);
+                Property problemMsg = node.getProperty(StandardDdlLexicon.MESSAGE);
+
+                throw new Exception(Messages.getString(Messages.KSequencers.Problem_Message, problemLevel) + NEW_LINE + problemMsg); 
+            }
+        }
+
+        NodeIterator nodes = node.getNodes();
+        while(nodes.hasNext())
+            analyseDdlNodes(nodes.nextNode());
+
+    }
+
+    private void analyseSequencerResults(SequencerType sequencerType, Node rootNode) throws Exception {
+        if (SequencerType.DDL != sequencerType)
+            return;
+
+        analyseDdlNodes(rootNode);
+    }
+
     private boolean sequence(SequencerType sequencerType, Property property,
                                                  Node outputNode, String eventId) throws Exception {
         KLog.getLogger().debug("Executing pre-sequencing of " + sequencerType.name() + " Sequencer for property " + property.getName());  //$NON-NLS-1$//$NON-NLS-2$
@@ -316,8 +356,12 @@ public class KSequencers implements SQLConstants, EventListener, KSequencerContr
                     // wait for the event to run through before proclaiming eveything is complete
                     runningSequencers.add(seqPropId);
 
-                    // Save this session
-                    seqSession.save();
+                    try {
+                        analyseSequencerResults(sequencerType, seqOutputNode);
+                    } finally {
+                        // Save this session
+                        seqSession.save();
+                    }
                 }
             }
 

@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 import org.junit.Test;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.importer.AbstractImporterTest;
@@ -36,6 +37,7 @@ import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
 import org.komodo.importer.ImportOptions.OptionKeys;
 import org.komodo.importer.ImportType;
+import org.komodo.importer.Messages;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.test.utils.TestUtilities;
@@ -52,6 +54,10 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 public class TestTeiidDdlImporter extends AbstractImporterTest {
 
 	private static final String TEIID_MYSQL_ACCTS = "Teiid-MySQLAccounts.ddl";
+
+	private static final String INVALID_KEYWORD_DDL = "invalid-keyword.ddl";
+
+	private static final String INVALID_COLUMN_DDL = "invalid-column.ddl";
 
 	private static final String TEIID_FLATFILE = "Teiid-FlatFile.ddl";
 
@@ -397,5 +403,92 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
         assertEquals(importOptions.getOption(OptionKeys.NAME), schemaName);
 
         verifyFlatFileDdl(schemaNode);
+    }
+
+    @Test
+    public void testInvalidKeywordDdlSequencerError() throws Exception {
+        InputStream ddlStream =  TestUtilities.getResourceAsStream(getClass(),
+                                                                   DDL_DIRECTORY,
+                                                                   INVALID_KEYWORD_DDL);
+
+        // Options for the import (default)
+        ImportOptions importOptions = new ImportOptions();
+        importOptions.setOption(OptionKeys.NAME, "INVALID");
+
+        // Saves Messages during import
+        ImportMessages importMessages = new ImportMessages();
+
+        KomodoObject modelNode = executeImporter(ddlStream,
+                                                                                  ImportType.MODEL,
+                                                                                  importOptions,
+                                                                                  importMessages);
+
+        //
+        // Test that a model was created
+        // The invalid xml means the model can be created
+        // but the sequencers will fail
+        //
+        assertNotNull(modelNode);
+
+        //
+        // Confirmation that the model was created ok
+        //
+        List<String> progressMessages = importMessages.getProgressMessages();
+        assertEquals(1, progressMessages.size());
+        assertEquals(Messages.getString(Messages.IMPORTER.nodeCreated), progressMessages.get(0));
+
+        //
+        // Error messages
+        //
+        List<String> errorMessages = importMessages.getErrorMessages();
+        assertEquals(1, errorMessages.size());
+
+        String expErrorMsg = "DDL Parsing encountered unknown statement:" + NEW_LINE +
+                                           "CREATE INVALID TABLE \"accounts.ACCOUNT\" (" + NEW_LINE +
+                                           TAB + "INVALID_ID long CAN BE NULL DEFAULT '0'" + NEW_LINE +
+                                           ");";
+        assertEquals(expErrorMsg, errorMessages.get(0));
+    }
+
+    @Test
+    public void testInvalidColumnDdlSequencerError() throws Exception {
+        InputStream ddlStream =  TestUtilities.getResourceAsStream(getClass(),
+                                                                   DDL_DIRECTORY,
+                                                                   INVALID_COLUMN_DDL);
+
+        // Options for the import (default)
+        ImportOptions importOptions = new ImportOptions();
+        importOptions.setOption(OptionKeys.NAME, "INVALID");
+
+        // Saves Messages during import
+        ImportMessages importMessages = new ImportMessages();
+
+        KomodoObject modelNode = executeImporter(ddlStream,
+                                                                                  ImportType.MODEL,
+                                                                                  importOptions,
+                                                                                  importMessages);
+
+        //
+        // Test that a model was created
+        // The invalid xml means the model can be created
+        // but the sequencers will fail
+        //
+        assertNotNull(modelNode);
+
+        //
+        // Confirmation that the model was created ok
+        //
+        List<String> progressMessages = importMessages.getProgressMessages();
+        assertEquals(1, progressMessages.size());
+        assertEquals(Messages.getString(Messages.IMPORTER.nodeCreated), progressMessages.get(0));
+
+        //
+        // Error messages
+        //
+        List<String> errorMessages = importMessages.getErrorMessages();
+        assertEquals(1, errorMessages.size());
+
+        String expErrorMsg = "Parse Exception (Line=2, Column=18) - Unparsable table body";
+        assertEquals(expErrorMsg, errorMessages.get(0));
     }
 }
