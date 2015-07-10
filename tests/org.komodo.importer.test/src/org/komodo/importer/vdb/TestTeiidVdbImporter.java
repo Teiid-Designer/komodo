@@ -465,9 +465,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         List<String> errorMessages = importMessages.getErrorMessages();
         assertEquals(1, errorMessages.size());
 
-        String expErrorMsg = "java.lang.RuntimeException: Error reading VDB file " +
-                                          "\"/tko:komodo/tko:workspace/tweet-example-vdb/jcr:content/jcr:data\": " +
-                                          "ParseError at [row,col]:[8,9]" + NEW_LINE +
+        String expErrorMsg = "ParseError at [row,col]:[8,9]" + NEW_LINE +
                                           "Message: Element type \"model\" must be followed by either attribute " +
                                           "specifications, \">\" or \"/>\".";
         assertEquals(expErrorMsg, errorMessages.get(0));

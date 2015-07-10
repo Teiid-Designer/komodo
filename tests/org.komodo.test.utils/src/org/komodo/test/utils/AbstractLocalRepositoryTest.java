@@ -202,15 +202,19 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest im
         }
     }
 
-    protected void commit() throws Exception {
+    protected void commit(UnitOfWork.State expectedState) throws Exception {
         this.uow.commit();
         assertThat( this.callback.await( TIME_TO_WAIT, TimeUnit.MINUTES ), is( true ) );
         assertThat( this.uow.getError(), is( nullValue() ) );
-        assertThat( this.uow.getState(), is( UnitOfWork.State.COMMITTED ) );
+        assertThat( this.uow.getState(), is( expectedState ) );
 
         // create new transaction
         this.callback = new SynchronousCallback();
         this.uow = createTransaction(callback);
+    }
+
+    protected void commit() throws Exception {
+        commit(UnitOfWork.State.COMMITTED);
     }
 
     protected UnitOfWork createTransaction(String name, SynchronousCallback callback) throws Exception {

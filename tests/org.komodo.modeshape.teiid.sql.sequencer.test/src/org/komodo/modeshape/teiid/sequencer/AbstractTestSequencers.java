@@ -88,8 +88,14 @@ public abstract class AbstractTestSequencers extends AbstractTSqlSequencerTest {
     public void testComplexDDLStatement() throws Exception {
         StringBuffer ddl = new StringBuffer();
 
-        ddl.append("CREATE FOREIGN SCHEMA TWITTER (connection-jndi-name=\"java:/twitterDS\":translator-name=\"rest\") ")
-             .append("CREATE VIRTUAL PROCEDURE getTweets(query varchar) RETURNS (created_on varchar(25), from_user varchar(25), to_user varchar(25), ")
+        /*
+         * Commented out unsupported SCHEMA syntax text.
+         * May be supported in the future but at the moment, generate
+         * unknown statements which are invalid for KSequencers.
+         */
+
+//        ddl.append("CREATE FOREIGN SCHEMA TWITTER (connection-jndi-name=\"java:/twitterDS\":translator-name=\"rest\") ")
+        ddl.append("CREATE VIRTUAL PROCEDURE getTweets(query varchar) RETURNS (created_on varchar(25), from_user varchar(25), to_user varchar(25), ")
              .append("profile_image_url varchar(25), source varchar(25), text varchar(140)) AS ") 
                      .append("select tweet.* from ")
                      .append("(call twitter.invokeHTTP(action => 'GET', endpoint =>querystring(\'',query as \"q\"))) w,  ")
@@ -101,9 +107,9 @@ public abstract class AbstractTestSequencers extends AbstractTSqlSequencerTest {
                              .append("source string PATH 'source', ")
                              .append("text string PATH 'text') tweet; ")
              .append("CREATE VIEW Tweet AS select * FROM twitterview.getTweets; ")
-             .append("CREATE FOREIGN SCHEMA PARTSSUPPLIER (connection-jndi-name=\"parts-oracle\":translator-name=\"jdbc\"); ")
+//             .append("CREATE FOREIGN SCHEMA PARTSSUPPLIER (connection-jndi-name=\"parts-oracle\":translator-name=\"jdbc\") ")
              .append("CREATE FOREIGN TABLE PARTSSUPPLIER.PART (id integer PRIMARY KEY,  name   varchar(25), color varchar(25),  weight integer); ") 
-             .append("CREATE VIRTUAL SCHEMA PARTS_VIEWS; ")
+//             .append("CREATE VIRTUAL SCHEMA PARTS_VIEWS ")
              .append("CREATE VIEW PARTS_VIEWS.PARTS ( ")
                  .append("PART_ID integer PRIMARY KEY, ")
                  .append("PART_NAME varchar(255), ")
@@ -116,7 +122,7 @@ public abstract class AbstractTestSequencers extends AbstractTSqlSequencerTest {
                          .append("b.color as PART_COLOR, ")
                          .append("b.weight as PART_WEIGHT ")
                      .append("FROM PARTSSUPPLIER.part a, PARTSSUPPLIER.part b WHERE a.id = b.id; ")
-             .append("CREATE FOREIGN SCHEMA PRODUCT (connection-jndi-name=\"product-oracle\":translator-name=\"jdbc\"); ")
+//             .append("CREATE FOREIGN SCHEMA PRODUCT (connection-jndi-name=\"product-oracle\":translator-name=\"jdbc\") ")
              .append("CREATE FOREIGN TABLE PRODUCT.Customer ( ")
                  .append("id integer PRIMARY KEY, ")
                  .append("firstname  varchar(25), ")
@@ -126,8 +132,9 @@ public abstract class AbstractTestSequencers extends AbstractTSqlSequencerTest {
                  .append("id integer PRIMARY KEY, ")
                  .append("customerid  integer, ")
                  .append("saledate date, ")
-                 .append("amount decimal(25,4)) (CONSTRAINT FOREIGN  KEY(customerid)  REFERENCES Customer(id)); ")
-             .append("CREATE VIRTUAL SCHEMA PRODUCT_VIEWS; ")
+                 .append("amount decimal(25,4), ")
+                 .append("CONSTRAINT CUSTOMER_FK FOREIGN KEY(customerid) REFERENCES PRODUCT.Customer(id)); ")
+//             .append("CREATE VIRTUAL SCHEMA PRODUCT_VIEWS ")
              .append("CREATE VIEW PRODUCT_VIEWS.CustomerOrders ( ")
                  .append("name varchar(50), ")
                  .append("saledate date, ")

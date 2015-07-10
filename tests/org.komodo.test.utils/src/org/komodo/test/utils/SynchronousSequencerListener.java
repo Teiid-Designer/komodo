@@ -100,4 +100,11 @@ public class SynchronousSequencerListener implements KSequencerListener {
     public boolean exceptionOccurred() {
         return sequencerException != null;
     }
+
+    /**
+     * @return any exception that may have occurred or null.
+     */
+    public Exception exception() {
+        return sequencerException;
+    }
 }

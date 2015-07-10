@@ -24,6 +24,7 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.Repository.UnitOfWork;
 
 @SuppressWarnings( {"javadoc", "nls"} )
 public class SchemaImplTest extends RelationalModelTest {
@@ -99,7 +100,12 @@ public class SchemaImplTest extends RelationalModelTest {
 
     @Test
     public void shouldExportInvalidDdl() throws Exception {
-        setRenditionValueAwaitSequencing("This is not ddl syntax");
+        this.schema.setRendition( this.uow, "This is not ddl syntax" );
+
+        // Invalid ddl
+        commit(UnitOfWork.State.ERROR);
+
+        traverse( this.uow, this.schema.getAbsolutePath() );
 
         final String fragment = this.schema.export(this.uow, new Properties());
         assertThat(fragment, is(notNullValue()));
