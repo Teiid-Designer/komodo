@@ -48,6 +48,10 @@ To build the komodo code, cd into your komodo local repo, then use the build scr
 
 To setup a development environment in Eclipse, please refer to this [article](https://developer.jboss.org/docs/DOC-53242).
 
+## Try out VDB Builder
+
+If you want to try out the __VDB Builder__ cli,  please see our [Samples Page](https://github.com/Teiid-Designer/teiid-designer-samples/tree/master/cli) to get started.
+
 ## Contribute fixes and features
 
 Komodo is open source, and we welcome anybody that wants to participate and contribute!
