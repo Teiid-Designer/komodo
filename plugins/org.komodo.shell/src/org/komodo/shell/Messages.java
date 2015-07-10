@@ -130,6 +130,7 @@ public class Messages implements StringConstants {
     public enum ExportCommand {
         InvalidArgMsgObjectName,
         InvalidArgMsgOutputFileName,
+        Failure,
         ObjectExported,
         NoContentExported,
         CannotExportObjectDoesNotExist,

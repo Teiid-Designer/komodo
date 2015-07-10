@@ -61,6 +61,7 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
     public static final String NAME = "show"; //$NON-NLS-1$
 
     private static final int DEFAULT_WIDTH = 25;
+    private static final int MAX_PROPERTY_VALUE_WIDTH = 100;  // Limit on the value column width
     private static final String SUBCMD_PROPERTIES = "properties"; //$NON-NLS-1$
 
     /**
@@ -190,6 +191,11 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
             }
 
             sorted.put( name, value );
+        }
+        
+        // Puts a hard limit on value column width - some may be extremely long.  (The entire value will still be printed)
+        if(maxValueWidth>MAX_PROPERTY_VALUE_WIDTH) {
+        	maxValueWidth = MAX_PROPERTY_VALUE_WIDTH;
         }
 
         // Print properties header
@@ -397,7 +403,13 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
 
         // Get the value for the supplied property
         final String propValue = context.getPropertyValue( propertyName );
-        final int maxValueWidth = Math.max( DEFAULT_WIDTH, propValue.length() );
+        int maxValueWidth = Math.max( DEFAULT_WIDTH, propValue.length() );
+
+        // Puts a hard limit on value column width - some may be extremely long.  (The entire value will still be printed)
+        if(maxValueWidth>MAX_PROPERTY_VALUE_WIDTH) {
+        	maxValueWidth = MAX_PROPERTY_VALUE_WIDTH;
+        }
+        
         final String format = getFormat( maxNameWidth, maxValueWidth );
 
         // Print properties header
