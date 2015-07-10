@@ -23,6 +23,7 @@ package org.komodo.shell.commands.core;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.komodo.relational.model.Column;
@@ -146,10 +147,14 @@ public final class AddConstraintColumnCommand extends BuiltInShellCommand {
                 return -1;
             }
 
-            for ( final String path : columnPaths ) {
-                if ( ( noLastArg ) || ( path.toUpperCase().startsWith( lastArgument.toUpperCase() ) ) ) {
-                    candidates.add( path );
-                }
+            if(noLastArg) {
+            	candidates.addAll(Arrays.asList(columnPaths));
+            } else {
+            	for (String item : Arrays.asList(columnPaths)) {
+            		if (item.toUpperCase().startsWith(lastArgument.toUpperCase())) {
+            			candidates.add(item);
+            		}
+            	}
             }
 
             return 0;

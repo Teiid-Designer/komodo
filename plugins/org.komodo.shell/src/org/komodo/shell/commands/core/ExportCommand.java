@@ -47,8 +47,8 @@ public class ExportCommand extends BuiltInShellCommand implements StringConstant
      */
     @Override
     public boolean execute() throws Exception {
-        String objPathArg = requiredArgument(0, Messages.getString("ExportCommand.InvalidArgMsg_ObjectName")); //$NON-NLS-1$
-        String filePathArg = requiredArgument(1, Messages.getString("ExportCommand.InvalidArgMsg_OutputFileName")); //$NON-NLS-1$
+        String objPathArg = requiredArgument(0, Messages.getString(Messages.ExportCommand.InvalidArgMsgObjectName)); 
+        String filePathArg = requiredArgument(1, Messages.getString(Messages.ExportCommand.InvalidArgMsgOutputFileName));
 
         if(!validateObjectPath(objPathArg)) {
         	return false;
@@ -60,7 +60,7 @@ public class ExportCommand extends BuiltInShellCommand implements StringConstant
         try {
         	export(objPathArg, filePathArg);
         } catch (Exception e) {
-            print(CompletionConstants.MESSAGE_INDENT, Messages.getString("ExportCommand.Failure", objPathArg)); //$NON-NLS-1$
+            print(CompletionConstants.MESSAGE_INDENT, Messages.getString(Messages.ExportCommand.Failure, objPathArg));
             print(CompletionConstants.MESSAGE_INDENT, TAB + e.getMessage());
             return false;
         }
@@ -93,18 +93,18 @@ public class ExportCommand extends BuiltInShellCommand implements StringConstant
         // Get the context for export
         WorkspaceContext contextToExport = ContextUtils.getContextForPath(wsStatus, objPath);
         if (contextToExport == null)
-            throw new Exception(Messages.getString("ExportCommand.cannotExport_objectDoesNotExist", objPath)); //$NON-NLS-1$
+        	throw new Exception(Messages.getString(Messages.ExportCommand.CannotExportObjectDoesNotExist, objPath)); 
 
         KomodoObject objToExport = contextToExport.getKomodoObj();
 
         if( objToExport == null ) {
-        	throw new Exception(Messages.getString("ExportCommand.cannotExport_objectDoesNotExist", objPath)); //$NON-NLS-1$
+        	throw new Exception(Messages.getString(Messages.ExportCommand.CannotExportObjectDoesNotExist, objPath)); 
         }
 
         // Check for file location and name
         File theFile = new File(fileNameAndLocation);
         if( theFile.exists()) {
-        	throw new Exception(Messages.getString("ExportCommand.cannotExport_fileAlreadyExists", fileNameAndLocation)); //$NON-NLS-1$
+        	throw new Exception(Messages.getString(Messages.ExportCommand.CannotExportFileAlreadyExists, fileNameAndLocation)); 
         }
 
         // Check object type
