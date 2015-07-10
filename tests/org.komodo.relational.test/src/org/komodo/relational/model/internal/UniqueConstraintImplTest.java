@@ -60,7 +60,7 @@ public final class UniqueConstraintImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveCorrectConstraintType() throws Exception {
         assertThat( this.uniqueConstraint.getConstraintType(), is( TableConstraint.ConstraintType.UNIQUE ) );
-        assertThat( this.uniqueConstraint.getProperty( this.uow, TeiidDdlLexicon.Constraint.TYPE ).getStringValue( this.uow ),
+        assertThat( this.uniqueConstraint.getRawProperty( this.uow, TeiidDdlLexicon.Constraint.TYPE ).getStringValue( this.uow ),
                     is( TableConstraint.ConstraintType.UNIQUE.toValue() ) );
     }
 

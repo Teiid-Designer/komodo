@@ -82,6 +82,11 @@ public final class TableConstraintTest extends RelationalModelTest {
         this.constraint.addColumn( this.uow, null );
     }
 
+    @Test( expected = UnsupportedOperationException.class )
+    public void shouldNotBeAbleToSetConstraintType() throws Exception {
+        this.constraint.setProperty( this.uow, TeiidDdlLexicon.Constraint.TYPE, "INDEX" );
+    }
+
     @Test
     public void shouldNotContainFilteredProperties() throws Exception {
         final String[] filteredProps = this.constraint.getPropertyNames( this.uow );

@@ -76,7 +76,7 @@ public final class PrimaryKeyImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveCorrectConstraintType() throws Exception {
         assertThat( this.primaryKey.getConstraintType(), is( TableConstraint.ConstraintType.PRIMARY_KEY ) );
-        assertThat( this.primaryKey.getProperty( this.uow, TeiidDdlLexicon.Constraint.TYPE ).getStringValue( this.uow ),
+        assertThat( this.primaryKey.getRawProperty( this.uow, TeiidDdlLexicon.Constraint.TYPE ).getStringValue( this.uow ),
                     is( TableConstraint.ConstraintType.PRIMARY_KEY.toValue() ) );
     }
 

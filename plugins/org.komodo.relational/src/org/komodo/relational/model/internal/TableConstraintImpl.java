@@ -7,6 +7,7 @@
  */
 package org.komodo.relational.model.internal;
 
+import org.komodo.relational.ExcludeQNamesFilter;
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.internal.RelationalChildRestrictedObject;
@@ -21,6 +22,7 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.ArgCheck;
 import org.modeshape.jcr.JcrLexicon;
+import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.Constraint;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateTable;
 
@@ -29,10 +31,21 @@ import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateTable;
  */
 abstract class TableConstraintImpl extends RelationalChildRestrictedObject implements TableConstraint {
 
+    /**
+     * A filter to exclude specific, readonly properties.
+     */
+    private static final Filter PROPS_FILTER = new ExcludeQNamesFilter( TeiidDdlLexicon.Constraint.TYPE );
+
     protected TableConstraintImpl( final UnitOfWork uow,
                                    final Repository repository,
                                    final String path ) throws KException {
         super(uow, repository, path);
+
+        // add in filter to hide the constraint type
+        final Filter[] updatedFilters = new Filter[ DEFAULT_FILTERS.length + 1 ];
+        System.arraycopy( DEFAULT_FILTERS, 0, updatedFilters, 0, DEFAULT_FILTERS.length );
+        updatedFilters[ DEFAULT_FILTERS.length ] = PROPS_FILTER;
+        setFilters( updatedFilters );
     }
 
     /**
@@ -163,6 +176,23 @@ abstract class TableConstraintImpl extends RelationalChildRestrictedObject imple
         } else {
             throw new KException( Messages.getString( Relational.REFERENCED_COLUMN_NOT_FOUND, columnId ) );
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.repository.ObjectImpl#setProperty(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String,
+     *      java.lang.Object[])
+     */
+    @Override
+    public void setProperty( final UnitOfWork transaction,
+                             final String propertyName,
+                             final Object... values ) throws KException {
+        if ( PROPS_FILTER.rejectProperty( propertyName ) ) {
+            throw new UnsupportedOperationException( Messages.getString( Relational.PROPERTY_NOT_MODIFIABLE, propertyName ) );
+        }
+
+        super.setProperty( transaction, propertyName, values );
     }
 
 }
