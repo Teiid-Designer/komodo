@@ -22,6 +22,7 @@
 package org.komodo.shell.commands.core;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -213,10 +214,49 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
 
         // print property name and value
         for ( final Entry< String, String > entry : sorted.entrySet() ) {
-            print( MESSAGE_INDENT, String.format( format, entry.getKey(), entry.getValue() ) );
+        	String propName = entry.getKey();
+        	String propValue = entry.getValue();
+        	// propValue less than maximum width
+        	if(propValue.length() <= maxValueWidth) {
+        		print( MESSAGE_INDENT, String.format( format, propName, propValue ) );
+        	// propValue exceeds maximum width - splits it up onto separate lines
+        	} else {
+        		printPropWithLongValue(format,propName,propValue,maxValueWidth);
+        	}
         }
     }
+    
+    private void printPropWithLongValue(String format, String propName, String propValue, int maxValueWidth) {
+		// splits long strings into equal length lines of 'maxValueWidth' length.
+		List<String> lines = splitEqually(propValue,maxValueWidth);
+		boolean first = true;
+		for(String line : lines) {
+			// First line includes the propName
+			if(first) {
+        		print( MESSAGE_INDENT, String.format( format, propName, line ) );
+				first = false;
+			// Subsequent lines the 'name' is just a spacer
+			} else {
+        		print( MESSAGE_INDENT, String.format( format, EMPTY_STRING, line ) );
+			}
+		}
+    }
+    
+    private List<String> splitEqually(String text, int size) {
+    	// Remove Control chars from the incoming string
+		String noCtrlText = text.replaceAll("\\p{Cntrl}", EMPTY_STRING); //$NON-NLS-1$
+		
+        // Give the list the right capacity to start with. You could use an array
+        // instead if you wanted.
+        List<String> result = new ArrayList<String>((noCtrlText.length() + size - 1) / size);
 
+        for (int start = 0; start < noCtrlText.length(); start += size) {
+        	result.add(noCtrlText.substring(start, Math.min(noCtrlText.length(), start + size)));
+        }
+        
+        return result;
+    }
+    
     private String getFormat( final int column1Width,
                               final int column2Width ) {
         final StringBuilder result = new StringBuilder();
@@ -421,7 +461,14 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
                               Messages.getString( SHELL.PROPERTY_VALUE_HEADER ) ) );
         print( MESSAGE_INDENT, String.format( format, getHeaderDelimiter( maxNameWidth ), getHeaderDelimiter( maxValueWidth ) ) );
 
-        print( MESSAGE_INDENT, String.format( format, name, propValue ) );
+    	// propValue less than maximum width
+    	if(propValue.length() <= maxValueWidth) {
+    		print( MESSAGE_INDENT, String.format( format, name, propValue ) );
+    	// propValue exceeds maximum width - splits it up onto separate lines
+    	} else {
+    		printPropWithLongValue(format,name,propValue,maxValueWidth);
+    	}
+    	
         print();
     }
 
