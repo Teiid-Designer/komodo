@@ -29,6 +29,8 @@ import static org.junit.Assert.fail;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Iterator;
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
@@ -42,12 +44,16 @@ import javax.jcr.query.Query;
 import javax.jcr.query.QueryManager;
 import javax.jcr.query.QueryResult;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.constants.SystemConstants;
 import org.komodo.test.utils.MultiUseAbstractTest;
 import org.komodo.test.utils.TestUtilities;
+import org.komodo.utils.FileUtils;
 import org.komodo.utils.KLog;
 import org.modeshape.common.collection.Problem;
 import org.modeshape.common.collection.Problems;
@@ -65,11 +71,23 @@ import org.modeshape.jcr.api.JcrConstants;
 public class TestObjectOperations implements StringConstants {
 
     private static final String BOOKS_EXAMPLE_FULL = "books.xml";
+    private static Path _dataDirectory;
 
     /**
      * Default location of the configuration of the test repository
      */
     private static final String DEFAULT_TEST_REPOSITORY_CONFIG = "test-local-repository-in-memory-config.json"; //$NON-NLS-1$
+
+    @BeforeClass
+    public static void oneTimeSetup() throws Exception {
+        _dataDirectory = Files.createTempDirectory( "KomodoEngineDataDir" );
+        System.setProperty( SystemConstants.ENGINE_DATA_DIR, _dataDirectory.toString() );
+    }
+
+    @AfterClass
+    public static void oneTimeTeardown() {
+        FileUtils.removeDirectoryAndChildren( _dataDirectory.toFile() );
+    }
 
     private ModeShapeEngine engine;
 
@@ -118,7 +136,7 @@ public class TestObjectOperations implements StringConstants {
 
     protected Session newSession() throws RepositoryException {
         return repository.login();
-    }    
+    }
 
     private void clearRepository() throws Exception {
         Session session = newSession();

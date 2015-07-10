@@ -4,6 +4,7 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import java.io.File;
 import org.junit.Test;
 import org.komodo.relational.model.Table;
@@ -27,6 +28,7 @@ public class SetCommandTest extends AbstractCommandTest {
 	private static final String SET_COMMAND_3 = "setCommand3.txt"; //$NON-NLS-1$
 	private static final String SET_COMMAND_4 = "setCommand4.txt"; //$NON-NLS-1$
     private static final String SET_COMMAND_5 = "setCommand5.txt"; //$NON-NLS-1$
+    private static final String SET_CONSTRAINT_TYPE = "setConstraintTypeProperty.txt"; //$NON-NLS-1$
 
 	/**
 	 * Test for SetCommand
@@ -34,6 +36,19 @@ public class SetCommandTest extends AbstractCommandTest {
 	public SetCommandTest( ) {
 		super();
 	}
+
+    @Test
+    public void shouldNotBeAbleToSetTableConstraintType() throws Exception {
+        setup( SET_CONSTRAINT_TYPE, SetCommand.class );
+
+        try {
+            execute();
+            fail();
+        } catch ( final Throwable e ) {
+            assertThat( getCommandOutput().endsWith( "The property \"teiidddl:constraintType\" is not valid or cannot be modified\n" ),
+                        is( true ) );
+        }
+    }
 
     @Test
     public void testSetProperty1() throws Exception {
@@ -135,6 +150,5 @@ public class SetCommandTest extends AbstractCommandTest {
         assertThat( this.wsStatus.isShowingPropertyNamePrefixes(), is( true ) );
         assertThat( this.wsStatus.isShowingTypeInPrompt(), is( false ) );
     }
-
 
 }

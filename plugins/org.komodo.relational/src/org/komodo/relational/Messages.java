@@ -139,6 +139,11 @@ public class Messages implements StringConstants {
         PROCEDURE_NOT_FOUND_TO_REMOVE,
 
         /**
+         * An error message indicating a property is not modifiable.
+         */
+        PROPERTY_NOT_MODIFIABLE,
+
+        /**
          * An error message indicating a column with a specified JCR UUID could not be found.
          */
         REFERENCED_COLUMN_NOT_FOUND,

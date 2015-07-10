@@ -273,7 +273,7 @@ public class TableImpl extends RelationalObjectImpl implements Table {
         final List< AccessPattern > result = new ArrayList< AccessPattern >();
 
         for ( final KomodoObject kobject : getChildrenOfType( transaction, Constraint.TABLE_ELEMENT ) ) {
-            final Property prop = kobject.getProperty( transaction, Constraint.TYPE );
+            final Property prop = kobject.getRawProperty( transaction, Constraint.TYPE );
 
             if ( AccessPattern.CONSTRAINT_TYPE.toValue().equals( prop.getStringValue( transaction ) ) ) {
                 final AccessPattern constraint = new AccessPatternImpl( transaction, getRepository(), kobject.getAbsolutePath() );
@@ -478,7 +478,7 @@ public class TableImpl extends RelationalObjectImpl implements Table {
         PrimaryKey result = null;
 
         for ( final KomodoObject kobject : getChildrenOfType( transaction, Constraint.TABLE_ELEMENT ) ) {
-            final Property prop = kobject.getProperty( transaction, Constraint.TYPE );
+            final Property prop = kobject.getRawProperty( transaction, Constraint.TYPE );
 
             if ( PrimaryKey.CONSTRAINT_TYPE.toValue().equals( prop.getStringValue( transaction ) ) ) {
                 result = new PrimaryKeyImpl( transaction, getRepository(), kobject.getAbsolutePath() );
@@ -643,7 +643,7 @@ public class TableImpl extends RelationalObjectImpl implements Table {
         final List< UniqueConstraint > result = new ArrayList< UniqueConstraint >();
 
         for ( final KomodoObject kobject : getChildrenOfType( transaction, Constraint.TABLE_ELEMENT ) ) {
-            final Property prop = kobject.getProperty( transaction, Constraint.TYPE );
+            final Property prop = kobject.getRawProperty( transaction, Constraint.TYPE );
 
             if ( UniqueConstraint.CONSTRAINT_TYPE.toValue().equals( prop.getStringValue( transaction ) ) ) {
                 final UniqueConstraint constraint = new UniqueConstraintImpl( transaction,

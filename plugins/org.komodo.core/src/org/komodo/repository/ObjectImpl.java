@@ -1028,7 +1028,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
             String primaryKeyConstraint = DdlConstants.PRIMARY_KEY;
             String uniqueConstraint = TeiidDdlConstants.TeiidReservedWord.UNIQUE.toDdl();
 
-            Property constProperty = getProperty(transaction, TeiidDdlLexicon.Constraint.TYPE);
+            Property constProperty = getRawProperty(transaction, TeiidDdlLexicon.Constraint.TYPE);
             if (constProperty == null)
                 result = KomodoType.UNKNOWN;
             else {

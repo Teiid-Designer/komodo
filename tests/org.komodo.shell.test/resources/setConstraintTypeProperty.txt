@@ -1,0 +1,14 @@
+create vdb MyVdb
+cd MyVdb
+
+create model MyModel
+cd MyModel
+
+create table MyTable
+cd MyTable
+
+create primarykey pk 
+cd pk
+
+# try and set hidden, unmodifiable property
+set property teiidddl:constraintType INDEX
