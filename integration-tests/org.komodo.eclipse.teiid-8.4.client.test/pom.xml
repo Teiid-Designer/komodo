@@ -5,12 +5,12 @@
 	<parent>
 		<artifactId>integration-tests</artifactId>
 		<groupId>org.jboss.tools.komodo</groupId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>0.0.2-SNAPSHOT</version>
 	</parent>
 
 	<groupId>org.jboss.tools.komodo.tests</groupId>
 	<artifactId>org.komodo.eclipse.teiid-8.4.client.test</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.2-SNAPSHOT</version>
 	<packaging>eclipse-test-plugin</packaging>
 
 	<name>org.komodo.eclipse.teiid-8.4.client.test</name>

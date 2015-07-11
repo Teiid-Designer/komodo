@@ -5,13 +5,13 @@
     <parent>
         <groupId>org.jboss.tools.komodo</groupId>
         <artifactId>plugins</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>0.0.2-SNAPSHOT</version>
     </parent>
     <groupId>org.jboss.tools.komodo.plugins</groupId>
     <artifactId>org.komodo.teiid.client</artifactId>
     <packaging>eclipse-plugin</packaging>
     <name>Komodo Teiid Client</name>
-	  <version>0.0.1-SNAPSHOT</version>
+	  <version>0.0.2-SNAPSHOT</version>
     <description>Teiid SQL runtime client</description>
     <properties>
         <version.jboss>8.0.0.Final</version.jboss>
