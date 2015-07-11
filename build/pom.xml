@@ -2,7 +2,7 @@
   <parent>
     <groupId>org.jboss.tools</groupId>
     <artifactId>komodo</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2-SNAPSHOT</version>
   </parent>
 
   <groupId>org.jboss.tools</groupId>
@@ -12,7 +12,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <properties>
-    <org.komodo.version>0.0.1-SNAPSHOT</org.komodo.version>
+    <org.komodo.version>0.0.2-SNAPSHOT</org.komodo.version>
   </properties>
 
   <build>

@@ -2,7 +2,7 @@
 <feature
       id="org.komodo.engine.feature"
       label="Komodo Engine"
-      version="0.0.1.qualifier"
+      version="0.0.2.qualifier"
       provider-name="%providerName">
 
    <description url="http://www.example.com/description">
