@@ -4,7 +4,6 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
-
 import org.junit.Test;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.vdb.ModelSource;
@@ -97,6 +96,11 @@ public class ImportCommandTest extends AbstractCommandTest {
         { // Check model
             final Model[] models = vdb.getModels(trans);
             assertThat(models.length, is(1));
+            //
+            // model definition is filtered by default
+            //
+            models[0].setFilters(null);
+
             assertThat(models[0].getName(trans), is("AzureService"));
             assertThat(models[0].getModelType(trans), is(Model.Type.VIRTUAL));
             assertThat(models[0].isVisible( trans ), is(true));
@@ -165,6 +169,11 @@ public class ImportCommandTest extends AbstractCommandTest {
 		{ // Check model
 			final Model[] models = vdb.getModels(trans);
 			assertThat(models.length, is(1));
+            //
+            // model definition is filtered by default
+            //
+            models[0].setFilters(null);
+
 			assertThat(models[0].getName(trans), is("myService"));
 			assertThat(models[0].getModelType(trans), is(Model.Type.VIRTUAL));
 			assertThat(models[0].isVisible(trans), is(true));

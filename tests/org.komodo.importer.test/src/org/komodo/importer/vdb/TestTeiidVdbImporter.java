@@ -1273,6 +1273,11 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         Model[] models = vdb.getModels(uow);
         assertEquals(2, models.length);
         for (Model model : models) {
+            //
+            // model definition is filtered by default
+            //
+            model.setFilters(null);
+
             verifyProperty(model, VdbLexicon.Model.METADATA_TYPE, "DDL");
 
             if ("PartsViewModel".equals(model.getName(uow))) {
