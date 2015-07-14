@@ -34,6 +34,18 @@ import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.SchemaElement;
  */
 public final class StoredProcedureImpl extends AbstractProcedureImpl implements StoredProcedure {
 
+    /**
+     * The allowed child types.
+     */
+    private static final KomodoType[] KID_TYPES;
+
+    static {
+        KID_TYPES = new KomodoType[ CHILD_TYPES.length + 2 ];
+        System.arraycopy( CHILD_TYPES, 0, KID_TYPES, 0, CHILD_TYPES.length );
+        KID_TYPES[ CHILD_TYPES.length ] = DataTypeResultSet.IDENTIFIER;
+        KID_TYPES[ CHILD_TYPES.length + 1 ] = TabularResultSet.IDENTIFIER;
+    }
+
     private enum StandardOption {
 
         NATIVE_QUERY( "native-query" ), //$NON-NLS-1$
@@ -176,6 +188,16 @@ public final class StoredProcedureImpl extends AbstractProcedureImpl implements 
                                 final Repository repository,
                                 final String workspacePath ) throws KException {
         super( uow, repository, workspacePath );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.repository.ObjectImpl#getChildTypes()
+     */
+    @Override
+    public KomodoType[] getChildTypes() {
+        return KID_TYPES;
     }
 
     /**

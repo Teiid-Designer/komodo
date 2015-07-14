@@ -7,10 +7,14 @@
 */
 package org.komodo.shell.util;
 
+import java.util.Arrays;
+import java.util.List;
+import org.komodo.repository.RepositoryImpl;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.utils.StringUtils;
+import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 
 /**
@@ -23,6 +27,62 @@ public class ContextUtils implements StringConstants {
 
 	private static final String ROOT_OPT1 = PATH_SEPARATOR;
 	private static final String ROOT_OPT2 = ROOT_OPT1 + WorkspaceContext.WORKSPACE_ROOT_DISPLAY_NAME;
+
+	/**
+	 * A collection of grouping node names that should be removed from the display paths.
+	 */
+    private static final List< String > GROUPING_NODES = Arrays.asList( new String[] { VdbLexicon.DataRole.PERMISSIONS,
+                                                                                      VdbLexicon.Vdb.DATA_ROLES,
+                                                                                      VdbLexicon.Vdb.TRANSLATORS } );
+
+    private static String convertPathToDisplayPath( final String path ) {
+        if ( StringUtils.isBlank( path ) ) {
+            return path;
+        }
+
+        if ( RepositoryImpl.WORKSPACE_ROOT.equals( path ) ) {
+            return ROOT_OPT2;
+        }
+
+        // if path starts with /tko:komodo/tko:workspace then convert to /workspace
+        if ( path.startsWith( RepositoryImpl.WORKSPACE_ROOT ) ) {
+            // remove any grouping nodes from the display path
+            final String remaining = path.substring( RepositoryImpl.WORKSPACE_ROOT.length() );
+            final StringBuilder displayPath = new StringBuilder();
+
+            if ( remaining.startsWith( FORWARD_SLASH ) ) {
+                displayPath.append( FORWARD_SLASH );
+            }
+
+            boolean firstTime = true;
+
+            for ( final String segment : getPathSegments( remaining ) ) {
+                if ( EMPTY_STRING.equals( segment ) ) {
+                    continue;
+                }
+
+                final boolean skip = GROUPING_NODES.contains( segment );
+
+                if ( !firstTime && !skip ) {
+                    displayPath.append( FORWARD_SLASH );
+                } else {
+                    firstTime = false;
+                }
+
+                if ( !skip ) {
+                    displayPath.append( segment );
+                }
+            }
+
+            if ( remaining.endsWith( FORWARD_SLASH ) ) {
+                displayPath.append( FORWARD_SLASH );
+            }
+
+            return ( ROOT_OPT2 + displayPath );
+        }
+
+        return path;
+    }
 
 	/**
 	 * The shell root prompt. Value is {@value}.
@@ -38,12 +98,14 @@ public class ContextUtils implements StringConstants {
 	 * @return the context at the specified path, null if not found.
 	 */
 	public static WorkspaceContext getContextForPath(WorkspaceStatus workspaceStatus, String path) {
-		if(StringUtils.isBlank(path)) return workspaceStatus.getCurrentContext();
+	    path = convertPathToDisplayPath( path );
 
-		// check path for cd into root options
-		if( path.equalsIgnoreCase(ROOT_OPT1) || path.equalsIgnoreCase(ROOT_OPT2) || path.equalsIgnoreCase(ROOT_OPT3)) {
-			return workspaceStatus.getWorkspaceContext();
-		}
+	    if(StringUtils.isBlank(path)) return workspaceStatus.getCurrentContext();
+
+        // check path for cd into root options
+        if ( path.equalsIgnoreCase( ROOT_OPT1 ) || path.equalsIgnoreCase( ROOT_OPT2 ) || path.equalsIgnoreCase( ROOT_OPT3 ) ) {
+            return workspaceStatus.getWorkspaceContext();
+        }
 
 		// Location supplied as absolute path
 		if(ContextUtils.isAbsolutePath(path)) {
@@ -170,6 +232,8 @@ public class ContextUtils implements StringConstants {
 	 * @return the context at the specified absolute path, null if not found.
 	 */
 	private static WorkspaceContext getContextForAbsolutePath(WorkspaceContext rootContext, String absolutePath) {
+	    absolutePath = convertPathToDisplayPath( absolutePath );
+
 		WorkspaceContext resultContext = null;
 
 		if(isAbsolutePath(absolutePath)) {
@@ -212,6 +276,8 @@ public class ContextUtils implements StringConstants {
 	 * @return true if path is absolute, false if not
 	 */
 	public static boolean isAbsolutePath(String path) {
+	    path = convertPathToDisplayPath( path );
+
 		if(path.startsWith(PATH_SEPARATOR + WorkspaceContext.WORKSPACE_ROOT_DISPLAY_NAME + PATH_SEPARATOR)) {
 			return true;
 		}
@@ -224,6 +290,8 @@ public class ContextUtils implements StringConstants {
 	 * @return the path relative to the root context
 	 */
 	public static String convertAbsolutePathToRootRelative(String absolutePath) {
+        absolutePath = convertPathToDisplayPath( absolutePath );
+
 		if(absolutePath.startsWith(PATH_SEPARATOR + WorkspaceContext.WORKSPACE_ROOT_DISPLAY_NAME + PATH_SEPARATOR)) {
 			return absolutePath.substring( (PATH_SEPARATOR+WorkspaceContext.WORKSPACE_ROOT_DISPLAY_NAME+PATH_SEPARATOR).length() );
 		}
@@ -237,6 +305,8 @@ public class ContextUtils implements StringConstants {
 	 * @return the path relative to the root context
 	 */
 	public static String convertAbsolutePathToRelative(WorkspaceContext context, String absolutePath) {
+        absolutePath = convertPathToDisplayPath( absolutePath );
+
 		String absContextPath = null;
 		try {
 			absContextPath = context.getFullName();

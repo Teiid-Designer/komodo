@@ -235,12 +235,24 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
      */
     @Override
     public void record() {
+    	recordToFile(toString());
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
         final Arguments args = getArguments();
-    	StringBuffer buff = new StringBuffer(getName());
-    	for(int i=0; i<args.size(); i++) {
-    		buff.append(" "+args.get(i)); //$NON-NLS-1$
-    	}
-    	recordToFile(buff.toString());
+        final StringBuffer buff = new StringBuffer( getName() );
+
+        for ( int i = 0, size = args.size(); i < size; ++i ) {
+            buff.append(' ').append(args.get( i ) );
+        }
+
+        return buff.toString();
     }
 
     /**
@@ -329,16 +341,7 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
 	 */
 	public boolean validateChildType(String objType, WorkspaceContext context) throws Exception {
 		List<String> allowableChildTypes = context.getAllowableChildTypes();
-		String contextObjType = context.getType().toLowerCase();
-		if(contextObjType.equals(KomodoType.TABLE.getType().toLowerCase())) {
-			allowableChildTypes.add(KomodoType.PRIMARY_KEY.getType().toLowerCase());
-		} else if(contextObjType.equals(KomodoType.STORED_PROCEDURE.getType().toLowerCase())) {
-			allowableChildTypes.add(KomodoType.TABULAR_RESULT_SET.getType().toLowerCase());
-			allowableChildTypes.add(KomodoType.DATA_TYPE_RESULT_SET.getType().toLowerCase());
-		} else if(contextObjType.equals(KomodoType.PUSHDOWN_FUNCTION.getType().toLowerCase())) {
-			allowableChildTypes.add(KomodoType.TABULAR_RESULT_SET.getType().toLowerCase());
-			allowableChildTypes.add(KomodoType.DATA_TYPE_RESULT_SET.getType().toLowerCase());
-		}
+
 		if(!allowableChildTypes.contains(objType.toLowerCase())) {
             print(CompletionConstants.MESSAGE_INDENT,Messages.getString("BuiltInShellCommand.typeArg_childTypeNotAllowed", objType, context.getFullName())); //$NON-NLS-1$
 			return false;

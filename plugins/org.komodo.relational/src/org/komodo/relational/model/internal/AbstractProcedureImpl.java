@@ -45,7 +45,7 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
     /**
      * The allowed child types.
      */
-    private static final KomodoType[] CHILD_TYPES = new KomodoType[] { Parameter.IDENTIFIER };
+    protected static final KomodoType[] CHILD_TYPES = new KomodoType[] { Parameter.IDENTIFIER };
 
     static Class< ? extends AbstractProcedure > getProcedureType( final UnitOfWork transaction,
                                                                   final KomodoObject kobject ) throws KException {
