@@ -19,19 +19,13 @@ cd PartsSQLServer
 create table PARTS
 cd PARTS
 set property NAMEINSOURCE '"partssupplier"."dbo"."PARTS"'
-create column PART_COLOR
-cd PART_COLOR
-set property datatypeName string
-set property datatypeLength 30
-set property NATIVE_TYPE varchar
-set property NAMEINSOURCE '"PART_COLOR"'
-cd ..
 create column PART_ID
 cd PART_ID
 set property datatypeName string
 set property datatypeLength 50
 set property NATIVE_TYPE varchar
 set property NAMEINSOURCE '"PART_ID"'
+set property nullable 'NOT NULL'
 cd ..
 create column PART_NAME
 cd PART_NAME
@@ -39,6 +33,13 @@ set property datatypeName string
 set property datatypeLength 255
 set property NATIVE_TYPE varchar
 set property NAMEINSOURCE '"PART_NAME"'
+cd ..
+create column PART_COLOR
+cd PART_COLOR
+set property datatypeName string
+set property datatypeLength 30
+set property NATIVE_TYPE varchar
+set property NAMEINSOURCE '"PART_COLOR"'
 cd ..
 create column PART_WEIGHT
 cd PART_WEIGHT
@@ -59,6 +60,8 @@ cd SHIPPER_ID
 set property datatypeName bigdecimal
 set property NATIVE_TYPE numeric
 set property NAMEINSOURCE '"SHIPPER_ID"'
+set property nullable 'NOT NULL'
+set property FIXED_LENGTH true
 cd ..
 create column SHIPPER_NAME
 cd SHIPPER_NAME
@@ -79,6 +82,8 @@ cd STATUS_ID
 set property datatypeName bigdecimal
 set property NATIVE_TYPE numeric
 set property NAMEINSOURCE '"STATUS_ID"'
+set property nullable 'NOT NULL'
+set property FIXED_LENGTH true
 cd ..
 create column STATUS_NAME
 cd STATUS_NAME
@@ -94,19 +99,13 @@ cd ..
 create table SUPPLIER
 cd SUPPLIER
 set property NAMEINSOURCE '"partssupplier"."dbo"."SUPPLIER"'
-create column SUPPLIER_CITY
-cd SUPPLIER_CITY
-set property datatypeName string
-set property datatypeLength 30
-set property NATIVE_TYPE varchar
-set property NAMEINSOURCE '"SUPPLIER_CITY"'
-cd ..
 create column SUPPLIER_ID
 cd SUPPLIER_ID
 set property datatypeName string
 set property datatypeLength 10
 set property NATIVE_TYPE varchar
 set property NAMEINSOURCE '"SUPPLIER_ID"'
+set property nullable 'NOT NULL'
 cd ..
 create column SUPPLIER_NAME
 cd SUPPLIER_NAME
@@ -115,18 +114,26 @@ set property datatypeLength 30
 set property NATIVE_TYPE varchar
 set property NAMEINSOURCE '"SUPPLIER_NAME"'
 cd ..
+create column SUPPLIER_STATUS
+cd SUPPLIER_STATUS
+set property datatypeName bigdecimal
+set property NATIVE_TYPE numeric
+set property NAMEINSOURCE '"SUPPLIER_STATUS"'
+set property FIXED_LENGTH true
+cd ..
+create column SUPPLIER_CITY
+cd SUPPLIER_CITY
+set property datatypeName string
+set property datatypeLength 30
+set property NATIVE_TYPE varchar
+set property NAMEINSOURCE '"SUPPLIER_CITY"'
+cd ..
 create column SUPPLIER_STATE
 cd SUPPLIER_STATE
 set property datatypeName string
 set property datatypeLength 2
 set property NATIVE_TYPE varchar
 set property NAMEINSOURCE '"SUPPLIER_STATE"'
-cd ..
-create column SUPPLIER_STATUS
-cd SUPPLIER_STATUS
-set property datatypeName bigdecimal
-set property NATIVE_TYPE numeric
-set property NAMEINSOURCE '"SUPPLIER_STATUS"'
 cd ..
 cd ..
 #
@@ -135,31 +142,35 @@ cd ..
 create table SUPPLIER_PARTS
 cd SUPPLIER_PARTS
 set property NAMEINSOURCE '"partssupplier"."dbo"."SUPPLIER_PARTS"'
-create column PART_ID
-cd PART_ID
-set property datatypeName string
-set property datatypeLength 50
-set property NATIVE_TYPE varchar
-set property NAMEINSOURCE '"PART_ID"'
-cd ..
-create column QUANTITY
-cd QUANTITY
-set property datatypeName bigdecimal
-set property NATIVE_TYPE numeric
-set property NAMEINSOURCE '"QUANTITY"'
-cd ..
-create column SHIPPER_ID
-cd SHIPPER_ID
-set property datatypeName bigdecimal
-set property NATIVE_TYPE numeric
-set property NAMEINSOURCE '"SHIPPER_ID"'
-cd ..
 create column SUPPLIER_ID
 cd SUPPLIER_ID
 set property datatypeName string
 set property datatypeLength 10
 set property NATIVE_TYPE varchar
 set property NAMEINSOURCE '"SUPPLIER_ID"'
+set property nullable 'NOT NULL'
+cd ..
+create column PART_ID
+cd PART_ID
+set property datatypeName string
+set property datatypeLength 50
+set property NATIVE_TYPE varchar
+set property NAMEINSOURCE '"PART_ID"'
+set property nullable 'NOT NULL'
+cd ..
+create column QUANTITY
+cd QUANTITY
+set property datatypeName bigdecimal
+set property NATIVE_TYPE numeric
+set property NAMEINSOURCE '"QUANTITY"'
+set property FIXED_LENGTH true
+cd ..
+create column SHIPPER_ID
+cd SHIPPER_ID
+set property datatypeName bigdecimal
+set property NATIVE_TYPE numeric
+set property NAMEINSOURCE '"SHIPPER_ID"'
+set property FIXED_LENGTH true
 cd ..
 cd ..
 #
@@ -184,19 +195,14 @@ cd PartsOracle
 create table PARTS
 cd PARTS
 set property NAMEINSOURCE '"PARTSSUPPLIER"."PARTS"'
-create column PART_COLOR
-cd PART_COLOR
-set property datatypeName string
-set property datatypeLength 30
-set property NATIVE_TYPE VARCHAR2
-set property NAMEINSOURCE '"PART_COLOR"'
-cd ..
 create column PART_ID
 cd PART_ID
 set property datatypeName string
 set property datatypeLength 4
 set property NATIVE_TYPE CHAR
 set property NAMEINSOURCE '"PART_ID"'
+set property nullable 'NOT NULL'
+set property FIXED_LENGTH true
 cd ..
 create column PART_NAME
 cd PART_NAME
@@ -205,12 +211,23 @@ set property datatypeLength 255
 set property NATIVE_TYPE VARCHAR2
 set property NAMEINSOURCE '"PART_NAME"'
 cd ..
+create column PART_COLOR
+cd PART_COLOR
+set property datatypeName string
+set property datatypeLength 30
+set property NATIVE_TYPE VARCHAR2
+set property NAMEINSOURCE '"PART_COLOR"'
+cd ..
 create column PART_WEIGHT
 cd PART_WEIGHT
 set property datatypeName string
 set property datatypeLength 255
 set property NATIVE_TYPE VARCHAR2
 set property NAMEINSOURCE '"PART_WEIGHT"'
+cd ..
+create PrimaryKey pk
+cd pk
+add-column /workspace/PartsVDB/PartsOracle/PARTS/PART_ID
 cd ..
 cd ..
 #
@@ -224,6 +241,8 @@ cd SHIPPER_ID
 set property datatypeName bigdecimal
 set property NATIVE_TYPE varchar
 set property NAMEINSOURCE '"SHIPPER_ID"'
+set property nullable 'NOT NULL'
+set property FIXED_LENGTH true
 cd ..
 create column SHIPPER_NAME
 cd SHIPPER_NAME
@@ -231,6 +250,10 @@ set property datatypeName string
 set property datatypeLength 30
 set property NATIVE_TYPE NUMBER
 set property NAMEINSOURCE '"SHIPPER_NAME"'
+cd ..
+create PrimaryKey pk
+cd pk
+add-column /workspace/PartsVDB/PartsOracle/SHIP_VIA/SHIPPER_ID
 cd ..
 cd ..
 #
@@ -244,6 +267,8 @@ cd STATUS_ID
 set property datatypeName bigdecimal
 set property NATIVE_TYPE NUMBER
 set property NAMEINSOURCE '"STATUS_ID"'
+set property nullable 'NOT NULL'
+set property FIXED_LENGTH true
 cd ..
 create column STATUS_NAME
 cd STATUS_NAME
@@ -252,6 +277,10 @@ set property datatypeLength 30
 set property NATIVE_TYPE VARCHAR2
 set property NAMEINSOURCE '"STATUS_NAME"'
 cd ..
+create PrimaryKey pk
+cd pk
+add-column /workspace/PartsVDB/PartsOracle/STATUS/STATUS_ID
+cd ..
 cd ..
 #
 # SUPPLIER table
@@ -259,19 +288,13 @@ cd ..
 create table SUPPLIER
 cd SUPPLIER
 set property NAMEINSOURCE '"PARTSSUPPLIER"."SUPPLIER"'
-create column SUPPLIER_CITY
-cd SUPPLIER_CITY
-set property datatypeName string
-set property datatypeLength 30
-set property NATIVE_TYPE VARCHAR2
-set property NAMEINSOURCE '"SUPPLIER_CITY"'
-cd ..
 create column SUPPLIER_ID
 cd SUPPLIER_ID
 set property datatypeName string
 set property datatypeLength 10
 set property NATIVE_TYPE VARCHAR2
 set property NAMEINSOURCE '"SUPPLIER_ID"'
+set property nullable 'NOT NULL'
 cd ..
 create column SUPPLIER_NAME
 cd SUPPLIER_NAME
@@ -280,6 +303,20 @@ set property datatypeLength 30
 set property NATIVE_TYPE VARCHAR2
 set property NAMEINSOURCE '"SUPPLIER_NAME"'
 cd ..
+create column SUPPLIER_STATUS
+cd SUPPLIER_STATUS
+set property datatypeName bigdecimal
+set property NATIVE_TYPE NUMBER
+set property NAMEINSOURCE '"SUPPLIER_STATUS"'
+set property FIXED_LENGTH true
+cd ..
+create column SUPPLIER_CITY
+cd SUPPLIER_CITY
+set property datatypeName string
+set property datatypeLength 30
+set property NATIVE_TYPE VARCHAR2
+set property NAMEINSOURCE '"SUPPLIER_CITY"'
+cd ..
 create column SUPPLIER_STATE
 cd SUPPLIER_STATE
 set property datatypeName string
@@ -287,11 +324,9 @@ set property datatypeLength 2
 set property NATIVE_TYPE VARCHAR2
 set property NAMEINSOURCE '"SUPPLIER_STATE"'
 cd ..
-create column SUPPLIER_STATUS
-cd SUPPLIER_STATUS
-set property datatypeName bigdecimal
-set property NATIVE_TYPE NUMBER
-set property NAMEINSOURCE '"SUPPLIER_STATUS"'
+create PrimaryKey pk
+cd pk
+add-column /workspace/PartsVDB/PartsOracle/SUPPLIER/SUPPLIER_ID
 cd ..
 cd ..
 #
@@ -300,31 +335,40 @@ cd ..
 create table SUPPLIER_PARTS
 cd SUPPLIER_PARTS
 set property NAMEINSOURCE '"PARTSSUPPLIER"."SUPPLIER_PARTS"'
-create column PART_ID
-cd PART_ID
-set property datatypeName string
-set property datatypeLength 4
-set property NATIVE_TYPE CHAR
-set property NAMEINSOURCE '"PART_ID"'
-cd ..
-create column QUANTITY
-cd QUANTITY
-set property datatypeName bigdecimal
-set property NATIVE_TYPE NUMBER
-set property NAMEINSOURCE '"QUANTITY"'
-cd ..
-create column SHIPPER_ID
-cd SHIPPER_ID
-set property datatypeName bigdecimal
-set property NATIVE_TYPE NUMBER
-set property NAMEINSOURCE '"SHIPPER_ID"'
-cd ..
 create column SUPPLIER_ID
 cd SUPPLIER_ID
 set property datatypeName string
 set property datatypeLength 10
 set property NATIVE_TYPE VARCHAR2
 set property NAMEINSOURCE '"SUPPLIER_ID"'
+set property nullable 'NOT NULL'
+cd ..
+create column PART_ID
+cd PART_ID
+set property datatypeName string
+set property datatypeLength 4
+set property NATIVE_TYPE CHAR
+set property NAMEINSOURCE '"PART_ID"'
+set property nullable 'NOT NULL'
+set property FIXED_LENGTH true
+cd ..
+create column QUANTITY
+cd QUANTITY
+set property datatypeName bigdecimal
+set property NATIVE_TYPE NUMBER
+set property NAMEINSOURCE '"QUANTITY"'
+set property FIXED_LENGTH true
+cd ..
+create column SHIPPER_ID
+cd SHIPPER_ID
+set property datatypeName bigdecimal
+set property NATIVE_TYPE NUMBER
+set property NAMEINSOURCE '"SHIPPER_ID"'
+set property FIXED_LENGTH true
+cd ..
+create PrimaryKey pk
+cd pk
+add-column /workspace/PartsVDB/PartsOracle/SUPPLIER_PARTS/PART_ID
 cd ..
 cd ..
 #
@@ -348,13 +392,45 @@ cd PartsViews
 #
 create view PartSummary
 cd PartSummary
-create column PART_COLOR
 create column PART_ID
+cd PART_ID
+set property datatypeName string
+set property datatypeLength 4
+set property nullable 'NOT NULL'
+set property FIXED_LENGTH true
+cd ..
 create column PART_NAME
+cd PART_NAME
+set property datatypeName string
+set property datatypeLength 255
+cd ..
+create column PART_COLOR
+cd PART_COLOR
+set property datatypeName string
+set property datatypeLength 30
+cd ..
 create column PART_WEIGHT
-create column QUANTITY
-create column SHIPPER_ID
+cd PART_WEIGHT
+set property datatypeName string
+set property datatypeLength 255
+cd ..
 create column SUPPLIER_ID
+cd SUPPLIER_ID
+set property datatypeName string
+set property datatypeLength 10
+set property nullable 'NOT NULL'
+cd ..
+create column QUANTITY
+cd QUANTITY
+set property datatypeName bigdecimal
+set property FIXED_LENGTH true
+cd ..
+create column SHIPPER_ID
+cd SHIPPER_ID
+set property datatypeName bigdecimal
+set property FIXED_LENGTH true
+cd ..
+set property queryExpression 'SELECT PartsOracle.PARTS.PART_ID, PartsOracle.PARTS.PART_NAME, PartsOracle.PARTS.PART_COLOR, PartsOracle.PARTS.PART_WEIGHT, PartsSQLServer.SUPPLIER_PARTS.SUPPLIER_ID, PartsSQLServer.SUPPLIER_PARTS.QUANTITY, PartsSQLServer.SUPPLIER_PARTS.SHIPPER_ID FROM PartsOracle.PARTS, PartsSQLServer.SUPPLIER_PARTS WHERE PartsSQLServer.SUPPLIER_PARTS.PART_ID = PartsOracle.PARTS.PART_ID'
 cd ..
 cd ..
 #
@@ -368,6 +444,3 @@ cd custom_oracle
 #set property supportsFullOuterJoins false
 cd ..
 home
-
-
-
