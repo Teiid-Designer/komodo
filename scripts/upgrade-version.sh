@@ -80,10 +80,14 @@ MVN_FLAGS="${MVN_FLAGS} -P target-platform,multiple.target -Dmaven.repo.local=${
 #
 # Maven command
 #
-MVN="mvn ${MVN_FLAGS} org.eclipse.tycho:tycho-versions-plugin:set-version -DnewVersion=$VERSION"
+MVN="mvn ${MVN_FLAGS} org.eclipse.tycho:tycho-versions-plugin:set-version -DnewVersion=${VERSION}"
 
 echo "==============="
 
 cd "${ROOT_DIR}"
 echo "Executing ${MVN}"
-${MVN}
+#${MVN}
+
+echo "==============="
+echo "Changing version in build/pom.xml"
+sed -i "s/<org\.komodo\.version>.*<\/org\.komodo\.version>/<org\.komodo\.version>${VERSION}<\/org\.komodo\.version>/" "${ROOT_DIR}/build/pom.xml"

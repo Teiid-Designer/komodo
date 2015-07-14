@@ -12,7 +12,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <properties>
-    <org.komodo.version>0.0.1-SNAPSHOT</org.komodo.version>
+    <org.komodo.version>0.0.2-SNAPSHOT</org.komodo.version>
   </properties>
 
   <build>
