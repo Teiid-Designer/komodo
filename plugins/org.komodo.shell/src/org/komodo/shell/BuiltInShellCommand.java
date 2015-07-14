@@ -307,6 +307,30 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
     	}
         return true;
     }
+    
+	/**
+	 * Validates that the supplied path argument is a readable file.
+	 * @param filePathArg the path to test
+	 * @return 'true' if the path is valid readable file, 'false' if not.
+	 */
+	public boolean validateReadableFileArg(String filePathArg) {
+		String filePath = filePathArg.trim();
+
+        // Check the fileName arg validity
+        File theFile = new File(filePath);
+        if(!theFile.exists()) {
+        	print(CompletionConstants.MESSAGE_INDENT, Messages.getString("BuiltInShellCommand.FileNotFound", filePath)); //$NON-NLS-1$
+        	return false;
+        } else if(!theFile.isFile()) {
+        	print(CompletionConstants.MESSAGE_INDENT, Messages.getString("BuiltInShellCommand.FileArgNotAFile", filePath)); //$NON-NLS-1$
+        	return false;
+        } else if(!theFile.canRead()) {
+        	print(CompletionConstants.MESSAGE_INDENT, Messages.getString("BuiltInShellCommand.FileNotReadable", filePath)); //$NON-NLS-1$
+        	return false;
+        }
+        
+		return true;
+	}
 
 	/**
 	 * Validates whether the supplied path is valid.  If the path is relative this takes into account the
