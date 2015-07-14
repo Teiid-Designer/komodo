@@ -77,7 +77,7 @@ public class PlayCommand  extends BuiltInShellCommand implements StringConstants
 			final boolean success = command.execute();
 
             if ( !success && reader.isBatch() ) {
-                throw new Exception( Messages.getString( "PlayCommand.CommandFailure", command.getName() ) ); //$NON-NLS-1$
+                throw new Exception( Messages.getString( "PlayCommand.CommandFailure", command ) ); //$NON-NLS-1$
             }
 		}
 	}

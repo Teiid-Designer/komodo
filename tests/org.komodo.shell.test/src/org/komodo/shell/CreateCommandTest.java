@@ -12,12 +12,7 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
-/**
- *
- * @author blafond
- *
- */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( { "javadoc", "nls" } )
 public class CreateCommandTest extends AbstractCommandTest {
 
 	private static final String CREATE_COMMAND_1 = "createCommand1.txt"; //$NON-NLS-1$

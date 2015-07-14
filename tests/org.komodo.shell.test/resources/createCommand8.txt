@@ -6,10 +6,10 @@ create Vdb MyVdb1 /workspace
 create Vdb MyVdb2 /workspace
 #
 # VdbTranslator
-create VdbTranslator MyTranslator1 /workspace/MyVdb1
+create VdbTranslator MyTranslator1 oracle /workspace/MyVdb1
 #
 # VdbImport
-create VdbImport MyImport1 /workspace/MyVdb1
+create VdbImport MyImport2 /workspace/MyVdb1
 #
 # VdbModel
 create Model MyModel /workspace/MyVdb1
@@ -18,7 +18,7 @@ create Model MyModel /workspace/MyVdb1
 create VdbModelSource MyModelSource1 /workspace/MyVdb1/MyModel
 #
 # VdbEntry
-create VdbEntry MyEntry1 /workspace/MyVdb1
+create VdbEntry MyEntry1 /path/to/file.xml /workspace/MyVdb1
 #
 # VdbDataRole
 create VdbDataRole MyDataRole1 /workspace/MyVdb1

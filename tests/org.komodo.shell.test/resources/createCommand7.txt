@@ -29,11 +29,11 @@ create AccessPattern MyAp /workspace/MyVdb/MyModel/MyTable1
 #
 create UniqueConstraint MyUc /workspace/MyVdb/MyModel/MyTable1
 #
-create ForeignKey MyFk /workspace/MyVdb/MyModel/MyTable1 /workspace/MyVdb/MyModel/MyTable2
+create ForeignKey MyFk /workspace/MyVdb/MyModel/MyTable2 /workspace/MyVdb/MyModel/MyTable1
 #
-#create DataTypeResultSet MyDataTypeResultSet /workspace/MyVdb/MyModel/MyStoredProc
+#create DataTypeResultSet /workspace/MyVdb/MyModel/MyStoredProc
 #
-#create TabularResultSet MyTabResultSet /workspace/MyVdb/MyModel/MyPushdownFunc
+#create TabularResultSet /workspace/MyVdb/MyModel/MyPushdownFunc
 #
 #create ResultSetColumn MyResultSetCol /workspace/MyVdb/MyModel/MyVirtualProc/resultSet
 #

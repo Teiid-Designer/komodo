@@ -101,6 +101,28 @@ public class Messages implements StringConstants {
     	}
     }
 
+    public enum CreateCommand {
+
+        DEFAULT_VDB_FILE_PATH,
+        FAILURE,
+        MISSING_ENTRY_PATH,
+        MISSING_FOREIGN_KEY_TABLE_REF,
+        MISSING_OBJ_NAME,
+        MISSING_OBJ_TYPE,
+        MISSING_OPTION_VALUE,
+        MISSING_TRANSLATOR_TYPE,
+        NO_DUPLICATES_ALLOWED,
+        OBJECT_CREATED,
+        PATH_NOT_FOUND,
+        TOO_MANY_ARGS,
+        TYPE_NOT_VALID;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
     public enum StatusCommand {
         Separator,
         Connected,
