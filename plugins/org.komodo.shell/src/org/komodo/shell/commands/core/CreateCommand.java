@@ -385,12 +385,20 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
 
             return -1;
         } else if ( getArguments().size() == 2 ) {
-            // TODO need to handle those types that have args after name and before parent path
-            // The arg is expected to be a path
-            updateTabCompleteCandidatesForPath( candidates, getWorkspaceStatus().getCurrentContext(), true, lastArgument );
+        	final String typeArg = getArguments().get(0);
+        	// VDB Translator - candidate is translator type
+        	if( (lastArgument == null) && typeArg.equals(KomodoType.VDB_TRANSLATOR.getType())) {
+        		candidates.add("<translatorType>"); //$NON-NLS-1$
+        		return 0;
+        	// All else - path candidates
+        	} else {
+        		// TODO need to handle those types that have args after name and before parent path
+        		// The arg is expected to be a path
+        		updateTabCompleteCandidatesForPath( candidates, getWorkspaceStatus().getCurrentContext(), true, lastArgument );
 
-            // Do not put space after it - may want to append more to the path
-            return NO_APPEND_SEPARATOR;
+        		// Do not put space after it - may want to append more to the path
+        		return NO_APPEND_SEPARATOR;
+        	}
         }
         return -1;
     }
