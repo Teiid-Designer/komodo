@@ -234,7 +234,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
                         if ( multiple ) {
                             setMultiValuedProperty( session, node, factory, name, values, type );
                         } else {
-                            node.setProperty( name, PropertyImpl.createValue( factory, values[0], type ) );
+                            setSingleValuedProperty(node, factory, name, values[0], type);
                         }
                     }
                 }
@@ -256,16 +256,18 @@ public class ObjectImpl implements KomodoObject, StringConstants {
                     } else {
                         if ( ( values[0] != null )
                              && ( ( !( values[0] instanceof String ) ) || !StringUtils.isBlank( ( String )values[0] ) ) ) {
-                            node.setProperty( name, PropertyImpl.createValue( factory, values[0] ) );
+                            setSingleValuedProperty(node, factory, name, values[0], PropertyType.UNDEFINED);
                         }
                     }
                 } else if ( propDescriptor.isMultiple() ) {
                     final int propType = PropertyDescriptorImpl.convert( propDescriptor.getType() );
                     setMultiValuedProperty( session, node, factory, name, values, propType );
                 } else {
+                    final int propType = PropertyDescriptorImpl.convert( propDescriptor.getType() );
                     if ( ( values[0] != null )
                          && ( ( !( values[0] instanceof String ) ) || !StringUtils.isBlank( ( String )values[0] ) ) ) {
                         node.setProperty( name, PropertyImpl.createValue( factory, values[0] ) );
+                        setSingleValuedProperty(node, factory, name, values[0], propType);
                     }
                 }
             }
@@ -1324,6 +1326,22 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         } catch (final Exception e) {
             throw handleError( e );
         }
+    }
+
+    private void setSingleValuedProperty(final Node node,
+                                                                  final ValueFactory factory,
+                                                                  final String name,
+                                                                  final Object propValue,
+                                                                  final int propertyType) throws Exception {
+        javax.jcr.Property property = node.getProperty(name);
+        if (property == null)
+            return;
+
+        Value oldValue = property.getValue();
+        Value newValue = PropertyImpl.createValue( factory, propValue, propertyType );
+
+        if (oldValue != null && ! oldValue.equals(newValue))
+            node.setProperty( name, newValue );
     }
 
     void setMultiValuedProperty( final Session session,
