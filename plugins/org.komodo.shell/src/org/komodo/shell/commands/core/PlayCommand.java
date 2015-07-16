@@ -42,6 +42,10 @@ public class PlayCommand  extends BuiltInShellCommand implements StringConstants
 	public boolean execute() throws Exception {
         String fileNameArg = requiredArgument(0, Messages.getString("PlayCommand.InvalidArgMsg_FileName")); //$NON-NLS-1$
 
+        // Validate the supplied path
+        boolean validFile = validateReadableFileArg(fileNameArg);
+        if(!validFile) return false;
+        
         try {
         	playFile(fileNameArg);
             print(CompletionConstants.MESSAGE_INDENT, Messages.getString("PlayCommand.fileExecuted", fileNameArg)); //$NON-NLS-1$
