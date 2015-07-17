@@ -1333,10 +1333,16 @@ public class ObjectImpl implements KomodoObject, StringConstants {
                                                                   final String name,
                                                                   final Object propValue,
                                                                   final int propertyType) throws Exception {
-        javax.jcr.Property property = node.getProperty(name);
-        if (property == null)
-            return;
 
+    	// Allow property to be created if it does not exist
+        final boolean hasProperty = node.hasProperty( name );
+        if(!hasProperty) {
+    		node.setProperty(name,PropertyImpl.createValue( factory, propValue, propertyType ));
+    		return;
+        }
+        
+    	javax.jcr.Property property = node.getProperty(name);
+    	
         Value oldValue = property.getValue();
         Value newValue = PropertyImpl.createValue( factory, propValue, propertyType );
 
