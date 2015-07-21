@@ -25,11 +25,12 @@ package org.komodo.modeshape.vdb.test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.komodo.modeshape.vdb.test.export.TestVdbExport;
+import org.komodo.modeshape.vdb.test.ddl.TestDdlNodeVisitor;
 
 @SuppressWarnings( "javadoc" )
 @RunWith( Suite.class )
 @Suite.SuiteClasses( {
-                                        TestVdbExport.class
+                                        TestVdbExport.class, TestDdlNodeVisitor.class
                                     } )
 public class AllTests {
     // nothing to do

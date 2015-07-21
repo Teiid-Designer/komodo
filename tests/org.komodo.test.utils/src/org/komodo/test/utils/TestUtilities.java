@@ -65,6 +65,11 @@ public class TestUtilities implements StringConstants {
     public static final String TWEET_EXAMPLE_NAME = "tweet-example-vdb";
 
     /**
+     * Tweet example file, translator has no description defined
+     */
+    public static final String NO_TRANSLATOR_DESCRIP_NAME = "notranslator-descrip-vdb";
+
+    /**
      * Tweet example file suffix
      */
     public static final String TWEET_EXAMPLE_SUFFIX = DOT + XML;
@@ -109,6 +114,17 @@ public class TestUtilities implements StringConstants {
         return getResourceAsStream(TestUtilities.class,
                                                                   RESOURCES_DIRECTORY,
                                                                   TWEET_EXAMPLE_NAME,
+                                                                  TWEET_EXAMPLE_SUFFIX);
+    }
+
+    /**
+     * @return input stream of vdb xml with undefined translator description attribute
+     * @throws Exception if error occurs
+     */
+    public static InputStream undefinedAttrExample() throws Exception {
+        return getResourceAsStream(TestUtilities.class,
+                                                                  RESOURCES_DIRECTORY,
+                                                                  NO_TRANSLATOR_DESCRIP_NAME,
                                                                   TWEET_EXAMPLE_SUFFIX);
     }
 
@@ -165,6 +181,114 @@ public class TestUtilities implements StringConstants {
         Node rest = translators.addNode(REST_TRANSLATOR);
         rest.setPrimaryType(VdbLexicon.Translator.TRANSLATOR);
         rest.setProperty(VdbLexicon.Translator.DESCRIPTION, "Rest Web Service translator");
+        rest.setProperty("DefaultServiceMode", "MESSAGE");
+        rest.setProperty("DefaultBinding", "HTTP");
+        rest.setProperty(VdbLexicon.Translator.TYPE, "ws");
+
+        /*
+         *      twitter
+         *          @jcr:primaryType=vdb:declarativeModel
+         *          @jcr:uuid={uuid-to-be-created}
+         *          @mmcore:modelType=PHYSICAL
+         *          @vdb:sourceTranslator=rest
+         *          @vdb:sourceName=twitter
+         *          @vdb:metadataType=DDL
+         *          @vdb:visible=true
+         *          @vdb:sourceJndiName=java:/twitterDS
+         */
+        Node twitter = tweetExample.addNode(TWITTER_MODEL);
+        twitter.setPrimaryType(VdbLexicon.Vdb.DECLARATIVE_MODEL);
+        twitter.setProperty(CoreLexicon.JcrId.MODEL_TYPE, CoreLexicon.ModelType.PHYSICAL);
+        twitter.setProperty(VdbLexicon.Model.VISIBLE, true);
+        twitter.setProperty(VdbLexicon.Model.METADATA_TYPE, "DDL");
+
+        /*
+         *          vdb:sources
+         *              @jcr:primaryType=vdb:sources
+         */
+        Node twitterSources = twitter.addNode(VdbLexicon.Vdb.SOURCES, VdbLexicon.Vdb.SOURCES);
+
+        /*
+         *              twitter
+         *                  @jcr:primaryType=vdb:source
+         *                  @vdb:sourceTranslator=rest
+         *                  @vdb:sourceJndiName=java:/twitterDS
+         */
+        Node twitterSource = twitterSources.addNode(TWITTER_MODEL, VdbLexicon.Source.SOURCE);
+        twitterSource.setProperty(VdbLexicon.Source.TRANSLATOR, REST_TRANSLATOR);
+        twitterSource.setProperty(VdbLexicon.Source.JNDI_NAME, "java:/twitterDS");
+
+        /*      
+         *      twitterview
+         *          @jcr:primaryType=vdb:declarativeModel
+         *          @jcr:uuid={uuid-to-be-created}
+         *          @mmcore:modelType=VIRTUAL
+         *          @vdb:visible=true
+         *          @vdb:metadataType=DDL
+         *          @vdb:modelDefinition=CREATE VIRTUAL PROCEDURE getTweets(query varchar) RETURNS (created_on varchar(25), from_user varchar(25), to_user varchar(25), profile_image_url varchar(25), source varchar(25), text varchar(140)) AS select tweet.* from (call twitter.invokeHTTP(action => 'GET', endpoint =>querystring('',query as "q"))) w, XMLTABLE('results' passing JSONTOXML('myxml', w.result) columns created_on string PATH 'created_at', from_user string PATH 'from_user', to_user string PATH 'to_user', profile_image_url string PATH 'profile_image_url', source string PATH 'source', text string PATH 'text') tweet; CREATE VIEW Tweet AS select * FROM twitterview.getTweets;
+         */
+        Node twitterView = tweetExample.addNode(TWITTER_VIEW_MODEL);
+        twitterView.setPrimaryType(VdbLexicon.Vdb.DECLARATIVE_MODEL);
+        twitterView.setProperty(CoreLexicon.JcrId.MODEL_TYPE, CoreLexicon.ModelType.VIRTUAL);
+        twitterView.setProperty(VdbLexicon.Model.METADATA_TYPE, "DDL");
+        twitterView.setProperty(VdbLexicon.Model.VISIBLE, true);
+        twitterView.setProperty(VdbLexicon.Model.MODEL_DEFINITION, TWITTER_VIEW_MODEL_DDL);
+
+        return tweetExample;
+    }
+    
+    /**
+     * Creates the structure of the tweet example vdb
+     *
+     * @param parentNode parent to append the new vdb
+     * @return the new vdb node
+     * @throws Exception if error occurs
+     */
+    public static Node createTweetExampleNoTransDescripNode(Node parentNode) throws Exception {
+        /*
+         * tweet-example-vdb.xml
+         *      @jcr:primaryType=vdb:virtualDatabase
+         *      @jcr:mixinTypes=[mode:derived,mix:referenceable]
+         *      @jcr:uuid={uuid-to-be-created}
+         *      @mode:sha1={sha1-to-be-created}
+         *      @vdb:preview=false
+         *      @vdb:version=1
+         *      @vdb:originalFile=/vdbs/declarativeModels-vdb.xml
+         *      @vdb:name=twitter
+         *      @vdb:description=Shows how to call Web Services
+         *      @UseConnectorMetadata=cached
+         */
+        Node tweetExample = parentNode.addNode(TWEET_EXAMPLE_NAME + TWEET_EXAMPLE_SUFFIX);
+        tweetExample.setPrimaryType(VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        tweetExample.addMixin("mode:derived");
+        tweetExample.addMixin("mix:referenceable");
+        tweetExample.setProperty(VdbLexicon.Vdb.NAME, "twitter");
+        tweetExample.setProperty(VdbLexicon.Vdb.DESCRIPTION, "Shows how to call Web Services");
+
+        // Miscellaneous property
+        tweetExample.setProperty("UseConnectorMetadata", "cached");
+
+        tweetExample.setProperty(VdbLexicon.Vdb.ORIGINAL_FILE, "/vdbs/" + TWEET_EXAMPLE_NAME + TWEET_EXAMPLE_SUFFIX);
+        tweetExample.setProperty(VdbLexicon.Vdb.PREVIEW, false);
+        tweetExample.setProperty(VdbLexicon.Vdb.VERSION, 1);
+
+        /*
+         *      vdb:translators
+         *          @jcr:primaryType=vdb:translators
+         */
+        Node translators = tweetExample.addNode(VdbLexicon.Vdb.TRANSLATORS);
+        translators.setPrimaryType(VdbLexicon.Vdb.TRANSLATORS);
+
+        /*
+         *          rest
+         *              @jcr:primaryType=vdb:translator
+         *              @DefaultServiceMode=MESSAGE
+         *              @DefaultBinding=HTTP
+         *              @vdb:type=ws
+         *              @vdb:description=Rest Web Service translator
+         */
+        Node rest = translators.addNode(REST_TRANSLATOR);
+        rest.setPrimaryType(VdbLexicon.Translator.TRANSLATOR);
         rest.setProperty("DefaultServiceMode", "MESSAGE");
         rest.setProperty("DefaultBinding", "HTTP");
         rest.setProperty(VdbLexicon.Translator.TYPE, "ws");
