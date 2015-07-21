@@ -2,6 +2,7 @@ package org.komodo.shell;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+
 import org.junit.Test;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.vdb.Vdb;
@@ -10,6 +11,7 @@ import org.komodo.shell.commands.core.CreateCommand;
 import org.komodo.shell.util.ContextUtils;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
 @SuppressWarnings( { "javadoc", "nls" } )
@@ -23,6 +25,7 @@ public class CreateCommandTest extends AbstractCommandTest {
 	private static final String CREATE_COMMAND_6 = "createCommand6.txt"; //$NON-NLS-1$
 	private static final String CREATE_COMMAND_7 = "createCommand7.txt"; //$NON-NLS-1$
 	private static final String CREATE_COMMAND_8 = "createCommand8.txt"; //$NON-NLS-1$
+	private static final String CREATE_COMMAND_9 = "createCustomProperty.txt"; //$NON-NLS-1$
 
 	/**
 	 * Test for CreateCommand
@@ -229,4 +232,31 @@ public class CreateCommandTest extends AbstractCommandTest {
 
     }
 
+    @Test
+    /**
+     * Creates a custom property using the create command
+     * @throws Exception
+     */
+    public void testCreateCustomProperty() throws Exception {
+    	setup(CREATE_COMMAND_9, CreateCommand.class);
+
+    	execute();
+
+    	assertEquals("/workspace/myVDB", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+
+    	WorkspaceContext vdbContext = ContextUtils.getContextForPath(wsStatus, "/workspace/myVDB"); //$NON-NLS-1$
+    	KomodoObject ko = vdbContext.getKomodoObj();
+    	UnitOfWork trans = wsStatus.getTransaction();
+    	// Verify the komodo class is a Vdb and is VDB type
+    	assertEquals(KomodoType.VDB.name(), ko.getTypeIdentifier(trans).name());
+
+    	Vdb vdb = (Vdb)resolveType(trans, ko, Vdb.class);
+
+    	// Verify the custom property exists
+    	Property customProp = vdb.getProperty(trans, "customProp");
+    	assertNotNull(customProp);
+    	
+    	// Verify the property value
+    	assertEquals("aValue", customProp.getValue(trans));
+    }
 }

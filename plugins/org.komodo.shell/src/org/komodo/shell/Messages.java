@@ -110,9 +110,13 @@ public class Messages implements StringConstants {
         MISSING_OBJ_NAME,
         MISSING_OBJ_TYPE,
         MISSING_OPTION_VALUE,
+        MISSING_PROPERTY_NAME,
+        MISSING_PROPERTY_VALUE,
+        PROPERTY_ALREADY_EXISTS,
         MISSING_TRANSLATOR_TYPE,
         NO_DUPLICATES_ALLOWED,
         OBJECT_CREATED,
+        PROPERTY_CREATED,
         PATH_NOT_FOUND,
         TOO_MANY_ARGS,
         TYPE_NOT_VALID;
@@ -129,6 +133,15 @@ public class Messages implements StringConstants {
         NotConnected,
         PingOk,
         PingFail;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    public enum SetCommand {
+        TOO_MANY_ARGS;
 
         @Override
         public String toString() {

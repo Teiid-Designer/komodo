@@ -1,0 +1,4 @@
+# create a VDB, then add a custom property
+create vdb myVDB
+cd myVDB
+create property customProp aValue

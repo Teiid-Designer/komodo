@@ -41,7 +41,7 @@ public class UnsetPropertyCommand extends BuiltInShellCommand {
         try {
             final String propNameArg = requiredArgument( 0, getString( "missingPropertyName" ) ); //$NON-NLS-1$
 
-            if ( !validateProperty( propNameArg, getContext() ) ) {
+            if ( !validateProperty( propNameArg, getContext(), true ) ) {
                 return false;
             }
 
