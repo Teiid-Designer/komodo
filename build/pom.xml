@@ -22,6 +22,7 @@
         <directory>kits/</directory>
         <filtering>true</filtering>
         <includes>
+          <include>**/*.bat</include>
           <include>**/*.sh</include>
           <include>**/*.properties</include>
         </includes>
