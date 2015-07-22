@@ -23,13 +23,13 @@ package org.komodo.shell.commands.core;
 
 import java.util.List;
 import org.komodo.shell.BuiltInShellCommand;
-import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
 import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.utils.StringUtils;
 
 /**
  * Cd command - allows changing the workspace context
@@ -98,9 +98,9 @@ public class CdCommand extends BuiltInShellCommand implements StringConstants {
 			// The arg is expected to be a path
 			updateTabCompleteCandidatesForPath(candidates, currentContext, true, lastArgument);
 
-			// Do not put space after it - may want to append more to the path
-			return CompletionConstants.NO_APPEND_SEPARATOR;
+            return ( candidates.isEmpty() ? -1 : ( StringUtils.isBlank( lastArgument ) ? 0 : ( toString().length() + 1 ) ) );
 		}
+
 		return -1;
 	}
 

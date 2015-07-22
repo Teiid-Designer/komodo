@@ -307,7 +307,7 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
     	}
         return true;
     }
-    
+
 	/**
 	 * Validates that the supplied path argument is a readable file.
 	 * @param filePathArg the path to test
@@ -328,7 +328,7 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
         	print(CompletionConstants.MESSAGE_INDENT, Messages.getString("BuiltInShellCommand.FileNotReadable", filePath)); //$NON-NLS-1$
         	return false;
         }
-        
+
 		return true;
 	}
 
@@ -423,11 +423,9 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
 	 * @throws Exception exception if problem getting the value.
 	 */
 	public boolean validatePropertyName(WorkspaceContext context, String propName) throws Exception {
-		// Check for valid propName
-		String propValue = context.getPropertyValue(propName);
+		final boolean exists = context.getProperties().contains( propName );
 
-		// If a property with the supplied name is not found, propValue is null.
-		if(propValue==null) {
+        if ( !exists ) {
             print(CompletionConstants.MESSAGE_INDENT,Messages.getString("BuiltInShellCommand.propertyArg_noPropertyWithThisName", propName)); //$NON-NLS-1$
 			return false;
 		}
@@ -559,11 +557,22 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
      * @param lastArg the commandline arg
      */
     private void updateCandidates(List<CharSequence> candidates, List<String> completionList, String lastArg) {
-    	for (String item : completionList) {
-    		if (item.toUpperCase().startsWith(lastArg.toUpperCase())) {
-    			candidates.add(item);
-    		}
-    	}
+        updateCandidates( candidates, completionList, lastArg, true );
+    }
+
+    private void updateCandidates( final List< CharSequence > candidates,
+                                   final List< String > completionList,
+                                   final String lastArg,
+                                   final boolean caseSensitive ) {
+        for ( final String item : completionList ) {
+            if (caseSensitive) {
+                if ( item.startsWith( lastArg )) {
+                    candidates.add( item );
+                }
+            } else if ( item.toUpperCase().startsWith( lastArg.toUpperCase() ) ) {
+                candidates.add( item );
+            }
+        }
     }
 
 }

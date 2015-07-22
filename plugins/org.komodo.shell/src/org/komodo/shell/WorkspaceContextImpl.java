@@ -314,7 +314,7 @@ public class WorkspaceContextImpl implements WorkspaceContext {
             return displayValue;
         }
 
-        return Messages.getString( SHELL.NO_PROPERTY_VALUE );
+        return null;
     }
 
     /**
