@@ -103,6 +103,45 @@ public class TestVdbExport extends AbstractSequencerTest {
     }
 
     @Test(timeout=3000000)
+    public void testBasicVdbExportUndefinedAttribute() throws Exception {
+        Node twitterExampleNode = TestUtilities.createTweetExampleNoTransDescripNode(rootNode);
+        saveSession();
+
+        traverse(twitterExampleNode);
+
+        //
+        // Sequencing completed, now verify
+        //
+        Node tweet = verify(twitterExampleNode,"twitterview/Tweet", TeiidDdlLexicon.CreateTable.VIEW_STATEMENT);
+        verify(tweet, TeiidSqlLexicon.Query.ID, TeiidSqlLexicon.Query.ID);
+
+        //
+        // Create node visitor and visit the jcr nodes
+        //
+        StringWriter testWriter = new StringWriter();
+        VdbNodeVisitor visitor = createNodeVisitor(testWriter);
+        visitor.visit(twitterExampleNode);
+
+        //
+        // Create an XML Document from the filled writer
+        //
+        String testXML = testWriter.toString();
+        System.out.println(testXML);
+        Document testDoc = TestUtilities.createDocument(testXML);
+
+        //
+        // Create comparison XML Document from the example xml files
+        //
+        InputStream compareStream = TestUtilities.undefinedAttrExample();
+        Document compareDoc = TestUtilities.createDocument(compareStream);
+
+        // Compare the XML documents. Unlike Document.isEqualNode(document)
+        // the document nodes can be in a different order and the documents are
+        // still equal.
+        TestUtilities.compareDocuments(compareDoc, testDoc);
+    }
+    
+    @Test(timeout=3000000)
     public void testAllElementsVdbExport() throws Exception {
         Node allElementsNode = TestUtilities.createAllElementsExampleNode(rootNode);
         saveSession();

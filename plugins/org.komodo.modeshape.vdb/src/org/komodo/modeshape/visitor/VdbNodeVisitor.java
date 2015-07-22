@@ -53,7 +53,7 @@ public class VdbNodeVisitor extends AbstractNodeVisitor implements StringConstan
      */
     public static String DATA_ROLE_PERMISSION_CONDITION_XML = "condition"; //$NON-NLS-1$
 
-    private static final String UNDEFINED = "undefined"; //$NON-NLS-1$
+    private static final String UNDEFINED = null; 
 
     private static Map<String, NodeTypeName> nodeNameIndex = new HashMap<String, NodeTypeName>();
 
@@ -223,7 +223,7 @@ public class VdbNodeVisitor extends AbstractNodeVisitor implements StringConstan
     }
 
     private void writeAttribute(String name, String value) throws XMLStreamException {
-        writer.writeAttribute(name, value);
+    	if(value!=null) writer.writeAttribute(name, value);
     }
 
     private void writeCData(String data) throws XMLStreamException {

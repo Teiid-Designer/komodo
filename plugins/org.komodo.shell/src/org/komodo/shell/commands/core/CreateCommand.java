@@ -242,6 +242,11 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
                     throw new Exception( Messages.getString( MISSING_FOREIGN_KEY_TABLE_REF ) );
                 }
 
+                // may have a parent path
+                if ( args.length > 3 ) {
+                    throw new Exception( Messages.getString( TOO_MANY_ARGS, objType ) );
+                }
+                
                 final String fkName = args[ 0 ];
                 final String tableRefPath = args[ 1 ];
                 final KomodoObject parent = getParent( 2, args );
