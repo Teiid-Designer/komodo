@@ -9,6 +9,8 @@ package org.komodo.shell.commands.core;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import static org.komodo.shell.CompletionConstants.NO_APPEND_SEPARATOR;
+import static org.komodo.shell.Messages.SetCommand.TOO_MANY_ARGS;
+
 import java.io.File;
 import java.util.Arrays;
 import java.util.Date;
@@ -72,6 +74,11 @@ public class SetCommand extends BuiltInShellCommand {
         		// path is optional.  if path is not included, current context is assumed.
         		String pathArg = optionalArgument(3);
 
+                // check for too many args
+                if ( getArguments().size() > 4 ) {
+                    throw new Exception( Messages.getString( TOO_MANY_ARGS, subcmdArg ) );
+                }
+                
                 // Validates SET PROPERTY args
                 if (!validateSetProperty(propNameArg,propValueArg,pathArg)) {
         			return false;
@@ -184,26 +191,26 @@ public class SetCommand extends BuiltInShellCommand {
      * @throws Exception
      */
 	protected boolean validateSetProperty(String propName, String propValue, String contextPath) throws Exception {
+		// Validate the path first if supplied
+		if(!StringUtils.isEmpty(contextPath)) {
+			if (!validatePath(contextPath)) {
+				return false;
+			}
+		}
+		
 		// Get the context for object.  otherwise use current context
         final WorkspaceContext context = StringUtils.isEmpty( contextPath ) ? getContext()
                                                                            : ContextUtils.getContextForPath( getWorkspaceStatus(),
                                                                                                              contextPath );
 
 		// Validate the type is valid for the context
-		if (!validateProperty(propName,context)) {
+		if (!validateProperty(propName,context,true)) {
 			return false;
 		}
 
 		// Validate the property value
 		if (!validatePropertyValue(propName,propValue,context)) {
 			return false;
-		}
-
-		// Validate the path if supplied
-		if(!StringUtils.isEmpty(contextPath)) {
-			if (!validatePath(contextPath)) {
-				return false;
-			}
 		}
 
 		return true;

@@ -378,11 +378,13 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
 	 * If invalid an error message is printed out.
 	 * @param propName the property name
 	 * @param context the workspace context
+	 * @param printMessage specify whether output message printed
 	 * @return 'true' if the property is valid for the context, 'false' if not.
 	 * @exception Exception the exception
 	 */
     public boolean validateProperty( final String propName,
-                                     final WorkspaceContext context ) throws Exception {
+                                     final WorkspaceContext context,
+                                     final boolean printMessage) throws Exception {
         if ( !StringUtils.isEmpty( propName ) ) {
             final List< String > propNames = context.getProperties();
 
@@ -390,9 +392,11 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
                  || ( !isShowingPropertyNamePrefixes() && propNames.contains( attachPrefix( context, propName ) ) ) ) {
                 return true;
             }
-
-            print( CompletionConstants.MESSAGE_INDENT,
-                   Messages.getString( "BuiltInShellCommand.propertyArg_noPropertyWithThisName", propName ) ); //$NON-NLS-1$
+            
+            if(printMessage) {
+            	print( CompletionConstants.MESSAGE_INDENT,
+            			Messages.getString( "BuiltInShellCommand.propertyArg_noPropertyWithThisName", propName ) ); //$NON-NLS-1$
+            }
         }
 
         return false;

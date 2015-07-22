@@ -17,8 +17,12 @@ import static org.komodo.shell.Messages.CreateCommand.MISSING_OBJ_NAME;
 import static org.komodo.shell.Messages.CreateCommand.MISSING_OBJ_TYPE;
 import static org.komodo.shell.Messages.CreateCommand.MISSING_OPTION_VALUE;
 import static org.komodo.shell.Messages.CreateCommand.MISSING_TRANSLATOR_TYPE;
+import static org.komodo.shell.Messages.CreateCommand.MISSING_PROPERTY_NAME;
+import static org.komodo.shell.Messages.CreateCommand.MISSING_PROPERTY_VALUE;
+import static org.komodo.shell.Messages.CreateCommand.PROPERTY_ALREADY_EXISTS;
 import static org.komodo.shell.Messages.CreateCommand.NO_DUPLICATES_ALLOWED;
 import static org.komodo.shell.Messages.CreateCommand.OBJECT_CREATED;
+import static org.komodo.shell.Messages.CreateCommand.PROPERTY_CREATED;
 import static org.komodo.shell.Messages.CreateCommand.PATH_NOT_FOUND;
 import static org.komodo.shell.Messages.CreateCommand.TOO_MANY_ARGS;
 import static org.komodo.shell.Messages.CreateCommand.TYPE_NOT_VALID;
@@ -53,6 +57,8 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
      * The command name.
      */
     public static final String NAME = "create"; //$NON-NLS-1$
+    
+    private static final String PROPERTY = "property";  //$NON-NLS-1$
 
     private static final Set< KomodoType > NOT_SUPPORTED;
 
@@ -96,9 +102,16 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
             // Commit transaction
             getWorkspaceStatus().commit( CreateCommand.class.getSimpleName() );
 
-            // Print message
-            print( MESSAGE_INDENT,
-                   Messages.getString( OBJECT_CREATED, typeArg, kobject.getName( getWorkspaceStatus().getTransaction() ) ) );
+            if( PROPERTY.equals(typeArg.toLowerCase()) ) {
+                final String typeName = requiredArgument( 1, Messages.getString( MISSING_OBJ_TYPE ) );
+                // Print message
+                print( MESSAGE_INDENT,
+            			Messages.getString( PROPERTY_CREATED, typeName ) );
+            } else {
+            	// Print message
+            	print( MESSAGE_INDENT,
+            			Messages.getString( OBJECT_CREATED, typeArg, kobject.getName( getWorkspaceStatus().getTransaction() ) ) );
+            }
         } catch ( final Exception e ) {
             print( MESSAGE_INDENT, Messages.getString( FAILURE, typeArg ) );
             print( MESSAGE_INDENT, TAB + e.getMessage() );
@@ -321,7 +334,36 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
             }
             case UNKNOWN:
             default:
-                throw new Exception( Messages.getString( TYPE_NOT_VALID, objType ) );
+            	// Allows Custom properties to be created
+            	if( objType!=null && PROPERTY.equals(objType.toLowerCase()) ) {
+                    // must have a property name
+                    if ( args.length == 0 ) {
+                        throw new Exception( Messages.getString( MISSING_PROPERTY_NAME ) );
+                    }
+
+                    // must have a property value
+                    if ( args.length == 1 ) {
+                        throw new Exception( Messages.getString( MISSING_PROPERTY_VALUE ) );
+                    }
+
+                    // may have a parent path
+                    if ( args.length > 2 ) {
+                        throw new Exception( Messages.getString( TOO_MANY_ARGS, objType ) );
+                    }
+                    
+                    final String propName = args[ 0 ];
+                    final String propValue = args[ 1 ];
+                    WorkspaceContext context = getWorkspaceStatus().getCurrentContext();
+            		// Can create if it does not already exist
+            		if (!validateProperty(propName,context,false)) {
+                        context.setPropertyValue( propName, propValue );
+                	// Already exists - cannot create
+            		} else {
+                        throw new Exception( Messages.getString( PROPERTY_ALREADY_EXISTS, propName ) );
+            		}
+            	} else {
+            		throw new Exception( Messages.getString( TYPE_NOT_VALID, objType ) );
+            	}
         }
 
         return result;
@@ -370,6 +412,14 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
                     candidates.add( type );
                 }
             }
+            
+            // Allow creation of custom properties everywhere except workspace node
+            String contextType = getWorkspaceStatus().getCurrentContext().getType();
+           	if( !WorkspaceStatus.WORKSPACE_TYPE.equals(contextType.toUpperCase()) ) {
+                if ( ( lastArgument == null ) || ( PROPERTY.toUpperCase().startsWith( lastArgument.toUpperCase() ) ) ) {
+                    candidates.add( PROPERTY );
+                }
+        	}
 
             // if there is a lastArgument return its length
             return ( candidates.isEmpty() ? -1 : ( StringUtils.isBlank( lastArgument ) ? 0 : lastArgument.length() ) );
