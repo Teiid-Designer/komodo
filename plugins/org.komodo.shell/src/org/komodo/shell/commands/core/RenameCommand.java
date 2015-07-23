@@ -60,7 +60,9 @@ public class RenameCommand extends BuiltInShellCommand implements StringConstant
         	// Rename
             rename(objNameArg, newName);
             // Commit transaction
-            getWorkspaceStatus().commit("RenameCommand"); //$NON-NLS-1$
+            if ( isAutoCommit() ) {
+                getWorkspaceStatus().commit( RenameCommand.class.getSimpleName() );
+            }
             // Print message
             print(CompletionConstants.MESSAGE_INDENT, Messages.getString("RenameCommand.ObjectRenamed", objNameArg, newName)); //$NON-NLS-1$
         } catch (Exception e) {

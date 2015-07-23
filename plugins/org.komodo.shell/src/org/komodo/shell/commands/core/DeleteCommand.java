@@ -48,7 +48,9 @@ public class DeleteCommand extends BuiltInShellCommand implements StringConstant
         	// Delete
             delete(objPathArg);
             // Commit transaction
-            getWorkspaceStatus().commit("DeleteCommand"); //$NON-NLS-1$
+            if ( isAutoCommit() ) {
+                getWorkspaceStatus().commit( DeleteCommand.class.getSimpleName() );
+            }
             // Print message
             print(CompletionConstants.MESSAGE_INDENT, Messages.getString("DeleteCommand.ObjectDeleted", objPathArg)); //$NON-NLS-1$
         } catch (Exception e) {

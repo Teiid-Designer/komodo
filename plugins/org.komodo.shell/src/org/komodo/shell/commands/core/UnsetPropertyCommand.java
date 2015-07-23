@@ -48,12 +48,14 @@ public class UnsetPropertyCommand extends BuiltInShellCommand {
 
             final WorkspaceContext context = getContext();
 
-            // Set the property
+            // remove the property by setting its value to null
             final String propertyName = ( !isShowingPropertyNamePrefixes() ? attachPrefix( context, propNameArg ) : propNameArg );
             context.setPropertyValue( propertyName, null );
 
             // Commit transaction
-            getWorkspaceStatus().commit( getClass().getSimpleName() );
+            if ( isAutoCommit() ) {
+                getWorkspaceStatus().commit( UnsetPropertyCommand.class.getSimpleName() );
+            }
 
             // Print message
             print( MESSAGE_INDENT, getString( "propertyUnset", propNameArg ) ); //$NON-NLS-1$
