@@ -13,6 +13,7 @@ import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.test.utils.AbstractLocalRepositoryTest;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
@@ -61,8 +62,14 @@ public class RelationalModelTest extends AbstractLocalRepositoryTest {
 
     protected Vdb createVdb( final String vdbName,
                              final String vdbPath ) throws Exception {
+        return createVdb(vdbName, null, vdbPath);
+    }
+
+    protected Vdb createVdb( final String vdbName,
+                             final KomodoObject parent,
+                             final String vdbPath ) throws Exception {
         final WorkspaceManager mgr = WorkspaceManager.getInstance( _repo );
-        final Vdb vdb = mgr.createVdb( this.uow, null, vdbName, vdbPath );
+        final Vdb vdb = mgr.createVdb( this.uow, parent, vdbName, vdbPath );
 
         assertThat( vdb.getPrimaryType( this.uow ).getName(), is( VdbLexicon.Vdb.VIRTUAL_DATABASE ) );
         assertThat( vdb.getName( this.uow ), is( vdbName ) );

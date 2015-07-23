@@ -29,6 +29,7 @@ import static org.komodo.shell.Messages.RemoveConstraintColumnCommand.INVALID_CO
 import static org.komodo.shell.Messages.RemoveConstraintColumnCommand.MISSING_COLUMN_PATH_ARG;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.TableConstraint;
@@ -39,6 +40,7 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.utils.StringUtils;
 
 /**
  * Removes a {@link Column column reference} from a {@link TableConstraint table constraint}.
@@ -140,17 +142,31 @@ public final class RemoveConstraintColumnCommand extends BuiltInShellCommand {
             }
 
             // add matching paths of referenced columns
-            final boolean noLastArg = ( lastArgument == null );
+            final boolean noLastArg = StringUtils.isBlank( lastArgument );
 
             for ( final Column column : refCols ) {
                 final String path = column.getAbsolutePath();
 
-                if ( ( noLastArg ) || ( path.toUpperCase().startsWith( lastArgument.toUpperCase() ) ) ) {
+                if ( noLastArg || ( path.startsWith( lastArgument ) ) ) {
                     candidates.add( path );
                 }
             }
 
-            return 0;
+            Collections.sort( candidates, new Comparator< CharSequence >() {
+
+                /**
+                 * {@inheritDoc}
+                 *
+                 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+                 */
+                @Override
+                public int compare( final CharSequence thisPath,
+                                    final CharSequence thatPath ) {
+                    return thisPath.toString().compareTo( thatPath.toString() );
+                }
+            });
+
+            return ( candidates.isEmpty() ? -1 : ( toString().length() + 1 ) );
         }
 
         // no completions if more than one arg

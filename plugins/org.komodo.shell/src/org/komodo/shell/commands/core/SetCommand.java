@@ -149,8 +149,7 @@ public class SetCommand extends BuiltInShellCommand {
         } catch (InvalidCommandArgumentException e) {
             throw e;
         } catch (Exception e) {
-            print(MESSAGE_INDENT, Messages.getString("SetCommand.Failure")); //$NON-NLS-1$
-            print(MESSAGE_INDENT, "\t" + e.getMessage()); //$NON-NLS-1$
+            print( MESSAGE_INDENT, Messages.getString( "SetCommand.Failure", e.getLocalizedMessage() ) ); //$NON-NLS-1$
             return false;
         }
         return true;
@@ -421,7 +420,7 @@ public class SetCommand extends BuiltInShellCommand {
                 }
             }
 
-    		return 0;
+            return ( candidates.isEmpty() ? -1 : ( StringUtils.isBlank( lastArgument ) ? 0 : ( toString().length() + 1 ) ) );
         } else if ( getArguments().size() == 2 ) {
             if ( getArguments().get( 0 ).toLowerCase().equals( SUBCMD_RECORD ) ) return 0;
 

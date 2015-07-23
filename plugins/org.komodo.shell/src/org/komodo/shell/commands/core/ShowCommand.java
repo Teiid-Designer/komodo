@@ -137,8 +137,7 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
         } catch (InvalidCommandArgumentException e) {
             throw e;
         } catch (Exception e) {
-            print(MESSAGE_INDENT, Messages.getString("ShowCommand.Failure")); //$NON-NLS-1$
-            print(MESSAGE_INDENT, "\t" + e.getMessage()); //$NON-NLS-1$
+            print( MESSAGE_INDENT, Messages.getString( "ShowCommand.Failure", e.getLocalizedMessage() ) ); //$NON-NLS-1$
             return false;
         }
         return true;
@@ -177,6 +176,10 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
                 value = ( ( WorkspaceContextImpl )context ).getUnfilteredPropertyValue( name );
             } else {
                 value = context.getPropertyValue( name );
+
+                if ( StringUtils.isBlank( value ) ) {
+                    value = Messages.getString( SHELL.NO_PROPERTY_VALUE );
+                }
             }
 
             if ( !isShowingPropertyNamePrefixes() ) {
@@ -193,7 +196,7 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
 
             sorted.put( name, value );
         }
-        
+
         // Puts a hard limit on value column width - some may be extremely long.  (The entire value will still be printed)
         if(maxValueWidth>MAX_PROPERTY_VALUE_WIDTH) {
         	maxValueWidth = MAX_PROPERTY_VALUE_WIDTH;
@@ -225,7 +228,7 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
         	}
         }
     }
-    
+
     private void printPropWithLongValue(String format, String propName, String propValue, int maxValueWidth) {
 		// splits long strings into equal length lines of 'maxValueWidth' length.
 		List<String> lines = splitEqually(propValue,maxValueWidth);
@@ -241,11 +244,11 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
 			}
 		}
     }
-    
+
     private List<String> splitEqually(String text, int size) {
     	// Remove Control chars from the incoming string
 		String noCtrlText = text.replaceAll("\\p{Cntrl}", EMPTY_STRING); //$NON-NLS-1$
-		
+
         // Give the list the right capacity to start with. You could use an array
         // instead if you wanted.
         List<String> result = new ArrayList<String>((noCtrlText.length() + size - 1) / size);
@@ -253,10 +256,10 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
         for (int start = 0; start < noCtrlText.length(); start += size) {
         	result.add(noCtrlText.substring(start, Math.min(noCtrlText.length(), start + size)));
         }
-        
+
         return result;
     }
-    
+
     private String getFormat( final int column1Width,
                               final int column2Width ) {
         final StringBuilder result = new StringBuilder();
@@ -442,14 +445,19 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
         final int maxNameWidth = Math.max( DEFAULT_WIDTH, propertyName.length() );
 
         // Get the value for the supplied property
-        final String propValue = context.getPropertyValue( propertyName );
+        String propValue = context.getPropertyValue( propertyName );
+
+        if ( StringUtils.isBlank( propValue ) ) {
+            propValue = Messages.getString( SHELL.NO_PROPERTY_VALUE );
+        }
+
         int maxValueWidth = Math.max( DEFAULT_WIDTH, propValue.length() );
 
         // Puts a hard limit on value column width - some may be extremely long.  (The entire value will still be printed)
         if(maxValueWidth>MAX_PROPERTY_VALUE_WIDTH) {
         	maxValueWidth = MAX_PROPERTY_VALUE_WIDTH;
         }
-        
+
         final String format = getFormat( maxNameWidth, maxValueWidth );
 
         // Print properties header
@@ -468,7 +476,7 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
     	} else {
     		printPropWithLongValue(format,name,propValue,maxValueWidth);
     	}
-    	
+
         print();
     }
 
@@ -542,18 +550,19 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
     		// --------------------------------------------------------------
     		if(lastArgument==null) {
     			candidates.addAll(SUBCMDS);
-    			// --------------------------------------------------------------
-    			// One arg - determine the completion options for it.
-    			// --------------------------------------------------------------
-    		} else {
-    			for (String item : SUBCMDS) {
-    				if (item.toUpperCase().startsWith(lastArgument.toUpperCase())) {
-    					candidates.add(item);
-    				}
-    			}
+                return 0;
     		}
-    		return 0;
-    	} else if (getArguments().size()==1) {
+
+            for ( final String item : SUBCMDS ) {
+                if ( item.toUpperCase().startsWith( lastArgument.toUpperCase() ) ) {
+                    candidates.add( item );
+                }
+            }
+
+            return ( candidates.isEmpty() ? -1 : ( toString().length() + 1 ) );
+    	}
+
+    	if (getArguments().size()==1) {
     		String cmdArgLower = getArguments().get(0).toLowerCase();
     		// Tab completion for "properties", "children", "summary" - expects a path arg
     		if(SUBCMD_PROPERTIES.equals(cmdArgLower) || SUBCMD_CHILDREN.equals(cmdArgLower) || SUBCMD_SUMMARY.equals(cmdArgLower)) {
@@ -563,12 +572,19 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
     			// Do not put space after it - may want to append more to the path
     			return CompletionConstants.NO_APPEND_SEPARATOR;
     			// Tab completion for "property" - expects a valid property for the current context.
-    		} else if(SUBCMD_PROPERTY.equals(cmdArgLower)) {
+    		}
+
+    		if(SUBCMD_PROPERTY.equals(cmdArgLower)) {
     		    updateTabCompleteCandidatesForProperty(candidates, getContext(), lastArgument);
 
-    			return 0;
+                if ( StringUtils.isBlank( lastArgument ) ) {
+                    return 0;
+                }
+
+                return ( candidates.isEmpty() ? -1 : ( toString().length() + 1 ) );
             }
     	}
+
     	return -1;
     }
 

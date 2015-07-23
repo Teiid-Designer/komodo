@@ -22,8 +22,10 @@
 package org.komodo.shell.commands.core;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import org.komodo.repository.KomodoTypeRegistry;
 import org.komodo.shell.BuiltInShellCommand;
@@ -32,6 +34,7 @@ import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.utils.StringUtils;
 
 /**
  * Finds objects in the workspace of a specified type. Search results are the workspace paths of the found objects.
@@ -71,13 +74,12 @@ public final class FindCommand extends BuiltInShellCommand {
             }
 
             // query
-            final String[] foundObjectPaths = query( queryType );
+            final String[] foundObjectPaths = query( queryType, null );
 
             // print results
             printResults( queryType, foundObjectPaths );
         } catch ( final Exception e ) {
-            print( MESSAGE_INDENT, Messages.getString( "FindCommand.Failure" ) ); //$NON-NLS-1$
-            print( MESSAGE_INDENT, "\t" + e.getMessage() ); //$NON-NLS-1$
+            print( MESSAGE_INDENT, Messages.getString( "FindCommand.Failure", e.getLocalizedMessage() ) ); //$NON-NLS-1$
             return false;
         }
 
@@ -143,8 +145,24 @@ public final class FindCommand extends BuiltInShellCommand {
             // print paths of found objects
             final int indent = ( 2 * MESSAGE_INDENT );
 
-            for ( final String absolutePath : foundObjectPaths ) {
-                print( indent, absolutePath );
+            // sort paths
+            final List< String > sorted = new ArrayList< >( Arrays.asList( foundObjectPaths ) );
+            Collections.sort( sorted, new Comparator< String >() {
+
+                /**
+                 * {@inheritDoc}
+                 *
+                 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+                 */
+                @Override
+                public int compare( final String thisPath,
+                                    final String thatPath ) {
+                    return thisPath.compareTo( thatPath );
+                }
+            } );
+
+            for ( final String path : sorted ) {
+                print( indent, path );
             }
         }
     }
@@ -152,14 +170,17 @@ public final class FindCommand extends BuiltInShellCommand {
     /**
      * @param queryType
      *        the type of object being searched for (cannot be <code>null</code>)
+     * @param parentPath
+     *        the parent path whose children recursively will be checked (can be empty if searching from the workspace root)
      * @return the paths of the workspace objects with the matching type (never <code>null</code> but can be empty)
      * @throws Exception
      *         if an error occurs
      */
-    protected String[] query( final KomodoType queryType ) throws Exception {
+    protected String[] query( final KomodoType queryType,
+                              final String parentPath ) throws Exception {
         final String lexiconType = KomodoTypeRegistry.getInstance().getIdentifier( queryType ).getLexiconType();
         final String[] searchResults = getContext().getWorkspaceManager().findByType( getWorkspaceStatus().getTransaction(),
-                                                                                      lexiconType );
+                                                                                      lexiconType, parentPath );
 
         if ( searchResults.length == 0 ) {
             return searchResults;
@@ -193,19 +214,33 @@ public final class FindCommand extends BuiltInShellCommand {
     public int tabCompletion( final String lastArgument,
                               final List< CharSequence > candidates ) throws Exception {
         if ( getArguments().isEmpty() ) {
-            final boolean noLastArg = ( lastArgument == null );
+            final boolean noLastArg = StringUtils.isBlank( lastArgument );
 
             for ( final KomodoType kType : KomodoType.values() ) {
                 if ( NOT_APPLICABLE_TYPES.contains( kType ) ) {
                     continue;
                 }
 
-                if ( ( noLastArg ) || ( kType.name().toUpperCase().startsWith( lastArgument.toUpperCase() ) ) ) {
+                if ( noLastArg || ( kType.getType().toUpperCase().startsWith( lastArgument.toUpperCase() ) ) ) {
                     candidates.add( kType.getType() );
                 }
             }
 
-            return 0;
+            Collections.sort( candidates, new Comparator< CharSequence >() {
+
+                /**
+                 * {@inheritDoc}
+                 *
+                 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+                 */
+                @Override
+                public int compare( final CharSequence thisType,
+                                    final CharSequence thatType ) {
+                    return thisType.toString().compareTo( thatType.toString() );
+                }
+            });
+
+            return ( candidates.isEmpty() ? -1 : ( toString().length() + 1 ) );
         }
 
         // no completions if more than one arg

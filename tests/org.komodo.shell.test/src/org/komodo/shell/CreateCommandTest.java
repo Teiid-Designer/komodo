@@ -1,8 +1,10 @@
 package org.komodo.shell;
 
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import org.junit.Test;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.vdb.Vdb;
@@ -25,7 +27,8 @@ public class CreateCommandTest extends AbstractCommandTest {
 	private static final String CREATE_COMMAND_6 = "createCommand6.txt"; //$NON-NLS-1$
 	private static final String CREATE_COMMAND_7 = "createCommand7.txt"; //$NON-NLS-1$
 	private static final String CREATE_COMMAND_8 = "createCommand8.txt"; //$NON-NLS-1$
-	private static final String CREATE_COMMAND_9 = "createCustomProperty.txt"; //$NON-NLS-1$
+    private static final String CREATE_COMMAND_9 = "createCustomProperty.txt"; //$NON-NLS-1$
+    private static final String CREATE_COMMAND_10 = "createExistingProperty.txt"; //$NON-NLS-1$
 
 	/**
 	 * Test for CreateCommand
@@ -255,8 +258,21 @@ public class CreateCommandTest extends AbstractCommandTest {
     	// Verify the custom property exists
     	Property customProp = vdb.getProperty(trans, "customProp");
     	assertNotNull(customProp);
-    	
+
     	// Verify the property value
     	assertEquals("aValue", customProp.getValue(trans));
     }
+
+    @Test
+    public void shouldFailCreatingExistingProperty() throws Exception {
+        setup( CREATE_COMMAND_10, CreateCommand.class );
+
+        try {
+            execute();
+            fail();
+        } catch ( final Throwable e ) {
+            assertThat( e.getLocalizedMessage().contains( "create property vdb:description newdescription" ), is( true ) );
+        }
+    }
+
 }

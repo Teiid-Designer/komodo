@@ -129,6 +129,8 @@ public class TabCompleter implements Completion {
     					for (CharSequence sequence : list) {
     						completeOperation.addCompletionCandidate(sequence.toString());
     					}
+
+    					completeOperation.setOffset( tabCompletionResult );
     				}
     				if (tabCompletionResult == CompletionConstants.NO_APPEND_SEPARATOR) {
     					completeOperation.doAppendSeparator(false);

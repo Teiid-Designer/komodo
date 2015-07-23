@@ -14,6 +14,7 @@ import org.komodo.shell.Messages;
 import org.komodo.shell.api.InvalidCommandArgumentException;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.utils.StringUtils;
 
 /**
  * A command to unset/remove a property value.
@@ -61,8 +62,7 @@ public class UnsetPropertyCommand extends BuiltInShellCommand {
         } catch ( final InvalidCommandArgumentException e ) {
             throw e;
         } catch ( final Exception e ) {
-            print( MESSAGE_INDENT, getString( "error" ) ); //$NON-NLS-1$
-            print( MESSAGE_INDENT, "\t" + e.getMessage() ); //$NON-NLS-1$
+            print( MESSAGE_INDENT, getString( "error", e.getLocalizedMessage() ) ); //$NON-NLS-1$
             return false;
         }
     }
@@ -79,25 +79,30 @@ public class UnsetPropertyCommand extends BuiltInShellCommand {
     public int tabCompletion( final String lastArgument,
                               final List< CharSequence > candidates ) throws Exception {
         if ( getArguments().size() == 0 ) {
-            final List< String > names = getContext().getProperties();
+            final WorkspaceContext context = getContext();
+            final List< String > names = context.getProperties();
+            final boolean noLastArg = StringUtils.isBlank( lastArgument );
 
-            if ( !isShowingPropertyNamePrefixes() ) {
-                for ( int i = 0, size = names.size(); i < size; ++i ) {
-                    names.set( i, removePrefix( names.get( i ) ) );
-                }
-            }
+            // make sure property has a value and remove property prefixes if necessary
+            for ( String propName : names ) {
+                if ( !StringUtils.isBlank( context.getPropertyValue( propName ) ) ) {
+                    boolean add = noLastArg;
 
-            if ( lastArgument == null ) {
-                candidates.addAll( names );
-            } else {
-                for ( final String name : names ) {
-                    if ( name.toUpperCase().startsWith( lastArgument.toUpperCase() ) ) {
-                        candidates.add( name );
+                    if ( !isShowingPropertyNamePrefixes() ) {
+                        propName = removePrefix( propName );
+                    }
+
+                    if ( !noLastArg && propName.startsWith( lastArgument ) ) {
+                        add = true;
+                    }
+
+                    if ( add ) {
+                        candidates.add( propName );
                     }
                 }
             }
 
-            return 0;
+            return ( candidates.isEmpty() ? -1 : ( StringUtils.isBlank( lastArgument ) ? 0 : ( toString().length() + 1 ) ) );
         }
 
         return -1;

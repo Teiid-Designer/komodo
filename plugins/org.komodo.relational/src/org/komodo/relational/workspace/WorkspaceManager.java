@@ -55,6 +55,7 @@ import org.komodo.spi.repository.RepositoryObserver;
 import org.komodo.spi.utils.KeyInValueHashMap;
 import org.komodo.spi.utils.KeyInValueHashMap.KeyFromValueAdapter;
 import org.komodo.utils.ArgCheck;
+import org.komodo.utils.StringUtils;
 import org.modeshape.jcr.api.JcrConstants;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
@@ -73,8 +74,7 @@ public class WorkspaceManager extends RelationalObjectImpl {
      */
     public static final int TYPE_ID = WorkspaceManager.class.hashCode();
 
-    private static final String FIND_QUERY_PATTERN = "SELECT [jcr:path] FROM [%s] WHERE ISDESCENDANTNODE('" //$NON-NLS-1$
-                                                     + RepositoryImpl.WORKSPACE_ROOT + "') ORDER BY [jcr:name] ASC"; //$NON-NLS-1$
+    private static final String FIND_QUERY_PATTERN = "SELECT [jcr:path] FROM [%s] WHERE ISDESCENDANTNODE('%s') ORDER BY [jcr:name] ASC"; //$NON-NLS-1$
 
     private static class WskpMgrAdapter implements KeyFromValueAdapter< Repository.Id, WorkspaceManager > {
 
@@ -323,35 +323,61 @@ public class WorkspaceManager extends RelationalObjectImpl {
      *        the transaction (cannot be <code>null</code> and must have a state of
      *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @param type
+     *        the lexicon node type name of objects being found (cannot be empty)
+     * @param parentPath
+     *        the parent path whose children recursively will be checked (can be empty if searching from the workspace root)
+     * @return the paths of all the objects under the specified parent path with the specified type (never <code>null</code> but
+     *         can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    public String[] findByType( final UnitOfWork transaction,
+                                final String type,
+                                String parentPath ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
+                         "transaction state must be NOT_STARTED and was " + transaction.getState() ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( type, "type" ); //$NON-NLS-1$
+
+        if ( StringUtils.isBlank( parentPath ) ) {
+            parentPath = RepositoryImpl.WORKSPACE_ROOT;
+        }
+
+        try {
+            final String queryText = String.format( FIND_QUERY_PATTERN, type, parentPath );
+            final List< KomodoObject > results = getRepository().query( transaction, queryText );
+            final int numPaths = results.size();
+
+            if ( numPaths == 0 ) {
+                return StringConstants.EMPTY_ARRAY;
+            }
+
+            final String[] result = new String[ numPaths ];
+            int i = 0;
+
+            for ( final KomodoObject kObject : results ) {
+                result[ i++ ] = kObject.getAbsolutePath();
+            }
+
+            return result;
+        } catch ( final Exception e ) {
+            throw handleError( e );
+        }
+    }
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> and must have a state of
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param type
      *        the lexicon node type name of objects being found
-     * @return the paths of all the objects in the workspaces with the specified type (never <code>null</code> but can be empty)
+     * @return the paths of all the objects in the workspace with the specified type (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
      */
     public String[] findByType( final UnitOfWork transaction,
                                 final String type ) throws KException {
-        String[] result = null;
-
-        try {
-            final String queryText = String.format(FIND_QUERY_PATTERN, type);
-            List<KomodoObject> results = getRepository().query(transaction, queryText);
-            int numPaths = results.size();
-
-            if (numPaths == 0) {
-                result = StringConstants.EMPTY_ARRAY;
-            } else {
-                result = new String[numPaths];
-                int i = 0;
-
-                for (KomodoObject kObject : results) {
-                    result[i++] = kObject.getAbsolutePath();
-                }
-            }
-
-            return result;
-        } catch (final Exception e) {
-            throw handleError( e );
-        }
+        return findByType( transaction, type, RepositoryImpl.WORKSPACE_ROOT );
     }
 
     /**

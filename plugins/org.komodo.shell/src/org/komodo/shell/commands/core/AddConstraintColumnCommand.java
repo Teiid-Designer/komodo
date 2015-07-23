@@ -25,6 +25,7 @@ import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.TableConstraint;
@@ -37,6 +38,7 @@ import org.komodo.shell.util.ContextUtils;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.utils.StringUtils;
 
 /**
  * Adds a {@link Column column reference} to a {@link TableConstraint table constraint}.
@@ -106,8 +108,7 @@ public final class AddConstraintColumnCommand extends BuiltInShellCommand {
                 return false;
             }
         } catch ( final Exception e ) {
-            print( MESSAGE_INDENT, Messages.getString( "AddConstraintColumnCommand.error" ) ); //$NON-NLS-1$
-            print( MESSAGE_INDENT, "\t" + e.getLocalizedMessage() ); //$NON-NLS-1$
+            print( MESSAGE_INDENT, Messages.getString( "AddConstraintColumnCommand.error", e.getLocalizedMessage() ) ); //$NON-NLS-1$
             return false;
         }
     }
@@ -138,26 +139,40 @@ public final class AddConstraintColumnCommand extends BuiltInShellCommand {
     public int tabCompletion( final String lastArgument,
                               final List< CharSequence > candidates ) throws Exception {
         if ( getArguments().isEmpty() ) {
-            final boolean noLastArg = ( lastArgument == null );
 
-            // find columns in workspace
-            final String[] columnPaths = this.findCommand.query( KomodoType.COLUMN );
+            // find columns
+            final KomodoObject parent = getContext().getParent().getKomodoObj();
+            final String[] columnPaths = this.findCommand.query( KomodoType.COLUMN, parent.getAbsolutePath() );
 
             if ( columnPaths.length == 0 ) {
                 return -1;
             }
 
-            if(noLastArg) {
-            	candidates.addAll(Arrays.asList(columnPaths));
+            if ( StringUtils.isBlank( lastArgument ) ) {
+                candidates.addAll( Arrays.asList( columnPaths ) );
             } else {
-            	for (String item : Arrays.asList(columnPaths)) {
-            		if (item.toUpperCase().startsWith(lastArgument.toUpperCase())) {
-            			candidates.add(item);
-            		}
-            	}
+                for ( final String item : Arrays.asList( columnPaths ) ) {
+                    if ( item.startsWith( lastArgument ) ) {
+                        candidates.add( item );
+                    }
+                }
             }
 
-            return 0;
+            Collections.sort( candidates, new Comparator< CharSequence >() {
+
+                /**
+                 * {@inheritDoc}
+                 *
+                 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+                 */
+                @Override
+                public int compare( final CharSequence thisPath,
+                                    final CharSequence thatPath ) {
+                    return thisPath.toString().compareTo( thatPath.toString() );
+                }
+            });
+
+            return ( candidates.isEmpty() ? -1 : ( toString().length() + 1 ) );
         }
 
         // no completions if more than one arg

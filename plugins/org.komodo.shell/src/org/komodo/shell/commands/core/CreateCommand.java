@@ -16,16 +16,17 @@ import static org.komodo.shell.Messages.CreateCommand.MISSING_FOREIGN_KEY_TABLE_
 import static org.komodo.shell.Messages.CreateCommand.MISSING_OBJ_NAME;
 import static org.komodo.shell.Messages.CreateCommand.MISSING_OBJ_TYPE;
 import static org.komodo.shell.Messages.CreateCommand.MISSING_OPTION_VALUE;
-import static org.komodo.shell.Messages.CreateCommand.MISSING_TRANSLATOR_TYPE;
 import static org.komodo.shell.Messages.CreateCommand.MISSING_PROPERTY_NAME;
 import static org.komodo.shell.Messages.CreateCommand.MISSING_PROPERTY_VALUE;
-import static org.komodo.shell.Messages.CreateCommand.PROPERTY_ALREADY_EXISTS;
+import static org.komodo.shell.Messages.CreateCommand.MISSING_TRANSLATOR_TYPE;
 import static org.komodo.shell.Messages.CreateCommand.NO_DUPLICATES_ALLOWED;
 import static org.komodo.shell.Messages.CreateCommand.OBJECT_CREATED;
-import static org.komodo.shell.Messages.CreateCommand.PROPERTY_CREATED;
 import static org.komodo.shell.Messages.CreateCommand.PATH_NOT_FOUND;
+import static org.komodo.shell.Messages.CreateCommand.PROPERTY_ALREADY_EXISTS;
+import static org.komodo.shell.Messages.CreateCommand.PROPERTY_CREATED;
 import static org.komodo.shell.Messages.CreateCommand.TOO_MANY_ARGS;
 import static org.komodo.shell.Messages.CreateCommand.TYPE_NOT_VALID;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -35,6 +36,7 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.FindWorkspaceNodeVisitor;
 import org.komodo.shell.Messages;
+import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
@@ -57,7 +59,7 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
      * The command name.
      */
     public static final String NAME = "create"; //$NON-NLS-1$
-    
+
     private static final String PROPERTY = "property";  //$NON-NLS-1$
 
     private static final Set< KomodoType > NOT_SUPPORTED;
@@ -113,8 +115,7 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
             			Messages.getString( OBJECT_CREATED, typeArg, kobject.getName( getWorkspaceStatus().getTransaction() ) ) );
             }
         } catch ( final Exception e ) {
-            print( MESSAGE_INDENT, Messages.getString( FAILURE, typeArg ) );
-            print( MESSAGE_INDENT, TAB + e.getMessage() );
+            print( MESSAGE_INDENT, Messages.getString( FAILURE, typeArg, e.getLocalizedMessage() ) );
             return false;
         }
 
@@ -148,6 +149,40 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
         }
 
         return wkspManager.create( uow, parent, objName, type, properties );
+    }
+
+    private List< String > findTables() throws Exception {
+        final FindCommand findCmd = new FindCommand( getWorkspaceStatus() );
+        findCmd.setOutput( getWriter() );
+
+        try {
+            findCmd.setArguments( new Arguments( StringConstants.EMPTY_STRING ) );
+        } catch ( final Exception e ) {
+            // only occurs on parsing error of arguments and we have no arguments
+        }
+
+        final String[] tablePaths = findCmd.query( KomodoType.TABLE, null );
+
+        if ( tablePaths.length == 0 ) {
+            return Collections.emptyList();
+        }
+
+        final String currentTablePath = ContextUtils.convertPathToDisplayPath( getContext().getKomodoObj().getAbsolutePath() );
+        final List< String > result = new ArrayList< >( tablePaths.length );
+        boolean found = false;
+
+        for ( final String path : tablePaths ) {
+            final String displayPath = ContextUtils.convertPathToDisplayPath( path );
+
+            if ( !found && currentTablePath.equals( displayPath ) ) {
+                found = true;
+                continue;
+            }
+
+            result.add( displayPath );
+        }
+
+        return result;
     }
 
     private KomodoObject create( final String objType,
@@ -246,7 +281,7 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
                 if ( args.length > 3 ) {
                     throw new Exception( Messages.getString( TOO_MANY_ARGS, objType ) );
                 }
-                
+
                 final String fkName = args[ 0 ];
                 final String tableRefPath = args[ 1 ];
                 final KomodoObject parent = getParent( 2, args );
@@ -355,7 +390,7 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
                     if ( args.length > 2 ) {
                         throw new Exception( Messages.getString( TOO_MANY_ARGS, objType ) );
                     }
-                    
+
                     final String propName = args[ 0 ];
                     final String propValue = args[ 1 ];
                     WorkspaceContext context = getWorkspaceStatus().getCurrentContext();
@@ -417,7 +452,7 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
                     candidates.add( type );
                 }
             }
-            
+
             // Allow creation of custom properties everywhere except workspace node
             String contextType = getWorkspaceStatus().getCurrentContext().getType();
            	if( !WorkspaceStatus.WORKSPACE_TYPE.equals(contextType.toUpperCase()) ) {
@@ -426,27 +461,61 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
                 }
         	}
 
-            // if there is a lastArgument return its length
-            return ( candidates.isEmpty() ? -1 : ( StringUtils.isBlank( lastArgument ) ? 0 : lastArgument.length() ) );
-        } else if ( getArguments().size() == 1 ) {
-            final String typeArg = getArguments().get( 0 );
+            return ( candidates.isEmpty() ? -1 : ( StringUtils.isBlank( lastArgument ) ? 0 : ( toString().length() + 1 ) ) );
+        }
 
-            // result sets do not have a name
-            if ( ( lastArgument == null ) && !typeArg.equals( KomodoType.DATA_TYPE_RESULT_SET.getType() )
-                 && !typeArg.equals( KomodoType.TABULAR_RESULT_SET.getType() ) ) {
-                candidates.add( "objName" ); //$NON-NLS-1$
-                return 0;
+        if ( getArguments().size() == 1 ) {
+            return -1;
+        }
+
+        if ( getArguments().size() == 2 ) {
+            final String typeArg = getArguments().get( 0 ).toUpperCase();
+
+            // foreign key requires referenced table path
+            if ( typeArg.equals( KomodoType.FOREIGN_KEY.getType().toUpperCase() ) ) {
+                // find all tables not including the current parent object
+                final List< String > tablePaths = findTables();
+
+                if ( !tablePaths.isEmpty() ) {
+                    for ( final String path : tablePaths ) {
+                        if ( StringUtils.isBlank( lastArgument ) || ( path.startsWith( lastArgument ) ) ) {
+                            candidates.add( path );
+                        }
+                    }
+                }
+
+                return ( candidates.isEmpty() ? -1 : ( toString().length() + 1 ) );
+            }
+
+            // The arg is expected to be a path if not one of these types. These types require an additional arg.
+            if ( !typeArg.equals( KomodoType.VDB_ENTRY.getType().toUpperCase() )
+                 && !typeArg.equals( KomodoType.STATEMENT_OPTION.getType().toUpperCase() )
+                 && !typeArg.equals( KomodoType.VDB_TRANSLATOR.getType().toUpperCase() )
+                 && !typeArg.equals( KomodoType.VDB.getType().toUpperCase() ) ) {
+                updateTabCompleteCandidatesForPath( candidates, getWorkspaceStatus().getCurrentContext(), true, lastArgument );
+
+                // Do not put space after it - may want to append more to the path
+                return NO_APPEND_SEPARATOR;
             }
 
             return -1;
-        } else if ( getArguments().size() == 2 ) {
-            // TODO need to handle those types that have args after name and before parent path
-            // The arg is expected to be a path
-            updateTabCompleteCandidatesForPath( candidates, getWorkspaceStatus().getCurrentContext(), true, lastArgument );
-
-            // Do not put space after it - may want to append more to the path
-            return NO_APPEND_SEPARATOR;
         }
+
+        if ( getArguments().size() == 3 ) {
+            final String typeArg = getArguments().get( 0 ).toUpperCase();
+
+            // these types can have a path as last arg
+            if ( typeArg.equals( KomodoType.VDB_ENTRY.getType().toUpperCase() )
+                 || typeArg.equals( KomodoType.STATEMENT_OPTION.getType().toUpperCase() )
+                 || typeArg.equals( KomodoType.VDB_TRANSLATOR.getType().toUpperCase() )
+                 || typeArg.equals( KomodoType.VDB.getType().toUpperCase() ) ) {
+                updateTabCompleteCandidatesForPath( candidates, getWorkspaceStatus().getCurrentContext(), true, lastArgument );
+
+                // Do not put space after it - may want to append more to the path
+                return NO_APPEND_SEPARATOR;
+            }
+        }
+
         return -1;
     }
 

@@ -119,6 +119,53 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldFindAllObjectsOfTypeInWorkspaceWhenPassingInEmptyParentPath() throws Exception {
+        final String prefix = this.name.getMethodName();
+        int suffix = 0;
+
+        // create at root
+        for ( int i = 0; i < 5; ++i ) {
+            createVdb( ( prefix + ++suffix ), ( VDB_PATH + i ) );
+        }
+
+        // create under a folder
+        final KomodoObject parent = _repo.add( this.uow, null, "blah", null );
+
+        for ( int i = 0; i < 7; ++i ) {
+            createVdb( ( prefix + ++suffix ), parent, ( VDB_PATH + i ) );
+        }
+
+        commit(); // must save before running a query
+
+        assertThat( this.wsMgr.findByType( this.uow, VdbLexicon.Vdb.VIRTUAL_DATABASE, StringConstants.EMPTY_STRING ).length,
+                    is( suffix ) );
+    }
+
+    @Test
+    public void shouldFindAllObjectsOfTypeUnderASpecificParentPath() throws Exception {
+        final String prefix = this.name.getMethodName();
+        final int numAtRoot = 3;
+
+        // create at root
+        for ( int i = 0; i < numAtRoot; ++i ) {
+            createVdb( ( prefix + i ), ( VDB_PATH + i ) );
+        }
+
+        // create under a folder
+        final KomodoObject parent = _repo.add( this.uow, null, "blah", null );
+        final int expected = 3;
+
+        for ( int i = numAtRoot; i < ( numAtRoot + expected ); ++i ) {
+            createVdb( ( prefix + i ), parent, ( VDB_PATH + i ) );
+        }
+
+        commit(); // must save before running a query
+
+        assertThat( this.wsMgr.findByType( this.uow, VdbLexicon.Vdb.VIRTUAL_DATABASE, parent.getAbsolutePath() ).length,
+                    is( expected ) );
+    }
+
+    @Test
     public void shouldFindModels() throws Exception {
         Vdb parent = createVdb();
         final String prefix = this.name.getMethodName();
@@ -135,7 +182,7 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
 
         for (int i = 0; i < 7; ++i) {
             suffix++;
-            parent = createVdb("vdb" + suffix, folder.getAbsolutePath());
+            parent = createVdb( "vdb" + suffix, folder, (VDB_PATH + i) );
             parent.addModel(this.uow, (prefix + suffix));
         }
 
@@ -158,7 +205,7 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
         final KomodoObject parent = _repo.add(this.uow, null, "blah", null);
 
         for (int i = 0; i < 7; ++i) {
-            createVdb((prefix + ++suffix), parent.getAbsolutePath());
+            createVdb( ( prefix + ++suffix ), parent, ( VDB_PATH + i ) );
         }
 
         commit(); // must save before running a query
@@ -178,6 +225,11 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
     }
 
     @Test( expected = Exception.class )
+    public void shouldNotAllowEmptyTypeWhenFindingObjects() throws Exception {
+        this.wsMgr.findByType(this.uow, StringConstants.EMPTY_STRING, "/my/path");
+    }
+
+    @Test( expected = Exception.class )
     public void shouldNotAllowEmptyVdbName() throws Exception {
         this.wsMgr.createVdb(this.uow, null, StringConstants.EMPTY_STRING, "externalFilePath");
     }
@@ -185,6 +237,11 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
     @Test( expected = Exception.class )
     public void shouldNotAllowNullExternalFilePath() throws Exception {
         this.wsMgr.createVdb(this.uow, null, "vdbName", null);
+    }
+
+    @Test( expected = Exception.class )
+    public void shouldNotAllowNullTypeWhenFindingObjects() throws Exception {
+        this.wsMgr.findByType(this.uow, null, "/my/path");
     }
 
     @Test( expected = Exception.class )

@@ -35,7 +35,12 @@ public class ContextUtils implements StringConstants {
                                                                                       VdbLexicon.Vdb.DATA_ROLES,
                                                                                       VdbLexicon.Vdb.TRANSLATORS } );
 
-    private static String convertPathToDisplayPath( final String path ) {
+    /**
+     * @param path
+     *        the path whose display path is being requested (cannot be empty)
+     * @return the display path (never empty)
+     */
+    public static String convertPathToDisplayPath( final String path ) {
         if ( StringUtils.isBlank( path ) ) {
             return path;
         }
