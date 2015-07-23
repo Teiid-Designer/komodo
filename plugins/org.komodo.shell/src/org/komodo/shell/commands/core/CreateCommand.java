@@ -102,7 +102,9 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
             final KomodoObject kobject = create( typeArg, optionalArgs );
 
             // Commit transaction
-            getWorkspaceStatus().commit( CreateCommand.class.getSimpleName() );
+            if ( isAutoCommit() ) {
+                getWorkspaceStatus().commit( CreateCommand.class.getSimpleName() );
+            }
 
             if( PROPERTY.equals(typeArg.toLowerCase()) ) {
                 final String typeName = requiredArgument( 1, Messages.getString( MISSING_OBJ_TYPE ) );

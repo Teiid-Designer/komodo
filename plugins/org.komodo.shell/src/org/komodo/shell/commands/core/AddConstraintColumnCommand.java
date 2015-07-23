@@ -97,7 +97,9 @@ public final class AddConstraintColumnCommand extends BuiltInShellCommand {
                 constraint.addColumn( getWorkspaceStatus().getTransaction(), ( Column )column );
 
                 // Commit transaction
-                getWorkspaceStatus().commit("AddConstraintColumnCommand"); //$NON-NLS-1$
+                if ( isAutoCommit() ) {
+                    getWorkspaceStatus().commit( AddConstraintColumnCommand.class.getSimpleName() );
+                }
 
                 print( MESSAGE_INDENT,
                        Messages.getString( "AddConstraintColumnCommand.columnRefAdded", columnPathArg, getContext().getFullName() ) ); //$NON-NLS-1$

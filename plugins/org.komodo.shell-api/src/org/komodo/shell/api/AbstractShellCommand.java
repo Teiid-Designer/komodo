@@ -36,6 +36,7 @@ public abstract class AbstractShellCommand implements ShellCommand {
 
 	private final WorkspaceStatus wsStatus;
 	private Arguments arguments;
+	private boolean autoCommit = true;
 	private Writer writer;
 	protected List<String> validWsContextTypes = Collections.emptyList();
 
@@ -200,5 +201,22 @@ public abstract class AbstractShellCommand implements ShellCommand {
 	public int tabCompletion(String lastArgument, List<CharSequence> candidates) throws Exception {
 		return -1;
 	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see org.komodo.shell.api.ShellCommand#isAutoCommit()
+	 */
+	@Override
+	public boolean isAutoCommit() {
+	    return this.autoCommit;
+	}
+
+	/**
+     * @param newAutoCommit the flag indicating if the command should commit the transaction after executing
+     */
+    public void setAutoCommit( final boolean newAutoCommit ) {
+        this.autoCommit = newAutoCommit;
+    }
 
 }

@@ -85,7 +85,9 @@ public final class RemoveConstraintColumnCommand extends BuiltInShellCommand {
                 constraint.removeColumn( getWorkspaceStatus().getTransaction(), ( Column )column );
 
                 // Commit transaction
-                getWorkspaceStatus().commit( RemoveConstraintColumnCommand.class.getSimpleName() );
+                if ( isAutoCommit() ) {
+                    getWorkspaceStatus().commit( RemoveConstraintColumnCommand.class.getSimpleName() );
+                }
 
                 print( MESSAGE_INDENT, Messages.getString( COLUMN_REF_REMOVED, columnPathArg, getContext().getFullName() ) );
                 return true;

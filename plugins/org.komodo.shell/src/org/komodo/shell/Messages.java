@@ -141,6 +141,8 @@ public class Messages implements StringConstants {
     }
 
     public enum SetCommand {
+
+        ADD_TABLE_CONSTRAINT_COLUMN_FAILED,
         TOO_MANY_ARGS;
 
         @Override

@@ -9,16 +9,16 @@ package org.komodo.shell.commands.core;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import static org.komodo.shell.CompletionConstants.NO_APPEND_SEPARATOR;
+import static org.komodo.shell.Messages.SetCommand.ADD_TABLE_CONSTRAINT_COLUMN_FAILED;
 import static org.komodo.shell.Messages.SetCommand.TOO_MANY_ARGS;
-
 import java.io.File;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-import java.util.StringTokenizer;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.Messages;
+import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.InvalidCommandArgumentException;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
@@ -28,6 +28,7 @@ import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.PropertyDescriptor;
 import org.komodo.spi.repository.PropertyDescriptor.Type;
 import org.komodo.utils.StringUtils;
+import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.Constraint;
 
 /**
  * A command to set a property value, a global property value, or to turn on recording.
@@ -78,7 +79,7 @@ public class SetCommand extends BuiltInShellCommand {
                 if ( getArguments().size() > 4 ) {
                     throw new Exception( Messages.getString( TOO_MANY_ARGS, subcmdArg ) );
                 }
-                
+
                 // Validates SET PROPERTY args
                 if (!validateSetProperty(propNameArg,propValueArg,pathArg)) {
         			return false;
@@ -92,7 +93,9 @@ public class SetCommand extends BuiltInShellCommand {
         		setProperty(context,propNameArg, propValueArg);
 
                 // Commit transaction
-                getWorkspaceStatus().commit("SetCommand"); //$NON-NLS-1$
+                if ( isAutoCommit() ) {
+                    getWorkspaceStatus().commit( SetCommand.class.getSimpleName() );
+                }
 
                 // Print message
         		print(MESSAGE_INDENT, Messages.getString("SetCommand.PropertySet", propNameArg)); //$NON-NLS-1$
@@ -196,7 +199,7 @@ public class SetCommand extends BuiltInShellCommand {
 				return false;
 			}
 		}
-		
+
 		// Get the context for object.  otherwise use current context
         final WorkspaceContext context = StringUtils.isEmpty( contextPath ) ? getContext()
                                                                            : ContextUtils.getContextForPath( getWorkspaceStatus(),
@@ -326,16 +329,7 @@ public class SetCommand extends BuiltInShellCommand {
             multiValues = valuesString;
         }
 
-        final StringTokenizer parser = new StringTokenizer( multiValues, "," ); //$NON-NLS-1$
-        final String[] result = new String[ parser.countTokens() ];
-        int i = 0;
-
-        while ( parser.hasMoreTokens() ) {
-            final String value = parser.nextToken();
-            result[i++] = value;
-        }
-
-        return result;
+        return multiValues.split( "," ); //$NON-NLS-1$
     }
 
     private void setProperty( final WorkspaceContext context,
@@ -344,10 +338,42 @@ public class SetCommand extends BuiltInShellCommand {
         final String propertyName = isShowingPropertyNamePrefixes() ? name : attachPrefix( context, name );
 
         if ( !StringUtils.isBlank( propValue ) && isMultiValuedProperty( context, propertyName ) ) {
-            final String[] values = parseMultiValues( propValue );
-            context.getKomodoObj().setProperty( getWorkspaceStatus().getTransaction(), propertyName, ( Object[] )values );
+            if ( Constraint.REFERENCES.equals( propertyName ) ) {
+                executeSetConstraintColumns( propValue );
+            } else {
+                final String[] values = parseMultiValues( propValue );
+                context.getKomodoObj().setProperty( getWorkspaceStatus().getTransaction(), propertyName, ( Object[] )values );
+            }
         } else {
             context.setPropertyValue( propertyName, propValue );
+        }
+    }
+
+    private void executeSetConstraintColumns( final String propValue ) throws Exception {
+        { // first clear value if necessary
+            if ( getContext().getPropertyValue( Constraint.REFERENCES ) != null ) {
+                final UnsetPropertyCommand cmd = new UnsetPropertyCommand( getWorkspaceStatus() );
+                cmd.setOutput( getWriter() );
+                cmd.setArguments( new Arguments( Constraint.REFERENCES ) );
+                cmd.setAutoCommit( false );
+
+                if ( !cmd.execute() ) {
+                    throw new Exception( Messages.getString( ADD_TABLE_CONSTRAINT_COLUMN_FAILED, cmd ) );
+                }
+            }
+        }
+
+        { // set new value
+            for ( final String columnPath : parseMultiValues( propValue ) ) {
+                final AddConstraintColumnCommand cmd = new AddConstraintColumnCommand( getWorkspaceStatus() );
+                cmd.setOutput( getWriter() );
+                cmd.setArguments( new Arguments( columnPath ) );
+                cmd.setAutoCommit( false );
+
+                if ( !cmd.execute() ) {
+                    throw new Exception( Messages.getString( ADD_TABLE_CONSTRAINT_COLUMN_FAILED, cmd ) );
+                }
+            }
         }
     }
 

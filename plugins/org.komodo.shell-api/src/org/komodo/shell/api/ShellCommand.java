@@ -30,6 +30,11 @@ import java.util.List;
 public interface ShellCommand {
 
     /**
+     * @return <code>true</code> if the command should commit the transaction after execution
+     */
+    boolean isAutoCommit();
+
+    /**
      * @return the command name (never empty)
      */
     public String getName();

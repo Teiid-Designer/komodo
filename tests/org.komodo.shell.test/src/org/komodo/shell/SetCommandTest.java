@@ -1,12 +1,16 @@
 package org.komodo.shell;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import java.io.File;
+import java.util.Arrays;
 import org.junit.Test;
+import org.komodo.relational.model.Column;
+import org.komodo.relational.model.PrimaryKey;
 import org.komodo.relational.model.Table;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
@@ -29,13 +33,8 @@ public class SetCommandTest extends AbstractCommandTest {
 	private static final String SET_COMMAND_4 = "setCommand4.txt"; //$NON-NLS-1$
     private static final String SET_COMMAND_5 = "setCommand5.txt"; //$NON-NLS-1$
     private static final String SET_CONSTRAINT_TYPE = "setConstraintTypeProperty.txt"; //$NON-NLS-1$
-
-	/**
-	 * Test for SetCommand
-	 */
-	public SetCommandTest( ) {
-		super();
-	}
+    private static final String SET_PRIMARY_KEY_COLS = "setPrimaryKeyColumns.txt"; //$NON-NLS-1$
+    private static final String REPLACE_PRIMARY_KEY_COLS = "replacePrimaryKeyColumns.txt"; //$NON-NLS-1$
 
     @Test
     public void shouldNotBeAbleToSetTableConstraintType() throws Exception {
@@ -48,6 +47,46 @@ public class SetCommandTest extends AbstractCommandTest {
             assertThat( getCommandOutput().endsWith( "The property \"teiidddl:constraintType\" is not valid or cannot be modified\n" ),
                         is( true ) );
         }
+    }
+
+    @Test
+    public void shouldReplacePrimaryKeyColumns() throws Exception {
+        // see https://github.com/Teiid-Designer/komodo/issues/211
+        setup( REPLACE_PRIMARY_KEY_COLS, SetCommand.class );
+        execute();
+        assertThat( this.wsStatus.getCurrentContext().getFullName(), is( "/workspace/MyVdb/MyModel/MyTable/pk" ) ); //$NON-NLS-1$
+
+        final UnitOfWork transaction = this.wsStatus.getTransaction();
+        final KomodoObject kobject = this.wsStatus.getCurrentContext().getKomodoObj();
+        assertThat( kobject.getTypeIdentifier( transaction ).name(), is( KomodoType.PRIMARY_KEY.name() ) );
+
+        final PrimaryKey pk = ( PrimaryKey )resolveType( transaction, kobject, PrimaryKey.class );
+        assertThat( pk.getColumns( transaction ).length, is( 1 ) );
+
+        final Column column = pk.getColumns( transaction )[ 0 ];
+        assertThat( ContextUtils.convertPathToDisplayPath( column.getAbsolutePath() ),
+                    is( "/workspace/MyVdb/MyModel/MyTable/LastName" ) );
+    }
+
+    @Test
+    public void shouldSetPrimaryKeyColumns() throws Exception {
+        // see https://github.com/Teiid-Designer/komodo/issues/211
+        setup( SET_PRIMARY_KEY_COLS, SetCommand.class );
+        execute();
+        assertThat( this.wsStatus.getCurrentContext().getFullName(), is( "/workspace/MyVdb/MyModel/MyTable/pk" ) ); //$NON-NLS-1$
+
+        final UnitOfWork transaction = this.wsStatus.getTransaction();
+        final KomodoObject kobject = this.wsStatus.getCurrentContext().getKomodoObj();
+        assertThat( kobject.getTypeIdentifier( transaction ).name(), is( KomodoType.PRIMARY_KEY.name() ) );
+
+        final PrimaryKey pk = ( PrimaryKey )resolveType( transaction, kobject, PrimaryKey.class );
+        assertThat( pk.getColumns( transaction ).length, is( 2 ) );
+
+        final Column[] columns = pk.getColumns( transaction );
+        final String[] paths = new String[] { ContextUtils.convertPathToDisplayPath( columns[ 0 ].getAbsolutePath() ),
+                                              ContextUtils.convertPathToDisplayPath( columns[ 1 ].getAbsolutePath() ) };
+        assertThat( Arrays.asList( paths ),
+                    hasItems( "/workspace/MyVdb/MyModel/MyTable/FirstName", "/workspace/MyVdb/MyModel/MyTable/LastName" ) );
     }
 
     @Test

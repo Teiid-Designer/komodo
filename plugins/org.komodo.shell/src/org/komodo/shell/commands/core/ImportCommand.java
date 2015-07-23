@@ -123,7 +123,10 @@ public class ImportCommand extends BuiltInShellCommand {
             	// OK to keep VDB - rename it to vdbName
             	if(okToImport) {
             		vdbObject.rename(wsStatus.getTransaction(), vdbName);
-                    wsStatus.commit("ImportCommand"); //$NON-NLS-1$
+
+                    if ( isAutoCommit() ) {
+                        wsStatus.commit( ImportCommand.class.getSimpleName() );
+                    }
 
                     print(CompletionConstants.MESSAGE_INDENT, Messages.getString("ImportCommand.VdbImportSuccessMsg", fileNameArg)); //$NON-NLS-1$
 

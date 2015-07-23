@@ -1,0 +1,22 @@
+create vdb MyVdb
+cd MyVdb
+
+create model MyModel
+cd MyModel
+
+create table MyTable
+cd MyTable
+
+create column FirstName
+create column MiddleName
+create column LastName
+
+create primarykey pk 
+cd pk
+
+# add a column to primary key
+add-column /workspace/MyVdb/MyModel/MyTable/FirstName
+add-column ../MiddleName
+
+# replace existing column
+set property teiidddl:tableElementRefs ../LastName
