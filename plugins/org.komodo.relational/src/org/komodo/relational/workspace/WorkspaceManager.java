@@ -74,7 +74,16 @@ public class WorkspaceManager extends RelationalObjectImpl {
      */
     public static final int TYPE_ID = WorkspaceManager.class.hashCode();
 
-    private static final String FIND_QUERY_PATTERN = "SELECT [jcr:path] FROM [%s] WHERE ISDESCENDANTNODE('%s') ORDER BY [jcr:name] ASC"; //$NON-NLS-1$
+    // @formatter:off
+    private static final String FIND_ALL_QUERY_PATTERN = "SELECT [jcr:path] FROM [%s]" //$NON-NLS-1$
+                                                         + " WHERE ISDESCENDANTNODE('%s')" //$NON-NLS-1$
+                                                         + " ORDER BY [jcr:path] ASC"; //$NON-NLS-1$
+
+    private static final String FIND_MATCHING_QUERY_PATTERN = "SELECT [jcr:path] FROM [%s]"  //$NON-NLS-1$
+                                                              + " WHERE ISDESCENDANTNODE('%s')" //$NON-NLS-1$
+                                                              + " AND [jcr:name] LIKE '%s'" //$NON-NLS-1$
+                                                              + " ORDER BY [jcr:path] ASC"; //$NON-NLS-1$
+    // @formatter:on
 
     private static class WskpMgrAdapter implements KeyFromValueAdapter< Repository.Id, WorkspaceManager > {
 
@@ -326,6 +335,8 @@ public class WorkspaceManager extends RelationalObjectImpl {
      *        the lexicon node type name of objects being found (cannot be empty)
      * @param parentPath
      *        the parent path whose children recursively will be checked (can be empty if searching from the workspace root)
+     * @param namePattern
+     *        the regex used to match object names (can be empty if all objects of the given type are being requested)
      * @return the paths of all the objects under the specified parent path with the specified type (never <code>null</code> but
      *         can be empty)
      * @throws KException
@@ -333,7 +344,8 @@ public class WorkspaceManager extends RelationalObjectImpl {
      */
     public String[] findByType( final UnitOfWork transaction,
                                 final String type,
-                                String parentPath ) throws KException {
+                                String parentPath,
+                                final String namePattern ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
                          "transaction state must be NOT_STARTED and was " + transaction.getState() ); //$NON-NLS-1$
@@ -344,7 +356,14 @@ public class WorkspaceManager extends RelationalObjectImpl {
         }
 
         try {
-            final String queryText = String.format( FIND_QUERY_PATTERN, type, parentPath );
+            String queryText = null;
+
+            if ( StringUtils.isBlank( namePattern ) ) {
+                queryText = String.format( FIND_ALL_QUERY_PATTERN, type, parentPath );
+            } else {
+                queryText = String.format( FIND_MATCHING_QUERY_PATTERN, type, parentPath, namePattern );
+            }
+
             final List< KomodoObject > results = getRepository().query( transaction, queryText );
             final int numPaths = results.size();
 
@@ -377,7 +396,7 @@ public class WorkspaceManager extends RelationalObjectImpl {
      */
     public String[] findByType( final UnitOfWork transaction,
                                 final String type ) throws KException {
-        return findByType( transaction, type, RepositoryImpl.WORKSPACE_ROOT );
+        return findByType( transaction, type, RepositoryImpl.WORKSPACE_ROOT, null );
     }
 
     /**

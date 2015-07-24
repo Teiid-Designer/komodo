@@ -22,7 +22,6 @@
 package org.komodo.shell.commands.core;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -73,8 +72,11 @@ public final class FindCommand extends BuiltInShellCommand {
                 return false;
             }
 
+            // may have a name pattern
+            final String pattern = optionalArgument( 1 );
+
             // query
-            final String[] foundObjectPaths = query( queryType, null );
+            final String[] foundObjectPaths = query( queryType, null, pattern );
 
             // print results
             printResults( queryType, foundObjectPaths );
@@ -145,23 +147,7 @@ public final class FindCommand extends BuiltInShellCommand {
             // print paths of found objects
             final int indent = ( 2 * MESSAGE_INDENT );
 
-            // sort paths
-            final List< String > sorted = new ArrayList< >( Arrays.asList( foundObjectPaths ) );
-            Collections.sort( sorted, new Comparator< String >() {
-
-                /**
-                 * {@inheritDoc}
-                 *
-                 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-                 */
-                @Override
-                public int compare( final String thisPath,
-                                    final String thatPath ) {
-                    return thisPath.compareTo( thatPath );
-                }
-            } );
-
-            for ( final String path : sorted ) {
+            for ( final String path : foundObjectPaths ) {
                 print( indent, path );
             }
         }
@@ -172,15 +158,18 @@ public final class FindCommand extends BuiltInShellCommand {
      *        the type of object being searched for (cannot be <code>null</code>)
      * @param parentPath
      *        the parent path whose children recursively will be checked (can be empty if searching from the workspace root)
+     * @param pattern
+     *        the regex used to match object names (can be empty if all objects of the given type are being requested)
      * @return the paths of the workspace objects with the matching type (never <code>null</code> but can be empty)
      * @throws Exception
      *         if an error occurs
      */
     protected String[] query( final KomodoType queryType,
-                              final String parentPath ) throws Exception {
+                              final String parentPath,
+                              final String pattern ) throws Exception {
         final String lexiconType = KomodoTypeRegistry.getInstance().getIdentifier( queryType ).getLexiconType();
         final String[] searchResults = getContext().getWorkspaceManager().findByType( getWorkspaceStatus().getTransaction(),
-                                                                                      lexiconType, parentPath );
+                                                                                      lexiconType, parentPath, pattern );
 
         if ( searchResults.length == 0 ) {
             return searchResults;

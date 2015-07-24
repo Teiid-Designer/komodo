@@ -163,7 +163,7 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
             // only occurs on parsing error of arguments and we have no arguments
         }
 
-        final String[] tablePaths = findCmd.query( KomodoType.TABLE, null );
+        final String[] tablePaths = findCmd.query( KomodoType.TABLE, null, null );
 
         if ( tablePaths.length == 0 ) {
             return Collections.emptyList();

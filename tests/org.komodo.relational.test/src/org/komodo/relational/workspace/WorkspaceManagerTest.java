@@ -137,7 +137,7 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
 
         commit(); // must save before running a query
 
-        assertThat( this.wsMgr.findByType( this.uow, VdbLexicon.Vdb.VIRTUAL_DATABASE, StringConstants.EMPTY_STRING ).length,
+        assertThat( this.wsMgr.findByType( this.uow, VdbLexicon.Vdb.VIRTUAL_DATABASE, StringConstants.EMPTY_STRING, null ).length,
                     is( suffix ) );
     }
 
@@ -161,8 +161,33 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
 
         commit(); // must save before running a query
 
-        assertThat( this.wsMgr.findByType( this.uow, VdbLexicon.Vdb.VIRTUAL_DATABASE, parent.getAbsolutePath() ).length,
+        assertThat( this.wsMgr.findByType( this.uow, VdbLexicon.Vdb.VIRTUAL_DATABASE, parent.getAbsolutePath(), null ).length,
                     is( expected ) );
+    }
+
+    @Test
+    public void shouldFindMatchingObjects() throws Exception {
+        // create at workspace root
+        createVdb( "blah" );
+        createVdb( "elvis" );
+        createVdb( "sledge" );
+
+        // create under a folder
+        final KomodoObject parent = _repo.add( this.uow, null, "folder", null );
+        createVdb( "john", parent, VDB_PATH );
+        createVdb( "paul", parent, VDB_PATH );
+        createVdb( "george", parent, VDB_PATH );
+        createVdb( "ringo", parent, VDB_PATH );
+
+        commit(); // must save before running a query
+
+        assertThat( this.wsMgr.findByType( this.uow, VdbLexicon.Vdb.VIRTUAL_DATABASE, null, null ).length, is( 7 ) );
+        assertThat( this.wsMgr.findByType( this.uow, VdbLexicon.Vdb.VIRTUAL_DATABASE, null, "*" ).length, is( 7 ) );
+        assertThat( this.wsMgr.findByType( this.uow, VdbLexicon.Vdb.VIRTUAL_DATABASE, null, "blah" ).length, is( 1 ) );
+        assertThat( this.wsMgr.findByType( this.uow, VdbLexicon.Vdb.VIRTUAL_DATABASE, null, "*e" ).length, is( 2 ) );
+        assertThat( this.wsMgr.findByType( this.uow, VdbLexicon.Vdb.VIRTUAL_DATABASE, null, "*o*" ).length, is( 3 ) );
+        assertThat( this.wsMgr.findByType( this.uow, VdbLexicon.Vdb.VIRTUAL_DATABASE, null, "pa%l" ).length, is( 1 ) );
+        assertThat( this.wsMgr.findByType( this.uow, VdbLexicon.Vdb.VIRTUAL_DATABASE, null, "a*" ).length, is( 0 ) );
     }
 
     @Test
@@ -226,7 +251,7 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
 
     @Test( expected = Exception.class )
     public void shouldNotAllowEmptyTypeWhenFindingObjects() throws Exception {
-        this.wsMgr.findByType(this.uow, StringConstants.EMPTY_STRING, "/my/path");
+        this.wsMgr.findByType( this.uow, StringConstants.EMPTY_STRING, "/my/path", null );
     }
 
     @Test( expected = Exception.class )
@@ -241,7 +266,7 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
 
     @Test( expected = Exception.class )
     public void shouldNotAllowNullTypeWhenFindingObjects() throws Exception {
-        this.wsMgr.findByType(this.uow, null, "/my/path");
+        this.wsMgr.findByType( this.uow, null, "/my/path", null );
     }
 
     @Test( expected = Exception.class )

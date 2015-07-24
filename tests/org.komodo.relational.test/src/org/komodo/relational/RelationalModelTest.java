@@ -61,19 +61,19 @@ public class RelationalModelTest extends AbstractLocalRepositoryTest {
     }
 
     protected Vdb createVdb( final String vdbName,
-                             final String vdbPath ) throws Exception {
-        return createVdb(vdbName, null, vdbPath);
+                             final String originalFilePath ) throws Exception {
+        return createVdb(vdbName, null, originalFilePath);
     }
 
     protected Vdb createVdb( final String vdbName,
                              final KomodoObject parent,
-                             final String vdbPath ) throws Exception {
+                             final String originalFilePath ) throws Exception {
         final WorkspaceManager mgr = WorkspaceManager.getInstance( _repo );
-        final Vdb vdb = mgr.createVdb( this.uow, parent, vdbName, vdbPath );
+        final Vdb vdb = mgr.createVdb( this.uow, parent, vdbName, originalFilePath );
 
         assertThat( vdb.getPrimaryType( this.uow ).getName(), is( VdbLexicon.Vdb.VIRTUAL_DATABASE ) );
         assertThat( vdb.getName( this.uow ), is( vdbName ) );
-        assertThat( vdb.getOriginalFilePath( this.uow ), is( vdbPath ) );
+        assertThat( vdb.getOriginalFilePath( this.uow ), is( originalFilePath ) );
         return vdb;
     }
 
