@@ -25,7 +25,6 @@ import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.TableConstraint;
@@ -144,7 +143,7 @@ public final class AddConstraintColumnCommand extends BuiltInShellCommand {
 
             // find columns
             final KomodoObject parent = getContext().getParent().getKomodoObj();
-            final String[] columnPaths = this.findCommand.query( KomodoType.COLUMN, parent.getAbsolutePath() );
+            final String[] columnPaths = this.findCommand.query( KomodoType.COLUMN, parent.getAbsolutePath(), null );
 
             if ( columnPaths.length == 0 ) {
                 return -1;
@@ -159,20 +158,6 @@ public final class AddConstraintColumnCommand extends BuiltInShellCommand {
                     }
                 }
             }
-
-            Collections.sort( candidates, new Comparator< CharSequence >() {
-
-                /**
-                 * {@inheritDoc}
-                 *
-                 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-                 */
-                @Override
-                public int compare( final CharSequence thisPath,
-                                    final CharSequence thatPath ) {
-                    return thisPath.toString().compareTo( thatPath.toString() );
-                }
-            });
 
             return ( candidates.isEmpty() ? -1 : ( toString().length() + 1 ) );
         }
