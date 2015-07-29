@@ -23,6 +23,7 @@ package org.komodo.importer.ddl;
 
 import java.io.File;
 import java.io.InputStream;
+
 import org.komodo.importer.AbstractImporter;
 import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
@@ -31,9 +32,9 @@ import org.komodo.importer.ImportType;
 import org.komodo.importer.Messages;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Schema;
-import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.ArgCheck;
@@ -57,28 +58,29 @@ public class DdlImporter extends AbstractImporter {
     }
 
     @Override
-    protected KomodoObject executeImport(UnitOfWork transaction, String content,
-                                                                     ImportOptions importOptions,
-                                                                     ImportMessages importMessages) throws KException {
-        String name = importOptions.getOption(OptionKeys.NAME).toString();
+    protected void executeImport(UnitOfWork transaction, String content,
+    		                             KomodoObject parentObject, ImportOptions importOptions,
+    		                             ImportMessages importMessages) throws KException {
 
-        switch(importType) {
+    	// Get the parentObject type that we are importing into
+    	KomodoType kType = parentObject.getTypeIdentifier(transaction);
+    	
+        switch(kType) {
             case MODEL:
             {
+            	Model model = (Model)parentObject;
                 ModelType.Type modelType = (ModelType.Type) importOptions.getOption(OptionKeys.MODEL_TYPE);
-                Vdb vdb = getWorkspaceManager().createVdb(transaction, getWorkspace(transaction), "vdb-for-" + name, name); //$NON-NLS-1$
-                Model model = getWorkspaceManager().createModel(transaction, vdb, name);
                 model.setModelType(transaction, Model.Type.valueOf(modelType.toString()));
                 model.setModelDefinition(transaction, content);
                 model.setProperty(transaction, StandardDdlLexicon.PARSER_ID, TeiidDdlParser.ID);
-                return model;
+                return;
             }
             case SCHEMA:
             {
-                Schema schema = getWorkspaceManager().createSchema(transaction, getWorkspace(transaction), name);
+            	Schema schema = (Schema)parentObject;
                 schema.setRendition(transaction, content);
                 schema.setProperty(transaction, StandardDdlLexicon.PARSER_ID, TeiidDdlParser.ID);
-                return schema;
+                return;
             }
             default:
                 throw new UnsupportedOperationException();
@@ -86,63 +88,67 @@ public class DdlImporter extends AbstractImporter {
     }
 
     /**
-     * Perform the model import using the specified DDL File.  The DDL constructs must be valid to put directly beneath a model.
+	 * @throws KException  
+	 */
+    @Override
+    protected boolean handleExistingNode(UnitOfWork transaction,
+    		ImportOptions importOptions,
+    		ImportMessages importMessages) throws KException {
+
+    	return true;
+    }
+    
+    /**
+     * Perform the DDL import using the specified DDL File.  The DDL constructs must be valid to put directly beneath the parentObject.
+     * @param uow the transaction
      * @param ddlFile the DDL file
+     * @param parentObject the target parent object to place the new objects
      * @param importOptions the options for the import
      * @param importMessages the messages recorded during the import
-     * @return newly created root ddl node
      */
-    public KomodoObject importDdl(File ddlFile, ImportOptions importOptions, ImportMessages importMessages) {
-        KomodoObject ko = null;
-
+    public void importDdl(UnitOfWork uow, File ddlFile, KomodoObject parentObject, ImportOptions importOptions, ImportMessages importMessages) {
         if (!validFile(ddlFile, importMessages))
-            return ko;
+            return;
 
         try {
-            ko = prepareImport(toString(ddlFile), importOptions, importMessages);
+            doImport(uow, toString(ddlFile), parentObject, importOptions, importMessages);
         } catch (Exception ex) {
             importMessages.addErrorMessage(ex.getLocalizedMessage());
         }
-
-        return ko;
     }
 
     /**
      * Perform the model import using the specified DDL Stream.  The DDL constructs must be valid to put directly beneath a model.
+     * @param uow the transaction
      * @param ddlStream the DDL input stream
+     * @param parentObject the target parent object to place the new objects
      * @param importOptions the options for the import
      * @param importMessages the messages recorded during the import
-     * @return newly created root ddl node
      */
-    public KomodoObject importDdl(InputStream ddlStream, ImportOptions importOptions, ImportMessages importMessages) {
+    public void importDdl(UnitOfWork uow, InputStream ddlStream, KomodoObject parentObject, ImportOptions importOptions, ImportMessages importMessages) {
         ArgCheck.isNotNull(ddlStream);
 
-        KomodoObject ko = null;
         try {
-            ko = prepareImport(toString(ddlStream), importOptions, importMessages);
+            doImport(uow, toString(ddlStream), parentObject, importOptions, importMessages);
         } catch (Exception ex) {
             importMessages.addErrorMessage(ex.getLocalizedMessage());
         }
-
-        return ko;
     }
 
     /**
      * Perform the model import using the specified DDL.  The DDL constructs must be valid to put directly beneath a model.
+     * @param uow the transaction
      * @param ddl the DDL
+     * @param parentObject the target parent object to place the new objects
      * @param importOptions the options for the import
      * @param importMessages the messages recorded during the import
-     * @return newly created root ddl node
      */
-    public KomodoObject importDdl(String ddl, ImportOptions importOptions, ImportMessages importMessages) {
-        KomodoObject ko = null;
+    public void importDdl(UnitOfWork uow, String ddl, KomodoObject parentObject, ImportOptions importOptions, ImportMessages importMessages) {
         try {
-            ko = prepareImport(ddl, importOptions, importMessages);
+            doImport(uow, ddl, parentObject, importOptions, importMessages);
         } catch (Exception ex) {
             importMessages.addErrorMessage(ex.getLocalizedMessage());
         }
-
-        return ko;
     }
 
     /**

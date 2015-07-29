@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import org.komodo.relational.model.Model;
@@ -18,6 +19,7 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
 import org.komodo.spi.constants.ExportConstants;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.Exportable;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -34,6 +36,10 @@ public class ExportCommand extends BuiltInShellCommand implements StringConstant
      */
     public static final String NAME = "export"; //$NON-NLS-1$
 
+    private static final String SUBCMD_DDL = "ddl"; //$NON-NLS-1$
+    private static final String SUBCMD_VDB = "vdb"; //$NON-NLS-1$
+    private static final List<String> SUBCMDS = Arrays.asList(SUBCMD_VDB, SUBCMD_DDL);
+    
     /**
      * @param wsStatus
      *        the workspace status
@@ -47,16 +53,49 @@ public class ExportCommand extends BuiltInShellCommand implements StringConstant
      */
     @Override
     public boolean execute() throws Exception {
-        String objPathArg = requiredArgument(0, Messages.getString(Messages.ExportCommand.InvalidArgMsgObjectName)); 
-        String filePathArg = requiredArgument(1, Messages.getString(Messages.ExportCommand.InvalidArgMsgOutputFileName));
+        String subcmdArg = requiredArgument(0, Messages.getString("ExportCommand.InvalidArgMsgSubCommand")); //$NON-NLS-1$
 
+        String objPathArg = requiredArgument(1, Messages.getString(Messages.ExportCommand.InvalidArgMsgObjectName)); 
+        String filePathArg = requiredArgument(2, Messages.getString(Messages.ExportCommand.InvalidArgMsgOutputFileName));
+
+        // --------------------------------------------
+        // Validate the supplied paths
+        // --------------------------------------------
         if(!validateObjectPath(objPathArg)) {
         	return false;
         }
         if(!validateFileName(filePathArg)) {
         	return false;
         }
+        
+        // Get object being exported
+        WorkspaceContext contextToExport = ContextUtils.getContextForPath(getWorkspaceStatus(), objPathArg);
+        KomodoObject objToExport = contextToExport.getKomodoObj();
+        if(objToExport==null ) {
+            print(CompletionConstants.MESSAGE_INDENT, Messages.getString(Messages.ExportCommand.CannotExportObjectDoesNotExist, objPathArg));
+            return false;
+        }
+        
+        if (SUBCMD_VDB.equalsIgnoreCase(subcmdArg)) {
+            // --------------------------------------------
+            // Validate the supplied object is a VDB
+            // --------------------------------------------
+            KomodoType typeIdentifier = objToExport.getTypeIdentifier(getWorkspaceStatus().getTransaction());
+            if( !typeIdentifier.equals(KomodoType.VDB)) {
+                print(CompletionConstants.MESSAGE_INDENT, Messages.getString(Messages.ExportCommand.ObjectNotAVdb, objPathArg));
+                return false;
+            }
 
+        } else if (SUBCMD_DDL.equalsIgnoreCase(subcmdArg)) {
+            // --------------------------------------------
+            // Make sure the object is exportable
+            // --------------------------------------------
+            if( !(objToExport instanceof Exportable) ) {
+                print(CompletionConstants.MESSAGE_INDENT, Messages.getString(Messages.ExportCommand.CannotExportObjectNotExportable, objPathArg));
+                return false;
+            }
+        }
+        
         try {
         	export(objPathArg, filePathArg);
         } catch (Exception e) {
@@ -64,6 +103,7 @@ public class ExportCommand extends BuiltInShellCommand implements StringConstant
             print(CompletionConstants.MESSAGE_INDENT, TAB + e.getMessage());
             return false;
         }
+        
         return true;
     }
 
@@ -116,7 +156,6 @@ public class ExportCommand extends BuiltInShellCommand implements StringConstant
         properties.put( ExportConstants.USE_TABS_PROP_KEY, true);
 
         if( typeIdentifier.equals(KomodoType.VDB)) {
-
             Vdb vdb = wkspManager.resolve(transaction, objToExport, Vdb.class);
             if( vdb == null ) {
                 throw new Exception(Messages.getString(Messages.ExportCommand.CannotExportProblemWithVdb));
@@ -124,7 +163,6 @@ public class ExportCommand extends BuiltInShellCommand implements StringConstant
 
             output = vdb.export(transaction, properties);
             fileExtension = XML;
-
         } else if (typeIdentifier.equals(KomodoType.MODEL)) {
             Model model = wkspManager.resolve(transaction, objToExport, Model.class);
             if( model == null ) {
@@ -133,7 +171,6 @@ public class ExportCommand extends BuiltInShellCommand implements StringConstant
 
             output = model.export(transaction, properties);
             fileExtension = DDL;
-
         } else if (typeIdentifier.equals(KomodoType.SCHEMA)) {
             Schema schema = wkspManager.resolve(transaction, objToExport, Schema.class);
             if( schema == null )
@@ -141,6 +178,9 @@ public class ExportCommand extends BuiltInShellCommand implements StringConstant
 
             output = schema.export(transaction, properties);
             fileExtension = DDL;
+        } else {
+            print(CompletionConstants.MESSAGE_INDENT, Messages.getString(Messages.ExportCommand.ExportOfTypeNotSupported, typeIdentifier.getType()));
+            return;
         }
 
         if ( output == null ||  output.isEmpty()) {
@@ -178,12 +218,24 @@ public class ExportCommand extends BuiltInShellCommand implements StringConstant
     @Override
     public int tabCompletion(String lastArgument, List<CharSequence> candidates) throws Exception {
     	if (getArguments().isEmpty()) {
+    		// SubCommand completion options
+    		if(lastArgument==null) {
+    			candidates.addAll(SUBCMDS);
+    		} else {
+    			for (String subCmd : SUBCMDS) {
+    				if (subCmd.toUpperCase().startsWith(lastArgument.toUpperCase())) {
+    					candidates.add(subCmd);
+    				}
+    			}
+    		}
+    		return 0;
+    	} else if (getArguments().size()==1) {
     		// The arg is expected to be a path
     		updateTabCompleteCandidatesForPath(candidates, getWorkspaceStatus().getCurrentContext(), true, lastArgument);
 
     		// Do not put space after it - may want to append more to the path
     		return CompletionConstants.NO_APPEND_SEPARATOR;
-    	} else if (getArguments().size()==1) {
+    	} else if (getArguments().size()==2) {
     		// This arg is required filePath
     		if(lastArgument==null) {
     			candidates.add("<filePath>"); //$NON-NLS-1$
@@ -192,4 +244,5 @@ public class ExportCommand extends BuiltInShellCommand implements StringConstant
     	}
     	return -1;
     }
+    
 }

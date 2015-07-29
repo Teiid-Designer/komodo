@@ -23,21 +23,25 @@ package org.komodo.importer.ddl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 import org.junit.Test;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.importer.AbstractImporterTest;
 import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
-import org.komodo.importer.ImportOptions.OptionKeys;
-import org.komodo.importer.ImportType;
-import org.komodo.importer.Messages;
+import org.komodo.relational.model.Model;
+import org.komodo.relational.model.Schema;
+import org.komodo.relational.vdb.Vdb;
+import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.repository.SynchronousCallback;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.test.utils.TestUtilities;
@@ -60,41 +64,56 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
 	private static final String INVALID_COLUMN_DDL = "invalid-column.ddl";
 
 	private static final String TEIID_FLATFILE = "Teiid-FlatFile.ddl";
+	
+	private static final String MODEL_NAME = "MyModel";
+	private static final String SCHEMA_NAME = "MySchema";
+	private static final String VDB_NAME = "MyVDB";
 
 	@Override
-	protected KomodoObject runImporter(Repository repository,
-	                                                             File file, ImportType importType, ImportOptions importOptions,
-	                                                             ImportMessages importMessages) {
+	protected void runImporter(Repository repository,
+	                                                             File file, KomodoObject parentObject, ImportOptions importOptions,
+	                                                             ImportMessages importMessages) throws Exception {
         DdlImporter importer = new DdlImporter(_repo);
-        importer.setImportType(importType);
-        return importer.importDdl(file, importOptions, importMessages);
+        importer.importDdl(uow, file, parentObject, importOptions, importMessages);
 	}
 
 	@Override
-	protected KomodoObject runImporter(Repository repository,
-	                                                             InputStream inputStream, ImportType importType, 
+	protected void runImporter(Repository repository,
+	                                                             InputStream inputStream, KomodoObject parentObject, 
 	                                                             ImportOptions importOptions,
-	                                                             ImportMessages importMessages) {
+	                                                             ImportMessages importMessages) throws Exception {
 	    DdlImporter importer = new DdlImporter(_repo);
-	    importer.setImportType(importType);
-        return importer.importDdl(inputStream, importOptions, importMessages);
+        importer.importDdl(uow, inputStream, parentObject, importOptions, importMessages);
 	}
-
+	
+	
+	// Commit Transaction and handle Importer errors, adding to import messages.  Then start a new transaction.
+	private void commitHandleErrors(ImportMessages importMessages) throws Exception {
+    	// Commit the transaction and handle any import exceptions
+    	this.uow.commit();
+        this.callback.await( TIME_TO_WAIT, TimeUnit.MINUTES );
+    	if(this.callback.hasError()) {
+    		importMessages.addErrorMessage(callback.error());
+    	}
+        // create new transaction
+        this.callback = new SynchronousCallback();
+        this.uow = createTransaction(callback);
+	}
+	
 	/**
      * Test Error condition - bad DDL file name supplied
      * Expected Outcome - Error message saying that the supplied file is not found
      */
     @Test
     public void testBadDdlFile() throws Exception {
-    	ImportOptions importOptions = new ImportOptions();
-
     	ImportMessages importMessages = new ImportMessages();
+        KomodoObject workspace = _repo.komodoWorkspace(uow);
+    	executeImporter(new File("unknown.ddl"), workspace, new ImportOptions(), importMessages);
 
-    	KomodoObject modelNode = executeImporter(new File("unknown.ddl"), ImportType.MODEL, importOptions, importMessages);
-
-    	// No model created
-    	assertNull("Failed - expected null model ", modelNode);
-
+        // Verify no children created
+    	KomodoObject[] children = workspace.getChildren(uow);
+    	assertEquals(0,children.length);
+        
     	// Should have 1 error message
     	assertEquals(1, importMessages.getErrorMessages().size());
 
@@ -121,20 +140,19 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
     	// Make file unreadable
     	tmpFile.setReadable(false);
 
-    	// Options for the import (default)
-    	ImportOptions importOptions = new ImportOptions();
-
     	// Saves Messages during import
     	ImportMessages importMessages = new ImportMessages();
 
-    	KomodoObject modelNode = executeImporter(tmpFile, ImportType.MODEL, importOptions, importMessages);
+        KomodoObject workspace = _repo.komodoWorkspace(uow);
+    	executeImporter(tmpFile, workspace, new ImportOptions(), importMessages);
 
     	// Set back to readable
     	tmpFile.setReadable(true);
 
-    	// No model created
-    	assertNull("Failed - expected null model ", modelNode);
-
+        // Verify no children created
+    	KomodoObject[] children = workspace.getChildren(uow);
+    	assertEquals(0,children.length);
+        
     	// Should have 1 error message
     	assertEquals(1, importMessages.getErrorMessages().size());
 
@@ -154,17 +172,16 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
         assertTrue(tmpFile.exists());
         assertEquals(0, tmpFile.length());
 
-        // Options for the import (default)
-        ImportOptions importOptions = new ImportOptions();
-
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
 
-        KomodoObject modelNode = executeImporter(tmpFile, ImportType.MODEL, importOptions, importMessages);
+        KomodoObject workspace = _repo.komodoWorkspace(uow);
+        executeImporter(tmpFile, workspace, new ImportOptions(), importMessages);
 
-        // No model created
-        assertNull("Failed - expected null model ", modelNode);
-
+        // Verify no children created
+    	KomodoObject[] children = workspace.getChildren(uow);
+    	assertEquals(0,children.length);
+        
         // Should have 1 error message
         assertEquals(1, importMessages.getErrorMessages().size());
 
@@ -172,8 +189,8 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
         assertEquals("The supplied content string is empty", msg);
     }
 
+    // Verifies a MySQL model node
     private void verifyMySQLAcctsDdl(KomodoObject modelNode) throws Exception {
-
         // ----------------------------------
         // Test expected tables exist
         // ----------------------------------
@@ -265,55 +282,94 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
         InputStream ddlStream = TestUtilities.getResourceAsStream(getClass(),
                                                                   DDL_DIRECTORY, TEIID_MYSQL_ACCTS);
 
-    	// Options for the import (default)
+        // Create a VDB and Model that the content will be put under
+        Vdb vdb = WorkspaceManager.getInstance(_repo).createVdb(uow, null, VDB_NAME, "externalPath"); 
+        Model model = WorkspaceManager.getInstance(_repo).createModel(uow, vdb, MODEL_NAME);
+        
     	ImportOptions importOptions = new ImportOptions();
-    	importOptions.setOption(OptionKeys.NAME, TEIID_MYSQL_ACCTS);
-
-    	// Saves Messages during import
-    	ImportMessages importMessages = new ImportMessages();
-
-        KomodoObject modelNode = executeImporter(ddlStream,
-                                                                               ImportType.MODEL,
-                                                                               importOptions,
-                                                                               importMessages);
-
-    	// Test that a Model was created
-    	assertNotNull("Failed - No Model Created ", modelNode);
+        ImportMessages importMessages = new ImportMessages();
+    	executeImporter(ddlStream,model,importOptions,importMessages);
+    	
+    	// Commit the transaction and handle any import exceptions
+    	commitHandleErrors(importMessages);
+    	
+    	// Retrive model after import
+    	assertEquals(1, vdb.getModels(uow).length);
+    	Model resultModel = vdb.getModels(uow)[0];
 
     	// Test Model name
-    	String modelName = modelNode.getName(this.uow);
-    	assertEquals(importOptions.getOption(OptionKeys.NAME), modelName);
+    	String modelName = resultModel.getName(this.uow);
+    	assertEquals(MODEL_NAME, modelName);
 
-    	verifyMySQLAcctsDdl(modelNode);
+    	verifyMySQLAcctsDdl(resultModel);
     }
-
+    
     @Test
     public void testDdlImport_MySQLAcctsAsSchema() throws Exception {
         InputStream ddlStream = TestUtilities.getResourceAsStream(getClass(),
                                                                   DDL_DIRECTORY, TEIID_MYSQL_ACCTS);
 
+        // Create a Schema that the content will be put under
+        Schema schema = WorkspaceManager.getInstance(_repo).createSchema(uow, null, SCHEMA_NAME); 
+        
         ImportOptions importOptions = new ImportOptions();
-        importOptions.setOption(OptionKeys.NAME, TEIID_MYSQL_ACCTS);
-
-        // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
+        executeImporter(ddlStream,schema,importOptions,importMessages);
 
-        KomodoObject schemaNode = executeImporter(ddlStream,
-                                                                                 ImportType.SCHEMA,
-                                                                                 importOptions,
-                                                                                 importMessages);
-
-        // Test that a schema fragment was created
-        assertNotNull("Failed - No Schema Created ", schemaNode);
+    	// Commit the transaction and handle any import exceptions
+    	commitHandleErrors(importMessages);
+        
+    	// Retrive schema after import
+    	assertEquals(1, WorkspaceManager.getInstance(_repo).findSchemas(uow).length);
+    	Schema schemaNode = WorkspaceManager.getInstance(_repo).findSchemas(uow)[0];
+    	
+        // Test that a Schema was created
+        assertNotNull("Failed - No Schema fragment Created ", schemaNode);
         verifyPrimaryType(schemaNode, KomodoLexicon.Schema.NODE_TYPE);
 
-        // Test Model name
+        // Test Schema name
         String schemaName = schemaNode.getName(this.uow);
-        assertEquals(importOptions.getOption(OptionKeys.NAME), schemaName);
+        assertEquals(SCHEMA_NAME, schemaName);
 
         verifyMySQLAcctsDdl(schemaNode);
     }
+    
+	/**
+     * Imports MySQL Model DDL, then re-imports.  import of DDL into a parent does a full replace of the existing content...
+     * Expected outcome - successful creation with replacement of first import content
+     */
+    @Test
+    public void testDdlImportModelThenReimport() throws Exception {
+        // Import the original model from DDL
+    	testDdlImport_MySQLAcctsAsModel();
+        commit();
+        
+        // Now re-import the FlatFile DDL
+        InputStream ddlStream = TestUtilities.getResourceAsStream(getClass(), DDL_DIRECTORY, TEIID_FLATFILE);
 
+        // Get the model created in the first import
+        Model model = WorkspaceManager.getInstance(_repo).findModels(uow)[0];
+        
+    	ImportOptions importOptions = new ImportOptions();
+        ImportMessages importMessages = new ImportMessages();
+    	executeImporter(ddlStream,model,importOptions,importMessages);
+    	
+    	// Commit the transaction and handle any import exceptions
+    	commitHandleErrors(importMessages);
+    	
+    	// Retrieve model after import
+        Model[] models = WorkspaceManager.getInstance(_repo).findModels(uow);
+    	assertEquals(1, models.length);
+    	Model resultModel = models[0];
+
+    	// Test Model name
+    	String modelName = resultModel.getName(this.uow);
+    	assertEquals(MODEL_NAME, modelName);
+
+    	verifyFlatFileDdl(resultModel);
+    }
+
+    // Verifies the FlatFile node
     private void verifyFlatFileDdl(KomodoObject schemaNode) throws Exception {
         // ----------------------------------
         // Test expected procedures exist
@@ -355,25 +411,28 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
         InputStream ddlStream = TestUtilities.getResourceAsStream(getClass(),
                                                                   DDL_DIRECTORY, TEIID_FLATFILE);
 
-    	// Options for the import (default)
-    	ImportOptions importOptions = new ImportOptions();
+        // Create a VDB and Model that the content will be put under
+        Vdb vdb = WorkspaceManager.getInstance(_repo).createVdb(uow, null, VDB_NAME, "externalPath"); 
+        Model model = WorkspaceManager.getInstance(_repo).createModel(uow, vdb, MODEL_NAME);
+        
+        ImportOptions importOptions = new ImportOptions();
+        ImportMessages importMessages = new ImportMessages();
+    	executeImporter(ddlStream,model,importOptions,importMessages);
 
-    	importOptions.setOption(OptionKeys.NAME, TEIID_FLATFILE);
-
-    	ImportMessages importMessages = new ImportMessages();
-
-        KomodoObject modelNode = executeImporter(ddlStream,
-                                                                               ImportType.MODEL,
-                                                                               importOptions,
-                                                                               importMessages);
-
+    	// Commit the transaction and handle any import exceptions
+    	commitHandleErrors(importMessages);
+        
+    	// Retrive model after import
+    	assertEquals(1, vdb.getModels(uow).length);
+    	Model modelNode = vdb.getModels(uow)[0];
+    	
     	// Test that a Model was created
     	assertNotNull("Failed - No Model Created ", modelNode);
     	verifyPrimaryType(modelNode, VdbLexicon.Vdb.DECLARATIVE_MODEL);
 
     	// Test Model name
     	String modelName = modelNode.getName(this.uow);
-    	assertEquals(importOptions.getOption(OptionKeys.NAME), modelName);
+    	assertEquals(MODEL_NAME, modelName);
 
         verifyFlatFileDdl(modelNode);
     }
@@ -383,24 +442,27 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
         InputStream ddlStream = TestUtilities.getResourceAsStream(getClass(),
                                                                   DDL_DIRECTORY, TEIID_FLATFILE);
 
-        // Options for the import
+        // Create a Schema that the content will be put under
+        Schema schema = WorkspaceManager.getInstance(_repo).createSchema(uow, null, SCHEMA_NAME); 
+        
         ImportOptions importOptions = new ImportOptions();
-        importOptions.setOption(OptionKeys.NAME, TEIID_FLATFILE);
-
         ImportMessages importMessages = new ImportMessages();
+        executeImporter(ddlStream,schema,importOptions,importMessages);
 
-        KomodoObject schemaNode = executeImporter(ddlStream,
-                                                                                  ImportType.SCHEMA,
-                                                                                  importOptions,
-                                                                                  importMessages);
-
+    	// Commit the transaction and handle any import exceptions
+    	commitHandleErrors(importMessages);
+        
+    	// Retrive schema after import
+    	assertEquals(1, WorkspaceManager.getInstance(_repo).findSchemas(uow).length);
+    	Schema schemaNode = WorkspaceManager.getInstance(_repo).findSchemas(uow)[0];
+    	
         // Test that a Model was created
         assertNotNull("Failed - No Schema fragment Created ", schemaNode);
         verifyPrimaryType(schemaNode, KomodoLexicon.Schema.NODE_TYPE);
 
         // Test Schema name
         String schemaName = schemaNode.getName(this.uow);
-        assertEquals(importOptions.getOption(OptionKeys.NAME), schemaName);
+        assertEquals(SCHEMA_NAME, schemaName);
 
         verifyFlatFileDdl(schemaNode);
     }
@@ -411,35 +473,23 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
                                                                    DDL_DIRECTORY,
                                                                    INVALID_KEYWORD_DDL);
 
-        // Options for the import (default)
+        // Create a VDB and Model that the content will be put under
+        Vdb vdb = WorkspaceManager.getInstance(_repo).createVdb(uow, null, VDB_NAME, "externalPath"); 
+        Model model = WorkspaceManager.getInstance(_repo).createModel(uow, vdb, MODEL_NAME);
+        
         ImportOptions importOptions = new ImportOptions();
-        importOptions.setOption(OptionKeys.NAME, "INVALID");
-
-        // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
+        executeImporter(ddlStream,model,importOptions,importMessages);
 
-        KomodoObject modelNode = executeImporter(ddlStream,
-                                                                                  ImportType.MODEL,
-                                                                                  importOptions,
-                                                                                  importMessages);
-
-        //
-        // Test that a model was created
-        // The invalid xml means the model can be created
-        // but the sequencers will fail
-        //
-        assertNotNull(modelNode);
-
-        //
-        // Confirmation that the model was created ok
-        //
-        List<String> progressMessages = importMessages.getProgressMessages();
-        assertEquals(1, progressMessages.size());
-        assertEquals(Messages.getString(Messages.IMPORTER.nodeCreated), progressMessages.get(0));
-
-        //
-        // Error messages
-        //
+    	// Commit the transaction and handle any import exceptions
+    	commitHandleErrors(importMessages);
+        
+    	// Retrive model after import
+    	assertEquals(1, vdb.getModels(uow).length);
+    	Model modelNode = vdb.getModels(uow)[0];
+    	assertEquals(MODEL_NAME,modelNode.getName(uow));
+    	
+        // Error messages - expects one parsing error
         List<String> errorMessages = importMessages.getErrorMessages();
         assertEquals(1, errorMessages.size());
 
@@ -456,35 +506,23 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
                                                                    DDL_DIRECTORY,
                                                                    INVALID_COLUMN_DDL);
 
-        // Options for the import (default)
+        // Create a VDB and Model that the content will be put under
+        Vdb vdb = WorkspaceManager.getInstance(_repo).createVdb(uow, null, VDB_NAME, "externalPath"); 
+        Model model = WorkspaceManager.getInstance(_repo).createModel(uow, vdb, MODEL_NAME);
+                        
         ImportOptions importOptions = new ImportOptions();
-        importOptions.setOption(OptionKeys.NAME, "INVALID");
-
-        // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
+        executeImporter(ddlStream,model,importOptions,importMessages);
 
-        KomodoObject modelNode = executeImporter(ddlStream,
-                                                                                  ImportType.MODEL,
-                                                                                  importOptions,
-                                                                                  importMessages);
+    	// Commit the transaction and handle any import exceptions
+    	commitHandleErrors(importMessages);
+        
+    	// Retrive model after import
+    	assertEquals(1, vdb.getModels(uow).length);
+    	Model modelNode = vdb.getModels(uow)[0];
+    	assertEquals(MODEL_NAME,modelNode.getName(uow));
 
-        //
-        // Test that a model was created
-        // The invalid xml means the model can be created
-        // but the sequencers will fail
-        //
-        assertNotNull(modelNode);
-
-        //
-        // Confirmation that the model was created ok
-        //
-        List<String> progressMessages = importMessages.getProgressMessages();
-        assertEquals(1, progressMessages.size());
-        assertEquals(Messages.getString(Messages.IMPORTER.nodeCreated), progressMessages.get(0));
-
-        //
-        // Error messages
-        //
+        // Error messages - expects one parsing error
         List<String> errorMessages = importMessages.getErrorMessages();
         assertEquals(1, errorMessages.size());
 

@@ -2,11 +2,13 @@ package org.komodo.shell.commands.core;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.shell.util.ContextUtils;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
@@ -40,25 +42,44 @@ public class RenameCommand extends BuiltInShellCommand implements StringConstant
         String objNameArg = requiredArgument(0, Messages.getString("RenameCommand.InvalidArgMsg_ObjectName")); //$NON-NLS-1$
         String newName = requiredArgument(1, Messages.getString("RenameCommand.InvalidArgMsg_NewName")); //$NON-NLS-1$
 
-        // Validate that specified object exists
-        if (!validateChildExists(objNameArg,getWorkspaceStatus().getCurrentContext())) {
-            return false;
-        }
-        // Validate the new name
-        String childType = getWorkspaceStatus().getCurrentContext().getChild(objNameArg).getType();
-        KomodoType kType = KomodoType.getKomodoType(childType);
-        if (!validateObjectName(newName,kType)) {
-            return false;
-        }
+        // Get the context for current object and target object since they can be supplied with a path
+        WorkspaceContext objContext = ContextUtils.getContextForPath(getWorkspaceStatus(), objNameArg);
+        
+        // objContext null - Object could not be located
+    	if(objContext==null) {
+        	print(CompletionConstants.MESSAGE_INDENT,Messages.getString("RenameCommand.cannotRename_objectDoesNotExist", objNameArg)); //$NON-NLS-1$
+    		return false;
+    	}
 
+    	String[] pathSegs = ContextUtils.getPathSegments(newName);
+    	String targetParentPath = ContextUtils.getPath(pathSegs, pathSegs.length-1);
+        WorkspaceContext targetContext = ContextUtils.getContextForPath(getWorkspaceStatus(), targetParentPath);
+        // only allow move to an existing context
+    	if(targetContext==null) {
+        	print(CompletionConstants.MESSAGE_INDENT,Messages.getString("RenameCommand.cannotRename_targetContextDoesNotExist", targetParentPath)); //$NON-NLS-1$
+    		return false;
+    	}
+    	
+        // Check validity of the new object name
+    	String newShortName = pathSegs[pathSegs.length-1];
+    	KomodoType kType = objContext.getKomodoObj().getTypeIdentifier(getWorkspaceStatus().getTransaction());
+//        if (!validateObjectName(newShortName,kType)) {
+//            return false;
+//        }
+
+        // make sure type is valid for the target context
+        if ( !validateChildType( kType.getType(), targetContext ) ) {
+        	return false;
+        }
+        
         // Validate that the rename would not create a duplicate of same type
-        if (!validateNotDuplicateType(objNameArg,newName,getWorkspaceStatus().getCurrentContext())) {
+        if (!validateNotDuplicateType(objContext,newShortName,targetContext)) {
             return false;
         }
 
         try {
         	// Rename
-            rename(objNameArg, newName);
+            rename(objContext, newShortName, targetContext);
             // Commit transaction
             if ( isAutoCommit() ) {
                 getWorkspaceStatus().commit( RenameCommand.class.getSimpleName() );
@@ -74,52 +95,33 @@ public class RenameCommand extends BuiltInShellCommand implements StringConstant
     }
 
     /**
-     * Validate a child with the specified name exists
-     * @param name the child name
-     * @param context the parent context
-     * @return 'true' if exists, 'false' if not.
-     */
-    private boolean validateChildExists(String name, WorkspaceContext context) throws Exception {
-    	WorkspaceContext childContext = context.getChild(name);
-    	if(childContext==null) {
-        	print(CompletionConstants.MESSAGE_INDENT,Messages.getString("RenameCommand.cannotRename_objectDoesNotExist", name)); //$NON-NLS-1$
-    		return false;
-    	}
-        return true;
-    }
-
-    /**
      * Validates whether another child of the same name and type already exists
-     * @param oldName the name of the object being renamed
+     * @param objToRename the object being renamed
      * @param newName the new child name
-     * @param context the parent context
+     * @param targetContext the parent context
      * @return 'true' if exists, 'false' if not.
      */
-    private boolean validateNotDuplicateType(String oldName, String newName, WorkspaceContext context) throws Exception {
-    	// The child being renamed.
-    	WorkspaceContext childToRename = context.getChild(oldName);
-    	// Determine if child with specifed name already exists
-    	WorkspaceContext existingChild = context.getChild(newName);
+    private boolean validateNotDuplicateType(WorkspaceContext objToRename, String newName, WorkspaceContext targetContext) throws Exception {
+    	// Determine if child with new name and original object type already exists
+    	WorkspaceContext existingChild = targetContext.getChild(newName,objToRename.getType());
     	// If child exists, check the type
     	if(existingChild!=null) {
-    		if(existingChild.getType().equals(childToRename.getType())) {
-    			print(CompletionConstants.MESSAGE_INDENT,Messages.getString("RenameCommand.cannotRename_wouldCreateDuplicate", newName)); //$NON-NLS-1$
-    			return false;
-    		}
+    		print(CompletionConstants.MESSAGE_INDENT,Messages.getString("RenameCommand.cannotRename_wouldCreateDuplicate", newName)); //$NON-NLS-1$
+    		return false;
     	}
-        return true;
+    	return true;
     }
 
-    private void rename(String objName, String newName) throws Exception {
-        WorkspaceStatus wsStatus = getWorkspaceStatus();
-
-        KomodoObject parent = wsStatus.getCurrentContext().getKomodoObj();
-
-        KomodoObject child = parent.getChild(wsStatus.getTransaction(), objName);
-        if( child != null ) {
-        	child.rename(wsStatus.getTransaction(), newName);
+    private void rename(WorkspaceContext objContext, String newShortName, WorkspaceContext targetContext) throws Exception {
+        // Original Object to rename
+        KomodoObject origObject = objContext.getKomodoObj();
+        // 
+        if( origObject != null ) {
+        	String parentAbsPath = targetContext.getKomodoObj().getAbsolutePath();
+        	String newChildPath = parentAbsPath + FORWARD_SLASH + newShortName;
+        	origObject.rename(getWorkspaceStatus().getTransaction(), newChildPath);
         } else {
-        	throw new Exception(Messages.getString("RenameCommand.cannotRename_objectDoesNotExist", objName)); //$NON-NLS-1$
+        	throw new Exception(Messages.getString("RenameCommand.cannotRename_objectDoesNotExist", origObject)); //$NON-NLS-1$
         }
     }
 

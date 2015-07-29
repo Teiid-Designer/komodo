@@ -63,18 +63,18 @@ public final class FindCommand extends BuiltInShellCommand {
      */
     @Override
     public boolean execute() throws Exception {
+        final String typeArg = requiredArgument( 0, Messages.getString( "FindCommand.MissingTypeArg" ) ); //$NON-NLS-1$
+        final KomodoType queryType = getQueryType( typeArg );
+
+        if ( queryType == null ) {
+            print( MESSAGE_INDENT, Messages.getString( "FindCommand.InvalidType", typeArg ) ); //$NON-NLS-1$
+            return false;
+        }
+
+        // may have a name pattern
+        final String pattern = optionalArgument( 1 );
+
         try {
-            final String typeArg = requiredArgument( 0, Messages.getString( "FindCommand.MissingTypeArg" ) ); //$NON-NLS-1$
-            final KomodoType queryType = getQueryType( typeArg );
-
-            if ( queryType == null ) {
-                print( MESSAGE_INDENT, Messages.getString( "FindCommand.InvalidType", typeArg ) ); //$NON-NLS-1$
-                return false;
-            }
-
-            // may have a name pattern
-            final String pattern = optionalArgument( 1 );
-
             // query
             final String[] foundObjectPaths = query( queryType, null, pattern );
 

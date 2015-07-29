@@ -11,4 +11,5 @@ Bundle-ActivationPolicy: lazy
 Require-Bundle: org.komodo.spi;bundle-version="0.0.1",
  org.komodo.relational;bundle-version="0.0.1",
  org.komodo.utils;bundle-version="0.0.1",
- org.komodo.core
+ org.komodo.core,
+ org.komodo.importer;bundle-version="0.0.2"

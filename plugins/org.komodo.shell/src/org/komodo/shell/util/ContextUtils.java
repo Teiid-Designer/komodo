@@ -96,8 +96,7 @@ public class ContextUtils implements StringConstants {
 
 	/**
 	 * Get the workspace context for the specified path.  The path can be either an absolute path, or relative
-	 * to the current context.
-	 * separated by the PATH_SEPARATOR, for example 'table1/col1'.  or it could be single path.
+	 * to the current context.  The path is separated by the PATH_SEPARATOR, for example 'table1/col1'.
 	 * @param workspaceStatus the workspace status
 	 * @param path the supplied path
 	 * @return the context at the specified path, null if not found.
@@ -335,8 +334,25 @@ public class ContextUtils implements StringConstants {
 	 * @param path the supplied path
 	 * @return the array of path segments
 	 */
-	private static String[] getPathSegments(String path) {
+	public static String[] getPathSegments(String path) {
 		return path.split(PATH_SEPARATOR);
+	}
+
+	/**
+	 * Builds a path from the specified segments, starting at the root and including nLevels
+	 * @param pathSegments the array of segments
+	 * @param nLevels number of levels to include
+	 * @return the path
+	 */
+	public static String getPath(String[] pathSegments, int nLevels) {
+		StringBuilder sb = new StringBuilder();
+		for(int i=0; i<nLevels; i++) {
+			if(i!=0) {
+				sb.append(PATH_SEPARATOR);
+			}
+			sb.append(pathSegments[i]);
+		}
+		return sb.toString();
 	}
 
 }

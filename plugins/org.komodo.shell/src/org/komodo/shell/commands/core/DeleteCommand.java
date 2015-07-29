@@ -79,12 +79,6 @@ public class DeleteCommand extends BuiltInShellCommand implements StringConstant
 			return false;
 		}
 
-		// The context for the delete must be *below* the current context.
-		if(!ContextUtils.isContextBelow(getWorkspaceStatus().getCurrentContext(),contextToDelete)) {
-            print(CompletionConstants.MESSAGE_INDENT,Messages.getString("DeleteCommand.contextMustBeBelowCurrent",contextToDelete.getFullName())); //$NON-NLS-1$
-			return false;
-		}
-
 		return true;
 	}
 
