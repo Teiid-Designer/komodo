@@ -348,7 +348,7 @@ public final class ColumnImplTest extends RelationalModelTest {
 
     @Test
     public void shouldSetCharOctetLength() throws Exception {
-        final int value = 10;
+        final long value = 10;
         this.column.setCharOctetLength( this.uow, value );
         assertThat( this.column.getCharOctetLength( this.uow ), is( value ) );
     }
@@ -386,20 +386,20 @@ public final class ColumnImplTest extends RelationalModelTest {
 
     @Test
     public void shouldSetDatatypePrecisionProperty() throws Exception {
-        final int value = 10;
+        final long value = 10;
         this.column.setPrecision( this.uow, value );
         assertThat( this.column.getPrecision( this.uow ), is( value ) );
         assertThat( this.column.getProperty( this.uow, StandardDdlLexicon.DATATYPE_PRECISION ).getLongValue( this.uow ),
-                    is( ( long )value ) );
+                    is( value ) );
     }
 
     @Test
     public void shouldSetDatatypeScaleProperty() throws Exception {
-        final int value = 10;
+        final long value = 10;
         this.column.setScale( this.uow, value );
         assertThat( this.column.getScale( this.uow ), is( value ) );
         assertThat( this.column.getProperty( this.uow, StandardDdlLexicon.DATATYPE_SCALE ).getLongValue( this.uow ),
-                    is( ( long )value ) );
+                    is( value ) );
     }
 
     @Test
@@ -477,7 +477,7 @@ public final class ColumnImplTest extends RelationalModelTest {
 
     @Test
     public void shouldSetRadix() throws Exception {
-        final int value = 10;
+        final long value = 10;
         this.column.setRadix( this.uow, value );
         assertThat( this.column.getRadix( this.uow ), is( value ) );
     }

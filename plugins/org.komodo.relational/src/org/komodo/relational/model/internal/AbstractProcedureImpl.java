@@ -527,12 +527,12 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.AbstractProcedure#setUpdateCount(org.komodo.spi.repository.Repository.UnitOfWork, int)
+     * @see org.komodo.relational.model.AbstractProcedure#setUpdateCount(org.komodo.spi.repository.Repository.UnitOfWork, long)
      */
     @Override
     public void setUpdateCount( final UnitOfWork transaction,
-                                final int newUpdateCount ) throws KException {
-        setStatementOption( transaction, StandardOption.UPDATECOUNT.name(), Integer.toString( newUpdateCount ) );
+                                final long newUpdateCount ) throws KException {
+        setStatementOption( transaction, StandardOption.UPDATECOUNT.name(), Long.toString( newUpdateCount ) );
     }
 
     /**

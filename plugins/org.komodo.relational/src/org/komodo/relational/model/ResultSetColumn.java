@@ -100,7 +100,7 @@ public interface ResultSetColumn extends OptionContainer, RelationalObject {
      *         if an error occurs
      * @see RelationalConstants#DEFAULT_PRECISION
      */
-    int getPrecision( final UnitOfWork transaction ) throws KException;
+    long getPrecision( final UnitOfWork transaction ) throws KException;
 
     /**
      * @param transaction
@@ -110,7 +110,7 @@ public interface ResultSetColumn extends OptionContainer, RelationalObject {
      *         if an error occurs
      * @see RelationalConstants#DEFAULT_SCALE
      */
-    int getScale( final UnitOfWork transaction ) throws KException;
+    long getScale( final UnitOfWork transaction ) throws KException;
 
     /**
      * @param transaction
@@ -200,7 +200,7 @@ public interface ResultSetColumn extends OptionContainer, RelationalObject {
      * @see RelationalConstants#DEFAULT_PRECISION
      */
     void setPrecision( final UnitOfWork transaction,
-                       final int newPrecision ) throws KException;
+                       final long newPrecision ) throws KException;
 
     /**
      * @param transaction
@@ -212,7 +212,7 @@ public interface ResultSetColumn extends OptionContainer, RelationalObject {
      * @see RelationalConstants#DEFAULT_SCALE
      */
     void setScale( final UnitOfWork transaction,
-                   final int newScale ) throws KException;
+                   final long newScale ) throws KException;
 
     /**
      * @param transaction

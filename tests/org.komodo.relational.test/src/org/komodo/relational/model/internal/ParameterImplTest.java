@@ -294,20 +294,20 @@ public final class ParameterImplTest extends RelationalModelTest {
 
     @Test
     public void shouldSetDatatypePrecisionProperty() throws Exception {
-        final int value = 10;
+        final long value = 10;
         this.parameter.setPrecision( this.uow, value );
         assertThat( this.parameter.getPrecision( this.uow ), is( value ) );
         assertThat( this.parameter.getProperty( this.uow, StandardDdlLexicon.DATATYPE_PRECISION ).getLongValue( this.uow ),
-                    is( ( long )value ) );
+                    is( value ) );
     }
 
     @Test
     public void shouldSetDatatypeScaleProperty() throws Exception {
-        final int value = 10;
+        final long value = 10;
         this.parameter.setScale( this.uow, value );
         assertThat( this.parameter.getScale( this.uow ), is( value ) );
         assertThat( this.parameter.getProperty( this.uow, StandardDdlLexicon.DATATYPE_SCALE ).getLongValue( this.uow ),
-                    is( ( long )value ) );
+                    is( value ) );
     }
 
     @Test

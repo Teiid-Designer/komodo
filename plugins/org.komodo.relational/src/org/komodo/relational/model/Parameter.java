@@ -156,7 +156,7 @@ public interface Parameter extends OptionContainer, RelationalObject {
      * @throws KException
      *         if an error occurs
      */
-    int getPrecision( final UnitOfWork transaction ) throws KException;
+    long getPrecision( final UnitOfWork transaction ) throws KException;
 
     /**
      * @param transaction
@@ -165,7 +165,7 @@ public interface Parameter extends OptionContainer, RelationalObject {
      * @throws KException
      *         if an error occurs
      */
-    int getScale( final UnitOfWork transaction ) throws KException;
+    long getScale( final UnitOfWork transaction ) throws KException;
 
     /**
      * @param transaction
@@ -242,7 +242,7 @@ public interface Parameter extends OptionContainer, RelationalObject {
      *         if an error occurs
      */
     void setPrecision( final UnitOfWork transaction,
-                       final int newPrecision ) throws KException;
+                       final long newPrecision ) throws KException;
 
     /**
      * @param transaction
@@ -265,6 +265,6 @@ public interface Parameter extends OptionContainer, RelationalObject {
      *         if an error occurs
      */
     void setScale( final UnitOfWork transaction,
-                   final int newScale ) throws KException;
+                   final long newScale ) throws KException;
 
 }

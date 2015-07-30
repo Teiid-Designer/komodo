@@ -77,11 +77,11 @@ public interface RelationalConstants {
     /**
      * The default value for the <code>datatype precision</code> property. Value is {@value} .
      */
-    int DEFAULT_PRECISION = 0;
+    long DEFAULT_PRECISION = 0;
 
     /**
      * The default value for the <code>datatype scale</code> property. Value is {@value} .
      */
-    int DEFAULT_SCALE = 0;
+    long DEFAULT_SCALE = 0;
 
 }
