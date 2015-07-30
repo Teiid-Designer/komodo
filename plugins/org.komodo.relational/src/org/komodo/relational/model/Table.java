@@ -112,7 +112,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
     /**
      * The default value of this table's cardinality. Value is {@value} .
      */
-    int DEFAULT_CARDINALITY = -1;
+    long DEFAULT_CARDINALITY = -1;
 
     /**
      * The default value indicating if this table is materialized. Value is {@value} .
@@ -209,7 +209,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
      *         if an error occurs
      * @see #DEFAULT_CARDINALITY
      */
-    int getCardinality( final UnitOfWork transaction ) throws KException;
+    long getCardinality( final UnitOfWork transaction ) throws KException;
 
     /**
      * @param transaction
@@ -412,7 +412,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
      * @see #DEFAULT_CARDINALITY
      */
     void setCardinality( final UnitOfWork transaction,
-                         int newCardinality ) throws KException;
+                         long newCardinality ) throws KException;
 
     /**
      * @param transaction

@@ -294,14 +294,14 @@ public class TableImpl extends RelationalObjectImpl implements Table {
      * @see org.komodo.relational.model.Table#getCardinality(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public int getCardinality( final UnitOfWork transaction ) throws KException {
+    public long getCardinality( final UnitOfWork transaction ) throws KException {
         final String option = OptionContainerUtils.getOption( transaction, this, StandardOption.CARDINALITY.name() );
 
         if ( option == null ) {
             return Table.DEFAULT_CARDINALITY;
         }
 
-        return Integer.parseInt( option );
+        return Long.parseLong( option );
     }
 
     /**
@@ -942,12 +942,12 @@ public class TableImpl extends RelationalObjectImpl implements Table {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.Table#setCardinality(org.komodo.spi.repository.Repository.UnitOfWork, int)
+     * @see org.komodo.relational.model.Table#setCardinality(org.komodo.spi.repository.Repository.UnitOfWork, long)
      */
     @Override
     public void setCardinality( final UnitOfWork transaction,
-                                final int newCardinality ) throws KException {
-        setStatementOption(transaction, StandardOption.CARDINALITY.name(), Integer.toString(newCardinality));
+                                final long newCardinality ) throws KException {
+        setStatementOption(transaction, StandardOption.CARDINALITY.name(), Long.toString(newCardinality));
     }
 
     /**

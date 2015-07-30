@@ -264,8 +264,8 @@ public final class ResultSetColumnImpl extends RelationalChildRestrictedObject i
      * @see org.komodo.relational.model.ResultSetColumn#getPrecision(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public int getPrecision( final UnitOfWork uow ) throws KException {
-        final Integer value = getObjectProperty( uow, PropertyValueType.INTEGER, "getPrecision", //$NON-NLS-1$
+    public long getPrecision( final UnitOfWork uow ) throws KException {
+        final Long value = getObjectProperty( uow, PropertyValueType.LONG, "getPrecision", //$NON-NLS-1$
                                                  StandardDdlLexicon.DATATYPE_PRECISION );
 
         if ( value == null ) {
@@ -328,8 +328,8 @@ public final class ResultSetColumnImpl extends RelationalChildRestrictedObject i
      * @see org.komodo.relational.model.ResultSetColumn#getScale(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public int getScale( final UnitOfWork uow ) throws KException {
-        final Integer value = getObjectProperty( uow, PropertyValueType.INTEGER, "getScale", //$NON-NLS-1$
+    public long getScale( final UnitOfWork uow ) throws KException {
+        final Long value = getObjectProperty( uow, PropertyValueType.LONG, "getScale", //$NON-NLS-1$
                                                  StandardDdlLexicon.DATATYPE_SCALE );
 
         if ( value == null ) {
@@ -521,11 +521,11 @@ public final class ResultSetColumnImpl extends RelationalChildRestrictedObject i
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.ResultSetColumn#setPrecision(org.komodo.spi.repository.Repository.UnitOfWork, int)
+     * @see org.komodo.relational.model.ResultSetColumn#setPrecision(org.komodo.spi.repository.Repository.UnitOfWork, long)
      */
     @Override
     public void setPrecision( final UnitOfWork uow,
-                              final int newPrecision ) throws KException {
+                              final long newPrecision ) throws KException {
         setObjectProperty( uow, "setPrecision", StandardDdlLexicon.DATATYPE_PRECISION, newPrecision ); //$NON-NLS-1$
     }
 
@@ -548,11 +548,11 @@ public final class ResultSetColumnImpl extends RelationalChildRestrictedObject i
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.ResultSetColumn#setScale(org.komodo.spi.repository.Repository.UnitOfWork, int)
+     * @see org.komodo.relational.model.ResultSetColumn#setScale(org.komodo.spi.repository.Repository.UnitOfWork, long)
      */
     @Override
     public void setScale( final UnitOfWork uow,
-                          final int newScale ) throws KException {
+                          final long newScale ) throws KException {
         setObjectProperty( uow, "setScale", StandardDdlLexicon.DATATYPE_SCALE, newScale ); //$NON-NLS-1$
     }
 

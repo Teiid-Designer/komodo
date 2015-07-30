@@ -788,7 +788,7 @@ public final class TableImplTest extends RelationalModelTest {
 
     @Test
     public void shouldSetCardinality() throws Exception {
-        final int value = 10;
+        final long value = 10;
         this.table.setCardinality( this.uow, value );
         assertThat( this.table.getCardinality( this.uow ), is( value ) );
     }

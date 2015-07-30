@@ -75,7 +75,7 @@ public interface Column extends OptionContainer, RelationalObject {
     /**
      * The default value for the <code>character octet length</code> property. Value is {@value} .
      */
-    int DEFAULT_CHAR_OCTET_LENGTH = 0;
+    long DEFAULT_CHAR_OCTET_LENGTH = 0;
 
     /**
      * The default value for the <code>currency</code> property. Value is {@value} .
@@ -100,7 +100,7 @@ public interface Column extends OptionContainer, RelationalObject {
     /**
      * The default value for the <code>datatype radix</code> property. Value is {@value} .
      */
-    int DEFAULT_RADIX = 0;
+    long DEFAULT_RADIX = 0;
 
     /**
      * The default value indicating if this column is selectable. Value is {@value} .
@@ -129,7 +129,7 @@ public interface Column extends OptionContainer, RelationalObject {
      * @throws KException
      *         if an error occurs
      */
-    int getCharOctetLength( final UnitOfWork transaction ) throws KException;
+    long getCharOctetLength( final UnitOfWork transaction ) throws KException;
 
     /**
      * @param transaction
@@ -251,7 +251,7 @@ public interface Column extends OptionContainer, RelationalObject {
      *         if an error occurs
      * @see RelationalConstants#DEFAULT_PRECISION
      */
-    int getPrecision( final UnitOfWork transaction ) throws KException;
+    long getPrecision( final UnitOfWork transaction ) throws KException;
 
     /**
      * @param transaction
@@ -260,7 +260,7 @@ public interface Column extends OptionContainer, RelationalObject {
      * @throws KException
      *         if an error occurs
      */
-    int getRadix( final UnitOfWork transaction ) throws KException;
+    long getRadix( final UnitOfWork transaction ) throws KException;
 
     /**
      * @param transaction
@@ -270,7 +270,7 @@ public interface Column extends OptionContainer, RelationalObject {
      *         if an error occurs
      * @see RelationalConstants#DEFAULT_SCALE
      */
-    int getScale( final UnitOfWork transaction ) throws KException;
+    long getScale( final UnitOfWork transaction ) throws KException;
 
     /**
      * @param transaction
@@ -394,7 +394,7 @@ public interface Column extends OptionContainer, RelationalObject {
      *         if an error occurs
      */
     void setCharOctetLength( final UnitOfWork transaction,
-                             final int newCharOctetLength ) throws KException;
+                             final long newCharOctetLength ) throws KException;
 
     /**
      * @param transaction
@@ -566,7 +566,7 @@ public interface Column extends OptionContainer, RelationalObject {
      * @see RelationalConstants#DEFAULT_PRECISION
      */
     void setPrecision( final UnitOfWork transaction,
-                       final int newPrecision ) throws KException;
+                       final long newPrecision ) throws KException;
 
     /**
      * @param transaction
@@ -577,7 +577,7 @@ public interface Column extends OptionContainer, RelationalObject {
      *         if an error occurs
      */
     void setRadix( final UnitOfWork transaction,
-                   final int newRadix ) throws KException;
+                   final long newRadix ) throws KException;
 
     /**
      * @param transaction
@@ -589,7 +589,7 @@ public interface Column extends OptionContainer, RelationalObject {
      * @see RelationalConstants#DEFAULT_SCALE
      */
     void setScale( final UnitOfWork transaction,
-                   final int newScale ) throws KException;
+                   final long newScale ) throws KException;
 
     /**
      * @param transaction

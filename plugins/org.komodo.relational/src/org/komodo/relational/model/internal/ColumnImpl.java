@@ -188,14 +188,14 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
      * @see org.komodo.relational.model.Column#getCharOctetLength(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public int getCharOctetLength( final UnitOfWork transaction ) throws KException {
+    public long getCharOctetLength( final UnitOfWork transaction ) throws KException {
         final String option = OptionContainerUtils.getOption( transaction, this, StandardOption.CHAR_OCTET_LENGTH.name() );
 
         if ( option == null ) {
             return Column.DEFAULT_CHAR_OCTET_LENGTH;
         }
 
-        return Integer.parseInt( option );
+        return Long.parseLong( option );
     }
 
     /**
@@ -369,8 +369,8 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
      * @see org.komodo.relational.model.Column#getPrecision(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public int getPrecision( final UnitOfWork uow ) throws KException {
-        final Integer value = getObjectProperty( uow, PropertyValueType.INTEGER, "getPrecision", //$NON-NLS-1$
+    public long getPrecision( final UnitOfWork uow ) throws KException {
+        final Long value = getObjectProperty( uow, PropertyValueType.LONG, "getPrecision", //$NON-NLS-1$
                                                  StandardDdlLexicon.DATATYPE_PRECISION );
 
         if ( value == null ) {
@@ -433,14 +433,14 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
      * @see org.komodo.relational.model.Column#getRadix(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public int getRadix( final UnitOfWork transaction ) throws KException {
+    public long getRadix( final UnitOfWork transaction ) throws KException {
         final String option = OptionContainerUtils.getOption( transaction, this, StandardOption.RADIX.name() );
 
         if ( option == null ) {
             return Column.DEFAULT_RADIX;
         }
 
-        return Integer.parseInt( option );
+        return Long.parseLong( option );
     }
 
     /**
@@ -449,8 +449,8 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
      * @see org.komodo.relational.model.Column#getScale(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public int getScale( final UnitOfWork uow ) throws KException {
-        final Integer value = getObjectProperty( uow, PropertyValueType.INTEGER, "getScale", //$NON-NLS-1$
+    public long getScale( final UnitOfWork uow ) throws KException {
+        final Long value = getObjectProperty( uow, PropertyValueType.LONG, "getScale", //$NON-NLS-1$
                                                  StandardDdlLexicon.DATATYPE_SCALE );
 
         if ( value == null ) {
@@ -730,12 +730,12 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.Column#setCharOctetLength(org.komodo.spi.repository.Repository.UnitOfWork, int)
+     * @see org.komodo.relational.model.Column#setCharOctetLength(org.komodo.spi.repository.Repository.UnitOfWork, long)
      */
     @Override
     public void setCharOctetLength( final UnitOfWork transaction,
-                                    final int newCharOctetLength ) throws KException {
-        setStatementOption( transaction, StandardOption.CHAR_OCTET_LENGTH.name(), Integer.toString( newCharOctetLength ) );
+                                    final long newCharOctetLength ) throws KException {
+        setStatementOption( transaction, StandardOption.CHAR_OCTET_LENGTH.name(), Long.toString( newCharOctetLength ) );
     }
 
     /**
@@ -893,11 +893,11 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.Column#setPrecision(org.komodo.spi.repository.Repository.UnitOfWork, int)
+     * @see org.komodo.relational.model.Column#setPrecision(org.komodo.spi.repository.Repository.UnitOfWork, long)
      */
     @Override
     public void setPrecision( final UnitOfWork uow,
-                              final int newPrecision ) throws KException {
+                              final long newPrecision ) throws KException {
         setObjectProperty( uow, "setPrecision", StandardDdlLexicon.DATATYPE_PRECISION, newPrecision ); //$NON-NLS-1$
     }
 
@@ -920,22 +920,22 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.Column#setRadix(org.komodo.spi.repository.Repository.UnitOfWork, int)
+     * @see org.komodo.relational.model.Column#setRadix(org.komodo.spi.repository.Repository.UnitOfWork, long)
      */
     @Override
     public void setRadix( final UnitOfWork transaction,
-                          final int newRadix ) throws KException {
-        setStatementOption( transaction, StandardOption.RADIX.name(), Integer.toString( newRadix ) );
+                          final long newRadix ) throws KException {
+        setStatementOption( transaction, StandardOption.RADIX.name(), Long.toString( newRadix ) );
     }
 
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.Column#setScale(org.komodo.spi.repository.Repository.UnitOfWork, int)
+     * @see org.komodo.relational.model.Column#setScale(org.komodo.spi.repository.Repository.UnitOfWork, long)
      */
     @Override
     public void setScale( final UnitOfWork uow,
-                          final int newScale ) throws KException {
+                          final long newScale ) throws KException {
         setObjectProperty( uow, "setScale", StandardDdlLexicon.DATATYPE_SCALE, newScale ); //$NON-NLS-1$
     }
 

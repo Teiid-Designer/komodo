@@ -129,7 +129,7 @@ public interface AbstractProcedure extends OptionContainer, RelationalObject, Sc
      *         if an error occurs
      */
     void setUpdateCount( final UnitOfWork transaction,
-                         final int newUpdateCount ) throws KException;
+                         final long newUpdateCount ) throws KException;
 
     /**
      * @param transaction
