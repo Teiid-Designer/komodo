@@ -38,7 +38,6 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
-import org.modeshape.jcr.JcrLexicon;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.Constraint;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateTable;
@@ -230,10 +229,9 @@ public class TableImpl extends RelationalObjectImpl implements Table {
         final KomodoObject child = addChild( transaction, foreignKeyName, null );
         child.addDescriptor( transaction, Constraint.FOREIGN_KEY_CONSTRAINT );
 
-        final String tableId = referencedTable.getRawProperty( transaction, JcrLexicon.UUID.getString() ).getStringValue( transaction );
-        child.setProperty( transaction, Constraint.TABLE_REFERENCE, tableId );
-
         final ForeignKey result = new ForeignKeyImpl( transaction, getRepository(), child.getAbsolutePath() );
+        result.setReferencesTable( transaction, referencedTable );
+
         return result;
     }
 

@@ -143,7 +143,18 @@ public class Messages implements StringConstants {
     public enum SetCommand {
 
         ADD_TABLE_CONSTRAINT_COLUMN_FAILED,
-        TOO_MANY_ARGS;
+        COLUMN_PATH_NOT_FOUND,
+        INVALID_TABLE_REF_COLUMN_PATH,
+        TABLE_COLUMNS_CANNOT_BE_SET,
+        TABLE_COLUMNS_SET,
+        TABLE_PATH_NOT_FOUND,
+        TABLE_REF_CANNOT_BE_SET,
+        TABLE_REF_COLUMNS_SET,
+        TABLE_REF_REFS_CANNOT_BE_SET,
+        TABLE_REF_SET,
+        TOO_MANY_ARGS,
+        UNSET_TABLE_CONSTRAINT_COLUMN_FAILED,
+        UNSET_TABLE_REF_COLUMN_FAILED;
 
         @Override
         public String toString() {

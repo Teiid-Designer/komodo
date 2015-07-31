@@ -1328,11 +1328,11 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         }
     }
 
-    private void setSingleValuedProperty(final Node node,
-                                                                  final ValueFactory factory,
-                                                                  final String name,
-                                                                  final Object propValue,
-                                                                  final int propertyType) throws Exception {
+    private void setSingleValuedProperty( final Node node,
+                                          final ValueFactory factory,
+                                          final String name,
+                                          final Object propValue,
+                                          final int propertyType ) throws Exception {
 
     	// Allow property to be created if it does not exist
         final boolean hasProperty = node.hasProperty( name );
@@ -1340,14 +1340,24 @@ public class ObjectImpl implements KomodoObject, StringConstants {
     		node.setProperty(name,PropertyImpl.createValue( factory, propValue, propertyType ));
     		return;
         }
-        
+
     	javax.jcr.Property property = node.getProperty(name);
-    	
+
         Value oldValue = property.getValue();
         Value newValue = PropertyImpl.createValue( factory, propValue, propertyType );
 
-        if (oldValue != null && ! oldValue.equals(newValue))
-            node.setProperty( name, newValue );
+        if ( !oldValue.equals( newValue ) ) {
+            boolean doIt = true;
+
+            // for Value references the toString and getString are different. so for current values we must use getString to compare
+            if ( PropertyType.REFERENCE == propertyType || PropertyType.WEAKREFERENCE == propertyType ) {
+                doIt = !oldValue.getString().equals( newValue.toString() );
+            }
+
+            if ( doIt ) {
+                node.setProperty( name, newValue );
+            }
+        }
     }
 
     void setMultiValuedProperty( final Session session,

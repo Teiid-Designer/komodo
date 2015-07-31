@@ -125,9 +125,27 @@ public class RepositoryTools implements StringConstants {
         return findOrCreate(transaction, parent, name, komodoObjectType, komodoObjectType);
     }
 
-    private static String findPathOfReference( final UnitOfWork transaction,
-                                               final Repository repository,
-                                               final String id ) throws Exception {
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> and must have a state of
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param repository
+     *        the repository where the object can be found (cannot be <code>null</code>)
+     * @param id
+     *        the object identifier (cannot be empty)
+     * @return the path of the requested object or <code>null</code> if not found
+     * @throws Exception
+     *         if an error occurs
+     */
+    public static String findPathOfReference( final UnitOfWork transaction,
+                                              final Repository repository,
+                                              final String id ) throws Exception {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
+                         "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( id, "id" ); //$NON-NLS-1$
+
         final KomodoObject kobject = repository.getUsingId( transaction, id );
 
         if ( kobject == null ) {

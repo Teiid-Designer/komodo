@@ -153,7 +153,7 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
         return wkspManager.create( uow, parent, objName, type, properties );
     }
 
-    private List< String > findTables() throws Exception {
+    private List< String > findPossibleTablesForForeignKey() throws Exception {
         final FindCommand findCmd = new FindCommand( getWorkspaceStatus() );
         findCmd.setOutput( getWriter() );
 
@@ -169,18 +169,11 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
             return Collections.emptyList();
         }
 
-        final String currentTablePath = ContextUtils.convertPathToDisplayPath( getContext().getKomodoObj().getAbsolutePath() );
         final List< String > result = new ArrayList< >( tablePaths.length );
-        boolean found = false;
 
+        // add display path of each table path
         for ( final String path : tablePaths ) {
             final String displayPath = ContextUtils.convertPathToDisplayPath( path );
-
-            if ( !found && currentTablePath.equals( displayPath ) ) {
-                found = true;
-                continue;
-            }
-
             result.add( displayPath );
         }
 
@@ -476,7 +469,7 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
             // foreign key requires referenced table path
             if ( typeArg.equals( KomodoType.FOREIGN_KEY.getType().toUpperCase() ) ) {
                 // find all tables not including the current parent object
-                final List< String > tablePaths = findTables();
+                final List< String > tablePaths = findPossibleTablesForForeignKey();
 
                 if ( !tablePaths.isEmpty() ) {
                     for ( final String path : tablePaths ) {

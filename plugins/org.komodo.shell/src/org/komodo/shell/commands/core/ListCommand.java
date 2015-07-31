@@ -52,6 +52,16 @@ public class ListCommand extends BuiltInShellCommand {
     public boolean execute() throws Exception {
         final ShowCommand showCmd = new ShowCommand( getWorkspaceStatus() );
         final Arguments args = new Arguments( ShowCommand.SUBCMD_CHILDREN );
+
+        // now add in args passed to this command
+        final Arguments listCmdArgs = getArguments();
+
+        if ( ( listCmdArgs != null ) && !listCmdArgs.isEmpty() ) {
+            for ( final String arg : listCmdArgs ) {
+                args.add( arg );
+            }
+        }
+
         showCmd.setArguments( args );
         showCmd.setOutput( getWriter() );
 

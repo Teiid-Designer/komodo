@@ -303,13 +303,19 @@ public final class ForeignKeyImpl extends TableConstraintImpl implements Foreign
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotNull( newReferencesTable, "newReferencesTable" ); //$NON-NLS-1$
 
-        String tableId = null;
+        // only set if different
+        final Table current = getReferencesTable( transaction );
 
-        if ( newReferencesTable != null ) {
-            tableId = newReferencesTable.getRawProperty( transaction, JcrLexicon.UUID.getString() ).getStringValue( transaction );
+        if ( !newReferencesTable.equals( current ) ) {
+            final String tableId = newReferencesTable.getRawProperty( transaction,
+                                                                      JcrLexicon.UUID.getString() ).getStringValue( transaction );
+            setProperty( transaction, Constraint.TABLE_REFERENCE, tableId );
+
+            if ( ( current != null ) && hasProperty( transaction, Constraint.TABLE_REFERENCE_REFERENCES ) ) {
+                // remove reference columns because they pertained to previous referenced table
+                setProperty( transaction, Constraint.TABLE_REFERENCE_REFERENCES, ( Object[] )null );
+            }
         }
-
-        setProperty( transaction, Constraint.TABLE_REFERENCE, tableId );
     }
 
 }

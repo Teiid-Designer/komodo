@@ -37,6 +37,7 @@ import org.komodo.shell.util.ContextUtils;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.Repository;
 import org.komodo.utils.StringUtils;
 
 /**
@@ -93,7 +94,18 @@ public final class AddConstraintColumnCommand extends BuiltInShellCommand {
                 final KomodoObject kobject = getContext().getKomodoObj();
                 assert ( kobject instanceof TableConstraint );
                 final TableConstraint constraint = ( TableConstraint )kobject;
-                constraint.addColumn( getWorkspaceStatus().getTransaction(), ( Column )column );
+
+                // must be a column in the parent of the table constraint
+                final Repository.UnitOfWork transaction = getWorkspaceStatus().getTransaction();
+                final KomodoObject parentTable = constraint.getParent( transaction );
+
+                if ( parentTable.equals( column.getParent( transaction ) ) ) {
+                    constraint.addColumn( transaction, ( Column )column );
+                } else {
+                    throw new Exception( Messages.getString( "AddConstraintColumnCommand.invalidColumn", //$NON-NLS-1$
+                                                             ContextUtils.convertPathToDisplayPath( column.getAbsolutePath() ),
+                                                             constraint.getName( transaction ) ) );
+                }
 
                 // Commit transaction
                 if ( isAutoCommit() ) {
