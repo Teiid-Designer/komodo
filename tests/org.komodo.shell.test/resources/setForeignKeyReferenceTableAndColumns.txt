@@ -1,0 +1,9 @@
+play ./resources/PartsVDBScript.txt
+
+// create foreign key
+cd /workspace/PartsVDB/PartsOracle/PARTS
+create foreignkey fk /workspace/PartsVDB/PartsOracle/SHIP_VIA
+cd fk
+
+// set table reference columns
+set property teiidddl:tableRefElementRefs /workspace/PartsVDB/PartsOracle/SHIP_VIA/SHIPPER_ID,/workspace/PartsVDB/PartsOracle/SHIP_VIA/SHIPPER_NAME

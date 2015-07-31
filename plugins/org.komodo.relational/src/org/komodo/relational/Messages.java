@@ -25,6 +25,7 @@ import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.KomodoObject;
 
 /**
  * Messages for the org.komodo.relationa plugin
@@ -89,6 +90,29 @@ public class Messages implements StringConstants {
         INVALID_STATEMENT_OPTION_VALUE,
 
         /**
+         * An error message indicating the column cannot be used as a foreign key column. The one parameter is the column path.
+         */
+        INVALID_TABLE_CONSTRAINT_COLUMN,
+
+        /**
+         * An error message indicating an object being set as the foreign key table reference is not a table or even a
+         * {@link KomodoObject}. Takes the object class as a parameter.
+         */
+        INVALID_TABLE_REF,
+
+        /**
+         * An error message indicating the column cannot be used as a reference as its table is not the parent table of the
+         * foreign key.
+         */
+        INVALID_TABLE_REF_COLUMN,
+
+        /**
+         * An error message indicating an object being set as the foreign key table reference is not a table. Takes the path and
+         * type of the object as parameters.
+         */
+        INVALID_TABLE_REF_PATH,
+
+        /**
          * An error message indicating a mapped role name could not be removed.
          */
         MAPPED_ROLE_NOT_FOUND_TO_REMOVE,
@@ -109,6 +133,11 @@ public class Messages implements StringConstants {
         MODEL_SOURCE_NOT_FOUND_TO_REMOVE,
 
         /**
+         * An error message indicating more than one value is being used to set the table reference.
+         */
+        MULTIPLE_TABLE_REFS_NOT_ALLOWED,
+
+        /**
          * An error message indicating the object being deleted does not have a parent.
          */
         OBJECT_BEING_DELETED_HAS_NULL_PARENT,
@@ -117,11 +146,6 @@ public class Messages implements StringConstants {
          * An error message indicating the object being deleted is not from the repository doing the delete.
          */
         OBJECT_BEING_DELETED_HAS_WRONG_REPOSITORY,
-
-        /**
-         * An object could not be resolved by the type resolver.
-         */
-        OBJECT_NOT_RESOLVABLE,
 
         /**
          * An error message indicating a procedure parameter could not be removed.
@@ -179,9 +203,10 @@ public class Messages implements StringConstants {
         TABLE_NOT_FOUND_TO_REMOVE,
 
         /**
-         * A type resolver for a relational object was not found.
+         * An error message indicating columns of a foreign key's table reference cannot be set since there is no table reference
+         * set. The one parameter is the foreign key's name.
          */
-        TYPE_RESOLVER_NOT_FOUND,
+        TABLE_REF_NOT_SET,
 
         /**
          * An error message indicating a VDB translator could not be removed because it was not found.

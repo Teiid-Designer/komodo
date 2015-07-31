@@ -10,6 +10,7 @@ import java.io.File;
 import java.util.Arrays;
 import org.junit.Test;
 import org.komodo.relational.model.Column;
+import org.komodo.relational.model.ForeignKey;
 import org.komodo.relational.model.PrimaryKey;
 import org.komodo.relational.model.Table;
 import org.komodo.shell.api.WorkspaceContext;
@@ -35,6 +36,8 @@ public class SetCommandTest extends AbstractCommandTest {
     private static final String SET_CONSTRAINT_TYPE = "setConstraintTypeProperty.txt"; //$NON-NLS-1$
     private static final String SET_PRIMARY_KEY_COLS = "setPrimaryKeyColumns.txt"; //$NON-NLS-1$
     private static final String REPLACE_PRIMARY_KEY_COLS = "replacePrimaryKeyColumns.txt"; //$NON-NLS-1$
+    private static final String SET_FOREIGN_KEY = "setForeignKeyReferenceTableAndColumns.txt"; //$NON-NLS-1$
+    private static final String REMOVE_FOREIGN_KEY_REF_COLS = "removeForeignKeyReferenceTableColumns.txt"; //$NON-NLS-1$
 
     @Test
     public void shouldNotBeAbleToSetTableConstraintType() throws Exception {
@@ -47,6 +50,26 @@ public class SetCommandTest extends AbstractCommandTest {
             assertThat( getCommandOutput().endsWith( "The property \"teiidddl:constraintType\" is not valid or cannot be modified\n" ),
                         is( true ) );
         }
+    }
+
+    @Test
+    public void shouldRemoveExistingColumnsWhenChangingForeignKeyTableReference() throws Exception {
+        // see https://github.com/Teiid-Designer/komodo/issues/149
+        setup( REMOVE_FOREIGN_KEY_REF_COLS, SetCommand.class );
+        execute();
+        assertThat( this.wsStatus.getCurrentContext().getFullName(), is( "/workspace/PartsVDB/PartsOracle/PARTS/fk" ) ); //$NON-NLS-1$
+
+        final UnitOfWork transaction = this.wsStatus.getTransaction();
+        final KomodoObject kobject = this.wsStatus.getCurrentContext().getKomodoObj();
+        assertThat( kobject.getTypeIdentifier( transaction ).name(), is( KomodoType.FOREIGN_KEY.name() ) );
+
+        final ForeignKey fk = ( ForeignKey )resolveType( transaction, kobject, ForeignKey.class );
+        final Table refTable = fk.getReferencesTable( transaction );
+        assertThat( ContextUtils.convertPathToDisplayPath( refTable.getAbsolutePath() ),
+                    is( "/workspace/PartsVDB/PartsOracle/STATUS" ) );
+
+        final Column[] refColumns = fk.getReferencesColumns( transaction );
+        assertThat( refColumns.length, is( 0 ) );
     }
 
     @Test
@@ -66,6 +89,32 @@ public class SetCommandTest extends AbstractCommandTest {
         final Column column = pk.getColumns( transaction )[ 0 ];
         assertThat( ContextUtils.convertPathToDisplayPath( column.getAbsolutePath() ),
                     is( "/workspace/MyVdb/MyModel/MyTable/LastName" ) );
+    }
+
+    @Test
+    public void shouldSetForeignKey() throws Exception {
+        // see https://github.com/Teiid-Designer/komodo/issues/149
+        setup( SET_FOREIGN_KEY, SetCommand.class );
+        execute();
+        assertThat( this.wsStatus.getCurrentContext().getFullName(), is( "/workspace/PartsVDB/PartsOracle/PARTS/fk" ) ); //$NON-NLS-1$
+
+        final UnitOfWork transaction = this.wsStatus.getTransaction();
+        final KomodoObject kobject = this.wsStatus.getCurrentContext().getKomodoObj();
+        assertThat( kobject.getTypeIdentifier( transaction ).name(), is( KomodoType.FOREIGN_KEY.name() ) );
+
+        final ForeignKey fk = ( ForeignKey )resolveType( transaction, kobject, ForeignKey.class );
+        final Table refTable = fk.getReferencesTable( transaction );
+        assertThat( ContextUtils.convertPathToDisplayPath( refTable.getAbsolutePath() ),
+                    is( "/workspace/PartsVDB/PartsOracle/SHIP_VIA" ) );
+
+        final Column[] refColumns = fk.getReferencesColumns( transaction );
+        assertThat( refColumns.length, is( 2 ) );
+
+        final String[] paths = new String[] { ContextUtils.convertPathToDisplayPath( refColumns[ 0 ].getAbsolutePath() ),
+                                              ContextUtils.convertPathToDisplayPath( refColumns[ 1 ].getAbsolutePath() ) };
+        assertThat( Arrays.asList( paths ),
+                    hasItems( "/workspace/PartsVDB/PartsOracle/SHIP_VIA/SHIPPER_ID",
+                              "/workspace/PartsVDB/PartsOracle/SHIP_VIA/SHIPPER_NAME" ) );
     }
 
     @Test
