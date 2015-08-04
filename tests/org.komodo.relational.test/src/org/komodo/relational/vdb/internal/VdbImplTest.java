@@ -14,12 +14,19 @@ import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import org.junit.Before;
 import org.junit.Test;
+import org.komodo.importer.ImportMessages;
+import org.komodo.importer.ImportOptions;
+import org.komodo.importer.ImportOptions.OptionKeys;
+import org.komodo.importer.vdb.VdbImporter;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalObject.Filter;
 import org.komodo.relational.RelationalProperties;
@@ -32,12 +39,18 @@ import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.Vdb.VdbManifest;
 import org.komodo.relational.vdb.VdbImport;
+import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyDescriptor;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class VdbImplTest extends RelationalModelTest {
@@ -504,6 +517,182 @@ public final class VdbImplTest extends RelationalModelTest {
         this.vdb.rename( this.uow, newName );
         assertThat( this.vdb.getName( this.uow ), is( newName ) );
         assertThat( this.vdb.getVdbName( this.uow ), is( newName ) );
+    }
+
+    @Test
+    public void shouldRoundTripVdb() throws Exception {
+        final File vdbFile = new File( "resources/AzureService-vdb.xml" );
+        final InputStream vdbStream = new FileInputStream( vdbFile );
+        assertThat( vdbStream, is( notNullValue() ) );
+
+        final String name = "AzureService";
+        final VdbImporter importer = new VdbImporter( _repo );
+        final ImportOptions importOptions = new ImportOptions();
+        importOptions.setOption( OptionKeys.NAME, name );
+        importer.importVdb( vdbStream, importOptions, new ImportMessages() );
+
+        commit(); // commit the import
+
+        final Vdb[] vdbs = WorkspaceManager.getInstance( _repo ).findVdbs( this.uow );
+        assertThat( vdbs.length, is( 2 ) );
+
+        // find the imported VDB
+        Vdb importedVdb = null;
+
+        if ( name.equals( vdbs[ 0 ].getName( this.uow ) ) ) {
+            importedVdb = vdbs[ 0 ];
+        } else if ( name.equals( vdbs[ 1 ].getName( this.uow ) ) ) {
+            importedVdb = vdbs[ 1 ];
+        } else {
+            fail();
+        }
+
+        final Vdb.VdbManifest manifest = importedVdb.createManifest( this.uow, null );
+        final Document doc = manifest.asDocument();
+        final NodeList kids = doc.getChildNodes();
+        assertThat( kids.getLength(), is( 1 ) );
+
+        final Node vdbNode = kids.item( 0 );
+        assertThat( vdbNode.getAttributes().getNamedItem( VdbLexicon.ManifestIds.NAME ).getNodeValue(), is( "AzureService" ) );
+        assertThat( vdbNode.getAttributes().getNamedItem( VdbLexicon.ManifestIds.VERSION ).getNodeValue(), is( "1" ) );
+
+        if ( vdbNode.getNodeType() != Node.ELEMENT_NODE ) {
+            fail( "vdbNode is not an XML element" );
+        }
+
+        final Element vdbElement = ( Element )vdbNode;
+
+        { // description
+            final NodeList descriptionNodes = vdbElement.getElementsByTagName( VdbLexicon.ManifestIds.DESCRIPTION );
+            assertThat( descriptionNodes.getLength(), is( 1 ) );
+            assertThat( descriptionNodes.item( 0 ).getTextContent(), is( "VDB for: AzureService, Version: 1" ) );
+        }
+
+        { // connection type
+            final NodeList connectionTypeNodes = vdbElement.getElementsByTagName( VdbLexicon.ManifestIds.CONNECTION_TYPE );
+            assertThat( connectionTypeNodes.getLength(), is( 1 ) );
+            assertThat( connectionTypeNodes.item( 0 ).getTextContent(), is( "BY_VERSION" ) );
+        }
+
+        { // properties
+            final NodeList propertyNodes = vdbElement.getElementsByTagName( VdbLexicon.ManifestIds.PROPERTY );
+            assertThat( propertyNodes.getLength(), is( 2 ) );
+
+            final Node node1 = propertyNodes.item( 0 );
+            final Node node2 = propertyNodes.item( 1 );
+            boolean node1Taken = false;
+            boolean node2Taken = false;
+
+            { // auto-generate property
+                final String autoGenerateProp = "{http://teiid.org/rest}auto-generate";
+
+                if ( autoGenerateProp.equals( node1.getAttributes().getNamedItem( "name" ).getTextContent() ) ) {
+                    assertThat( node1.getAttributes().getNamedItem( "value" ).getTextContent(), is( "true" ) );
+                    node1Taken = true;
+                } else if ( autoGenerateProp.equals( node2.getAttributes().getNamedItem( "name" ).getTextContent() ) ) {
+                    assertThat( node2.getAttributes().getNamedItem( "value" ).getTextContent(), is( "true" ) );
+                    node2Taken = true;
+                } else {
+                    fail( "auto-generate property failure" );
+                }
+            }
+
+            { // data-services-view property
+                final String dataServiceViewProp = "data-service-view";
+
+                if ( !node1Taken
+                     && dataServiceViewProp.equals( node1.getAttributes().getNamedItem( "name" ).getTextContent() ) ) {
+                    assertThat( node1.getAttributes().getNamedItem( "value" ).getTextContent(), is( "SvcView" ) );
+                } else if ( !node2Taken
+                            && dataServiceViewProp.equals( node2.getAttributes().getNamedItem( "name" ).getTextContent() ) ) {
+                    assertThat( node2.getAttributes().getNamedItem( "value" ).getTextContent(), is( "SvcView" ) );
+                } else {
+                    fail( "data-service-view property failure" );
+                }
+            }
+        }
+
+        { // import VDB
+            final NodeList importVdbNodes = vdbElement.getElementsByTagName( VdbLexicon.ManifestIds.IMPORT_VDB );
+            assertThat( importVdbNodes.getLength(), is( 1 ) );
+
+            final Node node = importVdbNodes.item( 0 );
+            final NamedNodeMap attributes = node.getAttributes();
+
+            { // name
+                final String attr = VdbLexicon.ManifestIds.NAME;
+                assertThat( attributes.getNamedItem( attr ), is( notNullValue() ) );
+                assertThat( attributes.getNamedItem( attr ).getTextContent(), is( "SvcSourceVdb_AzurePricesDS" ) );
+            }
+
+            { // version
+                final String attr = VdbLexicon.ManifestIds.VERSION;
+                assertThat( attributes.getNamedItem( attr ), is( notNullValue() ) );
+                assertThat( attributes.getNamedItem( attr ).getTextContent(), is( "1" ) );
+            }
+
+            { // import-data-policies
+                final String attr = VdbLexicon.ManifestIds.IMPORT_DATA_POLICIES;
+                assertThat( attributes.getNamedItem( attr ), is( notNullValue() ) );
+                assertThat( attributes.getNamedItem( attr ).getTextContent(), is( "true" ) );
+            }
+        }
+
+        { // model
+            final NodeList modelNodes = vdbElement.getElementsByTagName( VdbLexicon.ManifestIds.MODEL );
+            assertThat( modelNodes.getLength(), is( 1 ) );
+
+            final Node modelNode = modelNodes.item( 0 );
+            final NamedNodeMap attributes = modelNode.getAttributes();
+
+            if ( modelNode.getNodeType() != Node.ELEMENT_NODE ) {
+                fail( "modelNode is not an XML element" );
+            }
+
+            final Element modelElement = ( Element )modelNode;
+
+            { // name
+                final String attr = VdbLexicon.ManifestIds.NAME;
+                assertThat( attributes.getNamedItem( attr ), is( notNullValue() ) );
+                assertThat( attributes.getNamedItem( attr ).getTextContent(), is( "AzureService" ) );
+            }
+
+            { // type
+                final String attr = VdbLexicon.ManifestIds.TYPE;
+                assertThat( attributes.getNamedItem( attr ), is( notNullValue() ) );
+                assertThat( attributes.getNamedItem( attr ).getTextContent(), is( "VIRTUAL" ) );
+            }
+//
+//            { // visible
+//                final String attr = VdbLexicon.ManifestIds.VISIBLE;
+//                assertThat( attributes.getNamedItem( attr ), is( notNullValue() ) );
+//                assertThat( attributes.getNamedItem( attr ).getTextContent(), is( "true" ) );
+//            }
+
+            { // metadata
+                final NodeList metaDataNodes = modelElement.getElementsByTagName( VdbLexicon.ManifestIds.METADATA );
+                assertThat( metaDataNodes.getLength(), is( 1 ) );
+
+                final Node metaDataNode = metaDataNodes.item( 0 );
+
+                { // type
+                    final String attr = VdbLexicon.ManifestIds.TYPE;
+                    assertThat( metaDataNode.getAttributes().getNamedItem( attr ), is( notNullValue() ) );
+                    assertThat( metaDataNode.getAttributes().getNamedItem( attr ).getTextContent(), is( "DDL" ) );
+                }
+
+                { // metadata
+                    final String ddl = metaDataNode.getTextContent();
+                    final String expected = "CREATE VIEW SvcView ( RowId integer, ProdCode string, SalePrice bigdecimal, PRIMARY KEY(RowId) ) AS SELECT ROW_NUMBER() OVER (ORDER BY ProdCode), ProdCode, SalePrice FROM Prices.dbo.PricesTable; SET NAMESPACE 'http://teiid.org/rest' AS REST; CREATE VIRTUAL PROCEDURE RestProc() RETURNS TABLE (result xml) OPTIONS (\"REST:URI\" 'rest', \"REST:METHOD\" 'GET') AS BEGIN SELECT XMLELEMENT(NAME Elems, XMLAGG(XMLELEMENT(NAME Elem, XMLFOREST(RowId, ProdCode, SalePrice)))) AS result FROM SvcView; END;";
+                    assertThat( ddl, is( expected ) );
+
+                    // since the actual export will have the CDATA marker make sure by actually doing an export here
+                    final String export = importedVdb.export( this.uow, null );
+                    assertThat( export.contains( "<![CDATA[" ), is( true ) );
+                    assertThat( export.contains( "]]>" ), is( true ) );
+                }
+            }
+        }
     }
 
     @Test
