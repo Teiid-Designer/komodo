@@ -30,11 +30,9 @@ import org.komodo.relational.model.Column;
 import org.komodo.relational.model.TableConstraint;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.Messages;
-import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
-import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
@@ -50,22 +48,12 @@ public final class AddConstraintColumnCommand extends BuiltInShellCommand {
      */
     public static final String NAME = "add-column"; //$NON-NLS-1$
 
-    private final FindCommand findCommand;
-
     /**
      * @param status
      *        the workspace status (cannot be <code>null</code>)
      */
     public AddConstraintColumnCommand( final WorkspaceStatus status ) {
         super( status, NAME );
-        this.findCommand = new FindCommand( status );
-        this.findCommand.setOutput( getWriter() );
-
-        try {
-            this.findCommand.setArguments( new Arguments( StringConstants.EMPTY_STRING ) );
-        } catch ( final Exception e ) {
-            // only occurs on parsing error of arguments and we have no arguments
-        }
     }
 
     /**
@@ -155,7 +143,7 @@ public final class AddConstraintColumnCommand extends BuiltInShellCommand {
 
             // find columns
             final KomodoObject parent = getContext().getParent().getKomodoObj();
-            final String[] columnPaths = this.findCommand.query( KomodoType.COLUMN, parent.getAbsolutePath(), null );
+            final String[] columnPaths = FindCommand.query( getWorkspaceStatus(), KomodoType.COLUMN, parent.getAbsolutePath(), null );
 
             if ( columnPaths.length == 0 ) {
                 return -1;

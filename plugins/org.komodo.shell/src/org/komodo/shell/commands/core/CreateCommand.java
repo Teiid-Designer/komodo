@@ -26,7 +26,6 @@ import static org.komodo.shell.Messages.CreateCommand.PROPERTY_ALREADY_EXISTS;
 import static org.komodo.shell.Messages.CreateCommand.PROPERTY_CREATED;
 import static org.komodo.shell.Messages.CreateCommand.TOO_MANY_ARGS;
 import static org.komodo.shell.Messages.CreateCommand.TYPE_NOT_VALID;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -36,7 +35,6 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.FindWorkspaceNodeVisitor;
 import org.komodo.shell.Messages;
-import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
@@ -151,33 +149,6 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
         }
 
         return wkspManager.create( uow, parent, objName, type, properties );
-    }
-
-    private List< String > findPossibleTablesForForeignKey() throws Exception {
-        final FindCommand findCmd = new FindCommand( getWorkspaceStatus() );
-        findCmd.setOutput( getWriter() );
-
-        try {
-            findCmd.setArguments( new Arguments( StringConstants.EMPTY_STRING ) );
-        } catch ( final Exception e ) {
-            // only occurs on parsing error of arguments and we have no arguments
-        }
-
-        final String[] tablePaths = findCmd.query( KomodoType.TABLE, null, null );
-
-        if ( tablePaths.length == 0 ) {
-            return Collections.emptyList();
-        }
-
-        final List< String > result = new ArrayList< >( tablePaths.length );
-
-        // add display path of each table path
-        for ( final String path : tablePaths ) {
-            final String displayPath = ContextUtils.convertPathToDisplayPath( path );
-            result.add( displayPath );
-        }
-
-        return result;
     }
 
     private KomodoObject create( final String objType,
@@ -469,13 +440,11 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
             // foreign key requires referenced table path
             if ( typeArg.equals( KomodoType.FOREIGN_KEY.getType().toUpperCase() ) ) {
                 // find all tables not including the current parent object
-                final List< String > tablePaths = findPossibleTablesForForeignKey();
+                final String[] tablePaths = FindCommand.query( getWorkspaceStatus(), KomodoType.TABLE, null, null );
 
-                if ( !tablePaths.isEmpty() ) {
-                    for ( final String path : tablePaths ) {
-                        if ( StringUtils.isBlank( lastArgument ) || ( path.startsWith( lastArgument ) ) ) {
-                            candidates.add( path );
-                        }
+                for ( final String path : tablePaths ) {
+                    if ( StringUtils.isBlank( lastArgument ) || ( path.startsWith( lastArgument ) ) ) {
+                        candidates.add( path );
                     }
                 }
 

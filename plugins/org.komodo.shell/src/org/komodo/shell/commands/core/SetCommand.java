@@ -331,17 +331,7 @@ public class SetCommand extends BuiltInShellCommand {
                         }
                     }
                 } else if ( Constraint.TABLE_REFERENCE.equals( propertyName ) ) {
-                    // provide paths for all tables except the parent table
-                    final FindCommand findCmd = new FindCommand( getWorkspaceStatus() );
-                    findCmd.setOutput( getWriter() );
-
-                    try {
-                        findCmd.setArguments( new Arguments( StringConstants.EMPTY_STRING ) );
-                    } catch ( final Exception e ) {
-                        // only occurs on parsing error of arguments and we have no arguments
-                    }
-
-                    final String[] tablePaths = findCmd.query( KomodoType.TABLE, null, null );
+                    final String[] tablePaths = FindCommand.query( getWorkspaceStatus(), KomodoType.TABLE, null, null );
 
                     if ( tablePaths.length != 0 ) {
                         // do not include the parent table of the foreign key
@@ -350,12 +340,10 @@ public class SetCommand extends BuiltInShellCommand {
                         int i = 0;
                         boolean found = false;
 
-                        for ( final String path : tablePaths ) {
-                            final String displayPath = ContextUtils.convertPathToDisplayPath( path );
-
+                        for ( final String tablePath : tablePaths ) {
                             if ( found ) {
-                                possibleValues[ i++ ] = displayPath;
-                            } else if ( currentTablePath.equals( displayPath ) ) {
+                                possibleValues[ i++ ] = tablePath;
+                            } else if ( currentTablePath.equals( tablePath ) ) {
                                 found = true;
                             }
                         }
