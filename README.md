@@ -45,8 +45,10 @@ The general idea is to keep your 'master' branch in-sync with the 'upstream/mast
 - Install maven 3 - http://maven.apache.org/download.html
 - To build the komodo code, cd into your komodo local repo, then use the build script
 
-	$ cd komodo                         # switches to the 'master' branch
-	$ ./build.sh                        # build the code (you can add '-s' to skip unit tests)
+~~~
+$ cd komodo                         # switches to the 'master' branch
+$ ./build.sh                        # build the code (you can add '-s' to skip unit tests)
+~~~
 
 To setup a development environment in Eclipse, please refer to this [article](https://developer.jboss.org/docs/DOC-53242).
 
