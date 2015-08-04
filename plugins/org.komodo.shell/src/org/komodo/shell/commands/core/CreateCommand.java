@@ -36,7 +36,6 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.FindWorkspaceNodeVisitor;
 import org.komodo.shell.Messages;
-import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
@@ -153,17 +152,8 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
         return wkspManager.create( uow, parent, objName, type, properties );
     }
 
-    private List< String > findPossibleTablesForForeignKey() throws Exception {
-        final FindCommand findCmd = new FindCommand( getWorkspaceStatus() );
-        findCmd.setOutput( getWriter() );
-
-        try {
-            findCmd.setArguments( new Arguments( StringConstants.EMPTY_STRING ) );
-        } catch ( final Exception e ) {
-            // only occurs on parsing error of arguments and we have no arguments
-        }
-
-        final String[] tablePaths = findCmd.query( KomodoType.TABLE, null, null );
+    private List< String > findTables() throws Exception {
+        final String[] tablePaths = FindCommand.query( getWorkspaceStatus(), KomodoType.TABLE, null, null );
 
         if ( tablePaths.length == 0 ) {
             return Collections.emptyList();
@@ -469,7 +459,7 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
             // foreign key requires referenced table path
             if ( typeArg.equals( KomodoType.FOREIGN_KEY.getType().toUpperCase() ) ) {
                 // find all tables not including the current parent object
-                final List< String > tablePaths = findPossibleTablesForForeignKey();
+                final List< String > tablePaths = findTables();
 
                 if ( !tablePaths.isEmpty() ) {
                     for ( final String path : tablePaths ) {

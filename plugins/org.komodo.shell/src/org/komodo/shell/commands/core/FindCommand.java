@@ -29,7 +29,6 @@ import java.util.List;
 import org.komodo.repository.KomodoTypeRegistry;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.Messages;
-import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
 import org.komodo.spi.repository.KomodoType;
@@ -76,7 +75,7 @@ public final class FindCommand extends BuiltInShellCommand {
             final String pattern = optionalArgument( 1 );
 
             // query
-            final String[] foundObjectPaths = query( queryType, null, pattern );
+            final String[] foundObjectPaths = query( getWorkspaceStatus(), queryType, null, pattern );
 
             // print results
             printResults( queryType, foundObjectPaths );
@@ -154,21 +153,25 @@ public final class FindCommand extends BuiltInShellCommand {
     }
 
     /**
+     * Query to find the display paths of the specified object type
+     * @param wsStatus
+     *        the workspace status
      * @param queryType
      *        the type of object being searched for (cannot be <code>null</code>)
      * @param parentPath
      *        the parent path whose children recursively will be checked (can be empty if searching from the workspace root)
      * @param pattern
      *        the regex used to match object names (can be empty if all objects of the given type are being requested)
-     * @return the paths of the workspace objects with the matching type (never <code>null</code> but can be empty)
+     * @return the display paths of the workspace objects with the matching type (never <code>null</code> but can be empty)
      * @throws Exception
      *         if an error occurs
      */
-    protected String[] query( final KomodoType queryType,
-                              final String parentPath,
-                              final String pattern ) throws Exception {
+    protected static String[] query( final WorkspaceStatus wsStatus,
+    		                         final KomodoType queryType,
+    		                         final String parentPath,
+    		                         final String pattern ) throws Exception {
         final String lexiconType = KomodoTypeRegistry.getInstance().getIdentifier( queryType ).getLexiconType();
-        final String[] searchResults = getContext().getWorkspaceManager().findByType( getWorkspaceStatus().getTransaction(),
+        final String[] searchResults = wsStatus.getCurrentContext().getWorkspaceManager().findByType( wsStatus.getTransaction(),
                                                                                       lexiconType, parentPath, pattern );
 
         if ( searchResults.length == 0 ) {
@@ -177,17 +180,8 @@ public final class FindCommand extends BuiltInShellCommand {
 
         final String[] result = new String[ searchResults.length ];
         int i = 0;
-
         for ( final String absolutePath : searchResults ) {
-            String path = absolutePath;
-
-            // should always start with the absolute repository path but check just in case
-            if ( path.startsWith( WorkspaceContext.REPO_WS_ROOT_PATH ) ) {
-                result[i] = ( ContextUtils.ROOT_OPT3 + path.substring( WorkspaceContext.REPO_WS_ROOT_PATH.length() ) );
-            } else {
-                result[i] = path;
-            }
-
+            result[i] = ContextUtils.convertPathToDisplayPath(absolutePath);
             ++i;
         }
 
