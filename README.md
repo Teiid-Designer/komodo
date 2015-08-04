@@ -41,7 +41,9 @@ The general idea is to keep your 'master' branch in-sync with the 'upstream/mast
 
 ## Build the Code
 
-To build the komodo code, cd into your komodo local repo, then use the build script
+- Install JDK 1.7
+- Install maven 3 - http://maven.apache.org/download.html
+- To build the komodo code, cd into your komodo local repo, then use the build script
 
 	$ cd komodo                         # switches to the 'master' branch
 	$ ./build.sh                        # build the code (you can add '-s' to skip unit tests)
