@@ -23,11 +23,14 @@ package org.komodo.importer.vdb;
 
 import java.io.File;
 import java.io.InputStream;
+
 import org.komodo.importer.AbstractImporter;
 import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
+import org.komodo.importer.ImportOptions.ExistingNodeOptions;
 import org.komodo.importer.ImportOptions.OptionKeys;
 import org.komodo.importer.ImportType;
+import org.komodo.importer.Messages;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
@@ -52,62 +55,90 @@ public class VdbImporter extends AbstractImporter {
     }
 
     @Override
-    protected KomodoObject executeImport(UnitOfWork transaction,
+    protected void executeImport(UnitOfWork transaction,
                                                                      String content,
+                                                                     KomodoObject parentObject,
                                                                      ImportOptions importOptions,
                                                                      ImportMessages importMessages) throws KException {
 
         String vdbName = importOptions.getOption(OptionKeys.NAME).toString();
         String vdbFilePath = importOptions.getOption(OptionKeys.VDB_FILE_PATH).toString();
-        KomodoObject workspace = getWorkspace(transaction);
 
-        Vdb vdb = getWorkspaceManager().createVdb(transaction, workspace, vdbName, vdbFilePath);
+        Vdb vdb = getWorkspaceManager().createVdb(transaction, parentObject, vdbName, vdbFilePath);
         KomodoObject fileNode = vdb.addChild(transaction, JcrLexicon.CONTENT.getString(), null);
         fileNode.setProperty(transaction, JcrLexicon.DATA.getString(), content);
-        return vdb;
     }
 
+    @Override
+    protected boolean handleExistingNode(UnitOfWork transaction,
+    		ImportOptions importOptions,
+    		ImportMessages importMessages) throws KException {
+    	
+    	// VDB name to create
+    	String vdbName = importOptions.getOption(OptionKeys.NAME).toString();
+
+    	// No node with the requested name - ok to create
+    	if (! getWorkspace(transaction).hasChild(transaction, vdbName))
+    		return true;
+
+    	// Option specifying how to handle when node exists with requested name
+    	ExistingNodeOptions exNodeOption = (ExistingNodeOptions)importOptions.getOption(OptionKeys.HANDLE_EXISTING);
+
+    	switch (exNodeOption) {
+    	// RETURN - Return 'false' - do not create a node.  Log an error message
+    	case RETURN:
+    		importMessages.addErrorMessage(Messages.getString(Messages.IMPORTER.nodeExistsReturn));
+    		return false;
+    	// CREATE_NEW - Return 'true' - will create a new VDB with new unique name.  Log a progress message.
+    	case CREATE_NEW:
+    		String newName = determineNewName(transaction, vdbName);
+    		importMessages.addProgressMessage(Messages.getString(Messages.IMPORTER.nodeExistCreateNew, vdbName, newName));
+    		importOptions.setOption(OptionKeys.NAME, newName);
+    		break;
+    	// OVERWRITE - Return 'true' - deletes the existing VDB so that new one can replace existing.
+    	case OVERWRITE:
+    		KomodoObject oldNode = getWorkspace(transaction).getChild(transaction, vdbName);
+    		oldNode.remove(transaction);
+    	}
+
+    	return true;
+    }
+    
     /**
      * Perform the vdb import using the specified xml Stream.
      *
+     * @param uow the transaction
      * @param vdbStream the vdb xml input stream
+     * @param parentObject the parent object in which to place the vdb
      * @param importOptions the options for the import
      * @param importMessages the messages recorded during the import
-     * @return newly created root vdb node
      */
-    public KomodoObject importVdb(InputStream vdbStream, ImportOptions importOptions, ImportMessages importMessages) {
+    public void importVdb(UnitOfWork uow, InputStream vdbStream, KomodoObject parentObject, ImportOptions importOptions, ImportMessages importMessages) {
         ArgCheck.isNotNull(vdbStream);
 
-        KomodoObject ko = null;
         try {
-            ko = prepareImport(toString(vdbStream), importOptions, importMessages);
+            doImport(uow, toString(vdbStream), parentObject, importOptions, importMessages);
         } catch (Exception ex) {
             importMessages.addErrorMessage(ex.getLocalizedMessage());
         }
-
-        return ko;
     }
 
     /**
      * Perform the vdb import using the specified vdb xml File.
      *
+     * @param uow the transaction
      * @param vdbXmlFile the vdb xml file
+     * @param parentObject the parent object in which to place the vdb
      * @param importOptions the options for the import
      * @param importMessages the messages recorded during the import
-     * @return newly created root vdb node
      */
-    public KomodoObject importVdb(File vdbXmlFile, ImportOptions importOptions, ImportMessages importMessages) {
-        KomodoObject ko = null;
-
-        if (!validFile(vdbXmlFile, importMessages))
-            return ko;
+    public void importVdb(UnitOfWork uow, File vdbXmlFile, KomodoObject parentObject, ImportOptions importOptions, ImportMessages importMessages) {
+        if (!validFile(vdbXmlFile, importMessages)) return;
 
         try {
-            ko = prepareImport(toString(vdbXmlFile), importOptions, importMessages);
+            doImport(uow, toString(vdbXmlFile), parentObject, importOptions, importMessages);
         } catch (Exception ex) {
             importMessages.addErrorMessage(ex.getLocalizedMessage());
         }
-
-        return ko;
     }
 }

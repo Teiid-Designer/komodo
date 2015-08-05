@@ -159,7 +159,7 @@ public class ExportCommandTest extends AbstractCommandTest {
             createInitialTransaction();
             writer = new FileWriter(exportCmdFile);
             String path = convertToContextPath(tweetVdb);
-            writer.write("export " + path + SPACE + exportDest.getAbsolutePath() + NEW_LINE);
+            writer.write("export vdb " + path + SPACE + exportDest.getAbsolutePath() + NEW_LINE);
             writer.close();
 
             //
@@ -226,7 +226,7 @@ public class ExportCommandTest extends AbstractCommandTest {
             writer = new FileWriter(exportCmdFile);
             writer.write("cd /workspace" + NEW_LINE);
             writer.write("cd " + tweetVdb.getName(uow) + NEW_LINE);
-            writer.write("export twitterview " + exportDest.getAbsolutePath() + NEW_LINE);
+            writer.write("export ddl twitterview " + exportDest.getAbsolutePath() + NEW_LINE);
             writer.close();
 
             //
@@ -283,7 +283,7 @@ public class ExportCommandTest extends AbstractCommandTest {
             createInitialTransaction();
             writer = new FileWriter(exportCmdFile);
             String path = convertToContextPath(allElementsVdb);
-            writer.write("export " + path + SPACE + exportDest.getAbsolutePath() + NEW_LINE);
+            writer.write("export vdb " + path + SPACE + exportDest.getAbsolutePath() + NEW_LINE);
             writer.close();
 
             //
@@ -350,7 +350,7 @@ public class ExportCommandTest extends AbstractCommandTest {
             writer = new FileWriter(exportCmdFile);
             writer.write("cd /workspace" + NEW_LINE);
             writer.write("cd " + allElementsVdb.getName(uow) + NEW_LINE);
-            writer.write("export model-one " + exportDest.getAbsolutePath() + NEW_LINE);
+            writer.write("export ddl model-one " + exportDest.getAbsolutePath() + NEW_LINE);
             writer.close();
 
             //
@@ -410,7 +410,7 @@ public class ExportCommandTest extends AbstractCommandTest {
             writer = new FileWriter(exportCmdFile);
             writer.write("cd /workspace" + NEW_LINE);
             writer.write("cd " + allElementsVdb.getName(uow) + NEW_LINE);
-            writer.write("export model-two " + exportDest.getAbsolutePath() + NEW_LINE);
+            writer.write("export ddl model-two " + exportDest.getAbsolutePath() + NEW_LINE);
             writer.close();
 
             //
@@ -471,7 +471,7 @@ public class ExportCommandTest extends AbstractCommandTest {
             createInitialTransaction();
             writer = new FileWriter(exportCmdFile);
             String path = convertToContextPath(exampleSchema);
-            writer.write("export " + path + SPACE + exportDest.getAbsolutePath() + NEW_LINE);
+            writer.write("export ddl " + path + SPACE + exportDest.getAbsolutePath() + NEW_LINE);
             writer.close();
 
             //

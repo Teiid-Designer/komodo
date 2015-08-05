@@ -26,7 +26,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import org.komodo.spi.constants.StringConstants;
+import org.modeshape.common.text.Position;
+import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlParsingException;
 
 /**
  * ImportMessages
@@ -69,6 +72,33 @@ public class ImportMessages implements StringConstants {
         this.unhandledTypeCountMap = null;
     }
 
+    /**
+     * Add an error message based on the supplied exception.
+     * @param exception the exception
+     */
+    public void addErrorMessage(Throwable exception) {
+    	while (exception.getCause() != null) {
+    		//
+    		// Zero down to the root cause of the exception
+    		//
+    		exception = exception.getCause();
+    	}
+
+    	String message = exception.getLocalizedMessage();
+    	if (exception instanceof TeiidDdlParsingException) {
+    		TeiidDdlParsingException teiidEx = (TeiidDdlParsingException) exception;
+    		Position position = teiidEx.getPosition();
+
+    		message = Messages.getString(Messages.IMPORTER.teiidParserException,
+    				teiidEx.getMessage(),
+    				position.getLine(),
+    				position.getColumn());
+    	}
+
+    	errorMessages.add(message);
+    }
+
+    
     /**
      * Add an error message
      * @param message the error message
@@ -279,6 +309,20 @@ public class ImportMessages implements StringConstants {
      */
     public void setParseErrorIndex(int index) {
         this.parseErrorIndex = index;
+    }
+    
+    @Override
+    public String toString() {
+    	List<String> allMessages = getAllMessages();
+    	if(allMessages.size()==0) {
+    		return "No Import Messages"; //$NON-NLS-1$
+    	}
+    	StringBuilder sb = new StringBuilder();
+    	for(String message : allMessages) {
+    		sb.append(message);
+    		sb.append('\n');
+    	}
+    	return sb.toString();
     }
 
 }

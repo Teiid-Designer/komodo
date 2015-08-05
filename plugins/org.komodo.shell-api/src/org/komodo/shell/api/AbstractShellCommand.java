@@ -16,10 +16,12 @@
 package org.komodo.shell.api;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import org.komodo.shell.api.Messages.SHELLAPI;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.utils.ArgCheck;
@@ -49,6 +51,7 @@ public abstract class AbstractShellCommand implements ShellCommand {
     public AbstractShellCommand( final WorkspaceStatus status ) {
         ArgCheck.isNotNull( status, "status" ); //$NON-NLS-1$
         this.wsStatus = status;
+        this.writer = new PrintWriter(System.out);
     }
 
 	/**
@@ -156,22 +159,20 @@ public abstract class AbstractShellCommand implements ShellCommand {
 	 */
 	@Override
 	public void print(int indent,String formattedMessage, Object... params) {
+		if(this.writer==null) return;
+		
 		ArgCheck.isNonNegative(indent, Messages.getString(SHELLAPI.negative_indent_supplied));
 		StringBuffer sb = new StringBuffer();
 		for(int i=0; i<indent; i++) {
 			sb.append(StringConstants.SPACE);
 		}
 		String msg = String.format(formattedMessage, params);
-		if (writer != null) {
-			try {
-				writer.write(sb.toString()+msg);
-				writer.write('\n');
-				writer.flush();
-			} catch (IOException e) {
-			    e.printStackTrace();
-			    System.out.println(msg);
-			}
-		} else {
+		try {
+			writer.write(sb.toString()+msg);
+			writer.write('\n');
+			writer.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
 			System.out.println(msg);
 		}
 	}

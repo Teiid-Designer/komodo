@@ -1312,14 +1312,17 @@ public class ObjectImpl implements KomodoObject, StringConstants {
                           newName );
         }
 
+        // If the supplied newName is not an absolute path, assume its a simple name and append the parent absolute path
+        String newPath = newName;
+        if(!newPath.startsWith(FORWARD_SLASH)) {
+        	newPath = getParent( transaction ).getAbsolutePath();
+        	if(!newPath.endsWith(FORWARD_SLASH)) {
+        		newPath += FORWARD_SLASH;
+        	}
+        	newPath += newName;
+        }
+         
         try {
-            String newPath = getParent( transaction ).getAbsolutePath();
-
-            if (!newPath.endsWith( FORWARD_SLASH )) {
-                newPath += FORWARD_SLASH;
-            }
-
-            newPath += newName;
             getSession( transaction ).move( getAbsolutePath(), newPath );
             this.path = newPath;
             // TODO seems like index could change also

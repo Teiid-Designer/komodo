@@ -28,7 +28,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+
 import org.komodo.core.KEngine;
+import org.komodo.importer.ImportMessages;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -246,6 +248,14 @@ public interface WorkspaceStatus extends StringConstants {
      */
     void commit(String source) throws Exception;
 
+    /**
+     * Commit
+     * @param source identifier for commit
+     * @param importMessages collects import messages
+     * @throws Exception
+     */
+	void commitImport( final String source, ImportMessages importMessages ) throws Exception;
+    
     /**
      * Rolls back any unsaved changes.
      *

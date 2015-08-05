@@ -174,18 +174,45 @@ public class Messages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
+    
+    public enum ImportCommand {
+    	InvalidArgMsg_SubCommand,
+    	InvalidArgMsg_FileName,
+    	InvalidArgMsg_ModelName,
+    	InvalidTargetPath,
+    	DdlImportInProgressMsg,
+    	VdbImportInProgressMsg,
+    	DdlImportSuccessMsg,
+    	VdbImportSuccessMsg,
+    	InvalidSubCommand,
+    	ImportFailedMsg,
+    	childTypeNotAllowed,
+    	InvalidDDLParentType,
+    	ErrorCreatingTempNode,
+    	DeleteTempContextFailedMsg,
+    	cannotImport_wouldCreateDuplicate;
+
+    	@Override
+    	public String toString() {
+    		return getEnumName(this) + DOT + name();
+    	}
+    }
 
     public enum ExportCommand {
-        InvalidArgMsgObjectName,
+    	InvalidArgMsgSubCommand,
+    	InvalidArgMsgObjectName,
         InvalidArgMsgOutputFileName,
         Failure,
         ObjectExported,
         NoContentExported,
+        ObjectNotAVdb,
         CannotExportObjectDoesNotExist,
+        CannotExportObjectNotExportable,
         CannotExportFileAlreadyExists,
         CannotExportProblemWithVdb,
         CannotExportProblemWithModel,
-        CannotExportProblemWithSchema;
+        CannotExportProblemWithSchema,
+        ExportOfTypeNotSupported;
 
         @Override
         public String toString() {

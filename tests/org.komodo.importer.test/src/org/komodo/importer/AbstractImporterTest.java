@@ -24,14 +24,15 @@ package org.komodo.importer;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.modeshape.jcr.api.JcrConstants.JCR_MIXIN_TYPES;
 import static org.modeshape.jcr.api.JcrConstants.JCR_PRIMARY_TYPE;
+
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
@@ -47,57 +48,54 @@ import org.modeshape.jcr.api.JcrConstants;
 @SuppressWarnings( {"nls"} )
 public abstract class AbstractImporterTest extends AbstractLocalRepositoryTest {
 
-    protected static final String DATA_DIRECTORY = File.separator + "data"; //$NON-NLS-1$
+    protected static final String DATA_DIRECTORY = File.separator + "data";
 
-    protected static final String VDB_DIRECTORY = DATA_DIRECTORY + File.separator + "vdb"; //$NON-NLS-1$
+    protected static final String VDB_DIRECTORY = DATA_DIRECTORY + File.separator + "vdb";
 
-    protected static final String BOOKS_DIRECTORY = DATA_DIRECTORY + File.separator + "books"; //$NON-NLS-1$
+    protected static final String BOOKS_DIRECTORY = DATA_DIRECTORY + File.separator + "books";
 
-    protected static final String DDL_DIRECTORY = DATA_DIRECTORY + File.separator + "ddl"; //$NON-NLS-1$
+    protected static final String DDL_DIRECTORY = DATA_DIRECTORY + File.separator + "ddl";
 
-    protected abstract KomodoObject runImporter(Repository repository,
+    protected abstract void runImporter(Repository repository,
                                                 InputStream inputStream,
-                                                ImportType importType,
+                                                KomodoObject parentObject,
                                                 ImportOptions importOptions,
-                                                ImportMessages importMessages);
+                                                ImportMessages importMessages) throws Exception;
 
-    protected abstract KomodoObject runImporter(Repository repository,
+    protected abstract void runImporter(Repository repository,
                                                 File file,
-                                                ImportType importType,
+                                                KomodoObject parentObject,
                                                 ImportOptions importOptions,
-                                                ImportMessages importMessages);
-
-    protected KomodoObject runImporter(Repository repository, Object content,
-                                                                 ImportType importType, ImportOptions importOptions,
-                                                                 ImportMessages importMessages) {
+                                                ImportMessages importMessages) throws Exception;
+    
+    protected void runImporter(Repository repository, Object content,
+                                                                 KomodoObject parentObject, ImportOptions importOptions,
+                                                                 ImportMessages importMessages) throws Exception {
         if (content instanceof File)
-            return runImporter(repository, (File) content, importType, importOptions, importMessages);
+            runImporter(repository, (File) content, parentObject, importOptions, importMessages);
         else if (content instanceof InputStream)
-            return runImporter(repository, (InputStream) content, importType, importOptions, importMessages);
+            runImporter(repository, (InputStream) content, parentObject, importOptions, importMessages);
 
-        fail("Content should be a file or input stream");
-        return null;
     }
 
-    protected KomodoObject executeImporter(Object content, ImportType importType,
+    protected void executeImporter(Object content, KomodoObject parentObject,
                                                                         ImportOptions importOptions,
                                                                         ImportMessages importMessages)
                                                                         throws Exception {
         assertNotNull(_repo);
         assertNotNull(content);
-        assertNotNull(importType);
+        assertNotNull(parentObject);
         assertNotNull(importOptions);
         assertNotNull(importMessages);
 
-        KomodoObject kObject = runImporter(_repo, content, importType, importOptions, importMessages);
+        runImporter(_repo, content, parentObject, importOptions, importMessages);
+        
         if (importMessages.hasError()) {
             KLog.getLogger().debug(importMessages.errorMessagesToString());
-            return kObject;
         }
 
-        traverse(_repo.createTransaction("traverse-imported-nodes", true, null), kObject.getAbsolutePath());
+        traverse(this.uow, parentObject.getAbsolutePath());
 
-        return kObject;
     }
 
     protected String enc(String input) throws Exception {
