@@ -33,12 +33,14 @@ import javax.jcr.PropertyIterator;
 import javax.jcr.RepositoryException;
 import javax.jcr.Value;
 import javax.jcr.nodetype.NodeType;
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import org.komodo.modeshape.AbstractNodeVisitor;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.modeshape.jcr.JcrLexicon;
+import org.modeshape.jcr.api.JcrConstants;
 import org.modeshape.sequencer.teiid.lexicon.CoreLexicon;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
@@ -53,7 +55,7 @@ public class VdbNodeVisitor extends AbstractNodeVisitor implements StringConstan
      */
     public static String DATA_ROLE_PERMISSION_CONDITION_XML = "condition"; //$NON-NLS-1$
 
-    private static final String UNDEFINED = null; 
+    private static final String UNDEFINED = null;
 
     private static Map<String, NodeTypeName> nodeNameIndex = new HashMap<String, NodeTypeName>();
 
@@ -143,17 +145,17 @@ public class VdbNodeVisitor extends AbstractNodeVisitor implements StringConstan
         int DESCRIPTION = 1;
         int CONNECTION_TYPE = 1;
         int IMPORT_VDB = 1;
-        
+
         int MODEL = 1;
         int MODEL_PROPERTY = 2;
         int MODEL_DESCRIPTION = 2;
         int MODEL_METADATA = 2;
         int MODEL_VALIDATION = 2;
         int MODEL_SOURCE = 2;
-        
+
         int TRANSLATOR = 1;
         int TRANSLATOR_PROPERTY = 2;
-        
+
         int DATA_ROLE = 1;
         int DATA_ROLE_DESCRIPTION = 2;
         int PERMISSION = 2;
@@ -162,14 +164,14 @@ public class VdbNodeVisitor extends AbstractNodeVisitor implements StringConstan
         int PERMISSION_ALLOW = 3;
         int CONDITION = 3;
         int MASK = 3;
-        
+
         int ENTRY = 1;
         int ENTRY_PROPERTY = 2;
         int ENTRY_DESCRIPTION = 2;
     }
 
     private final XMLStreamWriter writer;
-    
+
     private boolean showTabs;
 
     /**
@@ -187,7 +189,7 @@ public class VdbNodeVisitor extends AbstractNodeVisitor implements StringConstan
     protected String undefined() {
         return UNDEFINED;
     }
-    
+
     /**
      * Set to true to show tabs
      *
@@ -205,7 +207,7 @@ public class VdbNodeVisitor extends AbstractNodeVisitor implements StringConstan
     private void writeNewLine() throws XMLStreamException {
         writeNewLine(1);
     }
-    
+
     private void writeTab(int total) throws XMLStreamException {
     	if( showTabs ) {
     		for (int i = 0; i < total; ++i)
@@ -398,7 +400,7 @@ public class VdbNodeVisitor extends AbstractNodeVisitor implements StringConstan
         // Process property attributes
         Properties exportableProps = filterExportableProperties(node.getProperties(), VdbLexicon.Translator.TYPE, VdbLexicon.Translator.DESCRIPTION);
         properties(node, ElementTabValue.TRANSLATOR_PROPERTY, exportableProps);
-        
+
         writeTab(ElementTabValue.TRANSLATOR);
         writeEndElement();
     }
@@ -449,7 +451,7 @@ public class VdbNodeVisitor extends AbstractNodeVisitor implements StringConstan
         description(node, ElementTabValue.MODEL_DESCRIPTION);
 
         Properties exportableProps = filterExportableProperties(node.getProperties(), CoreLexicon.JcrId.MODEL_TYPE);
-        
+
         properties(node, ElementTabValue.MODEL_PROPERTY, exportableProps);
 
         // Sources
@@ -463,7 +465,7 @@ public class VdbNodeVisitor extends AbstractNodeVisitor implements StringConstan
             writeStartElement(VdbLexicon.ManifestIds.METADATA);
             Property metaTypeProp = property(node, VdbLexicon.Model.METADATA_TYPE);
             writeAttribute(VdbLexicon.ManifestIds.TYPE, toString(metaTypeProp));
-            
+
         	writeNewLine();
         	writeTab(ElementTabValue.MODEL_METADATA + 1);
             writeCData(visitor.getDdl());
@@ -511,11 +513,11 @@ public class VdbNodeVisitor extends AbstractNodeVisitor implements StringConstan
         writeTab(numTabs);
         writeElementWithText(NodeTypeName.DESCRIPTION.getTag(), toString(property));
     }
-    
+
     private Properties filterExportableProperties(PropertyIterator propIter, String... propertiesToIgnore) throws RepositoryException {
         Properties exportableProps = new Properties();
         List<String> propsToIgnore = Arrays.asList(propertiesToIgnore);
-        
+
         while(propIter.hasNext()) {
             Property property = propIter.nextProperty();
             String name = property.getName();
@@ -528,7 +530,7 @@ public class VdbNodeVisitor extends AbstractNodeVisitor implements StringConstan
             // Ignore jcr properties since these are internal to modeshape
             if (name.startsWith(JcrLexicon.Namespace.PREFIX))
                 continue;
-            
+
 
             String value = toString(property);
 
@@ -549,13 +551,29 @@ public class VdbNodeVisitor extends AbstractNodeVisitor implements StringConstan
                 	continue;
                 }
             }
-            
 
-            
+            name = convertNamePrefixToUri( property );
             exportableProps.put(name, value);
         }
-            
+
         return exportableProps;
+    }
+
+    private String convertNamePrefixToUri( final Property property ) throws RepositoryException {
+        final String name = property.getName();
+        final int index = name.indexOf( COLON );
+
+        // if JCR expanded name or just a local name just return the name
+        if ( index == -1 ) {
+            return name;
+        }
+
+        // convert JCR qualified name to expanded name
+        final String prefix = name.substring( 0, index );
+        final String uri = property.getSession().getNamespaceURI( prefix );
+        final QName expanded = new QName( uri, name.substring( index + 1 ) );
+
+        return expanded.toString();
     }
 
     private void virtualDatabase(Node node) throws XMLStreamException, RepositoryException {
@@ -587,10 +605,10 @@ public class VdbNodeVisitor extends AbstractNodeVisitor implements StringConstan
         }
 
         // Properties elements
-        Properties exportableProps = filterExportableProperties(node.getProperties(), 
+        Properties exportableProps = filterExportableProperties(node.getProperties(),
         		VdbLexicon.Vdb.NAME, VdbLexicon.Vdb.VERSION,
-                NodeTypeName.DESCRIPTION.getId(), VdbLexicon.Vdb.CONNECTION_TYPE);
-        
+                NodeTypeName.DESCRIPTION.getId(), VdbLexicon.Vdb.CONNECTION_TYPE, JcrConstants.MODE_SHA1);
+
         properties(node, ElementTabValue.VDB_PROPERTY, exportableProps);
 
         writeNewLine();
@@ -680,14 +698,14 @@ public class VdbNodeVisitor extends AbstractNodeVisitor implements StringConstan
     public void visit(Property property) {
         // Not required
     }
-    
+
     @Override
     protected void visitChild(Node node, String relNodePath) throws PathNotFoundException, RepositoryException {
         try {
         	if (node.hasNode(relNodePath)) {
         		// write tab value based on node path/type
 	        	writeTab(getTabValue(relNodePath));
-	        	
+
 	            Node child = node.getNode(relNodePath);
 	            child.accept(this);
         	}
@@ -695,7 +713,7 @@ public class VdbNodeVisitor extends AbstractNodeVisitor implements StringConstan
             throw new RepositoryException(ex);
         }
     }
-    
+
     private int getTabValue(String relNodePath) {
     	if( relNodePath.equals(NodeTypeName.IMPORT_VDB.getId()) ) {
     		return ElementTabValue.IMPORT_VDB;
@@ -718,7 +736,7 @@ public class VdbNodeVisitor extends AbstractNodeVisitor implements StringConstan
     	} else     	if( relNodePath.equals(NodeTypeName.VIRTUAL_DATABASE.getId()) ) {
     		return ElementTabValue.VIRTUAL_DATABASE;
     	}
-    	
+
     	return 0;
     }
 }
