@@ -529,7 +529,8 @@ public final class VdbImplTest extends RelationalModelTest {
         final VdbImporter importer = new VdbImporter( _repo );
         final ImportOptions importOptions = new ImportOptions();
         importOptions.setOption( OptionKeys.NAME, name );
-        importer.importVdb( vdbStream, importOptions, new ImportMessages() );
+        KomodoObject workspace = _repo.komodoWorkspace(uow);
+        importer.importVdb( this.uow, vdbStream, workspace, importOptions, new ImportMessages() );
 
         commit(); // commit the import
 
