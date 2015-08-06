@@ -824,22 +824,30 @@ public class DdlNodeVisitor extends AbstractNodeVisitor
         procedureParameters(procedure);
         append(CLOSE_BRACKET);
 
-        Node resultSet = procedure.getNode(TeiidDdlLexicon.CreateProcedure.RESULT_SET);
-        if (resultSet != null) {
-            append(SPACE).append(RETURNS).append(SPACE).append(TABLE).append(SPACE);
+        boolean hasResultSet = procedure.hasNode(TeiidDdlLexicon.CreateProcedure.RESULT_SET);
+        if(hasResultSet) {
+            Node resultSet = procedure.getNode(TeiidDdlLexicon.CreateProcedure.RESULT_SET);
+            // Handle DataType result
+            if (hasMixinType(resultSet, TeiidDdlLexicon.CreateProcedure.RESULT_DATA_TYPE)) {
+                ColumnContext columnContext = createColumnContext(resultSet);
+                append(SPACE).append(RETURNS).append(SPACE).
+                append(columnContext.getDataType());
+            } else {
+                append(SPACE).append(RETURNS).append(SPACE).append(TABLE).append(SPACE);
 
-            append(OPEN_BRACKET);
-            Collection<Node> resultColumns = getChildren(resultSet, TeiidDdlLexicon.CreateProcedure.RESULT_COLUMN);
-            Iterator<Node> iterator = resultColumns.iterator();
-            while (iterator.hasNext()) {
-                Node resultColumn = iterator.next();
-                ColumnContext columnContext = createColumnContext(resultColumn);
-                column(resultColumn, columnContext, true, true);
+                append(OPEN_BRACKET);
+                Collection<Node> resultColumns = getChildren(resultSet, TeiidDdlLexicon.CreateProcedure.RESULT_COLUMN);
+                Iterator<Node> iterator = resultColumns.iterator();
+                while (iterator.hasNext()) {
+                    Node resultColumn = iterator.next();
+                    ColumnContext columnContext = createColumnContext(resultColumn);
+                    column(resultColumn, columnContext, true, true);
 
-                if (iterator.hasNext())
-                    append(COMMA).append(SPACE);
+                    if (iterator.hasNext())
+                        append(COMMA).append(SPACE);
+                }
+                append(CLOSE_BRACKET);
             }
-            append(CLOSE_BRACKET);
         }
 
         //options
