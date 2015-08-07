@@ -274,6 +274,20 @@ public class TestDdlNodeVisitor extends AbstractSequencerTest {
         helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "myProc");
     }
 
+    @Test(timeout = 5000000)
+    public void testSourceProcedureNoReturn() throws Exception {
+        String ddl = "CREATE FOREIGN PROCEDURE saveFile(IN filePath string, IN file object OPTIONS (ANNOTATION 'The contents to save.  Can be one of CLOB, BLOB, or XML'))" + NEW_LINE +
+                "OPTIONS (ANNOTATION 'Saves the given value to the given path.  Any existing file will be overriden.')";
+        helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "saveFile");
+    }
+
+    @Test(timeout = 5000000)
+    public void testSourceProcedureIntegerReturn() throws Exception {
+        String ddl = "CREATE FOREIGN PROCEDURE SourceProc(IN filePath string, IN file object) RETURNS integer" + NEW_LINE +
+                "OPTIONS (ANNOTATION 'hello world')";
+        helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "SourceProc");
+    }
+    
     @Test( timeout = 5000000 )
     public void testPushdownFunctionNoArgs() throws Exception {
         String ddl = "CREATE FOREIGN FUNCTION SourceFunc() RETURNS integer" + NEW_LINE +
