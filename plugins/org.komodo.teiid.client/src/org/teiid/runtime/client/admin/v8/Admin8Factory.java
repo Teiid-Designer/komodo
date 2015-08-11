@@ -25,6 +25,7 @@ package org.teiid.runtime.client.admin.v8;
 import static org.jboss.as.controller.client.helpers.ClientConstants.DEPLOYMENT_REMOVE_OPERATION;
 import static org.jboss.as.controller.client.helpers.ClientConstants.DEPLOYMENT_UNDEPLOY_OPERATION;
 import static org.jboss.as.controller.client.helpers.ClientConstants.RESULT;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -45,6 +46,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.logging.Logger;
+
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
@@ -52,6 +54,7 @@ import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.sasl.RealmCallback;
 import javax.security.sasl.RealmChoiceCallback;
+
 import org.jboss.as.cli.Util;
 import org.jboss.as.cli.operation.OperationFormatException;
 import org.jboss.as.cli.operation.impl.DefaultOperationRequestAddress;
@@ -119,13 +122,12 @@ public class Admin8Factory {
 
     /**
      * Creates a ServerAdmin with the specified connection properties.
-     * @param teiidVersion,
-     * @param userName
-     * @param password
-     * @param serverURL
-     * @param applicationName
-     * @return
-     * @throws AdminException
+     * @param teiidVersion the teiid server version
+     * @param port number
+     * @param userName the user name
+     * @param password the password
+     * @return the Admin object
+     * @throws AdminException the Admin Exception
      */
     public Admin createAdmin(TeiidVersion teiidVersion, String host, int port, String userName, char[] password) throws AdminException {
         if(host == null) {
@@ -216,6 +218,13 @@ public class Admin8Factory {
 		private ModelControllerClient connection;
     	private boolean domainMode = false;
     	private String profileName = "ha";
+    	
+    	private Collection<String> dataSourceNames;
+    	private Set<String> installedResourceAdapterNames;
+    	private Set<String> deployedResourceAdaptorNames;
+    	private HashSet<String> installedJdbcDrivers;
+    	private HashMap<String, String> connectionFactoryNames;
+
 
         /**
          * @param teiidVersion
@@ -236,6 +245,20 @@ public class Admin8Factory {
         public TeiidVersion getTeiidVersion() {
             return teiidVersion;
         }
+        
+        @Override
+		public void refresh() {
+        	// The expectation is that various getters will look for null then go back to the server
+        	// to retrieve the information and re-cache it, until refresh() is called again.
+        	// This allows making only necessary CLI calls during loading of Teiid server Data Source and Translator info
+        	
+        	dataSourceNames = null;
+        	installedResourceAdapterNames = null;
+        	deployedResourceAdaptorNames = null;
+        	installedJdbcDrivers = null;
+        	connectionFactoryNames = null;
+			
+		}
 
         private void requires(String item, TeiidVersion requiredVersion) throws AdminException {
             if (getTeiidVersion().isLessThan(requiredVersion))
@@ -292,7 +315,7 @@ public class Admin8Factory {
 			//AS-4776 HACK - END
 			
 			BuildPropertyDefinitions bpd = new BuildPropertyDefinitions();
-			buildResourceAdpaterProperties(rarName, bpd);
+			buildResourceAdapterProperties(rarName, bpd);
 			ArrayList<PropertyDefinition> jcaSpecific = bpd.getPropertyDefinitions();
 
 			///subsystem=resource-adapters/resource-adapter=fileDS/connection-definitions=fileDS:add(jndi-name=java\:\/fooDS)
@@ -422,40 +445,42 @@ public class Admin8Factory {
 		}
 
 		public Set<String> getInstalledJDBCDrivers() throws AdminException {
-			HashSet<String> driverList = new HashSet<String>();
-			driverList.addAll(getChildNodeNames("datasources", "jdbc-driver"));
-
-			if (!this.domainMode) {
-				//'installed-driver-list' not available in the domain mode.
-				final ModelNode request = buildRequest("datasources", "installed-drivers-list");
-		        try {
-		            ModelNode outcome = this.connection.execute(request);
-		            if (Util.isSuccess(outcome)) {
-			            List<String> drivers = getList(outcome, new AbstractMetadatMapper() {
-							@Override
-							public String unwrap(ModelNode node) {
-								if (node.hasDefined("driver-name")) {
-									return node.get("driver-name").asString();
+			if( this.installedJdbcDrivers == null ) {
+				installedJdbcDrivers = new HashSet<String>();
+				installedJdbcDrivers.addAll(getChildNodeNames("datasources", "jdbc-driver"));
+	
+				if (!this.domainMode) {
+					//'installed-driver-list' not available in the domain mode.
+					final ModelNode request = buildRequest("datasources", "installed-drivers-list");
+			        try {
+			            ModelNode outcome = this.connection.execute(request);
+			            if (Util.isSuccess(outcome)) {
+				            List<String> drivers = getList(outcome, new AbstractMetadatMapper() {
+								@Override
+								public String unwrap(ModelNode node) {
+									if (node.hasDefined("driver-name")) {
+										return node.get("driver-name").asString();
+									}
+									return null;
 								}
-								return null;
-							}
-						});
-			            driverList.addAll(drivers);
+							});
+				            installedJdbcDrivers.addAll(drivers);
+			            }
+			        } catch (IOException e) {
+			        	throw new AdminComponentException(e);
+			        }
+				}
+				else {
+					// TODO: AS7 needs to provide better way to query the deployed JDBC drivers
+					List<String> deployments = getChildNodeNames(null, "deployment");
+		            for (String deployment:deployments) {
+		            	if (!deployment.contains("translator") && deployment.endsWith(".jar")) {
+		            		installedJdbcDrivers.add(deployment);
+		            	}
 		            }
-		        } catch (IOException e) {
-		        	throw new AdminComponentException(e);
-		        }
+				}
 			}
-			else {
-				// TODO: AS7 needs to provide better way to query the deployed JDBC drivers
-				List<String> deployments = getChildNodeNames(null, "deployment");
-	            for (String deployment:deployments) {
-	            	if (!deployment.contains("translator") && deployment.endsWith(".jar")) {
-	            		driverList.add(deployment);
-	            	}
-	            }
-			}
-	        return driverList;
+	        return installedJdbcDrivers;
 		}
 
 		public String getProfileName() throws AdminException {
@@ -480,6 +505,7 @@ public class Admin8Factory {
 			Set<String> resourceAdapters = getResourceAdapterNames();
         	if (resourceAdapters.contains(templateName)) {
 	            createConnectionFactory(deploymentName, templateName, properties);
+	            refresh();
 	            return;
         	}
 
@@ -537,6 +563,8 @@ public class Admin8Factory {
 	        // issue the "enable" operation
 			cliCall("enable", new String[] { "subsystem", "datasources","data-source", deploymentName },
 					null, new ResultCallback());
+			
+			refresh();
 		}
 
 		// /subsystem=datasources/data-source=DS/connection-properties=foo:add(value=/home/rareddy/testing)
@@ -693,8 +721,9 @@ public class Admin8Factory {
 		@Override
 		public void deleteDataSource(String deployedName) throws AdminException {
 			deployedName = removeJavaContext(deployedName);
-
+			
 			Collection<String> dsNames = getDataSourceNames();
+			
 			if (!dsNames.contains(deployedName)) {
 				 throw new AdminProcessingException(Messages.gs(Messages.TEIID.TEIID70008, deployedName));
 			}
@@ -726,6 +755,8 @@ public class Admin8Factory {
 					//AS-4776 HACK - END
 				}
 			}
+			
+			refresh();
 
 			dsNames = getDataSourceNames();
 			if (dsNames.contains(deployedName)) {
@@ -981,30 +1012,34 @@ public class Admin8Factory {
 		 */
 		@Override
 		public Collection<String> getDataSourceNames() throws AdminException {
-			Set<String> datasourceNames = new HashSet<String>();
-			datasourceNames.addAll(getChildNodeNames("datasources", "data-source"));
-			datasourceNames.addAll(getChildNodeNames("datasources", "xa-data-source"));
-			datasourceNames.addAll(getConnectionFactoryNames().keySet());
-
-			Set<String> dsNames = new HashSet<String>();
-			for (String s:datasourceNames) {
-				if (s.startsWith(JAVA_CONTEXT)) {
-					dsNames.add(s.substring(6));
-				}
-				else {
-					dsNames.add(s);
+			if( this.dataSourceNames == null ) {
+				Set<String> datasourceNames = new HashSet<String>();
+				datasourceNames.addAll(getChildNodeNames("datasources", "data-source"));
+				datasourceNames.addAll(getChildNodeNames("datasources", "xa-data-source"));
+				datasourceNames.addAll(getConnectionFactoryNames().keySet());
+	
+				dataSourceNames = new HashSet<String>();
+				for (String s:datasourceNames) {
+					if (s.startsWith(JAVA_CONTEXT)) {
+						this.dataSourceNames.add(s.substring(6));
+					}
+					else {
+						this.dataSourceNames.add(s);
+					}
 				}
 			}
-	        return dsNames;
+	        return this.dataSourceNames;
 		}
 
 		private Map<String, String> getConnectionFactoryNames() throws AdminException {
-			HashMap<String, String> datasourceNames = new HashMap<String, String>();
-			Set<String> resourceAdapters = getInstalledResourceAdaptorNames();
-			for (String resource:resourceAdapters) {
-				getRAConnections(datasourceNames, resource);
+			if( this.connectionFactoryNames == null ) {
+				connectionFactoryNames = new HashMap<String, String>();
+				Set<String> resourceAdapters = getInstalledResourceAdaptorNames();
+				for (String resource:resourceAdapters) {
+					getRAConnections(connectionFactoryNames, resource);
+				}
 			}
-			return datasourceNames;
+			return connectionFactoryNames;
 		}
 
 		private void getRAConnections(final HashMap<String, String> datasourceNames, final String rarName) throws AdminException {
@@ -1031,9 +1066,11 @@ public class Admin8Factory {
 		 * @throws AdminException
 		 */
 		private Set<String> getInstalledResourceAdaptorNames() throws AdminException {
-			Set<String> templates = new HashSet<String>();
-			templates.addAll(getChildNodeNames("resource-adapters", "resource-adapter"));
-	        return templates;
+			if( this.installedResourceAdapterNames == null ) {
+				installedResourceAdapterNames = new HashSet<String>();
+				this.installedResourceAdapterNames.addAll(getChildNodeNames("resource-adapters", "resource-adapter"));
+			}
+	        return installedResourceAdapterNames;
 		}
 
 		// :read-children-names(child-type=deployment)
@@ -1051,14 +1088,16 @@ public class Admin8Factory {
 		}
 
 		private Set<String> getDeployedResourceAdaptorNames() throws AdminException {
-			Set<String> templates = new HashSet<String>();
-			List<String> deployments = getChildNodeNames(null, "deployment");
-            for (String deployment:deployments) {
-            	if (deployment.endsWith(".rar")) {
-            		templates.add(deployment);
-            	}
-            }
-			return templates;
+			if( this.deployedResourceAdaptorNames == null ) {
+				this.deployedResourceAdaptorNames = new HashSet<String>();
+				List<String> deployments = getChildNodeNames(null, "deployment");
+	            for (String deployment:deployments) {
+	            	if (deployment.endsWith(".rar")) {
+	            		this.deployedResourceAdaptorNames.add(deployment);
+	            	}
+	            }
+			}
+			return deployedResourceAdaptorNames;
 		}
 
 		public List<String> getDeployments(){
@@ -1164,7 +1203,7 @@ public class Admin8Factory {
 		/**
 		 * /subsystem=resource-adapters/resource-adapter=teiid-connector-ws.rar/connection-definitions=foo:read-resource-description
 		 */
-		private void buildResourceAdpaterProperties(String rarName, BuildPropertyDefinitions builder) throws AdminException {
+		private void buildResourceAdapterProperties(String rarName, BuildPropertyDefinitions builder) throws AdminException {
 			cliCall("read-resource-description", new String[] { "subsystem","resource-adapters",
 					"resource-adapter", rarName,
 					"connection-definitions", "any" }, null, builder);
@@ -1183,7 +1222,7 @@ public class Admin8Factory {
 			Set<String> resourceAdapters = getResourceAdapterNames();
         	if (resourceAdapters.contains(templateName)) {
         		cliCall("read-rar-description", new String[] {"subsystem", "teiid"}, new String[] {"rar-name", templateName}, builder);
-        		buildResourceAdpaterProperties(templateName, builder);
+        		buildResourceAdapterProperties(templateName, builder);
 		        return builder.getPropertyDefinitions();
         	}
 

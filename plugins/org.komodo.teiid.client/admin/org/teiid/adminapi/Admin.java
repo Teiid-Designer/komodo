@@ -433,6 +433,12 @@ public interface Admin {
      * @throws AdminException
      */
     void restart();
+    
+    /**
+     * Refresh cached contents in the Admin Factory
+     * 
+     */
+    void refresh();
 
     /**
      * Added to interface by komodo and not part of the original teiid client.
@@ -445,5 +451,4 @@ public interface Admin {
      */
     @Since(Version.TEIID_8_0)
     Collection<DataSourceDriver> getDataSourceDrivers() throws AdminException;
-
 }

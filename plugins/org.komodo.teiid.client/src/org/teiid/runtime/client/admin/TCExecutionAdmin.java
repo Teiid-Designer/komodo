@@ -149,15 +149,12 @@ public class TCExecutionAdmin implements ExecutionAdmin {
         if (this.dataSourceNames.contains(dsName)) {
             this.admin.deleteDataSource(dsName);
 
-            if (!this.admin.getDataSourceNames().contains(dsName)) {
-                this.dataSourceNames.remove(dsName);
-                TeiidDataSource tds = this.dataSourceByNameMap.get(dsName);
+            TeiidDataSource tds = this.dataSourceByNameMap.get(dsName);
+            
+            refreshDataSources();
 
-                if (tds != null) {
-                    this.dataSourceByNameMap.remove(dsName);
-                    this.getEventManager().notifyListeners(ExecutionConfigurationEvent.createRemoveDataSourceEvent(tds));
-
-                }
+            if (tds != null) {
+            	this.getEventManager().notifyListeners(ExecutionConfigurationEvent.createRemoveDataSourceEvent(tds));
             }
         }
     }
@@ -302,18 +299,17 @@ public class TCExecutionAdmin implements ExecutionAdmin {
 
         this.admin.createDataSource(dsName, typeName, properties);
 
-        refreshDataSourceNames();
+        // call admin.refresh() to clear cached resource info
+        this.admin.refresh();
+        
+        refreshDataSources();
 
         // Check that local name list contains new dsName
-        if (dataSourceExists(dsName)) {
-            String nullStr = null;
-            TeiidDataSource tds = new TCTeiidDataSource(nullStr, dsName, typeName, properties);
-
-            this.dataSourceByNameMap.put(dsName, tds);
-            this.getEventManager().notifyListeners(ExecutionConfigurationEvent.createAddDataSourceEvent(tds));
-
-            return tds;
-        }
+        TeiidDataSource tds = this.dataSourceByNameMap.get(dsName);
+        if( tds != null ) {
+        	this.getEventManager().notifyListeners(ExecutionConfigurationEvent.createAddDataSourceEvent(tds));
+        	return tds;
+        } 
 
         // We shouldn't get here if data source was created
         throw new TeiidExecutionException(
@@ -376,6 +372,10 @@ public class TCExecutionAdmin implements ExecutionAdmin {
                     }
                     try {
                         adminSpec.deploy(admin, fileName, iStream);
+                        
+                        // call admin.refresh() to clear cached resource info
+                        this.admin.refresh();
+                        
                     } catch (Exception ex) {
                         // Jar deployment failed
                         KLog.getLogger().error(Messages.getString(Messages.ExecutionAdmin.jarDeploymentFailed, theFile.getPath()), ex);
@@ -406,6 +406,10 @@ public class TCExecutionAdmin implements ExecutionAdmin {
                 }
                 try {
                     adminSpec.deploy(admin, fileName, iStream);
+                    
+                    // call admin.refresh() to clear cached resource info
+                    this.admin.refresh();
+                    
                     refreshDataSourceTypes();
                 } catch (Exception ex) {
                     // Jar deployment failed
@@ -442,7 +446,7 @@ public class TCExecutionAdmin implements ExecutionAdmin {
 
     @Override
     public Set<String> getDataSourceTemplateNames() throws Exception {
-        return this.admin.getDataSourceTemplateNames();
+        return this.dataSourceTypeNames;
     }
     
     @Override
@@ -478,7 +482,7 @@ public class TCExecutionAdmin implements ExecutionAdmin {
      */
     @Override
     public Properties getDataSourceProperties(String name) throws Exception {
-        return this.admin.getDataSource(name);
+    	return getDataSource(name).getProperties();
     }
 
     @Override
@@ -584,16 +588,28 @@ public class TCExecutionAdmin implements ExecutionAdmin {
      * @throws Exception if refreshing admin connection fails
      */
     public void refresh() throws Exception {
-        // populate translator map
-        refreshTranslators(this.admin.getTranslators());
-
+    	// Clears any cached data source or translator info prior to reloading
+    	this.admin.refresh();
+    	
         // populate data source type names set
         refreshDataSourceTypes();
 
-        // populate data source names list
-        refreshDataSourceNames();
+        refreshDataSources();
+        
+        // populate translator map
+        refreshTranslators();
 
+        // populate VDBs and source bindings
+        refreshVDBs();
+
+        // notify listeners
+        this.getEventManager().notifyListeners(ExecutionConfigurationEvent.createTeiidRefreshEvent(this.teiidInstance));
+    }
+    
+    protected void refreshDataSources() throws Exception {
         this.dataSourceByNameMap.clear();
+        this.dataSourceNames = new ArrayList<String>(this.admin.getDataSourceNames());
+        
         Collection<TeiidDataSource> tdsList = connectionMatcher.findTeiidDataSources(this.dataSourceNames);
         for (TeiidDataSource ds : tdsList) {
             // Get Properties for the source
@@ -605,12 +621,6 @@ public class TCExecutionAdmin implements ExecutionAdmin {
         	// put ds into map
             this.dataSourceByNameMap.put(ds.getName(), ds);
         }
-
-        // populate VDBs and source bindings
-        refreshVDBs();
-
-        // notify listeners
-        this.getEventManager().notifyListeners(ExecutionConfigurationEvent.createTeiidRefreshEvent(this.teiidInstance));
     }
 
     protected void refreshDataSourceNames() throws Exception {
@@ -624,7 +634,8 @@ public class TCExecutionAdmin implements ExecutionAdmin {
      * @param translators
      * @throws Exception
      */
-    protected void refreshTranslators( Collection<? extends Translator> translators ) throws Exception {
+    protected void refreshTranslators() throws Exception {
+    	Collection<? extends Translator> translators = this.admin.getTranslators();
         for (Translator translator : translators) {
             if (translator.getName() != null) {
                 if( teiidInstance.getVersion().isLessThan(Version.TEIID_8_6.get())) {
