@@ -67,7 +67,8 @@ SRC_DIR="${SCRIPT_DIR}"
 # Ensure it only contains komodo related artifacts and
 # does not clutter up user's existing $HOME/.m2 repository
 #
-LOCAL_REPO="${ROOT_DIR}/m2-repository"
+#LOCAL_REPO="${ROOT_DIR}/m2-repository"
+LOCAL_REPO="${HOME}/.m2/repository"
 
 #
 # Maven command

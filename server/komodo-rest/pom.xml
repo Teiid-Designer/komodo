@@ -1,0 +1,107 @@
+<?xml version="1.0"?>
+<!--
+ ~ JBoss, Home of Professional Open Source.
+ ~ See the COPYRIGHT.txt file distributed with this work for information
+ ~ regarding copyright ownership.  Some portions may be licensed
+ ~ to Red Hat, Inc. under one or more contributor license agreements.
+ ~
+ ~ This library is free software; you can redistribute it and/or
+ ~ modify it under the terms of the GNU Lesser General Public
+ ~ License as published by the Free Software Foundation; either
+ ~ version 2.1 of the License, or (at your option) any later version.
+ ~
+ ~ This library is distributed in the hope that it will be useful,
+ ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ ~ Lesser General Public License for more details.
+ ~
+ ~ You should have received a copy of the GNU Lesser General Public
+ ~ License along with this library; if not, write to the Free Software
+ ~ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ ~ 02110-1301 USA.
+-->
+<project
+    xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- ================================================================== -->
+    <!-- Parent -->
+    <!-- ================================================================== -->
+    <parent>
+        <groupId>org.jboss.tools.komodo</groupId>
+        <artifactId>komodo-server</artifactId>
+        <version>0.0.2-SNAPSHOT</version>
+    </parent>
+
+    <!-- ================================================================== -->
+    <!-- Self -->
+    <!-- ================================================================== -->
+    <artifactId>komodo-rest</artifactId>
+    <packaging>war</packaging>
+    <name>Komodo REST</name>
+    <description>Provides RESTful access to the Komodo engine</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.infinispan</groupId>
+            <artifactId>infinispan-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.undertow</groupId>
+            <artifactId>undertow-servlet</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-jaxrs</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-json-p-provider</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-undertow</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.tools.komodo.plugins</groupId>
+            <artifactId>org.komodo.modeshape.teiid.sql.sequencer</artifactId>
+            <version>${komodo.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.tools.komodo.plugins</groupId>
+            <artifactId>org.komodo.relational</artifactId>
+            <version>${komodo.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+        </dependency>
+    </dependencies>
+
+    <!-- ================================================================== -->
+    <!-- Build -->
+    <!-- ================================================================== -->
+    <build>
+        <!-- Set the name of the war, used as the context root when the app is deployed -->
+        <finalName>${project.artifactId}</finalName>
+
+        <plugins>
+            <plugin>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <!-- Java EE 7 doesn't require web.xml, Maven needs to catch up! -->
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
