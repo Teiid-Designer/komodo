@@ -240,8 +240,8 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveCorrectChildTypes() {
-        assertThat( Arrays.asList( this.wsMgr.getChildTypes() ), hasItems( Vdb.IDENTIFIER, Schema.IDENTIFIER ) );
-        assertThat( this.wsMgr.getChildTypes().length, is( 2 ) );
+        assertThat( Arrays.asList( this.wsMgr.getChildTypes() ), hasItems( Vdb.IDENTIFIER, Schema.IDENTIFIER, Teiid.IDENTIFIER ) );
+        assertThat( this.wsMgr.getChildTypes().length, is( 3 ) );
     }
 
     @Test( expected = Exception.class )

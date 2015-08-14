@@ -2,7 +2,7 @@ package org.komodo.shell.commands.core;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import org.komodo.relational.teiid.Teiid;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
@@ -39,30 +39,31 @@ public class RenameCommand extends BuiltInShellCommand implements StringConstant
      */
     @Override
     public boolean execute() throws Exception {
-        String objNameArg = requiredArgument(0, Messages.getString("RenameCommand.InvalidArgMsg_ObjectName")); //$NON-NLS-1$
-        String newName = requiredArgument(1, Messages.getString("RenameCommand.InvalidArgMsg_NewName")); //$NON-NLS-1$
+        String objNameArg = requiredArgument(0, Messages.getString(Messages.RenameCommand.InvalidArgMsg_ObjectName));
+        String newName = requiredArgument(1, Messages.getString(Messages.RenameCommand.InvalidArgMsg_NewName));
 
+        WorkspaceStatus wsStatus = getWorkspaceStatus();
         // Get the context for current object and target object since they can be supplied with a path
-        WorkspaceContext objContext = ContextUtils.getContextForPath(getWorkspaceStatus(), objNameArg);
+        WorkspaceContext objContext = ContextUtils.getContextForPath(wsStatus, objNameArg);
         
         // objContext null - Object could not be located
     	if(objContext==null) {
-        	print(CompletionConstants.MESSAGE_INDENT,Messages.getString("RenameCommand.cannotRename_objectDoesNotExist", objNameArg)); //$NON-NLS-1$
+        	print(CompletionConstants.MESSAGE_INDENT,Messages.getString(Messages.RenameCommand.cannotRename_objectDoesNotExist, objNameArg));
     		return false;
     	}
 
     	String[] pathSegs = ContextUtils.getPathSegments(newName);
     	String targetParentPath = ContextUtils.getPath(pathSegs, pathSegs.length-1);
-        WorkspaceContext targetContext = ContextUtils.getContextForPath(getWorkspaceStatus(), targetParentPath);
+        WorkspaceContext targetContext = ContextUtils.getContextForPath(wsStatus, targetParentPath);
         // only allow move to an existing context
     	if(targetContext==null) {
-        	print(CompletionConstants.MESSAGE_INDENT,Messages.getString("RenameCommand.cannotRename_targetContextDoesNotExist", targetParentPath)); //$NON-NLS-1$
+        	print(CompletionConstants.MESSAGE_INDENT,Messages.getString(Messages.RenameCommand.cannotRename_targetContextDoesNotExist, targetParentPath));
     		return false;
     	}
-    	
+
         // Check validity of the new object name
     	String newShortName = pathSegs[pathSegs.length-1];
-    	KomodoType kType = objContext.getKomodoObj().getTypeIdentifier(getWorkspaceStatus().getTransaction());
+    	KomodoType kType = objContext.getKomodoObj().getTypeIdentifier(wsStatus.getTransaction());
 //        if (!validateObjectName(newShortName,kType)) {
 //            return false;
 //        }
@@ -78,16 +79,27 @@ public class RenameCommand extends BuiltInShellCommand implements StringConstant
         }
 
         try {
+            // If teiid object was renamed, check if it is set as the default server.  unset default if necessary
+            KomodoObject kObject = objContext.getKomodoObj();
+            Teiid teiid = objContext.getWorkspaceManager().resolve(wsStatus.getTransaction(), kObject, Teiid.class);
+            if( teiid != null ) {
+                Teiid defaultTeiid = wsStatus.getTeiid();
+                if(defaultTeiid!=null && defaultTeiid.getName(wsStatus.getTransaction()).equals(teiid.getName(wsStatus.getTransaction()))) {
+                    wsStatus.setTeiid(null);
+                }
+            }
+            
         	// Rename
             rename(objContext, newShortName, targetContext);
             // Commit transaction
             if ( isAutoCommit() ) {
-                getWorkspaceStatus().commit( RenameCommand.class.getSimpleName() );
+                wsStatus.commit( RenameCommand.class.getSimpleName() );
             }
+            
             // Print message
-            print(CompletionConstants.MESSAGE_INDENT, Messages.getString("RenameCommand.ObjectRenamed", objNameArg, newName)); //$NON-NLS-1$
+            print(CompletionConstants.MESSAGE_INDENT, Messages.getString(Messages.RenameCommand.ObjectRenamed, objNameArg, newName));
         } catch (Exception e) {
-            print(CompletionConstants.MESSAGE_INDENT, Messages.getString("RenameCommand.Failure", objNameArg)); //$NON-NLS-1$
+            print(CompletionConstants.MESSAGE_INDENT, Messages.getString(Messages.RenameCommand.Failure, objNameArg));
             print(CompletionConstants.MESSAGE_INDENT, TAB + e.getMessage());
             return false;
         }
@@ -106,7 +118,7 @@ public class RenameCommand extends BuiltInShellCommand implements StringConstant
     	WorkspaceContext existingChild = targetContext.getChild(newName,objToRename.getType());
     	// If child exists, check the type
     	if(existingChild!=null) {
-    		print(CompletionConstants.MESSAGE_INDENT,Messages.getString("RenameCommand.cannotRename_wouldCreateDuplicate", newName)); //$NON-NLS-1$
+    		print(CompletionConstants.MESSAGE_INDENT,Messages.getString(Messages.RenameCommand.cannotRename_wouldCreateDuplicate, newName));
     		return false;
     	}
     	return true;
@@ -121,7 +133,7 @@ public class RenameCommand extends BuiltInShellCommand implements StringConstant
         	String newChildPath = parentAbsPath + FORWARD_SLASH + newShortName;
         	origObject.rename(getWorkspaceStatus().getTransaction(), newChildPath);
         } else {
-        	throw new Exception(Messages.getString("RenameCommand.cannotRename_objectDoesNotExist", origObject)); //$NON-NLS-1$
+        	throw new Exception(Messages.getString(Messages.RenameCommand.cannotRename_objectDoesNotExist, origObject));
         }
     }
 

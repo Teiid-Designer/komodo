@@ -202,17 +202,24 @@ public interface WorkspaceStatus extends StringConstants {
      */
     boolean isShowingTypeInPrompt();
 
-	/**
+    /**
      * @return current teiid model
      */
     Teiid getTeiid();
 
     /**
+     * Determine if workspace currently has a connected teiid instance
+     * @return <code>true</code> if has a connected teiid instance
+     */
+    boolean hasConnectedTeiid();
+
+    /**
      * Set the current teiid model
      *
      * @param teiid
+     * @throws Exception 
      */
-    void setTeiid(Teiid teiid);
+    void setTeiid(Teiid teiid) throws Exception;
 
 	/**
 	 * Add a WorkspaceContext Event Handler

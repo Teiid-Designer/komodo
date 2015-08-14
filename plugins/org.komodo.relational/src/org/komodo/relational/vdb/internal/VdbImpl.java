@@ -36,6 +36,7 @@ import org.komodo.repository.ObjectImpl;
 import org.komodo.repository.PropertyDescriptorImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.ExportConstants;
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Descriptor;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
@@ -957,10 +958,13 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( newName, "newName" ); //$NON-NLS-1$
-        ArgCheck.doesNotContain( newName, "/", "newName" ); //$NON-NLS-1$ //$NON-NLS-2$
 
         super.rename( transaction, newName );
-        setVdbName( transaction, newName );
+        String shortName = newName;
+        if(newName.contains(StringConstants.FORWARD_SLASH)) { 
+            shortName = newName.substring(shortName.lastIndexOf(StringConstants.FORWARD_SLASH)+1);
+        }
+        setVdbName( transaction, shortName );
     }
 
     /**

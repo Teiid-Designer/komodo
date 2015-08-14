@@ -42,9 +42,9 @@ import org.komodo.shell.api.InvalidCommandArgumentException;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
+import org.komodo.shell.util.PrintUtils;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Repository;
-import org.komodo.spi.runtime.ExecutionAdmin.ConnectivityType;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.utils.KLog;
 import org.komodo.utils.StringUtils;
@@ -95,7 +95,7 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
 	@Override
     public boolean execute() throws Exception {
 		// Make sure the correct number of args supplied
-        String subcmdArg = requiredArgument(0, Messages.getString("ShowCommand.InvalidArgMsg_SubCommand")); //$NON-NLS-1$
+        String subcmdArg = requiredArgument(0, Messages.getString(Messages.ShowCommand.InvalidArgMsg_SubCommand));
 
         // Validates the sub-command arg
         if (!validate(getArguments())) {
@@ -123,7 +123,7 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
             } else if (SUBCMD_GLOBAL.equalsIgnoreCase(subcmdArg)) {
         		printGlobal( );
             } else if (SUBCMD_PROPERTY.equalsIgnoreCase(subcmdArg)) {
-                String propName = requiredArgument(1, Messages.getString("ShowCommand.InvalidArgMsg_PropertyName")); //$NON-NLS-1$
+                String propName = requiredArgument(1, Messages.getString(Messages.ShowCommand.InvalidArgMsg_PropertyName)); 
 
             	printProperty(context,propName);
             } else if (SUBCMD_SUMMARY.equalsIgnoreCase(subcmdArg)) {
@@ -132,12 +132,12 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
 
             	printSummary(theContext);
             } else {
-                throw new InvalidCommandArgumentException(0, Messages.getString("ShowCommand.InvalidSubCommand")); //$NON-NLS-1$
+                throw new InvalidCommandArgumentException(0, Messages.getString(Messages.ShowCommand.InvalidSubCommand));
             }
         } catch (InvalidCommandArgumentException e) {
             throw e;
         } catch (Exception e) {
-            print( MESSAGE_INDENT, Messages.getString( "ShowCommand.Failure", e.getLocalizedMessage() ) ); //$NON-NLS-1$
+            print( MESSAGE_INDENT, Messages.getString( Messages.ShowCommand.Failure, e.getLocalizedMessage() ) ); 
             return false;
         }
         return true;
@@ -158,7 +158,7 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
         }
 
         if ( props.isEmpty() ) {
-            final String noPropsMsg = Messages.getString( "ShowCommand.NoPropertiesMsg", context.getType(), context.getFullName() ); //$NON-NLS-1$
+            final String noPropsMsg = Messages.getString( Messages.ShowCommand.NoPropertiesMsg, context.getType(), context.getFullName() ); 
             print( MESSAGE_INDENT, noPropsMsg );
             return;
         }
@@ -205,7 +205,7 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
         // Print properties header
         final String objType = context.getType(); // current object type
         final String objFullName = context.getFullName(); // current object name
-        final String propListHeader = Messages.getString( "ShowCommand.PropertiesHeader", objType, objFullName ); //$NON-NLS-1$
+        final String propListHeader = Messages.getString( Messages.ShowCommand.PropertiesHeader, objType, objFullName );
         print( MESSAGE_INDENT, propListHeader );
 
         final String format = getFormat( maxNameWidth, maxValueWidth );
@@ -287,41 +287,49 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
 
         // Repo info
         final Repository.Id repoId = context.getRepository().getId();
-		print(MESSAGE_INDENT,
-		      Messages.getString("ShowCommand.CurrentRepo", repoId.getUrl(), repoId.getWorkspaceName())); //$NON-NLS-1$
+        print(MESSAGE_INDENT, Messages.getString(Messages.ShowCommand.CurrentRepoName, repoId.getWorkspaceName()));
+        print(MESSAGE_INDENT, Messages.getString(Messages.ShowCommand.CurrentRepoUrl, repoId.getUrl()));
 
 		// Teiid Instance info
 		Teiid teiid = wsStatus.getTeiid();
 		if (teiid == null)
-			print(MESSAGE_INDENT, Messages.getString("ShowCommand.NoCurrentTeiid")); //$NON-NLS-1$
+			print(MESSAGE_INDENT, Messages.getString(Messages.ShowCommand.NoCurrentTeiid));
 		else {
-			TeiidInstance teiidInstance = teiid.getTeiidInstance();
+			TeiidInstance teiidInstance = teiid.getTeiidInstance(wsStatus.getTransaction());
+            String teiidName = teiid.getName(wsStatus.getTransaction());
 			String teiidUrl = teiidInstance.getUrl();
 			String teiidConnected = teiidInstance.isConnected() ? Messages.getString(Messages.ShowCommand.Connected) : Messages.getString(Messages.ShowCommand.NotConnected);
+            String currentServerText = Messages.getString(Messages.ShowCommand.serverStatusText, teiidName, teiidUrl, teiidConnected);
+            print(MESSAGE_INDENT, Messages.getString(Messages.ShowCommand.CurrentTeiid, currentServerText));
 
-			String teiidJdbcUrl = teiidInstance.getTeiidJdbcInfo().getUrl();
-			/* Only test jdbc connection if teiid instance has been connected to */
-			String teiidJdbcConnected = teiidConnected;
-			if (teiidInstance.isConnected()) {
-				teiidJdbcConnected = teiidInstance.ping(ConnectivityType.JDBC).isOK() ? Messages.getString(Messages.ShowCommand.PingOk) : Messages.getString(Messages.ShowCommand.PingFail);
-			}
-
-			String currentTeiidInst = OPEN_SQUARE_BRACKET + teiidUrl + " : " + teiidConnected + CLOSE_SQUARE_BRACKET; //$NON-NLS-1$
-			String currentTeiidJdbc = OPEN_SQUARE_BRACKET + teiidJdbcUrl + " : " + teiidJdbcConnected + CLOSE_SQUARE_BRACKET; //$NON-NLS-1$
-			print(MESSAGE_INDENT, Messages.getString("ShowCommand.CurrentTeiid", currentTeiidInst)); //$NON-NLS-1$
-			print(MESSAGE_INDENT, Messages.getString("ShowCommand.CurrentTeiidJdbc", currentTeiidJdbc)); //$NON-NLS-1$
+//			String teiidJdbcUrl = teiidInstance.getTeiidJdbcInfo().getUrl();
+//			/* Only test jdbc connection if teiid instance has been connected to */
+//			String teiidJdbcConnected = teiidConnected;
+//			if (teiidInstance.isConnected()) {
+//			    Outcome jdbcPingOutcome = null;
+//			    try {
+//			        jdbcPingOutcome = teiidInstance.ping(ConnectivityType.JDBC);
+//			    } catch (Exception ex) {
+//			        teiidJdbcConnected = Messages.getString(Messages.ShowCommand.PingFail);
+//			    }
+//			    if(jdbcPingOutcome!=null) {
+//	                teiidJdbcConnected = jdbcPingOutcome.isOK() ? Messages.getString(Messages.ShowCommand.PingOk) : Messages.getString(Messages.ShowCommand.PingFail);
+//			    }
+//			}
+			//String currentTeiidJdbc = OPEN_SQUARE_BRACKET + teiidJdbcUrl + CLOSE_SQUARE_BRACKET + " : " + OPEN_SQUARE_BRACKET + teiidJdbcConnected + CLOSE_SQUARE_BRACKET; //$NON-NLS-1$
+			//print(MESSAGE_INDENT, Messages.getString("ShowCommand.CurrentTeiidJdbc", currentTeiidJdbc)); //$NON-NLS-1$
 		}
 
 		// Current Context
 		WorkspaceContext currentContext = wsStatus.getCurrentContext();
-		print(MESSAGE_INDENT, Messages.getString("ShowCommand.CurrentContext", currentContext.getFullName())); //$NON-NLS-1$
+		print(MESSAGE_INDENT, Messages.getString(Messages.ShowCommand.CurrentContext, currentContext.getFullName()));
 	}
 
     private void printChildren( final WorkspaceContext context ) throws Exception {
         final List< WorkspaceContext > children = context.getChildren();
 
         if ( children.isEmpty() ) {
-            String noChildrenMsg = Messages.getString( "ShowCommand.noChildrenMsg", context.getType(), context.getFullName() ); //$NON-NLS-1$
+            String noChildrenMsg = Messages.getString( Messages.ShowCommand.noChildrenMsg, context.getType(), context.getFullName() );
             print( MESSAGE_INDENT, noChildrenMsg );
             return;
         }
@@ -374,7 +382,7 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
         Collections.sort( children, sorter );
 
         // Print children header
-        final String childrenHeader = Messages.getString( "ShowCommand.ChildrenHeader", context.getType(), context.getFullName() ); //$NON-NLS-1$
+        final String childrenHeader = Messages.getString( Messages.ShowCommand.ChildrenHeader, context.getType(), context.getFullName() );
         print( MESSAGE_INDENT, childrenHeader );
 
         final String format = getFormat( maxNameWidth, maxTypeWidth );
@@ -396,43 +404,15 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
 	 */
     private void printGlobal() throws Exception {
         final Properties globalProperties = getWorkspaceStatus().getProperties();
-        final Map< String, String > sorted = new TreeMap<>();
-        int maxNameWidth = DEFAULT_WIDTH;
-        int maxValueWidth = DEFAULT_WIDTH;
-
-        for ( final String propName : globalProperties.stringPropertyNames() ) {
-            if ( maxNameWidth < propName.length() ) {
-                maxNameWidth = propName.length();
-            }
-
-            String value = globalProperties.getProperty( propName );
-
-            if ( StringUtils.isBlank( value ) ) {
-                value = Messages.getString( SHELL.NO_PROPERTY_VALUE );
-            }
-
-            if ( maxValueWidth < value.length() ) {
-                maxValueWidth = value.length();
-            }
-
-            sorted.put( propName, value.toString() );
-        }
-
+        
         // Print properties header
-        final String globalPropsHeader = Messages.getString( "ShowCommand.GlobalPropertiesHeader" ); //$NON-NLS-1$
+        final String globalPropsHeader = Messages.getString( Messages.ShowCommand.GlobalPropertiesHeader ); 
         print( MESSAGE_INDENT, globalPropsHeader );
 
-        final String format = getFormat( maxNameWidth, maxValueWidth );
-        print( MESSAGE_INDENT,
-               String.format( format,
-                              Messages.getString( SHELL.PROPERTY_NAME_HEADER ),
-                              Messages.getString( SHELL.PROPERTY_VALUE_HEADER ) ) );
-        print( MESSAGE_INDENT, String.format( format, getHeaderDelimiter( maxNameWidth ), getHeaderDelimiter( maxValueWidth ) ) );
-
-        // print property name and value
-        for ( final Entry< String, String > entry : sorted.entrySet() ) {
-            print( MESSAGE_INDENT, String.format( format, entry.getKey(), entry.getValue() ) );
-        }
+        // Print the properties
+        String nameTitle = Messages.getString( SHELL.PROPERTY_NAME_HEADER );
+        String valueTitle = Messages.getString( SHELL.PROPERTY_VALUE_HEADER );
+        PrintUtils.printProperties(this, globalProperties, nameTitle, valueTitle);
     }
 
 	/**
@@ -461,7 +441,7 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
         final String format = getFormat( maxNameWidth, maxValueWidth );
 
         // Print properties header
-        String propListHeader = Messages.getString( "ShowCommand.PropertyHeader", context.getType(), context.getFullName() ); //$NON-NLS-1$
+        String propListHeader = Messages.getString( Messages.ShowCommand.PropertyHeader, context.getType(), context.getFullName() ); 
         print( MESSAGE_INDENT, propListHeader );
         print( MESSAGE_INDENT,
                String.format( format,
@@ -509,7 +489,7 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
 			// For "property", the second arg (propName) is required.
 			} else if(subCmd.equals(SUBCMD_PROPERTY)) {
 				// Second required arg is the property name.  Verify that it is valid for the current object
-		        String propName = requiredArgument(1, Messages.getString("ShowCommand.InvalidArgMsg_PropertyName")); //$NON-NLS-1$
+		        String propName = requiredArgument(1, Messages.getString(Messages.ShowCommand.InvalidArgMsg_PropertyName));
 				WorkspaceContext context = getContext();
 				if(!validatePropertyName(context, propName)) {
 					return false;
@@ -527,11 +507,11 @@ public class ShowCommand extends BuiltInShellCommand implements StringConstants 
 	private boolean validateSubCmd(String subCmd) {
 		// Validate the sub-command
 		if (subCmd.length()==0) {
-			print(MESSAGE_INDENT,Messages.getString("ShowCommand.InvalidArgMsg_SubCommand")); //$NON-NLS-1$
+			print(MESSAGE_INDENT,Messages.getString(Messages.ShowCommand.InvalidArgMsg_SubCommand));
 			return false;
 		}
 		if(!SUBCMDS.contains(subCmd)) {
-			print(MESSAGE_INDENT,Messages.getString("ShowCommand.InvalidSubCommand")); //$NON-NLS-1$
+			print(MESSAGE_INDENT,Messages.getString(Messages.ShowCommand.InvalidSubCommand));
 			return false;
 		}
 		return true;

@@ -213,11 +213,6 @@ public final class VdbImplTest extends RelationalModelTest {
     }
 
     @Test( expected = IllegalArgumentException.class )
-    public void shouldFailRenameWhenNewNameHasSlash() throws Exception {
-        this.vdb.rename( this.uow, "illegal/name" );
-    }
-
-    @Test( expected = IllegalArgumentException.class )
     public void shouldFailRenameWhenNewNameIsEmpty() throws Exception {
         this.vdb.rename( this.uow, EMPTY_STRING );
     }

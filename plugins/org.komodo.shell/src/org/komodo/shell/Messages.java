@@ -102,7 +102,6 @@ public class Messages implements StringConstants {
     }
 
     public enum CreateCommand {
-
         DEFAULT_VDB_FILE_PATH,
         FAILURE,
         MISSING_ENTRY_PATH,
@@ -126,6 +125,21 @@ public class Messages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
+    
+    public enum DeleteCommand {
+        InvalidArgMsg_ObjectPath,
+        ObjectDeleted,
+        Failure,
+        cannotDelete_objectDoesNotExist,
+        contextMustBeBelowCurrent, 
+        cantDeleteReserved,
+        cannotRename_objectDoesNotExist;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
 
     public enum StatusCommand {
         Separator,
@@ -133,6 +147,18 @@ public class Messages implements StringConstants {
         NotConnected,
         PingOk,
         PingFail;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+    
+    public enum PlayCommand {
+        InvalidArgMsg_FileName,
+        fileExecuted,
+        Failure,
+        CommandFailure;
 
         @Override
         public String toString() {
@@ -154,8 +180,23 @@ public class Messages implements StringConstants {
         TABLE_REF_SET,
         TOO_MANY_ARGS,
         UNSET_TABLE_CONSTRAINT_COLUMN_FAILED,
-        UNSET_TABLE_REF_COLUMN_FAILED;
-
+        UNSET_TABLE_REF_COLUMN_FAILED,
+        InvalidArgMsg_SubCommand,
+        InvalidArgMsg_PropertyName,
+        InvalidArgMsg_PropertyValue,
+        InvalidArgMsg_GlobalPropertyName,
+        InvalidGlobalProperty,
+        PropertySet,
+        GlobalPropertySet,
+        resetGlobalProperties,
+        InvalidSubCommand,
+        Failure,
+        onOffArg_empty,
+        onOffArg_invalid,
+        setRecordingStateMsg,
+        recordingFileNotSet,
+        recordingFileNotWriteable,
+        invalidTeiidName;
         @Override
         public String toString() {
             return getEnumName(this) + DOT + name();
@@ -163,11 +204,73 @@ public class Messages implements StringConstants {
     }
 
     public enum ShowCommand {
-        Separator,
+        InvalidArgMsg_SubCommand,
+        InvalidArgMsg_PropertyName,
+        InvalidArgMsg_ServerObjName,
+        InvalidSubCommand,
+        Failure,
+        NoPropertiesMsg,
+        PropertiesHeader,
+        PropertyHeader,
+        ChildrenHeader,
+        CurrentRepoUrl,
+        CurrentRepoName,
+        NoCurrentTeiid,
+        CurrentTeiid,
+        CurrentTeiidJdbc,
+        CurrentContext,
+        GlobalPropertiesHeader,
+        noChildrenMsg,
+        serverStatusText,
+        ServerNotConnected,
+        ServerTypeHeader,
         Connected,
         NotConnected,
         PingOk,
         PingFail;
+        
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+    
+    public enum ServerCommand {
+        InvalidArgMsg_SubCommand,
+        InvalidArgMsg_ServerObjType,
+        InvalidArgMsg_ServerObjName,
+        InvalidArgMsg_DeployServerObjType,
+        InvalidArgMsg_DeployServerObjName,
+        InvalidSubCommand,
+        InvalidServerObjectType,
+        InvalidServerDeployObjectType,
+        Failure,
+        NoTeiidDefined,
+        PropertiesHeader,
+        PropertyHeader,
+        ServerNotConnected,
+        ServerTypeHeader,
+        ServerObjDetailsHeader,
+        ObjectNameHeader,
+        AttemptingToConnect,
+        ConnectionError,
+        TeiidStatus,
+        Connected,
+        NotConnected,
+        AttemptingToDisconnect,
+        DisconnectSuccessMsg,
+        NoServerToDisconnectMsg,
+        CouldNotResolve,
+        ServerItemNotFound,
+        CanOnlyCopyDynamicVDBs,
+        VdbExportFailed,
+        VdbDeployFinished,
+        VdbUnDeployFinished,
+        VdbCopyToRepoFinished,
+        InvalidArgMsg_ServerName,
+        noTeiidInstancesDefined,
+        teiidSetOk,
+        noTeiidWithName;
 
         @Override
         public String toString() {
@@ -219,7 +322,44 @@ public class Messages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
+    
+    public enum FindCommand {
+        helpTypesHeading,
+        Failure,
+        MissingTypeArg,
+        InvalidType,
+        NoObjectsFound,
+        TypeHeader;
 
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+    
+    /**
+     * Localized messages of the {@link AddConstraintColumnCommand}.
+     */
+    public enum AddConstraintColumnCommand {
+
+        columnRefAdded,
+        columnPathNotFound,
+        error,
+        invalidColumnPath,
+        invalidColumn,
+        missingColumnPathArg;
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see java.lang.Enum#toString()
+         */
+        @Override
+        public String toString() {
+            return getEnumName( this ) + DOT + name();
+        }
+    }
+    
     /**
      * Localized messages of the {@link RemoveConstraintColumnCommand}.
      */
@@ -240,7 +380,29 @@ public class Messages implements StringConstants {
         public String toString() {
             return getEnumName( this ) + DOT + name();
         }
+    }
+    
+    /**
+     * Localized messages of the {@link RenameCommand}.
+     */
+    public enum RenameCommand {
+        InvalidArgMsg_ObjectName,
+        InvalidArgMsg_NewName,
+        ObjectRenamed,
+        Failure,
+        cannotRename_wouldCreateDuplicate,
+        cannotRename_objectDoesNotExist,
+        cannotRename_targetContextDoesNotExist;
 
+        /**
+         * {@inheritDoc}
+         *
+         * @see java.lang.Enum#toString()
+         */
+        @Override
+        public String toString() {
+            return getEnumName( this ) + DOT + name();
+        }
     }
 
     private static String getEnumName(Enum<?> enumValue) {

@@ -2,6 +2,7 @@ package org.komodo.shell.commands.core;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CompletionConstants;
@@ -38,7 +39,7 @@ public class DeleteCommand extends BuiltInShellCommand implements StringConstant
      */
     @Override
     public boolean execute() throws Exception {
-        String objPathArg = requiredArgument(0, Messages.getString("DeleteCommand.InvalidArgMsg_ObjectPath")); //$NON-NLS-1$
+        String objPathArg = requiredArgument(0, Messages.getString(Messages.DeleteCommand.InvalidArgMsg_ObjectPath));
 
 		if (!this.validate(objPathArg)) {
 			return false;
@@ -52,9 +53,9 @@ public class DeleteCommand extends BuiltInShellCommand implements StringConstant
                 getWorkspaceStatus().commit( DeleteCommand.class.getSimpleName() );
             }
             // Print message
-            print(CompletionConstants.MESSAGE_INDENT, Messages.getString("DeleteCommand.ObjectDeleted", objPathArg)); //$NON-NLS-1$
+            print(CompletionConstants.MESSAGE_INDENT, Messages.getString(Messages.DeleteCommand.ObjectDeleted, objPathArg));
         } catch (Exception e) {
-            print(CompletionConstants.MESSAGE_INDENT, Messages.getString("DeleteCommand.Failure", objPathArg)); //$NON-NLS-1$
+            print(CompletionConstants.MESSAGE_INDENT, Messages.getString(Messages.DeleteCommand.Failure, objPathArg));
             print(CompletionConstants.MESSAGE_INDENT, TAB + e.getMessage());
             return false;
         }
@@ -68,14 +69,14 @@ public class DeleteCommand extends BuiltInShellCommand implements StringConstant
 		WorkspaceContext contextToDelete = ContextUtils.getContextForPath(getWorkspaceStatus(), pathArg);
 		// Error if could not locate context
 		if (contextToDelete==null) {
-            print(CompletionConstants.MESSAGE_INDENT,Messages.getString("DeleteCommand.cannotDelete_objectDoesNotExist", pathArg)); //$NON-NLS-1$
+            print(CompletionConstants.MESSAGE_INDENT,Messages.getString(Messages.DeleteCommand.cannotDelete_objectDoesNotExist, pathArg));
 			return false;
 		}
 
 		int contextLevel = ContextUtils.getContextLevel(contextToDelete);
 		// Cannot delete the workspace!
 		if(contextLevel<=0) {
-            print(CompletionConstants.MESSAGE_INDENT,Messages.getString("DeleteCommand.cantDeleteReserved",contextToDelete.getFullName())); //$NON-NLS-1$
+            print(CompletionConstants.MESSAGE_INDENT,Messages.getString(Messages.DeleteCommand.cantDeleteReserved,contextToDelete.getFullName()));
 			return false;
 		}
 
@@ -92,9 +93,18 @@ public class DeleteCommand extends BuiltInShellCommand implements StringConstant
         KomodoObject objToDelete = contextToDelete.getKomodoObj();
 
         if( objToDelete != null ) {
+            // If teiid object is being deleted, check if it is set as the default server.  Unset default if necessary
+            Teiid teiid = wkspManager.resolve(transaction, objToDelete, Teiid.class);
+            if( teiid != null ) {
+                Teiid defaultTeiid = wsStatus.getTeiid();
+                if(defaultTeiid!=null && defaultTeiid.getName(transaction).equals(teiid.getName(transaction))) {
+                    wsStatus.setTeiid(null);
+                }
+            }
+            
             wkspManager.delete(transaction, objToDelete);
         } else {
-        	throw new Exception(Messages.getString("DeleteCommand.cannotDelete_objectDoesNotExist", objPath)); //$NON-NLS-1$
+        	throw new Exception(Messages.getString(Messages.DeleteCommand.cannotDelete_objectDoesNotExist, objPath));
         }
     }
 

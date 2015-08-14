@@ -591,16 +591,40 @@ public class TCExecutionAdmin implements ExecutionAdmin {
     	// Clears any cached data source or translator info prior to reloading
     	this.admin.refresh();
     	
-        // populate data source type names set
-        refreshDataSourceTypes();
+    	// Refresh each type.  Each call is wrapped in a try catch, so an early exception will not prevent
+    	// refresh of the subsequent types
+    	
+        // populate data source type names
+    	Exception resultException = null;
+        try {
+            refreshDataSourceTypes();
+        } catch (Exception ex) {
+            resultException = ex;
+        }
 
-        refreshDataSources();
+        // populate data sources
+        try {
+            refreshDataSources();
+        } catch (Exception ex) {
+            resultException = ex;
+        }
         
-        // populate translator map
-        refreshTranslators();
+        // populate translators
+        try {
+            refreshTranslators();
+        } catch (Exception ex) {
+            resultException = ex;
+        }
 
         // populate VDBs and source bindings
-        refreshVDBs();
+        try {
+            refreshVDBs();
+        } catch (Exception ex) {
+            resultException = ex;
+        }
+        
+        // Throw the first exception if any...
+        if(resultException!=null) throw resultException;
 
         // notify listeners
         this.getEventManager().notifyListeners(ExecutionConfigurationEvent.createTeiidRefreshEvent(this.teiidInstance));

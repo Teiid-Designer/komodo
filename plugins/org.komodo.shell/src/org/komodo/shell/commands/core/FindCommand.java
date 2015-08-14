@@ -62,11 +62,11 @@ public final class FindCommand extends BuiltInShellCommand {
      */
     @Override
     public boolean execute() throws Exception {
-        final String typeArg = requiredArgument( 0, Messages.getString( "FindCommand.MissingTypeArg" ) ); //$NON-NLS-1$
+        final String typeArg = requiredArgument( 0, Messages.getString( Messages.FindCommand.MissingTypeArg ) );
         final KomodoType queryType = getQueryType( typeArg );
 
         if ( queryType == null ) {
-            print( MESSAGE_INDENT, Messages.getString( "FindCommand.InvalidType", typeArg ) ); //$NON-NLS-1$
+            print( MESSAGE_INDENT, Messages.getString( Messages.FindCommand.InvalidType, typeArg ) );
             return false;
         }
 
@@ -80,7 +80,7 @@ public final class FindCommand extends BuiltInShellCommand {
             // print results
             printResults( queryType, foundObjectPaths );
         } catch ( final Exception e ) {
-            print( MESSAGE_INDENT, Messages.getString( "FindCommand.Failure", e.getLocalizedMessage() ) ); //$NON-NLS-1$
+            print( MESSAGE_INDENT, Messages.getString( Messages.FindCommand.Failure, e.getLocalizedMessage() ) );
             return false;
         }
 
@@ -98,7 +98,7 @@ public final class FindCommand extends BuiltInShellCommand {
         final int detailIndent = ( indent * 2 );
 
         print();
-        print( detailIndent, Messages.getString( "FindCommand.helpTypesHeading" ) ); //$NON-NLS-1$
+        print( detailIndent, Messages.getString( Messages.FindCommand.helpTypesHeading ) );
 
         final List< String > types = KomodoType.getTypes();
 
@@ -137,10 +137,10 @@ public final class FindCommand extends BuiltInShellCommand {
     private void printResults( final KomodoType queryType,
                                final String[] foundObjectPaths ) throws Exception {
         if ( foundObjectPaths.length == 0 ) {
-            print( MESSAGE_INDENT, Messages.getString( "FindCommand.NoObjectsFound", queryType.getType() ) ); //$NON-NLS-1$
+            print( MESSAGE_INDENT, Messages.getString( Messages.FindCommand.NoObjectsFound, queryType.getType() ) );
         } else {
             // print header
-            final String header = Messages.getString( "FindCommand.TypeHeader", queryType.getType() ); //$NON-NLS-1$
+            final String header = Messages.getString( Messages.FindCommand.TypeHeader, queryType.getType() );
             print( MESSAGE_INDENT, header );
 
             // print paths of found objects

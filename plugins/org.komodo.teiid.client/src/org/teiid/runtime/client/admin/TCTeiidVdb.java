@@ -1,14 +1,19 @@
 package org.teiid.runtime.client.admin;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.TeiidVdb;
 import org.teiid.adminapi.Model;
 import org.teiid.adminapi.VDB;
+import org.teiid.adminapi.impl.VDBMetaData;
+import org.teiid.adminapi.impl.VDBMetadataParser;
 import org.teiid.core.util.ArgCheck;
+import org.teiid.runtime.client.Messages;
 
 /**
  *
@@ -16,12 +21,14 @@ import org.teiid.core.util.ArgCheck;
 public class TCTeiidVdb implements TeiidVdb, Comparable<TCTeiidVdb> {
     
     private static final String PREVIEW = "preview"; //$NON-NLS-1$
+    private static final String DEPLOYMENT_NAME = "deployment-name"; //$NON-NLS-1$
     
     private final VDB vdb;
 
     private final TeiidInstance teiidInstance;
 
     private final boolean isPreview;
+    private final String deploymentName;
 
     public TCTeiidVdb( VDB vdb,
                      TeiidInstance teiidInstance ) {
@@ -31,6 +38,7 @@ public class TCTeiidVdb implements TeiidVdb, Comparable<TCTeiidVdb> {
         this.vdb = vdb;
         this.teiidInstance = teiidInstance;
         isPreview = Boolean.parseBoolean(vdb.getProperties().getProperty(PREVIEW));
+        deploymentName = vdb.getProperties().getProperty(DEPLOYMENT_NAME);
     }
 
     /**
@@ -85,7 +93,7 @@ public class TCTeiidVdb implements TeiidVdb, Comparable<TCTeiidVdb> {
 
     @Override
     public String getDeployedName() {
-        return getName();
+        return deploymentName;
     }
 
     /* (non-Javadoc)
@@ -104,6 +112,18 @@ public class TCTeiidVdb implements TeiidVdb, Comparable<TCTeiidVdb> {
         return isPreview;
     }
 
+    /* (non-Javadoc)
+     * @see org.teiid.designer.runtime.impl.ITeiidVdb#isXmlDeployment()
+     */
+    @Override
+    public boolean isXmlDeployment() {
+        boolean isXml = false;
+        if(vdb instanceof VDBMetaData) {
+            isXml = ((VDBMetaData)vdb).isXmlDeployment();
+        }
+        return isXml;
+    }
+    
     @Override
     public boolean isActive() {
         return vdb.getStatus().equals(VDB.Status.ACTIVE);
@@ -155,5 +175,27 @@ public class TCTeiidVdb implements TeiidVdb, Comparable<TCTeiidVdb> {
     @Override
     public String getPropertyValue(String key) {
         return vdb.getPropertyValue(key);
+    }
+
+    @Override
+    public Properties getProperties( ) {
+        return vdb.getProperties();
+    }
+    
+    @Override
+    public String export() throws Exception {
+        String vdbStr = null;
+        if(vdb instanceof VDBMetaData) {
+            VDBMetaData vdbMeta = (VDBMetaData)vdb;
+            if(vdbMeta.isXmlDeployment()) {
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                VDBMetadataParser.marshell((VDBMetaData)vdb, out);
+
+                vdbStr = new String(out.toByteArray());
+            } else {
+                throw new Exception(Messages.getString(Messages.TeiidVdb.canOnlyExportDynamicVdbs));
+            }
+        }
+        return vdbStr;
     }
 }

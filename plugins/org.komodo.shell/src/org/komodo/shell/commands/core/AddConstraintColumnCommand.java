@@ -65,13 +65,13 @@ public final class AddConstraintColumnCommand extends BuiltInShellCommand {
     public boolean execute() throws Exception {
         try {
             final String columnPathArg = requiredArgument( 0,
-                                                           Messages.getString( "AddConstraintColumnCommand.missingColumnPathArg" ) ); //$NON-NLS-1$
+                                                           Messages.getString( Messages.AddConstraintColumnCommand.missingColumnPathArg ) );
 
             // get reference of the column at the specified path
             final WorkspaceContext columnContext = ContextUtils.getContextForPath( getWorkspaceStatus(), columnPathArg );
 
             if ( columnContext == null ) {
-                print( MESSAGE_INDENT, Messages.getString( "AddConstraintColumnCommand.columnPathNotFound", columnPathArg ) ); //$NON-NLS-1$
+                print( MESSAGE_INDENT, Messages.getString( Messages.AddConstraintColumnCommand.columnPathNotFound, columnPathArg ) );
                 return false;
             }
 
@@ -90,7 +90,7 @@ public final class AddConstraintColumnCommand extends BuiltInShellCommand {
                 if ( parentTable.equals( column.getParent( transaction ) ) ) {
                     constraint.addColumn( transaction, ( Column )column );
                 } else {
-                    throw new Exception( Messages.getString( "AddConstraintColumnCommand.invalidColumn", //$NON-NLS-1$
+                    throw new Exception( Messages.getString( Messages.AddConstraintColumnCommand.invalidColumn,
                                                              ContextUtils.convertPathToDisplayPath( column.getAbsolutePath() ),
                                                              constraint.getName( transaction ) ) );
                 }
@@ -101,15 +101,15 @@ public final class AddConstraintColumnCommand extends BuiltInShellCommand {
                 }
 
                 print( MESSAGE_INDENT,
-                       Messages.getString( "AddConstraintColumnCommand.columnRefAdded", columnPathArg, getContext().getFullName() ) ); //$NON-NLS-1$
+                       Messages.getString( Messages.AddConstraintColumnCommand.columnRefAdded, columnPathArg, getContext().getFullName() ) );
 
                 return true;
             } else {
-                print( MESSAGE_INDENT, Messages.getString( "AddConstraintColumnCommand.invalidColumnPath", columnPathArg ) ); //$NON-NLS-1$
+                print( MESSAGE_INDENT, Messages.getString( Messages.AddConstraintColumnCommand.invalidColumnPath, columnPathArg ) );
                 return false;
             }
         } catch ( final Exception e ) {
-            print( MESSAGE_INDENT, Messages.getString( "AddConstraintColumnCommand.error", e.getLocalizedMessage() ) ); //$NON-NLS-1$
+            print( MESSAGE_INDENT, Messages.getString( Messages.AddConstraintColumnCommand.error, e.getLocalizedMessage() ) );
             return false;
         }
     }
