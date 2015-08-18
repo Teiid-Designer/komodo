@@ -12,6 +12,7 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
@@ -94,10 +95,11 @@ public class DeleteCommand extends BuiltInShellCommand implements StringConstant
 
         if( objToDelete != null ) {
             // If teiid object is being deleted, check if it is set as the default server.  Unset default if necessary
-            Teiid teiid = wkspManager.resolve(transaction, objToDelete, Teiid.class);
-            if( teiid != null ) {
-                Teiid defaultTeiid = wsStatus.getTeiid();
-                if(defaultTeiid!=null && defaultTeiid.getName(transaction).equals(teiid.getName(transaction))) {
+            KomodoType kType = contextToDelete.getKomodoObj().getTypeIdentifier(wsStatus.getTransaction());
+            if (KomodoType.TEIID == kType) {
+                final Teiid defaultTeiid = wsStatus.getTeiid();
+
+                if ((defaultTeiid != null) && defaultTeiid.getName(transaction).equals(contextToDelete.getName())) {
                     wsStatus.setTeiid(null);
                 }
             }

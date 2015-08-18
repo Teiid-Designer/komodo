@@ -147,6 +147,7 @@ public class ServerCommand extends BuiltInShellCommand implements StringConstant
                         wStatus.setTeiid(theTeiid);
                         teiidFound = true;
                         print(CompletionConstants.MESSAGE_INDENT, Messages.getString(Messages.ServerCommand.teiidSetOk, teiidName));
+                        break;
                     }
                 }
 
@@ -198,10 +199,8 @@ public class ServerCommand extends BuiltInShellCommand implements StringConstant
                 // Plural type - shows names of all
                 if(SERVER_OBJ_TYPES_PLURAL.contains(serverObjType.toLowerCase())) {
                     printServerObjectNames(wsStatus,serverObjType);
-                }
-                
                 // Singular type - requires name of the object, then shows object properties
-                if(SERVER_OBJ_TYPES_SINGULAR.contains(serverObjType.toLowerCase())) {
+                } else if(SERVER_OBJ_TYPES_SINGULAR.contains(serverObjType.toLowerCase())) {
                     String serverObjName = requiredArgument(2, Messages.getString(Messages.ServerCommand.InvalidArgMsg_ServerObjName));
                     printServerObjectDetails(wsStatus,serverObjType,serverObjName);
                 }
@@ -438,9 +437,9 @@ public class ServerCommand extends BuiltInShellCommand implements StringConstant
         if(vdbModels.isEmpty()) {
             print(MESSAGE_INDENT, "No models in this VDB"); //$NON-NLS-1$
         } else {
-            List modelList = null;
+            List<String> modelList = null;
             if(vdbModels instanceof List) {
-                modelList = (List)vdbModels;
+                modelList = (List<String>)vdbModels;
             } else {
                 modelList = new ArrayList<String>(vdbModels);
             }

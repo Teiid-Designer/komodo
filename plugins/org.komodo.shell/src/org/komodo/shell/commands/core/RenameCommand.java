@@ -80,11 +80,10 @@ public class RenameCommand extends BuiltInShellCommand implements StringConstant
 
         try {
             // If teiid object was renamed, check if it is set as the default server.  unset default if necessary
-            KomodoObject kObject = objContext.getKomodoObj();
-            Teiid teiid = objContext.getWorkspaceManager().resolve(wsStatus.getTransaction(), kObject, Teiid.class);
-            if( teiid != null ) {
-                Teiid defaultTeiid = wsStatus.getTeiid();
-                if(defaultTeiid!=null && defaultTeiid.getName(wsStatus.getTransaction()).equals(teiid.getName(wsStatus.getTransaction()))) {
+            if (KomodoType.TEIID == kType) {
+                final Teiid defaultTeiid = wsStatus.getTeiid();
+
+                if ((defaultTeiid != null) && defaultTeiid.getName(wsStatus.getTransaction()).equals(objContext.getName())) {
                     wsStatus.setTeiid(null);
                 }
             }
