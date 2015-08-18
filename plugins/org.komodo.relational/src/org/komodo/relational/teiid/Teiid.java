@@ -44,9 +44,10 @@ public interface Teiid extends RelationalObject {
     KomodoType IDENTIFIER = KomodoType.TEIID;
 
     /**
+     * @param uow the transaction
      * @return the teiid instance
      */
-    TeiidInstance getTeiidInstance();
+    TeiidInstance getTeiidInstance(UnitOfWork uow);
 
     /**
      * @param uow

@@ -88,14 +88,14 @@ public class SetCommand extends BuiltInShellCommand {
      */
     @Override
     public boolean execute() throws Exception {
-        String subcmdArg = requiredArgument(0, Messages.getString("SetCommand.InvalidArgMsg_SubCommand")); //$NON-NLS-1$
+        String subcmdArg = requiredArgument(0, Messages.getString(Messages.SetCommand.InvalidArgMsg_SubCommand));
 
         try {
         	// Set property
         	if (SUBCMD_PROPERTY.equalsIgnoreCase(subcmdArg)) {
         		// property name and value are required
-        		String propNameArg = requiredArgument(1, Messages.getString("SetCommand.InvalidArgMsg_PropertyName")); //$NON-NLS-1$
-        		String propValueArg = requiredArgument(2, Messages.getString("SetCommand.InvalidArgMsg_PropertyValue")); //$NON-NLS-1$
+        		String propNameArg = requiredArgument(1, Messages.getString(Messages.SetCommand.InvalidArgMsg_PropertyName));
+        		String propValueArg = requiredArgument(2, Messages.getString(Messages.SetCommand.InvalidArgMsg_PropertyValue));
         		// path is optional.  if path is not included, current context is assumed.
         		String pathArg = optionalArgument(3);
 
@@ -122,32 +122,32 @@ public class SetCommand extends BuiltInShellCommand {
                 }
 
                 // Print message
-        		print(MESSAGE_INDENT, Messages.getString("SetCommand.PropertySet", propNameArg)); //$NON-NLS-1$
+        		print(MESSAGE_INDENT, Messages.getString(Messages.SetCommand.PropertySet, propNameArg));
         	} else if (SUBCMD_GLOBAL.equalsIgnoreCase(subcmdArg)) {
         		// property name and value are required
-        		String propNameArg = requiredArgument(1, Messages.getString("SetCommand.InvalidArgMsg_GlobalPropertyName")); //$NON-NLS-1$
+        		String propNameArg = requiredArgument(1, Messages.getString(Messages.SetCommand.InvalidArgMsg_GlobalPropertyName));
         		String propValueArg = null;
 
                 if ( RESET_GLOBAL.equals( propNameArg.toLowerCase() ) ) {
                     getWorkspaceStatus().resetProperties();
-                    print( MESSAGE_INDENT, Messages.getString( "SetCommand.resetGlobalProperties" ) ); //$NON-NLS-1$
+                    print( MESSAGE_INDENT, Messages.getString( Messages.SetCommand.resetGlobalProperties ) );
                 } else {
-                    propValueArg = requiredArgument( 2, Messages.getString( "SetCommand.InvalidArgMsg_PropertyValue" ) ); //$NON-NLS-1$
+                    propValueArg = requiredArgument( 2, Messages.getString( Messages.SetCommand.InvalidArgMsg_PropertyValue ) );
 
                     // validate global property name and value
                     final String errorMsg = getWorkspaceStatus().validateGlobalPropertyValue( propNameArg, propValueArg );
 
                     if ( !StringUtils.isEmpty( errorMsg ) ) {
-                        print( MESSAGE_INDENT, Messages.getString( "SetCommand.InvalidGlobalProperty", errorMsg ) ); //$NON-NLS-1$
+                        print( MESSAGE_INDENT, Messages.getString( Messages.SetCommand.InvalidGlobalProperty, errorMsg ) );
                         return false;
                     }
 
                     // Set the property
                     setGlobalProperty( propNameArg, propValueArg );
-                    print( MESSAGE_INDENT, Messages.getString( "SetCommand.GlobalPropertySet", propNameArg ) ); //$NON-NLS-1$
+                    print( MESSAGE_INDENT, Messages.getString( Messages.SetCommand.GlobalPropertySet, propNameArg ) );
                 }
         	} else if (SUBCMD_RECORD.equalsIgnoreCase(subcmdArg)) {
-        		String onOffArg = requiredArgument(1, Messages.getString("SetCommand.onOffArg_empty")); //$NON-NLS-1$
+        		String onOffArg = requiredArgument(1, Messages.getString(Messages.SetCommand.onOffArg_empty));
 
         		if (!this.validateRecord(onOffArg)) {
         			return false;
@@ -163,7 +163,7 @@ public class SetCommand extends BuiltInShellCommand {
         		Date d = new Date();
         		String rState = wsStatus.getRecordingStatus() ? ON : OFF;
         		String rFile = wsStatus.getRecordingOutputFile().getCanonicalPath();
-        		String stateChangedMsg = Messages.getString("SetCommand.setRecordingStateMsg",rState,d.toString(),rFile); //$NON-NLS-1$
+        		String stateChangedMsg = Messages.getString(Messages.SetCommand.setRecordingStateMsg,rState,d.toString(),rFile);
 
                 print(MESSAGE_INDENT,stateChangedMsg);
 
@@ -171,12 +171,12 @@ public class SetCommand extends BuiltInShellCommand {
 
                 return true;
         	} else {
-        		throw new InvalidCommandArgumentException(0, Messages.getString("SetCommand.InvalidSubCommand")); //$NON-NLS-1$
+        		throw new InvalidCommandArgumentException(0, Messages.getString(Messages.SetCommand.InvalidSubCommand));
         	}
         } catch (InvalidCommandArgumentException e) {
             throw e;
         } catch (Exception e) {
-            print( MESSAGE_INDENT, Messages.getString( "SetCommand.Failure", e.getLocalizedMessage() ) ); //$NON-NLS-1$
+            print( MESSAGE_INDENT, Messages.getString( Messages.SetCommand.Failure, e.getLocalizedMessage() ) );
             return false;
         }
         return true;
@@ -250,26 +250,26 @@ public class SetCommand extends BuiltInShellCommand {
 	protected boolean validateRecord(String onOffArg) {
 		// Check for empty arg
 		if(StringUtils.isEmpty(onOffArg)) {
-            print(MESSAGE_INDENT,Messages.getString("SetCommand.onOffArg_empty")); //$NON-NLS-1$
+            print(MESSAGE_INDENT,Messages.getString(Messages.SetCommand.onOffArg_empty));
 			return false;
 		}
 
 		// Check for invalid arg
 		if(!onOffArg.equalsIgnoreCase(ON) && !onOffArg.equalsIgnoreCase(OFF)) {
-            print(MESSAGE_INDENT,Messages.getString("SetCommand.onOffArg_invalid")); //$NON-NLS-1$
+            print(MESSAGE_INDENT,Messages.getString(Messages.SetCommand.onOffArg_invalid));
 			return false;
 		}
 
 		// If verify that global file var was set.
 		String recordingFileStr = getWorkspaceStatus().getProperties().getProperty(WorkspaceStatus.RECORDING_FILE_KEY);
 		if(StringUtils.isEmpty(recordingFileStr)) {
-			print(MESSAGE_INDENT,Messages.getString("SetCommand.recordingFileNotSet")); //$NON-NLS-1$
+			print(MESSAGE_INDENT,Messages.getString(Messages.SetCommand.recordingFileNotSet));
 			return false;
 		} else {
 			File recordingFile = getWorkspaceStatus().getRecordingOutputFile();
 			if(recordingFile!=null && recordingFile.exists()) {
 				if(!recordingFile.canWrite()) {
-					print(MESSAGE_INDENT,Messages.getString("SetCommand.recordingFileNotWriteable",recordingFile)); //$NON-NLS-1$
+					print(MESSAGE_INDENT,Messages.getString(Messages.SetCommand.recordingFileNotWriteable,recordingFile));
 					return false;
 				}
 			}

@@ -53,7 +53,7 @@ public class ExportCommand extends BuiltInShellCommand implements StringConstant
      */
     @Override
     public boolean execute() throws Exception {
-        String subcmdArg = requiredArgument(0, Messages.getString("ExportCommand.InvalidArgMsgSubCommand")); //$NON-NLS-1$
+        String subcmdArg = requiredArgument(0, Messages.getString(Messages.ExportCommand.InvalidArgMsgSubCommand));
 
         String objPathArg = requiredArgument(1, Messages.getString(Messages.ExportCommand.InvalidArgMsgObjectName)); 
         String filePathArg = requiredArgument(2, Messages.getString(Messages.ExportCommand.InvalidArgMsgOutputFileName));

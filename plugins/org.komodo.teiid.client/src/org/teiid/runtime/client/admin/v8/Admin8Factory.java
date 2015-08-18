@@ -224,6 +224,8 @@ public class Admin8Factory {
     	private Set<String> deployedResourceAdaptorNames;
     	private HashSet<String> installedJdbcDrivers;
     	private HashMap<String, String> connectionFactoryNames;
+    	private Collection<String> dsNames;
+    	private Collection<String> xaDsNames;
 
 
         /**
@@ -257,6 +259,8 @@ public class Admin8Factory {
         	deployedResourceAdaptorNames = null;
         	installedJdbcDrivers = null;
         	connectionFactoryNames = null;
+        	dsNames = null;
+        	xaDsNames = null;
 			
 		}
 
@@ -600,20 +604,18 @@ public class Admin8Factory {
 
 			Properties dsProperties = new Properties();
 
-			// check regular data-source
-			cliCall("read-resource",
-					new String[] { "subsystem", "datasources", "data-source", deployedName}, null,
-					new DataSourceProperties(dsProperties));
-
-			// check xa connections
-			if (dsProperties.isEmpty()) {
+            // Regular DataSource
+			if(getDSNames().contains(deployedName)) {
+			    cliCall("read-resource",
+			            new String[] { "subsystem", "datasources", "data-source", deployedName}, null,
+			            new DataSourceProperties(dsProperties));
+			// Xa DataSource
+			} else if(getXaDSNames().contains(deployedName)) {
 				cliCall("read-resource",
 						new String[] {"subsystem", "datasources", "xa-data-source", deployedName}, null,
 						new DataSourceProperties(dsProperties));
-			}
-
-			// check connection factories
-			if (dsProperties.isEmpty()) {
+			// Connection Factory
+			} else if(getConnectionFactoryNames().keySet().contains(deployedName)) {
 				Map<String, String> raDSMap = getConnectionFactoryNames();
 				// deployed rar name, may be it is == deployedName or if server restarts it will be rar name or rar->[1..n] name
 				String rarName = raDSMap.get(deployedName);
@@ -1014,8 +1016,8 @@ public class Admin8Factory {
 		public Collection<String> getDataSourceNames() throws AdminException {
 			if( this.dataSourceNames == null ) {
 				Set<String> datasourceNames = new HashSet<String>();
-				datasourceNames.addAll(getChildNodeNames("datasources", "data-source"));
-				datasourceNames.addAll(getChildNodeNames("datasources", "xa-data-source"));
+				datasourceNames.addAll(getDSNames());
+				datasourceNames.addAll(getXaDSNames());
 				datasourceNames.addAll(getConnectionFactoryNames().keySet());
 	
 				dataSourceNames = new HashSet<String>();
@@ -1031,6 +1033,22 @@ public class Admin8Factory {
 	        return this.dataSourceNames;
 		}
 
+        private Collection<String> getDSNames() throws AdminException {
+            if( this.dsNames == null ) {
+                dsNames = new HashSet<String>();
+                dsNames.addAll(getChildNodeNames("datasources", "data-source"));
+            }
+            return dsNames;
+        }
+
+        private Collection<String> getXaDSNames() throws AdminException {
+            if( this.xaDsNames == null ) {
+                xaDsNames = new HashSet<String>();
+                xaDsNames.addAll(getChildNodeNames("datasources", "xa-data-source"));
+            }
+            return xaDsNames;
+        }
+        
 		private Map<String, String> getConnectionFactoryNames() throws AdminException {
 			if( this.connectionFactoryNames == null ) {
 				connectionFactoryNames = new HashMap<String, String>();

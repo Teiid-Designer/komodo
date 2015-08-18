@@ -40,7 +40,7 @@ public class PlayCommand  extends BuiltInShellCommand implements StringConstants
 	 */
 	@Override
 	public boolean execute() throws Exception {
-        String fileNameArg = requiredArgument(0, Messages.getString("PlayCommand.InvalidArgMsg_FileName")); //$NON-NLS-1$
+        String fileNameArg = requiredArgument(0, Messages.getString(Messages.PlayCommand.InvalidArgMsg_FileName));
 
         // Validate the supplied path
         boolean validFile = validateReadableFileArg(fileNameArg);
@@ -48,9 +48,9 @@ public class PlayCommand  extends BuiltInShellCommand implements StringConstants
         
         try {
         	playFile(fileNameArg);
-            print(CompletionConstants.MESSAGE_INDENT, Messages.getString("PlayCommand.fileExecuted", fileNameArg)); //$NON-NLS-1$
+            print(CompletionConstants.MESSAGE_INDENT, Messages.getString(Messages.PlayCommand.fileExecuted, fileNameArg));
         } catch (Exception e) {
-            print(CompletionConstants.MESSAGE_INDENT, Messages.getString("PlayCommand.Failure", fileNameArg)); //$NON-NLS-1$
+            print(CompletionConstants.MESSAGE_INDENT, Messages.getString(Messages.PlayCommand.Failure, fileNameArg));
             print(CompletionConstants.MESSAGE_INDENT, TAB + e.getMessage());
             return false;
         }
@@ -81,7 +81,7 @@ public class PlayCommand  extends BuiltInShellCommand implements StringConstants
 			final boolean success = command.execute();
 
             if ( !success && reader.isBatch() ) {
-                throw new Exception( Messages.getString( "PlayCommand.CommandFailure", command ) ); //$NON-NLS-1$
+                throw new Exception( Messages.getString( Messages.PlayCommand.CommandFailure, command ) );
             }
 		}
 	}

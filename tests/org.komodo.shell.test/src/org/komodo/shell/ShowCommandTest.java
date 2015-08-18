@@ -53,7 +53,7 @@ public class ShowCommandTest extends AbstractCommandTest {
     	// make sure repository URL and workspace appear, no Teiid is set, and current context path
     	String writerOutput = getCommandOutput();
         assertTrue(writerOutput.contains("test-local-repository-in-memory-config.json"));
-        assertTrue(writerOutput.contains("Workspace : komodoLocalWorkspace"));
+        assertTrue(writerOutput.contains("Name : komodoLocalWorkspace"));
         assertTrue(writerOutput.contains("None set"));
         assertTrue(writerOutput.contains("/workspace"));
 
@@ -69,7 +69,7 @@ public class ShowCommandTest extends AbstractCommandTest {
         // make sure repository URL and workspace appear, no Teiid is set, and current context path
         String writerOutput = getCommandOutput();
         assertTrue(writerOutput.contains("test-local-repository-in-memory-config.json"));
-        assertTrue(writerOutput.contains("Workspace : komodoLocalWorkspace"));
+        assertTrue(writerOutput.contains("Name : komodoLocalWorkspace"));
         assertTrue(writerOutput.contains("None set"));
         assertTrue(writerOutput.contains("/workspace/MyVdb/MyModel"));
 

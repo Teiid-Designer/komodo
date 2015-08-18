@@ -185,6 +185,9 @@ public class ImportCommand extends BuiltInShellCommand {
             			// Delete the VDB with filename that was already created
                         WorkspaceContext vdbContext = parentContext.getChild(vdbFile.getName(), KomodoType.VDB.getType());
                         deleteContext(vdbContext);
+                        if ( isAutoCommit() ) {
+                            wsStatus.commit( ImportCommand.class.getSimpleName() );
+                        }
             		} else {
             			theVdb.rename(wsStatus.getTransaction(), vdbName);
 

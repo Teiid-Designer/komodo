@@ -92,6 +92,16 @@ public class Messages {
     }
 
     @SuppressWarnings( "javadoc" )
+    public enum TeiidVdb {
+        canOnlyExportDynamicVdbs;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT +  name();
+        }
+    }
+    
+    @SuppressWarnings( "javadoc" )
     public enum VDBMetadata {
         description_describe,
         vdb_name_describe,
@@ -173,6 +183,23 @@ public class Messages {
         allow_execute_describe,
         allow_alter_describe,
         allow_language_describe;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+    
+    @SuppressWarnings( "javadoc" )
+    public enum VDBMetadataParser {
+
+        unexpected_element1,
+        unexpected_element2,
+        unexpected_element3,
+        unexpected_element4,
+        unexpected_element5,
+        unexpected_element6,
+        unexpected_element7;
 
         @Override
         public String toString() {

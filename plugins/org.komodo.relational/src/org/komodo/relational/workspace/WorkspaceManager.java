@@ -67,7 +67,7 @@ public class WorkspaceManager extends RelationalObjectImpl {
     /**
      * The allowed child types.
      */
-    private static final KomodoType[] CHILD_TYPES = new KomodoType[] { Vdb.IDENTIFIER, Schema.IDENTIFIER };
+    private static final KomodoType[] CHILD_TYPES = new KomodoType[] { Vdb.IDENTIFIER, Schema.IDENTIFIER, Teiid.IDENTIFIER };
 
     /**
      * The type identifier.

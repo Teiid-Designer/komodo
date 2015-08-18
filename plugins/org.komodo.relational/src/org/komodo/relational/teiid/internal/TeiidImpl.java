@@ -166,7 +166,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
         @Override
         public int getPort() {
             try {
-                return getJdbcPort(null);
+                return getJdbcPort(transaction);
             } catch (KException ex) {
                 KEngine.getInstance().getErrorHandler().error(ex);
                 return DEFAULT_PORT;
@@ -176,7 +176,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
         @Override
         public void setPort( int port ) {
             try {
-                setJdbcPort(null, port);
+                setJdbcPort(transaction, port);
             } catch (KException ex) {
                 KEngine.getInstance().getErrorHandler().error(ex);
             }
@@ -185,7 +185,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
         @Override
         public String getUsername() {
             try {
-                return getJdbcUsername(null);
+                return getJdbcUsername(transaction);
             } catch (KException ex) {
                 KEngine.getInstance().getErrorHandler().error(ex);
                 return DEFAULT_JDBC_USERNAME;
@@ -195,7 +195,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
         @Override
         public void setUsername( String userName ) {
             try {
-                setJdbcUsername(null, userName);
+                setJdbcUsername(transaction, userName);
             } catch (KException ex) {
                 KEngine.getInstance().getErrorHandler().error(ex);
             }
@@ -204,7 +204,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
         @Override
         public String getPassword() {
             try {
-                return getJdbcPassword(null);
+                return getJdbcPassword(transaction);
             } catch (KException ex) {
                 KEngine.getInstance().getErrorHandler().error(ex);
                 return DEFAULT_JDBC_PASSWORD;
@@ -214,7 +214,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
         @Override
         public void setPassword( String password ) {
             try {
-                setJdbcPassword(null, password);
+                setJdbcPassword(transaction, password);
             } catch (KException ex) {
                 KEngine.getInstance().getErrorHandler().error(ex);
             }
@@ -223,7 +223,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
         @Override
         public boolean isSecure() {
             try {
-                return isJdbcSecure(null);
+                return isJdbcSecure(transaction);
             } catch (KException ex) {
                 KEngine.getInstance().getErrorHandler().error(ex);
                 return DEFAULT_SECURE;
@@ -233,7 +233,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
         @Override
         public void setSecure( boolean secure ) {
             try {
-                setJdbcSecure(null, secure);
+                setJdbcSecure(transaction, secure);
             } catch (KException ex) {
                 KEngine.getInstance().getErrorHandler().error(ex);
             }
@@ -271,7 +271,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
         @Override
         public int getPort() {
             try {
-                return getAdminPort(null);
+                return getAdminPort(transaction);
             } catch (KException ex) {
                 KEngine.getInstance().getErrorHandler().error(ex);
                 return DEFAULT_PORT;
@@ -281,7 +281,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
         @Override
         public void setPort( int port ) {
             try {
-                setAdminPort(null, port);
+                setAdminPort(transaction, port);
             } catch (KException ex) {
                 KEngine.getInstance().getErrorHandler().error(ex);
             }
@@ -290,7 +290,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
         @Override
         public String getUsername() {
             try {
-                return getAdminUser(null);
+                return getAdminUser(transaction);
             } catch (KException ex) {
                 KEngine.getInstance().getErrorHandler().error(ex);
                 return DEFAULT_ADMIN_USERNAME;
@@ -300,7 +300,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
         @Override
         public void setUsername( String userName ) {
             try {
-                setAdminUser(null, userName);
+                setAdminUser(transaction, userName);
             } catch (KException ex) {
                 KEngine.getInstance().getErrorHandler().error(ex);
             }
@@ -309,7 +309,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
         @Override
         public String getPassword() {
             try {
-                return getAdminPassword(null);
+                return getAdminPassword(transaction);
             } catch (KException ex) {
                 KEngine.getInstance().getErrorHandler().error(ex);
                 return DEFAULT_ADMIN_PASSWORD;
@@ -319,7 +319,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
         @Override
         public void setPassword( String password ) {
             try {
-                setAdminPassword(null, password);
+                setAdminPassword(transaction, password);
             } catch (KException ex) {
                 KEngine.getInstance().getErrorHandler().error(ex);
             }
@@ -328,7 +328,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
         @Override
         public boolean isSecure() {
             try {
-                return isAdminSecure(null);
+                return isAdminSecure(transaction);
             } catch (KException ex) {
                 KEngine.getInstance().getErrorHandler().error(ex);
                 return DEFAULT_SECURE;
@@ -338,7 +338,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
         @Override
         public void setSecure( boolean secure ) {
             try {
-                setAdminSecure(null, secure);
+                setAdminSecure(transaction, secure);
             } catch (KException ex) {
                 KEngine.getInstance().getErrorHandler().error(ex);
             }
@@ -369,7 +369,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
         @Override
         public String getHost() {
             try {
-                return TeiidImpl.this.getHost(null);
+                return TeiidImpl.this.getHost(transaction);
             } catch (KException ex) {
                 KEngine.getInstance().getErrorHandler().error(ex);
                 return null;
@@ -389,7 +389,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
         @Override
         public String getName() {
             try {
-                return TeiidImpl.this.getName(null);
+                return TeiidImpl.this.getName(transaction);
             } catch (KException ex) {
                 KEngine.getInstance().getErrorHandler().error(ex);
                 return null;
@@ -436,6 +436,8 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
      * Parent of the teiid instance
      */
     private final TeiidParentImpl teiidParent;
+    
+    private UnitOfWork transaction;
 
     /**
      * @param uow
@@ -462,7 +464,8 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
     }
 
     @Override
-    public TeiidInstance getTeiidInstance() {
+    public TeiidInstance getTeiidInstance(UnitOfWork uow) {
+        this.transaction = uow;
         return teiidParent.getTeiidInstance();
     }
 
@@ -492,7 +495,8 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
      */
     @Override
     public String getHost( UnitOfWork uow ) throws KException {
-        return getObjectProperty(uow, PropertyValueType.STRING, "getHost", KomodoLexicon.Teiid.HOST); //$NON-NLS-1$
+        String host = getObjectProperty(uow, PropertyValueType.STRING, "getHost", KomodoLexicon.Teiid.HOST); //$NON-NLS-1$
+        return host != null ? host : HostProvider.DEFAULT_HOST;
     }
 
     /**

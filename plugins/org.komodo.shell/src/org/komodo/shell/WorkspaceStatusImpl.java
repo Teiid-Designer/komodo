@@ -45,6 +45,8 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.api.WorkspaceStatusEventHandler;
 import org.komodo.shell.util.ContextUtils;
 import org.komodo.spi.KException;
+import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
@@ -57,8 +59,9 @@ import org.komodo.utils.StringUtils;
  */
 public class WorkspaceStatusImpl implements WorkspaceStatus {
 
+    private static final String SERVER_DEFAULT_KEY = "SERVER_DEFAULT"; //$NON-NLS-1$
     private static final String SAVED_CONTEXT_PATH = "SAVED_CONTEXT_PATH"; //$NON-NLS-1$
-    private static final List< String > HIDDEN_PROPS = Arrays.asList( new String[] { SAVED_CONTEXT_PATH } );
+    private static final List< String > HIDDEN_PROPS = Arrays.asList( new String[] { SAVED_CONTEXT_PATH, SERVER_DEFAULT_KEY } );
 
     private final KomodoShell shell;
 
@@ -289,12 +292,33 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
 
     @Override
     public Teiid getTeiid() {
+        // If teiid is not set, look at global default.  use it if found.
+        if( teiid == null ) {
+            String globalDefaultServer = getProperties().getProperty(SERVER_DEFAULT_KEY);
+            if(!StringUtils.isEmpty(globalDefaultServer)) {
+                setDefaultServer(globalDefaultServer);
+            }
+        }
         return teiid;
     }
 
     @Override
-    public void setTeiid(Teiid teiid) {
+    public boolean hasConnectedTeiid() {
+        Teiid teiid = getTeiid();
+
+        if(teiid!=null && teiid.getTeiidInstance(getTransaction()).isConnected()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public void setTeiid(Teiid teiid) throws Exception {
         this.teiid = teiid;
+        // Set the hidden property SERVER_DEFAULT_KEY
+        String teiidName = teiid==null ? StringConstants.EMPTY_STRING : this.teiid.getName(getTransaction());
+        this.wsProperties.setProperty( SERVER_DEFAULT_KEY, teiidName);
     }
 
     @Override
@@ -530,6 +554,29 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
 
                 setCurrentContext( context );
             }
+            
+            // set default teiid if necessary
+            final String defaultServer = props.getProperty( SERVER_DEFAULT_KEY );
+
+            if ( !StringUtils.isBlank( defaultServer ) ) {
+                setDefaultServer(defaultServer);
+            }
+        }
+    }
+    
+    private void setDefaultServer(String defaultServer) {
+        try {
+            // Attempt to get default context from workspace
+            WorkspaceContext teiidContext = getWorkspaceContext().getChild(defaultServer, KomodoType.TEIID.getType());
+            // If context found, set the default teiid
+            if(teiidContext!=null) {
+                Teiid theTeiid = getWorkspaceContext().getWorkspaceManager().resolve(getTransaction(), teiidContext.getKomodoObj(), Teiid.class);
+                if( theTeiid != null ) {
+                    teiid = theTeiid;
+                }
+            }
+        } catch (Exception e) {
+            // On exception, the server is not set
         }
     }
 

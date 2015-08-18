@@ -9,8 +9,10 @@ package org.komodo.relational;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Table;
+import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.spi.repository.KomodoObject;
@@ -76,6 +78,24 @@ public class RelationalModelTest extends AbstractLocalRepositoryTest {
         assertThat( vdb.getOriginalFilePath( this.uow ), is( originalFilePath ) );
         return vdb;
     }
+    
+    protected Teiid createTeiid() throws Exception {
+        return createTeiid( getDefaultTeiidName() );
+    }
+
+    protected Teiid createTeiid( final String teiidName ) throws Exception {
+        return createTeiid( teiidName, null );
+    }
+
+    protected Teiid createTeiid( final String teiidName,
+                                 final KomodoObject parent ) throws Exception {
+        final WorkspaceManager mgr = WorkspaceManager.getInstance( _repo );
+        final Teiid teiid = mgr.createTeiid( this.uow, parent, teiidName );
+
+        assertThat( teiid.getPrimaryType( this.uow ).getName(), is( KomodoLexicon.Teiid.NODE_TYPE ) );
+        assertThat( teiid.getName( this.uow ), is( teiidName ) );
+        return teiid;
+    }
 
     protected String getDefaultModelName() {
         return ( this.name.getMethodName() + "-Model" );
@@ -87,6 +107,10 @@ public class RelationalModelTest extends AbstractLocalRepositoryTest {
 
     protected String getDefaultVdbName() {
         return ( this.name.getMethodName() + "-Vdb" );
+    }
+
+    protected String getDefaultTeiidName() {
+        return ( this.name.getMethodName() + "-Teiid" );
     }
 
 }

@@ -444,7 +444,7 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
     	// List of potentials completions
     	List<String> potentialsList = new ArrayList<String>();
     	// Only offer '..' if below the root
-    	if( (currentContext.getType()!=WorkspaceStatus.WORKSPACE_TYPE) && includeGoUp ) {
+    	if( (!currentContext.getType().equalsIgnoreCase(KomodoType.WORKSPACE.getType())) && includeGoUp ) {
     		potentialsList.add(StringConstants.DOT_DOT);
     	}
 

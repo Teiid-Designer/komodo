@@ -49,6 +49,7 @@ import org.komodo.shell.commands.core.ListCommand;
 import org.komodo.shell.commands.core.PlayCommand;
 import org.komodo.shell.commands.core.RemoveConstraintColumnCommand;
 import org.komodo.shell.commands.core.RenameCommand;
+import org.komodo.shell.commands.core.ServerCommand;
 import org.komodo.shell.commands.core.SetCommand;
 import org.komodo.shell.commands.core.ShowCommand;
 import org.komodo.shell.commands.core.UnsetPropertyCommand;
@@ -108,7 +109,7 @@ public class ShellCommandFactory {
         registerCommand( SetCommand.class );
         registerCommand( ShowCommand.class );
         registerCommand( UnsetPropertyCommand.class );
-        // registerCommand( UseTeiidCommand.class );
+        registerCommand( ServerCommand.class );
 
         // register any commands contributed by command providers
         discoverContributedCommands();

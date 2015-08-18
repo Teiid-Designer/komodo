@@ -64,7 +64,6 @@ public class CreateCommand extends BuiltInShellCommand implements StringConstant
 
     static {
         final Set< KomodoType > temp = new HashSet<>();
-        temp.add( KomodoType.TEIID );
         temp.add( KomodoType.UNKNOWN );
         temp.add( KomodoType.WORKSPACE );
         NOT_SUPPORTED = Collections.unmodifiableSet( temp );

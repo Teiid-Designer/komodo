@@ -23,6 +23,7 @@ package org.komodo.spi.runtime;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Properties;
 
 /**
  *
@@ -64,6 +65,11 @@ public interface TeiidVdb {
      */
     boolean isPreviewVdb();
 
+    /**
+     * @return <code>true</code> if this is an xml deployment
+     */
+    boolean isXmlDeployment();
+    
     /**
      * @return <code>true</code> if this VDB is active
      */
@@ -109,4 +115,18 @@ public interface TeiidVdb {
      * @return value of property or null
      */
     String getPropertyValue(String key);
+    
+    /**
+     * 
+     * @return vdb properties
+     */
+    Properties getProperties( );
+    
+    /**
+     * 
+     * @return xml string of the vdb
+     * @throws Exception 
+     */
+    String export( ) throws Exception;
+
 }
