@@ -32,11 +32,6 @@ public interface JsonConstants {
     String ID = "id"; //$NON-NLS-1$
 
     /**
-     * name property
-     */
-    String NAME = "name"; //$NON-NLS-1$
-
-    /**
      * path property
      */
     String DATA_PATH = "data-path"; //$NON-NLS-1$

@@ -22,6 +22,8 @@
 package org.komodo.relational.json;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -31,7 +33,12 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoObjectVisitor;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
+import org.komodo.spi.repository.PropertyDescriptor;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.modeshape.jcr.JcrLexicon;
+import org.modeshape.jcr.ModeShapeLexicon;
+import org.modeshape.sequencer.ddl.StandardDdlLexicon;
+import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 /**
@@ -89,6 +96,18 @@ public class JsonVisitor implements JsonConstants, KomodoObjectVisitor, StringCo
     }
 
     private void quoted(String value) {
+        if (value.contains(SPEECH_MARK)) {
+            StringBuffer newValue = new StringBuffer();
+            for (int i = 0; i < value.length(); ++i) {
+                char v = value.charAt(i);
+                if (v == '"')
+                    newValue.append(DOUBLE_BACK_SLASH);
+
+                newValue.append(v);
+            }
+            value = newValue.toString();
+        }
+
         definition.append(SPEECH_MARK).append(value).append(SPEECH_MARK);
     }
 
@@ -114,10 +133,33 @@ public class JsonVisitor implements JsonConstants, KomodoObjectVisitor, StringCo
             definition.append(TAB);
     }
 
-    private void property(String name, String value) {
+    private void propertyValue(Object value) {
+        if (value instanceof Integer || value instanceof Long ||
+             value instanceof Double || value instanceof Float)
+            definition.append(value);
+        else
+            quoted(value.toString());
+    }
+
+    private void property(String name, Object value) {
         quoted(name);
         colon();
-        quoted(value);
+        propertyValue(value);
+    }
+
+    private void property(String name, Object[] values) {
+        if (values == null || values.length == 0)
+            return;
+
+        quoted(name);
+        colon();
+        openSquareBracket();
+        for (int i = 0; i < values.length; ++i) {
+            propertyValue(values[i]);
+            if ((i + 1) < values.length)
+                comma();
+        }
+        closeSquareBracket();
     }
 
     private String links(String id, String type) {
@@ -182,13 +224,46 @@ public class JsonVisitor implements JsonConstants, KomodoObjectVisitor, StringCo
         return transaction.decode(kObject.getName(transaction));
     }
 
-    private void properties(KomodoObject kObject, String label, KomodoType kType) throws Exception {
+    private boolean ignoreProperty(String propertyName) {
+        if (propertyName.startsWith(JcrLexicon.Namespace.PREFIX))
+            return true; // ignore built-in properties like primaryType and mixinTypes
+
+        if (propertyName.startsWith(ModeShapeLexicon.Namespace.PREFIX))
+            return true; // ignore built-in properties like mode:sha1
+
+        if (propertyName.equals(VdbLexicon.Vdb.ORIGINAL_FILE))
+            return true;
+
+        if (propertyName.equals(VdbLexicon.Model.MODEL_DEFINITION))
+            return true;
+
+        if (propertyName.equals(StandardDdlLexicon.DDL_EXPRESSION))
+            return true;
+
+        if (propertyName.equals(StandardDdlLexicon.DDL_LENGTH))
+            return true;
+
+        if (propertyName.equals(StandardDdlLexicon.DDL_START_CHAR_INDEX))
+            return true;
+
+        if (propertyName.equals(StandardDdlLexicon.DDL_START_COLUMN_NUMBER))
+            return true;
+
+        if (propertyName.equals(StandardDdlLexicon.DDL_START_LINE_NUMBER))
+            return true;
+
+        if (propertyName.equals(TeiidDdlLexicon.CreateTable.QUERY_EXPRESSION))
+            return true;
+
+        if (propertyName.equals(TeiidDdlLexicon.CreateProcedure.STATEMENT))
+            return true;
+
+        return false;
+    }
+
+    private void properties(KomodoObject kObject, KomodoType kType) throws Exception {
         String id = id(kObject);
         property(ID, id);
-        comma();
-        newline();
-
-        property(NAME, transaction.decode(label));
         comma();
         newline();
 
@@ -199,6 +274,39 @@ public class JsonVisitor implements JsonConstants, KomodoObjectVisitor, StringCo
         property(TYPE, kType.getType());
         comma();
         newline();
+
+        final List<String> propNames = new ArrayList<>(Arrays.asList(kObject.getPropertyNames(transaction))); // props with values
+        final PropertyDescriptor[] descriptors = kObject.getPropertyDescriptors(transaction);
+
+        if (descriptors.length != 0) {
+            for (PropertyDescriptor descriptor : descriptors) {
+                String name = descriptor.getName();
+                if (!propNames.contains(name)) {
+                    propNames.add(name);
+                }
+            }
+        }
+
+        Iterator<String> propIter = propNames.iterator();
+        while(propIter.hasNext()) {
+            String propName = propIter.next();
+            Property property = kObject.getProperty(transaction, propName);
+            if (property == null)
+                continue;
+
+            if (ignoreProperty(propName))
+                continue;
+
+            if (property.isMultiple(transaction))
+                property(propName, property.getValues(transaction));
+            else
+                property(propName, property.getValue(transaction));
+
+            if (propIter.hasNext()) {
+                comma();
+                newline();
+            }
+        }
 
         String selfLink = links(id, kType.getType());
         comma();
@@ -247,26 +355,9 @@ public class JsonVisitor implements JsonConstants, KomodoObjectVisitor, StringCo
         this.parentLink = currentParentLink;
     }
 
-    private void append(KomodoObject kObject, String name) throws Exception {
-        KomodoType komodoType = kObject.getTypeIdentifier(transaction);
-        properties(kObject, name, komodoType);
-    }
-
     private void append(KomodoObject kObject) throws Exception {
-        append(kObject, kObject.getName(transaction));
-    }
-
-    private void virtualDatabase(KomodoObject kObject) throws Exception {
-        Property nameProperty = kObject.getProperty(transaction, VdbLexicon.Vdb.NAME);
-
-        String vdbName = kObject.getName(transaction);
-        if (nameProperty != null) {
-            Object value = nameProperty.getValue(transaction);
-            if (value != null)
-                vdbName = value.toString();
-        }
-
-        append(kObject, vdbName);
+        KomodoType komodoType = kObject.getTypeIdentifier(transaction);
+        properties(kObject, komodoType);
     }
 
     /**
@@ -305,10 +396,7 @@ public class JsonVisitor implements JsonConstants, KomodoObjectVisitor, StringCo
         raiseIndent();
         newline();
 
-        if(KomodoType.VDB.equals(type))
-            virtualDatabase(kObject);
-        else
-            append(kObject);
+        append(kObject);
 
         // decrement level
         lowerIndent();

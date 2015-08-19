@@ -36,11 +36,18 @@ public class JsonVerifyParser implements JsonConstants, StringConstants {
 
     private static final Pattern ID_PATTERN = Pattern.compile("\\\"[a-zA-Z0-9_:\\-\\.]+\\\"\\,");
 
-    private static final Pattern NAME_PATTERN = ID_PATTERN;
+    // More generous that ID pattern as it allows unquoted integers, forward slash and escaped speech marks
+    private static final Pattern PROPERTY_PATTERN = Pattern.compile("(\\\")?[a-zA-Z0-9_:/\\[\\]\\-\\.\\*\\\"\\\\]+(\\\")?(\\,)?");
 
     private static final Pattern PATH_PATTERN = Pattern.compile("\\\"[a-zA-Z0-9_:/\\[\\]\\-\\.]+\\\"(\\,)?");
 
     private static final Pattern TYPE_PATTERN = Pattern.compile("\\\"[a-zA-Z0-9_]+\\\"(\\,)?");
+
+    // A bare word has no speech marks surrounding it so would be in the middle of a multi-worded property value
+    private static final Pattern BARE_WORD_PATTERN = Pattern.compile("[a-zA-Z0-9_\\.'\\(\\)=;]+");
+
+    // An end word has a single speech mark appended to it, marking the last word in a multi-worded property value
+    private static final Pattern END_WORD_PATTERN = Pattern.compile("[a-zA-Z0-9_\\.'\\(\\)=;]+\\\"(\\,)?");
 
     private StringTokenizer tokens;
 
@@ -57,6 +64,27 @@ public class JsonVerifyParser implements JsonConstants, StringConstants {
         Matcher matcher = pattern.matcher(currToken);
         assertTrue("Failed to match " + currToken, matcher.matches());
         nextToken();
+
+        //
+        // Deals with possibility that property value is multi-worded
+        //
+        do {
+            matcher = BARE_WORD_PATTERN.matcher(currToken);
+            if (matcher.matches()) {
+                nextToken();
+                continue;
+            }
+
+            matcher = END_WORD_PATTERN.matcher(currToken);
+            if (matcher.matches()) {
+                nextToken();
+                break;
+            }
+
+            // Neither a bare word or end word so get out of this loop
+            break;
+
+        } while (tokens.hasMoreTokens());
     }
 
     private void parentValue() {
@@ -109,8 +137,6 @@ public class JsonVerifyParser implements JsonConstants, StringConstants {
 
         if (ID.equals(name))
             value(ID_PATTERN);
-        else if (NAME.equals(name))
-            value(NAME_PATTERN);
         else if (PARENT.equals(name))
             parentValue();
         else if (DATA_PATH.equals(name))
@@ -125,10 +151,11 @@ public class JsonVerifyParser implements JsonConstants, StringConstants {
             value(ID_PATTERN);
         else if (HREF.equals(name))
             value(PATH_PATTERN);
-        else {
+        else if (currToken.equals(OPEN_BRACE)) {
             // child object
             jsonObject();
-        }
+        } else
+            value(PROPERTY_PATTERN);
     }
 
     private void jsonObject() {
