@@ -107,6 +107,26 @@ public class TestUtilities implements StringConstants {
                             "CREATE VIEW Tweet AS select * FROM twitterview.getTweets;";
 
     /**
+     * Portfolio vdb
+     */
+    public static final String PORTFOLIO_VDB_FILE = "portfolio-vdb.xml";
+
+    /**
+     * Portfolio vdb name
+     */
+    public static final String PORTFOLIO_VDB_NAME = "Portfolio";
+
+    /**
+     * Parts vdb
+     */
+    public static final String PARTS_VDB_FILE = "parts_dynamic-vdb.xml";
+
+    /**
+     * Parts vdb name
+     */
+    public static final String PARTS_VDB_NAME = "MyPartsVDB_Dynamic";
+
+    /**
      * @return input stream of tweet example xml
      * @throws Exception if error occurs
      */
@@ -977,6 +997,26 @@ public class TestUtilities implements StringConstants {
         permission4.setProperty(uow, VdbLexicon.DataRole.Permission.ALLOW_LANGUAGE, true);
 
         return myVdbExample;
+    }
+
+    /**
+     * @return input stream of portfolio example xml
+     * @throws Exception if error occurs
+     */
+    public static InputStream portfolioExample() throws Exception {
+        return getResourceAsStream(TestUtilities.class,
+                                   RESOURCES_DIRECTORY,
+                                   PORTFOLIO_VDB_FILE);
+    }
+
+    /**
+     * @return input stream of parts example xml
+     * @throws Exception if error occurs
+     */
+    public static InputStream partsExample() throws Exception {
+        return getResourceAsStream(TestUtilities.class,
+                                   RESOURCES_DIRECTORY,
+                                   PARTS_VDB_FILE);
     }
 
     /**

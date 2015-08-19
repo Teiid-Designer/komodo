@@ -196,6 +196,12 @@ public interface Repository {
          */
         void rollback();
 
+        /**
+         * Decode the given string if it has been encoded by the UnitOfWork implementation
+         * @param encoded encoded string
+         * @return a decoded string according to the encoding requirements of the implementation
+         */
+        String decode(String encoded);
     }
 
     /**

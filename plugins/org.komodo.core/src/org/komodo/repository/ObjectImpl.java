@@ -1479,8 +1479,8 @@ public class ObjectImpl implements KomodoObject, StringConstants {
     }
 
     @Override
-    public void visit( final UnitOfWork transaction,
-                       final KomodoObjectVisitor visitor ) throws Exception {
+    public void accept( final UnitOfWork transaction,
+                        final KomodoObjectVisitor visitor ) throws Exception {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         visitor.visit(transaction, this);

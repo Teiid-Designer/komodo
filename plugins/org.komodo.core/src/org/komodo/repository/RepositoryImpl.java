@@ -44,6 +44,7 @@ import org.komodo.spi.repository.RepositoryObserver;
 import org.komodo.spi.repository.ValidationManager;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.KLog;
+import org.modeshape.jcr.JcrSession;
 import org.modeshape.jcr.api.JcrConstants;
 import org.modeshape.jcr.api.JcrTools;
 
@@ -360,6 +361,18 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
             }
         }
 
+        /**
+         * Decode the given string if it has been encoded by the UnitOfWork implementation
+         * @param encoded encoded string
+         * @return a decoded string according to the encoding requirements of the implementation
+         */
+        @Override
+        public String decode(String encoded) {
+            if (! (this.session instanceof JcrSession))
+                return encoded; // session not supported
+
+            return ((JcrSession) session).decode(encoded);
+        }
     }
 
     /**
@@ -545,7 +558,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
                                        final String queryStatement ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
-                         "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty(queryStatement, "Query statement cannot be empty"); //$NON-NLS-1$
 
         if (LOGGER.isDebugEnabled()) {
@@ -591,7 +604,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
                                                  final String... keywords ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
-                         "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty(keywords, "Search by keyword requires keywords"); //$NON-NLS-1$
 
         if (LOGGER.isDebugEnabled()) {
@@ -622,7 +635,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
                                               final String... types ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
-                         "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty(types, "types"); //$NON-NLS-1$
 
         if (LOGGER.isDebugEnabled()) {
@@ -650,7 +663,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
                                               final String path ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
-                         "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty(path, "path"); //$NON-NLS-1$
 
         if (LOGGER.isDebugEnabled()) {
@@ -678,7 +691,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
                                           final String path ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
-                         "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         //
         // Transaction has to be committable (hence the 'false') since is it possible that
@@ -861,7 +874,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
                                     final String parentPath ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
-                         "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotNull(file, "file"); //$NON-NLS-1$
 
         try {
@@ -884,7 +897,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
                                         final String parentPath ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
-                         "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotNull(url, "url"); //$NON-NLS-1$
         ArgCheck.isNotEmpty(name, "name"); //$NON-NLS-1$
 
@@ -951,7 +964,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
                          final KomodoObject komodoObject ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
-                         "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotNull(descriptor, "descriptor"); //$NON-NLS-1$
         ArgCheck.isNotNull(komodoObject, "komodoObject"); //$NON-NLS-1$
 
@@ -1022,7 +1035,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
                         final String... paths ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
-                         "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( paths, "paths" ); //$NON-NLS-1$
 
         if (LOGGER.isDebugEnabled()) {
@@ -1103,7 +1116,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
                                 final String... artifactPaths ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
-                         "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty(artifactPaths, "artifactPaths"); //$NON-NLS-1$
 
         if (LOGGER.isDebugEnabled()) {
@@ -1154,7 +1167,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
                            final String... artifactPaths ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
-                         "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty(artifactPaths, "artifactPaths"); //$NON-NLS-1$
 
         if (LOGGER.isDebugEnabled()) {
@@ -1208,7 +1221,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
     public KomodoObject komodoEnvironment( final UnitOfWork transaction ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
-                         "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         komodoRoot( transaction );
         return create( transaction, ENV_ROOT, KomodoLexicon.Environment.NODE_TYPE );
     }
