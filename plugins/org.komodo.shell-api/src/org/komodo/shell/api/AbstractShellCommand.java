@@ -18,10 +18,8 @@ package org.komodo.shell.api;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import org.komodo.shell.api.Messages.SHELLAPI;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.utils.ArgCheck;
@@ -39,59 +37,82 @@ public abstract class AbstractShellCommand implements ShellCommand {
 	private final WorkspaceStatus wsStatus;
 	private Arguments arguments;
 	private boolean autoCommit = true;
+    private final String name;
 	private Writer writer;
-	protected List<String> validWsContextTypes = Collections.emptyList();
+//	protected List<String> validWsContextTypes = Collections.emptyList();
 
     /**
-     * Constructs a command.
-     *
-     * @param status
+     * @param commandName
+     *        the command name (cannot be empty)
+     * @param workspaceStatus
      *        the workspace status (cannot be <code>null</code>)
      */
-    public AbstractShellCommand( final WorkspaceStatus status ) {
-        ArgCheck.isNotNull( status, "status" ); //$NON-NLS-1$
-        this.wsStatus = status;
-        this.writer = new PrintWriter(System.out);
+    public AbstractShellCommand( final String commandName,
+                                 final WorkspaceStatus workspaceStatus ) {
+        ArgCheck.isNotEmpty( commandName, "commandName" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( workspaceStatus, "workspaceStatus" ); //$NON-NLS-1$
+        this.name = commandName;
+        this.wsStatus = workspaceStatus;
     }
+    
+//    /**
+//     * Constructs a command.
+//     *
+//     * @param status
+//     *        the workspace status (cannot be <code>null</code>)
+//     */
+//    public AbstractShellCommand( final WorkspaceStatus status ) {
+//        ArgCheck.isNotNull( status, "status" ); //$NON-NLS-1$
+//        this.wsStatus = status;
+//        this.writer = new PrintWriter(System.out);
+//    }
 
-	/**
-	 * @see org.komodo.shell.api.ShellCommand#initValidWsContextTypes()
-	 */
-	@Override
-	public void initValidWsContextTypes() {
-		// default is valid for all workspace context types
-		List<String> validTypes = new ArrayList<String>(1);
-		validTypes.add(WorkspaceContext.ALL_TYPES);
-		this.validWsContextTypes = validTypes;
-	}
+//	/**
+//	 * @see org.komodo.shell.api.ShellCommand#initValidWsContextTypes()
+//	 */
+//	@Override
+//	public void initValidWsContextTypes() {
+//		// default is valid for all workspace context types
+//		List<String> validTypes = new ArrayList<String>(1);
+//		validTypes.add(WorkspaceContext.ALL_TYPES);
+//		this.validWsContextTypes = validTypes;
+//	}
 
-	/**
-	 * @return the list of valid Ws context
-	 */
-	public List<String> getValidWsContextTypes( ) {
-		return this.validWsContextTypes;
-	}
+//	/**
+//	 * @return the list of valid Ws context
+//	 */
+//	public List<String> getValidWsContextTypes( ) {
+//		return this.validWsContextTypes;
+//	}
+//
+//	/**
+//	 * @see org.komodo.shell.api.ShellCommand#isValidForWsContext(String)
+//	 */
+//	@Override
+//	public boolean isValidForWsContext(String contextType) {
+//	    if (validWsContextTypes == null)
+//	        return true;
+//
+//		if(validWsContextTypes.contains(WorkspaceContext.ALL_TYPES)) {
+//			return true;
+//		}
+//
+//		for(String cType : validWsContextTypes) {
+//			if(cType.equals(contextType)) {
+//				return true;
+//			}
+//		}
+//
+//		return false;
+//	}
 
-	/**
-	 * @see org.komodo.shell.api.ShellCommand#isValidForWsContext(String)
-	 */
-	@Override
-	public boolean isValidForWsContext(String contextType) {
-	    if (validWsContextTypes == null)
-	        return true;
-
-		if(validWsContextTypes.contains(WorkspaceContext.ALL_TYPES)) {
-			return true;
-		}
-
-		for(String cType : validWsContextTypes) {
-			if(cType.equals(contextType)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
+    /**
+     * @see org.komodo.shell.api.ShellCommand#getName()
+     */
+    @Override
+    public String getName() {
+        return this.name;
+    }
 
 	/**
 	 * @return the workspace status

@@ -43,6 +43,67 @@ import org.komodo.utils.StringUtils;
 public abstract class BuiltInShellCommand extends AbstractShellCommand {
 
     /**
+     * Constructs a command.
+     *
+     * @param status
+     *        the workspace status (cannot be <code>null</code>)
+     * @param names
+     *        the command name and then any aliases (cannot be <code>null</code>, empty, or have a <code>null</code> first
+     *        element)
+     */
+    public BuiltInShellCommand(final WorkspaceStatus status,
+                               final String... names ) {
+
+        super(names[0], status);
+        
+        this.name = names[0];
+
+        // save aliases if necessary
+        if ( names.length == 1 ) {
+            this.aliases = StringConstants.EMPTY_ARRAY;
+        } else {
+            this.aliases = new String[ names.length - 1 ];
+            boolean firstTime = true;
+            int i = 0;
+
+            for ( final String alias : names ) {
+                if (firstTime) {
+                    firstTime = false;
+                    continue;
+                }
+
+                this.aliases[i++] = alias;
+            }
+        }
+
+//        initValidWsContextTypes();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommand#execute()
+     */
+    @Override
+    public final boolean execute() throws Exception {
+        final boolean success = doExecute();
+
+        if (shouldCommit()) {
+            if (success) {
+                getWorkspaceStatus().commit(getName());
+            } else {
+                getWorkspaceStatus().rollback(getName());
+            }
+        }
+
+        return success;
+    }
+
+    protected abstract boolean shouldCommit();
+
+    protected abstract boolean doExecute() throws Exception;
+
+    /**
      * @param context
      *        the associated context (cannot be null)
      * @param propertyName
@@ -88,45 +149,6 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
 	private final StringNameValidator nameValidator = new StringNameValidator();
     private final String name;
     private final String[] aliases;
-
-    /**
-     * Constructs a command.
-     *
-     * @param status
-     *        the workspace status (cannot be <code>null</code>)
-     * @param names
-     *        the command name and then any aliases (cannot be <code>null</code>, empty, or have a <code>null</code> first
-     *        element)
-     */
-	public BuiltInShellCommand(final WorkspaceStatus status,
-	                           final String... names ) {
-		super(status);
-
-		ArgCheck.isNotEmpty( names, "names" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( names[0], "names[0]" ); //$NON-NLS-1$
-
-        this.name = names[0];
-
-        // save aliases if necessary
-        if ( names.length == 1 ) {
-            this.aliases = StringConstants.EMPTY_ARRAY;
-        } else {
-            this.aliases = new String[ names.length - 1 ];
-            boolean firstTime = true;
-            int i = 0;
-
-            for ( final String alias : names ) {
-                if (firstTime) {
-                    firstTime = false;
-                    continue;
-                }
-
-                this.aliases[i++] = alias;
-            }
-        }
-
-        initValidWsContextTypes();
-	}
 
     /**
      * {@inheritDoc}

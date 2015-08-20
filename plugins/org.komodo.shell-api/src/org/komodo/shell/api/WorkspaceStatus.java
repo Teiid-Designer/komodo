@@ -28,10 +28,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
 import org.komodo.core.KEngine;
-import org.komodo.importer.ImportMessages;
-import org.komodo.relational.teiid.Teiid;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
@@ -91,6 +88,15 @@ public interface WorkspaceStatus extends StringConstants {
         }
     } );
 
+    /**
+     * @param commandName
+     *        the name of the command being requested (cannot be empty)
+     * @return the command (never <code>null</code>)
+     * @throws Exception
+     *         if command not found or an error occurs
+     */
+    ShellCommand getCommand( final String commandName ) throws Exception;
+    
     /**
      * Sets the specified global property value.
      *
@@ -203,23 +209,17 @@ public interface WorkspaceStatus extends StringConstants {
     boolean isShowingTypeInPrompt();
 
     /**
-     * @return current teiid model
+     * @return current server default
      */
-    Teiid getTeiid();
+    String getServer();
 
     /**
-     * Determine if workspace currently has a connected teiid instance
-     * @return <code>true</code> if has a connected teiid instance
-     */
-    boolean hasConnectedTeiid();
-
-    /**
-     * Set the current teiid model
+     * Set the current server default
      *
-     * @param teiid
+     * @param serverName
      * @throws Exception 
      */
-    void setTeiid(Teiid teiid) throws Exception;
+    void setServer(String serverName) throws Exception;
 
 	/**
 	 * Add a WorkspaceContext Event Handler
@@ -255,13 +255,13 @@ public interface WorkspaceStatus extends StringConstants {
      */
     void commit(String source) throws Exception;
 
-    /**
-     * Commit
-     * @param source identifier for commit
-     * @param importMessages collects import messages
-     * @throws Exception
-     */
-	void commitImport( final String source, ImportMessages importMessages ) throws Exception;
+//    /**
+//     * Commit
+//     * @param source identifier for commit
+//     * @param importMessages collects import messages
+//     * @throws Exception
+//     */
+//	void commitImport( final String source, ImportMessages importMessages ) throws Exception;
     
     /**
      * Rolls back any unsaved changes.

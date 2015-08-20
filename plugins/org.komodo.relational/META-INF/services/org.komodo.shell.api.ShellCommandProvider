@@ -1,0 +1,3 @@
+org.komodo.relational.commands.WorkspaceCommandProvider
+org.komodo.relational.commands.datarole.DataRoleCommandProvider
+org.komodo.relational.commands.vdb.VdbCommandProvider

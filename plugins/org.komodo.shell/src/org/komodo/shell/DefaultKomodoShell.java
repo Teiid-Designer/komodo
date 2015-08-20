@@ -229,6 +229,7 @@ public class DefaultKomodoShell implements KomodoShell {
 
         wsStatus = new WorkspaceStatusImpl(this);
         factory = new ShellCommandFactory(wsStatus);
+        ((WorkspaceStatusImpl)wsStatus).setCommandFactory( this.factory );
 
         // load shell properties if they exist
         final String dataDir = getShellDataLocation();

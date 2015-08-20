@@ -35,11 +35,13 @@ public class PlayCommand  extends BuiltInShellCommand implements StringConstants
         super( wsStatus, NAME );
     }
 
-	/**
-	 * @see org.komodo.shell.api.ShellCommand#execute()
-	 */
-	@Override
-	public boolean execute() throws Exception {
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#doExecute()
+     */
+    @Override
+    protected boolean doExecute() throws Exception {
         String fileNameArg = requiredArgument(0, Messages.getString(Messages.PlayCommand.InvalidArgMsg_FileName));
 
         // Validate the supplied path
@@ -93,5 +95,26 @@ public class PlayCommand  extends BuiltInShellCommand implements StringConstants
     public void setCommandOutput( final Writer commandWriter ) {
         this.commandWriter = commandWriter;
     }
+    
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
+     */
+    @Override
+    public boolean isValidForCurrentContext() {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#shouldCommit()
+     */
+    @Override
+    protected boolean shouldCommit() {
+        return false;
+    }
+
 
 }

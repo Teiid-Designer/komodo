@@ -35,10 +35,12 @@ public class UnsetPropertyCommand extends BuiltInShellCommand {
     }
 
     /**
-     * @see org.komodo.shell.api.ShellCommand#execute()
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    public boolean execute() throws Exception {
+    protected boolean doExecute() throws Exception {
         try {
             final String propNameArg = requiredArgument( 0, getString( "missingPropertyName" ) ); //$NON-NLS-1$
 
@@ -109,5 +111,26 @@ public class UnsetPropertyCommand extends BuiltInShellCommand {
 
         return -1;
     }
+    
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
+     */
+    @Override
+    public boolean isValidForCurrentContext() {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#shouldCommit()
+     */
+    @Override
+    protected boolean shouldCommit() {
+        return false;
+    }
+
 
 }
