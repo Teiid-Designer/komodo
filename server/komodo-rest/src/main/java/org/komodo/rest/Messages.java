@@ -43,14 +43,54 @@ public final class Messages {
         COMMIT_TIMEOUT,
 
         /**
-         * An error message indicating Komodo Engine did not startup in the required amount of time.
+         * An error message indicating the Komodo Engine did not clear the repository due to an error.
+         */
+        KOMODO_ENGINE_CLEAR_ERROR,
+
+        /**
+         * An error message indicating the Komodo Engine did not clear the repository in the required amount of time.
+         */
+        KOMODO_ENGINE_CLEAR_TIMEOUT,
+
+        /**
+         * An error message indicating the Komodo Engine did not shutdown due to an error.
+         */
+        KOMODO_ENGINE_SHUTDOWN_ERROR,
+
+        /**
+         * An error message indicating the Komodo Engine did not shutdown in the required amount of time.
+         */
+        KOMODO_ENGINE_SHUTDOWN_TIMEOUT,
+
+        /**
+         * An error message indicating the Komodo Engine did not startup due to an error.
+         */
+        KOMODO_ENGINE_STARTUP_ERROR,
+
+        /**
+         * An error message indicating the Komodo Engine did not startup in the required amount of time.
          */
         KOMODO_ENGINE_STARTUP_TIMEOUT,
 
         /**
-         * A message indicating a value is not present.
+         * An error message indicating the Komodo Engine's workspace manager could not be obtained.
          */
-        NO_VALUE,
+        KOMODO_ENGINE_WORKSPACE_MGR_ERROR,
+
+        /**
+         * An error message indicating the requested resource was not found.
+         */
+        RESOURCE_NOT_FOUND,
+
+        /**
+         * An error message indicating a repository rollback had an error.
+         */
+        ROLLBACK_ERROR,
+
+        /**
+         * An error message indicating a repository rollback did not complete in the required amount of time.
+         */
+        ROLLBACK_TIMEOUT,
 
         /**
          * An error indicating the VDB descriptor JSON representation could not be created.
@@ -60,12 +100,59 @@ public final class Messages {
         /**
          * An error indicating a VDB could not be created.
          */
-        VDB_SERVICE_ADD_VDB_ERROR,
+        VDB_SERVICE_CREATE_VDB_ERROR,
+
+        /**
+         * An error indicating an error occurred trying to obtain the specified VDB.
+         */
+        VDB_SERVICE_GET_VDB_ERROR,
 
         /**
          * An error indicating a JSON document representing the VDBs in the workspace could not be retrieved.
          */
-        VDB_SERVICE_GET_VDBS_ERROR;
+        VDB_SERVICE_GET_VDBS_ERROR,
+
+        /**
+         * An error when creating a VDB indicating the input VDB JSON document was missing.
+         */
+        VDB_SERVICE_MISSING_VDB,
+
+        /**
+         * An error indicating the VDB name is missing from the input JSON document.
+         */
+        VDB_SERVICE_MISSING_VDB_NAME,
+
+        /**
+         * An error indicating a VDB with the specified name already exists and therefore cannot be created.
+         */
+        VDB_SERVICE_VDB_EXISTS,
+
+        /**
+         * An error indicating the parameter and JSON VDB name does not match for a VDB being created.
+         */
+        VDB_SERVICE_VDB_NAME_ERROR;
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see java.lang.Enum#toString()
+         */
+        @Override
+        public String toString() {
+            return getEnumName( this ) + DOT + name();
+        }
+
+    }
+
+    /**
+     * General messages.
+     */
+    public enum General {
+
+        /**
+         * A message indicating a value is not present.
+         */
+        NO_VALUE;
 
         /**
          * {@inheritDoc}

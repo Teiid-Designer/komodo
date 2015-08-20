@@ -10,62 +10,140 @@ package org.komodo.rest;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
-import javax.json.JsonObject;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.FileAttribute;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import org.jboss.resteasy.plugins.server.undertow.UndertowJaxrsServer;
 import org.jboss.resteasy.test.TestPortProvider;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestName;
+import org.komodo.rest.json.RestVdb;
+import org.komodo.rest.json.RestVdbDescriptor;
+import org.komodo.spi.constants.SystemConstants;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class KomodoVdbServiceTest {
 
+    private static Path _kengineDataDir;
+    private static KomodoRestV1Application _restApp;
     private static UndertowJaxrsServer _server;
-
-    @BeforeClass
-    public static void beforeAll() throws Exception {
-        _server = new UndertowJaxrsServer().start();
-        _server.deploy( new KomodoRestV1Application() );
-    }
+    private static final Gson GSON = new GsonBuilder().create();
 
     @AfterClass
     public static void afterAll() throws Exception {
         _server.stop();
+        _restApp.stop();
+    }
+
+    @BeforeClass
+    public static void beforeAll() throws Exception {
+        _kengineDataDir = Files.createTempDirectory( null, new FileAttribute[ 0 ] );
+        System.setProperty( SystemConstants.ENGINE_DATA_DIR, _kengineDataDir.toString() );
+
+        _server = new UndertowJaxrsServer().start();
+
+        _restApp = new KomodoRestV1Application();
+        _server.deploy( _restApp );
     }
 
     private Client client;
+    private Response response;
+
+    @Rule
+    public TestName testName = new TestName();
+
+    @After
+    public void afterEach() throws Exception {
+        if ( this.response != null ) {
+            this.response.close();
+        }
+
+        this.client.close();
+
+        _restApp.clearRepository();
+    }
 
     @Before
     public void beforeEach() {
         this.client = ClientBuilder.newClient();
     }
 
-    @After
-    public void afterEach() {
-        this.client.close();
+    protected Invocation.Builder request( final String url ) {
+        return this.client.target( TestPortProvider.generateURL( url ) ).request();
     }
 
-    protected WebTarget request( String url ) {
-        return this.client.target( TestPortProvider.generateURL( url ) );
+    @Test
+    public void shouldCreateVdb() throws Exception {
+        final String vdbName = this.testName.getMethodName();
+        final String description = "this is your VDB description";
+        final String extPath = "c:/vdbs/YourVdb.xml";
+        final RestVdb restVdb = new RestVdb( vdbName );
+        restVdb.setDescription( description );
+        restVdb.setOriginalFilePath( extPath );
+
+        final String input = restVdb.toJson();
+        this.response = request( "/komodo/v1/workspace/vdbs" ).post( Entity.json( input ) );
+        final String entity = this.response.readEntity( String.class );
+        assertThat( entity, is( notNullValue() ) );
+
+        // make sure the VDB descriptor JSON document is returned
+        final RestVdbDescriptor descriptor = GSON.fromJson( entity, RestVdbDescriptor.class );
+        assertThat( descriptor.getName(), is( vdbName ) );
+        assertThat( descriptor.getDescription(), is( description ) );
+        assertThat( descriptor.getLinks().length, is( 3 ) );
+    }
+
+    @Test
+    public void shouldGetVdb() throws Exception {
+        final String vdbName = this.testName.getMethodName();
+        final String description = "this is my VDB description";
+        final String extPath = "c:/vdbs/MyVdb.xml";
+
+        { // add
+            final RestVdb restVdb = new RestVdb( vdbName );
+            restVdb.setDescription( description );
+            restVdb.setOriginalFilePath( extPath );
+            final String input = restVdb.toJson();
+            this.response = request( "/komodo/v1/workspace/vdbs" ).post( Entity.json( input ) );
+            this.response.close(); // must close before making another request
+        }
+
+        // get
+        this.response = request( "/komodo/v1/workspace/vdbs/" + vdbName ).get();
+        final String entity = this.response.readEntity( String.class );
+        assertThat( entity, is( notNullValue() ) );
+
+        // make sure the VDB descriptor JSON document is returned
+        final RestVdbDescriptor descriptor = GSON.fromJson( entity, RestVdbDescriptor.class );
+        assertThat( descriptor.getName(), is( vdbName ) );
+        assertThat( descriptor.getDescription(), is( description ) );
+        assertThat( descriptor.getLinks().length, is( 3 ) );
+    }
+
+    @Test
+    public void shouldNotFindVdb() throws Exception {
+        this.response = request( "/komodo/v1/workspace/vdbs/blah" ).get();
+        assertThat( this.response.getStatus(), is( Status.NOT_FOUND.getStatusCode() ) );
     }
 
     @Test
     public void shouldReturnEmptyResponseWhenNoVdbsInWorkspace() {
-        final JsonObject result = request( "/komodo/v1/workspace/vdbs" ).request().get( JsonObject.class );
-        assertThat( result, is( notNullValue() ) );
-        assertThat( result.isEmpty(), is( true ) );
-    }
-
-    @Test
-    public void shouldReturnVdbsResponse() throws Exception {
-        final JsonObject result = request( "/komodo/v1/workspace/vdbs" ).request().get( JsonObject.class );
-        assertThat( result, is( notNullValue() ) );
-        assertThat( result.isEmpty(), is( true ) );
+        this.response = request( "/komodo/v1/workspace/vdbs" ).get();
+        final String entity = this.response.readEntity( String.class );
+        assertThat( entity, is( "{\"vdbs\":[]}" ) );
     }
 
 }

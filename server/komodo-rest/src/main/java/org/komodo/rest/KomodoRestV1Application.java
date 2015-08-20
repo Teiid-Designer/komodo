@@ -7,76 +7,130 @@
 */
 package org.komodo.rest;
 
+import static org.komodo.rest.Messages.Error.KOMODO_ENGINE_CLEAR_ERROR;
+import static org.komodo.rest.Messages.Error.KOMODO_ENGINE_CLEAR_TIMEOUT;
+import static org.komodo.rest.Messages.Error.KOMODO_ENGINE_SHUTDOWN_ERROR;
+import static org.komodo.rest.Messages.Error.KOMODO_ENGINE_SHUTDOWN_TIMEOUT;
+import static org.komodo.rest.Messages.Error.KOMODO_ENGINE_STARTUP_ERROR;
 import static org.komodo.rest.Messages.Error.KOMODO_ENGINE_STARTUP_TIMEOUT;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.PreDestroy;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.core.Application;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import org.komodo.core.KEngine;
+import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.spi.repository.Repository;
+import org.komodo.spi.repository.RepositoryClientEvent;
 import org.komodo.spi.repository.RepositoryObserver;
 
 /**
  * The JAX-RS {@link Application} that provides the Komodo REST API.
  */
-@ApplicationPath( "/komodo/v1" )
-public final class KomodoRestV1Application extends Application {
+@ApplicationPath( V1Constants.APP_PATH )
+public final class KomodoRestV1Application extends Application implements RepositoryObserver {
 
+    /**
+     * Constants associated with version 1 of the Komodo REST application.
+     */
+    public interface V1Constants {
+
+        /**
+         * The URI path segment for the Komodo REST application. This will be prefixed by the base URI to get the URL.
+         */
+        String APP_PATH = "/komodo/v1"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for the Komodo workspace.
+         */
+        String WORKSPACE_SEGMENT = "workspace"; //$NON-NLS-1$
+
+        /**
+         * The URI path segment for the Komodo workspace. This will be prefixed by the base URI to get the URL.
+         */
+        String WORKSPACE_URI_PATH = APP_PATH + '/' + WORKSPACE_SEGMENT;
+
+        /**
+         * The name of the URI path segment for the collection of VDBs in the Komodo workspace. the URL.
+         */
+        String VDBS_SEGMENT = "vdbs"; //$NON-NLS-1$
+
+        /**
+         * The URI path segment for the collection of VDBs in the Komodo workspace. This will be prefixed by the base URI to get
+         * the URL.
+         */
+        String VDBS_URI_PATH = WORKSPACE_URI_PATH + '/' + VDBS_SEGMENT;
+
+        /**
+         * The application-relative URI path segment for the collection of VDBs in the Komodo workspace. the URL.
+         */
+        String VDBS_RELATIVE_PATH = "workspace/vdbs"; //$NON-NLS-1$
+
+    }
+
+    private static final int TIMEOUT = 1;
+    private static final TimeUnit UNIT = TimeUnit.MINUTES;
+
+    private final KEngine kengine;
+    private CountDownLatch latch;
     private final Set< Object > singletons;
 
     /**
      * Constructs a Komodo REST application.
      *
-     * @throws Exception
-     *         if the {@link KomodoVdbService} cannot be started
+     * @throws ServerErrorException
+     *         if the Komodo engine cannot be started
      */
-    public KomodoRestV1Application() throws Exception {
-        // start engine
-        final KEngine kengine = KEngine.getInstance();
-        final Repository repo = kengine.getDefaultRepository();
+    public KomodoRestV1Application() throws ServerErrorException {
+        this.latch = new CountDownLatch( 1 );
+        this.kengine = start();
 
-        // wait for repository to start
-        final CountDownLatch latch = new CountDownLatch( 1 );
+        final Set< Object > objs = new HashSet< >();
+        objs.add( new KomodoExceptionMapper() );
+        objs.add( new KomodoVdbService( this.kengine ) );
+        this.singletons = Collections.unmodifiableSet( objs );
+    }
 
-        // Observer attached to the default repository for listening for the change of state
-        final RepositoryObserver observer = new RepositoryObserver() {
+    /**
+     * Clears the Komodo default repository.
+     *
+     * @throws ServerErrorException
+     *         if an error occurs clearing the repository
+     */
+    public void clearRepository() throws ServerErrorException {
+        this.latch = new CountDownLatch( 1 );
 
-            /**
-             * {@inheritDoc}
-             *
-             * @see org.komodo.spi.repository.RepositoryObserver#eventOccurred()
-             */
-            @Override
-            public void eventOccurred() {
-                latch.countDown();
-            }
-        };
+        final RepositoryClientEvent event = RepositoryClientEvent.createClearEvent( this.kengine );
+        this.kengine.getDefaultRepository().notify( event );
 
-        repo.addObserver( observer );
+        // wait for repository to clear
+        boolean cleared = false;
 
-        // since latch is all setup start engine and block thread until latch has counted down or timeout has been reached
-        kengine.start();
-
-        final int timeout = 1;
-        final TimeUnit unit = TimeUnit.MINUTES;
-        final boolean started = latch.await( timeout, unit );
-
-        if ( !started ) {
-            throw new ServerErrorException( Messages.getString( KOMODO_ENGINE_STARTUP_TIMEOUT, timeout, unit ),
-                                            Response.Status.REQUEST_TIMEOUT );
+        try {
+            cleared = this.latch.await( TIMEOUT, UNIT );
+        } catch ( final Exception e ) {
+            throw new ServerErrorException( Messages.getString( KOMODO_ENGINE_CLEAR_ERROR ), Status.INTERNAL_SERVER_ERROR );
         }
 
-        { // construct singletons
-            final Set< Object > objs = new HashSet< >();
-            objs.add( new KomodoExceptionMapper() );
-            objs.add( new KomodoVdbService( kengine ) );
-            this.singletons = Collections.unmodifiableSet( objs );
+        if ( !cleared ) {
+            throw new ServerErrorException( Messages.getString( KOMODO_ENGINE_CLEAR_TIMEOUT, TIMEOUT, UNIT ),
+                                            Status.REQUEST_TIMEOUT );
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.RepositoryObserver#eventOccurred()
+     */
+    @Override
+    public void eventOccurred() {
+        this.latch.countDown();
     }
 
     /**
@@ -87,6 +141,58 @@ public final class KomodoRestV1Application extends Application {
     @Override
     public Set< Object > getSingletons() {
         return this.singletons;
+    }
+
+    private KEngine start() throws ServerErrorException {
+        final KEngine kengine = KEngine.getInstance();
+        final Repository repo = kengine.getDefaultRepository();
+        repo.addObserver( this );
+
+        // wait for repository to start
+        boolean started = false;
+
+        try {
+            kengine.start();
+            started = this.latch.await( TIMEOUT, UNIT );
+        } catch ( final Exception e ) {
+            throw new ServerErrorException( Messages.getString( KOMODO_ENGINE_STARTUP_ERROR ), Status.INTERNAL_SERVER_ERROR );
+        }
+
+        if ( !started ) {
+            throw new ServerErrorException( Messages.getString( KOMODO_ENGINE_STARTUP_TIMEOUT, TIMEOUT, UNIT ),
+                                            Status.REQUEST_TIMEOUT );
+        }
+
+        return kengine;
+    }
+
+    /**
+     * Stops the Komodo Engine.
+     *
+     * @throws ServerErrorException
+     *         if there is a problem shutting down the Komodo engine
+     */
+    @PreDestroy
+    public void stop() throws ServerErrorException {
+        if ( this.kengine != null ) {
+            this.latch = new CountDownLatch( 1 );
+
+            // wait for repository to shutdown
+            boolean shutdown = false;
+
+            try {
+                this.kengine.shutdown();
+                shutdown = this.latch.await( TIMEOUT, UNIT );
+            } catch ( final Exception e ) {
+                throw new ServerErrorException( Messages.getString( KOMODO_ENGINE_SHUTDOWN_ERROR ),
+                                                Status.INTERNAL_SERVER_ERROR );
+            }
+
+            if ( !shutdown ) {
+                throw new ServerErrorException( Messages.getString( KOMODO_ENGINE_SHUTDOWN_TIMEOUT, TIMEOUT, UNIT ),
+                                                Status.REQUEST_TIMEOUT );
+            }
+        }
     }
 
 }

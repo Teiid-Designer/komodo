@@ -8,13 +8,15 @@
 package org.komodo.rest;
 
 import static org.komodo.rest.Messages.Error.COMMIT_TIMEOUT;
+import static org.komodo.rest.Messages.Error.RESOURCE_NOT_FOUND;
 import java.util.concurrent.TimeUnit;
-import javax.json.JsonObject;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import org.komodo.core.KEngine;
 import org.komodo.repository.SynchronousCallback;
+import org.komodo.rest.json.Jsonable;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -23,6 +25,9 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
  * A Komodo service implementation.
  */
 public abstract class KomodoService {
+
+    private static final int TIMEOUT = 30;
+    private static final TimeUnit UNIT = TimeUnit.SECONDS;
 
     protected final Repository repo;
 
@@ -36,22 +41,30 @@ public abstract class KomodoService {
         this.repo = engine.getDefaultRepository();
     }
 
-    /**
-     * @param transaction
-     *        the transaction that needs to be committed (cannot be <code>null</code>)
-     * @return the response (never <code>null</code>)
-     */
     protected Response commit( final UnitOfWork transaction,
-                               final JsonObject json ) throws Exception {
+                               final Jsonable jsonable ) throws Exception {
         assert( transaction.getCallback() instanceof SynchronousCallback );
+        final int timeout = TIMEOUT;
+        final TimeUnit unit = UNIT;
+
         final SynchronousCallback callback = ( SynchronousCallback )transaction.getCallback();
         transaction.commit();
 
-        final int timeout = 30;
-        final TimeUnit unit = TimeUnit.SECONDS;
-
         if ( callback.await( timeout, unit ) ) {
-            return Response.ok().entity( json.toString() ).type( MediaType.APPLICATION_JSON ).build();
+            final Throwable error = callback.error();
+
+            if ( error == null ) {
+                final ResponseBuilder builder = Response.ok().type( MediaType.TEXT_PLAIN );
+
+                if ( jsonable != null ) {
+                    builder.entity( jsonable.toJson() );
+                }
+
+                return builder.build();
+            }
+
+            // callback was called because of an error condition
+            return Response.status( Status.INTERNAL_SERVER_ERROR ).entity( error.getLocalizedMessage() ).build();
         }
 
         return Response.status( Status.GATEWAY_TIMEOUT ).entity( Messages.getString( COMMIT_TIMEOUT,
@@ -75,6 +88,34 @@ public abstract class KomodoService {
         return this.repo.createTransaction( ( getClass().getSimpleName() + ':' + name + ':' + System.currentTimeMillis() ),
                                             rollbackOnly,
                                             callback );
+    }
+
+    protected Response resourceNotFound( final UnitOfWork transaction,
+                                         final String resourceName ) throws Exception {
+        assert( transaction.getCallback() instanceof SynchronousCallback );
+
+        final int timeout = TIMEOUT;
+        final TimeUnit unit = UNIT;
+
+        final SynchronousCallback callback = ( SynchronousCallback )transaction.getCallback();
+        transaction.commit();
+
+        if ( callback.await( timeout, unit ) ) {
+            final Throwable error = callback.error();
+
+            if ( error == null ) {
+                return Response.status( Status.NOT_FOUND ).entity( Messages.getString( RESOURCE_NOT_FOUND,
+                                                                                       resourceName ) ).build();
+            }
+
+            // callback was called because of an error condition
+            return Response.status( Status.INTERNAL_SERVER_ERROR ).entity( error.getLocalizedMessage() ).build();
+        }
+
+        return Response.status( Status.GATEWAY_TIMEOUT ).entity( Messages.getString( COMMIT_TIMEOUT,
+                                                                                     transaction.getName(),
+                                                                                     timeout,
+                                                                                     unit ) ).build();
     }
 
 }

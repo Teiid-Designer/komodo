@@ -7,115 +7,334 @@
 */
 package org.komodo.rest;
 
-import static org.komodo.rest.Messages.Error.NO_VALUE;
-import static org.komodo.rest.Messages.Error.VDB_SERVICE_ADD_VDB_ERROR;
+import static org.komodo.rest.Messages.Error.KOMODO_ENGINE_WORKSPACE_MGR_ERROR;
+import static org.komodo.rest.Messages.Error.VDB_SERVICE_CREATE_VDB_ERROR;
 import static org.komodo.rest.Messages.Error.VDB_SERVICE_GET_VDBS_ERROR;
-import javax.json.JsonObject;
+import static org.komodo.rest.Messages.Error.VDB_SERVICE_GET_VDB_ERROR;
+import static org.komodo.rest.Messages.Error.VDB_SERVICE_MISSING_VDB;
+import static org.komodo.rest.Messages.Error.VDB_SERVICE_MISSING_VDB_NAME;
+import static org.komodo.rest.Messages.Error.VDB_SERVICE_VDB_EXISTS;
+import static org.komodo.rest.Messages.Error.VDB_SERVICE_VDB_NAME_ERROR;
+import static org.komodo.rest.Messages.General.NO_VALUE;
+import java.net.URI;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.ServerErrorException;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 import org.komodo.core.KEngine;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
-import org.komodo.rest.json.JsonBuilderContext;
-import org.komodo.rest.json.VdbDescriptorJsonBuilder;
-import org.komodo.rest.json.VdbsJsonBuilder;
-import org.komodo.spi.KException;
+import org.komodo.rest.json.RestVdb;
+import org.komodo.rest.json.RestVdbDescriptor;
+import org.komodo.rest.json.RestVdbDirectory;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.StringUtils;
+import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.google.gson.Gson;
 
 /**
  * A Komodo REST service for obtaining VDB information from the workspace.
  */
-@Path( "workspace/vdbs" )
+@Path( KomodoRestV1Application.V1Constants.VDBS_RELATIVE_PATH )
 public final class KomodoVdbService extends KomodoService {
 
-    protected final JsonBuilderContext context;
-    protected final WorkspaceManager wsMgr;
+    private static final Logger LOGGER = LoggerFactory.getLogger( KomodoVdbService.class );
+
+    private final Gson builder = new Gson();
+    private final WorkspaceManager wsMgr;
 
     /**
      * @param engine
      *        the Komodo Engine (cannot be <code>null</code> and must be started)
-     * @throws KException
+     * @throws ServerErrorException
      *         if there is a problem obtaining the {@link WorkspaceManager workspace manager}
      */
-    public KomodoVdbService( final KEngine engine ) throws KException {
+    public KomodoVdbService( final KEngine engine ) throws ServerErrorException {
         super( engine );
-        this.context = new JsonBuilderContext();
-        this.context.rootUri = "http://localhost:8080/"; //$NON-NLS-1$  // TODO should not be hardcoded
-        this.wsMgr = WorkspaceManager.getInstance( this.repo );
-    }
 
-    /**
-     * @param vdbName
-     *        the name of the VDB to create (cannot be empty)
-     * @param parentPath
-     *        the parent path where the VDB should be created (can be <code>null</code> if workspace root is the parent)
-     * @param externalFilePath
-     *        the external file path of the VDB (can be empty)
-     * @return a JSON representation of the new VDB (never <code>null</code>)
-     * @throws KomodoRestException
-     *         if there is an error creating the VDB
-     */
-    @Consumes( "application/json" )
-    @Path( "{vdbName}" )
-    @POST
-    @Produces( "application/json" )
-    public Response addVdb( final @PathParam( "vdbName" ) String vdbName,
-                            final String parentPath,
-                            final String externalFilePath) throws KomodoRestException {
         try {
-            final UnitOfWork uow = createTransaction( "addVdb", false ); //$NON-NLS-1$
-            final String extPath = ( StringUtils.isBlank( externalFilePath ) ? Messages.getString( NO_VALUE ) : externalFilePath );
-            final Vdb vdb = this.wsMgr.createVdb( uow, null, vdbName, extPath );
-
-            final JsonObject json = VdbDescriptorJsonBuilder.BUILDER.build( vdb, uow, this.context );
-            final Response response = commit( uow, json );
-            return response;
+            this.wsMgr = WorkspaceManager.getInstance( this.repo );
         } catch ( final Exception e ) {
-            if ( e instanceof KomodoRestException ) {
-                throw ( KomodoRestException )e;
-            }
-
-            final String path = ( StringUtils.isBlank( parentPath ) ? Messages.getString( NO_VALUE ) : parentPath );
-            final String filePath = ( StringUtils.isBlank( externalFilePath ) ? Messages.getString( NO_VALUE ) : externalFilePath );
-            throw new KomodoRestException( Messages.getString( VDB_SERVICE_ADD_VDB_ERROR, vdbName, path, filePath ), e );
+            throw new ServerErrorException( Messages.getString( KOMODO_ENGINE_WORKSPACE_MGR_ERROR ),
+                                            Status.INTERNAL_SERVER_ERROR );
         }
     }
 
     /**
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
      * @param vdbName
-     *        the name of the VDB being retrieved (cannot be empty)
-     * @return the JSON representation of the VDB (never <code>null</code>)
+     *        the VDB name (cannot be empty)
+     * @param vdbJson
+     *        the VDB JSON representation (cannot be <code>null</code>)
+     * @return a JSON representation of the new VDB (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is an error creating the VDB
      */
-    @GET
+    @PUT
     @Path( "{vdbName}" )
-    @Produces( "application/json" )
-    public Response getVdb( @PathParam( "vdbName" ) final String vdbName) {
-        // TODO implement
-        return null;
+    @Consumes( MediaType.APPLICATION_JSON )
+    @Produces( MediaType.APPLICATION_JSON )
+    public Response addOrUpdateVdb( final @Context HttpHeaders headers,
+                                    final @Context UriInfo uriInfo,
+                                    final @PathParam( "vdbName" ) String vdbName,
+                                    final String vdbJson) throws KomodoRestException {
+        if ( vdbJson == null ) {
+            throw new KomodoRestException( Messages.getString( VDB_SERVICE_MISSING_VDB ) );
+        }
+
+        final RestVdb restVdb = this.builder.fromJson( vdbJson, RestVdb.class );
+
+        if ( StringUtils.isBlank( restVdb.getName() ) ) {
+            throw new KomodoRestException( Messages.getString( VDB_SERVICE_MISSING_VDB_NAME ) );
+        }
+
+        // if name parameter is different than JSON name then do a rename if it exists
+        final String vdbNameJson = restVdb.getName();
+        UnitOfWork uow = null;
+
+        try {
+            uow = createTransaction( "addOrUpdateVdb", false ); //$NON-NLS-1$
+            final boolean exists = this.wsMgr.hasChild( uow, vdbName );
+            final boolean namesMatch = vdbName.equals( vdbNameJson );
+
+            if ( !exists && !namesMatch ) {
+                throw new KomodoRestException( Messages.getString( VDB_SERVICE_VDB_NAME_ERROR, vdbName, vdbNameJson ) );
+            }
+
+            // create new VDB
+            if ( !exists ) {
+                return doAddVdb( uow, uriInfo.getBaseUri(), restVdb );
+            }
+
+            // must be an update
+            final KomodoObject kobject = this.wsMgr.getChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
+            final Vdb vdb = this.wsMgr.resolve( uow, kobject, Vdb.class );
+
+            // TODO parse the JSON input to set VDB properties and children
+
+            // rename if names did not match
+            if ( !namesMatch ) {
+                vdb.rename( uow, vdbNameJson );
+            }
+
+            final RestVdbDescriptor descriptor = buildDescriptor( vdb, uriInfo.getBaseUri(), uow );
+            final Response response = commit( uow, descriptor );
+            return response;
+        } catch ( final Exception e ) {
+            if ( ( uow != null ) && ( uow.getState() != State.COMMITTED ) ) {
+                uow.rollback();
+            }
+
+            if ( e instanceof KomodoRestException ) {
+                throw ( KomodoRestException )e;
+            }
+
+            throw new KomodoRestException( Messages.getString( VDB_SERVICE_CREATE_VDB_ERROR ), e );
+        }
     }
 
     /**
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @param vdbJson
+     *        the VDB JSON representation (cannot be <code>null</code>)
+     * @return a JSON representation of the new VDB (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is an error creating the VDB
+     */
+    @POST
+    @Consumes( MediaType.APPLICATION_JSON )
+    @Produces( MediaType.APPLICATION_JSON )
+    public Response addVdb( final @Context HttpHeaders headers,
+                            final @Context UriInfo uriInfo,
+                            final String vdbJson ) throws KomodoRestException {
+        if ( vdbJson == null ) {
+            throw new KomodoRestException( Messages.getString( VDB_SERVICE_MISSING_VDB ) );
+        }
+
+        final RestVdb restVdb = this.builder.fromJson( vdbJson, RestVdb.class );
+
+        if ( StringUtils.isBlank( restVdb.getName() ) ) {
+            throw new KomodoRestException( Messages.getString( VDB_SERVICE_MISSING_VDB_NAME ) );
+        }
+
+        UnitOfWork uow = null;
+        final String vdbName = restVdb.getName();
+
+        try {
+            uow = createTransaction( "createVdb", false ); //$NON-NLS-1$
+
+            if ( this.wsMgr.hasChild( uow, vdbName ) ) {
+                throw new KomodoRestException( Messages.getString( VDB_SERVICE_VDB_EXISTS ) );
+            }
+
+            return doAddVdb( uow, uriInfo.getBaseUri(), restVdb );
+        } catch ( final Exception e ) {
+            if ( ( uow != null ) && ( uow.getState() != State.COMMITTED ) ) {
+                uow.rollback();
+            }
+
+            if ( e instanceof KomodoRestException ) {
+                throw ( KomodoRestException )e;
+            }
+
+            throw new KomodoRestException( Messages.getString( VDB_SERVICE_CREATE_VDB_ERROR ), e );
+        }
+    }
+
+    private RestVdbDescriptor buildDescriptor( final Vdb vdb,
+                                               final URI baseUri,
+                                               final UnitOfWork uow ) throws Exception {
+        final String vdbName = vdb.getName( uow );
+        final RestVdbDescriptor result = new RestVdbDescriptor( vdbName, baseUri );
+        result.setDescription( vdb.getDescription( uow ) );
+
+        LOGGER.debug( "buildDescriptor:VDB '{0}' descriptor was constructed", vdbName ); //$NON-NLS-1$
+        return result;
+    }
+
+    private Response doAddVdb( final UnitOfWork uow,
+                               final URI baseUri,
+                               final RestVdb restVdb ) throws KomodoRestException {
+        final String vdbName = restVdb.getName();
+        String extPath = Messages.getString( NO_VALUE );
+
+        try {
+            // see if there is a external file path set
+            if ( !StringUtils.isBlank( restVdb.getOriginalFilePath() ) ) {
+                extPath = restVdb.getOriginalFilePath();
+            }
+
+            final Vdb vdb = this.wsMgr.createVdb( uow, null, vdbName, extPath );
+            LOGGER.debug( "doAddVdb:VDB '{0}' was created", vdbName ); //$NON-NLS-1$
+
+            // TODO parse the JSON input to set VDB properties and children
+            if ( !StringUtils.isBlank( restVdb.getDescription() ) ) {
+                vdb.setDescription( uow, restVdb.getDescription() );
+            }
+
+            final RestVdbDescriptor descriptor = buildDescriptor( vdb, baseUri, uow );
+            final Response response = commit( uow, descriptor );
+            return response;
+        } catch ( final Exception e ) {
+            if ( ( uow != null ) && ( uow.getState() != State.COMMITTED ) ) {
+                uow.rollback();
+            }
+
+            if ( e instanceof KomodoRestException ) {
+                throw ( KomodoRestException )e;
+            }
+
+            throw new KomodoRestException( Messages.getString( VDB_SERVICE_CREATE_VDB_ERROR ), e );
+        }
+    }
+
+    /**
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @param vdbName
+     *        the name of the VDB being retrieved (cannot be empty)
+     * @return the JSON representation of the VDB (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is a problem finding the specified workspace VDB or constructing the JSON representation
+     */
+    @GET
+    @Path( "{vdbName}" )
+    @Produces( MediaType.APPLICATION_JSON )
+    public Response getVdb( final @Context HttpHeaders headers,
+                            final @Context UriInfo uriInfo,
+                            final @PathParam( "vdbName" ) String vdbName) throws KomodoRestException {
+        UnitOfWork uow = null;
+
+        try {
+            // find VDB
+            uow = createTransaction( "getVdb", true ); //$NON-NLS-1$
+            RestVdbDescriptor descriptor = null;
+
+            if ( this.wsMgr.hasChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE ) ) {
+                final KomodoObject kobject = this.wsMgr.getChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
+                final Vdb vdb = this.wsMgr.resolve( uow, kobject, Vdb.class );
+                descriptor = buildDescriptor( vdb, uriInfo.getBaseUri(), uow );
+
+                LOGGER.debug( "getVdb:VDB '{0}' was found", vdbName ); //$NON-NLS-1$
+                final Response response = commit( uow, descriptor );
+                return response;
+            }
+
+            LOGGER.debug( "getVdb:VDB '{0}' was not found", vdbName ); //$NON-NLS-1$
+            return resourceNotFound( uow, vdbName );
+        } catch ( final Exception e ) {
+            if ( ( uow != null ) && ( uow.getState() != State.ROLLED_BACK ) ) {
+                uow.rollback();
+            }
+
+            if ( e instanceof KomodoRestException ) {
+                throw ( KomodoRestException )e;
+            }
+
+            throw new KomodoRestException( Messages.getString( VDB_SERVICE_GET_VDB_ERROR, vdbName ), e );
+        }
+    }
+
+    /**
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
      * @return a JSON document representing all the VDBs in the Komodo workspace (never <code>null</code>)
      * @throws KomodoRestException
      *         if there is a problem constructing the VDBs JSON document
      */
     @GET
     @Path( "/" )
-    @Produces( "application/json" )
-    public Response getVdbs() throws KomodoRestException {
+    @Produces( MediaType.APPLICATION_JSON )
+    public Response getVdbs( final @Context HttpHeaders headers,
+                             final @Context UriInfo uriInfo ) throws KomodoRestException {
+        UnitOfWork uow = null;
+
         try {
-            final UnitOfWork uow = createTransaction( "getVdbs", true ); //$NON-NLS-1$
+            // find VDBs
+            uow = createTransaction( "getVdbs", true ); //$NON-NLS-1$
             final Vdb[] vdbs = this.wsMgr.findVdbs( uow );
-            final JsonObject json = VdbsJsonBuilder.BUILDER.build( vdbs, uow, this.context );
-            final Response response = commit( uow, json );
+            LOGGER.debug( "getVdbs:found '{0}' VDBs", vdbs.length ); //$NON-NLS-1$
+
+            final RestVdbDescriptor[] descriptors = new RestVdbDescriptor[ vdbs.length ];
+            int i = 0;
+
+            for ( final Vdb vdb : vdbs ) {
+                descriptors[ i++ ] = buildDescriptor( vdb, uriInfo.getBaseUri(), uow );
+            }
+
+            // create response
+            final RestVdbDirectory vdbDir = new RestVdbDirectory( descriptors );
+            final Response response = commit( uow, vdbDir );
             return response;
         } catch ( final Exception e ) {
+            if ( ( uow != null ) && ( uow.getState() != State.ROLLED_BACK ) ) {
+                uow.rollback();
+            }
+
             if ( e instanceof KomodoRestException ) {
                 throw ( KomodoRestException )e;
             }

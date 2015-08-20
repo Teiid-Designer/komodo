@@ -8,12 +8,15 @@
 package org.komodo.rest;
 
 /**
- *
+ * An error originating from or caught by the Komodo REST application.
  */
 public class KomodoRestException extends Exception {
 
+    private static final long serialVersionUID = 1L;
+
     /**
      * @param message
+     *        the error message (can be empty)
      */
     public KomodoRestException( final String message ) {
         this( message, null );
@@ -21,10 +24,12 @@ public class KomodoRestException extends Exception {
 
     /**
      * @param message
+     *        the error message (can be empty)
      * @param cause
+     *        the cause (can be <code>null</code>)
      */
     public KomodoRestException( final String message,
-                                 final Throwable cause ) {
+                                final Throwable cause ) {
         super( message, cause );
     }
 
