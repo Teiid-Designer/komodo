@@ -39,7 +39,7 @@ public class NoOpCommand extends AbstractShellCommand {
      *        the workspace status (cannot be <code>null</code>)
      */
     public NoOpCommand( final WorkspaceStatus wsStatus ) {
-        super( wsStatus );
+        super( NAME, wsStatus );
     }
 
     /**
@@ -101,5 +101,16 @@ public class NoOpCommand extends AbstractShellCommand {
 	public void recordComment(String comment) {
 	    // Nothing to do
 	}
+	
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
+     */
+    @Override
+    public boolean isValidForCurrentContext() {
+        return true;
+    }
+
 
 }

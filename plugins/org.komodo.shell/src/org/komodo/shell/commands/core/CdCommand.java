@@ -50,11 +50,13 @@ public class CdCommand extends BuiltInShellCommand implements StringConstants {
         super( wsStatus, NAME, "edit", "goto" ); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
-	/**
-	 * @see org.komodo.shell.api.ShellCommand#execute()
-	 */
-	@Override
-	public boolean execute() throws Exception {
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#doExecute()
+     */
+    @Override
+	protected boolean doExecute() throws Exception {
 		String locationArg = requiredArgument(0, Messages.getString(SHELL.InvalidArgMsg_EntryPath));
 
 		if (!this.validate(locationArg)) {
@@ -72,6 +74,26 @@ public class CdCommand extends BuiltInShellCommand implements StringConstants {
 
 		return false;
 	}
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
+     */
+    @Override
+    public boolean isValidForCurrentContext() {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#shouldCommit()
+     */
+    @Override
+    protected boolean shouldCommit() {
+        return false;
+    }
 
 	/*
 	 * (non-Javadoc)

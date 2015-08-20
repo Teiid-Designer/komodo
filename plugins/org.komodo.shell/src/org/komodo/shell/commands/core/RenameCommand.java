@@ -2,7 +2,6 @@ package org.komodo.shell.commands.core;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.komodo.relational.teiid.Teiid;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
@@ -35,10 +34,12 @@ public class RenameCommand extends BuiltInShellCommand implements StringConstant
     }
 
     /**
-     * @see org.komodo.shell.api.ShellCommand#execute()
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    public boolean execute() throws Exception {
+    protected boolean doExecute() throws Exception {
         String objNameArg = requiredArgument(0, Messages.getString(Messages.RenameCommand.InvalidArgMsg_ObjectName));
         String newName = requiredArgument(1, Messages.getString(Messages.RenameCommand.InvalidArgMsg_NewName));
 
@@ -81,10 +82,10 @@ public class RenameCommand extends BuiltInShellCommand implements StringConstant
         try {
             // If teiid object was renamed, check if it is set as the default server.  unset default if necessary
             if (KomodoType.TEIID == kType) {
-                final Teiid defaultTeiid = wsStatus.getTeiid();
+                final String server = wsStatus.getServer();
 
-                if ((defaultTeiid != null) && defaultTeiid.getName(wsStatus.getTransaction()).equals(objContext.getName())) {
-                    wsStatus.setTeiid(null);
+                if ((server != null) && server.equals(objContext.getName())) {
+                    wsStatus.setServer(null);
                 }
             }
             
@@ -167,5 +168,26 @@ public class RenameCommand extends BuiltInShellCommand implements StringConstant
         }
         return -1;
     }
+    
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
+     */
+    @Override
+    public boolean isValidForCurrentContext() {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#shouldCommit()
+     */
+    @Override
+    protected boolean shouldCommit() {
+        return false;
+    }
+
 
 }

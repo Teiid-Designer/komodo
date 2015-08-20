@@ -21,8 +21,11 @@
  ************************************************************************************/
 package org.komodo.shell.commands.core;
 
+import java.util.List;
 import org.komodo.shell.BuiltInShellCommand;
-import org.komodo.shell.api.Arguments;
+import org.komodo.shell.CompletionConstants;
+import org.komodo.shell.Messages;
+import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 
 /**
@@ -45,27 +48,54 @@ public class ListCommand extends BuiltInShellCommand {
         super( wsStatus, NAME, "ls", "ll" ); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
-	/**
-	 * @see org.komodo.shell.api.ShellCommand#execute()
-	 */
-	@Override
-    public boolean execute() throws Exception {
-        final ShowCommand showCmd = new ShowCommand( getWorkspaceStatus() );
-        final Arguments args = new Arguments( ShowCommand.SUBCMD_CHILDREN );
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#doExecute()
+     */
+    @Override
+    protected boolean doExecute() throws Exception {
+        WorkspaceStatus wsStatus = getWorkspaceStatus();
 
-        // now add in args passed to this command
-        final Arguments listCmdArgs = getArguments();
+        WorkspaceContext currentContext = wsStatus.getCurrentContext();
 
-        if ( ( listCmdArgs != null ) && !listCmdArgs.isEmpty() ) {
-            for ( final String arg : listCmdArgs ) {
-                args.add( arg );
-            }
+        List<WorkspaceContext> children = currentContext.getChildren();
+        if(children.isEmpty()) {
+            String cType = getWorkspaceStatus().getCurrentContext().getType().toString();
+            String name = getWorkspaceStatus().getCurrentContext().getName();
+
+            String noChildrenMsg = Messages.getString("ListCommand.noChildrenMsg",cType,name); //$NON-NLS-1$
+            print(CompletionConstants.MESSAGE_INDENT,noChildrenMsg);
         }
 
-        showCmd.setArguments( args );
-        showCmd.setOutput( getWriter() );
+        for(WorkspaceContext childContext : children) {
+            String childName = childContext.getName();
+            String childType = childContext.getType();
+            print(CompletionConstants.MESSAGE_INDENT, childName+" ["+childType+"]"); //$NON-NLS-1$ //$NON-NLS-2$
+        }
 
-        return showCmd.execute();
+        return true;
     }
+    
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
+     */
+    @Override
+    public boolean isValidForCurrentContext() {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#shouldCommit()
+     */
+    @Override
+    protected boolean shouldCommit() {
+        return false;
+    }
+
 
 }

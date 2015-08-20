@@ -44,11 +44,13 @@ public class HomeCommand extends BuiltInShellCommand {
         super( wsStatus, NAME );
     }
 
-	/**
-	 * @see org.komodo.shell.api.ShellCommand#execute()
-	 */
-	@Override
-    public boolean execute() throws Exception {
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#doExecute()
+     */
+    @Override
+    protected boolean doExecute() throws Exception {
         final CdCommand cdCmd = new CdCommand( getWorkspaceStatus() );
         final Arguments args = new Arguments( StringConstants.FORWARD_SLASH );
         cdCmd.setArguments( args );
@@ -56,5 +58,26 @@ public class HomeCommand extends BuiltInShellCommand {
 
         return cdCmd.execute();
     }
+    
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
+     */
+    @Override
+    public boolean isValidForCurrentContext() {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#shouldCommit()
+     */
+    @Override
+    protected boolean shouldCommit() {
+        return false;
+    }
+
 
 }
