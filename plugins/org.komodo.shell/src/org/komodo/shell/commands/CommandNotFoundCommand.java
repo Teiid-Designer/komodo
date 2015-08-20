@@ -33,19 +33,14 @@ import org.komodo.utils.ArgCheck;
  */
 public class CommandNotFoundCommand extends AbstractShellCommand {
 
-    private final String name;
+    private static final String NAME = "cmd-not-found"; //$NON-NLS-1$
 
     /**
-     * @param name
-     *        the command name that was not found (cannot be empty)
      * @param wsStatus
      *        the workspace status (cannot be <code>null</code>)
      */
-    public CommandNotFoundCommand( final String name,
-                                   final WorkspaceStatus wsStatus ) {
-        super( wsStatus );
-        ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
-        this.name = name;
+    public CommandNotFoundCommand( final WorkspaceStatus wsStatus ) {
+        super( NAME, wsStatus );
     }
 
     /**
@@ -56,14 +51,6 @@ public class CommandNotFoundCommand extends AbstractShellCommand {
     @Override
     public final String[] getAliases() {
         return StringConstants.EMPTY_ARRAY;
-    }
-
-    /**
-     * @see org.komodo.shell.api.ShellCommand#getName()
-     */
-    @Override
-    public final String getName() {
-        return this.name;
     }
 
 	/**
@@ -106,7 +93,17 @@ public class CommandNotFoundCommand extends AbstractShellCommand {
 	@Override
 	public boolean execute() {
 		print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.COMMAND_NOT_FOUND));
-        return true;
+       
+		return true;
 	}
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
+     */
+    @Override
+    public boolean isValidForCurrentContext() {
+        return true;
+    }
 
 }

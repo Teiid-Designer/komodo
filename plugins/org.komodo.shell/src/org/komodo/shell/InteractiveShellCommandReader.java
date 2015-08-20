@@ -84,10 +84,10 @@ public class InteractiveShellCommandReader extends AbstractShellCommandReader im
 	}
 
 	private Prompt doGetPrompt() throws Exception {
-	    if(getWorkspaceStatus().hasConnectedTeiid()) {
-	        String serverName = getWorkspaceStatus().getTeiid().getName(getWorkspaceStatus().getTransaction());
-	        return new Prompt(connectedAnsiPrompt(serverName));
-	    }
+//	    if(getWorkspaceStatus().hasConnectedTeiid()) {
+//	        String serverName = getWorkspaceStatus().getTeiid().getName(getWorkspaceStatus().getTransaction());
+//	        return new Prompt(connectedAnsiPrompt(serverName));
+//	    }
 	    return new Prompt(defaultAnsiPrompt());
 	}
 

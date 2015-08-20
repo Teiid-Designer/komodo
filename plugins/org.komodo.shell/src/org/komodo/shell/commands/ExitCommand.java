@@ -44,14 +44,37 @@ public class ExitCommand extends BuiltInShellCommand {
         super( wsStatus, NAME, "quit" ); //$NON-NLS-1$
     }
 
-	/**
-	 * @see org.komodo.shell.api.ShellCommand#execute()
-	 */
-	@Override
-	public boolean execute() throws Exception {
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#doExecute()
+     */
+    @Override
+    protected boolean doExecute() throws Exception {
 		getWorkspaceStatus().getShell().exit();
         print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.GOOD_BYE));
         return true;
 	}
+    
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
+     */
+    @Override
+    public boolean isValidForCurrentContext() {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#shouldCommit()
+     */
+    @Override
+    protected boolean shouldCommit() {
+        return false;
+    }
+
 
 }

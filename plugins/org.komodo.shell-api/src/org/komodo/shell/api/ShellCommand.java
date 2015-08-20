@@ -66,17 +66,21 @@ public interface ShellCommand {
 	 */
 	Writer getWriter();
 
-	/**
-	 * Init Valid workspace context types for this command
-	 */
-	public void initValidWsContextTypes();
+//	/**
+//	 * Init Valid workspace context types for this command
+//	 */
+//	public void initValidWsContextTypes();
 
-	/**
-	 * Is the command valid for the supplied Ws Context
-	 * @param contextType the context type
-	 * @return 'true' if valid, 'false' if not.
-	 */
-	public boolean isValidForWsContext(String contextType);
+    /**
+     * @return <code>true</code> if current {@link WorkspaceContext} is valid for this command
+     */
+    public boolean isValidForCurrentContext();
+//	/**
+//	 * Is the command valid for the supplied Ws Context
+//	 * @param contextType the context type
+//	 * @return 'true' if valid, 'false' if not.
+//	 */
+//	public boolean isValidForWsContext(String contextType);
 
 	/**
 	 * Called to execute the command.

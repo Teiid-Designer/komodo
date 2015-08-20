@@ -34,19 +34,19 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.komodo.core.KEngine;
-import org.komodo.importer.ImportMessages;
-import org.komodo.relational.teiid.Teiid;
-import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.repository.ObjectImpl;
+import org.komodo.repository.RepositoryImpl;
 import org.komodo.repository.SynchronousCallback;
 import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.KomodoShell;
+import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.api.WorkspaceStatusEventHandler;
 import org.komodo.shell.util.ContextUtils;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
@@ -82,8 +82,9 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     private Properties wsProperties;
 
     private boolean recordingStatus = false;
+    private ShellCommandFactory commandFactory;
 
-    private Teiid teiid;
+    private String server;
 
     /**
      * Constructor
@@ -118,9 +119,9 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
                 this.callback = (SynchronousCallback)uowListener;
             }
         }
-
+        
         final Repository repo = getEngine().getDefaultRepository();
-        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(repo);
+        final KomodoObject wkspMgr = new ObjectImpl( repo, RepositoryImpl.WORKSPACE_ROOT, 0 );
 
         wsContext = new WorkspaceContextImpl(this,null,wkspMgr);
         contextCache.put( wkspMgr.getAbsolutePath(), wsContext );
@@ -202,32 +203,32 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         createTransaction(source);
     }
     
-    @Override
-	public void commitImport( final String source, ImportMessages importMessages ) throws Exception {
-        final String txName = this.uow.getName();
-        this.uow.commit();
-
-        final boolean success = this.callback.await( 3, TimeUnit.MINUTES );
-        if ( success ) {
-        	// For imports, if has callback error - add to import errors and return.
-        	if(this.callback.hasError()) {
-            	importMessages.addErrorMessage(callback.error());
-            	createTransaction(source);
-            	return;
-        	}
-            final KException error = uow.getError();
-            final State txState = this.uow.getState();
-
-            if ( ( error != null ) || !State.COMMITTED.equals( txState ) ) {
-                throw new KException( Messages.getString( SHELL.TRANSACTION_COMMIT_ERROR, txName ), error );
-            }
-        } else {
-            throw new KException( Messages.getString( SHELL.TRANSACTION_TIMEOUT, txName ) );
-        }
-
-        // create new transaction
-        createTransaction(source);
-    }
+//    @Override
+//	public void commitImport( final String source, ImportMessages importMessages ) throws Exception {
+//        final String txName = this.uow.getName();
+//        this.uow.commit();
+//
+//        final boolean success = this.callback.await( 3, TimeUnit.MINUTES );
+//        if ( success ) {
+//        	// For imports, if has callback error - add to import errors and return.
+//        	if(this.callback.hasError()) {
+//            	importMessages.addErrorMessage(callback.error());
+//            	createTransaction(source);
+//            	return;
+//        	}
+//            final KException error = uow.getError();
+//            final State txState = this.uow.getState();
+//
+//            if ( ( error != null ) || !State.COMMITTED.equals( txState ) ) {
+//                throw new KException( Messages.getString( SHELL.TRANSACTION_COMMIT_ERROR, txName ), error );
+//            }
+//        } else {
+//            throw new KException( Messages.getString( SHELL.TRANSACTION_TIMEOUT, txName ) );
+//        }
+//
+//        // create new transaction
+//        createTransaction(source);
+//    }
 
     /**
      * {@inheritDoc}
@@ -291,34 +292,23 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     }
 
     @Override
-    public Teiid getTeiid() {
+    public String getServer() {
         // If teiid is not set, look at global default.  use it if found.
-        if( teiid == null ) {
+        if( server == null ) {
             String globalDefaultServer = getProperties().getProperty(SERVER_DEFAULT_KEY);
             if(!StringUtils.isEmpty(globalDefaultServer)) {
-                setDefaultServer(globalDefaultServer);
+                setServer(globalDefaultServer);
             }
         }
-        return teiid;
+        return server;
     }
 
     @Override
-    public boolean hasConnectedTeiid() {
-        Teiid teiid = getTeiid();
-
-        if(teiid!=null && teiid.getTeiidInstance(getTransaction()).isConnected()) {
-            return true;
-        }
-
-        return false;
-    }
-
-    @Override
-    public void setTeiid(Teiid teiid) throws Exception {
-        this.teiid = teiid;
+    public void setServer(String server) {
+        this.server = server;
         // Set the hidden property SERVER_DEFAULT_KEY
-        String teiidName = teiid==null ? StringConstants.EMPTY_STRING : this.teiid.getName(getTransaction());
-        this.wsProperties.setProperty( SERVER_DEFAULT_KEY, teiidName);
+        String serverName = server==null ? StringConstants.EMPTY_STRING : server;
+        this.wsProperties.setProperty( SERVER_DEFAULT_KEY, serverName);
     }
 
     @Override
@@ -559,26 +549,26 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
             final String defaultServer = props.getProperty( SERVER_DEFAULT_KEY );
 
             if ( !StringUtils.isBlank( defaultServer ) ) {
-                setDefaultServer(defaultServer);
+                setServer(defaultServer);
             }
         }
     }
     
-    private void setDefaultServer(String defaultServer) {
-        try {
-            // Attempt to get default context from workspace
-            WorkspaceContext teiidContext = getWorkspaceContext().getChild(defaultServer, KomodoType.TEIID.getType());
-            // If context found, set the default teiid
-            if(teiidContext!=null) {
-                Teiid theTeiid = getWorkspaceContext().getWorkspaceManager().resolve(getTransaction(), teiidContext.getKomodoObj(), Teiid.class);
-                if( theTeiid != null ) {
-                    teiid = theTeiid;
-                }
-            }
-        } catch (Exception e) {
-            // On exception, the server is not set
-        }
-    }
+//    private void setDefaultServer(String defaultServer) {
+//        try {
+//            // Attempt to get default context from workspace
+//            WorkspaceContext teiidContext = getWorkspaceContext().getChild(defaultServer, KomodoType.TEIID.getType());
+//            // If context found, set the default teiid
+//            if(teiidContext!=null) {
+//                Teiid theTeiid = getWorkspaceContext().getWorkspaceManager().resolve(getTransaction(), teiidContext.getKomodoObj(), Teiid.class);
+//                if( theTeiid != null ) {
+//                    teiid = theTeiid;
+//                }
+//            }
+//        } catch (Exception e) {
+//            // On exception, the server is not set
+//        }
+//    }
 
     /**
      * {@inheritDoc}
@@ -594,6 +584,25 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         }
 
         return copy;
+    }
+    
+    /**
+     * @param factory
+     *        the command factory (cannot be <code>null</code>)
+     */
+    public void setCommandFactory( final ShellCommandFactory factory ) {
+        ArgCheck.isNotNull( factory, "factory" ); //$NON-NLS-1$
+        this.commandFactory = factory;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.WorkspaceStatus#getCommand(java.lang.String)
+     */
+    @Override
+    public ShellCommand getCommand( final String commandName ) throws Exception {
+        return this.commandFactory.getCommand( commandName );
     }
 
 }

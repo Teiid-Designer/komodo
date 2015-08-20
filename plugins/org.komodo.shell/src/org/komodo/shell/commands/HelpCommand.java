@@ -15,6 +15,7 @@
  */
 package org.komodo.shell.commands;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -26,7 +27,6 @@ import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
 import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.ShellCommand;
-import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.constants.StringConstants;
 
@@ -46,7 +46,8 @@ public class HelpCommand extends BuiltInShellCommand {
      */
     public static final String NAME = "help"; //$NON-NLS-1$
 
-	private static final int CMDS_PER_LINE = 4;
+    private static final int CMDS_PER_LINE = 4;
+    private static final int DEFAULT_COLUMN_WIDTH = 10;
 
 	private Map<String, ShellCommand> commands = Collections.< String, ShellCommand >emptyMap();
 
@@ -67,14 +68,12 @@ public class HelpCommand extends BuiltInShellCommand {
     }
 
     /**
-	 * Execute.
-	 *
-	 * @return true, if successful
-	 * @throws Exception the exception
-	 * @see org.komodo.shell.api.ShellCommand#execute()
-	 */
-	@Override
-	public boolean execute() throws Exception {
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#doExecute()
+     */
+    @Override
+    protected boolean doExecute() throws Exception {
 		String commandName = optionalArgument(0);
 		if (commandName == null) {
 			printHelpAll();
@@ -84,37 +83,64 @@ public class HelpCommand extends BuiltInShellCommand {
 		return true;
 	}
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
+     */
+    @Override
+    public boolean isValidForCurrentContext() {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#shouldCommit()
+     */
+    @Override
+    protected boolean shouldCommit() {
+        return false;
+    }
+
 	/**
 	 * Prints the generic help - all commands for this workspace context
 	 */
 	private void printHelpAll() throws Exception {
 		print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.Help_COMMAND_LIST_MSG));
 
-		// Determine the current Workspace Context type
-		WorkspaceStatus wsStatus = getWorkspaceStatus();
-		WorkspaceContext currentContext = wsStatus.getCurrentContext();
-		String currentContextType = currentContext.getType();
-
 		StringBuffer indentBuffer = new StringBuffer();
 		for(int i=0; i<CompletionConstants.MESSAGE_INDENT; i++) {
 			indentBuffer.append(StringConstants.SPACE);
 		}
 
+		// Assemble the valid command names and find the max command character length
+		int maxCommandLength = DEFAULT_COLUMN_WIDTH;
+        List<String> validCmdNames = new ArrayList<String>();
+        for (Entry<String,ShellCommand> entry : this.commands.entrySet()) {
+            String cmdName = entry.getKey();
+            ShellCommand command = entry.getValue();
+            if(command.isValidForCurrentContext()) {
+                validCmdNames.add(cmdName);
+                if(cmdName.length()>maxCommandLength) {
+                    maxCommandLength = cmdName.length();
+                }
+            }
+        }
+        
+        // Print appropriate commands per line
 		int colCount = 0;
 		StringBuilder builder = new StringBuilder();
-		for (Entry<String,ShellCommand> entry : this.commands.entrySet()) {
-			String cmdName = entry.getKey();
-			ShellCommand command = entry.getValue();
-			if(command.isValidForWsContext(currentContextType)) {
-				builder.append(String.format("%-18s", cmdName)); //$NON-NLS-1$
-				colCount++;
+		for (String cmdName : validCmdNames) {
+            builder.append(String.format("%-"+(maxCommandLength+5)+"s", cmdName)); //$NON-NLS-1$ //$NON-NLS-2$
+            colCount++;
 
-				if (colCount == CMDS_PER_LINE) {
-					builder.append("\n"+indentBuffer.toString()); //$NON-NLS-1$
-					colCount = 0;
-				}
-			}
+            if (colCount == CMDS_PER_LINE) {
+                builder.append("\n"+indentBuffer.toString()); //$NON-NLS-1$
+                colCount = 0;
+            }
 		}
+
 		print(CompletionConstants.MESSAGE_INDENT,builder.toString());
 		if(colCount!=0) print(CompletionConstants.MESSAGE_INDENT,"\n"); //$NON-NLS-1$
 		print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.Help_GET_HELP_1));

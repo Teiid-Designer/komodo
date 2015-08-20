@@ -37,21 +37,17 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.CommandNotFoundCommand;
 import org.komodo.shell.commands.ExitCommand;
 import org.komodo.shell.commands.HelpCommand;
-import org.komodo.shell.commands.core.AddConstraintColumnCommand;
 import org.komodo.shell.commands.core.CdCommand;
-import org.komodo.shell.commands.core.CreateCommand;
-import org.komodo.shell.commands.core.DeleteCommand;
-import org.komodo.shell.commands.core.ExportCommand;
-import org.komodo.shell.commands.core.FindCommand;
 import org.komodo.shell.commands.core.HomeCommand;
-import org.komodo.shell.commands.core.ImportCommand;
 import org.komodo.shell.commands.core.ListCommand;
 import org.komodo.shell.commands.core.PlayCommand;
-import org.komodo.shell.commands.core.RemoveConstraintColumnCommand;
 import org.komodo.shell.commands.core.RenameCommand;
-import org.komodo.shell.commands.core.ServerCommand;
-import org.komodo.shell.commands.core.SetCommand;
-import org.komodo.shell.commands.core.ShowCommand;
+import org.komodo.shell.commands.core.ShowChildrenCommand;
+import org.komodo.shell.commands.core.ShowGlobalCommand;
+import org.komodo.shell.commands.core.ShowPropertiesCommand;
+import org.komodo.shell.commands.core.ShowPropertyCommand;
+import org.komodo.shell.commands.core.ShowStatusCommand;
+import org.komodo.shell.commands.core.ShowSummaryCommand;
 import org.komodo.shell.commands.core.UnsetPropertyCommand;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.FileUtils;
@@ -91,25 +87,24 @@ public class ShellCommandFactory {
 	 */
     private void registerCommands() throws Exception {
         // register built-in commands
-        registerCommand( AddConstraintColumnCommand.class );
         registerCommand( CdCommand.class );
-        registerCommand( CreateCommand.class );
-        registerCommand( DeleteCommand.class );
         registerCommand( ExitCommand.class );
-        registerCommand( ExportCommand.class );
-        registerCommand( FindCommand.class );
+        //registerCommand( ExportCommand.class );
+        //registerCommand( FindCommand.class );
         registerCommand( HelpCommand.class );
         registerCommand( HomeCommand.class );
-        registerCommand( ImportCommand.class );
+        //registerCommand( ImportCommand.class );
         registerCommand( ListCommand.class );
         // registerCommand( NavigateCommand.class );
         registerCommand( PlayCommand.class );
-        registerCommand( RemoveConstraintColumnCommand.class );
         registerCommand( RenameCommand.class );
-        registerCommand( SetCommand.class );
-        registerCommand( ShowCommand.class );
         registerCommand( UnsetPropertyCommand.class );
-        registerCommand( ServerCommand.class );
+        registerCommand( ShowStatusCommand.class );
+        registerCommand( ShowGlobalCommand.class );
+        registerCommand( ShowChildrenCommand.class );
+        registerCommand( ShowPropertiesCommand.class );
+        registerCommand( ShowPropertyCommand.class );
+        registerCommand( ShowSummaryCommand.class );
 
         // register any commands contributed by command providers
         discoverContributedCommands();
@@ -171,9 +166,9 @@ public class ShellCommandFactory {
     private void registerCommand( final Class< ? extends ShellCommand > commandClass ) throws Exception {
         final Constructor< ? extends ShellCommand > constructor = commandClass.getConstructor( WorkspaceStatus.class );
         final ShellCommand command = constructor.newInstance( this.wsStatus );
-        command.initValidWsContextTypes();
+        command.setOutput(this.wsStatus.getShell().getCommandOutput());
+        //command.initValidWsContextTypes();
         this.commandMap.put( command.getName().toLowerCase(), command );
-
         // add aliases
         final String[] aliases = command.getAliases();
 
@@ -201,7 +196,7 @@ public class ShellCommandFactory {
 
             // if still not found the command can't be found
             if ( command == null ) {
-                return new CommandNotFoundCommand( commandName, this.wsStatus );
+                return new CommandNotFoundCommand( this.wsStatus );
             }
         }
 
@@ -221,7 +216,7 @@ public class ShellCommandFactory {
 		List<String> commandList = new ArrayList<String>();
 		for(String mapKey : this.commandMap.keySet()) {
 			ShellCommand command = this.commandMap.get(mapKey);
-			if(command.isValidForWsContext(this.wsStatus.getCurrentContext().getType())) {
+			if(command.isValidForCurrentContext()) {
 				commandList.add(mapKey);
 			}
 		}
