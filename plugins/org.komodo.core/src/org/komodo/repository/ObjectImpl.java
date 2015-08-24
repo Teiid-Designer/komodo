@@ -1003,46 +1003,63 @@ public class ObjectImpl implements KomodoObject, StringConstants {
                 break;
         }
 
-        KomodoType result;
-        if (identifiers == null) {
+        KomodoType result = KomodoType.UNKNOWN;
+        if (identifiers == null || identifiers.isEmpty()) {
             // No identifiers but could be DDL Statements container
             String nodeName = getName(transaction);
             if (StandardDdlLexicon.STATEMENTS_CONTAINER.equals(nodeName))
-                return KomodoType.DDL_SCHEMA;
+                result = KomodoType.DDL_SCHEMA;
 
-            result = KomodoType.UNKNOWN;
         } else if( identifiers.size() == 1 ) {
             result = identifiers.iterator().next().getKomodoType();
         } else {
-            //
-            // Only lexicon id with multiple identifiers is TABLE_ELEMENT
-            //
 
-            // ACCESS_PATTERN, TeiidDdlLexicon.Constraint.TABLE_ELEMENT
-            //
-            // COLUMN, TeiidDdlLexicon.Constraint.TABLE_ELEMENT
-            //
-            // PRIMARY_KEY, TeiidDdlLexicon.Constraint.TABLE_ELEMENT
-            //
-            // UNIQUE_CONSTRAINT, TeiidDdlLexicon.Constraint.TABLE_ELEMENT
+            // Multiple identifiers all with the same lexiconType
+            String lexiconType = identifiers.iterator().next().getLexiconType();
 
-            String accessPatternConstraint = TeiidDdlConstants.TeiidNonReservedWord.ACCESSPATTERN.toDdl();
-            String primaryKeyConstraint = DdlConstants.PRIMARY_KEY;
-            String uniqueConstraint = TeiidDdlConstants.TeiidReservedWord.UNIQUE.toDdl();
+            if (TeiidDdlLexicon.CreateProcedure.PROCEDURE_STATEMENT.equals(lexiconType)) {
+                /*
+                 * TeiidDdlLexicon.CreateProcedure.PROCEDURE_STATEMENT
+                 *
+                 * * STORED_PROCEDURE
+                 * * VIRTUAL_PROCEDURE
+                 */
 
-            Property constProperty = getRawProperty(transaction, TeiidDdlLexicon.Constraint.TYPE);
-            if (constProperty == null)
-                result = KomodoType.UNKNOWN;
-            else {
-                String constType = constProperty.getStringValue(transaction);
-                if (accessPatternConstraint.equals(constType))
-                    result = KomodoType.ACCESS_PATTERN;
-                else if (primaryKeyConstraint.equals(constType))
-                    result = KomodoType.PRIMARY_KEY;
-                else if (uniqueConstraint.equals(constType))
-                    result = KomodoType.UNIQUE_CONSTRAINT;
-                else
-                    result = KomodoType.COLUMN;
+                // If identifiers contains virtual procedure then its one of those,
+                // otherwise its a stored procedure.
+                result = KomodoType.STORED_PROCEDURE;
+                for (TypeIdentifier identifier : identifiers) {
+                    if (KomodoType.VIRTUAL_PROCEDURE.equals(identifier.getKomodoType())) {
+                        result = KomodoType.VIRTUAL_PROCEDURE;
+                        break;
+                    }
+                }
+
+            } else if (TeiidDdlLexicon.Constraint.TABLE_ELEMENT.equals(lexiconType)) {
+                /*
+                 * TeiidDdlLexicon.Constraint.TABLE_ELEMENT
+                 *
+                 * * ACCESS_PATTERN
+                 * * COLUMN
+                 * * PRIMARY_KEY
+                 * * UNIQUE_CONSTRAINT
+                 */
+                String accessPatternConstraint = TeiidDdlConstants.TeiidNonReservedWord.ACCESSPATTERN.toDdl();
+                String primaryKeyConstraint = DdlConstants.PRIMARY_KEY;
+                String uniqueConstraint = TeiidDdlConstants.TeiidReservedWord.UNIQUE.toDdl();
+
+                Property constProperty = getRawProperty(transaction, TeiidDdlLexicon.Constraint.TYPE);
+                if (constProperty != null) {
+                    String constType = constProperty.getStringValue(transaction);
+                    if (accessPatternConstraint.equals(constType))
+                        result = KomodoType.ACCESS_PATTERN;
+                    else if (primaryKeyConstraint.equals(constType))
+                        result = KomodoType.PRIMARY_KEY;
+                    else if (uniqueConstraint.equals(constType))
+                        result = KomodoType.UNIQUE_CONSTRAINT;
+                    else
+                        result = KomodoType.COLUMN;
+                }
             }
         }
 
@@ -1462,8 +1479,8 @@ public class ObjectImpl implements KomodoObject, StringConstants {
     }
 
     @Override
-    public void visit( final UnitOfWork transaction,
-                       final KomodoObjectVisitor visitor ) throws Exception {
+    public void accept( final UnitOfWork transaction,
+                        final KomodoObjectVisitor visitor ) throws Exception {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         visitor.visit(transaction, this);

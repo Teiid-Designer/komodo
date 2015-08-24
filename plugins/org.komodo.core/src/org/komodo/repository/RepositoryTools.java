@@ -286,7 +286,7 @@ public class RepositoryTools implements StringConstants {
 
             KomodoObject[] children = object.getChildren(transaction);
             for (int i = 0; i < children.length; ++i)
-                children[i].visit(transaction, this);
+                children[i].accept(transaction, this);
 
             return buffer.toString();
         }

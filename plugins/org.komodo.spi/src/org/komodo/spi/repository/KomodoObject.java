@@ -465,7 +465,7 @@ public interface KomodoObject extends KNode {
      * @throws Exception
      *         if error occurs
      */
-    void visit( final UnitOfWork transaction,
+    void accept( final UnitOfWork transaction,
                 final KomodoObjectVisitor visitor ) throws Exception;
 
     /**
