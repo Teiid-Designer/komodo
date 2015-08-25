@@ -43,10 +43,10 @@ public final class ShowVdbPropertiesCommand extends VdbShellCommand {
         final PropertyDescriptor[] descriptors = vdb.getPropertyDescriptors( uow );
 
         if ( descriptors.length == 0 ) {
-            print( MESSAGE_INDENT, getMessage(NO_PROPERTIES) );
+            print( MESSAGE_INDENT, getWorkspaceMessage(NO_PROPERTIES) );
         } else {
             // print header
-            print( MESSAGE_INDENT, getMessage(PROPERTIES_HEADER, getDisplayType( vdb ), vdb.getName( uow ) ) );
+            print( MESSAGE_INDENT, getWorkspaceMessage(PROPERTIES_HEADER, getDisplayType( vdb ), vdb.getName( uow ) ) );
 
             for ( final PropertyDescriptor descriptor : descriptors ) {
                 final String name = descriptor.getName();
@@ -55,7 +55,7 @@ public final class ShowVdbPropertiesCommand extends VdbShellCommand {
                 if ( vdb.hasProperty( uow, name ) ) {
                     value = vdb.getProperty( uow, name ).getStringValue( uow );
                 } else {
-                    value = getMessage(PROPERTY_NOT_SET);
+                    value = getWorkspaceMessage(PROPERTY_NOT_SET);
                 }
 
                 print( MESSAGE_INDENT, String.format( "%-25s%-25s", name, value ) ); //$NON-NLS-1$

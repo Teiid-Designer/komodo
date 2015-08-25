@@ -1,4 +1,4 @@
-package org.komodo.shell.commands.core;
+package org.komodo.relational.commands;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +8,6 @@ import org.komodo.shell.Messages;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
-import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 
@@ -18,7 +17,7 @@ import org.komodo.spi.repository.KomodoType;
  * @author blafond
  *
  */
-public class RenameCommand extends BuiltInShellCommand implements StringConstants {
+public class RenameCommand extends BuiltInShellCommand {
 
     /**
      * The command name.

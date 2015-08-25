@@ -8,7 +8,7 @@
 package org.komodo.relational.commands.vdb;
 
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.PRINT_RELATIONAL_OBJECT;
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.NO_MODELS;
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowModelsCommand.NO_MODELS;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.vdb.Vdb;
@@ -42,11 +42,11 @@ public final class ShowModelsCommand extends VdbShellCommand {
         final Model[] models = vdb.getModels( uow );
 
         if ( models.length == 0 ) {
-            print( MESSAGE_INDENT, NO_MODELS.getMessage() );
+            print( MESSAGE_INDENT, getMessage(NO_MODELS) );
         } else {
             for ( final Model model : models ) {
                 final String name = model.getName( uow );
-                print( MESSAGE_INDENT, getMessage(PRINT_RELATIONAL_OBJECT, name, getDisplayType( model ) ) );
+                print( MESSAGE_INDENT, getWorkspaceMessage(PRINT_RELATIONAL_OBJECT, name, getDisplayType( model ) ) );
             }
         }
 

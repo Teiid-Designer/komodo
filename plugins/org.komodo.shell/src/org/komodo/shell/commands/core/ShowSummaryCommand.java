@@ -29,14 +29,13 @@ import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
-import org.komodo.spi.constants.StringConstants;
 
 /**
  * Show Command.  Has various acceptable args.
  * show < properties | children | status | global | property | summary >
  *
  */
-public class ShowSummaryCommand extends BuiltInShellCommand implements StringConstants {
+public class ShowSummaryCommand extends BuiltInShellCommand {
 
     /**
      * The command name.
@@ -90,16 +89,6 @@ public class ShowSummaryCommand extends BuiltInShellCommand implements StringCon
         return true;
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.BuiltInShellCommand#shouldCommit()
-     */
-    @Override
-    protected boolean shouldCommit() {
-        return false;
-    }
-
     protected boolean validate(Arguments allArgs) throws Exception {
         // optional path arg
         if(!allArgs.isEmpty()) {
@@ -130,5 +119,15 @@ public class ShowSummaryCommand extends BuiltInShellCommand implements StringCon
 
         return -1;
     }
-    
+ 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#shouldCommit()
+     */
+    @Override
+    protected boolean shouldCommit() {
+        return false;
+    }
+
 }

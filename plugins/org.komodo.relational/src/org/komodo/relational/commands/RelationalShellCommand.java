@@ -8,6 +8,8 @@
 package org.komodo.relational.commands;
 
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.INVALID_OBJECT_TYPE;
+import java.util.Arrays;
+import java.util.List;
 import org.komodo.relational.Messages;
 import org.komodo.relational.RelationalObject;
 import org.komodo.relational.workspace.WorkspaceManager;
@@ -15,6 +17,7 @@ import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.Descriptor;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -26,10 +29,10 @@ public abstract class RelationalShellCommand extends BuiltInShellCommand {
 
     private final boolean commit;
 
-    protected RelationalShellCommand( final String commandName,
+    protected RelationalShellCommand( final WorkspaceStatus wsStatus,
                                       final boolean shouldCommit,
-                                      final WorkspaceStatus wsStatus ) {
-        super( wsStatus, commandName );
+                                      final String... commandNames ) {
+        super( wsStatus, commandNames );
         this.commit = shouldCommit;
     }
 
@@ -75,21 +78,39 @@ public abstract class RelationalShellCommand extends BuiltInShellCommand {
         return WorkspaceManager.getInstance( getRepository() );
     }
 
-    protected boolean isCurrentTypeValid( final int... validTypes ) {
-        assert ( validTypes != null );
-        final int currType = getWorkspaceStatus().getWorkspaceContext().getKomodoObj().getTypeId();
+    protected boolean isCurrentTypeValid( final String... descriptorNames ) throws KException {
+        if ( ( descriptorNames == null ) || ( descriptorNames.length == 0 ) ) {
+            return true;
+        }
 
-        for ( final int type : validTypes ) {
-            if ( type == currType ) {
+        final List< String > validTypes = Arrays.asList( descriptorNames );
+        final KomodoObject kobject = getWorkspaceStatus().getCurrentContext().getKomodoObj();
+
+        // check primary type
+        final String primaryType = kobject.getPrimaryType( getTransaction() ).getName();
+
+        if ( validTypes.contains( primaryType ) ) {
+            return true;
+        }
+
+        // check mixins
+        final Descriptor[] mixins = kobject.getDescriptors( getTransaction() );
+
+        for ( final Descriptor mixin : mixins ) {
+            if ( validTypes.contains( mixin.getName() ) ) {
                 return true;
             }
         }
 
         return false;
     }
-
+    
     protected String getMessage(Enum< ? > key, Object... parameters) {
-        return Messages.getString(WorkspaceCommandMessages.RESOURCE_BUNDLE,key.name(),parameters);
+        return Messages.getString(WorkspaceCommandMessages.RESOURCE_BUNDLE,key.toString(),parameters);
+    }
+
+    protected String getWorkspaceMessage(Enum< ? > key, Object... parameters) {
+        return Messages.getString(WorkspaceCommandMessages.RESOURCE_BUNDLE,key.toString(),parameters);
     }
     
     /**

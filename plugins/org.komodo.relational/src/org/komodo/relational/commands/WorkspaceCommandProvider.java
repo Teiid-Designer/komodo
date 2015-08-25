@@ -9,8 +9,12 @@ package org.komodo.relational.commands;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandProvider;
+import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.Repository;
 
 /**
  * A shell command provider for workspace-level commands.
@@ -36,6 +40,15 @@ public class WorkspaceCommandProvider implements ShellCommandProvider {
         result.put( SetCustomPropertyCommand.NAME, SetCustomPropertyCommand.class );
 
         return result;
+    }
+    
+    @Override
+    public WorkspaceManager resolve ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(kObj.getRepository());
+        if(wkspMgr.getAbsolutePath().equals(kObj.getAbsolutePath())) {
+            return wkspMgr;
+        }
+        return null;
     }
 
 }

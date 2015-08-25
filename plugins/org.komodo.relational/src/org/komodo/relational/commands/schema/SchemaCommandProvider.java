@@ -5,12 +5,12 @@
 *
 * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
 */
-package org.komodo.relational.commands.server;
+package org.komodo.relational.commands.schema;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.komodo.relational.teiid.Teiid;
-import org.komodo.relational.teiid.internal.TeiidImpl;
+import org.komodo.relational.model.Schema;
+import org.komodo.relational.model.internal.SchemaImpl;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandProvider;
 import org.komodo.spi.KException;
@@ -20,12 +20,12 @@ import org.komodo.spi.repository.Repository;
 /**
  * A shell command provider for VDBs.
  */
-public class ServerCommandProvider implements ShellCommandProvider {
+public class SchemaCommandProvider implements ShellCommandProvider {
 
     /**
      * Constructs a command provider for VDB shell commands.
      */
-    public ServerCommandProvider() {
+    public SchemaCommandProvider() {
         // nothing to do
     }
 
@@ -38,17 +38,15 @@ public class ServerCommandProvider implements ShellCommandProvider {
     public Map< String, Class< ? extends ShellCommand >> provideCommands() {
         final Map< String, Class< ? extends ShellCommand >> result = new HashMap<>();
 
-        result.put( ServerConnectCommand.NAME, ServerConnectCommand.class );
-        result.put( ServerSetCommand.NAME, ServerSetCommand.class );
-        result.put( ServerShowVdbsCommand.NAME, ServerShowVdbsCommand.class );
+        //result.put( ServerConnectCommand.NAME, ServerConnectCommand.class );
 
         return result;
     }
     
     @Override
-    public Teiid resolve ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        if(TeiidImpl.RESOLVER.resolvable(uow, kObj)) {
-            return TeiidImpl.RESOLVER.resolve(uow, kObj);
+    public Schema resolve ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
+        if(SchemaImpl.RESOLVER.resolvable(uow, kObj)) {
+            return SchemaImpl.RESOLVER.resolve(uow, kObj);
         }
         return null;
     }

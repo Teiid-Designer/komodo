@@ -9,8 +9,13 @@ package org.komodo.relational.commands.vdb;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.komodo.relational.vdb.Vdb;
+import org.komodo.relational.vdb.internal.VdbImpl;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandProvider;
+import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.Repository;
 
 /**
  * A shell command provider for VDBs.
@@ -59,6 +64,14 @@ public class VdbCommandProvider implements ShellCommandProvider {
         result.put( ShowVdbPropertiesCommand.NAME, ShowVdbPropertiesCommand.class );
 
         return result;
+    }
+    
+    @Override
+    public Vdb resolve ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
+        if(VdbImpl.RESOLVER.resolvable(uow, kObj)) {
+            return VdbImpl.RESOLVER.resolve(uow, kObj);
+        }
+        return null;
     }
 
 }

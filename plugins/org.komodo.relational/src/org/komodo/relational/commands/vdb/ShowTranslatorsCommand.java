@@ -8,7 +8,7 @@
 package org.komodo.relational.commands.vdb;
 
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.PRINT_RELATIONAL_OBJECT;
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.NO_TRANSLATORS;
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowTranslatorsCommand.NO_TRANSLATORS;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
@@ -42,11 +42,11 @@ public final class ShowTranslatorsCommand extends VdbShellCommand {
         final Translator[] translators = vdb.getTranslators( uow );
 
         if ( translators.length == 0 ) {
-            print( MESSAGE_INDENT, NO_TRANSLATORS.getMessage() );
+            print( MESSAGE_INDENT, getMessage(NO_TRANSLATORS) );
         } else {
             for ( final Translator translator : translators ) {
                 final String name = translator.getName( uow );
-                print( MESSAGE_INDENT, getMessage(PRINT_RELATIONAL_OBJECT, name, getDisplayType( translator ) ) );
+                print( MESSAGE_INDENT, getWorkspaceMessage(PRINT_RELATIONAL_OBJECT, name, getDisplayType( translator ) ) );
             }
         }
 

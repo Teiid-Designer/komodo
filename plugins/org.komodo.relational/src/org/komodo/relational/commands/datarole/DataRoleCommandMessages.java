@@ -7,19 +7,14 @@
  */
 package org.komodo.relational.commands.datarole;
 
-import static org.komodo.spi.constants.StringConstants.DOT;
 import java.util.ResourceBundle;
-import org.komodo.relational.Messages;
 import org.komodo.relational.vdb.DataRole;
+import org.komodo.spi.constants.StringConstants;
 
 /**
  * Localized messages for {@link DataRole}-related shell commands.
  */
-enum DataRoleCommandMessages {
-
-    MISSING_MAPPED_ROLE_NAME,
-
-    MISSING_PERMISSION_NAME;
+public class DataRoleCommandMessages implements StringConstants {
 
     private static final String BUNDLE_NAME = ( DataRoleCommandMessages.class.getPackage().getName() + DOT + DataRoleCommandMessages.class.getSimpleName().toLowerCase() );
 
@@ -28,18 +23,41 @@ enum DataRoleCommandMessages {
      */
     public static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle( BUNDLE_NAME );
 
-    String getMessage( final Object... params ) {
-        return Messages.getString( RESOURCE_BUNDLE, toString(), params );
+    @SuppressWarnings( "javadoc" )
+    public enum General {
+        MISSING_MAPPED_ROLE_NAME,
+        MISSING_PERMISSION_NAME;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @see java.lang.Enum#toString()
-     */
-    @Override
-    public String toString() {
-        return Messages.getEnumName( this ) + DOT + name();
+    @SuppressWarnings( "javadoc" )
+    public enum AddMappedRoleCommand {
+        MISSING_MAPPED_ROLE_NAME;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+    
+    @SuppressWarnings( "javadoc" )
+    public enum AddPermissionCommand {
+        MISSING_PERMISSION_NAME;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+    
+    private static String getEnumName(Enum<?> enumValue) {
+        String className = enumValue.getClass().getName();
+        String[] components = className.split("\\$"); //$NON-NLS-1$
+        return components[components.length - 1];
     }
 
 }

@@ -7,7 +7,7 @@
  */
 package org.komodo.relational.commands.vdb;
 
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.MISSING_IMPORT_NAME;
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_IMPORT_NAME;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.shell.api.WorkspaceStatus;
 
@@ -33,7 +33,7 @@ public final class DeleteImportCommand extends VdbShellCommand {
      */
     @Override
     protected boolean doExecute() throws Exception {
-        final String vdbName = requiredArgument( 0, MISSING_IMPORT_NAME.getMessage() );
+        final String vdbName = requiredArgument( 0, getMessage(MISSING_IMPORT_NAME) );
 
         final Vdb vdb = getVdb();
         vdb.removeImport( getTransaction(), vdbName );

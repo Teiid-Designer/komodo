@@ -7,7 +7,7 @@
  */
 package org.komodo.relational.commands.vdb;
 
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.MISSING_ENTRY_NAME;
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_ENTRY_NAME;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.shell.api.WorkspaceStatus;
 
@@ -33,7 +33,7 @@ public final class DeleteEntryCommand extends VdbShellCommand {
      */
     @Override
     protected boolean doExecute() throws Exception {
-        final String entryName = requiredArgument( 0, MISSING_ENTRY_NAME.getMessage() );
+        final String entryName = requiredArgument( 0, getMessage(MISSING_ENTRY_NAME) );
 
         final Vdb vdb = getVdb();
         vdb.removeEntry( getTransaction(), entryName );

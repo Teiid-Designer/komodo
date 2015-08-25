@@ -29,7 +29,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import org.komodo.core.KEngine;
+import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
@@ -301,5 +303,7 @@ public interface WorkspaceStatus extends StringConstants {
      * @return the parent komodo shell
      */
     KomodoShell getShell();
+    
+    public < T extends KomodoObject > T resolve ( final KomodoObject kObj ) throws KException;
 
 }

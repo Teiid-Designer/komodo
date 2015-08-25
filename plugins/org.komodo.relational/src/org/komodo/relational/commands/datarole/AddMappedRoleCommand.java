@@ -7,7 +7,7 @@
  */
 package org.komodo.relational.commands.datarole;
 
-import static org.komodo.relational.commands.datarole.DataRoleCommandMessages.MISSING_MAPPED_ROLE_NAME;
+import static org.komodo.relational.commands.datarole.DataRoleCommandMessages.AddMappedRoleCommand.MISSING_MAPPED_ROLE_NAME;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.shell.api.WorkspaceStatus;
 
@@ -33,7 +33,7 @@ public final class AddMappedRoleCommand extends DataRoleShellCommand {
      */
     @Override
     protected boolean doExecute() throws Exception {
-        final String mappedRoleName = requiredArgument( 0, MISSING_MAPPED_ROLE_NAME.getMessage() );
+        final String mappedRoleName = requiredArgument( 0, getMessage(MISSING_MAPPED_ROLE_NAME) );
 
         final DataRole dataRole = getDataRole();
         dataRole.addMappedRole( getTransaction(), mappedRoleName );

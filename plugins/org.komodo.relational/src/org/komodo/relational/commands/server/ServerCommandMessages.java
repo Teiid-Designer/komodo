@@ -7,85 +7,14 @@
  */
 package org.komodo.relational.commands.server;
 
-import static org.komodo.spi.constants.StringConstants.DOT;
 import java.util.ResourceBundle;
-import org.komodo.relational.Messages;
 import org.komodo.relational.vdb.DataRole;
+import org.komodo.spi.constants.StringConstants;
 
 /**
  * Localized messages for {@link DataRole}-related shell commands.
  */
-enum ServerCommandMessages {
-
-    /**
-     * An error message indicating a VDB data role is missing a name.
-     */
-    MISSING_DATA_ROLE_NAME,
-
-    /**
-     * An error message indicating a VDB entry is missing a name.
-     */
-    MISSING_ENTRY_NAME,
-
-    /**
-     * An error message indicating a VDB entry is missing a path.
-     */
-    MISSING_ENTRY_PATH,
-
-    /**
-     * An error message indicating an import VDB is missing a name.
-     */
-    MISSING_IMPORT_NAME,
-
-    /**
-     * An error message indicating a VDB model is missing a name.
-     */
-    MISSING_MODEL_NAME,
-
-    /**
-     * An error message indicating a VDB translator is missing a name.
-     */
-    MISSING_TRANSLATOR_NAME,
-
-    /**
-     * An error message indicating a VDB translator is missing a type.
-     */
-    MISSING_TRANSLATOR_TYPE,
-
-    /**
-     * An error message indicating the VDB version is missing.
-     */
-    MISSING_VDB_VERSION,
-
-    /**
-     * A message indicating the VDB has no data roles defined.
-     */
-    NO_DATA_ROLES,
-
-    /**
-     * A message indicating the VDB has no entries defined.
-     */
-    NO_ENTRIES,
-
-    /**
-     * A message indicating the VDB has no VDB imports defined.
-     */
-    NO_IMPORTS,
-
-    /**
-     * A message indicating the VDB has no models defined.
-     */
-    NO_MODELS,
-
-    /**
-     * A message indicating the VDB has no translators defined.
-     */
-    NO_TRANSLATORS,
-
-    /**
-     * A message indicating the VDB was successfully exported.
-     */
-    VDB_EXPORTED;
+public class ServerCommandMessages implements StringConstants {
 
     private static final String BUNDLE_NAME = ( ServerCommandMessages.class.getPackage().getName() + DOT + ServerCommandMessages.class.getSimpleName().toLowerCase() );
 
@@ -94,18 +23,68 @@ enum ServerCommandMessages {
      */
     public static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle( BUNDLE_NAME );
 
-    String getMessage( final Object... params ) {
-        return Messages.getString( RESOURCE_BUNDLE, toString(), params );
+    @SuppressWarnings( "javadoc" )
+    public enum Common {
+        NoTeiidDefined,
+        ServerNotConnected;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @see java.lang.Enum#toString()
-     */
-    @Override
-    public String toString() {
-        return Messages.getEnumName( this ) + DOT + name();
+    @SuppressWarnings( "javadoc" )
+    public enum ServerConnectCommand {
+        AttemptingToConnect,
+        ConnectionError,
+        TeiidStatus,
+        Connected,
+        NotConnected;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+    
+    @SuppressWarnings( "javadoc" )
+    public enum ServerDisconnectCommand {
+        AttemptingToDisconnect,
+        DisconnectSuccessMsg,
+        NoServerToDisconnectMsg;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+    
+    @SuppressWarnings( "javadoc" )
+    public enum ServerSetCommand {
+        MISSING_SERVER_NAME;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum ServerShowVdbsCommand {
+        ServerTypeHeader,
+        ObjectNameHeader;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+    
+    private static String getEnumName(Enum<?> enumValue) {
+        String className = enumValue.getClass().getName();
+        String[] components = className.split("\\$"); //$NON-NLS-1$
+        return components[components.length - 1];
     }
 
 }
