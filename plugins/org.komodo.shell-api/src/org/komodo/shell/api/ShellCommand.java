@@ -73,8 +73,9 @@ public interface ShellCommand {
 
     /**
      * @return <code>true</code> if current {@link WorkspaceContext} is valid for this command
+     * @throws Exception the exception
      */
-    public boolean isValidForCurrentContext();
+    public boolean isValidForCurrentContext() throws Exception;
 //	/**
 //	 * Is the command valid for the supplied Ws Context
 //	 * @param contextType the context type

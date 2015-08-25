@@ -24,13 +24,12 @@ package org.komodo.shell.commands.core;
 import java.util.List;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CompletionConstants;
-import org.komodo.shell.Messages;
-import org.komodo.shell.api.WorkspaceContext;
+import org.komodo.shell.api.Arguments;
+import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 
 /**
- * Displays a summary of the current status, including what repository the
- * user is currently connected to (if any).
+ * ListCommand - shows the children of a KomodoObject.
  *
  */
 public class ListCommand extends BuiltInShellCommand {
@@ -55,24 +54,14 @@ public class ListCommand extends BuiltInShellCommand {
      */
     @Override
     protected boolean doExecute() throws Exception {
-        WorkspaceStatus wsStatus = getWorkspaceStatus();
-
-        WorkspaceContext currentContext = wsStatus.getCurrentContext();
-
-        List<WorkspaceContext> children = currentContext.getChildren();
-        if(children.isEmpty()) {
-            String cType = getWorkspaceStatus().getCurrentContext().getType().toString();
-            String name = getWorkspaceStatus().getCurrentContext().getName();
-
-            String noChildrenMsg = Messages.getString("ListCommand.noChildrenMsg",cType,name); //$NON-NLS-1$
-            print(CompletionConstants.MESSAGE_INDENT,noChildrenMsg);
+        if (!validate(getArguments())) {
+            return false;
         }
 
-        for(WorkspaceContext childContext : children) {
-            String childName = childContext.getName();
-            String childType = childContext.getType();
-            print(CompletionConstants.MESSAGE_INDENT, childName+" ["+childType+"]"); //$NON-NLS-1$ //$NON-NLS-2$
-        }
+        ShellCommand showChildrenCommand = getWorkspaceStatus().getCommand(ShowChildrenCommand.NAME);
+        showChildrenCommand.setArguments(getArguments());
+
+        showChildrenCommand.execute();
 
         return true;
     }
@@ -87,6 +76,37 @@ public class ListCommand extends BuiltInShellCommand {
         return true;
     }
 
+    protected boolean validate(Arguments allArgs) throws Exception {
+        // optional path arg
+        if(!allArgs.isEmpty()) {
+            // Optional path arg
+            String pathArg = optionalArgument(0);
+            if(!validatePath(pathArg)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * @see org.komodo.shell.api.AbstractShellCommand#tabCompletion(java.lang.String, java.util.List)
+     */
+    @Override
+    public int tabCompletion(String lastArgument, List<CharSequence> candidates) throws Exception {
+
+        if (getArguments().isEmpty()) {
+            // The arg is expected to be a path
+            updateTabCompleteCandidatesForPath(candidates, getContext(), true, lastArgument);
+
+            // Do not put space after it - may want to append more to the path
+            return CompletionConstants.NO_APPEND_SEPARATOR;
+            // Tab completion for "property" - expects a valid property for the current context.
+        }
+
+        return -1;
+    }
+    
     /**
      * {@inheritDoc}
      *
@@ -96,6 +116,5 @@ public class ListCommand extends BuiltInShellCommand {
     protected boolean shouldCommit() {
         return false;
     }
-
 
 }

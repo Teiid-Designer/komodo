@@ -7,8 +7,8 @@
  */
 package org.komodo.relational.commands.vdb;
 
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.MISSING_TRANSLATOR_NAME;
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.MISSING_TRANSLATOR_TYPE;
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_TRANSLATOR_NAME;
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_TRANSLATOR_TYPE;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.shell.api.WorkspaceStatus;
 
@@ -34,8 +34,8 @@ public class AddTranslatorCommand extends VdbShellCommand {
      */
     @Override
     protected boolean doExecute() throws Exception {
-        final String translatorName = requiredArgument( 0, MISSING_TRANSLATOR_NAME.getMessage() );
-        final String translatorType = requiredArgument( 1, MISSING_TRANSLATOR_TYPE.getMessage() );
+        final String translatorName = requiredArgument( 0, getMessage(MISSING_TRANSLATOR_NAME) );
+        final String translatorType = requiredArgument( 1, getMessage(MISSING_TRANSLATOR_TYPE) );
 
         final Vdb vdb = getVdb();
         vdb.addTranslator( getTransaction(), translatorName, translatorType );

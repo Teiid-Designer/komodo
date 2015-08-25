@@ -58,8 +58,8 @@ public final class SetVdbPropertyCommand extends VdbShellCommand {
      */
     @Override
     protected boolean doExecute() throws Exception {
-        final String name = requiredArgument( 0, getMessage(MISSING_PROPERTY_NAME_VALUE) );
-        final String value = requiredArgument( 0, getMessage(MISSING_PROPERTY_NAME_VALUE) );
+        final String name = requiredArgument( 0, getWorkspaceMessage(MISSING_PROPERTY_NAME_VALUE) );
+        final String value = requiredArgument( 0, getWorkspaceMessage(MISSING_PROPERTY_NAME_VALUE) );
 
         final Vdb vdb = getVdb();
         final UnitOfWork transaction = getTransaction();
@@ -91,7 +91,7 @@ public final class SetVdbPropertyCommand extends VdbShellCommand {
                 if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
                     vdb.setPreview( transaction, Boolean.parseBoolean( value ) );
                 } else {
-                    print( MESSAGE_INDENT, getMessage(INVALID_BOOLEAN_PROPERTY_VALUE, PREVIEW ) );
+                    print( MESSAGE_INDENT, getWorkspaceMessage(INVALID_BOOLEAN_PROPERTY_VALUE, PREVIEW ) );
                     success = false;
                 }
 
@@ -101,7 +101,7 @@ public final class SetVdbPropertyCommand extends VdbShellCommand {
                     final int timeout = Integer.parseInt( value );
                     vdb.setQueryTimeout( transaction, timeout );
                 } catch ( final NumberFormatException e ) {
-                    print( MESSAGE_INDENT, getMessage(INVALID_INTEGER_PROPERTY_VALUE, QUERY_TIMEOUT ) );
+                    print( MESSAGE_INDENT, getWorkspaceMessage(INVALID_INTEGER_PROPERTY_VALUE, QUERY_TIMEOUT ) );
                     success = false;
                 }
 
@@ -114,14 +114,14 @@ public final class SetVdbPropertyCommand extends VdbShellCommand {
                     final int version = Integer.parseInt( value );
                     vdb.setVersion( transaction, version );
                 } catch ( final NumberFormatException e ) {
-                    print( MESSAGE_INDENT, getMessage(INVALID_INTEGER_PROPERTY_VALUE, VERSION ) );
+                    print( MESSAGE_INDENT, getWorkspaceMessage(INVALID_INTEGER_PROPERTY_VALUE, VERSION ) );
                     success = false;
                 }
 
                 break;
             default:
                 success = false;
-                print( MESSAGE_INDENT, getMessage(INVALID_PROPERTY_NAME, NAME ) );
+                print( MESSAGE_INDENT, getWorkspaceMessage(INVALID_PROPERTY_NAME, NAME ) );
                 break;
         }
 

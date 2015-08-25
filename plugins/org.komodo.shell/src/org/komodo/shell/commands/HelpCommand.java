@@ -120,7 +120,7 @@ public class HelpCommand extends BuiltInShellCommand {
         for (Entry<String,ShellCommand> entry : this.commands.entrySet()) {
             String cmdName = entry.getKey();
             ShellCommand command = entry.getValue();
-            if(command.isValidForCurrentContext()) {
+            if(command.isValidForCurrentContext() && !(command instanceof CommandNotFoundCommand)) {
                 validCmdNames.add(cmdName);
                 if(cmdName.length()>maxCommandLength) {
                     maxCommandLength = cmdName.length();

@@ -7,8 +7,8 @@
  */
 package org.komodo.relational.commands.vdb;
 
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.MISSING_ENTRY_NAME;
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.MISSING_ENTRY_PATH;
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_ENTRY_NAME;
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_ENTRY_PATH;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.shell.api.WorkspaceStatus;
 
@@ -34,8 +34,8 @@ public final class AddEntryCommand extends VdbShellCommand {
      */
     @Override
     protected boolean doExecute() throws Exception {
-        final String entryName = requiredArgument( 0, MISSING_ENTRY_NAME.getMessage() );
-        final String entryPath = requiredArgument( 1, MISSING_ENTRY_PATH.getMessage() );
+        final String entryName = requiredArgument( 0, getMessage(MISSING_ENTRY_NAME) );
+        final String entryPath = requiredArgument( 1, getMessage(MISSING_ENTRY_PATH) );
 
         final Vdb vdb = getVdb();
         vdb.addEntry( getTransaction(), entryName, entryPath );

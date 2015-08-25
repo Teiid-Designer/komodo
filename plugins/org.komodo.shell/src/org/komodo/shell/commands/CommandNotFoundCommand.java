@@ -21,7 +21,6 @@ import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.AbstractShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.utils.ArgCheck;
 
 /**
  * The command used when a command does not exist for a given command name.
@@ -33,7 +32,10 @@ import org.komodo.utils.ArgCheck;
  */
 public class CommandNotFoundCommand extends AbstractShellCommand {
 
-    private static final String NAME = "cmd-not-found"; //$NON-NLS-1$
+    /**
+     * Name of the CommandNotFoundCommand
+     */
+    public static final String NAME = "cmd-not-found"; //$NON-NLS-1$
 
     /**
      * @param wsStatus

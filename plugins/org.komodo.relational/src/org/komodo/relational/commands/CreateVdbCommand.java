@@ -9,7 +9,6 @@ package org.komodo.relational.commands;
 
 import static org.komodo.relational.commands.WorkspaceCommandMessages.CreateVdbCommand.MISSING_VDB_EXTERNAL_PATH;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.CreateVdbCommand.MISSING_VDB_NAME;
-import org.komodo.relational.Messages;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.WorkspaceStatus;
 
@@ -25,7 +24,7 @@ public final class CreateVdbCommand extends RelationalShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public CreateVdbCommand( final WorkspaceStatus status ) {
-        super( NAME, true, status );
+        super( status, true, NAME );
     }
 
     /**
@@ -51,7 +50,7 @@ public final class CreateVdbCommand extends RelationalShellCommand {
      */
     @Override
     public boolean isValidForCurrentContext() {
-        return true;
+        return false;
     }
 
 }

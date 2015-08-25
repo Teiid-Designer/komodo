@@ -8,7 +8,7 @@
 package org.komodo.relational.commands.vdb;
 
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.PRINT_RELATIONAL_OBJECT;
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.NO_DATA_ROLES;
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowDataRolesCommand.NO_DATA_ROLES;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Vdb;
@@ -42,11 +42,11 @@ public final class ShowDataRolesCommand extends VdbShellCommand {
         final DataRole[] dataRoles = vdb.getDataRoles( uow );
 
         if ( dataRoles.length == 0 ) {
-            print( MESSAGE_INDENT, NO_DATA_ROLES.getMessage() );
+            print( MESSAGE_INDENT, getMessage(NO_DATA_ROLES) );
         } else {
             for ( final DataRole role : dataRoles ) {
                 final String name = role.getName( uow );
-                print( MESSAGE_INDENT, getMessage(PRINT_RELATIONAL_OBJECT, name, getDisplayType( role ) ) );
+                print( MESSAGE_INDENT, getWorkspaceMessage(PRINT_RELATIONAL_OBJECT, name, getDisplayType( role ) ) );
             }
         }
 

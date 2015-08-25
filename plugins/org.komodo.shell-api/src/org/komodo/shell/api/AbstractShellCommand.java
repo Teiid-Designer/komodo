@@ -16,9 +16,7 @@
 package org.komodo.shell.api;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.Writer;
-import java.util.Collections;
 import java.util.List;
 import org.komodo.shell.api.Messages.SHELLAPI;
 import org.komodo.spi.constants.StringConstants;
@@ -32,7 +30,7 @@ import org.komodo.utils.ArgCheck;
  *
  * @author eric.wittmann@redhat.com
  */
-public abstract class AbstractShellCommand implements ShellCommand {
+public abstract class AbstractShellCommand implements ShellCommand, StringConstants {
 
 	private final WorkspaceStatus wsStatus;
 	private Arguments arguments;

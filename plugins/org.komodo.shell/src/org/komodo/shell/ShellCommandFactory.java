@@ -41,7 +41,9 @@ import org.komodo.shell.commands.core.CdCommand;
 import org.komodo.shell.commands.core.HomeCommand;
 import org.komodo.shell.commands.core.ListCommand;
 import org.komodo.shell.commands.core.PlayCommand;
-import org.komodo.shell.commands.core.RenameCommand;
+import org.komodo.shell.commands.core.SetGlobalPropertyCommand;
+import org.komodo.shell.commands.core.SetPropertyCommand;
+import org.komodo.shell.commands.core.SetRecordCommand;
 import org.komodo.shell.commands.core.ShowChildrenCommand;
 import org.komodo.shell.commands.core.ShowGlobalCommand;
 import org.komodo.shell.commands.core.ShowPropertiesCommand;
@@ -64,57 +66,63 @@ import org.komodo.utils.StringUtils;
  */
 public class ShellCommandFactory {
 
-	private final WorkspaceStatus wsStatus;
     private final Map<String, ShellCommand> commandMap;
     private final Map<String, ShellCommand> aliasMap; // separate from commandMap so HelpCommand only shows command names
+    private Collection<ShellCommandProvider> providers = new ArrayList<>();
 
     /**
-     * @param wsStatus
-     *        the workspace context (cannot be <code>null</code>)
      * @throws Exception
      *         if a built-in command cannot be created or if an error occurs
      */
-    public ShellCommandFactory( final WorkspaceStatus wsStatus ) throws Exception {
-        ArgCheck.isNotNull( wsStatus, "wsStatus" ); //$NON-NLS-1$
-        this.wsStatus = wsStatus;
+    public ShellCommandFactory( ) throws Exception {
         this.commandMap = new HashMap< String, ShellCommand >();
         this.aliasMap = new HashMap< String, ShellCommand >();
-        registerCommands();
+        
+        discoverProviders();
+    }
+    
+    /**
+     * The the command providers
+     * @return the command providers
+     */
+    public Collection<ShellCommandProvider> getCommandProviders() {
+        return providers;
     }
 
 	/**
 	 * Registers all known commands.
+	 * @param wsStatus the workspace status
+	 * @throws Exception the exception
 	 */
-    private void registerCommands() throws Exception {
+    public void registerCommands(WorkspaceStatus wsStatus) throws Exception {
         // register built-in commands
-        registerCommand( CdCommand.class );
-        registerCommand( ExitCommand.class );
-        //registerCommand( ExportCommand.class );
-        //registerCommand( FindCommand.class );
-        registerCommand( HelpCommand.class );
-        registerCommand( HomeCommand.class );
-        //registerCommand( ImportCommand.class );
-        registerCommand( ListCommand.class );
-        // registerCommand( NavigateCommand.class );
-        registerCommand( PlayCommand.class );
-        registerCommand( RenameCommand.class );
-        registerCommand( UnsetPropertyCommand.class );
-        registerCommand( ShowStatusCommand.class );
-        registerCommand( ShowGlobalCommand.class );
-        registerCommand( ShowChildrenCommand.class );
-        registerCommand( ShowPropertiesCommand.class );
-        registerCommand( ShowPropertyCommand.class );
-        registerCommand( ShowSummaryCommand.class );
+        registerCommand( CommandNotFoundCommand.class, wsStatus);
+        registerCommand( CdCommand.class, wsStatus );
+        registerCommand( ExitCommand.class, wsStatus );
+        registerCommand( HelpCommand.class, wsStatus );
+        registerCommand( HomeCommand.class, wsStatus );
+        registerCommand( PlayCommand.class, wsStatus );
+        registerCommand( ShowStatusCommand.class, wsStatus );
+        registerCommand( ShowGlobalCommand.class, wsStatus );
+        registerCommand( ListCommand.class, wsStatus );
+        registerCommand( ShowChildrenCommand.class, wsStatus );
+        registerCommand( ShowPropertiesCommand.class, wsStatus );
+        registerCommand( ShowPropertyCommand.class, wsStatus );
+        registerCommand( ShowSummaryCommand.class, wsStatus );
+        registerCommand( SetGlobalPropertyCommand.class, wsStatus );
+        registerCommand( SetPropertyCommand.class, wsStatus );
+        registerCommand( SetRecordCommand.class, wsStatus );
+        registerCommand( UnsetPropertyCommand.class, wsStatus );
 
         // register any commands contributed by command providers
-        discoverContributedCommands();
+        discoverContributedCommands(wsStatus);
     }
 
     /**
      * Discover any contributed commands, both on the classpath and registered
      * in the .komodo/commands.ini file in the user's home directory.
      */
-    private void discoverContributedCommands() {
+    private void discoverContributedCommands(WorkspaceStatus wsStatus) {
         List<ClassLoader> commandClassloaders = new ArrayList<ClassLoader>();
         commandClassloaders.add(Thread.currentThread().getContextClassLoader());
 
@@ -140,33 +148,42 @@ public class ShellCommandFactory {
                 KEngine.getInstance().getErrorHandler().error(e);
             }
         }
+        
+        for(ShellCommandProvider provider : providers) {
+            Map<String, Class<? extends ShellCommand>> commands = provider.provideCommands();
+            for (Map.Entry<String, Class<? extends ShellCommand>> entry : commands.entrySet()) {
+                Class<? extends ShellCommand> commandClass = entry.getValue();
 
+                if (commandClass != null) {
+                    try {
+                        registerCommand( commandClass, wsStatus );
+                    } catch (Exception e) {
+                        KEngine.getInstance().getErrorHandler().error(e);
+                    }
+                }
+            }
+        }
+
+    }
+    
+    private void discoverProviders() {
+        List<ClassLoader> commandClassloaders = new ArrayList<ClassLoader>();
+        commandClassloaders.add(Thread.currentThread().getContextClassLoader());
+        
         // Now that we have identified all ClassLoaders to check for commands, iterate
         // through them all and use the Java ServiceLoader mechanism to actually
         // load the commands.
         for (ClassLoader classLoader : commandClassloaders) {
             for (ShellCommandProvider provider : ServiceLoader.load(ShellCommandProvider.class, classLoader)) {
-                Map<String, Class<? extends ShellCommand>> commands = provider.provideCommands();
-
-                for (Map.Entry<String, Class<? extends ShellCommand>> entry : commands.entrySet()) {
-                	Class<? extends ShellCommand> commandClass = entry.getValue();
-
-                	if (commandClass != null) {
-        				try {
-                            registerCommand( commandClass );
-						} catch (Exception e) {
-						    KEngine.getInstance().getErrorHandler().error(e);
-						}
-        			}
-                }
+                providers.add(provider);
             }
         }
     }
 
-    private void registerCommand( final Class< ? extends ShellCommand > commandClass ) throws Exception {
+    private void registerCommand( final Class< ? extends ShellCommand > commandClass, WorkspaceStatus wsStatus ) throws Exception {
         final Constructor< ? extends ShellCommand > constructor = commandClass.getConstructor( WorkspaceStatus.class );
-        final ShellCommand command = constructor.newInstance( this.wsStatus );
-        command.setOutput(this.wsStatus.getShell().getCommandOutput());
+        final ShellCommand command = constructor.newInstance( wsStatus );
+        command.setOutput(wsStatus.getShell().getCommandOutput());
         //command.initValidWsContextTypes();
         this.commandMap.put( command.getName().toLowerCase(), command );
         // add aliases
@@ -185,8 +202,9 @@ public class ShellCommandFactory {
      * @param commandName
      *        the name of the command being requested (cannot be empty)
      * @return the command or a {@link CommandNotFoundCommand} (never <code>null</code>)
+     * @throws Exception the exception
      */
-    public ShellCommand getCommand( final String commandName ) {
+    public ShellCommand getCommand( final String commandName ) throws Exception {
         ArgCheck.isNotEmpty( commandName, "commandName" ); //$NON-NLS-1$
         ShellCommand command = this.commandMap.get( commandName.toLowerCase() );
 
@@ -196,7 +214,7 @@ public class ShellCommandFactory {
 
             // if still not found the command can't be found
             if ( command == null ) {
-                return new CommandNotFoundCommand( this.wsStatus );
+                return this.commandMap.get(CommandNotFoundCommand.NAME);
             }
         }
 
