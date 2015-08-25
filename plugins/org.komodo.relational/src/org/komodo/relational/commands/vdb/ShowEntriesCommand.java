@@ -8,7 +8,7 @@
 package org.komodo.relational.commands.vdb;
 
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.PRINT_RELATIONAL_OBJECT;
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.NO_ENTRIES;
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowEntriesCommand.NO_ENTRIES;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import org.komodo.relational.vdb.Entry;
 import org.komodo.relational.vdb.Vdb;
@@ -42,11 +42,11 @@ public final class ShowEntriesCommand extends VdbShellCommand {
         final Entry[] entries = vdb.getEntries( uow );
 
         if ( entries.length == 0 ) {
-            print( MESSAGE_INDENT, NO_ENTRIES.getMessage() );
+            print( MESSAGE_INDENT, getMessage(NO_ENTRIES) );
         } else {
             for ( final Entry entry : entries ) {
                 final String name = entry.getName( uow );
-                print( MESSAGE_INDENT, getMessage(PRINT_RELATIONAL_OBJECT, name, getDisplayType( entry ) ) );
+                print( MESSAGE_INDENT, getWorkspaceMessage(PRINT_RELATIONAL_OBJECT, name, getDisplayType( entry ) ) );
             }
         }
 

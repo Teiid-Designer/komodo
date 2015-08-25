@@ -40,6 +40,7 @@ import org.komodo.repository.SynchronousCallback;
 import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.KomodoShell;
 import org.komodo.shell.api.ShellCommand;
+import org.komodo.shell.api.ShellCommandProvider;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.api.WorkspaceStatusEventHandler;
@@ -89,10 +90,11 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     /**
      * Constructor
      * @param shell parent shell
+     * @param commandFactory the command factory
      * @throws Exception error on initialisation failure
      */
-    public WorkspaceStatusImpl(KomodoShell shell) throws Exception {
-        this( null, shell );
+    public WorkspaceStatusImpl(KomodoShell shell, ShellCommandFactory commandFactory) throws Exception {
+        this( null, shell, commandFactory );
     }
 
     /**
@@ -100,18 +102,21 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
      *        the transaction to use initially in the shell (can be <code>null</code> if one should be created)
      * @param shell
      *        parent shell
+     * @param commandFactory the command factory
      * @throws Exception
      *         error on initialisation failure
      */
     public WorkspaceStatusImpl( final UnitOfWork transaction,
-                                final KomodoShell shell ) throws Exception {
+                                final KomodoShell shell,
+                                final ShellCommandFactory commandFactory) throws Exception {
         this.shell = shell;
+        this.commandFactory = commandFactory;
         init(transaction);
     }
 
     private void init( final UnitOfWork transaction ) throws Exception {
         if ( transaction == null ) {
-        	createTransaction("init"); //$NON-NLS-1$
+            createTransaction("init"); //$NON-NLS-1$
         } else {
             this.uow = transaction;
             Repository.UnitOfWorkListener uowListener = transaction.getCallback();
@@ -183,7 +188,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     }
 
     @Override
-	public void commit( final String source ) throws Exception {
+    public void commit( final String source ) throws Exception {
         final String txName = this.uow.getName();
         this.uow.commit();
 
@@ -204,18 +209,18 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     }
     
 //    @Override
-//	public void commitImport( final String source, ImportMessages importMessages ) throws Exception {
+//  public void commitImport( final String source, ImportMessages importMessages ) throws Exception {
 //        final String txName = this.uow.getName();
 //        this.uow.commit();
 //
 //        final boolean success = this.callback.await( 3, TimeUnit.MINUTES );
 //        if ( success ) {
-//        	// For imports, if has callback error - add to import errors and return.
-//        	if(this.callback.hasError()) {
-//            	importMessages.addErrorMessage(callback.error());
-//            	createTransaction(source);
-//            	return;
-//        	}
+//          // For imports, if has callback error - add to import errors and return.
+//          if(this.callback.hasError()) {
+//              importMessages.addErrorMessage(callback.error());
+//              createTransaction(source);
+//              return;
+//          }
 //            final KException error = uow.getError();
 //            final State txState = this.uow.getState();
 //
@@ -385,10 +390,10 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
      */
     @Override
     public File getRecordingOutputFile() {
-    	String filePath = this.wsProperties.getProperty(WorkspaceStatus.RECORDING_FILE_KEY);
-    	if(StringUtils.isEmpty(filePath)) {
-    		return null;
-    	}
+        String filePath = this.wsProperties.getProperty(WorkspaceStatus.RECORDING_FILE_KEY);
+        if(StringUtils.isEmpty(filePath)) {
+            return null;
+        }
         return new File(filePath);
     }
 
@@ -586,15 +591,15 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         return copy;
     }
     
-    /**
-     * @param factory
-     *        the command factory (cannot be <code>null</code>)
-     */
-    public void setCommandFactory( final ShellCommandFactory factory ) {
-        ArgCheck.isNotNull( factory, "factory" ); //$NON-NLS-1$
-        this.commandFactory = factory;
-    }
-
+//    /**
+//     * @param factory
+//     *        the command factory (cannot be <code>null</code>)
+//     */
+//    public void setCommandFactory( final ShellCommandFactory factory ) {
+//        ArgCheck.isNotNull( factory, "factory" ); //$NON-NLS-1$
+//        this.commandFactory = factory;
+//    }
+//
     /**
      * {@inheritDoc}
      *
@@ -603,6 +608,17 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     @Override
     public ShellCommand getCommand( final String commandName ) throws Exception {
         return this.commandFactory.getCommand( commandName );
+    }
+    
+    @Override
+    public < T extends KomodoObject > T resolve ( final KomodoObject kObj ) throws KException {
+        if(this.commandFactory.getCommandProviders()!=null) {
+            for(ShellCommandProvider provider : this.commandFactory.getCommandProviders()) {
+                KomodoObject resolvedObj = provider.resolve(getTransaction(), kObj);
+                if(resolvedObj!=null) return (T)resolvedObj;
+            }
+        }
+        return (T)kObj;
     }
 
 }

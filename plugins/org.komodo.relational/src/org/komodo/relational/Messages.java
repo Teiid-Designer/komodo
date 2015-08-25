@@ -245,6 +245,10 @@ public class Messages implements StringConstants {
 
     }
 
+    /**
+     * @param enumValue the value
+     * @return the name
+     */
     public static String getEnumName( Enum< ? > enumValue ) {
         String className = enumValue.getClass().getName();
         String[] components = className.split("\\$"); //$NON-NLS-1$

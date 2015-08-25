@@ -10,8 +10,12 @@ package org.komodo.relational.commands.datarole;
 import java.util.HashMap;
 import java.util.Map;
 import org.komodo.relational.vdb.DataRole;
+import org.komodo.relational.vdb.internal.DataRoleImpl;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandProvider;
+import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.Repository;
 
 /**
  * A shell command provider for {@link DataRole}s.
@@ -38,6 +42,14 @@ public class DataRoleCommandProvider implements ShellCommandProvider {
         result.put( AddPermissionCommand.NAME, AddPermissionCommand.class );
 
         return result;
+    }
+    
+    @Override
+    public DataRole resolve ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
+        if(DataRoleImpl.RESOLVER.resolvable(uow, kObj)) {
+            return DataRoleImpl.RESOLVER.resolve(uow, kObj);
+        }
+        return null;
     }
 
 }

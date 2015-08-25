@@ -28,14 +28,13 @@ import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
-import org.komodo.spi.constants.StringConstants;
 import org.komodo.utils.StringUtils;
 
 /**
- * Cd command - allows changing the workspace context
+ * CdCommand - allows changing the workspace context
  *
  */
-public class CdCommand extends BuiltInShellCommand implements StringConstants {
+public class CdCommand extends BuiltInShellCommand {
 
     /**
      * The command name.

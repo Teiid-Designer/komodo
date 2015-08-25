@@ -26,14 +26,14 @@ import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.Messages;
 import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Repository;
+import org.komodo.utils.StringUtils;
 
 /**
  * Show Status Command.
  *
  */
-public class ShowStatusCommand extends BuiltInShellCommand implements StringConstants {
+public class ShowStatusCommand extends BuiltInShellCommand {
 
     /**
      * The command name.
@@ -89,25 +89,26 @@ public class ShowStatusCommand extends BuiltInShellCommand implements StringCons
 
         // Repo info
         final Repository.Id repoId = context.getRepository().getId();
-        print(MESSAGE_INDENT, Messages.getString(Messages.ShowCommand.CurrentRepoName, repoId.getWorkspaceName()));
-        print(MESSAGE_INDENT, Messages.getString(Messages.ShowCommand.CurrentRepoUrl, repoId.getUrl()));
+        print(MESSAGE_INDENT, Messages.getString(Messages.ShowStatusCommand.CurrentRepoName, repoId.getWorkspaceName()));
+        print(MESSAGE_INDENT, Messages.getString(Messages.ShowStatusCommand.CurrentRepoUrl, repoId.getUrl()));
 
-		// Teiid Instance info
-//		Teiid teiid = wsStatus.getTeiid();
-//		if (teiid == null)
-//			print(MESSAGE_INDENT, Messages.getString(Messages.ShowCommand.NoCurrentTeiid));
-//		else {
+		// Get current server and test connection if defined
+		String serverName = wsStatus.getServer();
+		if (StringUtils.isEmpty(serverName))
+			print(MESSAGE_INDENT, Messages.getString(Messages.ShowStatusCommand.NoCurrentTeiid));
+		else {
+		    String currentServerText = serverName;
 //			TeiidInstance teiidInstance = teiid.getTeiidInstance(wsStatus.getTransaction());
 //            String teiidName = teiid.getName(wsStatus.getTransaction());
 //			String teiidUrl = teiidInstance.getUrl();
 //			String teiidConnected = teiidInstance.isConnected() ? Messages.getString(Messages.ShowCommand.Connected) : Messages.getString(Messages.ShowCommand.NotConnected);
 //            String currentServerText = Messages.getString(Messages.ShowCommand.serverStatusText, teiidName, teiidUrl, teiidConnected);
-//            print(MESSAGE_INDENT, Messages.getString(Messages.ShowCommand.CurrentTeiid, currentServerText));
-//		}
+            print(MESSAGE_INDENT, Messages.getString(Messages.ShowStatusCommand.CurrentTeiid, currentServerText));
+		}
 
 		// Current Context
 		WorkspaceContext currentContext = wsStatus.getCurrentContext();
-		print(MESSAGE_INDENT, Messages.getString(Messages.ShowCommand.CurrentContext, currentContext.getFullName()));
+		print(MESSAGE_INDENT, Messages.getString(Messages.ShowStatusCommand.CurrentContext, currentContext.getFullName()));
 	}
 
 }

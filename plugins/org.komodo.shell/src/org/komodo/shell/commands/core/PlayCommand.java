@@ -10,7 +10,6 @@ import org.komodo.shell.ShellCommandReaderFactory;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.ExitCommand;
-import org.komodo.spi.constants.StringConstants;
 
 /**
  * This command is intended to allow executing (playing) a saved komodo CLI script on your local file system
@@ -18,7 +17,7 @@ import org.komodo.spi.constants.StringConstants;
  * @author blafond
  *
  */
-public class PlayCommand  extends BuiltInShellCommand implements StringConstants {
+public class PlayCommand  extends BuiltInShellCommand {
 
     /**
      * The command name.
@@ -63,7 +62,8 @@ public class PlayCommand  extends BuiltInShellCommand implements StringConstants
 		WorkspaceStatus wsStatus = getWorkspaceStatus();
 		String[] args = new String[]{"-f", commandFile}; //$NON-NLS-1$
 
-		ShellCommandFactory factory = new ShellCommandFactory(wsStatus);
+		ShellCommandFactory factory = new ShellCommandFactory();
+        factory.registerCommands(wsStatus);
 		ShellCommandReader reader = ShellCommandReaderFactory.createCommandReader(args, factory, wsStatus);
         reader.open();
 

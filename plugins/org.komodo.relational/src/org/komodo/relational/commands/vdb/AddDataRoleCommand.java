@@ -7,7 +7,7 @@
  */
 package org.komodo.relational.commands.vdb;
 
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.MISSING_DATA_ROLE_NAME;
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_DATA_ROLE_NAME;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.shell.api.WorkspaceStatus;
 
@@ -33,7 +33,7 @@ public final class AddDataRoleCommand extends VdbShellCommand {
      */
     @Override
     protected boolean doExecute() throws Exception {
-        final String dataRoleName = requiredArgument( 0, MISSING_DATA_ROLE_NAME.getMessage() );
+        final String dataRoleName = requiredArgument( 0, getMessage(MISSING_DATA_ROLE_NAME) );
 
         final Vdb vdb = getVdb();
         vdb.addDataRole( getTransaction(), dataRoleName );

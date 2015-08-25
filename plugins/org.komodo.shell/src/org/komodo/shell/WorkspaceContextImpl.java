@@ -33,6 +33,7 @@ import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceContextVisitor;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
+import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
@@ -62,14 +63,15 @@ public class WorkspaceContextImpl implements WorkspaceContext {
      * @param wsStatus the workspace status object
      * @param parent the parent context
      * @param repoObject repository object on which this context is based
+     * @throws KException exception
      */
     public WorkspaceContextImpl( WorkspaceStatus wsStatus,
                                  WorkspaceContext parent,
-                                 KomodoObject repoObject ) {
+                                 KomodoObject repoObject ) throws KException {
         super();
         this.wsStatus = wsStatus;
         this.parent = parent;
-        this.repoObject = repoObject;
+        this.repoObject = !repoObject.getClass().equals(org.komodo.repository.ObjectImpl.class) ? repoObject : wsStatus.resolve(repoObject);
     }
 
     @Override
@@ -114,12 +116,10 @@ public class WorkspaceContextImpl implements WorkspaceContext {
      */
     @Override
     public String getName() throws Exception {
-    	String name = this.repoObject.getName(this.wsStatus.getTransaction());
-    	KomodoType nodeType = this.repoObject.getTypeIdentifier(this.wsStatus.getTransaction());
-    	if(nodeType==KomodoType.WORKSPACE) {
-    		name = WORKSPACE_ROOT_DISPLAY_NAME;
-    	}
-    	return name;
+        if(isWorkspaceRoot(this.repoObject)) {
+            return WORKSPACE_ROOT_DISPLAY_NAME;
+        }
+        return this.repoObject.getName(this.wsStatus.getTransaction());
     }
 
     /* (non-Javadoc)
@@ -127,9 +127,19 @@ public class WorkspaceContextImpl implements WorkspaceContext {
      */
     @Override
     public String getType() throws Exception {
+        if(isWorkspaceRoot(this.repoObject)) {
+            return KomodoType.WORKSPACE.getType();
+        }
         return this.repoObject.getTypeIdentifier( this.wsStatus.getTransaction() ).getType();
     }
 
+    private boolean isWorkspaceRoot(final KomodoObject kObject) {
+        if(kObject==this.wsStatus.getWorkspaceContext().getKomodoObj()) {
+            return true;
+        }
+        return false;
+    }
+    
     /* (non-Javadoc)
      * @see org.komodo.shell.api.WorkspaceContext#getParent()
      */

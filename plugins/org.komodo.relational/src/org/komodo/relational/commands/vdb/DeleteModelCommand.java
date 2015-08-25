@@ -7,7 +7,7 @@
  */
 package org.komodo.relational.commands.vdb;
 
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.MISSING_MODEL_NAME;
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_MODEL_NAME;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.shell.api.WorkspaceStatus;
 
@@ -33,7 +33,7 @@ public final class DeleteModelCommand extends VdbShellCommand {
      */
     @Override
     protected boolean doExecute() throws Exception {
-        final String modelName = requiredArgument( 0, MISSING_MODEL_NAME.getMessage() );
+        final String modelName = requiredArgument( 0, getMessage(MISSING_MODEL_NAME) );
 
         final Vdb vdb = getVdb();
         vdb.removeModel( getTransaction(), modelName );

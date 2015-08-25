@@ -227,9 +227,10 @@ public class DefaultKomodoShell implements KomodoShell {
         // This will block and await the start of both the engine and its default repository
         startKEngine();
 
-        wsStatus = new WorkspaceStatusImpl(this);
-        factory = new ShellCommandFactory(wsStatus);
-        ((WorkspaceStatusImpl)wsStatus).setCommandFactory( this.factory );
+        factory = new ShellCommandFactory();
+        wsStatus = new WorkspaceStatusImpl(this,factory);
+        
+        factory.registerCommands(wsStatus);
 
         // load shell properties if they exist
         final String dataDir = getShellDataLocation();

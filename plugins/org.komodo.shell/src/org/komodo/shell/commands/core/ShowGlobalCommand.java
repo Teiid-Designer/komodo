@@ -28,14 +28,12 @@ import org.komodo.shell.Messages;
 import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.PrintUtils;
-import org.komodo.spi.constants.StringConstants;
 
 /**
- * Show Command.  Has various acceptable args.
- * show < properties | children | status | global | property | summary >
+ * ShowGlobalCommand - shows global workspace properties.
  *
  */
-public class ShowGlobalCommand extends BuiltInShellCommand implements StringConstants {
+public class ShowGlobalCommand extends BuiltInShellCommand {
 
     /**
      * The command name.
@@ -60,7 +58,7 @@ public class ShowGlobalCommand extends BuiltInShellCommand implements StringCons
         final Properties globalProperties = getWorkspaceStatus().getProperties();
 
         // Print properties header
-        final String globalPropsHeader = Messages.getString( Messages.ShowCommand.GlobalPropertiesHeader ); 
+        final String globalPropsHeader = Messages.getString( Messages.ShowGlobalCommand.GlobalPropertiesHeader ); 
         print( MESSAGE_INDENT, globalPropsHeader );
 
         // Print the properties

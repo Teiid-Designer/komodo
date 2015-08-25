@@ -16,6 +16,9 @@
 package org.komodo.shell.api;
 
 import java.util.Map;
+import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.Repository;
 
 
 /**
@@ -35,4 +38,11 @@ public interface ShellCommandProvider {
 	 */
 	public Map<String, Class<? extends ShellCommand>> provideCommands();
 
+	/**
+	 * @param uow the transaction
+	 * @param kObj the KomodoObject
+	 * @return resolved object
+	 * @throws KException the exception
+	 */
+	public < T extends KomodoObject > T resolve ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException;
 }

@@ -12,6 +12,7 @@ import org.komodo.relational.commands.RelationalShellCommand;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.internal.DataRoleImpl;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 /**
  * A base class for {@link DataRole data role}-related shell commands.
@@ -21,7 +22,7 @@ abstract class DataRoleShellCommand extends RelationalShellCommand {
     protected DataRoleShellCommand( final String name,
                                     final boolean shouldCommit,
                                     final WorkspaceStatus status ) {
-        super( name, shouldCommit, status );
+        super( status, shouldCommit, name );
     }
 
     protected DataRole getDataRole() throws Exception {
@@ -34,10 +35,15 @@ abstract class DataRoleShellCommand extends RelationalShellCommand {
      * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
      */
     @Override
-    public final boolean isValidForCurrentContext() {
-        return isCurrentTypeValid( DataRole.TYPE_ID );
+    public final boolean isValidForCurrentContext() throws Exception {
+        return isCurrentTypeValid( VdbLexicon.DataRole.DATA_ROLE );
     }
 
+    @Override
+    protected String getMessage(Enum< ? > key, Object... parameters) {
+        return Messages.getString(DataRoleCommandMessages.RESOURCE_BUNDLE,key.toString(),parameters);
+    }
+    
     /**
      * @see org.komodo.shell.api.ShellCommand#printHelp(int indent)
      */

@@ -9,28 +9,28 @@ package org.komodo.shell.commands.core;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.List;
+import java.util.Set;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.Messages;
 import org.komodo.shell.api.InvalidCommandArgumentException;
-import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.utils.StringUtils;
 
 /**
- * A command to unset/remove a property value.
+ * A command to set the value of a global property
  */
-public class UnsetPropertyCommand extends BuiltInShellCommand {
+public class SetGlobalPropertyCommand extends BuiltInShellCommand {
 
     /**
      * The command name.
      */
-    public static final String NAME = "unset-property"; //$NON-NLS-1$
+    public static final String NAME = "set-global"; //$NON-NLS-1$
 
     /**
      * @param status
      *        the workspace status (cannot be <code>null</code>)
      */
-    public UnsetPropertyCommand( final WorkspaceStatus status ) {
+    public SetGlobalPropertyCommand( final WorkspaceStatus status ) {
         super( status, NAME );
     }
 
@@ -42,25 +42,21 @@ public class UnsetPropertyCommand extends BuiltInShellCommand {
     @Override
     protected boolean doExecute() throws Exception {
         try {
-            final String propNameArg = requiredArgument( 0, Messages.getString( Messages.SHELL.InvalidArgMsg_PropertyName ) );
+            // property name and value are required
+            String propNameArg = requiredArgument(0, Messages.getString(Messages.SetGlobalPropertyCommand.InvalidArgMsg_GlobalPropertyName));
+            String propValueArg = requiredArgument(1, Messages.getString(Messages.SetGlobalPropertyCommand.InvalidArgMsg_PropertyValue ) );
 
-            if ( !validateProperty( propNameArg, getContext(), true ) ) {
+            // validate global property name and value
+            final String errorMsg = getWorkspaceStatus().validateGlobalPropertyValue( propNameArg, propValueArg );
+
+            if ( !StringUtils.isEmpty( errorMsg ) ) {
+                print( MESSAGE_INDENT, Messages.getString( Messages.SetGlobalPropertyCommand.InvalidGlobalProperty, errorMsg ) );
                 return false;
             }
 
-            final WorkspaceContext context = getContext();
-
-            // remove the property by setting its value to null
-            final String propertyName = ( !isShowingPropertyNamePrefixes() ? attachPrefix( context, propNameArg ) : propNameArg );
-            context.setPropertyValue( propertyName, null );
-
-            // Commit transaction
-            if ( isAutoCommit() ) {
-                getWorkspaceStatus().commit( UnsetPropertyCommand.class.getSimpleName() );
-            }
-
-            // Print message
-            print( MESSAGE_INDENT, getString( "propertyUnset", propNameArg ) ); //$NON-NLS-1$
+            // Set the property
+            setGlobalProperty( propNameArg, propValueArg );
+            print( MESSAGE_INDENT, Messages.getString( Messages.SetGlobalPropertyCommand.GlobalPropertySet, propNameArg ) );
 
             return true;
         } catch ( final InvalidCommandArgumentException e ) {
@@ -71,11 +67,22 @@ public class UnsetPropertyCommand extends BuiltInShellCommand {
         }
     }
 
-    private String getString( final String msgKey,
-                              final String... args ) {
-        return Messages.getString( UnsetPropertyCommand.class.getSimpleName() + '.' + msgKey, ( Object[] )args );
+    /**
+     * Sets a global workspace property
+     * @param propName the global property name
+     * @param propValue the property value
+     * @throws Exception the exception
+     */
+    private void setGlobalProperty(String propName, String propValue) throws Exception {
+        WorkspaceStatus wsStatus = getWorkspaceStatus();
+        wsStatus.setProperty(propName, propValue);
     }
     
+    private String getString( final String msgKey,
+                              final String... args ) {
+        return Messages.getString( SetGlobalPropertyCommand.class.getSimpleName() + '.' + msgKey, ( Object[] )args );
+    }
+
     /**
      * @see org.komodo.shell.api.AbstractShellCommand#tabCompletion(java.lang.String, java.util.List)
      */
@@ -83,25 +90,15 @@ public class UnsetPropertyCommand extends BuiltInShellCommand {
     public int tabCompletion( final String lastArgument,
                               final List< CharSequence > candidates ) throws Exception {
         if ( getArguments().size() == 0 ) {
-            final WorkspaceContext context = getContext();
-            final List< String > names = context.getProperties();
-            final boolean noLastArg = StringUtils.isBlank( lastArgument );
+            // Global property completion options
+            final Set< String > potentials = WorkspaceStatus.GLOBAL_PROPS.keySet();
 
-            // make sure property has a value and remove property prefixes if necessary
-            for ( String propName : names ) {
-                if ( !StringUtils.isBlank( context.getPropertyValue( propName ) ) ) {
-                    boolean add = noLastArg;
-
-                    if ( !isShowingPropertyNamePrefixes() ) {
-                        propName = removePrefix( propName );
-                    }
-
-                    if ( !noLastArg && propName.startsWith( lastArgument ) ) {
-                        add = true;
-                    }
-
-                    if ( add ) {
-                        candidates.add( propName );
+            if ( lastArgument == null ) {
+                candidates.addAll( potentials );
+            } else {
+                for ( final String name : potentials ) {
+                    if ( name.toUpperCase().startsWith( lastArgument.toUpperCase() ) ) {
+                        candidates.add( name );
                     }
                 }
             }

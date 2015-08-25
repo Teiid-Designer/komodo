@@ -23,7 +23,7 @@ public final class SetCustomPropertyCommand extends RelationalShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public SetCustomPropertyCommand( final WorkspaceStatus status ) {
-        super( NAME, true, status );
+        super( status, true, NAME );
     }
 
     /**
@@ -51,7 +51,7 @@ public final class SetCustomPropertyCommand extends RelationalShellCommand {
     public boolean isValidForCurrentContext() {
 //        final int currType = getWorkspaceStatus().getWorkspaceContext().getKomodoObj().getTypeId();
         // TODO type needs to be a relational object here
-        return true;
+        return false;
     }
 
 }

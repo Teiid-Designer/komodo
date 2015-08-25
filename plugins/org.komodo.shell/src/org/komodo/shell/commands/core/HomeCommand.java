@@ -27,7 +27,7 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.constants.StringConstants;
 
 /**
- * Changes the context to the workspace root.
+ * HomeCommand - Changes the context to the workspace root.
  */
 public class HomeCommand extends BuiltInShellCommand {
 

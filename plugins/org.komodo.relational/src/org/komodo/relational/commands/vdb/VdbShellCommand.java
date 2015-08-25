@@ -12,6 +12,7 @@ import org.komodo.relational.commands.RelationalShellCommand;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.internal.VdbImpl;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 /**
  * A base class for @{link {@link Vdb VDB}-related shell commands.
@@ -21,7 +22,7 @@ abstract class VdbShellCommand extends RelationalShellCommand {
     protected VdbShellCommand( final String name,
                                final boolean shouldCommit,
                                final WorkspaceStatus status ) {
-        super( name, shouldCommit, status );
+        super( status, shouldCommit, name );
     }
 
     protected Vdb getVdb() throws Exception {
@@ -34,10 +35,15 @@ abstract class VdbShellCommand extends RelationalShellCommand {
      * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
      */
     @Override
-    public final boolean isValidForCurrentContext() {
-        return isCurrentTypeValid( Vdb.TYPE_ID );
+    public final boolean isValidForCurrentContext() throws Exception {
+        return isCurrentTypeValid( VdbLexicon.Vdb.VIRTUAL_DATABASE );
     }
 
+    @Override
+    protected String getMessage(Enum< ? > key, Object... parameters) {
+        return Messages.getString(VdbCommandMessages.RESOURCE_BUNDLE,key.toString(),parameters);
+    }
+    
     /**
      * @see org.komodo.shell.api.ShellCommand#printHelp(int indent)
      */
