@@ -18,54 +18,6 @@ import org.komodo.utils.ArgCheck;
 public final class RestLink {
 
     /**
-     * The HTTP methods associated with the link.
-     */
-    public enum MethodType {
-
-        /**
-         * Delete a resource.
-         */
-        DELETE,
-
-        /**
-         * Retrieve a resource.
-         */
-        GET,
-
-        /**
-         * Patch a resource.
-         */
-        PATCH,
-
-        /**
-         * Add or update a resource.
-         */
-        POST,
-
-        /**
-         * Create a resource.
-         */
-        PUT;
-
-        /**
-         * @param text
-         *        the text whose enum is being requested (can be empty)
-         * @return the link type (never <code>null</code>)
-         * @throws RuntimeException
-         *         if text is empty or does not represent a link type
-         */
-        public static MethodType fromString( final String text ) {
-            for ( final MethodType type : values() ) {
-                if ( type.toString().equals( text ) ) {
-                    return type;
-                }
-            }
-
-            throw new RuntimeException( "Unexpected method type of '" + text + '\'' ); //$NON-NLS-1$
-        }
-    }
-
-    /**
      * The link relationship type.
      */
     public enum LinkType {
@@ -124,27 +76,62 @@ public final class RestLink {
 
     }
 
+    /**
+     * The HTTP methods associated with the link.
+     */
+    public enum MethodType {
+
+        /**
+         * Delete a resource.
+         */
+        DELETE,
+
+        /**
+         * Retrieve a resource.
+         */
+        GET,
+
+        /**
+         * Patch a resource.
+         */
+        PATCH,
+
+        /**
+         * Add or update a resource.
+         */
+        POST,
+
+        /**
+         * Create a resource.
+         */
+        PUT;
+
+        /**
+         * @param text
+         *        the text whose enum is being requested (can be empty)
+         * @return the link type (never <code>null</code>)
+         * @throws RuntimeException
+         *         if text is empty or does not represent a link type
+         */
+        public static MethodType fromString( final String text ) {
+            for ( final MethodType type : values() ) {
+                if ( type.toString().equals( text ) ) {
+                    return type;
+                }
+            }
+
+            throw new RuntimeException( "Unexpected method type of '" + text + '\'' ); //$NON-NLS-1$
+        }
+    }
+
+    /**
+     * An empty array of links.
+     */
+    public static final RestLink[] NO_LINKS = new RestLink[ 0 ];
+
     private final String rel;
     private final String href;
     private final String method;
-
-    /**
-     * @param rel
-     *        the link type (cannot be <code>null</code>)
-     * @param href
-     *        the link HREF (cannot be <code>null</code>)
-     */
-    public RestLink( final LinkType rel,
-                     final URI href,
-                     final MethodType method ) {
-        ArgCheck.isNotNull( rel, "rel" ); //$NON-NLS-1$
-        ArgCheck.isNotNull( href, "href" ); //$NON-NLS-1$
-        ArgCheck.isNotNull( method, "method" ); //$NON-NLS-1$
-
-        this.rel = rel.name().toLowerCase();
-        this.href = href.toString();
-        this.method = method.name();
-    }
 
     /**
      * @param rel
@@ -180,6 +167,26 @@ public final class RestLink {
         }
 
         this.method = type.name();
+    }
+
+    /**
+     * @param rel
+     *        the link type (cannot be <code>null</code>)
+     * @param href
+     *        the link HREF (cannot be <code>null</code>)
+     * @param method
+     *        the method type (cannot be <code>null</code>)
+     */
+    public RestLink( final LinkType rel,
+                     final URI href,
+                     final MethodType method ) {
+        ArgCheck.isNotNull( rel, "rel" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( href, "href" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( method, "method" ); //$NON-NLS-1$
+
+        this.rel = rel.name().toLowerCase();
+        this.href = href.toString();
+        this.method = method.name();
     }
 
     /**

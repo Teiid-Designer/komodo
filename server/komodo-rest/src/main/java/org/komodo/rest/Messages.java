@@ -150,6 +150,16 @@ public final class Messages {
     public enum General {
 
         /**
+         * The name of the DELETE operation.
+         */
+        DELETE_OPERATION_NAME,
+
+        /**
+         * The name of the GET operation.
+         */
+        GET_OPERATION_NAME,
+
+        /**
          * A message indicating a value is not present.
          */
         NO_VALUE;

@@ -15,11 +15,14 @@ import static org.komodo.rest.Messages.Error.VDB_SERVICE_MISSING_VDB;
 import static org.komodo.rest.Messages.Error.VDB_SERVICE_MISSING_VDB_NAME;
 import static org.komodo.rest.Messages.Error.VDB_SERVICE_VDB_EXISTS;
 import static org.komodo.rest.Messages.Error.VDB_SERVICE_VDB_NAME_ERROR;
+import static org.komodo.rest.Messages.General.DELETE_OPERATION_NAME;
+import static org.komodo.rest.Messages.General.GET_OPERATION_NAME;
 import static org.komodo.rest.Messages.General.NO_VALUE;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -41,6 +44,7 @@ import org.komodo.rest.json.RestLink.LinkType;
 import org.komodo.rest.json.RestVdb;
 import org.komodo.rest.json.RestVdbDescriptor;
 import org.komodo.rest.json.RestVdbDirectory;
+import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
@@ -161,7 +165,7 @@ public final class KomodoVdbService extends KomodoService {
                 vdb.rename( uow, vdbNameJson );
             }
 
-            final RestVdbDescriptor descriptor = buildDescriptor( vdb, uriInfo.getBaseUri(), uow );
+            final RestVdbDescriptor descriptor = buildVdbDescriptorEntity( vdb, uriInfo.getBaseUri(), uow );
             final Response response = commit( uow, descriptor );
             return response;
         } catch ( final Exception e ) {
@@ -228,20 +232,84 @@ public final class KomodoVdbService extends KomodoService {
         }
     }
 
-    private RestVdbDescriptor buildDescriptor( final Vdb vdb,
-                                               final URI baseUri,
-                                               final UnitOfWork uow ) throws Exception {
+    private RestVdbDescriptor buildVdbDescriptorEntity( final Vdb vdb,
+                                                        final URI baseUri,
+                                                        final UnitOfWork uow ) throws KException {
         final String vdbName = vdb.getName( uow );
         final RestVdbDescriptor result = new RestVdbDescriptor( vdbName, baseUri, getLinkTypesToGenerate( vdb ) );
         result.setDescription( vdb.getDescription( uow ) );
 
-        LOGGER.debug( "buildDescriptor:VDB '{0}' descriptor was constructed", vdbName ); //$NON-NLS-1$
+        LOGGER.debug( "buildVdbDescriptorEntity:VDB '{0}' descriptor entity was constructed", vdbName ); //$NON-NLS-1$
         return result;
+    }
+
+    private RestVdb buildVdbEntity( final Vdb vdb,
+                                    final URI baseUri,
+                                    final UnitOfWork uow ) throws KException {
+        final String vdbName = vdb.getName( uow );
+        final RestVdb result = new RestVdb( vdbName );
+        result.setDescription( vdb.getDescription( uow ) );
+
+        LOGGER.debug( "buildVdbEntity:VDB '{0}' entity was constructed", vdbName ); //$NON-NLS-1$
+        return result;
+    }
+
+    /**
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @param vdbName
+     *        the name of the VDB being deleted (cannot be empty)
+     * @return the JSON representation of the VDB that was deleted (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is a problem deleting the specified workspace VDB or constructing the JSON representation
+     */
+    @DELETE
+    @Path( "{vdbName}" )
+    @Produces( MediaType.APPLICATION_JSON )
+    public Response deleteVdb( final @Context HttpHeaders headers,
+                               final @Context UriInfo uriInfo,
+                               final @PathParam( "vdbName" ) String vdbName) throws KomodoRestException {
+        UnitOfWork uow = null;
+
+        try {
+            uow = createTransaction( "deleteVdb", false ); //$NON-NLS-1$
+
+            // make sure VDB exists
+            if ( this.wsMgr.hasChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE ) ) {
+                final KomodoObject kobject = this.wsMgr.getChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
+                final Vdb vdb = this.wsMgr.resolve( uow, kobject, Vdb.class );
+                final RestVdb descriptor = buildVdbEntity( vdb, uriInfo.getBaseUri(), uow );
+                vdb.remove( uow );
+
+                LOGGER.debug( "deleteVdb:VDB '{0}' was deleted", vdbName ); //$NON-NLS-1$
+                final Response response = commit( uow, descriptor );
+                return response;
+            }
+
+            LOGGER.debug( "deleteVdb:VDB '{0}' was not found to delete", vdbName ); //$NON-NLS-1$
+            return resourceNotFound( uow, vdbName, Messages.getString( DELETE_OPERATION_NAME ) );
+        } catch ( final Exception e ) {
+            if ( ( uow != null ) && ( uow.getState() != State.ROLLED_BACK ) ) {
+                uow.rollback();
+            }
+
+            if ( e instanceof KomodoRestException ) {
+                throw ( KomodoRestException )e;
+            }
+
+            throw new KomodoRestException( Messages.getString( VDB_SERVICE_GET_VDB_ERROR, vdbName ), e );
+        }
     }
 
     private Response doAddVdb( final UnitOfWork uow,
                                final URI baseUri,
                                final RestVdb restVdb ) throws KomodoRestException {
+        assert( !uow.isRollbackOnly() );
+        assert( uow.getState() == State.NOT_STARTED );
+        assert( restVdb != null );
+
         final String vdbName = restVdb.getName();
         String extPath = Messages.getString( NO_VALUE );
 
@@ -259,7 +327,7 @@ public final class KomodoVdbService extends KomodoService {
                 vdb.setDescription( uow, restVdb.getDescription() );
             }
 
-            final RestVdbDescriptor descriptor = buildDescriptor( vdb, baseUri, uow );
+            final RestVdbDescriptor descriptor = buildVdbDescriptorEntity( vdb, baseUri, uow );
             final Response response = commit( uow, descriptor );
             return response;
         } catch ( final Exception e ) {
@@ -300,14 +368,13 @@ public final class KomodoVdbService extends KomodoService {
         UnitOfWork uow = null;
 
         try {
-            // find VDB
             uow = createTransaction( "getVdb", true ); //$NON-NLS-1$
-            RestVdbDescriptor descriptor = null;
 
+            // make sure VDB exists
             if ( this.wsMgr.hasChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE ) ) {
                 final KomodoObject kobject = this.wsMgr.getChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
                 final Vdb vdb = this.wsMgr.resolve( uow, kobject, Vdb.class );
-                descriptor = buildDescriptor( vdb, uriInfo.getBaseUri(), uow );
+                final RestVdbDescriptor descriptor = buildVdbDescriptorEntity( vdb, uriInfo.getBaseUri(), uow );
 
                 LOGGER.debug( "getVdb:VDB '{0}' was found", vdbName ); //$NON-NLS-1$
                 final Response response = commit( uow, descriptor );
@@ -315,7 +382,7 @@ public final class KomodoVdbService extends KomodoService {
             }
 
             LOGGER.debug( "getVdb:VDB '{0}' was not found", vdbName ); //$NON-NLS-1$
-            return resourceNotFound( uow, vdbName );
+            return resourceNotFound( uow, vdbName, Messages.getString( GET_OPERATION_NAME ) );
         } catch ( final Exception e ) {
             if ( ( uow != null ) && ( uow.getState() != State.ROLLED_BACK ) ) {
                 uow.rollback();
@@ -416,7 +483,7 @@ public final class KomodoVdbService extends KomodoService {
             for ( final Vdb vdb : vdbs ) {
                 if ( ( start == 0 ) || ( i >= start ) ) {
                     if ( ( size == ALL_AVAILABLE ) || ( descriptors.size() < size ) ) {
-                        descriptors.add( buildDescriptor( vdb, uriInfo.getBaseUri(), uow ) );
+                        descriptors.add( buildVdbDescriptorEntity( vdb, uriInfo.getBaseUri(), uow ) );
                     } else {
                         break;
                     }

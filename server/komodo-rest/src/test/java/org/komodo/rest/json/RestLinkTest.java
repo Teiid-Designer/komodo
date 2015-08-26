@@ -77,6 +77,7 @@ public final class RestLinkTest {
         final RestLink link2 = new RestLink( link1.getRel(),
                                              UriBuilder.fromUri( "http://org.komodo:1234" ).build(),
                                              link1.getMethod() );
+        assertThat( link1.getHref(), is( not( link2.getHref() ) ) );
         assertThat( link1, is( not( link2 ) ) );
     }
 
@@ -84,6 +85,7 @@ public final class RestLinkTest {
     public void shouldNotBeEqualWhenMethodDifferent() {
         final RestLink link1 = new RestLink( LINK_TYPE, URI, METHOD_TYPE );
         final RestLink link2 = new RestLink( link1.getRel(), link1.getHref(), METHOD_TYPE_2 );
+        assertThat( link1.getMethod(), is( not( link2.getMethod() ) ) );
         assertThat( link1, is( not( link2 ) ) );
     }
 
@@ -91,6 +93,7 @@ public final class RestLinkTest {
     public void shouldNotBeEqualWhenRelDifferent() {
         final RestLink link1 = new RestLink( LINK_TYPE, URI, METHOD_TYPE );
         final RestLink link2 = new RestLink( LINK_TYPE_2, link1.getHref(), link1.getMethod() );
+        assertThat( link1.getRel(), is( not( link2.getRel() ) ) );
         assertThat( link1, is( not( link2 ) ) );
     }
 

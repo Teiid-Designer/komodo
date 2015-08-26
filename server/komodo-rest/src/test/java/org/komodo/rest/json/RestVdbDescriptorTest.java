@@ -12,6 +12,7 @@ import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
 import static org.komodo.rest.json.RestLink.LinkType.NO_LINK_TYPES;
 import java.net.URI;
+import java.util.Arrays;
 import javax.ws.rs.core.UriBuilder;
 import org.junit.Test;
 import org.komodo.rest.json.RestLink.LinkType;
@@ -90,6 +91,7 @@ public final class RestVdbDescriptorTest {
         final RestVdbDescriptor descriptor1 = new RestVdbDescriptor( VDB_NAME, URI, LINK_TYPES );
         final RestVdbDescriptor descriptor2 = new RestVdbDescriptor( descriptor1.getName(), URI, LINK_TYPES );
         descriptor2.setDescription( descriptor1.getDescription() + "blah" );
+        assertThat( descriptor1.getDescription(), is( not( descriptor2.getDescription() ) ) );
         assertThat( descriptor1, is( not( descriptor2 ) ) );
     }
 
@@ -98,6 +100,7 @@ public final class RestVdbDescriptorTest {
         final RestVdbDescriptor descriptor1 = new RestVdbDescriptor( VDB_NAME, URI, LINK_TYPES );
         final RestVdbDescriptor descriptor2 = new RestVdbDescriptor( descriptor1.getName(), URI, LINK_TYPE );
         descriptor2.setDescription( descriptor1.getDescription() );
+        assertThat( Arrays.deepEquals( descriptor1.getLinks(), descriptor2.getLinks() ), is( false ) );
         assertThat( descriptor1, is( not( descriptor2 ) ) );
     }
 
@@ -106,6 +109,7 @@ public final class RestVdbDescriptorTest {
         final RestVdbDescriptor descriptor1 = new RestVdbDescriptor( VDB_NAME, URI, LINK_TYPES );
         final RestVdbDescriptor descriptor2 = new RestVdbDescriptor( descriptor1.getName() + "blah", URI, LINK_TYPES );
         descriptor2.setDescription( descriptor1.getDescription() );
+        assertThat( descriptor1.getName(), is( not( descriptor2.getName() ) ) );
         assertThat( descriptor1, is( not( descriptor2 ) ) );
     }
 

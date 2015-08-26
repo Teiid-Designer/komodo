@@ -73,7 +73,10 @@ public final class KomodoRestUriBuilder {
         return UriBuilder.fromUri( getVdbUri( vdbName ) ).path( VDB_MANIFEST_SEGMENT ).build();
     }
 
-    private URI getVdbsUri() {
+    /**
+     * @return the URI to use when requesting a collection of VDBs in the workspace (never <code>null</code>)
+     */
+    public URI getVdbsUri() {
         return UriBuilder.fromUri( this.baseUri ).path( VDBS_URI_PATH ).build();
     }
 

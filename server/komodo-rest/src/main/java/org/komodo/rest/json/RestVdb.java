@@ -7,6 +7,7 @@
 */
 package org.komodo.rest.json;
 
+import org.komodo.utils.ArgCheck;
 import com.google.gson.annotations.SerializedName;
 
 /**
@@ -20,67 +21,69 @@ public final class RestVdb implements Jsonable {
     private String originalFilePath;
     private RestLink[] links;
 
-    public RestVdb() {
-
-    }
-
     /**
-     *
+     * @param vdbName
+     *        the name of the VDB (cannot be empty)
      */
     public RestVdb( final String vdbName ) {
+        ArgCheck.isNotEmpty( vdbName, "vdbName" ); //$NON-NLS-1$
         this.name = vdbName;
     }
 
     /**
-     * @return the description
+     * @return the VDB description (can be empty)
      */
     public String getDescription() {
         return this.description;
     }
 
     /**
-     * @return the links
+     * @return the links (never <code>null</code> but can be empty)
      */
     public RestLink[] getLinks() {
+        if ( this.links == null ) {
+            return RestLink.NO_LINKS;
+        }
+
         return this.links;
     }
 
     /**
-     * @return the name
+     * @return the VDB name (never empty)
      */
     public String getName() {
         return this.name;
     }
 
     /**
-     * @return the originalFilePath
+     * @return the external file path of the VDB (can be empty)
      */
     public String getOriginalFilePath() {
         return this.originalFilePath;
     }
 
     /**
-     * @param description
-     *        the description to set
+     * @param newDescription
+     *        the new description (can be empty)
      */
-    public void setDescription( final String description ) {
-        this.description = description;
+    public void setDescription( final String newDescription ) {
+        this.description = newDescription;
     }
 
     /**
-     * @param links
-     *        the links to set
+     * @param newLinks
+     *        the new links (can be <code>null</code> or empty)
      */
-    public void setLinks( final RestLink[] links ) {
-        this.links = links;
+    public void setLinks( final RestLink[] newLinks ) {
+        this.links = newLinks;
     }
 
     /**
-     * @param originalFilePath
-     *        the originalFilePath to set
+     * @param newOriginalFilePath
+     *        the new VDB external file path (can be empty)
      */
-    public void setOriginalFilePath( final String originalFilePath ) {
-        this.originalFilePath = originalFilePath;
+    public void setOriginalFilePath( final String newOriginalFilePath ) {
+        this.originalFilePath = newOriginalFilePath;
     }
 
 }

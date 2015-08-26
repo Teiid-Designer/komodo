@@ -11,6 +11,7 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
 import java.net.URI;
+import java.util.Arrays;
 import javax.ws.rs.core.UriBuilder;
 import org.junit.Test;
 import org.komodo.rest.json.RestLink.LinkType;
@@ -46,14 +47,6 @@ public final class RestVdbDirectoryTest {
     }
 
     @Test
-    public void shouldBeEqualWhenDescriptorsAreDifferent() {
-        final RestVdbDescriptor[] descriptors = new RestVdbDescriptor[] { MY_VDB, YOUR_VDB };
-        final RestVdbDirectory vdbDir1 = new RestVdbDirectory( descriptors );
-        final RestVdbDirectory vdbDir2 = new RestVdbDirectory( MY_VDB );
-        assertThat( vdbDir1, is( not( vdbDir2 ) ) );
-    }
-
-    @Test
     public void shouldConstructEmptyJsonDocumentWithEmptyDescriptors() {
         final RestVdbDirectory vdbDir = new RestVdbDirectory( new RestVdbDescriptor[ 0 ] );
         assertThat( BUILDER.toJson( vdbDir ), is( "{\"vdbs\":[]}" ) );
@@ -86,6 +79,15 @@ public final class RestVdbDirectoryTest {
         assertThat( vdbDir.getDescriptors().length, is( DESCRIPTORS.length ) );
         assertThat( vdbDir.getDescriptors()[ 0 ], is( MY_VDB ) );
         assertThat( vdbDir.getDescriptors()[ 1 ], is( YOUR_VDB ) );
+    }
+
+    @Test
+    public void shouldNotBeEqualWhenDescriptorsAreDifferent() {
+        final RestVdbDescriptor[] descriptors = new RestVdbDescriptor[] { MY_VDB, YOUR_VDB };
+        final RestVdbDirectory vdbDir1 = new RestVdbDirectory( descriptors );
+        final RestVdbDirectory vdbDir2 = new RestVdbDirectory( MY_VDB );
+        assertThat( Arrays.deepEquals( vdbDir1.getDescriptors(), vdbDir2.getDescriptors() ), is( false ) );
+        assertThat( vdbDir1, is( not( vdbDir2 ) ) );
     }
 
 }

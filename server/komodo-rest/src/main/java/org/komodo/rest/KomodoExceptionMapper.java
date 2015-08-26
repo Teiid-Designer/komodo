@@ -7,13 +7,16 @@
 */
 package org.komodo.rest;
 
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
+import javax.ws.rs.ext.Provider;
 
 /**
  * Maps {@link Throwable errors} to {@link Response responses}.
  */
+@Provider
 public final class KomodoExceptionMapper implements ExceptionMapper< Throwable > {
 
     /**
@@ -23,7 +26,10 @@ public final class KomodoExceptionMapper implements ExceptionMapper< Throwable >
      */
     @Override
     public Response toResponse( final Throwable t ) {
-        return Response.status( Status.INTERNAL_SERVER_ERROR ).entity( t.getLocalizedMessage() ).build();
+        return Response.status( Status.INTERNAL_SERVER_ERROR )
+                       .entity( t.getLocalizedMessage() )
+                       .type( MediaType.TEXT_PLAIN )
+                       .build();
     }
 
 }

@@ -71,13 +71,16 @@ public abstract class KomodoService {
             }
 
             // callback was called because of an error condition
-            return Response.status( Status.INTERNAL_SERVER_ERROR ).type( MediaType.TEXT_PLAIN ).entity( error.getLocalizedMessage() ).build();
+            return Response.status( Status.INTERNAL_SERVER_ERROR )
+                           .type( MediaType.TEXT_PLAIN )
+                           .entity( error.getLocalizedMessage() )
+                           .build();
         }
 
-        return Response.status( Status.GATEWAY_TIMEOUT ).type( MediaType.TEXT_PLAIN ).entity( Messages.getString( COMMIT_TIMEOUT,
-                                                                                                                  transaction.getName(),
-                                                                                                                  timeout,
-                                                                                                                  unit ) ).build();
+        return Response.status( Status.GATEWAY_TIMEOUT )
+                       .type( MediaType.TEXT_PLAIN )
+                       .entity( Messages.getString( COMMIT_TIMEOUT, transaction.getName(), timeout, unit ) )
+                       .build();
     }
 
     /**
@@ -100,7 +103,8 @@ public abstract class KomodoService {
     }
 
     protected Response resourceNotFound( final UnitOfWork transaction,
-                                         final String resourceName ) throws Exception {
+                                         final String resourceName,
+                                         final String operationName ) throws Exception {
         assert( transaction.getCallback() instanceof SynchronousCallback );
 
         final int timeout = TIMEOUT;
@@ -116,18 +120,23 @@ public abstract class KomodoService {
                 LOGGER.debug( "resourceNotFound: successfully committed '{0}', rollbackOnly = '{1}'", //$NON-NLS-1$
                               transaction.getName(),
                               transaction.isRollbackOnly() );
-                return Response.status( Status.NOT_FOUND ).type( MediaType.TEXT_PLAIN ).entity( Messages.getString( RESOURCE_NOT_FOUND,
-                                                                                                                    resourceName ) ).build();
+                return Response.status( Status.NOT_FOUND )
+                               .type( MediaType.TEXT_PLAIN )
+                               .entity( Messages.getString( RESOURCE_NOT_FOUND, resourceName, operationName ) )
+                               .build();
             }
 
             // callback was called because of an error condition
-            return Response.status( Status.INTERNAL_SERVER_ERROR ).type( MediaType.TEXT_PLAIN ).entity( error.getLocalizedMessage() ).build();
+            return Response.status( Status.INTERNAL_SERVER_ERROR )
+                           .type( MediaType.TEXT_PLAIN )
+                           .entity( error.getLocalizedMessage() )
+                           .build();
         }
 
-        return Response.status( Status.GATEWAY_TIMEOUT ).type( MediaType.TEXT_PLAIN ).entity( Messages.getString( COMMIT_TIMEOUT,
-                                                                                                                  transaction.getName(),
-                                                                                                                  timeout,
-                                                                                                                  unit ) ).build();
+        return Response.status( Status.GATEWAY_TIMEOUT )
+                       .type( MediaType.TEXT_PLAIN )
+                       .entity( Messages.getString( COMMIT_TIMEOUT, transaction.getName(), timeout, unit ) )
+                       .build();
     }
 
 }
