@@ -579,9 +579,9 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
      *        the object being resolved
      * @param resolvedClass
      *        the class the object should be resolved to (cannot be <code>null</code>)
-     * @return the strong typed object of the desired type
+     * @return the strong typed object of the desired type (can be <code>null</code> if not resolvable)
      * @throws KException
-     *         if a resolver could not be found, if the object was not resolvable, or if an error occurred
+     *         if a resolver could not be found or if an error occurred
      */
     public < T extends KomodoObject > T resolve( final UnitOfWork transaction,
                                                  final Object object,

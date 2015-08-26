@@ -56,7 +56,17 @@ public final class KomodoRestV1Application extends Application implements Reposi
         String WORKSPACE_URI_PATH = APP_PATH + '/' + WORKSPACE_SEGMENT;
 
         /**
-         * The name of the URI path segment for the collection of VDBs in the Komodo workspace. the URL.
+         * The name of the URI path segment for the VDB manifest XML resource.
+         */
+        String VDB_MANIFEST_SEGMENT = "manifest"; //$NON-NLS-1$
+
+        /**
+         * The application-relative URI path segment for the collection of VDBs in the Komodo workspace.
+         */
+        String VDBS_RELATIVE_PATH = "workspace/vdbs"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for the collection of VDBs in the Komodo workspace.
          */
         String VDBS_SEGMENT = "vdbs"; //$NON-NLS-1$
 
@@ -65,11 +75,6 @@ public final class KomodoRestV1Application extends Application implements Reposi
          * the URL.
          */
         String VDBS_URI_PATH = WORKSPACE_URI_PATH + '/' + VDBS_SEGMENT;
-
-        /**
-         * The application-relative URI path segment for the collection of VDBs in the Komodo workspace. the URL.
-         */
-        String VDBS_RELATIVE_PATH = "workspace/vdbs"; //$NON-NLS-1$
 
     }
 

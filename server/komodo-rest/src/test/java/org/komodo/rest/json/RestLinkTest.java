@@ -8,22 +8,90 @@
 package org.komodo.rest.json;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
+import java.net.URI;
 import javax.ws.rs.core.UriBuilder;
 import org.junit.Test;
+import org.komodo.rest.json.RestLink.LinkType;
+import org.komodo.rest.json.RestLink.MethodType;
 import com.google.gson.Gson;
 
 @SuppressWarnings( { "javadoc", "nls" } )
-public class RestLinkTest {
+public final class RestLinkTest {
 
-    private final Gson gson = new Gson();
+    private static final Gson BUILDER = new Gson();
+    private static final String JSON = "{\"rel\":\"self\",\"href\":\"http://localhost:8080\",\"method\":\"GET\"}";
+    private static final LinkType LINK_TYPE = LinkType.SELF;
+    private static final LinkType LINK_TYPE_2 = LinkType.DELETE;
+    private static final MethodType METHOD_TYPE = MethodType.GET;
+    private static final MethodType METHOD_TYPE_2 = MethodType.DELETE;
+    private static final URI URI = UriBuilder.fromUri( "http://localhost:8080" ).build();
 
     @Test
-    public void shouldHaveCorrectJson() {
-        final RestLink link = new RestLink( RestLink.LinkType.SELF, UriBuilder.fromUri( "http://localhost:8080" ).build() );
+    public void shouldBeEqual() {
+        final RestLink link1 = new RestLink( LINK_TYPE, URI );
+        final RestLink link2 = new RestLink( link1.getRel(), link1.getHref(), link1.getMethod() );
+        assertThat( link1, is( link2 ) );
+    }
 
-        // {"rel":"self","href":"http://org.komodo/link"}
-        assertThat( this.gson.toJson( link ), is( "{\"rel\":\"self\",\"href\":\"http://localhost:8080\"}" ) );
+    @Test
+    public void shouldExportJson() {
+        final RestLink link = new RestLink( LINK_TYPE, URI, METHOD_TYPE );
+        assertThat( BUILDER.toJson( link ), is( JSON ) );
+    }
+
+    @Test( expected = IllegalArgumentException.class )
+    public void shouldFailWhenLinkTypeIsNull() {
+        new RestLink( null, URI );
+    }
+
+    @Test( expected = IllegalArgumentException.class )
+    public void shouldFailWhenLinkTypeIsNull2() {
+        new RestLink( null, URI, METHOD_TYPE );
+    }
+
+    @Test( expected = IllegalArgumentException.class )
+    public void shouldFailWhenMethodTypeIsNull() {
+        new RestLink( LINK_TYPE, URI, null );
+    }
+
+    @Test
+    public void shouldHaveSameHashCode() {
+        final RestLink link1 = new RestLink( LINK_TYPE, URI, METHOD_TYPE );
+        final RestLink link2 = new RestLink( link1.getRel(), link1.getHref(), link1.getMethod() );
+        assertThat( link1.hashCode(), is( link2.hashCode() ) );
+    }
+
+    @Test
+    public void shouldImportJson() {
+        final RestLink link = BUILDER.fromJson( JSON, RestLink.class );
+        assertThat( link.getRel(), is( LINK_TYPE ) );
+        assertThat( link.getHref(), is( URI ) );
+        assertThat( link.getMethod(), is( METHOD_TYPE ) );
+    }
+
+    @Test
+    public void shouldNotBeEqualWhenHrefDifferent() {
+        final RestLink link1 = new RestLink( LINK_TYPE, URI, METHOD_TYPE );
+        final RestLink link2 = new RestLink( link1.getRel(),
+                                             UriBuilder.fromUri( "http://org.komodo:1234" ).build(),
+                                             link1.getMethod() );
+        assertThat( link1, is( not( link2 ) ) );
+    }
+
+    @Test
+    public void shouldNotBeEqualWhenMethodDifferent() {
+        final RestLink link1 = new RestLink( LINK_TYPE, URI, METHOD_TYPE );
+        final RestLink link2 = new RestLink( link1.getRel(), link1.getHref(), METHOD_TYPE_2 );
+        assertThat( link1, is( not( link2 ) ) );
+    }
+
+    @Test
+    public void shouldNotBeEqualWhenRelDifferent() {
+        final RestLink link1 = new RestLink( LINK_TYPE, URI, METHOD_TYPE );
+        final RestLink link2 = new RestLink( LINK_TYPE_2, link1.getHref(), link1.getMethod() );
+        assertThat( link1, is( not( link2 ) ) );
     }
 
 }

@@ -17,6 +17,8 @@ import static org.komodo.rest.Messages.Error.VDB_SERVICE_VDB_EXISTS;
 import static org.komodo.rest.Messages.Error.VDB_SERVICE_VDB_NAME_ERROR;
 import static org.komodo.rest.Messages.General.NO_VALUE;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -34,6 +36,8 @@ import javax.ws.rs.core.UriInfo;
 import org.komodo.core.KEngine;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.repository.ObjectImpl;
+import org.komodo.rest.json.RestLink.LinkType;
 import org.komodo.rest.json.RestVdb;
 import org.komodo.rest.json.RestVdbDescriptor;
 import org.komodo.rest.json.RestVdbDirectory;
@@ -52,6 +56,29 @@ import com.google.gson.Gson;
 @Path( KomodoRestV1Application.V1Constants.VDBS_RELATIVE_PATH )
 public final class KomodoVdbService extends KomodoService {
 
+    /**
+     * Query parameters used by the service methods.
+     */
+    public interface QueryParam {
+
+        /**
+         * A regex expression used when searching. If not present, all objects are returned.
+         */
+        String PATTERN = "pattern"; //$NON-NLS-1$
+
+        /**
+         * The number of objects to return. If not present, all objects are returned.
+         */
+        String SIZE = "size"; //$NON-NLS-1$
+
+        /**
+         * The index of the first object to return. Defaults to zero.
+         */
+        String START = "start"; //$NON-NLS-1$
+
+    }
+
+    private static final int ALL_AVAILABLE = -1;
     private static final Logger LOGGER = LoggerFactory.getLogger( KomodoVdbService.class );
 
     private final Gson builder = new Gson();
@@ -205,7 +232,7 @@ public final class KomodoVdbService extends KomodoService {
                                                final URI baseUri,
                                                final UnitOfWork uow ) throws Exception {
         final String vdbName = vdb.getName( uow );
-        final RestVdbDescriptor result = new RestVdbDescriptor( vdbName, baseUri );
+        final RestVdbDescriptor result = new RestVdbDescriptor( vdbName, baseUri, getLinkTypesToGenerate( vdb ) );
         result.setDescription( vdb.getDescription( uow ) );
 
         LOGGER.debug( "buildDescriptor:VDB '{0}' descriptor was constructed", vdbName ); //$NON-NLS-1$
@@ -246,6 +273,11 @@ public final class KomodoVdbService extends KomodoService {
 
             throw new KomodoRestException( Messages.getString( VDB_SERVICE_CREATE_VDB_ERROR ), e );
         }
+    }
+
+    private LinkType[] getLinkTypesToGenerate( final Vdb vdb ) {
+        // TODO figure out which ones???
+        return new LinkType[] { LinkType.SELF, LinkType.PARENT, LinkType.DELETE, LinkType.MANIFEST };
     }
 
     /**
@@ -314,20 +346,87 @@ public final class KomodoVdbService extends KomodoService {
         UnitOfWork uow = null;
 
         try {
+            final String searchPattern = uriInfo.getQueryParameters().getFirst( QueryParam.PATTERN );
+
             // find VDBs
             uow = createTransaction( "getVdbs", true ); //$NON-NLS-1$
-            final Vdb[] vdbs = this.wsMgr.findVdbs( uow );
-            LOGGER.debug( "getVdbs:found '{0}' VDBs", vdbs.length ); //$NON-NLS-1$
+            Vdb[] vdbs = null;
 
-            final RestVdbDescriptor[] descriptors = new RestVdbDescriptor[ vdbs.length ];
+            if ( StringUtils.isBlank( searchPattern ) ) {
+                vdbs = this.wsMgr.findVdbs( uow );
+                LOGGER.debug( "getVdbs:found '{0}' VDBs", vdbs.length ); //$NON-NLS-1$
+            } else {
+                final String[] vdbPaths = this.wsMgr.findByType( uow, VdbLexicon.Vdb.VIRTUAL_DATABASE, null, searchPattern );
+
+                if ( vdbPaths.length == 0 ) {
+                    vdbs = Vdb.NO_VDBS;
+                } else {
+                    vdbs = new Vdb[ vdbPaths.length ];
+                    int i = 0;
+
+                    for ( final String path : vdbPaths ) {
+                        vdbs[ i++ ] = this.wsMgr.resolve( uow, new ObjectImpl( this.wsMgr.getRepository(), path, 0 ), Vdb.class );
+                    }
+
+                    LOGGER.debug( "getVdbs:found '{0}' VDBs using pattern '{1}'", vdbs.length, searchPattern ); //$NON-NLS-1$
+                }
+            }
+
+            int start = 0;
+
+            { // start query parameter
+                final String qparam = uriInfo.getQueryParameters().getFirst( QueryParam.START );
+
+                if ( qparam != null ) {
+
+                    try {
+                        start = Integer.parseInt( qparam );
+
+                        if ( start < 0 ) {
+                            start = 0;
+                        }
+                    } catch ( final Exception e ) {
+                        start = 0;
+                    }
+                }
+            }
+
+            int size = ALL_AVAILABLE;
+
+            { // size query parameter
+                final String qparam = uriInfo.getQueryParameters().getFirst( QueryParam.SIZE );
+
+                if ( qparam != null ) {
+
+                    try {
+                        size = Integer.parseInt( qparam );
+
+                        if ( size <= 0 ) {
+                            size = ALL_AVAILABLE;
+                        }
+                    } catch ( final Exception e ) {
+                        size = ALL_AVAILABLE;
+                    }
+                }
+            }
+
+            final List< RestVdbDescriptor > descriptors = new ArrayList< >();
             int i = 0;
 
             for ( final Vdb vdb : vdbs ) {
-                descriptors[ i++ ] = buildDescriptor( vdb, uriInfo.getBaseUri(), uow );
+                if ( ( start == 0 ) || ( i >= start ) ) {
+                    if ( ( size == ALL_AVAILABLE ) || ( descriptors.size() < size ) ) {
+                        descriptors.add( buildDescriptor( vdb, uriInfo.getBaseUri(), uow ) );
+                    } else {
+                        break;
+                    }
+                }
+
+                ++i;
             }
 
             // create response
-            final RestVdbDirectory vdbDir = new RestVdbDirectory( descriptors );
+            final RestVdbDirectory vdbDir = new RestVdbDirectory( descriptors.toArray( new RestVdbDescriptor[ descriptors.size() ] ) );
             final Response response = commit( uow, vdbDir );
             return response;
         } catch ( final Exception e ) {

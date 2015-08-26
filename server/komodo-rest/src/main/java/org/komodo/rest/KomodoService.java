@@ -20,11 +20,15 @@ import org.komodo.rest.json.Jsonable;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A Komodo service implementation.
  */
 public abstract class KomodoService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger( KomodoService.class );
 
     private static final int TIMEOUT = 30;
     private static final TimeUnit UNIT = TimeUnit.SECONDS;
@@ -54,7 +58,10 @@ public abstract class KomodoService {
             final Throwable error = callback.error();
 
             if ( error == null ) {
-                final ResponseBuilder builder = Response.ok().type( MediaType.TEXT_PLAIN );
+                LOGGER.debug( "commit: successfully committed '{0}', rollbackOnly = '{1}'", //$NON-NLS-1$
+                              transaction.getName(),
+                              transaction.isRollbackOnly() );
+                final ResponseBuilder builder = Response.ok().type( MediaType.APPLICATION_JSON );
 
                 if ( jsonable != null ) {
                     builder.entity( jsonable.toJson() );
@@ -64,13 +71,13 @@ public abstract class KomodoService {
             }
 
             // callback was called because of an error condition
-            return Response.status( Status.INTERNAL_SERVER_ERROR ).entity( error.getLocalizedMessage() ).build();
+            return Response.status( Status.INTERNAL_SERVER_ERROR ).type( MediaType.TEXT_PLAIN ).entity( error.getLocalizedMessage() ).build();
         }
 
-        return Response.status( Status.GATEWAY_TIMEOUT ).entity( Messages.getString( COMMIT_TIMEOUT,
-                                                                                     transaction.getName(),
-                                                                                     timeout,
-                                                                                     unit ) ).build();
+        return Response.status( Status.GATEWAY_TIMEOUT ).type( MediaType.TEXT_PLAIN ).entity( Messages.getString( COMMIT_TIMEOUT,
+                                                                                                                  transaction.getName(),
+                                                                                                                  timeout,
+                                                                                                                  unit ) ).build();
     }
 
     /**
@@ -85,9 +92,11 @@ public abstract class KomodoService {
     protected UnitOfWork createTransaction( final String name,
                                             final boolean rollbackOnly ) throws KException {
         final SynchronousCallback callback = new SynchronousCallback();
-        return this.repo.createTransaction( ( getClass().getSimpleName() + ':' + name + ':' + System.currentTimeMillis() ),
-                                            rollbackOnly,
-                                            callback );
+        final UnitOfWork result = this.repo.createTransaction( ( getClass().getSimpleName() + ':' + name + ':'
+                                                                 + System.currentTimeMillis() ),
+                                                               rollbackOnly, callback );
+        LOGGER.debug( "createTransaction:created '{0}', rollbackOnly = '{1}'", result.getName(), result.isRollbackOnly() ); //$NON-NLS-1$
+        return result;
     }
 
     protected Response resourceNotFound( final UnitOfWork transaction,
@@ -104,18 +113,21 @@ public abstract class KomodoService {
             final Throwable error = callback.error();
 
             if ( error == null ) {
-                return Response.status( Status.NOT_FOUND ).entity( Messages.getString( RESOURCE_NOT_FOUND,
-                                                                                       resourceName ) ).build();
+                LOGGER.debug( "resourceNotFound: successfully committed '{0}', rollbackOnly = '{1}'", //$NON-NLS-1$
+                              transaction.getName(),
+                              transaction.isRollbackOnly() );
+                return Response.status( Status.NOT_FOUND ).type( MediaType.TEXT_PLAIN ).entity( Messages.getString( RESOURCE_NOT_FOUND,
+                                                                                                                    resourceName ) ).build();
             }
 
             // callback was called because of an error condition
-            return Response.status( Status.INTERNAL_SERVER_ERROR ).entity( error.getLocalizedMessage() ).build();
+            return Response.status( Status.INTERNAL_SERVER_ERROR ).type( MediaType.TEXT_PLAIN ).entity( error.getLocalizedMessage() ).build();
         }
 
-        return Response.status( Status.GATEWAY_TIMEOUT ).entity( Messages.getString( COMMIT_TIMEOUT,
-                                                                                     transaction.getName(),
-                                                                                     timeout,
-                                                                                     unit ) ).build();
+        return Response.status( Status.GATEWAY_TIMEOUT ).type( MediaType.TEXT_PLAIN ).entity( Messages.getString( COMMIT_TIMEOUT,
+                                                                                                                  transaction.getName(),
+                                                                                                                  timeout,
+                                                                                                                  unit ) ).build();
     }
 
 }

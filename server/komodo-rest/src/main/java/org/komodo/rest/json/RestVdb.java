@@ -10,16 +10,15 @@ package org.komodo.rest.json;
 import com.google.gson.annotations.SerializedName;
 
 /**
- *
+ * A VDB that can be used by GSON to build a JSON document representation.
  */
-public class RestVdb implements Jsonable {
+public final class RestVdb implements Jsonable {
 
-    private String description;
-
-    private RestLink[] links;
     @SerializedName( "id" )
     private String name;
+    private String description;
     private String originalFilePath;
+    private RestLink[] links;
 
     public RestVdb() {
 

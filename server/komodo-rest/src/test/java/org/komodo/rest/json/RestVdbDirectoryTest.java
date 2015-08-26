@@ -8,49 +8,84 @@
 package org.komodo.rest.json;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
 import java.net.URI;
-import org.junit.Before;
+import javax.ws.rs.core.UriBuilder;
 import org.junit.Test;
+import org.komodo.rest.json.RestLink.LinkType;
 import com.google.gson.Gson;
 
 @SuppressWarnings( { "javadoc", "nls" } )
-public class RestVdbDirectoryTest {
+public final class RestVdbDirectoryTest {
 
-    private URI baseUri;
-    private final Gson gson = new Gson();
+    private static final Gson BUILDER = new Gson();
+    private static final RestVdbDescriptor[] DESCRIPTORS;
+    private static final String JSON;
+    private static final RestVdbDescriptor MY_VDB;
+    private static final RestVdbDescriptor YOUR_VDB;
 
-    @Before
-    public void constructBaseUri() throws Exception {
-        this.baseUri = new URI( "http://localhost:8080/komodo-rest/" );
+    static {
+        final URI uri = UriBuilder.fromUri( "http://localhost:8080" ).build();
+        MY_VDB = new RestVdbDescriptor( "MyVdb", uri, LinkType.SELF, LinkType.PARENT, LinkType.MANIFEST );
+        MY_VDB.setDescription( "my description" );
+
+        YOUR_VDB = new RestVdbDescriptor( "YourVdb", uri, LinkType.SELF, LinkType.PARENT, LinkType.MANIFEST, LinkType.DELETE );
+        YOUR_VDB.setDescription( "your description" );
+
+        DESCRIPTORS = new RestVdbDescriptor[] { MY_VDB, YOUR_VDB };
+        JSON = "{\"vdbs\":[" + BUILDER.toJson( MY_VDB ) + ',' + BUILDER.toJson( YOUR_VDB ) + "]}";
+    }
+
+    @Test
+    public void shouldBeEqual() {
+        final RestVdbDescriptor[] descriptors = new RestVdbDescriptor[] { MY_VDB, YOUR_VDB };
+        final RestVdbDirectory vdbDir1 = new RestVdbDirectory( descriptors );
+        final RestVdbDirectory vdbDir2 = new RestVdbDirectory( descriptors );
+        assertThat( vdbDir1, is( vdbDir2 ) );
+    }
+
+    @Test
+    public void shouldBeEqualWhenDescriptorsAreDifferent() {
+        final RestVdbDescriptor[] descriptors = new RestVdbDescriptor[] { MY_VDB, YOUR_VDB };
+        final RestVdbDirectory vdbDir1 = new RestVdbDirectory( descriptors );
+        final RestVdbDirectory vdbDir2 = new RestVdbDirectory( MY_VDB );
+        assertThat( vdbDir1, is( not( vdbDir2 ) ) );
     }
 
     @Test
     public void shouldConstructEmptyJsonDocumentWithEmptyDescriptors() {
         final RestVdbDirectory vdbDir = new RestVdbDirectory( new RestVdbDescriptor[ 0 ] );
-        assertThat( this.gson.toJson( vdbDir ), is( "{\"vdbs\":[]}" ) );
+        assertThat( BUILDER.toJson( vdbDir ), is( "{\"vdbs\":[]}" ) );
     }
 
     @Test
     public void shouldConstructEmptyJsonDocumentWithNullDescriptors() {
-        final RestVdbDirectory vdbDir = new RestVdbDirectory( null );
-        assertThat( this.gson.toJson( vdbDir ), is( "{\"vdbs\":[]}" ) );
+        final RestVdbDirectory vdbDir = new RestVdbDirectory( ( RestVdbDescriptor[] )null );
+        assertThat( BUILDER.toJson( vdbDir ), is( "{\"vdbs\":[]}" ) );
     }
 
     @Test
-    public void shouldHaveCorrectJson() {
-        final RestVdbDescriptor vdb1 = new RestVdbDescriptor( "MyVdb", this.baseUri );
-        vdb1.setDescription( "my description" );
-
-        final RestVdbDescriptor vdb2 = new RestVdbDescriptor( "YourVdb", this.baseUri );
-        vdb2.setDescription( "your description" );
-
-        final RestVdbDescriptor[] descriptors = new RestVdbDescriptor[] { vdb1, vdb2 };
+    public void shouldExportJson() {
+        final RestVdbDescriptor[] descriptors = new RestVdbDescriptor[] { MY_VDB, YOUR_VDB };
         final RestVdbDirectory vdbDir = new RestVdbDirectory( descriptors );
+        assertThat( BUILDER.toJson( vdbDir ), is( JSON ) );
+    }
 
-        // {"vdbs":[{"id":"MyVdb","description":"my description","links":[{"rel":"self","href":"http://localhost:8080/komodo-rest/vdbs/MyVdb"},{"rel":"parent","href":"http://localhost:8080/komodo-rest/vdbs/"},{"rel":"content","href":"http://localhost:8080/komodo-rest/vdbs/MyVdb.xml"}]},{"id":"YourVdb","description":"your description","links":[{"rel":"self","href":"http://localhost:8080/komodo-rest/vdbs/YourVdb"},{"rel":"parent","href":"http://localhost:8080/komodo-rest/vdbs/"},{"rel":"content","href":"http://localhost:8080/komodo-rest/vdbs/YourVdb.xml"}]}]}
-        final String expected = "{\"vdbs\":[" + this.gson.toJson( vdb1 ) + ',' + this.gson.toJson( vdb2 ) + "]}";
-        assertThat( this.gson.toJson( vdbDir ), is( expected ) );
+    @Test
+    public void shouldHaveSameHashCode() {
+        final RestVdbDescriptor[] descriptors = new RestVdbDescriptor[] { MY_VDB, YOUR_VDB };
+        final RestVdbDirectory vdbDir1 = new RestVdbDirectory( descriptors );
+        final RestVdbDirectory vdbDir2 = new RestVdbDirectory( descriptors );
+        assertThat( vdbDir1.hashCode(), is( vdbDir2.hashCode() ) );
+    }
+
+    @Test
+    public void shouldImportJson() {
+        final RestVdbDirectory vdbDir = BUILDER.fromJson( JSON, RestVdbDirectory.class );
+        assertThat( vdbDir.getDescriptors().length, is( DESCRIPTORS.length ) );
+        assertThat( vdbDir.getDescriptors()[ 0 ], is( MY_VDB ) );
+        assertThat( vdbDir.getDescriptors()[ 1 ], is( YOUR_VDB ) );
     }
 
 }

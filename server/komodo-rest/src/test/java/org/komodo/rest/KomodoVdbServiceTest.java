@@ -30,6 +30,7 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 import org.komodo.rest.json.RestVdb;
 import org.komodo.rest.json.RestVdbDescriptor;
+import org.komodo.rest.json.RestVdbDirectory;
 import org.komodo.spi.constants.SystemConstants;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -81,6 +82,27 @@ public final class KomodoVdbServiceTest {
         this.client = ClientBuilder.newClient();
     }
 
+    private RestVdb[] createVdbs( final int numVdbsToCreate ) {
+        final RestVdb[] result = new RestVdb[ numVdbsToCreate ];
+
+        for ( int i = 0; i < numVdbsToCreate; ++i ) {
+            final String vdbName = ( this.testName.getMethodName() + '_' + ( i + 1 ) );
+            final String description = vdbName + " description goes here";
+            final String extPath = "/vdbs/" + vdbName + ".xml";
+
+            final RestVdb restVdb = new RestVdb( vdbName );
+            restVdb.setDescription( description );
+            restVdb.setOriginalFilePath( extPath );
+            result[ i ] = restVdb;
+
+            final String input = restVdb.toJson();
+            this.response = request( "/komodo/v1/workspace/vdbs" ).post( Entity.json( input ) );
+            this.response.close(); // must close before making another request
+        }
+
+        return result;
+    }
+
     protected Invocation.Builder request( final String url ) {
         return this.client.target( TestPortProvider.generateURL( url ) ).request();
     }
@@ -103,34 +125,65 @@ public final class KomodoVdbServiceTest {
         final RestVdbDescriptor descriptor = GSON.fromJson( entity, RestVdbDescriptor.class );
         assertThat( descriptor.getName(), is( vdbName ) );
         assertThat( descriptor.getDescription(), is( description ) );
-        assertThat( descriptor.getLinks().length, is( 3 ) );
+        assertThat( descriptor.getLinks().length, is( 4 ) );
     }
 
     @Test
     public void shouldGetVdb() throws Exception {
-        final String vdbName = this.testName.getMethodName();
-        final String description = "this is my VDB description";
-        final String extPath = "c:/vdbs/MyVdb.xml";
-
-        { // add
-            final RestVdb restVdb = new RestVdb( vdbName );
-            restVdb.setDescription( description );
-            restVdb.setOriginalFilePath( extPath );
-            final String input = restVdb.toJson();
-            this.response = request( "/komodo/v1/workspace/vdbs" ).post( Entity.json( input ) );
-            this.response.close(); // must close before making another request
-        }
+        final RestVdb[] vdbs = createVdbs( 1 );
 
         // get
-        this.response = request( "/komodo/v1/workspace/vdbs/" + vdbName ).get();
+        this.response = request( "/komodo/v1/workspace/vdbs/" + vdbs[ 0 ].getName() ).get();
         final String entity = this.response.readEntity( String.class );
         assertThat( entity, is( notNullValue() ) );
 
         // make sure the VDB descriptor JSON document is returned
         final RestVdbDescriptor descriptor = GSON.fromJson( entity, RestVdbDescriptor.class );
-        assertThat( descriptor.getName(), is( vdbName ) );
-        assertThat( descriptor.getDescription(), is( description ) );
-        assertThat( descriptor.getLinks().length, is( 3 ) );
+        assertThat( descriptor.getName(), is( vdbs[ 0 ].getName() ) );
+        assertThat( descriptor.getDescription(), is( vdbs[ 0 ].getDescription() ) );
+        assertThat( descriptor.getLinks().length, is( 4 ) );
+    }
+
+    @Test
+    public void shouldGetVdbWhenPatternMatches() throws Exception {
+        final RestVdb[] vdbs = createVdbs( 1 );
+
+        this.response = request( "/komodo/v1/workspace/vdbs/?pattern=" + vdbs[ 0 ].getName().charAt( 0 ) + '*' ).get();
+        final String entity = this.response.readEntity( String.class );
+        assertThat( entity, is( notNullValue() ) );
+
+        final RestVdbDirectory vdbDir = GSON.fromJson( entity, RestVdbDirectory.class );
+        assertThat( vdbDir.getDescriptors().length, is( 1 ) );
+    }
+
+    @Test
+    public void shouldLimitNumberOfVdbsReturnedWhenUsingSizeQueryParameter() throws Exception {
+        createVdbs( 10 );
+        final int resultSize = 5;
+
+        this.response = request( "/komodo/v1/workspace/vdbs/?size=" + resultSize ).get();
+        final String entity = this.response.readEntity( String.class );
+        assertThat( entity, is( notNullValue() ) );
+
+        final RestVdbDirectory vdbDir = GSON.fromJson( entity, RestVdbDirectory.class );
+        assertThat( vdbDir.getDescriptors().length, is( resultSize ) );
+    }
+
+    @Test
+    public void shouldLimitNumberOfVdbsReturnedWhenUsingStartQueryParameter() throws Exception {
+        final int numToCreate = 10;
+        final RestVdb[] vdbs = createVdbs( numToCreate );
+        final int start = 8;
+
+        this.response = request( "/komodo/v1/workspace/vdbs/?start=" + start ).get();
+        final String entity = this.response.readEntity( String.class );
+        assertThat( entity, is( notNullValue() ) );
+
+        final RestVdbDirectory vdbDir = GSON.fromJson( entity, RestVdbDirectory.class );
+        assertThat( vdbDir.getDescriptors().length, is( numToCreate - start ) );
+
+        // check content
+        assertThat( vdbs[ start - 1 ].getName(), is( vdbDir.getDescriptors()[ 0 ].getName() ) );
     }
 
     @Test
