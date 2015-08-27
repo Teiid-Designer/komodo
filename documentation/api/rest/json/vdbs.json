@@ -1,0 +1,46 @@
+{
+    "vdbs": [
+        {
+            "id": "Portfolio",
+            "description": "The Portfolio Vdb",
+            "_links": [
+                {
+                    "rel": "self",
+                    "href": "/vdbs/Portfolio"
+                },
+                {
+                    "rel": "content",
+                    "href": "/vdb/Portfolio"
+                }
+            ]
+        },
+        {
+            "id": "tweet-example",
+            "description": "The Twitter Vdb",
+            "_links": [
+                {
+                    "rel": "self",
+                    "href": "/vdbs/tweet-example"
+                },
+                {
+                    "rel": "content",
+                    "href": "/vdb/tweet-example"
+                }
+            ]
+        },
+        {
+            "id": "MyPartsVDB_Dynamic",
+            "description": "The Parts Vdb",
+            "_links": [
+                {
+                    "rel": "self",
+                    "href": "/vdbs/MyPartsVDB_Dynamic"
+                },
+                {
+                    "rel": "content",
+                    "href": "/vdb/MyPartsVDB_Dynamic"
+                }
+            ]
+        }
+    ]
+}
