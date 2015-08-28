@@ -183,7 +183,7 @@ public class ShellCommandFactory {
     private void registerCommand( final Class< ? extends ShellCommand > commandClass, WorkspaceStatus wsStatus ) throws Exception {
         final Constructor< ? extends ShellCommand > constructor = commandClass.getConstructor( WorkspaceStatus.class );
         final ShellCommand command = constructor.newInstance( wsStatus );
-        command.setOutput(wsStatus.getShell().getCommandOutput());
+        command.setWriter(wsStatus.getShell().getOutputWriter());
         //command.initValidWsContextTypes();
         this.commandMap.put( command.getName().toLowerCase(), command );
         // add aliases

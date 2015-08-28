@@ -7,7 +7,12 @@
  */
 package org.komodo.relational.commands.server;
 
-import static org.komodo.relational.commands.server.ServerCommandMessages.ServerSetCommand.MISSING_SERVER_NAME;
+import static org.komodo.relational.commands.server.ServerCommandMessages.ServerSetCommand.MissingServerNameArg;
+import static org.komodo.relational.commands.server.ServerCommandMessages.ServerSetCommand.ServerDoesNotExist;
+import static org.komodo.relational.commands.server.ServerCommandMessages.ServerSetCommand.ServerSetSuccess;
+import java.util.List;
+import org.komodo.relational.teiid.Teiid;
+import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.api.WorkspaceStatus;
 
 /**
@@ -32,11 +37,17 @@ public final class ServerSetCommand extends ServerShellCommand {
      */
     @Override
     protected boolean doExecute() throws Exception {
-        String serverName = requiredArgument(0, getMessage(MISSING_SERVER_NAME));
+        String serverName = requiredArgument(0, getMessage(MissingServerNameArg));
 
-        WorkspaceStatus wsStatus = getWorkspaceStatus();
-
-        wsStatus.setServer(serverName);
+        // Validate that the server object exists
+        if(!hasServer(serverName)) {
+            print(CompletionConstants.MESSAGE_INDENT, getMessage(ServerDoesNotExist,serverName));
+            return false;
+        }
+        
+        // Set the server name
+        getWorkspaceStatus().setServer(serverName);
+        print(CompletionConstants.MESSAGE_INDENT, getMessage(ServerSetSuccess,serverName));
         return true;
     }
     
@@ -48,6 +59,23 @@ public final class ServerSetCommand extends ServerShellCommand {
     @Override
     public final boolean isValidForCurrentContext() {
         return true;
+    }
+    
+    // Determine if a server with the supplied name exists
+    private boolean hasServer(String serverName) throws Exception {
+        List<Teiid> teiids = getWorkspaceManager().findTeiids(getTransaction());
+
+        if (teiids == null || teiids.size() == 0) {
+            return false;
+        }
+
+        for (Teiid theTeiid : teiids) {
+            String teiidName = theTeiid.getName(getTransaction());
+            if (serverName.equals(theTeiid.getId(getTransaction())) || serverName.equals(teiidName)) {
+                return true;
+            }
+        }
+        return false;
     }
     
 }

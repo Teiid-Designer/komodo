@@ -26,14 +26,12 @@ import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.ShellCommand;
-import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
+import org.komodo.spi.repository.KomodoObject;
 
 /**
- * Show Command.  Has various acceptable args.
- * show < properties | children | status | global | property | summary >
- *
+ * ShowSummaryCommand - shows a summary of the KomodoObject.  (shows its properties and children).
  */
 public class ShowSummaryCommand extends BuiltInShellCommand {
 
@@ -63,7 +61,7 @@ public class ShowSummaryCommand extends BuiltInShellCommand {
 
         WorkspaceStatus wsStatus = getWorkspaceStatus();
         String pathArg = optionalArgument(0);
-        WorkspaceContext theContext = ContextUtils.getContextForPath(wsStatus, pathArg);
+        KomodoObject theContext = ContextUtils.getContextForPath(wsStatus, pathArg);
 
         ShellCommand showPropertiesCommand = getWorkspaceStatus().getCommand(ShowPropertiesCommand.NAME);
         ShellCommand showChildrenCommand = getWorkspaceStatus().getCommand(ShowChildrenCommand.NAME);
@@ -103,7 +101,7 @@ public class ShowSummaryCommand extends BuiltInShellCommand {
     }
 
     /**
-     * @see org.komodo.shell.api.AbstractShellCommand#tabCompletion(java.lang.String, java.util.List)
+     * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
      */
     @Override
     public int tabCompletion(String lastArgument, List<CharSequence> candidates) throws Exception {
@@ -114,7 +112,6 @@ public class ShowSummaryCommand extends BuiltInShellCommand {
 
             // Do not put space after it - may want to append more to the path
             return CompletionConstants.NO_APPEND_SEPARATOR;
-            // Tab completion for "property" - expects a valid property for the current context.
         }
 
         return -1;

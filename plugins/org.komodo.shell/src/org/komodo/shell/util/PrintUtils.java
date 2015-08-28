@@ -8,7 +8,10 @@
 package org.komodo.shell.util;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -18,10 +21,10 @@ import java.util.Properties;
 import java.util.TreeMap;
 import org.komodo.shell.Messages;
 import org.komodo.shell.Messages.SHELL;
-import org.komodo.shell.WorkspaceContextImpl;
-import org.komodo.shell.api.ShellCommand;
-import org.komodo.shell.api.WorkspaceContext;
+import org.komodo.shell.api.Messages.SHELLAPI;
+import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.KLog;
 import org.komodo.utils.StringUtils;
@@ -35,12 +38,51 @@ public class PrintUtils implements StringConstants {
     private static final int MAX_PROPERTY_VALUE_WIDTH = 100;  // Limit on the value column width
     
     /**
-     * @param command the ShellCommand
+     * Print the message to the writer.  A newLine is added after the message.
+     * @param writer the Writer
+     * @param indent number of indent spaces
+     * @param formattedMessage the message
+     * @param params message params
+     */
+    public static void print(Writer writer, int indent, String formattedMessage, Object... params) {
+        print(writer,true,indent,formattedMessage,params);
+    }
+    
+    /**
+     * Print to writer with supplied info
+     * @param writer the Writer
+     * @param addNewLine 'true' to add new line after message. 
+     * @param indent number of indent spaces
+     * @param formattedMessage the message
+     * @param params message params
+     */
+    public static void print(Writer writer, boolean addNewLine, int indent,String formattedMessage, Object... params) {
+        if(writer==null) return;
+        
+        ArgCheck.isNonNegative(indent, Messages.getString(SHELLAPI.negative_indent_supplied));
+        StringBuffer sb = new StringBuffer();
+        for(int i=0; i<indent; i++) {
+            sb.append(StringConstants.SPACE);
+        }
+        String msg = String.format(formattedMessage, params);
+        try {
+            writer.write(sb.toString()+msg);
+            if(addNewLine) writer.write(NEW_LINE);
+            writer.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println(msg);
+        }
+    }
+
+    /**
+     * @param wsStatus the WorkspaceStatus
      * @param items the item list
      * @param headerTitle name for header
      */
-    public static void printList( ShellCommand command, List<String> items, String headerTitle ) {
-
+    public static void printList( final WorkspaceStatus wsStatus, List<String> items, String headerTitle ) {
+        Writer commandOutput = wsStatus.getShell().getOutputWriter();
+        
         int maxNameWidth = DEFAULT_WIDTH;
         for(String item : items) {
             updateMaxNameWidth(maxNameWidth,item);
@@ -51,24 +93,26 @@ public class PrintUtils implements StringConstants {
 
         // Print Header
         final String format = getFormat( maxNameWidth );
-        command.print( MESSAGE_INDENT, String.format( format, headerTitle ) );
-        command.print( MESSAGE_INDENT, String.format( format, getHeaderDelimiter( maxNameWidth ) ) );
+        print( commandOutput, MESSAGE_INDENT, String.format( format, headerTitle ) );
+        print( commandOutput, MESSAGE_INDENT, String.format( format, getHeaderDelimiter( maxNameWidth ) ) );
 
         // Print each name
         for ( final String name : items ) {
-            command.print( MESSAGE_INDENT, name );
+            print( commandOutput, MESSAGE_INDENT, name );
         }
 
     }
     
     /**
-     * @param command the ShellCommand
+     * Print the supplied properties
+     * @param wsStatus the WorkspaceStatus
      * @param props the properties
      * @param nameTitle the name title
      * @param valueTitle the value title
      */
-    public static void printProperties(ShellCommand command, Properties props, String nameTitle, String valueTitle) {
-
+    public static void printProperties(final WorkspaceStatus wsStatus, Properties props, String nameTitle, String valueTitle) {
+        Writer commandOutput = wsStatus.getShell().getOutputWriter();
+        
         final Map< String, String > sorted = new TreeMap<>();
         int maxNameWidth = DEFAULT_WIDTH;
         int maxValueWidth = DEFAULT_WIDTH;
@@ -97,8 +141,8 @@ public class PrintUtils implements StringConstants {
         
         final String format = getFormat( maxNameWidth, maxValueWidth );
         
-        command.print( MESSAGE_INDENT, String.format( format, nameTitle, valueTitle ) );
-        command.print( MESSAGE_INDENT, String.format( format, getHeaderDelimiter( maxNameWidth ), getHeaderDelimiter( maxValueWidth ) ) );
+        print( commandOutput, MESSAGE_INDENT, String.format( format, nameTitle, valueTitle ) );
+        print( commandOutput, MESSAGE_INDENT, String.format( format, getHeaderDelimiter( maxNameWidth ), getHeaderDelimiter( maxValueWidth ) ) );
 
         // print property name and value
         for ( final Entry< String, String > entry : sorted.entrySet() ) {
@@ -106,35 +150,38 @@ public class PrintUtils implements StringConstants {
             String propValue = entry.getValue();
             // propValue less than maximum width
             if(propValue.length() <= maxValueWidth) {
-                command.print( MESSAGE_INDENT, String.format( format, propName, propValue ) );
+                print( commandOutput, MESSAGE_INDENT, String.format( format, propName, propValue ) );
                 // propValue exceeds maximum width - splits it up onto separate lines
             } else {
-                printPropWithLongValue(command,format,propName,propValue,maxValueWidth);
+                printPropWithLongValue(commandOutput,format,propName,propValue,maxValueWidth);
             }
         }
     }
     
     /**
      * Prints the properties for a context
-     * @param command the shell command
+     * @param wsStatus the WorkspaceStatus
      * @param showHiddenProps 'true' to show hidden properties
      * @param showPropPrefixes 'true' to show property prefixes
      * @param context the workspace context
      * @throws Exception the exception
      */
-    public static void printProperties( ShellCommand command, boolean showHiddenProps, boolean showPropPrefixes, final WorkspaceContext context ) throws Exception {
+    public static void printProperties( final WorkspaceStatus wsStatus, boolean showHiddenProps, boolean showPropPrefixes, final KomodoObject context ) throws Exception {
+        Writer commandOutput = wsStatus.getShell().getOutputWriter();
+        
         // show unfiltered properties if necessary
         List< String > props = null;
 
         if ( showHiddenProps ) {
-            props = ( ( WorkspaceContextImpl )context ).getUnfilteredProperties();
+            props = KomodoObjectUtils.getUnfilteredProperties(wsStatus,context);
         } else {
-            props = context.getProperties();
+            props = KomodoObjectUtils.getProperties(wsStatus,context);
         }
-
+        
         if ( props.isEmpty() ) {
-            final String noPropsMsg = Messages.getString( SHELL.NoPropertiesMsg, context.getType(), context.getFullName() ); 
-            command.print( MESSAGE_INDENT, noPropsMsg );
+            String objFullName = KomodoObjectUtils.getFullName(wsStatus, context);
+            final String noPropsMsg = Messages.getString( SHELL.NoPropertiesMsg, wsStatus.getTypeDisplay(context), objFullName ); 
+            print( commandOutput, MESSAGE_INDENT, noPropsMsg );
             return;
         }
 
@@ -148,9 +195,9 @@ public class PrintUtils implements StringConstants {
             String value = null;
 
             if ( showHiddenProps ) {
-                value = ( ( WorkspaceContextImpl )context ).getUnfilteredPropertyValue( name );
+                value = KomodoObjectUtils.getUnfilteredPropertyValue(wsStatus, context, name );
             } else {
-                value = context.getPropertyValue( name );
+                value = KomodoObjectUtils.getPropertyValue(wsStatus, context, name );
 
                 if ( StringUtils.isBlank( value ) ) {
                     value = Messages.getString( SHELL.NO_PROPERTY_VALUE );
@@ -158,7 +205,7 @@ public class PrintUtils implements StringConstants {
             }
 
             if ( !showPropPrefixes ) {
-                name = removePrefix( props.get( i ) );
+                name = KomodoObjectUtils.removePrefix( props.get( i ) );
             }
 
             if ( maxNameWidth < name.length() ) {
@@ -178,17 +225,17 @@ public class PrintUtils implements StringConstants {
         }
 
         // Print properties header
-        final String objType = context.getType(); // current object type
-        final String objFullName = context.getFullName(); // current object name
+        final String objType = wsStatus.getTypeDisplay(context); // current object type
+        String objFullName = KomodoObjectUtils.getFullName(wsStatus, context);
         final String propListHeader = Messages.getString( SHELL.PropertiesHeader, objType, objFullName );
-        command.print( MESSAGE_INDENT, propListHeader );
+        print( commandOutput, MESSAGE_INDENT, propListHeader );
 
         final String format = PrintUtils.getFormat( maxNameWidth, maxValueWidth );
-        command.print( MESSAGE_INDENT,
+        print( commandOutput, MESSAGE_INDENT,
                String.format( format,
                               Messages.getString( SHELL.PROPERTY_NAME_HEADER ),
                               Messages.getString( SHELL.PROPERTY_VALUE_HEADER ) ) );
-        command.print( MESSAGE_INDENT, String.format( format, PrintUtils.getHeaderDelimiter( maxNameWidth ), PrintUtils.getHeaderDelimiter( maxValueWidth ) ) );
+        print( commandOutput, MESSAGE_INDENT, String.format( format, PrintUtils.getHeaderDelimiter( maxNameWidth ), PrintUtils.getHeaderDelimiter( maxValueWidth ) ) );
 
         // print property name and value
         for ( final Entry< String, String > entry : sorted.entrySet() ) {
@@ -196,33 +243,35 @@ public class PrintUtils implements StringConstants {
             String propValue = entry.getValue();
             // propValue less than maximum width
             if(propValue.length() <= maxValueWidth) {
-                command.print( MESSAGE_INDENT, String.format( format, propName, propValue ) );
+                print( commandOutput, MESSAGE_INDENT, String.format( format, propName, propValue ) );
             // propValue exceeds maximum width - splits it up onto separate lines
             } else {
-                printPropWithLongValue(command,format,propName,propValue,maxValueWidth);
+                printPropWithLongValue(commandOutput,format,propName,propValue,maxValueWidth);
             }
         }
     }
     
     /**
      * Shows the komodo object property with the specified name
-     * @param command the shell command
+     * @param wsStatus the WorkspaceStatus
      * @param context the workspace context
      * @param name the property name
      * @throws Exception the exception
      */
-    public static void printProperty( ShellCommand command, WorkspaceContext context, String name ) throws Exception {
-        String propertyName = attachPrefix( context, name );
+    public static void printProperty( final WorkspaceStatus wsStatus, KomodoObject context, String name ) throws Exception {
+        Writer commandOutput = wsStatus.getShell().getOutputWriter();
+        
+        String propertyName = KomodoObjectUtils.attachPrefix( wsStatus, context, name );
 
         // Get the value for the supplied property
-        String propValue = context.getPropertyValue( propertyName );
+        String propValue = KomodoObjectUtils.getPropertyValue(wsStatus, context, propertyName );
 
         if ( StringUtils.isBlank( propValue ) ) {
             propValue = Messages.getString( SHELL.NO_PROPERTY_VALUE );
         }
         
-        if ( !context.getWorkspaceStatus().isShowingPropertyNamePrefixes() ) {
-            propertyName = removePrefix( propertyName );
+        if ( !wsStatus.isShowingPropertyNamePrefixes() ) {
+            propertyName = KomodoObjectUtils.removePrefix( propertyName );
         }
         final int maxNameWidth = Math.max( DEFAULT_WIDTH, propertyName.length() );
 
@@ -236,35 +285,40 @@ public class PrintUtils implements StringConstants {
         final String format = PrintUtils.getFormat( maxNameWidth, maxValueWidth );
 
         // Print properties header
-        String propListHeader = Messages.getString( SHELL.PropertyHeader, context.getType(), context.getFullName() ); 
-        command.print( MESSAGE_INDENT, propListHeader );
-        command.print( MESSAGE_INDENT,
+        String objFullName = KomodoObjectUtils.getFullName(wsStatus, context);
+        String propListHeader = Messages.getString( SHELL.PropertyHeader, wsStatus.getTypeDisplay(context), objFullName ); 
+        print( commandOutput, MESSAGE_INDENT, propListHeader );
+        print( commandOutput, MESSAGE_INDENT,
                String.format( format,
                               Messages.getString( SHELL.PROPERTY_NAME_HEADER ),
                               Messages.getString( SHELL.PROPERTY_VALUE_HEADER ) ) );
-        command.print( MESSAGE_INDENT, String.format( format, PrintUtils.getHeaderDelimiter( maxNameWidth ), PrintUtils.getHeaderDelimiter( maxValueWidth ) ) );
+        print( commandOutput, MESSAGE_INDENT, String.format( format, PrintUtils.getHeaderDelimiter( maxNameWidth ), PrintUtils.getHeaderDelimiter( maxValueWidth ) ) );
 
         // propValue less than maximum width
         if(propValue.length() <= maxValueWidth) {
-            command.print( MESSAGE_INDENT, String.format( format, propertyName, propValue ) );
+            print( commandOutput, MESSAGE_INDENT, String.format( format, propertyName, propValue ) );
         // propValue exceeds maximum width - splits it up onto separate lines
         } else {
-            printPropWithLongValue(command,format,propertyName,propValue,maxValueWidth);
+            printPropWithLongValue(commandOutput,format,propertyName,propValue,maxValueWidth);
         }
 
     }
     
     /**
-     * @param command the shell command
+     * @param wsStatus the workspace status
      * @param context the workspace context
      * @throws Exception the exception
      */
-    public static void printChildren( final ShellCommand command, final WorkspaceContext context ) throws Exception {
-        final List< WorkspaceContext > children = context.getChildren();
+    public static void printChildren( final WorkspaceStatus wsStatus, final KomodoObject context ) throws Exception {
+        Writer commandOutput = wsStatus.getShell().getOutputWriter();
+        
+        final KomodoObject[] children = context.getChildren(wsStatus.getTransaction());
+        List<KomodoObject> childList = Arrays.asList(children);
 
-        if ( children.isEmpty() ) {
-            String noChildrenMsg = Messages.getString( SHELL.noChildrenMsg, context.getType(), context.getFullName() );
-            command.print( MESSAGE_INDENT, noChildrenMsg );
+        if ( childList.isEmpty() ) {
+            String objFullName = KomodoObjectUtils.getFullName(wsStatus, context);
+            String noChildrenMsg = Messages.getString( SHELL.noChildrenMsg, wsStatus.getTypeDisplay(context), objFullName );
+            print(commandOutput, MESSAGE_INDENT, noChildrenMsg );
             return;
         }
 
@@ -272,14 +326,14 @@ public class PrintUtils implements StringConstants {
         int maxTypeWidth = DEFAULT_WIDTH;
 
         // loop through children getting name, type, and finding widest child name
-        for ( int i = 0, size = children.size(); i < size; ++i ) {
-            final String name = children.get( i ).getName();
+        for ( int i = 0, size = childList.size(); i < size; ++i ) {
+            final String name = KomodoObjectUtils.getName(wsStatus, childList.get(0));
 
             if ( maxNameWidth < name.length() ) {
                 maxNameWidth = name.length();
             }
 
-            final String type = children.get( i ).getType();
+            final String type = wsStatus.getTypeDisplay(childList.get(0));
 
             if ( maxTypeWidth < type.length() ) {
                 maxTypeWidth = type.length();
@@ -287,7 +341,7 @@ public class PrintUtils implements StringConstants {
         }
 
         // sort
-        final Comparator< WorkspaceContext > sorter = new Comparator< WorkspaceContext >() {
+        final Comparator< KomodoObject > sorter = new Comparator< KomodoObject >() {
 
             /**
              * {@inheritDoc}
@@ -295,14 +349,16 @@ public class PrintUtils implements StringConstants {
              * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
              */
             @Override
-            public int compare( final WorkspaceContext thisContext,
-                                final WorkspaceContext thatContext ) {
+            public int compare( final KomodoObject thisContext,
+                                final KomodoObject thatContext ) {
                 try {
-                    final String thisType = thisContext.getType();
-                    int result = thisType.compareTo( thatContext.getType() );
+                    final String thisType = wsStatus.getTypeDisplay(thisContext);
+                    int result = thisType.compareTo( wsStatus.getTypeDisplay(thatContext) );
 
                     if ( result == 0 ) {
-                        return thisContext.getName().compareTo( thatContext.getName() );
+                        String thisName = KomodoObjectUtils.getName(wsStatus,thisContext);
+                        String thatName = KomodoObjectUtils.getName(wsStatus,thatContext);
+                        return thisName.compareTo( thatName );
                     }
 
                     return result;
@@ -313,80 +369,38 @@ public class PrintUtils implements StringConstants {
             }
 
         };
-        Collections.sort( children, sorter );
+        Collections.sort( childList, sorter );
 
         // Print children header
-        final String childrenHeader = Messages.getString( SHELL.ChildrenHeader, context.getType(), context.getFullName() );
-        command.print( MESSAGE_INDENT, childrenHeader );
+        String objFullName = KomodoObjectUtils.getFullName(wsStatus, context);
+        final String childrenHeader = Messages.getString( SHELL.ChildrenHeader, wsStatus.getTypeDisplay(context), objFullName );
+        print( commandOutput, MESSAGE_INDENT, childrenHeader );
 
         final String format = PrintUtils.getFormat( maxNameWidth, maxTypeWidth );
-        command.print( MESSAGE_INDENT,
+        print( commandOutput, MESSAGE_INDENT,
                String.format( format, Messages.getString( SHELL.CHILD_NAME_HEADER ), Messages.getString( SHELL.CHILD_TYPE_HEADER ) ) );
-        command.print( MESSAGE_INDENT, String.format( format, PrintUtils.getHeaderDelimiter( maxNameWidth ), PrintUtils.getHeaderDelimiter( maxTypeWidth ) ) );
+        print( commandOutput, MESSAGE_INDENT, String.format( format, PrintUtils.getHeaderDelimiter( maxNameWidth ), PrintUtils.getHeaderDelimiter( maxTypeWidth ) ) );
 
         // Print each child
-        for ( final WorkspaceContext childContext : children ) {
-            final String childName = childContext.getName();
-            final String childType = childContext.getType();
-            command.print( MESSAGE_INDENT, String.format( format, childName, childType ) );
+        for ( final KomodoObject childContext : childList ) {
+            final String childName = KomodoObjectUtils.getName(wsStatus,childContext);
+            final String childType = wsStatus.getTypeDisplay(childContext);
+            print( commandOutput, MESSAGE_INDENT, String.format( format, childName, childType ) );
         }
     }
     
-    /**
-     * @param context
-     *        the associated context (cannot be null)
-     * @param propertyName
-     *        the name whose namespace prefix is being attached (cannot be empty)
-     * @return the property name with the namespace prefix attached (never empty)
-     * @throws Exception
-     *         if an error occurs
-     */
-    protected static String attachPrefix( final WorkspaceContext context,
-                                          final String propertyName ) throws Exception {
-        ArgCheck.isNotNull( context, "context" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( propertyName, "propertyName" ); //$NON-NLS-1$
-
-        for ( final String name : context.getProperties() ) {
-            if ( propertyName.equals( removePrefix( name ) ) ) {
-                return name;
-            }
-        }
-
-        return propertyName;
-    }
-    
-    /**
-     * @param propertyName
-     *        the property name whose namespace prefix is being removed (cannot be empty)
-     * @return the name without the namespace prefix (never empty)
-     */
-    private static String removePrefix( final String propertyName ) {
-        ArgCheck.isNotEmpty( propertyName, "qname" ); //$NON-NLS-1$
-        final int index = propertyName.indexOf( ':' );
-
-        if ( index == -1 ) {
-            return propertyName;
-        }
-
-        if ( index < propertyName.length() ) {
-            return propertyName.substring( index + 1 );
-        }
-
-        return propertyName;
-    }
-    
-    private static void printPropWithLongValue(ShellCommand command, String format, String propName, String propValue, int maxValueWidth) {
+    private static void printPropWithLongValue(Writer commandOutput, String format, String propName, String propValue, int maxValueWidth) {
         // splits long strings into equal length lines of 'maxValueWidth' length.
         List<String> lines = splitEqually(propValue,maxValueWidth);
         boolean first = true;
         for(String line : lines) {
             // First line includes the propName
             if(first) {
-                command.print( MESSAGE_INDENT, String.format( format, propName, line ) );
+                print( commandOutput, MESSAGE_INDENT, String.format( format, propName, line ) );
                 first = false;
             // Subsequent lines the 'name' is just a spacer
             } else {
-                command.print( MESSAGE_INDENT, String.format( format, EMPTY_STRING, line ) );
+                print( commandOutput, MESSAGE_INDENT, String.format( format, EMPTY_STRING, line ) );
             }
         }
     }

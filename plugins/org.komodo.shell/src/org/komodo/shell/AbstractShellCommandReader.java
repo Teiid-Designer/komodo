@@ -23,8 +23,6 @@ package org.komodo.shell;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintStream;
 import java.io.Writer;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -34,6 +32,7 @@ import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.NoOpCommand;
+import org.komodo.shell.util.KomodoObjectUtils;
 
 /**
  * Abstract class for all shell command readers.
@@ -47,8 +46,6 @@ public abstract class AbstractShellCommandReader implements ShellCommandReader {
 
 	private final WorkspaceStatus wsStatus;
 	private final ShellCommandFactory factory;
-	private final InputStream inStream;
-	private final PrintStream outStream;
     private Map<String, String> properties;
 
     /**
@@ -60,8 +57,6 @@ public abstract class AbstractShellCommandReader implements ShellCommandReader {
     public AbstractShellCommandReader(ShellCommandFactory factory, WorkspaceStatus wsStatus) {
     	this.factory = factory;
     	this.wsStatus = wsStatus;
-        this.inStream = wsStatus.getInputStream();
-        this.outStream = wsStatus.getOutputStream();
     }
 
     /**
@@ -76,8 +71,6 @@ public abstract class AbstractShellCommandReader implements ShellCommandReader {
         this.factory = factory;
         this.wsStatus = wsStatus;
         this.properties = properties;
-        this.inStream = wsStatus.getInputStream();
-        this.outStream = wsStatus.getOutputStream();
     }
 
 	/**
@@ -113,7 +106,7 @@ public abstract class AbstractShellCommandReader implements ShellCommandReader {
 		// Create the command.
 		ShellCommand command = factory.getCommand(commandName);
 		command.setArguments(arguments);
-		command.setOutput(getCommandOutput());
+		command.setWriter(getOutputWriter());
 		return command;
 	}
 
@@ -139,16 +132,6 @@ public abstract class AbstractShellCommandReader implements ShellCommandReader {
 
         return filtered;
     }
-
-	/**
-     * Gets the output stream that should be used by commands when they need to
-     * print a message to the console.
-     *
-     * @return the command output
-     */
-	protected Writer getCommandOutput() {
-		return new OutputStreamWriter(outStream);
-	}
 
 	/**
      * Reads a single line from the input source (e.g. user input) and returns
@@ -193,16 +176,19 @@ public abstract class AbstractShellCommandReader implements ShellCommandReader {
 	 * @return input stream for receiving commands inputted into the console
 	 */
 	public InputStream getInputStream() {
-	    return inStream;
+	    return this.wsStatus.getInputStream();
 	}
 
-	/**
-	 * @return output stream for printing messages to the console
-	 */
-	public PrintStream getOutputStream() {
-	    return outStream;
-	}
-
+    /**
+     * Gets the output stream that should be used by commands when they need to
+     * print a message to the console.
+     *
+     * @return the command output
+     */
+    protected Writer getOutputWriter() {
+        return this.wsStatus.getOutputWriter();
+    }
+    
 	/**
      * Checks if is batch.
      *
@@ -220,14 +206,14 @@ public abstract class AbstractShellCommandReader implements ShellCommandReader {
 
         try {
             if ( getWorkspaceStatus().isShowingFullPathInPrompt() ) {
-                path = getWorkspaceStatus().getCurrentContext().getFullName();
+                path = KomodoObjectUtils.getFullName(this.wsStatus, this.wsStatus.getCurrentContext());
             } else {
-                path = getWorkspaceStatus().getCurrentContext().getName();
+                path = KomodoObjectUtils.getName(this.wsStatus, this.wsStatus.getCurrentContext());
             }
         } catch ( final Exception e ) {
             // problem getting context name
             path = Messages.getString( SHELL.PATH_NOT_FOUND,
-                                       getWorkspaceStatus().getCurrentContext().getKomodoObj().getAbsolutePath() );
+                                       this.wsStatus.getCurrentContext().getAbsolutePath() );
             return Messages.getString( Messages.SHELL.PROMPT, path );
         }
 
@@ -235,7 +221,7 @@ public abstract class AbstractShellCommandReader implements ShellCommandReader {
 
         // see if type should be displayed
         if ( getWorkspaceStatus().isShowingTypeInPrompt() ) {
-            return Messages.getString( Messages.SHELL.PROMPT_WITH_TYPE, path, getWorkspaceStatus().getCurrentContext().getType() );
+            return Messages.getString( Messages.SHELL.PROMPT_WITH_TYPE, path, getWorkspaceStatus().getTypeDisplay(getWorkspaceStatus().getCurrentContext()) );
         }
 
         return Messages.getString( Messages.SHELL.PROMPT, path );

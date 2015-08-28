@@ -62,7 +62,9 @@ public class ServerCommandMessages implements StringConstants {
     
     @SuppressWarnings( "javadoc" )
     public enum ServerSetCommand {
-        MISSING_SERVER_NAME;
+        ServerDoesNotExist,
+        MissingServerNameArg,
+        ServerSetSuccess;
 
         @Override
         public String toString() {

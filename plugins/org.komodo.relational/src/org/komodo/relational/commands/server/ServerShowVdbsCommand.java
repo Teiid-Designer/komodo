@@ -63,7 +63,7 @@ public final class ServerShowVdbsCommand extends ServerShellCommand {
             String name = vdb.getName();
             objNames.add(name);
         }
-        PrintUtils.printList(this, objNames, getMessage(ObjectNameHeader));
+        PrintUtils.printList(getWorkspaceStatus(), objNames, getMessage(ObjectNameHeader));
         print();
 
         return true;

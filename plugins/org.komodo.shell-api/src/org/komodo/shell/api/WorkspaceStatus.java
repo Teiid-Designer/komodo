@@ -21,9 +21,8 @@
  ************************************************************************************/
 package org.komodo.shell.api;
 
-import java.io.File;
 import java.io.InputStream;
-import java.io.PrintStream;
+import java.io.Writer;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -120,11 +119,6 @@ public interface WorkspaceStatus extends StringConstants {
      */
     void setProperties( final Properties props ) throws Exception;
 
-	/**
-	 * Set all properties back to their default values.
-	 */
-	void resetProperties();
-
     /**
      * Gets a copy of the global workspace properties.
      *
@@ -153,21 +147,32 @@ public interface WorkspaceStatus extends StringConstants {
 	 * Get the workspace context
 	 * @return the workspace context
 	 */
-	WorkspaceContext getWorkspaceContext();
+	KomodoObject getRootContext();
 
 	/**
 	 * Set the current workspace context
 	 * @param context the current workspace context
 	 * @throws Exception if error occurs
 	 */
-	void setCurrentContext(WorkspaceContext context) throws Exception;
+	void setCurrentContext(KomodoObject context) throws Exception;
 
 	/**
 	 * Get the current workspace context
 	 * @return the current workspace context
 	 */
-	WorkspaceContext getCurrentContext();
+	KomodoObject getCurrentContext();
+	
+    /**
+     * Get the current workspace context type
+     * @return the current workspace context type
+     */
+    String getCurrentContextType();
 
+    /**
+     * Close the recording output file if open
+     */
+    void closeRecordingWriter();
+    
 	/**
 	 * Toggles the recording status 'on' or 'off'
 	 * @param recordState 'true' to enable recording, 'false' to disable
@@ -181,10 +186,10 @@ public interface WorkspaceStatus extends StringConstants {
 	boolean getRecordingStatus();
 
 	/**
-	 * Get the recording output file path
-	 * @return the output file
+	 * Get the Writer for recording output
+	 * @return the recording writer
 	 */
-	File getRecordingOutputFile();
+	Writer getRecordingWriter();
 
     /**
      * @return <code>true</code> if the full object path is being displayed in the prompt
@@ -239,11 +244,11 @@ public interface WorkspaceStatus extends StringConstants {
      * @return the input stream
      */
     InputStream getInputStream();
-
+    
     /**
-     * @return the output stream
+     * @return the output writer
      */
-    PrintStream getOutputStream();
+    Writer getOutputWriter();
 
     /**
      * @return the komodo engine
@@ -288,22 +293,32 @@ public interface WorkspaceStatus extends StringConstants {
     void setTransaction( final UnitOfWork transaction );
 
     /**
-     * @param contextId
-     * @return workspace context with given id
-     */
-    WorkspaceContext getWorkspaceContext(String contextId);
-
-    /**
-     * @param contextId
-     * @param context
-     */
-    void addWorkspaceContext(String contextId, WorkspaceContext context);
-
-    /**
      * @return the parent komodo shell
      */
     KomodoShell getShell();
     
-    public < T extends KomodoObject > T resolve ( final KomodoObject kObj ) throws KException;
+    /**
+     * Resolve a KomodoObject into a concrete class if available
+     * @param kObj the KomodoObject
+     * @return the resolved Object
+     * @throws KException the exception
+     */
+    < T extends KomodoObject > T resolve ( final KomodoObject kObj ) throws KException;
 
+    /**
+     * Get the object type string for display
+     * @param kObj the KomodoObject
+     * @return the type display string
+     * @throws KException the exception
+     */
+    String getTypeDisplay ( final KomodoObject kObj ) throws KException;
+
+    /**
+     * Determine if the supplied KomodoObject is the root context node
+     * @param kObj the KomodoObject
+     * @return 'true' if root, 'false' if not
+     * @throws KException the exception
+     */
+    boolean isRoot ( final KomodoObject kObj ) throws KException;
+    
 }
