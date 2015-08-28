@@ -9,7 +9,6 @@ package org.komodo.rest.json;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -27,15 +26,15 @@ import com.google.gson.annotations.SerializedName;
  *     "id" : "MyVdb",
  *     "description" : "vdb description goes here",
  *     "links" : [
- *         { "rel" : "self", "href" : "http://<baseUri>/komodo/workspace/vdbs/MyVdb" },
- *         { "rel" : "parent", "href" : "http://<baseUri>/komodo/workspace/vdbs" },
- *         { "rel" : "delete", "href" : "http://<baseUri>/komodo/workspace/vdbs/MyVdb" },
- *         { "rel" : "manifest", "href" : "http://<baseUri>/komodo/workspace/vdbs/MyVdb/manifest" }
+ *         { "rel" : "self", "href" : "http://<baseUri>/komodo/workspace/vdbs/MyVdb", "method" : "GET" },
+ *         { "rel" : "parent", "href" : "http://<baseUri>/komodo/workspace/vdbs", "method" : "GET" },
+ *         { "rel" : "delete", "href" : "http://<baseUri>/komodo/workspace/vdbs/MyVdb", "method" : "DELETE" },
+ *         { "rel" : "manifest", "href" : "http://<baseUri>/komodo/workspace/vdbs/MyVdb/manifest", "method" : "GET" }
  *     ]
  * }
  * </pre>
  */
-public final class RestVdbDescriptor implements Jsonable {
+public final class RestVdbDescriptor extends KomodoRestEntity {
 
     /**
      * An empty array of descriptors.
@@ -43,9 +42,15 @@ public final class RestVdbDescriptor implements Jsonable {
     public static final RestVdbDescriptor[] NO_DESCRIPTORS = new RestVdbDescriptor[ 0 ];
 
     @SerializedName( "id" )
-    private final String name;
+    private String name;
     private String description;
-    private final RestLink[] links;
+
+    /**
+     * Constructor for use <strong>only</strong> when deserializing.
+     */
+    public RestVdbDescriptor() {
+        // nothing to do
+    }
 
     /**
      * @param vdbName
@@ -85,26 +90,34 @@ public final class RestVdbDescriptor implements Jsonable {
      */
     @Override
     public boolean equals( final Object other ) {
-        if ( ( other == null ) || !getClass().equals( other.getClass() ) ) {
+        if ( !super.equals( other ) ) {
             return false;
         }
 
+        assert( other != null );
+        assert( getClass().equals( other.getClass() ) );
+
         final RestVdbDescriptor that = ( RestVdbDescriptor )other;
 
-        if ( this.name.equals( that.name ) ) {
-            if ( this.description == null ) {
-                if ( that.description != null ) {
-                    return false;
-                }
-            } else if ( !this.description.equals( that.description ) ) {
+        // check name
+        if ( this.name == null ) {
+            if ( that.name != null ) {
                 return false;
             }
-
-            return Arrays.deepEquals( this.links, that.links );
+        } else if ( !this.name.equals( that.name ) ) {
+            return false;
         }
 
-        // names not equal
-        return false;
+        // check description
+        if ( this.description == null ) {
+            if ( that.description != null ) {
+                return false;
+            }
+        } else if ( !this.description.equals( that.description ) ) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -115,14 +128,7 @@ public final class RestVdbDescriptor implements Jsonable {
     }
 
     /**
-     * @return the links (never <code>null</code> or empty)
-     */
-    public RestLink[] getLinks() {
-        return this.links;
-    }
-
-    /**
-     * @return the name (never empty)
+     * @return the name (can be empty)
      */
     public String getName() {
         return this.name;
@@ -135,15 +141,23 @@ public final class RestVdbDescriptor implements Jsonable {
      */
     @Override
     public int hashCode() {
-        return Objects.hash( this.name, this.description, Arrays.deepHashCode( this.links ) );
+        return Objects.hash( this.name, this.description, super.hashCode() );
     }
 
     /**
-     * @param description
+     * @param newDescription
      *        the new description (can be empty)
      */
-    public void setDescription( final String description ) {
-        this.description = description;
+    public void setDescription( final String newDescription ) {
+        this.description = newDescription;
+    }
+
+    /**
+     * @param newName
+     *        the VDB name (can be empty)
+     */
+    public void setName( final String newName ) {
+        this.name = newName;
     }
 
 }

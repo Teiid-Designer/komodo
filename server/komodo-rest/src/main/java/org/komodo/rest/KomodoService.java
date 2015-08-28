@@ -16,7 +16,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import org.komodo.core.KEngine;
 import org.komodo.repository.SynchronousCallback;
-import org.komodo.rest.json.Jsonable;
+import org.komodo.rest.json.KomodoRestEntity;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -46,7 +46,7 @@ public abstract class KomodoService {
     }
 
     protected Response commit( final UnitOfWork transaction,
-                               final Jsonable jsonable ) throws Exception {
+                               final KomodoRestEntity jsonable ) throws Exception {
         assert( transaction.getCallback() instanceof SynchronousCallback );
         final int timeout = TIMEOUT;
         final TimeUnit unit = UNIT;

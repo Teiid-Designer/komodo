@@ -10,6 +10,7 @@ package org.komodo.rest;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.komodo.rest.json.JsonConstants.JSON_BUILDER;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -35,8 +36,6 @@ import org.komodo.rest.json.RestVdb;
 import org.komodo.rest.json.RestVdbDescriptor;
 import org.komodo.rest.json.RestVdbDirectory;
 import org.komodo.spi.constants.SystemConstants;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class KomodoVdbServiceTest {
@@ -45,7 +44,6 @@ public final class KomodoVdbServiceTest {
     private static KomodoRestV1Application _restApp;
     private static UndertowJaxrsServer _server;
     private static KomodoRestUriBuilder _uriBuilder;
-    private static final Gson GSON = new GsonBuilder().create();
 
     @AfterClass
     public static void afterAll() throws Exception {
@@ -110,7 +108,7 @@ public final class KomodoVdbServiceTest {
             final String entity = this.response.readEntity( String.class );
             assertThat( entity, is( notNullValue() ) );
 
-            final RestVdbDescriptor descriptor = GSON.fromJson( entity, RestVdbDescriptor.class );
+            final RestVdbDescriptor descriptor = JSON_BUILDER.fromJson( entity, RestVdbDescriptor.class );
             assertThat( descriptor.getName(), is( restVdb.getName() ) );
             assertThat( descriptor.getDescription(), is( restVdb.getDescription() ) );
             assertThat( descriptor.getLinks().length, is( 4 ) );
@@ -143,7 +141,7 @@ public final class KomodoVdbServiceTest {
         assertThat( entity, is( notNullValue() ) );
 
         // make sure the VDB descriptor JSON document is returned
-        final RestVdbDescriptor descriptor = GSON.fromJson( entity, RestVdbDescriptor.class );
+        final RestVdbDescriptor descriptor = JSON_BUILDER.fromJson( entity, RestVdbDescriptor.class );
         assertThat( descriptor.getName(), is( restVdb.getName() ) );
         assertThat( descriptor.getDescription(), is( restVdb.getDescription() ) );
         assertThat( descriptor.getLinks().length, is( 4 ) );
@@ -160,7 +158,7 @@ public final class KomodoVdbServiceTest {
         final String entity = this.response.readEntity( String.class );
         assertThat( entity, is( notNullValue() ) );
 
-        final RestVdbDirectory vdbDir = GSON.fromJson( entity, RestVdbDirectory.class );
+        final RestVdbDirectory vdbDir = JSON_BUILDER.fromJson( entity, RestVdbDirectory.class );
         assertThat( vdbDir.getDescriptors().length, is( 1 ) );
     }
 
@@ -175,7 +173,7 @@ public final class KomodoVdbServiceTest {
         final String entity = this.response.readEntity( String.class );
         assertThat( entity, is( notNullValue() ) );
 
-        final RestVdbDirectory vdbDir = GSON.fromJson( entity, RestVdbDirectory.class );
+        final RestVdbDirectory vdbDir = JSON_BUILDER.fromJson( entity, RestVdbDirectory.class );
         assertThat( vdbDir.getDescriptors().length, is( resultSize ) );
     }
 
@@ -191,7 +189,7 @@ public final class KomodoVdbServiceTest {
         final String entity = this.response.readEntity( String.class );
         assertThat( entity, is( notNullValue() ) );
 
-        final RestVdbDirectory vdbDir = GSON.fromJson( entity, RestVdbDirectory.class );
+        final RestVdbDirectory vdbDir = JSON_BUILDER.fromJson( entity, RestVdbDirectory.class );
         assertThat( vdbDir.getDescriptors().length, is( numToCreate - start ) );
 
         // check content

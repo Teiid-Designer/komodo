@@ -12,28 +12,52 @@ import org.komodo.utils.ArgCheck;
 import com.google.gson.annotations.SerializedName;
 
 /**
- * A VDB that can be used by GSON to build a JSON document representation.
+ * A translator that can be used by GSON to build a JSON document representation.
+ *
+ * <pre>
+ * {
+ *     "id" : "MyTranslator",
+ *     "description" : "translator description goes here",
+ *     "type" : "customType",
+ *     "properties" : [
+ *         "green" : "lantern",
+ *         "captain" : "america",
+ *         "black" : "widow"
+ *     ]
+ * }
+ * </pre>
  */
-public final class RestVdb extends KomodoRestEntity {
+public final class RestTranslator extends KomodoRestEntity {
+
+    /**
+     * And empty array of translators.
+     */
+    public static final RestTranslator[] NO_TRANSLATORS = new RestTranslator[ 0 ];
 
     @SerializedName( "id" )
     private String name;
     private String description;
-    private String originalFilePath;
-
-    // data roles
-    // entries
-    // imports
-    // models
-    // translators
+    private String type;
 
     /**
-     * @param vdbName
-     *        the name of the VDB (cannot be empty)
+     * Constructor for use <strong>only</strong> when deserializing.
      */
-    public RestVdb( final String vdbName ) {
-        ArgCheck.isNotEmpty( vdbName, "vdbName" ); //$NON-NLS-1$
-        this.name = vdbName;
+    public RestTranslator() {
+        // nothing to do
+    }
+
+    /**
+     * @param name
+     *        the name of the translator (cannot be empty)
+     * @param type
+     *        the translator type (cannot be empty)
+     */
+    public RestTranslator( final String name,
+                           final String type ) {
+        ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( type, "type" ); //$NON-NLS-1$
+        this.name = name;
+        this.type = type;
     }
 
     /**
@@ -50,7 +74,7 @@ public final class RestVdb extends KomodoRestEntity {
         assert( other != null );
         assert( getClass().equals( other.getClass() ) );
 
-        final RestVdb that = ( RestVdb )other;
+        final RestTranslator that = ( RestTranslator )other;
 
         // check name
         if ( this.name == null ) {
@@ -70,12 +94,12 @@ public final class RestVdb extends KomodoRestEntity {
             return false;
         }
 
-        // check file path
-        if ( this.originalFilePath == null ) {
-            if ( that.originalFilePath != null ) {
+        // check type
+        if ( this.type == null ) {
+            if ( that.type != null ) {
                 return false;
             }
-        } else if ( !this.originalFilePath.equals( that.originalFilePath ) ) {
+        } else if ( !this.type.equals( that.type ) ) {
             return false;
         }
 
@@ -83,24 +107,24 @@ public final class RestVdb extends KomodoRestEntity {
     }
 
     /**
-     * @return the VDB description (can be empty)
+     * @return the description (can be empty)
      */
     public String getDescription() {
         return this.description;
     }
 
     /**
-     * @return the VDB name (never empty)
+     * @return the name (can be empty)
      */
     public String getName() {
         return this.name;
     }
 
     /**
-     * @return the external file path of the VDB (can be empty)
+     * @return the translator type (can be empty)
      */
-    public String getOriginalFilePath() {
-        return this.originalFilePath;
+    public String getType() {
+        return this.type;
     }
 
     /**
@@ -110,7 +134,7 @@ public final class RestVdb extends KomodoRestEntity {
      */
     @Override
     public int hashCode() {
-        return Objects.hash( this.name, this.description, this.originalFilePath, super.hashCode() );
+        return Objects.hash( this.name, this.description, this.type, super.hashCode() );
     }
 
     /**
@@ -122,11 +146,19 @@ public final class RestVdb extends KomodoRestEntity {
     }
 
     /**
-     * @param newOriginalFilePath
-     *        the new VDB external file path (can be empty)
+     * @param newName
+     *        the VDB name (can be empty)
      */
-    public void setOriginalFilePath( final String newOriginalFilePath ) {
-        this.originalFilePath = newOriginalFilePath;
+    public void setName( final String newName ) {
+        this.name = newName;
+    }
+
+    /**
+     * @param newType
+     *        the new translator type (can be empty)
+     */
+    public void setType( final String newType ) {
+        this.type = newType;
     }
 
 }

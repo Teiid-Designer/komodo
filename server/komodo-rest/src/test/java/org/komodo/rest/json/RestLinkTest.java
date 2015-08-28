@@ -10,17 +10,16 @@ package org.komodo.rest.json;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
+import static org.komodo.rest.json.JsonConstants.JSON_BUILDER;
 import java.net.URI;
 import javax.ws.rs.core.UriBuilder;
 import org.junit.Test;
 import org.komodo.rest.json.RestLink.LinkType;
 import org.komodo.rest.json.RestLink.MethodType;
-import com.google.gson.Gson;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class RestLinkTest {
 
-    private static final Gson BUILDER = new Gson();
     private static final String JSON = "{\"rel\":\"self\",\"href\":\"http://localhost:8080\",\"method\":\"GET\"}";
     private static final LinkType LINK_TYPE = LinkType.SELF;
     private static final LinkType LINK_TYPE_2 = LinkType.DELETE;
@@ -38,7 +37,7 @@ public final class RestLinkTest {
     @Test
     public void shouldExportJson() {
         final RestLink link = new RestLink( LINK_TYPE, URI, METHOD_TYPE );
-        assertThat( BUILDER.toJson( link ), is( JSON ) );
+        assertThat( JSON_BUILDER.toJson( link ), is( JSON ) );
     }
 
     @Test( expected = IllegalArgumentException.class )
@@ -65,7 +64,7 @@ public final class RestLinkTest {
 
     @Test
     public void shouldImportJson() {
-        final RestLink link = BUILDER.fromJson( JSON, RestLink.class );
+        final RestLink link = JSON_BUILDER.fromJson( JSON, RestLink.class );
         assertThat( link.getRel(), is( LINK_TYPE ) );
         assertThat( link.getHref(), is( URI ) );
         assertThat( link.getMethod(), is( METHOD_TYPE ) );

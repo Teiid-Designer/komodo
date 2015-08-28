@@ -43,6 +43,11 @@ public final class Messages {
         COMMIT_TIMEOUT,
 
         /**
+         * An error indicating the the JSON entity is incomplete.
+         */
+        INCOMPLETE_JSON,
+
+        /**
          * An error message indicating the Komodo Engine did not clear the repository due to an error.
          */
         KOMODO_ENGINE_CLEAR_ERROR,
@@ -91,6 +96,11 @@ public final class Messages {
          * An error message indicating a repository rollback did not complete in the required amount of time.
          */
         ROLLBACK_TIMEOUT,
+
+        /**
+         * An error indicating the token found in a JSON representation is unknown or misplaced.
+         */
+        UNEXPECTED_JSON_TOKEN,
 
         /**
          * An error indicating the VDB descriptor JSON representation could not be created.

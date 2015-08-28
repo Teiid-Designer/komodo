@@ -43,7 +43,7 @@ public final class KomodoRestV1Application extends Application implements Reposi
         /**
          * The URI path segment for the Komodo REST application. This will be prefixed by the base URI to get the URL.
          */
-        String APP_PATH = "/komodo/v1"; //$NON-NLS-1$
+        String APP_PATH = "/v1"; //$NON-NLS-1$
 
         /**
          * The name of the URI path segment for the Komodo workspace.

@@ -18,6 +18,7 @@ import static org.komodo.rest.Messages.Error.VDB_SERVICE_VDB_NAME_ERROR;
 import static org.komodo.rest.Messages.General.DELETE_OPERATION_NAME;
 import static org.komodo.rest.Messages.General.GET_OPERATION_NAME;
 import static org.komodo.rest.Messages.General.NO_VALUE;
+import static org.komodo.rest.json.JsonConstants.JSON_BUILDER;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +53,6 @@ import org.komodo.utils.StringUtils;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.google.gson.Gson;
 
 /**
  * A Komodo REST service for obtaining VDB information from the workspace.
@@ -85,7 +85,6 @@ public final class KomodoVdbService extends KomodoService {
     private static final int ALL_AVAILABLE = -1;
     private static final Logger LOGGER = LoggerFactory.getLogger( KomodoVdbService.class );
 
-    private final Gson builder = new Gson();
     private final WorkspaceManager wsMgr;
 
     /**
@@ -130,7 +129,7 @@ public final class KomodoVdbService extends KomodoService {
             throw new KomodoRestException( Messages.getString( VDB_SERVICE_MISSING_VDB ) );
         }
 
-        final RestVdb restVdb = this.builder.fromJson( vdbJson, RestVdb.class );
+        final RestVdb restVdb = JSON_BUILDER.fromJson( vdbJson, RestVdb.class );
 
         if ( StringUtils.isBlank( restVdb.getName() ) ) {
             throw new KomodoRestException( Messages.getString( VDB_SERVICE_MISSING_VDB_NAME ) );
@@ -202,7 +201,7 @@ public final class KomodoVdbService extends KomodoService {
             throw new KomodoRestException( Messages.getString( VDB_SERVICE_MISSING_VDB ) );
         }
 
-        final RestVdb restVdb = this.builder.fromJson( vdbJson, RestVdb.class );
+        final RestVdb restVdb = JSON_BUILDER.fromJson( vdbJson, RestVdb.class );
 
         if ( StringUtils.isBlank( restVdb.getName() ) ) {
             throw new KomodoRestException( Messages.getString( VDB_SERVICE_MISSING_VDB_NAME ) );

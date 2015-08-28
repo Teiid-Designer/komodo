@@ -8,6 +8,7 @@
 package org.komodo.rest.json;
 
 import java.util.Arrays;
+import com.google.common.base.Objects;
 
 /**
  * Represents a VDB directory and can be used by GSON to build a JSON document representation.
@@ -39,9 +40,16 @@ import java.util.Arrays;
  * }
  * </pre>
  */
-public final class RestVdbDirectory implements Jsonable {
+public final class RestVdbDirectory extends KomodoRestEntity {
 
-    private final RestVdbDescriptor[] vdbs;
+    private RestVdbDescriptor[] vdbs = RestVdbDescriptor.NO_DESCRIPTORS;
+
+    /**
+     * Constructor for use <strong>only</strong> when deserializing.
+     */
+    public RestVdbDirectory() {
+        // nothing to do
+    }
 
     /**
      * @param descriptors
@@ -52,25 +60,28 @@ public final class RestVdbDirectory implements Jsonable {
     }
 
     /**
-     * @return the descriptors (can be <code>null</code> or empty)
-     */
-    public RestVdbDescriptor[] getDescriptors() {
-        return this.vdbs;
-    }
-
-    /**
      * {@inheritDoc}
      *
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
     public boolean equals( final Object other ) {
-        if ( ( other == null ) || !getClass().equals( other.getClass() ) ) {
+        if ( !super.equals( other ) ) {
             return false;
         }
 
+        assert( other != null );
+        assert( getClass().equals( other.getClass() ) );
+
         final RestVdbDirectory that = ( RestVdbDirectory )other;
         return Arrays.deepEquals( this.vdbs, that.vdbs );
+    }
+
+    /**
+     * @return the descriptors (never <code>null</code> but can be empty)
+     */
+    public RestVdbDescriptor[] getDescriptors() {
+        return this.vdbs;
     }
 
     /**
@@ -80,7 +91,15 @@ public final class RestVdbDirectory implements Jsonable {
      */
     @Override
     public int hashCode() {
-        return Arrays.deepHashCode( this.vdbs );
+        return Objects.hashCode( Arrays.deepHashCode( this.vdbs ), super.hashCode() );
+    }
+
+    /**
+     * @param newVdbs
+     *        the new VDB descriptors (can be <code>null</code>)
+     */
+    public void setVdbs( final RestVdbDescriptor[] newVdbs ) {
+        this.vdbs = ( ( newVdbs == null ) ? RestVdbDescriptor.NO_DESCRIPTORS : newVdbs );
     }
 
 }
