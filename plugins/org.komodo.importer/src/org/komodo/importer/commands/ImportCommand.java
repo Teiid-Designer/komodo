@@ -19,7 +19,6 @@ import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
 import org.komodo.shell.api.InvalidCommandArgumentException;
-import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
 import org.komodo.spi.repository.KomodoObject;
@@ -71,7 +70,7 @@ public class ImportCommand extends BuiltInShellCommand {
         }
         
         // Validate the parentContext.  If not supplied (null arg) this returns the current context.
-        WorkspaceContext parentContext = ContextUtils.getContextForPath(getWorkspaceStatus(), parentContextPath);
+        KomodoObject parentContext = ContextUtils.getContextForPath(getWorkspaceStatus(), parentContextPath);
         if(parentContext==null) {
             print(CompletionConstants.MESSAGE_INDENT, Messages.getString(Messages.ImportCommand.InvalidTargetPath, parentContextPath));
         	return false;
@@ -81,7 +80,7 @@ public class ImportCommand extends BuiltInShellCommand {
     	UnitOfWork trans = wsStatus.getTransaction();
         if (SUBCMD_DDL.equalsIgnoreCase(subcmdArg)) {
         	// Can only import DDL into Model and Schema
-        	KomodoType kType = parentContext.getKomodoObj().getTypeIdentifier(trans);
+        	KomodoType kType = parentContext.getTypeIdentifier(trans);
         	if(kType != KomodoType.MODEL && kType != KomodoType.SCHEMA) {
         		print(CompletionConstants.MESSAGE_INDENT, Messages.getString(Messages.ImportCommand.InvalidDDLParentType));
         		return false;
@@ -140,9 +139,9 @@ public class ImportCommand extends BuiltInShellCommand {
 //            }
         } else if (SUBCMD_VDB.equalsIgnoreCase(subcmdArg)) {
             // Validate VDB is valid for the specified parent
-            if(!validateParentPath(parentContextPath,KomodoType.VDB)) {
-            	return false;
-            }
+//            if(!validateParentPath(parentContextPath,KomodoType.VDB)) {
+//            	return false;
+//            }
 
             // The import will be performed using the VDB filename.  If successful, it will be renamed to the VDB name
             File vdbFile = new File(fileNameArg);
@@ -150,10 +149,10 @@ public class ImportCommand extends BuiltInShellCommand {
             importOptions.setOption(OptionKeys.NAME, vdbFile.getName());
 
             // Determine if a VDB with 'filename' already exists
-    		boolean okToContinue = validateNotDuplicate(vdbFile.getName(), KomodoType.VDB, parentContext);
-    		if(!okToContinue) {
-    			return false;
-    		}
+//    		boolean okToContinue = validateNotDuplicate(vdbFile.getName(), KomodoType.VDB, parentContext);
+//    		if(!okToContinue) {
+//    			return false;
+//    		}
             
             // Set up the import.
             ImportMessages importMessages = new ImportMessages();
@@ -257,15 +256,15 @@ public class ImportCommand extends BuiltInShellCommand {
      * @param objType the type of object
      * @return 'true' if valid, 'false' if not.
      */
-    private boolean validateParentPath(String parentPath, KomodoType objType) throws Exception {
-    	WorkspaceContext parentContext = ContextUtils.getContextForPath(getWorkspaceStatus(), parentPath);
-    	List<String> allowableChildTypes = parentContext.getAllowableChildTypes();
-    	if(!allowableChildTypes.contains(objType.getType().toLowerCase())) {
-            print(CompletionConstants.MESSAGE_INDENT,Messages.getString(Messages.ImportCommand.childTypeNotAllowed, objType, parentContext.getFullName()));
-    		return false;
-    	}
-    	return true;
-    }
+//    private boolean validateParentPath(String parentPath, KomodoType objType) throws Exception {
+//    	WorkspaceContext parentContext = ContextUtils.getContextForPath(getWorkspaceStatus(), parentPath);
+//    	List<String> allowableChildTypes = parentContext.getAllowableChildTypes();
+//    	if(!allowableChildTypes.contains(objType.getType().toLowerCase())) {
+//            print(CompletionConstants.MESSAGE_INDENT,Messages.getString(Messages.ImportCommand.childTypeNotAllowed, objType, parentContext.getFullName()));
+//    		return false;
+//    	}
+//    	return true;
+//    }
 
     /**
      * Validates whether another child of the same name and type already exists
@@ -274,17 +273,17 @@ public class ImportCommand extends BuiltInShellCommand {
      * @param parentContext the parent context
      * @return 'true' if exists, 'false' if not.
      */
-    private boolean validateNotDuplicate(String objName, KomodoType kType, WorkspaceContext parentContext) throws Exception {
-    	// Attempt to get child
-    	WorkspaceContext child = parentContext.getChild(objName,kType.getType());
-
-    	// If child exists, print message and return false
-    	if(child!=null) {
-    		print(CompletionConstants.MESSAGE_INDENT,Messages.getString(Messages.ImportCommand.cannotImport_wouldCreateDuplicate, objName, kType.getType())); 
-    		return false;
-    	}
-        return true;
-    }
+//    private boolean validateNotDuplicate(String objName, KomodoType kType, WorkspaceContext parentContext) throws Exception {
+//    	// Attempt to get child
+//    	WorkspaceContext child = parentContext.getChild(objName,kType.getType());
+//
+//    	// If child exists, print message and return false
+//    	if(child!=null) {
+//    		print(CompletionConstants.MESSAGE_INDENT,Messages.getString(Messages.ImportCommand.cannotImport_wouldCreateDuplicate, objName, kType.getType())); 
+//    		return false;
+//    	}
+//        return true;
+//    }
 
     /**
      * Import DDL from a file - adds the DDL object under the specified targetContext
@@ -294,18 +293,16 @@ public class ImportCommand extends BuiltInShellCommand {
      * @param importOptions the ImportOptions
      * @param importMessages holds the importer messages
      */
-    private void importDdl(UnitOfWork uow, File ddlFile, WorkspaceContext parentContext, ImportOptions importOptions, ImportMessages importMessages) {
+    private void importDdl(UnitOfWork uow, File ddlFile, KomodoObject parentObj, ImportOptions importOptions, ImportMessages importMessages) {
         Repository repository = null;
         try {
-            repository = parentContext.getRepository();
+            repository = parentObj.getRepository();
         } catch (Exception ex) {
             importMessages.addErrorMessage(ex.getLocalizedMessage());
             return;
         }
         DdlImporter importer = new DdlImporter(repository);
 
-        // The parent object for the DDL content
-        KomodoObject parentObj = parentContext.getKomodoObj();
         // Import - (sequencing will not initiate until we commit the transaction)
         importer.importDdl(uow, ddlFile, parentObj, importOptions, importMessages);
     }
@@ -314,21 +311,19 @@ public class ImportCommand extends BuiltInShellCommand {
      * Import VDB from a file - adds the VDB under the specified parentContext
      * @param uow the transaction
      * @param vdbFile the file containing the vdb xml
-     * @param parentContext the VDB parent WorkspaceContext
+     * @param parentObj the VDB parent WorkspaceContext
      * @param importOptions options for the import
      * @param importMessages messages from the import
      */
-    private void importVdb(UnitOfWork uow, File vdbFile, WorkspaceContext parentContext, ImportOptions importOptions, ImportMessages importMessages) {
+    private void importVdb(UnitOfWork uow, File vdbFile, KomodoObject parentObj, ImportOptions importOptions, ImportMessages importMessages) {
         Repository repository = null;
         try {
-            repository = parentContext.getRepository();
+            repository = parentObj.getRepository();
         } catch (Exception ex) {
             importMessages.addErrorMessage(ex.getLocalizedMessage());
         }
         VdbImporter importer = new VdbImporter(repository);
 
-        // The VDB parent object
-        KomodoObject parentObj = parentContext.getKomodoObj();
         // Import - (sequencing will not initiate until we commit the transaction)
         importer.importVdb(uow, vdbFile, parentObj, importOptions, importMessages);
     }

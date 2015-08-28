@@ -25,9 +25,9 @@ import java.util.List;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.Messages;
 import org.komodo.shell.Messages.SHELL;
-import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.utils.StringUtils;
 
 /**
@@ -64,7 +64,7 @@ public class CdCommand extends BuiltInShellCommand {
 
 		String locArg = locationArg.trim();
 		WorkspaceStatus wsStatus = getWorkspaceStatus();
-		WorkspaceContext newContext = ContextUtils.getContextForPath(wsStatus, locArg);
+		KomodoObject newContext = ContextUtils.getContextForPath(wsStatus, locArg);
 
 		if(newContext!=null) {
 			getWorkspaceStatus().setCurrentContext(newContext);
@@ -109,12 +109,12 @@ public class CdCommand extends BuiltInShellCommand {
 	}
 
 	/**
-	 * @see org.komodo.shell.api.AbstractShellCommand#tabCompletion(java.lang.String, java.util.List)
+	 * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
 	 */
 	@Override
 	public int tabCompletion(String lastArgument, List<CharSequence> candidates) throws Exception {
 		if (getArguments().isEmpty()) {
-			WorkspaceContext currentContext = getWorkspaceStatus().getCurrentContext();
+			KomodoObject currentContext = getWorkspaceStatus().getCurrentContext();
 
 			// The arg is expected to be a path
 			updateTabCompleteCandidatesForPath(candidates, currentContext, true, lastArgument);

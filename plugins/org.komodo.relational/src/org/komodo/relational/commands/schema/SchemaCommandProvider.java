@@ -50,5 +50,22 @@ public class SchemaCommandProvider implements ShellCommandProvider {
         }
         return null;
     }
+    
+    @Override
+    public boolean isRoot ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
+        if(SchemaImpl.RESOLVER.resolvable(uow, kObj)) {
+            return false;
+        }
+        return false;
+    }
+    
+    @Override
+    public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
+        if(SchemaImpl.RESOLVER.resolvable(uow, kObj)) {
+            Schema schema = SchemaImpl.RESOLVER.resolve(uow, kObj);
+            return schema.getTypeDisplayName();
+        }
+        return null;
+    }
 
 }

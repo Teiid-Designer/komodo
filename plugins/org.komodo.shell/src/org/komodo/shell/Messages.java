@@ -102,7 +102,18 @@ public class Messages implements StringConstants {
         HelpDescription,
         HelpDescriptionHeading,
         HelpExamplesHeading,
-        WelcomeMessage;
+        WelcomeMessage,
+        locationArg_noContextWithThisName,
+        propertyArg_noPropertyWithThisName,
+        locationArg_empty,
+        typeArg_childTypeNotAllowed,
+        objectNameNotValid,
+        FileNotFound,
+        FileArgNotAFile,
+        FileCannotRead,
+        RecordingFileOutputError,
+        RecordingFileCannotWrite,
+        RecordingFileNotDefined;
 
     	@Override
     	public String toString() {
@@ -189,7 +200,7 @@ public class Messages implements StringConstants {
         onOffArg_invalid,
         setRecordingStateMsg,
         recordingFileNotSet,
-        recordingFileNotWriteable;
+        recordingFileProblem;
         
       @Override
       public String toString() {

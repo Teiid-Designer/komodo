@@ -52,5 +52,22 @@ public class ServerCommandProvider implements ShellCommandProvider {
         }
         return null;
     }
+    
+    @Override
+    public boolean isRoot ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
+        if(TeiidImpl.RESOLVER.resolvable(uow, kObj)) {
+            return false;
+        }
+        return false;
+    }
+    
+    @Override
+    public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
+        if(TeiidImpl.RESOLVER.resolvable(uow, kObj)) {
+            Teiid teiid = TeiidImpl.RESOLVER.resolve(uow, kObj);
+            return teiid.getTypeDisplayName();
+        }
+        return null;
+    }
 
 }

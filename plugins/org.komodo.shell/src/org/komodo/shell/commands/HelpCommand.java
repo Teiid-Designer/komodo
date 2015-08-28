@@ -170,7 +170,7 @@ public class HelpCommand extends BuiltInShellCommand {
         if (command == null) {
             print( CompletionConstants.MESSAGE_INDENT, Messages.getString( SHELL.Help_INVALID_COMMAND, cmdName ) );
         } else {
-            command.setOutput( getWorkspaceStatus().getShell().getCommandOutput() );
+            command.setWriter( getWorkspaceStatus().getShell().getOutputWriter() );
             command.printHelp( CompletionConstants.MESSAGE_INDENT );
         }
     }
@@ -181,7 +181,7 @@ public class HelpCommand extends BuiltInShellCommand {
 	 * @param lastArgument the last argument
 	 * @param candidates the candidates
 	 * @return the int
-	 * @see org.komodo.shell.api.AbstractShellCommand#tabCompletion(java.lang.String,
+	 * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String,
 	 *      java.util.List)
 	 */
 	@Override

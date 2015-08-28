@@ -15,19 +15,13 @@
  */
 package org.komodo.shell.commands;
 
-import org.komodo.shell.api.AbstractShellCommand;
+import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.spi.constants.StringConstants;
 
 /**
- * The command about nothing.  The Seinfeld command.
- *
- * This class adapted from https://github.com/Governance/s-ramp/blob/master/s-ramp-shell
- * - no changes currently
- *
- * @author eric.wittmann@redhat.com
+ * NoOp Command
  */
-public class NoOpCommand extends AbstractShellCommand {
+public class NoOpCommand extends BuiltInShellCommand {
 
     /**
      * The command name.
@@ -39,25 +33,7 @@ public class NoOpCommand extends AbstractShellCommand {
      *        the workspace status (cannot be <code>null</code>)
      */
     public NoOpCommand( final WorkspaceStatus wsStatus ) {
-        super( NAME, wsStatus );
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.ShellCommand#getAliases()
-     */
-    @Override
-    public final String[] getAliases() {
-        return StringConstants.EMPTY_ARRAY;
-    }
-
-    /**
-     * @see org.komodo.shell.api.ShellCommand#getName()
-     */
-    @Override
-    public final String getName() {
-        return NAME;
+        super( wsStatus, NAME );
     }
 
 	/**
@@ -76,32 +52,6 @@ public class NoOpCommand extends AbstractShellCommand {
 	    // Nothing to do
 	}
 
-	/**
-	 * @see org.komodo.shell.api.ShellCommand#execute()
-	 */
-	@Override
-	public boolean execute() {
-        return true;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * @see org.komodo.shell.api.ShellCommand#record()
-	 */
-	@Override
-	public void record() {
-	    // Nothing to do
-	}
-
-	/* (non-Javadoc)
-	 * @see org.komodo.shell.api.ShellCommand#recordComment(java.lang.String)
-	 */
-	@Override
-	public void recordComment(String comment) {
-	    // Nothing to do
-	}
-	
     /**
      * {@inheritDoc}
      *
@@ -112,5 +62,20 @@ public class NoOpCommand extends AbstractShellCommand {
         return true;
     }
 
+    /* (non-Javadoc)
+     * @see org.komodo.shell.BuiltInShellCommand#shouldCommit()
+     */
+    @Override
+    protected boolean shouldCommit() {
+        return false;
+    }
+
+    /* (non-Javadoc)
+     * @see org.komodo.shell.BuiltInShellCommand#doExecute()
+     */
+    @Override
+    protected boolean doExecute() throws Exception {
+        return true;
+    }
 
 }

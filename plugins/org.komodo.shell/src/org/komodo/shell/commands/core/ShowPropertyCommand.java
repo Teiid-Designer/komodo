@@ -27,9 +27,10 @@ import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.Messages;
 import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.InvalidCommandArgumentException;
-import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.shell.util.KomodoObjectUtils;
 import org.komodo.shell.util.PrintUtils;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.utils.StringUtils;
 
 /**
@@ -60,14 +61,14 @@ public class ShowPropertyCommand extends BuiltInShellCommand {
     protected boolean doExecute() throws Exception {
         // required arg is the property name.  Verify that it is valid for the current object
         String propName = requiredArgument(0, Messages.getString(Messages.ShowPropertyCommand.InvalidArgMsg_PropertyName));
-        WorkspaceContext context = getContext();
-        String prefixedName = attachPrefix(context, propName);
+        KomodoObject context = getContext();
+        String prefixedName = KomodoObjectUtils.attachPrefix(getWorkspaceStatus(),context, propName);
         if(!validatePropertyName(context, prefixedName)) {
             return false;
         }
 
 		try {
-		    PrintUtils.printProperty(this,context,prefixedName);
+		    PrintUtils.printProperty(getWorkspaceStatus(),context,prefixedName);
 		} catch (InvalidCommandArgumentException e) {
 		    throw e;
 		} catch (Exception e) {
@@ -88,7 +89,7 @@ public class ShowPropertyCommand extends BuiltInShellCommand {
     }
 
     /**
-     * @see org.komodo.shell.api.AbstractShellCommand#tabCompletion(java.lang.String, java.util.List)
+     * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
      */
     @Override
     public int tabCompletion(String lastArgument, List<CharSequence> candidates) throws Exception {

@@ -27,7 +27,7 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.constants.StringConstants;
 
 /**
- * HomeCommand - Changes the context to the workspace root.
+ * HomeCommand - Changes the context to the root.
  */
 public class HomeCommand extends BuiltInShellCommand {
 
@@ -54,9 +54,10 @@ public class HomeCommand extends BuiltInShellCommand {
         final CdCommand cdCmd = new CdCommand( getWorkspaceStatus() );
         final Arguments args = new Arguments( StringConstants.FORWARD_SLASH );
         cdCmd.setArguments( args );
-        cdCmd.setOutput( getWriter() );
+        cdCmd.setWriter( getWriter() );
 
-        return cdCmd.execute();
+        cdCmd.execute();
+        return true;
     }
     
     /**

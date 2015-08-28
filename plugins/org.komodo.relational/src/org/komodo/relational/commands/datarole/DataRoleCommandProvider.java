@@ -52,4 +52,21 @@ public class DataRoleCommandProvider implements ShellCommandProvider {
         return null;
     }
 
+    @Override
+    public boolean isRoot ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
+        if(DataRoleImpl.RESOLVER.resolvable(uow, kObj)) {
+            return false;
+        }
+        return false;
+    }
+    
+    @Override
+    public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
+        if(DataRoleImpl.RESOLVER.resolvable(uow, kObj)) {
+            DataRole dataRole = DataRoleImpl.RESOLVER.resolve(uow, kObj);
+            return dataRole.getTypeDisplayName();
+        }
+        return null;
+    }
+
 }

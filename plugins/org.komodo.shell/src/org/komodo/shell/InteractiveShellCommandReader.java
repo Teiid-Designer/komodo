@@ -38,7 +38,7 @@ import org.komodo.shell.api.WorkspaceStatusEventHandler;
 public class InteractiveShellCommandReader extends AbstractShellCommandReader implements WorkspaceStatusEventHandler {
 
 	private static final String ANSI_BOLD_RED = "\033[1m\033[31m"; //$NON-NLS-1$
-	private static final String ANSI_BOLD_GREEN = "\033[1m\033[32m"; //$NON-NLS-1$
+	//private static final String ANSI_BOLD_GREEN = "\033[1m\033[32m"; //$NON-NLS-1$
 	private static final String ANSI_RESET = "\033[0m "; //$NON-NLS-1$
 
     private Console consoleReader;
@@ -79,9 +79,9 @@ public class InteractiveShellCommandReader extends AbstractShellCommandReader im
 	/**
 	 * Creates the ANSI compatible prompt.
 	 */
-	private String connectedAnsiPrompt(String serverName) throws Exception {
-		return ANSI_BOLD_GREEN + getPrompt() + " " + serverName + " > " + ANSI_RESET; //$NON-NLS-1$ //$NON-NLS-2$
-	}
+//	private String connectedAnsiPrompt(String serverName) throws Exception {
+//		return ANSI_BOLD_GREEN + getPrompt() + " " + serverName + " > " + ANSI_RESET; //$NON-NLS-1$ //$NON-NLS-2$
+//	}
 
 	private Prompt doGetPrompt() throws Exception {
 //	    if(getWorkspaceStatus().hasConnectedTeiid()) {
@@ -105,10 +105,10 @@ public class InteractiveShellCommandReader extends AbstractShellCommandReader im
 	}
 
 	/**
-	 * @see org.komodo.common.shell.AbstractShellCommandReader#getCommandOutput()
+	 * @see org.komodo.common.shell.AbstractShellCommandReader#getOutputWriter()
 	 */
 	@Override
-	protected Writer getCommandOutput() {
+	protected Writer getOutputWriter() {
         return new OutputStreamWriter(Settings.getInstance().getStdOut());
 	}
 

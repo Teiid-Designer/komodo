@@ -8,18 +8,21 @@
 package org.komodo.shell.commands.core;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
-import java.io.File;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.Messages;
+import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.InvalidCommandArgumentException;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.utils.StringUtils;
 
 /**
- * A command to enable and disable command recording
+ * SetRecordCommand - enable or disable command recording
  */
 public class SetRecordCommand extends BuiltInShellCommand {
 
@@ -50,25 +53,36 @@ public class SetRecordCommand extends BuiltInShellCommand {
         try {
             String onOffArg = requiredArgument(0, Messages.getString(Messages.SetRecordCommand.onOffArg_empty));
 
-            if (!this.validateRecord(onOffArg)) {
+            // Check for invalid arg
+            if(!onOffArg.equalsIgnoreCase(ON) && !onOffArg.equalsIgnoreCase(OFF)) {
+                print(MESSAGE_INDENT,Messages.getString(Messages.SetRecordCommand.onOffArg_invalid));
                 return false;
             }
 
+            // Set WorkspaceStatus
             WorkspaceStatus wsStatus = getWorkspaceStatus();
+            String recordingFileStr = getWorkspaceStatus().getProperties().getProperty(WorkspaceStatus.RECORDING_FILE_KEY);
             if(onOffArg.equalsIgnoreCase(ON)) {
                 wsStatus.setRecordingStatus(true);
+                
+                // Output message if output file not defined or writer not available.
+                if(StringUtils.isEmpty(recordingFileStr)) {
+                    print(MESSAGE_INDENT,Messages.getString(Messages.SetRecordCommand.recordingFileNotSet));
+                    return false;
+                } else {
+                    Writer recordingWriter = getWorkspaceStatus().getRecordingWriter();
+                    if(recordingWriter==null) {
+                        print(MESSAGE_INDENT,Messages.getString(Messages.SetRecordCommand.recordingFileProblem,recordingFileStr));
+                        return false;
+                    }
+                }
             } else if(onOffArg.equalsIgnoreCase(OFF)) {
                 wsStatus.setRecordingStatus(false);
             }
 
-            Date d = new Date();
-            String rState = wsStatus.getRecordingStatus() ? ON : OFF;
-            String rFile = wsStatus.getRecordingOutputFile().getCanonicalPath();
-            String stateChangedMsg = Messages.getString(Messages.SetRecordCommand.setRecordingStateMsg,rState,d.toString(),rFile);
-
+            String stateChangedMsg = Messages.getString(Messages.SetRecordCommand.setRecordingStateMsg,onOffArg,(new Date()).toString(),recordingFileStr);
+            outputToRecordingFile("#  ----------\n#  "+stateChangedMsg+"\n#  ----------"); //$NON-NLS-1$ //$NON-NLS-2$
             print(MESSAGE_INDENT,stateChangedMsg);
-
-            recordComment("====== "+stateChangedMsg+" ======"); //$NON-NLS-1$ //$NON-NLS-2$
 
             return true;
         } catch ( final InvalidCommandArgumentException e ) {
@@ -85,43 +99,7 @@ public class SetRecordCommand extends BuiltInShellCommand {
     }
 
     /**
-     * Validate the SET RECORD args
-     * @param onOffArg the on / off arg
-     * @return 'true' if valid, 'false' if not.
-     */
-    protected boolean validateRecord(String onOffArg) {
-        // Check for empty arg
-        if(StringUtils.isEmpty(onOffArg)) {
-            print(MESSAGE_INDENT,Messages.getString(Messages.SetRecordCommand.onOffArg_empty));
-            return false;
-        }
-
-        // Check for invalid arg
-        if(!onOffArg.equalsIgnoreCase(ON) && !onOffArg.equalsIgnoreCase(OFF)) {
-            print(MESSAGE_INDENT,Messages.getString(Messages.SetRecordCommand.onOffArg_invalid));
-            return false;
-        }
-
-        // If verify that global file var was set.
-        String recordingFileStr = getWorkspaceStatus().getProperties().getProperty(WorkspaceStatus.RECORDING_FILE_KEY);
-        if(StringUtils.isEmpty(recordingFileStr)) {
-            print(MESSAGE_INDENT,Messages.getString(Messages.SetRecordCommand.recordingFileNotSet));
-            return false;
-        } else {
-            File recordingFile = getWorkspaceStatus().getRecordingOutputFile();
-            if(recordingFile!=null && recordingFile.exists()) {
-                if(!recordingFile.canWrite()) {
-                    print(MESSAGE_INDENT,Messages.getString(Messages.SetRecordCommand.recordingFileNotWriteable,recordingFile));
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
-    
-    /**
-     * @see org.komodo.shell.api.AbstractShellCommand#tabCompletion(java.lang.String, java.util.List)
+     * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
      */
     @Override
     public int tabCompletion( final String lastArgument,
@@ -158,6 +136,27 @@ public class SetRecordCommand extends BuiltInShellCommand {
     @Override
     protected boolean shouldCommit() {
         return true;
+    }
+    
+    /**
+     * Write the supplied message to the recording output file.
+     * @param message the line to output
+     */
+    private void outputToRecordingFile(String message) {
+        WorkspaceStatus wsStatus = getWorkspaceStatus();
+        Writer recordingWriter = wsStatus.getRecordingWriter();
+        if(recordingWriter!=null) {
+            try {
+                recordingWriter.write(message+StringConstants.NEW_LINE);
+                recordingWriter.flush();
+            } catch (IOException ex) {
+                String filePath = wsStatus.getProperties().getProperty(WorkspaceStatus.RECORDING_FILE_KEY);
+                print(MESSAGE_INDENT, Messages.getString(SHELL.RecordingFileOutputError,filePath));
+            }
+        // Print error message if the recording file was not defined
+        } else {
+            print(MESSAGE_INDENT,Messages.getString(SHELL.RecordingFileNotDefined));
+        }
     }
 
 }

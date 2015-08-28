@@ -14,6 +14,7 @@ import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandProvider;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 
 /**
@@ -47,6 +48,24 @@ public class WorkspaceCommandProvider implements ShellCommandProvider {
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(kObj.getRepository());
         if(wkspMgr.getAbsolutePath().equals(kObj.getAbsolutePath())) {
             return wkspMgr;
+        }
+        return null;
+    }
+    
+    @Override
+    public boolean isRoot ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(kObj.getRepository());
+        if(wkspMgr.getAbsolutePath().equals(kObj.getAbsolutePath())) {
+            return true;
+        }
+        return false;
+    }
+    
+    @Override
+    public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(kObj.getRepository());
+        if(wkspMgr.getAbsolutePath().equals(kObj.getAbsolutePath())) {
+            return KomodoType.WORKSPACE.getType();
         }
         return null;
     }

@@ -15,12 +15,11 @@
  */
 package org.komodo.shell.commands;
 
+import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
 import org.komodo.shell.Messages.SHELL;
-import org.komodo.shell.api.AbstractShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.spi.constants.StringConstants;
 
 /**
  * The command used when a command does not exist for a given command name.
@@ -30,7 +29,7 @@ import org.komodo.spi.constants.StringConstants;
  *
  * @author eric.wittmann@redhat.com
  */
-public class CommandNotFoundCommand extends AbstractShellCommand {
+public class CommandNotFoundCommand extends BuiltInShellCommand {
 
     /**
      * Name of the CommandNotFoundCommand
@@ -42,17 +41,7 @@ public class CommandNotFoundCommand extends AbstractShellCommand {
      *        the workspace status (cannot be <code>null</code>)
      */
     public CommandNotFoundCommand( final WorkspaceStatus wsStatus ) {
-        super( NAME, wsStatus );
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.ShellCommand#getAliases()
-     */
-    @Override
-    public final String[] getAliases() {
-        return StringConstants.EMPTY_ARRAY;
+        super( wsStatus, NAME );
     }
 
 	/**
@@ -71,33 +60,16 @@ public class CommandNotFoundCommand extends AbstractShellCommand {
         // Nothing to do
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.ShellCommand#record()
+    /* (non-Javadoc)
+     * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    public void record() {
-        // Nothing to do
+    protected boolean doExecute() throws Exception {
+        print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.COMMAND_NOT_FOUND));
+        
+        return true;
     }
-
-    /**
-     * @see org.komodo.shell.api.ShellCommand#recordComment(String)
-     */
-    @Override
-    public void recordComment(String str) {
-        // Nothing to do
-    }
-
-	/**
-	 * @see org.komodo.shell.api.ShellCommand#execute()
-	 */
-	@Override
-	public boolean execute() {
-		print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.COMMAND_NOT_FOUND));
-       
-		return true;
-	}
+    
     /**
      * {@inheritDoc}
      *
@@ -106,6 +78,14 @@ public class CommandNotFoundCommand extends AbstractShellCommand {
     @Override
     public boolean isValidForCurrentContext() {
         return true;
+    }
+
+    /* (non-Javadoc)
+     * @see org.komodo.shell.BuiltInShellCommand#shouldCommit()
+     */
+    @Override
+    protected boolean shouldCommit() {
+        return false;
     }
 
 }

@@ -131,7 +131,7 @@ public final class SetVdbPropertyCommand extends VdbShellCommand {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.shell.api.AbstractShellCommand#tabCompletion(java.lang.String, java.util.List)
+     * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
      */
     @Override
     public int tabCompletion( final String lastArgument,
