@@ -29,10 +29,10 @@ import org.komodo.shell.Messages;
 import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.InvalidCommandArgumentException;
-import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
 import org.komodo.shell.util.PrintUtils;
+import org.komodo.spi.repository.KomodoObject;
 
 /**
  * ShowPropertiesCommand - show properties for a KomodoObject
@@ -69,10 +69,10 @@ public class ShowPropertiesCommand extends BuiltInShellCommand {
 
 		try {
 		    String pathArg = optionalArgument(0);
-		    WorkspaceContext theContext = ContextUtils.getContextForPath(wsStatus, pathArg);
+		    KomodoObject theContext = ContextUtils.getContextForPath(wsStatus, pathArg);
 
 		    // Print properties for the context
-		    PrintUtils.printProperties(this,wsStatus.isShowingHiddenProperties(),wsStatus.isShowingPropertyNamePrefixes(),theContext);
+		    PrintUtils.printProperties(wsStatus,wsStatus.isShowingHiddenProperties(),wsStatus.isShowingPropertyNamePrefixes(),theContext);
 		} catch (InvalidCommandArgumentException e) {
 		    throw e;
 		} catch (Exception e) {
@@ -106,7 +106,7 @@ public class ShowPropertiesCommand extends BuiltInShellCommand {
 	}
 
     /**
-     * @see org.komodo.shell.api.AbstractShellCommand#tabCompletion(java.lang.String, java.util.List)
+     * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
      */
     @Override
     public int tabCompletion(String lastArgument, List<CharSequence> candidates) throws Exception {

@@ -73,5 +73,22 @@ public class VdbCommandProvider implements ShellCommandProvider {
         }
         return null;
     }
+    
+    @Override
+    public boolean isRoot ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
+        if(VdbImpl.RESOLVER.resolvable(uow, kObj)) {
+            return false;
+        }
+        return false;
+    }
+    
+    @Override
+    public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
+        if(VdbImpl.RESOLVER.resolvable(uow, kObj)) {
+            Vdb vdb = VdbImpl.RESOLVER.resolve(uow, kObj);
+            return vdb.getTypeDisplayName();
+        }
+        return null;
+    }
 
 }

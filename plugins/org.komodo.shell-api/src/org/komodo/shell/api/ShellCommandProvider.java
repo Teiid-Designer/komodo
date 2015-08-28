@@ -22,13 +22,7 @@ import org.komodo.spi.repository.Repository;
 
 
 /**
- * Provides comands - used by the shell command factory when creating the map of
- * available shell commands.
- * 
- * This class adapted from classes at https://github.com/Governance/s-ramp/blob/master/s-ramp-shell-api
- * - altered map
- * 
- * @author eric.wittmann@redhat.com
+ * The ShellCommandProvider interface
  */
 public interface ShellCommandProvider {
 
@@ -38,11 +32,30 @@ public interface ShellCommandProvider {
 	 */
 	public Map<String, Class<? extends ShellCommand>> provideCommands();
 
-	/**
-	 * @param uow the transaction
-	 * @param kObj the KomodoObject
-	 * @return resolved object
-	 * @throws KException the exception
-	 */
-	public < T extends KomodoObject > T resolve ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException;
+    /**
+     * Resolve the supplied KomodoObject
+     * @param uow the transaction
+     * @param kObj the KomodoObject
+     * @return resolved object
+     * @throws KException the exception
+     */
+    public < T extends KomodoObject > T resolve ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException;
+
+    /**
+     * Determine if the supplied KomodoObject is the context root
+     * @param uow the transaction
+     * @param kObj the KomodoObject
+     * @return resolved object
+     * @throws KException the exception
+     */
+    public boolean isRoot ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException;
+
+    /**
+     * Get the type display string for a KomodoObject
+     * @param uow the transaction
+     * @param kObj the KomodoObject
+     * @return the type display string
+     * @throws KException the exception
+     */
+    public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException;
 }

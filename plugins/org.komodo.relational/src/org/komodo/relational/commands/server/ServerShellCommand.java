@@ -7,13 +7,11 @@
  */
 package org.komodo.relational.commands.server;
 
-import static org.komodo.relational.commands.server.ServerCommandMessages.Common.NoTeiidDefined;
 import java.util.List;
 import org.komodo.relational.Messages;
 import org.komodo.relational.commands.RelationalShellCommand;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.vdb.Vdb;
-import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.utils.StringUtils;
@@ -32,7 +30,6 @@ abstract class ServerShellCommand extends RelationalShellCommand {
     protected boolean hasDefaultServer() {
         String server = getWorkspaceStatus().getServer();
         if(StringUtils.isBlank(server)) {
-            print(CompletionConstants.MESSAGE_INDENT, getMessage(NoTeiidDefined));
             return false;
         }
         return true;

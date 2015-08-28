@@ -24,14 +24,14 @@ package org.komodo.shell.commands.core;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.Messages;
-import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.shell.util.KomodoObjectUtils;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.utils.StringUtils;
 
 /**
- * Show Status Command.
- *
+ * ShowStatusCommand - show the workspace status (current repo, current context, current server, etc)
  */
 public class ShowStatusCommand extends BuiltInShellCommand {
 
@@ -85,7 +85,7 @@ public class ShowStatusCommand extends BuiltInShellCommand {
 	 */
 	private void printStatus( ) throws Exception {
         WorkspaceStatus wsStatus = getWorkspaceStatus();
-        WorkspaceContext context = wsStatus.getCurrentContext();
+        KomodoObject context = wsStatus.getCurrentContext();
 
         // Repo info
         final Repository.Id repoId = context.getRepository().getId();
@@ -107,8 +107,9 @@ public class ShowStatusCommand extends BuiltInShellCommand {
 		}
 
 		// Current Context
-		WorkspaceContext currentContext = wsStatus.getCurrentContext();
-		print(MESSAGE_INDENT, Messages.getString(Messages.ShowStatusCommand.CurrentContext, currentContext.getFullName()));
+		KomodoObject currentContext = wsStatus.getCurrentContext();
+        String objFullName = KomodoObjectUtils.getFullName(wsStatus, currentContext);
+		print(MESSAGE_INDENT, Messages.getString(Messages.ShowStatusCommand.CurrentContext, objFullName));
 	}
 
 }

@@ -12,12 +12,13 @@ import java.util.List;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.Messages;
 import org.komodo.shell.api.InvalidCommandArgumentException;
-import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.shell.util.KomodoObjectUtils;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.utils.StringUtils;
 
 /**
- * A command to unset/remove a property value.
+ * UnsetPropertyCommand - unsets the specified property of a KomodoObject.
  */
 public class UnsetPropertyCommand extends BuiltInShellCommand {
 
@@ -48,11 +49,11 @@ public class UnsetPropertyCommand extends BuiltInShellCommand {
                 return false;
             }
 
-            final WorkspaceContext context = getContext();
+            final KomodoObject context = getContext();
 
             // remove the property by setting its value to null
-            final String propertyName = ( !isShowingPropertyNamePrefixes() ? attachPrefix( context, propNameArg ) : propNameArg );
-            context.setPropertyValue( propertyName, null );
+            final String propertyName = ( !isShowingPropertyNamePrefixes() ? KomodoObjectUtils.attachPrefix( getWorkspaceStatus(),context, propNameArg ) : propNameArg );
+            context.setProperty( getWorkspaceStatus().getTransaction(),propertyName, (Object[])null );
 
             // Commit transaction
             if ( isAutoCommit() ) {
@@ -77,41 +78,19 @@ public class UnsetPropertyCommand extends BuiltInShellCommand {
     }
     
     /**
-     * @see org.komodo.shell.api.AbstractShellCommand#tabCompletion(java.lang.String, java.util.List)
+     * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
      */
     @Override
     public int tabCompletion( final String lastArgument,
                               final List< CharSequence > candidates ) throws Exception {
         if ( getArguments().size() == 0 ) {
-            final WorkspaceContext context = getContext();
-            final List< String > names = context.getProperties();
-            final boolean noLastArg = StringUtils.isBlank( lastArgument );
-
-            // make sure property has a value and remove property prefixes if necessary
-            for ( String propName : names ) {
-                if ( !StringUtils.isBlank( context.getPropertyValue( propName ) ) ) {
-                    boolean add = noLastArg;
-
-                    if ( !isShowingPropertyNamePrefixes() ) {
-                        propName = removePrefix( propName );
-                    }
-
-                    if ( !noLastArg && propName.startsWith( lastArgument ) ) {
-                        add = true;
-                    }
-
-                    if ( add ) {
-                        candidates.add( propName );
-                    }
-                }
-            }
-
+            updateTabCompleteCandidatesForProperty( candidates, getContext(), lastArgument );
+            
             return ( candidates.isEmpty() ? -1 : ( StringUtils.isBlank( lastArgument ) ? 0 : ( toString().length() + 1 ) ) );
-        }
-
+        } 
         return -1;
     }
-    
+
     /**
      * {@inheritDoc}
      *

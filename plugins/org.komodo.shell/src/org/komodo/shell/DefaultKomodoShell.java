@@ -22,7 +22,6 @@
 package org.komodo.shell;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,7 +32,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
-import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
@@ -47,6 +45,8 @@ import org.komodo.shell.api.KomodoShellParent;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.HelpCommand;
+import org.komodo.shell.commands.core.SetRecordCommand;
+import org.komodo.shell.util.PrintUtils;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.constants.SystemConstants;
@@ -124,8 +124,7 @@ public class DefaultKomodoShell implements KomodoShell {
     private final KomodoShellParent parent;
     private final KEngine kEngine;
     private final InputStream inStream;
-    private final PrintStream outStream;
-    private final Writer commandOutput;
+    private final Writer outputWriter;
 
     /**
      * Constructor.
@@ -138,8 +137,7 @@ public class DefaultKomodoShell implements KomodoShell {
         this.parent = parent;
         this.kEngine = kEngine;
         this.inStream = inStream;
-        this.outStream = outStream;
-        this.commandOutput = new OutputStreamWriter(outStream);
+        this.outputWriter = new OutputStreamWriter(outStream);
 
         StringBuffer sb = new StringBuffer();
         for (int i = 0; i < CompletionConstants.MESSAGE_INDENT; i++) {
@@ -159,8 +157,8 @@ public class DefaultKomodoShell implements KomodoShell {
     }
 
     @Override
-    public PrintStream getOutputStream() {
-        return outStream;
+    public Writer getOutputWriter() {
+        return outputWriter;
     }
 
     /**
@@ -208,11 +206,6 @@ public class DefaultKomodoShell implements KomodoShell {
     }
 
     @Override
-	public Writer getCommandOutput() {
-    	return commandOutput;
-    }
-
-    @Override
     public void exit() {
         shutdown();
         parent.exit();
@@ -232,25 +225,6 @@ public class DefaultKomodoShell implements KomodoShell {
         
         factory.registerCommands(wsStatus);
 
-        // load shell properties if they exist
-        final String dataDir = getShellDataLocation();
-        final File startupPropertiesFile = new File( dataDir, PROPERTIES_FILE_NAME );
-
-        if ( startupPropertiesFile.exists() && startupPropertiesFile.isFile() && startupPropertiesFile.canRead() ) {
-            Properties props = new Properties();
-
-            try {
-                props.load( new FileInputStream( startupPropertiesFile ) );
-            } catch ( final Exception e ) {
-                this.outStream.println( this.msgIndentStr
-                                        + Messages.getString( SHELL.ERROR_LOADING_PROPERTIES,
-                                                              startupPropertiesFile.getAbsolutePath(),
-                                                              e.getMessage() ) );
-            }
-
-            this.wsStatus.setProperties( props );
-        }
-
         reader = ShellCommandReaderFactory.createCommandReader(args, factory, wsStatus);
         reader.open();
 
@@ -259,7 +233,7 @@ public class DefaultKomodoShell implements KomodoShell {
         // run help command
         final ShellCommand helpCmd = factory.getCommand( HelpCommand.NAME );
         helpCmd.setArguments( new Arguments( EMPTY_STRING ) );
-        helpCmd.setOutput( getCommandOutput() );
+        helpCmd.setWriter( getOutputWriter() );
         helpCmd.execute();
 
         boolean done = false;
@@ -273,20 +247,21 @@ public class DefaultKomodoShell implements KomodoShell {
                 if (command == null) {
                     done = true;
                 } else {
-                    boolean success = command.execute();
+                    command.execute();
 
-                    if ( success ) {
-                        if ( this.wsStatus.getRecordingStatus() ) {
-                            command.record();
-                        }
-                    } else if ( this.reader.isBatch() ) {
-                        shutdown();
+//                    if ( success ) {
+                    if ( this.wsStatus.getRecordingStatus() && !(command instanceof SetRecordCommand) ) {
+                        writeCommandToRecordingFile(command);
                     }
+//                    } else if ( this.reader.isBatch() ) {
+//                        shutdown();
+//                    }
                 }
             } catch (InvalidCommandArgumentException e) {
-                outStream.println(msgIndentStr + Messages.getString(SHELL.INVALID_ARG, e.getMessage()));
+                PrintUtils.print(getOutputWriter(), CompletionConstants.MESSAGE_INDENT, Messages.getString(SHELL.INVALID_ARG, e.getMessage()));
+                
                 if (command != null) {
-                    outStream.println(msgIndentStr + Messages.getString(SHELL.USAGE));
+                    PrintUtils.print(getOutputWriter(), CompletionConstants.MESSAGE_INDENT, Messages.getString(SHELL.USAGE));
                     command.printUsage(CompletionConstants.MESSAGE_INDENT);
                 }
                 if (reader.isBatch())
@@ -370,6 +345,7 @@ public class DefaultKomodoShell implements KomodoShell {
             }
 
             this.wsStatus.getProperties().store( new FileOutputStream( propFile.toString() ), null );
+            this.wsStatus.closeRecordingWriter();
         } catch ( final Exception e ) {
             displayMessage( "Error during shutdown saving workspace status: " + e.getLocalizedMessage() ); //$NON-NLS-1$
         }
@@ -392,7 +368,7 @@ public class DefaultKomodoShell implements KomodoShell {
     }
 
     private void displayMessage(String message) {
-        outStream.print(message);
+        PrintUtils.print(outputWriter, false, 0, message);
     }
 
     /**
@@ -401,4 +377,33 @@ public class DefaultKomodoShell implements KomodoShell {
     private void displayWelcomeMessage() {
         displayMessage(Messages.getString(SHELL.WelcomeMessage));
     }
+    
+    /**
+     * Write the supplied line to the recording output file.
+     * @param line the line to output
+     */
+    private void writeCommandToRecordingFile(ShellCommand command) {
+      Writer recordingWriter = wsStatus.getRecordingWriter();
+      if(recordingWriter!=null) {
+          try {
+              recordingWriter.write(command.toString()+StringConstants.NEW_LINE);
+              recordingWriter.flush();
+          } catch (IOException ex) {
+              String filePath = wsStatus.getProperties().getProperty(WorkspaceStatus.RECORDING_FILE_KEY);
+              PrintUtils.print(recordingWriter, 0, Messages.getString(SHELL.RecordingFileOutputError,filePath));
+          }
+      // Print error message if the recording file was not defined
+      } else {
+            PrintUtils.print(recordingWriter, 0,Messages.getString(SHELL.RecordingFileNotDefined));
+      }
+    }
+
+    /* (non-Javadoc)
+     * @see org.komodo.shell.api.KomodoShell#getShellPropertiesFile()
+     */
+    @Override
+    public String getShellPropertiesFile() {
+        return PROPERTIES_FILE_NAME;
+    }
+    
 }

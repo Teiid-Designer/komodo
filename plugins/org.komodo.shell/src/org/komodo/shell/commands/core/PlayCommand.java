@@ -78,13 +78,13 @@ public class PlayCommand  extends BuiltInShellCommand {
                 break;
             }
 
-            command.setOutput( this.commandWriter );
+            command.setWriter( this.commandWriter );
 
-			final boolean success = command.execute();
-
-            if ( !success && reader.isBatch() ) {
-                throw new Exception( Messages.getString( Messages.PlayCommand.CommandFailure, command ) );
-            }
+			command.execute();
+//
+//            if ( !success && reader.isBatch() ) {
+//                throw new Exception( Messages.getString( Messages.PlayCommand.CommandFailure, command ) );
+//            }
 		}
 	}
 

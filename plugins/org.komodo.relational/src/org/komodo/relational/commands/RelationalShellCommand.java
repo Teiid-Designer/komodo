@@ -37,7 +37,7 @@ public abstract class RelationalShellCommand extends BuiltInShellCommand {
     }
 
     protected RelationalObject get() throws Exception {
-        final KomodoObject kobject = getWorkspaceStatus().getCurrentContext().getKomodoObj();
+        final KomodoObject kobject = getWorkspaceStatus().getCurrentContext();
 
         if ( kobject instanceof RelationalObject ) {
             return ( RelationalObject )kobject;
@@ -63,7 +63,7 @@ public abstract class RelationalShellCommand extends BuiltInShellCommand {
     }
 
     protected String getPath() throws Exception {
-        return getWorkspaceStatus().getCurrentContext().getKomodoObj().getAbsolutePath();
+        return getWorkspaceStatus().getCurrentContext().getAbsolutePath();
     }
 
     protected Repository getRepository() throws Exception {
@@ -84,7 +84,7 @@ public abstract class RelationalShellCommand extends BuiltInShellCommand {
         }
 
         final List< String > validTypes = Arrays.asList( descriptorNames );
-        final KomodoObject kobject = getWorkspaceStatus().getCurrentContext().getKomodoObj();
+        final KomodoObject kobject = getWorkspaceStatus().getCurrentContext();
 
         // check primary type
         final String primaryType = kobject.getPrimaryType( getTransaction() ).getName();

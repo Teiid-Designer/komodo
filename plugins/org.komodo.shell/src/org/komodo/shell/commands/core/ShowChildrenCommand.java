@@ -29,10 +29,10 @@ import org.komodo.shell.Messages;
 import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.InvalidCommandArgumentException;
-import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
 import org.komodo.shell.util.PrintUtils;
+import org.komodo.spi.repository.KomodoObject;
 
 /**
  * ShowChildrenCommand - show children of a KomodoObject.
@@ -69,9 +69,9 @@ public class ShowChildrenCommand extends BuiltInShellCommand {
 
 		try {
 		    String pathArg = optionalArgument(0);
-		    WorkspaceContext theContext = ContextUtils.getContextForPath(wsStatus, pathArg);
-
-		    PrintUtils.printChildren(this,theContext);
+		    KomodoObject theContext = ContextUtils.getContextForPath(wsStatus, pathArg);
+		    
+		    PrintUtils.printChildren(wsStatus,theContext);
 		} catch (InvalidCommandArgumentException e) {
 		    throw e;
 		} catch (Exception e) {
@@ -105,7 +105,7 @@ public class ShowChildrenCommand extends BuiltInShellCommand {
     }
 
 	/**
-     * @see org.komodo.shell.api.AbstractShellCommand#tabCompletion(java.lang.String, java.util.List)
+     * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
      */
     @Override
     public int tabCompletion(String lastArgument, List<CharSequence> candidates) throws Exception {
