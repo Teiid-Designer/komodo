@@ -10,7 +10,6 @@ package org.komodo.rest.json;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
-import static org.komodo.rest.json.JsonConstants.JSON_BUILDER;
 import java.net.URI;
 import java.util.Arrays;
 import javax.ws.rs.core.UriBuilder;
@@ -22,7 +21,6 @@ import org.komodo.rest.json.RestLink.LinkType;
 public final class RestVdbDirectoryTest {
 
     private static final RestVdbDescriptor[] DESCRIPTORS;
-    private static final String JSON;
     private static final RestVdbDescriptor MY_VDB;
     private static final RestVdbDescriptor YOUR_VDB;
 
@@ -35,7 +33,6 @@ public final class RestVdbDirectoryTest {
         YOUR_VDB.setDescription( "your description" );
 
         DESCRIPTORS = new RestVdbDescriptor[] { MY_VDB, YOUR_VDB };
-        JSON = "{\"vdbs\":[" + JSON_BUILDER.toJson( MY_VDB ) + ',' + JSON_BUILDER.toJson( YOUR_VDB ) + "]}";
     }
 
     private RestVdbDirectory vdbDir;
@@ -47,8 +44,10 @@ public final class RestVdbDirectoryTest {
 
     @Test
     public void shouldBeEqual() {
-        final RestVdbDirectory vdbDir2 = new RestVdbDirectory( this.vdbDir.getDescriptors() );
-        assertThat( this.vdbDir, is( vdbDir2 ) );
+        final RestVdbDirectory thatVdbDir = new RestVdbDirectory( this.vdbDir.getDescriptors() );
+        thatVdbDir.setLinks( this.vdbDir.getLinks() );
+        thatVdbDir.setProperties( this.vdbDir.getProperties() );
+        assertThat( this.vdbDir, is( thatVdbDir ) );
     }
 
     @Test
@@ -59,43 +58,22 @@ public final class RestVdbDirectoryTest {
     }
 
     @Test
-    public void shouldConstructEmptyJsonDocumentWithEmptyDescriptors() {
-        final RestVdbDirectory vdbDir = new RestVdbDirectory( new RestVdbDescriptor[ 0 ] );
-        assertThat( JSON_BUILDER.toJson( vdbDir ), is( "{\"vdbs\":[]}" ) );
-    }
-
-    @Test
-    public void shouldConstructEmptyJsonDocumentWithNullDescriptors() {
-        final RestVdbDirectory vdbDir = new RestVdbDirectory( ( RestVdbDescriptor[] )null );
-        assertThat( JSON_BUILDER.toJson( vdbDir ), is( "{\"vdbs\":[]}" ) );
-    }
-
-    @Test
-    public void shouldExportJson() {
-        assertThat( JSON_BUILDER.toJson( this.vdbDir ), is( JSON ) );
-    }
-
-    @Test
     public void shouldHaveSameHashCode() {
-        final RestVdbDirectory vdbDir2 = new RestVdbDirectory( this.vdbDir.getDescriptors() );
-        assertThat( this.vdbDir.hashCode(), is( vdbDir2.hashCode() ) );
-    }
+        final RestVdbDirectory thatVdbDir = new RestVdbDirectory( this.vdbDir.getDescriptors() );
+        thatVdbDir.setLinks( this.vdbDir.getLinks() );
+        thatVdbDir.setProperties( this.vdbDir.getProperties() );
 
-    @Test
-    public void shouldImportJson() {
-        final RestVdbDirectory vdbDir = JSON_BUILDER.fromJson( JSON, RestVdbDirectory.class );
-        assertThat( vdbDir.getDescriptors().length, is( DESCRIPTORS.length ) );
-        assertThat( vdbDir.getDescriptors()[ 0 ], is( MY_VDB ) );
-        assertThat( vdbDir.getDescriptors()[ 1 ], is( YOUR_VDB ) );
-        assertThat( vdbDir.getLinks().length, is( 0 ) );
-        assertThat( vdbDir.getProperties().isEmpty(), is( true ) );
+        assertThat( this.vdbDir.hashCode(), is( thatVdbDir.hashCode() ) );
     }
 
     @Test
     public void shouldNotBeEqualWhenDescriptorsAreDifferent() {
-        final RestVdbDirectory vdbDir2 = new RestVdbDirectory( MY_VDB );
-        assertThat( Arrays.deepEquals( this.vdbDir.getDescriptors(), vdbDir2.getDescriptors() ), is( false ) );
-        assertThat( this.vdbDir, is( not( vdbDir2 ) ) );
+        final RestVdbDirectory thatVdbDir = new RestVdbDirectory( MY_VDB );
+        thatVdbDir.setLinks( this.vdbDir.getLinks() );
+        thatVdbDir.setProperties( this.vdbDir.getProperties() );
+
+        assertThat( Arrays.deepEquals( this.vdbDir.getDescriptors(), thatVdbDir.getDescriptors() ), is( false ) );
+        assertThat( this.vdbDir, is( not( thatVdbDir ) ) );
     }
 
     @Test

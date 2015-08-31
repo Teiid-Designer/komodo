@@ -1,6 +1,6 @@
 {
     "name" : "Komodo Local Repository",
-    "jndiName" : "jcr/KomodoLocalRepository",
+    "jndiName" : "java:global/KomodoLocalRepository",
     "monitoring" : {
         "enabled" : true
     },

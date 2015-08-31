@@ -22,6 +22,7 @@ import com.google.gson.annotations.SerializedName;
  * A VDB descriptor that can be used by GSON to build a JSON document representation.
  *
  * <pre>
+ * <code>
  * {
  *     "id" : "MyVdb",
  *     "description" : "vdb description goes here",
@@ -32,6 +33,7 @@ import com.google.gson.annotations.SerializedName;
  *         { "rel" : "manifest", "href" : "http://<baseUri>/komodo/workspace/vdbs/MyVdb/manifest", "method" : "GET" }
  *     ]
  * }
+ * </code>
  * </pre>
  */
 public final class RestVdbDescriptor extends KomodoRestEntity {
@@ -128,7 +130,7 @@ public final class RestVdbDescriptor extends KomodoRestEntity {
     }
 
     /**
-     * @return the name (can be empty)
+     * @return the VDB name (can be empty)
      */
     public String getName() {
         return this.name;
@@ -154,7 +156,7 @@ public final class RestVdbDescriptor extends KomodoRestEntity {
 
     /**
      * @param newName
-     *        the VDB name (can be empty)
+     *        the new VDB name (can be empty)
      */
     public void setName( final String newName ) {
         this.name = newName;

@@ -14,8 +14,8 @@ import java.util.Map;
 import org.komodo.rest.json.JsonConstants;
 import org.komodo.rest.json.KomodoRestEntity;
 import org.komodo.rest.json.RestLink;
-import com.google.common.reflect.TypeToken;
 import com.google.gson.TypeAdapter;
+import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
@@ -27,7 +27,6 @@ import com.google.gson.stream.JsonWriter;
  */
 public abstract class KomodoRestEntitySerializer< T extends KomodoRestEntity > extends TypeAdapter< T > {
 
-    @SuppressWarnings( "serial" )
     private static final Type PROP_TYPE = new TypeToken< Map< String, String > >() {/* nothing to do */}.getType();
 
     protected void beginRead( final JsonReader in ) throws IOException {

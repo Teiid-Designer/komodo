@@ -14,6 +14,7 @@ import com.google.common.base.Objects;
  * Represents a VDB directory and can be used by GSON to build a JSON document representation.
  *
  * <pre>
+ * <code>
  * {
  *     vdbs: {
  *         {
@@ -38,6 +39,7 @@ import com.google.common.base.Objects;
  *         }
  *     }
  * }
+ * </code>
  * </pre>
  */
 public final class RestVdbDirectory extends KomodoRestEntity {

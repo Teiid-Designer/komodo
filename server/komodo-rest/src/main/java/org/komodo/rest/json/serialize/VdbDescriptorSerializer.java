@@ -34,7 +34,6 @@ public final class VdbDescriptorSerializer extends KomodoRestEntitySerializer< R
     @Override
     public RestVdbDescriptor read( final JsonReader in ) throws IOException {
         final RestVdbDescriptor vdbDescriptor = new RestVdbDescriptor();
-        boolean foundName = false;
 
         beginRead( in );
 
@@ -43,11 +42,12 @@ public final class VdbDescriptorSerializer extends KomodoRestEntitySerializer< R
 
             switch ( name ) {
                 case JsonConstants.DESCRIPTION:
-                    vdbDescriptor.setDescription( in.nextString() );
+                    final String description = in.nextString();
+                    vdbDescriptor.setDescription( description );
                     break;
                 case JsonConstants.ID:
-                    vdbDescriptor.setName( in.nextString() );
-                    foundName = true;
+                    final String id = in.nextString();
+                    vdbDescriptor.setName( id );
                     break;
                 case JsonConstants.LINKS:
                     readLinks( in, vdbDescriptor );
@@ -60,7 +60,7 @@ public final class VdbDescriptorSerializer extends KomodoRestEntitySerializer< R
             }
         }
 
-        if ( !foundName ) {
+        if ( !isComplete( vdbDescriptor ) ) {
             throw new IOException( Messages.getString( INCOMPLETE_JSON, RestVdbDescriptor.class.getSimpleName() ) );
         }
 

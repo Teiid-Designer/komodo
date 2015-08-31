@@ -11,7 +11,6 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
-import static org.komodo.rest.json.JsonConstants.JSON_BUILDER;
 import static org.komodo.rest.json.RestLink.LinkType.NO_LINK_TYPES;
 import java.net.URI;
 import java.util.Arrays;
@@ -25,10 +24,9 @@ import org.komodo.spi.constants.StringConstants;
 public final class RestVdbDescriptorTest {
 
     private static final String DESCRIPTION = "my description";
-    private static final String JSON = "{\"id\":\"MyVdb\",\"description\":\"my description\",\"links\":[{\"rel\":\"self\",\"href\":\"http://localhost:8080/v1/workspace/vdbs/MyVdb\",\"method\":\"GET\"},{\"rel\":\"parent\",\"href\":\"http://localhost:8080/v1/workspace/vdbs\",\"method\":\"GET\"},{\"rel\":\"manifest\",\"href\":\"http://localhost:8080/v1/workspace/vdbs/MyVdb/manifest\",\"method\":\"GET\"}]}";
     private static final LinkType LINK_TYPE = LinkType.SELF;
     private static final LinkType[] LINK_TYPES = new LinkType[] { LinkType.SELF, LinkType.PARENT, LinkType.MANIFEST };
-    private static final URI URI = UriBuilder.fromUri( "http://localhost:8080" ).build();
+    private static final URI URI = UriBuilder.fromUri( "http://localhost:8080/v1" ).build();
     private static final String VDB_NAME = "MyVdb";
 
     private RestVdbDescriptor descriptor;
@@ -41,9 +39,11 @@ public final class RestVdbDescriptorTest {
 
     @Test
     public void shouldBeEqual() {
-        final RestVdbDescriptor descriptor2 = new RestVdbDescriptor( this.descriptor.getName(), URI, LINK_TYPES );
-        descriptor2.setDescription( this.descriptor.getDescription() );
-        assertThat( this.descriptor, is( descriptor2 ) );
+        final RestVdbDescriptor thatDescriptor = new RestVdbDescriptor( this.descriptor.getName(), URI, LINK_TYPES );
+        thatDescriptor.setDescription( this.descriptor.getDescription() );
+        thatDescriptor.setLinks( this.descriptor.getLinks() );
+        thatDescriptor.setProperties( this.descriptor.getProperties() );
+        assertThat( this.descriptor, is( thatDescriptor ) );
     }
 
     @Test
@@ -59,11 +59,6 @@ public final class RestVdbDescriptorTest {
         assertThat( empty.getName(), is( nullValue() ) );
         assertThat( empty.getProperties().isEmpty(), is( true ) );
         assertThat( empty.getLinks().length, is( 0 ) );
-    }
-
-    @Test
-    public void shouldExportJson() {
-        assertThat( JSON_BUILDER.toJson( this.descriptor ), is( JSON ) );
     }
 
     @Test( expected = IllegalArgumentException.class )
@@ -93,42 +88,41 @@ public final class RestVdbDescriptorTest {
 
     @Test
     public void shouldHaveSameHashCode() {
-        final RestVdbDescriptor descriptor2 = new RestVdbDescriptor( this.descriptor.getName(), URI, LINK_TYPES );
-        descriptor2.setDescription( this.descriptor.getDescription() );
-        assertThat( this.descriptor.hashCode(), is( descriptor2.hashCode() ) );
-    }
-
-    @Test
-    public void shouldImportJson() {
-        final RestVdbDescriptor descriptor = JSON_BUILDER.fromJson( JSON, RestVdbDescriptor.class );
-        assertThat( descriptor.getName(), is( VDB_NAME ) );
-        assertThat( descriptor.getDescription(), is( DESCRIPTION ) );
-        assertThat( descriptor.getLinks().length, is( LINK_TYPES.length ) );
-        assertThat( descriptor.getProperties().isEmpty(), is( true ) );
+        final RestVdbDescriptor thatDescriptor = new RestVdbDescriptor( this.descriptor.getName(), URI, LINK_TYPES );
+        thatDescriptor.setDescription( this.descriptor.getDescription() );
+        assertThat( this.descriptor.hashCode(), is( thatDescriptor.hashCode() ) );
     }
 
     @Test
     public void shouldNotBeEqualWhenDescriptionIsDifferent() {
-        final RestVdbDescriptor descriptor2 = new RestVdbDescriptor( this.descriptor.getName(), URI, LINK_TYPES );
-        descriptor2.setDescription( this.descriptor.getDescription() + "blah" );
-        assertThat( this.descriptor.getDescription(), is( not( descriptor2.getDescription() ) ) );
-        assertThat( this.descriptor, is( not( descriptor2 ) ) );
+        final RestVdbDescriptor thatDescriptor = new RestVdbDescriptor( this.descriptor.getName(), URI, LINK_TYPES );
+        thatDescriptor.setDescription( this.descriptor.getDescription() + "blah" );
+        thatDescriptor.setLinks( this.descriptor.getLinks() );
+        thatDescriptor.setProperties( this.descriptor.getProperties() );
+
+        assertThat( this.descriptor.getDescription(), is( not( thatDescriptor.getDescription() ) ) );
+        assertThat( this.descriptor, is( not( thatDescriptor ) ) );
     }
 
     @Test
     public void shouldNotBeEqualWhenLinksAreDifferent() {
-        final RestVdbDescriptor descriptor2 = new RestVdbDescriptor( this.descriptor.getName(), URI, LINK_TYPE );
-        descriptor2.setDescription( this.descriptor.getDescription() );
-        assertThat( Arrays.deepEquals( this.descriptor.getLinks(), descriptor2.getLinks() ), is( false ) );
-        assertThat( this.descriptor, is( not( descriptor2 ) ) );
+        final RestVdbDescriptor thatDescriptor = new RestVdbDescriptor( this.descriptor.getName(), URI, LINK_TYPE );
+        thatDescriptor.setDescription( this.descriptor.getDescription() );
+        thatDescriptor.setProperties( this.descriptor.getProperties() );
+
+        assertThat( Arrays.deepEquals( this.descriptor.getLinks(), thatDescriptor.getLinks() ), is( false ) );
+        assertThat( this.descriptor, is( not( thatDescriptor ) ) );
     }
 
     @Test
     public void shouldNotBeEqualWhenVdbNameIsDifferent() {
-        final RestVdbDescriptor descriptor2 = new RestVdbDescriptor( this.descriptor.getName() + "blah", URI, LINK_TYPES );
-        descriptor2.setDescription( this.descriptor.getDescription() );
-        assertThat( this.descriptor.getName(), is( not( descriptor2.getName() ) ) );
-        assertThat( this.descriptor, is( not( descriptor2 ) ) );
+        final RestVdbDescriptor thatDescriptor = new RestVdbDescriptor( this.descriptor.getName() + "blah", URI, LINK_TYPES );
+        thatDescriptor.setDescription( this.descriptor.getDescription() );
+        thatDescriptor.setLinks( this.descriptor.getLinks() );
+        thatDescriptor.setProperties( this.descriptor.getProperties() );
+
+        assertThat( this.descriptor.getName(), is( not( thatDescriptor.getName() ) ) );
+        assertThat( this.descriptor, is( not( thatDescriptor ) ) );
     }
 
     @Test
@@ -142,18 +136,6 @@ public final class RestVdbDescriptorTest {
                                                                     LinkType.PARENT,
                                                                     LinkType.DELETE );
         assertThat( descriptor.getLinks().length, is( 4 ) );
-    }
-
-    @Test( expected = Exception.class )
-    public void shouldNotExportJsonWhenThereIsNoName() {
-        final RestVdbDescriptor descriptor = new RestVdbDescriptor();
-        JSON_BUILDER.toJson( descriptor );
-    }
-
-    @Test( expected = Exception.class )
-    public void shouldNotImportJsonWhenIdIsMissing() {
-        final String malformed = "{\"description\":\"my description\",\"links\":[{\"rel\":\"self\",\"href\":\"http://localhost:8080/v1/workspace/vdbs/MyVdb\",\"method\":\"GET\"},{\"rel\":\"parent\",\"href\":\"http://localhost:8080/v1/workspace/vdbs\",\"method\":\"GET\"},{\"rel\":\"manifest\",\"href\":\"http://localhost:8080/v1/workspace/vdbs/MyVdb/manifest\",\"method\":\"GET\"}]}";
-        JSON_BUILDER.fromJson( malformed, RestVdbDescriptor.class );
     }
 
     @Test

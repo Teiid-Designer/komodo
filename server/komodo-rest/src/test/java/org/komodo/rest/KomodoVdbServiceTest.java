@@ -62,7 +62,8 @@ public final class KomodoVdbServiceTest {
         _server.deploy( _restApp );
 
         final URI baseUri = URI.create( TestPortProvider.generateBaseUrl() );
-        _uriBuilder = new KomodoRestUriBuilder( baseUri );
+        final URI appUri = UriBuilder.fromUri( baseUri ).path( "/v1" ).build();
+        _uriBuilder = new KomodoRestUriBuilder( appUri );
     }
 
     private Client client;

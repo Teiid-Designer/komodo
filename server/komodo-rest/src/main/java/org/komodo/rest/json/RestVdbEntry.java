@@ -12,52 +12,49 @@ import org.komodo.utils.ArgCheck;
 import com.google.gson.annotations.SerializedName;
 
 /**
- * A translator that can be used by GSON to build a JSON document representation.
+ * A VDB entry that can be used by GSON to build a JSON document representation.
  *
  * <pre>
+ * <code>
  * {
- *     "id" : "MyTranslator",
- *     "description" : "translator description goes here",
- *     "type" : "customType",
- *     "properties" : [
- *         "green" : "lantern",
- *         "captain" : "america",
- *         "black" : "widow"
- *     ]
+ *     "id" : "MyEntry",
+ *     "path" : "/my/entry/path",
+ *     "description" : "translator description goes here"
  * }
+ * </code>
  * </pre>
  */
-public final class RestTranslator extends KomodoRestEntity {
+public final class RestVdbEntry extends KomodoRestEntity {
 
     /**
-     * And empty array of translators.
+     * And empty array of VDB entries.
      */
-    public static final RestTranslator[] NO_TRANSLATORS = new RestTranslator[ 0 ];
+    public static final RestVdbEntry[] NO_ENTRIES = new RestVdbEntry[ 0 ];
 
     @SerializedName( "id" )
     private String name;
     private String description;
-    private String type;
+    private String path;
 
     /**
      * Constructor for use <strong>only</strong> when deserializing.
      */
-    public RestTranslator() {
+    public RestVdbEntry() {
         // nothing to do
     }
 
     /**
      * @param name
-     *        the name of the translator (cannot be empty)
-     * @param type
-     *        the translator type (cannot be empty)
+     *        the name of the entry (cannot be empty)
+     * @param path
+     *        the path of the entry (cannot be empty)
      */
-    public RestTranslator( final String name,
-                           final String type ) {
+    public RestVdbEntry( final String name,
+                         final String path ) {
         ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( type, "type" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( path, "path" ); //$NON-NLS-1$
         this.name = name;
-        this.type = type;
+        this.path = path;
     }
 
     /**
@@ -74,7 +71,7 @@ public final class RestTranslator extends KomodoRestEntity {
         assert( other != null );
         assert( getClass().equals( other.getClass() ) );
 
-        final RestTranslator that = ( RestTranslator )other;
+        final RestVdbEntry that = ( RestVdbEntry )other;
 
         // check name
         if ( this.name == null ) {
@@ -95,11 +92,11 @@ public final class RestTranslator extends KomodoRestEntity {
         }
 
         // check type
-        if ( this.type == null ) {
-            if ( that.type != null ) {
+        if ( this.path == null ) {
+            if ( that.path != null ) {
                 return false;
             }
-        } else if ( !this.type.equals( that.type ) ) {
+        } else if ( !this.path.equals( that.path ) ) {
             return false;
         }
 
@@ -121,10 +118,10 @@ public final class RestTranslator extends KomodoRestEntity {
     }
 
     /**
-     * @return the translator type (can be empty)
+     * @return the entry path (can be empty)
      */
-    public String getType() {
-        return this.type;
+    public String getPath() {
+        return this.path;
     }
 
     /**
@@ -134,7 +131,7 @@ public final class RestTranslator extends KomodoRestEntity {
      */
     @Override
     public int hashCode() {
-        return Objects.hash( this.name, this.description, this.type, super.hashCode() );
+        return Objects.hash( this.name, this.description, this.path, super.hashCode() );
     }
 
     /**
@@ -147,18 +144,18 @@ public final class RestTranslator extends KomodoRestEntity {
 
     /**
      * @param newName
-     *        the VDB name (can be empty)
+     *        the new entry name (can be empty)
      */
     public void setName( final String newName ) {
         this.name = newName;
     }
 
     /**
-     * @param newType
-     *        the new translator type (can be empty)
+     * @param newPath
+     *        the new entry path (can be empty)
      */
-    public void setType( final String newType ) {
-        this.type = newType;
+    public void setPath( final String newPath ) {
+        this.path = newPath;
     }
 
 }

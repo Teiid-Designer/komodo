@@ -9,7 +9,6 @@ package org.komodo.rest.json;
 
 import java.net.URI;
 import java.util.Objects;
-import javax.ws.rs.core.UriBuilder;
 import org.komodo.utils.ArgCheck;
 
 /**
@@ -129,9 +128,16 @@ public final class RestLink {
      */
     public static final RestLink[] NO_LINKS = new RestLink[ 0 ];
 
-    private final String rel;
-    private final String href;
-    private final String method;
+    private LinkType rel;
+    private URI href;
+    private MethodType method;
+
+    /**
+     * Constructor for use <strong>only</strong> when deserializing.
+     */
+    public RestLink() {
+        // nothing to do
+    }
 
     /**
      * @param rel
@@ -144,8 +150,8 @@ public final class RestLink {
         ArgCheck.isNotNull( rel, "rel" ); //$NON-NLS-1$
         ArgCheck.isNotNull( href, "href" ); //$NON-NLS-1$
 
-        this.rel = rel.name().toLowerCase();
-        this.href = href.toString();
+        this.rel = rel;
+        this.href = href;
 
         MethodType type = null;
 
@@ -166,7 +172,7 @@ public final class RestLink {
                 throw new RuntimeException( "Unexpected link type of '" + rel + '\'' ); //$NON-NLS-1$
         }
 
-        this.method = type.name();
+        this.method = type;
     }
 
     /**
@@ -184,9 +190,9 @@ public final class RestLink {
         ArgCheck.isNotNull( href, "href" ); //$NON-NLS-1$
         ArgCheck.isNotNull( method, "method" ); //$NON-NLS-1$
 
-        this.rel = rel.name().toLowerCase();
-        this.href = href.toString();
-        this.method = method.name();
+        this.rel = rel;
+        this.href = href;
+        this.method = method;
     }
 
     /**
@@ -201,28 +207,48 @@ public final class RestLink {
         }
 
         final RestLink that = ( RestLink )other;
-        return ( this.rel.equals( that.rel ) && this.href.equals( that.href ) && this.method.equals( that.method ) );
+
+        // rel
+        if ( this.rel != that.rel ) {
+            return false;
+        }
+
+        // href
+        if ( this.href == null ) {
+            if ( that.href != null ) {
+                return false;
+            }
+        } else if ( !this.href.equals( that.href ) ) {
+            return false;
+        }
+
+        // method type
+        if ( this.method != that.method ) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
-     * @return the href the HREF (never <code>null</code>)
+     * @return the href the HREF (can be <code>null</code>)
      */
     public URI getHref() {
-        return UriBuilder.fromUri( this.href ).build();
+        return this.href;
     }
 
     /**
-     * @return the method type (never <code>null</code>)
+     * @return the method type (can be <code>null</code>)
      */
     public MethodType getMethod() {
-        return MethodType.fromString( this.method );
+        return this.method;
     }
 
     /**
-     * @return the rel link type (never <code>null</code>)
+     * @return the rel link type (can be <code>null</code>)
      */
     public LinkType getRel() {
-        return LinkType.fromString( this.rel );
+        return this.rel;
     }
 
     /**
@@ -233,6 +259,30 @@ public final class RestLink {
     @Override
     public int hashCode() {
         return Objects.hash( this.rel, this.href, this.method );
+    }
+
+    /**
+     * @param newHref
+     *        the new HREF (can be <code>null</code>)
+     */
+    public void setHref( final URI newHref ) {
+        this.href = newHref;
+    }
+
+    /**
+     * @param newMethodType
+     *        the new method type (can be <code>null</code>)
+     */
+    public void setMethod( final MethodType newMethodType ) {
+        this.method = newMethodType;
+    }
+
+    /**
+     * @param newRel
+     *        the new link type (can be <code>null</code>)
+     */
+    public void setRel( final LinkType newRel ) {
+        this.rel = newRel;
     }
 
 }

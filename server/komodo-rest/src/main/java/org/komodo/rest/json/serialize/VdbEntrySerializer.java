@@ -12,18 +12,18 @@ import static org.komodo.rest.Messages.Error.UNEXPECTED_JSON_TOKEN;
 import java.io.IOException;
 import org.komodo.rest.Messages;
 import org.komodo.rest.json.JsonConstants;
-import org.komodo.rest.json.RestVdbTranslator;
+import org.komodo.rest.json.RestVdbEntry;
 import org.komodo.utils.StringUtils;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
 /**
- * A GSON serializer/deserializer for {@link RestVdbTranslator}s.
+ * A GSON serializer/deserializer for {@link RestVdbEntry}s.
  */
-public final class VdbTranslatorSerializer extends KomodoRestEntitySerializer< RestVdbTranslator > {
+public final class VdbEntrySerializer extends KomodoRestEntitySerializer< RestVdbEntry > {
 
-    private boolean isComplete( final RestVdbTranslator translator ) {
-        return ( !StringUtils.isBlank( translator.getName() ) && !StringUtils.isBlank( translator.getType() ) );
+    private boolean isComplete( final RestVdbEntry entry ) {
+        return ( !StringUtils.isBlank( entry.getName() ) && !StringUtils.isBlank( entry.getPath() ) );
     }
 
     /**
@@ -32,8 +32,8 @@ public final class VdbTranslatorSerializer extends KomodoRestEntitySerializer< R
      * @see org.komodo.rest.json.serialize.KomodoRestEntitySerializer#read(com.google.gson.stream.JsonReader)
      */
     @Override
-    public RestVdbTranslator read( final JsonReader in ) throws IOException {
-        final RestVdbTranslator translator = new RestVdbTranslator();
+    public RestVdbEntry read( final JsonReader in ) throws IOException {
+        final RestVdbEntry entry = new RestVdbEntry();
 
         beginRead( in );
 
@@ -43,33 +43,33 @@ public final class VdbTranslatorSerializer extends KomodoRestEntitySerializer< R
             switch ( name ) {
                 case JsonConstants.DESCRIPTION:
                     final String description = in.nextString();
-                    translator.setDescription( description );
+                    entry.setDescription( description );
                     break;
                 case JsonConstants.ID:
                     final String id = in.nextString();
-                    translator.setName( id );
+                    entry.setName( id );
                     break;
                 case JsonConstants.LINKS:
-                    readLinks( in, translator );
+                    readLinks( in, entry );
+                    break;
+                case JsonConstants.PATH:
+                    final String path = in.nextString();
+                    entry.setPath( path );
                     break;
                 case JsonConstants.PROPERTIES:
-                    readProperties( in, translator );
-                    break;
-                case JsonConstants.TYPE:
-                    final String type = in.nextString();
-                    translator.setType( type );
+                    readProperties( in, entry );
                     break;
                 default:
                     throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
             }
         }
 
-        if ( !isComplete( translator ) ) {
-            throw new IOException( Messages.getString( INCOMPLETE_JSON, RestVdbTranslator.class.getSimpleName() ) );
+        if ( !isComplete( entry ) ) {
+            throw new IOException( Messages.getString( INCOMPLETE_JSON, RestVdbEntry.class.getSimpleName() ) );
         }
 
         endRead( in );
-        return translator;
+        return entry;
     }
 
     /**
@@ -80,9 +80,9 @@ public final class VdbTranslatorSerializer extends KomodoRestEntitySerializer< R
      */
     @Override
     public void write( final JsonWriter out,
-                       final RestVdbTranslator value ) throws IOException {
+                       final RestVdbEntry value ) throws IOException {
         if ( !isComplete( value ) ) {
-            throw new IOException( Messages.getString( INCOMPLETE_JSON, RestVdbTranslator.class.getSimpleName() ) );
+            throw new IOException( Messages.getString( INCOMPLETE_JSON, RestVdbEntry.class.getSimpleName() ) );
         }
 
         beginWrite( out );
@@ -91,9 +91,9 @@ public final class VdbTranslatorSerializer extends KomodoRestEntitySerializer< R
         out.name( JsonConstants.ID );
         out.value( value.getName() );
 
-        // type
-        out.name( JsonConstants.TYPE );
-        out.value( value.getType() );
+        // path
+        out.name( JsonConstants.PATH );
+        out.value( value.getPath() );
 
         // description
         if ( !StringUtils.isBlank( value.getDescription() ) ) {

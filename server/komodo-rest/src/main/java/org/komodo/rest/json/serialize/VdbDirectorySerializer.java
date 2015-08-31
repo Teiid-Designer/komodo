@@ -7,7 +7,6 @@
 */
 package org.komodo.rest.json.serialize;
 
-import static org.komodo.rest.Messages.Error.INCOMPLETE_JSON;
 import static org.komodo.rest.Messages.Error.UNEXPECTED_JSON_TOKEN;
 import static org.komodo.rest.json.JsonConstants.JSON_BUILDER;
 import java.io.IOException;
@@ -31,7 +30,6 @@ public final class VdbDirectorySerializer extends KomodoRestEntitySerializer< Re
     @Override
     public RestVdbDirectory read( final JsonReader in ) throws IOException {
         final RestVdbDirectory vdbDir = new RestVdbDirectory();
-        boolean foundDescriptors = false;
 
         beginRead( in );
 
@@ -48,15 +46,10 @@ public final class VdbDirectorySerializer extends KomodoRestEntitySerializer< Re
                 case JsonConstants.VDBS:
                     final RestVdbDescriptor[] vdbs = JSON_BUILDER.fromJson( in, RestVdbDescriptor[].class );
                     vdbDir.setVdbs( vdbs );
-                    foundDescriptors = true;
                     break;
                 default:
                     throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
             }
-        }
-
-        if ( !foundDescriptors ) {
-            throw new IOException( Messages.getString( INCOMPLETE_JSON, RestVdbDirectory.class.getSimpleName() ) );
         }
 
         endRead( in );

@@ -41,7 +41,8 @@ public final class KomodoRestV1Application extends Application implements Reposi
     public interface V1Constants {
 
         /**
-         * The URI path segment for the Komodo REST application. This will be prefixed by the base URI to get the URL.
+         * The URI path segment for the Komodo REST application. It is included in the base URI. <strong>DO NOT INCLUDE THIS IN
+         * OTHER URI SEGMENTS</strong>
          */
         String APP_PATH = "/v1"; //$NON-NLS-1$
 
@@ -53,7 +54,7 @@ public final class KomodoRestV1Application extends Application implements Reposi
         /**
          * The URI path segment for the Komodo workspace. This will be prefixed by the base URI to get the URL.
          */
-        String WORKSPACE_URI_PATH = APP_PATH + '/' + WORKSPACE_SEGMENT;
+        String WORKSPACE_URI_PATH = '/' + WORKSPACE_SEGMENT;
 
         /**
          * The name of the URI path segment for the VDB manifest XML resource.

@@ -10,7 +10,6 @@ package org.komodo.rest.json;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
-import static org.komodo.rest.json.JsonConstants.JSON_BUILDER;
 import java.net.URI;
 import javax.ws.rs.core.UriBuilder;
 import org.junit.Test;
@@ -20,7 +19,6 @@ import org.komodo.rest.json.RestLink.MethodType;
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class RestLinkTest {
 
-    private static final String JSON = "{\"rel\":\"self\",\"href\":\"http://localhost:8080\",\"method\":\"GET\"}";
     private static final LinkType LINK_TYPE = LinkType.SELF;
     private static final LinkType LINK_TYPE_2 = LinkType.DELETE;
     private static final MethodType METHOD_TYPE = MethodType.GET;
@@ -29,15 +27,9 @@ public final class RestLinkTest {
 
     @Test
     public void shouldBeEqual() {
-        final RestLink link1 = new RestLink( LINK_TYPE, URI );
-        final RestLink link2 = new RestLink( link1.getRel(), link1.getHref(), link1.getMethod() );
-        assertThat( link1, is( link2 ) );
-    }
-
-    @Test
-    public void shouldExportJson() {
-        final RestLink link = new RestLink( LINK_TYPE, URI, METHOD_TYPE );
-        assertThat( JSON_BUILDER.toJson( link ), is( JSON ) );
+        final RestLink thisLink = new RestLink( LINK_TYPE, URI );
+        final RestLink thatLink = new RestLink( thisLink.getRel(), thisLink.getHref(), thisLink.getMethod() );
+        assertThat( thisLink, is( thatLink ) );
     }
 
     @Test( expected = IllegalArgumentException.class )
@@ -57,43 +49,35 @@ public final class RestLinkTest {
 
     @Test
     public void shouldHaveSameHashCode() {
-        final RestLink link1 = new RestLink( LINK_TYPE, URI, METHOD_TYPE );
-        final RestLink link2 = new RestLink( link1.getRel(), link1.getHref(), link1.getMethod() );
-        assertThat( link1.hashCode(), is( link2.hashCode() ) );
-    }
-
-    @Test
-    public void shouldImportJson() {
-        final RestLink link = JSON_BUILDER.fromJson( JSON, RestLink.class );
-        assertThat( link.getRel(), is( LINK_TYPE ) );
-        assertThat( link.getHref(), is( URI ) );
-        assertThat( link.getMethod(), is( METHOD_TYPE ) );
+        final RestLink thisLink = new RestLink( LINK_TYPE, URI, METHOD_TYPE );
+        final RestLink thatLink = new RestLink( thisLink.getRel(), thisLink.getHref(), thisLink.getMethod() );
+        assertThat( thisLink.hashCode(), is( thatLink.hashCode() ) );
     }
 
     @Test
     public void shouldNotBeEqualWhenHrefDifferent() {
-        final RestLink link1 = new RestLink( LINK_TYPE, URI, METHOD_TYPE );
-        final RestLink link2 = new RestLink( link1.getRel(),
-                                             UriBuilder.fromUri( "http://org.komodo:1234" ).build(),
-                                             link1.getMethod() );
-        assertThat( link1.getHref(), is( not( link2.getHref() ) ) );
-        assertThat( link1, is( not( link2 ) ) );
+        final RestLink thisLink = new RestLink( LINK_TYPE, URI, METHOD_TYPE );
+        final RestLink thatLink = new RestLink( thisLink.getRel(),
+                                                UriBuilder.fromUri( "http://org.komodo:1234" ).build(),
+                                                thisLink.getMethod() );
+        assertThat( thisLink.getHref(), is( not( thatLink.getHref() ) ) );
+        assertThat( thisLink, is( not( thatLink ) ) );
     }
 
     @Test
     public void shouldNotBeEqualWhenMethodDifferent() {
-        final RestLink link1 = new RestLink( LINK_TYPE, URI, METHOD_TYPE );
-        final RestLink link2 = new RestLink( link1.getRel(), link1.getHref(), METHOD_TYPE_2 );
-        assertThat( link1.getMethod(), is( not( link2.getMethod() ) ) );
-        assertThat( link1, is( not( link2 ) ) );
+        final RestLink thisLink = new RestLink( LINK_TYPE, URI, METHOD_TYPE );
+        final RestLink thatLink = new RestLink( thisLink.getRel(), thisLink.getHref(), METHOD_TYPE_2 );
+        assertThat( thisLink.getMethod(), is( not( thatLink.getMethod() ) ) );
+        assertThat( thisLink, is( not( thatLink ) ) );
     }
 
     @Test
     public void shouldNotBeEqualWhenRelDifferent() {
-        final RestLink link1 = new RestLink( LINK_TYPE, URI, METHOD_TYPE );
-        final RestLink link2 = new RestLink( LINK_TYPE_2, link1.getHref(), link1.getMethod() );
-        assertThat( link1.getRel(), is( not( link2.getRel() ) ) );
-        assertThat( link1, is( not( link2 ) ) );
+        final RestLink thisLink = new RestLink( LINK_TYPE, URI, METHOD_TYPE );
+        final RestLink thatLink = new RestLink( LINK_TYPE_2, thisLink.getHref(), thisLink.getMethod() );
+        assertThat( thisLink.getRel(), is( not( thatLink.getRel() ) ) );
+        assertThat( thisLink, is( not( thatLink ) ) );
     }
 
 }
