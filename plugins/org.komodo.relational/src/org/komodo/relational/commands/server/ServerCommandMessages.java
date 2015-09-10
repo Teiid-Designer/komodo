@@ -74,8 +74,8 @@ public class ServerCommandMessages implements StringConstants {
 
     @SuppressWarnings( "javadoc" )
     public enum ServerShowVdbsCommand {
-        ServerTypeHeader,
-        ObjectNameHeader;
+        InfoMessage,
+        ListHeader;
 
         @Override
         public String toString() {
@@ -83,6 +83,39 @@ public class ServerCommandMessages implements StringConstants {
         }
     }
     
+    @SuppressWarnings( "javadoc" )
+    public enum ServerShowTranslatorsCommand {
+        InfoMessage,
+        ListHeader;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum ServerShowDatasourcesCommand {
+        InfoMessage,
+        ListHeader;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum ServerShowDatasourceTypesCommand {
+        InfoMessage,
+        ListHeader;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
     private static String getEnumName(Enum<?> enumValue) {
         String className = enumValue.getClass().getName();
         String[] components = className.split("\\$"); //$NON-NLS-1$

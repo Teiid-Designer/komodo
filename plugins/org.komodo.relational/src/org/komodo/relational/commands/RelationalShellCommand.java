@@ -66,7 +66,7 @@ public abstract class RelationalShellCommand extends BuiltInShellCommand {
         return getWorkspaceStatus().getCurrentContext().getAbsolutePath();
     }
 
-    protected Repository getRepository() throws Exception {
+    protected Repository getRepository() throws KException {
         return getWorkspaceStatus().getCurrentContext().getRepository();
     }
 
@@ -74,7 +74,7 @@ public abstract class RelationalShellCommand extends BuiltInShellCommand {
         return getWorkspaceStatus().getTransaction();
     }
 
-    protected WorkspaceManager getWorkspaceManager() throws Exception {
+    protected WorkspaceManager getWorkspaceManager() throws KException {
         return WorkspaceManager.getInstance( getRepository() );
     }
 

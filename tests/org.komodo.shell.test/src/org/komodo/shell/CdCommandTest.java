@@ -18,6 +18,7 @@ package org.komodo.shell;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.shell.commands.core.CdCommand;
+import org.komodo.shell.util.KomodoObjectUtils;
 
 /**
  * Test Class to test CdCommand
@@ -54,7 +55,7 @@ public class CdCommandTest extends AbstractCommandTest {
     	execute();
 
     	// Check WorkspaceContext
-    	assertEquals("/workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/workspace", KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext())); //$NON-NLS-1$
     }
 
     @Test
@@ -64,7 +65,7 @@ public class CdCommandTest extends AbstractCommandTest {
     	execute();
 
     	// Check WorkspaceContext
-    	assertEquals("/workspace/MyVdb/MyModel", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/workspace/MyVdb/MyModel",  KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext())); //$NON-NLS-1$
     }
 
     @Test
@@ -74,7 +75,7 @@ public class CdCommandTest extends AbstractCommandTest {
     	execute();
 
     	// Check WorkspaceContext
-    	assertEquals("/workspace/MyVdb/MyModel", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/workspace/MyVdb/MyModel",  KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext())); //$NON-NLS-1$
     }
 
     @Test
@@ -84,7 +85,7 @@ public class CdCommandTest extends AbstractCommandTest {
     	execute();
 
     	// Check WorkspaceContext
-    	assertEquals("/workspace/MyVdb", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/workspace/MyVdb",  KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext())); //$NON-NLS-1$
     }
 
     @Test
@@ -94,7 +95,7 @@ public class CdCommandTest extends AbstractCommandTest {
     	execute();
 
     	// Check WorkspaceContext
-    	assertEquals("/workspace/MyVdb/MyModel/MyTable1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/workspace/MyVdb/MyModel/MyTable1",  KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext())); //$NON-NLS-1$
     }
 
     @Test
@@ -104,7 +105,7 @@ public class CdCommandTest extends AbstractCommandTest {
     	execute();
 
     	// Check WorkspaceContext
-    	assertEquals("/workspace/MyVdb/MyModel/MyTable1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/workspace/MyVdb/MyModel/MyTable1",  KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext())); //$NON-NLS-1$
     }
 
     @Test
@@ -114,7 +115,7 @@ public class CdCommandTest extends AbstractCommandTest {
     	execute();
 
     	// Check WorkspaceContext
-    	String contextName = wsStatus.getCurrentContext().getFullName();
+    	String contextName =  KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext());
     	assertEquals("/workspace", contextName); //$NON-NLS-1$
     }
 
@@ -125,7 +126,7 @@ public class CdCommandTest extends AbstractCommandTest {
     	execute();
 
     	// Check WorkspaceContext
-    	assertEquals("/workspace/MyVdb", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/workspace/MyVdb",  KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext())); //$NON-NLS-1$
     }
 
     @Test
@@ -135,7 +136,7 @@ public class CdCommandTest extends AbstractCommandTest {
     	execute();
 
     	// Check WorkspaceContext
-    	assertEquals("/workspace/MyVdb/MyModel/MyTable2", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+    	assertEquals("/workspace/MyVdb/MyModel/MyTable2",  KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext())); //$NON-NLS-1$
     }
 
     @Test
@@ -145,7 +146,7 @@ public class CdCommandTest extends AbstractCommandTest {
         execute();
 
         // Check WorkspaceContext
-        assertEquals("/workspace/MyVdb/MyModel/Table1", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+        assertEquals("/workspace/MyVdb/MyModel/Table1",  KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext())); //$NON-NLS-1$
     }
 
     @Test
@@ -155,7 +156,7 @@ public class CdCommandTest extends AbstractCommandTest {
         execute();
 
         // Check WorkspaceContext
-        assertEquals("/workspace/MyVdb", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+        assertEquals("/workspace/MyVdb",  KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext())); //$NON-NLS-1$
     }
 
 }

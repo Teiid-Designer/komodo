@@ -28,7 +28,6 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.KomodoObjectUtils;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
-import org.komodo.utils.StringUtils;
 
 /**
  * ShowStatusCommand - show the workspace status (current repo, current context, current server, etc)
@@ -93,11 +92,11 @@ public class ShowStatusCommand extends BuiltInShellCommand {
         print(MESSAGE_INDENT, Messages.getString(Messages.ShowStatusCommand.CurrentRepoUrl, repoId.getUrl()));
 
 		// Get current server and test connection if defined
-		String serverName = wsStatus.getServer();
-		if (StringUtils.isEmpty(serverName))
+		KomodoObject serverObj = wsStatus.getServer();
+		if (serverObj==null)
 			print(MESSAGE_INDENT, Messages.getString(Messages.ShowStatusCommand.NoCurrentTeiid));
 		else {
-		    String currentServerText = serverName;
+		    String currentServerText = serverObj.getName(wsStatus.getTransaction());
 //			TeiidInstance teiidInstance = teiid.getTeiidInstance(wsStatus.getTransaction());
 //            String teiidName = teiid.getName(wsStatus.getTransaction());
 //			String teiidUrl = teiidInstance.getUrl();

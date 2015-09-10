@@ -79,13 +79,13 @@ public class RenameCommand extends BuiltInShellCommand {
 
         try {
             // If teiid object was renamed, check if it is set as the default server.  unset default if necessary
-            if (KomodoType.TEIID == kType) {
-                final String server = wsStatus.getServer();
-
-                if ((server != null) && server.equals(objContext.getName(wsStatus.getTransaction()))) {
-                    wsStatus.setServer(null);
-                }
-            }
+//            if (KomodoType.TEIID == kType) {
+//                final String server = wsStatus.getServer();
+//
+//                if ((server != null) && server.equals(objContext.getName(wsStatus.getTransaction()))) {
+//                    wsStatus.setServer(null);
+//                }
+//            }
             
         	// Rename
             rename(objContext, newShortName, targetContext);

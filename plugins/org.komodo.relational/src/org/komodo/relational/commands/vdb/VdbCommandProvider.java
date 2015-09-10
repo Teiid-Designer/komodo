@@ -82,6 +82,14 @@ public class VdbCommandProvider implements ShellCommandProvider {
         return false;
     }
     
+    /**
+     * @throws KException the exception 
+     */
+    @Override
+    public boolean isServer ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
+        return false;
+    }
+    
     @Override
     public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
         if(VdbImpl.RESOLVER.resolvable(uow, kObj)) {

@@ -246,16 +246,13 @@ public class DefaultKomodoShell implements KomodoShell {
                 command = reader.read();
                 if (command == null) {
                     done = true;
+                    shutdown();
                 } else {
                     command.execute();
 
-//                    if ( success ) {
                     if ( this.wsStatus.getRecordingStatus() && !(command instanceof SetRecordCommand) ) {
                         writeCommandToRecordingFile(command);
                     }
-//                    } else if ( this.reader.isBatch() ) {
-//                        shutdown();
-//                    }
                 }
             } catch (InvalidCommandArgumentException e) {
                 PrintUtils.print(getOutputWriter(), CompletionConstants.MESSAGE_INDENT, Messages.getString(SHELL.INVALID_ARG, e.getMessage()));

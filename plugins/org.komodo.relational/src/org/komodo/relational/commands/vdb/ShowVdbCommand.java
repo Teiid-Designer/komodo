@@ -31,12 +31,13 @@ public final class ShowVdbCommand extends VdbShellCommand {
      */
     @Override
     protected boolean doExecute() throws Exception {
+        getCommand(ShowVdbPropertiesCommand.NAME).execute();
+        
         getCommand(ShowDataRolesCommand.NAME).execute();
         getCommand(ShowEntriesCommand.NAME).execute();
         getCommand(ShowModelsCommand.NAME).execute();
         getCommand(ShowImportsCommand.NAME).execute();
         getCommand(ShowTranslatorsCommand.NAME).execute();
-        getCommand(ShowVdbPropertiesCommand.NAME).execute();
 
         return true;
     }
