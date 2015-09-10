@@ -78,13 +78,13 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     private KomodoObject currentContext;
     private Set<WorkspaceStatusEventHandler> eventHandlers = new HashSet<WorkspaceStatusEventHandler>();
 
-    private Properties wsProperties;
+    private Properties wsProperties = new Properties();
 
     private boolean recordingStatus = false;
     private Writer recordingFileWriter = null;
     private ShellCommandFactory commandFactory;
 
-    private String server;
+    private KomodoObject server;
 
     /**
      * Constructor
@@ -146,11 +146,11 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         currentContext = rootContext;
 
         // initialize the global properties
-        this.wsProperties = initGlobalProperties();
+        initGlobalProperties();
     }
     
-    private Properties initGlobalProperties() {
-        Properties props = new Properties();
+    private void initGlobalProperties() throws KException {
+        this.wsProperties.clear();
         
         // load shell properties if they exist
         final String dataDir = this.shell.getShellDataLocation();
@@ -158,7 +158,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
 
         if ( startupPropertiesFile.exists() && startupPropertiesFile.isFile() && startupPropertiesFile.canRead() ) {
             try {
-                props.load( new FileInputStream( startupPropertiesFile ) );
+                this.wsProperties.load( new FileInputStream( startupPropertiesFile ) );
             } catch ( final Exception e ) {
                 String msg = Messages.getString( SHELL.ERROR_LOADING_PROPERTIES,
                                                  startupPropertiesFile.getAbsolutePath(),
@@ -168,12 +168,16 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         }
         
         // Init the recording output file if it is defined
-        String recordingFile = props.getProperty(RECORDING_FILE_KEY);
+        String recordingFile = this.wsProperties.getProperty(RECORDING_FILE_KEY);
         if(!StringUtils.isBlank(recordingFile)) {
             setRecordingWriter(recordingFile);
         }
-
-        return props;
+        
+        // Init the default server if it is defined
+        String serverName = this.wsProperties.getProperty(SERVER_DEFAULT_KEY);
+        if(!StringUtils.isBlank(serverName)) {
+            this.server = getServerWithName(serverName);
+        }
     }
 
     private void createTransaction(final String source ) throws Exception {
@@ -301,22 +305,36 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     }
 
     @Override
-    public String getServer() {
-        // If teiid is not set, look at global default.  use it if found.
-        if( server == null ) {
+    public KomodoObject getServer() throws KException {
+        // If server is not set, look at global default.  set server from it if possible
+        if(server==null) {
+            // Determine if any root nodes are server and match the name
             String globalDefaultServer = getProperties().getProperty(SERVER_DEFAULT_KEY);
             if(!StringUtils.isEmpty(globalDefaultServer)) {
-                setServer(globalDefaultServer);
+                server = getServerWithName(globalDefaultServer);
+            }
+        }
+        return server;
+    }
+    
+    private KomodoObject getServerWithName(String serverName) throws KException {
+        KomodoObject server = null;
+        KomodoObject[] children = getRootContext().getChildren(getTransaction());
+        for(KomodoObject child : children) {
+            KomodoObject resolvedChild = resolve(child);
+            if(serverName.equals(resolvedChild.getName(getTransaction())) && isServer(resolvedChild)) {
+                server = resolvedChild;
+                break;
             }
         }
         return server;
     }
 
     @Override
-    public void setServer(String server) {
-        this.server = server;
+    public void setServer(KomodoObject serverObj) throws KException {
+        this.server = serverObj;
         // Set the hidden property SERVER_DEFAULT_KEY
-        String serverName = server==null ? StringConstants.EMPTY_STRING : server;
+        String serverName = serverObj==null ? StringConstants.EMPTY_STRING : serverObj.getName(getTransaction());
         this.wsProperties.setProperty( SERVER_DEFAULT_KEY, serverName);
     }
 
@@ -542,7 +560,8 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
             final String defaultServer = props.getProperty( SERVER_DEFAULT_KEY );
 
             if ( !StringUtils.isBlank( defaultServer ) ) {
-                setServer(defaultServer);
+                KomodoObject serverObj = getServerWithName(defaultServer);
+                setServer(serverObj);
             }
         }
     }
@@ -640,6 +659,21 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
             }
         }
         return isRoot;
+    }
+
+    @Override
+    public boolean isServer ( final KomodoObject kObj ) throws KException {
+        // determine from providers if this is a server type
+        boolean isServer = false;
+        if(this.commandFactory.getCommandProviders()!=null) {
+            for(ShellCommandProvider provider : this.commandFactory.getCommandProviders()) {
+                if(provider.isServer(getTransaction(), kObj)) {
+                    isServer = true;
+                    break;
+                }
+            }
+        }
+        return isServer;
     }
 
     @Override

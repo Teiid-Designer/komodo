@@ -7,9 +7,16 @@
  */
 package org.komodo.relational.commands.vdb;
 
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.DeleteImportCommand.IMPORT_DELETED;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_IMPORT_NAME;
+import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+import java.util.ArrayList;
+import java.util.List;
 import org.komodo.relational.vdb.Vdb;
+import org.komodo.relational.vdb.VdbImport;
+import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
  * A shell command to delete a VDB import from a VDB.
@@ -33,12 +40,51 @@ public final class DeleteImportCommand extends VdbShellCommand {
      */
     @Override
     protected boolean doExecute() throws Exception {
-        final String vdbName = requiredArgument( 0, getMessage(MISSING_IMPORT_NAME) );
+        final String importName = requiredArgument( 0, getMessage(MISSING_IMPORT_NAME) );
 
         final Vdb vdb = getVdb();
-        vdb.removeImport( getTransaction(), vdbName );
+        vdb.removeImport( getTransaction(), importName );
 
+        // Print success message
+        print(MESSAGE_INDENT, getMessage(IMPORT_DELETED,importName));
+        
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
+     */
+    @Override
+    public int tabCompletion( final String lastArgument,
+                              final List< CharSequence > candidates ) throws Exception {
+        final Arguments args = getArguments();
+
+        final UnitOfWork uow = getTransaction();
+        final Vdb vdb = getVdb();
+        final VdbImport[] imports = vdb.getImports( uow );
+        List<String> existingImportNames = new ArrayList<String>(imports.length);
+        for(VdbImport theImport : imports) {
+            existingImportNames.add(theImport.getName(uow));
+        }
+        
+        if ( args.isEmpty() ) {
+            if ( lastArgument == null ) {
+                candidates.addAll( existingImportNames );
+            } else {
+                for ( final String item : existingImportNames ) {
+                    if ( item.toUpperCase().startsWith( lastArgument.toUpperCase() ) ) {
+                        candidates.add( item );
+                    }
+                }
+            }
+
+            return 0;
+        }
+
+        // no tab completion
+        return -1;
+    }
+    
 }

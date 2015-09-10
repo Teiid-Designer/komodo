@@ -64,7 +64,7 @@ public final class ServerDisconnectCommand extends ServerShellCommand {
      */
     @Override
     public final boolean isValidForCurrentContext() {
-        return hasConnectedTeiid();
+        return hasConnectedDefaultTeiid();
     }
     
 }

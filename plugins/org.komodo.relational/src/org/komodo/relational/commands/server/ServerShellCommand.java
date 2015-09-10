@@ -7,14 +7,20 @@
  */
 package org.komodo.relational.commands.server;
 
+import static org.komodo.relational.commands.server.ServerCommandMessages.Common.NoTeiidDefined;
+import static org.komodo.relational.commands.server.ServerCommandMessages.Common.ServerNotConnected;
+import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.List;
 import org.komodo.relational.Messages;
 import org.komodo.relational.commands.RelationalShellCommand;
 import org.komodo.relational.teiid.Teiid;
+import org.komodo.relational.teiid.internal.TeiidImpl;
 import org.komodo.relational.vdb.Vdb;
+import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.runtime.TeiidInstance;
-import org.komodo.utils.StringUtils;
 
 /**
  * A base class for @{link {@link Vdb VDB}-related shell commands.
@@ -27,39 +33,80 @@ abstract class ServerShellCommand extends RelationalShellCommand {
         super( status, shouldCommit, name );
     }
 
-    protected boolean hasDefaultServer() {
-        String server = getWorkspaceStatus().getServer();
-        if(StringUtils.isBlank(server)) {
+    /** 
+     * Validates the existence of a connected server, and prints output
+     * depending on the problem
+     * @return 'true' if there is a default connected server
+     * @throws KException the exception
+     */
+    protected boolean validateHasConnectedDefaultServer() throws KException {
+        if(!hasDefaultServer()) {
+            print(CompletionConstants.MESSAGE_INDENT, getMessage(NoTeiidDefined));
+            return false;
+        }
+        
+        Teiid teiid = getDefaultServer();
+        if(!isConnected(teiid)) {
+            print( MESSAGE_INDENT, getMessage( ServerNotConnected ) ); 
             return false;
         }
         return true;
     }
     
-    protected String getDefaultServerName() {
-        return getWorkspaceStatus().getServer();
+    protected boolean hasDefaultServer() {
+        KomodoObject server = null;
+        try {
+            server = getWorkspaceStatus().getServer();
+        } catch (KException ex) {
+            // on exception returns null object
+        }
+        if(server!=null) return true;
+        return false;
     }
     
-    protected Teiid getDefaultServer() throws Exception {
-        String server = getWorkspaceStatus().getServer();
-        if(StringUtils.isBlank(server)) {
-            return null;
+    protected String getDefaultServerName() throws KException {
+        KomodoObject server = null;
+        try {
+            server = getWorkspaceStatus().getServer();
+        } catch (KException ex) {
+            // on exception returns null object
         }
-        
+        if(server!=null) {
+            return server.getName(getWorkspaceStatus().getTransaction());
+        }
+        return null;
+    }
+    
+    protected Teiid getDefaultServer() throws KException {
+        KomodoObject kObj = getWorkspaceStatus().getServer();
+        if(TeiidImpl.RESOLVER.resolvable(getWorkspaceStatus().getTransaction(), kObj)) {
+            return (Teiid)kObj;
+        }
+        return null;
+    }
+    
+    /**
+     * Get the teiid object with the supplied name from the workspace
+     * @param serverName the name of the teiid object
+     * @return the teiid object
+     * @throws Exception the exception
+     */
+    protected Teiid getWorkspaceTeiid(String serverName) throws Exception {
+        Teiid resultTeiid = null;
         List<Teiid> teiids = getWorkspaceManager().findTeiids(getTransaction());
 
         if (teiids == null || teiids.size() == 0) {
-            return null;
+            return resultTeiid;
         }
 
-        Teiid teiid = null;
         for (Teiid theTeiid : teiids) {
             String teiidName = theTeiid.getName(getTransaction());
-            if (server.equals(theTeiid.getId(getTransaction())) || server.equals(teiidName)) {
-                teiid = theTeiid;
+            if (serverName.equals(theTeiid.getId(getTransaction())) || serverName.equals(teiidName)) {
+                resultTeiid = theTeiid;
                 break;
             }
         }
-        return teiid;
+        return resultTeiid;
     }
     
     protected boolean isConnected( final Teiid teiid ) {
@@ -71,7 +118,7 @@ abstract class ServerShellCommand extends RelationalShellCommand {
         return teiidInstance.isConnected();
     }
 
-    protected boolean hasConnectedTeiid( ) {
+    protected boolean hasConnectedDefaultTeiid( ) {
         Teiid teiid = null;
         try {
             teiid = getDefaultServer();

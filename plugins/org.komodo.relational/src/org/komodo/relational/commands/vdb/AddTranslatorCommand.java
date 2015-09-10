@@ -7,8 +7,10 @@
  */
 package org.komodo.relational.commands.vdb;
 
+import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_TRANSLATOR_NAME;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_TRANSLATOR_TYPE;
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.AddTranslatorCommand.TRANSLATOR_ADDED;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.shell.api.WorkspaceStatus;
 
@@ -40,6 +42,9 @@ public class AddTranslatorCommand extends VdbShellCommand {
         final Vdb vdb = getVdb();
         vdb.addTranslator( getTransaction(), translatorName, translatorType );
 
+        // Print success message
+        print(MESSAGE_INDENT, getMessage(TRANSLATOR_ADDED,translatorName));
+        
         return true;
     }
 

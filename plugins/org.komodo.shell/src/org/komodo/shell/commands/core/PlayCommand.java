@@ -1,6 +1,5 @@
 package org.komodo.shell.commands.core;
 
-import java.io.Writer;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
@@ -23,8 +22,6 @@ public class PlayCommand  extends BuiltInShellCommand {
      * The command name.
      */
     public static final String NAME = "play"; //$NON-NLS-1$
-
-    private Writer commandWriter;
 
     /**
      * @param wsStatus
@@ -78,24 +75,12 @@ public class PlayCommand  extends BuiltInShellCommand {
                 break;
             }
 
-            command.setWriter( this.commandWriter );
+            command.setWriter( getWriter() );
 
 			command.execute();
-//
-//            if ( !success && reader.isBatch() ) {
-//                throw new Exception( Messages.getString( Messages.PlayCommand.CommandFailure, command ) );
-//            }
 		}
 	}
 
-    /**
-     * @param commandWriter
-     *        the writer the commands being played should use (cannot be <code>null</code>)
-     */
-    public void setCommandOutput( final Writer commandWriter ) {
-        this.commandWriter = commandWriter;
-    }
-    
     /**
      * {@inheritDoc}
      *

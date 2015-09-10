@@ -1,4 +1,0 @@
-# import VDB s-vdb.xml
-#
-import vdb ./resources/vdbs/s-vdb.xml
-show children

@@ -32,7 +32,12 @@ public class VdbCommandMessages implements StringConstants {
         MISSING_MODEL_NAME,
         MISSING_TRANSLATOR_NAME,
         MISSING_TRANSLATOR_TYPE,
-        MISSING_VDB_VERSION;
+        MISSING_VDB_VERSION,
+        DATA_ROLE_NAME,
+        ENTRY_NAME,
+        IMPORT_NAME,
+        MODEL_NAME,
+        TRANSLATOR_NAME;
 
         @Override
         public String toString() {
@@ -51,7 +56,8 @@ public class VdbCommandMessages implements StringConstants {
     }
     @SuppressWarnings( "javadoc" )
     public enum ShowDataRolesCommand {
-        NO_DATA_ROLES;
+        NO_DATA_ROLES,
+        DATA_ROLES_HEADER;
 
         @Override
         public String toString() {
@@ -61,7 +67,8 @@ public class VdbCommandMessages implements StringConstants {
 
     @SuppressWarnings( "javadoc" )
     public enum ShowEntriesCommand {
-        NO_ENTRIES;
+        NO_ENTRIES,
+        ENTRIES_HEADER;
 
         @Override
         public String toString() {
@@ -71,7 +78,8 @@ public class VdbCommandMessages implements StringConstants {
     
     @SuppressWarnings( "javadoc" )
     public enum ShowImportsCommand {
-        NO_IMPORTS;
+        NO_IMPORTS,
+        IMPORTS_HEADER;
 
         @Override
         public String toString() {
@@ -81,7 +89,8 @@ public class VdbCommandMessages implements StringConstants {
     
     @SuppressWarnings( "javadoc" )
     public enum ShowModelsCommand {
-        NO_MODELS;
+        NO_MODELS,
+        MODELS_HEADER;
 
         @Override
         public String toString() {
@@ -91,7 +100,108 @@ public class VdbCommandMessages implements StringConstants {
 
     @SuppressWarnings( "javadoc" )
     public enum ShowTranslatorsCommand {
-        NO_TRANSLATORS;
+        NO_TRANSLATORS,
+        TRANSLATORS_HEADER;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+    
+    @SuppressWarnings( "javadoc" )
+    public enum AddDataRoleCommand {
+        DATA_ROLE_ADDED;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+    
+    @SuppressWarnings( "javadoc" )
+    public enum AddEntryCommand {
+        ENTRY_ADDED;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+    
+    @SuppressWarnings( "javadoc" )
+    public enum AddImportCommand {
+        IMPORT_ADDED;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum AddModelCommand {
+        MODEL_ADDED;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+    
+    @SuppressWarnings( "javadoc" )
+    public enum AddTranslatorCommand {
+        TRANSLATOR_ADDED;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+    
+    @SuppressWarnings( "javadoc" )
+    public enum DeleteDataRoleCommand {
+        DATA_ROLE_DELETED;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+    
+    @SuppressWarnings( "javadoc" )
+    public enum DeleteEntryCommand {
+        ENTRY_DELETED;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+    
+    @SuppressWarnings( "javadoc" )
+    public enum DeleteImportCommand {
+        IMPORT_DELETED;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum DeleteModelCommand {
+        MODEL_DELETED;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+    
+    @SuppressWarnings( "javadoc" )
+    public enum DeleteTranslatorCommand {
+        TRANSLATOR_DELETED;
 
         @Override
         public String toString() {

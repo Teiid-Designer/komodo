@@ -1,4 +1,0 @@
-# import VDB importProps-vdb.xml
-#
-import vdb ./resources/vdbs/BQT2_ALL_TYPES_TABLE-vdb.xml
-show children
