@@ -9,8 +9,11 @@ package org.komodo.relational.commands;
 
 import static org.komodo.relational.commands.WorkspaceCommandMessages.CreateVdbCommand.MISSING_VDB_EXTERNAL_PATH;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.CreateVdbCommand.MISSING_VDB_NAME;
+import static org.komodo.relational.commands.WorkspaceCommandMessages.CreateVdbCommand.VDB_CREATED;
+import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.spi.repository.KomodoType;
 
 /**
  * A shell command to create a VDB.
@@ -40,6 +43,9 @@ public final class CreateVdbCommand extends RelationalShellCommand {
         final WorkspaceManager mgr = getWorkspaceManager();
         mgr.createVdb( getTransaction(), null, vdbName, extPath );
 
+        // Print success message
+        print(MESSAGE_INDENT, getMessage(VDB_CREATED,vdbName));
+        
         return true;
     }
 
@@ -49,8 +55,10 @@ public final class CreateVdbCommand extends RelationalShellCommand {
      * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
      */
     @Override
-    public boolean isValidForCurrentContext() {
-        return false;
+    public boolean isValidForCurrentContext() throws Exception {
+        // Only allow VDB create in the workspace
+        KomodoType contextType = getWorkspaceStatus().getCurrentContext().getTypeIdentifier(getTransaction());
+        return (contextType==KomodoType.WORKSPACE);
     }
 
 }

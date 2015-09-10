@@ -7,7 +7,9 @@
  */
 package org.komodo.relational.commands.vdb;
 
+import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_MODEL_NAME;
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.AddModelCommand.MODEL_ADDED;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.shell.api.WorkspaceStatus;
 
@@ -38,6 +40,9 @@ public final class AddModelCommand extends VdbShellCommand {
         final Vdb vdb = getVdb();
         vdb.addModel( getTransaction(), modelName );
 
+        // Print success message
+        print(MESSAGE_INDENT, getMessage(MODEL_ADDED,modelName));
+        
         return true;
     }
 

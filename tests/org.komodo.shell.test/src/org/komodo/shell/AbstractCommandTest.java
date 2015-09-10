@@ -13,18 +13,14 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.komodo.core.KEngine;
-import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.InvalidCommandArgumentException;
 import org.komodo.shell.api.KomodoShell;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.commands.core.PlayCommand;
-import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.constants.SystemConstants;
-import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
-import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.spi.repository.RepositoryClient;
 import org.komodo.test.utils.AbstractLocalRepositoryTest;
@@ -102,10 +98,11 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
         KomodoShell komodoShell = Mockito.mock( KomodoShell.class );
         Mockito.when( komodoShell.getEngine() ).thenReturn( kEngine );
         Mockito.when( komodoShell.getInputStream() ).thenReturn( System.in );
-        Mockito.when( komodoShell.getOutputStream() ).thenReturn( System.out );
+        Mockito.when( komodoShell.getOutputWriter() ).thenReturn( new StringWriter() );
         Mockito.when( komodoShell.getShellDataLocation() ).thenReturn( getLoggingDirectory().toString() );
+        Mockito.when( komodoShell.getShellPropertiesFile()).thenReturn( "vdbbuilderShell.properties");
 
-        this.wsStatus = new WorkspaceStatusImpl( this.uow, komodoShell );
+        this.wsStatus = new WorkspaceStatusImpl( this.uow, komodoShell, new ShellCommandFactory() );
         this.testedCommandClass = commandClass;
 
         try {
@@ -121,8 +118,7 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
             // construct play command
             this.playCmd = new PlayCommand( this.wsStatus );
             this.playCmd.setArguments( args );
-            this.playCmd.setOutput( this.writer );
-            this.playCmd.setCommandOutput( this.commandWriter );
+            this.playCmd.setWriter( this.writer );
         } catch ( Exception e ) {
             Assert.fail( "Failed - setup error: " + e.getMessage() ); //$NON-NLS-1$
         }
@@ -154,9 +150,7 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
 	 */
     protected void execute() {
         try {
-            if ( !this.playCmd.execute() ) {
-                Assert.fail( "Command " + this.testedCommandClass.getName() + " execution failed.\n" + this.writer.toString() ); //$NON-NLS-1$ //$NON-NLS-2$
-            }
+            this.playCmd.execute();
 
             // make a transaction available to tests after the playback is over
             if ( this.uow.getState() == State.COMMITTED ) {
@@ -190,16 +184,16 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
 		return sb.toString();
 	}
 
-    protected static < T extends KomodoObject > KomodoObject resolveType( final UnitOfWork transaction,
-                                                                          final KomodoObject ko,
-                                                                          final Class< T > resolvedClass ) {
-		try {
-			return WorkspaceManager.getInstance(_repo).resolve(transaction, ko, resolvedClass);
-		} catch ( KException ke) {
-			Assert.fail("Failed : "+ ke.getMessage()); //$NON-NLS-1$
-		}
-
-		return null;
-	}
-
+//    protected static < T extends KomodoObject > KomodoObject resolveType( final UnitOfWork transaction,
+//                                                                          final KomodoObject ko,
+//                                                                          final Class< T > resolvedClass ) {
+//		try {
+//			return WorkspaceManager.getInstance(_repo).resolve(transaction, ko, resolvedClass);
+//		} catch ( KException ke) {
+//			Assert.fail("Failed : "+ ke.getMessage()); //$NON-NLS-1$
+//		}
+//
+//		return null;
+//	}
+//
 }

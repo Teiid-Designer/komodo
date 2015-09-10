@@ -7,12 +7,16 @@
  */
 package org.komodo.relational.commands.vdb;
 
-import static org.komodo.relational.commands.WorkspaceCommandMessages.General.PRINT_RELATIONAL_OBJECT;
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.IMPORT_NAME;
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowImportsCommand.IMPORTS_HEADER;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowImportsCommand.NO_IMPORTS;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+import java.util.ArrayList;
+import java.util.List;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.VdbImport;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.shell.util.PrintUtils;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
@@ -42,13 +46,17 @@ public final class ShowImportsCommand extends VdbShellCommand {
         final VdbImport[] imports = vdb.getImports( uow );
 
         if ( imports.length == 0 ) {
-            print( MESSAGE_INDENT, getMessage(NO_IMPORTS) );
+            print( MESSAGE_INDENT, getMessage(NO_IMPORTS, vdb.getName(uow)) );
         } else {
-            for ( final VdbImport vdbImport : imports ) {
-                final String name = vdbImport.getName( uow );
-                print( MESSAGE_INDENT, getWorkspaceMessage(PRINT_RELATIONAL_OBJECT, name, getDisplayType( vdbImport ) ) );
+            print( MESSAGE_INDENT, getMessage(IMPORTS_HEADER, vdb.getName(uow)) );
+            List<String> names = new ArrayList<String>(imports.length);
+            for ( final VdbImport theImport : imports ) {
+                names.add(theImport.getName(uow));
             }
+            
+            PrintUtils.printList(getWorkspaceStatus(), names, getMessage(IMPORT_NAME));
         }
+        print();
 
         return true;
     }

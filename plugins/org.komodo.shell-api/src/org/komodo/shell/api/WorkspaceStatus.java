@@ -218,15 +218,15 @@ public interface WorkspaceStatus extends StringConstants {
     /**
      * @return current server default
      */
-    String getServer();
+    KomodoObject getServer() throws KException;
 
     /**
      * Set the current server default
      *
-     * @param serverName
+     * @param serverObj
      * @throws Exception 
      */
-    void setServer(String serverName) throws Exception;
+    void setServer(KomodoObject serverObj) throws KException;
 
 	/**
 	 * Add a WorkspaceContext Event Handler
@@ -320,5 +320,13 @@ public interface WorkspaceStatus extends StringConstants {
      * @throws KException the exception
      */
     boolean isRoot ( final KomodoObject kObj ) throws KException;
+
+    /**
+     * Determine if the supplied KomodoObject is a server type
+     * @param kObj the KomodoObject
+     * @return 'true' if server type, 'false' if not
+     * @throws KException the exception
+     */
+    boolean isServer ( final KomodoObject kObj ) throws KException;
     
 }

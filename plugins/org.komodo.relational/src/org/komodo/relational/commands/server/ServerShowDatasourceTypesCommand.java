@@ -7,29 +7,28 @@
  */
 package org.komodo.relational.commands.server;
 
-import static org.komodo.relational.commands.server.ServerCommandMessages.ServerShowVdbsCommand.InfoMessage;
-import static org.komodo.relational.commands.server.ServerCommandMessages.ServerShowVdbsCommand.ListHeader;
+import static org.komodo.relational.commands.server.ServerCommandMessages.ServerShowDatasourceTypesCommand.InfoMessage;
+import static org.komodo.relational.commands.server.ServerCommandMessages.ServerShowDatasourceTypesCommand.ListHeader;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.PrintUtils;
-import org.komodo.spi.runtime.TeiidVdb;
 
 /**
  * A shell command to show all vdbs on a server
  */
-public final class ServerShowVdbsCommand extends ServerShellCommand {
+public final class ServerShowDatasourceTypesCommand extends ServerShellCommand {
 
-    static final String NAME = "server-show-vdbs"; //$NON-NLS-1$
+    static final String NAME = "server-show-datasource-types"; //$NON-NLS-1$
 
     /**
      * @param status
      *        the shell's workspace status (cannot be <code>null</code>)
      */
-    public ServerShowVdbsCommand( final WorkspaceStatus status ) {
+    public ServerShowDatasourceTypesCommand( final WorkspaceStatus status ) {
         super( NAME, true, status );
     }
 
@@ -50,10 +49,9 @@ public final class ServerShowVdbsCommand extends ServerShellCommand {
 
         Teiid teiid = getDefaultServer();
         List<String> objNames = new ArrayList<String>();
-        Collection<TeiidVdb> vdbs = teiid.getTeiidInstance(getTransaction()).getVdbs();
-        for(TeiidVdb vdb : vdbs) {
-            String name = vdb.getName();
-            objNames.add(name);
+        Set<String> types = teiid.getTeiidInstance(getTransaction()).getDataSourceTypeNames();
+        for(String type : types) {
+            objNames.add(type);
         }
         PrintUtils.printList(getWorkspaceStatus(), objNames, getMessage(ListHeader));
         print();

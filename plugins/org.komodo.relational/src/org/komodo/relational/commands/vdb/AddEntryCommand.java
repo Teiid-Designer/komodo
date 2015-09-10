@@ -7,8 +7,10 @@
  */
 package org.komodo.relational.commands.vdb;
 
+import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_ENTRY_NAME;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_ENTRY_PATH;
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.AddEntryCommand.ENTRY_ADDED;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.shell.api.WorkspaceStatus;
 
@@ -40,6 +42,9 @@ public final class AddEntryCommand extends VdbShellCommand {
         final Vdb vdb = getVdb();
         vdb.addEntry( getTransaction(), entryName, entryPath );
 
+        // Print success message
+        print(MESSAGE_INDENT, getMessage(ENTRY_ADDED,entryName));
+        
         return true;
     }
 

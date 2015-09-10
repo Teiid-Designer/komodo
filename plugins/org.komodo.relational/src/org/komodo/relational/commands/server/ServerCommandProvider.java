@@ -39,8 +39,12 @@ public class ServerCommandProvider implements ShellCommandProvider {
         final Map< String, Class< ? extends ShellCommand >> result = new HashMap<>();
 
         result.put( ServerConnectCommand.NAME, ServerConnectCommand.class );
+        result.put( ServerDisconnectCommand.NAME, ServerDisconnectCommand.class );
         result.put( ServerSetCommand.NAME, ServerSetCommand.class );
         result.put( ServerShowVdbsCommand.NAME, ServerShowVdbsCommand.class );
+        result.put( ServerShowTranslatorsCommand.NAME, ServerShowTranslatorsCommand.class );
+        result.put( ServerShowDatasourcesCommand.NAME, ServerShowDatasourcesCommand.class );
+        result.put( ServerShowDatasourceTypesCommand.NAME, ServerShowDatasourceTypesCommand.class );
 
         return result;
     }
@@ -57,6 +61,17 @@ public class ServerCommandProvider implements ShellCommandProvider {
     public boolean isRoot ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
         if(TeiidImpl.RESOLVER.resolvable(uow, kObj)) {
             return false;
+        }
+        return false;
+    }
+    
+    /**
+     * @throws KException the exception 
+     */
+    @Override
+    public boolean isServer ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
+        if(TeiidImpl.RESOLVER.resolvable(uow, kObj)) {
+            return true;
         }
         return false;
     }

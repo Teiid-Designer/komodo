@@ -10,10 +10,10 @@ package org.komodo.relational.commands.server;
 import static org.komodo.relational.commands.server.ServerCommandMessages.ServerSetCommand.MissingServerNameArg;
 import static org.komodo.relational.commands.server.ServerCommandMessages.ServerSetCommand.ServerDoesNotExist;
 import static org.komodo.relational.commands.server.ServerCommandMessages.ServerSetCommand.ServerSetSuccess;
-import java.util.List;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.spi.repository.KomodoObject;
 
 /**
  * A shell command to set the default server name
@@ -39,14 +39,31 @@ public final class ServerSetCommand extends ServerShellCommand {
     protected boolean doExecute() throws Exception {
         String serverName = requiredArgument(0, getMessage(MissingServerNameArg));
 
-        // Validate that the server object exists
-        if(!hasServer(serverName)) {
+        // Validate that server object with this name exists in the workspace
+        Teiid wsTeiid = getWorkspaceTeiid(serverName);
+        if(wsTeiid==null) {
             print(CompletionConstants.MESSAGE_INDENT, getMessage(ServerDoesNotExist,serverName));
             return false;
         }
         
-        // Set the server name
-        getWorkspaceStatus().setServer(serverName);
+        // Check for current server
+        KomodoObject currentServer = getWorkspaceStatus().getServer();
+        if(currentServer!=null) {
+            // Request set to current server, no need to reset
+            if(serverName.equals(currentServer.getName(getTransaction()))) {
+                print(CompletionConstants.MESSAGE_INDENT, getMessage(ServerSetSuccess,serverName));
+                return true;
+            // Has different server currently.  Disconnect it.
+            } else {
+                if(hasConnectedDefaultTeiid()) {
+                    getCommand(ServerDisconnectCommand.NAME).execute();
+                }
+            }
+        }
+        
+        // Set the server name on workspace status
+        getWorkspaceStatus().setServer(wsTeiid);
+
         print(CompletionConstants.MESSAGE_INDENT, getMessage(ServerSetSuccess,serverName));
         return true;
     }
@@ -59,23 +76,6 @@ public final class ServerSetCommand extends ServerShellCommand {
     @Override
     public final boolean isValidForCurrentContext() {
         return true;
-    }
-    
-    // Determine if a server with the supplied name exists
-    private boolean hasServer(String serverName) throws Exception {
-        List<Teiid> teiids = getWorkspaceManager().findTeiids(getTransaction());
-
-        if (teiids == null || teiids.size() == 0) {
-            return false;
-        }
-
-        for (Teiid theTeiid : teiids) {
-            String teiidName = theTeiid.getName(getTransaction());
-            if (serverName.equals(theTeiid.getId(getTransaction())) || serverName.equals(teiidName)) {
-                return true;
-            }
-        }
-        return false;
     }
     
 }

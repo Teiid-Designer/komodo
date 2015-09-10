@@ -23,7 +23,7 @@ import org.komodo.spi.repository.PropertyDescriptor;
 import org.komodo.utils.ArgCheck;
 
 /**
- *  Utilities for formatted printing
+ *  Utilities for working with KomodoObject
  */
 public class KomodoObjectUtils implements StringConstants {
 

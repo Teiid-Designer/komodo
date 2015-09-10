@@ -7,12 +7,16 @@
  */
 package org.komodo.relational.commands.vdb;
 
-import static org.komodo.relational.commands.WorkspaceCommandMessages.General.PRINT_RELATIONAL_OBJECT;
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MODEL_NAME;
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowModelsCommand.MODELS_HEADER;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowModelsCommand.NO_MODELS;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+import java.util.ArrayList;
+import java.util.List;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.shell.util.PrintUtils;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
@@ -42,13 +46,17 @@ public final class ShowModelsCommand extends VdbShellCommand {
         final Model[] models = vdb.getModels( uow );
 
         if ( models.length == 0 ) {
-            print( MESSAGE_INDENT, getMessage(NO_MODELS) );
+            print( MESSAGE_INDENT, getMessage(NO_MODELS, vdb.getName(uow)) );
         } else {
+            print( MESSAGE_INDENT, getMessage(MODELS_HEADER, vdb.getName(uow)) );
+            List<String> names = new ArrayList<String>(models.length);
             for ( final Model model : models ) {
-                final String name = model.getName( uow );
-                print( MESSAGE_INDENT, getWorkspaceMessage(PRINT_RELATIONAL_OBJECT, name, getDisplayType( model ) ) );
+                names.add(model.getName(uow));
             }
+            
+            PrintUtils.printList(getWorkspaceStatus(), names, getMessage(MODEL_NAME));
         }
+        print();
 
         return true;
     }

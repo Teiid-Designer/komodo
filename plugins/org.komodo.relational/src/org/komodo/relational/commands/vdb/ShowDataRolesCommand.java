@@ -7,12 +7,16 @@
  */
 package org.komodo.relational.commands.vdb;
 
-import static org.komodo.relational.commands.WorkspaceCommandMessages.General.PRINT_RELATIONAL_OBJECT;
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.DATA_ROLE_NAME;
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowDataRolesCommand.DATA_ROLES_HEADER;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowDataRolesCommand.NO_DATA_ROLES;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+import java.util.ArrayList;
+import java.util.List;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.shell.util.PrintUtils;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
@@ -42,13 +46,17 @@ public final class ShowDataRolesCommand extends VdbShellCommand {
         final DataRole[] dataRoles = vdb.getDataRoles( uow );
 
         if ( dataRoles.length == 0 ) {
-            print( MESSAGE_INDENT, getMessage(NO_DATA_ROLES) );
+            print( MESSAGE_INDENT, getMessage(NO_DATA_ROLES, vdb.getName(uow)) );
         } else {
+            print( MESSAGE_INDENT, getMessage(DATA_ROLES_HEADER, vdb.getName(uow)) );
+            List<String> names = new ArrayList<String>(dataRoles.length);
             for ( final DataRole role : dataRoles ) {
-                final String name = role.getName( uow );
-                print( MESSAGE_INDENT, getWorkspaceMessage(PRINT_RELATIONAL_OBJECT, name, getDisplayType( role ) ) );
+                names.add(role.getName(uow));
             }
+            
+            PrintUtils.printList(getWorkspaceStatus(), names, getMessage(DATA_ROLE_NAME));
         }
+        print();
 
         return true;
     }
