@@ -1,5 +1,5 @@
 /*
- * JBoss, Home of Professional Open Source.
+* JBoss, Home of Professional Open Source.
 *
 * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
 *
@@ -7,25 +7,25 @@
 */
 package org.komodo.rest.json;
 
+import java.util.Arrays;
 import java.util.Objects;
 import org.komodo.utils.ArgCheck;
-import com.google.gson.annotations.SerializedName;
+import org.komodo.utils.StringUtils;
 
 /**
  * A VDB that can be used by GSON to build a JSON document representation.
  */
 public final class RestVdb extends KomodoRestEntity {
 
-    @SerializedName( "id" )
     private String name;
     private String description;
     private String originalFilePath;
+    private RestVdbDataRole[] dataRoles = RestVdbDataRole.NO_DATA_ROLES;
+    private RestVdbEntry[] entries = RestVdbEntry.NO_ENTRIES;
+    private RestVdbImport[] imports = RestVdbImport.NO_IMPORTS;
+    private RestVdbTranslator[] translators = RestVdbTranslator.NO_TRANSLATORS;
 
-    // data roles
-    // *entries
-    // *imports
     // models
-    // *translators
 
     /**
      * Constructor for use <strong>only</strong> when deserializing.
@@ -86,7 +86,34 @@ public final class RestVdb extends KomodoRestEntity {
             return false;
         }
 
+        // data roles
+        if ( !Arrays.deepEquals( getDataRoles(), that.getDataRoles() ) ) {
+            return false;
+        }
+
+        // entries
+        if ( !Arrays.deepEquals( getEntries(), that.getEntries() ) ) {
+            return false;
+        }
+
+        // imports
+        if ( !Arrays.deepEquals( getImports(), that.getImports() ) ) {
+            return false;
+        }
+
+        // translators
+        if ( !Arrays.deepEquals( getTranslators(), that.getTranslators() ) ) {
+            return false;
+        }
+
         return true;
+    }
+
+    /**
+     * @return the data roles (never <code>null</code> but can be empty)
+     */
+    public RestVdbDataRole[] getDataRoles() {
+        return this.dataRoles;
     }
 
     /**
@@ -94,6 +121,20 @@ public final class RestVdb extends KomodoRestEntity {
      */
     public String getDescription() {
         return this.description;
+    }
+
+    /**
+     * @return the entries (never <code>null</code> but can be empty)
+     */
+    public RestVdbEntry[] getEntries() {
+        return this.entries;
+    }
+
+    /**
+     * @return the VDB imports (never <code>null</code> but can be empty)
+     */
+    public RestVdbImport[] getImports() {
+        return this.imports;
     }
 
     /**
@@ -111,13 +152,35 @@ public final class RestVdb extends KomodoRestEntity {
     }
 
     /**
+     * @return the translators (never <code>null</code> but can be empty)
+     */
+    public RestVdbTranslator[] getTranslators() {
+        return this.translators;
+    }
+
+    /**
      * {@inheritDoc}
      *
      * @see java.lang.Object#hashCode()
      */
     @Override
     public int hashCode() {
-        return Objects.hash( this.name, this.description, this.originalFilePath, super.hashCode() );
+        return Objects.hash( this.name,
+                             this.description,
+                             this.originalFilePath,
+                             Arrays.deepHashCode( this.dataRoles ),
+                             Arrays.deepHashCode( this.entries ),
+                             Arrays.deepHashCode( this.imports ),
+                             Arrays.deepHashCode( this.translators ),
+                             super.hashCode() );
+    }
+
+    /**
+     * @param newDataRoles
+     *        the new data roles (can be <code>null</code>)
+     */
+    public void setDataRoles( final RestVdbDataRole[] newDataRoles ) {
+        this.dataRoles = ( ( newDataRoles == null ) ? RestVdbDataRole.NO_DATA_ROLES : newDataRoles );
     }
 
     /**
@@ -126,6 +189,22 @@ public final class RestVdb extends KomodoRestEntity {
      */
     public void setDescription( final String newDescription ) {
         this.description = newDescription;
+    }
+
+    /**
+     * @param newEntries
+     *        the new entries (can be <code>null</code>)
+     */
+    public void setEntries( final RestVdbEntry[] newEntries ) {
+        this.entries = ( ( newEntries == null ) ? RestVdbEntry.NO_ENTRIES : newEntries );
+    }
+
+    /**
+     * @param newImports
+     *        the new VDB imports (can be <code>null</code>)
+     */
+    public void setImports( final RestVdbImport[] newImports ) {
+        this.imports = ( ( newImports == null ) ? RestVdbImport.NO_IMPORTS : newImports );
     }
 
     /**
@@ -142,6 +221,116 @@ public final class RestVdb extends KomodoRestEntity {
      */
     public void setOriginalFilePath( final String newOriginalFilePath ) {
         this.originalFilePath = newOriginalFilePath;
+    }
+
+    /**
+     * @param newTranslators
+     *        the new translators (can be <code>null</code>)
+     */
+    public void setTranslators( final RestVdbTranslator[] newTranslators ) {
+        this.translators = ( ( newTranslators == null ) ? RestVdbTranslator.NO_TRANSLATORS : newTranslators );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder();
+        builder.append( "VDB name = " ).append( this.name ); //$NON-NLS-1$
+        builder.append( ", " ); //$NON-NLS-1$
+
+        { // data roles
+            final RestVdbDataRole[] dataRoles = getDataRoles();
+            builder.append( "data roles = [" ); //$NON-NLS-1$
+
+            if ( dataRoles.length != 0 ) {
+                boolean firstTime = true;
+
+                for ( final RestVdbDataRole dataRole : dataRoles ) {
+                    if ( firstTime ) {
+                        firstTime = false;
+                    } else {
+                        builder.append( ", " ); //$NON-NLS-1$
+                    }
+
+                    final String name = dataRole.getName();
+                    builder.append( StringUtils.isBlank( name ) ? "<no name>" : name ); //$NON-NLS-1$
+                }
+            }
+
+            builder.append( "]" ); //$NON-NLS-1$
+        }
+
+        { // entries
+            final RestVdbEntry[] entries = getEntries();
+            builder.append( "entries = [" ); //$NON-NLS-1$
+
+            if ( entries.length != 0 ) {
+                boolean firstTime = true;
+
+                for ( final RestVdbEntry entry : entries ) {
+                    if ( firstTime ) {
+                        firstTime = false;
+                    } else {
+                        builder.append( ", " ); //$NON-NLS-1$
+                    }
+
+                    final String name = entry.getName();
+                    builder.append( StringUtils.isBlank( name ) ? "<no name>" : name ); //$NON-NLS-1$
+                }
+            }
+
+            builder.append( "]" ); //$NON-NLS-1$
+        }
+
+        { // VDB imports
+            final RestVdbImport[] vdbImports = getImports();
+            builder.append( "imports = [" ); //$NON-NLS-1$
+
+            if ( this.imports.length != 0 ) {
+                boolean firstTime = true;
+
+                for ( final RestVdbImport vdbImport : vdbImports ) {
+                    if ( firstTime ) {
+                        firstTime = false;
+                    } else {
+                        builder.append( ", " ); //$NON-NLS-1$
+                    }
+
+                    final String name = vdbImport.getName();
+                    builder.append( StringUtils.isBlank( name ) ? "<no name>" : name ); //$NON-NLS-1$
+                }
+            }
+
+            builder.append( "]" ); //$NON-NLS-1$
+        }
+
+        { // translators
+            final RestVdbTranslator[] translators = getTranslators();
+            builder.append( "translators = [" ); //$NON-NLS-1$
+
+            if ( translators.length != 0 ) {
+                boolean firstTime = true;
+
+                for ( final RestVdbTranslator translator : translators ) {
+                    if ( firstTime ) {
+                        firstTime = false;
+                    } else {
+                        builder.append( ", " ); //$NON-NLS-1$
+                    }
+
+                    final String name = translator.getName();
+                    builder.append( StringUtils.isBlank( name ) ? "<no name>" : name ); //$NON-NLS-1$
+                }
+            }
+
+            builder.append( "]" ); //$NON-NLS-1$
+        }
+
+        return builder.toString();
     }
 
 }

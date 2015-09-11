@@ -1,5 +1,5 @@
 /*
- * JBoss, Home of Professional Open Source.
+* JBoss, Home of Professional Open Source.
 *
 * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
 *
@@ -8,7 +8,8 @@
 package org.komodo.rest.json;
 
 import java.util.Arrays;
-import com.google.common.base.Objects;
+import java.util.Objects;
+import org.komodo.utils.StringUtils;
 
 /**
  * Represents a VDB directory and can be used by GSON to build a JSON document representation.
@@ -93,7 +94,7 @@ public final class RestVdbDirectory extends KomodoRestEntity {
      */
     @Override
     public int hashCode() {
-        return Objects.hashCode( Arrays.deepHashCode( this.vdbs ), super.hashCode() );
+        return Objects.hash( Arrays.deepHashCode( this.vdbs ), super.hashCode() );
     }
 
     /**
@@ -102,6 +103,36 @@ public final class RestVdbDirectory extends KomodoRestEntity {
      */
     public void setVdbs( final RestVdbDescriptor[] newVdbs ) {
         this.vdbs = ( ( newVdbs == null ) ? RestVdbDescriptor.NO_DESCRIPTORS : newVdbs );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder();
+        final RestVdbDescriptor[] descriptors = getDescriptors();
+        builder.append( "VDB directory: [" ).append( this.vdbs.length ).append( " VDB descriptors" ); //$NON-NLS-1$ //$NON-NLS-2$
+
+        if ( descriptors.length != 0 ) {
+            boolean firstTime = true;
+
+            for ( final RestVdbDescriptor vdb : descriptors ) {
+                if ( firstTime ) {
+                    firstTime = false;
+                } else {
+                    builder.append( ", " ); //$NON-NLS-1$
+                }
+
+                final String name = vdb.getName();
+                builder.append( StringUtils.isBlank( name ) ? "<no name>" : name ); //$NON-NLS-1$
+            }
+        }
+
+        builder.append( "]" ); //$NON-NLS-1$
+        return builder.toString();
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * JBoss, Home of Professional Open Source.
+* JBoss, Home of Professional Open Source.
 *
 * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
 *
@@ -7,16 +7,62 @@
 */
 package org.komodo.rest.json;
 
-import static org.komodo.rest.json.JsonConstants.JSON_BUILDER;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import org.komodo.utils.ArgCheck;
 
 /**
  * Indicates the objects has a JSON representation.
  */
 public abstract class KomodoRestEntity {
+
+    /**
+     * A {@link KomodoRestEntity} that indicates the resource was not found.
+     */
+    public static class ResourceNotFound extends KomodoRestEntity {
+
+        private final String operationName;
+        private final String resourceName;
+
+        /**
+         * @param resourceName
+         *        the name of the resource that was not found (cannot be empty)
+         * @param operationName
+         *        the operation that was executed (cannot be empty)
+         */
+        public ResourceNotFound( final String resourceName,
+                                 final String operationName ) {
+            ArgCheck.isNotEmpty( resourceName, "resourceName" ); //$NON-NLS-1$
+            ArgCheck.isNotEmpty( operationName, "operationName" ); //$NON-NLS-1$
+
+            this.resourceName = resourceName;
+            this.operationName = operationName;
+        }
+
+        /**
+         * @return the operation name (never empty)
+         */
+        public String getOperationName() {
+            return this.operationName;
+        }
+
+        /**
+         * @return the resource name (never empty)
+         */
+        public String getResourceName() {
+            return this.resourceName;
+        }
+
+    }
+
+    /**
+     * Indicates no content is being returned.
+     */
+    public static final KomodoRestEntity NO_CONTENT = new KomodoRestEntity() {
+        // nothing to do
+    };
 
     protected final Map< String, String > properties = new HashMap< >();
     protected RestLink[] links = RestLink.NO_LINKS;
@@ -82,13 +128,6 @@ public abstract class KomodoRestEntity {
         if ( ( newProperties != null ) && !newProperties.isEmpty() ) {
             this.properties.putAll( newProperties );
         }
-    }
-
-    /**
-     * @return a JSON string representation (never empty)
-     */
-    public String toJson() {
-        return JSON_BUILDER.toJson( this );
     }
 
 }

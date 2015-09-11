@@ -1,5 +1,5 @@
 /*
- * JBoss, Home of Professional Open Source.
+* JBoss, Home of Professional Open Source.
 *
 * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
 *
@@ -283,6 +283,21 @@ public final class RestLink {
      */
     public void setRel( final LinkType newRel ) {
         this.rel = newRel;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder();
+        builder.append( "rel = " ).append( this.rel ); //$NON-NLS-1$
+        builder.append( ", " ); //$NON-NLS-1$
+        builder.append( "href = " ).append( this.href ); //$NON-NLS-1$
+
+        return builder.toString();
     }
 
 }

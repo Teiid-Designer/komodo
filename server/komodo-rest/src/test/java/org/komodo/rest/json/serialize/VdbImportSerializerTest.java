@@ -1,5 +1,5 @@
 /*
- * JBoss, Home of Professional Open Source.
+* JBoss, Home of Professional Open Source.
 *
 * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
 *
@@ -9,7 +9,6 @@ package org.komodo.rest.json.serialize;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static org.komodo.rest.json.JsonConstants.JSON_BUILDER;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.vdb.Vdb;
@@ -34,12 +33,12 @@ public final class VdbImportSerializerTest {
 
     @Test
     public void shouldExport() {
-        assertThat( JSON_BUILDER.toJson( this.vdbImport ), is( JSON ) );
+        assertThat( KomodoJsonMarshaller.marshall( this.vdbImport ), is( JSON ) );
     }
 
     @Test
     public void shouldImport() {
-        final RestVdbImport vdbImport = JSON_BUILDER.fromJson( JSON, RestVdbImport.class );
+        final RestVdbImport vdbImport = KomodoJsonMarshaller.unmarshall( JSON, RestVdbImport.class );
         assertThat( vdbImport.isImportDataPolicies(), is( IMPORT_DATA_POLICIES ) );
         assertThat( vdbImport.getName(), is( NAME ) );
         assertThat( vdbImport.getVersion(), is( VERSION ) );
@@ -50,7 +49,7 @@ public final class VdbImportSerializerTest {
     @Test
     public void shouldImportWhenImportDataPoliciesIsMissing() {
         final String malformed = "{\"id\":\"MyImport\",\"version\":2}";
-        final RestVdbImport vdbImport = JSON_BUILDER.fromJson( malformed, RestVdbImport.class );
+        final RestVdbImport vdbImport = KomodoJsonMarshaller.unmarshall( malformed, RestVdbImport.class );
         assertThat( vdbImport.isImportDataPolicies(), is( VdbImport.DEFAULT_IMPORT_DATA_POLICIES ) );
         assertThat( vdbImport.getName(), is( NAME ) );
         assertThat( vdbImport.getVersion(), is( VERSION ) );
@@ -61,7 +60,7 @@ public final class VdbImportSerializerTest {
     @Test
     public void shouldImportWhenVersionIsMissing() {
         final String malformed = "{\"id\":\"MyImport\",\"importDataPolicies\":true}";
-        final RestVdbImport vdbImport = JSON_BUILDER.fromJson( malformed, RestVdbImport.class );
+        final RestVdbImport vdbImport = KomodoJsonMarshaller.unmarshall( malformed, RestVdbImport.class );
         assertThat( vdbImport.isImportDataPolicies(), is( IMPORT_DATA_POLICIES ) );
         assertThat( vdbImport.getName(), is( NAME ) );
         assertThat( vdbImport.getVersion(), is( Vdb.DEFAULT_VERSION ) );
@@ -74,13 +73,13 @@ public final class VdbImportSerializerTest {
         final RestVdbImport incomplete = new RestVdbImport();
         incomplete.setImportDataPolicies( IMPORT_DATA_POLICIES );
         incomplete.setVersion( VERSION );
-        JSON_BUILDER.toJson( incomplete );
+        KomodoJsonMarshaller.marshall( incomplete );
     }
 
     @Test( expected = Exception.class )
     public void shouldNotImportWhenIdIsMissing() {
         final String malformed = "{\"version\":5,\"importDataPolicies\":false}";
-        JSON_BUILDER.fromJson( malformed, RestVdbImport.class );
+        KomodoJsonMarshaller.unmarshall( malformed, RestVdbImport.class );
     }
 
 }

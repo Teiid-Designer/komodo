@@ -1,5 +1,5 @@
 /*
- * JBoss, Home of Professional Open Source.
+* JBoss, Home of Professional Open Source.
 *
 * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
 *
@@ -9,7 +9,6 @@ package org.komodo.rest.json.serialize;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static org.komodo.rest.json.JsonConstants.JSON_BUILDER;
 import java.net.URI;
 import javax.ws.rs.core.UriBuilder;
 import org.junit.Test;
@@ -28,12 +27,12 @@ public final class LinkSerializerTest {
     @Test
     public void shouldExportJson() {
         final RestLink link = new RestLink( LINK_TYPE, URI, METHOD_TYPE );
-        assertThat( JSON_BUILDER.toJson( link ), is( JSON ) );
+        assertThat( KomodoJsonMarshaller.BUILDER.toJson( link ), is( JSON ) );
     }
 
     @Test
     public void shouldImportJson() {
-        final RestLink link = JSON_BUILDER.fromJson( JSON, RestLink.class );
+        final RestLink link = KomodoJsonMarshaller.BUILDER.fromJson( JSON, RestLink.class );
         assertThat( link.getRel(), is( LINK_TYPE ) );
         assertThat( link.getHref(), is( URI ) );
         assertThat( link.getMethod(), is( METHOD_TYPE ) );

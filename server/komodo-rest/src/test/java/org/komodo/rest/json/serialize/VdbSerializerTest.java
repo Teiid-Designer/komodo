@@ -1,5 +1,5 @@
 /*
- * JBoss, Home of Professional Open Source.
+* JBoss, Home of Professional Open Source.
 *
 * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
 *
@@ -9,7 +9,6 @@ package org.komodo.rest.json.serialize;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static org.komodo.rest.json.JsonConstants.JSON_BUILDER;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.rest.json.RestVdb;
@@ -33,12 +32,12 @@ public final class VdbSerializerTest {
 
     @Test
     public void shouldExportJson() {
-        assertThat( JSON_BUILDER.toJson( this.vdb ), is( JSON ) );
+        assertThat( KomodoJsonMarshaller.marshall( this.vdb ), is( JSON ) );
     }
 
     @Test
     public void shouldImportJson() {
-        final RestVdb descriptor = JSON_BUILDER.fromJson( JSON, RestVdb.class );
+        final RestVdb descriptor = KomodoJsonMarshaller.unmarshall( JSON, RestVdb.class );
         assertThat( descriptor.getName(), is( VDB_NAME ) );
         assertThat( descriptor.getDescription(), is( DESCRIPTION ) );
         assertThat( descriptor.getOriginalFilePath(), is( ORIGINAL_FILE ) );
@@ -49,13 +48,13 @@ public final class VdbSerializerTest {
     @Test( expected = Exception.class )
     public void shouldNotExportJsonWhenNameIsMissing() {
         final RestVdb descriptor = new RestVdb();
-        JSON_BUILDER.toJson( descriptor );
+        KomodoJsonMarshaller.marshall( descriptor );
     }
 
     @Test( expected = Exception.class )
     public void shouldNotImportJsonWhenIdIsMissing() {
         final String malformed = "{\"description\":\"my description\",\"links\":[{\"rel\":\"self\",\"href\":\"http://localhost:8080/v1/workspace/vdbs/MyVdb\",\"method\":\"GET\"},{\"rel\":\"parent\",\"href\":\"http://localhost:8080/v1/workspace/vdbs\",\"method\":\"GET\"},{\"rel\":\"manifest\",\"href\":\"http://localhost:8080/v1/workspace/vdbs/MyVdb/manifest\",\"method\":\"GET\"}]}";
-        JSON_BUILDER.fromJson( malformed, RestVdb.class );
+        KomodoJsonMarshaller.unmarshall( malformed, RestVdb.class );
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * JBoss, Home of Professional Open Source.
+* JBoss, Home of Professional Open Source.
 *
 * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
 *
@@ -10,7 +10,6 @@ package org.komodo.rest;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.komodo.rest.json.JsonConstants.JSON_BUILDER;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -35,6 +34,7 @@ import org.komodo.rest.json.RestLink.LinkType;
 import org.komodo.rest.json.RestVdb;
 import org.komodo.rest.json.RestVdbDescriptor;
 import org.komodo.rest.json.RestVdbDirectory;
+import org.komodo.rest.json.serialize.KomodoJsonMarshaller;
 import org.komodo.spi.constants.SystemConstants;
 
 @SuppressWarnings( { "javadoc", "nls" } )
@@ -101,7 +101,7 @@ public final class KomodoVdbServiceTest {
             restVdb.setOriginalFilePath( extPath );
             result[ i ] = restVdb;
 
-            final String input = restVdb.toJson();
+            final String input = KomodoJsonMarshaller.marshall( restVdb );
             this.response = request( _uriBuilder.getVdbsUri() ).post( Entity.json( input ) );
             assertThat( this.response.getStatus(), is( Status.OK.getStatusCode() ) );
 
@@ -109,7 +109,7 @@ public final class KomodoVdbServiceTest {
             final String entity = this.response.readEntity( String.class );
             assertThat( entity, is( notNullValue() ) );
 
-            final RestVdbDescriptor descriptor = JSON_BUILDER.fromJson( entity, RestVdbDescriptor.class );
+            final RestVdbDescriptor descriptor = KomodoJsonMarshaller.unmarshall( entity, RestVdbDescriptor.class );
             assertThat( descriptor.getName(), is( restVdb.getName() ) );
             assertThat( descriptor.getDescription(), is( restVdb.getDescription() ) );
             assertThat( descriptor.getLinks().length, is( 4 ) );
@@ -129,7 +129,7 @@ public final class KomodoVdbServiceTest {
     public void shouldDeleteVdb() throws Exception {
         final RestVdb restVdb = createVdbs( 1 )[ 0 ];
         this.response = request( _uriBuilder.buildVdbUri( LinkType.DELETE, restVdb.getName() ) ).delete();
-        assertThat( this.response.getStatus(), is( Status.OK.getStatusCode() ) );
+        assertThat( this.response.getStatus(), is( Status.NO_CONTENT.getStatusCode() ) );
     }
 
     @Test
@@ -142,10 +142,10 @@ public final class KomodoVdbServiceTest {
         assertThat( entity, is( notNullValue() ) );
 
         // make sure the VDB descriptor JSON document is returned
-        final RestVdbDescriptor descriptor = JSON_BUILDER.fromJson( entity, RestVdbDescriptor.class );
+        final RestVdb descriptor = KomodoJsonMarshaller.unmarshall( entity, RestVdb.class );
         assertThat( descriptor.getName(), is( restVdb.getName() ) );
         assertThat( descriptor.getDescription(), is( restVdb.getDescription() ) );
-        assertThat( descriptor.getLinks().length, is( 4 ) );
+        assertThat( descriptor.getLinks().length, is( 0 ) );
     }
 
     @Test
@@ -159,7 +159,7 @@ public final class KomodoVdbServiceTest {
         final String entity = this.response.readEntity( String.class );
         assertThat( entity, is( notNullValue() ) );
 
-        final RestVdbDirectory vdbDir = JSON_BUILDER.fromJson( entity, RestVdbDirectory.class );
+        final RestVdbDirectory vdbDir = KomodoJsonMarshaller.unmarshall( entity, RestVdbDirectory.class );
         assertThat( vdbDir.getDescriptors().length, is( 1 ) );
     }
 
@@ -174,7 +174,7 @@ public final class KomodoVdbServiceTest {
         final String entity = this.response.readEntity( String.class );
         assertThat( entity, is( notNullValue() ) );
 
-        final RestVdbDirectory vdbDir = JSON_BUILDER.fromJson( entity, RestVdbDirectory.class );
+        final RestVdbDirectory vdbDir = KomodoJsonMarshaller.unmarshall( entity, RestVdbDirectory.class );
         assertThat( vdbDir.getDescriptors().length, is( resultSize ) );
     }
 
@@ -190,7 +190,7 @@ public final class KomodoVdbServiceTest {
         final String entity = this.response.readEntity( String.class );
         assertThat( entity, is( notNullValue() ) );
 
-        final RestVdbDirectory vdbDir = JSON_BUILDER.fromJson( entity, RestVdbDirectory.class );
+        final RestVdbDirectory vdbDir = KomodoJsonMarshaller.unmarshall( entity, RestVdbDirectory.class );
         assertThat( vdbDir.getDescriptors().length, is( numToCreate - start ) );
 
         // check content
@@ -212,8 +212,7 @@ public final class KomodoVdbServiceTest {
     @Test
     public void shouldReturnEmptyResponseWhenNoVdbsInWorkspace() {
         this.response = request( _uriBuilder.getVdbsUri() ).get();
-        final String entity = this.response.readEntity( String.class );
-        assertThat( entity, is( "{\"vdbs\":[]}" ) );
+        assertThat( this.response.getStatus(), is( Status.NO_CONTENT.getStatusCode() ) );
     }
 
 }

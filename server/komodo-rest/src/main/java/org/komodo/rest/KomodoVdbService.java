@@ -1,5 +1,5 @@
 /*
- * JBoss, Home of Professional Open Source.
+* JBoss, Home of Professional Open Source.
 *
 * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
 *
@@ -18,7 +18,7 @@ import static org.komodo.rest.Messages.Error.VDB_SERVICE_VDB_NAME_ERROR;
 import static org.komodo.rest.Messages.General.DELETE_OPERATION_NAME;
 import static org.komodo.rest.Messages.General.GET_OPERATION_NAME;
 import static org.komodo.rest.Messages.General.NO_VALUE;
-import static org.komodo.rest.json.JsonConstants.JSON_BUILDER;
+import static org.komodo.rest.json.KomodoRestEntity.NO_CONTENT;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,10 +41,13 @@ import org.komodo.core.KEngine;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.ObjectImpl;
+import org.komodo.rest.json.KomodoRestEntity;
+import org.komodo.rest.json.KomodoRestEntity.ResourceNotFound;
 import org.komodo.rest.json.RestLink.LinkType;
 import org.komodo.rest.json.RestVdb;
 import org.komodo.rest.json.RestVdbDescriptor;
 import org.komodo.rest.json.RestVdbDirectory;
+import org.komodo.rest.json.serialize.KomodoJsonMarshaller;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -129,7 +132,7 @@ public final class KomodoVdbService extends KomodoService {
             throw new KomodoRestException( Messages.getString( VDB_SERVICE_MISSING_VDB ) );
         }
 
-        final RestVdb restVdb = JSON_BUILDER.fromJson( vdbJson, RestVdb.class );
+        final RestVdb restVdb = KomodoJsonMarshaller.unmarshall( vdbJson, RestVdb.class );
 
         if ( StringUtils.isBlank( restVdb.getName() ) ) {
             throw new KomodoRestException( Messages.getString( VDB_SERVICE_MISSING_VDB_NAME ) );
@@ -201,7 +204,7 @@ public final class KomodoVdbService extends KomodoService {
             throw new KomodoRestException( Messages.getString( VDB_SERVICE_MISSING_VDB ) );
         }
 
-        final RestVdb restVdb = JSON_BUILDER.fromJson( vdbJson, RestVdb.class );
+        final RestVdb restVdb = KomodoJsonMarshaller.unmarshall( vdbJson, RestVdb.class );
 
         if ( StringUtils.isBlank( restVdb.getName() ) ) {
             throw new KomodoRestException( Messages.getString( VDB_SERVICE_MISSING_VDB_NAME ) );
@@ -279,16 +282,16 @@ public final class KomodoVdbService extends KomodoService {
             if ( this.wsMgr.hasChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE ) ) {
                 final KomodoObject kobject = this.wsMgr.getChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
                 final Vdb vdb = this.wsMgr.resolve( uow, kobject, Vdb.class );
-                final RestVdb descriptor = buildVdbEntity( vdb, uriInfo.getBaseUri(), uow );
                 vdb.remove( uow );
 
                 LOGGER.debug( "deleteVdb:VDB '{0}' was deleted", vdbName ); //$NON-NLS-1$
-                final Response response = commit( uow, descriptor );
+                final Response response = commit( uow, KomodoRestEntity.NO_CONTENT );
+
                 return response;
             }
 
             LOGGER.debug( "deleteVdb:VDB '{0}' was not found to delete", vdbName ); //$NON-NLS-1$
-            return resourceNotFound( uow, vdbName, Messages.getString( DELETE_OPERATION_NAME ) );
+            return commit( uow, new ResourceNotFound( vdbName, Messages.getString( DELETE_OPERATION_NAME ) ) );
         } catch ( final Exception e ) {
             if ( ( uow != null ) && ( uow.getState() != State.ROLLED_BACK ) ) {
                 uow.rollback();
@@ -373,15 +376,15 @@ public final class KomodoVdbService extends KomodoService {
             if ( this.wsMgr.hasChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE ) ) {
                 final KomodoObject kobject = this.wsMgr.getChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
                 final Vdb vdb = this.wsMgr.resolve( uow, kobject, Vdb.class );
-                final RestVdbDescriptor descriptor = buildVdbDescriptorEntity( vdb, uriInfo.getBaseUri(), uow );
+                final RestVdb restVdb = buildVdbEntity( vdb, uriInfo.getBaseUri(), uow );
 
                 LOGGER.debug( "getVdb:VDB '{0}' was found", vdbName ); //$NON-NLS-1$
-                final Response response = commit( uow, descriptor );
+                final Response response = commit( uow, restVdb );
                 return response;
             }
 
             LOGGER.debug( "getVdb:VDB '{0}' was not found", vdbName ); //$NON-NLS-1$
-            return resourceNotFound( uow, vdbName, Messages.getString( GET_OPERATION_NAME ) );
+            return commit( uow, new ResourceNotFound( vdbName, Messages.getString( GET_OPERATION_NAME ) ) );
         } catch ( final Exception e ) {
             if ( ( uow != null ) && ( uow.getState() != State.ROLLED_BACK ) ) {
                 uow.rollback();
@@ -436,6 +439,11 @@ public final class KomodoVdbService extends KomodoService {
 
                     LOGGER.debug( "getVdbs:found '{0}' VDBs using pattern '{1}'", vdbs.length, searchPattern ); //$NON-NLS-1$
                 }
+            }
+
+            if ( vdbs.length == 0 ) {
+                final Response response = commit( uow, NO_CONTENT );
+                return response;
             }
 
             int start = 0;

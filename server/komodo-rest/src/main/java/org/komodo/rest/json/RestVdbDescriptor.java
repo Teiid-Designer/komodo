@@ -1,5 +1,5 @@
 /*
- * JBoss, Home of Professional Open Source.
+* JBoss, Home of Professional Open Source.
 *
 * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
 *
@@ -16,7 +16,6 @@ import java.util.Set;
 import org.komodo.rest.KomodoRestUriBuilder;
 import org.komodo.rest.json.RestLink.LinkType;
 import org.komodo.utils.ArgCheck;
-import com.google.gson.annotations.SerializedName;
 
 /**
  * A VDB descriptor that can be used by GSON to build a JSON document representation.
@@ -43,7 +42,6 @@ public final class RestVdbDescriptor extends KomodoRestEntity {
      */
     public static final RestVdbDescriptor[] NO_DESCRIPTORS = new RestVdbDescriptor[ 0 ];
 
-    @SerializedName( "id" )
     private String name;
     private String description;
 
@@ -160,6 +158,18 @@ public final class RestVdbDescriptor extends KomodoRestEntity {
      */
     public void setName( final String newName ) {
         this.name = newName;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder();
+        builder.append( "VDB descriptor name = " ).append( this.name ); //$NON-NLS-1$
+        return builder.toString();
     }
 
 }

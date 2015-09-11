@@ -1,5 +1,5 @@
 /*
- * JBoss, Home of Professional Open Source.
+* JBoss, Home of Professional Open Source.
 *
 * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
 *
@@ -9,7 +9,6 @@ package org.komodo.rest.json.serialize;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static org.komodo.rest.json.JsonConstants.JSON_BUILDER;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -49,12 +48,12 @@ public final class VdbTranslatorSerializerTest {
 
     @Test
     public void shouldExportJson() {
-        assertThat( JSON_BUILDER.toJson( this.translator ), is( JSON ) );
+        assertThat( KomodoJsonMarshaller.marshall( this.translator ), is( JSON ) );
     }
 
     @Test
     public void shouldImportJson() {
-        final RestVdbTranslator translator = JSON_BUILDER.fromJson( JSON, RestVdbTranslator.class );
+        final RestVdbTranslator translator = KomodoJsonMarshaller.unmarshall( JSON, RestVdbTranslator.class );
         assertThat( translator.getDescription(), is( DESCRIPTION ) );
         assertThat( translator.getName(), is( NAME ) );
         assertThat( translator.getType(), is( TYPE ) );
@@ -76,26 +75,26 @@ public final class VdbTranslatorSerializerTest {
     public void shouldNotExportWhenNameIsMissing() {
         final RestVdbTranslator incomplete = new RestVdbTranslator();
         translator.setType( TYPE );
-        JSON_BUILDER.toJson( incomplete );
+        KomodoJsonMarshaller.marshall( incomplete );
     }
 
     @Test( expected = Exception.class )
     public void shouldNotExportWhenTypeIsMissing() {
         final RestVdbTranslator incomplete = new RestVdbTranslator();
         translator.setName( NAME );
-        JSON_BUILDER.toJson( incomplete );
+        KomodoJsonMarshaller.marshall( incomplete );
     }
 
     @Test( expected = Exception.class )
     public void shouldNotImportJsonWhenIdIsMissing() {
         final String malformed = "{\"type\":\"oracle\",\"description\":\"my description\",\"properties\":{\"magic\":\"johnson\",\"michael\":\"jordan\",\"larry\":\"bird\"}}";
-        JSON_BUILDER.fromJson( malformed, RestVdbTranslator.class );
+        KomodoJsonMarshaller.unmarshall( malformed, RestVdbTranslator.class );
     }
 
     @Test( expected = Exception.class )
     public void shouldNotImportJsonWhenTypeIsMissing() {
         final String malformed = "{\"id\":\"MyTranslator\",\"description\":\"my description\",\"properties\":{\"magic\":\"johnson\",\"michael\":\"jordan\",\"larry\":\"bird\"}}";
-        JSON_BUILDER.fromJson( malformed, RestVdbTranslator.class );
+        KomodoJsonMarshaller.unmarshall( malformed, RestVdbTranslator.class );
     }
 
 }

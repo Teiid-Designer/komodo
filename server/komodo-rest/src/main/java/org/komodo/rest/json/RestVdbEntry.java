@@ -1,5 +1,5 @@
 /*
- * JBoss, Home of Professional Open Source.
+* JBoss, Home of Professional Open Source.
 *
 * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
 *
@@ -9,7 +9,6 @@ package org.komodo.rest.json;
 
 import java.util.Objects;
 import org.komodo.utils.ArgCheck;
-import com.google.gson.annotations.SerializedName;
 
 /**
  * A VDB entry that can be used by GSON to build a JSON document representation.
@@ -31,7 +30,6 @@ public final class RestVdbEntry extends KomodoRestEntity {
      */
     public static final RestVdbEntry[] NO_ENTRIES = new RestVdbEntry[ 0 ];
 
-    @SerializedName( "id" )
     private String name;
     private String description;
     private String path;
@@ -156,6 +154,21 @@ public final class RestVdbEntry extends KomodoRestEntity {
      */
     public void setPath( final String newPath ) {
         this.path = newPath;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder();
+        builder.append( "entry name = " ).append( this.name ); //$NON-NLS-1$
+        builder.append( ", " ); //$NON-NLS-1$
+        builder.append( "path = " ).append( this.path ); //$NON-NLS-1$
+
+        return builder.toString();
     }
 
 }

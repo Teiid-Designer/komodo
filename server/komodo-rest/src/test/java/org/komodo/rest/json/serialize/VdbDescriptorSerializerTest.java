@@ -1,5 +1,5 @@
 /*
- * JBoss, Home of Professional Open Source.
+* JBoss, Home of Professional Open Source.
 *
 * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
 *
@@ -9,7 +9,6 @@ package org.komodo.rest.json.serialize;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static org.komodo.rest.json.JsonConstants.JSON_BUILDER;
 import java.net.URI;
 import javax.ws.rs.core.UriBuilder;
 import org.junit.Before;
@@ -38,23 +37,23 @@ public final class VdbDescriptorSerializerTest {
     @Test
     public void shouldExportEmptyJsonDocumentWithEmptyDescriptors() {
         final RestVdbDirectory vdbDir = new RestVdbDirectory( new RestVdbDescriptor[ 0 ] );
-        assertThat( JSON_BUILDER.toJson( vdbDir ), is( "{\"vdbs\":[]}" ) );
+        assertThat( KomodoJsonMarshaller.marshall( vdbDir ), is( "{\"vdbs\":[]}" ) );
     }
 
     @Test
     public void shouldExportEmptyJsonDocumentWithNullDescriptors() {
         final RestVdbDirectory vdbDir = new RestVdbDirectory( ( RestVdbDescriptor[] )null );
-        assertThat( JSON_BUILDER.toJson( vdbDir ), is( "{\"vdbs\":[]}" ) );
+        assertThat( KomodoJsonMarshaller.marshall( vdbDir ), is( "{\"vdbs\":[]}" ) );
     }
 
     @Test
     public void shouldExportJson() {
-        assertThat( JSON_BUILDER.toJson( this.descriptor ), is( JSON ) );
+        assertThat( KomodoJsonMarshaller.marshall( this.descriptor ), is( JSON ) );
     }
 
     @Test
     public void shouldImportJson() {
-        final RestVdbDescriptor descriptor = JSON_BUILDER.fromJson( JSON, RestVdbDescriptor.class );
+        final RestVdbDescriptor descriptor = KomodoJsonMarshaller.unmarshall( JSON, RestVdbDescriptor.class );
         assertThat( descriptor.getName(), is( VDB_NAME ) );
         assertThat( descriptor.getDescription(), is( DESCRIPTION ) );
         assertThat( descriptor.getLinks().length, is( LINK_TYPES.length ) );
@@ -64,13 +63,13 @@ public final class VdbDescriptorSerializerTest {
     @Test( expected = Exception.class )
     public void shouldNotExportWhenNameIsMissing() {
         final RestVdbDescriptor incomplete = new RestVdbDescriptor();
-        JSON_BUILDER.toJson( incomplete );
+        KomodoJsonMarshaller.marshall( incomplete );
     }
 
     @Test( expected = Exception.class )
     public void shouldNotImportWhenIdIsMissing() {
         final String malformed = "{\"description\":\"my description\",\"links\":[{\"rel\":\"self\",\"href\":\"http://localhost:8080/v1/workspace/vdbs/MyVdb\",\"method\":\"GET\"},{\"rel\":\"parent\",\"href\":\"http://localhost:8080/v1/workspace/vdbs\",\"method\":\"GET\"},{\"rel\":\"manifest\",\"href\":\"http://localhost:8080/v1/workspace/vdbs/MyVdb/manifest\",\"method\":\"GET\"}]}";
-        JSON_BUILDER.fromJson( malformed, RestVdbDescriptor.class );
+        KomodoJsonMarshaller.unmarshall( malformed, RestVdbDescriptor.class );
     }
 
 }

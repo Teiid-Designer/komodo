@@ -1,5 +1,5 @@
 /*
- * JBoss, Home of Professional Open Source.
+* JBoss, Home of Professional Open Source.
 *
 * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
 *
@@ -9,7 +9,6 @@ package org.komodo.rest.json.serialize;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static org.komodo.rest.json.JsonConstants.JSON_BUILDER;
 import java.net.URI;
 import javax.ws.rs.core.UriBuilder;
 import org.junit.Before;
@@ -35,7 +34,7 @@ public final class VdbDirectorySerializerTest {
         YOUR_VDB.setDescription( "your description" );
 
         DESCRIPTORS = new RestVdbDescriptor[] { MY_VDB, YOUR_VDB };
-        JSON = "{\"vdbs\":[" + JSON_BUILDER.toJson( MY_VDB ) + ',' + JSON_BUILDER.toJson( YOUR_VDB ) + "]}";
+        JSON = "{\"vdbs\":[" + KomodoJsonMarshaller.marshall( MY_VDB ) + ',' + KomodoJsonMarshaller.marshall( YOUR_VDB ) + "]}";
     }
 
     private RestVdbDirectory vdbDir;
@@ -47,12 +46,12 @@ public final class VdbDirectorySerializerTest {
 
     @Test
     public void shouldExportJson() {
-        assertThat( JSON_BUILDER.toJson( this.vdbDir ), is( JSON ) );
+        assertThat( KomodoJsonMarshaller.marshall( this.vdbDir ), is( JSON ) );
     }
 
     @Test
     public void shouldImportJson() {
-        final RestVdbDirectory vdbDir = JSON_BUILDER.fromJson( JSON, RestVdbDirectory.class );
+        final RestVdbDirectory vdbDir = KomodoJsonMarshaller.unmarshall( JSON, RestVdbDirectory.class );
         assertThat( vdbDir.getDescriptors().length, is( DESCRIPTORS.length ) );
         assertThat( vdbDir.getDescriptors()[ 0 ], is( MY_VDB ) );
         assertThat( vdbDir.getDescriptors()[ 1 ], is( YOUR_VDB ) );

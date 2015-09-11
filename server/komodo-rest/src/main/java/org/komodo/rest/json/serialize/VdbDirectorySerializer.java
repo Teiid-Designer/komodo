@@ -1,5 +1,5 @@
 /*
- * JBoss, Home of Professional Open Source.
+* JBoss, Home of Professional Open Source.
 *
 * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
 *
@@ -8,7 +8,7 @@
 package org.komodo.rest.json.serialize;
 
 import static org.komodo.rest.Messages.Error.UNEXPECTED_JSON_TOKEN;
-import static org.komodo.rest.json.JsonConstants.JSON_BUILDER;
+import static org.komodo.rest.json.serialize.KomodoJsonMarshaller.BUILDER;
 import java.io.IOException;
 import org.komodo.rest.Messages;
 import org.komodo.rest.json.JsonConstants;
@@ -44,7 +44,7 @@ public final class VdbDirectorySerializer extends KomodoRestEntitySerializer< Re
                     readProperties( in, vdbDir );
                     break;
                 case JsonConstants.VDBS:
-                    final RestVdbDescriptor[] vdbs = JSON_BUILDER.fromJson( in, RestVdbDescriptor[].class );
+                    final RestVdbDescriptor[] vdbs = BUILDER.fromJson( in, RestVdbDescriptor[].class );
                     vdbDir.setVdbs( vdbs );
                     break;
                 default:
@@ -66,16 +66,13 @@ public final class VdbDirectorySerializer extends KomodoRestEntitySerializer< Re
     public void write( final JsonWriter out,
                        final RestVdbDirectory value ) throws IOException {
         beginWrite( out );
-        out.name( JsonConstants.VDBS );
 
-        out.beginArray();
-        for ( final RestVdbDescriptor vdb : value.getDescriptors() ) {
-            JSON_BUILDER.toJson( vdb, RestVdbDescriptor.class, out );
-        }
-        out.endArray();
+        out.name( JsonConstants.VDBS );
+        BUILDER.toJson( value.getDescriptors(), RestVdbDescriptor[].class, out );
 
         writeProperties( out, value );
         writeLinks( out, value );
+
         endWrite( out );
     }
 

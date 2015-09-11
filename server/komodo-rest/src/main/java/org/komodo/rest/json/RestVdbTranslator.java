@@ -1,5 +1,5 @@
 /*
- * JBoss, Home of Professional Open Source.
+* JBoss, Home of Professional Open Source.
 *
 * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
 *
@@ -9,7 +9,6 @@ package org.komodo.rest.json;
 
 import java.util.Objects;
 import org.komodo.utils.ArgCheck;
-import com.google.gson.annotations.SerializedName;
 
 /**
  * A translator that can be used by GSON to build a JSON document representation.
@@ -32,11 +31,10 @@ import com.google.gson.annotations.SerializedName;
 public final class RestVdbTranslator extends KomodoRestEntity {
 
     /**
-     * And empty array of translators.
+     * An empty array of translators.
      */
     public static final RestVdbTranslator[] NO_TRANSLATORS = new RestVdbTranslator[ 0 ];
 
-    @SerializedName( "id" )
     private String name;
     private String description;
     private String type;
@@ -161,6 +159,21 @@ public final class RestVdbTranslator extends KomodoRestEntity {
      */
     public void setType( final String newType ) {
         this.type = newType;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder();
+        builder.append( "translator name = " ).append( this.name ); //$NON-NLS-1$
+        builder.append( ", " ); //$NON-NLS-1$
+        builder.append( "type = " ).append( this.type ); //$NON-NLS-1$
+
+        return builder.toString();
     }
 
 }

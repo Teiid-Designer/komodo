@@ -1,5 +1,5 @@
 /*
- * JBoss, Home of Professional Open Source.
+* JBoss, Home of Professional Open Source.
 *
 * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
 *
@@ -11,7 +11,6 @@ import java.util.Objects;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.VdbImport;
 import org.komodo.utils.ArgCheck;
-import com.google.gson.annotations.SerializedName;
 
 /**
  * A VDB import that can be used by GSON to build a JSON document representation.
@@ -33,7 +32,6 @@ public final class RestVdbImport extends KomodoRestEntity {
      */
     public static final RestVdbImport[] NO_IMPORTS = new RestVdbImport[ 0 ];
 
-    @SerializedName( "id" )
     private String name;
     private int version = Vdb.DEFAULT_VERSION;
     private boolean importDataPolicies = VdbImport.DEFAULT_IMPORT_DATA_POLICIES;
@@ -149,6 +147,23 @@ public final class RestVdbImport extends KomodoRestEntity {
      */
     public void setVersion( final int newVersion ) {
         this.version = newVersion;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder();
+        builder.append( "import name = " ).append( this.name ); //$NON-NLS-1$
+        builder.append( ", " ); //$NON-NLS-1$
+        builder.append( "version = " ).append( this.version ); //$NON-NLS-1$
+        builder.append( ", " ); //$NON-NLS-1$
+        builder.append( "importDataPolicies = " ).append( this.importDataPolicies ); //$NON-NLS-1$
+
+        return builder.toString();
     }
 
 }

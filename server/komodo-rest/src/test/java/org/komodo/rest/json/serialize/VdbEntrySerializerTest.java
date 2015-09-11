@@ -1,5 +1,5 @@
 /*
- * JBoss, Home of Professional Open Source.
+* JBoss, Home of Professional Open Source.
 *
 * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
 *
@@ -10,7 +10,6 @@ package org.komodo.rest.json.serialize;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
-import static org.komodo.rest.json.JsonConstants.JSON_BUILDER;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.rest.json.RestVdbEntry;
@@ -33,19 +32,19 @@ public final class VdbEntrySerializerTest {
 
     @Test
     public void shouldExport() {
-        assertThat( JSON_BUILDER.toJson( this.entry ), is( JSON ) );
+        assertThat( KomodoJsonMarshaller.marshall( this.entry ), is( JSON ) );
     }
 
     @Test
     public void shouldExportWhenDescriptionIsMissing() {
         this.entry.setDescription( null );
         final String json = "{\"id\":\"MyEntry\",\"path\":\"/my/entry/path\"}";
-        assertThat( JSON_BUILDER.toJson( this.entry ), is( json ) );
+        assertThat( KomodoJsonMarshaller.marshall( this.entry ), is( json ) );
     }
 
     @Test
     public void shouldImport() {
-        final RestVdbEntry entry = JSON_BUILDER.fromJson( JSON, RestVdbEntry.class );
+        final RestVdbEntry entry = KomodoJsonMarshaller.unmarshall( JSON, RestVdbEntry.class );
         assertThat( entry.getDescription(), is( DESCRIPTION ) );
         assertThat( entry.getName(), is( NAME ) );
         assertThat( entry.getPath(), is( PATH ) );
@@ -56,7 +55,7 @@ public final class VdbEntrySerializerTest {
     @Test
     public void shouldImportWhenDescriptionIsMissing() {
         final String json = "{\"id\":\"MyEntry\",\"path\":\"/my/entry/path\"}";
-        final RestVdbEntry entry = JSON_BUILDER.fromJson( json, RestVdbEntry.class );
+        final RestVdbEntry entry = KomodoJsonMarshaller.unmarshall( json, RestVdbEntry.class );
         assertThat( entry.getDescription(), is( nullValue() ) );
         assertThat( entry.getName(), is( NAME ) );
         assertThat( entry.getPath(), is( PATH ) );
@@ -69,7 +68,7 @@ public final class VdbEntrySerializerTest {
         final RestVdbEntry incomplete = new RestVdbEntry();
         incomplete.setDescription( DESCRIPTION );
         incomplete.setPath( PATH );
-        JSON_BUILDER.toJson( incomplete );
+        KomodoJsonMarshaller.marshall( incomplete );
     }
 
     @Test( expected = Exception.class )
@@ -77,19 +76,19 @@ public final class VdbEntrySerializerTest {
         final RestVdbEntry incomplete = new RestVdbEntry();
         incomplete.setDescription( DESCRIPTION );
         incomplete.setName( NAME );
-        JSON_BUILDER.toJson( incomplete );
+        KomodoJsonMarshaller.marshall( incomplete );
     }
 
     @Test( expected = Exception.class )
     public void shouldNotImportWhenIdIsMissing() {
         final String malformed = "{\"path\":\"/my/entry/path\",\"description\":\"my description\"}";
-        JSON_BUILDER.fromJson( malformed, RestVdbEntry.class );
+        KomodoJsonMarshaller.unmarshall( malformed, RestVdbEntry.class );
     }
 
     @Test( expected = Exception.class )
     public void shouldNotImportWhenPathIsMissing() {
         final String malformed = "{\"id\":\"MyEntry\",\"description\":\"my description\"}";
-        JSON_BUILDER.fromJson( malformed, RestVdbEntry.class );
+        KomodoJsonMarshaller.unmarshall( malformed, RestVdbEntry.class );
     }
 
 }
