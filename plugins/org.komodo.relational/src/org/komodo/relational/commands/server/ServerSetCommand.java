@@ -13,7 +13,6 @@ import static org.komodo.relational.commands.server.ServerCommandMessages.Server
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.spi.repository.KomodoObject;
 
 /**
  * A shell command to set the default server name
@@ -40,29 +39,29 @@ public final class ServerSetCommand extends ServerShellCommand {
         String serverName = requiredArgument(0, getMessage(MissingServerNameArg));
 
         // Validate that server object with this name exists in the workspace
-        Teiid wsTeiid = getWorkspaceTeiid(serverName);
+        Teiid wsTeiid = ServerUtils.getWorkspaceTeiidObject(getWorkspaceManager(), getWorkspaceStatus(), serverName);
         if(wsTeiid==null) {
             print(CompletionConstants.MESSAGE_INDENT, getMessage(ServerDoesNotExist,serverName));
             return false;
         }
         
         // Check for current server
-        KomodoObject currentServer = getWorkspaceStatus().getServer();
-        if(currentServer!=null) {
+        if(hasWorkspaceServer()) {
             // Request set to current server, no need to reset
-            if(serverName.equals(currentServer.getName(getTransaction()))) {
+            String currentServerName = getWorkspaceServerName();
+            if(serverName.equals(currentServerName)) {
                 print(CompletionConstants.MESSAGE_INDENT, getMessage(ServerSetSuccess,serverName));
                 return true;
             // Has different server currently.  Disconnect it.
             } else {
-                if(hasConnectedDefaultTeiid()) {
+                if(hasConnectedWorkspaceServer()) {
                     getCommand(ServerDisconnectCommand.NAME).execute();
                 }
             }
         }
         
-        // Set the server name on workspace status
-        getWorkspaceStatus().setServer(wsTeiid);
+        // Set the server on workspace status
+        getWorkspaceStatus().setStateObject(ServerCommandProvider.SERVER_DEFAULT_KEY, wsTeiid);
 
         print(CompletionConstants.MESSAGE_INDENT, getMessage(ServerSetSuccess,serverName));
         return true;

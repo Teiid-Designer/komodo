@@ -55,10 +55,17 @@ public final class CreateVdbCommand extends RelationalShellCommand {
      * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
      */
     @Override
-    public boolean isValidForCurrentContext() throws Exception {
+    public boolean isValidForCurrentContext() {
+        boolean isValid = false;
+        
         // Only allow VDB create in the workspace
-        KomodoType contextType = getWorkspaceStatus().getCurrentContext().getTypeIdentifier(getTransaction());
-        return (contextType==KomodoType.WORKSPACE);
+        try {
+            KomodoType contextType = getWorkspaceStatus().getCurrentContext().getTypeIdentifier(getTransaction());
+            isValid = (contextType==KomodoType.WORKSPACE);
+        } catch (Exception ex) {
+            // on exception will return false
+        }
+        return isValid;
     }
 
 }

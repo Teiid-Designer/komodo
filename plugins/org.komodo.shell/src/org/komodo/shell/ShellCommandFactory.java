@@ -116,6 +116,9 @@ public class ShellCommandFactory {
 
         // register any commands contributed by command providers
         discoverContributedCommands(wsStatus);
+        
+        // Save registered command list on WorkspaceStatus
+        wsStatus.setRegisteredCommands(this.commandMap.values());
     }
 
     /**
@@ -226,23 +229,32 @@ public class ShellCommandFactory {
     }
 
 	/**
-	 * Get valid command names for the current context
-	 * @return List<String> list of commands for current context
+	 * Get all registered commands
+	 * @return List<String> list of commands
 	 * @throws Exception if error occurs
 	 */
-	public List<String> getCommandsForCurrentContext( ) throws Exception {
-		List<String> commandList = new ArrayList<String>();
-		for(String mapKey : this.commandMap.keySet()) {
-			ShellCommand command = this.commandMap.get(mapKey);
-			if(command.isValidForCurrentContext()) {
-				commandList.add(mapKey);
-			}
-		}
-		Collections.sort(commandList);
-		return commandList;
+	public Collection<ShellCommand> getRegisteredCommands( ) throws Exception {
+	    return commandMap.values();
 	}
 
-	/**
+    /**
+     * Get valid command names for the current context
+     * @return List<String> list of commands for current context
+     * @throws Exception if error occurs
+     */
+    public List<String> getCommandsForCurrentContext( ) throws Exception {
+        List<String> commandList = new ArrayList<String>();
+        for(String mapKey : this.commandMap.keySet()) {
+            ShellCommand command = this.commandMap.get(mapKey);
+            if(command.isValidForCurrentContext()) {
+                commandList.add(mapKey);
+            }
+        }
+        Collections.sort(commandList);
+        return commandList;
+    }
+
+    /**
 	 * Gets the available commands, ordered by command {@link QName}.
 	 */
 	private Map<String, ShellCommand> getCommands() {

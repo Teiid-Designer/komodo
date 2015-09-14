@@ -17,6 +17,7 @@ import java.util.List;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.shell.commands.core.SetPropertyCommand;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
@@ -49,6 +50,8 @@ public final class SetVdbPropertyCommand extends VdbShellCommand {
      */
     public SetVdbPropertyCommand( final WorkspaceStatus status ) {
         super( NAME, true, status );
+        // Overrides the BuiltInCommand "set-property"
+        setOverriddenCommands(new String[]{SetPropertyCommand.NAME});
     }
 
     /**

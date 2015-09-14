@@ -14,8 +14,10 @@ import static org.komodo.relational.commands.vdb.VdbCommandMessages.ExportComman
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.io.File;
 import java.io.FileWriter;
+import java.util.Properties;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.spi.constants.ExportConstants;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
@@ -40,14 +42,20 @@ public final class ExportCommand extends VdbShellCommand {
      */
     @Override
     protected boolean doExecute() throws Exception {
-        final String fileName = requiredArgument( 0, getWorkspaceMessage(MISSING_OUTPUT_FILE_NAME) );
+        String fileName = requiredArgument( 0, getWorkspaceMessage(MISSING_OUTPUT_FILE_NAME) );
+        // If there is no file extension, add .xml
+        if (fileName.indexOf(DOT) == -1) {
+            fileName = fileName + DOT + "xml"; //$NON-NLS-1$
+        }
         final boolean override = Boolean.getBoolean( optionalArgument( 1, "false" ) ); //$NON-NLS-1$
         final File file = new File( fileName );
 
         if ( file.createNewFile() || ( file.exists() && override ) ) {
             final UnitOfWork uow = getTransaction();
             final Vdb vdb = getVdb();
-            final String manifest = vdb.export( uow, null );
+            Properties properties = new Properties();
+            properties.put( ExportConstants.USE_TABS_PROP_KEY, true);
+            final String manifest = vdb.export( uow, properties );
 
             // write file
             try ( final FileWriter recordingFileWriter = new FileWriter( fileName, false ) ) {
@@ -64,5 +72,5 @@ public final class ExportCommand extends VdbShellCommand {
         print( MESSAGE_INDENT, getWorkspaceMessage(OUTPUT_FILE_ERROR, fileName ) );
         return false;
     }
-
+    
 }

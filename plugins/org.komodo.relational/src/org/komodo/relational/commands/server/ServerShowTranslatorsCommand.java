@@ -41,14 +41,14 @@ public final class ServerShowTranslatorsCommand extends ServerShellCommand {
     @Override
     protected boolean doExecute() throws Exception {
         // Validates that a server is connected (prints output for errors)
-        boolean hasConnectedDefault = validateHasConnectedDefaultServer();
+        boolean hasConnectedDefault = validateHasConnectedWorkspaceServer();
         if(!hasConnectedDefault) return false;
         
         // Print title
-        final String title = getMessage(InfoMessage, getDefaultServerName() );
+        final String title = getMessage(InfoMessage, getWorkspaceServerName() );
         print( MESSAGE_INDENT, title );
 
-        Teiid teiid = getDefaultServer();
+        Teiid teiid = getWorkspaceServer();
         List<String> objNames = new ArrayList<String>();
         Collection<TeiidTranslator> translators = teiid.getTeiidInstance(getTransaction()).getTranslators();
         for(TeiidTranslator translator : translators) {
@@ -69,6 +69,6 @@ public final class ServerShowTranslatorsCommand extends ServerShellCommand {
      */
     @Override
     public final boolean isValidForCurrentContext() {
-        return hasConnectedDefaultTeiid();
+        return hasConnectedWorkspaceServer();
     }
 }

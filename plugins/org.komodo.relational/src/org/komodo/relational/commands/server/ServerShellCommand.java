@@ -10,7 +10,6 @@ package org.komodo.relational.commands.server;
 import static org.komodo.relational.commands.server.ServerCommandMessages.Common.NoTeiidDefined;
 import static org.komodo.relational.commands.server.ServerCommandMessages.Common.ServerNotConnected;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
-import java.util.List;
 import org.komodo.relational.Messages;
 import org.komodo.relational.commands.RelationalShellCommand;
 import org.komodo.relational.teiid.Teiid;
@@ -39,13 +38,13 @@ abstract class ServerShellCommand extends RelationalShellCommand {
      * @return 'true' if there is a default connected server
      * @throws KException the exception
      */
-    protected boolean validateHasConnectedDefaultServer() throws KException {
-        if(!hasDefaultServer()) {
+    protected boolean validateHasConnectedWorkspaceServer() throws KException {
+        if(!hasWorkspaceServer()) {
             print(CompletionConstants.MESSAGE_INDENT, getMessage(NoTeiidDefined));
             return false;
         }
         
-        Teiid teiid = getDefaultServer();
+        Teiid teiid = getWorkspaceServer();
         if(!isConnected(teiid)) {
             print( MESSAGE_INDENT, getMessage( ServerNotConnected ) ); 
             return false;
@@ -53,60 +52,30 @@ abstract class ServerShellCommand extends RelationalShellCommand {
         return true;
     }
     
-    protected boolean hasDefaultServer() {
-        KomodoObject server = null;
+    protected boolean hasWorkspaceServer() {
+        KomodoObject kObj = null;
         try {
-            server = getWorkspaceStatus().getServer();
+            kObj = getWorkspaceServer();
         } catch (KException ex) {
-            // on exception returns null object
+            // exception just return false
         }
-        if(server!=null) return true;
-        return false;
+        return kObj!=null;
     }
     
-    protected String getDefaultServerName() throws KException {
-        KomodoObject server = null;
-        try {
-            server = getWorkspaceStatus().getServer();
-        } catch (KException ex) {
-            // on exception returns null object
-        }
+    protected String getWorkspaceServerName() throws KException {
+        KomodoObject server = getWorkspaceServer();
         if(server!=null) {
             return server.getName(getWorkspaceStatus().getTransaction());
         }
         return null;
     }
     
-    protected Teiid getDefaultServer() throws KException {
-        KomodoObject kObj = getWorkspaceStatus().getServer();
+    protected Teiid getWorkspaceServer() throws KException {
+        KomodoObject kObj = getWorkspaceStatus().getStateObjects().get(ServerCommandProvider.SERVER_DEFAULT_KEY);
         if(TeiidImpl.RESOLVER.resolvable(getWorkspaceStatus().getTransaction(), kObj)) {
             return (Teiid)kObj;
         }
         return null;
-    }
-    
-    /**
-     * Get the teiid object with the supplied name from the workspace
-     * @param serverName the name of the teiid object
-     * @return the teiid object
-     * @throws Exception the exception
-     */
-    protected Teiid getWorkspaceTeiid(String serverName) throws Exception {
-        Teiid resultTeiid = null;
-        List<Teiid> teiids = getWorkspaceManager().findTeiids(getTransaction());
-
-        if (teiids == null || teiids.size() == 0) {
-            return resultTeiid;
-        }
-
-        for (Teiid theTeiid : teiids) {
-            String teiidName = theTeiid.getName(getTransaction());
-            if (serverName.equals(theTeiid.getId(getTransaction())) || serverName.equals(teiidName)) {
-                resultTeiid = theTeiid;
-                break;
-            }
-        }
-        return resultTeiid;
     }
     
     protected boolean isConnected( final Teiid teiid ) {
@@ -118,10 +87,10 @@ abstract class ServerShellCommand extends RelationalShellCommand {
         return teiidInstance.isConnected();
     }
 
-    protected boolean hasConnectedDefaultTeiid( ) {
+    protected boolean hasConnectedWorkspaceServer( ) {
         Teiid teiid = null;
         try {
-            teiid = getDefaultServer();
+            teiid = getWorkspaceServer();
         } catch (Exception ex) {
         }
         

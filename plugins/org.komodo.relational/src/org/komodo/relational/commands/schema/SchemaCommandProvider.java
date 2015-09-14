@@ -13,12 +13,13 @@ import org.komodo.relational.model.Schema;
 import org.komodo.relational.model.internal.SchemaImpl;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandProvider;
+import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 
 /**
- * A shell command provider for VDBs.
+ * A shell command provider for Schema.
  */
 public class SchemaCommandProvider implements ShellCommandProvider {
 
@@ -59,14 +60,6 @@ public class SchemaCommandProvider implements ShellCommandProvider {
         return false;
     }
     
-    /**
-     * @throws KException the exception 
-     */
-    @Override
-    public boolean isServer ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        return false;
-    }
-    
     @Override
     public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
         if(SchemaImpl.RESOLVER.resolvable(uow, kObj)) {
@@ -74,6 +67,25 @@ public class SchemaCommandProvider implements ShellCommandProvider {
             return schema.getTypeDisplayName();
         }
         return null;
+    }
+
+    /**
+     * @throws KException the exception 
+     */
+    @Override
+    public String getStatusMessage ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
+        return null;
+    }
+    
+    /**
+     * @throws KException the exception 
+     */
+    /* (non-Javadoc)
+     * @see org.komodo.shell.api.ShellCommandProvider#initWorkspaceState(org.komodo.shell.api.WorkspaceStatus)
+     */
+    @Override
+    public void initWorkspaceState(WorkspaceStatus wsStatus) throws KException {
+        // Init any workspace state
     }
 
 }

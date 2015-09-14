@@ -36,6 +36,11 @@ public class NoOpCommand extends BuiltInShellCommand {
         super( wsStatus, NAME );
     }
 
+    @Override
+    public boolean isCoreCommand() {
+        return true;
+    }
+    
 	/**
 	 * @see org.komodo.shell.api.ShellCommand#printUsage(int indent)
 	 */

@@ -35,6 +35,11 @@ public class UnsetPropertyCommand extends BuiltInShellCommand {
         super( status, NAME );
     }
 
+    @Override
+    public boolean isCoreCommand() {
+        return true;
+    }
+    
     /**
      * {@inheritDoc}
      *
@@ -89,16 +94,6 @@ public class UnsetPropertyCommand extends BuiltInShellCommand {
             return ( candidates.isEmpty() ? -1 : ( StringUtils.isBlank( lastArgument ) ? 0 : ( toString().length() + 1 ) ) );
         } 
         return -1;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
-     */
-    @Override
-    public boolean isValidForCurrentContext() {
-        return true;
     }
 
     /* (non-Javadoc)

@@ -8,6 +8,7 @@
 package org.komodo.relational.commands.vdb;
 
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.shell.commands.core.ShowPropertiesCommand;
 
 /**
  * A shell command to show the complete VDB state.
@@ -31,7 +32,7 @@ public final class ShowVdbCommand extends VdbShellCommand {
      */
     @Override
     protected boolean doExecute() throws Exception {
-        getCommand(ShowVdbPropertiesCommand.NAME).execute();
+        getCommand(ShowPropertiesCommand.NAME).execute();
         
         getCommand(ShowDataRolesCommand.NAME).execute();
         getCommand(ShowEntriesCommand.NAME).execute();
