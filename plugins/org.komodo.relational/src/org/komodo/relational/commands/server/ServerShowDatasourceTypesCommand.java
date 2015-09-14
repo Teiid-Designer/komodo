@@ -40,14 +40,14 @@ public final class ServerShowDatasourceTypesCommand extends ServerShellCommand {
     @Override
     protected boolean doExecute() throws Exception {
         // Validates that a server is connected (prints output for errors)
-        boolean hasConnectedDefault = validateHasConnectedDefaultServer();
+        boolean hasConnectedDefault = validateHasConnectedWorkspaceServer();
         if(!hasConnectedDefault) return false;
         
         // Print title
-        final String title = getMessage(InfoMessage, getDefaultServerName() );
+        final String title = getMessage(InfoMessage, getWorkspaceServerName() );
         print( MESSAGE_INDENT, title );
 
-        Teiid teiid = getDefaultServer();
+        Teiid teiid = getWorkspaceServer();
         List<String> objNames = new ArrayList<String>();
         Set<String> types = teiid.getTeiidInstance(getTransaction()).getDataSourceTypeNames();
         for(String type : types) {
@@ -66,6 +66,6 @@ public final class ServerShowDatasourceTypesCommand extends ServerShellCommand {
      */
     @Override
     public final boolean isValidForCurrentContext() {
-        return hasConnectedDefaultTeiid();
+        return hasConnectedWorkspaceServer();
     }
 }

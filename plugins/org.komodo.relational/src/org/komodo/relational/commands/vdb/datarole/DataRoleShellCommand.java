@@ -5,7 +5,7 @@
  *
  * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
  */
-package org.komodo.relational.commands.datarole;
+package org.komodo.relational.commands.vdb.datarole;
 
 import org.komodo.relational.Messages;
 import org.komodo.relational.commands.RelationalShellCommand;
@@ -35,8 +35,14 @@ abstract class DataRoleShellCommand extends RelationalShellCommand {
      * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
      */
     @Override
-    public final boolean isValidForCurrentContext() throws Exception {
-        return isCurrentTypeValid( VdbLexicon.DataRole.DATA_ROLE );
+    public final boolean isValidForCurrentContext() {
+        boolean isValid = false;
+        try {
+            isValid = isCurrentTypeValid( VdbLexicon.DataRole.DATA_ROLE );
+        } catch (Exception ex) {
+            // exception returns false
+        }
+        return isValid;
     }
 
     @Override

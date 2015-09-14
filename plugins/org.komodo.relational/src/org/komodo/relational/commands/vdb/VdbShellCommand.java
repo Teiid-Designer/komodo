@@ -35,8 +35,14 @@ abstract class VdbShellCommand extends RelationalShellCommand {
      * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
      */
     @Override
-    public final boolean isValidForCurrentContext() throws Exception {
-        return isCurrentTypeValid( VdbLexicon.Vdb.VIRTUAL_DATABASE );
+    public final boolean isValidForCurrentContext() {
+        boolean isValid = false;
+        try {
+            isValid = isCurrentTypeValid( VdbLexicon.Vdb.VIRTUAL_DATABASE );
+        } catch (Exception ex) {
+            // exception returns false
+        }
+        return isValid;
     }
 
     @Override

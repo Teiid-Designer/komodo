@@ -44,6 +44,11 @@ public class ExitCommand extends BuiltInShellCommand {
         super( wsStatus, NAME, "quit" ); //$NON-NLS-1$
     }
 
+    @Override
+    public boolean isCoreCommand() {
+        return true;
+    }
+    
     /**
      * {@inheritDoc}
      *

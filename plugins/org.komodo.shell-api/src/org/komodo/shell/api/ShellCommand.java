@@ -80,9 +80,25 @@ public interface ShellCommand {
 
     /**
      * @return <code>true</code> if command is valid for the current context
-     * @throws Exception the exception
      */
-    boolean isValidForCurrentContext() throws Exception;
+    boolean isValidForCurrentContext();
+
+    /**
+     * @return <code>true</code> if command is a core built in command
+     */
+    boolean isCoreCommand();
+
+    /**
+     * Get the command names that are overridden by this command.
+     * @return the command names to override (never <code>null</code> but can be empty)
+     */
+    List<String> getOverriddenCommands();
+    
+    /**
+     * Get the command names that are overridden by this command.
+     * @param commands the command names to override
+     */
+    void setOverriddenCommands(String[] commands);
 
 	/**
 	 * Called to execute the command.

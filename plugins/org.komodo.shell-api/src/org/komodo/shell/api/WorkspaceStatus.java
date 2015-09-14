@@ -23,8 +23,10 @@ package org.komodo.shell.api;
 
 import java.io.InputStream;
 import java.io.Writer;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import org.komodo.core.KEngine;
@@ -97,6 +99,18 @@ public interface WorkspaceStatus extends StringConstants {
      *         if command not found or an error occurs
      */
     ShellCommand getCommand( final String commandName ) throws Exception;
+
+    /**
+     * Get all registered commands
+     * @return registered commands (never <code>null</code>)
+     */
+    Collection<ShellCommand> getRegisteredCommands( ) ;
+
+    /**
+     * Set all registered commands
+     * @param commands the currently registered commands
+     */
+     void setRegisteredCommands(Collection<ShellCommand> commands) ;
     
     /**
      * Sets the specified global property value.
@@ -215,19 +229,6 @@ public interface WorkspaceStatus extends StringConstants {
      */
     boolean isShowingTypeInPrompt();
 
-    /**
-     * @return current server default
-     */
-    KomodoObject getServer() throws KException;
-
-    /**
-     * Set the current server default
-     *
-     * @param serverObj
-     * @throws Exception 
-     */
-    void setServer(KomodoObject serverObj) throws KException;
-
 	/**
 	 * Add a WorkspaceContext Event Handler
 	 * @param handler the workspace context eventHandler
@@ -298,6 +299,25 @@ public interface WorkspaceStatus extends StringConstants {
     KomodoShell getShell();
     
     /**
+     * Get Additional generic workspace state objects
+     * @return the map of state objects
+     */
+    Map<String,KomodoObject> getStateObjects();
+    
+    /**
+     * Set a generic workspace state object
+     * @param key the state key
+     * @param stateObj the state object
+     */
+    void setStateObject(String key, KomodoObject stateObj);
+    
+    /**
+     * Remove a generic workspace state object
+     * @param key the state key
+     */
+    void removeStateObject(String key);
+    
+    /**
      * Resolve a KomodoObject into a concrete class if available
      * @param kObj the KomodoObject
      * @return the resolved Object
@@ -322,11 +342,17 @@ public interface WorkspaceStatus extends StringConstants {
     boolean isRoot ( final KomodoObject kObj ) throws KException;
 
     /**
-     * Determine if the supplied KomodoObject is a server type
+     * Get status messages from providers that should be displayed
      * @param kObj the KomodoObject
-     * @return 'true' if server type, 'false' if not
-     * @throws KException the exception
+     * @return the status messages
      */
-    boolean isServer ( final KomodoObject kObj ) throws KException;
+    List<String> getProvidedStatusMessages( final KomodoObject kObj );
+    
+    /**
+     * Initialize any workspace state from providers
+     * @param globalProps the workspace global properties
+     * @throws KException the exception
+     */ 
+    public void initProvidedStates( final Properties globalProps ) throws KException;
     
 }

@@ -59,6 +59,11 @@ public class HelpCommand extends BuiltInShellCommand {
         super( wsStatus, NAME, "man" ); //$NON-NLS-1$
     }
 
+    @Override
+    public boolean isCoreCommand() {
+        return true;
+    }
+    
     /**
      * @param commands
      *        the commands the commands applicable for the current context (can be <code>null</code> or empty)

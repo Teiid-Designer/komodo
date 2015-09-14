@@ -34,6 +34,11 @@ public class SetGlobalPropertyCommand extends BuiltInShellCommand {
         super( status, NAME );
     }
 
+    @Override
+    public boolean isCoreCommand() {
+        return true;
+    }
+    
     /**
      * {@inheritDoc}
      *
@@ -109,16 +114,6 @@ public class SetGlobalPropertyCommand extends BuiltInShellCommand {
         return -1;
     }
     
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
-     */
-    @Override
-    public boolean isValidForCurrentContext() {
-        return true;
-    }
-
     /* (non-Javadoc)
      * @see org.komodo.shell.BuiltInShellCommand#shouldCommit()
      */

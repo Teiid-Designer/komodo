@@ -95,6 +95,7 @@ public class Messages implements StringConstants {
     	InvalidArgMsg_PropertyName,
     	InvalidArgMsg_PropertyValue,
     	TOO_MANY_ARGS,
+    	InvalidCommandForContext,
     	FileShellCommandReader_NoConsole,
         HelpNoAliases,
         HelpAliasesHeading,

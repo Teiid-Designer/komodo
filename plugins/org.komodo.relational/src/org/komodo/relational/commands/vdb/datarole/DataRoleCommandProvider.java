@@ -5,7 +5,7 @@
 *
 * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
 */
-package org.komodo.relational.commands.datarole;
+package org.komodo.relational.commands.vdb.datarole;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,6 +13,7 @@ import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.internal.DataRoleImpl;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandProvider;
+import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
@@ -60,14 +61,6 @@ public class DataRoleCommandProvider implements ShellCommandProvider {
         return false;
     }
     
-    /**
-     * @throws KException the exception 
-     */
-    @Override
-    public boolean isServer ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        return false;
-    }
-    
     @Override
     public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
         if(DataRoleImpl.RESOLVER.resolvable(uow, kObj)) {
@@ -75,6 +68,25 @@ public class DataRoleCommandProvider implements ShellCommandProvider {
             return dataRole.getTypeDisplayName();
         }
         return null;
+    }
+    
+    /**
+     * @throws KException the exception 
+     */
+    @Override
+    public String getStatusMessage ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
+        return null;
+    }
+
+    /**
+     * @throws KException the exception 
+     */
+    /* (non-Javadoc)
+     * @see org.komodo.shell.api.ShellCommandProvider#initWorkspaceState(org.komodo.shell.api.WorkspaceStatus)
+     */
+    @Override
+    public void initWorkspaceState(WorkspaceStatus wsStatus) throws KException {
+        // Init any workspace state
     }
 
 }

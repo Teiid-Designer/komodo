@@ -27,9 +27,14 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -47,7 +52,6 @@ import org.komodo.shell.util.ContextUtils;
 import org.komodo.shell.util.KomodoObjectUtils;
 import org.komodo.shell.util.PrintUtils;
 import org.komodo.spi.KException;
-import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -61,9 +65,8 @@ import org.komodo.utils.StringUtils;
  */
 public class WorkspaceStatusImpl implements WorkspaceStatus {
 
-    private static final String SERVER_DEFAULT_KEY = "SERVER_DEFAULT"; //$NON-NLS-1$
     private static final String SAVED_CONTEXT_PATH = "SAVED_CONTEXT_PATH"; //$NON-NLS-1$
-    private static final List< String > HIDDEN_PROPS = Arrays.asList( new String[] { SAVED_CONTEXT_PATH, SERVER_DEFAULT_KEY } );
+    private static final List< String > HIDDEN_PROPS = Arrays.asList( new String[] { SAVED_CONTEXT_PATH } );
 
     private final KomodoShell shell;
 
@@ -84,7 +87,8 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     private Writer recordingFileWriter = null;
     private ShellCommandFactory commandFactory;
 
-    private KomodoObject server;
+    private Collection<ShellCommand> registeredCommands = Collections.emptyList();
+    private Map<String,KomodoObject> stateObjects = new HashMap<String,KomodoObject>();
 
     /**
      * Constructor
@@ -173,11 +177,8 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
             setRecordingWriter(recordingFile);
         }
         
-        // Init the default server if it is defined
-        String serverName = this.wsProperties.getProperty(SERVER_DEFAULT_KEY);
-        if(!StringUtils.isBlank(serverName)) {
-            this.server = getServerWithName(serverName);
-        }
+        // Let the providers init any provided states
+        initProvidedStates(this.wsProperties);
     }
 
     private void createTransaction(final String source ) throws Exception {
@@ -302,40 +303,6 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
 
         // create new transaction
         createTransaction(source);
-    }
-
-    @Override
-    public KomodoObject getServer() throws KException {
-        // If server is not set, look at global default.  set server from it if possible
-        if(server==null) {
-            // Determine if any root nodes are server and match the name
-            String globalDefaultServer = getProperties().getProperty(SERVER_DEFAULT_KEY);
-            if(!StringUtils.isEmpty(globalDefaultServer)) {
-                server = getServerWithName(globalDefaultServer);
-            }
-        }
-        return server;
-    }
-    
-    private KomodoObject getServerWithName(String serverName) throws KException {
-        KomodoObject server = null;
-        KomodoObject[] children = getRootContext().getChildren(getTransaction());
-        for(KomodoObject child : children) {
-            KomodoObject resolvedChild = resolve(child);
-            if(serverName.equals(resolvedChild.getName(getTransaction())) && isServer(resolvedChild)) {
-                server = resolvedChild;
-                break;
-            }
-        }
-        return server;
-    }
-
-    @Override
-    public void setServer(KomodoObject serverObj) throws KException {
-        this.server = serverObj;
-        // Set the hidden property SERVER_DEFAULT_KEY
-        String serverName = serverObj==null ? StringConstants.EMPTY_STRING : serverObj.getName(getTransaction());
-        this.wsProperties.setProperty( SERVER_DEFAULT_KEY, serverName);
     }
 
     @Override
@@ -555,14 +522,6 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
 
                 setCurrentContext( context );
             }
-            
-            // set default teiid if necessary
-            final String defaultServer = props.getProperty( SERVER_DEFAULT_KEY );
-
-            if ( !StringUtils.isBlank( defaultServer ) ) {
-                KomodoObject serverObj = getServerWithName(defaultServer);
-                setServer(serverObj);
-            }
         }
     }
     
@@ -630,6 +589,31 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         return this.commandFactory.getCommand( commandName );
     }
     
+    /* (non-Javadoc)
+     * @see org.komodo.shell.api.WorkspaceStatus#getStateObjects()
+     */
+    @Override
+    public Map<String, KomodoObject> getStateObjects() {
+        return this.stateObjects;
+    }
+
+    /* (non-Javadoc)
+     * @see org.komodo.shell.api.WorkspaceStatus#setStateObject(java.lang.String, org.komodo.spi.repository.KomodoObject)
+     */
+    @Override
+    public void setStateObject(String key,
+                               KomodoObject stateObj) {
+        this.stateObjects.put(key, stateObj);
+    }
+
+    /* (non-Javadoc)
+     * @see org.komodo.shell.api.WorkspaceStatus#removeStateObject(java.lang.String)
+     */
+    @Override
+    public void removeStateObject(String key) {
+        this.stateObjects.remove(key);
+    }
+
     @Override
     public < T extends KomodoObject > T resolve ( final KomodoObject kObj ) throws KException {
         if(this.commandFactory.getCommandProviders()!=null) {
@@ -662,21 +646,6 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     }
 
     @Override
-    public boolean isServer ( final KomodoObject kObj ) throws KException {
-        // determine from providers if this is a server type
-        boolean isServer = false;
-        if(this.commandFactory.getCommandProviders()!=null) {
-            for(ShellCommandProvider provider : this.commandFactory.getCommandProviders()) {
-                if(provider.isServer(getTransaction(), kObj)) {
-                    isServer = true;
-                    break;
-                }
-            }
-        }
-        return isServer;
-    }
-
-    @Override
     public String getTypeDisplay ( final KomodoObject kObj ) {
         if(this.commandFactory.getCommandProviders()!=null) {
             for(ShellCommandProvider provider : this.commandFactory.getCommandProviders()) {
@@ -691,4 +660,48 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         return kObj.getClass().getSimpleName();
     }
         
+    @Override
+    public List<String> getProvidedStatusMessages( final KomodoObject kObj ) {
+        List<String> allMessages = new ArrayList<String>();
+        if(this.commandFactory.getCommandProviders()!=null) {
+            for(ShellCommandProvider provider : this.commandFactory.getCommandProviders()) {
+                String statusMessage = null;
+                try {
+                    statusMessage = provider.getStatusMessage(getTransaction(), kObj);
+                } catch (KException ex) {
+                    // just set message null
+                }
+                if(!StringUtils.isBlank(statusMessage)) {
+                    allMessages.add(statusMessage);
+                }
+            }
+        }
+        return allMessages;
+    }
+    
+    @Override
+    public void initProvidedStates( final Properties globalProps ) throws KException {
+        if(this.commandFactory.getCommandProviders()!=null) {
+            for(ShellCommandProvider provider : this.commandFactory.getCommandProviders()) {
+                provider.initWorkspaceState(this);
+            }
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see org.komodo.shell.api.WorkspaceStatus#getRegisteredCommands()
+     */
+    @Override
+    public Collection<ShellCommand> getRegisteredCommands() {
+        return this.registeredCommands;
+    }
+
+    /* (non-Javadoc)
+     * @see org.komodo.shell.api.WorkspaceStatus#setRegisteredCommands(java.util.Collection)
+     */
+    @Override
+    public void setRegisteredCommands(Collection<ShellCommand> commands) {
+        this.registeredCommands=commands;
+    }
+
 }
