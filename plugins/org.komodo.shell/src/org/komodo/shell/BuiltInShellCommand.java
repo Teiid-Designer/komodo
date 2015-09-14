@@ -15,9 +15,11 @@
  */
 package org.komodo.shell;
 
+import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.io.File;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.komodo.shell.Messages.SHELL;
@@ -51,6 +53,7 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
     
     //private final StringNameValidator nameValidator = new StringNameValidator();
     private final String[] aliases;
+    private String[] overriddenCommands = StringConstants.EMPTY_ARRAY;
     
     /**
      * Constructs a command.
@@ -95,6 +98,13 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
      */
     @Override
     public final void execute() throws Exception {
+        // Make sure command is valid for the context
+        if(!isValidForCurrentContext()) {
+            // Print message if invalid for context
+            print(MESSAGE_INDENT, Messages.getString( SHELL.InvalidCommandForContext ) );
+            return;
+        }
+        
         final boolean success = doExecute();
 
         if (shouldCommit()) {
@@ -220,6 +230,55 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
         return this.writer;
     }
 
+    /**
+     * Get command names that are overridden by the command
+     * @return the overriddenCommands
+     */
+    @Override
+    public List<String> getOverriddenCommands() {
+        return Arrays.asList(overriddenCommands);
+    }
+
+    /**
+     * Set the command names that are overridden by the command
+     * @param overriddenCommands the overriddenCommands to set
+     */
+    @Override
+    public void setOverriddenCommands(String[] overriddenCommands) {
+        this.overriddenCommands = overriddenCommands;
+    }
+    
+    /**
+     * Determines if the command is a core command
+     */
+    @Override
+    public boolean isCoreCommand() {
+        return false;
+    }
+    
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
+     */
+    @Override
+    public boolean isValidForCurrentContext() {
+        // The command is valid unless it is overridden by a provided command
+        boolean isOverridden = false;
+        // Go thru all registered commands and determine if any override this command
+        for(ShellCommand registeredCommand : getWorkspaceStatus().getRegisteredCommands()) {
+            if(!registeredCommand.isCoreCommand() && registeredCommand.isValidForCurrentContext()) {
+                List overriddenCommands = registeredCommand.getOverriddenCommands();
+                if(overriddenCommands.contains(getName())) {
+                    isOverridden = true;
+                    break;
+                }
+            }
+        }
+        // Valid if not overridden
+        return !isOverridden;
+    }
+    
     /**
      * @see org.komodo.shell.api.ShellCommand#tabCompletion(java.lang.String, java.util.List)
      */

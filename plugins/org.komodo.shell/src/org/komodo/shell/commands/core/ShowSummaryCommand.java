@@ -48,6 +48,11 @@ public class ShowSummaryCommand extends BuiltInShellCommand {
         super( wsStatus, NAME );
     }
 
+    @Override
+    public boolean isCoreCommand() {
+        return true;
+    }
+    
     /**
      * {@inheritDoc}
      *
@@ -77,16 +82,6 @@ public class ShowSummaryCommand extends BuiltInShellCommand {
         return true;
     }
     
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
-     */
-    @Override
-    public boolean isValidForCurrentContext() {
-        return true;
-    }
-
     protected boolean validate(Arguments allArgs) throws Exception {
         // optional path arg
         if(!allArgs.isEmpty()) {

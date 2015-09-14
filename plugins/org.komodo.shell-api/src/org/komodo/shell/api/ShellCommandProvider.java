@@ -51,15 +51,6 @@ public interface ShellCommandProvider {
     public boolean isRoot ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException;
 
     /**
-     * Determine if the supplied KomodoObject is a server type
-     * @param uow the transaction
-     * @param kObj the KomodoObject
-     * @return 'true' if the KomodoObject is a server type
-     * @throws KException the exception
-     */
-    public boolean isServer ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException;
-
-    /**
      * Get the type display string for a KomodoObject
      * @param uow the transaction
      * @param kObj the KomodoObject
@@ -67,4 +58,21 @@ public interface ShellCommandProvider {
      * @throws KException the exception
      */
     public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException;
+    
+    /**
+     * Initialize workspace state for recognized properties
+     * @param wsStatus the workspace status
+     * @throws KException the exception
+     */
+    public void initWorkspaceState ( final WorkspaceStatus wsStatus ) throws KException;
+    
+    /**
+     * Get status message for the provided KomodoObject
+     * @param uow the transaction
+     * @param kObj the KomodoObject
+     * @return the status message
+     * @throws KException the exception
+     */
+    public String getStatusMessage ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException;
+
 }

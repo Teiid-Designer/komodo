@@ -52,6 +52,11 @@ public class ShowPropertyCommand extends BuiltInShellCommand {
         super( wsStatus, NAME );
     }
 
+    @Override
+    public boolean isCoreCommand() {
+        return true;
+    }
+    
     /**
      * {@inheritDoc}
      *
@@ -78,16 +83,6 @@ public class ShowPropertyCommand extends BuiltInShellCommand {
         return true;
     }
     
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
-     */
-    @Override
-    public boolean isValidForCurrentContext() {
-        return true;
-    }
-
     /**
      * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
      */

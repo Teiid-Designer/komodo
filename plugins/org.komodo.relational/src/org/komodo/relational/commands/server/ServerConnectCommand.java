@@ -41,12 +41,12 @@ public final class ServerConnectCommand extends ServerShellCommand {
      */
     @Override
     protected boolean doExecute() throws Exception {
-        if(!hasDefaultServer()) {
+        if(!hasWorkspaceServer()) {
             print(CompletionConstants.MESSAGE_INDENT, getMessage(NoTeiidDefined));
             return false;
         }
         
-        Teiid teiid = getDefaultServer();
+        Teiid teiid = getWorkspaceServer();
 
         print(CompletionConstants.MESSAGE_INDENT, getMessage(AttemptingToConnect,teiid.getName(getWorkspaceStatus().getTransaction())));
         TeiidInstance teiidInstance = teiid.getTeiidInstance(getWorkspaceStatus().getTransaction());
@@ -69,7 +69,7 @@ public final class ServerConnectCommand extends ServerShellCommand {
      */
     @Override
     public final boolean isValidForCurrentContext() {
-        if(hasDefaultServer()) {
+        if(hasWorkspaceServer()) {
             return true;
         }
         return false;

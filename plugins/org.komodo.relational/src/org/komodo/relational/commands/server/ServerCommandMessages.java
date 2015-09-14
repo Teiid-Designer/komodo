@@ -26,7 +26,11 @@ public class ServerCommandMessages implements StringConstants {
     @SuppressWarnings( "javadoc" )
     public enum Common {
         NoTeiidDefined,
-        ServerNotConnected;
+        ServerNotConnected,
+        Connected,
+        NotConnected,
+        serverStatusText,
+        CurrentTeiid;
 
         @Override
         public String toString() {

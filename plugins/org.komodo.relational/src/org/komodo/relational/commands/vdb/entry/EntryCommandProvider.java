@@ -1,32 +1,32 @@
 /*
  * JBoss, Home of Professional Open Source.
- *
- * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
- *
- * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
- */
-package org.komodo.relational.commands;
+*
+* See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
+*
+* See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
+*/
+package org.komodo.relational.commands.vdb.entry;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.relational.vdb.Entry;
+import org.komodo.relational.vdb.internal.EntryImpl;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandProvider;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
-import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 
 /**
- * A shell command provider for workspace-level commands.
+ * A shell command provider for Entries.
  */
-public class WorkspaceCommandProvider implements ShellCommandProvider {
+public class EntryCommandProvider implements ShellCommandProvider {
 
     /**
-     * Constructs a command provider for workspace shell commands.
+     * Constructs a command provider for Entry shell commands.
      */
-    public WorkspaceCommandProvider() {
+    public EntryCommandProvider() {
         // nothing to do
     }
 
@@ -38,35 +38,33 @@ public class WorkspaceCommandProvider implements ShellCommandProvider {
     @Override
     public Map< String, Class< ? extends ShellCommand >> provideCommands() {
         final Map< String, Class< ? extends ShellCommand >> result = new HashMap<>();
-        result.put( CreateVdbCommand.NAME, CreateVdbCommand.class );
-        result.put( SetCustomPropertyCommand.NAME, SetCustomPropertyCommand.class );
+
+        //result.put( ServerConnectCommand.NAME, ServerConnectCommand.class );
 
         return result;
     }
     
     @Override
-    public WorkspaceManager resolve ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(kObj.getRepository());
-        if(wkspMgr.getAbsolutePath().equals(kObj.getAbsolutePath())) {
-            return wkspMgr;
+    public Entry resolve ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
+        if(EntryImpl.RESOLVER.resolvable(uow, kObj)) {
+            return EntryImpl.RESOLVER.resolve(uow, kObj);
         }
         return null;
     }
     
     @Override
     public boolean isRoot ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(kObj.getRepository());
-        if(wkspMgr.getAbsolutePath().equals(kObj.getAbsolutePath())) {
-            return true;
+        if(EntryImpl.RESOLVER.resolvable(uow, kObj)) {
+            return false;
         }
         return false;
     }
     
     @Override
     public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(kObj.getRepository());
-        if(wkspMgr.getAbsolutePath().equals(kObj.getAbsolutePath())) {
-            return KomodoType.WORKSPACE.getType();
+        if(EntryImpl.RESOLVER.resolvable(uow, kObj)) {
+            Entry entry = EntryImpl.RESOLVER.resolve(uow, kObj);
+            return entry.getTypeDisplayName();
         }
         return null;
     }

@@ -22,6 +22,8 @@
 package org.komodo.shell.commands.core;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+import java.util.Collection;
+import java.util.List;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.Messages;
 import org.komodo.shell.api.WorkspaceStatus;
@@ -47,6 +49,11 @@ public class ShowStatusCommand extends BuiltInShellCommand {
         super( wsStatus, NAME );
     }
 
+    @Override
+    public boolean isCoreCommand() {
+        return true;
+    }
+    
     /**
      * {@inheritDoc}
      *
@@ -55,16 +62,6 @@ public class ShowStatusCommand extends BuiltInShellCommand {
     @Override
     protected boolean doExecute() throws Exception {
 		printStatus( );
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
-     */
-    @Override
-    public boolean isValidForCurrentContext() {
         return true;
     }
 
@@ -91,24 +88,24 @@ public class ShowStatusCommand extends BuiltInShellCommand {
         print(MESSAGE_INDENT, Messages.getString(Messages.ShowStatusCommand.CurrentRepoName, repoId.getWorkspaceName()));
         print(MESSAGE_INDENT, Messages.getString(Messages.ShowStatusCommand.CurrentRepoUrl, repoId.getUrl()));
 
-		// Get current server and test connection if defined
-		KomodoObject serverObj = wsStatus.getServer();
-		if (serverObj==null)
-			print(MESSAGE_INDENT, Messages.getString(Messages.ShowStatusCommand.NoCurrentTeiid));
-		else {
-		    String currentServerText = serverObj.getName(wsStatus.getTransaction());
-//			TeiidInstance teiidInstance = teiid.getTeiidInstance(wsStatus.getTransaction());
-//            String teiidName = teiid.getName(wsStatus.getTransaction());
-//			String teiidUrl = teiidInstance.getUrl();
-//			String teiidConnected = teiidInstance.isConnected() ? Messages.getString(Messages.ShowCommand.Connected) : Messages.getString(Messages.ShowCommand.NotConnected);
-//            String currentServerText = Messages.getString(Messages.ShowCommand.serverStatusText, teiidName, teiidUrl, teiidConnected);
-            print(MESSAGE_INDENT, Messages.getString(Messages.ShowStatusCommand.CurrentTeiid, currentServerText));
-		}
-
-		// Current Context
-		KomodoObject currentContext = wsStatus.getCurrentContext();
+        // Current Context
+        KomodoObject currentContext = wsStatus.getCurrentContext();
         String objFullName = KomodoObjectUtils.getFullName(wsStatus, currentContext);
-		print(MESSAGE_INDENT, Messages.getString(Messages.ShowStatusCommand.CurrentContext, objFullName));
+        print(MESSAGE_INDENT, Messages.getString(Messages.ShowStatusCommand.CurrentContext, objFullName));
+        
+        // Get additional provided statuses for current context
+        List<String> providedStatusList = wsStatus.getProvidedStatusMessages(currentContext);
+        for(String status : providedStatusList) {
+            print(MESSAGE_INDENT, status);
+        }
+        // Get additional provided statuses for state objects
+        Collection<KomodoObject> stateObjs = wsStatus.getStateObjects().values();
+        for(KomodoObject stateObj : stateObjs) {
+            List<String> stateObjectStatusList = wsStatus.getProvidedStatusMessages(stateObj);
+            for(String status : stateObjectStatusList) {
+                print(MESSAGE_INDENT, status);
+            }
+        }
 	}
 
 }

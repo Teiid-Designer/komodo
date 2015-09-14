@@ -49,6 +49,11 @@ public class CdCommand extends BuiltInShellCommand {
         super( wsStatus, NAME, "edit", "goto" ); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
+    @Override
+    public boolean isCoreCommand() {
+        return true;
+    }
+    
     /**
      * {@inheritDoc}
      *
@@ -73,16 +78,6 @@ public class CdCommand extends BuiltInShellCommand {
 
 		return false;
 	}
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
-     */
-    @Override
-    public boolean isValidForCurrentContext() {
-        return true;
-    }
 
     /**
      * {@inheritDoc}

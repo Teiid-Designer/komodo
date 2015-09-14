@@ -31,6 +31,11 @@ public class PlayCommand  extends BuiltInShellCommand {
         super( wsStatus, NAME );
     }
 
+    @Override
+    public boolean isCoreCommand() {
+        return true;
+    }
+    
     /**
      * {@inheritDoc}
      *
@@ -80,16 +85,6 @@ public class PlayCommand  extends BuiltInShellCommand {
 			command.execute();
 		}
 	}
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
-     */
-    @Override
-    public boolean isValidForCurrentContext() {
-        return true;
-    }
 
     /**
      * {@inheritDoc}

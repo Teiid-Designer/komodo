@@ -13,6 +13,7 @@ import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.internal.VdbImpl;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandProvider;
+import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
@@ -61,7 +62,6 @@ public class VdbCommandProvider implements ShellCommandProvider {
         result.put( ExportCommand.NAME, ExportCommand.class );
         result.put( SetVdbPropertyCommand.NAME, SetVdbPropertyCommand.class );
         result.put( ShowVdbCommand.NAME, ShowVdbCommand.class );
-        result.put( ShowVdbPropertiesCommand.NAME, ShowVdbPropertiesCommand.class );
 
         return result;
     }
@@ -82,14 +82,6 @@ public class VdbCommandProvider implements ShellCommandProvider {
         return false;
     }
     
-    /**
-     * @throws KException the exception 
-     */
-    @Override
-    public boolean isServer ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        return false;
-    }
-    
     @Override
     public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
         if(VdbImpl.RESOLVER.resolvable(uow, kObj)) {
@@ -97,6 +89,25 @@ public class VdbCommandProvider implements ShellCommandProvider {
             return vdb.getTypeDisplayName();
         }
         return null;
+    }
+
+    /**
+     * @throws KException the exception 
+     */
+    @Override
+    public String getStatusMessage ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
+        return null;
+    }
+
+    /**
+     * @throws KException the exception 
+     */
+    /* (non-Javadoc)
+     * @see org.komodo.shell.api.ShellCommandProvider#initWorkspaceState(org.komodo.shell.api.WorkspaceStatus)
+     */
+    @Override
+    public void initWorkspaceState(WorkspaceStatus wsStatus) throws KException {
+        // Init any workspace state
     }
 
 }
