@@ -36,7 +36,7 @@ public class DataRoleCommandMessages implements StringConstants {
 
     @SuppressWarnings( "javadoc" )
     public enum AddMappedRoleCommand {
-        MISSING_MAPPED_ROLE_NAME;
+        MAPPED_ROLE_ADDED;
 
         @Override
         public String toString() {
@@ -46,7 +46,27 @@ public class DataRoleCommandMessages implements StringConstants {
     
     @SuppressWarnings( "javadoc" )
     public enum AddPermissionCommand {
-        MISSING_PERMISSION_NAME;
+        PERMISSION_ADDED;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum DeleteMappedRoleCommand {
+        MAPPED_ROLE_DELETED;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+    
+    @SuppressWarnings( "javadoc" )
+    public enum DeletePermissionCommand {
+        PERMISSION_DELETED;
 
         @Override
         public String toString() {

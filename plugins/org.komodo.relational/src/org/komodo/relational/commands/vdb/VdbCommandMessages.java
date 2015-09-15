@@ -208,6 +208,16 @@ public class VdbCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
+
+    @SuppressWarnings( "javadoc" )
+    public enum SetVdbPropertyCommand {
+        PLACEHOLDER;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
     
     private static String getEnumName(Enum<?> enumValue) {
         String className = enumValue.getClass().getName();

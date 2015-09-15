@@ -38,6 +38,9 @@ public class WorkspaceCommandProvider implements ShellCommandProvider {
     @Override
     public Map< String, Class< ? extends ShellCommand >> provideCommands() {
         final Map< String, Class< ? extends ShellCommand >> result = new HashMap<>();
+
+        result.put( CreateSchemaCommand.NAME, CreateSchemaCommand.class );
+        result.put( CreateTeiidCommand.NAME, CreateTeiidCommand.class );
         result.put( CreateVdbCommand.NAME, CreateVdbCommand.class );
         result.put( SetCustomPropertyCommand.NAME, SetCustomPropertyCommand.class );
 

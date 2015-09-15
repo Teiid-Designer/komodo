@@ -21,7 +21,7 @@ import org.komodo.shell.commands.core.SetPropertyCommand;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
- * A shell command to set a VDB version.
+ * A shell command to set VDB properties
  */
 public final class SetVdbPropertyCommand extends VdbShellCommand {
 
@@ -62,7 +62,7 @@ public final class SetVdbPropertyCommand extends VdbShellCommand {
     @Override
     protected boolean doExecute() throws Exception {
         final String name = requiredArgument( 0, getWorkspaceMessage(MISSING_PROPERTY_NAME_VALUE) );
-        final String value = requiredArgument( 0, getWorkspaceMessage(MISSING_PROPERTY_NAME_VALUE) );
+        final String value = requiredArgument( 1, getWorkspaceMessage(MISSING_PROPERTY_NAME_VALUE) );
 
         final Vdb vdb = getVdb();
         final UnitOfWork transaction = getTransaction();

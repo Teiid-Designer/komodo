@@ -56,6 +56,26 @@ public class WorkspaceCommandMessages implements StringConstants {
         }
     }
     
+    public enum CreateTeiidCommand {
+        MISSING_TEIID_NAME,
+        TEIID_CREATED;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+    
+    public enum CreateSchemaCommand {
+        MISSING_SCHEMA_NAME,
+        SCHEMA_CREATED;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+    
     private static String getEnumName(Enum<?> enumValue) {
         String className = enumValue.getClass().getName();
         String[] components = className.split("\\$"); //$NON-NLS-1$
