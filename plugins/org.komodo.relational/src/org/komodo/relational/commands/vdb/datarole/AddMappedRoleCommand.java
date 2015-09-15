@@ -7,7 +7,9 @@
  */
 package org.komodo.relational.commands.vdb.datarole;
 
-import static org.komodo.relational.commands.vdb.datarole.DataRoleCommandMessages.AddMappedRoleCommand.MISSING_MAPPED_ROLE_NAME;
+import static org.komodo.relational.commands.vdb.datarole.DataRoleCommandMessages.AddMappedRoleCommand.MAPPED_ROLE_ADDED;
+import static org.komodo.relational.commands.vdb.datarole.DataRoleCommandMessages.General.MISSING_MAPPED_ROLE_NAME;
+import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.shell.api.WorkspaceStatus;
 
@@ -38,6 +40,9 @@ public final class AddMappedRoleCommand extends DataRoleShellCommand {
         final DataRole dataRole = getDataRole();
         dataRole.addMappedRole( getTransaction(), mappedRoleName );
 
+        // Print success message
+        print(MESSAGE_INDENT, getMessage(MAPPED_ROLE_ADDED,mappedRoleName));
+        
         return true;
     }
 

@@ -39,7 +39,23 @@ public class ModelCommandProvider implements ShellCommandProvider {
     public Map< String, Class< ? extends ShellCommand >> provideCommands() {
         final Map< String, Class< ? extends ShellCommand >> result = new HashMap<>();
 
-        //result.put( ServerConnectCommand.NAME, ServerConnectCommand.class );
+        result.put( AddPushdownFunctionCommand.NAME, AddPushdownFunctionCommand.class );
+        result.put( AddSourceCommand.NAME, AddSourceCommand.class );
+        result.put( AddStoredProcedureCommand.NAME, AddStoredProcedureCommand.class );
+        result.put( AddTableCommand.NAME, AddTableCommand.class );
+        result.put( AddUserDefinedFunctionCommand.NAME, AddUserDefinedFunctionCommand.class );
+        result.put( AddViewCommand.NAME, AddViewCommand.class );
+        result.put( AddVirtualProcedureCommand.NAME, AddVirtualProcedureCommand.class );
+
+        result.put( DeletePushdownFunctionCommand.NAME, DeletePushdownFunctionCommand.class );
+        result.put( DeleteSourceCommand.NAME, DeleteSourceCommand.class );
+        result.put( DeleteStoredProcedureCommand.NAME, DeleteStoredProcedureCommand.class );
+        result.put( DeleteTableCommand.NAME, DeleteTableCommand.class );
+        result.put( DeleteUserDefinedFunctionCommand.NAME, DeleteUserDefinedFunctionCommand.class );
+        result.put( DeleteViewCommand.NAME, DeleteViewCommand.class );
+        result.put( DeleteVirtualProcedureCommand.NAME, DeleteVirtualProcedureCommand.class );
+
+        result.put( SetModelPropertyCommand.NAME, SetModelPropertyCommand.class );
 
         return result;
     }

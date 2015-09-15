@@ -72,7 +72,7 @@ abstract class ServerShellCommand extends RelationalShellCommand {
     
     protected Teiid getWorkspaceServer() throws KException {
         KomodoObject kObj = getWorkspaceStatus().getStateObjects().get(ServerCommandProvider.SERVER_DEFAULT_KEY);
-        if(TeiidImpl.RESOLVER.resolvable(getWorkspaceStatus().getTransaction(), kObj)) {
+        if(kObj!=null && TeiidImpl.RESOLVER.resolvable(getWorkspaceStatus().getTransaction(), kObj)) {
             return (Teiid)kObj;
         }
         return null;

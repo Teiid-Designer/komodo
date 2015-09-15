@@ -1,9 +1,14 @@
 org.komodo.relational.commands.WorkspaceCommandProvider
 org.komodo.relational.commands.schema.SchemaCommandProvider
 org.komodo.relational.commands.model.ModelCommandProvider
+org.komodo.relational.commands.teiid.TeiidCommandProvider
 org.komodo.relational.commands.vdb.VdbCommandProvider
 org.komodo.relational.commands.vdb.datarole.DataRoleCommandProvider
 org.komodo.relational.commands.vdb.vdbimport.VdbImportCommandProvider
 org.komodo.relational.commands.vdb.entry.EntryCommandProvider
 org.komodo.relational.commands.vdb.translator.TranslatorCommandProvider
 org.komodo.relational.commands.server.ServerCommandProvider
+org.komodo.relational.commands.model.pushdownfunction.PushdownFunctionCommandProvider
+org.komodo.relational.commands.model.storedprocedure.StoredProcedureCommandProvider
+org.komodo.relational.commands.model.table.TableCommandProvider
+org.komodo.relational.commands.model.view.ViewCommandProvider
