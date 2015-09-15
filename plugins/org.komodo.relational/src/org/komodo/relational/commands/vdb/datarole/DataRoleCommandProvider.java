@@ -41,6 +41,9 @@ public class DataRoleCommandProvider implements ShellCommandProvider {
 
         result.put( AddMappedRoleCommand.NAME, AddMappedRoleCommand.class );
         result.put( AddPermissionCommand.NAME, AddPermissionCommand.class );
+        result.put( DeleteMappedRoleCommand.NAME, DeleteMappedRoleCommand.class );
+        result.put( DeletePermissionCommand.NAME, DeletePermissionCommand.class );
+        result.put( SetDataRolePropertyCommand.NAME, SetDataRolePropertyCommand.class );
 
         return result;
     }

@@ -7,7 +7,9 @@
  */
 package org.komodo.relational.commands.vdb.datarole;
 
-import static org.komodo.relational.commands.vdb.datarole.DataRoleCommandMessages.AddPermissionCommand.MISSING_PERMISSION_NAME;
+import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+import static org.komodo.relational.commands.vdb.datarole.DataRoleCommandMessages.General.MISSING_PERMISSION_NAME;
+import static org.komodo.relational.commands.vdb.datarole.DataRoleCommandMessages.AddPermissionCommand.PERMISSION_ADDED;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.shell.api.WorkspaceStatus;
 
@@ -38,6 +40,9 @@ public final class AddPermissionCommand extends DataRoleShellCommand {
         final DataRole dataRole = getDataRole();
         dataRole.addPermission( getTransaction(), permissionName );
 
+        // Print success message
+        print(MESSAGE_INDENT, getMessage(PERMISSION_ADDED,permissionName));
+        
         return true;
     }
 

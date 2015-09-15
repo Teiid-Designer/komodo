@@ -39,7 +39,7 @@ public class SchemaCommandProvider implements ShellCommandProvider {
     public Map< String, Class< ? extends ShellCommand >> provideCommands() {
         final Map< String, Class< ? extends ShellCommand >> result = new HashMap<>();
 
-        //result.put( ServerConnectCommand.NAME, ServerConnectCommand.class );
+        result.put( SetSchemaPropertyCommand.NAME, SetSchemaPropertyCommand.class );
 
         return result;
     }
