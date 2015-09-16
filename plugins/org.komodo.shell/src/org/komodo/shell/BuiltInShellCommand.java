@@ -30,7 +30,9 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
 import org.komodo.shell.util.KomodoObjectUtils;
 import org.komodo.shell.util.PrintUtils;
+import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.Descriptor;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.utils.ArgCheck;
@@ -256,28 +258,28 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
         return false;
     }
     
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
-     */
-    @Override
-    public boolean isValidForCurrentContext() {
-        // The command is valid unless it is overridden by a provided command
-        boolean isOverridden = false;
-        // Go thru all registered commands and determine if any override this command
-        for(ShellCommand registeredCommand : getWorkspaceStatus().getRegisteredCommands()) {
-            if(!registeredCommand.isCoreCommand() && registeredCommand.isValidForCurrentContext()) {
-                List overriddenCommands = registeredCommand.getOverriddenCommands();
-                if(overriddenCommands.contains(getName())) {
-                    isOverridden = true;
-                    break;
-                }
-            }
-        }
-        // Valid if not overridden
-        return !isOverridden;
-    }
+//    /**
+//     * {@inheritDoc}
+//     *
+//     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
+//     */
+//    @Override
+//    public abstract boolean isValidForCurrentContext() {
+//        // The command is valid unless it is overridden by a provided command
+//        boolean isOverridden = false;
+//        // Go thru all registered commands and determine if any override this command
+//        for(ShellCommand registeredCommand : getWorkspaceStatus().getRegisteredCommands()) {
+//            if(!registeredCommand.isCoreCommand() && registeredCommand.isValidForCurrentContext()) {
+//                List overriddenCommands = registeredCommand.getOverriddenCommands();
+//                if(overriddenCommands.contains(getName())) {
+//                    isOverridden = true;
+//                    break;
+//                }
+//            }
+//        }
+//        // Valid if not overridden
+//        return !isOverridden;
+//    }
     
     /**
      * @see org.komodo.shell.api.ShellCommand#tabCompletion(java.lang.String, java.util.List)
@@ -662,4 +664,32 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
         }
     }
     
+    protected boolean isCurrentTypeValid( final String... descriptorNames ) throws KException {
+        if ( ( descriptorNames == null ) || ( descriptorNames.length == 0 ) ) {
+            return true;
+        }
+
+        final List< String > validTypes = Arrays.asList( descriptorNames );
+        final KomodoObject kobject = getWorkspaceStatus().getCurrentContext();
+
+        // check primary type
+        final String primaryType = kobject.getPrimaryType( getWorkspaceStatus().getTransaction() ).getName();
+
+        if ( validTypes.contains( primaryType ) ) {
+            return true;
+        }
+
+        // check mixins
+        final Descriptor[] mixins = kobject.getDescriptors( getWorkspaceStatus().getTransaction() );
+
+        for ( final Descriptor mixin : mixins ) {
+            if ( validTypes.contains( mixin.getName() ) ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+    
+   
 }

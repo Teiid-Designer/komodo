@@ -5,28 +5,28 @@
  *
  * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
  */
-package org.komodo.relational.commands.model.pushdownfunction;
+package org.komodo.relational.commands.model.virtualprocedure;
 
 import org.komodo.relational.Messages;
 import org.komodo.relational.commands.RelationalShellCommand;
-import org.komodo.relational.model.PushdownFunction;
-import org.komodo.relational.model.internal.PushdownFunctionImpl;
+import org.komodo.relational.model.VirtualProcedure;
+import org.komodo.relational.model.internal.VirtualProcedureImpl;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 
 /**
- * A base class for @{link {@link PushdownFunction PushdownFunction}-related shell commands.
+ * A base class for @{link {@link VirtualProcedure VirtualProcedure}-related shell commands.
  */
-abstract class PushdownFunctionShellCommand extends RelationalShellCommand {
+abstract class VirtualProcedureShellCommand extends RelationalShellCommand {
 
-    protected PushdownFunctionShellCommand( final String name,
+    protected VirtualProcedureShellCommand( final String name,
                                final boolean shouldCommit,
                                final WorkspaceStatus status ) {
         super( status, shouldCommit, name );
     }
 
-    protected PushdownFunction getPushdownFunction() throws Exception {
-        return new PushdownFunctionImpl( getTransaction(), getRepository(), getPath() );
+    protected VirtualProcedure getVirtualProcedure() throws Exception {
+        return new VirtualProcedureImpl( getTransaction(), getRepository(), getPath() );
     }
 
     /**
@@ -36,17 +36,18 @@ abstract class PushdownFunctionShellCommand extends RelationalShellCommand {
      */
     @Override
     public final boolean isValidForCurrentContext() {
+        boolean isValid = false;
         try {
-            return PushdownFunctionImpl.RESOLVER.resolvable(getTransaction(), getContext());
+            isValid = isCurrentTypeValid( TeiidDdlLexicon.CreateProcedure.PROCEDURE_STATEMENT );
         } catch (Exception ex) {
             // exception returns false
         }
-        return false;
+        return isValid;
     }
 
     @Override
     protected String getMessage(Enum< ? > key, Object... parameters) {
-        return Messages.getString(PushdownFunctionCommandMessages.RESOURCE_BUNDLE,key.toString(),parameters);
+        return Messages.getString(VirtualProcedureCommandMessages.RESOURCE_BUNDLE,key.toString(),parameters);
     }
     
     /**
@@ -54,7 +55,7 @@ abstract class PushdownFunctionShellCommand extends RelationalShellCommand {
      */
     @Override
     public void printHelp( final int indent ) {
-        print( indent, Messages.getString( PushdownFunctionCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".help" ) ); //$NON-NLS-1$
+        print( indent, Messages.getString( VirtualProcedureCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".help" ) ); //$NON-NLS-1$
     }
 
     /**
@@ -62,7 +63,7 @@ abstract class PushdownFunctionShellCommand extends RelationalShellCommand {
      */
     @Override
     public void printUsage( final int indent ) {
-        print( indent, Messages.getString( PushdownFunctionCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".usage" ) ); //$NON-NLS-1$
+        print( indent, Messages.getString( VirtualProcedureCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".usage" ) ); //$NON-NLS-1$
     }
 
 }
