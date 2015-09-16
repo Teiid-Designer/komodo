@@ -25,6 +25,7 @@ import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Response.Status;
 import org.komodo.core.KEngine;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
+import org.komodo.rest.relational.KomodoVdbService;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.RepositoryClientEvent;
 import org.komodo.spi.repository.RepositoryObserver;

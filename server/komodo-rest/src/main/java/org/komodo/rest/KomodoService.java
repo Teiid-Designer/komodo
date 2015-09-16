@@ -7,9 +7,9 @@
 */
 package org.komodo.rest;
 
+import static org.komodo.rest.KomodoRestEntity.NO_CONTENT;
 import static org.komodo.rest.Messages.Error.COMMIT_TIMEOUT;
 import static org.komodo.rest.Messages.Error.RESOURCE_NOT_FOUND;
-import static org.komodo.rest.json.KomodoRestEntity.NO_CONTENT;
 import java.util.concurrent.TimeUnit;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -17,9 +17,8 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import org.komodo.core.KEngine;
 import org.komodo.repository.SynchronousCallback;
-import org.komodo.rest.json.KomodoRestEntity;
-import org.komodo.rest.json.KomodoRestEntity.ResourceNotFound;
-import org.komodo.rest.json.serialize.KomodoJsonMarshaller;
+import org.komodo.rest.KomodoRestEntity.ResourceNotFound;
+import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;

@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  ************************************************************************************/
-package org.komodo.rest;
+package org.komodo.rest.relational;
 
 import static org.komodo.spi.constants.StringConstants.CLOSE_ANGLE_BRACKET;
 import static org.komodo.spi.constants.StringConstants.DOT;
@@ -30,7 +30,7 @@ import java.util.ResourceBundle;
 /**
  * Localized messages for the {@code komodo-rest} project.
  */
-public final class Messages {
+public final class RelationalMessages {
 
     /**
      * Messages relating to errors.
@@ -38,69 +38,44 @@ public final class Messages {
     public enum Error {
 
         /**
-         * An error message indicating a repository commit did not complete in the required amount of time.
+         * An error indicating the VDB descriptor JSON representation could not be created.
          */
-        COMMIT_TIMEOUT,
+        VDB_DESCRIPTOR_BUILDER_ERROR,
 
         /**
-         * An error indicating the the JSON entity is incomplete.
+         * An error indicating a VDB could not be created.
          */
-        INCOMPLETE_JSON,
+        VDB_SERVICE_CREATE_VDB_ERROR,
 
         /**
-         * An error message indicating the Komodo Engine did not clear the repository due to an error.
+         * An error indicating an error occurred trying to obtain the specified VDB.
          */
-        KOMODO_ENGINE_CLEAR_ERROR,
+        VDB_SERVICE_GET_VDB_ERROR,
 
         /**
-         * An error message indicating the Komodo Engine did not clear the repository in the required amount of time.
+         * An error indicating a JSON document representing the VDBs in the workspace could not be retrieved.
          */
-        KOMODO_ENGINE_CLEAR_TIMEOUT,
+        VDB_SERVICE_GET_VDBS_ERROR,
 
         /**
-         * An error message indicating the Komodo Engine did not shutdown due to an error.
+         * An error when creating a VDB indicating the input VDB JSON document was missing.
          */
-        KOMODO_ENGINE_SHUTDOWN_ERROR,
+        VDB_SERVICE_MISSING_VDB,
 
         /**
-         * An error message indicating the Komodo Engine did not shutdown in the required amount of time.
+         * An error indicating the VDB name is missing from the input JSON document.
          */
-        KOMODO_ENGINE_SHUTDOWN_TIMEOUT,
+        VDB_SERVICE_MISSING_VDB_NAME,
 
         /**
-         * An error message indicating the Komodo Engine did not startup due to an error.
+         * An error indicating a VDB with the specified name already exists and therefore cannot be created.
          */
-        KOMODO_ENGINE_STARTUP_ERROR,
+        VDB_SERVICE_VDB_EXISTS,
 
         /**
-         * An error message indicating the Komodo Engine did not startup in the required amount of time.
+         * An error indicating the parameter and JSON VDB name does not match for a VDB being created.
          */
-        KOMODO_ENGINE_STARTUP_TIMEOUT,
-
-        /**
-         * An error message indicating the Komodo Engine's workspace manager could not be obtained.
-         */
-        KOMODO_ENGINE_WORKSPACE_MGR_ERROR,
-
-        /**
-         * An error message indicating the requested resource was not found.
-         */
-        RESOURCE_NOT_FOUND,
-
-        /**
-         * An error message indicating a repository rollback had an error.
-         */
-        ROLLBACK_ERROR,
-
-        /**
-         * An error message indicating a repository rollback did not complete in the required amount of time.
-         */
-        ROLLBACK_TIMEOUT,
-
-        /**
-         * An error indicating the token found in a JSON representation is unknown or misplaced.
-         */
-        UNEXPECTED_JSON_TOKEN;
+        VDB_SERVICE_VDB_NAME_ERROR;
 
         /**
          * {@inheritDoc}
@@ -114,40 +89,8 @@ public final class Messages {
 
     }
 
-    /**
-     * General messages.
-     */
-    public enum General {
-
-        /**
-         * The name of the DELETE operation.
-         */
-        DELETE_OPERATION_NAME,
-
-        /**
-         * The name of the GET operation.
-         */
-        GET_OPERATION_NAME,
-
-        /**
-         * A message indicating a value is not present.
-         */
-        NO_VALUE;
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see java.lang.Enum#toString()
-         */
-        @Override
-        public String toString() {
-            return getEnumName( this ) + DOT + name();
-        }
-
-    }
-
-    private static final String BUNDLE_NAME = Messages.class.getPackage().getName() + DOT
-                                              + Messages.class.getSimpleName().toLowerCase();
+    private static final String BUNDLE_NAME = RelationalMessages.class.getPackage().getName() + DOT
+                                              + RelationalMessages.class.getSimpleName().toLowerCase();
 
     private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle( BUNDLE_NAME );
 
@@ -203,7 +146,7 @@ public final class Messages {
     /**
      * Don't allow construction outside of this class.
      */
-    private Messages() {
+    private RelationalMessages() {
         // nothing to do
     }
 
