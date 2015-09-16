@@ -44,7 +44,7 @@ public class SetPropertyCommand extends BuiltInShellCommand {
     }
 
     @Override
-    public boolean isCoreCommand() {
+    public boolean isValidForCurrentContext() {
         return true;
     }
     

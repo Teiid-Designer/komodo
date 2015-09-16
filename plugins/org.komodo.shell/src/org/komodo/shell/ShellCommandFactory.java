@@ -195,7 +195,7 @@ public class ShellCommandFactory {
         if ( ( aliases != null ) && ( aliases.length != 0 ) ) {
             for ( final String alias : aliases ) {
                 if ( !StringUtils.isBlank( alias ) ) {
-                    this.aliasMap.put( alias.toLowerCase(), command );
+                    this.aliasMap.put(  alias.toLowerCase(), command );
                 }
             }
         }

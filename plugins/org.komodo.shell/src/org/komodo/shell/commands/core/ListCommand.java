@@ -48,7 +48,7 @@ public class ListCommand extends BuiltInShellCommand {
     }
 
     @Override
-    public boolean isCoreCommand() {
+    public boolean isValidForCurrentContext() {
         return true;
     }
     

@@ -36,7 +36,7 @@ public class UnsetPropertyCommand extends BuiltInShellCommand {
     }
 
     @Override
-    public boolean isCoreCommand() {
+    public boolean isValidForCurrentContext() {
         return true;
     }
     

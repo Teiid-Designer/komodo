@@ -49,7 +49,7 @@ public class ShowSummaryCommand extends BuiltInShellCommand {
     }
 
     @Override
-    public boolean isCoreCommand() {
+    public boolean isValidForCurrentContext() {
         return true;
     }
     
