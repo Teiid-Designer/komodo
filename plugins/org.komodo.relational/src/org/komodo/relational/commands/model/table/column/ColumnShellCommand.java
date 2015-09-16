@@ -5,28 +5,28 @@
  *
  * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
  */
-package org.komodo.relational.commands.model.pushdownfunction;
+package org.komodo.relational.commands.model.table.column;
 
 import org.komodo.relational.Messages;
 import org.komodo.relational.commands.RelationalShellCommand;
-import org.komodo.relational.model.PushdownFunction;
-import org.komodo.relational.model.internal.PushdownFunctionImpl;
+import org.komodo.relational.model.Column;
+import org.komodo.relational.model.internal.ColumnImpl;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 
 /**
- * A base class for @{link {@link PushdownFunction PushdownFunction}-related shell commands.
+ * A base class for @{link {@link Column Column}-related shell commands.
  */
-abstract class PushdownFunctionShellCommand extends RelationalShellCommand {
+abstract class ColumnShellCommand extends RelationalShellCommand {
 
-    protected PushdownFunctionShellCommand( final String name,
+    protected ColumnShellCommand( final String name,
                                final boolean shouldCommit,
                                final WorkspaceStatus status ) {
         super( status, shouldCommit, name );
     }
 
-    protected PushdownFunction getPushdownFunction() throws Exception {
-        return new PushdownFunctionImpl( getTransaction(), getRepository(), getPath() );
+    protected Column getColumn() throws Exception {
+        return new ColumnImpl( getTransaction(), getRepository(), getPath() );
     }
 
     /**
@@ -36,17 +36,18 @@ abstract class PushdownFunctionShellCommand extends RelationalShellCommand {
      */
     @Override
     public final boolean isValidForCurrentContext() {
+        boolean isValid = false;
         try {
-            return PushdownFunctionImpl.RESOLVER.resolvable(getTransaction(), getContext());
+            isValid = isCurrentTypeValid( TeiidDdlLexicon.CreateTable.TABLE_ELEMENT );
         } catch (Exception ex) {
             // exception returns false
         }
-        return false;
+        return isValid;
     }
 
     @Override
     protected String getMessage(Enum< ? > key, Object... parameters) {
-        return Messages.getString(PushdownFunctionCommandMessages.RESOURCE_BUNDLE,key.toString(),parameters);
+        return Messages.getString(ColumnCommandMessages.RESOURCE_BUNDLE,key.toString(),parameters);
     }
     
     /**
@@ -54,7 +55,7 @@ abstract class PushdownFunctionShellCommand extends RelationalShellCommand {
      */
     @Override
     public void printHelp( final int indent ) {
-        print( indent, Messages.getString( PushdownFunctionCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".help" ) ); //$NON-NLS-1$
+        print( indent, Messages.getString( ColumnCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".help" ) ); //$NON-NLS-1$
     }
 
     /**
@@ -62,7 +63,7 @@ abstract class PushdownFunctionShellCommand extends RelationalShellCommand {
      */
     @Override
     public void printUsage( final int indent ) {
-        print( indent, Messages.getString( PushdownFunctionCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".usage" ) ); //$NON-NLS-1$
+        print( indent, Messages.getString( ColumnCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".usage" ) ); //$NON-NLS-1$
     }
 
 }

@@ -78,33 +78,6 @@ public abstract class RelationalShellCommand extends BuiltInShellCommand {
         return WorkspaceManager.getInstance( getRepository() );
     }
 
-    protected boolean isCurrentTypeValid( final String... descriptorNames ) throws KException {
-        if ( ( descriptorNames == null ) || ( descriptorNames.length == 0 ) ) {
-            return true;
-        }
-
-        final List< String > validTypes = Arrays.asList( descriptorNames );
-        final KomodoObject kobject = getWorkspaceStatus().getCurrentContext();
-
-        // check primary type
-        final String primaryType = kobject.getPrimaryType( getTransaction() ).getName();
-
-        if ( validTypes.contains( primaryType ) ) {
-            return true;
-        }
-
-        // check mixins
-        final Descriptor[] mixins = kobject.getDescriptors( getTransaction() );
-
-        for ( final Descriptor mixin : mixins ) {
-            if ( validTypes.contains( mixin.getName() ) ) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-    
     protected String getMessage(Enum< ? > key, Object... parameters) {
         return Messages.getString(WorkspaceCommandMessages.RESOURCE_BUNDLE,key.toString(),parameters);
     }

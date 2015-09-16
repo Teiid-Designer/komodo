@@ -45,7 +45,7 @@ public class HomeCommand extends BuiltInShellCommand {
     }
 
     @Override
-    public boolean isCoreCommand() {
+    public boolean isValidForCurrentContext() {
         return true;
     }
     
