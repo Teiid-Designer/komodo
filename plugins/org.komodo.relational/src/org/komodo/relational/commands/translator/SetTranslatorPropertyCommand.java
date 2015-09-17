@@ -53,7 +53,7 @@ public final class SetTranslatorPropertyCommand extends TranslatorShellCommand {
         final Translator translator = getTranslator();
         final UnitOfWork transaction = getTransaction();
         boolean success = true;
-        
+
         switch ( name ) {
             case DESCRIPTION:
                 translator.setDescription( transaction, value );
