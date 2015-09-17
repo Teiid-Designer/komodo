@@ -58,7 +58,7 @@ public final class SetPermissionPropertyCommand extends PermissionShellCommand {
         final String value = requiredArgument( 1, getWorkspaceMessage(MISSING_PROPERTY_NAME_VALUE) );
 
         final Permission permission = getPermission();
-        
+
         final UnitOfWork transaction = getTransaction();
         boolean success = true;
 

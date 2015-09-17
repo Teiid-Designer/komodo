@@ -25,8 +25,48 @@ public class PermissionCommandMessages implements StringConstants {
     
     @SuppressWarnings( "javadoc" )
     public enum General {
-        INVALID_DIRECTION_PROPERTY_VALUE,
-        INVALID_NULLABLE_PROPERTY_VALUE;
+        MISSING_CONDITION_NAME,
+        MISSING_MASK_NAME;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+    
+    @SuppressWarnings( "javadoc" )
+    public enum AddConditionCommand {
+        CONDITION_ADDED;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum DeleteConditionCommand {
+        CONDITION_DELETED;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum AddMaskCommand {
+        MASK_ADDED;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum DeleteMaskCommand {
+        MASK_DELETED;
 
         @Override
         public String toString() {

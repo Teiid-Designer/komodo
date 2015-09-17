@@ -25,8 +25,27 @@ public class UniqueConstraintCommandMessages implements StringConstants {
     
     @SuppressWarnings( "javadoc" )
     public enum General {
-        INVALID_DIRECTION_PROPERTY_VALUE,
-        INVALID_NULLABLE_PROPERTY_VALUE;
+        MISSING_COLUMN_NAME;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+    
+    @SuppressWarnings( "javadoc" )
+    public enum AddColumnCommand {
+        COLUMN_ADDED;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+    
+    @SuppressWarnings( "javadoc" )
+    public enum DeleteColumnCommand {
+        COLUMN_DELETED;
 
         @Override
         public String toString() {
