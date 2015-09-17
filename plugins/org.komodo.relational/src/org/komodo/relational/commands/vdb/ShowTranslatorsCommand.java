@@ -7,16 +7,13 @@
  */
 package org.komodo.relational.commands.vdb;
 
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.TRANSLATOR_NAME;
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.NAME_TYPE_DISPLAY;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowTranslatorsCommand.NO_TRANSLATORS;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowTranslatorsCommand.TRANSLATORS_HEADER;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
-import java.util.ArrayList;
-import java.util.List;
 import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.shell.util.PrintUtils;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
@@ -49,12 +46,9 @@ public final class ShowTranslatorsCommand extends VdbShellCommand {
             print( MESSAGE_INDENT, getMessage(NO_TRANSLATORS, vdb.getName(uow)) );
         } else {
             print( MESSAGE_INDENT, getMessage(TRANSLATORS_HEADER, vdb.getName(uow)) );
-            List<String> names = new ArrayList<String>(translators.length);
             for ( final Translator translator : translators ) {
-                names.add(translator.getName(uow));
+                print(MESSAGE_INDENT,getMessage(NAME_TYPE_DISPLAY,translator.getName(uow),translator.getTypeDisplayName()));
             }
-            
-            PrintUtils.printList(getWorkspaceStatus(), names, getMessage(TRANSLATOR_NAME));
         }
         print();
 
