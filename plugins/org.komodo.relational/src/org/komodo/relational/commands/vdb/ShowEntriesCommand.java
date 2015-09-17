@@ -7,7 +7,7 @@
  */
 package org.komodo.relational.commands.vdb;
 
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.ENTRY_NAME;
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.NAME_TYPE_DISPLAY;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowEntriesCommand.ENTRIES_HEADER;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowEntriesCommand.NO_ENTRIES;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
@@ -16,7 +16,6 @@ import java.util.List;
 import org.komodo.relational.vdb.Entry;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.shell.util.PrintUtils;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
@@ -51,10 +50,8 @@ public final class ShowEntriesCommand extends VdbShellCommand {
             print( MESSAGE_INDENT, getMessage(ENTRIES_HEADER, vdb.getName(uow)) );
             List<String> names = new ArrayList<String>(entries.length);
             for ( final Entry entry : entries ) {
-                names.add(entry.getName(uow));
+                print(MESSAGE_INDENT,getMessage(NAME_TYPE_DISPLAY,entry.getName(uow),entry.getTypeDisplayName()));
             }
-            
-            PrintUtils.printList(getWorkspaceStatus(), names, getMessage(ENTRY_NAME));
         }
         print();
 

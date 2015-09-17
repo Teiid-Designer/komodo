@@ -19,7 +19,7 @@ import org.komodo.shell.api.WorkspaceStatus;
  */
 public final class ServerSetCommand extends ServerShellCommand {
 
-    static final String NAME = "server-set"; //$NON-NLS-1$
+    static final String NAME = "set-server"; //$NON-NLS-1$
 
     /**
      * @param status
