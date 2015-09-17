@@ -12,7 +12,6 @@ import org.komodo.relational.commands.RelationalShellCommand;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.internal.VdbImpl;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 /**
  * A base class for @{link {@link Vdb VDB}-related shell commands.
@@ -36,13 +35,12 @@ abstract class VdbShellCommand extends RelationalShellCommand {
      */
     @Override
     public final boolean isValidForCurrentContext() {
-        boolean isValid = false;
         try {
-            isValid = isCurrentTypeValid( VdbLexicon.Vdb.VIRTUAL_DATABASE );
+            return VdbImpl.RESOLVER.resolvable(getTransaction(), getContext());
         } catch (Exception ex) {
             // exception returns false
         }
-        return isValid;
+        return false;
     }
 
     @Override

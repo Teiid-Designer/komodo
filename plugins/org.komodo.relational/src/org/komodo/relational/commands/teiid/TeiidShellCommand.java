@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.teiid;
 
-import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.Messages;
 import org.komodo.relational.commands.RelationalShellCommand;
 import org.komodo.relational.teiid.Teiid;
@@ -36,13 +35,12 @@ abstract class TeiidShellCommand extends RelationalShellCommand {
      */
     @Override
     public final boolean isValidForCurrentContext() {
-        boolean isValid = false;
         try {
-            isValid = isCurrentTypeValid( KomodoLexicon.Teiid.NODE_TYPE );
+            return TeiidImpl.RESOLVER.resolvable(getTransaction(), getContext());
         } catch (Exception ex) {
             // exception returns false
         }
-        return isValid;
+        return false;
     }
 
     @Override

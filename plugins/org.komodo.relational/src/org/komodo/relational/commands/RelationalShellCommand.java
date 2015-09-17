@@ -8,8 +8,6 @@
 package org.komodo.relational.commands;
 
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.INVALID_OBJECT_TYPE;
-import java.util.Arrays;
-import java.util.List;
 import org.komodo.relational.Messages;
 import org.komodo.relational.RelationalObject;
 import org.komodo.relational.workspace.WorkspaceManager;
@@ -17,7 +15,6 @@ import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.KException;
-import org.komodo.spi.repository.Descriptor;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;

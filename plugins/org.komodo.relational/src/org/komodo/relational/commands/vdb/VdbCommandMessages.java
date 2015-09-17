@@ -33,11 +33,7 @@ public class VdbCommandMessages implements StringConstants {
         MISSING_TRANSLATOR_NAME,
         MISSING_TRANSLATOR_TYPE,
         MISSING_VDB_VERSION,
-        DATA_ROLE_NAME,
-        ENTRY_NAME,
-        IMPORT_NAME,
-        MODEL_NAME,
-        TRANSLATOR_NAME;
+        NAME_TYPE_DISPLAY;
 
         @Override
         public String toString() {

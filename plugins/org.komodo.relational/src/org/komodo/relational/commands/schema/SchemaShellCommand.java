@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.schema;
 
-import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.Messages;
 import org.komodo.relational.commands.RelationalShellCommand;
 import org.komodo.relational.model.Schema;
@@ -36,13 +35,12 @@ abstract class SchemaShellCommand extends RelationalShellCommand {
      */
     @Override
     public final boolean isValidForCurrentContext() {
-        boolean isValid = false;
         try {
-            isValid = isCurrentTypeValid( KomodoLexicon.Schema.NODE_TYPE );
+            return SchemaImpl.RESOLVER.resolvable(getTransaction(), getContext());
         } catch (Exception ex) {
             // exception returns false
         }
-        return isValid;
+        return false;
     }
 
     @Override

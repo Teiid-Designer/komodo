@@ -12,7 +12,6 @@ import org.komodo.relational.commands.RelationalShellCommand;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.internal.ModelImpl;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 /**
  * A base class for @{link {@link Model Model}-related shell commands.
@@ -36,13 +35,12 @@ abstract class ModelShellCommand extends RelationalShellCommand {
      */
     @Override
     public final boolean isValidForCurrentContext() {
-        boolean isValid = false;
         try {
-            isValid = isCurrentTypeValid( VdbLexicon.Vdb.DECLARATIVE_MODEL );
+            return ModelImpl.RESOLVER.resolvable(getTransaction(), getContext());
         } catch (Exception ex) {
             // exception returns false
         }
-        return isValid;
+        return false;
     }
 
     @Override
