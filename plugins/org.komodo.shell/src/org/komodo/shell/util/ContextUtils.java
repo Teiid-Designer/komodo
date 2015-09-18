@@ -9,11 +9,11 @@ package org.komodo.shell.util;
 
 import java.util.Arrays;
 import java.util.List;
+import org.komodo.core.KomodoLexicon.Komodo;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
-import org.komodo.spi.repository.Repository;
 import org.komodo.utils.StringUtils;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
@@ -151,60 +151,6 @@ public class ContextUtils implements StringConstants {
 		}
 
 		return resultContext;
-	}
-
-	/**
-	 * Determine if the second context is above the first.
-	 * @param transaction the transaction
-	 * @param context1 the first context
-	 * @param context2 the second context
-	 * @return 'true' if context2 is above(closer to root) than context1
-	 * @throws KException the exception
-	 */
-	public static boolean isContextAbove(Repository.UnitOfWork transaction, KomodoObject context1, KomodoObject context2) throws KException {
-		int context1Level = getContextLevel(transaction,context1);
-		int context2Level = getContextLevel(transaction,context2);
-
-		return (context2Level < context1Level) ? true : false;
-	}
-
-	/**
-	 * Determine if the second context is below the first.
-	 * @param transaction the transaction
-	 * @param context1 the first context
-	 * @param context2 the second context
-	 * @return 'true' if context2 is below(further from root) than context1
-	 * @throws KException the exception
-	 */
-	public static boolean isContextBelow(Repository.UnitOfWork transaction, KomodoObject context1, KomodoObject context2) throws KException {
-		int context1Level = getContextLevel(transaction,context1);
-		int context2Level = getContextLevel(transaction,context2);
-
-		return (context2Level > context1Level) ? true : false;
-	}
-
-	/**
-	 * Get the context level, relative to the root context.
-	 * Examples:
-	 * tko.komodo = 0
-	 * tko.komodo-tko.workspace = 1
-	 * tko.komodo-tko.workspace-MyVdb = 2
-	 *
-	 * @param transaction the transaction
-	 * @param context the supplied context
-	 * @return the context level relative to the root.
-	 * @throws KException the exception
-	 */
-	public static int getContextLevel(Repository.UnitOfWork transaction, KomodoObject context) throws KException {
-		int contextLevel = 0;
-
-		KomodoObject parent = context.getParent(transaction);
-		while(parent!=null) {
-			contextLevel++;
-			parent = parent.getParent(transaction);
-		}
-
-		return contextLevel;
 	}
 
 	/**

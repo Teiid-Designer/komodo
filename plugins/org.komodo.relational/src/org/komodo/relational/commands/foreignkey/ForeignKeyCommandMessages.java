@@ -33,26 +33,6 @@ public class ForeignKeyCommandMessages implements StringConstants {
         }
     }
     
-    @SuppressWarnings( "javadoc" )
-    public enum AddColumnCommand {
-        COLUMN_ADDED;
-
-        @Override
-        public String toString() {
-            return getEnumName(this) + DOT + name();
-        }
-    }
-    
-    @SuppressWarnings( "javadoc" )
-    public enum DeleteColumnCommand {
-        COLUMN_DELETED;
-
-        @Override
-        public String toString() {
-            return getEnumName(this) + DOT + name();
-        }
-    }
-    
     private static String getEnumName(Enum<?> enumValue) {
         String className = enumValue.getClass().getName();
         String[] components = className.split("\\$"); //$NON-NLS-1$
