@@ -22,7 +22,6 @@
 	<property name="libs" value="jackson-annotations.jar,
                                  jackson-core.jar,
                                  jackson-databind.jar,
-                                 jackson-module-jaxb-annotations.jar,
 	                             jackson-module-jsonschema.jar,
                                  xsom.jar,
                                  relaxngDatatype.jar"/>
@@ -69,11 +68,9 @@
 		<!-- Executes maven from the root directory, installing
 		     the project dependencies.
 		-->
-		<!--
 		<mvn dir="${GIT-HOME}"
 			 args="-pl target-platform
 			       install"/>
-			       -->
 	</target>
 
 	<target name="clean-internal" if="should-generate">
@@ -91,7 +88,7 @@
 		<echo message="Generating from maven ..." />
 
 		<!-- Call the process sources goal and generate using javacc -->
-		<mvn dir="." args="-P download-sources,generate-jaxb-classes process-sources" />
+		<mvn dir="." args="-P download-sources process-sources" />
 
 	</target>
 </project>

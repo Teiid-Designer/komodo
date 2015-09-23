@@ -226,7 +226,7 @@
                 <xs:documentation>Vdb Property</xs:documentation>
             </xs:annotation>
             <xs:extension base="property">
-                <xs:attribute name="suggestedValue" type="vdbPropertyEnumType" use="optional"/>
+                <xs:attribute name="suggestedName" type="vdbPropertyEnumType" use="optional"/>
             </xs:extension>
         </xs:simpleContent>
     </xs:complexType>
@@ -247,7 +247,7 @@
                 <xs:documentation>Model Property</xs:documentation>
             </xs:annotation>
             <xs:extension base="property">
-                <xs:attribute name="suggestedValue" type="modelPropertyEnumType" use="optional"/>
+                <xs:attribute name="suggestedName" type="modelPropertyEnumType" use="optional"/>
             </xs:extension>
         </xs:simpleContent>
     </xs:complexType>
@@ -268,7 +268,7 @@
                 <xs:documentation>Translator Property</xs:documentation>
             </xs:annotation>
             <xs:extension base="property">
-                <xs:attribute name="suggestedValue" type="translatorPropertyEnumType" use="optional"/>
+                <xs:attribute name="suggestedName" type="translatorPropertyEnumType" use="optional"/>
             </xs:extension>
         </xs:simpleContent>
     </xs:complexType>
@@ -289,7 +289,7 @@
                 <xs:documentation>Entry Property</xs:documentation>
             </xs:annotation>
             <xs:extension base="property">
-                <xs:attribute name="suggestedValue" type="entryPropertyEnumType" use="optional"/>
+                <xs:attribute name="suggestedName" type="entryPropertyEnumType" use="optional"/>
             </xs:extension>
         </xs:simpleContent>
     </xs:complexType>
