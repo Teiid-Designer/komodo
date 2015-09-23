@@ -22,6 +22,8 @@
 package org.komodo.spi.repository;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import org.komodo.spi.constants.StringConstants;
 
@@ -43,47 +45,47 @@ public enum KomodoType {
     /**
      * Vdb
      */
-    VDB,
+    VDB("vdb"), //$NON-NLS-1$
 
     /**
      * Vdb Entry
      */
-    VDB_ENTRY,
+    VDB_ENTRY("entry"), //$NON-NLS-1$
 
     /**
      * Vdb Import
      */
-    VDB_IMPORT,
+    VDB_IMPORT("import-vdb"), //$NON-NLS-1$
 
     /**
      * Vdb Model Source
      */
-    VDB_MODEL_SOURCE,
+    VDB_MODEL_SOURCE("source"), //$NON-NLS-1$
 
     /**
      * Vdb Translator
      */
-    VDB_TRANSLATOR,
+    VDB_TRANSLATOR("translator"), //$NON-NLS-1$
 
     /**
      * Vdb Condition
      */
-    VDB_CONDITION,
+    VDB_CONDITION("condition"), //$NON-NLS-1$
 
     /**
      * Vdb Data Role
      */
-    VDB_DATA_ROLE,
+    VDB_DATA_ROLE("data-role"), //$NON-NLS-1$
 
     /**
      * Vdb Make
      */
-    VDB_MASK,
+    VDB_MASK("mask"), //$NON-NLS-1$
 
     /**
      * Vdb Permission
      */
-    VDB_PERMISSION,
+    VDB_PERMISSION("permission"), //$NON-NLS-1$
 
     /**
      * Access Pattern
@@ -118,7 +120,7 @@ public enum KomodoType {
     /**
      * Model
      */
-    MODEL,
+    MODEL("model"), //$NON-NLS-1$
 
     /**
      * Paremeter
@@ -200,6 +202,24 @@ public enum KomodoType {
      */
     UNKNOWN;
 
+    private Collection<String> aliases;
+
+    /**
+     * Default constructor
+     */
+    private KomodoType() {
+    }
+
+    private KomodoType(String... aliases) {
+        this();
+        if (aliases != null) {
+            this.aliases = new ArrayList<String>(aliases.length);
+            for (String alias : aliases) {
+                this.aliases.add(alias);
+            }
+        }
+    }
+
     /**
      * @return actual type
      */
@@ -213,6 +233,16 @@ public enum KomodoType {
         }
 
         return sb.toString();
+    }
+
+    /**
+     * @return the aliases
+     */
+    public Collection<String> getAliases() {
+        if (this.aliases == null)
+            return Collections.emptyList();
+
+        return this.aliases;
     }
 
     @Override
@@ -235,6 +265,9 @@ public enum KomodoType {
 
         for (KomodoType value : values()) {
             if (value.getType().equalsIgnoreCase(kType))
+                return value;
+
+            if (value.getAliases().contains(kType))
                 return value;
         }
 
