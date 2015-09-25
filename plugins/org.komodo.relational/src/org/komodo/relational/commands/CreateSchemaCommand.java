@@ -7,10 +7,12 @@
  */
 package org.komodo.relational.commands;
 
+import static org.komodo.relational.commands.WorkspaceCommandMessages.CreateSchemaCommand.CREATE_SCHEMA_ERROR;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.CreateSchemaCommand.MISSING_SCHEMA_NAME;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.CreateSchemaCommand.SCHEMA_CREATED;
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.shell.CommandResultImpl;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoType;
 
@@ -26,7 +28,7 @@ public final class CreateSchemaCommand extends RelationalShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public CreateSchemaCommand( final WorkspaceStatus status ) {
-        super( status, true, NAME );
+        super( status, NAME );
     }
 
     /**
@@ -35,16 +37,31 @@ public final class CreateSchemaCommand extends RelationalShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final String schemaName = requiredArgument( 0, getMessage(MISSING_SCHEMA_NAME) );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        final WorkspaceManager mgr = getWorkspaceManager();
-        mgr.createSchema( getTransaction(), null, schemaName );
+        try {
+            final String schemaName = requiredArgument( 0, getMessage( MISSING_SCHEMA_NAME ) );
 
-        // Print success message
-        print(MESSAGE_INDENT, getMessage(SCHEMA_CREATED,schemaName));
-        
-        return true;
+            final WorkspaceManager mgr = getWorkspaceManager();
+            mgr.createSchema( getTransaction(), null, schemaName );
+
+            result = new CommandResultImpl( getMessage( SCHEMA_CREATED, schemaName ) );
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( CREATE_SCHEMA_ERROR ), e );
+        }
+
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 1;
     }
 
     /**
@@ -56,9 +73,9 @@ public final class CreateSchemaCommand extends RelationalShellCommand {
     public boolean isValidForCurrentContext() {
         // Only allow Schema create in the workspace
         try {
-            KomodoType contextType = getContext().getTypeIdentifier(getTransaction());
-            return contextType==KomodoType.WORKSPACE;
-        } catch (Exception ex) {
+            KomodoType contextType = getContext().getTypeIdentifier( getTransaction() );
+            return contextType == KomodoType.WORKSPACE;
+        } catch ( Exception ex ) {
             // on exception will return false
         }
         return false;

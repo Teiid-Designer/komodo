@@ -15,7 +15,7 @@ import java.util.List;
 import org.komodo.relational.model.ForeignKey;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.shell.commands.core.SetPropertyCommand;
+import org.komodo.shell.commands.SetPropertyCommand;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
@@ -23,7 +23,7 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
  */
 public final class SetForeignKeyPropertyCommand extends ForeignKeyShellCommand {
 
-    static final String NAME = "set-foreignkey-property"; //$NON-NLS-1$
+    static final String NAME = SetPropertyCommand.NAME;
 
     private static final String PRIMARY_TYPE = "primary-type"; //$NON-NLS-1$
 
@@ -35,8 +35,6 @@ public final class SetForeignKeyPropertyCommand extends ForeignKeyShellCommand {
      */
     public SetForeignKeyPropertyCommand( final WorkspaceStatus status ) {
         super( NAME, true, status );
-        // Overrides the BuiltInCommand "set-property"
-        setOverriddenCommands(new String[]{SetPropertyCommand.NAME});
     }
 
     /**
@@ -50,7 +48,7 @@ public final class SetForeignKeyPropertyCommand extends ForeignKeyShellCommand {
         final String value = requiredArgument( 1, getWorkspaceMessage(MISSING_PROPERTY_NAME_VALUE) );
 
         final ForeignKey fk = getForeignKey();
-        
+
         final UnitOfWork transaction = getTransaction();
         boolean success = true;
 

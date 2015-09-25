@@ -7,29 +7,33 @@
  */
 package org.komodo.relational.commands.parameter;
 
-import static org.komodo.relational.commands.parameter.ParameterCommandMessages.General.INVALID_DIRECTION_PROPERTY_VALUE;
-import static org.komodo.relational.commands.parameter.ParameterCommandMessages.General.INVALID_NULLABLE_PROPERTY_VALUE;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.INVALID_BOOLEAN_PROPERTY_VALUE;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.INVALID_INTEGER_PROPERTY_VALUE;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.INVALID_PROPERTY_NAME;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.MISSING_PROPERTY_NAME_VALUE;
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_ERROR;
+import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_SUCCESS;
+import static org.komodo.relational.commands.parameter.ParameterCommandMessages.General.INVALID_DIRECTION_PROPERTY_VALUE;
+import static org.komodo.relational.commands.parameter.ParameterCommandMessages.General.INVALID_NULLABLE_PROPERTY_VALUE;
 import java.util.Arrays;
 import java.util.List;
 import org.komodo.relational.RelationalConstants.Nullable;
 import org.komodo.relational.model.Parameter;
 import org.komodo.relational.model.Parameter.Direction;
+import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.shell.commands.core.SetPropertyCommand;
+import org.komodo.shell.commands.SetPropertyCommand;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.utils.StringUtils;
 
 /**
  * A shell command to set Parameter properties
  */
 public final class SetParameterPropertyCommand extends ParameterShellCommand {
 
-    static final String NAME = "set-parameter-property"; //$NON-NLS-1$
+    static final String NAME = SetPropertyCommand.NAME;
 
     private static final String DATATYPE_NAME = "datatype-name"; //$NON-NLS-1$
     private static final String DEFAULT_VALUE = "default-value"; //$NON-NLS-1$
@@ -49,9 +53,7 @@ public final class SetParameterPropertyCommand extends ParameterShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public SetParameterPropertyCommand( final WorkspaceStatus status ) {
-        super( NAME, true, status );
-        // Overrides the BuiltInCommand "set-property"
-        setOverriddenCommands(new String[]{SetPropertyCommand.NAME});
+        super( NAME, status );
     }
 
     /**
@@ -60,93 +62,110 @@ public final class SetParameterPropertyCommand extends ParameterShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final String name = requiredArgument( 0, getWorkspaceMessage(MISSING_PROPERTY_NAME_VALUE) );
-        final String value = requiredArgument( 1, getWorkspaceMessage(MISSING_PROPERTY_NAME_VALUE) );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        final Parameter parameter = getParameter();
-        final UnitOfWork transaction = getTransaction();
-        boolean success = true;
+        try {
+            final String name = requiredArgument( 0, getWorkspaceMessage( MISSING_PROPERTY_NAME_VALUE ) );
+            final String value = requiredArgument( 1, getWorkspaceMessage( MISSING_PROPERTY_NAME_VALUE ) );
 
-        switch ( name ) {
-            case DATATYPE_NAME:
-                parameter.setDatatypeName(transaction, value);
-                break;
-            case DEFAULT_VALUE:
-                parameter.setDefaultValue(transaction, value);
-                break;
-            case DIRECTION:
-                if ( Direction.IN.name().equals( value ) ) {
-                    parameter.setDirection( transaction, Direction.IN );
-                } else if ( Direction.IN_OUT.name().equals( value ) ) {
-                    parameter.setDirection( transaction, Direction.IN_OUT );
-                } else if ( Direction.OUT.name().equals( value ) ) {
-                    parameter.setDirection( transaction, Direction.OUT );
-                } else if ( Direction.VARIADIC.name().equals( value ) ) {
-                    parameter.setDirection( transaction, Direction.VARIADIC );
-                } else {
-                    print( MESSAGE_INDENT, getWorkspaceMessage(INVALID_DIRECTION_PROPERTY_VALUE, NULLABLE ) );
-                    success = false;
-                }
-                break;
-            case LENGTH:
-                try {
-                    final long length = Long.parseLong( value );
-                    parameter.setLength(transaction, length);
-                } catch ( final NumberFormatException e ) {
-                    print( MESSAGE_INDENT, getWorkspaceMessage(INVALID_INTEGER_PROPERTY_VALUE, LENGTH ) );
-                    success = false;
-                }
+            final Parameter parameter = getParameter();
+            final UnitOfWork transaction = getTransaction();
+            String errorMsg = null;
 
-                break;
-            case NULLABLE:
-                if ( Nullable.NO_NULLS.name().equals( value ) ) {
-                    parameter.setNullable( transaction, Nullable.NO_NULLS );
-                } else if ( Nullable.NULLABLE.name().equals( value ) ) {
-                    parameter.setNullable( transaction, Nullable.NULLABLE );
-                } else if ( Nullable.NULLABLE_UNKNOWN.name().equals( value ) ) {
-                    parameter.setNullable( transaction, Nullable.NULLABLE_UNKNOWN );
-                } else {
-                    print( MESSAGE_INDENT, getWorkspaceMessage(INVALID_NULLABLE_PROPERTY_VALUE, NULLABLE ) );
-                    success = false;
-                }
-                break;
-            case PRECISION:
-                try {
-                    final long precision = Long.parseLong( value );
-                    parameter.setPrecision(transaction, precision);
-                } catch ( final NumberFormatException e ) {
-                    print( MESSAGE_INDENT, getWorkspaceMessage(INVALID_INTEGER_PROPERTY_VALUE, PRECISION ) );
-                    success = false;
-                }
+            switch ( name ) {
+                case DATATYPE_NAME:
+                    parameter.setDatatypeName( transaction, value );
+                    break;
+                case DEFAULT_VALUE:
+                    parameter.setDefaultValue( transaction, value );
+                    break;
+                case DIRECTION:
+                    if ( Direction.IN.name().equals( value ) ) {
+                        parameter.setDirection( transaction, Direction.IN );
+                    } else if ( Direction.IN_OUT.name().equals( value ) ) {
+                        parameter.setDirection( transaction, Direction.IN_OUT );
+                    } else if ( Direction.OUT.name().equals( value ) ) {
+                        parameter.setDirection( transaction, Direction.OUT );
+                    } else if ( Direction.VARIADIC.name().equals( value ) ) {
+                        parameter.setDirection( transaction, Direction.VARIADIC );
+                    } else {
+                        errorMsg = getWorkspaceMessage( INVALID_DIRECTION_PROPERTY_VALUE, NULLABLE );
+                    }
 
-                break;
-            case RESULT:
-                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                    parameter.setResult( transaction, Boolean.parseBoolean( value ) );
-                } else {
-                    print( MESSAGE_INDENT, getWorkspaceMessage(INVALID_BOOLEAN_PROPERTY_VALUE, RESULT ) );
-                    success = false;
-                }
+                    break;
+                case LENGTH:
+                    try {
+                        final long length = Long.parseLong( value );
+                        parameter.setLength( transaction, length );
+                    } catch ( final NumberFormatException e ) {
+                        errorMsg = getWorkspaceMessage( INVALID_INTEGER_PROPERTY_VALUE, LENGTH );
+                    }
 
-                break;
-            case SCALE:
-                try {
-                    final long scale = Long.parseLong( value );
-                    parameter.setScale(transaction, scale);
-                } catch ( final NumberFormatException e ) {
-                    print( MESSAGE_INDENT, getWorkspaceMessage(INVALID_INTEGER_PROPERTY_VALUE, SCALE ) );
-                    success = false;
-                }
+                    break;
+                case NULLABLE:
+                    if ( Nullable.NO_NULLS.name().equals( value ) ) {
+                        parameter.setNullable( transaction, Nullable.NO_NULLS );
+                    } else if ( Nullable.NULLABLE.name().equals( value ) ) {
+                        parameter.setNullable( transaction, Nullable.NULLABLE );
+                    } else if ( Nullable.NULLABLE_UNKNOWN.name().equals( value ) ) {
+                        parameter.setNullable( transaction, Nullable.NULLABLE_UNKNOWN );
+                    } else {
+                        errorMsg = getWorkspaceMessage( INVALID_NULLABLE_PROPERTY_VALUE, NULLABLE );
+                    }
 
-                break;
-            default:
-                success = false;
-                print( MESSAGE_INDENT, getWorkspaceMessage(INVALID_PROPERTY_NAME, NAME ) );
-                break;
+                    break;
+                case PRECISION:
+                    try {
+                        final long precision = Long.parseLong( value );
+                        parameter.setPrecision( transaction, precision );
+                    } catch ( final NumberFormatException e ) {
+                        errorMsg = getWorkspaceMessage( INVALID_INTEGER_PROPERTY_VALUE, PRECISION );
+                    }
+
+                    break;
+                case RESULT:
+                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                        parameter.setResult( transaction, Boolean.parseBoolean( value ) );
+                    } else {
+                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, RESULT );
+                    }
+
+                    break;
+                case SCALE:
+                    try {
+                        final long scale = Long.parseLong( value );
+                        parameter.setScale( transaction, scale );
+                    } catch ( final NumberFormatException e ) {
+                        errorMsg = getWorkspaceMessage( INVALID_INTEGER_PROPERTY_VALUE, SCALE );
+                    }
+
+                    break;
+                default:
+                    errorMsg = getWorkspaceMessage( INVALID_PROPERTY_NAME, name, Parameter.class.getSimpleName() );
+                    break;
+            }
+
+            if ( StringUtils.isBlank( errorMsg ) ) {
+                result = new CommandResultImpl( getMessage( SET_PROPERTY_SUCCESS, name ) );
+            } else {
+                result = new CommandResultImpl( false, errorMsg, null );
+            }
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( SET_PROPERTY_ERROR ), e );
         }
 
-        return success;
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 2;
     }
 
     /**
@@ -191,7 +210,7 @@ public final class SetParameterPropertyCommand extends ParameterShellCommand {
 
             return 0;
         }
-        
+
         // no tab completion
         return -1;
     }

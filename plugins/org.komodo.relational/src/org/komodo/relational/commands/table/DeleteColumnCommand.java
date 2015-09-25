@@ -8,13 +8,15 @@
 package org.komodo.relational.commands.table;
 
 import static org.komodo.relational.commands.table.TableCommandMessages.DeleteColumnCommand.COLUMN_DELETED;
+import static org.komodo.relational.commands.table.TableCommandMessages.DeleteColumnCommand.DELETE_COLUMN_ERROR;
 import static org.komodo.relational.commands.table.TableCommandMessages.General.MISSING_COLUMN_NAME;
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.ArrayList;
 import java.util.List;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.Table;
+import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
@@ -30,7 +32,7 @@ public final class DeleteColumnCommand extends TableShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public DeleteColumnCommand( final WorkspaceStatus status ) {
-        super( NAME, true, status );
+        super( NAME, status );
     }
 
     /**
@@ -39,18 +41,33 @@ public final class DeleteColumnCommand extends TableShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final String columnName = requiredArgument( 0, getMessage(MISSING_COLUMN_NAME) );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        final Table table = getTable();
-        table.removeColumn( getTransaction(), columnName );
+        try {
+            final String columnName = requiredArgument( 0, getMessage( MISSING_COLUMN_NAME ) );
 
-        // Print success message
-        print(MESSAGE_INDENT, getMessage(COLUMN_DELETED,columnName));
-        
-        return true;
+            final Table table = getTable();
+            table.removeColumn( getTransaction(), columnName );
+
+            result = new CommandResultImpl( getMessage( COLUMN_DELETED, columnName ) );
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( DELETE_COLUMN_ERROR ), e );
+        }
+
+        return result;
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 1;
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -68,7 +85,7 @@ public final class DeleteColumnCommand extends TableShellCommand {
         for(Column column : columns) {
             existingColumnNames.add(column.getName(uow));
         }
-        
+
         if ( args.isEmpty() ) {
             if ( lastArgument == null ) {
                 candidates.addAll( existingColumnNames );
@@ -86,5 +103,5 @@ public final class DeleteColumnCommand extends TableShellCommand {
         // no tab completion
         return -1;
     }
-    
+
 }

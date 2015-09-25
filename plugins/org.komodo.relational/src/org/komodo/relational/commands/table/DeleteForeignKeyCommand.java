@@ -7,14 +7,16 @@
  */
 package org.komodo.relational.commands.table;
 
+import static org.komodo.relational.commands.table.TableCommandMessages.DeleteForeignKeyCommand.DELETE_FOREIGN_KEY_ERROR;
 import static org.komodo.relational.commands.table.TableCommandMessages.DeleteForeignKeyCommand.FOREIGN_KEY_DELETED;
 import static org.komodo.relational.commands.table.TableCommandMessages.General.MISSING_FOREIGN_KEY_NAME;
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.ArrayList;
 import java.util.List;
 import org.komodo.relational.model.ForeignKey;
 import org.komodo.relational.model.Table;
+import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
@@ -30,7 +32,7 @@ public final class DeleteForeignKeyCommand extends TableShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public DeleteForeignKeyCommand( final WorkspaceStatus status ) {
-        super( NAME, true, status );
+        super( NAME, status );
     }
 
     /**
@@ -39,18 +41,33 @@ public final class DeleteForeignKeyCommand extends TableShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final String fkName = requiredArgument( 0, getMessage(MISSING_FOREIGN_KEY_NAME) );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        final Table table = getTable();
-        table.removeForeignKey( getTransaction(), fkName );
+        try {
+            final String fkName = requiredArgument( 0, getMessage( MISSING_FOREIGN_KEY_NAME ) );
 
-        // Print success message
-        print(MESSAGE_INDENT, getMessage(FOREIGN_KEY_DELETED,fkName));
-        
-        return true;
+            final Table table = getTable();
+            table.removeForeignKey( getTransaction(), fkName );
+
+            result = new CommandResultImpl( getMessage( FOREIGN_KEY_DELETED, fkName ) );
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( DELETE_FOREIGN_KEY_ERROR ), e );
+        }
+
+        return result;
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 1;
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -68,7 +85,7 @@ public final class DeleteForeignKeyCommand extends TableShellCommand {
         for(ForeignKey fk : fks) {
             existingFKNames.add(fk.getName(uow));
         }
-        
+
         if ( args.isEmpty() ) {
             if ( lastArgument == null ) {
                 candidates.addAll( existingFKNames );
@@ -86,5 +103,5 @@ public final class DeleteForeignKeyCommand extends TableShellCommand {
         // no tab completion
         return -1;
     }
-    
+
 }

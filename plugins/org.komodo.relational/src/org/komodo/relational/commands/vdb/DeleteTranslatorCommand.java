@@ -7,14 +7,16 @@
  */
 package org.komodo.relational.commands.vdb;
 
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.DeleteTranslatorCommand.DELETE_TRANSLATOR_ERROR;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.DeleteTranslatorCommand.TRANSLATOR_DELETED;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_TRANSLATOR_NAME;
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.ArrayList;
 import java.util.List;
 import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
+import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
@@ -30,25 +32,40 @@ public class DeleteTranslatorCommand extends VdbShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public DeleteTranslatorCommand( final WorkspaceStatus status ) {
-        super( NAME, true, status );
+        super( NAME, status );
     }
 
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.shell.api.ShellCommand#execute()
+     * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final String translatorName = requiredArgument( 0, getMessage(MISSING_TRANSLATOR_NAME) );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        final Vdb vdb = getVdb();
-        vdb.removeTranslator( getTransaction(), translatorName );
+        try {
+            final String translatorName = requiredArgument( 0, getMessage( MISSING_TRANSLATOR_NAME ) );
 
-        // Print success message
-        print(MESSAGE_INDENT, getMessage(TRANSLATOR_DELETED,translatorName));
-        
-        return true;
+            final Vdb vdb = getVdb();
+            vdb.removeTranslator( getTransaction(), translatorName );
+
+            result = new CommandResultImpl( getMessage( TRANSLATOR_DELETED, translatorName ) );
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( DELETE_TRANSLATOR_ERROR ), e );
+        }
+
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 1;
     }
 
     /**
@@ -68,7 +85,7 @@ public class DeleteTranslatorCommand extends VdbShellCommand {
         for(Translator translator : translators) {
             existingTranslatorNames.add(translator.getName(uow));
         }
-        
+
         if ( args.isEmpty() ) {
             if ( lastArgument == null ) {
                 candidates.addAll( existingTranslatorNames );
@@ -86,5 +103,5 @@ public class DeleteTranslatorCommand extends VdbShellCommand {
         // no tab completion
         return -1;
     }
-    
+
 }

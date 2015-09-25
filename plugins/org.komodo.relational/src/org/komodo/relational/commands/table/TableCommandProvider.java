@@ -55,7 +55,14 @@ public class TableCommandProvider implements ShellCommandProvider {
 
         return result;
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommandProvider#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      org.komodo.spi.repository.KomodoObject)
+     */
+    @SuppressWarnings( "unchecked" )
     @Override
     public Table resolve ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
         if(TableImpl.RESOLVER.resolvable(uow, kObj)) {
@@ -63,7 +70,7 @@ public class TableCommandProvider implements ShellCommandProvider {
         }
         return null;
     }
-    
+
     @Override
     public boolean isRoot ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
         if(TableImpl.RESOLVER.resolvable(uow, kObj)) {
@@ -71,7 +78,7 @@ public class TableCommandProvider implements ShellCommandProvider {
         }
         return false;
     }
-    
+
     @Override
     public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
         if(TableImpl.RESOLVER.resolvable(uow, kObj)) {
@@ -82,15 +89,15 @@ public class TableCommandProvider implements ShellCommandProvider {
     }
 
     /**
-     * @throws KException the exception 
+     * @throws KException the exception
      */
     @Override
     public String getStatusMessage ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
         return null;
     }
-    
+
     /**
-     * @throws KException the exception 
+     * @throws KException the exception
      */
     /* (non-Javadoc)
      * @see org.komodo.shell.api.ShellCommandProvider#initWorkspaceState(org.komodo.shell.api.WorkspaceStatus)

@@ -7,14 +7,16 @@
  */
 package org.komodo.relational.commands.vdb;
 
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.DeleteImportCommand.DELETE_IMPORT_ERROR;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.DeleteImportCommand.IMPORT_DELETED;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_IMPORT_NAME;
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.ArrayList;
 import java.util.List;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.VdbImport;
+import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
@@ -30,7 +32,7 @@ public final class DeleteImportCommand extends VdbShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public DeleteImportCommand( final WorkspaceStatus status ) {
-        super( NAME, true, status );
+        super( NAME, status );
     }
 
     /**
@@ -39,16 +41,31 @@ public final class DeleteImportCommand extends VdbShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final String importName = requiredArgument( 0, getMessage(MISSING_IMPORT_NAME) );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        final Vdb vdb = getVdb();
-        vdb.removeImport( getTransaction(), importName );
+        try {
+            final String importName = requiredArgument( 0, getMessage( MISSING_IMPORT_NAME ) );
 
-        // Print success message
-        print(MESSAGE_INDENT, getMessage(IMPORT_DELETED,importName));
-        
-        return true;
+            final Vdb vdb = getVdb();
+            vdb.removeImport( getTransaction(), importName );
+
+            result = new CommandResultImpl( getMessage( IMPORT_DELETED, importName ) );
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( DELETE_IMPORT_ERROR ), e );
+        }
+
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 1;
     }
 
     /**
@@ -68,7 +85,7 @@ public final class DeleteImportCommand extends VdbShellCommand {
         for(VdbImport theImport : imports) {
             existingImportNames.add(theImport.getName(uow));
         }
-        
+
         if ( args.isEmpty() ) {
             if ( lastArgument == null ) {
                 candidates.addAll( existingImportNames );
@@ -86,5 +103,5 @@ public final class DeleteImportCommand extends VdbShellCommand {
         // no tab completion
         return -1;
     }
-    
+
 }

@@ -7,14 +7,16 @@
  */
 package org.komodo.relational.commands.model;
 
+import static org.komodo.relational.commands.model.ModelCommandMessages.DeleteSourceCommand.DELETE_SOURCE_ERROR;
 import static org.komodo.relational.commands.model.ModelCommandMessages.DeleteSourceCommand.SOURCE_DELETED;
 import static org.komodo.relational.commands.model.ModelCommandMessages.General.MISSING_SOURCE_NAME;
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.ArrayList;
 import java.util.List;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.vdb.ModelSource;
+import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
@@ -30,7 +32,7 @@ public final class DeleteSourceCommand extends ModelShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public DeleteSourceCommand( final WorkspaceStatus status ) {
-        super( NAME, true, status );
+        super( NAME, status );
     }
 
     /**
@@ -39,18 +41,33 @@ public final class DeleteSourceCommand extends ModelShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final String sourceName = requiredArgument( 0, getMessage(MISSING_SOURCE_NAME) );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        final Model model = getModel();
-        model.removeSource( getTransaction(), sourceName );
+        try {
+            final String sourceName = requiredArgument( 0, getMessage( MISSING_SOURCE_NAME ) );
 
-        // Print success message
-        print(MESSAGE_INDENT, getMessage(SOURCE_DELETED,sourceName));
-        
-        return true;
+            final Model model = getModel();
+            model.removeSource( getTransaction(), sourceName );
+
+            result = new CommandResultImpl( getMessage( SOURCE_DELETED, sourceName ) );
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( DELETE_SOURCE_ERROR ), e );
+        }
+
+        return result;
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 1;
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -68,7 +85,7 @@ public final class DeleteSourceCommand extends ModelShellCommand {
         for(ModelSource source : sources) {
             existingSourceNames.add(source.getName(uow));
         }
-        
+
         if ( args.isEmpty() ) {
             if ( lastArgument == null ) {
                 candidates.addAll( existingSourceNames );
@@ -86,5 +103,5 @@ public final class DeleteSourceCommand extends ModelShellCommand {
         // no tab completion
         return -1;
     }
-    
+
 }

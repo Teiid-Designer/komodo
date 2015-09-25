@@ -19,14 +19,14 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  ************************************************************************************/
-package org.komodo.shell.commands.core;
+package org.komodo.shell.commands;
 
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.List;
 import org.komodo.shell.BuiltInShellCommand;
+import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.Messages;
 import org.komodo.shell.Messages.SHELL;
-import org.komodo.shell.api.InvalidCommandArgumentException;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.KomodoObjectUtils;
 import org.komodo.shell.util.PrintUtils;
@@ -52,37 +52,51 @@ public class ShowPropertyCommand extends BuiltInShellCommand {
         super( wsStatus, NAME );
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
+     */
     @Override
     public boolean isValidForCurrentContext() {
         return true;
     }
-    
+
     /**
      * {@inheritDoc}
      *
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        // required arg is the property name.  Verify that it is valid for the current object
-        String propName = requiredArgument(0, Messages.getString(Messages.ShowPropertyCommand.InvalidArgMsg_PropertyName));
-        KomodoObject context = getContext();
-        String prefixedName = KomodoObjectUtils.attachPrefix(getWorkspaceStatus(),context, propName);
-        if(!validatePropertyName(context, prefixedName)) {
-            return false;
-        }
+    protected CommandResult doExecute() {
+        try {
+            // required arg is the property name.  Verify that it is valid for the current object
+            String propName = requiredArgument( 0,
+                                                Messages.getString( Messages.ShowPropertyCommand.InvalidArgMsg_PropertyName ) );
 
-		try {
-		    PrintUtils.printProperty(getWorkspaceStatus(),context,prefixedName);
-		} catch (InvalidCommandArgumentException e) {
-		    throw e;
-		} catch (Exception e) {
-		    print( MESSAGE_INDENT, Messages.getString(SHELL.CommandFailure, e.getLocalizedMessage() ) ); 
-		    return false;
-		}
-        return true;
+            KomodoObject context = getContext();
+            String prefixedName = KomodoObjectUtils.attachPrefix( getWorkspaceStatus(), context, propName );
+            if ( !validatePropertyName( context, prefixedName ) ) {
+                return new CommandResultImpl( false, Messages.getString( SHELL.CommandFailure, NAME ), null );
+            }
+
+            PrintUtils.printProperty( getWorkspaceStatus(), context, prefixedName );
+            return CommandResult.SUCCESS;
+        } catch ( Exception e ) {
+            return new CommandResultImpl( false, Messages.getString( SHELL.CommandFailure, NAME ), e );
+        }
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 1;
+    }
+
     /**
      * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
      */
@@ -98,16 +112,6 @@ public class ShowPropertyCommand extends BuiltInShellCommand {
             return ( candidates.isEmpty() ? -1 : ( toString().length() + 1 ) );
         }
         return -1;
-    }
-    
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.BuiltInShellCommand#shouldCommit()
-     */
-    @Override
-    protected boolean shouldCommit() {
-        return false;
     }
 
 }

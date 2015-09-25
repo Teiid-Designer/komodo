@@ -7,10 +7,12 @@
  */
 package org.komodo.relational.commands;
 
+import static org.komodo.relational.commands.WorkspaceCommandMessages.CreateTeiidCommand.CREATE_TEIID_ERROR;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.CreateTeiidCommand.MISSING_TEIID_NAME;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.CreateTeiidCommand.TEIID_CREATED;
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.shell.CommandResultImpl;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoType;
 
@@ -26,7 +28,7 @@ public final class CreateTeiidCommand extends RelationalShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public CreateTeiidCommand( final WorkspaceStatus status ) {
-        super( status, true, NAME );
+        super( status, NAME );
     }
 
     /**
@@ -35,16 +37,31 @@ public final class CreateTeiidCommand extends RelationalShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final String teiidName = requiredArgument( 0, getMessage(MISSING_TEIID_NAME) );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        final WorkspaceManager mgr = getWorkspaceManager();
-        mgr.createTeiid( getTransaction(), null, teiidName );
+        try {
+            final String teiidName = requiredArgument( 0, getMessage( MISSING_TEIID_NAME ) );
 
-        // Print success message
-        print(MESSAGE_INDENT, getMessage(TEIID_CREATED,teiidName));
-        
-        return true;
+            final WorkspaceManager mgr = getWorkspaceManager();
+            mgr.createTeiid( getTransaction(), null, teiidName );
+
+            result = new CommandResultImpl( getMessage( TEIID_CREATED, teiidName ) );
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( CREATE_TEIID_ERROR ), e );
+        }
+
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 1;
     }
 
     /**

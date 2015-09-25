@@ -21,39 +21,40 @@ import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.ServiceLoader;
-import java.util.TreeMap;
-import javax.xml.namespace.QName;
+import java.util.Set;
 import org.komodo.core.KEngine;
+import org.komodo.shell.Messages.SHELL;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandProvider;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.shell.commands.CommandNotFoundCommand;
+import org.komodo.shell.commands.CdCommand;
 import org.komodo.shell.commands.ExitCommand;
 import org.komodo.shell.commands.HelpCommand;
-import org.komodo.shell.commands.core.CdCommand;
-import org.komodo.shell.commands.core.HomeCommand;
-import org.komodo.shell.commands.core.ListCommand;
-import org.komodo.shell.commands.core.PlayCommand;
-import org.komodo.shell.commands.core.SetGlobalPropertyCommand;
-import org.komodo.shell.commands.core.SetPropertyCommand;
-import org.komodo.shell.commands.core.SetRecordCommand;
-import org.komodo.shell.commands.core.ShowChildrenCommand;
-import org.komodo.shell.commands.core.ShowGlobalCommand;
-import org.komodo.shell.commands.core.ShowPropertiesCommand;
-import org.komodo.shell.commands.core.ShowPropertyCommand;
-import org.komodo.shell.commands.core.ShowStatusCommand;
-import org.komodo.shell.commands.core.ShowSummaryCommand;
-import org.komodo.shell.commands.core.UnsetPropertyCommand;
+import org.komodo.shell.commands.HomeCommand;
+import org.komodo.shell.commands.ListCommand;
+import org.komodo.shell.commands.PlayCommand;
+import org.komodo.shell.commands.SetGlobalPropertyCommand;
+import org.komodo.shell.commands.SetPropertyCommand;
+import org.komodo.shell.commands.SetRecordCommand;
+import org.komodo.shell.commands.ShowChildrenCommand;
+import org.komodo.shell.commands.ShowGlobalCommand;
+import org.komodo.shell.commands.ShowPropertiesCommand;
+import org.komodo.shell.commands.ShowPropertyCommand;
+import org.komodo.shell.commands.ShowStatusCommand;
+import org.komodo.shell.commands.ShowSummaryCommand;
+import org.komodo.shell.commands.UnsetPropertyCommand;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.FileUtils;
-import org.komodo.utils.StringUtils;
 
 /**
  * Factory used to create shell commands.
@@ -66,8 +67,13 @@ import org.komodo.utils.StringUtils;
  */
 public class ShellCommandFactory {
 
-    private final Map<String, ShellCommand> commandMap;
-    private final Map<String, ShellCommand> aliasMap; // separate from commandMap so HelpCommand only shows command names
+    private static final String BUILT_IN_PROVIDER_ID = "KOMODO_BUILT_IN"; //$NON-NLS-1$
+
+    private static ShellCommand _commandNotFound;
+
+    // key = command name, value = {key = provider ID, value = command}
+    private final Map< String, Map< String, ShellCommand > > commandMap;
+//    private final Map<String, ShellCommand> aliasMap; // separate from commandMap so HelpCommand only shows command names
     private Collection<ShellCommandProvider> providers = new ArrayList<>();
 
     /**
@@ -75,12 +81,12 @@ public class ShellCommandFactory {
      *         if a built-in command cannot be created or if an error occurs
      */
     public ShellCommandFactory( ) throws Exception {
-        this.commandMap = new HashMap< String, ShellCommand >();
-        this.aliasMap = new HashMap< String, ShellCommand >();
-        
+        this.commandMap = new HashMap<>();
+//        this.aliasMap = new HashMap<>();
+
         discoverProviders();
     }
-    
+
     /**
      * The the command providers
      * @return the command providers
@@ -89,36 +95,38 @@ public class ShellCommandFactory {
         return providers;
     }
 
-	/**
-	 * Registers all known commands.
-	 * @param wsStatus the workspace status
-	 * @throws Exception the exception
-	 */
-    public void registerCommands(WorkspaceStatus wsStatus) throws Exception {
+    /**
+     * Registers all built-in and discovered commands.
+     *
+     * @param wsStatus
+     *        the workspace status (cannot be <code>null</code>)
+     * @throws Exception
+     *         if an error occurs
+     */
+    public void registerCommands( final WorkspaceStatus wsStatus ) throws Exception {
+        ArgCheck.isNotNull( wsStatus, "wsStatus" ); //$NON-NLS-1$
+        _commandNotFound = new CommandNotFoundCommand( wsStatus );
+
         // register built-in commands
-        registerCommand( CommandNotFoundCommand.class, wsStatus);
-        registerCommand( CdCommand.class, wsStatus );
-        registerCommand( ExitCommand.class, wsStatus );
-        registerCommand( HelpCommand.class, wsStatus );
-        registerCommand( HomeCommand.class, wsStatus );
-        registerCommand( PlayCommand.class, wsStatus );
-        registerCommand( ShowStatusCommand.class, wsStatus );
-        registerCommand( ShowGlobalCommand.class, wsStatus );
-        registerCommand( ListCommand.class, wsStatus );
-        registerCommand( ShowChildrenCommand.class, wsStatus );
-        registerCommand( ShowPropertiesCommand.class, wsStatus );
-        registerCommand( ShowPropertyCommand.class, wsStatus );
-        registerCommand( ShowSummaryCommand.class, wsStatus );
-        registerCommand( SetGlobalPropertyCommand.class, wsStatus );
-        registerCommand( SetPropertyCommand.class, wsStatus );
-        registerCommand( SetRecordCommand.class, wsStatus );
-        registerCommand( UnsetPropertyCommand.class, wsStatus );
+        registerCommand( BUILT_IN_PROVIDER_ID, CdCommand.class, wsStatus );
+        registerCommand( BUILT_IN_PROVIDER_ID, ExitCommand.class, wsStatus );
+        registerCommand( BUILT_IN_PROVIDER_ID, HelpCommand.class, wsStatus );
+        registerCommand( BUILT_IN_PROVIDER_ID, HomeCommand.class, wsStatus );
+        registerCommand( BUILT_IN_PROVIDER_ID, ListCommand.class, wsStatus );
+        registerCommand( BUILT_IN_PROVIDER_ID, PlayCommand.class, wsStatus );
+        registerCommand( BUILT_IN_PROVIDER_ID, ShowChildrenCommand.class, wsStatus );
+        registerCommand( BUILT_IN_PROVIDER_ID, ShowGlobalCommand.class, wsStatus );
+        registerCommand( BUILT_IN_PROVIDER_ID, SetGlobalPropertyCommand.class, wsStatus );
+        registerCommand( BUILT_IN_PROVIDER_ID, SetPropertyCommand.class, wsStatus );
+        registerCommand( BUILT_IN_PROVIDER_ID, SetRecordCommand.class, wsStatus );
+        registerCommand( BUILT_IN_PROVIDER_ID, ShowPropertiesCommand.class, wsStatus );
+        registerCommand( BUILT_IN_PROVIDER_ID, ShowPropertyCommand.class, wsStatus );
+        registerCommand( BUILT_IN_PROVIDER_ID, ShowStatusCommand.class, wsStatus );
+        registerCommand( BUILT_IN_PROVIDER_ID, ShowSummaryCommand.class, wsStatus );
+        registerCommand( BUILT_IN_PROVIDER_ID, UnsetPropertyCommand.class, wsStatus );
 
         // register any commands contributed by command providers
-        discoverContributedCommands(wsStatus);
-        
-        // Save registered command list on WorkspaceStatus
-        wsStatus.setRegisteredCommands(this.commandMap.values());
+        discoverContributedCommands( wsStatus );
     }
 
     /**
@@ -151,28 +159,33 @@ public class ShellCommandFactory {
                 KEngine.getInstance().getErrorHandler().error(e);
             }
         }
-        
-        for(ShellCommandProvider provider : providers) {
-            Map<String, Class<? extends ShellCommand>> commands = provider.provideCommands();
-            for (Map.Entry<String, Class<? extends ShellCommand>> entry : commands.entrySet()) {
-                Class<? extends ShellCommand> commandClass = entry.getValue();
 
-                if (commandClass != null) {
-                    try {
-                        registerCommand( commandClass, wsStatus );
-                    } catch (Exception e) {
-                        KEngine.getInstance().getErrorHandler().error(e);
+        for ( final ShellCommandProvider provider : this.providers ) {
+            final Map< String, Class< ? extends ShellCommand > > commands = provider.provideCommands();
+
+            if ( ( commands != null ) && !commands.isEmpty() ) {
+                final String providerId = provider.getClass().getName();
+
+                for ( final Map.Entry< String, Class< ? extends ShellCommand > > entry : commands.entrySet() ) {
+                    final Class< ? extends ShellCommand > commandClass = entry.getValue();
+
+                    if ( commandClass != null ) {
+                        try {
+                            registerCommand( providerId, commandClass, wsStatus );
+                        } catch ( final Exception e ) {
+                            KEngine.getInstance().getErrorHandler().error( e );
+                        }
                     }
                 }
             }
         }
 
     }
-    
+
     private void discoverProviders() {
         List<ClassLoader> commandClassloaders = new ArrayList<ClassLoader>();
         commandClassloaders.add(Thread.currentThread().getContextClassLoader());
-        
+
         // Now that we have identified all ClassLoaders to check for commands, iterate
         // through them all and use the Java ServiceLoader mechanism to actually
         // load the commands.
@@ -183,114 +196,191 @@ public class ShellCommandFactory {
         }
     }
 
-    private void registerCommand( final Class< ? extends ShellCommand > commandClass, WorkspaceStatus wsStatus ) throws Exception {
+    private void registerCommand( final String providerId,
+                                  final Class< ? extends ShellCommand > commandClass,
+                                  final WorkspaceStatus wsStatus ) throws Exception {
         final Constructor< ? extends ShellCommand > constructor = commandClass.getConstructor( WorkspaceStatus.class );
         final ShellCommand command = constructor.newInstance( wsStatus );
         command.setWriter(wsStatus.getShell().getOutputWriter());
-        //command.initValidWsContextTypes();
-        this.commandMap.put( command.getName().toLowerCase(), command );
-        // add aliases
-        final String[] aliases = command.getAliases();
 
-        if ( ( aliases != null ) && ( aliases.length != 0 ) ) {
-            for ( final String alias : aliases ) {
-                if ( !StringUtils.isBlank( alias ) ) {
-                    this.aliasMap.put(  alias.toLowerCase(), command );
-                }
-            }
+        final String cmdName = command.getName();
+        Map<String, ShellCommand> commands = this.commandMap.get( cmdName );
+
+        if (commands == null) {
+            commands = new HashMap<>();
+            this.commandMap.put( cmdName, commands );
         }
+
+        commands.put( providerId, command );
     }
 
     /**
      * @param commandName
-     *        the name of the command being requested (cannot be empty)
-     * @return the command or a {@link CommandNotFoundCommand} (never <code>null</code>)
-     * @throws Exception the exception
+     *        the name of the available command being requested (cannot be empty)
+     * @return the specified command or a "command not found" command (never <code>null</code>)
+     * @throws Exception
+     *         if an error occurs
      */
     public ShellCommand getCommand( final String commandName ) throws Exception {
         ArgCheck.isNotEmpty( commandName, "commandName" ); //$NON-NLS-1$
-        ShellCommand command = this.commandMap.get( commandName.toLowerCase() );
 
-        if ( command == null ) {
-            // see if alias
-            command = this.aliasMap.get( commandName.toLowerCase() );
+        // get a list of available commands
+        final Set< ShellCommand > availableCommands = getCommandsForCurrentContext();
 
-            // if still not found the command can't be found
-            if ( command == null ) {
-                return this.commandMap.get(CommandNotFoundCommand.NAME);
+        // see if there is a match
+        for ( final ShellCommand possible : availableCommands ) {
+            if ( commandName.equals( possible.getName() ) ) {
+                return possible;
             }
         }
 
-        if ( command instanceof HelpCommand ) {
-            ( ( HelpCommand )command ).setCommands( getCommands() );
+        // see if there is a matching alias
+        for ( final ShellCommand possible : availableCommands ) {
+            if ( Arrays.asList( possible.getAliases() ).contains( commandName ) ) {
+                return possible;
+            }
         }
 
-        return command;
+        // command can't be found
+        return _commandNotFound;
     }
 
-	/**
-	 * Get all registered commands
-	 * @return List<String> list of commands
-	 * @throws Exception if error occurs
-	 */
-	public Collection<ShellCommand> getRegisteredCommands( ) throws Exception {
-	    return commandMap.values();
-	}
+    private Set< ShellCommand > getCommandsForCurrentContext() throws Exception {
+        final Set< ShellCommand > availableCommands = new HashSet< >();
 
-    /**
-     * Get valid command names for the current context
-     * @return List<String> list of commands for current context
-     * @throws Exception if error occurs
-     */
-    public List<String> getCommandsForCurrentContext( ) throws Exception {
-        List<String> commandList = new ArrayList<String>();
-        for(String mapKey : this.commandMap.keySet()) {
-            ShellCommand command = this.commandMap.get(mapKey);
-            if(command.isValidForCurrentContext()) {
-                commandList.add(mapKey);
+        for ( final String cmdName : this.commandMap.keySet() ) {
+            final Map< String, ShellCommand > commands = this.commandMap.get( cmdName );
+            ShellCommand builtIn = null;
+            ShellCommand override = null;
+
+            for ( final Entry< String, ShellCommand > entry : commands.entrySet() ) {
+                if ( BUILT_IN_PROVIDER_ID.equals( entry.getKey() ) ) {
+                    builtIn = entry.getValue();
+
+                    if ( override != null ) {
+                        // found valid command and built-in is overridable so no need to look further
+                        if ( builtIn.isOverridable() ) {
+                            break;
+                        }
+
+                        // remove found valid command if built-in is not overridable
+                        availableCommands.remove( override );
+                    }
+
+                    if ( builtIn.isValidForCurrentContext() ) {
+                        if ( builtIn.isEnabled() ) {
+                            availableCommands.add( builtIn );
+                        }
+
+                        // no need to look further if built-in is not overridable
+                        if ( !builtIn.isOverridable() ) {
+                            break;
+                        }
+                    }
+                } else if ( ( override == null ) && entry.getValue().isValidForCurrentContext() ) {
+                    override = entry.getValue();
+
+                    if ( override.isEnabled() ) {
+                        availableCommands.add( override );
+                    }
+
+                    // remove built-in as it is being overridden
+                    if ( builtIn != null ) {
+                        assert builtIn.isOverridable();
+                        availableCommands.remove( builtIn );
+                        break; // no need to look further as the built-in has already been found
+                    }
+                }
             }
         }
-        Collections.sort(commandList);
+
+        return availableCommands;
+    }
+
+    /**
+     * Get valid command names for the current context.
+     *
+     * @return a list of commands for current context (never <code>null</code>)
+     * @throws Exception
+     *         if error occurs
+     */
+    public List< String > getCommandNamesForCurrentContext() throws Exception {
+        final List< String > commandList = new ArrayList< String >();
+
+        for ( final ShellCommand possible : getCommandsForCurrentContext() ) {
+            commandList.add( possible.getName() );
+        }
+
+        Collections.sort( commandList );
         return commandList;
     }
 
-    /**
-	 * Gets the available commands, ordered by command {@link QName}.
-	 */
-	private Map<String, ShellCommand> getCommands() {
-		TreeMap<String, ShellCommand> treeMap = new TreeMap<String, ShellCommand>(new Comparator<String>() {
-			@Override
-			public int compare(String name1, String name2) {
-				return name1.compareTo(name2);
-			}
-		});
-		treeMap.putAll(this.commandMap);
-		return treeMap;
-	}
+    class CommandNotFoundCommand extends BuiltInShellCommand {
 
-    /**
-     * Returns fileArray {@code ArrayList} of {@code File} objects that match a pattern in the specified directory.
-     * @param folderToScan The path to look for the matching files
-     * @param startWith The beginning portion of the file name
-     * @param endsWith The ending portion of the file name (i.e. ".jar")
-     * @return fileArray An ArrayList of
-     */
-    public final static ArrayList<File> getFilesForPattern(File folderToScan, String startWith, String endsWith) {
-	    String target_file ;  // fileThatYouWantToFilter
-		File[] listOfFiles = folderToScan.listFiles();
-		ArrayList<File> list = new ArrayList<File>();
+        /**
+         * @param wsStatus
+         *        the workspace status (cannot be <code>null</code>)
+         */
+        public CommandNotFoundCommand( final WorkspaceStatus wsStatus ) {
+            super( wsStatus, "cmd-not-found" ); //$NON-NLS-1$
+        }
 
-		for (File file:listOfFiles) {
-	        if (file.isFile()) {
-	            target_file = file.getName();
-	            if (target_file.startsWith(startWith)
-		                 && target_file.endsWith(endsWith)) {
-	            	list.add(file);
-		        }
-		    }
-		 }
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.shell.BuiltInShellCommand#isOverridable()
+         */
+        @Override
+        public boolean isOverridable() {
+            return false;
+        }
 
-		return list;
+        /**
+         * @see org.komodo.shell.api.ShellCommand#printUsage(int indent)
+         */
+        @Override
+        public void printUsage(int indent) {
+            // Nothing to do
+        }
+
+        /**
+         * @see org.komodo.shell.api.ShellCommand#printHelp(int indent)
+         */
+        @Override
+        public void printHelp(int indent) {
+            // Nothing to do
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.shell.BuiltInShellCommand#doExecute()
+         */
+        @Override
+        protected CommandResult doExecute() {
+            return new CommandResultImpl( Messages.getString( SHELL.COMMAND_NOT_FOUND ) );
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+         */
+        @Override
+        protected int getMaxArgCount() {
+            return Integer.MAX_VALUE; // set high as we don't want the max arg check to fail
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
+         */
+        @Override
+        public boolean isValidForCurrentContext() {
+            return true;
+        }
+
     }
 
 }

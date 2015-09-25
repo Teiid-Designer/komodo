@@ -27,12 +27,11 @@ import org.komodo.spi.runtime.TeiidInstance;
 abstract class ServerShellCommand extends RelationalShellCommand {
 
     protected ServerShellCommand( final String name,
-                               final boolean shouldCommit,
-                               final WorkspaceStatus status ) {
-        super( status, shouldCommit, name );
+                                  final WorkspaceStatus status ) {
+        super( status, name );
     }
 
-    /** 
+    /**
      * Validates the existence of a connected server, and prints output
      * depending on the problem
      * @return 'true' if there is a default connected server
@@ -43,15 +42,15 @@ abstract class ServerShellCommand extends RelationalShellCommand {
             print(CompletionConstants.MESSAGE_INDENT, getMessage(NoTeiidDefined));
             return false;
         }
-        
+
         Teiid teiid = getWorkspaceServer();
         if(!isConnected(teiid)) {
-            print( MESSAGE_INDENT, getMessage( ServerNotConnected ) ); 
+            print( MESSAGE_INDENT, getMessage( ServerNotConnected ) );
             return false;
         }
         return true;
     }
-    
+
     protected boolean hasWorkspaceServer() {
         KomodoObject kObj = null;
         try {
@@ -61,7 +60,7 @@ abstract class ServerShellCommand extends RelationalShellCommand {
         }
         return kObj!=null;
     }
-    
+
     protected String getWorkspaceServerName() throws KException {
         KomodoObject server = getWorkspaceServer();
         if(server!=null) {
@@ -69,7 +68,7 @@ abstract class ServerShellCommand extends RelationalShellCommand {
         }
         return null;
     }
-    
+
     protected Teiid getWorkspaceServer() throws KException {
         KomodoObject kObj = getWorkspaceStatus().getStateObjects().get(ServerCommandProvider.SERVER_DEFAULT_KEY);
         if(kObj!=null && TeiidImpl.RESOLVER.resolvable(getWorkspaceStatus().getTransaction(), kObj)) {
@@ -77,7 +76,7 @@ abstract class ServerShellCommand extends RelationalShellCommand {
         }
         return null;
     }
-    
+
     protected boolean isConnected( final Teiid teiid ) {
         if (teiid == null) {
             return false;
@@ -92,16 +91,17 @@ abstract class ServerShellCommand extends RelationalShellCommand {
         try {
             teiid = getWorkspaceServer();
         } catch (Exception ex) {
+            print( MESSAGE_INDENT, ex.getLocalizedMessage() );
         }
-        
+
         return isConnected(teiid);
     }
-    
+
     @Override
     protected String getMessage(Enum< ? > key, Object... parameters) {
         return Messages.getString(ServerCommandMessages.RESOURCE_BUNDLE,key.toString(),parameters);
     }
-    
+
     /**
      * @see org.komodo.shell.api.ShellCommand#printHelp(int indent)
      */

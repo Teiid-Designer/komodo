@@ -23,7 +23,6 @@ import org.jboss.aesh.console.ConsoleOutput;
 import org.jboss.aesh.console.Prompt;
 import org.jboss.aesh.console.settings.Settings;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.shell.api.WorkspaceStatusEventHandler;
 
 /**
  * An implementation of the {@link ShellCommandReader} that uses JLine to provide
@@ -31,11 +30,11 @@ import org.komodo.shell.api.WorkspaceStatusEventHandler;
  * and ansi output.
  *
  * This class adapted from https://github.com/Governance/s-ramp/blob/master/s-ramp-shell
- * - altered to use WorkspaceStatus and WorkspaceStatusEventHandler
+ * - altered to use WorkspaceStatus
  *
  * @author eric.wittmann@redhat.com
  */
-public class InteractiveShellCommandReader extends AbstractShellCommandReader implements WorkspaceStatusEventHandler {
+public class InteractiveShellCommandReader extends AbstractShellCommandReader {
 
 	private static final String ANSI_BOLD_RED = "\033[1m\033[31m"; //$NON-NLS-1$
 	//private static final String ANSI_BOLD_GREEN = "\033[1m\033[32m"; //$NON-NLS-1$
@@ -50,7 +49,6 @@ public class InteractiveShellCommandReader extends AbstractShellCommandReader im
 	 */
 	public InteractiveShellCommandReader(ShellCommandFactory factory, WorkspaceStatus wsStatus) {
 		super(factory, wsStatus);
-		wsStatus.addHandler(this);
 	}
 
 	/**
@@ -118,14 +116,6 @@ public class InteractiveShellCommandReader extends AbstractShellCommandReader im
 	@Override
 	public void close() throws IOException {
         consoleReader.stop();
-	}
-
-	/**
-	 * @see org.komodo.shell.api.WorkspaceStatusEventHandler#workspaceContextChanged()
-	 */
-	@Override
-	public void workspaceContextChanged() throws Exception {
-	    // nothing to do
 	}
 
 	/**

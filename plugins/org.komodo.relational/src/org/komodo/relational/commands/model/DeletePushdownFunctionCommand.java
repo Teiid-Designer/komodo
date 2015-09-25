@@ -7,14 +7,16 @@
  */
 package org.komodo.relational.commands.model;
 
+import static org.komodo.relational.commands.model.ModelCommandMessages.DeletePushdownFunctionCommand.DELETE_PUSHDOWN_FUNCTION_ERROR;
 import static org.komodo.relational.commands.model.ModelCommandMessages.DeletePushdownFunctionCommand.PUSHDOWN_FUNCTION_DELETED;
 import static org.komodo.relational.commands.model.ModelCommandMessages.General.MISSING_PUSHDOWN_FUNCTION_NAME;
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.ArrayList;
 import java.util.List;
 import org.komodo.relational.model.Function;
 import org.komodo.relational.model.Model;
+import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
@@ -30,7 +32,7 @@ public final class DeletePushdownFunctionCommand extends ModelShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public DeletePushdownFunctionCommand( final WorkspaceStatus status ) {
-        super( NAME, true, status );
+        super( NAME, status );
     }
 
     /**
@@ -39,18 +41,33 @@ public final class DeletePushdownFunctionCommand extends ModelShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final String functionName = requiredArgument( 0, getMessage(MISSING_PUSHDOWN_FUNCTION_NAME) );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        final Model model = getModel();
-        model.removeFunction( getTransaction(), functionName );
+        try {
+            final String functionName = requiredArgument( 0, getMessage( MISSING_PUSHDOWN_FUNCTION_NAME ) );
 
-        // Print success message
-        print(MESSAGE_INDENT, getMessage(PUSHDOWN_FUNCTION_DELETED,functionName));
-        
-        return true;
+            final Model model = getModel();
+            model.removeFunction( getTransaction(), functionName );
+
+            result = new CommandResultImpl( getMessage( PUSHDOWN_FUNCTION_DELETED, functionName ) );
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( DELETE_PUSHDOWN_FUNCTION_ERROR ), e );
+        }
+
+        return result;
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 1;
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -68,7 +85,7 @@ public final class DeletePushdownFunctionCommand extends ModelShellCommand {
         for(Function function : functions) {
             existingFunctionNames.add(function.getName(uow));
         }
-        
+
         if ( args.isEmpty() ) {
             if ( lastArgument == null ) {
                 candidates.addAll( existingFunctionNames );
@@ -86,5 +103,5 @@ public final class DeletePushdownFunctionCommand extends ModelShellCommand {
         // no tab completion
         return -1;
     }
-    
+
 }

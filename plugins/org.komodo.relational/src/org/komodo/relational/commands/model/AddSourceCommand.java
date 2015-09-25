@@ -7,10 +7,12 @@
  */
 package org.komodo.relational.commands.model;
 
+import static org.komodo.relational.commands.model.ModelCommandMessages.AddSourceCommand.ADD_SOURCE_ERROR;
 import static org.komodo.relational.commands.model.ModelCommandMessages.AddSourceCommand.SOURCE_ADDED;
 import static org.komodo.relational.commands.model.ModelCommandMessages.General.MISSING_SOURCE_NAME;
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import org.komodo.relational.model.Model;
+import org.komodo.shell.CommandResultImpl;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 
 /**
@@ -25,7 +27,7 @@ public final class AddSourceCommand extends ModelShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public AddSourceCommand( final WorkspaceStatus status ) {
-        super( NAME, true, status );
+        super( NAME, status );
     }
 
     /**
@@ -34,16 +36,31 @@ public final class AddSourceCommand extends ModelShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final String sourceName = requiredArgument( 0, getMessage(MISSING_SOURCE_NAME) );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        final Model model = getModel();
-        model.addSource( getTransaction(), sourceName );
+        try {
+            final String sourceName = requiredArgument( 0, getMessage( MISSING_SOURCE_NAME ) );
 
-        // Print success message
-        print(MESSAGE_INDENT, getMessage(SOURCE_ADDED,sourceName));
-        
-        return true;
+            final Model model = getModel();
+            model.addSource( getTransaction(), sourceName );
+
+            result = new CommandResultImpl( getMessage( SOURCE_ADDED, sourceName ) );
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( ADD_SOURCE_ERROR ), e );
+        }
+
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 1;
     }
 
 }

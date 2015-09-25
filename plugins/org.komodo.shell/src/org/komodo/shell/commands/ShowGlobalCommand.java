@@ -19,13 +19,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  ************************************************************************************/
-package org.komodo.shell.commands.core;
+package org.komodo.shell.commands;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.Properties;
 import org.komodo.shell.BuiltInShellCommand;
+import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.Messages;
 import org.komodo.shell.Messages.SHELL;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.PrintUtils;
 
@@ -48,40 +50,49 @@ public class ShowGlobalCommand extends BuiltInShellCommand {
         super( wsStatus, NAME );
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
+     */
     @Override
     public boolean isValidForCurrentContext() {
         return true;
     }
-    
+
     /**
      * {@inheritDoc}
      *
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final Properties globalProperties = getWorkspaceStatus().getProperties();
+    protected CommandResult doExecute() {
+        try {
+            final Properties globalProperties = getWorkspaceStatus().getProperties();
 
-        // Print properties header
-        final String globalPropsHeader = Messages.getString( Messages.ShowGlobalCommand.GlobalPropertiesHeader ); 
-        print( MESSAGE_INDENT, globalPropsHeader );
+            // Print properties header
+            final String globalPropsHeader = Messages.getString( Messages.ShowGlobalCommand.GlobalPropertiesHeader );
+            print( MESSAGE_INDENT, globalPropsHeader );
 
-        // Print the properties
-        String nameTitle = Messages.getString( SHELL.PROPERTY_NAME_HEADER );
-        String valueTitle = Messages.getString( SHELL.PROPERTY_VALUE_HEADER );
-        PrintUtils.printProperties(getWorkspaceStatus(), globalProperties, nameTitle, valueTitle);
-        
-        return true;
+            // Print the properties
+            String nameTitle = Messages.getString( SHELL.PROPERTY_NAME_HEADER );
+            String valueTitle = Messages.getString( SHELL.PROPERTY_VALUE_HEADER );
+            PrintUtils.printProperties( getWorkspaceStatus(), globalProperties, nameTitle, valueTitle );
+
+            return CommandResult.SUCCESS;
+        } catch ( final Exception e ) {
+            return new CommandResultImpl( false, Messages.getString( SHELL.CommandFailure, NAME ), e );
+        }
     }
-    
+
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.shell.BuiltInShellCommand#shouldCommit()
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
      */
     @Override
-    protected boolean shouldCommit() {
-        return false;
+    protected int getMaxArgCount() {
+        return 0;
     }
 
 }

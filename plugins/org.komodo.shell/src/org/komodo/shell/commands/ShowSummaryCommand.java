@@ -19,12 +19,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  ************************************************************************************/
-package org.komodo.shell.commands.core;
+package org.komodo.shell.commands;
 
 import java.util.List;
 import org.komodo.shell.BuiltInShellCommand;
+import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.CompletionConstants;
+import org.komodo.shell.Messages;
+import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.Arguments;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
@@ -48,40 +52,68 @@ public class ShowSummaryCommand extends BuiltInShellCommand {
         super( wsStatus, NAME );
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
+     */
     @Override
     public boolean isValidForCurrentContext() {
         return true;
     }
-    
+
     /**
      * {@inheritDoc}
      *
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        if (!validate(getArguments())) {
-			return false;
-		}
+    protected CommandResult doExecute() {
+        try {
+            if ( !validate( getArguments() ) ) {
+                return new CommandResultImpl( false, Messages.getString( SHELL.CommandFailure, NAME ), null );
+            }
 
-        WorkspaceStatus wsStatus = getWorkspaceStatus();
-        String pathArg = optionalArgument(0);
-        KomodoObject theContext = ContextUtils.getContextForPath(wsStatus, pathArg);
+            WorkspaceStatus wsStatus = getWorkspaceStatus();
+            String pathArg = optionalArgument( 0 );
+            KomodoObject theContext = ContextUtils.getContextForPath( wsStatus, pathArg );
 
-        ShellCommand showPropertiesCommand = getWorkspaceStatus().getCommand(ShowPropertiesCommand.NAME);
-        ShellCommand showChildrenCommand = getWorkspaceStatus().getCommand(ShowChildrenCommand.NAME);
-        if(theContext!=null) {
-            showPropertiesCommand.setArguments(getArguments());
-            showChildrenCommand.setArguments(getArguments());
+            ShellCommand showPropertiesCommand = getWorkspaceStatus().getCommand( ShowPropertiesCommand.NAME );
+            ShellCommand showChildrenCommand = getWorkspaceStatus().getCommand( ShowChildrenCommand.NAME );
+            if ( theContext != null ) {
+                showPropertiesCommand.setArguments( getArguments() );
+                showChildrenCommand.setArguments( getArguments() );
+            }
+
+            CommandResult result = showPropertiesCommand.execute();
+
+            if (!result.isOk()) {
+                return result;
+            }
+
+            print();
+            result = showChildrenCommand.execute();
+
+            if (!result.isOk()) {
+                return result;
+            }
+
+            return CommandResult.SUCCESS;
+        } catch ( final Exception e ) {
+            return new CommandResultImpl( false, Messages.getString( SHELL.CommandFailure, NAME ), e );
         }
-
-        showPropertiesCommand.execute();
-        print();
-        showChildrenCommand.execute();
-
-        return true;
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 1;
+    }
+
     protected boolean validate(Arguments allArgs) throws Exception {
         // optional path arg
         if(!allArgs.isEmpty()) {
@@ -110,16 +142,6 @@ public class ShowSummaryCommand extends BuiltInShellCommand {
         }
 
         return -1;
-    }
- 
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.BuiltInShellCommand#shouldCommit()
-     */
-    @Override
-    protected boolean shouldCommit() {
-        return false;
     }
 
 }

@@ -7,14 +7,16 @@
  */
 package org.komodo.relational.commands.table;
 
+import static org.komodo.relational.commands.table.TableCommandMessages.DeleteUniqueConstraintCommand.DELETE_UNIQUE_CONSTRAINT_ERROR;
 import static org.komodo.relational.commands.table.TableCommandMessages.DeleteUniqueConstraintCommand.UNIQUE_CONSTRAINT_DELETED;
 import static org.komodo.relational.commands.table.TableCommandMessages.General.MISSING_UNIQUE_CONSTRAINT_NAME;
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.ArrayList;
 import java.util.List;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.UniqueConstraint;
+import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
@@ -30,7 +32,7 @@ public final class DeleteUniqueConstraintCommand extends TableShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public DeleteUniqueConstraintCommand( final WorkspaceStatus status ) {
-        super( NAME, true, status );
+        super( NAME, status );
     }
 
     /**
@@ -39,18 +41,33 @@ public final class DeleteUniqueConstraintCommand extends TableShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final String ucName = requiredArgument( 0, getMessage(MISSING_UNIQUE_CONSTRAINT_NAME) );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        final Table table = getTable();
-        table.removeUniqueConstraint( getTransaction(), ucName );
+        try {
+            final String ucName = requiredArgument( 0, getMessage( MISSING_UNIQUE_CONSTRAINT_NAME ) );
 
-        // Print success message
-        print(MESSAGE_INDENT, getMessage(UNIQUE_CONSTRAINT_DELETED,ucName));
-        
-        return true;
+            final Table table = getTable();
+            table.removeUniqueConstraint( getTransaction(), ucName );
+
+            result = new CommandResultImpl( getMessage( UNIQUE_CONSTRAINT_DELETED, ucName ) );
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( DELETE_UNIQUE_CONSTRAINT_ERROR ), e );
+        }
+
+        return result;
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 1;
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -68,7 +85,7 @@ public final class DeleteUniqueConstraintCommand extends TableShellCommand {
         for(UniqueConstraint uc : ucs) {
             existingUCNames.add(uc.getName(uow));
         }
-        
+
         if ( args.isEmpty() ) {
             if ( lastArgument == null ) {
                 candidates.addAll( existingUCNames );
@@ -86,5 +103,5 @@ public final class DeleteUniqueConstraintCommand extends TableShellCommand {
         // no tab completion
         return -1;
     }
-    
+
 }

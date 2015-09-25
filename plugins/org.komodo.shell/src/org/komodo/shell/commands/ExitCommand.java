@@ -16,9 +16,10 @@
 package org.komodo.shell.commands;
 
 import org.komodo.shell.BuiltInShellCommand;
-import org.komodo.shell.CompletionConstants;
+import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.Messages;
 import org.komodo.shell.Messages.SHELL;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 
 /**
@@ -29,7 +30,7 @@ import org.komodo.shell.api.WorkspaceStatus;
  *
  * @author eric.wittmann@redhat.com
  */
-public class ExitCommand extends BuiltInShellCommand {
+public final class ExitCommand extends BuiltInShellCommand {
 
     /**
      * The command name.
@@ -44,23 +45,31 @@ public class ExitCommand extends BuiltInShellCommand {
         super( wsStatus, NAME, "quit" ); //$NON-NLS-1$
     }
 
-    @Override
-    public boolean isCoreCommand() {
-        return true;
-    }
-    
     /**
      * {@inheritDoc}
      *
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-		getWorkspaceStatus().getShell().exit();
-        print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.GOOD_BYE));
-        return true;
+    protected CommandResult doExecute() {
+        try {
+    		getWorkspaceStatus().getShell().exit();
+            return new CommandResultImpl( Messages.getString( SHELL.GOOD_BYE ) );
+        } catch (final Exception e) {
+            return new CommandResultImpl( false, e.getLocalizedMessage(), e );
+        }
 	}
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 0;
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -70,16 +79,5 @@ public class ExitCommand extends BuiltInShellCommand {
     public boolean isValidForCurrentContext() {
         return true;
     }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.BuiltInShellCommand#shouldCommit()
-     */
-    @Override
-    protected boolean shouldCommit() {
-        return false;
-    }
-
 
 }

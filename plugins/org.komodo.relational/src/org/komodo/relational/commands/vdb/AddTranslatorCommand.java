@@ -7,11 +7,13 @@
  */
 package org.komodo.relational.commands.vdb;
 
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.AddTranslatorCommand.ADD_TRANSLATOR_ERROR;
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.AddTranslatorCommand.TRANSLATOR_ADDED;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_TRANSLATOR_NAME;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_TRANSLATOR_TYPE;
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.AddTranslatorCommand.TRANSLATOR_ADDED;
 import org.komodo.relational.vdb.Vdb;
+import org.komodo.shell.CommandResultImpl;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 
 /**
@@ -26,26 +28,41 @@ public class AddTranslatorCommand extends VdbShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public AddTranslatorCommand( final WorkspaceStatus status ) {
-        super( NAME, true, status );
+        super( NAME, status );
     }
 
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.shell.api.ShellCommand#execute()
+     * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final String translatorName = requiredArgument( 0, getMessage(MISSING_TRANSLATOR_NAME) );
-        final String translatorType = requiredArgument( 1, getMessage(MISSING_TRANSLATOR_TYPE) );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        final Vdb vdb = getVdb();
-        vdb.addTranslator( getTransaction(), translatorName, translatorType );
+        try {
+            final String translatorName = requiredArgument( 0, getMessage( MISSING_TRANSLATOR_NAME ) );
+            final String translatorType = requiredArgument( 1, getMessage( MISSING_TRANSLATOR_TYPE ) );
 
-        // Print success message
-        print(MESSAGE_INDENT, getMessage(TRANSLATOR_ADDED,translatorName));
-        
-        return true;
+            final Vdb vdb = getVdb();
+            vdb.addTranslator( getTransaction(), translatorName, translatorType );
+
+            result = new CommandResultImpl( getMessage( TRANSLATOR_ADDED, translatorName ) );
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( ADD_TRANSLATOR_ERROR ), e );
+        }
+
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 2;
     }
 
 }

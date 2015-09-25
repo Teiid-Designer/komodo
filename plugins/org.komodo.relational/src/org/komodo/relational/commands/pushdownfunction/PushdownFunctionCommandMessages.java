@@ -22,7 +22,7 @@ public class PushdownFunctionCommandMessages implements StringConstants {
      * The resource bundle for localized messages.
      */
     public static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle( BUNDLE_NAME );
-    
+
     @SuppressWarnings( "javadoc" )
     public enum General {
         MISSING_PARAMETER_NAME,
@@ -35,9 +35,10 @@ public class PushdownFunctionCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     @SuppressWarnings( "javadoc" )
     public enum AddParameterCommand {
+        ADD_PARAMETER_ERROR,
         PARAMETER_ADDED;
 
         @Override
@@ -48,6 +49,7 @@ public class PushdownFunctionCommandMessages implements StringConstants {
 
     @SuppressWarnings( "javadoc" )
     public enum DeleteParameterCommand {
+        DELETE_PARAMETER_ERROR,
         PARAMETER_DELETED;
 
         @Override
@@ -55,7 +57,7 @@ public class PushdownFunctionCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     private static String getEnumName(Enum<?> enumValue) {
         String className = enumValue.getClass().getName();
         String[] components = className.split("\\$"); //$NON-NLS-1$

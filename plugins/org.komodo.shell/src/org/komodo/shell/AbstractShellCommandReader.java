@@ -29,9 +29,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.Arguments;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.shell.commands.NoOpCommand;
 import org.komodo.shell.util.KomodoObjectUtils;
 
 /**
@@ -54,9 +54,9 @@ public abstract class AbstractShellCommandReader implements ShellCommandReader {
      * @param factory the factory
      * @param wsStatus the workspace status
      */
-    public AbstractShellCommandReader(ShellCommandFactory factory, WorkspaceStatus wsStatus) {
-    	this.factory = factory;
-    	this.wsStatus = wsStatus;
+    public AbstractShellCommandReader( final ShellCommandFactory factory,
+                                       final WorkspaceStatus wsStatus) {
+        this( factory, wsStatus, null );
     }
 
     /**
@@ -188,7 +188,7 @@ public abstract class AbstractShellCommandReader implements ShellCommandReader {
     protected Writer getOutputWriter() {
         return this.wsStatus.getOutputWriter();
     }
-    
+
 	/**
      * Checks if is batch.
      *
@@ -226,4 +226,73 @@ public abstract class AbstractShellCommandReader implements ShellCommandReader {
 
         return Messages.getString( Messages.SHELL.PROMPT, path );
     }
+
+    class NoOpCommand extends BuiltInShellCommand {
+
+        /**
+         * @param wsStatus
+         *        the workspace status (cannot be <code>null</code>)
+         */
+        public NoOpCommand( final WorkspaceStatus wsStatus ) {
+            super( wsStatus, "no-op" ); //$NON-NLS-1$
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.shell.BuiltInShellCommand#doExecute()
+         */
+        @Override
+        protected CommandResult doExecute() {
+            return CommandResult.SUCCESS;
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+         */
+        @Override
+        protected int getMaxArgCount() {
+            return Integer.MAX_VALUE; // set high as we don't want this to fail max num arg check
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.shell.BuiltInShellCommand#isOverridable()
+         */
+        @Override
+        public boolean isOverridable() {
+            return false;
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
+         */
+        @Override
+        public boolean isValidForCurrentContext() {
+            return true;
+        }
+
+        /**
+         * @see org.komodo.shell.api.ShellCommand#printHelp(int indent)
+         */
+        @Override
+        public void printHelp( final int indent ) {
+            // Nothing to do
+        }
+
+        /**
+         * @see org.komodo.shell.api.ShellCommand#printUsage(int indent)
+         */
+        @Override
+        public void printUsage( final int indent ) {
+            // Nothing to do
+        }
+
+    }
+
 }

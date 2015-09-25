@@ -5,14 +5,15 @@
  *
  * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
  */
-package org.komodo.shell.commands.core;
+package org.komodo.shell.commands;
 
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.List;
 import org.komodo.repository.RepositoryTools;
 import org.komodo.shell.BuiltInShellCommand;
+import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.Messages;
-import org.komodo.shell.api.InvalidCommandArgumentException;
+import org.komodo.shell.Messages.SHELL;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
 import org.komodo.shell.util.KomodoObjectUtils;
@@ -43,18 +44,23 @@ public class SetPropertyCommand extends BuiltInShellCommand {
         super( status, NAME );
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
+     */
     @Override
     public boolean isValidForCurrentContext() {
         return true;
     }
-    
+
     /**
      * {@inheritDoc}
      *
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
+    protected CommandResult doExecute() {
         try {
             // property name and value are required
             String propNameArg = requiredArgument(0, Messages.getString(Messages.SHELL.InvalidArgMsg_PropertyName));
@@ -62,14 +68,11 @@ public class SetPropertyCommand extends BuiltInShellCommand {
             // path is optional.  if path is not included, current context is assumed.
             String pathArg = optionalArgument(2);
 
-            // check for too many args
-            if ( getArguments().size() > 3 ) {
-                throw new Exception( Messages.getString( Messages.SHELL.TOO_MANY_ARGS ) );
-            }
-
             // Validates SET PROPERTY args
             if (!validateSetProperty(propNameArg,propValueArg,pathArg)) {
-                return false;
+                return new CommandResultImpl( false,
+                                              Messages.getString( Messages.SetPropertyCommand.InvalidNameOrValue, propNameArg ),
+                                              null );
             }
 
             final KomodoObject context = StringUtils.isEmpty( pathArg ) ? getContext()
@@ -78,27 +81,20 @@ public class SetPropertyCommand extends BuiltInShellCommand {
 
             // Set the property
             setProperty(context,propNameArg, propValueArg);
-
-            // Commit transaction
-            if ( isAutoCommit() ) {
-                getWorkspaceStatus().commit( SetPropertyCommand.class.getSimpleName() );
-            }
-
-            // Print message
-            print(MESSAGE_INDENT, Messages.getString(Messages.SetPropertyCommand.PropertySet, propNameArg));
-            
-            return true;
-        } catch ( final InvalidCommandArgumentException e ) {
-            throw e;
+            return new CommandResultImpl( Messages.getString( Messages.SetPropertyCommand.PropertySet, propNameArg ) );
         } catch ( final Exception e ) {
-            print( MESSAGE_INDENT, getString( "error", e.getLocalizedMessage() ) ); //$NON-NLS-1$
-            return false;
+            return new CommandResultImpl( false, Messages.getString( SHELL.CommandFailure, NAME ), e );
         }
     }
 
-    private String getString( final String msgKey,
-                              final String... args ) {
-        return Messages.getString( SetPropertyCommand.class.getSimpleName() + '.' + msgKey, ( Object[] )args );
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 3;
     }
 
     /**
@@ -134,7 +130,7 @@ public class SetPropertyCommand extends BuiltInShellCommand {
 
         return true;
     }
-    
+
     @Override
     public boolean validatePropertyValue( final String propName,
                                           final String propValue,
@@ -154,7 +150,7 @@ public class SetPropertyCommand extends BuiltInShellCommand {
         // let super validate
         return super.validatePropertyValue( propName, propValue, context );
     }
-    
+
     private void setProperty( final KomodoObject context,
                               final String name,
                               final String propValue ) throws Exception {
@@ -212,7 +208,7 @@ public class SetPropertyCommand extends BuiltInShellCommand {
 //
 //        print( MESSAGE_INDENT, Messages.getString( TABLE_COLUMNS_SET, propValue ) );
 //    }
-    
+
     private boolean isMultiValuedProperty( final KomodoObject context,
                                            final String name ) throws Exception {
         final String propertyName = isShowingPropertyNamePrefixes() ? name : KomodoObjectUtils.attachPrefix( getWorkspaceStatus(),context, name );
@@ -284,7 +280,7 @@ public class SetPropertyCommand extends BuiltInShellCommand {
 
         return multiValues.split( "," ); //$NON-NLS-1$
     }
-    
+
     /**
      * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
      */
@@ -293,7 +289,7 @@ public class SetPropertyCommand extends BuiltInShellCommand {
                               final List< CharSequence > candidates ) throws Exception {
         if ( getArguments().size() == 0 ) {
             updateTabCompleteCandidatesForProperty( candidates, getContext(), lastArgument );
-            
+
             return ( candidates.isEmpty() ? -1 : ( StringUtils.isBlank( lastArgument ) ? 0 : ( toString().length() + 1 ) ) );
         } else if (getArguments().size() == 1) {
             final KomodoObject context = getContext();
@@ -318,7 +314,7 @@ public class SetPropertyCommand extends BuiltInShellCommand {
 
         return -1;
     }
-    
+
     private void provideCandidates( final KomodoObject context,
                                     final String name,
                                     final String lastArgument,
@@ -413,14 +409,6 @@ public class SetPropertyCommand extends BuiltInShellCommand {
                 }
             }
         }
-    }
-    
-    /* (non-Javadoc)
-     * @see org.komodo.shell.BuiltInShellCommand#shouldCommit()
-     */
-    @Override
-    protected boolean shouldCommit() {
-        return true;
     }
 
 }

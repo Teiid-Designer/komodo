@@ -8,9 +8,11 @@
 package org.komodo.relational.commands.table;
 
 import static org.komodo.relational.commands.table.TableCommandMessages.AddAccessPatternCommand.ACCESS_PATTERN_ADDED;
+import static org.komodo.relational.commands.table.TableCommandMessages.AddAccessPatternCommand.ADD_ACCESS_PATTERN_ERROR;
 import static org.komodo.relational.commands.table.TableCommandMessages.General.MISSING_ACCESS_PATTERN_NAME;
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import org.komodo.relational.model.Table;
+import org.komodo.shell.CommandResultImpl;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 
 /**
@@ -25,7 +27,7 @@ public final class AddAccessPatternCommand extends TableShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public AddAccessPatternCommand( final WorkspaceStatus status ) {
-        super( NAME, true, status );
+        super( NAME, status );
     }
 
     /**
@@ -34,16 +36,31 @@ public final class AddAccessPatternCommand extends TableShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final String apName = requiredArgument( 0, getMessage(MISSING_ACCESS_PATTERN_NAME) );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        final Table table = getTable();
-        table.addAccessPattern( getTransaction(), apName );
-        
-        // Print success message
-        print(MESSAGE_INDENT, getMessage(ACCESS_PATTERN_ADDED,apName));
-        
-        return true;
+        try {
+            final String apName = requiredArgument( 0, getMessage( MISSING_ACCESS_PATTERN_NAME ) );
+
+            final Table table = getTable();
+            table.addAccessPattern( getTransaction(), apName );
+
+            result = new CommandResultImpl( getMessage( ACCESS_PATTERN_ADDED, apName ) );
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( ADD_ACCESS_PATTERN_ERROR ), e );
+        }
+
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 1;
     }
 
 }

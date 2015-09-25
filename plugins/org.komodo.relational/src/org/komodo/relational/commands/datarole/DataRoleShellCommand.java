@@ -19,9 +19,8 @@ import org.komodo.shell.api.WorkspaceStatus;
 abstract class DataRoleShellCommand extends RelationalShellCommand {
 
     protected DataRoleShellCommand( final String name,
-                                    final boolean shouldCommit,
                                     final WorkspaceStatus status ) {
-        super( status, shouldCommit, name );
+        super( status, name );
     }
 
     protected DataRole getDataRole() throws Exception {
@@ -47,7 +46,7 @@ abstract class DataRoleShellCommand extends RelationalShellCommand {
     protected String getMessage(Enum< ? > key, Object... parameters) {
         return Messages.getString(DataRoleCommandMessages.RESOURCE_BUNDLE,key.toString(),parameters);
     }
-    
+
     /**
      * @see org.komodo.shell.api.ShellCommand#printHelp(int indent)
      */

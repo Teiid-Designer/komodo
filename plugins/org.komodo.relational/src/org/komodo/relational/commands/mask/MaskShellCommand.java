@@ -19,9 +19,8 @@ import org.komodo.shell.api.WorkspaceStatus;
 abstract class MaskShellCommand extends RelationalShellCommand {
 
     protected MaskShellCommand( final String name,
-                               final boolean shouldCommit,
-                               final WorkspaceStatus status ) {
-        super( status, shouldCommit, name );
+                                final WorkspaceStatus status ) {
+        super( status, name );
     }
 
     protected Mask getMask() throws Exception {
@@ -47,7 +46,7 @@ abstract class MaskShellCommand extends RelationalShellCommand {
     protected String getMessage(Enum< ? > key, Object... parameters) {
         return Messages.getString(MaskCommandMessages.RESOURCE_BUNDLE,key.toString(),parameters);
     }
-    
+
     /**
      * @see org.komodo.shell.api.ShellCommand#printHelp(int indent)
      */

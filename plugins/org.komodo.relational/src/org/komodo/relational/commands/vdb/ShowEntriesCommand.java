@@ -10,11 +10,12 @@ package org.komodo.relational.commands.vdb;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.NAME_TYPE_DISPLAY;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowEntriesCommand.ENTRIES_HEADER;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowEntriesCommand.NO_ENTRIES;
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowEntriesCommand.SHOW_ENTRIES_ERROR;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
-import java.util.ArrayList;
-import java.util.List;
 import org.komodo.relational.vdb.Entry;
 import org.komodo.relational.vdb.Vdb;
+import org.komodo.shell.CommandResultImpl;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
@@ -30,7 +31,7 @@ public final class ShowEntriesCommand extends VdbShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public ShowEntriesCommand( final WorkspaceStatus status ) {
-        super( NAME, false, status );
+        super( NAME, status );
     }
 
     /**
@@ -39,23 +40,40 @@ public final class ShowEntriesCommand extends VdbShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final UnitOfWork uow = getTransaction();
-        final Vdb vdb = getVdb();
-        final Entry[] entries = vdb.getEntries( uow );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        if ( entries.length == 0 ) {
-            print( MESSAGE_INDENT, getMessage(NO_ENTRIES, vdb.getName(uow)) );
-        } else {
-            print( MESSAGE_INDENT, getMessage(ENTRIES_HEADER, vdb.getName(uow)) );
-            List<String> names = new ArrayList<String>(entries.length);
-            for ( final Entry entry : entries ) {
-                print(MESSAGE_INDENT,getMessage(NAME_TYPE_DISPLAY,entry.getName(uow),entry.getTypeDisplayName()));
+        try {
+            final UnitOfWork uow = getTransaction();
+            final Vdb vdb = getVdb();
+            final Entry[] entries = vdb.getEntries( uow );
+
+            if ( entries.length == 0 ) {
+                result = new CommandResultImpl( getMessage( NO_ENTRIES, vdb.getName( uow ) ) );
+            } else {
+                print( MESSAGE_INDENT, getMessage( ENTRIES_HEADER, vdb.getName( uow ) ) );
+
+                for ( final Entry entry : entries ) {
+                    print( MESSAGE_INDENT, getMessage( NAME_TYPE_DISPLAY, entry.getName( uow ), entry.getTypeDisplayName() ) );
+                }
+
+                result = CommandResult.SUCCESS;
             }
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( SHOW_ENTRIES_ERROR ), e );
         }
-        print();
 
-        return true;
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 0;
     }
 
 }

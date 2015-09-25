@@ -7,9 +7,12 @@
  */
 package org.komodo.relational.commands.table;
 
+import static org.komodo.relational.commands.table.TableCommandMessages.AddForeignKeyCommand.ADD_FOREIGN_KEY_ERROR;
 import static org.komodo.relational.commands.table.TableCommandMessages.AddForeignKeyCommand.FOREIGN_KEY_ADDED;
 import static org.komodo.relational.commands.table.TableCommandMessages.General.MISSING_FOREIGN_KEY_NAME;
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+import org.komodo.relational.model.Table;
+import org.komodo.shell.CommandResultImpl;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 
 /**
@@ -24,7 +27,7 @@ public final class AddForeignKeyCommand extends TableShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public AddForeignKeyCommand( final WorkspaceStatus status ) {
-        super( NAME, true, status );
+        super( NAME, status );
     }
 
     /**
@@ -33,16 +36,31 @@ public final class AddForeignKeyCommand extends TableShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final String fkName = requiredArgument( 0, getMessage(MISSING_FOREIGN_KEY_NAME) );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        //final Table table = getTable();
-        //table.addForeignKey( getTransaction(), fkName );
-        
-        // Print success message
-        print(MESSAGE_INDENT, getMessage(FOREIGN_KEY_ADDED,fkName));
-        
-        return true;
+        try {
+            final String fkName = requiredArgument( 0, getMessage( MISSING_FOREIGN_KEY_NAME ) );
+
+            final Table table = getTable();
+            table.addForeignKey( getTransaction(), fkName );
+
+            result = new CommandResultImpl( getMessage( FOREIGN_KEY_ADDED, fkName ) );
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( ADD_FOREIGN_KEY_ERROR ), e );
+        }
+
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 1;
     }
 
 }

@@ -19,9 +19,8 @@ import org.komodo.shell.api.WorkspaceStatus;
 abstract class IndexShellCommand extends RelationalShellCommand {
 
     protected IndexShellCommand( final String name,
-                               final boolean shouldCommit,
-                               final WorkspaceStatus status ) {
-        super( status, shouldCommit, name );
+                                 final WorkspaceStatus status ) {
+        super( status, name );
     }
 
     protected Index getIndex() throws Exception {
@@ -47,7 +46,7 @@ abstract class IndexShellCommand extends RelationalShellCommand {
     protected String getMessage(Enum< ? > key, Object... parameters) {
         return Messages.getString(IndexCommandMessages.RESOURCE_BUNDLE,key.toString(),parameters);
     }
-    
+
     /**
      * @see org.komodo.shell.api.ShellCommand#printHelp(int indent)
      */

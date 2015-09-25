@@ -7,30 +7,34 @@
  */
 package org.komodo.relational.commands.table;
 
-import static org.komodo.relational.commands.table.TableCommandMessages.General.INVALID_ON_COMMIT_PROPERTY_VALUE;
-import static org.komodo.relational.commands.table.TableCommandMessages.General.INVALID_SCHEMA_ELEMENT_TYPE_PROPERTY_VALUE;
-import static org.komodo.relational.commands.table.TableCommandMessages.General.INVALID_TEMPORARY_TABLE_TYPE_PROPERTY_VALUE;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.INVALID_BOOLEAN_PROPERTY_VALUE;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.INVALID_INTEGER_PROPERTY_VALUE;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.INVALID_PROPERTY_NAME;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.MISSING_PROPERTY_NAME_VALUE;
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_ERROR;
+import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_SUCCESS;
+import static org.komodo.relational.commands.table.TableCommandMessages.General.INVALID_ON_COMMIT_PROPERTY_VALUE;
+import static org.komodo.relational.commands.table.TableCommandMessages.General.INVALID_SCHEMA_ELEMENT_TYPE_PROPERTY_VALUE;
+import static org.komodo.relational.commands.table.TableCommandMessages.General.INVALID_TEMPORARY_TABLE_TYPE_PROPERTY_VALUE;
 import java.util.Arrays;
 import java.util.List;
 import org.komodo.relational.model.SchemaElement;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.Table.OnCommit;
+import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.shell.commands.core.SetPropertyCommand;
+import org.komodo.shell.commands.SetPropertyCommand;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.utils.StringUtils;
 
 /**
  * A shell command to set Table properties
  */
 public final class SetTablePropertyCommand extends TableShellCommand {
 
-    static final String NAME = "set-table-property"; //$NON-NLS-1$
+    static final String NAME = SetPropertyCommand.NAME;
 
     private static final String DESCRIPTION = "description"; //$NON-NLS-1$
     private static final String CARDINALITY = "cardinality"; //$NON-NLS-1$
@@ -53,9 +57,7 @@ public final class SetTablePropertyCommand extends TableShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public SetTablePropertyCommand( final WorkspaceStatus status ) {
-        super( NAME, true, status );
-        // Overrides the BuiltInCommand "set-property"
-        setOverriddenCommands(new String[]{SetPropertyCommand.NAME});
+        super( NAME, status );
     }
 
     /**
@@ -64,96 +66,113 @@ public final class SetTablePropertyCommand extends TableShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final String name = requiredArgument( 0, getWorkspaceMessage(MISSING_PROPERTY_NAME_VALUE) );
-        final String value = requiredArgument( 1, getWorkspaceMessage(MISSING_PROPERTY_NAME_VALUE) );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        final Table table = getTable();
-        
-        final UnitOfWork transaction = getTransaction();
-        boolean success = true;
+        try {
+            final String name = requiredArgument( 0, getWorkspaceMessage( MISSING_PROPERTY_NAME_VALUE ) );
+            final String value = requiredArgument( 1, getWorkspaceMessage( MISSING_PROPERTY_NAME_VALUE ) );
 
-        switch ( name ) {
-            case DESCRIPTION:
-                table.setDescription(transaction, value);
-                break;
-            case CARDINALITY:
-                try {
-                    final int cardinality = Integer.parseInt( value );
-                    table.setCardinality(transaction, cardinality);
-                } catch ( final NumberFormatException e ) {
-                    print( MESSAGE_INDENT, getWorkspaceMessage(INVALID_INTEGER_PROPERTY_VALUE, CARDINALITY ) );
-                    success = false;
-                }
+            final Table table = getTable();
+            final UnitOfWork transaction = getTransaction();
+            String errorMsg = null;
 
-                break;
-            case MATERIALIZED:
-                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                    table.setMaterialized( transaction, Boolean.parseBoolean( value ) );
-                } else {
-                    print( MESSAGE_INDENT, getWorkspaceMessage(INVALID_BOOLEAN_PROPERTY_VALUE, MATERIALIZED ) );
-                    success = false;
-                }
+            switch ( name ) {
+                case DESCRIPTION:
+                    table.setDescription( transaction, value );
+                    break;
+                case CARDINALITY:
+                    try {
+                        final int cardinality = Integer.parseInt( value );
+                        table.setCardinality( transaction, cardinality );
+                    } catch ( final NumberFormatException e ) {
+                        errorMsg = getWorkspaceMessage( INVALID_INTEGER_PROPERTY_VALUE, CARDINALITY );
+                    }
 
-                break;
-            case MATERIALIZED_TABLE:
-                table.setMaterializedTable(transaction, value);
-                break;
-            case NAME_IN_SOURCE:
-                table.setNameInSource(transaction, value);
-                break;
-            case UPDATABLE:
-                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                    table.setUpdatable( transaction, Boolean.parseBoolean( value ) );
-                } else {
-                    print( MESSAGE_INDENT, getWorkspaceMessage(INVALID_BOOLEAN_PROPERTY_VALUE, UPDATABLE ) );
-                    success = false;
-                }
+                    break;
+                case MATERIALIZED:
+                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                        table.setMaterialized( transaction, Boolean.parseBoolean( value ) );
+                    } else {
+                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, MATERIALIZED );
+                    }
 
-                break;
-            case UUID:
-                table.setUuid(transaction, value);
-                break;
-            case ON_COMMIT_VALUE:
-                if ( OnCommit.DELETE_ROWS.name().equals( value ) ) {
-                    table.setOnCommitValue( transaction, OnCommit.DELETE_ROWS );
-                } else if ( OnCommit.PRESERVE_ROWS.name().equals( value ) ) {
-                    table.setOnCommitValue( transaction, OnCommit.PRESERVE_ROWS );
-                } else {
-                    print( MESSAGE_INDENT, getWorkspaceMessage(INVALID_ON_COMMIT_PROPERTY_VALUE, ON_COMMIT_VALUE ) );
-                    success = false;
-                }
-                break;
-            case QUERY_EXPRESSION:
-                table.setQueryExpression(transaction, value);
-                break;
-            case SCHEMA_ELEMENT_TYPE:
-                if ( SchemaElement.SchemaElementType.FOREIGN.name().equals( value ) ) {
-                    table.setSchemaElementType( transaction, SchemaElement.SchemaElementType.FOREIGN );
-                } else if ( SchemaElement.SchemaElementType.VIRTUAL.name().equals( value ) ) {
-                    table.setSchemaElementType( transaction, SchemaElement.SchemaElementType.VIRTUAL );
-                } else {
-                    print( MESSAGE_INDENT, getWorkspaceMessage(INVALID_SCHEMA_ELEMENT_TYPE_PROPERTY_VALUE, SCHEMA_ELEMENT_TYPE ) );
-                    success = false;
-                }
-                break;
-            case TEMPORARY_TABLE_TYPE:
-                if ( Table.TemporaryType.GLOBAL.name().equals( value ) ) {
-                    table.setTemporaryTableType( transaction, Table.TemporaryType.GLOBAL );
-                } else if ( Table.TemporaryType.LOCAL.name().equals( value ) ) {
-                    table.setTemporaryTableType( transaction, Table.TemporaryType.LOCAL );
-                } else {
-                    print( MESSAGE_INDENT, getWorkspaceMessage(INVALID_TEMPORARY_TABLE_TYPE_PROPERTY_VALUE, TEMPORARY_TABLE_TYPE ) );
-                    success = false;
-                }
-                break;
-            default:
-                success = false;
-                print( MESSAGE_INDENT, getWorkspaceMessage(INVALID_PROPERTY_NAME, NAME ) );
-                break;
+                    break;
+                case MATERIALIZED_TABLE:
+                    table.setMaterializedTable( transaction, value );
+                    break;
+                case NAME_IN_SOURCE:
+                    table.setNameInSource( transaction, value );
+                    break;
+                case UPDATABLE:
+                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                        table.setUpdatable( transaction, Boolean.parseBoolean( value ) );
+                    } else {
+                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, UPDATABLE );
+                    }
+
+                    break;
+                case UUID:
+                    table.setUuid( transaction, value );
+                    break;
+                case ON_COMMIT_VALUE:
+                    if ( OnCommit.DELETE_ROWS.name().equals( value ) ) {
+                        table.setOnCommitValue( transaction, OnCommit.DELETE_ROWS );
+                    } else if ( OnCommit.PRESERVE_ROWS.name().equals( value ) ) {
+                        table.setOnCommitValue( transaction, OnCommit.PRESERVE_ROWS );
+                    } else {
+                        errorMsg = getWorkspaceMessage( INVALID_ON_COMMIT_PROPERTY_VALUE, ON_COMMIT_VALUE );
+                    }
+
+                    break;
+                case QUERY_EXPRESSION:
+                    table.setQueryExpression( transaction, value );
+                    break;
+                case SCHEMA_ELEMENT_TYPE:
+                    if ( SchemaElement.SchemaElementType.FOREIGN.name().equals( value ) ) {
+                        table.setSchemaElementType( transaction, SchemaElement.SchemaElementType.FOREIGN );
+                    } else if ( SchemaElement.SchemaElementType.VIRTUAL.name().equals( value ) ) {
+                        table.setSchemaElementType( transaction, SchemaElement.SchemaElementType.VIRTUAL );
+                    } else {
+                        errorMsg = getWorkspaceMessage( INVALID_SCHEMA_ELEMENT_TYPE_PROPERTY_VALUE, SCHEMA_ELEMENT_TYPE );
+                    }
+
+                    break;
+                case TEMPORARY_TABLE_TYPE:
+                    if ( Table.TemporaryType.GLOBAL.name().equals( value ) ) {
+                        table.setTemporaryTableType( transaction, Table.TemporaryType.GLOBAL );
+                    } else if ( Table.TemporaryType.LOCAL.name().equals( value ) ) {
+                        table.setTemporaryTableType( transaction, Table.TemporaryType.LOCAL );
+                    } else {
+                        errorMsg = getWorkspaceMessage( INVALID_TEMPORARY_TABLE_TYPE_PROPERTY_VALUE, TEMPORARY_TABLE_TYPE );
+                    }
+
+                    break;
+                default:
+                    errorMsg = getWorkspaceMessage( INVALID_PROPERTY_NAME, name, Table.class.getSimpleName() );
+                    break;
+            }
+
+            if ( StringUtils.isBlank( errorMsg ) ) {
+                result = new CommandResultImpl( getMessage( SET_PROPERTY_SUCCESS, name ) );
+            } else {
+                result = new CommandResultImpl( false, errorMsg, null );
+            }
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( SET_PROPERTY_ERROR ), e );
         }
 
-        return success;
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 2;
     }
 
     /**
@@ -198,7 +217,7 @@ public final class SetTablePropertyCommand extends TableShellCommand {
 
             return 0;
         }
-        
+
         // no tab completion
         return -1;
     }

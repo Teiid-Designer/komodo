@@ -39,19 +39,22 @@ import java.util.concurrent.TimeUnit;
 import org.komodo.core.KEngine;
 import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.Arguments;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.InvalidCommandArgumentException;
 import org.komodo.shell.api.KomodoShell;
 import org.komodo.shell.api.KomodoShellParent;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.shell.commands.ExitCommand;
 import org.komodo.shell.commands.HelpCommand;
-import org.komodo.shell.commands.core.SetRecordCommand;
+import org.komodo.shell.commands.SetRecordCommand;
 import org.komodo.shell.util.PrintUtils;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.constants.SystemConstants;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.RepositoryObserver;
+import org.komodo.utils.KLog;
 import org.komodo.utils.StringUtils;
 
 /**
@@ -222,7 +225,7 @@ public class DefaultKomodoShell implements KomodoShell {
 
         factory = new ShellCommandFactory();
         wsStatus = new WorkspaceStatusImpl(this,factory);
-        
+
         factory.registerCommands(wsStatus);
 
         reader = ShellCommandReaderFactory.createCommandReader(args, factory, wsStatus);
@@ -234,9 +237,10 @@ public class DefaultKomodoShell implements KomodoShell {
         final ShellCommand helpCmd = factory.getCommand( HelpCommand.NAME );
         helpCmd.setArguments( new Arguments( EMPTY_STRING ) );
         helpCmd.setWriter( getOutputWriter() );
-        helpCmd.execute();
 
-        boolean done = false;
+        // if help command successfully executes set done flag to false
+        boolean done = !helpCmd.execute().isOk();
+
         while (!done && !shutdown) {
             ShellCommand command = null;
             try {
@@ -248,15 +252,47 @@ public class DefaultKomodoShell implements KomodoShell {
                     done = true;
                     shutdown();
                 } else {
-                    command.execute();
+                    // execute
+                    final CommandResult result = command.execute();
+                    KLog.getLogger().debug( "Command: {0}, Succeeded: {1}", command, result.isOk() ); //$NON-NLS-1$
 
-                    if ( this.wsStatus.getRecordingStatus() && !(command instanceof SetRecordCommand) ) {
-                        writeCommandToRecordingFile(command);
+                    // record
+                    if ( result.isOk() && this.wsStatus.getRecordingStatus() && !( command instanceof SetRecordCommand ) ) {
+                        writeCommandToRecordingFile( command );
+                    }
+
+                    // persist
+                    if ( this.wsStatus.isAutoCommit() ) {
+                        if ( result.isOk() && result.isPersistable() ) {
+                            this.wsStatus.commit( command.getClass().getSimpleName() );
+                        } else if ( result.isPersistable() ) {
+                            this.wsStatus.rollback( command.getClass().getSimpleName() );
+                        }
+                    }
+
+                    // display command execution message
+                    if ( !StringUtils.isBlank( result.getMessage() ) ) {
+                        PrintUtils.print( getOutputWriter(), CompletionConstants.MESSAGE_INDENT, result.getMessage() );
+                    }
+
+                    // log error and shutdown if necessary
+                    if ( result.getError() != null ) {
+                        KLog.getLogger().error( command.toString(), result.getError() );
+
+                        if ( this.reader.isBatch() ) {
+                            shutdown();
+                        } else if ( ExitCommand.NAME.equals( command.getName() ) ) {
+                            done = true;
+
+                            if ( !this.shutdown ) {
+                                shutdown();
+                            }
+                        }
                     }
                 }
             } catch (InvalidCommandArgumentException e) {
                 PrintUtils.print(getOutputWriter(), CompletionConstants.MESSAGE_INDENT, Messages.getString(SHELL.INVALID_ARG, e.getMessage()));
-                
+
                 if (command != null) {
                     PrintUtils.print(getOutputWriter(), CompletionConstants.MESSAGE_INDENT, Messages.getString(SHELL.USAGE));
                     command.printUsage(CompletionConstants.MESSAGE_INDENT);
@@ -374,7 +410,7 @@ public class DefaultKomodoShell implements KomodoShell {
     private void displayWelcomeMessage() {
         displayMessage(Messages.getString(SHELL.WelcomeMessage));
     }
-    
+
     /**
      * Write the supplied line to the recording output file.
      * @param line the line to output
@@ -402,5 +438,5 @@ public class DefaultKomodoShell implements KomodoShell {
     public String getShellPropertiesFile() {
         return PROPERTIES_FILE_NAME;
     }
-    
+
 }

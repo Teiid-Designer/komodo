@@ -7,10 +7,12 @@
  */
 package org.komodo.relational.commands.model;
 
+import static org.komodo.relational.commands.model.ModelCommandMessages.AddUserDefinedFunctionCommand.ADD_USER_DEFINED_FUNCTION_ERROR;
 import static org.komodo.relational.commands.model.ModelCommandMessages.AddUserDefinedFunctionCommand.USER_DEFINED_FUNCTION_ADDED;
 import static org.komodo.relational.commands.model.ModelCommandMessages.General.MISSING_USER_DEFINED_FUNCTION_NAME;
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import org.komodo.relational.model.Model;
+import org.komodo.shell.CommandResultImpl;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 
 /**
@@ -25,7 +27,7 @@ public final class AddUserDefinedFunctionCommand extends ModelShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public AddUserDefinedFunctionCommand( final WorkspaceStatus status ) {
-        super( NAME, true, status );
+        super( NAME, status );
     }
 
     /**
@@ -34,16 +36,31 @@ public final class AddUserDefinedFunctionCommand extends ModelShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final String udfName = requiredArgument( 0, getMessage(MISSING_USER_DEFINED_FUNCTION_NAME) );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        final Model model = getModel();
-        model.addUserDefinedFunction( getTransaction(), udfName );
+        try {
+            final String udfName = requiredArgument( 0, getMessage( MISSING_USER_DEFINED_FUNCTION_NAME ) );
 
-        // Print success message
-        print(MESSAGE_INDENT, getMessage(USER_DEFINED_FUNCTION_ADDED,udfName));
-        
-        return true;
+            final Model model = getModel();
+            model.addUserDefinedFunction( getTransaction(), udfName );
+
+            result = new CommandResultImpl( getMessage( USER_DEFINED_FUNCTION_ADDED, udfName ) );
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( ADD_USER_DEFINED_FUNCTION_ERROR ), e );
+        }
+
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 1;
     }
 
 }

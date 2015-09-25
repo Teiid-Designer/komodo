@@ -22,7 +22,7 @@ public class StoredProcedureCommandMessages implements StringConstants {
      * The resource bundle for localized messages.
      */
     public static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle( BUNDLE_NAME );
-    
+
     @SuppressWarnings( "javadoc" )
     public enum General {
         MISSING_PARAMETER_NAME,
@@ -34,9 +34,10 @@ public class StoredProcedureCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     @SuppressWarnings( "javadoc" )
     public enum AddParameterCommand {
+        ADD_PARAMETER_ERROR,
         PARAMETER_ADDED;
 
         @Override
@@ -47,6 +48,7 @@ public class StoredProcedureCommandMessages implements StringConstants {
 
     @SuppressWarnings( "javadoc" )
     public enum DeleteParameterCommand {
+        DELETE_PARAMETER_ERROR,
         PARAMETER_DELETED;
 
         @Override

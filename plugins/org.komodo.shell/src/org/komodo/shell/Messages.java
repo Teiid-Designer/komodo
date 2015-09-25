@@ -39,6 +39,7 @@ public class Messages implements StringConstants {
     private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME);
 
     public enum SHELL {
+        FileNotAccessible,
         ERROR_LOADING_PROPERTIES,
         INVALID_GLOBAL_PROPERTY_NAME,
         INVALID_BOOLEAN_GLOBAL_PROPERTY_VALUE,
@@ -74,7 +75,6 @@ public class Messages implements StringConstants {
     	ENTRY_PATH,
     	ENTRY_LIST_SUMMARY,
     	ENTRY,
-    	InvalidArgMsg_ArtifactId,
     	Property_InvalidArgMsg_SubCommand,
     	Property_InvalidArgMsg_PropertyName,
     	Property_InvalidArgMsg_PropertyValue,
@@ -146,13 +146,13 @@ public class Messages implements StringConstants {
 //            return getEnumName(this) + DOT + name();
 //        }
 //    }
-//    
+//
 //    public enum DeleteCommand {
 //        InvalidArgMsg_ObjectPath,
 //        ObjectDeleted,
 //        Failure,
 //        cannotDelete_objectDoesNotExist,
-//        contextMustBeBelowCurrent, 
+//        contextMustBeBelowCurrent,
 //        cantDeleteReserved,
 //        cannotRename_objectDoesNotExist;
 //
@@ -174,10 +174,11 @@ public class Messages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     public enum PlayCommand {
         InvalidArgMsg_FileName,
         fileExecuted,
+        FileNotAccessible,
         Failure,
         CommandFailure;
 
@@ -195,14 +196,14 @@ public class Messages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     public enum SetRecordCommand {
         onOffArg_empty,
         onOffArg_invalid,
         setRecordingStateMsg,
         recordingFileNotSet,
         recordingFileProblem;
-        
+
       @Override
       public String toString() {
           return getEnumName(this) + DOT + name();
@@ -214,7 +215,7 @@ public class Messages implements StringConstants {
         InvalidGlobalProperty,
         InvalidArgMsg_PropertyValue,
         GlobalPropertySet;
-        
+
       @Override
       public String toString() {
           return getEnumName(this) + DOT + name();
@@ -222,8 +223,9 @@ public class Messages implements StringConstants {
     }
 
     public enum SetPropertyCommand {
+        InvalidNameOrValue,
         PropertySet;
-        
+
       @Override
       public String toString() {
           return getEnumName(this) + DOT + name();
@@ -235,7 +237,7 @@ public class Messages implements StringConstants {
         InvalidGlobalProperty,
         InvalidArgMsg_PropertyValue,
         GlobalPropertySet;
-        
+
       @Override
       public String toString() {
           return getEnumName(this) + DOT + name();
@@ -304,13 +306,13 @@ public class Messages implements StringConstants {
 //        NotConnected,
 //        PingOk,
 //        PingFail;
-//        
+//
 //        @Override
 //        public String toString() {
 //            return getEnumName(this) + DOT + name();
 //        }
 //    }
-    
+
     public enum ShowStatusCommand {
         CurrentRepoUrl,
         CurrentRepoName,
@@ -323,7 +325,7 @@ public class Messages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     public enum ShowGlobalCommand {
         GlobalPropertiesHeader;
 
@@ -332,12 +334,12 @@ public class Messages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
 //    public enum ShowChildrenCommand {
 //        noChildrenMsg,
 //        ChildrenHeader,
 //        Failure;
-//        
+//
 //        @Override
 //        public String toString() {
 //            return getEnumName(this) + DOT + name();
@@ -346,13 +348,13 @@ public class Messages implements StringConstants {
 
     public enum ShowPropertyCommand {
         InvalidArgMsg_PropertyName;
-        
+
         @Override
         public String toString() {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     public enum ServerCommand {
         InvalidArgMsg_SubCommand,
         InvalidArgMsg_ServerObjType,
@@ -395,29 +397,6 @@ public class Messages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
-    public enum ImportCommand {
-    	InvalidArgMsg_SubCommand,
-    	InvalidArgMsg_FileName,
-    	InvalidArgMsg_ModelName,
-    	InvalidTargetPath,
-    	DdlImportInProgressMsg,
-    	VdbImportInProgressMsg,
-    	DdlImportSuccessMsg,
-    	VdbImportSuccessMsg,
-    	InvalidSubCommand,
-    	ImportFailedMsg,
-    	childTypeNotAllowed,
-    	InvalidDDLParentType,
-    	ErrorCreatingTempNode,
-    	DeleteTempContextFailedMsg,
-    	cannotImport_wouldCreateDuplicate;
-
-    	@Override
-    	public String toString() {
-    		return getEnumName(this) + DOT + name();
-    	}
-    }
 
     public enum ExportCommand {
     	InvalidArgMsgSubCommand,
@@ -440,7 +419,7 @@ public class Messages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     public enum FindCommand {
         helpTypesHeading,
         Failure,
@@ -454,7 +433,7 @@ public class Messages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     /**
      * Localized messages of the {@link AddConstraintColumnCommand}.
      */
@@ -477,7 +456,7 @@ public class Messages implements StringConstants {
             return getEnumName( this ) + DOT + name();
         }
     }
-    
+
     /**
      * Localized messages of the {@link RemoveConstraintColumnCommand}.
      */
@@ -499,7 +478,7 @@ public class Messages implements StringConstants {
             return getEnumName( this ) + DOT + name();
         }
     }
-    
+
     /**
      * Localized messages of the {@link RenameCommand}.
      */

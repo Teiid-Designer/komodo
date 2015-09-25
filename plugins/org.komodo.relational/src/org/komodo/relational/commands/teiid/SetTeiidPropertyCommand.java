@@ -11,21 +11,25 @@ import static org.komodo.relational.commands.WorkspaceCommandMessages.General.IN
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.INVALID_INTEGER_PROPERTY_VALUE;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.INVALID_PROPERTY_NAME;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.MISSING_PROPERTY_NAME_VALUE;
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_ERROR;
+import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_SUCCESS;
 import java.util.Arrays;
 import java.util.List;
 import org.komodo.relational.teiid.Teiid;
+import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.shell.commands.core.SetPropertyCommand;
+import org.komodo.shell.commands.SetPropertyCommand;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.utils.StringUtils;
 
 /**
  * A shell command to set Teiid properties
  */
 public final class SetTeiidPropertyCommand extends TeiidShellCommand {
 
-    static final String NAME = "set-teiid-property"; //$NON-NLS-1$
+    static final String NAME = SetPropertyCommand.NAME;
 
     private static final String ADMIN_PORT = "adminPort"; //$NON-NLS-1$
     private static final String ADMIN_PASSWORD = "adminPswd"; //$NON-NLS-1$
@@ -36,7 +40,7 @@ public final class SetTeiidPropertyCommand extends TeiidShellCommand {
     private static final String JDBC_SECURE = "jdbcSecure"; //$NON-NLS-1$
     private static final String JDBC_USER = "jdbcUser"; //$NON-NLS-1$
 
-    private static final List< String > ALL_PROPS = Arrays.asList( new String[] { ADMIN_PORT, ADMIN_PASSWORD, ADMIN_SECURE, ADMIN_USER, 
+    private static final List< String > ALL_PROPS = Arrays.asList( new String[] { ADMIN_PORT, ADMIN_PASSWORD, ADMIN_SECURE, ADMIN_USER,
                                                                                   JDBC_PORT, JDBC_PASSWORD, JDBC_SECURE, JDBC_USER } );
 
     /**
@@ -44,9 +48,7 @@ public final class SetTeiidPropertyCommand extends TeiidShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public SetTeiidPropertyCommand( final WorkspaceStatus status ) {
-        super( NAME, true, status );
-        // Overrides the BuiltInCommand "set-property"
-        setOverriddenCommands(new String[]{SetPropertyCommand.NAME});
+        super( NAME, status );
     }
 
     /**
@@ -55,72 +57,89 @@ public final class SetTeiidPropertyCommand extends TeiidShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final String name = requiredArgument( 0, getWorkspaceMessage(MISSING_PROPERTY_NAME_VALUE) );
-        final String value = requiredArgument( 1, getWorkspaceMessage(MISSING_PROPERTY_NAME_VALUE) );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        final Teiid teiid = getTeiid();
-        final UnitOfWork transaction = getTransaction();
-        boolean success = true;
+        try {
+            final String name = requiredArgument( 0, getWorkspaceMessage( MISSING_PROPERTY_NAME_VALUE ) );
+            final String value = requiredArgument( 1, getWorkspaceMessage( MISSING_PROPERTY_NAME_VALUE ) );
 
-        switch ( name ) {
-            case ADMIN_PORT:
-                try {
-                    final int port = Integer.parseInt( value );
-                    teiid.setAdminPort( transaction, port );
-                } catch ( final NumberFormatException e ) {
-                    print( MESSAGE_INDENT, getWorkspaceMessage(INVALID_INTEGER_PROPERTY_VALUE, ADMIN_PORT ) );
-                    success = false;
-                }
+            final Teiid teiid = getTeiid();
+            final UnitOfWork transaction = getTransaction();
+            String errorMsg = null;
 
-                break;
-            case ADMIN_PASSWORD:
-                teiid.setAdminPassword( transaction, value );
-                break;
-            case ADMIN_SECURE:
-                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                    teiid.setAdminSecure( transaction, Boolean.parseBoolean( value ) );
-                } else {
-                    print( MESSAGE_INDENT, getWorkspaceMessage(INVALID_BOOLEAN_PROPERTY_VALUE, ADMIN_SECURE ) );
-                    success = false;
-                }
+            switch ( name ) {
+                case ADMIN_PORT:
+                    try {
+                        final int port = Integer.parseInt( value );
+                        teiid.setAdminPort( transaction, port );
+                    } catch ( final NumberFormatException e ) {
+                        errorMsg = getWorkspaceMessage( INVALID_INTEGER_PROPERTY_VALUE, ADMIN_PORT );
+                    }
 
-                break;
-            case ADMIN_USER:
-                teiid.setAdminUser( transaction, value );
-                break;
-            case JDBC_PORT:
-                try {
-                    final int port = Integer.parseInt( value );
-                    teiid.setJdbcPort( transaction, port );
-                } catch ( final NumberFormatException e ) {
-                    print( MESSAGE_INDENT, getWorkspaceMessage(INVALID_INTEGER_PROPERTY_VALUE, JDBC_PORT ) );
-                    success = false;
-                }
+                    break;
+                case ADMIN_PASSWORD:
+                    teiid.setAdminPassword( transaction, value );
+                    break;
+                case ADMIN_SECURE:
+                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                        teiid.setAdminSecure( transaction, Boolean.parseBoolean( value ) );
+                    } else {
+                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, ADMIN_SECURE );
+                    }
 
-                break;
-            case JDBC_PASSWORD:
-                teiid.setJdbcPassword( transaction, value );
-                break;
-            case JDBC_SECURE:
-                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                    teiid.setJdbcSecure( transaction, Boolean.parseBoolean( value ) );
-                } else {
-                    print( MESSAGE_INDENT, getWorkspaceMessage(INVALID_BOOLEAN_PROPERTY_VALUE, JDBC_SECURE ) );
-                    success = false;
-                }
+                    break;
+                case ADMIN_USER:
+                    teiid.setAdminUser( transaction, value );
+                    break;
+                case JDBC_PORT:
+                    try {
+                        final int port = Integer.parseInt( value );
+                        teiid.setJdbcPort( transaction, port );
+                    } catch ( final NumberFormatException e ) {
+                        errorMsg = getWorkspaceMessage( INVALID_INTEGER_PROPERTY_VALUE, JDBC_PORT );
+                    }
 
-                break;
-            case JDBC_USER:
-                teiid.setJdbcUsername( transaction, value );
-                break;
-            default:
-                success = false;
-                print( MESSAGE_INDENT, getWorkspaceMessage(INVALID_PROPERTY_NAME, NAME ) );
-                break;
+                    break;
+                case JDBC_PASSWORD:
+                    teiid.setJdbcPassword( transaction, value );
+                    break;
+                case JDBC_SECURE:
+                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                        teiid.setJdbcSecure( transaction, Boolean.parseBoolean( value ) );
+                    } else {
+                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, JDBC_SECURE );
+                    }
+
+                    break;
+                case JDBC_USER:
+                    teiid.setJdbcUsername( transaction, value );
+                    break;
+                default:
+                    errorMsg = getWorkspaceMessage( INVALID_PROPERTY_NAME, name, Teiid.class.getSimpleName() );
+                    break;
+            }
+
+            if ( StringUtils.isBlank( errorMsg ) ) {
+                result = new CommandResultImpl( getMessage( SET_PROPERTY_SUCCESS, name ) );
+            } else {
+                result = new CommandResultImpl( false, errorMsg, null );
+            }
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( SET_PROPERTY_ERROR ), e );
         }
 
-        return success;
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 2;
     }
 
     /**

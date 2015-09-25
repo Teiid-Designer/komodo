@@ -8,13 +8,15 @@
 package org.komodo.relational.commands.vdb;
 
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.DeleteDataRoleCommand.DATA_ROLE_DELETED;
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.DeleteDataRoleCommand.DELETE_DATA_ROLE_ERROR;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_DATA_ROLE_NAME;
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.ArrayList;
 import java.util.List;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Vdb;
+import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
@@ -30,7 +32,7 @@ public final class DeleteDataRoleCommand extends VdbShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public DeleteDataRoleCommand( final WorkspaceStatus status ) {
-        super( NAME, true, status );
+        super( NAME, status );
     }
 
     /**
@@ -39,18 +41,33 @@ public final class DeleteDataRoleCommand extends VdbShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final String dataRoleName = requiredArgument( 0, getMessage(MISSING_DATA_ROLE_NAME) );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        final Vdb vdb = getVdb();
-        vdb.removeDataRole( getTransaction(), dataRoleName );
+        try {
+            final String dataRoleName = requiredArgument( 0, getMessage( MISSING_DATA_ROLE_NAME ) );
 
-        // Print success message
-        print(MESSAGE_INDENT, getMessage(DATA_ROLE_DELETED,dataRoleName));
-        
-        return true;
+            final Vdb vdb = getVdb();
+            vdb.removeDataRole( getTransaction(), dataRoleName );
+
+            result = new CommandResultImpl( getMessage( DATA_ROLE_DELETED, dataRoleName ) );
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( DELETE_DATA_ROLE_ERROR ), e );
+        }
+
+        return result;
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 1;
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -68,7 +85,7 @@ public final class DeleteDataRoleCommand extends VdbShellCommand {
         for(DataRole role : dataRoles) {
             existingRoleNames.add(role.getName(uow));
         }
-        
+
         if ( args.isEmpty() ) {
             if ( lastArgument == null ) {
                 candidates.addAll( existingRoleNames );
@@ -86,5 +103,5 @@ public final class DeleteDataRoleCommand extends VdbShellCommand {
         // no tab completion
         return -1;
     }
-    
+
 }

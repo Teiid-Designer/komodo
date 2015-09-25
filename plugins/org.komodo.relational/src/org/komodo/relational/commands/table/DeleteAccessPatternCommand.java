@@ -8,13 +8,15 @@
 package org.komodo.relational.commands.table;
 
 import static org.komodo.relational.commands.table.TableCommandMessages.DeleteAccessPatternCommand.ACCESS_PATTERN_DELETED;
+import static org.komodo.relational.commands.table.TableCommandMessages.DeleteAccessPatternCommand.DELETE_ACCESS_PATTERN_ERROR;
 import static org.komodo.relational.commands.table.TableCommandMessages.General.MISSING_ACCESS_PATTERN_NAME;
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.ArrayList;
 import java.util.List;
 import org.komodo.relational.model.AccessPattern;
 import org.komodo.relational.model.Table;
+import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
@@ -30,7 +32,7 @@ public final class DeleteAccessPatternCommand extends TableShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public DeleteAccessPatternCommand( final WorkspaceStatus status ) {
-        super( NAME, true, status );
+        super( NAME, status );
     }
 
     /**
@@ -39,18 +41,33 @@ public final class DeleteAccessPatternCommand extends TableShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final String apName = requiredArgument( 0, getMessage(MISSING_ACCESS_PATTERN_NAME) );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        final Table table = getTable();
-        table.removeAccessPattern( getTransaction(), apName );
+        try {
+            final String apName = requiredArgument( 0, getMessage( MISSING_ACCESS_PATTERN_NAME ) );
 
-        // Print success message
-        print(MESSAGE_INDENT, getMessage(ACCESS_PATTERN_DELETED,apName));
-        
-        return true;
+            final Table table = getTable();
+            table.removeAccessPattern( getTransaction(), apName );
+
+            result = new CommandResultImpl( getMessage( ACCESS_PATTERN_DELETED, apName ) );
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( DELETE_ACCESS_PATTERN_ERROR ), e );
+        }
+
+        return result;
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 1;
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -68,7 +85,7 @@ public final class DeleteAccessPatternCommand extends TableShellCommand {
         for(AccessPattern ap : aps) {
             existingAPNames.add(ap.getName(uow));
         }
-        
+
         if ( args.isEmpty() ) {
             if ( lastArgument == null ) {
                 candidates.addAll( existingAPNames );
@@ -86,5 +103,5 @@ public final class DeleteAccessPatternCommand extends TableShellCommand {
         // no tab completion
         return -1;
     }
-    
+
 }

@@ -7,11 +7,13 @@
  */
 package org.komodo.relational.commands;
 
+import static org.komodo.relational.commands.WorkspaceCommandMessages.CreateVdbCommand.CREATE_VDB_ERROR;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.CreateVdbCommand.MISSING_VDB_EXTERNAL_PATH;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.CreateVdbCommand.MISSING_VDB_NAME;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.CreateVdbCommand.VDB_CREATED;
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.shell.CommandResultImpl;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoType;
 
@@ -27,7 +29,7 @@ public final class CreateVdbCommand extends RelationalShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public CreateVdbCommand( final WorkspaceStatus status ) {
-        super( status, true, NAME );
+        super( status, NAME );
     }
 
     /**
@@ -36,17 +38,32 @@ public final class CreateVdbCommand extends RelationalShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final String vdbName = requiredArgument( 0, getMessage(MISSING_VDB_NAME) );
-        final String extPath = requiredArgument( 1, getMessage(MISSING_VDB_EXTERNAL_PATH) );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        final WorkspaceManager mgr = getWorkspaceManager();
-        mgr.createVdb( getTransaction(), null, vdbName, extPath );
+        try {
+            final String vdbName = requiredArgument( 0, getMessage( MISSING_VDB_NAME ) );
+            final String extPath = requiredArgument( 1, getMessage( MISSING_VDB_EXTERNAL_PATH ) );
 
-        // Print success message
-        print(MESSAGE_INDENT, getMessage(VDB_CREATED,vdbName));
-        
-        return true;
+            final WorkspaceManager mgr = getWorkspaceManager();
+            mgr.createVdb( getTransaction(), null, vdbName, extPath );
+
+            result = new CommandResultImpl( getMessage( VDB_CREATED, vdbName ) );
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( CREATE_VDB_ERROR ), e );
+        }
+
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 2;
     }
 
     /**
