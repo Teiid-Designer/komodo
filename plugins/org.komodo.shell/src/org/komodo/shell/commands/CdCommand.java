@@ -19,12 +19,14 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  ************************************************************************************/
-package org.komodo.shell.commands.core;
+package org.komodo.shell.commands;
 
 import java.util.List;
 import org.komodo.shell.BuiltInShellCommand;
+import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.Messages;
 import org.komodo.shell.Messages.SHELL;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
 import org.komodo.spi.repository.KomodoObject;
@@ -49,44 +51,53 @@ public class CdCommand extends BuiltInShellCommand {
         super( wsStatus, NAME, "edit", "goto" ); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
+     */
     @Override
     public boolean isValidForCurrentContext() {
         return true;
     }
-    
+
     /**
      * {@inheritDoc}
      *
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-	protected boolean doExecute() throws Exception {
-		String locationArg = requiredArgument(0, Messages.getString(SHELL.InvalidArgMsg_EntryPath));
+    protected CommandResult doExecute() {
+        try {
+    		String locationArg = requiredArgument(0, Messages.getString(SHELL.InvalidArgMsg_EntryPath));
 
-		if (!this.validate(locationArg)) {
-			return false;
-		}
+            if (!this.validate(locationArg)) {
+    			return CommandResult.FAIL;
+    		}
 
-		String locArg = locationArg.trim();
-		WorkspaceStatus wsStatus = getWorkspaceStatus();
-		KomodoObject newContext = ContextUtils.getContextForPath(wsStatus, locArg);
+    		String locArg = locationArg.trim();
+    		WorkspaceStatus wsStatus = getWorkspaceStatus();
+    		KomodoObject newContext = ContextUtils.getContextForPath(wsStatus, locArg);
 
-		if(newContext!=null) {
-			getWorkspaceStatus().setCurrentContext(newContext);
-			return true;
-		}
+    		if(newContext!=null) {
+    			getWorkspaceStatus().setCurrentContext(newContext);
+    			return CommandResult.SUCCESS;
+    		}
+        } catch ( final Exception e ) {
+            return new CommandResultImpl( false, Messages.getString( SHELL.CommandFailure, NAME ), e );
+        }
 
-		return false;
+        return CommandResult.FAIL;
 	}
 
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.shell.BuiltInShellCommand#shouldCommit()
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
      */
     @Override
-    protected boolean shouldCommit() {
-        return false;
+    protected int getMaxArgCount() {
+        return 1;
     }
 
 	/*

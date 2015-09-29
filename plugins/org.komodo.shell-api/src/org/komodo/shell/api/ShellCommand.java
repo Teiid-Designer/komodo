@@ -30,11 +30,6 @@ import java.util.List;
 public interface ShellCommand {
 
     /**
-     * @return <code>true</code> if the command should commit the transaction after execution
-     */
-    boolean isAutoCommit();
-
-    /**
      * @return the command name (never empty)
      */
     String getName();
@@ -65,18 +60,12 @@ public interface ShellCommand {
 	 * @return the stream writer (can be <code>null</code> if not set)
 	 */
 	Writer getWriter();
-	
+
 	/**
 	 * Get the WorkspaceStatus
 	 * @return the workspace status
 	 */
 	WorkspaceStatus getWorkspaceStatus();
-	
-	/**
-	 * Set the WorkspaceStatus
-	 * @param wsStatus the workspace status
-	 */
-	void setWorkspaceStatus(WorkspaceStatus wsStatus);
 
     /**
      * @return <code>true</code> if command is valid for the current context
@@ -84,27 +73,21 @@ public interface ShellCommand {
     boolean isValidForCurrentContext();
 
     /**
-     * @return <code>true</code> if command is a core built in command
+     * @return <code>true</code> if the command can be overridden
      */
-    boolean isCoreCommand();
+    boolean isOverridable();
 
     /**
-     * Get the command names that are overridden by this command.
-     * @return the command names to override (never <code>null</code> but can be empty)
+     * @return <code>true</code> if the command is enabled
      */
-    List<String> getOverriddenCommands();
-    
-    /**
-     * Get the command names that are overridden by this command.
-     * @param commands the command names to override
-     */
-    void setOverriddenCommands(String[] commands);
+    boolean isEnabled();
 
-	/**
-	 * Called to execute the command.
-	 * @throws Exception the exception
-	 */
-	void execute() throws Exception;
+    /**
+     * Called to execute the command.
+     *
+     * @return the result (never <code>null</code>)
+     */
+    CommandResult execute();
 
 	/**
 	 * Prints the usage help for this command.
@@ -117,14 +100,6 @@ public interface ShellCommand {
 	 * @param indent number of spaces to indent
 	 */
 	void printHelp(int indent);
-
-	/**
-	 * Prints the given message to the output stream.
-	 * @param indent the number of chars to indent the message
-	 * @param formattedMessage the message
-	 * @param params the params
-	 */
-	void print(int indent,String formattedMessage, Object ... params);
 
 	/**
 	 * Handle tab completion for the command.  This is optional, but provides a mechanism by

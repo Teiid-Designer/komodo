@@ -7,14 +7,16 @@
  */
 package org.komodo.relational.commands.vdb;
 
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.DeleteEntryCommand.DELETE_ENTRY_ERROR;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.DeleteEntryCommand.ENTRY_DELETED;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_ENTRY_NAME;
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.ArrayList;
 import java.util.List;
 import org.komodo.relational.vdb.Entry;
 import org.komodo.relational.vdb.Vdb;
+import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
@@ -30,7 +32,7 @@ public final class DeleteEntryCommand extends VdbShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public DeleteEntryCommand( final WorkspaceStatus status ) {
-        super( NAME, true, status );
+        super( NAME, status );
     }
 
     /**
@@ -39,18 +41,33 @@ public final class DeleteEntryCommand extends VdbShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final String entryName = requiredArgument( 0, getMessage(MISSING_ENTRY_NAME) );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        final Vdb vdb = getVdb();
-        vdb.removeEntry( getTransaction(), entryName );
+        try {
+            final String entryName = requiredArgument( 0, getMessage( MISSING_ENTRY_NAME ) );
 
-        // Print success message
-        print(MESSAGE_INDENT, getMessage(ENTRY_DELETED,entryName));
-        
-        return true;
+            final Vdb vdb = getVdb();
+            vdb.removeEntry( getTransaction(), entryName );
+
+            result = new CommandResultImpl( getMessage( ENTRY_DELETED, entryName ) );
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( DELETE_ENTRY_ERROR ), e );
+        }
+
+        return result;
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 1;
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -68,7 +85,7 @@ public final class DeleteEntryCommand extends VdbShellCommand {
         for(Entry entry : entries) {
             existingEntryNames.add(entry.getName(uow));
         }
-        
+
         if ( args.isEmpty() ) {
             if ( lastArgument == null ) {
                 candidates.addAll( existingEntryNames );

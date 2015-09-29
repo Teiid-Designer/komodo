@@ -7,16 +7,18 @@
  */
 package org.komodo.relational.commands;
 
-import static org.komodo.relational.commands.WorkspaceCommandMessages.RemoveConstraintColumnCommand.COLUMN_PATH_NOT_FOUND;
-import static org.komodo.relational.commands.WorkspaceCommandMessages.RemoveConstraintColumnCommand.COLUMN_REF_REMOVED;
-import static org.komodo.relational.commands.WorkspaceCommandMessages.RemoveConstraintColumnCommand.INVALID_COLUMN_PATH;
-import static org.komodo.relational.commands.WorkspaceCommandMessages.RemoveConstraintColumnCommand.MISSING_COLUMN_PATH;
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+import static org.komodo.relational.commands.WorkspaceCommandMessages.DeleteConstraintColumnCommand.COLUMN_PATH_NOT_FOUND;
+import static org.komodo.relational.commands.WorkspaceCommandMessages.DeleteConstraintColumnCommand.COLUMN_REF_REMOVED;
+import static org.komodo.relational.commands.WorkspaceCommandMessages.DeleteConstraintColumnCommand.DELETE_COLUMN_ERROR;
+import static org.komodo.relational.commands.WorkspaceCommandMessages.DeleteConstraintColumnCommand.INVALID_COLUMN_PATH;
+import static org.komodo.relational.commands.WorkspaceCommandMessages.DeleteConstraintColumnCommand.MISSING_COLUMN_PATH;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.TableConstraint;
+import org.komodo.shell.CommandResultImpl;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
 import org.komodo.spi.repository.KomodoObject;
@@ -35,7 +37,7 @@ public final class DeleteConstraintColumnCommand extends RelationalShellCommand 
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public DeleteConstraintColumnCommand( final WorkspaceStatus status ) {
-        super( status, true, NAME );
+        super( status, NAME );
     }
 
     /**
@@ -44,31 +46,49 @@ public final class DeleteConstraintColumnCommand extends RelationalShellCommand 
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final String columnPathArg = requiredArgument( 0, getMessage( MISSING_COLUMN_PATH ) );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        // get selected column and remove
-        final KomodoObject columnContext = ContextUtils.getContextForPath( getWorkspaceStatus(), columnPathArg );
+        try {
+            final String columnPathArg = requiredArgument( 0, getMessage( MISSING_COLUMN_PATH ) );
 
-        if ( columnContext == null ) {
-            print( MESSAGE_INDENT, getMessage( COLUMN_PATH_NOT_FOUND, columnPathArg ) );
-            return false;
+            // get selected column and remove
+            final KomodoObject columnContext = ContextUtils.getContextForPath( getWorkspaceStatus(), columnPathArg );
+
+            if ( columnContext == null ) {
+                result = new CommandResultImpl( false, getMessage( COLUMN_PATH_NOT_FOUND, columnPathArg ), null );
+            } else {
+
+                final KomodoObject column = columnContext;
+
+                if ( column instanceof Column ) {
+                    final TableConstraint constraint = getTableConstraint();
+                    constraint.removeColumn( getWorkspaceStatus().getTransaction(), ( Column )column );
+
+                    result = new CommandResultImpl( getMessage( COLUMN_REF_REMOVED,
+                                                                columnPathArg,
+                                                                getContext().getAbsolutePath() ) );
+                } else {
+                    result = new CommandResultImpl( false, getMessage( INVALID_COLUMN_PATH, columnPathArg ), null );
+                }
+            }
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( DELETE_COLUMN_ERROR ), e );
         }
 
-        final KomodoObject column = columnContext;
-
-        if ( column instanceof Column ) {
-            final TableConstraint constraint = getTableConstraint();
-            constraint.removeColumn( getWorkspaceStatus().getTransaction(), ( Column )column );
-
-            print( MESSAGE_INDENT, getMessage( COLUMN_REF_REMOVED, columnPathArg, getContext().getAbsolutePath() ) );
-            return true;
-        } else {
-            print( MESSAGE_INDENT, getMessage( INVALID_COLUMN_PATH, columnPathArg ) );
-            return false;
-        }
+        return result;
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 1;
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -79,21 +99,21 @@ public final class DeleteConstraintColumnCommand extends RelationalShellCommand 
         // This command is valid for AccessPattern,ForeignKey,Index,PrimaryKey,UniqueConstraint
         try {
             KomodoType contextType = getContext().getTypeIdentifier(getTransaction());
-            return (contextType==KomodoType.ACCESS_PATTERN || contextType==KomodoType.FOREIGN_KEY || 
+            return (contextType==KomodoType.ACCESS_PATTERN || contextType==KomodoType.FOREIGN_KEY ||
                     contextType==KomodoType.INDEX || contextType==KomodoType.PRIMARY_KEY || contextType==KomodoType.UNIQUE_CONSTRAINT);
         } catch (Exception ex) {
             // on exception will return false
         }
         return false;
     }
-    
+
     private TableConstraint getTableConstraint() {
         // initValidWsContextTypes() method assures execute is called only if current context is a TableConstraint
         final KomodoObject kobject = getContext();
         assert ( kobject instanceof TableConstraint );
         return ( TableConstraint )kobject;
     }
-    
+
     /**
      * {@inheritDoc}
      *
@@ -142,5 +162,5 @@ public final class DeleteConstraintColumnCommand extends RelationalShellCommand 
         // no completions if more than one arg
         return -1;
     }
-    
+
 }

@@ -3,12 +3,13 @@ package org.komodo.relational.commands;
 import java.util.ArrayList;
 import java.util.List;
 import org.komodo.shell.BuiltInShellCommand;
+import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
 import org.komodo.spi.repository.KomodoObject;
-import org.komodo.spi.repository.KomodoType;
 
 /**
  * renames the referenced node
@@ -37,71 +38,72 @@ public class RenameCommand extends BuiltInShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        String objNameArg = requiredArgument(0, Messages.getString(Messages.RenameCommand.InvalidArgMsg_ObjectName));
-        String newName = requiredArgument(1, Messages.getString(Messages.RenameCommand.InvalidArgMsg_NewName));
-
-        WorkspaceStatus wsStatus = getWorkspaceStatus();
-        // Get the context for current object and target object since they can be supplied with a path
-        KomodoObject objContext = ContextUtils.getContextForPath(wsStatus, objNameArg);
-        
-        // objContext null - Object could not be located
-    	if(objContext==null) {
-        	print(CompletionConstants.MESSAGE_INDENT,Messages.getString(Messages.RenameCommand.cannotRename_objectDoesNotExist, objNameArg));
-    		return false;
-    	}
-
-    	String[] pathSegs = ContextUtils.getPathSegments(newName);
-    	String targetParentPath = ContextUtils.getPath(pathSegs, pathSegs.length-1);
-    	KomodoObject targetContext = ContextUtils.getContextForPath(wsStatus, targetParentPath);
-        // only allow move to an existing context
-    	if(targetContext==null) {
-        	print(CompletionConstants.MESSAGE_INDENT,Messages.getString(Messages.RenameCommand.cannotRename_targetContextDoesNotExist, targetParentPath));
-    		return false;
-    	}
-
-        // Check validity of the new object name
-    	String newShortName = pathSegs[pathSegs.length-1];
-    	KomodoType kType = objContext.getTypeIdentifier(wsStatus.getTransaction());
-//        if (!validateObjectName(newShortName,kType)) {
-//            return false;
-//        }
-
-//        // make sure type is valid for the target context
-//        if ( !validateChildType( kType.getType(), targetContext ) ) {
-//        	return false;
-//        }
-        
-        // Validate that the rename would not create a duplicate of same type
-//        if (!validateNotDuplicateType(objContext,newShortName,targetContext)) {
-//            return false;
-//        }
+    protected CommandResult doExecute() {
+        CommandResult result;
 
         try {
-            // If teiid object was renamed, check if it is set as the default server.  unset default if necessary
-//            if (KomodoType.TEIID == kType) {
-//                final String server = wsStatus.getServer();
-//
-//                if ((server != null) && server.equals(objContext.getName(wsStatus.getTransaction()))) {
-//                    wsStatus.setServer(null);
-//                }
-//            }
-            
-        	// Rename
-            rename(objContext, newShortName, targetContext);
-            // Commit transaction
-            if ( isAutoCommit() ) {
-                wsStatus.commit( RenameCommand.class.getSimpleName() );
+            String objNameArg = requiredArgument( 0, Messages.getString( Messages.RenameCommand.InvalidArgMsg_ObjectName ) );
+            String newName = requiredArgument( 1, Messages.getString( Messages.RenameCommand.InvalidArgMsg_NewName ) );
+
+            WorkspaceStatus wsStatus = getWorkspaceStatus();
+            // Get the context for current object and target object since they can be supplied with a path
+            KomodoObject objContext = ContextUtils.getContextForPath( wsStatus, objNameArg );
+
+            // objContext null - Object could not be located
+            if ( objContext == null ) {
+                return new CommandResultImpl( false,
+                                              Messages.getString( Messages.RenameCommand.cannotRename_objectDoesNotExist,
+                                                                  objNameArg ),
+                                              null );
             }
-            
-            // Print message
-            print(CompletionConstants.MESSAGE_INDENT, Messages.getString(Messages.RenameCommand.ObjectRenamed, objNameArg, newName));
-        } catch (Exception e) {
-            print(CompletionConstants.MESSAGE_INDENT, Messages.getString(Messages.RenameCommand.Failure, objNameArg));
-            print(CompletionConstants.MESSAGE_INDENT, TAB + e.getMessage());
-            return false;
+
+            String[] pathSegs = ContextUtils.getPathSegments( newName );
+            String targetParentPath = ContextUtils.getPath( pathSegs, pathSegs.length - 1 );
+            KomodoObject targetContext = ContextUtils.getContextForPath( wsStatus, targetParentPath );
+            // only allow move to an existing context
+            if ( targetContext == null ) {
+                return new CommandResultImpl( false,
+                                              Messages.getString( Messages.RenameCommand.cannotRename_targetContextDoesNotExist,
+                                                                  targetParentPath ),
+                                              null );
+            }
+
+            // Check validity of the new object name
+            String newShortName = pathSegs[ pathSegs.length - 1 ];
+            //    	KomodoType kType = objContext.getTypeIdentifier(wsStatus.getTransaction());
+            //        if (!validateObjectName(newShortName,kType)) {
+            //            return false;
+            //        }
+
+            //        // make sure type is valid for the target context
+            //        if ( !validateChildType( kType.getType(), targetContext ) ) {
+            //        	return false;
+            //        }
+
+            // Validate that the rename would not create a duplicate of same type
+            //        if (!validateNotDuplicateType(objContext,newShortName,targetContext)) {
+            //            return false;
+            //        }
+
+            // If teiid object was renamed, check if it is set as the default server.  unset default if necessary
+            //            if (KomodoType.TEIID == kType) {
+            //                final String server = wsStatus.getServer();
+            //
+            //                if ((server != null) && server.equals(objContext.getName(wsStatus.getTransaction()))) {
+            //                    wsStatus.setServer(null);
+            //                }
+            //            }
+
+            // Rename
+            rename( objContext, newShortName, targetContext );
+            result = new CommandResultImpl( Messages.getString( Messages.RenameCommand.ObjectRenamed, objNameArg, newName ) );
+        } catch ( Exception e ) {
+            print( CompletionConstants.MESSAGE_INDENT, Messages.getString( Messages.RenameCommand.Failure, objNameArg ) );
+            print( CompletionConstants.MESSAGE_INDENT, TAB + e.getMessage() );
+            return new CommandResultImpl(false, Messages.getString( Messages.RenameCommand.Failure, objNameArg ), null);
         }
-        return true;
+
+        return result;
     }
 
 //    /**
@@ -123,7 +125,7 @@ public class RenameCommand extends BuiltInShellCommand {
 //    }
 
     private void rename(KomodoObject origObject, String newShortName, KomodoObject targetObject) throws Exception {
-        // 
+        //
         if( origObject != null ) {
         	String parentAbsPath = targetObject.getAbsolutePath();
         	String newChildPath = parentAbsPath + FORWARD_SLASH + newShortName;
@@ -164,7 +166,7 @@ public class RenameCommand extends BuiltInShellCommand {
         }
         return -1;
     }
-    
+
     /**
      * {@inheritDoc}
      *

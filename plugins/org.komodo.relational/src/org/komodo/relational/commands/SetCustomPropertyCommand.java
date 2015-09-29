@@ -8,7 +8,11 @@
 package org.komodo.relational.commands;
 
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.MISSING_PROPERTY_NAME_VALUE;
+import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_ERROR;
+import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_SUCCESS;
 import org.komodo.relational.RelationalObject;
+import org.komodo.shell.CommandResultImpl;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 
 /**
@@ -23,7 +27,7 @@ public final class SetCustomPropertyCommand extends RelationalShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public SetCustomPropertyCommand( final WorkspaceStatus status ) {
-        super( status, true, NAME );
+        super( status, NAME );
     }
 
     /**
@@ -32,14 +36,32 @@ public final class SetCustomPropertyCommand extends RelationalShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final String name = requiredArgument( 0, getMessage(MISSING_PROPERTY_NAME_VALUE));
-        final String value = requiredArgument( 1, getMessage(MISSING_PROPERTY_NAME_VALUE));
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        final RelationalObject robject = get();
-        robject.setProperty( getTransaction(), name, value );
+        try {
+            final String name = requiredArgument( 0, getMessage( MISSING_PROPERTY_NAME_VALUE ) );
+            final String value = requiredArgument( 1, getMessage( MISSING_PROPERTY_NAME_VALUE ) );
 
-        return true;
+            final RelationalObject robject = get();
+            robject.setProperty( getTransaction(), name, value );
+
+            result = new CommandResultImpl( getMessage( SET_PROPERTY_SUCCESS, name ) );
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( SET_PROPERTY_ERROR ), e );
+        }
+
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 2;
     }
 
     /**
@@ -49,9 +71,7 @@ public final class SetCustomPropertyCommand extends RelationalShellCommand {
      */
     @Override
     public boolean isValidForCurrentContext() {
-//        final int currType = getWorkspaceStatus().getWorkspaceContext().getKomodoObj().getTypeId();
-        // TODO type needs to be a relational object here
-        return false;
+        return ( getContext() instanceof RelationalObject );
     }
 
 }

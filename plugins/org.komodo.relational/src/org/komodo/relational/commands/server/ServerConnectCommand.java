@@ -14,8 +14,10 @@ import static org.komodo.relational.commands.server.ServerCommandMessages.Server
 import static org.komodo.relational.commands.server.ServerCommandMessages.ServerConnectCommand.NotConnected;
 import static org.komodo.relational.commands.server.ServerCommandMessages.ServerConnectCommand.TeiidStatus;
 import org.komodo.relational.teiid.Teiid;
+import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.runtime.TeiidInstance;
 
@@ -31,37 +33,53 @@ public final class ServerConnectCommand extends ServerShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public ServerConnectCommand( final WorkspaceStatus status ) {
-        super( NAME, true, status );
+        super( NAME, status );
     }
-    
+
     /**
      * {@inheritDoc}
      *
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        if(!hasWorkspaceServer()) {
-            print(CompletionConstants.MESSAGE_INDENT, getMessage(NoTeiidDefined));
-            return false;
+    protected CommandResult doExecute() {
+        if ( !hasWorkspaceServer() ) {
+            return new CommandResultImpl( false, getMessage( NoTeiidDefined ), null );
         }
-        
-        Teiid teiid = getWorkspaceServer();
 
-        print(CompletionConstants.MESSAGE_INDENT, getMessage(AttemptingToConnect,teiid.getName(getWorkspaceStatus().getTransaction())));
-        TeiidInstance teiidInstance = teiid.getTeiidInstance(getWorkspaceStatus().getTransaction());
+        CommandResult result = null;
+
         try {
-            teiidInstance.connect();
-        } catch (Exception ex) {
-            print(CompletionConstants.MESSAGE_INDENT, getMessage(ConnectionError,ex.getLocalizedMessage()));
+            Teiid teiid = getWorkspaceServer();
+            print( CompletionConstants.MESSAGE_INDENT, getMessage( AttemptingToConnect, teiid.getName( getTransaction() ) ) );
+
+            TeiidInstance teiidInstance = teiid.getTeiidInstance( getTransaction() );
+
+            try {
+                teiidInstance.connect();
+                boolean connected = teiidInstance.isConnected();
+                String connectStatus = connected ? getMessage( Connected ) : Messages.getString( NotConnected );
+                result = new CommandResultImpl( getMessage( TeiidStatus, teiid.getName( getTransaction() ), connectStatus ) );
+            } catch ( Exception ex ) {
+                result = new CommandResultImpl( false, getMessage( ConnectionError, ex.getLocalizedMessage() ), ex );
+            }
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( ConnectionError, e.getLocalizedMessage() ), e );
         }
 
-        boolean connected = teiidInstance.isConnected();
-        String connectStatus = connected ? getMessage(Connected) : Messages.getString(NotConnected); 
-        print(CompletionConstants.MESSAGE_INDENT, getMessage(TeiidStatus, teiid.getName(getWorkspaceStatus().getTransaction()), connectStatus)); 
-        return connected;
+        return result;
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 0;
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -69,10 +87,7 @@ public final class ServerConnectCommand extends ServerShellCommand {
      */
     @Override
     public final boolean isValidForCurrentContext() {
-        if(hasWorkspaceServer()) {
-            return true;
-        }
-        return false;
+        return hasWorkspaceServer();
     }
-    
+
 }

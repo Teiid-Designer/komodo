@@ -7,14 +7,16 @@
  */
 package org.komodo.relational.commands.model;
 
+import static org.komodo.relational.commands.model.ModelCommandMessages.DeleteTableCommand.DELETE_TABLE_ERROR;
 import static org.komodo.relational.commands.model.ModelCommandMessages.DeleteTableCommand.TABLE_DELETED;
 import static org.komodo.relational.commands.model.ModelCommandMessages.General.MISSING_TABLE_NAME;
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.ArrayList;
 import java.util.List;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Table;
+import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
@@ -30,7 +32,7 @@ public final class DeleteTableCommand extends ModelShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public DeleteTableCommand( final WorkspaceStatus status ) {
-        super( NAME, true, status );
+        super( NAME, status );
     }
 
     /**
@@ -39,18 +41,33 @@ public final class DeleteTableCommand extends ModelShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final String tableName = requiredArgument( 0, getMessage(MISSING_TABLE_NAME) );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        final Model model = getModel();
-        model.removeTable( getTransaction(), tableName );
+        try {
+            final String tableName = requiredArgument( 0, getMessage( MISSING_TABLE_NAME ) );
 
-        // Print success message
-        print(MESSAGE_INDENT, getMessage(TABLE_DELETED,tableName));
-        
-        return true;
+            final Model model = getModel();
+            model.removeTable( getTransaction(), tableName );
+
+            result = new CommandResultImpl( getMessage( TABLE_DELETED, tableName ) );
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( DELETE_TABLE_ERROR ), e );
+        }
+
+        return result;
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 1;
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -68,7 +85,7 @@ public final class DeleteTableCommand extends ModelShellCommand {
         for(Table table : tables) {
             existingTableNames.add(table.getName(uow));
         }
-        
+
         if ( args.isEmpty() ) {
             if ( lastArgument == null ) {
                 candidates.addAll( existingTableNames );
@@ -86,5 +103,5 @@ public final class DeleteTableCommand extends ModelShellCommand {
         // no tab completion
         return -1;
     }
-    
+
 }

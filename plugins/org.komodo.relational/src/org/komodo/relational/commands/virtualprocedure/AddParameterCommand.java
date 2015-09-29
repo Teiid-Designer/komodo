@@ -7,10 +7,12 @@
  */
 package org.komodo.relational.commands.virtualprocedure;
 
+import static org.komodo.relational.commands.virtualprocedure.VirtualProcedureCommandMessages.AddParameterCommand.ADD_PARAMETER_ERROR;
 import static org.komodo.relational.commands.virtualprocedure.VirtualProcedureCommandMessages.AddParameterCommand.PARAMETER_ADDED;
 import static org.komodo.relational.commands.virtualprocedure.VirtualProcedureCommandMessages.General.MISSING_PARAMETER_NAME;
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import org.komodo.relational.model.VirtualProcedure;
+import org.komodo.shell.CommandResultImpl;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 
 /**
@@ -18,14 +20,14 @@ import org.komodo.shell.api.WorkspaceStatus;
  */
 public final class AddParameterCommand extends VirtualProcedureShellCommand {
 
-    static final String NAME = "add-vp-parameter"; //$NON-NLS-1$
+    static final String NAME = "add-parameter"; //$NON-NLS-1$
 
     /**
      * @param status
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public AddParameterCommand( final WorkspaceStatus status ) {
-        super( NAME, true, status );
+        super( NAME, status );
     }
 
     /**
@@ -34,16 +36,31 @@ public final class AddParameterCommand extends VirtualProcedureShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final String paramName = requiredArgument( 0, getMessage(MISSING_PARAMETER_NAME) );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        final VirtualProcedure proc = getVirtualProcedure();
-        proc.addParameter(getTransaction(), paramName);
-        
-        // Print success message
-        print(MESSAGE_INDENT, getMessage(PARAMETER_ADDED,paramName));
-        
-        return true;
+        try {
+            final String paramName = requiredArgument( 0, getMessage( MISSING_PARAMETER_NAME ) );
+
+            final VirtualProcedure proc = getVirtualProcedure();
+            proc.addParameter( getTransaction(), paramName );
+
+            result = new CommandResultImpl( getMessage( PARAMETER_ADDED, paramName ) );
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( ADD_PARAMETER_ERROR ), e );
+        }
+
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 1;
     }
 
 }

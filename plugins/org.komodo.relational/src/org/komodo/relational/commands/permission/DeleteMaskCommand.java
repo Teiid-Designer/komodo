@@ -7,14 +7,16 @@
  */
 package org.komodo.relational.commands.permission;
 
+import static org.komodo.relational.commands.permission.PermissionCommandMessages.DeleteMaskCommand.DELETE_MASK_ERROR;
 import static org.komodo.relational.commands.permission.PermissionCommandMessages.DeleteMaskCommand.MASK_DELETED;
 import static org.komodo.relational.commands.permission.PermissionCommandMessages.General.MISSING_MASK_NAME;
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.ArrayList;
 import java.util.List;
 import org.komodo.relational.vdb.Condition;
 import org.komodo.relational.vdb.Permission;
+import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
@@ -30,7 +32,7 @@ public final class DeleteMaskCommand extends PermissionShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public DeleteMaskCommand( final WorkspaceStatus status ) {
-        super( NAME, true, status );
+        super( NAME, status );
     }
 
     /**
@@ -39,18 +41,33 @@ public final class DeleteMaskCommand extends PermissionShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final String maskName = requiredArgument( 0, getMessage(MISSING_MASK_NAME) );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        final Permission permission = getPermission();
-        permission.removeMask( getTransaction(), maskName );
+        try {
+            final String maskName = requiredArgument( 0, getMessage( MISSING_MASK_NAME ) );
 
-        // Print success message
-        print(MESSAGE_INDENT, getMessage(MASK_DELETED,maskName));
-        
-        return true;
+            final Permission permission = getPermission();
+            permission.removeMask( getTransaction(), maskName );
+
+            result = new CommandResultImpl( getMessage( MASK_DELETED, maskName ) );
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( DELETE_MASK_ERROR ), e );
+        }
+
+        return result;
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 1;
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -68,7 +85,7 @@ public final class DeleteMaskCommand extends PermissionShellCommand {
         for(Condition condition : conditions) {
             existingConditionNames.add(condition.getName(uow));
         }
-        
+
         if ( args.isEmpty() ) {
             if ( lastArgument == null ) {
                 candidates.addAll( existingConditionNames );

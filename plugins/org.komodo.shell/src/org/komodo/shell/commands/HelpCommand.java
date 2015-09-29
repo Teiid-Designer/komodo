@@ -16,16 +16,13 @@
 package org.komodo.shell.commands;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeSet;
 import org.komodo.shell.BuiltInShellCommand;
+import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
 import org.komodo.shell.Messages.SHELL;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.constants.StringConstants;
@@ -49,8 +46,6 @@ public class HelpCommand extends BuiltInShellCommand {
     private static final int CMDS_PER_LINE = 4;
     private static final int DEFAULT_COLUMN_WIDTH = 10;
 
-	private Map<String, ShellCommand> commands = Collections.< String, ShellCommand >emptyMap();
-
     /**
      * @param wsStatus
      *        the workspace status (cannot be <code>null</code>)
@@ -59,34 +54,36 @@ public class HelpCommand extends BuiltInShellCommand {
         super( wsStatus, NAME, "man" ); //$NON-NLS-1$
     }
 
-    @Override
-    public boolean isCoreCommand() {
-        return true;
-    }
-    
-    /**
-     * @param commands
-     *        the commands the commands applicable for the current context (can be <code>null</code> or empty)
-     */
-    public void setCommands(final Map< String, ShellCommand > commands) {
-        this.commands = ( ( commands == null ) ? Collections.< String, ShellCommand >emptyMap() : commands );
-    }
-
     /**
      * {@inheritDoc}
      *
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-		String commandName = optionalArgument(0);
-		if (commandName == null) {
-			printHelpAll();
-		} else {
-			printHelpForCommand(commandName);
-		}
-		return true;
+    protected CommandResult doExecute() {
+        try {
+    		String commandName = optionalArgument(0);
+    		if (commandName == null) {
+    			printHelpAll();
+    		} else {
+    			printHelpForCommand(commandName);
+    		}
+
+    		return CommandResult.SUCCESS;
+        } catch ( final Exception e ) {
+            return new CommandResultImpl( false, e.getLocalizedMessage(), e );
+        }
 	}
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 1;
+    }
 
     /**
      * {@inheritDoc}
@@ -96,16 +93,6 @@ public class HelpCommand extends BuiltInShellCommand {
     @Override
     public boolean isValidForCurrentContext() {
         return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.BuiltInShellCommand#shouldCommit()
-     */
-    @Override
-    protected boolean shouldCommit() {
-        return false;
     }
 
 	/**
@@ -122,17 +109,12 @@ public class HelpCommand extends BuiltInShellCommand {
 		// Assemble the valid command names and find the max command character length
 		int maxCommandLength = DEFAULT_COLUMN_WIDTH;
         List<String> validCmdNames = new ArrayList<String>();
-        for (Entry<String,ShellCommand> entry : this.commands.entrySet()) {
-            String cmdName = entry.getKey();
-            ShellCommand command = entry.getValue();
-            if(command.isValidForCurrentContext() && !(command instanceof CommandNotFoundCommand)) {
-                validCmdNames.add(cmdName);
-                if(cmdName.length()>maxCommandLength) {
-                    maxCommandLength = cmdName.length();
-                }
+        for (final String cmdName : getWorkspaceStatus().getAvailableCommands()) {
+            if(cmdName.length()>maxCommandLength) {
+                maxCommandLength = cmdName.length();
             }
         }
-        
+
         // Print appropriate commands per line
 		int colCount = 0;
 		StringBuilder builder = new StringBuilder();
@@ -154,23 +136,7 @@ public class HelpCommand extends BuiltInShellCommand {
 	}
 
     private void printHelpForCommand( final String cmdName ) throws Exception {
-        ShellCommand command = this.commands.get( cmdName );
-
-        if ( command == null ) {
-            // see if an alias
-            for ( final ShellCommand cmd : this.commands.values() ) {
-                final String[] aliases = cmd.getAliases();
-
-                if ( aliases.length != 0 ) {
-                    for ( final String alias : aliases ) {
-                        if ( alias.equals( cmdName ) ) {
-                            command = cmd;
-                            break;
-                        }
-                    }
-                }
-            }
-        }
+        final ShellCommand command = getWorkspaceStatus().getCommand( cmdName );
 
         if (command == null) {
             print( CompletionConstants.MESSAGE_INDENT, Messages.getString( SHELL.Help_INVALID_COMMAND, cmdName ) );
@@ -190,32 +156,23 @@ public class HelpCommand extends BuiltInShellCommand {
 	 *      java.util.List)
 	 */
 	@Override
-	public int tabCompletion(String lastArgument, List<CharSequence> candidates) {
-		if (getArguments().isEmpty()) {
-			for (String candidate : generateHelpCandidates()) {
-				if (lastArgument == null || candidate.startsWith(lastArgument)) {
-					candidates.add(candidate);
-				}
-			}
+    public int tabCompletion( String lastArgument,
+                              List< CharSequence > candidates ) {
+        if ( getArguments().isEmpty() ) {
+            try {
+                for ( String candidate : getWorkspaceStatus().getAvailableCommands() ) {
+                    if ( lastArgument == null || candidate.startsWith( lastArgument ) ) {
+                        candidates.add( candidate );
+                    }
+                }
+            } catch ( final Exception e ) {
+                throw new RuntimeException( e );
+            }
 
-			return 0;
-		} else {
-			return -1;
-		}
-	}
+            return 0;
+        }
 
-	/**
-	 * Generate help candidates.
-	 *
-	 * @return a collection of all possible command names
-	 */
-	private Collection<String> generateHelpCandidates() {
-		TreeSet<String> candidates = new TreeSet<String>();
-		for (String key : this.commands.keySet()) {
-			String candidate = key;
-			candidates.add(candidate);
-		}
-		return candidates;
-	}
+        return -1;
+    }
 
 }

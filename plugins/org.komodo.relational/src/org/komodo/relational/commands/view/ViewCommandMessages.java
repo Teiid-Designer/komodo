@@ -22,7 +22,7 @@ public class ViewCommandMessages implements StringConstants {
      * The resource bundle for localized messages.
      */
     public static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle( BUNDLE_NAME );
-    
+
     @SuppressWarnings( "javadoc" )
     public enum General {
         MISSING_ACCESS_PATTERN_NAME,
@@ -44,7 +44,7 @@ public class ViewCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     @SuppressWarnings( "javadoc" )
     public enum AddAccessPatternCommand {
         ACCESS_PATTERN_ADDED;
@@ -54,9 +54,10 @@ public class ViewCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     @SuppressWarnings( "javadoc" )
     public enum AddColumnCommand {
+        ADD_COLUMN_ERROR,
         COLUMN_ADDED;
 
         @Override
@@ -64,7 +65,7 @@ public class ViewCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     @SuppressWarnings( "javadoc" )
     public enum AddForeignKeyCommand {
         FOREIGN_KEY_ADDED;
@@ -74,7 +75,7 @@ public class ViewCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     @SuppressWarnings( "javadoc" )
     public enum AddIndexCommand {
         INDEX_ADDED;
@@ -84,7 +85,7 @@ public class ViewCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     @SuppressWarnings( "javadoc" )
     public enum AddUniqueConstraintCommand {
         UNIQUE_CONSTRAINT_ADDED;
@@ -94,7 +95,7 @@ public class ViewCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     @SuppressWarnings( "javadoc" )
     public enum DeleteAccessPatternCommand {
         ACCESS_PATTERN_DELETED;
@@ -104,9 +105,10 @@ public class ViewCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     @SuppressWarnings( "javadoc" )
     public enum DeleteColumnCommand {
+        DELETE_COLUMN_ERROR,
         COLUMN_DELETED;
 
         @Override
@@ -114,7 +116,7 @@ public class ViewCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     @SuppressWarnings( "javadoc" )
     public enum DeleteForeignKeyCommand {
         FOREIGN_KEY_DELETED;
@@ -124,7 +126,7 @@ public class ViewCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     @SuppressWarnings( "javadoc" )
     public enum DeleteIndexCommand {
         INDEX_DELETED;
@@ -134,7 +136,7 @@ public class ViewCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     @SuppressWarnings( "javadoc" )
     public enum DeleteUniqueConstraintCommand {
         UNIQUE_CONSTRAINT_DELETED;
@@ -144,7 +146,7 @@ public class ViewCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     private static String getEnumName(Enum<?> enumValue) {
         String className = enumValue.getClass().getName();
         String[] components = className.split("\\$"); //$NON-NLS-1$

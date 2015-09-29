@@ -7,10 +7,12 @@
  */
 package org.komodo.relational.commands.permission;
 
+import static org.komodo.relational.commands.permission.PermissionCommandMessages.AddConditionCommand.ADD_CONDITION_ERROR;
 import static org.komodo.relational.commands.permission.PermissionCommandMessages.AddConditionCommand.CONDITION_ADDED;
 import static org.komodo.relational.commands.permission.PermissionCommandMessages.General.MISSING_CONDITION_NAME;
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import org.komodo.relational.vdb.Permission;
+import org.komodo.shell.CommandResultImpl;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 
 /**
@@ -25,7 +27,7 @@ public final class AddConditionCommand extends PermissionShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public AddConditionCommand( final WorkspaceStatus status ) {
-        super( NAME, true, status );
+        super( NAME, status );
     }
 
     /**
@@ -34,16 +36,31 @@ public final class AddConditionCommand extends PermissionShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final String permissionName = requiredArgument( 0, getMessage(MISSING_CONDITION_NAME) );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        final Permission permission = getPermission();
-        permission.addCondition( getTransaction(), permissionName );
+        try {
+            final String permissionName = requiredArgument( 0, getMessage( MISSING_CONDITION_NAME ) );
 
-        // Print success message
-        print(MESSAGE_INDENT, getMessage(CONDITION_ADDED,permissionName));
-        
-        return true;
+            final Permission permission = getPermission();
+            permission.addCondition( getTransaction(), permissionName );
+
+            result = new CommandResultImpl( getMessage( CONDITION_ADDED, permissionName ) );
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( ADD_CONDITION_ERROR ), e );
+        }
+
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 1;
     }
 
 }

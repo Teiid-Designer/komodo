@@ -7,10 +7,12 @@
  */
 package org.komodo.relational.commands.vdb;
 
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_DATA_ROLE_NAME;
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.AddDataRoleCommand.ADD_DATA_ROLE_ERROR;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.AddDataRoleCommand.DATA_ROLE_ADDED;
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_DATA_ROLE_NAME;
 import org.komodo.relational.vdb.Vdb;
+import org.komodo.shell.CommandResultImpl;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 
 /**
@@ -25,7 +27,7 @@ public final class AddDataRoleCommand extends VdbShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public AddDataRoleCommand( final WorkspaceStatus status ) {
-        super( NAME, true, status );
+        super( NAME, status );
     }
 
     /**
@@ -34,16 +36,31 @@ public final class AddDataRoleCommand extends VdbShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final String dataRoleName = requiredArgument( 0, getMessage(MISSING_DATA_ROLE_NAME) );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        final Vdb vdb = getVdb();
-        vdb.addDataRole( getTransaction(), dataRoleName );
+        try {
+            final String dataRoleName = requiredArgument( 0, getMessage( MISSING_DATA_ROLE_NAME ) );
 
-        // Print success message
-        print(MESSAGE_INDENT, getMessage(DATA_ROLE_ADDED,dataRoleName));
-        
-        return true;
+            final Vdb vdb = getVdb();
+            vdb.addDataRole( getTransaction(), dataRoleName );
+
+            result = new CommandResultImpl( getMessage( DATA_ROLE_ADDED, dataRoleName ) );
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( ADD_DATA_ROLE_ERROR ), e );
+        }
+
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 1;
     }
 
 }

@@ -7,14 +7,16 @@
  */
 package org.komodo.relational.commands.table;
 
+import static org.komodo.relational.commands.table.TableCommandMessages.DeleteIndexCommand.DELETE_INDEX_ERROR;
 import static org.komodo.relational.commands.table.TableCommandMessages.DeleteIndexCommand.INDEX_DELETED;
 import static org.komodo.relational.commands.table.TableCommandMessages.General.MISSING_INDEX_NAME;
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.ArrayList;
 import java.util.List;
 import org.komodo.relational.model.Index;
 import org.komodo.relational.model.Table;
+import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
@@ -30,7 +32,7 @@ public final class DeleteIndexCommand extends TableShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public DeleteIndexCommand( final WorkspaceStatus status ) {
-        super( NAME, true, status );
+        super( NAME, status );
     }
 
     /**
@@ -39,18 +41,33 @@ public final class DeleteIndexCommand extends TableShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final String columnName = requiredArgument( 0, getMessage(MISSING_INDEX_NAME) );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        final Table table = getTable();
-        table.removeIndex( getTransaction(), columnName );
+        try {
+            final String columnName = requiredArgument( 0, getMessage( MISSING_INDEX_NAME ) );
 
-        // Print success message
-        print(MESSAGE_INDENT, getMessage(INDEX_DELETED,columnName));
-        
-        return true;
+            final Table table = getTable();
+            table.removeIndex( getTransaction(), columnName );
+
+            result = new CommandResultImpl( getMessage( INDEX_DELETED, columnName ) );
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( DELETE_INDEX_ERROR ), e );
+        }
+
+        return result;
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 1;
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -68,7 +85,7 @@ public final class DeleteIndexCommand extends TableShellCommand {
         for(Index index : indexes) {
             existingIndexNames.add(index.getName(uow));
         }
-        
+
         if ( args.isEmpty() ) {
             if ( lastArgument == null ) {
                 candidates.addAll( existingIndexNames );
@@ -86,5 +103,5 @@ public final class DeleteIndexCommand extends TableShellCommand {
         // no tab completion
         return -1;
     }
-    
+
 }

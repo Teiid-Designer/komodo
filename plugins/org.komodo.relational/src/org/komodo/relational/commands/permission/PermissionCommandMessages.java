@@ -22,9 +22,11 @@ public class PermissionCommandMessages implements StringConstants {
      * The resource bundle for localized messages.
      */
     public static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle( BUNDLE_NAME );
-    
+
     @SuppressWarnings( "javadoc" )
     public enum General {
+        INVALID_DIRECTION_PROPERTY_VALUE,
+        INVALID_NULLABLE_PROPERTY_VALUE,
         MISSING_CONDITION_NAME,
         MISSING_MASK_NAME;
 
@@ -33,9 +35,10 @@ public class PermissionCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     @SuppressWarnings( "javadoc" )
     public enum AddConditionCommand {
+        ADD_CONDITION_ERROR,
         CONDITION_ADDED;
 
         @Override
@@ -46,7 +49,8 @@ public class PermissionCommandMessages implements StringConstants {
 
     @SuppressWarnings( "javadoc" )
     public enum DeleteConditionCommand {
-        CONDITION_DELETED;
+        CONDITION_DELETED,
+        DELETE_CONDITION_ERROR;
 
         @Override
         public String toString() {
@@ -56,6 +60,7 @@ public class PermissionCommandMessages implements StringConstants {
 
     @SuppressWarnings( "javadoc" )
     public enum AddMaskCommand {
+        ADD_MASK_ERROR,
         MASK_ADDED;
 
         @Override
@@ -66,6 +71,7 @@ public class PermissionCommandMessages implements StringConstants {
 
     @SuppressWarnings( "javadoc" )
     public enum DeleteMaskCommand {
+        DELETE_MASK_ERROR,
         MASK_DELETED;
 
         @Override
@@ -73,7 +79,7 @@ public class PermissionCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     private static String getEnumName(Enum<?> enumValue) {
         String className = enumValue.getClass().getName();
         String[] components = className.split("\\$"); //$NON-NLS-1$

@@ -44,10 +44,17 @@ public class ViewCommandProvider implements ShellCommandProvider {
         result.put( DeleteColumnCommand.NAME, DeleteColumnCommand.class );
 
         result.put( SetViewPropertyCommand.NAME, SetViewPropertyCommand.class );
-        
+
         return result;
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommandProvider#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      org.komodo.spi.repository.KomodoObject)
+     */
+    @SuppressWarnings( "unchecked" )
     @Override
     public View resolve ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
         if(ViewImpl.RESOLVER.resolvable(uow, kObj)) {
@@ -55,7 +62,13 @@ public class ViewCommandProvider implements ShellCommandProvider {
         }
         return null;
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommandProvider#isRoot(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      org.komodo.spi.repository.KomodoObject)
+     */
     @Override
     public boolean isRoot ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
         if(ViewImpl.RESOLVER.resolvable(uow, kObj)) {
@@ -63,7 +76,13 @@ public class ViewCommandProvider implements ShellCommandProvider {
         }
         return false;
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommandProvider#getTypeDisplay(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      org.komodo.spi.repository.KomodoObject)
+     */
     @Override
     public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
         if(ViewImpl.RESOLVER.resolvable(uow, kObj)) {
@@ -74,21 +93,23 @@ public class ViewCommandProvider implements ShellCommandProvider {
     }
 
     /**
-     * @throws KException the exception 
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommandProvider#getStatusMessage(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      org.komodo.spi.repository.KomodoObject)
      */
     @Override
-    public String getStatusMessage ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
+    public String getStatusMessage ( final Repository.UnitOfWork uow, final KomodoObject kObj ) {
         return null;
     }
-    
+
     /**
-     * @throws KException the exception 
-     */
-    /* (non-Javadoc)
+     * {@inheritDoc}
+     *
      * @see org.komodo.shell.api.ShellCommandProvider#initWorkspaceState(org.komodo.shell.api.WorkspaceStatus)
      */
     @Override
-    public void initWorkspaceState(WorkspaceStatus wsStatus) throws KException {
+    public void initWorkspaceState(WorkspaceStatus wsStatus) {
         // Init any workspace state
     }
 

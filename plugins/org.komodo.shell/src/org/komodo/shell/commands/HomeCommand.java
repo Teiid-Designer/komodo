@@ -19,11 +19,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  ************************************************************************************/
-package org.komodo.shell.commands.core;
+package org.komodo.shell.commands;
 
 import org.komodo.shell.BuiltInShellCommand;
+import org.komodo.shell.CommandResultImpl;
+import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.Arguments;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.spi.Messages;
 import org.komodo.spi.constants.StringConstants;
 
 /**
@@ -44,36 +48,43 @@ public class HomeCommand extends BuiltInShellCommand {
         super( wsStatus, NAME );
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
+     */
     @Override
     public boolean isValidForCurrentContext() {
         return true;
     }
-    
+
     /**
      * {@inheritDoc}
      *
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final CdCommand cdCmd = new CdCommand( getWorkspaceStatus() );
-        final Arguments args = new Arguments( StringConstants.FORWARD_SLASH );
-        cdCmd.setArguments( args );
-        cdCmd.setWriter( getWriter() );
+    protected CommandResult doExecute() {
+        try {
+            final CdCommand cdCmd = new CdCommand( getWorkspaceStatus() );
+            final Arguments args = new Arguments( StringConstants.FORWARD_SLASH );
+            cdCmd.setArguments( args );
+            cdCmd.setWriter( getWriter() );
 
-        cdCmd.execute();
-        return true;
+            return cdCmd.execute();
+        } catch ( final Exception e ) {
+            return new CommandResultImpl( false, Messages.getString( SHELL.CommandFailure, NAME ), e );
+        }
     }
-    
+
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.shell.BuiltInShellCommand#shouldCommit()
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
      */
     @Override
-    protected boolean shouldCommit() {
-        return false;
+    protected int getMaxArgCount() {
+        return 0;
     }
-
 
 }

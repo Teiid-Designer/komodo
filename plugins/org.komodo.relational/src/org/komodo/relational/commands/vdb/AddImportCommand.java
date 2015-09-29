@@ -7,10 +7,12 @@
  */
 package org.komodo.relational.commands.vdb;
 
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_IMPORT_NAME;
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.AddImportCommand.ADD_IMPORT_ERROR;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.AddImportCommand.IMPORT_ADDED;
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_IMPORT_NAME;
 import org.komodo.relational.vdb.Vdb;
+import org.komodo.shell.CommandResultImpl;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 
 /**
@@ -25,7 +27,7 @@ public final class AddImportCommand extends VdbShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public AddImportCommand( final WorkspaceStatus status ) {
-        super( NAME, true, status );
+        super( NAME, status );
     }
 
     /**
@@ -34,16 +36,31 @@ public final class AddImportCommand extends VdbShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final String importName = requiredArgument( 0, getMessage(MISSING_IMPORT_NAME) );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        final Vdb vdb = getVdb();
-        vdb.addImport( getTransaction(), importName );
+        try {
+            final String importName = requiredArgument( 0, getMessage( MISSING_IMPORT_NAME ) );
 
-        // Print success message
-        print(MESSAGE_INDENT, getMessage(IMPORT_ADDED,importName));
-        
-        return true;
+            final Vdb vdb = getVdb();
+            vdb.addImport( getTransaction(), importName );
+
+            result = new CommandResultImpl( getMessage( IMPORT_ADDED, importName ) );
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( ADD_IMPORT_ERROR ), e );
+        }
+
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 1;
     }
 
 }

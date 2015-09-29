@@ -11,21 +11,25 @@ import static org.komodo.relational.commands.WorkspaceCommandMessages.General.IN
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.INVALID_INTEGER_PROPERTY_VALUE;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.INVALID_PROPERTY_NAME;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.MISSING_PROPERTY_NAME_VALUE;
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_ERROR;
+import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_SUCCESS;
 import java.util.Arrays;
 import java.util.List;
 import org.komodo.relational.vdb.VdbImport;
+import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.shell.commands.core.SetPropertyCommand;
+import org.komodo.shell.commands.SetPropertyCommand;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.utils.StringUtils;
 
 /**
  * A shell command to set a VdbImport properties
  */
 public final class SetVdbImportPropertyCommand extends VdbImportShellCommand {
 
-    static final String NAME = "set-vdbimport-property"; //$NON-NLS-1$
+    static final String NAME = SetPropertyCommand.NAME;
 
     private static final String IMPORT_DATA_POLICIES = "importDataPolicies"; //$NON-NLS-1$
     private static final String VERSION = "version"; //$NON-NLS-1$
@@ -37,9 +41,7 @@ public final class SetVdbImportPropertyCommand extends VdbImportShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public SetVdbImportPropertyCommand( final WorkspaceStatus status ) {
-        super( NAME, true, status );
-        // Overrides the BuiltInCommand "set-property"
-        setOverriddenCommands(new String[]{SetPropertyCommand.NAME});
+        super( NAME, status );
     }
 
     /**
@@ -48,41 +50,60 @@ public final class SetVdbImportPropertyCommand extends VdbImportShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final String name = requiredArgument( 0, getWorkspaceMessage(MISSING_PROPERTY_NAME_VALUE) );
-        final String value = requiredArgument( 1, getWorkspaceMessage(MISSING_PROPERTY_NAME_VALUE) );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        final VdbImport vdbImport = getVdbImport();
-        final UnitOfWork transaction = getTransaction();
-        boolean success = true;
+        try {
+            final String name = requiredArgument( 0, getWorkspaceMessage( MISSING_PROPERTY_NAME_VALUE ) );
+            final String value = requiredArgument( 1, getWorkspaceMessage( MISSING_PROPERTY_NAME_VALUE ) );
 
-        switch ( name ) {
-            case IMPORT_DATA_POLICIES:
-                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                    vdbImport.setImportDataPolicies( transaction, Boolean.parseBoolean( value ) );
-                } else {
-                    print( MESSAGE_INDENT, getWorkspaceMessage(INVALID_BOOLEAN_PROPERTY_VALUE, IMPORT_DATA_POLICIES ) );
-                    success = false;
-                }
+            final VdbImport vdbImport = getVdbImport();
+            final UnitOfWork transaction = getTransaction();
+            String errorMsg = null;
 
-                break;
-            case VERSION:
-                try {
-                    final int version = Integer.parseInt( value );
-                    vdbImport.setVersion( transaction, version );
-                } catch ( final NumberFormatException e ) {
-                    print( MESSAGE_INDENT, getWorkspaceMessage(INVALID_INTEGER_PROPERTY_VALUE, VERSION ) );
-                    success = false;
-                }
+            switch ( name ) {
+                case IMPORT_DATA_POLICIES:
+                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                        vdbImport.setImportDataPolicies( transaction, Boolean.parseBoolean( value ) );
+                    } else {
+                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, IMPORT_DATA_POLICIES );
+                    }
 
-                break;
-            default:
-                success = false;
-                print( MESSAGE_INDENT, getWorkspaceMessage(INVALID_PROPERTY_NAME, NAME ) );
-                break;
+                    break;
+                case VERSION:
+                    try {
+                        final int version = Integer.parseInt( value );
+                        vdbImport.setVersion( transaction, version );
+                    } catch ( final NumberFormatException e ) {
+                        errorMsg = getWorkspaceMessage( INVALID_INTEGER_PROPERTY_VALUE, VERSION );
+                    }
+
+                    break;
+                default:
+                    errorMsg = getWorkspaceMessage( INVALID_PROPERTY_NAME, name, VdbImport.class.getSimpleName() );
+                    break;
+            }
+
+            if ( StringUtils.isBlank( errorMsg ) ) {
+                result = new CommandResultImpl( getMessage( SET_PROPERTY_SUCCESS, name ) );
+            } else {
+                result = new CommandResultImpl( false, errorMsg, null );
+            }
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( SET_PROPERTY_ERROR ), e );
         }
 
-        return success;
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 2;
     }
 
     /**

@@ -9,11 +9,15 @@ package org.komodo.relational.commands.server;
 
 import static org.komodo.relational.commands.server.ServerCommandMessages.ServerShowDatasourceTypesCommand.InfoMessage;
 import static org.komodo.relational.commands.server.ServerCommandMessages.ServerShowDatasourceTypesCommand.ListHeader;
+import static org.komodo.relational.commands.server.ServerCommandMessages.ServerShowDatasourceTypesCommand.ShowDataSourceTypesError;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import org.komodo.relational.RelationalObject;
 import org.komodo.relational.teiid.Teiid;
+import org.komodo.shell.CommandResultImpl;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.PrintUtils;
 
@@ -29,7 +33,7 @@ public final class ServerShowDatasourceTypesCommand extends ServerShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public ServerShowDatasourceTypesCommand( final WorkspaceStatus status ) {
-        super( NAME, true, status );
+        super( NAME, status );
     }
 
     /**
@@ -38,27 +42,55 @@ public final class ServerShowDatasourceTypesCommand extends ServerShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        // Validates that a server is connected (prints output for errors)
-        boolean hasConnectedDefault = validateHasConnectedWorkspaceServer();
-        if(!hasConnectedDefault) return false;
-        
-        // Print title
-        final String title = getMessage(InfoMessage, getWorkspaceServerName() );
-        print( MESSAGE_INDENT, title );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        Teiid teiid = getWorkspaceServer();
-        List<String> objNames = new ArrayList<String>();
-        Set<String> types = teiid.getTeiidInstance(getTransaction()).getDataSourceTypeNames();
-        for(String type : types) {
-            objNames.add(type);
+        try {
+            // Validates that a server is connected (prints output for errors)
+            boolean hasConnectedDefault = validateHasConnectedWorkspaceServer();
+            if ( !hasConnectedDefault ) {
+                return new CommandResultImpl( false, null, null );
+            }
+
+            // Print title
+            final String title = getMessage( InfoMessage, getWorkspaceServerName() );
+            print( MESSAGE_INDENT, title );
+
+            Teiid teiid = getWorkspaceServer();
+            List< String > objNames = new ArrayList< String >();
+            Set< String > types = teiid.getTeiidInstance( getTransaction() ).getDataSourceTypeNames();
+            for ( String type : types ) {
+                objNames.add( type );
+            }
+            PrintUtils.printList( getWorkspaceStatus(), objNames, getMessage( ListHeader ) );
+            result = CommandResult.SUCCESS;
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( ShowDataSourceTypesError ), e );
         }
-        PrintUtils.printList(getWorkspaceStatus(), objNames, getMessage(ListHeader));
-        print();
 
-        return true;
+        return result;
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.RelationalShellCommand#get()
+     */
+    @Override
+    protected RelationalObject get() throws Exception {
+        return super.get();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 0;
+    }
+
     /**
      * {@inheritDoc}
      *

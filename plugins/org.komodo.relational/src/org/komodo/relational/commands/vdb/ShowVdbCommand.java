@@ -7,8 +7,11 @@
  */
 package org.komodo.relational.commands.vdb;
 
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowVdbCommand.SHOW_VDB_ERROR;
+import org.komodo.shell.CommandResultImpl;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.shell.commands.core.ShowPropertiesCommand;
+import org.komodo.shell.commands.ShowPropertiesCommand;
 
 /**
  * A shell command to show the complete VDB state.
@@ -22,7 +25,7 @@ public final class ShowVdbCommand extends VdbShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public ShowVdbCommand( final WorkspaceStatus status ) {
-        super( NAME, false, status );
+        super( NAME, status );
     }
 
     /**
@@ -31,16 +34,60 @@ public final class ShowVdbCommand extends VdbShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        getCommand(ShowPropertiesCommand.NAME).execute();
-        
-        getCommand(ShowDataRolesCommand.NAME).execute();
-        getCommand(ShowEntriesCommand.NAME).execute();
-        getCommand(ShowModelsCommand.NAME).execute();
-        getCommand(ShowImportsCommand.NAME).execute();
-        getCommand(ShowTranslatorsCommand.NAME).execute();
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        return true;
+        try {
+            result = getCommand( ShowPropertiesCommand.NAME ).execute();
+
+            if ( !result.isOk() ) {
+                return result;
+            }
+
+            result = getCommand( ShowDataRolesCommand.NAME ).execute();
+
+            if ( !result.isOk() ) {
+                return result;
+            }
+
+            result = getCommand( ShowEntriesCommand.NAME ).execute();
+
+            if ( !result.isOk() ) {
+                return result;
+            }
+
+            result = getCommand( ShowModelsCommand.NAME ).execute();
+
+            if ( !result.isOk() ) {
+                return result;
+            }
+
+            result = getCommand( ShowImportsCommand.NAME ).execute();
+
+            if ( !result.isOk() ) {
+                return result;
+            }
+
+            result = getCommand( ShowTranslatorsCommand.NAME ).execute();
+
+            if ( !result.isOk() ) {
+                return result;
+            }
+
+            return CommandResult.SUCCESS;
+        } catch ( final Exception e ) {
+            return new CommandResultImpl( false, getMessage( SHOW_VDB_ERROR ), e );
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 0;
     }
 
 }

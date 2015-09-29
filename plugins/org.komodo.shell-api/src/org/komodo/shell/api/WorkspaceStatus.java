@@ -23,7 +23,6 @@ package org.komodo.shell.api;
 
 import java.io.InputStream;
 import java.io.Writer;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -73,6 +72,11 @@ public interface WorkspaceStatus extends StringConstants {
     String SHOW_TYPE_IN_PROMPT_KEY = "SHOW_TYPE_IN_PROMPT"; //$NON-NLS-1$
 
     /**
+     * Indicates if single commands should be auto-committed after executing.
+     */
+    String AUTO_COMMIT = "AUTO_COMMIT"; //$NON-NLS-1$
+
+    /**
      * An unmodifiable collection of the valid global property names and their non-<code>null</code> default values.
      */
     Map< String, String > GLOBAL_PROPS = Collections.unmodifiableMap( new HashMap< String, String >() {
@@ -88,30 +92,26 @@ public interface WorkspaceStatus extends StringConstants {
             put( SHOW_HIDDEN_PROPERTIES_KEY, Boolean.FALSE.toString() );
             put( SHOW_PROP_NAME_PREFIX_KEY, Boolean.FALSE.toString() );
             put( SHOW_TYPE_IN_PROMPT_KEY, Boolean.TRUE.toString() );
+            put( AUTO_COMMIT, Boolean.TRUE.toString() );
         }
     } );
 
     /**
+     * @return the commands available for the current context (never <code>null</code>)
+     * @throws Exception
+     *         if an error occurs
+     */
+    String[] getAvailableCommands() throws Exception;
+
+    /**
      * @param commandName
-     *        the name of the command being requested (cannot be empty)
+     *        the name of the command, or the command alias, being requested (cannot be empty)
      * @return the command (never <code>null</code>)
      * @throws Exception
      *         if command not found or an error occurs
      */
     ShellCommand getCommand( final String commandName ) throws Exception;
 
-    /**
-     * Get all registered commands
-     * @return registered commands (never <code>null</code>)
-     */
-    Collection<ShellCommand> getRegisteredCommands( ) ;
-
-    /**
-     * Set all registered commands
-     * @param commands the currently registered commands
-     */
-     void setRegisteredCommands(Collection<ShellCommand> commands) ;
-    
     /**
      * Sets the specified global property value.
      *
@@ -175,18 +175,12 @@ public interface WorkspaceStatus extends StringConstants {
 	 * @return the current workspace context
 	 */
 	KomodoObject getCurrentContext();
-	
-    /**
-     * Get the current workspace context type
-     * @return the current workspace context type
-     */
-    String getCurrentContextType();
 
     /**
      * Close the recording output file if open
      */
     void closeRecordingWriter();
-    
+
 	/**
 	 * Toggles the recording status 'on' or 'off'
 	 * @param recordState 'true' to enable recording, 'false' to disable
@@ -245,7 +239,7 @@ public interface WorkspaceStatus extends StringConstants {
      * @return the input stream
      */
     InputStream getInputStream();
-    
+
     /**
      * @return the output writer
      */
@@ -270,7 +264,7 @@ public interface WorkspaceStatus extends StringConstants {
 //     * @throws Exception
 //     */
 //	void commitImport( final String source, ImportMessages importMessages ) throws Exception;
-    
+
     /**
      * Rolls back any unsaved changes.
      *
@@ -297,28 +291,29 @@ public interface WorkspaceStatus extends StringConstants {
      * @return the parent komodo shell
      */
     KomodoShell getShell();
-    
+
     /**
      * Get Additional generic workspace state objects
      * @return the map of state objects
      */
     Map<String,KomodoObject> getStateObjects();
-    
+
     /**
      * Set a generic workspace state object
      * @param key the state key
      * @param stateObj the state object
      */
     void setStateObject(String key, KomodoObject stateObj);
-    
+
     /**
      * Remove a generic workspace state object
      * @param key the state key
      */
     void removeStateObject(String key);
-    
+
     /**
      * Resolve a KomodoObject into a concrete class if available
+     * @param <T> the specific {@link KomodoObject} type being resolved
      * @param kObj the KomodoObject
      * @return the resolved Object
      * @throws KException the exception
@@ -347,12 +342,19 @@ public interface WorkspaceStatus extends StringConstants {
      * @return the status messages
      */
     List<String> getProvidedStatusMessages( final KomodoObject kObj );
-    
+
     /**
      * Initialize any workspace state from providers
      * @param globalProps the workspace global properties
      * @throws KException the exception
-     */ 
+     */
     public void initProvidedStates( final Properties globalProps ) throws KException;
-    
+
+    /**
+     * @return <code>true</code> if the current transaction should be committed after each command execution or rolled back if
+     *         command fails
+     * @see #AUTO_COMMIT
+     */
+    boolean isAutoCommit();
+
 }

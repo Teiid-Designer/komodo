@@ -36,6 +36,7 @@ public class DataRoleCommandMessages implements StringConstants {
 
     @SuppressWarnings( "javadoc" )
     public enum AddMappedRoleCommand {
+        ADD_MAPPED_ROLE_ERROR,
         MAPPED_ROLE_ADDED;
 
         @Override
@@ -43,9 +44,10 @@ public class DataRoleCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     @SuppressWarnings( "javadoc" )
     public enum AddPermissionCommand {
+        ADD_PERMISSION_ERROR,
         PERMISSION_ADDED;
 
         @Override
@@ -56,6 +58,7 @@ public class DataRoleCommandMessages implements StringConstants {
 
     @SuppressWarnings( "javadoc" )
     public enum DeleteMappedRoleCommand {
+        DELETE_MAPPED_ROLE_ERROR,
         MAPPED_ROLE_DELETED;
 
         @Override
@@ -63,9 +66,10 @@ public class DataRoleCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     @SuppressWarnings( "javadoc" )
     public enum DeletePermissionCommand {
+        DELETE_PERMISSION_ERROR,
         PERMISSION_DELETED;
 
         @Override
@@ -73,7 +77,7 @@ public class DataRoleCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     private static String getEnumName(Enum<?> enumValue) {
         String className = enumValue.getClass().getName();
         String[] components = className.split("\\$"); //$NON-NLS-1$

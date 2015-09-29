@@ -7,13 +7,15 @@
  */
 package org.komodo.relational.commands.datarole;
 
+import static org.komodo.relational.commands.datarole.DataRoleCommandMessages.DeleteMappedRoleCommand.DELETE_MAPPED_ROLE_ERROR;
 import static org.komodo.relational.commands.datarole.DataRoleCommandMessages.DeleteMappedRoleCommand.MAPPED_ROLE_DELETED;
 import static org.komodo.relational.commands.datarole.DataRoleCommandMessages.General.MISSING_MAPPED_ROLE_NAME;
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.ArrayList;
 import java.util.List;
 import org.komodo.relational.vdb.DataRole;
+import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
@@ -29,7 +31,7 @@ public final class DeleteMappedRoleCommand extends DataRoleShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public DeleteMappedRoleCommand( final WorkspaceStatus status ) {
-        super( NAME, true, status );
+        super( NAME, status );
     }
 
     /**
@@ -38,18 +40,33 @@ public final class DeleteMappedRoleCommand extends DataRoleShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final String mappedRoleName = requiredArgument( 0, getMessage(MISSING_MAPPED_ROLE_NAME) );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        final DataRole dataRole = getDataRole();
-        dataRole.removeMappedRole( getTransaction(), mappedRoleName );
+        try {
+            final String mappedRoleName = requiredArgument( 0, getMessage( MISSING_MAPPED_ROLE_NAME ) );
 
-        // Print success message
-        print(MESSAGE_INDENT, getMessage(MAPPED_ROLE_DELETED,mappedRoleName));
-        
-        return true;
+            final DataRole dataRole = getDataRole();
+            dataRole.removeMappedRole( getTransaction(), mappedRoleName );
+
+            result = new CommandResultImpl( getMessage( MAPPED_ROLE_DELETED, mappedRoleName ) );
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( DELETE_MAPPED_ROLE_ERROR ), e );
+        }
+
+        return result;
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 1;
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -67,7 +84,7 @@ public final class DeleteMappedRoleCommand extends DataRoleShellCommand {
         for(String mappedRole : mappedRoles) {
             existingRoleNames.add(mappedRole);
         }
-        
+
         if ( args.isEmpty() ) {
             if ( lastArgument == null ) {
                 candidates.addAll( existingRoleNames );
@@ -85,5 +102,5 @@ public final class DeleteMappedRoleCommand extends DataRoleShellCommand {
         // no tab completion
         return -1;
     }
-    
+
 }

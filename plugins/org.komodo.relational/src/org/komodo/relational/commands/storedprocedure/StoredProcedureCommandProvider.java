@@ -9,8 +9,6 @@ package org.komodo.relational.commands.storedprocedure;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.komodo.relational.commands.storedprocedure.AddParameterCommand;
-import org.komodo.relational.commands.storedprocedure.DeleteParameterCommand;
 import org.komodo.relational.model.StoredProcedure;
 import org.komodo.relational.model.internal.StoredProcedureImpl;
 import org.komodo.shell.api.ShellCommand;
@@ -49,7 +47,14 @@ public class StoredProcedureCommandProvider implements ShellCommandProvider {
 
         return result;
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommandProvider#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      org.komodo.spi.repository.KomodoObject)
+     */
+    @SuppressWarnings( "unchecked" )
     @Override
     public StoredProcedure resolve ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
         if(StoredProcedureImpl.RESOLVER.resolvable(uow, kObj)) {
@@ -57,7 +62,13 @@ public class StoredProcedureCommandProvider implements ShellCommandProvider {
         }
         return null;
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommandProvider#isRoot(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      org.komodo.spi.repository.KomodoObject)
+     */
     @Override
     public boolean isRoot ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
         if(StoredProcedureImpl.RESOLVER.resolvable(uow, kObj)) {
@@ -65,7 +76,13 @@ public class StoredProcedureCommandProvider implements ShellCommandProvider {
         }
         return false;
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommandProvider#getTypeDisplay(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      org.komodo.spi.repository.KomodoObject)
+     */
     @Override
     public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
         if(StoredProcedureImpl.RESOLVER.resolvable(uow, kObj)) {
@@ -76,21 +93,23 @@ public class StoredProcedureCommandProvider implements ShellCommandProvider {
     }
 
     /**
-     * @throws KException the exception 
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommandProvider#getStatusMessage(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      org.komodo.spi.repository.KomodoObject)
      */
     @Override
-    public String getStatusMessage ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
+    public String getStatusMessage ( final Repository.UnitOfWork uow, final KomodoObject kObj ) {
         return null;
     }
-    
+
     /**
-     * @throws KException the exception 
-     */
-    /* (non-Javadoc)
+     * {@inheritDoc}
+     *
      * @see org.komodo.shell.api.ShellCommandProvider#initWorkspaceState(org.komodo.shell.api.WorkspaceStatus)
      */
     @Override
-    public void initWorkspaceState(WorkspaceStatus wsStatus) throws KException {
+    public void initWorkspaceState(WorkspaceStatus wsStatus) {
         // Init any workspace state
     }
 

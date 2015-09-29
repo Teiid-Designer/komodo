@@ -34,6 +34,7 @@ public interface ShellCommandProvider {
 
     /**
      * Resolve the supplied KomodoObject
+     * @param <T> the specific {@link KomodoObject} type being resolved
      * @param uow the transaction
      * @param kObj the KomodoObject
      * @return resolved object
@@ -58,14 +59,14 @@ public interface ShellCommandProvider {
      * @throws KException the exception
      */
     public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException;
-    
+
     /**
      * Initialize workspace state for recognized properties
      * @param wsStatus the workspace status
      * @throws KException the exception
      */
     public void initWorkspaceState ( final WorkspaceStatus wsStatus ) throws KException;
-    
+
     /**
      * Get status message for the provided KomodoObject
      * @param uow the transaction

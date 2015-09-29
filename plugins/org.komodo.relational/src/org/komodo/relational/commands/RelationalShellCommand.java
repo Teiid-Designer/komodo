@@ -24,13 +24,9 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
  */
 public abstract class RelationalShellCommand extends BuiltInShellCommand {
 
-    private final boolean commit;
-
     protected RelationalShellCommand( final WorkspaceStatus wsStatus,
-                                      final boolean shouldCommit,
                                       final String... commandNames ) {
         super( wsStatus, commandNames );
-        this.commit = shouldCommit;
     }
 
     protected RelationalObject get() throws Exception {
@@ -82,7 +78,7 @@ public abstract class RelationalShellCommand extends BuiltInShellCommand {
     protected String getWorkspaceMessage(Enum< ? > key, Object... parameters) {
         return Messages.getString(WorkspaceCommandMessages.RESOURCE_BUNDLE,key.toString(),parameters);
     }
-    
+
     /**
      * @see org.komodo.shell.api.ShellCommand#printHelp(int indent)
      */
@@ -97,16 +93,6 @@ public abstract class RelationalShellCommand extends BuiltInShellCommand {
     @Override
     public void printUsage( final int indent ) {
         print( indent, Messages.getString( WorkspaceCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".usage" ) ); //$NON-NLS-1$
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.BuiltInShellCommand#shouldCommit()
-     */
-    @Override
-    protected final boolean shouldCommit() {
-        return this.commit;
     }
 
 }

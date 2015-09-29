@@ -37,7 +37,9 @@ public class WorkspaceCommandMessages implements StringConstants {
         OUTPUT_FILE_ERROR,
         PROPERTIES_HEADER,
         PRINT_RELATIONAL_OBJECT,
-        PROPERTY_NOT_SET;
+        PROPERTY_NOT_SET,
+        SET_PROPERTY_ERROR,
+        SET_PROPERTY_SUCCESS;
 
         @Override
         public String toString() {
@@ -46,6 +48,7 @@ public class WorkspaceCommandMessages implements StringConstants {
     }
 
     public enum CreateVdbCommand {
+        CREATE_VDB_ERROR,
         MISSING_VDB_EXTERNAL_PATH,
         MISSING_VDB_NAME,
         VDB_CREATED;
@@ -55,8 +58,9 @@ public class WorkspaceCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     public enum CreateTeiidCommand {
+        CREATE_TEIID_ERROR,
         MISSING_TEIID_NAME,
         TEIID_CREATED;
 
@@ -65,8 +69,9 @@ public class WorkspaceCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     public enum CreateSchemaCommand {
+        CREATE_SCHEMA_ERROR,
         MISSING_SCHEMA_NAME,
         SCHEMA_CREATED;
 
@@ -89,8 +94,9 @@ public class WorkspaceCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     public enum AddConstraintColumnCommand {
+        ADD_COLUMN_ERROR,
         COLUMN_REF_ADDED,
         COLUMN_PATH_NOT_FOUND,
         ERROR,
@@ -104,9 +110,10 @@ public class WorkspaceCommandMessages implements StringConstants {
         }
     }
 
-    public enum RemoveConstraintColumnCommand {
+    public enum DeleteConstraintColumnCommand {
         COLUMN_REF_REMOVED,
         COLUMN_PATH_NOT_FOUND,
+        DELETE_COLUMN_ERROR,
         INVALID_COLUMN_PATH,
         MISSING_COLUMN_PATH;
 
@@ -115,7 +122,7 @@ public class WorkspaceCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     private static String getEnumName(Enum<?> enumValue) {
         String className = enumValue.getClass().getName();
         String[] components = className.split("\\$"); //$NON-NLS-1$

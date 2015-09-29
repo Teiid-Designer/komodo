@@ -10,9 +10,12 @@ package org.komodo.relational.commands.vdb;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.NAME_TYPE_DISPLAY;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowModelsCommand.MODELS_HEADER;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowModelsCommand.NO_MODELS;
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowModelsCommand.SHOW_MODELS_ERROR;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.vdb.Vdb;
+import org.komodo.shell.CommandResultImpl;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
@@ -28,7 +31,7 @@ public final class ShowModelsCommand extends VdbShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public ShowModelsCommand( final WorkspaceStatus status ) {
-        super( NAME, false, status );
+        super( NAME, status );
     }
 
     /**
@@ -37,22 +40,40 @@ public final class ShowModelsCommand extends VdbShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final UnitOfWork uow = getTransaction();
-        final Vdb vdb = getVdb();
-        final Model[] models = vdb.getModels( uow );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        if ( models.length == 0 ) {
-            print( MESSAGE_INDENT, getMessage(NO_MODELS, vdb.getName(uow)) );
-        } else {
-            print( MESSAGE_INDENT, getMessage(MODELS_HEADER, vdb.getName(uow)) );
-            for ( final Model model : models ) {
-                print(MESSAGE_INDENT,getMessage(NAME_TYPE_DISPLAY,model.getName(uow),model.getTypeDisplayName()));
+        try {
+            final UnitOfWork uow = getTransaction();
+            final Vdb vdb = getVdb();
+            final Model[] models = vdb.getModels( uow );
+
+            if ( models.length == 0 ) {
+                result = new CommandResultImpl( getMessage( NO_MODELS, vdb.getName( uow ) ) );
+            } else {
+                print( MESSAGE_INDENT, getMessage( MODELS_HEADER, vdb.getName( uow ) ) );
+
+                for ( final Model model : models ) {
+                    print( MESSAGE_INDENT, getMessage( NAME_TYPE_DISPLAY, model.getName( uow ), model.getTypeDisplayName() ) );
+                }
+
+                result = CommandResult.SUCCESS;
             }
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( SHOW_MODELS_ERROR ), e );
         }
-        print();
 
-        return true;
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 0;
     }
 
 }

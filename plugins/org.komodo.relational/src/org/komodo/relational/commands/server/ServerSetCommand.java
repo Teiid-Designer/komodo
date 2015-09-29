@@ -7,11 +7,13 @@
  */
 package org.komodo.relational.commands.server;
 
+import static org.komodo.relational.commands.WorkspaceCommandMessages.CreateSchemaCommand.CREATE_SCHEMA_ERROR;
 import static org.komodo.relational.commands.server.ServerCommandMessages.ServerSetCommand.MissingServerNameArg;
 import static org.komodo.relational.commands.server.ServerCommandMessages.ServerSetCommand.ServerDoesNotExist;
 import static org.komodo.relational.commands.server.ServerCommandMessages.ServerSetCommand.ServerSetSuccess;
 import org.komodo.relational.teiid.Teiid;
-import org.komodo.shell.CompletionConstants;
+import org.komodo.shell.CommandResultImpl;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 
 /**
@@ -26,7 +28,7 @@ public final class ServerSetCommand extends ServerShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public ServerSetCommand( final WorkspaceStatus status ) {
-        super( NAME, true, status );
+        super( NAME, status );
     }
 
     /**
@@ -35,38 +37,52 @@ public final class ServerSetCommand extends ServerShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        String serverName = requiredArgument(0, getMessage(MissingServerNameArg));
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        // Validate that server object with this name exists in the workspace
-        Teiid wsTeiid = ServerUtils.getWorkspaceTeiidObject(getWorkspaceManager(), getWorkspaceStatus(), serverName);
-        if(wsTeiid==null) {
-            print(CompletionConstants.MESSAGE_INDENT, getMessage(ServerDoesNotExist,serverName));
-            return false;
-        }
-        
-        // Check for current server
-        if(hasWorkspaceServer()) {
-            // Request set to current server, no need to reset
-            String currentServerName = getWorkspaceServerName();
-            if(serverName.equals(currentServerName)) {
-                print(CompletionConstants.MESSAGE_INDENT, getMessage(ServerSetSuccess,serverName));
-                return true;
-            // Has different server currently.  Disconnect it.
-            } else {
-                if(hasConnectedWorkspaceServer()) {
-                    getCommand(ServerDisconnectCommand.NAME).execute();
+        try {
+            String serverName = requiredArgument( 0, getMessage( MissingServerNameArg ) );
+
+            // Validate that server object with this name exists in the workspace
+            Teiid wsTeiid = ServerUtils.getWorkspaceTeiidObject( getWorkspaceManager(), getWorkspaceStatus(), serverName );
+            if ( wsTeiid == null ) {
+                return new CommandResultImpl( false, getMessage( ServerDoesNotExist, serverName ), null );
+            }
+
+            // Check for current server
+            if ( hasWorkspaceServer() ) {
+                // Request set to current server, no need to reset
+                String currentServerName = getWorkspaceServerName();
+                if ( serverName.equals( currentServerName ) ) {
+                    return new CommandResultImpl( getMessage( ServerSetSuccess, serverName ) );
+                }
+
+                // Has different server currently.  Disconnect it.
+                if ( hasConnectedWorkspaceServer() ) {
+                    getCommand( ServerDisconnectCommand.NAME ).execute();
                 }
             }
-        }
-        
-        // Set the server on workspace status
-        getWorkspaceStatus().setStateObject(ServerCommandProvider.SERVER_DEFAULT_KEY, wsTeiid);
 
-        print(CompletionConstants.MESSAGE_INDENT, getMessage(ServerSetSuccess,serverName));
-        return true;
+            // Set the server on workspace status
+            getWorkspaceStatus().setStateObject( ServerCommandProvider.SERVER_DEFAULT_KEY, wsTeiid );
+            result = new CommandResultImpl( getMessage( ServerSetSuccess, serverName ) );
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( CREATE_SCHEMA_ERROR ), e );
+        }
+
+        return result;
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 1;
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -76,5 +92,5 @@ public final class ServerSetCommand extends ServerShellCommand {
     public final boolean isValidForCurrentContext() {
         return true;
     }
-    
+
 }

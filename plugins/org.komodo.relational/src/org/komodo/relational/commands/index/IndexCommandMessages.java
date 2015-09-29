@@ -22,17 +22,18 @@ public class IndexCommandMessages implements StringConstants {
      * The resource bundle for localized messages.
      */
     public static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle( BUNDLE_NAME );
-    
+
     @SuppressWarnings( "javadoc" )
     public enum General {
-        MISSING_COLUMN_NAME;
+        INVALID_SEARCHABLE_PROPERTY_VALUE,
+        INVALID_NULLABLE_PROPERTY_VALUE;
 
         @Override
         public String toString() {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     private static String getEnumName(Enum<?> enumValue) {
         String className = enumValue.getClass().getName();
         String[] components = className.split("\\$"); //$NON-NLS-1$

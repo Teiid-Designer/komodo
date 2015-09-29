@@ -43,13 +43,18 @@ public class WorkspaceCommandProvider implements ShellCommandProvider {
         result.put( CreateTeiidCommand.NAME, CreateTeiidCommand.class );
         result.put( CreateVdbCommand.NAME, CreateVdbCommand.class );
         result.put( FindCommand.NAME, FindCommand.class );
-        result.put( AddConstraintColumnCommand.NAME, AddConstraintColumnCommand.class );
-        result.put( DeleteConstraintColumnCommand.NAME, DeleteConstraintColumnCommand.class );
         result.put( SetCustomPropertyCommand.NAME, SetCustomPropertyCommand.class );
 
         return result;
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommandProvider#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      org.komodo.spi.repository.KomodoObject)
+     */
+    @SuppressWarnings( "unchecked" )
     @Override
     public WorkspaceManager resolve ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(kObj.getRepository());
@@ -58,7 +63,7 @@ public class WorkspaceCommandProvider implements ShellCommandProvider {
         }
         return null;
     }
-    
+
     @Override
     public boolean isRoot ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(kObj.getRepository());
@@ -67,7 +72,7 @@ public class WorkspaceCommandProvider implements ShellCommandProvider {
         }
         return false;
     }
-    
+
     @Override
     public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(kObj.getRepository());
@@ -78,15 +83,15 @@ public class WorkspaceCommandProvider implements ShellCommandProvider {
     }
 
     /**
-     * @throws KException the exception 
+     * @throws KException the exception
      */
     @Override
     public String getStatusMessage ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
         return null;
     }
-    
+
     /**
-     * @throws KException the exception 
+     * @throws KException the exception
      */
     /* (non-Javadoc)
      * @see org.komodo.shell.api.ShellCommandProvider#initWorkspaceState(org.komodo.shell.api.WorkspaceStatus)

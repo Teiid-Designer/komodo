@@ -10,21 +10,25 @@ package org.komodo.relational.commands.datarole;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.INVALID_BOOLEAN_PROPERTY_VALUE;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.INVALID_PROPERTY_NAME;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.MISSING_PROPERTY_NAME_VALUE;
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_ERROR;
+import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_SUCCESS;
 import java.util.Arrays;
 import java.util.List;
 import org.komodo.relational.vdb.DataRole;
+import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.shell.commands.core.SetPropertyCommand;
+import org.komodo.shell.commands.SetPropertyCommand;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.utils.StringUtils;
 
 /**
  * A shell command to set DataRole properties
  */
 public final class SetDataRolePropertyCommand extends DataRoleShellCommand {
 
-    static final String NAME = "set-data-role-property"; //$NON-NLS-1$
+    static final String NAME = SetPropertyCommand.NAME;
 
     private static final String ALLOWED_CREATE_TEMPORARY_TABLES = "allowCreateTemporaryTables"; //$NON-NLS-1$
     private static final String ANY_AUTHENTICATED = "anyAuthenticated"; //$NON-NLS-1$
@@ -39,9 +43,7 @@ public final class SetDataRolePropertyCommand extends DataRoleShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public SetDataRolePropertyCommand( final WorkspaceStatus status ) {
-        super( NAME, true, status );
-        // Overrides the BuiltInCommand "set-property"
-        setOverriddenCommands(new String[]{SetPropertyCommand.NAME});
+        super( NAME, status );
     }
 
     /**
@@ -50,52 +52,70 @@ public final class SetDataRolePropertyCommand extends DataRoleShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final String name = requiredArgument( 0, getWorkspaceMessage(MISSING_PROPERTY_NAME_VALUE) );
-        final String value = requiredArgument( 1, getWorkspaceMessage(MISSING_PROPERTY_NAME_VALUE) );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        final DataRole dataRole = getDataRole();
-        final UnitOfWork transaction = getTransaction();
-        boolean success = true;
+        try {
+            final String name = requiredArgument( 0, getWorkspaceMessage( MISSING_PROPERTY_NAME_VALUE ) );
+            final String value = requiredArgument( 1, getWorkspaceMessage( MISSING_PROPERTY_NAME_VALUE ) );
 
-        switch ( name ) {
-            case ALLOWED_CREATE_TEMPORARY_TABLES:
-                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                    dataRole.setAllowCreateTempTables( transaction, Boolean.parseBoolean( value ) );
-                } else {
-                    print( MESSAGE_INDENT, getWorkspaceMessage(INVALID_BOOLEAN_PROPERTY_VALUE, ALLOWED_CREATE_TEMPORARY_TABLES ) );
-                    success = false;
-                }
+            final DataRole dataRole = getDataRole();
+            final UnitOfWork transaction = getTransaction();
+            String errorMsg = null;
 
-                break;
-            case ANY_AUTHENTICATED:
-                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                    dataRole.setAnyAuthenticated( transaction, Boolean.parseBoolean( value ) );
-                } else {
-                    print( MESSAGE_INDENT, getWorkspaceMessage(INVALID_BOOLEAN_PROPERTY_VALUE, ANY_AUTHENTICATED ) );
-                    success = false;
-                }
+            switch ( name ) {
+                case ALLOWED_CREATE_TEMPORARY_TABLES:
+                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                        dataRole.setAllowCreateTempTables( transaction, Boolean.parseBoolean( value ) );
+                    } else {
+                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, ALLOWED_CREATE_TEMPORARY_TABLES );
+                    }
 
-                break;
-            case DESCRIPTION:
-                dataRole.setDescription( transaction, value );
-                break;
-            case GRANT_ALL:
-                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                    dataRole.setGrantAll( transaction, Boolean.parseBoolean( value ) );
-                } else {
-                    print( MESSAGE_INDENT, getWorkspaceMessage(INVALID_BOOLEAN_PROPERTY_VALUE, GRANT_ALL ) );
-                    success = false;
-                }
+                    break;
+                case ANY_AUTHENTICATED:
+                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                        dataRole.setAnyAuthenticated( transaction, Boolean.parseBoolean( value ) );
+                    } else {
+                        getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, ANY_AUTHENTICATED );
+                    }
 
-                break;
-            default:
-                success = false;
-                print( MESSAGE_INDENT, getWorkspaceMessage(INVALID_PROPERTY_NAME, NAME ) );
-                break;
+                    break;
+                case DESCRIPTION:
+                    dataRole.setDescription( transaction, value );
+                    break;
+                case GRANT_ALL:
+                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                        dataRole.setGrantAll( transaction, Boolean.parseBoolean( value ) );
+                    } else {
+                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, GRANT_ALL );
+                    }
+
+                    break;
+                default:
+                    errorMsg = getWorkspaceMessage( INVALID_PROPERTY_NAME, name, DataRole.class.getSimpleName() );
+                    break;
+            }
+
+            if ( StringUtils.isBlank( errorMsg ) ) {
+                result = new CommandResultImpl( getMessage( SET_PROPERTY_SUCCESS, name ) );
+            } else {
+                result = new CommandResultImpl( false, errorMsg, null );
+            }
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( SET_PROPERTY_ERROR ), e );
         }
 
-        return success;
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 2;
     }
 
     /**

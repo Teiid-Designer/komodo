@@ -7,10 +7,12 @@
  */
 package org.komodo.relational.commands.datarole;
 
+import static org.komodo.relational.commands.datarole.DataRoleCommandMessages.AddPermissionCommand.ADD_PERMISSION_ERROR;
 import static org.komodo.relational.commands.datarole.DataRoleCommandMessages.AddPermissionCommand.PERMISSION_ADDED;
 import static org.komodo.relational.commands.datarole.DataRoleCommandMessages.General.MISSING_PERMISSION_NAME;
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import org.komodo.relational.vdb.DataRole;
+import org.komodo.shell.CommandResultImpl;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 
 /**
@@ -25,7 +27,7 @@ public final class AddPermissionCommand extends DataRoleShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public AddPermissionCommand( final WorkspaceStatus status ) {
-        super( NAME, true, status );
+        super( NAME, status );
     }
 
     /**
@@ -34,16 +36,31 @@ public final class AddPermissionCommand extends DataRoleShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final String permissionName = requiredArgument( 0, getMessage(MISSING_PERMISSION_NAME) );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        final DataRole dataRole = getDataRole();
-        dataRole.addPermission( getTransaction(), permissionName );
+        try {
+            final String permissionName = requiredArgument( 0, getMessage( MISSING_PERMISSION_NAME ) );
 
-        // Print success message
-        print(MESSAGE_INDENT, getMessage(PERMISSION_ADDED,permissionName));
-        
-        return true;
+            final DataRole dataRole = getDataRole();
+            dataRole.addPermission( getTransaction(), permissionName );
+
+            result = new CommandResultImpl( getMessage( PERMISSION_ADDED, permissionName ) );
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( ADD_PERMISSION_ERROR ), e );
+        }
+
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 1;
     }
 
 }

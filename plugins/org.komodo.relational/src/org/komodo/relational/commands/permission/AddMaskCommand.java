@@ -7,10 +7,12 @@
  */
 package org.komodo.relational.commands.permission;
 
+import static org.komodo.relational.commands.permission.PermissionCommandMessages.AddMaskCommand.ADD_MASK_ERROR;
 import static org.komodo.relational.commands.permission.PermissionCommandMessages.AddMaskCommand.MASK_ADDED;
 import static org.komodo.relational.commands.permission.PermissionCommandMessages.General.MISSING_MASK_NAME;
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import org.komodo.relational.vdb.Permission;
+import org.komodo.shell.CommandResultImpl;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 
 /**
@@ -25,7 +27,7 @@ public final class AddMaskCommand extends PermissionShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public AddMaskCommand( final WorkspaceStatus status ) {
-        super( NAME, true, status );
+        super( NAME, status );
     }
 
     /**
@@ -34,16 +36,31 @@ public final class AddMaskCommand extends PermissionShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final String maskName = requiredArgument( 0, getMessage(MISSING_MASK_NAME) );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        final Permission permission = getPermission();
-        permission.addMask( getTransaction(), maskName );
+        try {
+            final String maskName = requiredArgument( 0, getMessage( MISSING_MASK_NAME ) );
 
-        // Print success message
-        print(MESSAGE_INDENT, getMessage(MASK_ADDED,maskName));
-        
-        return true;
+            final Permission permission = getPermission();
+            permission.addMask( getTransaction(), maskName );
+
+            result = new CommandResultImpl( getMessage( MASK_ADDED, maskName ) );
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( ADD_MASK_ERROR ), e );
+        }
+
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 1;
     }
 
 }

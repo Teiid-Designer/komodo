@@ -8,13 +8,15 @@
 package org.komodo.relational.commands.permission;
 
 import static org.komodo.relational.commands.permission.PermissionCommandMessages.DeleteConditionCommand.CONDITION_DELETED;
+import static org.komodo.relational.commands.permission.PermissionCommandMessages.DeleteConditionCommand.DELETE_CONDITION_ERROR;
 import static org.komodo.relational.commands.permission.PermissionCommandMessages.General.MISSING_CONDITION_NAME;
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.ArrayList;
 import java.util.List;
 import org.komodo.relational.vdb.Condition;
 import org.komodo.relational.vdb.Permission;
+import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
@@ -30,7 +32,7 @@ public final class DeleteConditionCommand extends PermissionShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public DeleteConditionCommand( final WorkspaceStatus status ) {
-        super( NAME, true, status );
+        super( NAME, status );
     }
 
     /**
@@ -39,18 +41,33 @@ public final class DeleteConditionCommand extends PermissionShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final String conditionName = requiredArgument( 0, getMessage(MISSING_CONDITION_NAME) );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        final Permission permission = getPermission();
-        permission.removeCondition( getTransaction(), conditionName );
+        try {
+            final String conditionName = requiredArgument( 0, getMessage( MISSING_CONDITION_NAME ) );
 
-        // Print success message
-        print(MESSAGE_INDENT, getMessage(CONDITION_DELETED,conditionName));
-        
-        return true;
+            final Permission permission = getPermission();
+            permission.removeCondition( getTransaction(), conditionName );
+
+            result = new CommandResultImpl( getMessage( CONDITION_DELETED, conditionName ) );
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( DELETE_CONDITION_ERROR ), e );
+        }
+
+        return result;
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 1;
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -68,7 +85,7 @@ public final class DeleteConditionCommand extends PermissionShellCommand {
         for(Condition condition : conditions) {
             existingConditionNames.add(condition.getName(uow));
         }
-        
+
         if ( args.isEmpty() ) {
             if ( lastArgument == null ) {
                 candidates.addAll( existingConditionNames );

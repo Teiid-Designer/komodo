@@ -7,11 +7,13 @@
  */
 package org.komodo.relational.commands.vdb;
 
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.AddEntryCommand.ADD_ENTRY_ERROR;
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.AddEntryCommand.ENTRY_ADDED;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_ENTRY_NAME;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_ENTRY_PATH;
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.AddEntryCommand.ENTRY_ADDED;
 import org.komodo.relational.vdb.Vdb;
+import org.komodo.shell.CommandResultImpl;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 
 /**
@@ -26,7 +28,7 @@ public final class AddEntryCommand extends VdbShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public AddEntryCommand( final WorkspaceStatus status ) {
-        super( NAME, true, status );
+        super( NAME, status );
     }
 
     /**
@@ -35,17 +37,32 @@ public final class AddEntryCommand extends VdbShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final String entryName = requiredArgument( 0, getMessage(MISSING_ENTRY_NAME) );
-        final String entryPath = requiredArgument( 1, getMessage(MISSING_ENTRY_PATH) );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        final Vdb vdb = getVdb();
-        vdb.addEntry( getTransaction(), entryName, entryPath );
+        try {
+            final String entryName = requiredArgument( 0, getMessage( MISSING_ENTRY_NAME ) );
+            final String entryPath = requiredArgument( 1, getMessage( MISSING_ENTRY_PATH ) );
 
-        // Print success message
-        print(MESSAGE_INDENT, getMessage(ENTRY_ADDED,entryName));
-        
-        return true;
+            final Vdb vdb = getVdb();
+            vdb.addEntry( getTransaction(), entryName, entryPath );
+
+            result = new CommandResultImpl( getMessage( ENTRY_ADDED, entryName ) );
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( ADD_ENTRY_ERROR ), e );
+        }
+
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 1;
     }
 
 }

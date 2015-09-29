@@ -7,14 +7,16 @@
  */
 package org.komodo.relational.commands.model;
 
+import static org.komodo.relational.commands.model.ModelCommandMessages.DeleteStoredProcedureCommand.DELETE_STORED_PROCEDURE_ERROR;
 import static org.komodo.relational.commands.model.ModelCommandMessages.DeleteStoredProcedureCommand.STORED_PROCEDURE_DELETED;
 import static org.komodo.relational.commands.model.ModelCommandMessages.General.MISSING_STORED_PROCEDURE_NAME;
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.ArrayList;
 import java.util.List;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Procedure;
+import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
@@ -30,7 +32,7 @@ public final class DeleteStoredProcedureCommand extends ModelShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public DeleteStoredProcedureCommand( final WorkspaceStatus status ) {
-        super( NAME, true, status );
+        super( NAME, status );
     }
 
     /**
@@ -39,18 +41,33 @@ public final class DeleteStoredProcedureCommand extends ModelShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final String procName = requiredArgument( 0, getMessage(MISSING_STORED_PROCEDURE_NAME) );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        final Model model = getModel();
-        model.removeProcedure( getTransaction(), procName );
+        try {
+            final String procName = requiredArgument( 0, getMessage( MISSING_STORED_PROCEDURE_NAME ) );
 
-        // Print success message
-        print(MESSAGE_INDENT, getMessage(STORED_PROCEDURE_DELETED,procName));
-        
-        return true;
+            final Model model = getModel();
+            model.removeProcedure( getTransaction(), procName );
+
+            result = new CommandResultImpl( getMessage( STORED_PROCEDURE_DELETED, procName ) );
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( DELETE_STORED_PROCEDURE_ERROR ), e );
+        }
+
+        return result;
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 1;
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -68,7 +85,7 @@ public final class DeleteStoredProcedureCommand extends ModelShellCommand {
         for(Procedure proc : procs) {
             existingProcNames.add(proc.getName(uow));
         }
-        
+
         if ( args.isEmpty() ) {
             if ( lastArgument == null ) {
                 candidates.addAll( existingProcNames );
@@ -86,5 +103,5 @@ public final class DeleteStoredProcedureCommand extends ModelShellCommand {
         // no tab completion
         return -1;
     }
-    
+
 }

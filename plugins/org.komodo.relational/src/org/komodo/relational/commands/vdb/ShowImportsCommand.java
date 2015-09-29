@@ -10,9 +10,12 @@ package org.komodo.relational.commands.vdb;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.NAME_TYPE_DISPLAY;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowImportsCommand.IMPORTS_HEADER;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowImportsCommand.NO_IMPORTS;
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowImportsCommand.SHOW_IMPORTS_ERROR;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.VdbImport;
+import org.komodo.shell.CommandResultImpl;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
@@ -28,7 +31,7 @@ public final class ShowImportsCommand extends VdbShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public ShowImportsCommand( final WorkspaceStatus status ) {
-        super( NAME, false, status );
+        super( NAME, status );
     }
 
     /**
@@ -37,22 +40,41 @@ public final class ShowImportsCommand extends VdbShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final UnitOfWork uow = getTransaction();
-        final Vdb vdb = getVdb();
-        final VdbImport[] imports = vdb.getImports( uow );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        if ( imports.length == 0 ) {
-            print( MESSAGE_INDENT, getMessage(NO_IMPORTS, vdb.getName(uow)) );
-        } else {
-            print( MESSAGE_INDENT, getMessage(IMPORTS_HEADER, vdb.getName(uow)) );
-            for ( final VdbImport theImport : imports ) {
-                print(MESSAGE_INDENT,getMessage(NAME_TYPE_DISPLAY,theImport.getName(uow),theImport.getTypeDisplayName()));
+        try {
+            final UnitOfWork uow = getTransaction();
+            final Vdb vdb = getVdb();
+            final VdbImport[] imports = vdb.getImports( uow );
+
+            if ( imports.length == 0 ) {
+                result = new CommandResultImpl( getMessage( NO_IMPORTS, vdb.getName( uow ) ) );
+            } else {
+                print( MESSAGE_INDENT, getMessage( IMPORTS_HEADER, vdb.getName( uow ) ) );
+
+                for ( final VdbImport theImport : imports ) {
+                    print( MESSAGE_INDENT,
+                           getMessage( NAME_TYPE_DISPLAY, theImport.getName( uow ), theImport.getTypeDisplayName() ) );
+                }
+
+                result = CommandResult.SUCCESS;
             }
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( SHOW_IMPORTS_ERROR ), e );
         }
-        print();
 
-        return true;
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 0;
     }
 
 }

@@ -7,7 +7,7 @@
  */
 package org.komodo.relational.commands;
 
-import static org.komodo.relational.commands.WorkspaceCommandMessages.FindCommand.FAILURE;
+import static org.komodo.relational.commands.WorkspaceCommandMessages.DeleteConstraintColumnCommand.DELETE_COLUMN_ERROR;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.FindCommand.INVALID_TYPE;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.FindCommand.MISSING_TYPE_NAME;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.FindCommand.NO_OBJECTS_FOUND;
@@ -19,6 +19,8 @@ import java.util.Comparator;
 import java.util.List;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.KomodoTypeRegistry;
+import org.komodo.shell.CommandResultImpl;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
 import org.komodo.spi.repository.KomodoType;
@@ -33,13 +35,13 @@ public final class FindCommand extends RelationalShellCommand {
 
     private static final List< KomodoType > NOT_APPLICABLE_TYPES = Arrays.asList( new KomodoType[] { KomodoType.UNKNOWN,
         KomodoType.WORKSPACE } );
-    
+
     /**
      * @param status
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public FindCommand( final WorkspaceStatus status ) {
-        super( status, true, NAME );
+        super( status, NAME );
     }
 
     /**
@@ -48,30 +50,41 @@ public final class FindCommand extends RelationalShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final String typeName = requiredArgument( 0, getMessage(MISSING_TYPE_NAME) );
-        final KomodoType queryType = getQueryType( typeName );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
 
-        if ( queryType == null ) {
-            print( MESSAGE_INDENT, getWorkspaceMessage(INVALID_TYPE, typeName ) );
-            return false;
-        }
-
-        // may have a name pattern
-        final String pattern = optionalArgument( 1 );
-        
         try {
-            // query
-            final String[] foundObjectPaths = query( getWorkspaceStatus(), queryType, null, pattern );
+            final String typeName = requiredArgument( 0, getMessage( MISSING_TYPE_NAME ) );
+            final KomodoType queryType = getQueryType( typeName );
 
-            // print results
-            printResults( queryType, foundObjectPaths );
+            if ( queryType == null ) {
+                result = new CommandResultImpl( false, getWorkspaceMessage( INVALID_TYPE, typeName ), null );
+            } else {
+                // may have a name pattern
+                final String pattern = optionalArgument( 1 );
+
+                // query
+                final String[] foundObjectPaths = query( getWorkspaceStatus(), queryType, null, pattern );
+
+                // print results
+                printResults( queryType, foundObjectPaths );
+                result = CommandResult.SUCCESS;
+            }
         } catch ( final Exception e ) {
-            print( MESSAGE_INDENT, getWorkspaceMessage(FAILURE, e.getLocalizedMessage()) );
-            return false;
+            result = new CommandResultImpl( false, getMessage( DELETE_COLUMN_ERROR ), e );
         }
 
-        return true;
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 2;
     }
 
     /**
@@ -83,7 +96,7 @@ public final class FindCommand extends RelationalShellCommand {
     public boolean isValidForCurrentContext() {
         return true;
     }
-    
+
     private KomodoType getQueryType( final String typeArg ) {
         final KomodoType ktype = KomodoType.getKomodoType( typeArg );
         return ( NOT_APPLICABLE_TYPES.contains( ktype ) ? null : ktype );

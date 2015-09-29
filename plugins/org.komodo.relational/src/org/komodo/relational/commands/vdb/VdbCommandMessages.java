@@ -53,7 +53,8 @@ public class VdbCommandMessages implements StringConstants {
     @SuppressWarnings( "javadoc" )
     public enum ShowDataRolesCommand {
         NO_DATA_ROLES,
-        DATA_ROLES_HEADER;
+        DATA_ROLES_HEADER,
+        SHOW_DATA_ROLES_ERROR;
 
         @Override
         public String toString() {
@@ -64,29 +65,32 @@ public class VdbCommandMessages implements StringConstants {
     @SuppressWarnings( "javadoc" )
     public enum ShowEntriesCommand {
         NO_ENTRIES,
-        ENTRIES_HEADER;
+        ENTRIES_HEADER,
+        SHOW_ENTRIES_ERROR;
 
         @Override
         public String toString() {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     @SuppressWarnings( "javadoc" )
     public enum ShowImportsCommand {
         NO_IMPORTS,
-        IMPORTS_HEADER;
+        IMPORTS_HEADER,
+        SHOW_IMPORTS_ERROR;
 
         @Override
         public String toString() {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     @SuppressWarnings( "javadoc" )
     public enum ShowModelsCommand {
         NO_MODELS,
-        MODELS_HEADER;
+        MODELS_HEADER,
+        SHOW_MODELS_ERROR;
 
         @Override
         public String toString() {
@@ -97,6 +101,7 @@ public class VdbCommandMessages implements StringConstants {
     @SuppressWarnings( "javadoc" )
     public enum ShowTranslatorsCommand {
         NO_TRANSLATORS,
+        SHOW_TRANSLATORS_ERROR,
         TRANSLATORS_HEADER;
 
         @Override
@@ -104,9 +109,22 @@ public class VdbCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
+    @SuppressWarnings( "javadoc" )
+    public enum ShowVdbCommand {
+
+        SHOW_VDB_ERROR;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+
+    }
+
     @SuppressWarnings( "javadoc" )
     public enum AddDataRoleCommand {
+        ADD_DATA_ROLE_ERROR,
         DATA_ROLE_ADDED;
 
         @Override
@@ -114,9 +132,10 @@ public class VdbCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     @SuppressWarnings( "javadoc" )
     public enum AddEntryCommand {
+        ADD_ENTRY_ERROR,
         ENTRY_ADDED;
 
         @Override
@@ -124,9 +143,10 @@ public class VdbCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     @SuppressWarnings( "javadoc" )
     public enum AddImportCommand {
+        ADD_IMPORT_ERROR,
         IMPORT_ADDED;
 
         @Override
@@ -137,6 +157,7 @@ public class VdbCommandMessages implements StringConstants {
 
     @SuppressWarnings( "javadoc" )
     public enum AddModelCommand {
+        ADD_MODEL_ERROR,
         MODEL_ADDED;
 
         @Override
@@ -144,9 +165,10 @@ public class VdbCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     @SuppressWarnings( "javadoc" )
     public enum AddTranslatorCommand {
+        ADD_TRANSLATOR_ERROR,
         TRANSLATOR_ADDED;
 
         @Override
@@ -154,19 +176,21 @@ public class VdbCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     @SuppressWarnings( "javadoc" )
     public enum DeleteDataRoleCommand {
-        DATA_ROLE_DELETED;
+        DATA_ROLE_DELETED,
+        DELETE_DATA_ROLE_ERROR;
 
         @Override
         public String toString() {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     @SuppressWarnings( "javadoc" )
     public enum DeleteEntryCommand {
+        DELETE_ENTRY_ERROR,
         ENTRY_DELETED;
 
         @Override
@@ -174,9 +198,10 @@ public class VdbCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     @SuppressWarnings( "javadoc" )
     public enum DeleteImportCommand {
+        DELETE_IMPORT_ERROR,
         IMPORT_DELETED;
 
         @Override
@@ -187,6 +212,7 @@ public class VdbCommandMessages implements StringConstants {
 
     @SuppressWarnings( "javadoc" )
     public enum DeleteModelCommand {
+        DELETE_MODEL_ERROR,
         MODEL_DELETED;
 
         @Override
@@ -194,9 +220,10 @@ public class VdbCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     @SuppressWarnings( "javadoc" )
     public enum DeleteTranslatorCommand {
+        DELETE_TRANSLATOR_ERROR,
         TRANSLATOR_DELETED;
 
         @Override
@@ -214,7 +241,7 @@ public class VdbCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     private static String getEnumName(Enum<?> enumValue) {
         String className = enumValue.getClass().getName();
         String[] components = className.split("\\$"); //$NON-NLS-1$

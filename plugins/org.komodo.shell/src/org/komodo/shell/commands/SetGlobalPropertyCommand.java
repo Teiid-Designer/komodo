@@ -5,14 +5,15 @@
  *
  * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
  */
-package org.komodo.shell.commands.core;
+package org.komodo.shell.commands;
 
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.List;
 import java.util.Set;
 import org.komodo.shell.BuiltInShellCommand;
+import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.Messages;
-import org.komodo.shell.api.InvalidCommandArgumentException;
+import org.komodo.shell.Messages.SHELL;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.utils.StringUtils;
 
@@ -34,18 +35,23 @@ public class SetGlobalPropertyCommand extends BuiltInShellCommand {
         super( status, NAME );
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
+     */
     @Override
     public boolean isValidForCurrentContext() {
         return true;
     }
-    
+
     /**
      * {@inheritDoc}
      *
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
+    protected CommandResult doExecute() {
         try {
             // property name and value are required
             String propNameArg = requiredArgument(0, Messages.getString(Messages.SetGlobalPropertyCommand.InvalidArgMsg_GlobalPropertyName));
@@ -55,21 +61,28 @@ public class SetGlobalPropertyCommand extends BuiltInShellCommand {
             final String errorMsg = getWorkspaceStatus().validateGlobalPropertyValue( propNameArg, propValueArg );
 
             if ( !StringUtils.isEmpty( errorMsg ) ) {
-                print( MESSAGE_INDENT, Messages.getString( Messages.SetGlobalPropertyCommand.InvalidGlobalProperty, errorMsg ) );
-                return false;
+                return new CommandResultImpl( false,
+                                              Messages.getString( Messages.SetGlobalPropertyCommand.InvalidGlobalProperty,
+                                                                  errorMsg ),
+                                              null );
             }
 
             // Set the property
             setGlobalProperty( propNameArg, propValueArg );
-            print( MESSAGE_INDENT, Messages.getString( Messages.SetGlobalPropertyCommand.GlobalPropertySet, propNameArg ) );
-
-            return true;
-        } catch ( final InvalidCommandArgumentException e ) {
-            throw e;
+            return new CommandResultImpl( Messages.getString( Messages.SetGlobalPropertyCommand.GlobalPropertySet, propNameArg ) );
         } catch ( final Exception e ) {
-            print( MESSAGE_INDENT, getString( "error", e.getLocalizedMessage() ) ); //$NON-NLS-1$
-            return false;
+            return new CommandResultImpl( false, Messages.getString( SHELL.CommandFailure, NAME ), e );
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 2;
     }
 
     /**
@@ -81,11 +94,6 @@ public class SetGlobalPropertyCommand extends BuiltInShellCommand {
     private void setGlobalProperty(String propName, String propValue) throws Exception {
         WorkspaceStatus wsStatus = getWorkspaceStatus();
         wsStatus.setProperty(propName, propValue);
-    }
-    
-    private String getString( final String msgKey,
-                              final String... args ) {
-        return Messages.getString( SetGlobalPropertyCommand.class.getSimpleName() + '.' + msgKey, ( Object[] )args );
     }
 
     /**
@@ -112,14 +120,6 @@ public class SetGlobalPropertyCommand extends BuiltInShellCommand {
         }
 
         return -1;
-    }
-    
-    /* (non-Javadoc)
-     * @see org.komodo.shell.BuiltInShellCommand#shouldCommit()
-     */
-    @Override
-    protected boolean shouldCommit() {
-        return true;
     }
 
 }

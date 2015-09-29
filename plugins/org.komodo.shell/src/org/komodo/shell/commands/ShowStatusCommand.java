@@ -19,13 +19,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  ************************************************************************************/
-package org.komodo.shell.commands.core;
+package org.komodo.shell.commands;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.Collection;
 import java.util.List;
 import org.komodo.shell.BuiltInShellCommand;
+import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.Messages;
+import org.komodo.shell.Messages.SHELL;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.KomodoObjectUtils;
 import org.komodo.spi.repository.KomodoObject;
@@ -49,30 +52,39 @@ public class ShowStatusCommand extends BuiltInShellCommand {
         super( wsStatus, NAME );
     }
 
-    @Override
-    public boolean isValidForCurrentContext() {
-        return true;
-    }
-    
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.shell.BuiltInShellCommand#doExecute()
+     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-		printStatus( );
+    public boolean isValidForCurrentContext() {
         return true;
     }
 
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.shell.BuiltInShellCommand#shouldCommit()
+     * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean shouldCommit() {
-        return false;
+    protected CommandResult doExecute() {
+        try {
+            printStatus();
+            return CommandResult.SUCCESS;
+        } catch ( final Exception e ) {
+            return new CommandResultImpl( false, Messages.getString( SHELL.CommandFailure, NAME ), e );
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 0;
     }
 
 	/**
@@ -92,7 +104,7 @@ public class ShowStatusCommand extends BuiltInShellCommand {
         KomodoObject currentContext = wsStatus.getCurrentContext();
         String objFullName = KomodoObjectUtils.getFullName(wsStatus, currentContext);
         print(MESSAGE_INDENT, Messages.getString(Messages.ShowStatusCommand.CurrentContext, objFullName));
-        
+
         // Get additional provided statuses for current context
         List<String> providedStatusList = wsStatus.getProvidedStatusMessages(currentContext);
         for(String status : providedStatusList) {

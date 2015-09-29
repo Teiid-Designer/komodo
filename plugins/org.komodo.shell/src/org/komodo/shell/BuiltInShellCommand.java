@@ -15,7 +15,6 @@
  */
 package org.komodo.shell;
 
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.io.File;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -24,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.Arguments;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.InvalidCommandArgumentException;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
@@ -50,13 +50,11 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
     private final String name;
     private WorkspaceStatus wsStatus;
     private Arguments arguments;
-    private boolean autoCommit = true;
     private Writer writer;
-    
+
     //private final StringNameValidator nameValidator = new StringNameValidator();
     private final String[] aliases;
-    private String[] overriddenCommands = StringConstants.EMPTY_ARRAY;
-    
+
     /**
      * Constructs a command.
      *
@@ -94,33 +92,35 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
     }
 
     /**
+     * @return the command result (cannot be <code>null</code>)
+     */
+    protected abstract CommandResult doExecute();
+
+    /**
      * {@inheritDoc}
      *
      * @see org.komodo.shell.api.ShellCommand#execute()
      */
     @Override
-    public final void execute() throws Exception {
+    public final CommandResult execute() {
         // Make sure command is valid for the context
-        if(!isValidForCurrentContext()) {
-            // Print message if invalid for context
-            print(MESSAGE_INDENT, Messages.getString( SHELL.InvalidCommandForContext ) );
-            return;
+        if ( !isValidForCurrentContext() ) {
+            return new CommandResultImpl( false, Messages.getString( SHELL.InvalidCommandForContext ), null );
         }
-        
-        final boolean success = doExecute();
 
-        if (shouldCommit()) {
-            if (success) {
-                getWorkspaceStatus().commit(getName());
-            } else {
-                getWorkspaceStatus().rollback(getName());
-            }
+        // make sure there aren't too many args
+        if ( getArguments().size() > getMaxArgCount() ) {
+            return new CommandResultImpl( false, Messages.getString( Messages.SHELL.TOO_MANY_ARGS ), null );
         }
+
+        // execute command
+        return doExecute();
     }
 
-    protected abstract boolean shouldCommit();
-
-    protected abstract boolean doExecute() throws Exception;
+    /**
+     * @return the maximum number of arguments allowed
+     */
+    protected abstract int getMaxArgCount();
 
     /**
      * @see org.komodo.shell.api.ShellCommand#getName()
@@ -143,11 +143,6 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
     @Override
     public WorkspaceStatus getWorkspaceStatus() {
         return this.wsStatus;
-    }
-
-    @Override
-    public void setWorkspaceStatus(WorkspaceStatus wsStatus) {
-        this.wsStatus=wsStatus;
     }
 
     /**
@@ -233,77 +228,35 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
     }
 
     /**
-     * Get command names that are overridden by the command
-     * @return the overriddenCommands
+     * {@inheritDoc}
+     * <p>
+     * Value is {@value}.
+     *
+     * @see org.komodo.shell.api.ShellCommand#isEnabled()
      */
     @Override
-    public List<String> getOverriddenCommands() {
-        return Arrays.asList(overriddenCommands);
+    public boolean isEnabled() {
+        return true;
     }
 
     /**
-     * Set the command names that are overridden by the command
-     * @param overriddenCommands the overriddenCommands to set
+     * {@inheritDoc}
+     * <p>
+     * Defaults to {@value}.
+     *
+     * @see org.komodo.shell.api.ShellCommand#isOverridable()
      */
     @Override
-    public void setOverriddenCommands(String[] overriddenCommands) {
-        this.overriddenCommands = overriddenCommands;
+    public boolean isOverridable() {
+        return true;
     }
-    
-    /**
-     * Determines if the command is a core command
-     */
-    @Override
-    public boolean isCoreCommand() {
-        return false;
-    }
-    
-//    /**
-//     * {@inheritDoc}
-//     *
-//     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
-//     */
-//    @Override
-//    public abstract boolean isValidForCurrentContext() {
-//        // The command is valid unless it is overridden by a provided command
-//        boolean isOverridden = false;
-//        // Go thru all registered commands and determine if any override this command
-//        for(ShellCommand registeredCommand : getWorkspaceStatus().getRegisteredCommands()) {
-//            if(!registeredCommand.isCoreCommand() && registeredCommand.isValidForCurrentContext()) {
-//                List overriddenCommands = registeredCommand.getOverriddenCommands();
-//                if(overriddenCommands.contains(getName())) {
-//                    isOverridden = true;
-//                    break;
-//                }
-//            }
-//        }
-//        // Valid if not overridden
-//        return !isOverridden;
-//    }
-    
+
     /**
      * @see org.komodo.shell.api.ShellCommand#tabCompletion(java.lang.String, java.util.List)
      */
     @Override
     public int tabCompletion(String lastArgument, List<CharSequence> candidates) throws Exception {
         return -1;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.ShellCommand#isAutoCommit()
-     */
-    @Override
-    public boolean isAutoCommit() {
-        return this.autoCommit;
-    }
-
-    /**
-     * @param newAutoCommit the flag indicating if the command should commit the transaction after executing
-     */
-    public void setAutoCommit( final boolean newAutoCommit ) {
-        this.autoCommit = newAutoCommit;
     }
 
 	protected KomodoObject getContext() {
@@ -387,13 +340,11 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
     protected void print() {
         print( 0, StringConstants.EMPTY_STRING );
     }
-    
-    /**
-     * @see org.komodo.shell.api.ShellCommand#print(int,java.lang.String, java.lang.Object[])
-     */
-    @Override
-    public void print(int indent,String formattedMessage, Object... params) {
-        PrintUtils.print(getWriter(), indent, formattedMessage, params);
+
+    protected void print( final int indent,
+                          final String formattedMessage,
+                          final Object... params ) {
+        PrintUtils.print( getWriter(), indent, formattedMessage, params );
     }
 
     /**
@@ -479,7 +430,7 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
                  || ( !isShowingPropertyNamePrefixes() && propNames.contains( KomodoObjectUtils.attachPrefix( getWorkspaceStatus(),context, propName ) ) ) ) {
                 return true;
             }
-            
+
             if(printMessage) {
             	print( CompletionConstants.MESSAGE_INDENT,
             			Messages.getString( SHELL.propertyArg_noPropertyWithThisName, propName ) );
@@ -513,7 +464,7 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
 		final boolean exists = KomodoObjectUtils.getProperties(getWorkspaceStatus(),context).contains( propName );
 
         if ( !exists ) {
-            print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.propertyArg_noPropertyWithThisName, propName)); 
+            print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.propertyArg_noPropertyWithThisName, propName));
 			return false;
 		}
 		return true;
@@ -663,7 +614,7 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
             }
         }
     }
-    
+
     protected boolean isCurrentTypeValid( final String... descriptorNames ) throws KException {
         if ( ( descriptorNames == null ) || ( descriptorNames.length == 0 ) ) {
             return true;
@@ -690,6 +641,5 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
 
         return false;
     }
-    
-   
+
 }

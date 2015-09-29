@@ -51,7 +51,7 @@ public class ServerCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     @SuppressWarnings( "javadoc" )
     public enum ServerDisconnectCommand {
         AttemptingToDisconnect,
@@ -63,7 +63,7 @@ public class ServerCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     @SuppressWarnings( "javadoc" )
     public enum ServerSetCommand {
         ServerDoesNotExist,
@@ -79,18 +79,20 @@ public class ServerCommandMessages implements StringConstants {
     @SuppressWarnings( "javadoc" )
     public enum ServerShowVdbsCommand {
         InfoMessage,
-        ListHeader;
+        ListHeader,
+        ShowVdbsError;
 
         @Override
         public String toString() {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     @SuppressWarnings( "javadoc" )
     public enum ServerShowTranslatorsCommand {
         InfoMessage,
-        ListHeader;
+        ListHeader,
+        ShowTranslatorsError;
 
         @Override
         public String toString() {
@@ -101,7 +103,8 @@ public class ServerCommandMessages implements StringConstants {
     @SuppressWarnings( "javadoc" )
     public enum ServerShowDatasourcesCommand {
         InfoMessage,
-        ListHeader;
+        ListHeader,
+        ShowDataSourcesError;
 
         @Override
         public String toString() {
@@ -112,7 +115,8 @@ public class ServerCommandMessages implements StringConstants {
     @SuppressWarnings( "javadoc" )
     public enum ServerShowDatasourceTypesCommand {
         InfoMessage,
-        ListHeader;
+        ListHeader,
+        ShowDataSourceTypesError;
 
         @Override
         public String toString() {
