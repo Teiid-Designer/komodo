@@ -78,6 +78,12 @@ public class ServerCommandProvider implements ShellCommandProvider {
         return null;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommandProvider#isRoot(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      org.komodo.spi.repository.KomodoObject)
+     */
     @Override
     public boolean isRoot ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
         if(TeiidImpl.RESOLVER.resolvable(uow, kObj)) {
@@ -86,6 +92,12 @@ public class ServerCommandProvider implements ShellCommandProvider {
         return false;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommandProvider#getTypeDisplay(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      org.komodo.spi.repository.KomodoObject)
+     */
     @Override
     public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
         if(TeiidImpl.RESOLVER.resolvable(uow, kObj)) {
@@ -95,6 +107,12 @@ public class ServerCommandProvider implements ShellCommandProvider {
         return null;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommandProvider#getStatusMessage(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      org.komodo.spi.repository.KomodoObject)
+     */
     @Override
     public String getStatusMessage ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
         if(TeiidImpl.RESOLVER.resolvable(uow, kObj)) {
@@ -117,11 +135,10 @@ public class ServerCommandProvider implements ShellCommandProvider {
         return Messages.getString(ServerCommandMessages.RESOURCE_BUNDLE,key.toString(),parameters);
     }
 
-    /* (non-Javadoc)
-     * @see org.komodo.shell.api.ShellCommandProvider#initWorkspaceState(org.komodo.spi.repository.Reposi)
-     */
     /**
-     * @throws KException the exception
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommandProvider#initWorkspaceState(org.komodo.shell.api.WorkspaceStatus)
      */
     @Override
     public void initWorkspaceState(WorkspaceStatus wsStatus) throws KException {

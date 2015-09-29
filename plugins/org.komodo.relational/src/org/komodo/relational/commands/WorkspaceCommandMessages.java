@@ -81,6 +81,48 @@ public class WorkspaceCommandMessages implements StringConstants {
         }
     }
 
+    public enum FindCommand {
+        MISSING_TYPE_NAME,
+        HELP_TYPES_HEADING,
+        FAILURE,
+        INVALID_TYPE,
+        NO_OBJECTS_FOUND,
+        TYPE_HEADER;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    public enum AddConstraintColumnCommand {
+        ADD_COLUMN_ERROR,
+        COLUMN_REF_ADDED,
+        COLUMN_PATH_NOT_FOUND,
+        ERROR,
+        INVALID_COLUMN_PATH,
+        INVALID_COLUMN,
+        MISSING_COLUMN_PATH;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    public enum DeleteConstraintColumnCommand {
+        COLUMN_REF_REMOVED,
+        COLUMN_PATH_NOT_FOUND,
+        DELETE_COLUMN_ERROR,
+        INVALID_COLUMN_PATH,
+        MISSING_COLUMN_PATH;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
     private static String getEnumName(Enum<?> enumValue) {
         String className = enumValue.getClass().getName();
         String[] components = className.split("\\$"); //$NON-NLS-1$

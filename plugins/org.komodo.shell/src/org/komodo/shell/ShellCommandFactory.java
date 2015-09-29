@@ -73,7 +73,6 @@ public class ShellCommandFactory {
 
     // key = command name, value = {key = provider ID, value = command}
     private final Map< String, Map< String, ShellCommand > > commandMap;
-//    private final Map<String, ShellCommand> aliasMap; // separate from commandMap so HelpCommand only shows command names
     private Collection<ShellCommandProvider> providers = new ArrayList<>();
 
     /**
@@ -82,8 +81,6 @@ public class ShellCommandFactory {
      */
     public ShellCommandFactory( ) throws Exception {
         this.commandMap = new HashMap<>();
-//        this.aliasMap = new HashMap<>();
-
         discoverProviders();
     }
 

@@ -4,14 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
+import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
-import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
 import org.komodo.spi.repository.KomodoObject;
-import org.komodo.spi.repository.KomodoType;
-import org.komodo.utils.StringUtils;
 
 /**
  * renames the referenced node
@@ -41,10 +39,10 @@ public class RenameCommand extends BuiltInShellCommand {
      */
     @Override
     protected CommandResult doExecute() {
-        String objNameArg = null;
+        CommandResult result;
 
         try {
-            objNameArg = requiredArgument( 0, Messages.getString( Messages.RenameCommand.InvalidArgMsg_ObjectName ) );
+            String objNameArg = requiredArgument( 0, Messages.getString( Messages.RenameCommand.InvalidArgMsg_ObjectName ) );
             String newName = requiredArgument( 1, Messages.getString( Messages.RenameCommand.InvalidArgMsg_NewName ) );
 
             WorkspaceStatus wsStatus = getWorkspaceStatus();
@@ -72,7 +70,7 @@ public class RenameCommand extends BuiltInShellCommand {
 
             // Check validity of the new object name
             String newShortName = pathSegs[ pathSegs.length - 1 ];
-            KomodoType kType = objContext.getTypeIdentifier( wsStatus.getTransaction() );
+            //    	KomodoType kType = objContext.getTypeIdentifier(wsStatus.getTransaction());
             //        if (!validateObjectName(newShortName,kType)) {
             //            return false;
             //        }
@@ -87,7 +85,6 @@ public class RenameCommand extends BuiltInShellCommand {
             //            return false;
             //        }
 
-            //        try {
             // If teiid object was renamed, check if it is set as the default server.  unset default if necessary
             //            if (KomodoType.TEIID == kType) {
             //                final String server = wsStatus.getServer();
@@ -99,25 +96,14 @@ public class RenameCommand extends BuiltInShellCommand {
 
             // Rename
             rename( objContext, newShortName, targetContext );
-
-            return new CommandResultImpl( Messages.getString( Messages.RenameCommand.ObjectRenamed, objNameArg, newName ) );
+            result = new CommandResultImpl( Messages.getString( Messages.RenameCommand.ObjectRenamed, objNameArg, newName ) );
         } catch ( Exception e ) {
-            if (StringUtils.isBlank( objNameArg )) {
-                return new CommandResultImpl( false, Messages.getString( SHELL.CommandFailure, NAME ), e );
-            }
-
-            return new CommandResultImpl( false, Messages.getString( Messages.RenameCommand.Failure, objNameArg ), e );
+            print( CompletionConstants.MESSAGE_INDENT, Messages.getString( Messages.RenameCommand.Failure, objNameArg ) );
+            print( CompletionConstants.MESSAGE_INDENT, TAB + e.getMessage() );
+            return new CommandResultImpl(false, Messages.getString( Messages.RenameCommand.Failure, objNameArg ), null);
         }
-    }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
-     */
-    @Override
-    protected int getMaxArgCount() {
-        return 2;
+        return result;
     }
 
 //    /**
@@ -190,5 +176,16 @@ public class RenameCommand extends BuiltInShellCommand {
     public boolean isValidForCurrentContext() {
         return true;
     }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#shouldCommit()
+     */
+    @Override
+    protected boolean shouldCommit() {
+        return false;
+    }
+
 
 }

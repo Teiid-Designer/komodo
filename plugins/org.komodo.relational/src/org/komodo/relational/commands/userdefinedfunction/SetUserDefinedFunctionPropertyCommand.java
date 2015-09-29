@@ -257,7 +257,7 @@ public final class SetUserDefinedFunctionPropertyCommand extends UserDefinedFunc
 
         if ( ( args.size() == 1 ) ) {
             String theArg = getArguments().get(0);
-            if(    AGGREGATE.equals(theArg) || ALLOWS_DISTINCT.equals(theArg) || ALLOWS_ORDERBY.equals(theArg) || ANALYTIC.equals(theArg)
+            if( AGGREGATE.equals(theArg) || ALLOWS_DISTINCT.equals(theArg) || ALLOWS_ORDERBY.equals(theArg) || ANALYTIC.equals(theArg)
                 || DECOMPOSABLE.equals(theArg) || NULL_ON_NULL.equals(theArg) || USES_DISTINCT_ROWS.equals(theArg) || VAR_ARGS.equals(theArg)) {
                 candidates.add( Boolean.TRUE.toString() );
                 candidates.add( Boolean.FALSE.toString() );

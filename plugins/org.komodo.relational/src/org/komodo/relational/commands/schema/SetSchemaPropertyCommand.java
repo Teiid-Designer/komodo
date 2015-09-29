@@ -86,7 +86,6 @@ public final class SetSchemaPropertyCommand extends SchemaShellCommand {
      */
     @Override
     protected int getMaxArgCount() {
-        // TODO Auto-generated method stub
         return 2;
     }
 

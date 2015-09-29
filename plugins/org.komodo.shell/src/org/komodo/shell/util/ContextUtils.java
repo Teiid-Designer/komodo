@@ -154,6 +154,8 @@ public class ContextUtils implements StringConstants {
 	}
 
 	/**
+<<<<<<< HEAD
+=======
 	 * Determine if the second context is above the first.
 	 * @param transaction the transaction
 	 * @param context1 the first context
@@ -208,6 +210,7 @@ public class ContextUtils implements StringConstants {
 	}
 
 	/**
+>>>>>>> 5db3ae1f988e9014d56c3814920caf1ed9645f5b
 	 * Get a context child (or parent) of the current context, based on provided segment name.  Returns null if a child of supplied name
 	 * does not exist.  The supplied segment can only represent a change of one level above or below the currentContext.
 	 * @param currentContext the current context

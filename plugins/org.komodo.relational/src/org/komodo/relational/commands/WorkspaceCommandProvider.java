@@ -42,6 +42,7 @@ public class WorkspaceCommandProvider implements ShellCommandProvider {
         result.put( CreateSchemaCommand.NAME, CreateSchemaCommand.class );
         result.put( CreateTeiidCommand.NAME, CreateTeiidCommand.class );
         result.put( CreateVdbCommand.NAME, CreateVdbCommand.class );
+        result.put( FindCommand.NAME, FindCommand.class );
         result.put( SetCustomPropertyCommand.NAME, SetCustomPropertyCommand.class );
 
         return result;

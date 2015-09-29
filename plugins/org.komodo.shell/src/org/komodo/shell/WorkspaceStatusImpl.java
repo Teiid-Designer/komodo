@@ -576,16 +576,6 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.shell.api.WorkspaceStatus#getAvailableCommands()
-     */
-    @Override
-    public String[] getAvailableCommands() throws Exception {
-        return this.commandFactory.getCommandNamesForCurrentContext().toArray( new String[ 0 ] );
-    }
-
-    /**
-     * {@inheritDoc}
-     *
      * @see org.komodo.shell.api.WorkspaceStatus#getCommand(java.lang.String)
      */
     @Override
@@ -619,17 +609,6 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     }
 
     @Override
-    public < T extends KomodoObject > T resolve ( final KomodoObject kObj ) throws KException {
-        if(this.commandFactory.getCommandProviders()!=null) {
-            for(ShellCommandProvider provider : this.commandFactory.getCommandProviders()) {
-                T resolvedObj = provider.resolve(getTransaction(), kObj);
-                if(resolvedObj!=null) return resolvedObj;
-            }
-        }
-        return null;
-    }
-
-    @Override
     public boolean isRoot ( final KomodoObject kObj ) throws KException {
         // parent null or FORWARD_SLASH path is default root
         KomodoObject parentObj = kObj.getParent(getTransaction());
@@ -657,7 +636,6 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
                 try {
                     typeString = provider.getTypeDisplay(getTransaction(), kObj);
                 } catch (KException ex) {
-                    // nothing to do
                 }
                 if(typeString!=null) return typeString;
             }
@@ -691,6 +669,27 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
                 provider.initWorkspaceState(this);
             }
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.WorkspaceStatus#getAvailableCommands()
+     */
+    @Override
+    public String[] getAvailableCommands() throws Exception {
+        return this.commandFactory.getCommandNamesForCurrentContext().toArray( new String[ 0 ] );
+    }
+
+    @Override
+    public < T extends KomodoObject > T resolve ( final KomodoObject kObj ) throws KException {
+        if(this.commandFactory.getCommandProviders()!=null) {
+            for(ShellCommandProvider provider : this.commandFactory.getCommandProviders()) {
+                T resolvedObj = provider.resolve(getTransaction(), kObj);
+                if(resolvedObj!=null) return resolvedObj;
+            }
+        }
+        return null;
     }
 
     /**

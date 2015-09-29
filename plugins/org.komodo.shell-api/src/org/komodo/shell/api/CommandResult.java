@@ -20,6 +20,16 @@ public interface CommandResult {
         /**
          * {@inheritDoc}
          *
+         * @see org.komodo.shell.api.CommandResult#getDetail(java.lang.String)
+         */
+        @Override
+        public Object getDetail( final String key ) {
+            return null;
+        }
+
+        /**
+         * {@inheritDoc}
+         *
          * @see org.komodo.shell.api.CommandResult#getError()
          */
         @Override
@@ -67,6 +77,16 @@ public interface CommandResult {
         /**
          * {@inheritDoc}
          *
+         * @see org.komodo.shell.api.CommandResult#getDetail(java.lang.String)
+         */
+        @Override
+        public Object getDetail( final String key ) {
+            return null;
+        }
+
+        /**
+         * {@inheritDoc}
+         *
          * @see org.komodo.shell.api.CommandResult#getError()
          */
         @Override
@@ -105,6 +125,13 @@ public interface CommandResult {
         }
 
     };
+
+    /**
+     * @param key
+     *        the identifier for the detail being requested (cannot be empty)
+     * @return the result detail associated with the specified key (can be <code>null</code>)
+     */
+    Object getDetail( final String key );
 
     /**
      * @return the error or <code>null</code> if no error occurred

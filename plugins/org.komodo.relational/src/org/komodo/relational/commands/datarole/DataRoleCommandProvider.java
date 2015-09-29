@@ -63,6 +63,12 @@ public class DataRoleCommandProvider implements ShellCommandProvider {
         return null;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommandProvider#isRoot(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      org.komodo.spi.repository.KomodoObject)
+     */
     @Override
     public boolean isRoot ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
         if(DataRoleImpl.RESOLVER.resolvable(uow, kObj)) {
@@ -89,13 +95,12 @@ public class DataRoleCommandProvider implements ShellCommandProvider {
     }
 
     /**
-     * @throws KException the exception
-     */
-    /* (non-Javadoc)
+     * {@inheritDoc}
+     *
      * @see org.komodo.shell.api.ShellCommandProvider#initWorkspaceState(org.komodo.shell.api.WorkspaceStatus)
      */
     @Override
-    public void initWorkspaceState(WorkspaceStatus wsStatus) throws KException {
+    public void initWorkspaceState(WorkspaceStatus wsStatus) {
         // Init any workspace state
     }
 

@@ -72,6 +72,18 @@ public final class ExitCommand extends BuiltInShellCommand {
 
     /**
      * {@inheritDoc}
+     * <p>
+     * Value is {@value}.
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#isOverridable()
+     */
+    @Override
+    public boolean isOverridable() {
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
      *
      * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
      */

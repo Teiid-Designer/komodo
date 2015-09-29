@@ -7,14 +7,18 @@
 */
 package org.komodo.shell;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.ShellCommand;
+import org.komodo.utils.ArgCheck;
 
 /**
  * Represents a result of a {@link ShellCommand command} execution.
  */
 public class CommandResultImpl implements CommandResult {
 
+    private Map< String, Object > detailMap;
     private final Exception error;
     private final String message;
     private boolean persistable;
@@ -35,8 +39,8 @@ public class CommandResultImpl implements CommandResult {
                               final Exception error ) {
         this.success = success;
         this.message = message;
-        this.persistable = true;
         this.error = error;
+        this.persistable = true;
     }
 
     /**
@@ -47,6 +51,37 @@ public class CommandResultImpl implements CommandResult {
      */
     public CommandResultImpl( final String message ) {
         this( true, message, null );
+    }
+
+    /**
+     * @param key
+     *        the detail identifier (cannot be empty)
+     * @param detail
+     *        the detail object (can be <code>null</code>)
+     */
+    public void addDetail( final String key,
+                           final Object detail ) {
+        ArgCheck.isNotEmpty( key, "key" ); //$NON-NLS-1$
+
+        if ( this.detailMap == null ) {
+            this.detailMap = new HashMap< >();
+        }
+
+        this.detailMap.put( key, detail );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.CommandResult#getDetail(java.lang.String)
+     */
+    @Override
+    public Object getDetail( final String key ) {
+        if ( this.detailMap == null ) {
+            return null;
+        }
+
+        return this.detailMap.get( key );
     }
 
     /**
@@ -87,6 +122,27 @@ public class CommandResultImpl implements CommandResult {
     @Override
     public boolean isPersistable() {
         return this.persistable;
+    }
+
+    /**
+     * @param key
+     *        the identifier of the detail being removed (cannot be empty)
+     * @return the detail being removed (can be <code>null</code>)
+     */
+    public Object removeDetail( final String key ) {
+        ArgCheck.isNotEmpty( key, "key" ); //$NON-NLS-1$
+
+        if ( this.detailMap == null ) {
+            return null;
+        }
+
+        final Object removed = this.detailMap.remove( key );
+
+        if ( this.detailMap.isEmpty() ) {
+            this.detailMap = null;
+        }
+
+        return removed;
     }
 
     /**

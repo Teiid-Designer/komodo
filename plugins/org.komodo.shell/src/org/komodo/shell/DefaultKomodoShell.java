@@ -225,7 +225,6 @@ public class DefaultKomodoShell implements KomodoShell {
 
         factory = new ShellCommandFactory();
         wsStatus = new WorkspaceStatusImpl(this,factory);
-
         factory.registerCommands(wsStatus);
 
         reader = ShellCommandReaderFactory.createCommandReader(args, factory, wsStatus);
@@ -265,7 +264,7 @@ public class DefaultKomodoShell implements KomodoShell {
                     if ( this.wsStatus.isAutoCommit() ) {
                         if ( result.isOk() && result.isPersistable() ) {
                             this.wsStatus.commit( command.getClass().getSimpleName() );
-                        } else if ( result.isPersistable() ) {
+                        } else if ( !result.isOk() && result.isPersistable() ) {
                             this.wsStatus.rollback( command.getClass().getSimpleName() );
                         }
                     }
