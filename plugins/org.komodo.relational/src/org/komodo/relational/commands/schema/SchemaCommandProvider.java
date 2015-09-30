@@ -66,10 +66,8 @@ public class SchemaCommandProvider implements ShellCommandProvider {
      *      org.komodo.spi.repository.KomodoObject)
      */
     @Override
-    public boolean isRoot ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        if(SchemaImpl.RESOLVER.resolvable(uow, kObj)) {
-            return false;
-        }
+    public boolean isRoot ( final Repository.UnitOfWork uow,
+                            final KomodoObject kObj ) {
         return false;
     }
 

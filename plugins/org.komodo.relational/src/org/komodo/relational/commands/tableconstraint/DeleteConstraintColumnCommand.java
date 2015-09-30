@@ -5,7 +5,7 @@
  *
  * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
  */
-package org.komodo.relational.commands;
+package org.komodo.relational.commands.tableconstraint;
 
 import static org.komodo.relational.commands.WorkspaceCommandMessages.DeleteConstraintColumnCommand.COLUMN_PATH_NOT_FOUND;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.DeleteConstraintColumnCommand.COLUMN_REF_REMOVED;
@@ -15,14 +15,20 @@ import static org.komodo.relational.commands.WorkspaceCommandMessages.DeleteCons
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import org.komodo.relational.commands.RelationalShellCommand;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.TableConstraint;
+import org.komodo.relational.model.internal.AccessPatternImpl;
+import org.komodo.relational.model.internal.ForeignKeyImpl;
+import org.komodo.relational.model.internal.IndexImpl;
+import org.komodo.relational.model.internal.PrimaryKeyImpl;
+import org.komodo.relational.model.internal.UniqueConstraintImpl;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
 import org.komodo.spi.repository.KomodoObject;
-import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.Repository;
 import org.komodo.utils.StringUtils;
 
 /**
@@ -96,15 +102,18 @@ public final class DeleteConstraintColumnCommand extends RelationalShellCommand 
      */
     @Override
     public boolean isValidForCurrentContext() {
-        // This command is valid for AccessPattern,ForeignKey,Index,PrimaryKey,UniqueConstraint
+        final KomodoObject kobject = getContext();
+        final Repository.UnitOfWork uow = getTransaction();
+
         try {
-            KomodoType contextType = getContext().getTypeIdentifier(getTransaction());
-            return (contextType==KomodoType.ACCESS_PATTERN || contextType==KomodoType.FOREIGN_KEY ||
-                    contextType==KomodoType.INDEX || contextType==KomodoType.PRIMARY_KEY || contextType==KomodoType.UNIQUE_CONSTRAINT);
-        } catch (Exception ex) {
-            // on exception will return false
+            return AccessPatternImpl.RESOLVER.resolvable( uow, kobject )
+                   || ForeignKeyImpl.RESOLVER.resolvable( uow, kobject )
+                   || IndexImpl.RESOLVER.resolvable( uow, kobject )
+                   || PrimaryKeyImpl.RESOLVER.resolvable( uow, kobject )
+                   || UniqueConstraintImpl.RESOLVER.resolvable( uow, kobject );
+        } catch ( final Exception e ) {
+            return false;
         }
-        return false;
     }
 
     private TableConstraint getTableConstraint() {

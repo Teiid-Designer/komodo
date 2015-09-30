@@ -70,10 +70,8 @@ public class DataRoleCommandProvider implements ShellCommandProvider {
      *      org.komodo.spi.repository.KomodoObject)
      */
     @Override
-    public boolean isRoot ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        if(DataRoleImpl.RESOLVER.resolvable(uow, kObj)) {
-            return false;
-        }
+    public boolean isRoot ( final Repository.UnitOfWork uow,
+                            final KomodoObject kObj ) {
         return false;
     }
 
