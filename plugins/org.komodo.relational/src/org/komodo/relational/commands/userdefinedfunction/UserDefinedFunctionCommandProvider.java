@@ -70,10 +70,8 @@ public class UserDefinedFunctionCommandProvider implements ShellCommandProvider 
      *      org.komodo.spi.repository.KomodoObject)
      */
     @Override
-    public boolean isRoot ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        if(UserDefinedFunctionImpl.RESOLVER.resolvable(uow, kObj)) {
-            return false;
-        }
+    public boolean isRoot ( final Repository.UnitOfWork uow,
+                            final KomodoObject kObj ) throws KException {
         return false;
     }
 

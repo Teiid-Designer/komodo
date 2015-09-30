@@ -18,6 +18,7 @@ package org.komodo.shell;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -38,11 +39,14 @@ import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandProvider;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.CdCommand;
+import org.komodo.shell.commands.CommitCommand;
 import org.komodo.shell.commands.ExitCommand;
 import org.komodo.shell.commands.HelpCommand;
 import org.komodo.shell.commands.HomeCommand;
 import org.komodo.shell.commands.ListCommand;
 import org.komodo.shell.commands.PlayCommand;
+import org.komodo.shell.commands.RollbackCommand;
+import org.komodo.shell.commands.SetAutoCommitCommand;
 import org.komodo.shell.commands.SetGlobalPropertyCommand;
 import org.komodo.shell.commands.SetPropertyCommand;
 import org.komodo.shell.commands.SetRecordCommand;
@@ -106,13 +110,16 @@ public class ShellCommandFactory {
 
         // register built-in commands
         registerCommand( BUILT_IN_PROVIDER_ID, CdCommand.class, wsStatus );
+        registerCommand( BUILT_IN_PROVIDER_ID, CommitCommand.class, wsStatus );
         registerCommand( BUILT_IN_PROVIDER_ID, ExitCommand.class, wsStatus );
         registerCommand( BUILT_IN_PROVIDER_ID, HelpCommand.class, wsStatus );
         registerCommand( BUILT_IN_PROVIDER_ID, HomeCommand.class, wsStatus );
         registerCommand( BUILT_IN_PROVIDER_ID, ListCommand.class, wsStatus );
         registerCommand( BUILT_IN_PROVIDER_ID, PlayCommand.class, wsStatus );
+        registerCommand( BUILT_IN_PROVIDER_ID, RollbackCommand.class, wsStatus );
         registerCommand( BUILT_IN_PROVIDER_ID, ShowChildrenCommand.class, wsStatus );
         registerCommand( BUILT_IN_PROVIDER_ID, ShowGlobalCommand.class, wsStatus );
+        registerCommand( BUILT_IN_PROVIDER_ID, SetAutoCommitCommand.class, wsStatus );
         registerCommand( BUILT_IN_PROVIDER_ID, SetGlobalPropertyCommand.class, wsStatus );
         registerCommand( BUILT_IN_PROVIDER_ID, SetPropertyCommand.class, wsStatus );
         registerCommand( BUILT_IN_PROVIDER_ID, SetRecordCommand.class, wsStatus );
@@ -188,7 +195,9 @@ public class ShellCommandFactory {
         // load the commands.
         for (ClassLoader classLoader : commandClassloaders) {
             for (ShellCommandProvider provider : ServiceLoader.load(ShellCommandProvider.class, classLoader)) {
-                providers.add(provider);
+                if ( !Modifier.isAbstract( provider.getClass().getModifiers() ) ) {
+                    providers.add( provider );
+                }
             }
         }
     }

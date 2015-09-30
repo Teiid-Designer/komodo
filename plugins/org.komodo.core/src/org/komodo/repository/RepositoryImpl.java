@@ -7,6 +7,7 @@
  */
 package org.komodo.repository;
 
+import static org.komodo.repository.Messages.Komodo.ERROR_REPO_HAS_CHANGES;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -18,6 +19,7 @@ import java.util.Set;
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.PropertyIterator;
+import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.Value;
 import javax.jcr.ValueFactory;
@@ -304,6 +306,24 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
         @Override
         public State getState() {
             return this.state;
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.spi.repository.Repository.UnitOfWork#hasChanges()
+         */
+        @Override
+        public boolean hasChanges() throws KException {
+            if ( this.state == State.RUNNING ) {
+                try {
+                    return ( ( this.session != null ) && this.session.isLive() && this.session.hasPendingChanges() );
+                } catch ( final RepositoryException e ) {
+                    throw new KException( Messages.getString( ERROR_REPO_HAS_CHANGES, this.name ), e );
+                }
+            }
+
+            return false;
         }
 
         /**

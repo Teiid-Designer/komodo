@@ -60,7 +60,6 @@ public class Messages implements StringConstants {
         LOCAL_REPOSITORY_STARTING,
         LOCAL_REPOSITORY_TIMEOUT_ERROR,
     	COMMAND_NOT_FOUND,
-    	GOOD_BYE,
     	Help_COMMAND_LIST_MSG,
     	Help_INVALID_COMMAND,
     	Help_USAGE,
@@ -161,6 +160,24 @@ public class Messages implements StringConstants {
 //            return getEnumName(this) + DOT + name();
 //        }
 //    }
+
+    public enum ExitCommand {
+
+        EXIT_CANCELED,
+        GOOD_BYE,
+        INVALID_EXIT_ARG;
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see java.lang.Enum#toString()
+         */
+        @Override
+        public String toString() {
+            return getEnumName( this ) + DOT + name();
+        }
+
+    }
 
     public enum StatusCommand {
         Separator,
@@ -345,6 +362,22 @@ public class Messages implements StringConstants {
 //            return getEnumName(this) + DOT + name();
 //        }
 //    }
+
+    public enum SetAutoCommitCommand {
+
+        ENABLE_FLAG_MISSING;
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see java.lang.Enum#toString()
+         */
+        @Override
+        public String toString() {
+            return getEnumName( this ) + DOT + name();
+        }
+
+    }
 
     public enum ShowPropertyCommand {
         InvalidArgMsg_PropertyName;

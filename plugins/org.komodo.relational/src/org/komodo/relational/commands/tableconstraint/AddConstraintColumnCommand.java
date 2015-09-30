@@ -5,7 +5,7 @@
  *
  * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
  */
-package org.komodo.relational.commands;
+package org.komodo.relational.commands.tableconstraint;
 
 import static org.komodo.relational.commands.WorkspaceCommandMessages.AddConstraintColumnCommand.ADD_COLUMN_ERROR;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.AddConstraintColumnCommand.COLUMN_PATH_NOT_FOUND;
@@ -15,6 +15,8 @@ import static org.komodo.relational.commands.WorkspaceCommandMessages.AddConstra
 import static org.komodo.relational.commands.WorkspaceCommandMessages.AddConstraintColumnCommand.MISSING_COLUMN_PATH;
 import java.util.Arrays;
 import java.util.List;
+import org.komodo.relational.commands.FindCommand;
+import org.komodo.relational.commands.RelationalShellCommand;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.TableConstraint;
 import org.komodo.relational.model.internal.AccessPatternImpl;
@@ -119,7 +121,7 @@ public final class AddConstraintColumnCommand extends RelationalShellCommand {
                    || IndexImpl.RESOLVER.resolvable( uow, kobject )
                    || PrimaryKeyImpl.RESOLVER.resolvable( uow, kobject )
                    || UniqueConstraintImpl.RESOLVER.resolvable( uow, kobject );
-        } catch ( Exception ex ) {
+        } catch ( final Exception e ) {
             return false;
         }
     }

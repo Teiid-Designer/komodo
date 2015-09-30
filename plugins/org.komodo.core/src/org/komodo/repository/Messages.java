@@ -78,6 +78,12 @@ public class Messages implements StringConstants {
 
         DUPLICATE_OBJECT_ERROR,
         ERROR_ADDING_ARTIFACT,
+
+        /**
+         * Indicates an error occurred determining if a repository has unsaved changes.
+         */
+        ERROR_REPO_HAS_CHANGES,
+
         ERROR_SESSION_IS_CLOSED,
 
         /**
