@@ -34,7 +34,7 @@ public final class PlayCommandTest extends AbstractCommandTest {
     public void shouldPlayFile() throws Exception {
         setup( "PartsVDBScript.txt", PlayCommand.class );
         execute();
-        assertThat( this.wsStatus.getCurrentContext().getFullName(), is( "/workspace" ) );
+        assertThat( this.wsStatus.getCurrentContextFullName(), is( "/workspace" ) );
 
         final WorkspaceManager wsMgr = this.wsStatus.getCurrentContext().getWorkspaceManager();
         final UnitOfWork transaction = this.wsStatus.getTransaction();

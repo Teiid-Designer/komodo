@@ -1,2 +1,0 @@
-play ./resources/setCommandGlobalProps.txt
-set global --reset

@@ -11,6 +11,7 @@ import java.util.List;
 import org.komodo.repository.RepositoryTools;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
+import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
 import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.CommandResult;
@@ -68,17 +69,33 @@ public class SetPropertyCommand extends BuiltInShellCommand {
             // path is optional.  if path is not included, current context is assumed.
             String pathArg = optionalArgument(2);
 
-            // Validates SET PROPERTY args
-            if (!validateSetProperty(propNameArg,propValueArg,pathArg)) {
+            // Validate the location Path if supplied
+            if(!StringUtils.isEmpty(pathArg)) {
+                String validationMsg = validatePath(pathArg);
+                if(!validationMsg.equals(CompletionConstants.OK)) {
+                    return new CommandResultImpl(false, validationMsg, null);
+                }
+            }
+            
+            // Get the context for object.  otherwise use current context
+            final KomodoObject context = StringUtils.isEmpty( pathArg ) ? getContext()
+                : ContextUtils.getContextForPath( getWorkspaceStatus(),
+                                                  pathArg );
+
+            // Validate the type is valid for the context
+            if (!validateProperty(propNameArg,context)) {
                 return new CommandResultImpl( false,
-                                              Messages.getString( Messages.SetPropertyCommand.InvalidNameOrValue, propNameArg ),
+                                              Messages.getString( Messages.SetPropertyCommand.InvalidPropName, propNameArg ),
                                               null );
             }
 
-            final KomodoObject context = StringUtils.isEmpty( pathArg ) ? getContext()
-                                                                           : ContextUtils.getContextForPath( getWorkspaceStatus(),
-                                                                                                             pathArg );
-
+            // Validate the property value
+            if (!validatePropertyValue(propNameArg,propValueArg,context)) {
+                return new CommandResultImpl( false,
+                                              Messages.getString( Messages.SetPropertyCommand.InvalidPropValue, propValueArg ),
+                                              null );
+            }
+            
             // Set the property
             setProperty(context,propNameArg, propValueArg);
             return new CommandResultImpl( Messages.getString( Messages.SetPropertyCommand.PropertySet, propNameArg ) );
@@ -95,40 +112,6 @@ public class SetPropertyCommand extends BuiltInShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 3;
-    }
-
-    /**
-     * Validate the SET PROPERTY args
-     * @param propName the property name
-     * @param propValue the property value
-     * @param contextPath the optional context path
-     * @return 'true' if valid, 'false' if not.
-     * @throws Exception
-     */
-    protected boolean validateSetProperty(String propName, String propValue, String contextPath) throws Exception {
-        // Validate the path first if supplied
-        if(!StringUtils.isEmpty(contextPath)) {
-            if (!validatePath(contextPath)) {
-                return false;
-            }
-        }
-
-        // Get the context for object.  otherwise use current context
-        final KomodoObject context = StringUtils.isEmpty( contextPath ) ? getContext()
-            : ContextUtils.getContextForPath( getWorkspaceStatus(),
-                                              contextPath );
-
-        // Validate the type is valid for the context
-        if (!validateProperty(propName,context,true)) {
-            return false;
-        }
-
-        // Validate the property value
-        if (!validatePropertyValue(propName,propValue,context)) {
-            return false;
-        }
-
-        return true;
     }
 
     @Override

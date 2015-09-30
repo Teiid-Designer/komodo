@@ -28,17 +28,7 @@ import org.komodo.shell.util.KomodoObjectUtils;
 public class CdCommandTest extends AbstractCommandTest {
 
 	private static final String CD_COMMAND_REL1 = "cdCommand_Relative1.txt"; //$NON-NLS-1$
-	private static final String CD_COMMAND_REL2 = "cdCommand_Relative2.txt"; //$NON-NLS-1$
-	private static final String CD_COMMAND_REL3 = "cdCommand_Relative3.txt"; //$NON-NLS-1$
-	private static final String CD_COMMAND_REL4 = "cdCommand_Relative4.txt"; //$NON-NLS-1$
-	private static final String CD_COMMAND_REL5 = "cdCommand_Relative5.txt"; //$NON-NLS-1$
-	private static final String CD_COMMAND_REL6 = "cdCommand_Relative6.txt"; //$NON-NLS-1$
-
 	private static final String CD_COMMAND_ABS1 = "cdCommand_Absolute1.txt"; //$NON-NLS-1$
-	private static final String CD_COMMAND_ABS2 = "cdCommand_Absolute2.txt"; //$NON-NLS-1$
-	private static final String CD_COMMAND_ABS3 = "cdCommand_Absolute3.txt"; //$NON-NLS-1$
-	private static final String CD_COMMAND_ABS4 = "cdCommand_Absolute4.txt"; //$NON-NLS-1$
-
     private static final String ALIAS_TEST = "cdCommand_aliases.txt"; //$NON-NLS-1$
 
     /**

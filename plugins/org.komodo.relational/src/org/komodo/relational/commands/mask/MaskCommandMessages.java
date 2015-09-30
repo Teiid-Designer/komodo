@@ -25,8 +25,7 @@ public class MaskCommandMessages implements StringConstants {
     
     @SuppressWarnings( "javadoc" )
     public enum General {
-        INVALID_DIRECTION_PROPERTY_VALUE,
-        INVALID_NULLABLE_PROPERTY_VALUE;
+        PLACEHOLDER;
 
         @Override
         public String toString() {

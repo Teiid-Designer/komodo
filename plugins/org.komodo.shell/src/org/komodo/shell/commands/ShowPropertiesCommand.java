@@ -27,12 +27,12 @@ import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
 import org.komodo.shell.Messages.SHELL;
-import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
 import org.komodo.shell.util.PrintUtils;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.utils.StringUtils;
 
 /**
  * ShowPropertiesCommand - show properties for a KomodoObject
@@ -73,12 +73,15 @@ public class ShowPropertiesCommand extends BuiltInShellCommand {
         WorkspaceStatus wsStatus = getWorkspaceStatus();
 
 		try {
-	        // Validates arguments
-	        if (!validate(getArguments())) {
-	            return new CommandResultImpl( false, Messages.getString( SHELL.CommandFailure, NAME ), null );
-	        }
+            // Validate the location Path if supplied
+            String pathArg = optionalArgument(0);
+            if(!StringUtils.isEmpty(pathArg)) {
+                String validationMsg = validatePath(pathArg);
+                if(!validationMsg.equals(CompletionConstants.OK)) {
+                    return new CommandResultImpl(false, validationMsg, null);
+                }
+            }
 
-		    String pathArg = optionalArgument(0);
 		    KomodoObject theContext = ContextUtils.getContextForPath(wsStatus, pathArg);
 
 		    // Print properties for the context
@@ -98,19 +101,6 @@ public class ShowPropertiesCommand extends BuiltInShellCommand {
     protected int getMaxArgCount() {
         return 1;
     }
-
-	protected boolean validate(Arguments allArgs) throws Exception {
-		// optional path arg
-	    if(!allArgs.isEmpty()) {
-	        // Optional path arg
-	        String pathArg = optionalArgument(0);
-	        if(!validatePath(pathArg)) {
-	            return false;
-	        }
-	    }
-
-		return true;
-	}
 
     /**
      * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)

@@ -5,18 +5,18 @@
  *
  * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
  */
-package org.komodo.relational.commands.virtualprocedure;
+package org.komodo.relational.commands.tabularresultset;
 
 import java.util.ResourceBundle;
-import org.komodo.relational.model.VirtualProcedure;
+import org.komodo.relational.model.TabularResultSet;
 import org.komodo.spi.constants.StringConstants;
 
 /**
- * Localized messages for {@link VirtualProcedure}-related shell commands.
+ * Localized messages for {@link TabularResultSet}-related shell commands.
  */
-public class VirtualProcedureCommandMessages implements StringConstants {
+public class TabularResultSetCommandMessages implements StringConstants {
 
-    private static final String BUNDLE_NAME = ( VirtualProcedureCommandMessages.class.getPackage().getName() + DOT + VirtualProcedureCommandMessages.class.getSimpleName().toLowerCase() );
+    private static final String BUNDLE_NAME = ( TabularResultSetCommandMessages.class.getPackage().getName() + DOT + TabularResultSetCommandMessages.class.getSimpleName().toLowerCase() );
 
     /**
      * The resource bundle for localized messages.

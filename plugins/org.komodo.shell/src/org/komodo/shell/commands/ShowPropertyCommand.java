@@ -28,7 +28,6 @@ import org.komodo.shell.Messages;
 import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.shell.util.KomodoObjectUtils;
 import org.komodo.shell.util.PrintUtils;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.utils.StringUtils;
@@ -75,12 +74,13 @@ public class ShowPropertyCommand extends BuiltInShellCommand {
                                                 Messages.getString( Messages.ShowPropertyCommand.InvalidArgMsg_PropertyName ) );
 
             KomodoObject context = getContext();
-            String prefixedName = KomodoObjectUtils.attachPrefix( getWorkspaceStatus(), context, propName );
-            if ( !validatePropertyName( context, prefixedName ) ) {
-                return new CommandResultImpl( false, Messages.getString( SHELL.CommandFailure, NAME ), null );
+            if ( !validateProperty( propName, context ) ) {
+                return new CommandResultImpl( false,
+                                              Messages.getString( Messages.SetPropertyCommand.InvalidPropName, propName ),
+                                              null );
             }
 
-            PrintUtils.printProperty( getWorkspaceStatus(), context, prefixedName );
+            PrintUtils.printProperty( getWorkspaceStatus(), context, propName );
             return CommandResult.SUCCESS;
         } catch ( Exception e ) {
             return new CommandResultImpl( false, Messages.getString( SHELL.CommandFailure, NAME ), e );

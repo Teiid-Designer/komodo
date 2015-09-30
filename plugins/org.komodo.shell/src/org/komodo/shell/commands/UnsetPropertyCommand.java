@@ -56,8 +56,10 @@ public class UnsetPropertyCommand extends BuiltInShellCommand {
         try {
             final String propNameArg = requiredArgument( 0, Messages.getString( Messages.SHELL.InvalidArgMsg_PropertyName ) );
 
-            if ( !validateProperty( propNameArg, getContext(), true ) ) {
-                return new CommandResultImpl( false, Messages.getString( SHELL.CommandFailure, NAME ), null );
+            if ( !validateProperty( propNameArg, getContext() ) ) {
+                return new CommandResultImpl( false,
+                                              Messages.getString( Messages.SetPropertyCommand.InvalidPropName, propNameArg ),
+                                              null );
             }
 
             final KomodoObject context = getContext();

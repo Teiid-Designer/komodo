@@ -1,8 +1,0 @@
-# tests absolute path deletion to lowest object
-create vdb vdb_test_1
-cd vdb_test_1
-create model model_1
-cd model_1
-create table table_1
-cd /workspace
-delete /workspace/vdb_test_1/model_1/table_1

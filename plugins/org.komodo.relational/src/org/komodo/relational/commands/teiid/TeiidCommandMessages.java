@@ -23,6 +23,16 @@ public class TeiidCommandMessages implements StringConstants {
      */
     public static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle( BUNDLE_NAME );
 
+    @SuppressWarnings( "javadoc" )
+    public enum General {
+        PLACEHOLDER;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
     private static String getEnumName(Enum<?> enumValue) {
         String className = enumValue.getClass().getName();
         String[] components = className.split("\\$"); //$NON-NLS-1$

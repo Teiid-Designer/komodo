@@ -12,7 +12,7 @@ import static org.komodo.relational.commands.WorkspaceCommandMessages.General.IN
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.MISSING_PROPERTY_NAME_VALUE;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_ERROR;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_SUCCESS;
-import static org.komodo.relational.commands.storedprocedure.StoredProcedureCommandMessages.General.INVALID_SCHEMA_ELEMENT_TYPE_PROPERTY_VALUE;
+import static org.komodo.relational.commands.virtualprocedure.VirtualProcedureCommandMessages.General.INVALID_SCHEMA_ELEMENT_TYPE_PROPERTY_VALUE;
 import java.util.Arrays;
 import java.util.List;
 import org.komodo.relational.model.SchemaElement;

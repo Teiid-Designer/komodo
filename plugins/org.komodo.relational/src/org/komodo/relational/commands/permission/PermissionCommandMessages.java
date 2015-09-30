@@ -25,8 +25,6 @@ public class PermissionCommandMessages implements StringConstants {
 
     @SuppressWarnings( "javadoc" )
     public enum General {
-        INVALID_DIRECTION_PROPERTY_VALUE,
-        INVALID_NULLABLE_PROPERTY_VALUE,
         MISSING_CONDITION_NAME,
         MISSING_MASK_NAME;
 

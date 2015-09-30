@@ -1,4 +1,4 @@
-package org.komodo.relational.commands;
+package org.komodo.shell.commands;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,9 +40,10 @@ public class RenameCommand extends BuiltInShellCommand {
     @Override
     protected CommandResult doExecute() {
         CommandResult result;
-
+        String objNameArg=null;
+        
         try {
-            String objNameArg = requiredArgument( 0, Messages.getString( Messages.RenameCommand.InvalidArgMsg_ObjectName ) );
+            objNameArg = requiredArgument( 0, Messages.getString( Messages.RenameCommand.InvalidArgMsg_ObjectName ) );
             String newName = requiredArgument( 1, Messages.getString( Messages.RenameCommand.InvalidArgMsg_NewName ) );
 
             WorkspaceStatus wsStatus = getWorkspaceStatus();
@@ -70,29 +71,12 @@ public class RenameCommand extends BuiltInShellCommand {
 
             // Check validity of the new object name
             String newShortName = pathSegs[ pathSegs.length - 1 ];
-            //    	KomodoType kType = objContext.getTypeIdentifier(wsStatus.getTransaction());
-            //        if (!validateObjectName(newShortName,kType)) {
-            //            return false;
-            //        }
-
-            //        // make sure type is valid for the target context
-            //        if ( !validateChildType( kType.getType(), targetContext ) ) {
-            //        	return false;
-            //        }
 
             // Validate that the rename would not create a duplicate of same type
-            //        if (!validateNotDuplicateType(objContext,newShortName,targetContext)) {
-            //            return false;
-            //        }
-
-            // If teiid object was renamed, check if it is set as the default server.  unset default if necessary
-            //            if (KomodoType.TEIID == kType) {
-            //                final String server = wsStatus.getServer();
-            //
-            //                if ((server != null) && server.equals(objContext.getName(wsStatus.getTransaction()))) {
-            //                    wsStatus.setServer(null);
-            //                }
-            //            }
+            if (!validateNotDuplicateType(objContext,newShortName,targetContext)) {
+                result = new CommandResultImpl( Messages.getString( Messages.RenameCommand.cannotRename_wouldCreateDuplicate, newName ) );
+                return result;
+            }
 
             // Rename
             rename( objContext, newShortName, targetContext );
@@ -106,23 +90,22 @@ public class RenameCommand extends BuiltInShellCommand {
         return result;
     }
 
-//    /**
-//     * Validates whether another child of the same name and type already exists
-//     * @param objToRename the object being renamed
-//     * @param newName the new child name
-//     * @param targetContext the parent context
-//     * @return 'true' if exists, 'false' if not.
-//     */
-//    private boolean validateNotDuplicateType(WorkspaceContext objToRename, String newName, WorkspaceContext targetContext) throws Exception {
-//    	// Determine if child with new name and original object type already exists
-//    	WorkspaceContext existingChild = targetContext.getChild(newName,objToRename.getType());
-//    	// If child exists, check the type
-//    	if(existingChild!=null) {
-//    		print(CompletionConstants.MESSAGE_INDENT,Messages.getString(Messages.RenameCommand.cannotRename_wouldCreateDuplicate, newName));
-//    		return false;
-//    	}
-//    	return true;
-//    }
+    /**
+     * Validates whether another child of the same name and type already exists
+     * @param objToRename the object being renamed
+     * @param newName the new child name
+     * @param targetContext the parent context
+     * @return 'true' if exists, 'false' if not.
+     */
+    private boolean validateNotDuplicateType(KomodoObject objToRename, String newName, KomodoObject targetObject) throws Exception {
+    	// Determine if child with new name and original object type already exists
+    	KomodoObject existingChild = targetObject.getChild(getWorkspaceStatus().getTransaction(),newName,objToRename.getTypeIdentifier(getWorkspaceStatus().getTransaction()).getType());
+    	// If child exists, check the type
+    	if(existingChild!=null) {
+    		return false;
+    	}
+    	return true;
+    }
 
     private void rename(KomodoObject origObject, String newShortName, KomodoObject targetObject) throws Exception {
         //
@@ -177,14 +160,12 @@ public class RenameCommand extends BuiltInShellCommand {
         return true;
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.BuiltInShellCommand#shouldCommit()
+    /* (non-Javadoc)
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
      */
     @Override
-    protected boolean shouldCommit() {
-        return false;
+    protected int getMaxArgCount() {
+        return 2;
     }
 
 

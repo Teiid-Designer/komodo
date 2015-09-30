@@ -19,22 +19,25 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.komodo.shell.commands.core.ListCommand;
+import org.komodo.shell.util.KomodoObjectUtils;
 
 /**
  * Test Class to test ListCommand
  *
  */
 @SuppressWarnings({"javadoc", "nls"})
-public class ListCommandTest extends AbstractCommandTest {
+public class HomeCommandTest extends AbstractCommandTest {
 
 	private static final String LIST_COMMAND1 = "listCommand1.txt"; //$NON-NLS-1$
+	private static final String LIST_COMMAND2 = "listCommand2.txt"; //$NON-NLS-1$
+    private static final String LIST_COMMAND3 = "listCommand3.txt"; //$NON-NLS-1$
     private static final String LIST_COMMAND4 = "listCommand4.txt"; //$NON-NLS-1$
     private static final String LIST_COMMAND5 = "listCommand5.txt"; //$NON-NLS-1$
 
 	/**
 	 * Test for ListCommand
 	 */
-	public ListCommandTest( ) {
+	public HomeCommandTest( ) {
 		super();
 	}
 
@@ -50,6 +53,36 @@ public class ListCommandTest extends AbstractCommandTest {
         assertTrue( writerOutput.contains( "Workspace \"/workspace\"" ) );
 
         assertEquals("/workspace", wsStatus.getCurrentContextFullName()); //$NON-NLS-1$
+    }
+
+    @Test
+    public void testList2() throws Exception {
+    	setup(LIST_COMMAND2, ListCommand.class);
+
+    	execute();
+
+        // make sure model names and model type appear in output
+        String writerOutput = getCommandOutput();
+        assertTrue( writerOutput.contains( "Model1" ) );
+        assertTrue( writerOutput.contains( "Model2" ) );
+        assertTrue( writerOutput.contains( "Model3" ) );
+
+    	assertEquals("/workspace/MyVdb", wsStatus.getCurrentContextFullName()); //$NON-NLS-1$
+    }
+
+    @Test
+    public void testList3() throws Exception {
+        setup(LIST_COMMAND3, ListCommand.class);
+
+        execute();
+
+        // make sure table name and table type appear in output
+        String writerOutput = getCommandOutput();
+        assertTrue( writerOutput.contains( "Table1" ) );
+
+        KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext());
+        
+        assertEquals("/workspace/MyVdb/Model1", wsStatus.getCurrentContextFullName()); //$NON-NLS-1$
     }
 
     @Test

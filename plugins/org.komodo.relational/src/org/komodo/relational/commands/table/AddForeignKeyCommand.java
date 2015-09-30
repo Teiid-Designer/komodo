@@ -43,7 +43,7 @@ public final class AddForeignKeyCommand extends TableShellCommand {
             final String fkName = requiredArgument( 0, getMessage( MISSING_FOREIGN_KEY_NAME ) );
 
             final Table table = getTable();
-            table.addForeignKey( getTransaction(), fkName );
+            //table.addForeignKey( getTransaction(), fkName );
 
             result = new CommandResultImpl( getMessage( FOREIGN_KEY_ADDED, fkName ) );
         } catch ( final Exception e ) {

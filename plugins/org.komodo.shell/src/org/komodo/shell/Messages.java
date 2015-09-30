@@ -121,46 +121,6 @@ public class Messages implements StringConstants {
     	}
     }
 
-//    public enum CreateCommand {
-//        DEFAULT_VDB_FILE_PATH,
-//        FAILURE,
-//        MISSING_ENTRY_PATH,
-//        MISSING_FOREIGN_KEY_TABLE_REF,
-//        MISSING_OBJ_NAME,
-//        MISSING_OBJ_TYPE,
-//        MISSING_OPTION_VALUE,
-//        MISSING_PROPERTY_NAME,
-//        MISSING_PROPERTY_VALUE,
-//        PROPERTY_ALREADY_EXISTS,
-//        MISSING_TRANSLATOR_TYPE,
-//        NO_DUPLICATES_ALLOWED,
-//        OBJECT_CREATED,
-//        PROPERTY_CREATED,
-//        PATH_NOT_FOUND,
-//        TOO_MANY_ARGS,
-//        TYPE_NOT_VALID;
-//
-//        @Override
-//        public String toString() {
-//            return getEnumName(this) + DOT + name();
-//        }
-//    }
-//
-//    public enum DeleteCommand {
-//        InvalidArgMsg_ObjectPath,
-//        ObjectDeleted,
-//        Failure,
-//        cannotDelete_objectDoesNotExist,
-//        contextMustBeBelowCurrent,
-//        cantDeleteReserved,
-//        cannotRename_objectDoesNotExist;
-//
-//        @Override
-//        public String toString() {
-//            return getEnumName(this) + DOT + name();
-//        }
-//    }
-
     public enum ExitCommand {
 
         EXIT_CANCELED,
@@ -240,7 +200,8 @@ public class Messages implements StringConstants {
     }
 
     public enum SetPropertyCommand {
-        InvalidNameOrValue,
+        InvalidPropName,
+        InvalidPropValue,
         PropertySet;
 
       @Override
@@ -260,75 +221,6 @@ public class Messages implements StringConstants {
           return getEnumName(this) + DOT + name();
       }
     }
-
-//    public enum SetCommand {
-//
-//        ADD_TABLE_CONSTRAINT_COLUMN_FAILED,
-//        COLUMN_PATH_NOT_FOUND,
-//        INVALID_TABLE_REF_COLUMN_PATH,
-//        TABLE_COLUMNS_CANNOT_BE_SET,
-//        TABLE_COLUMNS_SET,
-//        TABLE_PATH_NOT_FOUND,
-//        TABLE_REF_CANNOT_BE_SET,
-//        TABLE_REF_COLUMNS_SET,
-//        TABLE_REF_REFS_CANNOT_BE_SET,
-//        TABLE_REF_SET,
-//        TOO_MANY_ARGS,
-//        UNSET_TABLE_CONSTRAINT_COLUMN_FAILED,
-//        UNSET_TABLE_REF_COLUMN_FAILED,
-//        InvalidArgMsg_SubCommand,
-//        InvalidArgMsg_PropertyName,
-//        InvalidArgMsg_PropertyValue,
-//        InvalidArgMsg_GlobalPropertyName,
-//        InvalidGlobalProperty,
-//        PropertySet,
-//        GlobalPropertySet,
-//        resetGlobalProperties,
-//        InvalidSubCommand,
-//        Failure,
-//        onOffArg_empty,
-//        onOffArg_invalid,
-//        setRecordingStateMsg,
-//        recordingFileNotSet,
-//        recordingFileNotWriteable,
-//        invalidTeiidName;
-//        @Override
-//        public String toString() {
-//            return getEnumName(this) + DOT + name();
-//        }
-//    }
-//
-//    public enum ShowCommand {
-//        InvalidArgMsg_SubCommand,
-//        InvalidArgMsg_PropertyName,
-//        InvalidArgMsg_ServerObjName,
-//        InvalidSubCommand,
-//        Failure,
-//        NoPropertiesMsg,
-//        PropertiesHeader,
-//        PropertyHeader,
-//        ChildrenHeader,
-//        CurrentRepoUrl,
-//        CurrentRepoName,
-//        NoCurrentTeiid,
-//        CurrentTeiid,
-//        CurrentTeiidJdbc,
-//        CurrentContext,
-//        GlobalPropertiesHeader,
-//        noChildrenMsg,
-//        serverStatusText,
-//        ServerNotConnected,
-//        ServerTypeHeader,
-//        Connected,
-//        NotConnected,
-//        PingOk,
-//        PingFail;
-//
-//        @Override
-//        public String toString() {
-//            return getEnumName(this) + DOT + name();
-//        }
-//    }
 
     public enum ShowStatusCommand {
         CurrentRepoUrl,
@@ -351,17 +243,6 @@ public class Messages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-
-//    public enum ShowChildrenCommand {
-//        noChildrenMsg,
-//        ChildrenHeader,
-//        Failure;
-//
-//        @Override
-//        public String toString() {
-//            return getEnumName(this) + DOT + name();
-//        }
-//    }
 
     public enum SetAutoCommitCommand {
 
@@ -428,87 +309,6 @@ public class Messages implements StringConstants {
         @Override
         public String toString() {
             return getEnumName(this) + DOT + name();
-        }
-    }
-
-    public enum ExportCommand {
-    	InvalidArgMsgSubCommand,
-    	InvalidArgMsgObjectName,
-        InvalidArgMsgOutputFileName,
-        Failure,
-        ObjectExported,
-        NoContentExported,
-        ObjectNotAVdb,
-        CannotExportObjectDoesNotExist,
-        CannotExportObjectNotExportable,
-        CannotExportFileAlreadyExists,
-        CannotExportProblemWithVdb,
-        CannotExportProblemWithModel,
-        CannotExportProblemWithSchema,
-        ExportOfTypeNotSupported;
-
-        @Override
-        public String toString() {
-            return getEnumName(this) + DOT + name();
-        }
-    }
-
-    public enum FindCommand {
-        helpTypesHeading,
-        Failure,
-        MissingTypeArg,
-        InvalidType,
-        NoObjectsFound,
-        TypeHeader;
-
-        @Override
-        public String toString() {
-            return getEnumName(this) + DOT + name();
-        }
-    }
-
-    /**
-     * Localized messages of the {@link AddConstraintColumnCommand}.
-     */
-    public enum AddConstraintColumnCommand {
-
-        columnRefAdded,
-        columnPathNotFound,
-        error,
-        invalidColumnPath,
-        invalidColumn,
-        missingColumnPathArg;
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see java.lang.Enum#toString()
-         */
-        @Override
-        public String toString() {
-            return getEnumName( this ) + DOT + name();
-        }
-    }
-
-    /**
-     * Localized messages of the {@link RemoveConstraintColumnCommand}.
-     */
-    public enum RemoveConstraintColumnCommand {
-
-        COLUMN_REF_REMOVED,
-        COLUMN_PATH_NOT_FOUND,
-        ERROR,
-        INVALID_COLUMN_PATH,
-        MISSING_COLUMN_PATH_ARG;
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see java.lang.Enum#toString()
-         */
-        @Override
-        public String toString() {
-            return getEnumName( this ) + DOT + name();
         }
     }
 

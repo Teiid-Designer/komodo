@@ -327,7 +327,7 @@ public class PrintUtils implements StringConstants {
 
         // loop through children getting name, type, and finding widest child name
         for ( int i = 0, size = childList.size(); i < size; ++i ) {
-            final String name = KomodoObjectUtils.getName(wsStatus, childList.get(0));
+            final String name = KomodoObjectUtils.getName(wsStatus, childList.get(i));
 
             if ( maxNameWidth < name.length() ) {
                 maxNameWidth = name.length();

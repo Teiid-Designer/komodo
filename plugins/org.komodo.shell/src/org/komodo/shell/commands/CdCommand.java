@@ -24,6 +24,7 @@ package org.komodo.shell.commands;
 import java.util.List;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
+import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
 import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.CommandResult;
@@ -71,8 +72,10 @@ public class CdCommand extends BuiltInShellCommand {
         try {
     		String locationArg = requiredArgument(0, Messages.getString(SHELL.InvalidArgMsg_EntryPath));
 
-            if (!this.validate(locationArg)) {
-    			return CommandResult.FAIL;
+    		// Validate the location Path
+    		String validationMsg = validatePath(locationArg);
+    		if(!validationMsg.equals(CompletionConstants.OK)) {
+    		    return new CommandResultImpl(false, validationMsg, null);
     		}
 
     		String locArg = locationArg.trim();
@@ -99,20 +102,6 @@ public class CdCommand extends BuiltInShellCommand {
     protected int getMaxArgCount() {
         return 1;
     }
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see
-	 * org.komodo.shell.commands.archive.AbstractArchiveCommand#validate
-	 * (java.lang.String[])
-	 */
-	protected boolean validate(String... args) throws Exception {
-		if (!validatePath(args[0])) {
-			return false;
-		}
-		return true;
-	}
 
 	/**
 	 * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)

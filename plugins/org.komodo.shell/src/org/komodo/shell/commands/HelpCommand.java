@@ -113,6 +113,7 @@ public class HelpCommand extends BuiltInShellCommand {
             if(cmdName.length()>maxCommandLength) {
                 maxCommandLength = cmdName.length();
             }
+            validCmdNames.add(cmdName);
         }
 
         // Print appropriate commands per line

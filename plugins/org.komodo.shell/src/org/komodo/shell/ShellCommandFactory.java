@@ -47,6 +47,7 @@ import org.komodo.shell.commands.ListCommand;
 import org.komodo.shell.commands.PlayCommand;
 import org.komodo.shell.commands.RollbackCommand;
 import org.komodo.shell.commands.SetAutoCommitCommand;
+import org.komodo.shell.commands.RenameCommand;
 import org.komodo.shell.commands.SetGlobalPropertyCommand;
 import org.komodo.shell.commands.SetPropertyCommand;
 import org.komodo.shell.commands.SetRecordCommand;
@@ -117,6 +118,7 @@ public class ShellCommandFactory {
         registerCommand( BUILT_IN_PROVIDER_ID, ListCommand.class, wsStatus );
         registerCommand( BUILT_IN_PROVIDER_ID, PlayCommand.class, wsStatus );
         registerCommand( BUILT_IN_PROVIDER_ID, RollbackCommand.class, wsStatus );
+        registerCommand( BUILT_IN_PROVIDER_ID, RenameCommand.class, wsStatus );
         registerCommand( BUILT_IN_PROVIDER_ID, ShowChildrenCommand.class, wsStatus );
         registerCommand( BUILT_IN_PROVIDER_ID, ShowGlobalCommand.class, wsStatus );
         registerCommand( BUILT_IN_PROVIDER_ID, SetAutoCommitCommand.class, wsStatus );

@@ -390,25 +390,23 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
 
 	/**
 	 * Validates whether the supplied path is valid.  If the path is relative this takes into account the
-	 * current context.  If invalid an error message is printed out.
+	 * current context.  If valid 'Ok' is returned, otherwise the appropriate error message.
 	 * @param pathArg the path to test
-	 * @return 'true' if the path is valid, 'false' if not.
+	 * @return result message - "ok" if the path is valid, "error message" if not.
 	 */
-	public boolean validatePath(String pathArg) {
+	public String validatePath(String pathArg) {
 		String path = pathArg.trim();
 		if(path.length()==0) {
-            print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.locationArg_empty));
-			return false;
+		    return Messages.getString(SHELL.locationArg_empty);
 		}
 
 		WorkspaceStatus wsStatus = getWorkspaceStatus();
 		KomodoObject newContext = ContextUtils.getContextForPath(wsStatus, pathArg);
 
 		if(newContext==null) {
-            print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.locationArg_noContextWithThisName, path));
-			return false;
+		    return Messages.getString(SHELL.locationArg_noContextWithThisName, path);
 		}
-		return true;
+		return CompletionConstants.OK;
 	}
 
 	/**
@@ -416,13 +414,11 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
 	 * If invalid an error message is printed out.
 	 * @param propName the property name
 	 * @param context the workspace context
-	 * @param printMessage specify whether output message printed
 	 * @return 'true' if the property is valid for the context, 'false' if not.
 	 * @exception Exception the exception
 	 */
     public boolean validateProperty( final String propName,
-                                     final KomodoObject context,
-                                     final boolean printMessage) throws Exception {
+                                     final KomodoObject context) throws Exception {
         if ( !StringUtils.isEmpty( propName ) ) {
             final List< String > propNames = KomodoObjectUtils.getProperties(getWorkspaceStatus(),context);
 
@@ -431,10 +427,10 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
                 return true;
             }
 
-            if(printMessage) {
-            	print( CompletionConstants.MESSAGE_INDENT,
-            			Messages.getString( SHELL.propertyArg_noPropertyWithThisName, propName ) );
-            }
+//            if(printMessage) {
+//            	print( CompletionConstants.MESSAGE_INDENT,
+//            			Messages.getString( SHELL.propertyArg_noPropertyWithThisName, propName ) );
+//            }
         }
 
         return false;
@@ -460,15 +456,15 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
 	 * @return 'true' if valid, 'false' if not.
 	 * @throws Exception exception if problem getting the value.
 	 */
-	public boolean validatePropertyName(KomodoObject context, String propName) throws Exception {
-		final boolean exists = KomodoObjectUtils.getProperties(getWorkspaceStatus(),context).contains( propName );
-
-        if ( !exists ) {
-            print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.propertyArg_noPropertyWithThisName, propName));
-			return false;
-		}
-		return true;
-	}
+//	public boolean validatePropertyName(KomodoObject context, String propName) throws Exception {
+//		final boolean exists = KomodoObjectUtils.getProperties(getWorkspaceStatus(),context).contains( propName );
+//
+//        if ( !exists ) {
+//            print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.propertyArg_noPropertyWithThisName, propName));
+//			return false;
+//		}
+//		return true;
+//	}
 
     /**
      * Updates the candidates for tab completion, given the currentContext and path

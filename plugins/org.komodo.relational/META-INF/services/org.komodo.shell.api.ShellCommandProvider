@@ -2,6 +2,7 @@ org.komodo.relational.commands.WorkspaceCommandProvider
 org.komodo.relational.commands.column.ColumnCommandProvider
 org.komodo.relational.commands.condition.ConditionCommandProvider
 org.komodo.relational.commands.datarole.DataRoleCommandProvider
+org.komodo.relational.commands.datatyperesultset.DataTypeResultSetCommandProvider
 org.komodo.relational.commands.entry.EntryCommandProvider
 org.komodo.relational.commands.foreignkey.ForeignKeyCommandProvider
 org.komodo.relational.commands.index.IndexCommandProvider
@@ -15,7 +16,11 @@ org.komodo.relational.commands.schema.SchemaCommandProvider
 org.komodo.relational.commands.server.ServerCommandProvider
 org.komodo.relational.commands.storedprocedure.StoredProcedureCommandProvider
 org.komodo.relational.commands.table.TableCommandProvider
+<<<<<<< Updated upstream
 org.komodo.relational.commands.tableconstraint.TableConstraintCommandProvider
+=======
+org.komodo.relational.commands.tabularresultset.TabularResultSetCommandProvider
+>>>>>>> Stashed changes
 org.komodo.relational.commands.teiid.TeiidCommandProvider
 org.komodo.relational.commands.translator.TranslatorCommandProvider
 org.komodo.relational.commands.userdefinedfunction.UserDefinedFunctionCommandProvider

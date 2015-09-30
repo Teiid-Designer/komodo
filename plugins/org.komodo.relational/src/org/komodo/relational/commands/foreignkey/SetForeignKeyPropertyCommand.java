@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.komodo.relational.model.ForeignKey;
 import org.komodo.shell.api.Arguments;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.SetPropertyCommand;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -34,35 +35,39 @@ public final class SetForeignKeyPropertyCommand extends ForeignKeyShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public SetForeignKeyPropertyCommand( final WorkspaceStatus status ) {
-        super( NAME, true, status );
+        super( NAME, status );
     }
 
-    /**
-     * {@inheritDoc}
-     *
+    /* (non-Javadoc)
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
-    protected boolean doExecute() throws Exception {
-        final String name = requiredArgument( 0, getWorkspaceMessage(MISSING_PROPERTY_NAME_VALUE) );
-        final String value = requiredArgument( 1, getWorkspaceMessage(MISSING_PROPERTY_NAME_VALUE) );
+    protected CommandResult doExecute() {
+        CommandResult result = null;
+        
+        try {
+            final String name = requiredArgument( 0, getWorkspaceMessage(MISSING_PROPERTY_NAME_VALUE) );
+            final String value = requiredArgument( 1, getWorkspaceMessage(MISSING_PROPERTY_NAME_VALUE) );
 
-        final ForeignKey fk = getForeignKey();
+            final ForeignKey fk = getForeignKey();
 
-        final UnitOfWork transaction = getTransaction();
-        boolean success = true;
+            final UnitOfWork transaction = getTransaction();
+            boolean success = true;
 
-        switch ( name ) {
-            case PRIMARY_TYPE:
-                fk.setPrimaryType(transaction,value);
-                break;
-            default:
-                success = false;
-                print( MESSAGE_INDENT, getWorkspaceMessage(INVALID_PROPERTY_NAME, NAME ) );
-                break;
+            switch ( name ) {
+                case PRIMARY_TYPE:
+                    fk.setPrimaryType(transaction,value);
+                    break;
+                default:
+                    success = false;
+                    print( MESSAGE_INDENT, getWorkspaceMessage(INVALID_PROPERTY_NAME, NAME ) );
+                    break;
+            }
+        } catch (Exception e) {
+
         }
 
-        return success;
+        return result;
     }
 
     /**
@@ -91,6 +96,15 @@ public final class SetForeignKeyPropertyCommand extends ForeignKeyShellCommand {
 
         // no tab completion
         return -1;
+    }
+
+    /* (non-Javadoc)
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        // TODO Auto-generated method stub
+        return 0;
     }
 
 }
