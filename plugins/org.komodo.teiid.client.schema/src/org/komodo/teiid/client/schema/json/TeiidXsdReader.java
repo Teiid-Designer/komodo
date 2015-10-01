@@ -24,11 +24,15 @@ package org.komodo.teiid.client.schema.json;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import javax.xml.parsers.SAXParserFactory;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoType;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -210,7 +214,24 @@ public class TeiidXsdReader implements XSVisitor, StringConstants {
                 XSFacet facet = i.next();
                 if(facet.getName().equals(XSFacet.FACET_ENUMERATION)) {
                     ArrayNode values = parentCtx.withArray(VALUES);
-                    values.add(facet.getValue().toString());
+                    if (values.size() == 0)
+                        values.add(facet.getValue().toString());
+                    else {
+                        List<String> valList = new ArrayList<String>();
+                        valList.add(facet.getValue().toString());
+
+                        Iterator<JsonNode> iterator = values.elements();
+                        while(iterator.hasNext()) {
+                            String value = iterator.next().asText();
+                            valList.add(value);
+                        }
+
+                        values.removeAll();
+
+                        Collections.sort(valList);
+                        for (String value : valList)
+                            values.add(value);
+                    }
                 }
             }
         } else {
