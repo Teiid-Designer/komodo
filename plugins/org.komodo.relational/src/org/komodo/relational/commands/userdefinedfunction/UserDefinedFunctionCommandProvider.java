@@ -64,7 +64,6 @@ public class UserDefinedFunctionCommandProvider implements ShellCommandProvider 
 
     /**
      * {@inheritDoc}
-     *
      * @see org.komodo.shell.api.ShellCommandProvider#isRoot(org.komodo.spi.repository.Repository.UnitOfWork,
      *      org.komodo.spi.repository.KomodoObject)
      */

@@ -20,13 +20,13 @@ import org.komodo.shell.api.WorkspaceStatus;
  */
 abstract class ViewShellCommand extends RelationalShellCommand {
 
-    protected static final String DESCRIPTION = "description"; //$NON-NLS-1$
-    protected static final String CARDINALITY = "cardinality"; //$NON-NLS-1$
-    protected static final String MATERIALIZED = "materialized"; //$NON-NLS-1$
-    protected static final String MATERIALIZED_TABLE = "materialized_table"; //$NON-NLS-1$
-    protected static final String NAME_IN_SOURCE = "nameinsource"; //$NON-NLS-1$
-    protected static final String UPDATABLE = "updatable"; //$NON-NLS-1$
-    protected static final String UUID = "uuid"; //$NON-NLS-1$
+    protected static final String DESCRIPTION = "ANNOTATION"; //$NON-NLS-1$
+    protected static final String CARDINALITY = "CARDINALITY"; //$NON-NLS-1$
+    protected static final String MATERIALIZED = "MATERIALIZED"; //$NON-NLS-1$
+    protected static final String MATERIALIZED_TABLE = "MATERIALIZED_TABLE"; //$NON-NLS-1$
+    protected static final String NAME_IN_SOURCE = "NAMEINSOURCE"; //$NON-NLS-1$
+    protected static final String UPDATABLE = "UPDATABLE"; //$NON-NLS-1$
+    protected static final String UUID = "UUID"; //$NON-NLS-1$
     protected static final String ON_COMMIT_VALUE = "onCommitValue"; //$NON-NLS-1$
     protected static final String QUERY_EXPRESSION = "queryExpression"; //$NON-NLS-1$
     protected static final String SCHEMA_ELEMENT_TYPE = "schemaElementType"; //$NON-NLS-1$
@@ -67,19 +67,18 @@ abstract class ViewShellCommand extends RelationalShellCommand {
         return Messages.getString(ViewCommandMessages.RESOURCE_BUNDLE,key.toString(),parameters);
     }
 
-    /**
-     * @see org.komodo.shell.api.ShellCommand#printHelp(int indent)
-     */
     @Override
-    public void printHelp( final int indent ) {
-        print( indent, Messages.getString( ViewCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".help" ) ); //$NON-NLS-1$
+    protected void printHelpDescription( final int indent ) {
+        print( indent, Messages.getString( ViewCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".help", getName() ) ); //$NON-NLS-1$
     }
 
-    /**
-     * @see org.komodo.shell.api.ShellCommand#printUsage(int indent)
-     */
     @Override
-    public void printUsage( final int indent ) {
+    protected void printHelpExamples( final int indent ) {
+        print( indent, Messages.getString( ViewCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".examples" ) ); //$NON-NLS-1$
+    }
+
+    @Override
+    protected void printHelpUsage( final int indent ) {
         print( indent, Messages.getString( ViewCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".usage" ) ); //$NON-NLS-1$
     }
 

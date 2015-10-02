@@ -49,6 +49,8 @@ public class KomodoObjectUtils implements StringConstants {
      */
     public static String getName(final WorkspaceStatus wsStatus, final KomodoObject kObj) throws Exception {
         KomodoObject resolvedObj = wsStatus.resolve(kObj);
+        if(resolvedObj==null) return "unknown"; //$NON-NLS-1$
+        
         String name = resolvedObj.getName(wsStatus.getTransaction());
         if(name.equals(Komodo.NODE_TYPE)) {
             name = ContextUtils.KOMODO_DISPLAY_NAME;

@@ -50,6 +50,7 @@ public class VdbCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
+    
     @SuppressWarnings( "javadoc" )
     public enum ShowDataRolesCommand {
         NO_DATA_ROLES,

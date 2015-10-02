@@ -62,7 +62,7 @@ public final class AddEntryCommand extends VdbShellCommand {
      */
     @Override
     protected int getMaxArgCount() {
-        return 1;
+        return 2;
     }
 
 }

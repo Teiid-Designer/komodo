@@ -24,17 +24,20 @@ public class WorkspaceCommandMessages implements StringConstants {
     public static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle( BUNDLE_NAME );
 
     public enum General {
+        ERROR_DDL_EMPTY,
         ERROR_WRITING_FILE,
         INVALID_BOOLEAN_PROPERTY_VALUE,
         INVALID_INTEGER_PROPERTY_VALUE,
         INVALID_OBJECT_TYPE,
         INVALID_PROPERTY_NAME,
         MISSING_OUTPUT_FILE_NAME,
+        MISSING_INPUT_FILE_NAME,
         MISSING_PROPERTY_NAME_VALUE,
         MISSING_VDB_EXTERNAL_PATH,
         MISSING_VDB_NAME,
         NO_PROPERTIES,
         OUTPUT_FILE_ERROR,
+        INPUT_FILE_ERROR,
         PROPERTIES_HEADER,
         PRINT_RELATIONAL_OBJECT,
         PROPERTY_NOT_SET,

@@ -20,13 +20,13 @@ import org.komodo.shell.api.WorkspaceStatus;
  */
 abstract class PermissionShellCommand extends RelationalShellCommand {
 
-    protected static final String ALLOW_ALTER = "allow-alter"; //$NON-NLS-1$
-    protected static final String ALLOW_CREATE = "allow-create"; //$NON-NLS-1$
-    protected static final String ALLOW_DELETE = "allow-delete"; //$NON-NLS-1$
-    protected static final String ALLOW_EXECUTE = "allow-execute"; //$NON-NLS-1$
-    protected static final String ALLOW_LANGUAGE = "allow-language"; //$NON-NLS-1$
-    protected static final String ALLOW_READ = "allow-read"; //$NON-NLS-1$
-    protected static final String ALLOW_UPDATE = "allow-update"; //$NON-NLS-1$
+    protected static final String ALLOW_ALTER = "allowAlter"; //$NON-NLS-1$
+    protected static final String ALLOW_CREATE = "allowCreate"; //$NON-NLS-1$
+    protected static final String ALLOW_DELETE = "allowDelete"; //$NON-NLS-1$
+    protected static final String ALLOW_EXECUTE = "allowExecute"; //$NON-NLS-1$
+    protected static final String ALLOW_LANGUAGE = "allowLanguage"; //$NON-NLS-1$
+    protected static final String ALLOW_READ = "allowRead"; //$NON-NLS-1$
+    protected static final String ALLOW_UPDATE = "allowUpdate"; //$NON-NLS-1$
 
     protected static final List< String > ALL_PROPS = Arrays.asList( new String[] { ALLOW_ALTER, ALLOW_CREATE, ALLOW_DELETE,
                                                                                     ALLOW_EXECUTE, ALLOW_LANGUAGE, ALLOW_READ,
@@ -61,19 +61,18 @@ abstract class PermissionShellCommand extends RelationalShellCommand {
         return Messages.getString(PermissionCommandMessages.RESOURCE_BUNDLE,key.toString(),parameters);
     }
 
-    /**
-     * @see org.komodo.shell.api.ShellCommand#printHelp(int indent)
-     */
     @Override
-    public void printHelp( final int indent ) {
-        print( indent, Messages.getString( PermissionCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".help" ) ); //$NON-NLS-1$
+    protected void printHelpDescription( final int indent ) {
+        print( indent, Messages.getString( PermissionCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".help", getName() ) ); //$NON-NLS-1$
     }
 
-    /**
-     * @see org.komodo.shell.api.ShellCommand#printUsage(int indent)
-     */
     @Override
-    public void printUsage( final int indent ) {
+    protected void printHelpExamples( final int indent ) {
+        print( indent, Messages.getString( PermissionCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".examples" ) ); //$NON-NLS-1$
+    }
+
+    @Override
+    protected void printHelpUsage( final int indent ) {
         print( indent, Messages.getString( PermissionCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".usage" ) ); //$NON-NLS-1$
     }
 

@@ -22,10 +22,10 @@ abstract class VdbShellCommand extends RelationalShellCommand {
 
     protected static final String ALLOWED_LANGUAGES = "allowed-languages"; //$NON-NLS-1$
     protected static final String AUTHENTICATION_TYPE = "authentication-type"; //$NON-NLS-1$
-    protected static final String CONNECTION_TYPE = "connection-type"; //$NON-NLS-1$
+    protected static final String CONNECTION_TYPE = "connectionType"; //$NON-NLS-1$
     protected static final String DESCRIPTION = "description"; //$NON-NLS-1$
     protected static final String GSS_PATTERN = "gss-pattern"; //$NON-NLS-1$
-    protected static final String ORIGINAL_FILE_PATH = "original-file-path"; //$NON-NLS-1$
+    protected static final String ORIGINAL_FILE_PATH = "originalFile"; //$NON-NLS-1$
     protected static final String PASSWORD_PATTERN = "password-pattern"; //$NON-NLS-1$
     protected static final String PREVIEW = "preview"; //$NON-NLS-1$
     protected static final String QUERY_TIMEOUT = "query-timeout"; //$NON-NLS-1$
@@ -66,19 +66,18 @@ abstract class VdbShellCommand extends RelationalShellCommand {
         return Messages.getString(VdbCommandMessages.RESOURCE_BUNDLE,key.toString(),parameters);
     }
 
-    /**
-     * @see org.komodo.shell.api.ShellCommand#printHelp(int indent)
-     */
     @Override
-    public void printHelp( final int indent ) {
-        print( indent, Messages.getString( VdbCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".help" ) ); //$NON-NLS-1$
+    protected void printHelpDescription( final int indent ) {
+        print( indent, Messages.getString( VdbCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".help", getName() ) ); //$NON-NLS-1$
     }
 
-    /**
-     * @see org.komodo.shell.api.ShellCommand#printUsage(int indent)
-     */
     @Override
-    public void printUsage( final int indent ) {
+    protected void printHelpExamples( final int indent ) {
+        print( indent, Messages.getString( VdbCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".examples" ) ); //$NON-NLS-1$
+    }
+
+    @Override
+    protected void printHelpUsage( final int indent ) {
         print( indent, Messages.getString( VdbCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".usage" ) ); //$NON-NLS-1$
     }
 

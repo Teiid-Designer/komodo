@@ -79,20 +79,4 @@ public abstract class RelationalShellCommand extends BuiltInShellCommand {
         return Messages.getString(WorkspaceCommandMessages.RESOURCE_BUNDLE,key.toString(),parameters);
     }
 
-    /**
-     * @see org.komodo.shell.api.ShellCommand#printHelp(int indent)
-     */
-    @Override
-    public void printHelp( final int indent ) {
-        print( indent, Messages.getString( WorkspaceCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".help" ) ); //$NON-NLS-1$
-    }
-
-    /**
-     * @see org.komodo.shell.api.ShellCommand#printUsage(int indent)
-     */
-    @Override
-    public void printUsage( final int indent ) {
-        print( indent, Messages.getString( WorkspaceCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".usage" ) ); //$NON-NLS-1$
-    }
-
 }

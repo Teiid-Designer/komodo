@@ -7,9 +7,11 @@
  */
 package org.komodo.relational.commands;
 
+import static org.komodo.relational.commands.WorkspaceCommandMessages.RESOURCE_BUNDLE;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.MISSING_PROPERTY_NAME_VALUE;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_ERROR;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_SUCCESS;
+import org.komodo.relational.Messages;
 import org.komodo.relational.RelationalObject;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
@@ -73,5 +75,21 @@ public final class SetCustomPropertyCommand extends RelationalShellCommand {
     public boolean isValidForCurrentContext() {
         return ( getContext() instanceof RelationalObject );
     }
+    
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, Messages.getString( RESOURCE_BUNDLE, getClass().getSimpleName() + ".help", getName() ) ); //$NON-NLS-1$
+    }
+
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, Messages.getString( RESOURCE_BUNDLE, getClass().getSimpleName() + ".examples" ) ); //$NON-NLS-1$
+    }
+
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, Messages.getString( RESOURCE_BUNDLE, getClass().getSimpleName() + ".usage" ) ); //$NON-NLS-1$
+    }
+
 
 }

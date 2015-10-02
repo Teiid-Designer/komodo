@@ -325,8 +325,7 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
     }
 
     protected void printHelpDescription( final int indent ) {
-        print( indent,
-               Messages.getString( SHELL.HelpDescription, getName(), Messages.getString( getClass().getSimpleName() + ".help" ) ) ); //$NON-NLS-1$
+        print( indent, Messages.getString( getClass().getSimpleName() + ".help", getName() ) ); //$NON-NLS-1$
     }
 
     protected void printHelpExamples( final int indent ) {
@@ -367,25 +366,22 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
 	/**
 	 * Validates that the supplied path argument is a readable file.
 	 * @param filePathArg the path to test
-	 * @return 'true' if the path is valid readable file, 'false' if not.
+	 * @return "OK" if the path is valid readable file, other error message if not
 	 */
-	public boolean validateReadableFileArg(String filePathArg) {
+	public String validateReadableFileArg(String filePathArg) {
 		String filePath = filePathArg.trim();
 
         // Check the fileName arg validity
         File theFile = new File(filePath);
         if(!theFile.exists()) {
-        	print(CompletionConstants.MESSAGE_INDENT, Messages.getString(SHELL.FileNotFound, filePath));
-        	return false;
+            return Messages.getString(SHELL.FileNotFound, filePath);
         } else if(!theFile.isFile()) {
-        	print(CompletionConstants.MESSAGE_INDENT, Messages.getString(SHELL.FileArgNotAFile, filePath));
-        	return false;
+            return Messages.getString(SHELL.FileArgNotAFile, filePath);
         } else if(!theFile.canRead()) {
-        	print(CompletionConstants.MESSAGE_INDENT, Messages.getString(SHELL.FileCannotRead, filePath));
-        	return false;
+            return Messages.getString(SHELL.FileCannotRead, filePath);
         }
 
-		return true;
+		return CompletionConstants.OK;
 	}
 
 	/**

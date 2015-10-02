@@ -20,23 +20,23 @@ import org.komodo.shell.api.WorkspaceStatus;
  */
 abstract class UserDefinedFunctionShellCommand extends RelationalShellCommand {
 
-    protected static final String AGGREGATE = "aggregate"; //$NON-NLS-1$
-    protected static final String ALLOWS_DISTINCT = "allows-distinct"; //$NON-NLS-1$
-    protected static final String ALLOWS_ORDERBY = "allows-orderby"; //$NON-NLS-1$
-    protected static final String ANALYTIC = "analytic"; //$NON-NLS-1$
-    protected static final String CATEGORY = "category"; //$NON-NLS-1$
-    protected static final String DECOMPOSABLE = "decomposable"; //$NON-NLS-1$
-    protected static final String DESCRIPTION = "description"; //$NON-NLS-1$
-    protected static final String DETERMINISM = "determinism"; //$NON-NLS-1$
-    protected static final String JAVA_CLASS = "java-class"; //$NON-NLS-1$
-    protected static final String JAVA_METHOD = "java-method"; //$NON-NLS-1$
-    protected static final String NAME_IN_SOURCE = "name-in-source"; //$NON-NLS-1$
-    protected static final String NULL_ON_NULL = "null-on-null"; //$NON-NLS-1$
-    protected static final String SCHEMA_ELEMENT_TYPE = "schema-element-type"; //$NON-NLS-1$
-    protected static final String UPDATE_COUNT = "update-count"; //$NON-NLS-1$
-    protected static final String USES_DISTINCT_ROWS = "uses-distinct-rows"; //$NON-NLS-1$
-    protected static final String UUID = "uuid"; //$NON-NLS-1$
-    protected static final String VAR_ARGS = "var-args"; //$NON-NLS-1$
+    protected static final String AGGREGATE = "AGGREGATE"; //$NON-NLS-1$
+    protected static final String ALLOWS_DISTINCT = "ALLOWS_DISTINCT"; //$NON-NLS-1$
+    protected static final String ALLOWS_ORDERBY = "ALLOWS_ORDERBY"; //$NON-NLS-1$
+    protected static final String ANALYTIC = "ANALYTIC"; //$NON-NLS-1$
+    protected static final String CATEGORY = "CATEGORY"; //$NON-NLS-1$
+    protected static final String DECOMPOSABLE = "DECOMPOSABLE"; //$NON-NLS-1$
+    protected static final String DESCRIPTION = "ANNOTATION"; //$NON-NLS-1$
+    protected static final String DETERMINISM = "DETERMINISM"; //$NON-NLS-1$
+    protected static final String JAVA_CLASS = "JAVA_CLASS"; //$NON-NLS-1$
+    protected static final String JAVA_METHOD = "JAVA_METHOD"; //$NON-NLS-1$
+    protected static final String NAME_IN_SOURCE = "NAMEINSOURCE"; //$NON-NLS-1$
+    protected static final String NULL_ON_NULL = "NULL_ON_NULL"; //$NON-NLS-1$
+    protected static final String SCHEMA_ELEMENT_TYPE = "schemaElementType"; //$NON-NLS-1$
+    protected static final String UPDATE_COUNT = "UPDATECOUNT"; //$NON-NLS-1$
+    protected static final String USES_DISTINCT_ROWS = "USES_DISTINCT_ROWS"; //$NON-NLS-1$
+    protected static final String UUID = "UUID"; //$NON-NLS-1$
+    protected static final String VAR_ARGS = "VARARGS"; //$NON-NLS-1$
 
     protected static final List< String > ALL_PROPS = Arrays.asList( new String[] { AGGREGATE, ALLOWS_DISTINCT, ALLOWS_ORDERBY,
                                                                                     ANALYTIC, CATEGORY, DECOMPOSABLE, DESCRIPTION,
@@ -74,19 +74,18 @@ abstract class UserDefinedFunctionShellCommand extends RelationalShellCommand {
         return Messages.getString(UserDefinedFunctionCommandMessages.RESOURCE_BUNDLE,key.toString(),parameters);
     }
 
-    /**
-     * @see org.komodo.shell.api.ShellCommand#printHelp(int indent)
-     */
     @Override
-    public void printHelp( final int indent ) {
-        print( indent, Messages.getString( UserDefinedFunctionCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".help" ) ); //$NON-NLS-1$
+    protected void printHelpDescription( final int indent ) {
+        print( indent, Messages.getString( UserDefinedFunctionCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".help", getName() ) ); //$NON-NLS-1$
     }
 
-    /**
-     * @see org.komodo.shell.api.ShellCommand#printUsage(int indent)
-     */
     @Override
-    public void printUsage( final int indent ) {
+    protected void printHelpExamples( final int indent ) {
+        print( indent, Messages.getString( UserDefinedFunctionCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".examples" ) ); //$NON-NLS-1$
+    }
+
+    @Override
+    protected void printHelpUsage( final int indent ) {
         print( indent, Messages.getString( UserDefinedFunctionCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".usage" ) ); //$NON-NLS-1$
     }
 

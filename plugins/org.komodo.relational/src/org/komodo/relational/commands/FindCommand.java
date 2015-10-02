@@ -7,6 +7,7 @@
  */
 package org.komodo.relational.commands;
 
+import static org.komodo.relational.commands.WorkspaceCommandMessages.RESOURCE_BUNDLE;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.DeleteConstraintColumnCommand.DELETE_COLUMN_ERROR;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.FindCommand.INVALID_TYPE;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.FindCommand.MISSING_TYPE_NAME;
@@ -17,6 +18,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import org.komodo.relational.Messages;
+import org.komodo.relational.RelationalObject;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.KomodoTypeRegistry;
 import org.komodo.shell.CommandResultImpl;
@@ -94,7 +97,7 @@ public final class FindCommand extends RelationalShellCommand {
      */
     @Override
     public boolean isValidForCurrentContext() {
-        return true;
+        return ( getContext() instanceof RelationalObject );
     }
 
     private KomodoType getQueryType( final String typeArg ) {
@@ -197,5 +200,21 @@ public final class FindCommand extends RelationalShellCommand {
         // no completions if more than one arg
         return -1;
     }
+    
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, Messages.getString( RESOURCE_BUNDLE, getClass().getSimpleName() + ".help", getName() ) ); //$NON-NLS-1$
+    }
+
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, Messages.getString( RESOURCE_BUNDLE, getClass().getSimpleName() + ".examples" ) ); //$NON-NLS-1$
+    }
+
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, Messages.getString( RESOURCE_BUNDLE, getClass().getSimpleName() + ".usage" ) ); //$NON-NLS-1$
+    }
+
 
 }

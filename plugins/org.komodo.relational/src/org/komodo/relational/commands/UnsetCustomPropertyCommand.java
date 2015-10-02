@@ -7,9 +7,11 @@
  */
 package org.komodo.relational.commands;
 
+import static org.komodo.relational.commands.WorkspaceCommandMessages.RESOURCE_BUNDLE;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.UNSET_MISSING_PROPERTY_NAME;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.UNSET_PROPERTY_ERROR;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.UNSET_PROPERTY_SUCCESS;
+import org.komodo.relational.Messages;
 import org.komodo.relational.RelationalObject;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
@@ -71,6 +73,21 @@ public final class UnsetCustomPropertyCommand extends RelationalShellCommand {
     @Override
     public boolean isValidForCurrentContext() {
         return ( getContext() instanceof RelationalObject );
+    }
+    
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, Messages.getString( RESOURCE_BUNDLE, getClass().getSimpleName() + ".help", getName() ) ); //$NON-NLS-1$
+    }
+
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, Messages.getString( RESOURCE_BUNDLE, getClass().getSimpleName() + ".examples" ) ); //$NON-NLS-1$
+    }
+
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, Messages.getString( RESOURCE_BUNDLE, getClass().getSimpleName() + ".usage" ) ); //$NON-NLS-1$
     }
 
 }

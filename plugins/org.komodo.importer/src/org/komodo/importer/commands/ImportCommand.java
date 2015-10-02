@@ -69,9 +69,10 @@ public class ImportCommand extends BuiltInShellCommand {
             String parentContextPath = optionalArgument( 2 );
 
             // Validates the supplied fileNameArg is a valid, readable file
-            if ( !validateReadableFileArg( fileNameArg ) ) {
+            String validationResult = validateReadableFileArg( fileNameArg );
+            if ( !CompletionConstants.OK.equals(validationResult) ) {
                 return new CommandResultImpl( false,
-                                              Messages.getString( Messages.SHELL.FileNotAccessible, fileNameArg ),
+                                              Messages.getString( Messages.SHELL.FileNotAccessible, fileNameArg, validationResult ),
                                               null );
             }
 

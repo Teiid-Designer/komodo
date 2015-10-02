@@ -2,6 +2,7 @@ package org.komodo.shell.commands;
 
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
+import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
 import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.ShellCommandFactory;
@@ -50,10 +51,10 @@ public class PlayCommand  extends BuiltInShellCommand {
             String fileNameArg = requiredArgument(0, Messages.getString(Messages.PlayCommand.InvalidArgMsg_FileName));
 
             // Validate the supplied path
-            boolean validFile = validateReadableFileArg(fileNameArg);
-            if(!validFile) {
+            String validationResult = validateReadableFileArg(fileNameArg);
+            if(!CompletionConstants.OK.equals(validationResult)) {
                 return new CommandResultImpl( false,
-                                              Messages.getString( Messages.SHELL.FileNotAccessible, fileNameArg ),
+                                              Messages.getString( Messages.SHELL.FileNotAccessible, fileNameArg, validationResult ),
                                               null );
             }
 

@@ -98,12 +98,22 @@ public class RenameCommand extends BuiltInShellCommand {
      * @return 'true' if exists, 'false' if not.
      */
     private boolean validateNotDuplicateType(KomodoObject objToRename, String newName, KomodoObject targetObject) throws Exception {
-    	// Determine if child with new name and original object type already exists
-    	KomodoObject existingChild = targetObject.getChild(getWorkspaceStatus().getTransaction(),newName,objToRename.getTypeIdentifier(getWorkspaceStatus().getTransaction()).getType());
-    	// If child exists, check the type
-    	if(existingChild!=null) {
-    		return false;
-    	}
+        boolean hasExistingWithName = false;
+        KomodoObject[] objsOfType = targetObject.getChildrenOfType(getWorkspaceStatus().getTransaction(), objToRename.getTypeIdentifier(getWorkspaceStatus().getTransaction()).getType());
+        
+        for(KomodoObject kObj : objsOfType) {
+            String kObjName = kObj.getName(getWorkspaceStatus().getTransaction());
+            if(kObjName.equals(newName)) {
+                hasExistingWithName = true;
+                break;
+            }
+        }
+        
+        // Existing with supplied name not found - not a duplicate
+        if(hasExistingWithName) {
+            return false;
+        }
+
     	return true;
     }
 

@@ -20,14 +20,14 @@ import org.komodo.shell.api.WorkspaceStatus;
  */
 abstract class ParameterShellCommand extends RelationalShellCommand {
 
-    protected static final String DATATYPE_NAME = "datatype-name"; //$NON-NLS-1$
-    protected static final String DEFAULT_VALUE = "default-value"; //$NON-NLS-1$
-    protected static final String DIRECTION = "direction"; //$NON-NLS-1$
-    protected static final String LENGTH = "length"; //$NON-NLS-1$
+    protected static final String DATATYPE_NAME = "datatypeName"; //$NON-NLS-1$
+    protected static final String DEFAULT_VALUE = "defaultValue"; //$NON-NLS-1$
+    protected static final String DIRECTION = "parameterType"; //$NON-NLS-1$
+    protected static final String LENGTH = "datatypeLength"; //$NON-NLS-1$
     protected static final String NULLABLE = "nullable"; //$NON-NLS-1$
-    protected static final String PRECISION = "precision"; //$NON-NLS-1$
+    protected static final String PRECISION = "datatypePrecision"; //$NON-NLS-1$
     protected static final String RESULT = "result"; //$NON-NLS-1$
-    protected static final String SCALE = "scale"; //$NON-NLS-1$
+    protected static final String SCALE = "datatypeScale"; //$NON-NLS-1$
 
     protected static final List< String > ALL_PROPS = Arrays.asList( new String[] { DATATYPE_NAME, DEFAULT_VALUE, DIRECTION,
                                                                                     LENGTH, NULLABLE, PRECISION, RESULT,
@@ -62,19 +62,18 @@ abstract class ParameterShellCommand extends RelationalShellCommand {
         return Messages.getString(ParameterCommandMessages.RESOURCE_BUNDLE,key.toString(),parameters);
     }
 
-    /**
-     * @see org.komodo.shell.api.ShellCommand#printHelp(int indent)
-     */
     @Override
-    public void printHelp( final int indent ) {
-        print( indent, Messages.getString( ParameterCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".help" ) ); //$NON-NLS-1$
+    protected void printHelpDescription( final int indent ) {
+        print( indent, Messages.getString( ParameterCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".help", getName() ) ); //$NON-NLS-1$
     }
 
-    /**
-     * @see org.komodo.shell.api.ShellCommand#printUsage(int indent)
-     */
     @Override
-    public void printUsage( final int indent ) {
+    protected void printHelpExamples( final int indent ) {
+        print( indent, Messages.getString( ParameterCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".examples" ) ); //$NON-NLS-1$
+    }
+
+    @Override
+    protected void printHelpUsage( final int indent ) {
         print( indent, Messages.getString( ParameterCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".usage" ) ); //$NON-NLS-1$
     }
 

@@ -20,14 +20,14 @@ import org.komodo.shell.api.WorkspaceStatus;
  */
 abstract class StoredProcedureShellCommand extends RelationalShellCommand {
 
-    protected static final String DESCRIPTION = "description"; //$NON-NLS-1$
-    protected static final String NAME_IN_SOURCE = "name-in-source"; //$NON-NLS-1$
-    protected static final String NATIVE_QUERY = "native_query"; //$NON-NLS-1$
-    protected static final String NON_PREPARED = "non-prepared"; //$NON-NLS-1$
-    protected static final String SCHEMA_ELEMENT_TYPE = "schema-element-type"; //$NON-NLS-1$
-    protected static final String UPDATE_COUNT = "update-count"; //$NON-NLS-1$
-    protected static final String UUID = "uuid"; //$NON-NLS-1$
-
+    protected static final String DESCRIPTION = "ANNOTATION"; //$NON-NLS-1$
+    protected static final String NAME_IN_SOURCE = "NAMEINSOURCE"; //$NON-NLS-1$
+    protected static final String NATIVE_QUERY = "NATIVE_QUERY"; //$NON-NLS-1$
+    protected static final String NON_PREPARED = "NON_PREPARED"; //$NON-NLS-1$
+    protected static final String SCHEMA_ELEMENT_TYPE = "schemaElementType"; //$NON-NLS-1$
+    protected static final String UPDATE_COUNT = "UPDATECOUNT"; //$NON-NLS-1$
+    protected static final String UUID = "UUID"; //$NON-NLS-1$
+    
     protected static final List< String > ALL_PROPS = Arrays.asList( new String[] { DESCRIPTION, NAME_IN_SOURCE, NATIVE_QUERY,
                                                                                     NON_PREPARED, SCHEMA_ELEMENT_TYPE,
                                                                                     UPDATE_COUNT, UUID } );
@@ -61,19 +61,18 @@ abstract class StoredProcedureShellCommand extends RelationalShellCommand {
         return Messages.getString(StoredProcedureCommandMessages.RESOURCE_BUNDLE,key.toString(),parameters);
     }
 
-    /**
-     * @see org.komodo.shell.api.ShellCommand#printHelp(int indent)
-     */
     @Override
-    public void printHelp( final int indent ) {
-        print( indent, Messages.getString( StoredProcedureCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".help" ) ); //$NON-NLS-1$
+    protected void printHelpDescription( final int indent ) {
+        print( indent, Messages.getString( StoredProcedureCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".help", getName() ) ); //$NON-NLS-1$
     }
 
-    /**
-     * @see org.komodo.shell.api.ShellCommand#printUsage(int indent)
-     */
     @Override
-    public void printUsage( final int indent ) {
+    protected void printHelpExamples( final int indent ) {
+        print( indent, Messages.getString( StoredProcedureCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".examples" ) ); //$NON-NLS-1$
+    }
+
+    @Override
+    protected void printHelpUsage( final int indent ) {
         print( indent, Messages.getString( StoredProcedureCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".usage" ) ); //$NON-NLS-1$
     }
 

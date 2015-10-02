@@ -266,7 +266,6 @@ public class ObjectImpl implements KomodoObject, StringConstants {
                     final int propType = PropertyDescriptorImpl.convert( propDescriptor.getType() );
                     if ( ( values[0] != null )
                          && ( ( !( values[0] instanceof String ) ) || !StringUtils.isBlank( ( String )values[0] ) ) ) {
-                        node.setProperty( name, PropertyImpl.createValue( factory, values[0] ) );
                         setSingleValuedProperty(node, factory, name, values[0], propType);
                     }
                 }

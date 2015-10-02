@@ -14,12 +14,11 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.spi.repository.KomodoType;
 
 /**
  * A shell command to create a Schema.
  */
-public final class CreateSchemaCommand extends RelationalShellCommand {
+public final class CreateSchemaCommand extends WorkspaceShellCommand {
 
     static final String NAME = "create-schema"; //$NON-NLS-1$
 
@@ -62,23 +61,6 @@ public final class CreateSchemaCommand extends RelationalShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 1;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
-     */
-    @Override
-    public boolean isValidForCurrentContext() {
-        // Only allow Schema create in the workspace
-        try {
-            KomodoType contextType = getContext().getTypeIdentifier( getTransaction() );
-            return contextType == KomodoType.WORKSPACE;
-        } catch ( Exception ex ) {
-            // on exception will return false
-        }
-        return false;
     }
 
 }

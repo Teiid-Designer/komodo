@@ -20,8 +20,8 @@ import org.komodo.shell.api.WorkspaceStatus;
  */
 abstract class ModelSourceShellCommand extends RelationalShellCommand {
 
-    protected static final String JNDI_NAME = "jndi-name"; //$NON-NLS-1$
-    protected static final String TRANSLATOR_NAME = "translator-name"; //$NON-NLS-1$
+    protected static final String JNDI_NAME = "sourceJndiName"; //$NON-NLS-1$
+    protected static final String TRANSLATOR_NAME = "sourceTranslator"; //$NON-NLS-1$
 
     protected static final List< String > ALL_PROPS = Arrays.asList( new String[] { JNDI_NAME, TRANSLATOR_NAME } );
 
@@ -54,19 +54,18 @@ abstract class ModelSourceShellCommand extends RelationalShellCommand {
         return Messages.getString(ModelSourceCommandMessages.RESOURCE_BUNDLE,key.toString(),parameters);
     }
 
-    /**
-     * @see org.komodo.shell.api.ShellCommand#printHelp(int indent)
-     */
     @Override
-    public void printHelp( final int indent ) {
-        print( indent, Messages.getString( ModelSourceCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".help" ) ); //$NON-NLS-1$
+    protected void printHelpDescription( final int indent ) {
+        print( indent, Messages.getString( ModelSourceCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".help", getName() ) ); //$NON-NLS-1$
     }
 
-    /**
-     * @see org.komodo.shell.api.ShellCommand#printUsage(int indent)
-     */
     @Override
-    public void printUsage( final int indent ) {
+    protected void printHelpExamples( final int indent ) {
+        print( indent, Messages.getString( ModelSourceCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".examples" ) ); //$NON-NLS-1$
+    }
+
+    @Override
+    protected void printHelpUsage( final int indent ) {
         print( indent, Messages.getString( ModelSourceCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".usage" ) ); //$NON-NLS-1$
     }
 

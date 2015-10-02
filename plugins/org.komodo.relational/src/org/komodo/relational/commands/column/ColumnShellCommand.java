@@ -20,31 +20,31 @@ import org.komodo.shell.api.WorkspaceStatus;
  */
 abstract class ColumnShellCommand extends RelationalShellCommand {
 
-    protected static final String AUTO_INCREMENTED = "auto-incremented"; //$NON-NLS-1$
-    protected static final String CASE_SENSITIVE = "case-sensitive"; //$NON-NLS-1$
-    protected static final String CHAR_OCTET_LENGTH = "char-octet-lenght"; //$NON-NLS-1$
-    protected static final String COLLATION_NAME = "collation-name"; //$NON-NLS-1$
-    protected static final String CURRENCY = "currency"; //$NON-NLS-1$
-    protected static final String DATATYPE_NAME = "datatype-name"; //$NON-NLS-1$
-    protected static final String DEFAULT_VALUE = "default-value"; //$NON-NLS-1$
-    protected static final String DESCRIPTION = "description"; //$NON-NLS-1$
-    protected static final String DISTINCT_VALUES = "distinct-values"; //$NON-NLS-1$
-    protected static final String FIXED_LENGTH = "fixed-length"; //$NON-NLS-1$
-    protected static final String LENGTH = "length"; //$NON-NLS-1$
-    protected static final String MAX_VALUE = "max-value"; //$NON-NLS-1$
-    protected static final String MIN_VALUE = "min-value"; //$NON-NLS-1$
-    protected static final String NAME_IN_SOURCE = "name-in-source"; //$NON-NLS-1$
-    protected static final String NATIVE_TYPE = "native-type"; //$NON-NLS-1$
+    protected static final String AUTO_INCREMENTED = "autoIncrement"; //$NON-NLS-1$
+    protected static final String CASE_SENSITIVE = "CASE_SENSITIVE"; //$NON-NLS-1$
+    protected static final String CHAR_OCTET_LENGTH = "CHAR_OCTET_LENGTH"; //$NON-NLS-1$
+    protected static final String COLLATION_NAME = "collationName"; //$NON-NLS-1$
+    protected static final String CURRENCY = "CURRENCY"; //$NON-NLS-1$
+    protected static final String DATATYPE_NAME = "datatypeName"; //$NON-NLS-1$
+    protected static final String DEFAULT_VALUE = "defaultValue"; //$NON-NLS-1$
+    protected static final String DESCRIPTION = "ANNOTATION"; //$NON-NLS-1$
+    protected static final String DISTINCT_VALUES = "DISTINCT_VALUES"; //$NON-NLS-1$
+    protected static final String FIXED_LENGTH = "FIXED_LENGTH"; //$NON-NLS-1$
+    protected static final String LENGTH = "datatypeLength"; //$NON-NLS-1$
+    protected static final String MAX_VALUE = "MAX_VALUE"; //$NON-NLS-1$
+    protected static final String MIN_VALUE = "MIN_VALUE"; //$NON-NLS-1$
+    protected static final String NAME_IN_SOURCE = "NAMEINSOURCE"; //$NON-NLS-1$
+    protected static final String NATIVE_TYPE = "NATIVE_TYPE"; //$NON-NLS-1$
     protected static final String NULLABLE = "nullable"; //$NON-NLS-1$
-    protected static final String NULL_VALUE_COUNT = "null-value-count"; //$NON-NLS-1$
-    protected static final String PRECISION = "precision"; //$NON-NLS-1$
-    protected static final String RADIX = "radix"; //$NON-NLS-1$
-    protected static final String SCALE = "scale"; //$NON-NLS-1$
-    protected static final String SEARCHABLE = "searchable"; //$NON-NLS-1$
-    protected static final String SELECTABLE = "selectable"; //$NON-NLS-1$
-    protected static final String SIGNED = "signed"; //$NON-NLS-1$
-    protected static final String UPDATABLE = "updatable"; //$NON-NLS-1$
-    protected static final String UUID = "uuid"; //$NON-NLS-1$
+    protected static final String NULL_VALUE_COUNT = "NULL_VALUE_COUNT"; //$NON-NLS-1$
+    protected static final String PRECISION = "datatypePrecision"; //$NON-NLS-1$
+    protected static final String RADIX = "RADIX"; //$NON-NLS-1$
+    protected static final String SCALE = "datatypeScale"; //$NON-NLS-1$
+    protected static final String SEARCHABLE = "SEARCHABLE"; //$NON-NLS-1$
+    protected static final String SELECTABLE = "SELECTABLE"; //$NON-NLS-1$
+    protected static final String SIGNED = "SIGNED"; //$NON-NLS-1$
+    protected static final String UPDATABLE = "UPDATABLE"; //$NON-NLS-1$
+    protected static final String UUID = "UUID"; //$NON-NLS-1$
 
     protected static final List< String > ALL_PROPS = Arrays.asList( new String[] { AUTO_INCREMENTED, CASE_SENSITIVE,
                                                                                     CHAR_OCTET_LENGTH, COLLATION_NAME, CURRENCY,
@@ -84,19 +84,18 @@ abstract class ColumnShellCommand extends RelationalShellCommand {
         return Messages.getString(ColumnCommandMessages.RESOURCE_BUNDLE,key.toString(),parameters);
     }
 
-    /**
-     * @see org.komodo.shell.api.ShellCommand#printHelp(int indent)
-     */
     @Override
-    public void printHelp( final int indent ) {
-        print( indent, Messages.getString( ColumnCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".help" ) ); //$NON-NLS-1$
+    protected void printHelpDescription( final int indent ) {
+        print( indent, Messages.getString( ColumnCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".help", getName() ) ); //$NON-NLS-1$
     }
 
-    /**
-     * @see org.komodo.shell.api.ShellCommand#printUsage(int indent)
-     */
     @Override
-    public void printUsage( final int indent ) {
+    protected void printHelpExamples( final int indent ) {
+        print( indent, Messages.getString( ColumnCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".examples" ) ); //$NON-NLS-1$
+    }
+
+    @Override
+    protected void printHelpUsage( final int indent ) {
         print( indent, Messages.getString( ColumnCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".usage" ) ); //$NON-NLS-1$
     }
 

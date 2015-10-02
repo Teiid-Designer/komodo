@@ -48,6 +48,8 @@ public interface RelationalObject extends KomodoObject {
      */
     Filter DDL_QNAMES_FILTER = new ExcludeQNamesFilter( StandardDdlLexicon.DDL_EXPRESSION,
                                                         StandardDdlLexicon.DDL_LENGTH,
+                                                        StandardDdlLexicon.DEFAULT_PRECISION,
+                                                        StandardDdlLexicon.DEFAULT_OPTION,
                                                         StandardDdlLexicon.DDL_ORIGINAL_EXPRESSION,
                                                         StandardDdlLexicon.DDL_START_CHAR_INDEX,
                                                         StandardDdlLexicon.DDL_START_COLUMN_NUMBER,
