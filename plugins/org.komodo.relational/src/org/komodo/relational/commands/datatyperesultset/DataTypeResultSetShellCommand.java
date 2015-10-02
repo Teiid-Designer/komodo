@@ -7,6 +7,8 @@
  */
 package org.komodo.relational.commands.datatyperesultset;
 
+import java.util.Arrays;
+import java.util.List;
 import org.komodo.relational.Messages;
 import org.komodo.relational.commands.RelationalShellCommand;
 import org.komodo.relational.model.DataTypeResultSet;
@@ -17,6 +19,12 @@ import org.komodo.shell.api.WorkspaceStatus;
  * A base class for @{link {@link DataTypeResultSet DataTypeResultSet}-related shell commands.
  */
 abstract class DataTypeResultSetShellCommand extends RelationalShellCommand {
+
+    protected static final String ARRAY = "array"; //$NON-NLS-1$
+    protected static final String LENGTH = "length"; //$NON-NLS-1$
+    protected static final String TYPE = "type"; //$NON-NLS-1$
+
+    protected static final List< String > ALL_PROPS = Arrays.asList( new String[] { ARRAY, LENGTH, TYPE } );
 
     protected DataTypeResultSetShellCommand( final String name,
                                            final WorkspaceStatus status ) {

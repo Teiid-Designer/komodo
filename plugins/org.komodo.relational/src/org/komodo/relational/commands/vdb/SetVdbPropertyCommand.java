@@ -13,7 +13,6 @@ import static org.komodo.relational.commands.WorkspaceCommandMessages.General.IN
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.MISSING_PROPERTY_NAME_VALUE;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_ERROR;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_SUCCESS;
-import java.util.Arrays;
 import java.util.List;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.shell.CommandResultImpl;
@@ -30,23 +29,6 @@ import org.komodo.utils.StringUtils;
 public final class SetVdbPropertyCommand extends VdbShellCommand {
 
     static final String NAME = SetPropertyCommand.NAME;
-
-    private static final String ALLOWED_LANGUAGES = "allowed-languages"; //$NON-NLS-1$
-    private static final String AUTHENTICATION_TYPE = "authentication-type"; //$NON-NLS-1$
-    private static final String CONNECTION_TYPE = "connection-type"; //$NON-NLS-1$
-    private static final String DESCRIPTION = "description"; //$NON-NLS-1$
-    private static final String GSS_PATTERN = "gss-pattern"; //$NON-NLS-1$
-    private static final String ORIGINAL_FILE_PATH = "original-file-path"; //$NON-NLS-1$
-    private static final String PASSWORD_PATTERN = "password-pattern"; //$NON-NLS-1$
-    private static final String PREVIEW = "preview"; //$NON-NLS-1$
-    private static final String QUERY_TIMEOUT = "query-timeout"; //$NON-NLS-1$
-    private static final String SECURITY_DOMAIN = "security-domain"; //$NON-NLS-1$
-    private static final String VERSION = "version"; //$NON-NLS-1$
-
-    private static final List< String > ALL_PROPS = Arrays.asList( new String[] { ALLOWED_LANGUAGES, AUTHENTICATION_TYPE,
-                                                                                 CONNECTION_TYPE, DESCRIPTION, GSS_PATTERN,
-                                                                                 ORIGINAL_FILE_PATH, PASSWORD_PATTERN, PREVIEW,
-                                                                                 QUERY_TIMEOUT, SECURITY_DOMAIN, VERSION } );
 
     /**
      * @param status

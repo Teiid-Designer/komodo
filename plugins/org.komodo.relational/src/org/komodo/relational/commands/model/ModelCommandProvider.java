@@ -56,6 +56,7 @@ public class ModelCommandProvider implements ShellCommandProvider {
         result.put( DeleteVirtualProcedureCommand.NAME, DeleteVirtualProcedureCommand.class );
 
         result.put( SetModelPropertyCommand.NAME, SetModelPropertyCommand.class );
+        result.put( UnsetModelPropertyCommand.NAME, UnsetModelPropertyCommand.class );
 
         return result;
     }
@@ -95,11 +96,8 @@ public class ModelCommandProvider implements ShellCommandProvider {
      */
     @Override
     public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        if(ModelImpl.RESOLVER.resolvable(uow, kObj)) {
-            Model model = ModelImpl.RESOLVER.resolve(uow, kObj);
-            return model.getTypeDisplayName();
-        }
-        return null;
+        final Model resolved = resolve( uow, kObj );
+        return ( ( resolved == null ) ? null : resolved.getTypeDisplayName() );
     }
 
     /**

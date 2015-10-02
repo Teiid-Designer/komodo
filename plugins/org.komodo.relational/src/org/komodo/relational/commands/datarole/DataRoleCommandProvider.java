@@ -44,6 +44,7 @@ public class DataRoleCommandProvider implements ShellCommandProvider {
         result.put( DeleteMappedRoleCommand.NAME, DeleteMappedRoleCommand.class );
         result.put( DeletePermissionCommand.NAME, DeletePermissionCommand.class );
         result.put( SetDataRolePropertyCommand.NAME, SetDataRolePropertyCommand.class );
+        result.put( UnsetDataRolePropertyCommand.NAME, UnsetDataRolePropertyCommand.class );
 
         return result;
     }
@@ -77,11 +78,8 @@ public class DataRoleCommandProvider implements ShellCommandProvider {
 
     @Override
     public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        if(DataRoleImpl.RESOLVER.resolvable(uow, kObj)) {
-            DataRole dataRole = DataRoleImpl.RESOLVER.resolve(uow, kObj);
-            return dataRole.getTypeDisplayName();
-        }
-        return null;
+        final DataRole resolved = resolve( uow, kObj );
+        return ( ( resolved == null ) ? null : resolved.getTypeDisplayName() );
     }
 
     /**

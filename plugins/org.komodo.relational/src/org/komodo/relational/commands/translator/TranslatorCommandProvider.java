@@ -40,6 +40,7 @@ public class TranslatorCommandProvider implements ShellCommandProvider {
         final Map< String, Class< ? extends ShellCommand >> result = new HashMap<>();
 
         result.put( SetTranslatorPropertyCommand.NAME, SetTranslatorPropertyCommand.class );
+        result.put( UnsetTranslatorPropertyCommand.NAME, UnsetTranslatorPropertyCommand.class );
 
         return result;
     }
@@ -79,11 +80,8 @@ public class TranslatorCommandProvider implements ShellCommandProvider {
      */
     @Override
     public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        if(TranslatorImpl.RESOLVER.resolvable(uow, kObj)) {
-            Translator translator = TranslatorImpl.RESOLVER.resolve(uow, kObj);
-            return translator.getTypeDisplayName();
-        }
-        return null;
+        final Translator resolved = resolve( uow, kObj );
+        return ( ( resolved == null ) ? null : resolved.getTypeDisplayName() );
     }
 
     /**

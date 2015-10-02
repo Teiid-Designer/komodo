@@ -13,7 +13,6 @@ import static org.komodo.relational.commands.WorkspaceCommandMessages.General.MI
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_ERROR;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_SUCCESS;
 import static org.komodo.relational.commands.model.ModelCommandMessages.General.INVALID_MODEL_TYPE_PROPERTY_VALUE;
-import java.util.Arrays;
 import java.util.List;
 import org.komodo.relational.model.Model;
 import org.komodo.shell.CommandResultImpl;
@@ -30,13 +29,6 @@ import org.komodo.utils.StringUtils;
 public final class SetModelPropertyCommand extends ModelShellCommand {
 
     static final String NAME = SetPropertyCommand.NAME;
-
-    private static final String DESCRIPTION = "description"; //$NON-NLS-1$
-    private static final String METADATA_TYPE = "metadataType"; //$NON-NLS-1$
-    private static final String MODEL_TYPE = "modelType"; //$NON-NLS-1$
-    private static final String VISIBLE = "visible"; //$NON-NLS-1$
-
-    private static final List< String > ALL_PROPS = Arrays.asList( new String[] { DESCRIPTION, METADATA_TYPE, MODEL_TYPE, VISIBLE } );
 
     /**
      * @param status

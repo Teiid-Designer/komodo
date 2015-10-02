@@ -16,7 +16,6 @@ import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SE
 import static org.komodo.relational.commands.table.TableCommandMessages.General.INVALID_ON_COMMIT_PROPERTY_VALUE;
 import static org.komodo.relational.commands.table.TableCommandMessages.General.INVALID_SCHEMA_ELEMENT_TYPE_PROPERTY_VALUE;
 import static org.komodo.relational.commands.table.TableCommandMessages.General.INVALID_TEMPORARY_TABLE_TYPE_PROPERTY_VALUE;
-import java.util.Arrays;
 import java.util.List;
 import org.komodo.relational.model.SchemaElement;
 import org.komodo.relational.model.Table;
@@ -35,22 +34,6 @@ import org.komodo.utils.StringUtils;
 public final class SetTablePropertyCommand extends TableShellCommand {
 
     static final String NAME = SetPropertyCommand.NAME;
-
-    private static final String DESCRIPTION = "description"; //$NON-NLS-1$
-    private static final String CARDINALITY = "cardinality"; //$NON-NLS-1$
-    private static final String MATERIALIZED = "materialized"; //$NON-NLS-1$
-    private static final String MATERIALIZED_TABLE = "materialized_table"; //$NON-NLS-1$
-    private static final String NAME_IN_SOURCE = "nameinsource"; //$NON-NLS-1$
-    private static final String UPDATABLE = "updatable"; //$NON-NLS-1$
-    private static final String UUID = "uuid"; //$NON-NLS-1$
-    private static final String ON_COMMIT_VALUE = "onCommitValue"; //$NON-NLS-1$
-    private static final String QUERY_EXPRESSION = "queryExpression"; //$NON-NLS-1$
-    private static final String SCHEMA_ELEMENT_TYPE = "schemaElementType"; //$NON-NLS-1$
-    private static final String TEMPORARY_TABLE_TYPE = "temporary"; //$NON-NLS-1$
-
-    private static final List< String > ALL_PROPS = Arrays.asList( new String[] { DESCRIPTION, CARDINALITY, MATERIALIZED, MATERIALIZED_TABLE,
-                                                                                  NAME_IN_SOURCE, UPDATABLE, UUID, ON_COMMIT_VALUE,
-                                                                                  QUERY_EXPRESSION, SCHEMA_ELEMENT_TYPE, TEMPORARY_TABLE_TYPE} );
 
     /**
      * @param status

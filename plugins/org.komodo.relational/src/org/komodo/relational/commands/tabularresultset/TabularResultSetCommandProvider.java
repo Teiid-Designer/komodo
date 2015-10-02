@@ -39,11 +39,10 @@ public class TabularResultSetCommandProvider implements ShellCommandProvider {
     public Map< String, Class< ? extends ShellCommand >> provideCommands() {
         final Map< String, Class< ? extends ShellCommand >> result = new HashMap<>();
 
-        //result.put( AddParameterCommand.NAME, AddParameterCommand.class );
-
-        //result.put( DeleteParameterCommand.NAME, DeleteParameterCommand.class );
-
-        //result.put( SetStoredProcedurePropertyCommand.NAME, SetStoredProcedurePropertyCommand.class );
+        // TODO add command to add column
+        // TODO add command to show columns
+        // TODO add command to remove column
+        // TODO add command to override rename
 
         return result;
     }
@@ -83,11 +82,8 @@ public class TabularResultSetCommandProvider implements ShellCommandProvider {
      */
     @Override
     public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        if(TabularResultSetImpl.RESOLVER.resolvable(uow, kObj)) {
-            TabularResultSet rs = TabularResultSetImpl.RESOLVER.resolve(uow, kObj);
-            return rs.getTypeDisplayName();
-        }
-        return null;
+        final TabularResultSet resolved = resolve( uow, kObj );
+        return ( ( resolved == null ) ? null : resolved.getTypeDisplayName() );
     }
 
     /**

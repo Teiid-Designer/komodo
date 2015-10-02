@@ -39,7 +39,10 @@ public class WorkspaceCommandMessages implements StringConstants {
         PRINT_RELATIONAL_OBJECT,
         PROPERTY_NOT_SET,
         SET_PROPERTY_ERROR,
-        SET_PROPERTY_SUCCESS;
+        SET_PROPERTY_SUCCESS,
+        UNSET_MISSING_PROPERTY_NAME,
+        UNSET_PROPERTY_ERROR,
+        UNSET_PROPERTY_SUCCESS;
 
         @Override
         public String toString() {

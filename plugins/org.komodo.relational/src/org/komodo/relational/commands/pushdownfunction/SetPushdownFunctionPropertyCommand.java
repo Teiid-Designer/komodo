@@ -15,7 +15,6 @@ import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SE
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_SUCCESS;
 import static org.komodo.relational.commands.pushdownfunction.PushdownFunctionCommandMessages.General.INVALID_DETERMINISTIC_PROPERTY_VALUE;
 import static org.komodo.relational.commands.pushdownfunction.PushdownFunctionCommandMessages.General.INVALID_SCHEMA_ELEMENT_TYPE_PROPERTY_VALUE;
-import java.util.Arrays;
 import java.util.List;
 import org.komodo.relational.model.Function;
 import org.komodo.relational.model.PushdownFunction;
@@ -34,26 +33,6 @@ import org.komodo.utils.StringUtils;
 public final class SetPushdownFunctionPropertyCommand extends PushdownFunctionShellCommand {
 
     static final String NAME = SetPropertyCommand.NAME;
-
-    private static final String AGGREGATE = "aggregate"; //$NON-NLS-1$
-    private static final String ALLOWS_DISTINCT = "allows-distinct"; //$NON-NLS-1$
-    private static final String ALLOWS_ORDERBY = "allows-orderby"; //$NON-NLS-1$
-    private static final String ANALYTIC = "analytic"; //$NON-NLS-1$
-    private static final String DECOMPOSABLE = "decomposable"; //$NON-NLS-1$
-    private static final String DESCRIPTION = "description"; //$NON-NLS-1$
-    private static final String DETERMINISM = "determinism"; //$NON-NLS-1$
-    private static final String NAME_IN_SOURCE = "name-in-source"; //$NON-NLS-1$
-    private static final String NULL_ON_NULL = "null-on-null"; //$NON-NLS-1$
-    private static final String SCHEMA_ELEMENT_TYPE = "schema-element-type"; //$NON-NLS-1$
-    private static final String UPDATE_COUNT = "update-count"; //$NON-NLS-1$
-    private static final String USES_DISTINCT_ROWS = "uses-distinct-rows"; //$NON-NLS-1$
-    private static final String UUID = "uuid"; //$NON-NLS-1$
-    private static final String VAR_ARGS = "var-args"; //$NON-NLS-1$
-
-    private static final List< String > ALL_PROPS = Arrays.asList( new String[] { AGGREGATE, ALLOWS_DISTINCT, ALLOWS_ORDERBY,
-                                                                                  ANALYTIC, DECOMPOSABLE, DESCRIPTION, DETERMINISM,
-                                                                                  NAME_IN_SOURCE, NULL_ON_NULL, SCHEMA_ELEMENT_TYPE,
-                                                                                  UPDATE_COUNT, USES_DISTINCT_ROWS, UUID, VAR_ARGS} );
 
     /**
      * @param status

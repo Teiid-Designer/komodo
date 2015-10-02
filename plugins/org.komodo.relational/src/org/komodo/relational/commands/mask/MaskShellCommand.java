@@ -7,6 +7,8 @@
  */
 package org.komodo.relational.commands.mask;
 
+import java.util.Arrays;
+import java.util.List;
 import org.komodo.relational.Messages;
 import org.komodo.relational.commands.RelationalShellCommand;
 import org.komodo.relational.vdb.Mask;
@@ -17,6 +19,9 @@ import org.komodo.shell.api.WorkspaceStatus;
  * A base class for @{link {@link Mask Mask}-related shell commands.
  */
 abstract class MaskShellCommand extends RelationalShellCommand {
+
+    protected static final String ORDER = "order"; //$NON-NLS-1$
+    protected static final List< String > ALL_PROPS = Arrays.asList( new String[] { ORDER } );
 
     protected MaskShellCommand( final String name,
                                 final WorkspaceStatus status ) {

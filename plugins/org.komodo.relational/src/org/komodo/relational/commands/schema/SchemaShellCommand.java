@@ -7,6 +7,8 @@
  */
 package org.komodo.relational.commands.schema;
 
+import java.util.Arrays;
+import java.util.List;
 import org.komodo.relational.Messages;
 import org.komodo.relational.commands.RelationalShellCommand;
 import org.komodo.relational.model.Schema;
@@ -17,6 +19,10 @@ import org.komodo.shell.api.WorkspaceStatus;
  * A base class for @{link {@link Schema Schema}-related shell commands.
  */
 abstract class SchemaShellCommand extends RelationalShellCommand {
+
+    protected static final String RENDITION = "rendition"; //$NON-NLS-1$
+
+    protected static final List< String > ALL_PROPS = Arrays.asList( new String[] { RENDITION } );
 
     protected SchemaShellCommand( final String name,
                                   final WorkspaceStatus status ) {

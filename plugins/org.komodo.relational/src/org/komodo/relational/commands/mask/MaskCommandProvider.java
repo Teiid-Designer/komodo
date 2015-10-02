@@ -40,6 +40,7 @@ public class MaskCommandProvider implements ShellCommandProvider {
         final Map< String, Class< ? extends ShellCommand >> result = new HashMap<>();
 
         result.put( SetMaskPropertyCommand.NAME, SetMaskPropertyCommand.class );
+        result.put( UnsetMaskPropertyCommand.NAME, UnsetMaskPropertyCommand.class );
 
         return result;
     }
@@ -79,11 +80,8 @@ public class MaskCommandProvider implements ShellCommandProvider {
      */
     @Override
     public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        if(MaskImpl.RESOLVER.resolvable(uow, kObj)) {
-            Mask mask = MaskImpl.RESOLVER.resolve(uow, kObj);
-            return mask.getTypeDisplayName();
-        }
-        return null;
+        final Mask resolved = resolve( uow, kObj );
+        return ( ( resolved == null ) ? null : resolved.getTypeDisplayName() );
     }
 
     /**

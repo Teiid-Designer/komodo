@@ -7,6 +7,8 @@
  */
 package org.komodo.relational.commands.index;
 
+import java.util.Arrays;
+import java.util.List;
 import org.komodo.relational.Messages;
 import org.komodo.relational.commands.RelationalShellCommand;
 import org.komodo.relational.model.Index;
@@ -17,6 +19,10 @@ import org.komodo.shell.api.WorkspaceStatus;
  * A base class for @{link {@link Index Index}-related shell commands.
  */
 abstract class IndexShellCommand extends RelationalShellCommand {
+
+    protected static final String EXPRESSION = "expression"; //$NON-NLS-1$
+
+    protected static final List< String > ALL_PROPS = Arrays.asList( new String[] { EXPRESSION } );
 
     protected IndexShellCommand( final String name,
                                  final WorkspaceStatus status ) {

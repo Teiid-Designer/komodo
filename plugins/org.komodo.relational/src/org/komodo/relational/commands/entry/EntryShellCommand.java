@@ -7,17 +7,23 @@
  */
 package org.komodo.relational.commands.entry;
 
+import java.util.Arrays;
+import java.util.List;
 import org.komodo.relational.Messages;
 import org.komodo.relational.commands.RelationalShellCommand;
-import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Entry;
 import org.komodo.relational.vdb.internal.EntryImpl;
 import org.komodo.shell.api.WorkspaceStatus;
 
 /**
- * A base class for {@link DataRole data role}-related shell commands.
+ * A base class for {@link Entry VDB entry}-related shell commands.
  */
 abstract class EntryShellCommand extends RelationalShellCommand {
+
+    protected static final String DESCRIPTION = "description"; //$NON-NLS-1$
+    protected static final String PATH = "path"; //$NON-NLS-1$
+
+    protected static final List< String > ALL_PROPS = Arrays.asList( new String[] { DESCRIPTION, PATH } );
 
     protected EntryShellCommand( final String name,
                                  final WorkspaceStatus status ) {

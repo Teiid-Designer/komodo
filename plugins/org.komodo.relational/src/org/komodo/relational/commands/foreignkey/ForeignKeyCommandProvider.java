@@ -39,8 +39,11 @@ public class ForeignKeyCommandProvider implements ShellCommandProvider {
     public Map< String, Class< ? extends ShellCommand >> provideCommands() {
         final Map< String, Class< ? extends ShellCommand >> result = new HashMap<>();
 
-        result.put( SetForeignKeyPropertyCommand.NAME, SetForeignKeyPropertyCommand.class );
-
+        // TODO add command to references column
+        // TODO add command to show references columns
+        // TODO add command to show references table
+        // TODO add command to remove references column
+        // TODO add command to set references table
         return result;
     }
 
@@ -79,11 +82,8 @@ public class ForeignKeyCommandProvider implements ShellCommandProvider {
      */
     @Override
     public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        if(ForeignKeyImpl.RESOLVER.resolvable(uow, kObj)) {
-            ForeignKey fk = ForeignKeyImpl.RESOLVER.resolve(uow, kObj);
-            return fk.getTypeDisplayName();
-        }
-        return null;
+        final ForeignKey resolved = resolve( uow, kObj );
+        return ( ( resolved == null ) ? null : resolved.getTypeDisplayName() );
     }
 
     /**

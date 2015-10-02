@@ -7,6 +7,8 @@
  */
 package org.komodo.relational.commands.vdbimport;
 
+import java.util.Arrays;
+import java.util.List;
 import org.komodo.relational.Messages;
 import org.komodo.relational.commands.RelationalShellCommand;
 import org.komodo.relational.vdb.DataRole;
@@ -18,6 +20,11 @@ import org.komodo.shell.api.WorkspaceStatus;
  * A base class for {@link DataRole data role}-related shell commands.
  */
 abstract class VdbImportShellCommand extends RelationalShellCommand {
+
+    protected static final String IMPORT_DATA_POLICIES = "importDataPolicies"; //$NON-NLS-1$
+    protected static final String VERSION = "version"; //$NON-NLS-1$
+
+    protected static final List< String > ALL_PROPS = Arrays.asList( new String[] { IMPORT_DATA_POLICIES, VERSION } );
 
     protected VdbImportShellCommand( final String name,
                                      final WorkspaceStatus status ) {

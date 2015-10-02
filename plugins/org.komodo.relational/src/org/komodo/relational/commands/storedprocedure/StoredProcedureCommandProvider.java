@@ -40,10 +40,9 @@ public class StoredProcedureCommandProvider implements ShellCommandProvider {
         final Map< String, Class< ? extends ShellCommand >> result = new HashMap<>();
 
         result.put( AddParameterCommand.NAME, AddParameterCommand.class );
-
         result.put( DeleteParameterCommand.NAME, DeleteParameterCommand.class );
-
         result.put( SetStoredProcedurePropertyCommand.NAME, SetStoredProcedurePropertyCommand.class );
+        result.put( UnsetStoredProcedurePropertyCommand.NAME, UnsetStoredProcedurePropertyCommand.class );
 
         return result;
     }
@@ -83,11 +82,8 @@ public class StoredProcedureCommandProvider implements ShellCommandProvider {
      */
     @Override
     public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        if(StoredProcedureImpl.RESOLVER.resolvable(uow, kObj)) {
-            StoredProcedure proc = StoredProcedureImpl.RESOLVER.resolve(uow, kObj);
-            return proc.getTypeDisplayName();
-        }
-        return null;
+        final StoredProcedure resolved = resolve( uow, kObj );
+        return ( ( resolved == null ) ? null : resolved.getTypeDisplayName() );
     }
 
     /**

@@ -40,10 +40,9 @@ public class UserDefinedFunctionCommandProvider implements ShellCommandProvider 
         final Map< String, Class< ? extends ShellCommand >> result = new HashMap<>();
 
         result.put( AddParameterCommand.NAME, AddParameterCommand.class );
-
         result.put( DeleteParameterCommand.NAME, DeleteParameterCommand.class );
-
         result.put( SetUserDefinedFunctionPropertyCommand.NAME, SetUserDefinedFunctionPropertyCommand.class );
+        result.put( UnsetUserDefinedFunctionPropertyCommand.NAME, UnsetUserDefinedFunctionPropertyCommand.class );
 
         return result;
     }
@@ -71,7 +70,7 @@ public class UserDefinedFunctionCommandProvider implements ShellCommandProvider 
      */
     @Override
     public boolean isRoot ( final Repository.UnitOfWork uow,
-                            final KomodoObject kObj ) throws KException {
+                            final KomodoObject kObj ) {
         return false;
     }
 
@@ -83,11 +82,8 @@ public class UserDefinedFunctionCommandProvider implements ShellCommandProvider 
      */
     @Override
     public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        if(UserDefinedFunctionImpl.RESOLVER.resolvable(uow, kObj)) {
-            UserDefinedFunction func = UserDefinedFunctionImpl.RESOLVER.resolve(uow, kObj);
-            return func.getTypeDisplayName();
-        }
-        return null;
+        final UserDefinedFunction resolved = resolve( uow, kObj );
+        return ( ( resolved == null ) ? null : resolved.getTypeDisplayName() );
     }
 
     /**

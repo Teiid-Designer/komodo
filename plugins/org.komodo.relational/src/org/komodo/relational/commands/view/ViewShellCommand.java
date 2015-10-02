@@ -7,6 +7,8 @@
  */
 package org.komodo.relational.commands.view;
 
+import java.util.Arrays;
+import java.util.List;
 import org.komodo.relational.Messages;
 import org.komodo.relational.commands.RelationalShellCommand;
 import org.komodo.relational.model.View;
@@ -17,6 +19,24 @@ import org.komodo.shell.api.WorkspaceStatus;
  * A base class for @{link {@link View View}-related shell commands.
  */
 abstract class ViewShellCommand extends RelationalShellCommand {
+
+    protected static final String DESCRIPTION = "description"; //$NON-NLS-1$
+    protected static final String CARDINALITY = "cardinality"; //$NON-NLS-1$
+    protected static final String MATERIALIZED = "materialized"; //$NON-NLS-1$
+    protected static final String MATERIALIZED_TABLE = "materialized_table"; //$NON-NLS-1$
+    protected static final String NAME_IN_SOURCE = "nameinsource"; //$NON-NLS-1$
+    protected static final String UPDATABLE = "updatable"; //$NON-NLS-1$
+    protected static final String UUID = "uuid"; //$NON-NLS-1$
+    protected static final String ON_COMMIT_VALUE = "onCommitValue"; //$NON-NLS-1$
+    protected static final String QUERY_EXPRESSION = "queryExpression"; //$NON-NLS-1$
+    protected static final String SCHEMA_ELEMENT_TYPE = "schemaElementType"; //$NON-NLS-1$
+    protected static final String TEMPORARY_TABLE_TYPE = "temporary"; //$NON-NLS-1$
+
+    protected static final List< String > ALL_PROPS = Arrays.asList( new String[] { DESCRIPTION, CARDINALITY, MATERIALIZED,
+                                                                                    MATERIALIZED_TABLE, NAME_IN_SOURCE,
+                                                                                    ON_COMMIT_VALUE, QUERY_EXPRESSION,
+                                                                                    SCHEMA_ELEMENT_TYPE, TEMPORARY_TABLE_TYPE,
+                                                                                    UPDATABLE, UUID, } );
 
     protected ViewShellCommand( final String name,
                                 final WorkspaceStatus status ) {

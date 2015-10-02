@@ -40,6 +40,7 @@ public class ColumnCommandProvider implements ShellCommandProvider {
         final Map< String, Class< ? extends ShellCommand >> result = new HashMap<>();
 
         result.put( SetColumnPropertyCommand.NAME, SetColumnPropertyCommand.class );
+        result.put( UnsetColumnPropertyCommand.NAME, UnsetColumnPropertyCommand.class );
 
         return result;
     }
@@ -73,11 +74,8 @@ public class ColumnCommandProvider implements ShellCommandProvider {
 
     @Override
     public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        if(ColumnImpl.RESOLVER.resolvable(uow, kObj)) {
-            Column column = ColumnImpl.RESOLVER.resolve(uow, kObj);
-            return column.getTypeDisplayName();
-        }
-        return null;
+        final Column resolved = resolve( uow, kObj );
+        return ( ( resolved == null ) ? null : resolved.getTypeDisplayName() );
     }
 
     /**
