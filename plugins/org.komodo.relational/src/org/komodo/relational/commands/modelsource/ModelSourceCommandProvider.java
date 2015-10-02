@@ -40,6 +40,7 @@ public class ModelSourceCommandProvider implements ShellCommandProvider {
         final Map< String, Class< ? extends ShellCommand >> result = new HashMap<>();
 
         result.put( SetModelSourcePropertyCommand.NAME, SetModelSourcePropertyCommand.class );
+        result.put( UnsetModelSourcePropertyCommand.NAME, UnsetModelSourcePropertyCommand.class );
 
         return result;
     }
@@ -79,11 +80,8 @@ public class ModelSourceCommandProvider implements ShellCommandProvider {
      */
     @Override
     public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        if(ModelSourceImpl.RESOLVER.resolvable(uow, kObj)) {
-            ModelSource source = ModelSourceImpl.RESOLVER.resolve(uow, kObj);
-            return source.getTypeDisplayName();
-        }
-        return null;
+        final ModelSource resolved = resolve( uow, kObj );
+        return ( ( resolved == null ) ? null : resolved.getTypeDisplayName() );
     }
 
     /**

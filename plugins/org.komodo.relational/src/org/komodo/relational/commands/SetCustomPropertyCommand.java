@@ -16,7 +16,7 @@ import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 
 /**
- * A shell command to create a VDB.
+ * A shell command to set a custom property on a {@link RelationalObject}.
  */
 public final class SetCustomPropertyCommand extends RelationalShellCommand {
 

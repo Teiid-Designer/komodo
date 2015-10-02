@@ -14,7 +14,6 @@ import static org.komodo.relational.commands.WorkspaceCommandMessages.General.MI
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_ERROR;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_SUCCESS;
 import static org.komodo.relational.commands.storedprocedure.StoredProcedureCommandMessages.General.INVALID_SCHEMA_ELEMENT_TYPE_PROPERTY_VALUE;
-import java.util.Arrays;
 import java.util.List;
 import org.komodo.relational.model.SchemaElement;
 import org.komodo.relational.model.StoredProcedure;
@@ -32,17 +31,6 @@ import org.komodo.utils.StringUtils;
 public final class SetStoredProcedurePropertyCommand extends StoredProcedureShellCommand {
 
     static final String NAME = SetPropertyCommand.NAME;
-
-    private static final String DESCRIPTION = "description"; //$NON-NLS-1$
-    private static final String NAME_IN_SOURCE = "name-in-source"; //$NON-NLS-1$
-    private static final String NATIVE_QUERY = "native_query"; //$NON-NLS-1$
-    private static final String NON_PREPARED = "non-prepared"; //$NON-NLS-1$
-    private static final String SCHEMA_ELEMENT_TYPE = "schema-element-type"; //$NON-NLS-1$
-    private static final String UPDATE_COUNT = "update-count"; //$NON-NLS-1$
-    private static final String UUID = "uuid"; //$NON-NLS-1$
-
-    private static final List< String > ALL_PROPS = Arrays.asList( new String[] { DESCRIPTION, NAME_IN_SOURCE, NATIVE_QUERY, NON_PREPARED,
-                                                                                  SCHEMA_ELEMENT_TYPE, UPDATE_COUNT, UUID } );
 
     /**
      * @param status

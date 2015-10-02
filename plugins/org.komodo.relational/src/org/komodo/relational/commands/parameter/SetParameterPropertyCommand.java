@@ -15,7 +15,6 @@ import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SE
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_SUCCESS;
 import static org.komodo.relational.commands.parameter.ParameterCommandMessages.General.INVALID_DIRECTION_PROPERTY_VALUE;
 import static org.komodo.relational.commands.parameter.ParameterCommandMessages.General.INVALID_NULLABLE_PROPERTY_VALUE;
-import java.util.Arrays;
 import java.util.List;
 import org.komodo.relational.RelationalConstants.Nullable;
 import org.komodo.relational.model.Parameter;
@@ -29,24 +28,11 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.StringUtils;
 
 /**
- * A shell command to set Parameter properties
+ * A shell command to set {@link Parameter parameter} properties.
  */
 public final class SetParameterPropertyCommand extends ParameterShellCommand {
 
     static final String NAME = SetPropertyCommand.NAME;
-
-    private static final String DATATYPE_NAME = "datatype-name"; //$NON-NLS-1$
-    private static final String DEFAULT_VALUE = "default-value"; //$NON-NLS-1$
-    private static final String DIRECTION = "direction"; //$NON-NLS-1$
-    private static final String LENGTH = "length"; //$NON-NLS-1$
-    private static final String NULLABLE = "nullable"; //$NON-NLS-1$
-    private static final String PRECISION = "precision"; //$NON-NLS-1$
-    private static final String RESULT = "result"; //$NON-NLS-1$
-    private static final String SCALE = "scale"; //$NON-NLS-1$
-
-    private static final List< String > ALL_PROPS = Arrays.asList( new String[] { DATATYPE_NAME, DEFAULT_VALUE, DIRECTION,
-                                                                                  LENGTH, NULLABLE, PRECISION,
-                                                                                  RESULT, SCALE } );
 
     /**
      * @param status

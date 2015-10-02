@@ -5,69 +5,83 @@
  *
  * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
  */
-package org.komodo.relational.commands.foreignkey;
+package org.komodo.relational.commands.index;
 
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.INVALID_PROPERTY_NAME;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.MISSING_PROPERTY_NAME_VALUE;
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
-import java.util.Arrays;
+import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_ERROR;
+import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_SUCCESS;
 import java.util.List;
-import org.komodo.relational.model.ForeignKey;
+import org.komodo.relational.model.Index;
+import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.SetPropertyCommand;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.utils.StringUtils;
 
 /**
- * A shell command to set Column properties
+ * A shell command to set Index properties
  */
-public final class SetForeignKeyPropertyCommand extends ForeignKeyShellCommand {
+public final class UnsetIndexPropertyCommand extends IndexShellCommand {
 
     static final String NAME = SetPropertyCommand.NAME;
-
-    private static final String PRIMARY_TYPE = "primary-type"; //$NON-NLS-1$
-
-    private static final List< String > ALL_PROPS = Arrays.asList( new String[] { PRIMARY_TYPE } );
 
     /**
      * @param status
      *        the shell's workspace status (cannot be <code>null</code>)
      */
-    public SetForeignKeyPropertyCommand( final WorkspaceStatus status ) {
+    public UnsetIndexPropertyCommand( final WorkspaceStatus status ) {
         super( NAME, status );
     }
 
-    /* (non-Javadoc)
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
     protected CommandResult doExecute() {
         CommandResult result = null;
-        
+
         try {
-            final String name = requiredArgument( 0, getWorkspaceMessage(MISSING_PROPERTY_NAME_VALUE) );
-            final String value = requiredArgument( 1, getWorkspaceMessage(MISSING_PROPERTY_NAME_VALUE) );
+            final String name = requiredArgument( 0, getWorkspaceMessage( MISSING_PROPERTY_NAME_VALUE ) );
+            final String value = requiredArgument( 1, getWorkspaceMessage( MISSING_PROPERTY_NAME_VALUE ) );
 
-            final ForeignKey fk = getForeignKey();
-
+            final Index index = getIndex();
             final UnitOfWork transaction = getTransaction();
-            boolean success = true;
+            String errorMsg = null;
 
             switch ( name ) {
-                case PRIMARY_TYPE:
-                    fk.setPrimaryType(transaction,value);
+                case EXPRESSION:
+                    index.setExpression( transaction, value );
                     break;
                 default:
-                    success = false;
-                    print( MESSAGE_INDENT, getWorkspaceMessage(INVALID_PROPERTY_NAME, NAME ) );
+                    errorMsg = getWorkspaceMessage( INVALID_PROPERTY_NAME, name, Index.class.getSimpleName() );
                     break;
             }
-        } catch (Exception e) {
 
+            if ( StringUtils.isBlank( errorMsg ) ) {
+                result = new CommandResultImpl( getMessage( SET_PROPERTY_SUCCESS, name ) );
+            } else {
+                result = new CommandResultImpl( false, errorMsg, null );
+            }
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( false, getMessage( SET_PROPERTY_ERROR ), e );
         }
 
         return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 1;
     }
 
     /**
@@ -96,15 +110,6 @@ public final class SetForeignKeyPropertyCommand extends ForeignKeyShellCommand {
 
         // no tab completion
         return -1;
-    }
-
-    /* (non-Javadoc)
-     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
-     */
-    @Override
-    protected int getMaxArgCount() {
-        // TODO Auto-generated method stub
-        return 0;
     }
 
 }

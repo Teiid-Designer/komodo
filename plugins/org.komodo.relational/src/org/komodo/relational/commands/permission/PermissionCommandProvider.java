@@ -39,7 +39,12 @@ public class PermissionCommandProvider implements ShellCommandProvider {
     public Map< String, Class< ? extends ShellCommand >> provideCommands() {
         final Map< String, Class< ? extends ShellCommand >> result = new HashMap<>();
 
+        result.put( AddConditionCommand.NAME, AddConditionCommand.class );
+        result.put( AddMaskCommand.NAME, AddMaskCommand.class );
+        result.put( DeleteConditionCommand.NAME, DeleteConditionCommand.class );
+        result.put( DeleteMaskCommand.NAME, DeleteMaskCommand.class );
         result.put( SetPermissionPropertyCommand.NAME, SetPermissionPropertyCommand.class );
+        result.put( UnsetPermissionPropertyCommand.NAME, UnsetPermissionPropertyCommand.class );
 
         return result;
     }
@@ -79,11 +84,8 @@ public class PermissionCommandProvider implements ShellCommandProvider {
      */
     @Override
     public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        if(PermissionImpl.RESOLVER.resolvable(uow, kObj)) {
-            Permission permission = PermissionImpl.RESOLVER.resolve(uow, kObj);
-            return permission.getTypeDisplayName();
-        }
-        return null;
+        final Permission resolved = resolve( uow, kObj );
+        return ( ( resolved == null ) ? null : resolved.getTypeDisplayName() );
     }
 
     /**

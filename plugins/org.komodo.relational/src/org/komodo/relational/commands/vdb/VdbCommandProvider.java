@@ -60,6 +60,7 @@ public class VdbCommandProvider implements ShellCommandProvider {
         result.put( ShowVdbCommand.NAME, ShowVdbCommand.class );
         result.put( SetVdbPropertyCommand.NAME, SetVdbPropertyCommand.class );
         result.put( ExportCommand.NAME, ExportCommand.class );
+        result.put( UnsetVdbPropertyCommand.NAME, UnsetVdbPropertyCommand.class );
 
         return result;
     }
@@ -99,11 +100,8 @@ public class VdbCommandProvider implements ShellCommandProvider {
      */
     @Override
     public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        if(VdbImpl.RESOLVER.resolvable(uow, kObj)) {
-            Vdb vdb = VdbImpl.RESOLVER.resolve(uow, kObj);
-            return vdb.getTypeDisplayName();
-        }
-        return null;
+        final Vdb resolved = resolve( uow, kObj );
+        return ( ( resolved == null ) ? null : resolved.getTypeDisplayName() );
     }
 
     /**

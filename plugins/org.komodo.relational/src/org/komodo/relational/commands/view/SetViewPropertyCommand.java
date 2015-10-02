@@ -16,7 +16,6 @@ import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SE
 import static org.komodo.relational.commands.view.ViewCommandMessages.General.INVALID_ON_COMMIT_PROPERTY_VALUE;
 import static org.komodo.relational.commands.view.ViewCommandMessages.General.INVALID_SCHEMA_ELEMENT_TYPE_PROPERTY_VALUE;
 import static org.komodo.relational.commands.view.ViewCommandMessages.General.INVALID_TEMPORARY_TABLE_TYPE_PROPERTY_VALUE;
-import java.util.Arrays;
 import java.util.List;
 import org.komodo.relational.model.SchemaElement;
 import org.komodo.relational.model.Table;
@@ -31,28 +30,11 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.StringUtils;
 
 /**
- * A shell command to set View properties
+ * A shell command to set {@link View view} properties.
  */
 public final class SetViewPropertyCommand extends ViewShellCommand {
 
     static final String NAME = SetPropertyCommand.NAME;
-
-    private static final String DESCRIPTION = "description"; //$NON-NLS-1$
-    private static final String CARDINALITY = "cardinality"; //$NON-NLS-1$
-    private static final String MATERIALIZED = "materialized"; //$NON-NLS-1$
-    private static final String MATERIALIZED_TABLE = "materialized_table"; //$NON-NLS-1$
-    private static final String NAME_IN_SOURCE = "nameinsource"; //$NON-NLS-1$
-    private static final String UPDATABLE = "updatable"; //$NON-NLS-1$
-    private static final String PRIMARY_KEY = "primary-key"; //$NON-NLS-1$
-    private static final String UUID = "uuid"; //$NON-NLS-1$
-    private static final String ON_COMMIT_VALUE = "onCommitValue"; //$NON-NLS-1$
-    private static final String QUERY_EXPRESSION = "queryExpression"; //$NON-NLS-1$
-    private static final String SCHEMA_ELEMENT_TYPE = "schemaElementType"; //$NON-NLS-1$
-    private static final String TEMPORARY_TABLE_TYPE = "temporary"; //$NON-NLS-1$
-
-    private static final List< String > ALL_PROPS = Arrays.asList( new String[] { DESCRIPTION, CARDINALITY, MATERIALIZED, MATERIALIZED_TABLE,
-                                                                                  NAME_IN_SOURCE, ON_COMMIT_VALUE, PRIMARY_KEY, QUERY_EXPRESSION,
-                                                                                  SCHEMA_ELEMENT_TYPE, TEMPORARY_TABLE_TYPE, UPDATABLE, UUID, } );
 
     /**
      * @param status
@@ -113,9 +95,6 @@ public final class SetViewPropertyCommand extends ViewShellCommand {
                         errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, UPDATABLE );
                     }
 
-                    break;
-                case PRIMARY_KEY:
-                    view.setPrimaryKey( transaction, value );
                     break;
                 case UUID:
                     view.setUuid( transaction, value );

@@ -40,10 +40,9 @@ public class ViewCommandProvider implements ShellCommandProvider {
         final Map< String, Class< ? extends ShellCommand >> result = new HashMap<>();
 
         result.put( AddColumnCommand.NAME, AddColumnCommand.class );
-
         result.put( DeleteColumnCommand.NAME, DeleteColumnCommand.class );
-
         result.put( SetViewPropertyCommand.NAME, SetViewPropertyCommand.class );
+        result.put( UnsetViewPropertyCommand.NAME, UnsetViewPropertyCommand.class );
 
         return result;
     }
@@ -83,11 +82,8 @@ public class ViewCommandProvider implements ShellCommandProvider {
      */
     @Override
     public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        if(ViewImpl.RESOLVER.resolvable(uow, kObj)) {
-            View view = ViewImpl.RESOLVER.resolve(uow, kObj);
-            return view.getTypeDisplayName();
-        }
-        return null;
+        final View resolved = resolve( uow, kObj );
+        return ( ( resolved == null ) ? null : resolved.getTypeDisplayName() );
     }
 
     /**

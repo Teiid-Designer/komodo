@@ -39,11 +39,9 @@ public class DataTypeResultSetCommandProvider implements ShellCommandProvider {
     public Map< String, Class< ? extends ShellCommand >> provideCommands() {
         final Map< String, Class< ? extends ShellCommand >> result = new HashMap<>();
 
-        //result.put( AddParameterCommand.NAME, AddParameterCommand.class );
-
-        //result.put( DeleteParameterCommand.NAME, DeleteParameterCommand.class );
-
-        //result.put( SetStoredProcedurePropertyCommand.NAME, SetStoredProcedurePropertyCommand.class );
+        result.put( SetDataTypeResultSetPropertyCommand.NAME, SetDataTypeResultSetPropertyCommand.class );
+        result.put( UnsetDataTypeResultSetPropertyCommand.NAME, UnsetDataTypeResultSetPropertyCommand.class );
+        // TODO need rename command override
 
         return result;
     }
@@ -83,11 +81,8 @@ public class DataTypeResultSetCommandProvider implements ShellCommandProvider {
      */
     @Override
     public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        if(DataTypeResultSetImpl.RESOLVER.resolvable(uow, kObj)) {
-            DataTypeResultSet rs = DataTypeResultSetImpl.RESOLVER.resolve(uow, kObj);
-            return rs.getTypeDisplayName();
-        }
-        return null;
+        final DataTypeResultSet resolved = resolve( uow, kObj );
+        return ( ( resolved == null ) ? null : resolved.getTypeDisplayName() );
     }
 
     /**

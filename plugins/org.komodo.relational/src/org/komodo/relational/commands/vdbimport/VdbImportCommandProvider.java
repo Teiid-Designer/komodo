@@ -40,6 +40,7 @@ public class VdbImportCommandProvider implements ShellCommandProvider {
         final Map< String, Class< ? extends ShellCommand >> result = new HashMap<>();
 
         result.put( SetVdbImportPropertyCommand.NAME, SetVdbImportPropertyCommand.class );
+        result.put( UnsetVdbImportPropertyCommand.NAME, UnsetVdbImportPropertyCommand.class );
 
         return result;
     }
@@ -79,11 +80,8 @@ public class VdbImportCommandProvider implements ShellCommandProvider {
      */
     @Override
     public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        if(VdbImportImpl.RESOLVER.resolvable(uow, kObj)) {
-            VdbImport vdbImport = VdbImportImpl.RESOLVER.resolve(uow, kObj);
-            return vdbImport.getTypeDisplayName();
-        }
-        return null;
+        final VdbImport resolved = resolve( uow, kObj );
+        return ( ( resolved == null ) ? null : resolved.getTypeDisplayName() );
     }
 
     /**

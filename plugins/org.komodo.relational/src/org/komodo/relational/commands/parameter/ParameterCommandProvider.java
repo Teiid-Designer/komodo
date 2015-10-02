@@ -40,6 +40,7 @@ public class ParameterCommandProvider implements ShellCommandProvider {
         final Map< String, Class< ? extends ShellCommand >> result = new HashMap<>();
 
         result.put( SetParameterPropertyCommand.NAME, SetParameterPropertyCommand.class );
+        result.put( UnsetParameterPropertyCommand.NAME, UnsetParameterPropertyCommand.class );
 
         return result;
     }
@@ -79,11 +80,8 @@ public class ParameterCommandProvider implements ShellCommandProvider {
      */
     @Override
     public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        if(ParameterImpl.RESOLVER.resolvable(uow, kObj)) {
-            Parameter parameter = ParameterImpl.RESOLVER.resolve(uow, kObj);
-            return parameter.getTypeDisplayName();
-        }
-        return null;
+        final Parameter resolved = resolve( uow, kObj );
+        return ( ( resolved == null ) ? null : resolved.getTypeDisplayName() );
     }
 
     /**

@@ -13,7 +13,6 @@ import static org.komodo.relational.commands.WorkspaceCommandMessages.General.MI
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_ERROR;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_SUCCESS;
 import static org.komodo.relational.commands.virtualprocedure.VirtualProcedureCommandMessages.General.INVALID_SCHEMA_ELEMENT_TYPE_PROPERTY_VALUE;
-import java.util.Arrays;
 import java.util.List;
 import org.komodo.relational.model.SchemaElement;
 import org.komodo.relational.model.VirtualProcedure;
@@ -26,21 +25,11 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.StringUtils;
 
 /**
- * A shell command to set VirtualProcedure properties
+ * A shell command to set {@link VirtualProcedure virtual procedure} properties.
  */
 public final class SetVirtualProcedurePropertyCommand extends VirtualProcedureShellCommand {
 
     static final String NAME = SetPropertyCommand.NAME;
-
-    private static final String AS_CLAUSE_STATEMENT = "as-clause-statement"; //$NON-NLS-1$
-    private static final String DESCRIPTION = "description"; //$NON-NLS-1$
-    private static final String NAME_IN_SOURCE = "name-in-source"; //$NON-NLS-1$
-    private static final String SCHEMA_ELEMENT_TYPE = "schema-element-type"; //$NON-NLS-1$
-    private static final String UPDATE_COUNT = "update-count"; //$NON-NLS-1$
-    private static final String UUID = "uuid"; //$NON-NLS-1$
-
-    private static final List< String > ALL_PROPS = Arrays.asList( new String[] { AS_CLAUSE_STATEMENT, DESCRIPTION, NAME_IN_SOURCE,
-                                                                                  SCHEMA_ELEMENT_TYPE, UPDATE_COUNT, UUID } );
 
     /**
      * @param status

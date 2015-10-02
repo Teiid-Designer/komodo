@@ -7,6 +7,8 @@
  */
 package org.komodo.relational.commands.modelsource;
 
+import java.util.Arrays;
+import java.util.List;
 import org.komodo.relational.Messages;
 import org.komodo.relational.commands.RelationalShellCommand;
 import org.komodo.relational.vdb.ModelSource;
@@ -17,6 +19,11 @@ import org.komodo.shell.api.WorkspaceStatus;
  * A base class for @{link {@link ModelSource ModelSource}-related shell commands.
  */
 abstract class ModelSourceShellCommand extends RelationalShellCommand {
+
+    protected static final String JNDI_NAME = "jndi-name"; //$NON-NLS-1$
+    protected static final String TRANSLATOR_NAME = "translator-name"; //$NON-NLS-1$
+
+    protected static final List< String > ALL_PROPS = Arrays.asList( new String[] { JNDI_NAME, TRANSLATOR_NAME } );
 
     protected ModelSourceShellCommand( final String name,
                                        final WorkspaceStatus status ) {

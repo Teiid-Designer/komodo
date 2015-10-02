@@ -45,7 +45,7 @@ public interface VirtualProcedure extends Procedure {
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newStatement
-     *        the new AS clause statement (cannot be empty)
+     *        the new AS clause statement (can be empty)
      * @throws KException
      *         if an error occurs
      */

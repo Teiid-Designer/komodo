@@ -55,13 +55,8 @@ public class TableConstraintCommandProvider implements ShellCommandProvider {
     @Override
     public String getTypeDisplay( final UnitOfWork uow,
                                   final KomodoObject kObject ) throws KException {
-        final TableConstraint constraint = resolve( uow, kObject );
-
-        if (constraint == null) {
-            return null;
-        }
-
-        return constraint.getTypeDisplayName();
+        final TableConstraint resolved = resolve( uow, kObject );
+        return ( ( resolved == null ) ? null : resolved.getTypeDisplayName() );
     }
 
     /**

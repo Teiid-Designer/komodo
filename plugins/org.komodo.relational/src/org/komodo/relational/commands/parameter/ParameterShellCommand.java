@@ -7,6 +7,8 @@
  */
 package org.komodo.relational.commands.parameter;
 
+import java.util.Arrays;
+import java.util.List;
 import org.komodo.relational.Messages;
 import org.komodo.relational.commands.RelationalShellCommand;
 import org.komodo.relational.model.Parameter;
@@ -17,6 +19,19 @@ import org.komodo.shell.api.WorkspaceStatus;
  * A base class for @{link {@link Parameter Parameter}-related shell commands.
  */
 abstract class ParameterShellCommand extends RelationalShellCommand {
+
+    protected static final String DATATYPE_NAME = "datatype-name"; //$NON-NLS-1$
+    protected static final String DEFAULT_VALUE = "default-value"; //$NON-NLS-1$
+    protected static final String DIRECTION = "direction"; //$NON-NLS-1$
+    protected static final String LENGTH = "length"; //$NON-NLS-1$
+    protected static final String NULLABLE = "nullable"; //$NON-NLS-1$
+    protected static final String PRECISION = "precision"; //$NON-NLS-1$
+    protected static final String RESULT = "result"; //$NON-NLS-1$
+    protected static final String SCALE = "scale"; //$NON-NLS-1$
+
+    protected static final List< String > ALL_PROPS = Arrays.asList( new String[] { DATATYPE_NAME, DEFAULT_VALUE, DIRECTION,
+                                                                                    LENGTH, NULLABLE, PRECISION, RESULT,
+                                                                                    SCALE } );
 
     protected ParameterShellCommand( final String name,
                                      final WorkspaceStatus status ) {

@@ -40,6 +40,7 @@ public class IndexCommandProvider implements ShellCommandProvider {
         final Map< String, Class< ? extends ShellCommand >> result = new HashMap<>();
 
         result.put( SetIndexPropertyCommand.NAME, SetIndexPropertyCommand.class );
+        result.put( UnsetIndexPropertyCommand.NAME, UnsetIndexPropertyCommand.class );
 
         return result;
     }
@@ -79,11 +80,8 @@ public class IndexCommandProvider implements ShellCommandProvider {
      */
     @Override
     public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        if(IndexImpl.RESOLVER.resolvable(uow, kObj)) {
-            Index index = IndexImpl.RESOLVER.resolve(uow, kObj);
-            return index.getTypeDisplayName();
-        }
-        return null;
+        final Index resolved = resolve( uow, kObj );
+        return ( ( resolved == null ) ? null : resolved.getTypeDisplayName() );
     }
 
     /**

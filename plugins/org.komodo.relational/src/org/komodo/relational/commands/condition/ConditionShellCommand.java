@@ -7,6 +7,8 @@
  */
 package org.komodo.relational.commands.condition;
 
+import java.util.Arrays;
+import java.util.List;
 import org.komodo.relational.Messages;
 import org.komodo.relational.commands.RelationalShellCommand;
 import org.komodo.relational.vdb.Condition;
@@ -17,6 +19,10 @@ import org.komodo.shell.api.WorkspaceStatus;
  * A base class for @{link {@link Condition Condition}-related shell commands.
  */
 abstract class ConditionShellCommand extends RelationalShellCommand {
+
+    protected static final String CONSTRAINT = "constraint"; //$NON-NLS-1$
+
+    protected static final List< String > ALL_PROPS = Arrays.asList( new String[] { CONSTRAINT } );
 
     protected ConditionShellCommand( final String name,
                                      final WorkspaceStatus status ) {

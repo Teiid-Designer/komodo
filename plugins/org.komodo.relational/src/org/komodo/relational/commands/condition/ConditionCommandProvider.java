@@ -40,6 +40,7 @@ public class ConditionCommandProvider implements ShellCommandProvider {
         final Map< String, Class< ? extends ShellCommand >> result = new HashMap<>();
 
         result.put( SetConditionPropertyCommand.NAME, SetConditionPropertyCommand.class );
+        result.put( UnsetConditionPropertyCommand.NAME, UnsetConditionPropertyCommand.class );
 
         return result;
     }
@@ -73,11 +74,8 @@ public class ConditionCommandProvider implements ShellCommandProvider {
 
     @Override
     public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        if(ConditionImpl.RESOLVER.resolvable(uow, kObj)) {
-            Condition condition = ConditionImpl.RESOLVER.resolve(uow, kObj);
-            return condition.getTypeDisplayName();
-        }
-        return null;
+        final Condition resolved = resolve( uow, kObj );
+        return ( ( resolved == null ) ? null : resolved.getTypeDisplayName() );
     }
 
     /**

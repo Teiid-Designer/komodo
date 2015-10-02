@@ -40,10 +40,9 @@ public class VirtualProcedureCommandProvider implements ShellCommandProvider {
         final Map< String, Class< ? extends ShellCommand >> result = new HashMap<>();
 
         result.put( AddParameterCommand.NAME, AddParameterCommand.class );
-
         result.put( DeleteParameterCommand.NAME, DeleteParameterCommand.class );
-
-//        result.put( SetTablePropertyCommand.NAME, SetTablePropertyCommand.class );
+        result.put( SetVirtualProcedurePropertyCommand.NAME, SetVirtualProcedurePropertyCommand.class );
+        result.put( UnsetVirtualProcedurePropertyCommand.NAME, UnsetVirtualProcedurePropertyCommand.class );
 
         return result;
     }
@@ -83,11 +82,8 @@ public class VirtualProcedureCommandProvider implements ShellCommandProvider {
      */
     @Override
     public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        if(VirtualProcedureImpl.RESOLVER.resolvable(uow, kObj)) {
-            VirtualProcedure proc = VirtualProcedureImpl.RESOLVER.resolve(uow, kObj);
-            return proc.getTypeDisplayName();
-        }
-        return null;
+        final VirtualProcedure resolved = resolve( uow, kObj );
+        return ( ( resolved == null ) ? null : resolved.getTypeDisplayName() );
     }
 
     /**

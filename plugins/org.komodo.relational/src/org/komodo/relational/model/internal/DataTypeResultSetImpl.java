@@ -257,12 +257,21 @@ public final class DataTypeResultSetImpl extends RelationalChildRestrictedObject
      */
     @Override
     public void setArray( final UnitOfWork uow,
-                          final boolean newArray ) throws KException {
-        final String value = getObjectProperty( uow, PropertyValueType.STRING, "getDataType", StandardDdlLexicon.DATATYPE_NAME ); //$NON-NLS-1$
+                          final boolean newArrayIndicator ) throws KException {
+        final String value = getObjectProperty( uow, PropertyValueType.STRING, "setArray", StandardDdlLexicon.DATATYPE_NAME ); //$NON-NLS-1$
 
-        if (StringUtils.isBlank( value )) {
-            setObjectProperty( uow, "setArray", StandardDdlLexicon.DATATYPE_NAME, ( Type.DEFAULT_VALUE.name() + ARRAY_SUFFIX ) ); //$NON-NLS-1$
-        } else if (!value.endsWith( ARRAY_SUFFIX )) {
+        if ( StringUtils.isBlank( value ) ) {
+            // add suffix to default datatype if necessary
+            final String newValue = Type.DEFAULT_VALUE.name() + ( newArrayIndicator ? ARRAY_SUFFIX : EMPTY_STRING );
+            setObjectProperty( uow, "setArray", StandardDdlLexicon.DATATYPE_NAME, newValue ); //$NON-NLS-1$
+        } else if ( value.endsWith( ARRAY_SUFFIX ) && !newArrayIndicator ) {
+            // remove suffix
+            setObjectProperty( uow,
+                               "setArray", //$NON-NLS-1$
+                               StandardDdlLexicon.DATATYPE_NAME,
+                               value.substring( 0, value.length() - ARRAY_SUFFIX.length() ) );
+        } else if ( !value.endsWith( ARRAY_SUFFIX ) && newArrayIndicator ) {
+            // add suffix
             setObjectProperty( uow, "setArray", StandardDdlLexicon.DATATYPE_NAME, ( value + ARRAY_SUFFIX ) ); //$NON-NLS-1$
         }
     }

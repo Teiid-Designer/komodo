@@ -40,6 +40,7 @@ public class SchemaCommandProvider implements ShellCommandProvider {
         final Map< String, Class< ? extends ShellCommand >> result = new HashMap<>();
 
         result.put( SetSchemaPropertyCommand.NAME, SetSchemaPropertyCommand.class );
+        result.put( UnsetSchemaPropertyCommand.NAME, UnsetSchemaPropertyCommand.class );
 
         return result;
     }
@@ -79,11 +80,8 @@ public class SchemaCommandProvider implements ShellCommandProvider {
      */
     @Override
     public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        if(SchemaImpl.RESOLVER.resolvable(uow, kObj)) {
-            Schema schema = SchemaImpl.RESOLVER.resolve(uow, kObj);
-            return schema.getTypeDisplayName();
-        }
-        return null;
+        final Schema resolved = resolve( uow, kObj );
+        return ( ( resolved == null ) ? null : resolved.getTypeDisplayName() );
     }
 
     /**

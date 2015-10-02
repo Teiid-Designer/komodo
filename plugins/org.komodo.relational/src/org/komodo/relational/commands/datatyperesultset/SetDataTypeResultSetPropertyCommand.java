@@ -14,30 +14,22 @@ import static org.komodo.relational.commands.WorkspaceCommandMessages.General.MI
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_ERROR;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_SUCCESS;
 import static org.komodo.relational.commands.model.ModelCommandMessages.General.INVALID_MODEL_TYPE_PROPERTY_VALUE;
-import java.util.Arrays;
 import java.util.List;
 import org.komodo.relational.model.DataTypeResultSet;
-import org.komodo.relational.vdb.Mask;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.shell.commands.SetPropertyCommand;
+import org.komodo.shell.commands.UnsetPropertyCommand;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.StringUtils;
 
 /**
- * A shell command to set DataTypeResultSet properties
+ * A shell command to unset DataTypeResultSet properties
  */
 public final class SetDataTypeResultSetPropertyCommand extends DataTypeResultSetShellCommand {
 
-    static final String NAME = SetPropertyCommand.NAME;
-
-    private static final String ARRAY = "array"; //$NON-NLS-1$
-    private static final String LENGTH = "length"; //$NON-NLS-1$
-    private static final String TYPE = "type"; //$NON-NLS-1$
-
-    private static final List< String > ALL_PROPS = Arrays.asList( new String[] { ARRAY, LENGTH, TYPE } );
+    static final String NAME = UnsetPropertyCommand.NAME;
 
     /**
      * @param status
@@ -61,7 +53,7 @@ public final class SetDataTypeResultSetPropertyCommand extends DataTypeResultSet
             final String value = requiredArgument( 1, getWorkspaceMessage( MISSING_PROPERTY_NAME_VALUE ) );
 
             final DataTypeResultSet rs = getDataTypeResultSet();
-            
+
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
@@ -139,7 +131,7 @@ public final class SetDataTypeResultSetPropertyCommand extends DataTypeResultSet
                     }
                     break;
                 default:
-                    errorMsg = getWorkspaceMessage( INVALID_PROPERTY_NAME, name, Mask.class.getSimpleName() );
+                    errorMsg = getWorkspaceMessage( INVALID_PROPERTY_NAME, name, DataTypeResultSet.class.getSimpleName() );
                     break;
             }
 

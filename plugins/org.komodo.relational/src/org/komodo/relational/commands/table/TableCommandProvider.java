@@ -52,6 +52,7 @@ public class TableCommandProvider implements ShellCommandProvider {
         result.put( DeleteUniqueConstraintCommand.NAME, DeleteUniqueConstraintCommand.class );
 
         result.put( SetTablePropertyCommand.NAME, SetTablePropertyCommand.class );
+        result.put( UnsetTablePropertyCommand.NAME, UnsetTablePropertyCommand.class );
 
         return result;
     }
@@ -91,11 +92,8 @@ public class TableCommandProvider implements ShellCommandProvider {
      */
     @Override
     public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        if(TableImpl.RESOLVER.resolvable(uow, kObj)) {
-            Table table = TableImpl.RESOLVER.resolve(uow, kObj);
-            return table.getTypeDisplayName();
-        }
-        return null;
+        final Table resolved = resolve( uow, kObj );
+        return ( ( resolved == null ) ? null : resolved.getTypeDisplayName() );
     }
 
     /**

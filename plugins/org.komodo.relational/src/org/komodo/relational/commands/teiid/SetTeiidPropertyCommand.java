@@ -13,7 +13,6 @@ import static org.komodo.relational.commands.WorkspaceCommandMessages.General.IN
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.MISSING_PROPERTY_NAME_VALUE;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_ERROR;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_SUCCESS;
-import java.util.Arrays;
 import java.util.List;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.shell.CommandResultImpl;
@@ -30,18 +29,6 @@ import org.komodo.utils.StringUtils;
 public final class SetTeiidPropertyCommand extends TeiidShellCommand {
 
     static final String NAME = SetPropertyCommand.NAME;
-
-    private static final String ADMIN_PORT = "adminPort"; //$NON-NLS-1$
-    private static final String ADMIN_PASSWORD = "adminPswd"; //$NON-NLS-1$
-    private static final String ADMIN_SECURE = "adminSecure"; //$NON-NLS-1$
-    private static final String ADMIN_USER = "adminUser"; //$NON-NLS-1$
-    private static final String JDBC_PORT = "jdbcPort"; //$NON-NLS-1$
-    private static final String JDBC_PASSWORD = "jdbcPswd"; //$NON-NLS-1$
-    private static final String JDBC_SECURE = "jdbcSecure"; //$NON-NLS-1$
-    private static final String JDBC_USER = "jdbcUser"; //$NON-NLS-1$
-
-    private static final List< String > ALL_PROPS = Arrays.asList( new String[] { ADMIN_PORT, ADMIN_PASSWORD, ADMIN_SECURE, ADMIN_USER,
-                                                                                  JDBC_PORT, JDBC_PASSWORD, JDBC_SECURE, JDBC_USER } );
 
     /**
      * @param status

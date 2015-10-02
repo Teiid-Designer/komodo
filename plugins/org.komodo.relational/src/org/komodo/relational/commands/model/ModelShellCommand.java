@@ -7,6 +7,8 @@
  */
 package org.komodo.relational.commands.model;
 
+import java.util.Arrays;
+import java.util.List;
 import org.komodo.relational.Messages;
 import org.komodo.relational.commands.RelationalShellCommand;
 import org.komodo.relational.model.Model;
@@ -17,6 +19,14 @@ import org.komodo.shell.api.WorkspaceStatus;
  * A base class for @{link {@link Model Model}-related shell commands.
  */
 abstract class ModelShellCommand extends RelationalShellCommand {
+
+    protected static final String DESCRIPTION = "description"; //$NON-NLS-1$
+    protected static final String METADATA_TYPE = "metadataType"; //$NON-NLS-1$
+    protected static final String MODEL_TYPE = "modelType"; //$NON-NLS-1$
+    protected static final String VISIBLE = "visible"; //$NON-NLS-1$
+
+    protected static final List< String > ALL_PROPS = Arrays.asList( new String[] { DESCRIPTION, METADATA_TYPE, MODEL_TYPE,
+                                                                                    VISIBLE } );
 
     protected ModelShellCommand( final String name,
                                  final WorkspaceStatus status ) {

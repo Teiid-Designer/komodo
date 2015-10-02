@@ -12,7 +12,6 @@ import static org.komodo.relational.commands.WorkspaceCommandMessages.General.IN
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.MISSING_PROPERTY_NAME_VALUE;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_ERROR;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_SUCCESS;
-import java.util.Arrays;
 import java.util.List;
 import org.komodo.relational.vdb.Permission;
 import org.komodo.shell.CommandResultImpl;
@@ -29,17 +28,6 @@ import org.komodo.utils.StringUtils;
 public final class SetPermissionPropertyCommand extends PermissionShellCommand {
 
     static final String NAME = SetPropertyCommand.NAME;
-
-    private static final String ALLOW_ALTER = "allow-alter"; //$NON-NLS-1$
-    private static final String ALLOW_CREATE = "allow-create"; //$NON-NLS-1$
-    private static final String ALLOW_DELETE = "allow-delete"; //$NON-NLS-1$
-    private static final String ALLOW_EXECUTE = "allow-execute"; //$NON-NLS-1$
-    private static final String ALLOW_LANGUAGE = "allow-language"; //$NON-NLS-1$
-    private static final String ALLOW_READ = "allow-read"; //$NON-NLS-1$
-    private static final String ALLOW_UPDATE = "allow-update"; //$NON-NLS-1$
-
-    private static final List< String > ALL_PROPS = Arrays.asList( new String[] { ALLOW_ALTER, ALLOW_CREATE, ALLOW_DELETE, ALLOW_EXECUTE,
-                                                                                  ALLOW_LANGUAGE, ALLOW_READ, ALLOW_UPDATE } );
 
     /**
      * @param status

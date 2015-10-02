@@ -15,7 +15,6 @@ import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SE
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_SUCCESS;
 import static org.komodo.relational.commands.column.ColumnCommandMessages.General.INVALID_NULLABLE_PROPERTY_VALUE;
 import static org.komodo.relational.commands.column.ColumnCommandMessages.General.INVALID_SEARCHABLE_PROPERTY_VALUE;
-import java.util.Arrays;
 import java.util.List;
 import org.komodo.relational.RelationalConstants.Nullable;
 import org.komodo.relational.model.Column;
@@ -34,40 +33,6 @@ import org.komodo.utils.StringUtils;
 public final class SetColumnPropertyCommand extends ColumnShellCommand {
 
     static final String NAME = SetPropertyCommand.NAME;
-
-    private static final String AUTO_INCREMENTED = "auto-incremented"; //$NON-NLS-1$
-    private static final String CASE_SENSITIVE = "case-sensitive"; //$NON-NLS-1$
-    private static final String CHAR_OCTET_LENGTH = "char-octet-lenght"; //$NON-NLS-1$
-    private static final String COLLATION_NAME = "collation-name"; //$NON-NLS-1$
-    private static final String CURRENCY = "currency"; //$NON-NLS-1$
-    private static final String DATATYPE_NAME = "datatype-name"; //$NON-NLS-1$
-    private static final String DEFAULT_VALUE = "default-value"; //$NON-NLS-1$
-    private static final String DESCRIPTION = "description"; //$NON-NLS-1$
-    private static final String DISTINCT_VALUES = "distinct-values"; //$NON-NLS-1$
-    private static final String FIXED_LENGTH = "fixed-length"; //$NON-NLS-1$
-    private static final String LENGTH = "length"; //$NON-NLS-1$
-    private static final String MAX_VALUE = "max-value"; //$NON-NLS-1$
-    private static final String MIN_VALUE = "min-value"; //$NON-NLS-1$
-    private static final String NAME_IN_SOURCE = "name-in-source"; //$NON-NLS-1$
-    private static final String NATIVE_TYPE = "native-type"; //$NON-NLS-1$
-    private static final String NULLABLE = "nullable"; //$NON-NLS-1$
-    private static final String NULL_VALUE_COUNT = "null-value-count"; //$NON-NLS-1$
-    private static final String PRECISION = "precision"; //$NON-NLS-1$
-    private static final String RADIX = "radix"; //$NON-NLS-1$
-    private static final String SCALE = "scale"; //$NON-NLS-1$
-    private static final String SEARCHABLE = "searchable"; //$NON-NLS-1$
-    private static final String SELECTABLE = "selectable"; //$NON-NLS-1$
-    private static final String SIGNED = "signed"; //$NON-NLS-1$
-    private static final String UPDATABLE = "updatable"; //$NON-NLS-1$
-    private static final String UUID = "uuid"; //$NON-NLS-1$
-
-    private static final List< String > ALL_PROPS = Arrays.asList( new String[] { AUTO_INCREMENTED, CASE_SENSITIVE, CHAR_OCTET_LENGTH, COLLATION_NAME,
-                                                                                  CURRENCY, DATATYPE_NAME, DEFAULT_VALUE, DESCRIPTION,
-                                                                                  DISTINCT_VALUES, FIXED_LENGTH, LENGTH,
-                                                                                  MAX_VALUE, MIN_VALUE, NAME_IN_SOURCE, NATIVE_TYPE,
-                                                                                  NULLABLE, NULL_VALUE_COUNT, PRECISION,
-                                                                                  RADIX, SCALE, SEARCHABLE, SELECTABLE,
-                                                                                  SIGNED, UPDATABLE, UUID } );
 
     /**
      * @param status
