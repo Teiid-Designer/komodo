@@ -111,7 +111,7 @@ public class ContextUtils implements StringConstants {
         } catch (KException ex) {
             // Failed to locate the object
         }
-		
+
 		if(resultObject!=null) {
 		    try {
                 resultObject = workspaceStatus.resolve(resultObject);
@@ -154,38 +154,6 @@ public class ContextUtils implements StringConstants {
 	}
 
 	/**
-<<<<<<< HEAD
-=======
-	 * Determine if the second context is above the first.
-	 * @param transaction the transaction
-	 * @param context1 the first context
-	 * @param context2 the second context
-	 * @return 'true' if context2 is above(closer to root) than context1
-	 * @throws KException the exception
-	 */
-	public static boolean isContextAbove(Repository.UnitOfWork transaction, KomodoObject context1, KomodoObject context2) throws KException {
-		int context1Level = getContextLevel(transaction,context1);
-		int context2Level = getContextLevel(transaction,context2);
-
-		return (context2Level < context1Level) ? true : false;
-	}
-
-	/**
-	 * Determine if the second context is below the first.
-	 * @param transaction the transaction
-	 * @param context1 the first context
-	 * @param context2 the second context
-	 * @return 'true' if context2 is below(further from root) than context1
-	 * @throws KException the exception
-	 */
-	public static boolean isContextBelow(Repository.UnitOfWork transaction, KomodoObject context1, KomodoObject context2) throws KException {
-		int context1Level = getContextLevel(transaction,context1);
-		int context2Level = getContextLevel(transaction,context2);
-
-		return (context2Level > context1Level) ? true : false;
-	}
-
-	/**
 	 * Get the context level, relative to the root context.
 	 * Examples:
 	 * tko.komodo = 0
@@ -210,7 +178,6 @@ public class ContextUtils implements StringConstants {
 	}
 
 	/**
->>>>>>> 5db3ae1f988e9014d56c3814920caf1ed9645f5b
 	 * Get a context child (or parent) of the current context, based on provided segment name.  Returns null if a child of supplied name
 	 * does not exist.  The supplied segment can only represent a change of one level above or below the currentContext.
 	 * @param currentContext the current context
@@ -333,12 +300,33 @@ public class ContextUtils implements StringConstants {
 	 * @return the path relative to the root context
 	 */
 	public static String convertAbsolutePathToRootRelative(WorkspaceStatus wsStatus, String absolutePath) {
-        absolutePath = convertPathToDisplayPath( absolutePath );
+//        absolutePath = convertPathToDisplayPath( absolutePath );
+//
+//        String absContextPath = null;
+//        try {
+//            absContextPath = context.getFullName();
+//        } catch (Exception ex) {
+//            return null;
+//        }
+//        if(absolutePath.startsWith(absContextPath)) {
+//            String relativePath = absolutePath.substring( absContextPath.length() );
+//            if(!StringUtils.isEmpty(relativePath)) {
+//                if(relativePath.startsWith(PATH_SEPARATOR)) {
+//                    relativePath = relativePath.substring(1);
+//                }
+//            }
+//            return relativePath;
+//        }
+//        return null;
+
+
+	    absolutePath = convertPathToDisplayPath( absolutePath );
 
         KomodoObject rootContext = wsStatus.getRootContext();
         String absRootPath = null;
         try {
-            absRootPath = FORWARD_SLASH + KomodoObjectUtils.getFullName(wsStatus, rootContext) + FORWARD_SLASH;
+//            absRootPath = FORWARD_SLASH + KomodoObjectUtils.getFullName(wsStatus, rootContext) + FORWARD_SLASH;
+            absRootPath = KomodoObjectUtils.getFullName(wsStatus, rootContext) + FORWARD_SLASH;
         } catch (Exception ex) {
             return null;
         }

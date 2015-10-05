@@ -186,8 +186,7 @@ public final class SetViewPropertyCommand extends ViewShellCommand {
         if ( ( args.size() == 1 ) ) {
             String theArg = getArguments().get(0);
             if( MATERIALIZED.equals(theArg) || UPDATABLE.equals(theArg) ) {
-                candidates.add( Boolean.TRUE.toString() );
-                candidates.add( Boolean.FALSE.toString() );
+                updateCandidatesForBooleanProperty( lastArgument, candidates );
             } else if( ON_COMMIT_VALUE.equals(theArg) ) {
                 candidates.add( OnCommit.DELETE_ROWS.name() );
                 candidates.add( OnCommit.PRESERVE_ROWS.name() );
@@ -199,7 +198,7 @@ public final class SetViewPropertyCommand extends ViewShellCommand {
                 candidates.add( Table.TemporaryType.LOCAL.name() );
             }
 
-            return 0;
+            return ( candidates.isEmpty() ? -1 : ( StringUtils.isBlank( lastArgument ) ? 0 : ( toString().length() + 1 ) ) );
         }
 
         // no tab completion

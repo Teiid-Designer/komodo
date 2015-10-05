@@ -77,7 +77,7 @@ public final class ExitCommand extends BuiltInShellCommand {
             // make sure arg is valid
             if ( hasArg && !VALID_ARGS.contains( arg ) ) {
                 final String errorMsg = Messages.getString( INVALID_EXIT_ARG, arg );
-                return new CommandResultImpl( false, errorMsg, new InvalidCommandArgumentException( 0, errorMsg ) );
+                throw new InvalidCommandArgumentException( 0, errorMsg );
             }
 
             // max of one argument (this is checked by super)
@@ -92,10 +92,10 @@ public final class ExitCommand extends BuiltInShellCommand {
 
             if ( uow.hasChanges() ) {
                 if ( force ) {
-                    uow.rollback();
+                    wsStatus.rollback( ExitCommand.class.getName() );
                     doExit = true;
                 } else if ( save ) {
-                    uow.commit();
+                    wsStatus.commit( ExitCommand.class.getName() );
                     doExit = true;
                 }
             } else {

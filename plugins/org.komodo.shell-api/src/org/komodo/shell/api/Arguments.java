@@ -34,6 +34,13 @@ public class Arguments extends ArrayList<String> {
 
 	private boolean partialLastArgumentAllowed = false;
 
+    /**
+     * Constructs empty arguments.
+     */
+    public Arguments() {
+        // nothing to do
+    }
+
 	/**
      * @param arguments the command arguments (can be empty)
 	 * @throws InvalidCommandArgumentException the exception

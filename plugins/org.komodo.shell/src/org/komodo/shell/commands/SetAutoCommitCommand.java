@@ -88,18 +88,7 @@ public class SetAutoCommitCommand extends BuiltInShellCommand {
     public int tabCompletion( final String lastArgument,
                               final List< CharSequence > candidates ) throws Exception {
         if ( getArguments().size() == 0 ) {
-            if ( lastArgument == null ) {
-                candidates.add( Boolean.TRUE.toString() );
-                candidates.add( Boolean.FALSE.toString() );
-            } else {
-                final String value = lastArgument.toUpperCase();
-
-                if ( Boolean.TRUE.toString().toUpperCase().startsWith( value ) ) {
-                    candidates.add( Boolean.TRUE.toString() );
-                } else if ( Boolean.FALSE.toString().toUpperCase().startsWith( value ) ) {
-                    candidates.add( Boolean.FALSE.toString() );
-                }
-            }
+            updateCandidatesForBooleanProperty( lastArgument, candidates );
         }
 
         return ( candidates.isEmpty() ? -1 : ( toString().length() + 1 ) );

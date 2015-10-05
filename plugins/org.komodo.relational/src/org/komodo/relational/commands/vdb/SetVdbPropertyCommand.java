@@ -158,10 +158,8 @@ public final class SetVdbPropertyCommand extends VdbShellCommand {
         }
 
         if ( ( args.size() == 1 ) && PREVIEW.equals( getArguments().get( 0 ) ) ) {
-            candidates.add( Boolean.TRUE.toString() );
-            candidates.add( Boolean.FALSE.toString() );
-
-            return 0;
+            updateCandidatesForBooleanProperty( lastArgument, candidates );
+            return ( candidates.isEmpty() ? -1 : ( StringUtils.isBlank( lastArgument ) ? 0 : ( toString().length() + 1 ) ) );
         }
 
         // no tab completion

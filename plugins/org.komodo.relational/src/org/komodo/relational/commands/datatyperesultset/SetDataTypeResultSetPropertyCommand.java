@@ -184,8 +184,7 @@ public final class SetDataTypeResultSetPropertyCommand extends DataTypeResultSet
         if ( ( args.size() == 1 ) ) {
             String theArg = getArguments().get(0);
             if( ARRAY.equals(theArg) ) {
-                candidates.add( Boolean.TRUE.toString() );
-                candidates.add( Boolean.FALSE.toString() );
+                updateCandidatesForBooleanProperty( lastArgument, candidates );
             } else if( TYPE.equals(theArg) ) {
                 candidates.add( DataTypeResultSet.Type.BIGDECIMAL.name() );
                 candidates.add( DataTypeResultSet.Type.BIGINT.name() );
@@ -215,7 +214,7 @@ public final class SetDataTypeResultSetPropertyCommand extends DataTypeResultSet
                 candidates.add( DataTypeResultSet.Type.XML.name() );
             }
 
-            return 0;
+            return ( candidates.isEmpty() ? -1 : ( StringUtils.isBlank( lastArgument ) ? 0 : ( toString().length() + 1 ) ) );
         }
 
         // no tab completion

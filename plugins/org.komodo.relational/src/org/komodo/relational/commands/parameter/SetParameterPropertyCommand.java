@@ -181,8 +181,7 @@ public final class SetParameterPropertyCommand extends ParameterShellCommand {
         if ( ( args.size() == 1 ) ) {
             String theArg = getArguments().get(0);
             if( RESULT.equals(theArg) ) {
-                candidates.add( Boolean.TRUE.toString() );
-                candidates.add( Boolean.FALSE.toString() );
+                updateCandidatesForBooleanProperty( lastArgument, candidates );
             } else if( NULLABLE.equals(theArg) ) {
                 candidates.add( Nullable.NO_NULLS.name() );
                 candidates.add( Nullable.NULLABLE.name() );
@@ -194,7 +193,7 @@ public final class SetParameterPropertyCommand extends ParameterShellCommand {
                 candidates.add( Direction.VARIADIC.name() );
             }
 
-            return 0;
+            return ( candidates.isEmpty() ? -1 : ( StringUtils.isBlank( lastArgument ) ? 0 : ( toString().length() + 1 ) ) );
         }
 
         // no tab completion

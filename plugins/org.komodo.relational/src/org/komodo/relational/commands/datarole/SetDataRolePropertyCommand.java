@@ -136,9 +136,8 @@ public final class SetDataRolePropertyCommand extends DataRoleShellCommand {
         if ( ( args.size() == 1 ) ) {
             String theArg = getArguments().get(0);
             if(  ALLOWED_CREATE_TEMPORARY_TABLES.equals(theArg) || ANY_AUTHENTICATED.equals(theArg) || GRANT_ALL.equals(theArg) ) {
-                candidates.add( Boolean.TRUE.toString() );
-                candidates.add( Boolean.FALSE.toString() );
-                return 0;
+                updateCandidatesForBooleanProperty( lastArgument, candidates );
+                return ( candidates.isEmpty() ? -1 : ( StringUtils.isBlank( lastArgument ) ? 0 : ( toString().length() + 1 ) ) );
             }
         }
 

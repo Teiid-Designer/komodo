@@ -47,6 +47,9 @@ import org.komodo.utils.StringUtils;
  */
 public abstract class BuiltInShellCommand implements ShellCommand, StringConstants {
 
+    protected static final String trueString = Boolean.TRUE.toString();
+    protected static final String falseString = Boolean.FALSE.toString();
+
     private final String name;
     private WorkspaceStatus wsStatus;
     private Arguments arguments;
@@ -71,6 +74,7 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
         ArgCheck.isNotNull( workspaceStatus, "workspaceStatus" ); //$NON-NLS-1$
         this.name = names[0];
         this.wsStatus = workspaceStatus;
+        this.arguments = new Arguments();
 
         // save aliases if necessary
         if ( names.length == 1 ) {
@@ -110,7 +114,7 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
 
         // make sure there aren't too many args
         if ( getArguments().size() > getMaxArgCount() ) {
-            return new CommandResultImpl( false, Messages.getString( Messages.SHELL.TOO_MANY_ARGS ), null );
+            return new CommandResultImpl( false, Messages.getString( Messages.SHELL.TOO_MANY_ARGS, this ), null );
         }
 
         // execute command
@@ -149,18 +153,8 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
      * @see org.komodo.shell.api.ShellCommand#setArguments(Arguments)
      */
     @Override
-    public void setArguments(Arguments arguments) {
-        if(arguments!=null) {
-            this.arguments = arguments ;
-        } else {
-            Arguments args = null;
-            try {
-                args = new Arguments(EMPTY_STRING);
-                this.arguments = args;
-            } catch (InvalidCommandArgumentException ex) {
-                // TODO: LogError
-            }
-        }
+    public void setArguments( final Arguments newArguments ) {
+        this.arguments = ( ( newArguments == null ) ? new Arguments() : newArguments );
     }
 
     /**
@@ -578,6 +572,17 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
             candidates.addAll( potentials );
         } else {
             updateCandidates( candidates, potentials, propArg );
+        }
+    }
+
+    protected void updateCandidatesForBooleanProperty( final String lastArgument,
+                                                       final List< CharSequence > candidates ) {
+        if ( StringUtils.isBlank( lastArgument ) || trueString.startsWith( lastArgument ) ) {
+            candidates.add( Boolean.TRUE.toString() );
+        }
+
+        if ( StringUtils.isBlank( lastArgument ) || falseString.startsWith( lastArgument ) ) {
+            candidates.add( Boolean.FALSE.toString() );
         }
     }
 

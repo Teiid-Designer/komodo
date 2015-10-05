@@ -22,6 +22,7 @@
 package org.komodo.shell;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,6 +33,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
+import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
@@ -127,6 +129,7 @@ public class DefaultKomodoShell implements KomodoShell {
     private final KomodoShellParent parent;
     private final KEngine kEngine;
     private final InputStream inStream;
+    private final PrintStream outStream;
     private final Writer outputWriter;
 
     /**
@@ -140,6 +143,7 @@ public class DefaultKomodoShell implements KomodoShell {
         this.parent = parent;
         this.kEngine = kEngine;
         this.inStream = inStream;
+        this.outStream = outStream;
         this.outputWriter = new OutputStreamWriter(outStream);
 
         StringBuffer sb = new StringBuffer();
@@ -227,6 +231,25 @@ public class DefaultKomodoShell implements KomodoShell {
         wsStatus = new WorkspaceStatusImpl(this,factory);
         factory.registerCommands(wsStatus);
 
+        // load shell properties if they exist
+        final String dataDir = getShellDataLocation();
+        final File startupPropertiesFile = new File( dataDir, PROPERTIES_FILE_NAME );
+
+        if ( startupPropertiesFile.exists() && startupPropertiesFile.isFile() && startupPropertiesFile.canRead() ) {
+            final Properties props = new Properties();
+
+            try {
+                props.load( new FileInputStream( startupPropertiesFile ) );
+            } catch ( final Exception e ) {
+                this.outStream.println( this.msgIndentStr
+                                        + Messages.getString( SHELL.ERROR_LOADING_PROPERTIES,
+                                                              startupPropertiesFile.getAbsolutePath(),
+                                                              e.getMessage() ) );
+            }
+
+            this.wsStatus.setProperties( props );
+        }
+
         reader = ShellCommandReaderFactory.createCommandReader(args, factory, wsStatus);
         reader.open();
 
@@ -276,11 +299,22 @@ public class DefaultKomodoShell implements KomodoShell {
 
                     // log error and shutdown if necessary
                     if ( result.getError() != null ) {
-                        KLog.getLogger().error( command.toString(), result.getError() );
+                        String errorMsg = Messages.getString( SHELL.CommandFailure, command.toString() );
+                        Exception error = result.getError();
+
+                        // don't print out stacktrace for InvalidCommandArgumentExceptions
+                        if ( error instanceof InvalidCommandArgumentException ) {
+                            errorMsg += ' ' + error.getLocalizedMessage();
+                            error = null;
+                        }
+
+                        PrintUtils.print( getOutputWriter(), CompletionConstants.MESSAGE_INDENT, errorMsg );
 
                         if ( this.reader.isBatch() ) {
+                            KLog.getLogger().error( errorMsg, result.getError() );
                             shutdown();
-                        } else if ( ExitCommand.NAME.equals( command.getName() ) ) {
+                        } else if ( ExitCommand.NAME.equals( command.getName() )
+                                    && ( !( result.getError() instanceof InvalidCommandArgumentException ) ) ) {
                             done = true;
 
                             if ( !this.shutdown ) {
