@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -151,15 +152,15 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     }
 
     private void initGlobalProperties() throws KException {
-        this.wsProperties.clear();
+        resetProperties();
 
         // load shell properties if they exist
         final String dataDir = this.shell.getShellDataLocation();
         final File startupPropertiesFile = new File( dataDir, this.shell.getShellPropertiesFile() );
 
         if ( startupPropertiesFile.exists() && startupPropertiesFile.isFile() && startupPropertiesFile.canRead() ) {
-            try {
-                this.wsProperties.load( new FileInputStream( startupPropertiesFile ) );
+            try ( final FileInputStream fis = new FileInputStream( startupPropertiesFile ) ) {
+                this.wsProperties.load( fis );
             } catch ( final Exception e ) {
                 String msg = Messages.getString( SHELL.ERROR_LOADING_PROPERTIES,
                                                  startupPropertiesFile.getAbsolutePath(),
@@ -461,6 +462,12 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         return null; // name and value are valid
     }
 
+    private void resetProperties() {
+        for ( final Entry< String, String > entry : GLOBAL_PROPS.entrySet() ) {
+            setProperty( entry.getKey(), entry.getValue() );
+        }
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -497,6 +504,8 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
      */
     @Override
     public void setProperties( final Properties props ) throws Exception {
+        resetProperties();
+
         if ( ( props != null ) && !props.isEmpty() ) {
             for ( final String name : props.stringPropertyNames() ) {
                 setProperty( name, props.getProperty( name ) );

@@ -133,14 +133,13 @@ public final class SetModelPropertyCommand extends ModelShellCommand {
         if ( ( args.size() == 1 ) ) {
             String theArg = getArguments().get(0);
             if( VISIBLE.equals(theArg) ) {
-                candidates.add( Boolean.TRUE.toString() );
-                candidates.add( Boolean.FALSE.toString() );
+                updateCandidatesForBooleanProperty( lastArgument, candidates );
             } else if( MODEL_TYPE.equals(theArg) ) {
                 candidates.add( Model.Type.PHYSICAL.name() );
                 candidates.add( Model.Type.VIRTUAL.name() );
             }
 
-            return 0;
+            return ( candidates.isEmpty() ? -1 : ( StringUtils.isBlank( lastArgument ) ? 0 : ( toString().length() + 1 ) ) );
         }
 
         // no tab completion

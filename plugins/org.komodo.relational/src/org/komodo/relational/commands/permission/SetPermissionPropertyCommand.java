@@ -167,11 +167,10 @@ public final class SetPermissionPropertyCommand extends PermissionShellCommand {
             String theArg = getArguments().get(0);
             if( ALLOW_ALTER.equals(theArg) || ALLOW_CREATE.equals(theArg) || ALLOW_DELETE.equals(theArg) || ALLOW_EXECUTE.equals(theArg) ||
                 ALLOW_LANGUAGE.equals(theArg) || ALLOW_READ.equals(theArg) || ALLOW_UPDATE.equals(theArg) ) {
-                candidates.add( Boolean.TRUE.toString() );
-                candidates.add( Boolean.FALSE.toString() );
+                updateCandidatesForBooleanProperty( lastArgument, candidates );
             }
 
-            return 0;
+            return ( candidates.isEmpty() ? -1 : ( StringUtils.isBlank( lastArgument ) ? 0 : ( toString().length() + 1 ) ) );
         }
 
         // no tab completion

@@ -315,7 +315,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
          */
         @Override
         public boolean hasChanges() throws KException {
-            if ( this.state == State.RUNNING ) {
+            if ( this.state == State.NOT_STARTED ) {
                 try {
                     return ( ( this.session != null ) && this.session.isLive() && this.session.hasPendingChanges() );
                 } catch ( final RepositoryException e ) {

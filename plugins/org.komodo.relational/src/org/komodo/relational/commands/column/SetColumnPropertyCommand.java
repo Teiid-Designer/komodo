@@ -287,8 +287,7 @@ public final class SetColumnPropertyCommand extends ColumnShellCommand {
             String theArg = getArguments().get(0);
             if( AUTO_INCREMENTED.equals(theArg) || CASE_SENSITIVE.equals(theArg) || CURRENCY.equals(theArg)
              || FIXED_LENGTH.equals(theArg) || SELECTABLE.equals(theArg) || UPDATABLE.equals(theArg)) {
-                candidates.add( Boolean.TRUE.toString() );
-                candidates.add( Boolean.FALSE.toString() );
+                updateCandidatesForBooleanProperty( lastArgument, candidates );
             } else if( NULLABLE.equals(theArg) ) {
                 candidates.add( Nullable.NO_NULLS.name() );
                 candidates.add( Nullable.NULLABLE.name() );
@@ -300,7 +299,7 @@ public final class SetColumnPropertyCommand extends ColumnShellCommand {
                 candidates.add( Searchable.UNSEARCHABLE.name() );
             }
 
-            return 0;
+            return ( candidates.isEmpty() ? -1 : ( StringUtils.isBlank( lastArgument ) ? 0 : ( toString().length() + 1 ) ) );
         }
 
         // no tab completion

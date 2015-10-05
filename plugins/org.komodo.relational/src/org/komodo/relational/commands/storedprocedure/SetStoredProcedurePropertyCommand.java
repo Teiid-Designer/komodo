@@ -151,12 +151,13 @@ public final class SetStoredProcedurePropertyCommand extends StoredProcedureShel
         if ( ( args.size() == 1 ) ) {
             String theArg = getArguments().get(0);
             if( NON_PREPARED.equals(theArg) ) {
-                candidates.add( Boolean.TRUE.toString() );
-                candidates.add( Boolean.FALSE.toString() );
+                updateCandidatesForBooleanProperty( lastArgument, candidates );
             } else if( SCHEMA_ELEMENT_TYPE.equals(theArg)) {
                 candidates.add( SchemaElement.SchemaElementType.FOREIGN.name() );
                 candidates.add( SchemaElement.SchemaElementType.VIRTUAL.name() );
             }
+
+            return ( candidates.isEmpty() ? -1 : ( StringUtils.isBlank( lastArgument ) ? 0 : ( toString().length() + 1 ) ) );
         }
 
         // no tab completion

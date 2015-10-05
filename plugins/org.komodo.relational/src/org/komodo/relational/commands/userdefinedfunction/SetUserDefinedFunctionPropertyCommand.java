@@ -234,8 +234,7 @@ public final class SetUserDefinedFunctionPropertyCommand extends UserDefinedFunc
             String theArg = getArguments().get(0);
             if( AGGREGATE.equals(theArg) || ALLOWS_DISTINCT.equals(theArg) || ALLOWS_ORDERBY.equals(theArg) || ANALYTIC.equals(theArg)
                 || DECOMPOSABLE.equals(theArg) || NULL_ON_NULL.equals(theArg) || USES_DISTINCT_ROWS.equals(theArg) || VAR_ARGS.equals(theArg)) {
-                candidates.add( Boolean.TRUE.toString() );
-                candidates.add( Boolean.FALSE.toString() );
+                updateCandidatesForBooleanProperty( lastArgument, candidates );
             } else if( DETERMINISM.equals(theArg) ) {
                 candidates.add( Function.Determinism.COMMAND_DETERMINISTIC.name() );
                 candidates.add( Function.Determinism.DETERMINISTIC.name() );
@@ -248,7 +247,7 @@ public final class SetUserDefinedFunctionPropertyCommand extends UserDefinedFunc
                 candidates.add( SchemaElement.SchemaElementType.VIRTUAL.name() );
             }
 
-            return 0;
+            return ( candidates.isEmpty() ? -1 : ( StringUtils.isBlank( lastArgument ) ? 0 : ( toString().length() + 1 ) ) );
         }
 
         // no tab completion

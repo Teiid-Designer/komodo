@@ -115,11 +115,13 @@ public class SetGlobalPropertyCommand extends BuiltInShellCommand {
                     }
                 }
             }
-
-            return ( candidates.isEmpty() ? -1 : ( StringUtils.isBlank( lastArgument ) ? 0 : ( toString().length() + 1 ) ) );
+        } else if ( getArguments().size() == 1 ) {
+            if ( getWorkspaceStatus().isBooleanProperty( getArguments().get( 0 ) ) ) {
+                updateCandidatesForBooleanProperty( lastArgument, candidates );
+            }
         }
 
-        return -1;
+        return ( candidates.isEmpty() ? -1 : ( StringUtils.isBlank( lastArgument ) ? 0 : ( toString().length() + 1 ) ) );
     }
 
 }
