@@ -9,7 +9,6 @@ package org.komodo.relational.commands.translator;
 
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.INVALID_PROPERTY_NAME;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.UNSET_MISSING_PROPERTY_NAME;
-import static org.komodo.relational.commands.WorkspaceCommandMessages.General.UNSET_PROPERTY_ERROR;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.UNSET_PROPERTY_SUCCESS;
 import java.util.ArrayList;
 import java.util.List;
@@ -72,7 +71,7 @@ public final class UnsetTranslatorPropertyCommand extends TranslatorShellCommand
                 result = new CommandResultImpl( false, errorMsg, null );
             }
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( UNSET_PROPERTY_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

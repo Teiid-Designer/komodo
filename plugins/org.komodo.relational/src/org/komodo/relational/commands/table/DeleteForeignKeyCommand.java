@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.table;
 
-import static org.komodo.relational.commands.table.TableCommandMessages.DeleteForeignKeyCommand.DELETE_FOREIGN_KEY_ERROR;
 import static org.komodo.relational.commands.table.TableCommandMessages.DeleteForeignKeyCommand.FOREIGN_KEY_DELETED;
 import static org.komodo.relational.commands.table.TableCommandMessages.General.MISSING_FOREIGN_KEY_NAME;
 import java.util.ArrayList;
@@ -52,7 +51,7 @@ public final class DeleteForeignKeyCommand extends TableShellCommand {
 
             result = new CommandResultImpl( getMessage( FOREIGN_KEY_DELETED, fkName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( DELETE_FOREIGN_KEY_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

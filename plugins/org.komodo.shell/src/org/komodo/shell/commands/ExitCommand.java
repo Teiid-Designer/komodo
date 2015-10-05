@@ -110,7 +110,7 @@ public final class ExitCommand extends BuiltInShellCommand {
             // transaction has unsaved changes and neither save or force quit arg was present
             return new CommandResultImpl( false, Messages.getString( EXIT_CANCELED ), null );
         } catch ( final Exception e ) {
-            return new CommandResultImpl( false, e.getLocalizedMessage(), e );
+            return new CommandResultImpl( e );
         }
     }
 

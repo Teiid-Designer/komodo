@@ -12,7 +12,6 @@ import java.util.Set;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.Messages;
-import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.utils.StringUtils;
@@ -71,7 +70,7 @@ public class SetGlobalPropertyCommand extends BuiltInShellCommand {
             setGlobalProperty( propNameArg, propValueArg );
             return new CommandResultImpl( Messages.getString( Messages.SetGlobalPropertyCommand.GlobalPropertySet, propNameArg ) );
         } catch ( final Exception e ) {
-            return new CommandResultImpl( false, Messages.getString( SHELL.CommandFailure, NAME ), e );
+            return new CommandResultImpl( e );
         }
     }
 

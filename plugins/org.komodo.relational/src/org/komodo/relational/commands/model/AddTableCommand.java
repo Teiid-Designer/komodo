@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.model;
 
-import static org.komodo.relational.commands.model.ModelCommandMessages.AddTableCommand.ADD_TABLE_ERROR;
 import static org.komodo.relational.commands.model.ModelCommandMessages.AddTableCommand.TABLE_ADDED;
 import static org.komodo.relational.commands.model.ModelCommandMessages.General.MISSING_TABLE_NAME;
 import org.komodo.relational.model.Model;
@@ -47,7 +46,7 @@ public final class AddTableCommand extends ModelShellCommand {
 
             result = new CommandResultImpl( getMessage( TABLE_ADDED, tableName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( ADD_TABLE_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

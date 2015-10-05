@@ -87,7 +87,7 @@ public class CdCommand extends BuiltInShellCommand {
     			return CommandResult.SUCCESS;
     		}
         } catch ( final Exception e ) {
-            return new CommandResultImpl( false, Messages.getString( SHELL.CommandFailure, NAME ), e );
+            return new CommandResultImpl( e );
         }
 
         return CommandResult.FAIL;

@@ -25,7 +25,6 @@ import java.util.List;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.Messages;
-import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.PrintUtils;
@@ -83,7 +82,7 @@ public class ShowPropertyCommand extends BuiltInShellCommand {
             PrintUtils.printProperty( getWorkspaceStatus(), context, propName );
             return CommandResult.SUCCESS;
         } catch ( Exception e ) {
-            return new CommandResultImpl( false, Messages.getString( SHELL.CommandFailure, NAME ), e );
+            return new CommandResultImpl( e );
         }
     }
 

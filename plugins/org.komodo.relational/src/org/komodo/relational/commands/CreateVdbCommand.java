@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands;
 
-import static org.komodo.relational.commands.WorkspaceCommandMessages.CreateVdbCommand.CREATE_VDB_ERROR;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.CreateVdbCommand.MISSING_VDB_EXTERNAL_PATH;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.CreateVdbCommand.MISSING_VDB_NAME;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.CreateVdbCommand.VDB_CREATED;
@@ -49,7 +48,7 @@ public final class CreateVdbCommand extends WorkspaceShellCommand {
 
             result = new CommandResultImpl( getMessage( VDB_CREATED, vdbName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( CREATE_VDB_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

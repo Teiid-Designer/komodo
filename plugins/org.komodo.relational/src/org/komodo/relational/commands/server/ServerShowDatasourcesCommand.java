@@ -9,7 +9,6 @@ package org.komodo.relational.commands.server;
 
 import static org.komodo.relational.commands.server.ServerCommandMessages.ServerShowDatasourcesCommand.InfoMessage;
 import static org.komodo.relational.commands.server.ServerCommandMessages.ServerShowDatasourcesCommand.ListHeader;
-import static org.komodo.relational.commands.server.ServerCommandMessages.ServerShowDatasourcesCommand.ShowDataSourcesError;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -66,7 +65,7 @@ public final class ServerShowDatasourcesCommand extends ServerShellCommand {
             PrintUtils.printList( getWorkspaceStatus(), objNames, getMessage( ListHeader ) );
             result = CommandResult.SUCCESS;
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( ShowDataSourcesError ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

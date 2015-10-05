@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.table;
 
-import static org.komodo.relational.commands.table.TableCommandMessages.AddIndexCommand.ADD_INDEX_ERROR;
 import static org.komodo.relational.commands.table.TableCommandMessages.AddIndexCommand.INDEX_ADDED;
 import static org.komodo.relational.commands.table.TableCommandMessages.General.MISSING_INDEX_NAME;
 import org.komodo.relational.model.Table;
@@ -47,7 +46,7 @@ public final class AddIndexCommand extends TableShellCommand {
 
             result = new CommandResultImpl( getMessage( INDEX_ADDED, indexName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( ADD_INDEX_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

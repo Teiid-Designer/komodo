@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.model;
 
-import static org.komodo.relational.commands.model.ModelCommandMessages.DeleteUserDefinedFunctionCommand.DELETE_USER_DEFINED_FUNCTION_ERROR;
 import static org.komodo.relational.commands.model.ModelCommandMessages.DeleteUserDefinedFunctionCommand.USER_DEFINED_FUNCTION_DELETED;
 import static org.komodo.relational.commands.model.ModelCommandMessages.General.MISSING_USER_DEFINED_FUNCTION_NAME;
 import java.util.ArrayList;
@@ -52,7 +51,7 @@ public final class DeleteUserDefinedFunctionCommand extends ModelShellCommand {
 
             result = new CommandResultImpl( getMessage( USER_DEFINED_FUNCTION_DELETED, functionName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( DELETE_USER_DEFINED_FUNCTION_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

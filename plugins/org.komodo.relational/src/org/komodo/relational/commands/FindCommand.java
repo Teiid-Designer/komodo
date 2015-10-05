@@ -8,7 +8,6 @@
 package org.komodo.relational.commands;
 
 import static org.komodo.relational.commands.WorkspaceCommandMessages.RESOURCE_BUNDLE;
-import static org.komodo.relational.commands.WorkspaceCommandMessages.DeleteConstraintColumnCommand.DELETE_COLUMN_ERROR;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.FindCommand.INVALID_TYPE;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.FindCommand.MISSING_TYPE_NAME;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.FindCommand.NO_OBJECTS_FOUND;
@@ -74,7 +73,7 @@ public final class FindCommand extends RelationalShellCommand {
                 result = CommandResult.SUCCESS;
             }
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( DELETE_COLUMN_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;
@@ -200,7 +199,7 @@ public final class FindCommand extends RelationalShellCommand {
         // no completions if more than one arg
         return -1;
     }
-    
+
     @Override
     protected void printHelpDescription( final int indent ) {
         print( indent, Messages.getString( RESOURCE_BUNDLE, getClass().getSimpleName() + ".help", getName() ) ); //$NON-NLS-1$

@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.vdb;
 
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowVdbCommand.SHOW_VDB_ERROR;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
@@ -76,7 +75,7 @@ public final class ShowVdbCommand extends VdbShellCommand {
 
             return CommandResult.SUCCESS;
         } catch ( final Exception e ) {
-            return new CommandResultImpl( false, getMessage( SHOW_VDB_ERROR ), e );
+            return new CommandResultImpl( e );
         }
     }
 

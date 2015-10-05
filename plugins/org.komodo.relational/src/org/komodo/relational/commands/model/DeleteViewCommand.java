@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.model;
 
-import static org.komodo.relational.commands.model.ModelCommandMessages.DeleteViewCommand.DELETE_VIEW_ERROR;
 import static org.komodo.relational.commands.model.ModelCommandMessages.DeleteViewCommand.VIEW_DELETED;
 import static org.komodo.relational.commands.model.ModelCommandMessages.General.MISSING_VIEW_NAME;
 import java.util.ArrayList;
@@ -52,7 +51,7 @@ public final class DeleteViewCommand extends ModelShellCommand {
 
             result = new CommandResultImpl( getMessage( VIEW_DELETED, viewName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( DELETE_VIEW_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

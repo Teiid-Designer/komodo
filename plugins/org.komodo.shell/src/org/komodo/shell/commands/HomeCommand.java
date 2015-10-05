@@ -23,11 +23,9 @@ package org.komodo.shell.commands;
 
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
-import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.spi.Messages;
 import org.komodo.spi.constants.StringConstants;
 
 /**
@@ -73,7 +71,7 @@ public class HomeCommand extends BuiltInShellCommand {
 
             return cdCmd.execute();
         } catch ( final Exception e ) {
-            return new CommandResultImpl( false, Messages.getString( SHELL.CommandFailure, NAME ), e );
+            return new CommandResultImpl( e );
         }
     }
 

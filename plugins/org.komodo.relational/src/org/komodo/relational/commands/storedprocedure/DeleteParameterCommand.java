@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.storedprocedure;
 
-import static org.komodo.relational.commands.storedprocedure.StoredProcedureCommandMessages.DeleteParameterCommand.DELETE_PARAMETER_ERROR;
 import static org.komodo.relational.commands.storedprocedure.StoredProcedureCommandMessages.DeleteParameterCommand.PARAMETER_DELETED;
 import static org.komodo.relational.commands.storedprocedure.StoredProcedureCommandMessages.General.MISSING_PARAMETER_NAME;
 import java.util.ArrayList;
@@ -52,7 +51,7 @@ public final class DeleteParameterCommand extends StoredProcedureShellCommand {
 
             result = new CommandResultImpl( getMessage( PARAMETER_DELETED, paramName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( DELETE_PARAMETER_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

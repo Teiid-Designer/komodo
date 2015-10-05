@@ -8,7 +8,6 @@
 package org.komodo.relational.commands.table;
 
 import static org.komodo.relational.commands.table.TableCommandMessages.DeleteColumnCommand.COLUMN_DELETED;
-import static org.komodo.relational.commands.table.TableCommandMessages.DeleteColumnCommand.DELETE_COLUMN_ERROR;
 import static org.komodo.relational.commands.table.TableCommandMessages.General.MISSING_COLUMN_NAME;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +51,7 @@ public final class DeleteColumnCommand extends TableShellCommand {
 
             result = new CommandResultImpl( getMessage( COLUMN_DELETED, columnName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( DELETE_COLUMN_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

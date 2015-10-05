@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.vdb;
 
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.AddEntryCommand.ADD_ENTRY_ERROR;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.AddEntryCommand.ENTRY_ADDED;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_ENTRY_NAME;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_ENTRY_PATH;
@@ -49,7 +48,7 @@ public final class AddEntryCommand extends VdbShellCommand {
 
             result = new CommandResultImpl( getMessage( ENTRY_ADDED, entryName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( ADD_ENTRY_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

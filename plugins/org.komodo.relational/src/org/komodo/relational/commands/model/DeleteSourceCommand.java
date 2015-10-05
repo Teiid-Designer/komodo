@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.model;
 
-import static org.komodo.relational.commands.model.ModelCommandMessages.DeleteSourceCommand.DELETE_SOURCE_ERROR;
 import static org.komodo.relational.commands.model.ModelCommandMessages.DeleteSourceCommand.SOURCE_DELETED;
 import static org.komodo.relational.commands.model.ModelCommandMessages.General.MISSING_SOURCE_NAME;
 import java.util.ArrayList;
@@ -52,7 +51,7 @@ public final class DeleteSourceCommand extends ModelShellCommand {
 
             result = new CommandResultImpl( getMessage( SOURCE_DELETED, sourceName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( DELETE_SOURCE_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

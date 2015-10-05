@@ -8,7 +8,6 @@
 package org.komodo.relational.commands.table;
 
 import static org.komodo.relational.commands.table.TableCommandMessages.AddAccessPatternCommand.ACCESS_PATTERN_ADDED;
-import static org.komodo.relational.commands.table.TableCommandMessages.AddAccessPatternCommand.ADD_ACCESS_PATTERN_ERROR;
 import static org.komodo.relational.commands.table.TableCommandMessages.General.MISSING_ACCESS_PATTERN_NAME;
 import org.komodo.relational.model.Table;
 import org.komodo.shell.CommandResultImpl;
@@ -47,7 +46,7 @@ public final class AddAccessPatternCommand extends TableShellCommand {
 
             result = new CommandResultImpl( getMessage( ACCESS_PATTERN_ADDED, apName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( ADD_ACCESS_PATTERN_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

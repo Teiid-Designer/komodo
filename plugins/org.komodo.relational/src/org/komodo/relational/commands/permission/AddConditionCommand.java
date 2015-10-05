@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.permission;
 
-import static org.komodo.relational.commands.permission.PermissionCommandMessages.AddConditionCommand.ADD_CONDITION_ERROR;
 import static org.komodo.relational.commands.permission.PermissionCommandMessages.AddConditionCommand.CONDITION_ADDED;
 import static org.komodo.relational.commands.permission.PermissionCommandMessages.General.MISSING_CONDITION_NAME;
 import org.komodo.relational.vdb.Permission;
@@ -47,7 +46,7 @@ public final class AddConditionCommand extends PermissionShellCommand {
 
             result = new CommandResultImpl( getMessage( CONDITION_ADDED, permissionName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( ADD_CONDITION_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

@@ -71,7 +71,7 @@ public class HelpCommand extends BuiltInShellCommand {
 
     		return CommandResult.SUCCESS;
         } catch ( final Exception e ) {
-            return new CommandResultImpl( false, e.getLocalizedMessage(), e );
+            return new CommandResultImpl( e );
         }
 	}
 

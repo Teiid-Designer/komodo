@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.table;
 
-import static org.komodo.relational.commands.table.TableCommandMessages.AddForeignKeyCommand.ADD_FOREIGN_KEY_ERROR;
 import static org.komodo.relational.commands.table.TableCommandMessages.AddForeignKeyCommand.FOREIGN_KEY_ADDED;
 import static org.komodo.relational.commands.table.TableCommandMessages.General.MISSING_FOREIGN_KEY_NAME;
 import org.komodo.relational.model.Table;
@@ -47,7 +46,7 @@ public final class AddForeignKeyCommand extends TableShellCommand {
 
             result = new CommandResultImpl( getMessage( FOREIGN_KEY_ADDED, fkName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( ADD_FOREIGN_KEY_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

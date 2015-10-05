@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.vdb;
 
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.AddTranslatorCommand.ADD_TRANSLATOR_ERROR;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.AddTranslatorCommand.TRANSLATOR_ADDED;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_TRANSLATOR_NAME;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_TRANSLATOR_TYPE;
@@ -49,7 +48,7 @@ public class AddTranslatorCommand extends VdbShellCommand {
 
             result = new CommandResultImpl( getMessage( TRANSLATOR_ADDED, translatorName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( ADD_TRANSLATOR_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

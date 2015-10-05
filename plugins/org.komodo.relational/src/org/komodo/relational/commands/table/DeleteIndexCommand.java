@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.table;
 
-import static org.komodo.relational.commands.table.TableCommandMessages.DeleteIndexCommand.DELETE_INDEX_ERROR;
 import static org.komodo.relational.commands.table.TableCommandMessages.DeleteIndexCommand.INDEX_DELETED;
 import static org.komodo.relational.commands.table.TableCommandMessages.General.MISSING_INDEX_NAME;
 import java.util.ArrayList;
@@ -52,7 +51,7 @@ public final class DeleteIndexCommand extends TableShellCommand {
 
             result = new CommandResultImpl( getMessage( INDEX_DELETED, columnName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( DELETE_INDEX_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

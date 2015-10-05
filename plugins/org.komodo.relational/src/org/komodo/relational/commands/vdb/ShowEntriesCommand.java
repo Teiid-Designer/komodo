@@ -10,7 +10,6 @@ package org.komodo.relational.commands.vdb;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.NAME_TYPE_DISPLAY;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowEntriesCommand.ENTRIES_HEADER;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowEntriesCommand.NO_ENTRIES;
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowEntriesCommand.SHOW_ENTRIES_ERROR;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import org.komodo.relational.vdb.Entry;
 import org.komodo.relational.vdb.Vdb;
@@ -60,7 +59,7 @@ public final class ShowEntriesCommand extends VdbShellCommand {
                 result = CommandResult.SUCCESS;
             }
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( SHOW_ENTRIES_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

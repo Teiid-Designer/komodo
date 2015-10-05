@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.tableconstraint;
 
-import static org.komodo.relational.commands.WorkspaceCommandMessages.AddConstraintColumnCommand.ADD_COLUMN_ERROR;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.AddConstraintColumnCommand.COLUMN_PATH_NOT_FOUND;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.AddConstraintColumnCommand.COLUMN_REF_ADDED;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.AddConstraintColumnCommand.INVALID_COLUMN;
@@ -89,7 +88,7 @@ public final class AddConstraintColumnCommand extends RelationalShellCommand {
                 result = new CommandResultImpl( false, getMessage( INVALID_COLUMN_PATH, columnPath ), null );
             }
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( ADD_COLUMN_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

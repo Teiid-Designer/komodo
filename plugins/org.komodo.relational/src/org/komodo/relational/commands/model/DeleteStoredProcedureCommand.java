@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.model;
 
-import static org.komodo.relational.commands.model.ModelCommandMessages.DeleteStoredProcedureCommand.DELETE_STORED_PROCEDURE_ERROR;
 import static org.komodo.relational.commands.model.ModelCommandMessages.DeleteStoredProcedureCommand.STORED_PROCEDURE_DELETED;
 import static org.komodo.relational.commands.model.ModelCommandMessages.General.MISSING_STORED_PROCEDURE_NAME;
 import java.util.ArrayList;
@@ -52,7 +51,7 @@ public final class DeleteStoredProcedureCommand extends ModelShellCommand {
 
             result = new CommandResultImpl( getMessage( STORED_PROCEDURE_DELETED, procName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( DELETE_STORED_PROCEDURE_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

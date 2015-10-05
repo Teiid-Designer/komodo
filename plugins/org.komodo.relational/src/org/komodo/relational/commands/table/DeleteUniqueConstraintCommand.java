@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.table;
 
-import static org.komodo.relational.commands.table.TableCommandMessages.DeleteUniqueConstraintCommand.DELETE_UNIQUE_CONSTRAINT_ERROR;
 import static org.komodo.relational.commands.table.TableCommandMessages.DeleteUniqueConstraintCommand.UNIQUE_CONSTRAINT_DELETED;
 import static org.komodo.relational.commands.table.TableCommandMessages.General.MISSING_UNIQUE_CONSTRAINT_NAME;
 import java.util.ArrayList;
@@ -52,7 +51,7 @@ public final class DeleteUniqueConstraintCommand extends TableShellCommand {
 
             result = new CommandResultImpl( getMessage( UNIQUE_CONSTRAINT_DELETED, ucName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( DELETE_UNIQUE_CONSTRAINT_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

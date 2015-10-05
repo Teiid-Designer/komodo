@@ -41,10 +41,8 @@ public class WorkspaceCommandMessages implements StringConstants {
         PROPERTIES_HEADER,
         PRINT_RELATIONAL_OBJECT,
         PROPERTY_NOT_SET,
-        SET_PROPERTY_ERROR,
         SET_PROPERTY_SUCCESS,
         UNSET_MISSING_PROPERTY_NAME,
-        UNSET_PROPERTY_ERROR,
         UNSET_PROPERTY_SUCCESS;
 
         @Override
@@ -54,7 +52,6 @@ public class WorkspaceCommandMessages implements StringConstants {
     }
 
     public enum CreateVdbCommand {
-        CREATE_VDB_ERROR,
         MISSING_VDB_EXTERNAL_PATH,
         MISSING_VDB_NAME,
         VDB_CREATED;
@@ -66,7 +63,6 @@ public class WorkspaceCommandMessages implements StringConstants {
     }
 
     public enum CreateTeiidCommand {
-        CREATE_TEIID_ERROR,
         MISSING_TEIID_NAME,
         TEIID_CREATED;
 
@@ -77,7 +73,6 @@ public class WorkspaceCommandMessages implements StringConstants {
     }
 
     public enum CreateSchemaCommand {
-        CREATE_SCHEMA_ERROR,
         MISSING_SCHEMA_NAME,
         SCHEMA_CREATED;
 
@@ -102,7 +97,6 @@ public class WorkspaceCommandMessages implements StringConstants {
     }
 
     public enum AddConstraintColumnCommand {
-        ADD_COLUMN_ERROR,
         COLUMN_REF_ADDED,
         COLUMN_PATH_NOT_FOUND,
         ERROR,
@@ -119,7 +113,6 @@ public class WorkspaceCommandMessages implements StringConstants {
     public enum DeleteConstraintColumnCommand {
         COLUMN_REF_REMOVED,
         COLUMN_PATH_NOT_FOUND,
-        DELETE_COLUMN_ERROR,
         INVALID_COLUMN_PATH,
         MISSING_COLUMN_PATH;
 

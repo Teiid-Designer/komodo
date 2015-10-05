@@ -13,6 +13,7 @@ import java.util.Properties;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.modeshape.visitor.DdlNodeVisitor;
 import org.komodo.relational.ExcludeQNamesFilter;
+import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.internal.AdapterFactory;
@@ -34,7 +35,6 @@ import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.internal.ModelSourceImpl;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
-import org.komodo.spi.Messages;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
@@ -68,7 +68,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
      * A filter to exclude specific properties.
      */
     private static final Filter PROPS_FILTER = new ExcludeQNamesFilter( KomodoLexicon.VdbModel.MODEL_DEFINITION );
-    
+
     /**
      * The resolver of a {@link Model}.
      */
@@ -159,7 +159,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
                       final Repository repository,
                       final String workspacePath ) throws KException {
         super( uow, repository, workspacePath );
-        
+
         // add in filter to hide the model definition type
         final Filter[] updatedFilters = new Filter[ DEFAULT_FILTERS.length + 1 ];
         System.arraycopy( DEFAULT_FILTERS, 0, updatedFilters, 0, DEFAULT_FILTERS.length );

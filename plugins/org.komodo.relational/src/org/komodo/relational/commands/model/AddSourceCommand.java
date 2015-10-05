@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.model;
 
-import static org.komodo.relational.commands.model.ModelCommandMessages.AddSourceCommand.ADD_SOURCE_ERROR;
 import static org.komodo.relational.commands.model.ModelCommandMessages.AddSourceCommand.SOURCE_ADDED;
 import static org.komodo.relational.commands.model.ModelCommandMessages.General.MISSING_SOURCE_NAME;
 import org.komodo.relational.model.Model;
@@ -47,7 +46,7 @@ public final class AddSourceCommand extends ModelShellCommand {
 
             result = new CommandResultImpl( getMessage( SOURCE_ADDED, sourceName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( ADD_SOURCE_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

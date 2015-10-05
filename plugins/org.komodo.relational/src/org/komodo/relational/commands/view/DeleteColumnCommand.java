@@ -8,7 +8,6 @@
 package org.komodo.relational.commands.view;
 
 import static org.komodo.relational.commands.view.ViewCommandMessages.DeleteColumnCommand.COLUMN_DELETED;
-import static org.komodo.relational.commands.view.ViewCommandMessages.DeleteColumnCommand.DELETE_COLUMN_ERROR;
 import static org.komodo.relational.commands.view.ViewCommandMessages.General.MISSING_COLUMN_NAME;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +51,7 @@ public final class DeleteColumnCommand extends ViewShellCommand {
 
             result = new CommandResultImpl( getMessage( COLUMN_DELETED, columnName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( DELETE_COLUMN_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

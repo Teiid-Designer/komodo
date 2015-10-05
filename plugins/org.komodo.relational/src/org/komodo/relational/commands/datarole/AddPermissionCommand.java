@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.datarole;
 
-import static org.komodo.relational.commands.datarole.DataRoleCommandMessages.AddPermissionCommand.ADD_PERMISSION_ERROR;
 import static org.komodo.relational.commands.datarole.DataRoleCommandMessages.AddPermissionCommand.PERMISSION_ADDED;
 import static org.komodo.relational.commands.datarole.DataRoleCommandMessages.General.MISSING_PERMISSION_NAME;
 import org.komodo.relational.vdb.DataRole;
@@ -47,7 +46,7 @@ public final class AddPermissionCommand extends DataRoleShellCommand {
 
             result = new CommandResultImpl( getMessage( PERMISSION_ADDED, permissionName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( ADD_PERMISSION_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

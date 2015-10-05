@@ -9,7 +9,6 @@ package org.komodo.relational.commands;
 
 import static org.komodo.relational.commands.WorkspaceCommandMessages.RESOURCE_BUNDLE;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.MISSING_PROPERTY_NAME_VALUE;
-import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_ERROR;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_SUCCESS;
 import org.komodo.relational.Messages;
 import org.komodo.relational.RelationalObject;
@@ -50,7 +49,7 @@ public final class SetCustomPropertyCommand extends RelationalShellCommand {
 
             result = new CommandResultImpl( getMessage( SET_PROPERTY_SUCCESS, name ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( SET_PROPERTY_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;
@@ -75,7 +74,7 @@ public final class SetCustomPropertyCommand extends RelationalShellCommand {
     public boolean isValidForCurrentContext() {
         return ( getContext() instanceof RelationalObject );
     }
-    
+
     @Override
     protected void printHelpDescription( final int indent ) {
         print( indent, Messages.getString( RESOURCE_BUNDLE, getClass().getSimpleName() + ".help", getName() ) ); //$NON-NLS-1$

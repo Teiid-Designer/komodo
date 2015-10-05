@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.vdb;
 
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.DeleteTranslatorCommand.DELETE_TRANSLATOR_ERROR;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.DeleteTranslatorCommand.TRANSLATOR_DELETED;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_TRANSLATOR_NAME;
 import java.util.ArrayList;
@@ -52,7 +51,7 @@ public class DeleteTranslatorCommand extends VdbShellCommand {
 
             result = new CommandResultImpl( getMessage( TRANSLATOR_DELETED, translatorName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( DELETE_TRANSLATOR_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;
