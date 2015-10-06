@@ -134,7 +134,7 @@ public final class UnsetColumnPropertyCommand extends ColumnShellCommand {
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {
-                result = new CommandResultImpl( getMessage( UNSET_PROPERTY_SUCCESS, column.getName( transaction ), name ) );
+                result = new CommandResultImpl( getWorkspaceMessage( UNSET_PROPERTY_SUCCESS, column.getName( transaction ), name ) );
             } else {
                 result = new CommandResultImpl( false, errorMsg, null );
             }

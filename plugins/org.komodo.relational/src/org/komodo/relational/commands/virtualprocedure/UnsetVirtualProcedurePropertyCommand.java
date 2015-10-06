@@ -77,7 +77,7 @@ public final class UnsetVirtualProcedurePropertyCommand extends VirtualProcedure
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {
-                result = new CommandResultImpl( getMessage( UNSET_PROPERTY_SUCCESS, name ) );
+                result = new CommandResultImpl( getWorkspaceMessage( UNSET_PROPERTY_SUCCESS, name ) );
             } else {
                 result = new CommandResultImpl( false, errorMsg, null );
             }

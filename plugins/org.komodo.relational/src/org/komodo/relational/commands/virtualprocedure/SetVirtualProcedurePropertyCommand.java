@@ -93,7 +93,7 @@ public final class SetVirtualProcedurePropertyCommand extends VirtualProcedureSh
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {
-                result = new CommandResultImpl( getMessage( SET_PROPERTY_SUCCESS, name ) );
+                result = new CommandResultImpl( getWorkspaceMessage( SET_PROPERTY_SUCCESS, name ) );
             } else {
                 result = new CommandResultImpl( false, errorMsg, null );
             }

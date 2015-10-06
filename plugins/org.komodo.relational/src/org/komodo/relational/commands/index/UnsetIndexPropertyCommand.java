@@ -9,7 +9,7 @@ package org.komodo.relational.commands.index;
 
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.INVALID_PROPERTY_NAME;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.MISSING_PROPERTY_NAME_VALUE;
-import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_SUCCESS;
+import static org.komodo.relational.commands.WorkspaceCommandMessages.General.UNSET_PROPERTY_SUCCESS;
 import java.util.List;
 import org.komodo.relational.model.Index;
 import org.komodo.shell.CommandResultImpl;
@@ -62,7 +62,7 @@ public final class UnsetIndexPropertyCommand extends IndexShellCommand {
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {
-                result = new CommandResultImpl( getMessage( SET_PROPERTY_SUCCESS, name ) );
+                result = new CommandResultImpl( getWorkspaceMessage( UNSET_PROPERTY_SUCCESS, name ) );
             } else {
                 result = new CommandResultImpl( false, errorMsg, null );
             }
