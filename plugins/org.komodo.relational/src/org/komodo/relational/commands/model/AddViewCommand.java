@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.model;
 
-import static org.komodo.relational.commands.model.ModelCommandMessages.AddViewCommand.ADD_VIEW_ERROR;
 import static org.komodo.relational.commands.model.ModelCommandMessages.AddViewCommand.VIEW_ADDED;
 import static org.komodo.relational.commands.model.ModelCommandMessages.General.MISSING_VIEW_NAME;
 import org.komodo.relational.model.Model;
@@ -47,7 +46,7 @@ public final class AddViewCommand extends ModelShellCommand {
 
             result = new CommandResultImpl( getMessage( VIEW_ADDED, viewName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( ADD_VIEW_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

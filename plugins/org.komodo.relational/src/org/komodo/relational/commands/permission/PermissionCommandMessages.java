@@ -36,7 +36,6 @@ public class PermissionCommandMessages implements StringConstants {
 
     @SuppressWarnings( "javadoc" )
     public enum AddConditionCommand {
-        ADD_CONDITION_ERROR,
         CONDITION_ADDED;
 
         @Override
@@ -47,8 +46,7 @@ public class PermissionCommandMessages implements StringConstants {
 
     @SuppressWarnings( "javadoc" )
     public enum DeleteConditionCommand {
-        CONDITION_DELETED,
-        DELETE_CONDITION_ERROR;
+        CONDITION_DELETED;
 
         @Override
         public String toString() {
@@ -58,7 +56,6 @@ public class PermissionCommandMessages implements StringConstants {
 
     @SuppressWarnings( "javadoc" )
     public enum AddMaskCommand {
-        ADD_MASK_ERROR,
         MASK_ADDED;
 
         @Override

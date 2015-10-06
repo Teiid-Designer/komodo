@@ -38,7 +38,6 @@ public class UserDefinedFunctionCommandMessages implements StringConstants {
 
     @SuppressWarnings( "javadoc" )
     public enum AddParameterCommand {
-        ADD_PARAMETER_ERROR,
         PARAMETER_ADDED;
 
         @Override
@@ -49,7 +48,6 @@ public class UserDefinedFunctionCommandMessages implements StringConstants {
 
     @SuppressWarnings( "javadoc" )
     public enum DeleteParameterCommand {
-        DELETE_PARAMETER_ERROR,
         PARAMETER_DELETED;
 
         @Override

@@ -8,7 +8,6 @@
 package org.komodo.relational.commands.vdb;
 
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.DeleteDataRoleCommand.DATA_ROLE_DELETED;
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.DeleteDataRoleCommand.DELETE_DATA_ROLE_ERROR;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_DATA_ROLE_NAME;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +51,7 @@ public final class DeleteDataRoleCommand extends VdbShellCommand {
 
             result = new CommandResultImpl( getMessage( DATA_ROLE_DELETED, dataRoleName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( DELETE_DATA_ROLE_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

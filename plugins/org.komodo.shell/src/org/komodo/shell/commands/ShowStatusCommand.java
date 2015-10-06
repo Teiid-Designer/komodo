@@ -27,7 +27,6 @@ import java.util.List;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.Messages;
-import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.KomodoObjectUtils;
@@ -73,7 +72,7 @@ public class ShowStatusCommand extends BuiltInShellCommand {
             printStatus();
             return CommandResult.SUCCESS;
         } catch ( final Exception e ) {
-            return new CommandResultImpl( false, Messages.getString( SHELL.CommandFailure, NAME ), e );
+            return new CommandResultImpl( e );
         }
     }
 

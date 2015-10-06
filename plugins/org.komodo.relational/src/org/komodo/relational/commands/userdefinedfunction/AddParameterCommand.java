@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.userdefinedfunction;
 
-import static org.komodo.relational.commands.userdefinedfunction.UserDefinedFunctionCommandMessages.AddParameterCommand.ADD_PARAMETER_ERROR;
 import static org.komodo.relational.commands.userdefinedfunction.UserDefinedFunctionCommandMessages.AddParameterCommand.PARAMETER_ADDED;
 import static org.komodo.relational.commands.userdefinedfunction.UserDefinedFunctionCommandMessages.General.MISSING_PARAMETER_NAME;
 import org.komodo.relational.model.UserDefinedFunction;
@@ -47,7 +46,7 @@ public final class AddParameterCommand extends UserDefinedFunctionShellCommand {
 
             result = new CommandResultImpl( getMessage( PARAMETER_ADDED, paramName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( ADD_PARAMETER_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

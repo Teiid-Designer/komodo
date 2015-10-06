@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.pushdownfunction;
 
-import static org.komodo.relational.commands.pushdownfunction.PushdownFunctionCommandMessages.AddParameterCommand.ADD_PARAMETER_ERROR;
 import static org.komodo.relational.commands.pushdownfunction.PushdownFunctionCommandMessages.AddParameterCommand.PARAMETER_ADDED;
 import static org.komodo.relational.commands.pushdownfunction.PushdownFunctionCommandMessages.General.MISSING_PARAMETER_NAME;
 import org.komodo.relational.model.PushdownFunction;
@@ -47,7 +46,7 @@ public final class AddParameterCommand extends PushdownFunctionShellCommand {
 
             result = new CommandResultImpl( getMessage( PARAMETER_ADDED, paramName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( ADD_PARAMETER_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

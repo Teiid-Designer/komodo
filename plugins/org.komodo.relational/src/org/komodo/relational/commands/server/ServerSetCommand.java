@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.server;
 
-import static org.komodo.relational.commands.WorkspaceCommandMessages.CreateSchemaCommand.CREATE_SCHEMA_ERROR;
 import static org.komodo.relational.commands.server.ServerCommandMessages.ServerSetCommand.MissingServerNameArg;
 import static org.komodo.relational.commands.server.ServerCommandMessages.ServerSetCommand.ServerDoesNotExist;
 import static org.komodo.relational.commands.server.ServerCommandMessages.ServerSetCommand.ServerSetSuccess;
@@ -67,7 +66,7 @@ public final class ServerSetCommand extends ServerShellCommand {
             getWorkspaceStatus().setStateObject( ServerCommandProvider.SERVER_DEFAULT_KEY, wsTeiid );
             result = new CommandResultImpl( getMessage( ServerSetSuccess, serverName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( CREATE_SCHEMA_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

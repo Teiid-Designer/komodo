@@ -8,7 +8,6 @@
 package org.komodo.relational.commands.table;
 
 import static org.komodo.relational.commands.table.TableCommandMessages.DeleteAccessPatternCommand.ACCESS_PATTERN_DELETED;
-import static org.komodo.relational.commands.table.TableCommandMessages.DeleteAccessPatternCommand.DELETE_ACCESS_PATTERN_ERROR;
 import static org.komodo.relational.commands.table.TableCommandMessages.General.MISSING_ACCESS_PATTERN_NAME;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +51,7 @@ public final class DeleteAccessPatternCommand extends TableShellCommand {
 
             result = new CommandResultImpl( getMessage( ACCESS_PATTERN_DELETED, apName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( DELETE_ACCESS_PATTERN_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

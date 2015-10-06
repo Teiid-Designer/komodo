@@ -9,7 +9,6 @@ package org.komodo.relational.commands.mask;
 
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.INVALID_PROPERTY_NAME;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.UNSET_MISSING_PROPERTY_NAME;
-import static org.komodo.relational.commands.WorkspaceCommandMessages.General.UNSET_PROPERTY_ERROR;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.UNSET_PROPERTY_SUCCESS;
 import java.util.List;
 import org.komodo.relational.vdb.Mask;
@@ -67,7 +66,7 @@ public final class UnsetMaskPropertyCommand extends MaskShellCommand {
                 result = new CommandResultImpl( false, errorMsg, null );
             }
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( UNSET_PROPERTY_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

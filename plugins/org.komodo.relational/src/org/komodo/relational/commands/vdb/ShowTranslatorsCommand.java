@@ -9,7 +9,6 @@ package org.komodo.relational.commands.vdb;
 
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.NAME_TYPE_DISPLAY;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowTranslatorsCommand.NO_TRANSLATORS;
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowTranslatorsCommand.SHOW_TRANSLATORS_ERROR;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowTranslatorsCommand.TRANSLATORS_HEADER;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import org.komodo.relational.vdb.Translator;
@@ -61,7 +60,7 @@ public final class ShowTranslatorsCommand extends VdbShellCommand {
                 result = CommandResult.SUCCESS;
             }
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( SHOW_TRANSLATORS_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

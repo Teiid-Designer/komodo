@@ -17,8 +17,6 @@ import java.io.FileWriter;
 import java.util.Properties;
 import org.komodo.relational.model.Model;
 import org.komodo.shell.CommandResultImpl;
-import org.komodo.shell.Messages;
-import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.constants.ExportConstants;
@@ -64,7 +62,7 @@ public final class ExportCommand extends ModelShellCommand {
                 Properties properties = new Properties();
                 properties.put( ExportConstants.USE_TABS_PROP_KEY, true );
                 final String ddl = model.export( uow, properties );
-                
+
                 // No DDL context to export
                 if(StringUtils.isEmpty(ddl)) {
                     return new CommandResultImpl( false, getWorkspaceMessage( ERROR_DDL_EMPTY ), null );
@@ -82,7 +80,7 @@ public final class ExportCommand extends ModelShellCommand {
 
             return new CommandResultImpl( false, getWorkspaceMessage( OUTPUT_FILE_ERROR, fileName ), null );
         } catch ( final Exception e ) {
-            return new CommandResultImpl( false, Messages.getString( SHELL.CommandFailure, NAME ), e );
+            return new CommandResultImpl( e );
         }
     }
 

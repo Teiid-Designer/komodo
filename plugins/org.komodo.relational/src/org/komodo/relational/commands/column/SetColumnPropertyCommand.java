@@ -11,7 +11,6 @@ import static org.komodo.relational.commands.WorkspaceCommandMessages.General.IN
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.INVALID_INTEGER_PROPERTY_VALUE;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.INVALID_PROPERTY_NAME;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.MISSING_PROPERTY_NAME_VALUE;
-import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_ERROR;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_SUCCESS;
 import static org.komodo.relational.commands.column.ColumnCommandMessages.General.INVALID_NULLABLE_PROPERTY_VALUE;
 import static org.komodo.relational.commands.column.ColumnCommandMessages.General.INVALID_SEARCHABLE_PROPERTY_VALUE;
@@ -243,7 +242,7 @@ public final class SetColumnPropertyCommand extends ColumnShellCommand {
                 result = new CommandResultImpl( false, errorMsg, null );
             }
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( SET_PROPERTY_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

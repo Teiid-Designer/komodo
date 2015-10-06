@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.vdb;
 
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.AddDataRoleCommand.ADD_DATA_ROLE_ERROR;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.AddDataRoleCommand.DATA_ROLE_ADDED;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_DATA_ROLE_NAME;
 import org.komodo.relational.vdb.Vdb;
@@ -47,7 +46,7 @@ public final class AddDataRoleCommand extends VdbShellCommand {
 
             result = new CommandResultImpl( getMessage( DATA_ROLE_ADDED, dataRoleName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( ADD_DATA_ROLE_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.model;
 
-import static org.komodo.relational.commands.model.ModelCommandMessages.DeleteVirtualProcedureCommand.DELETE_VIRTUAL_PROCEDURE_ERROR;
 import static org.komodo.relational.commands.model.ModelCommandMessages.DeleteVirtualProcedureCommand.VIRTUAL_PROCEDURE_DELETED;
 import static org.komodo.relational.commands.model.ModelCommandMessages.General.MISSING_VIRTUAL_PROCEDURE_NAME;
 import java.util.ArrayList;
@@ -52,7 +51,7 @@ public final class DeleteVirtualProcedureCommand extends ModelShellCommand {
 
             result = new CommandResultImpl( getMessage( VIRTUAL_PROCEDURE_DELETED, procName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( DELETE_VIRTUAL_PROCEDURE_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

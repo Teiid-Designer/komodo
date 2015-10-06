@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.datarole;
 
-import static org.komodo.relational.commands.datarole.DataRoleCommandMessages.DeleteMappedRoleCommand.DELETE_MAPPED_ROLE_ERROR;
 import static org.komodo.relational.commands.datarole.DataRoleCommandMessages.DeleteMappedRoleCommand.MAPPED_ROLE_DELETED;
 import static org.komodo.relational.commands.datarole.DataRoleCommandMessages.General.MISSING_MAPPED_ROLE_NAME;
 import java.util.ArrayList;
@@ -51,7 +50,7 @@ public final class DeleteMappedRoleCommand extends DataRoleShellCommand {
 
             result = new CommandResultImpl( getMessage( MAPPED_ROLE_DELETED, mappedRoleName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( DELETE_MAPPED_ROLE_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

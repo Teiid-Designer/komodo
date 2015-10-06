@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.vdb;
 
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.DeleteImportCommand.DELETE_IMPORT_ERROR;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.DeleteImportCommand.IMPORT_DELETED;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_IMPORT_NAME;
 import java.util.ArrayList;
@@ -52,7 +51,7 @@ public final class DeleteImportCommand extends VdbShellCommand {
 
             result = new CommandResultImpl( getMessage( IMPORT_DELETED, importName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( DELETE_IMPORT_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

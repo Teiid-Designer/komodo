@@ -57,7 +57,6 @@ public class ViewCommandMessages implements StringConstants {
 
     @SuppressWarnings( "javadoc" )
     public enum AddColumnCommand {
-        ADD_COLUMN_ERROR,
         COLUMN_ADDED;
 
         @Override
@@ -108,7 +107,6 @@ public class ViewCommandMessages implements StringConstants {
 
     @SuppressWarnings( "javadoc" )
     public enum DeleteColumnCommand {
-        DELETE_COLUMN_ERROR,
         COLUMN_DELETED;
 
         @Override

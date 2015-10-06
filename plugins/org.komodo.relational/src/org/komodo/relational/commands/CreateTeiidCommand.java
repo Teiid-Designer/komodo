@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands;
 
-import static org.komodo.relational.commands.WorkspaceCommandMessages.CreateTeiidCommand.CREATE_TEIID_ERROR;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.CreateTeiidCommand.MISSING_TEIID_NAME;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.CreateTeiidCommand.TEIID_CREATED;
 import org.komodo.relational.workspace.WorkspaceManager;
@@ -47,7 +46,7 @@ public final class CreateTeiidCommand extends WorkspaceShellCommand {
 
             result = new CommandResultImpl( getMessage( TEIID_CREATED, teiidName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( CREATE_TEIID_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.model;
 
-import static org.komodo.relational.commands.model.ModelCommandMessages.AddUserDefinedFunctionCommand.ADD_USER_DEFINED_FUNCTION_ERROR;
 import static org.komodo.relational.commands.model.ModelCommandMessages.AddUserDefinedFunctionCommand.USER_DEFINED_FUNCTION_ADDED;
 import static org.komodo.relational.commands.model.ModelCommandMessages.General.MISSING_USER_DEFINED_FUNCTION_NAME;
 import org.komodo.relational.model.Model;
@@ -47,7 +46,7 @@ public final class AddUserDefinedFunctionCommand extends ModelShellCommand {
 
             result = new CommandResultImpl( getMessage( USER_DEFINED_FUNCTION_ADDED, udfName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( ADD_USER_DEFINED_FUNCTION_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

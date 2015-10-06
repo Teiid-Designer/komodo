@@ -25,7 +25,7 @@ public class CommandResultImpl implements CommandResult {
     private final boolean success;
 
     /**
-     * Constructs a successful, persistable result.
+     * Constructs a persistable result.
      *
      * @param success
      *        <code>true</code> if the command successfully executed
@@ -41,6 +41,17 @@ public class CommandResultImpl implements CommandResult {
         this.message = message;
         this.error = error;
         this.persistable = true;
+    }
+
+    /**
+     * Constructs a failure, persistable result with no message. The error message will be used as the result message.
+     *
+     * @param error
+     *        the error that occurred (cannot be <code>null</code>)
+     */
+    public CommandResultImpl( final Exception error ) {
+        this( false, null, error );
+        ArgCheck.isNotNull( error, "error" ); //$NON-NLS-1$
     }
 
     /**

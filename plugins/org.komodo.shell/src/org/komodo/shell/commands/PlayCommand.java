@@ -71,7 +71,7 @@ public class PlayCommand  extends BuiltInShellCommand {
                 return new CommandResultImpl( false, Messages.getString( Messages.PlayCommand.Failure, fileNameArg ), e );
             }
         } catch ( final Exception e ) {
-            return new CommandResultImpl( false, null, e );
+            return new CommandResultImpl( e );
         }
 	}
 

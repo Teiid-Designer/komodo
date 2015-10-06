@@ -7,7 +7,6 @@
  */
 package org.komodo.shell.commands;
 
-import static org.komodo.shell.Messages.SHELL.CommandFailure;
 import static org.komodo.shell.Messages.SetGlobalPropertyCommand.GlobalPropertySet;
 import java.util.List;
 import org.komodo.shell.BuiltInShellCommand;
@@ -45,7 +44,7 @@ public class RollbackCommand extends BuiltInShellCommand {
             getWorkspaceStatus().rollback( RollbackCommand.class.getName() );
             return new CommandResultImpl( Messages.getString( GlobalPropertySet, WorkspaceStatus.AUTO_COMMIT ) );
         } catch ( final Exception e ) {
-            return new CommandResultImpl( false, Messages.getString( CommandFailure, NAME ), e );
+            return new CommandResultImpl( e );
         }
     }
 

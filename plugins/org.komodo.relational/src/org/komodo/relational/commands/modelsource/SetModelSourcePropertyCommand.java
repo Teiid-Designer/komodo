@@ -9,7 +9,6 @@ package org.komodo.relational.commands.modelsource;
 
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.INVALID_PROPERTY_NAME;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.MISSING_PROPERTY_NAME_VALUE;
-import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_ERROR;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_SUCCESS;
 import java.util.List;
 import org.komodo.relational.vdb.ModelSource;
@@ -71,7 +70,7 @@ public final class SetModelSourcePropertyCommand extends ModelSourceShellCommand
                 result = new CommandResultImpl( false, errorMsg, null );
             }
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( SET_PROPERTY_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

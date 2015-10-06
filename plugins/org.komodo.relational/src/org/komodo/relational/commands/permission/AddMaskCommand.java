@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.permission;
 
-import static org.komodo.relational.commands.permission.PermissionCommandMessages.AddMaskCommand.ADD_MASK_ERROR;
 import static org.komodo.relational.commands.permission.PermissionCommandMessages.AddMaskCommand.MASK_ADDED;
 import static org.komodo.relational.commands.permission.PermissionCommandMessages.General.MISSING_MASK_NAME;
 import org.komodo.relational.vdb.Permission;
@@ -47,7 +46,7 @@ public final class AddMaskCommand extends PermissionShellCommand {
 
             result = new CommandResultImpl( getMessage( MASK_ADDED, maskName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( ADD_MASK_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

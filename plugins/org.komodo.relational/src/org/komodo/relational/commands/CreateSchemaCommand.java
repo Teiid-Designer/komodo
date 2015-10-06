@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands;
 
-import static org.komodo.relational.commands.WorkspaceCommandMessages.CreateSchemaCommand.CREATE_SCHEMA_ERROR;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.CreateSchemaCommand.MISSING_SCHEMA_NAME;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.CreateSchemaCommand.SCHEMA_CREATED;
 import org.komodo.relational.workspace.WorkspaceManager;
@@ -47,7 +46,7 @@ public final class CreateSchemaCommand extends WorkspaceShellCommand {
 
             result = new CommandResultImpl( getMessage( SCHEMA_CREATED, schemaName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( CREATE_SCHEMA_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

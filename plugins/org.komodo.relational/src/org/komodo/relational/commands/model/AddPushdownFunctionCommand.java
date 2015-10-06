@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.model;
 
-import static org.komodo.relational.commands.model.ModelCommandMessages.AddPushdownFunctionCommand.ADD_PUSHDOWN_FUNCTION_ERROR;
 import static org.komodo.relational.commands.model.ModelCommandMessages.AddPushdownFunctionCommand.PUSHDOWN_FUNCTION_ADDED;
 import static org.komodo.relational.commands.model.ModelCommandMessages.General.MISSING_PUSHDOWN_FUNCTION_NAME;
 import org.komodo.relational.model.Model;
@@ -47,7 +46,7 @@ public final class AddPushdownFunctionCommand extends ModelShellCommand {
 
             result = new CommandResultImpl( getMessage( PUSHDOWN_FUNCTION_ADDED, pushdownFunctionName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( ADD_PUSHDOWN_FUNCTION_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

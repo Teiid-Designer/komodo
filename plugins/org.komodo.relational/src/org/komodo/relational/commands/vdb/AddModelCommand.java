@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.vdb;
 
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.AddModelCommand.ADD_MODEL_ERROR;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.AddModelCommand.MODEL_ADDED;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_MODEL_NAME;
 import org.komodo.relational.vdb.Vdb;
@@ -47,7 +46,7 @@ public final class AddModelCommand extends VdbShellCommand {
 
             result = new CommandResultImpl( getMessage( MODEL_ADDED, modelName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( ADD_MODEL_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

@@ -93,7 +93,7 @@ public class SetRecordCommand extends BuiltInShellCommand {
             outputToRecordingFile("#  ----------\n#  "+stateChangedMsg+"\n#  ----------"); //$NON-NLS-1$ //$NON-NLS-2$
             return new CommandResultImpl(stateChangedMsg);
         } catch ( final Exception e ) {
-            return new CommandResultImpl( false, Messages.getString( SHELL.CommandFailure, NAME ), e );
+            return new CommandResultImpl( e );
         }
     }
 

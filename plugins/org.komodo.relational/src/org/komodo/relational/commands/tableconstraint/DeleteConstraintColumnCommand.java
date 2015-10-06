@@ -9,7 +9,6 @@ package org.komodo.relational.commands.tableconstraint;
 
 import static org.komodo.relational.commands.WorkspaceCommandMessages.DeleteConstraintColumnCommand.COLUMN_PATH_NOT_FOUND;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.DeleteConstraintColumnCommand.COLUMN_REF_REMOVED;
-import static org.komodo.relational.commands.WorkspaceCommandMessages.DeleteConstraintColumnCommand.DELETE_COLUMN_ERROR;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.DeleteConstraintColumnCommand.INVALID_COLUMN_PATH;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.DeleteConstraintColumnCommand.MISSING_COLUMN_PATH;
 import java.util.Collections;
@@ -79,7 +78,7 @@ public final class DeleteConstraintColumnCommand extends RelationalShellCommand 
                 }
             }
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( DELETE_COLUMN_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

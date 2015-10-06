@@ -8,7 +8,6 @@
 package org.komodo.relational.commands.permission;
 
 import static org.komodo.relational.commands.permission.PermissionCommandMessages.DeleteConditionCommand.CONDITION_DELETED;
-import static org.komodo.relational.commands.permission.PermissionCommandMessages.DeleteConditionCommand.DELETE_CONDITION_ERROR;
 import static org.komodo.relational.commands.permission.PermissionCommandMessages.General.MISSING_CONDITION_NAME;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +51,7 @@ public final class DeleteConditionCommand extends PermissionShellCommand {
 
             result = new CommandResultImpl( getMessage( CONDITION_DELETED, conditionName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( DELETE_CONDITION_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

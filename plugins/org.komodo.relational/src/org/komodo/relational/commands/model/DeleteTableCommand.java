@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.model;
 
-import static org.komodo.relational.commands.model.ModelCommandMessages.DeleteTableCommand.DELETE_TABLE_ERROR;
 import static org.komodo.relational.commands.model.ModelCommandMessages.DeleteTableCommand.TABLE_DELETED;
 import static org.komodo.relational.commands.model.ModelCommandMessages.General.MISSING_TABLE_NAME;
 import java.util.ArrayList;
@@ -52,7 +51,7 @@ public final class DeleteTableCommand extends ModelShellCommand {
 
             result = new CommandResultImpl( getMessage( TABLE_DELETED, tableName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( DELETE_TABLE_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.datarole;
 
-import static org.komodo.relational.commands.datarole.DataRoleCommandMessages.AddMappedRoleCommand.ADD_MAPPED_ROLE_ERROR;
 import static org.komodo.relational.commands.datarole.DataRoleCommandMessages.AddMappedRoleCommand.MAPPED_ROLE_ADDED;
 import static org.komodo.relational.commands.datarole.DataRoleCommandMessages.General.MISSING_MAPPED_ROLE_NAME;
 import org.komodo.relational.vdb.DataRole;
@@ -47,7 +46,7 @@ public final class AddMappedRoleCommand extends DataRoleShellCommand {
 
             result = new CommandResultImpl( getMessage( MAPPED_ROLE_ADDED, mappedRoleName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( ADD_MAPPED_ROLE_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

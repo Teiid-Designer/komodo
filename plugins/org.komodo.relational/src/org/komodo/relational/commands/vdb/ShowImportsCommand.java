@@ -10,7 +10,6 @@ package org.komodo.relational.commands.vdb;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.NAME_TYPE_DISPLAY;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowImportsCommand.IMPORTS_HEADER;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowImportsCommand.NO_IMPORTS;
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowImportsCommand.SHOW_IMPORTS_ERROR;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.VdbImport;
@@ -61,7 +60,7 @@ public final class ShowImportsCommand extends VdbShellCommand {
                 result = CommandResult.SUCCESS;
             }
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( SHOW_IMPORTS_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

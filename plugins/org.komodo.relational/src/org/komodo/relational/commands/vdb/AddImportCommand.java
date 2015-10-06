@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.vdb;
 
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.AddImportCommand.ADD_IMPORT_ERROR;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.AddImportCommand.IMPORT_ADDED;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_IMPORT_NAME;
 import org.komodo.relational.vdb.Vdb;
@@ -47,7 +46,7 @@ public final class AddImportCommand extends VdbShellCommand {
 
             result = new CommandResultImpl( getMessage( IMPORT_ADDED, importName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( ADD_IMPORT_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

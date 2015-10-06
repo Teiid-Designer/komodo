@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.vdb;
 
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.DeleteModelCommand.DELETE_MODEL_ERROR;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.DeleteModelCommand.MODEL_DELETED;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_MODEL_NAME;
 import java.util.ArrayList;
@@ -52,7 +51,7 @@ public final class DeleteModelCommand extends VdbShellCommand {
 
             result = new CommandResultImpl( getMessage( MODEL_DELETED, modelName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( DELETE_MODEL_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

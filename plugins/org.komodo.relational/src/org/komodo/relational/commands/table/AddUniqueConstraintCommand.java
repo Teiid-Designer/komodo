@@ -7,7 +7,6 @@ t * JBoss, Home of Professional Open Source.
  */
 package org.komodo.relational.commands.table;
 
-import static org.komodo.relational.commands.table.TableCommandMessages.AddUniqueConstraintCommand.ADD_UNIQUE_CONSTRAINT_ERROR;
 import static org.komodo.relational.commands.table.TableCommandMessages.AddUniqueConstraintCommand.UNIQUE_CONSTRAINT_ADDED;
 import static org.komodo.relational.commands.table.TableCommandMessages.General.MISSING_UNIQUE_CONSTRAINT_NAME;
 import org.komodo.relational.model.Table;
@@ -47,7 +46,7 @@ public final class AddUniqueConstraintCommand extends TableShellCommand {
 
             result = new CommandResultImpl( getMessage( UNIQUE_CONSTRAINT_ADDED, ucName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( ADD_UNIQUE_CONSTRAINT_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

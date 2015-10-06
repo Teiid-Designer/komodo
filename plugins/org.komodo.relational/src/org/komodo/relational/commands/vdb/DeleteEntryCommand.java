@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.vdb;
 
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.DeleteEntryCommand.DELETE_ENTRY_ERROR;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.DeleteEntryCommand.ENTRY_DELETED;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_ENTRY_NAME;
 import java.util.ArrayList;
@@ -52,7 +51,7 @@ public final class DeleteEntryCommand extends VdbShellCommand {
 
             result = new CommandResultImpl( getMessage( ENTRY_DELETED, entryName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( DELETE_ENTRY_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

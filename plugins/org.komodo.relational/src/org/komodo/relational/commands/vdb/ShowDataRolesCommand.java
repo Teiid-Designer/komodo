@@ -10,7 +10,6 @@ package org.komodo.relational.commands.vdb;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.NAME_TYPE_DISPLAY;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowDataRolesCommand.DATA_ROLES_HEADER;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowDataRolesCommand.NO_DATA_ROLES;
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowDataRolesCommand.SHOW_DATA_ROLES_ERROR;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Vdb;
@@ -60,7 +59,7 @@ public final class ShowDataRolesCommand extends VdbShellCommand {
                 result = CommandResult.SUCCESS;
             }
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( SHOW_DATA_ROLES_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

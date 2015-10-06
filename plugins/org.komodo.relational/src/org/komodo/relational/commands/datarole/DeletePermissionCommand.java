@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.datarole;
 
-import static org.komodo.relational.commands.datarole.DataRoleCommandMessages.DeletePermissionCommand.DELETE_PERMISSION_ERROR;
 import static org.komodo.relational.commands.datarole.DataRoleCommandMessages.DeletePermissionCommand.PERMISSION_DELETED;
 import static org.komodo.relational.commands.datarole.DataRoleCommandMessages.General.MISSING_PERMISSION_NAME;
 import java.util.ArrayList;
@@ -52,7 +51,7 @@ public final class DeletePermissionCommand extends DataRoleShellCommand {
 
             result = new CommandResultImpl( getMessage( PERMISSION_DELETED, permissionName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( DELETE_PERMISSION_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

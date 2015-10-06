@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.model;
 
-import static org.komodo.relational.commands.model.ModelCommandMessages.AddStoredProcedureCommand.ADD_STORED_PROCEDURE_ERROR;
 import static org.komodo.relational.commands.model.ModelCommandMessages.AddStoredProcedureCommand.STORED_PROCEDURE_ADDED;
 import static org.komodo.relational.commands.model.ModelCommandMessages.General.MISSING_STORED_PROCEDURE_NAME;
 import org.komodo.relational.model.Model;
@@ -47,7 +46,7 @@ public final class AddStoredProcedureCommand extends ModelShellCommand {
 
             result = new CommandResultImpl( getMessage( STORED_PROCEDURE_ADDED, procName ) );
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( ADD_STORED_PROCEDURE_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;

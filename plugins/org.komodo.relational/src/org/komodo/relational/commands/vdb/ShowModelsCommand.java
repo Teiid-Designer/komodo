@@ -10,7 +10,6 @@ package org.komodo.relational.commands.vdb;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.NAME_TYPE_DISPLAY;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowModelsCommand.MODELS_HEADER;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowModelsCommand.NO_MODELS;
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowModelsCommand.SHOW_MODELS_ERROR;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.vdb.Vdb;
@@ -60,7 +59,7 @@ public final class ShowModelsCommand extends VdbShellCommand {
                 result = CommandResult.SUCCESS;
             }
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( SHOW_MODELS_ERROR ), e );
+            result = new CommandResultImpl( e );
         }
 
         return result;
