@@ -28,7 +28,7 @@ import org.junit.Test;
 import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
 import org.komodo.importer.ImportOptions.OptionKeys;
-import org.komodo.importer.vdb.VdbImporter;
+import org.komodo.relational.importer.vdb.VdbImporter;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.test.utils.AbstractLocalRepositoryTest;

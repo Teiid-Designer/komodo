@@ -7,8 +7,8 @@
  */
 package org.komodo.relational.commands;
 
-import static org.komodo.relational.commands.WorkspaceCommandMessages.CreateTeiidCommand.MISSING_TEIID_NAME;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.CreateTeiidCommand.TEIID_CREATED;
+import static org.komodo.relational.commands.WorkspaceCommandMessages.General.MISSING_TEIID_NAME;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;

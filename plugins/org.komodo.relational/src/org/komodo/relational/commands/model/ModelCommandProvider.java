@@ -58,6 +58,7 @@ public class ModelCommandProvider implements ShellCommandProvider {
         result.put( SetModelPropertyCommand.NAME, SetModelPropertyCommand.class );
         result.put( UnsetModelPropertyCommand.NAME, UnsetModelPropertyCommand.class );
         result.put( ExportCommand.NAME, ExportCommand.class );
+        result.put( ImportCommand.NAME, ImportCommand.class );
 
         return result;
     }

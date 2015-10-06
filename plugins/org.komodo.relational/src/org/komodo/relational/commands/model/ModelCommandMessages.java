@@ -197,6 +197,24 @@ public class ModelCommandMessages implements StringConstants {
         }
     }
 
+    @SuppressWarnings( "javadoc" )
+    public enum ImportCommand {
+        DdlImportInProgressMsg,
+        DdlImportSuccessMsg,
+        ImportFailedMsg,
+        childTypeNotAllowed,
+        InvalidDDLParentType,
+        ErrorCreatingTempNode,
+        DeleteTempContextFailedMsg,
+        cannotImport_wouldCreateDuplicate,
+        DDL_IMPORTED;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
     private static String getEnumName(Enum<?> enumValue) {
         String className = enumValue.getClass().getName();
         String[] components = className.split("\\$"); //$NON-NLS-1$

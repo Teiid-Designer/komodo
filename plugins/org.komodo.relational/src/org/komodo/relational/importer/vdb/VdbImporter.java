@@ -19,11 +19,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  */
-package org.komodo.importer.vdb;
+package org.komodo.relational.importer.vdb;
 
 import java.io.File;
 import java.io.InputStream;
-
 import org.komodo.importer.AbstractImporter;
 import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
@@ -32,6 +31,7 @@ import org.komodo.importer.ImportOptions.OptionKeys;
 import org.komodo.importer.ImportType;
 import org.komodo.importer.Messages;
 import org.komodo.relational.vdb.Vdb;
+import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
@@ -67,6 +67,10 @@ public class VdbImporter extends AbstractImporter {
         Vdb vdb = getWorkspaceManager().createVdb(transaction, parentObject, vdbName, vdbFilePath);
         KomodoObject fileNode = vdb.addChild(transaction, JcrLexicon.CONTENT.getString(), null);
         fileNode.setProperty(transaction, JcrLexicon.DATA.getString(), content);
+    }
+    
+    protected WorkspaceManager getWorkspaceManager() throws KException {
+        return WorkspaceManager.getInstance( getRepository() );
     }
 
     @Override

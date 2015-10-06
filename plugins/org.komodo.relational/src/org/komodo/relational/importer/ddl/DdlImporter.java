@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  ************************************************************************************/
-package org.komodo.importer.ddl;
+package org.komodo.relational.importer.ddl;
 
 import java.io.File;
 import java.io.InputStream;

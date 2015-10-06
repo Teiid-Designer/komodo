@@ -19,22 +19,19 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  */
-package org.komodo.importer.vdb;
+package org.komodo.relational.importer.vdb;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-
 import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
 import org.junit.Test;
-import org.komodo.importer.AbstractImporterTest;
 import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
 import org.komodo.importer.ImportOptions.ExistingNodeOptions;
@@ -42,6 +39,7 @@ import org.komodo.importer.ImportOptions.OptionKeys;
 import org.komodo.importer.Messages;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Symbol;
+import org.komodo.relational.AbstractImporterTest;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Model.Type;
 import org.komodo.relational.vdb.DataRole;

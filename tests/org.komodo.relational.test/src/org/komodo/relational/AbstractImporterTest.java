@@ -19,20 +19,20 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  ************************************************************************************/
-package org.komodo.importer;
+package org.komodo.relational;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.modeshape.jcr.api.JcrConstants.JCR_MIXIN_TYPES;
 import static org.modeshape.jcr.api.JcrConstants.JCR_PRIMARY_TYPE;
-
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
+import org.komodo.importer.ImportMessages;
+import org.komodo.importer.ImportOptions;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
