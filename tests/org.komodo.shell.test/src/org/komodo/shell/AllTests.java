@@ -7,9 +7,10 @@ import org.junit.runners.Suite;
  * All Tests for CommandLine
  */
 @RunWith(Suite.class)
-@Suite.SuiteClasses( { CdCommandTest.class, DeleteCommandTest.class, ListCommandTest.class,
-                      PlayCommandTest.class, SetCommandTest.class,
-                      ShowCommandTest.class, UnsetCommandTest.class } )
+@Suite.SuiteClasses( { CdCommandTest.class, HomeCommandTest.class, ListCommandTest.class,
+                      PlayCommandTest.class, ShowChildrenCommandTest.class,
+                      ShowGlobalCommandTest.class, ShowPropertiesCommandTest.class, ShowPropertyCommandTest.class,
+                      ShowStatusCommandTest.class, ShowSummaryCommandTest.class} )
 public class AllTests {
     // nothing to do
 }

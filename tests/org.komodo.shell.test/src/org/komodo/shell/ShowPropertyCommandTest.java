@@ -18,7 +18,7 @@ package org.komodo.shell;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
-import org.komodo.shell.commands.core.ShowStatusCommand;
+import org.komodo.shell.commands.ShowPropertyCommand;
 
 /**
  * Test Class to test ShowStatusCommand
@@ -27,7 +27,7 @@ import org.komodo.shell.commands.core.ShowStatusCommand;
 @SuppressWarnings({"javadoc", "nls"})
 public class ShowPropertyCommandTest extends AbstractCommandTest {
 
-    private static final String SHOW_STATUS1 = "showStatus1.txt";
+    private static final String SHOW_STATUS1 = "showProperty1.txt";
 
 	/**
 	 * Test for StatusCommand
@@ -38,7 +38,7 @@ public class ShowPropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testShowStatus1() throws Exception {
-    	setup(SHOW_STATUS1, ShowStatusCommand.class);
+    	setup(SHOW_STATUS1, ShowPropertyCommand.class);
 
     	execute();
 
@@ -49,7 +49,7 @@ public class ShowPropertyCommandTest extends AbstractCommandTest {
         assertTrue(writerOutput.contains("None set"));
         assertTrue(writerOutput.contains("/workspace"));
 
-    	assertEquals("/workspace", wsStatus.getCurrentContextFullName()); //$NON-NLS-1$
+    	//assertEquals("/workspace", wsStatus.getCurrentContextFullName()); //$NON-NLS-1$
     }
 
 }

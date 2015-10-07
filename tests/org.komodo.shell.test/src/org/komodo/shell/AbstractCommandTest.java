@@ -17,7 +17,7 @@ import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.InvalidCommandArgumentException;
 import org.komodo.shell.api.KomodoShell;
 import org.komodo.shell.api.ShellCommand;
-import org.komodo.shell.commands.core.PlayCommand;
+import org.komodo.shell.commands.PlayCommand;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.constants.SystemConstants;
 import org.komodo.spi.repository.Repository;

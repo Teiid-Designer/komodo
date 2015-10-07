@@ -1,0 +1,2 @@
+#cd into workspace with absolute path
+cd /workspace

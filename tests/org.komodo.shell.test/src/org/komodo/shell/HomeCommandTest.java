@@ -18,8 +18,7 @@ package org.komodo.shell;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
-import org.komodo.shell.commands.core.ListCommand;
-import org.komodo.shell.util.KomodoObjectUtils;
+import org.komodo.shell.commands.HomeCommand;
 
 /**
  * Test Class to test ListCommand
@@ -28,11 +27,7 @@ import org.komodo.shell.util.KomodoObjectUtils;
 @SuppressWarnings({"javadoc", "nls"})
 public class HomeCommandTest extends AbstractCommandTest {
 
-	private static final String LIST_COMMAND1 = "listCommand1.txt"; //$NON-NLS-1$
-	private static final String LIST_COMMAND2 = "listCommand2.txt"; //$NON-NLS-1$
-    private static final String LIST_COMMAND3 = "listCommand3.txt"; //$NON-NLS-1$
-    private static final String LIST_COMMAND4 = "listCommand4.txt"; //$NON-NLS-1$
-    private static final String LIST_COMMAND5 = "listCommand5.txt"; //$NON-NLS-1$
+	private static final String HOME_COMMAND1 = "homeCommand1.txt"; //$NON-NLS-1$
 
 	/**
 	 * Test for ListCommand
@@ -42,8 +37,8 @@ public class HomeCommandTest extends AbstractCommandTest {
 	}
 
     @Test
-    public void testList1() throws Exception {
-    	setup(LIST_COMMAND1, ListCommand.class);
+    public void testHome1() throws Exception {
+    	setup(HOME_COMMAND1, HomeCommand.class);
 
     	execute();
 
@@ -52,63 +47,7 @@ public class HomeCommandTest extends AbstractCommandTest {
         assertTrue( writerOutput.contains( "no children" ) );
         assertTrue( writerOutput.contains( "Workspace \"/workspace\"" ) );
 
-        assertEquals("/workspace", wsStatus.getCurrentContextFullName()); //$NON-NLS-1$
-    }
-
-    @Test
-    public void testList2() throws Exception {
-    	setup(LIST_COMMAND2, ListCommand.class);
-
-    	execute();
-
-        // make sure model names and model type appear in output
-        String writerOutput = getCommandOutput();
-        assertTrue( writerOutput.contains( "Model1" ) );
-        assertTrue( writerOutput.contains( "Model2" ) );
-        assertTrue( writerOutput.contains( "Model3" ) );
-
-    	assertEquals("/workspace/MyVdb", wsStatus.getCurrentContextFullName()); //$NON-NLS-1$
-    }
-
-    @Test
-    public void testList3() throws Exception {
-        setup(LIST_COMMAND3, ListCommand.class);
-
-        execute();
-
-        // make sure table name and table type appear in output
-        String writerOutput = getCommandOutput();
-        assertTrue( writerOutput.contains( "Table1" ) );
-
-        KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext());
-        
-        assertEquals("/workspace/MyVdb/Model1", wsStatus.getCurrentContextFullName()); //$NON-NLS-1$
-    }
-
-    @Test
-    public void testListLsAlias() throws Exception {
-        setup(LIST_COMMAND4, ListCommand.class);
-
-        execute();
-
-        // make sure table name and table type appear in output
-        String writerOutput = getCommandOutput();
-        assertTrue( writerOutput.contains( "Table1" ) );
-
-        assertEquals("/workspace/MyVdb/Model1", wsStatus.getCurrentContextFullName()); //$NON-NLS-1$
-    }
-
-    @Test
-    public void testListLlAlias() throws Exception {
-        setup(LIST_COMMAND5, ListCommand.class);
-
-        execute();
-
-        // make sure table name and table type appear in output
-        String writerOutput = getCommandOutput();
-        assertTrue( writerOutput.contains( "Table1" ) );
-
-        assertEquals("/workspace/MyVdb/Model1", wsStatus.getCurrentContextFullName()); //$NON-NLS-1$
+        //assertEquals("/workspace", wsStatus.getCurrentContextFullName()); //$NON-NLS-1$
     }
 
 }
