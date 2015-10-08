@@ -16,9 +16,8 @@
 package org.komodo.shell;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import org.junit.Test;
-import org.komodo.shell.commands.core.ShowStatusCommand;
+import org.komodo.shell.commands.ShowChildrenCommand;
 
 /**
  * Test Class to test ShowStatusCommand
@@ -27,7 +26,7 @@ import org.komodo.shell.commands.core.ShowStatusCommand;
 @SuppressWarnings({"javadoc", "nls"})
 public class ShowChildrenCommandTest extends AbstractCommandTest {
 
-    private static final String SHOW_STATUS1 = "showStatus1.txt";
+    private static final String SHOW_CHILDREN1 = "showChildren1.txt";
 
 	/**
 	 * Test for StatusCommand
@@ -38,15 +37,15 @@ public class ShowChildrenCommandTest extends AbstractCommandTest {
 
     @Test
     public void testShowChildren1() throws Exception {
-        setup(SHOW_CHILDREN1, ShowCommand.class);
+        setup(SHOW_CHILDREN1, ShowChildrenCommand.class);
 
         execute();
 
-        String expectedOutput = INDENT+"There are no children for Workspace \"/workspace\".\n"; //$NON-NLS-1$
+        String expectedOutput = "There are no children for Workspace \"/workspace\".\n"; //$NON-NLS-1$
 
         String writerOutput = getCommandOutput();
         assertEquals(expectedOutput,writerOutput);
-        assertEquals("/workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+        //assertEquals("/workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
     }
 
 }

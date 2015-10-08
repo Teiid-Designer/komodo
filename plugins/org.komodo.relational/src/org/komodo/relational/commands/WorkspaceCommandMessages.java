@@ -33,8 +33,9 @@ public class WorkspaceCommandMessages implements StringConstants {
         MISSING_OUTPUT_FILE_NAME,
         MISSING_INPUT_FILE_NAME,
         MISSING_PROPERTY_NAME_VALUE,
-        MISSING_VDB_EXTERNAL_PATH,
         MISSING_VDB_NAME,
+        MISSING_TEIID_NAME,
+        MISSING_SCHEMA_NAME,
         NO_PROPERTIES,
         OUTPUT_FILE_ERROR,
         INPUT_FILE_ERROR,
@@ -53,8 +54,35 @@ public class WorkspaceCommandMessages implements StringConstants {
 
     public enum CreateVdbCommand {
         MISSING_VDB_EXTERNAL_PATH,
-        MISSING_VDB_NAME,
         VDB_CREATED;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+    
+    public enum ImportVdbCommand {
+        VdbImportInProgressMsg,
+        VdbImportSuccessMsg,
+        InvalidSubCommand,
+        ImportFailedMsg,
+        childTypeNotAllowed,
+        ErrorCreatingTempNode,
+        DeleteTempVdbFailedMsg,
+        cannotImport_wouldCreateDuplicate,
+        VDB_IMPORTED;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+    
+    public enum DeleteVdbCommand {
+        DELETE_VDB_ERROR,
+        VDB_NOT_FOUND,
+        VDB_DELETED;
 
         @Override
         public String toString() {
@@ -63,7 +91,7 @@ public class WorkspaceCommandMessages implements StringConstants {
     }
 
     public enum CreateTeiidCommand {
-        MISSING_TEIID_NAME,
+        CREATE_TEIID_ERROR,
         TEIID_CREATED;
 
         @Override
@@ -72,9 +100,31 @@ public class WorkspaceCommandMessages implements StringConstants {
         }
     }
 
+    public enum DeleteTeiidCommand {
+        DELETE_TEIID_ERROR,
+        TEIID_NOT_FOUND,
+        TEIID_DELETED;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
     public enum CreateSchemaCommand {
-        MISSING_SCHEMA_NAME,
+        CREATE_SCHEMA_ERROR,
         SCHEMA_CREATED;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    public enum DeleteSchemaCommand {
+        DELETE_SCHEMA_ERROR,
+        SCHEMA_NOT_FOUND,
+        SCHEMA_DELETED;
 
         @Override
         public String toString() {

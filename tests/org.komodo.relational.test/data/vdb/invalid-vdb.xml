@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<vdb name="invalid-vdb" version="1">
+
+    <description>Invalid vdb with missing end tags for warble model</description>
+
+    <model name="warble" type="PHYSICAL"
+        <source name="warble" translator-name="rest" connection-jndi-name="java:/twitterDS"
+    </model
+</vdb>

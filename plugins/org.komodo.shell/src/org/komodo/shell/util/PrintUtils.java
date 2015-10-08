@@ -179,7 +179,7 @@ public class PrintUtils implements StringConstants {
         }
 
         if ( props.isEmpty() ) {
-            final String path = wsStatus.getLabelProvider().getDisplayPath( context );
+            final String path = KomodoObjectUtils.getFullName( wsStatus, context );
             final String noPropsMsg = Messages.getString( SHELL.NoPropertiesMsg, wsStatus.getTypeDisplay(context), path );
             print( commandOutput, MESSAGE_INDENT, noPropsMsg );
             return;
@@ -226,7 +226,7 @@ public class PrintUtils implements StringConstants {
 
         // Print properties header
         final String objType = wsStatus.getTypeDisplay(context); // current object type
-        final String path = wsStatus.getLabelProvider().getDisplayPath( context );
+        final String path = KomodoObjectUtils.getFullName( wsStatus, context );
         final String propListHeader = Messages.getString( SHELL.PropertiesHeader, objType, path );
         print( commandOutput, MESSAGE_INDENT, propListHeader );
 
@@ -285,7 +285,7 @@ public class PrintUtils implements StringConstants {
         final String format = PrintUtils.getFormat( maxNameWidth, maxValueWidth );
 
         // Print properties header
-        final String path = wsStatus.getLabelProvider().getDisplayPath( context );
+        final String path = KomodoObjectUtils.getFullName( wsStatus, context );
         String propListHeader = Messages.getString( SHELL.PropertyHeader, wsStatus.getTypeDisplay(context), path );
         print( commandOutput, MESSAGE_INDENT, propListHeader );
         print( commandOutput, MESSAGE_INDENT,
@@ -316,7 +316,7 @@ public class PrintUtils implements StringConstants {
         List<KomodoObject> childList = Arrays.asList(children);
 
         if ( childList.isEmpty() ) {
-            final String path = wsStatus.getLabelProvider().getDisplayPath( context );
+            final String path = KomodoObjectUtils.getFullName( wsStatus,  context );
             String noChildrenMsg = Messages.getString( SHELL.noChildrenMsg, wsStatus.getTypeDisplay(context), path );
             print(commandOutput, MESSAGE_INDENT, noChildrenMsg );
             return;
@@ -372,7 +372,7 @@ public class PrintUtils implements StringConstants {
         Collections.sort( childList, sorter );
 
         // Print children header
-        final String path = wsStatus.getLabelProvider().getDisplayPath( context );
+        final String path = KomodoObjectUtils.getFullName( wsStatus, context );
         final String childrenHeader = Messages.getString( SHELL.ChildrenHeader, wsStatus.getTypeDisplay(context), path );
         print( commandOutput, MESSAGE_INDENT, childrenHeader );
 

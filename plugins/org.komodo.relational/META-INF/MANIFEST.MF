@@ -18,6 +18,7 @@ Require-Bundle: org.komodo.spi;bundle-version="0.0.1",
  org.komodo.teiid.client,
  org.komodo.modeshape.vdb;bundle-version="0.0.1",
  org.komodo.modeshape.teiid.sql.sequencer;bundle-version="0.0.1",
+ org.komodo.importer;bundle-version="0.0.2",
  org.komodo.shell-api;bundle-version="0.0.1",
  org.komodo.shell;bundle-version="0.0.1"
 Bundle-ActivationPolicy: lazy

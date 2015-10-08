@@ -9,6 +9,7 @@ package org.komodo.relational.commands.vdb;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.komodo.relational.commands.ImportVdbCommand;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.internal.VdbImpl;
 import org.komodo.shell.api.ShellCommand;

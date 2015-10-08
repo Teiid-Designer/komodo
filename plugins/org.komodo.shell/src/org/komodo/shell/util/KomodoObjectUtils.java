@@ -19,6 +19,7 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.PropertyDescriptor;
 import org.komodo.utils.ArgCheck;
+import org.komodo.utils.StringUtils;
 
 /**
  *  Utilities for working with KomodoObject
@@ -160,5 +161,22 @@ public class KomodoObjectUtils implements StringConstants {
         return propertyName;
     }
 
+    /**
+     * @param wsStatus
+     *        the workspace status (cannot be <code>null</code>)
+     * @param kobject
+     *        the object whose full name (path) is being requested (cannot be <code>null</code>)
+     * @return the object's full, qualified path (never empty)
+     */
+    public static String getFullName( final WorkspaceStatus wsStatus,
+                                      final KomodoObject kobject ) {
+        final String path = wsStatus.getLabelProvider().getDisplayPath( kobject );
+
+        if ( StringUtils.isBlank( path ) ) {
+            return kobject.getAbsolutePath();
+        }
+
+        return path;
+    }
 
 }

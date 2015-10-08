@@ -47,7 +47,7 @@ public final class SetCustomPropertyCommand extends RelationalShellCommand {
             final RelationalObject robject = get();
             robject.setProperty( getTransaction(), name, value );
 
-            result = new CommandResultImpl( getMessage( SET_PROPERTY_SUCCESS, name ) );
+            result = new CommandResultImpl( getWorkspaceMessage( SET_PROPERTY_SUCCESS, name ) );
         } catch ( final Exception e ) {
             result = new CommandResultImpl( e );
         }

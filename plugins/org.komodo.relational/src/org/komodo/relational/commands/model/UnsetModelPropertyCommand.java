@@ -70,7 +70,7 @@ public final class UnsetModelPropertyCommand extends ModelShellCommand {
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {
-                result = new CommandResultImpl( getMessage( UNSET_PROPERTY_SUCCESS, name ) );
+                result = new CommandResultImpl( getWorkspaceMessage( UNSET_PROPERTY_SUCCESS, name ) );
             } else {
                 result = new CommandResultImpl( false, errorMsg, null );
             }

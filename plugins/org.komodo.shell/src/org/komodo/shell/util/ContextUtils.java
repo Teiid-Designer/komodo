@@ -332,7 +332,7 @@ public class ContextUtils implements StringConstants {
 	    absolutePath = wsStatus.getLabelProvider().getDisplayPath( absolutePath );
 
         KomodoObject rootContext = wsStatus.getRootContext();
-        String absRootPath = wsStatus.getLabelProvider().getDisplayPath( rootContext );
+        String absRootPath = KomodoObjectUtils.getFullName( wsStatus, rootContext );
 
         if(absolutePath.startsWith(absRootPath)) {
 			return absolutePath.substring( absRootPath.length() );
@@ -354,7 +354,7 @@ public class ContextUtils implements StringConstants {
         ArgCheck.isNotNull( context, "context" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( absolutePath, "absolutePath" ); //$NON-NLS-1$
 
-        final String absContextPath = wsStatus.getLabelProvider().getDisplayPath( context );
+        final String absContextPath = KomodoObjectUtils.getFullName( wsStatus, context );
         final String displayPath = wsStatus.getLabelProvider().getDisplayPath( absolutePath );
         String path = ( StringUtils.isBlank( displayPath ) ? absolutePath : displayPath );
 

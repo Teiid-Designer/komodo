@@ -46,7 +46,7 @@ public final class UnsetCustomPropertyCommand extends RelationalShellCommand {
             final RelationalObject robject = get();
             robject.setProperty( getTransaction(), name, ( Object[] )null );
 
-            result = new CommandResultImpl( getMessage( UNSET_PROPERTY_SUCCESS, name ) );
+            result = new CommandResultImpl( getWorkspaceMessage( UNSET_PROPERTY_SUCCESS, name ) );
         } catch ( final Exception e ) {
             result = new CommandResultImpl( e );
         }

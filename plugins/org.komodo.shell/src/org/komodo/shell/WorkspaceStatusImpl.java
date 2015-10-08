@@ -238,33 +238,6 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         createTransaction(source);
     }
 
-//    @Override
-//  public void commitImport( final String source, ImportMessages importMessages ) throws Exception {
-//        final String txName = this.uow.getName();
-//        this.uow.commit();
-//
-//        final boolean success = this.callback.await( 3, TimeUnit.MINUTES );
-//        if ( success ) {
-//          // For imports, if has callback error - add to import errors and return.
-//          if(this.callback.hasError()) {
-//              importMessages.addErrorMessage(callback.error());
-//              createTransaction(source);
-//              return;
-//          }
-//            final KException error = uow.getError();
-//            final State txState = this.uow.getState();
-//
-//            if ( ( error != null ) || !State.COMMITTED.equals( txState ) ) {
-//                throw new KException( Messages.getString( SHELL.TRANSACTION_COMMIT_ERROR, txName ), error );
-//            }
-//        } else {
-//            throw new KException( Messages.getString( SHELL.TRANSACTION_TIMEOUT, txName ) );
-//        }
-//
-//        // create new transaction
-//        createTransaction(source);
-//    }
-
     /**
      * {@inheritDoc}
      *

@@ -509,11 +509,11 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
     				if(children.length != 0) {
     					// Get all children as potentials
     					for(KomodoObject childContext : children) {
-                            final String absolutePath = this.wsStatus.getLabelProvider().getDisplayPath( childContext );
+                            final String absolutePath = KomodoObjectUtils.getFullName( this.wsStatus, childContext );
     						potentialsList.add(absolutePath+FORWARD_SLASH);
     					}
     				} else {
-                        final String absolutePath = this.wsStatus.getLabelProvider().getDisplayPath( deepestMatchingContext );
+                        final String absolutePath = KomodoObjectUtils.getFullName( this.wsStatus, deepestMatchingContext );
     					potentialsList.add(absolutePath+FORWARD_SLASH);
     				}
     				updateCandidates(candidates, potentialsList, lastArgument);
@@ -530,12 +530,12 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
     			if(children.length!=0) {
     				// Get all children as potentials
     				for(KomodoObject childContext : children) {
-                        final String absolutePath = this.wsStatus.getLabelProvider().getDisplayPath( childContext );
+                        final String absolutePath = KomodoObjectUtils.getFullName( this.wsStatus, childContext );
     					String relativePath = ContextUtils.convertAbsolutePathToRelative(getWorkspaceStatus(), currentContext, absolutePath);
     					potentialsList.add(relativePath+FORWARD_SLASH);
     				}
     			} else {
-                    final String absolutePath = this.wsStatus.getLabelProvider().getDisplayPath( deepestMatchingContext );
+                    final String absolutePath = KomodoObjectUtils.getFullName( this.wsStatus, deepestMatchingContext );
     				String relativePath = ContextUtils.convertAbsolutePathToRelative(getWorkspaceStatus(), currentContext, absolutePath);
     				potentialsList.add(relativePath+FORWARD_SLASH);
     			}

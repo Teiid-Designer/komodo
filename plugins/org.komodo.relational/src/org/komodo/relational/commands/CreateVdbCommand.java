@@ -8,8 +8,8 @@
 package org.komodo.relational.commands;
 
 import static org.komodo.relational.commands.WorkspaceCommandMessages.CreateVdbCommand.MISSING_VDB_EXTERNAL_PATH;
-import static org.komodo.relational.commands.WorkspaceCommandMessages.CreateVdbCommand.MISSING_VDB_NAME;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.CreateVdbCommand.VDB_CREATED;
+import static org.komodo.relational.commands.WorkspaceCommandMessages.General.MISSING_VDB_NAME;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
