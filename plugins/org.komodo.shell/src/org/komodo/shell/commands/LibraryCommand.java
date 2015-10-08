@@ -21,42 +21,30 @@
  ************************************************************************************/
 package org.komodo.shell.commands;
 
-import java.util.List;
+import org.komodo.repository.ObjectImpl;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
-import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.api.CommandResult;
-import org.komodo.shell.api.ShellCommand;
+import org.komodo.shell.api.KomodoObjectLabelProvider;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.utils.StringUtils;
+import org.komodo.spi.repository.KomodoObject;
 
 /**
- * ListCommand - shows the children of a KomodoObject.
- *
+ * Changes the context to the Komodo library area.
  */
-public class ListCommand extends BuiltInShellCommand {
+public class LibraryCommand extends BuiltInShellCommand {
 
     /**
      * The command name.
      */
-    public static final String NAME = "list"; //$NON-NLS-1$
+    public static final String NAME = "library"; //$NON-NLS-1$
 
     /**
      * @param wsStatus
      *        the workspace status (cannot be <code>null</code>)
      */
-    public ListCommand( final WorkspaceStatus wsStatus ) {
-        super( wsStatus, NAME, "ls", "ll" ); //$NON-NLS-1$ //$NON-NLS-2$
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
-     */
-    @Override
-    public boolean isValidForCurrentContext() {
-        return true;
+    public LibraryCommand( final WorkspaceStatus wsStatus ) {
+        super( wsStatus, NAME );
     }
 
     /**
@@ -66,20 +54,13 @@ public class ListCommand extends BuiltInShellCommand {
      */
     @Override
     protected CommandResult doExecute() {
+        final KomodoObject current = getWorkspaceStatus().getCurrentContext();
+
         try {
-            // Validate the location Path if supplied
-            String pathArg = optionalArgument(0);
-            if(!StringUtils.isEmpty(pathArg)) {
-                String validationMsg = validatePath(pathArg);
-                if(!validationMsg.equals(CompletionConstants.OK)) {
-                    return new CommandResultImpl(false, validationMsg, null);
-                }
-            }
-
-            ShellCommand showChildrenCommand = getWorkspaceStatus().getCommand(ShowChildrenCommand.NAME);
-            showChildrenCommand.setArguments(getArguments());
-
-            return showChildrenCommand.execute();
+            getWorkspaceStatus().setCurrentContext( new ObjectImpl( current.getRepository(),
+                                                                    KomodoObjectLabelProvider.LIB_PATH,
+                                                                    0 ) );
+            return CommandResult.SUCCESS;
         } catch ( final Exception e ) {
             return new CommandResultImpl( e );
         }
@@ -92,25 +73,17 @@ public class ListCommand extends BuiltInShellCommand {
      */
     @Override
     protected int getMaxArgCount() {
-        return 1;
+        return 0;
     }
 
     /**
-     * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
      */
     @Override
-    public int tabCompletion(String lastArgument, List<CharSequence> candidates) throws Exception {
-
-        if (getArguments().isEmpty()) {
-            // The arg is expected to be a path
-            updateTabCompleteCandidatesForPath(candidates, getContext(), true, lastArgument);
-
-            // Do not put space after it - may want to append more to the path
-            return CompletionConstants.NO_APPEND_SEPARATOR;
-            // Tab completion for "property" - expects a valid property for the current context.
-        }
-
-        return -1;
+    public boolean isValidForCurrentContext() {
+        return true;
     }
 
 }

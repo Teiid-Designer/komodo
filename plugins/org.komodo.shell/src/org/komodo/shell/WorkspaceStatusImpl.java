@@ -42,13 +42,12 @@ import org.komodo.repository.ObjectImpl;
 import org.komodo.repository.RepositoryImpl;
 import org.komodo.repository.SynchronousCallback;
 import org.komodo.shell.Messages.SHELL;
+import org.komodo.shell.api.KomodoObjectLabelProvider;
 import org.komodo.shell.api.KomodoShell;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandProvider;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.api.WorkspaceStatusEventHandler;
-import org.komodo.shell.util.ContextUtils;
-import org.komodo.shell.util.KomodoObjectUtils;
 import org.komodo.shell.util.PrintUtils;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
@@ -87,6 +86,8 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     private ShellCommandFactory commandFactory;
 
     private Map<String,KomodoObject> stateObjects = new HashMap<String,KomodoObject>();
+
+    private KomodoObjectLabelProvider labelProvider;
 
     /**
      * Constructor
@@ -128,27 +129,15 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
 
         // The default root context is komodoRoot.  The providers may specify a higher root (as in WorkspaceManager)
         final Repository repo = getEngine().getDefaultRepository();
-        final KomodoObject komodoRoot = new ObjectImpl( repo, RepositoryImpl.KOMODO_ROOT, 0 );
-
-        // Determine if any children of komodo node were designated as root
-        KomodoObject[] children = komodoRoot.getChildren(getTransaction());
-        for(KomodoObject child : children) {
-            KomodoObject resolvedChild = resolve(child);
-            if(isRoot(resolvedChild)) {
-                rootContext = resolvedChild;
-                break;
-            }
-        }
-
-        // No child designated, set the komodo node as root
-        if(rootContext==null) {
-            rootContext = !komodoRoot.getClass().equals(org.komodo.repository.ObjectImpl.class) ? komodoRoot : resolve(komodoRoot);
-        }
-
-        currentContext = rootContext;
+        this.rootContext = new ObjectImpl( repo, RepositoryImpl.KOMODO_ROOT, 0 );
+        this.currentContext = this.rootContext;
 
         // initialize the global properties
         initGlobalProperties();
+
+        this.labelProvider = new DefaultLabelProvider();
+        this.labelProvider.setRepository( repo );
+        this.labelProvider.setWorkspaceStatus( this );
     }
 
     private void initGlobalProperties() throws KException {
@@ -305,23 +294,28 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
 
     @Override
     public void setCurrentContext(KomodoObject context) throws Exception {
-        currentContext = context;
-        String objFullName = KomodoObjectUtils.getFullName(this, context);
-        this.wsProperties.setProperty( SAVED_CONTEXT_PATH, objFullName );
+        this.currentContext = context;
+        this.wsProperties.setProperty( SAVED_CONTEXT_PATH, this.currentContext.getAbsolutePath() );
+
+        { // try and resolve
+            final KomodoObject resolved = resolve( this.currentContext );
+
+            if ( resolved != null ) {
+                this.currentContext = resolved;
+            }
+        }
+
         fireContextChangeEvent();
     }
 
     @Override
     public KomodoObject getCurrentContext() {
-        return currentContext;
+        return this.currentContext;
     }
 
-    /* (non-Javadoc)
-     * @see org.komodo.shell.api.WorkspaceStatus#getRootContext()
-     */
     @Override
     public KomodoObject getRootContext() {
-        return rootContext;
+        return this.rootContext;
     }
 
     /**
@@ -512,18 +506,28 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
             }
 
             // set current context to saved context if necessary
-            final String savedPath = props.getProperty( SAVED_CONTEXT_PATH );
+            String savedPath = props.getProperty( SAVED_CONTEXT_PATH );
 
-            if ( !StringUtils.isBlank( savedPath ) ) {
-                KomodoObject context = ContextUtils.getContextForPath(this, savedPath );
-
-                // saved path no longer exists so set context to workspace root
-                if ( context == null ) {
-                    context = getRootContext();
-                }
-
-                setCurrentContext( context );
+            if ( StringUtils.isBlank( savedPath ) ) {
+                savedPath = DefaultLabelProvider.WORKSPACE_PATH;
             }
+
+            final Repository repo = getEngine().getDefaultRepository();
+            KomodoObject context = new ObjectImpl( repo, savedPath, 0 );
+
+            // make sure object still exists
+            try {
+                context.getName( getTransaction() );
+            } catch ( final Exception e ) {
+                context = null;
+            }
+
+            // saved path no longer exists so set context to workspace root
+            if ( context == null ) {
+                context = getRootContext();
+            }
+
+            setCurrentContext( context );
         }
     }
 
@@ -617,34 +621,25 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         this.stateObjects.remove(key);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.WorkspaceStatus#getLabelProvider()
+     */
     @Override
-    public boolean isRoot ( final KomodoObject kObj ) throws KException {
-        // parent null or FORWARD_SLASH path is default root
-        KomodoObject parentObj = kObj.getParent(getTransaction());
-        if(parentObj==null || parentObj.getAbsolutePath().equals(FORWARD_SLASH)) {
-            return true;
-        }
-        // determine if another root has been specified as the root
-        boolean isRoot = false;
-        if(this.commandFactory.getCommandProviders()!=null) {
-            for(ShellCommandProvider provider : this.commandFactory.getCommandProviders()) {
-                if(provider.isRoot(getTransaction(), kObj)) {
-                    isRoot = true;
-                    break;
-                }
-            }
-        }
-        return isRoot;
+    public KomodoObjectLabelProvider getLabelProvider() {
+        return this.labelProvider;
     }
 
     @Override
     public String getTypeDisplay ( final KomodoObject kObj ) {
-        if(this.commandFactory.getCommandProviders()!=null) {
+        if(!this.commandFactory.getCommandProviders().isEmpty()) {
             for(ShellCommandProvider provider : this.commandFactory.getCommandProviders()) {
                 String typeString = null;
                 try {
                     typeString = provider.getTypeDisplay(getTransaction(), kObj);
                 } catch (KException ex) {
+                    KLog.getLogger().error( "ShellCommandProvider.getTypeDisplay error in provider \"{0}\"", ex, provider ); //$NON-NLS-1$
                 }
                 if(typeString!=null) return typeString;
             }
@@ -655,7 +650,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     @Override
     public List<String> getProvidedStatusMessages( final KomodoObject kObj ) {
         List<String> allMessages = new ArrayList<String>();
-        if(this.commandFactory.getCommandProviders()!=null) {
+        if(!this.commandFactory.getCommandProviders().isEmpty()) {
             for(ShellCommandProvider provider : this.commandFactory.getCommandProviders()) {
                 String statusMessage = null;
                 try {
@@ -673,7 +668,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
 
     @Override
     public void initProvidedStates( final Properties globalProps ) throws KException {
-        if(this.commandFactory.getCommandProviders()!=null) {
+        if(!this.commandFactory.getCommandProviders().isEmpty()) {
             for(ShellCommandProvider provider : this.commandFactory.getCommandProviders()) {
                 provider.initWorkspaceState(this);
             }
@@ -692,7 +687,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
 
     @Override
     public < T extends KomodoObject > T resolve ( final KomodoObject kObj ) throws KException {
-        if(this.commandFactory.getCommandProviders()!=null) {
+        if(!this.commandFactory.getCommandProviders().isEmpty()) {
             for(ShellCommandProvider provider : this.commandFactory.getCommandProviders()) {
                 T resolvedObj = provider.resolve(getTransaction(), kObj);
                 if(resolvedObj!=null) return resolvedObj;

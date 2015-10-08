@@ -23,8 +23,8 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.KomodoTypeRegistry;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.KomodoObjectLabelProvider;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.shell.util.ContextUtils;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.utils.StringUtils;
 
@@ -86,7 +86,7 @@ public final class FindCommand extends RelationalShellCommand {
      */
     @Override
     protected int getMaxArgCount() {
-        return 2;
+        return 1;
     }
 
     /**
@@ -137,9 +137,9 @@ public final class FindCommand extends RelationalShellCommand {
      *         if an error occurs
      */
     public static String[] query( final WorkspaceStatus wsStatus,
-                                     final KomodoType queryType,
-                                     final String parentPath,
-                                     final String pattern ) throws Exception {
+                                  final KomodoType queryType,
+                                  final String parentPath,
+                                  final String pattern ) throws Exception {
         final String lexiconType = KomodoTypeRegistry.getInstance().getIdentifier( queryType ).getLexiconType();
         final WorkspaceManager wsMgr = WorkspaceManager.getInstance( wsStatus.getCurrentContext().getRepository() );
         final String[] searchResults = wsMgr.findByType( wsStatus.getTransaction(), lexiconType, parentPath, pattern );
@@ -148,10 +148,11 @@ public final class FindCommand extends RelationalShellCommand {
             return searchResults;
         }
 
+        final KomodoObjectLabelProvider labelProvider = wsStatus.getLabelProvider();
         final String[] result = new String[ searchResults.length ];
         int i = 0;
         for ( final String absolutePath : searchResults ) {
-            result[i] = ContextUtils.convertPathToDisplayPath(absolutePath);
+            result[i] = labelProvider.getDisplayPath( absolutePath );
             ++i;
         }
 

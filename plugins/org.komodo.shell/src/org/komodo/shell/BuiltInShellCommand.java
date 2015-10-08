@@ -118,7 +118,11 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
         }
 
         // execute command
-        return doExecute();
+        final CommandResult result = doExecute();
+
+        // return result
+        assert (result != null);
+        return result;
     }
 
     /**
@@ -468,7 +472,7 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
     	// List of potentials completions
     	List<String> potentialsList = new ArrayList<String>();
     	// Only offer '..' if below the root
-    	if( (!KomodoObjectUtils.isRootContext(getWorkspaceStatus(),currentContext)) && includeGoUp ) {
+        if ( ( currentContext.getParent( this.wsStatus.getTransaction() ) != null ) && includeGoUp ) {
     		potentialsList.add(StringConstants.DOT_DOT);
     	}
 
@@ -479,7 +483,7 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
     	if(lastArgument==null) {
     	    KomodoObject[] children = currentContext.getChildren(transaction);
     		for(KomodoObject wsContext : children) {
-    		    String contextName = KomodoObjectUtils.getName(getWorkspaceStatus(), wsContext);
+    		    final String contextName = this.wsStatus.getLabelProvider().getDisplayName( wsContext );
     			potentialsList.add(contextName+FORWARD_SLASH);
     		}
     		candidates.addAll(potentialsList);
@@ -493,7 +497,7 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
     		if( lastArgument.startsWith(FORWARD_SLASH) ) {
     			// If not the full absolute root, then provide it
     			if(!ContextUtils.isAbsolutePath(lastArgument)) {
-    				potentialsList.add(FORWARD_SLASH+KomodoObjectUtils.getFullName(wsStatus, wsStatus.getRootContext())+FORWARD_SLASH);
+    				potentialsList.add(FORWARD_SLASH);
     				updateCandidates(candidates,potentialsList,lastArgument);
     		    // Starts with correct root - provide next option
     			} else {
@@ -505,11 +509,11 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
     				if(children.length != 0) {
     					// Get all children as potentials
     					for(KomodoObject childContext : children) {
-    						String absolutePath = KomodoObjectUtils.getFullName(getWorkspaceStatus(), childContext);
+                            final String absolutePath = this.wsStatus.getLabelProvider().getDisplayPath( childContext );
     						potentialsList.add(absolutePath+FORWARD_SLASH);
     					}
     				} else {
-                        String absolutePath = KomodoObjectUtils.getFullName(getWorkspaceStatus(), deepestMatchingContext);
+                        final String absolutePath = this.wsStatus.getLabelProvider().getDisplayPath( deepestMatchingContext );
     					potentialsList.add(absolutePath+FORWARD_SLASH);
     				}
     				updateCandidates(candidates, potentialsList, lastArgument);
@@ -526,12 +530,12 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
     			if(children.length!=0) {
     				// Get all children as potentials
     				for(KomodoObject childContext : children) {
-                        String absolutePath = KomodoObjectUtils.getFullName(getWorkspaceStatus(), childContext);
+                        final String absolutePath = this.wsStatus.getLabelProvider().getDisplayPath( childContext );
     					String relativePath = ContextUtils.convertAbsolutePathToRelative(getWorkspaceStatus(), currentContext, absolutePath);
     					potentialsList.add(relativePath+FORWARD_SLASH);
     				}
     			} else {
-                    String absolutePath = KomodoObjectUtils.getFullName(getWorkspaceStatus(), deepestMatchingContext);
+                    final String absolutePath = this.wsStatus.getLabelProvider().getDisplayPath( deepestMatchingContext );
     				String relativePath = ContextUtils.convertAbsolutePathToRelative(getWorkspaceStatus(), currentContext, absolutePath);
     				potentialsList.add(relativePath+FORWARD_SLASH);
     			}

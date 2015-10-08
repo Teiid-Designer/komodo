@@ -43,11 +43,12 @@ import org.komodo.shell.commands.CommitCommand;
 import org.komodo.shell.commands.ExitCommand;
 import org.komodo.shell.commands.HelpCommand;
 import org.komodo.shell.commands.HomeCommand;
+import org.komodo.shell.commands.LibraryCommand;
 import org.komodo.shell.commands.ListCommand;
 import org.komodo.shell.commands.PlayCommand;
+import org.komodo.shell.commands.RenameCommand;
 import org.komodo.shell.commands.RollbackCommand;
 import org.komodo.shell.commands.SetAutoCommitCommand;
-import org.komodo.shell.commands.RenameCommand;
 import org.komodo.shell.commands.SetGlobalPropertyCommand;
 import org.komodo.shell.commands.SetPropertyCommand;
 import org.komodo.shell.commands.SetRecordCommand;
@@ -58,6 +59,7 @@ import org.komodo.shell.commands.ShowPropertyCommand;
 import org.komodo.shell.commands.ShowStatusCommand;
 import org.komodo.shell.commands.ShowSummaryCommand;
 import org.komodo.shell.commands.UnsetPropertyCommand;
+import org.komodo.shell.commands.WorkspaceCommand;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.FileUtils;
 
@@ -90,8 +92,7 @@ public class ShellCommandFactory {
     }
 
     /**
-     * The the command providers
-     * @return the command providers
+     * @return the command providers (never <code>null</code>)
      */
     public Collection<ShellCommandProvider> getCommandProviders() {
         return providers;
@@ -115,6 +116,7 @@ public class ShellCommandFactory {
         registerCommand( BUILT_IN_PROVIDER_ID, ExitCommand.class, wsStatus );
         registerCommand( BUILT_IN_PROVIDER_ID, HelpCommand.class, wsStatus );
         registerCommand( BUILT_IN_PROVIDER_ID, HomeCommand.class, wsStatus );
+        registerCommand( BUILT_IN_PROVIDER_ID, LibraryCommand.class, wsStatus );
         registerCommand( BUILT_IN_PROVIDER_ID, ListCommand.class, wsStatus );
         registerCommand( BUILT_IN_PROVIDER_ID, PlayCommand.class, wsStatus );
         registerCommand( BUILT_IN_PROVIDER_ID, RollbackCommand.class, wsStatus );
@@ -130,42 +132,13 @@ public class ShellCommandFactory {
         registerCommand( BUILT_IN_PROVIDER_ID, ShowStatusCommand.class, wsStatus );
         registerCommand( BUILT_IN_PROVIDER_ID, ShowSummaryCommand.class, wsStatus );
         registerCommand( BUILT_IN_PROVIDER_ID, UnsetPropertyCommand.class, wsStatus );
+        registerCommand( BUILT_IN_PROVIDER_ID, WorkspaceCommand.class, wsStatus );
 
         // register any commands contributed by command providers
-        discoverContributedCommands( wsStatus );
+        registerContributedCommands( wsStatus );
     }
 
-    /**
-     * Discover any contributed commands, both on the classpath and registered
-     * in the .komodo/commands.ini file in the user's home directory.
-     */
-    private void discoverContributedCommands(WorkspaceStatus wsStatus) {
-        List<ClassLoader> commandClassloaders = new ArrayList<ClassLoader>();
-        commandClassloaders.add(Thread.currentThread().getContextClassLoader());
-
-        // Register commands listed in the user's commands.ini config file
-        String userHome = System.getProperty("user.home", "/"); //$NON-NLS-1$ //$NON-NLS-2$
-        String commandsDirName = System.getProperty("komodo.shell.commandsDir", //$NON-NLS-1$
-                userHome + "/.komodo/commands"); //$NON-NLS-1$
-        File commandsDir = new File(commandsDirName);
-        if (!commandsDir.exists()) {
-            commandsDir.mkdirs();
-        }
-        if (commandsDir.isDirectory()) {
-            try {
-            	Collection<File> jarFiles =  FileUtils.getFilesForPattern(commandsDir.getCanonicalPath(), "", ".jar"); //$NON-NLS-1$ //$NON-NLS-2$
-                List<URL> jarURLs = new ArrayList<URL>(jarFiles.size());
-                for (File jarFile : jarFiles) {
-                    jarURLs.add(jarFile.toURI().toURL());
-                }
-                URL[] urls = jarURLs.toArray(new URL[jarURLs.size()]);
-                ClassLoader extraCommandsCL = new URLClassLoader(urls, Thread.currentThread().getContextClassLoader());
-                commandClassloaders.add(extraCommandsCL);
-            } catch (IOException e) {
-                KEngine.getInstance().getErrorHandler().error(e);
-            }
-        }
-
+    private void registerContributedCommands( final WorkspaceStatus wsStatus ) {
         for ( final ShellCommandProvider provider : this.providers ) {
             final Map< String, Class< ? extends ShellCommand > > commands = provider.provideCommands();
 
@@ -185,20 +158,43 @@ public class ShellCommandFactory {
                 }
             }
         }
-
     }
 
     private void discoverProviders() {
-        List<ClassLoader> commandClassloaders = new ArrayList<ClassLoader>();
-        commandClassloaders.add(Thread.currentThread().getContextClassLoader());
+        final List< ClassLoader > commandClassloaders = new ArrayList< >();
+        commandClassloaders.add( Thread.currentThread().getContextClassLoader() );
 
-        // Now that we have identified all ClassLoaders to check for commands, iterate
-        // through them all and use the Java ServiceLoader mechanism to actually
-        // load the commands.
-        for (ClassLoader classLoader : commandClassloaders) {
-            for (ShellCommandProvider provider : ServiceLoader.load(ShellCommandProvider.class, classLoader)) {
+        // Find providers in the user's commands directory
+        final String userHome = System.getProperty( "user.home", "/" ); //$NON-NLS-1$ //$NON-NLS-2$
+        final String commandsDirName = System.getProperty( "komodo.shell.commandsDir", userHome + "/.komodo/commands" ); //$NON-NLS-1$ //$NON-NLS-2$
+        final File commandsDir = new File( commandsDirName );
+
+        if ( !commandsDir.exists() ) {
+            commandsDir.mkdirs();
+        }
+
+        if ( commandsDir.isDirectory() ) {
+            try {
+                final Collection< File > jarFiles = FileUtils.getFilesForPattern( commandsDir.getCanonicalPath(), "", ".jar" ); //$NON-NLS-1$ //$NON-NLS-2$
+                final List< URL > jarURLs = new ArrayList< >( jarFiles.size() );
+
+                for ( final File jarFile : jarFiles ) {
+                    jarURLs.add( jarFile.toURI().toURL() );
+                }
+
+                final URL[] urls = jarURLs.toArray( new URL[ jarURLs.size() ] );
+                final ClassLoader extraCommandsCL = new URLClassLoader( urls, Thread.currentThread().getContextClassLoader() );
+                commandClassloaders.add( extraCommandsCL );
+            } catch ( final IOException e ) {
+                KEngine.getInstance().getErrorHandler().error( e );
+            }
+        }
+
+        // iterate through the ClassLoaders and use the Java ServiceLoader mechanism to load the providers
+        for ( final ClassLoader classLoader : commandClassloaders ) {
+            for ( final ShellCommandProvider provider : ServiceLoader.load( ShellCommandProvider.class, classLoader ) ) {
                 if ( !Modifier.isAbstract( provider.getClass().getModifiers() ) ) {
-                    providers.add( provider );
+                    this.providers.add( provider );
                 }
             }
         }
@@ -348,7 +344,7 @@ public class ShellCommandFactory {
          */
         @Override
         public void printUsage(int indent) {
-            // Nothing to do
+            print( CompletionConstants.MESSAGE_INDENT, Messages.getString( SHELL.COMMAND_NOT_FOUND ) );
         }
 
         /**
@@ -356,7 +352,7 @@ public class ShellCommandFactory {
          */
         @Override
         public void printHelp(int indent) {
-            // Nothing to do
+            print( CompletionConstants.MESSAGE_INDENT, Messages.getString( SHELL.COMMAND_NOT_FOUND ) );
         }
 
         /**

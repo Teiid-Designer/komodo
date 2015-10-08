@@ -32,7 +32,7 @@ import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.shell.util.KomodoObjectUtils;
+import org.komodo.spi.repository.KomodoObject;
 
 /**
  * Abstract class for all shell command readers.
@@ -202,13 +202,14 @@ public abstract class AbstractShellCommandReader implements ShellCommandReader {
 
     protected String getPrompt() throws Exception {
         // see if full path should be displayed
+        final KomodoObject kobject = this.wsStatus.getCurrentContext();
         String path = null;
 
         try {
-            if ( getWorkspaceStatus().isShowingFullPathInPrompt() ) {
-                path = KomodoObjectUtils.getFullName(this.wsStatus, this.wsStatus.getCurrentContext());
+            if ( this.wsStatus.isShowingFullPathInPrompt() ) {
+                path = this.wsStatus.getLabelProvider().getDisplayPath( kobject );
             } else {
-                path = KomodoObjectUtils.getName(this.wsStatus, this.wsStatus.getCurrentContext());
+                path = this.wsStatus.getLabelProvider().getDisplayName( kobject );
             }
         } catch ( final Exception e ) {
             // problem getting context name
@@ -220,8 +221,8 @@ public abstract class AbstractShellCommandReader implements ShellCommandReader {
         assert ( path != null );
 
         // see if type should be displayed
-        if ( getWorkspaceStatus().isShowingTypeInPrompt() ) {
-            return Messages.getString( Messages.SHELL.PROMPT_WITH_TYPE, path, getWorkspaceStatus().getTypeDisplay(getWorkspaceStatus().getCurrentContext()) );
+        if ( this.wsStatus.isShowingTypeInPrompt() && DefaultLabelProvider.shouldShowType( kobject ) ) {
+            return Messages.getString( Messages.SHELL.PROMPT_WITH_TYPE, path, this.wsStatus.getTypeDisplay( kobject ) );
         }
 
         return Messages.getString( Messages.SHELL.PROMPT, path );

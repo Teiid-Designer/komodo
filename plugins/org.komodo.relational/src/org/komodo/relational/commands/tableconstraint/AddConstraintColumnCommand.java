@@ -80,7 +80,8 @@ public final class AddConstraintColumnCommand extends RelationalShellCommand {
                 } else {
                     result = new CommandResultImpl( false,
                                                     getMessage( INVALID_COLUMN,
-                                                                ContextUtils.convertPathToDisplayPath( column.getAbsolutePath() ),
+                                                                getWorkspaceStatus().getLabelProvider()
+                                                                                    .getDisplayPath( column.getAbsolutePath() ),
                                                                 constraint.getName( transaction ) ),
                                                     null );
                 }

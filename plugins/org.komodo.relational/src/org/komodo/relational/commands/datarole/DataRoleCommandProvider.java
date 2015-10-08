@@ -64,18 +64,6 @@ public class DataRoleCommandProvider implements ShellCommandProvider {
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.ShellCommandProvider#isRoot(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      org.komodo.spi.repository.KomodoObject)
-     */
-    @Override
-    public boolean isRoot ( final Repository.UnitOfWork uow,
-                            final KomodoObject kObj ) {
-        return false;
-    }
-
     @Override
     public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
         final DataRole resolved = resolve( uow, kObj );

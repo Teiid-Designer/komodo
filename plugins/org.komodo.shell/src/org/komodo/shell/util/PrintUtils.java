@@ -36,7 +36,7 @@ public class PrintUtils implements StringConstants {
 
     private static final int DEFAULT_WIDTH = 25;
     private static final int MAX_PROPERTY_VALUE_WIDTH = 100;  // Limit on the value column width
-    
+
     /**
      * Print the message to the writer.  A newLine is added after the message.
      * @param writer the Writer
@@ -47,18 +47,18 @@ public class PrintUtils implements StringConstants {
     public static void print(Writer writer, int indent, String formattedMessage, Object... params) {
         print(writer,true,indent,formattedMessage,params);
     }
-    
+
     /**
      * Print to writer with supplied info
      * @param writer the Writer
-     * @param addNewLine 'true' to add new line after message. 
+     * @param addNewLine 'true' to add new line after message.
      * @param indent number of indent spaces
      * @param formattedMessage the message
      * @param params message params
      */
     public static void print(Writer writer, boolean addNewLine, int indent,String formattedMessage, Object... params) {
         if(writer==null) return;
-        
+
         ArgCheck.isNonNegative(indent, Messages.getString(SHELLAPI.negative_indent_supplied));
         StringBuffer sb = new StringBuffer();
         for(int i=0; i<indent; i++) {
@@ -82,7 +82,7 @@ public class PrintUtils implements StringConstants {
      */
     public static void printList( final WorkspaceStatus wsStatus, List<String> items, String headerTitle ) {
         Writer commandOutput = wsStatus.getShell().getOutputWriter();
-        
+
         int maxNameWidth = DEFAULT_WIDTH;
         for(String item : items) {
             updateMaxNameWidth(maxNameWidth,item);
@@ -102,7 +102,7 @@ public class PrintUtils implements StringConstants {
         }
 
     }
-    
+
     /**
      * Print the supplied properties
      * @param wsStatus the WorkspaceStatus
@@ -112,17 +112,17 @@ public class PrintUtils implements StringConstants {
      */
     public static void printProperties(final WorkspaceStatus wsStatus, Properties props, String nameTitle, String valueTitle) {
         Writer commandOutput = wsStatus.getShell().getOutputWriter();
-        
+
         final Map< String, String > sorted = new TreeMap<>();
         int maxNameWidth = DEFAULT_WIDTH;
         int maxValueWidth = DEFAULT_WIDTH;
-        
+
         for(String name : props.stringPropertyNames()) {
             String value = props.getProperty(name);
             if(StringUtils.isEmpty(value)) {
                 value = Messages.getString( SHELL.NO_PROPERTY_VALUE );
             }
-            
+
             if ( maxNameWidth < name.length() ) {
                 maxNameWidth = name.length();
             }
@@ -133,14 +133,14 @@ public class PrintUtils implements StringConstants {
 
             sorted.put( name, value );
         }
-        
+
         // Puts a hard limit on value column width - some may be extremely long.  (The entire value will still be printed)
         if(maxValueWidth>MAX_PROPERTY_VALUE_WIDTH) {
             maxValueWidth = MAX_PROPERTY_VALUE_WIDTH;
         }
-        
+
         final String format = getFormat( maxNameWidth, maxValueWidth );
-        
+
         print( commandOutput, MESSAGE_INDENT, String.format( format, nameTitle, valueTitle ) );
         print( commandOutput, MESSAGE_INDENT, String.format( format, getHeaderDelimiter( maxNameWidth ), getHeaderDelimiter( maxValueWidth ) ) );
 
@@ -157,7 +157,7 @@ public class PrintUtils implements StringConstants {
             }
         }
     }
-    
+
     /**
      * Prints the properties for a context
      * @param wsStatus the WorkspaceStatus
@@ -168,7 +168,7 @@ public class PrintUtils implements StringConstants {
      */
     public static void printProperties( final WorkspaceStatus wsStatus, boolean showHiddenProps, boolean showPropPrefixes, final KomodoObject context ) throws Exception {
         Writer commandOutput = wsStatus.getShell().getOutputWriter();
-        
+
         // show unfiltered properties if necessary
         List< String > props = null;
 
@@ -177,10 +177,10 @@ public class PrintUtils implements StringConstants {
         } else {
             props = KomodoObjectUtils.getProperties(wsStatus,context);
         }
-        
+
         if ( props.isEmpty() ) {
-            String objFullName = KomodoObjectUtils.getFullName(wsStatus, context);
-            final String noPropsMsg = Messages.getString( SHELL.NoPropertiesMsg, wsStatus.getTypeDisplay(context), objFullName ); 
+            final String path = wsStatus.getLabelProvider().getDisplayPath( context );
+            final String noPropsMsg = Messages.getString( SHELL.NoPropertiesMsg, wsStatus.getTypeDisplay(context), path );
             print( commandOutput, MESSAGE_INDENT, noPropsMsg );
             return;
         }
@@ -226,8 +226,8 @@ public class PrintUtils implements StringConstants {
 
         // Print properties header
         final String objType = wsStatus.getTypeDisplay(context); // current object type
-        String objFullName = KomodoObjectUtils.getFullName(wsStatus, context);
-        final String propListHeader = Messages.getString( SHELL.PropertiesHeader, objType, objFullName );
+        final String path = wsStatus.getLabelProvider().getDisplayPath( context );
+        final String propListHeader = Messages.getString( SHELL.PropertiesHeader, objType, path );
         print( commandOutput, MESSAGE_INDENT, propListHeader );
 
         final String format = PrintUtils.getFormat( maxNameWidth, maxValueWidth );
@@ -250,7 +250,7 @@ public class PrintUtils implements StringConstants {
             }
         }
     }
-    
+
     /**
      * Shows the komodo object property with the specified name
      * @param wsStatus the WorkspaceStatus
@@ -260,7 +260,7 @@ public class PrintUtils implements StringConstants {
      */
     public static void printProperty( final WorkspaceStatus wsStatus, KomodoObject context, String name ) throws Exception {
         Writer commandOutput = wsStatus.getShell().getOutputWriter();
-        
+
         String propertyName = KomodoObjectUtils.attachPrefix( wsStatus, context, name );
 
         // Get the value for the supplied property
@@ -269,7 +269,7 @@ public class PrintUtils implements StringConstants {
         if ( StringUtils.isBlank( propValue ) ) {
             propValue = Messages.getString( SHELL.NO_PROPERTY_VALUE );
         }
-        
+
         if ( !wsStatus.isShowingPropertyNamePrefixes() ) {
             propertyName = KomodoObjectUtils.removePrefix( propertyName );
         }
@@ -285,8 +285,8 @@ public class PrintUtils implements StringConstants {
         final String format = PrintUtils.getFormat( maxNameWidth, maxValueWidth );
 
         // Print properties header
-        String objFullName = KomodoObjectUtils.getFullName(wsStatus, context);
-        String propListHeader = Messages.getString( SHELL.PropertyHeader, wsStatus.getTypeDisplay(context), objFullName ); 
+        final String path = wsStatus.getLabelProvider().getDisplayPath( context );
+        String propListHeader = Messages.getString( SHELL.PropertyHeader, wsStatus.getTypeDisplay(context), path );
         print( commandOutput, MESSAGE_INDENT, propListHeader );
         print( commandOutput, MESSAGE_INDENT,
                String.format( format,
@@ -303,7 +303,7 @@ public class PrintUtils implements StringConstants {
         }
 
     }
-    
+
     /**
      * @param wsStatus the workspace status
      * @param context the workspace context
@@ -311,13 +311,13 @@ public class PrintUtils implements StringConstants {
      */
     public static void printChildren( final WorkspaceStatus wsStatus, final KomodoObject context ) throws Exception {
         Writer commandOutput = wsStatus.getShell().getOutputWriter();
-        
+
         final KomodoObject[] children = context.getChildren(wsStatus.getTransaction());
         List<KomodoObject> childList = Arrays.asList(children);
 
         if ( childList.isEmpty() ) {
-            String objFullName = KomodoObjectUtils.getFullName(wsStatus, context);
-            String noChildrenMsg = Messages.getString( SHELL.noChildrenMsg, wsStatus.getTypeDisplay(context), objFullName );
+            final String path = wsStatus.getLabelProvider().getDisplayPath( context );
+            String noChildrenMsg = Messages.getString( SHELL.noChildrenMsg, wsStatus.getTypeDisplay(context), path );
             print(commandOutput, MESSAGE_INDENT, noChildrenMsg );
             return;
         }
@@ -327,7 +327,7 @@ public class PrintUtils implements StringConstants {
 
         // loop through children getting name, type, and finding widest child name
         for ( int i = 0, size = childList.size(); i < size; ++i ) {
-            final String name = KomodoObjectUtils.getName(wsStatus, childList.get(i));
+            final String name = wsStatus.getLabelProvider().getDisplayName( childList.get( i ) );
 
             if ( maxNameWidth < name.length() ) {
                 maxNameWidth = name.length();
@@ -356,8 +356,8 @@ public class PrintUtils implements StringConstants {
                     int result = thisType.compareTo( wsStatus.getTypeDisplay(thatContext) );
 
                     if ( result == 0 ) {
-                        String thisName = KomodoObjectUtils.getName(wsStatus,thisContext);
-                        String thatName = KomodoObjectUtils.getName(wsStatus,thatContext);
+                        final String thisName = wsStatus.getLabelProvider().getDisplayName( thisContext );
+                        final String thatName = wsStatus.getLabelProvider().getDisplayName( thatContext );
                         return thisName.compareTo( thatName );
                     }
 
@@ -372,8 +372,8 @@ public class PrintUtils implements StringConstants {
         Collections.sort( childList, sorter );
 
         // Print children header
-        String objFullName = KomodoObjectUtils.getFullName(wsStatus, context);
-        final String childrenHeader = Messages.getString( SHELL.ChildrenHeader, wsStatus.getTypeDisplay(context), objFullName );
+        final String path = wsStatus.getLabelProvider().getDisplayPath( context );
+        final String childrenHeader = Messages.getString( SHELL.ChildrenHeader, wsStatus.getTypeDisplay(context), path );
         print( commandOutput, MESSAGE_INDENT, childrenHeader );
 
         final String format = PrintUtils.getFormat( maxNameWidth, maxTypeWidth );
@@ -383,12 +383,12 @@ public class PrintUtils implements StringConstants {
 
         // Print each child
         for ( final KomodoObject childContext : childList ) {
-            final String childName = KomodoObjectUtils.getName(wsStatus,childContext);
+            final String childName = wsStatus.getLabelProvider().getDisplayName( childContext );
             final String childType = wsStatus.getTypeDisplay(childContext);
             print( commandOutput, MESSAGE_INDENT, String.format( format, childName, childType ) );
         }
     }
-    
+
     private static void printPropWithLongValue(Writer commandOutput, String format, String propName, String propValue, int maxValueWidth) {
         // splits long strings into equal length lines of 'maxValueWidth' length.
         List<String> lines = splitEqually(propValue,maxValueWidth);
@@ -430,7 +430,7 @@ public class PrintUtils implements StringConstants {
         result.append( "%-" ).append( column1Width + 5 ).append( 's' ); //$NON-NLS-1$
         return result.toString();
     }
-    
+
     /**
      * gets a format string for 2 columns
      * @param column1Width the width of column1
@@ -443,7 +443,7 @@ public class PrintUtils implements StringConstants {
         result.append( "%-" ).append( column1Width + 5 ).append( "s%-" ).append( column2Width + 5 ).append( 's' ); //$NON-NLS-1$ //$NON-NLS-2$
         return result.toString();
     }
-    
+
     private static void updateMaxNameWidth(int maxNameWidth, String name) {
         if ( maxNameWidth < name.length() ) {
             maxNameWidth = name.length();

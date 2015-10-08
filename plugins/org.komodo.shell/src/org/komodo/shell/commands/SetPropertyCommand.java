@@ -224,7 +224,8 @@ public class SetPropertyCommand extends BuiltInShellCommand {
 
             if ( propIsReference ) {
                 final String path = RepositoryTools.findPathOfReference( uow, property.getRepository(), value.toString() );
-                valueAsText = ( StringUtils.isBlank( path ) ? value.toString() : ContextUtils.convertPathToDisplayPath( path ) );
+                valueAsText = ( StringUtils.isBlank( path ) ? value.toString()
+                                                            : getWorkspaceStatus().getLabelProvider().getDisplayPath( path ) );
             } else {
                 valueAsText = value.toString();
 

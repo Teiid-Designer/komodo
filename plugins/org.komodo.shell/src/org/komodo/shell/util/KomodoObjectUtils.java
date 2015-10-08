@@ -7,11 +7,9 @@
 */
 package org.komodo.shell.util;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.komodo.core.KomodoLexicon.Komodo;
 import org.komodo.repository.RepositoryTools;
 import org.komodo.shell.Messages;
 import org.komodo.shell.Messages.SHELL;
@@ -27,66 +25,6 @@ import org.komodo.utils.ArgCheck;
  */
 public class KomodoObjectUtils implements StringConstants {
 
-    /**
-     * Checks whether the supplied KomodoObject is the root context
-     * @param wsStatus the WorkspaceStatus
-     * @param kObject the KomodoObject
-     * @return 'true' if the supplied kObj is the root context, 'false' if not.
-     */
-    public static boolean isRootContext(final WorkspaceStatus wsStatus, final KomodoObject kObject) {
-        if(kObject==wsStatus.getRootContext()) {
-            return true;
-        }
-        return false;
-    }
-    
-    /**
-     * Get the full name path for this context.  e.g. home.parentContext.thisContext
-     * @param wsStatus the WorkspaceStatus
-     * @param kObj the KomodoObject
-     * @return the full name
-     * @throws Exception if error occurs
-     */
-    public static String getName(final WorkspaceStatus wsStatus, final KomodoObject kObj) throws Exception {
-        KomodoObject resolvedObj = wsStatus.resolve(kObj);
-        if(resolvedObj==null) return "unknown"; //$NON-NLS-1$
-        
-        String name = resolvedObj.getName(wsStatus.getTransaction());
-        if(name.equals(Komodo.NODE_TYPE)) {
-            name = ContextUtils.KOMODO_DISPLAY_NAME;
-        } else if(name.equals(Komodo.ENVIRONMENT)) {
-            name = ContextUtils.ENV_DISPLAY_NAME;
-        } else if(name.equals(Komodo.LIBRARY)) {
-            name = ContextUtils.LIBRARY_DISPLAY_NAME;
-        } else if(name.equals(Komodo.WORKSPACE)) {
-            name = ContextUtils.WORKSPACE_DISPLAY_NAME;
-        }
-
-        return name;
-    }
-
-    /**
-     * Get the full name path for this context.  e.g. home.parentContext.thisContext
-     * @param wsStatus the WorkspaceStatus
-     * @param kObj the KomodoObject
-     * @return the full name
-     * @throws Exception if error occurs
-     */
-    public static String getFullName(final WorkspaceStatus wsStatus, final KomodoObject kObj) throws Exception {
-        KomodoObject resolvedObj = wsStatus.resolve(kObj);
-        StringBuffer sb = new StringBuffer();
-        if(!wsStatus.isRoot(resolvedObj)) {
-            KomodoObject parentObj = resolvedObj.getParent(wsStatus.getTransaction());
-            parentObj = wsStatus.resolve(parentObj);
-            sb.append(getFullName(wsStatus,parentObj));
-        }
-        
-        sb.append(File.separator);
-        sb.append(getName(wsStatus,resolvedObj));
-
-        return sb.toString();
-    }
-    
     /**
      * Get property names for a KomodoObject
      * @param wsStatus the WorkspaceStatus
@@ -111,7 +49,7 @@ public class KomodoObjectUtils implements StringConstants {
 
         return props;
     }
-    
+
     /**
      * @param wsStatus the WorkspaceStatus
      * @param kObj the KomodoObject
@@ -177,7 +115,7 @@ public class KomodoObjectUtils implements StringConstants {
 
         return Messages.getString( SHELL.NO_PROPERTY_VALUE );
     }
-    
+
     /**
      * @param wsStatus the WorkspaceStatus
      * @param context the KomodoObject

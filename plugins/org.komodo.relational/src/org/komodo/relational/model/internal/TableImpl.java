@@ -221,18 +221,7 @@ public class TableImpl extends RelationalObjectImpl implements Table {
     public ForeignKey addForeignKey( final UnitOfWork transaction,
                                      final String foreignKeyName,
                                      final Table referencedTable ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( foreignKeyName, "foreignKeyName" ); //$NON-NLS-1$
-        ArgCheck.isNotNull( referencedTable, "referencedTable" ); //$NON-NLS-1$
-
-        final KomodoObject child = addChild( transaction, foreignKeyName, null );
-        child.addDescriptor( transaction, Constraint.FOREIGN_KEY_CONSTRAINT );
-
-        final ForeignKey result = new ForeignKeyImpl( transaction, getRepository(), child.getAbsolutePath() );
-        result.setReferencesTable( transaction, referencedTable );
-
-        return result;
+        return RelationalModelFactory.createForeignKey( transaction, getRepository(), this, foreignKeyName, referencedTable );
     }
 
     /**

@@ -68,15 +68,6 @@ public class WorkspaceCommandProvider implements ShellCommandProvider {
     }
 
     @Override
-    public boolean isRoot ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(kObj.getRepository());
-        if(wkspMgr.getAbsolutePath().equals(kObj.getAbsolutePath())) {
-            return true;
-        }
-        return false;
-    }
-
-    @Override
     public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(kObj.getRepository());
         if(wkspMgr.getAbsolutePath().equals(kObj.getAbsolutePath())) {

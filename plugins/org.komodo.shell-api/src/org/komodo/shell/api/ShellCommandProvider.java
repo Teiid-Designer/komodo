@@ -43,15 +43,6 @@ public interface ShellCommandProvider {
     public < T extends KomodoObject > T resolve ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException;
 
     /**
-     * Determine if the supplied KomodoObject is the context root
-     * @param uow the transaction
-     * @param kObj the KomodoObject
-     * @return 'true' if the KomodoObject is the root object
-     * @throws KException the exception
-     */
-    public boolean isRoot ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException;
-
-    /**
      * Get the type display string for a KomodoObject
      * @param uow the transaction
      * @param kObj the KomodoObject

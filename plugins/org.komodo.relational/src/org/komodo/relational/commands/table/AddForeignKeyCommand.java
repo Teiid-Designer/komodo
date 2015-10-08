@@ -8,11 +8,17 @@
 package org.komodo.relational.commands.table;
 
 import static org.komodo.relational.commands.table.TableCommandMessages.AddForeignKeyCommand.FOREIGN_KEY_ADDED;
+import static org.komodo.relational.commands.table.TableCommandMessages.AddForeignKeyCommand.INVALID_TABLE_PATH;
+import static org.komodo.relational.commands.table.TableCommandMessages.AddForeignKeyCommand.MISSING_FOREIGN_KEY_TABLE_REF_PATH;
 import static org.komodo.relational.commands.table.TableCommandMessages.General.MISSING_FOREIGN_KEY_NAME;
 import org.komodo.relational.model.Table;
+import org.komodo.relational.model.internal.TableImpl;
+import org.komodo.repository.ObjectImpl;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.spi.repository.KomodoObject;
+import org.komodo.utils.StringUtils;
 
 /**
  * A shell command to add a Foreign Key to a Table.
@@ -40,11 +46,36 @@ public final class AddForeignKeyCommand extends TableShellCommand {
 
         try {
             final String fkName = requiredArgument( 0, getMessage( MISSING_FOREIGN_KEY_NAME ) );
+            final String tableRefPath = requiredArgument( 1, getMessage( MISSING_FOREIGN_KEY_TABLE_REF_PATH ) );
 
-            final Table table = getTable();
-            //table.addForeignKey( getTransaction(), fkName );
+            Table referencedTable = null;
 
-            result = new CommandResultImpl( getMessage( FOREIGN_KEY_ADDED, fkName ) );
+            { // see if valid table path
+                String repoPath = getWorkspaceStatus().getLabelProvider().getPath( tableRefPath );
+
+                if ( StringUtils.isBlank( repoPath ) ) {
+                    repoPath = tableRefPath;
+                }
+
+                final KomodoObject possible = new ObjectImpl( getRepository(), repoPath, 0 );
+
+                try {
+                    if ( TableImpl.RESOLVER.resolvable( getTransaction(), possible ) ) {
+                        referencedTable = TableImpl.RESOLVER.resolve( getTransaction(), possible );
+                    } else {
+                        result = new CommandResultImpl( false, getMessage( INVALID_TABLE_PATH, tableRefPath ), null );
+                    }
+                } catch ( final Exception e ) {
+                    result = new CommandResultImpl( false, getMessage( INVALID_TABLE_PATH, tableRefPath ), null );
+                }
+            }
+
+            // create foreign key if found referenced table
+            if ( referencedTable != null ) {
+                final Table table = getTable();
+                table.addForeignKey( getTransaction(), fkName, referencedTable );
+                result = new CommandResultImpl( getMessage( FOREIGN_KEY_ADDED, fkName ) );
+            }
         } catch ( final Exception e ) {
             result = new CommandResultImpl( e );
         }
@@ -59,7 +90,7 @@ public final class AddForeignKeyCommand extends TableShellCommand {
      */
     @Override
     protected int getMaxArgCount() {
-        return 1;
+        return 2;
     }
 
 }

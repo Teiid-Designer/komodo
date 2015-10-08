@@ -39,6 +39,8 @@ public class Messages implements StringConstants {
     private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME);
 
     public enum SHELL {
+        CommitSuccess,
+        RollbackSuccess,
         FileNotAccessible,
         ERROR_LOADING_PROPERTIES,
         INVALID_GLOBAL_PROPERTY_NAME,

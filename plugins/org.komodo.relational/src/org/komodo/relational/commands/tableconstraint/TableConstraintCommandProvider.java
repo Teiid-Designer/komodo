@@ -72,18 +72,6 @@ public class TableConstraintCommandProvider implements ShellCommandProvider {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.shell.api.ShellCommandProvider#isRoot(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      org.komodo.spi.repository.KomodoObject)
-     */
-    @Override
-    public boolean isRoot( final UnitOfWork uow,
-                           final KomodoObject kObject ) {
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
      * @see org.komodo.shell.api.ShellCommandProvider#provideCommands()
      */
     @Override

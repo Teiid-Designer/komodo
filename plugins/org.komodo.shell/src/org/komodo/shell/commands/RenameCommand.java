@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
-import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
@@ -39,9 +38,8 @@ public class RenameCommand extends BuiltInShellCommand {
      */
     @Override
     protected CommandResult doExecute() {
-        CommandResult result;
         String objNameArg=null;
-        
+
         try {
             objNameArg = requiredArgument( 0, Messages.getString( Messages.RenameCommand.InvalidArgMsg_ObjectName ) );
             String newName = requiredArgument( 1, Messages.getString( Messages.RenameCommand.InvalidArgMsg_NewName ) );
@@ -74,20 +72,15 @@ public class RenameCommand extends BuiltInShellCommand {
 
             // Validate that the rename would not create a duplicate of same type
             if (!validateNotDuplicateType(objContext,newShortName,targetContext)) {
-                result = new CommandResultImpl( Messages.getString( Messages.RenameCommand.cannotRename_wouldCreateDuplicate, newName ) );
-                return result;
+                return new CommandResultImpl( Messages.getString( Messages.RenameCommand.cannotRename_wouldCreateDuplicate, newName ) );
             }
 
             // Rename
             rename( objContext, newShortName, targetContext );
-            result = new CommandResultImpl( Messages.getString( Messages.RenameCommand.ObjectRenamed, objNameArg, newName ) );
+            return new CommandResultImpl( Messages.getString( Messages.RenameCommand.ObjectRenamed, objNameArg, newName ) );
         } catch ( Exception e ) {
-            print( CompletionConstants.MESSAGE_INDENT, Messages.getString( Messages.RenameCommand.Failure, objNameArg ) );
-            print( CompletionConstants.MESSAGE_INDENT, TAB + e.getMessage() );
-            return new CommandResultImpl(false, Messages.getString( Messages.RenameCommand.Failure, objNameArg ), null);
+            return new CommandResultImpl( e );
         }
-
-        return result;
     }
 
     /**
@@ -100,7 +93,7 @@ public class RenameCommand extends BuiltInShellCommand {
     private boolean validateNotDuplicateType(KomodoObject objToRename, String newName, KomodoObject targetObject) throws Exception {
         boolean hasExistingWithName = false;
         KomodoObject[] objsOfType = targetObject.getChildrenOfType(getWorkspaceStatus().getTransaction(), objToRename.getTypeIdentifier(getWorkspaceStatus().getTransaction()).getType());
-        
+
         for(KomodoObject kObj : objsOfType) {
             String kObjName = kObj.getName(getWorkspaceStatus().getTransaction());
             if(kObjName.equals(newName)) {
@@ -108,7 +101,7 @@ public class RenameCommand extends BuiltInShellCommand {
                 break;
             }
         }
-        
+
         // Existing with supplied name not found - not a duplicate
         if(hasExistingWithName) {
             return false;
