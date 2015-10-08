@@ -101,8 +101,8 @@ public class ShowStatusCommand extends BuiltInShellCommand {
 
         // Current Context
         KomodoObject currentContext = wsStatus.getCurrentContext();
-        String objFullName = KomodoObjectUtils.getFullName(wsStatus, currentContext);
-        print(MESSAGE_INDENT, Messages.getString(Messages.ShowStatusCommand.CurrentContext, objFullName));
+        final String path = KomodoObjectUtils.getFullName( wsStatus, currentContext );
+        print(MESSAGE_INDENT, Messages.getString(Messages.ShowStatusCommand.CurrentContext, path));
 
         // Get additional provided statuses for current context
         List<String> providedStatusList = wsStatus.getProvidedStatusMessages(currentContext);

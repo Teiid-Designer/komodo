@@ -7,7 +7,7 @@
  */
 package org.komodo.shell.commands;
 
-import static org.komodo.shell.Messages.SetGlobalPropertyCommand.GlobalPropertySet;
+import static org.komodo.shell.Messages.SHELL.CommitSuccess;
 import java.util.List;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
@@ -42,7 +42,7 @@ public class CommitCommand extends BuiltInShellCommand {
     protected CommandResult doExecute() {
         try {
             getWorkspaceStatus().commit( CommitCommand.class.getName() );
-            return new CommandResultImpl( Messages.getString( GlobalPropertySet, WorkspaceStatus.AUTO_COMMIT ) );
+            return new CommandResultImpl( Messages.getString( CommitSuccess ) );
         } catch ( final Exception e ) {
             return new CommandResultImpl( e );
         }

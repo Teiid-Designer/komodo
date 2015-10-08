@@ -321,20 +321,17 @@ public interface WorkspaceStatus extends StringConstants {
     < T extends KomodoObject > T resolve ( final KomodoObject kObj ) throws KException;
 
     /**
+     * @return the current label provider (never <code>null</code>)
+     */
+    KomodoObjectLabelProvider getLabelProvider();
+
+    /**
      * Get the object type string for display
      * @param kObj the KomodoObject
      * @return the type display string
      * @throws KException the exception
      */
     String getTypeDisplay ( final KomodoObject kObj ) throws KException;
-
-    /**
-     * Determine if the supplied KomodoObject is the root context node
-     * @param kObj the KomodoObject
-     * @return 'true' if root, 'false' if not
-     * @throws KException the exception
-     */
-    boolean isRoot ( final KomodoObject kObj ) throws KException;
 
     /**
      * Get status messages from providers that should be displayed

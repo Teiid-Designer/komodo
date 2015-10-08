@@ -65,18 +65,6 @@ public class PushdownFunctionCommandProvider implements ShellCommandProvider {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.shell.api.ShellCommandProvider#isRoot(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      org.komodo.spi.repository.KomodoObject)
-     */
-    @Override
-    public boolean isRoot ( final Repository.UnitOfWork uow,
-                            final KomodoObject kObj ) {
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
      * @see org.komodo.shell.api.ShellCommandProvider#getTypeDisplay(org.komodo.spi.repository.Repository.UnitOfWork,
      *      org.komodo.spi.repository.KomodoObject)
      */

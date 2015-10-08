@@ -27,12 +27,12 @@ import java.io.Writer;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.KomodoObjectUtils;
+import org.komodo.spi.repository.KomodoObject;
 
 /**
  * Abstract class for all shell command readers.
@@ -202,26 +202,12 @@ public abstract class AbstractShellCommandReader implements ShellCommandReader {
 
     protected String getPrompt() throws Exception {
         // see if full path should be displayed
-        String path = null;
-
-        try {
-            if ( getWorkspaceStatus().isShowingFullPathInPrompt() ) {
-                path = KomodoObjectUtils.getFullName(this.wsStatus, this.wsStatus.getCurrentContext());
-            } else {
-                path = KomodoObjectUtils.getName(this.wsStatus, this.wsStatus.getCurrentContext());
-            }
-        } catch ( final Exception e ) {
-            // problem getting context name
-            path = Messages.getString( SHELL.PATH_NOT_FOUND,
-                                       this.wsStatus.getCurrentContext().getAbsolutePath() );
-            return Messages.getString( Messages.SHELL.PROMPT, path );
-        }
-
-        assert ( path != null );
+        final KomodoObject kobject = this.wsStatus.getCurrentContext();
+        final String path = KomodoObjectUtils.getFullName( this.wsStatus, kobject );
 
         // see if type should be displayed
-        if ( getWorkspaceStatus().isShowingTypeInPrompt() ) {
-            return Messages.getString( Messages.SHELL.PROMPT_WITH_TYPE, path, getWorkspaceStatus().getTypeDisplay(getWorkspaceStatus().getCurrentContext()) );
+        if ( this.wsStatus.isShowingTypeInPrompt() && DefaultLabelProvider.shouldShowType( kobject ) ) {
+            return Messages.getString( Messages.SHELL.PROMPT_WITH_TYPE, path, this.wsStatus.getTypeDisplay( kobject ) );
         }
 
         return Messages.getString( Messages.SHELL.PROMPT, path );

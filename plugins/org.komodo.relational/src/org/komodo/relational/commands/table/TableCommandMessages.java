@@ -67,7 +67,9 @@ public class TableCommandMessages implements StringConstants {
 
     @SuppressWarnings( "javadoc" )
     public enum AddForeignKeyCommand {
-        FOREIGN_KEY_ADDED;
+        FOREIGN_KEY_ADDED,
+        INVALID_TABLE_PATH,
+        MISSING_FOREIGN_KEY_TABLE_REF_PATH;
 
         @Override
         public String toString() {

@@ -21,12 +21,13 @@
  ************************************************************************************/
 package org.komodo.shell.commands;
 
+import org.komodo.repository.ObjectImpl;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
-import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.KomodoObjectLabelProvider;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.KomodoObject;
 
 /**
  * HomeCommand - Changes the context to the root.
@@ -49,27 +50,17 @@ public class HomeCommand extends BuiltInShellCommand {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
-     */
-    @Override
-    public boolean isValidForCurrentContext() {
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
      * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
     @Override
     protected CommandResult doExecute() {
-        try {
-            final CdCommand cdCmd = new CdCommand( getWorkspaceStatus() );
-            final Arguments args = new Arguments( StringConstants.FORWARD_SLASH );
-            cdCmd.setArguments( args );
-            cdCmd.setWriter( getWriter() );
+        final KomodoObject current = getWorkspaceStatus().getCurrentContext();
 
-            return cdCmd.execute();
+        try {
+            getWorkspaceStatus().setCurrentContext( new ObjectImpl( current.getRepository(),
+                                                                    KomodoObjectLabelProvider.ROOT_PATH,
+                                                                    0 ) );
+            return CommandResult.SUCCESS;
         } catch ( final Exception e ) {
             return new CommandResultImpl( e );
         }
@@ -83,6 +74,16 @@ public class HomeCommand extends BuiltInShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 0;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
+     */
+    @Override
+    public boolean isValidForCurrentContext() {
+        return true;
     }
 
 }

@@ -48,7 +48,7 @@ public final class ImportCommand extends ModelShellCommand {
     static final String NAME = "import-ddl"; //$NON-NLS-1$
 
     private static final String TEMP_IMPORT_CONTEXT = "TempImportContext"; //$NON-NLS-1$
-    
+
     /**
      * @param status
      *        the shell's workspace status (cannot be <code>null</code>)
@@ -77,28 +77,28 @@ public final class ImportCommand extends ModelShellCommand {
             if(!CompletionConstants.OK.equals(validationResult)) {
                 return new CommandResultImpl( false, getWorkspaceMessage( INPUT_FILE_ERROR, fileName, validationResult ), null );
             }
-            
+
             // Import the DDL into the target context
             File ddlFile = new File(fileName);
             ImportOptions importOptions = new ImportOptions();
             ImportMessages importMessages = new ImportMessages();
-            
+
             // Create a temp schema to put the imported model
             KomodoObject tempSchema = createSchema(TEMP_IMPORT_CONTEXT);
             if(tempSchema==null) {
                 return new CommandResultImpl( false, getMessage( ErrorCreatingTempNode, TEMP_IMPORT_CONTEXT ), null );
             }
-            
+
             // Setup the import
             importDdl(getWorkspaceStatus().getTransaction(), ddlFile, tempSchema, importOptions, importMessages);
-            
+
             if(!importMessages.hasError()) {
-                
+
                 print(CompletionConstants.MESSAGE_INDENT, getMessage(DdlImportInProgressMsg, ddlFile));
-                
+
                 // The commit will initiate sequencing
                 commitImport(ImportCommand.class.getSimpleName(), importMessages);
-                
+
                 // No sequencing problems - success
                 if(!importMessages.hasError()) {
                     // Move the children underneath the supplied parent context
@@ -112,19 +112,19 @@ public final class ImportCommand extends ModelShellCommand {
                     }
                     // Clean up the temp schema
                     deleteSchema(KomodoObjectUtils.getFullName(getWorkspaceStatus(), tempSchema));
-                    
+
                     return new CommandResultImpl( true, getMessage( DdlImportSuccessMsg, fileName ), null );
                 // Problem with the import.  Fail and delete all the parents children
                 } else {
                     print(CompletionConstants.MESSAGE_INDENT, getMessage(ImportFailedMsg, fileName));
                     print(CompletionConstants.MESSAGE_INDENT, importMessages.errorMessagesToString());
-                                        
+
                     deleteSchema(KomodoObjectUtils.getFullName(getWorkspaceStatus(), tempSchema));
                 }
             } else {
                 print(CompletionConstants.MESSAGE_INDENT, getMessage(ImportFailedMsg, fileName));
                 print(CompletionConstants.MESSAGE_INDENT, importMessages.errorMessagesToString());
-                
+
                 deleteSchema(KomodoObjectUtils.getFullName(getWorkspaceStatus(), tempSchema));
             }
 
@@ -155,7 +155,7 @@ public final class ImportCommand extends ModelShellCommand {
         // Import - (sequencing will not initiate until we commit the transaction)
         importer.importDdl(uow, ddlFile, parentObj, importOptions, importMessages);
     }
-    
+
     private void commitImport( final String source, ImportMessages importMessages ) throws Exception {
         UnitOfWork trans = getTransaction();
         final String txName = trans.getName();
@@ -192,22 +192,22 @@ public final class ImportCommand extends ModelShellCommand {
         try {
             // Save original context
             KomodoObject origContext = getContext();
-            
+
             // Cd into workspace to create temp Schema
             CdCommand cdCommand = new CdCommand(getWorkspaceStatus());
             cdCommand.setArguments( new Arguments( "/" ) );  //$NON-NLS-1$
             CommandResult result = cdCommand.execute();
-            
+
             if(!result.isOk()) {
                 return resultSchema;
             }
-            
+
             // Create the temp schema
             CreateSchemaCommand createCommand = new CreateSchemaCommand(getWorkspaceStatus());
 
             createCommand.setArguments( new Arguments( schemaName ) );
             result = createCommand.execute();
-            
+
             if(result.isOk()) {
                 final KomodoObject[] schemas = getWorkspaceManager().getChildrenOfType(getTransaction(), KomodoLexicon.Schema.NODE_TYPE);
                 for(KomodoObject schema : schemas) {
@@ -217,7 +217,7 @@ public final class ImportCommand extends ModelShellCommand {
                     }
                 }
             }
-            
+
             // Cd back into the original Context
             String path = KomodoObjectUtils.getFullName(getWorkspaceStatus(), origContext);
             cdCommand.setArguments(new Arguments(path));
@@ -242,7 +242,7 @@ public final class ImportCommand extends ModelShellCommand {
         CommandResult result = null;
         return result;
     }
-    
+
     /**
      * {@inheritDoc}
      *

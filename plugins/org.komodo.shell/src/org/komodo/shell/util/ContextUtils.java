@@ -14,6 +14,7 @@ import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
+import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
@@ -95,7 +96,7 @@ public class ContextUtils implements StringConstants {
 	    if(StringUtils.isBlank(path)) return workspaceStatus.getCurrentContext();
 
         // check path for cd into root options
-        if ( path.equalsIgnoreCase( FORWARD_SLASH ) ) {
+        if ( path.equals( FORWARD_SLASH ) ) {
             return workspaceStatus.getRootContext();
         }
 
@@ -114,7 +115,11 @@ public class ContextUtils implements StringConstants {
 
 		if(resultObject!=null) {
 		    try {
-                resultObject = workspaceStatus.resolve(resultObject);
+                final KomodoObject resolved = workspaceStatus.resolve( resultObject );
+
+                if ( resolved != null ) {
+                    return resolved;
+                }
             } catch (KException ex) {
             }
 		}
@@ -187,14 +192,18 @@ public class ContextUtils implements StringConstants {
 	private static KomodoObject getContext(final WorkspaceStatus wsStatus, KomodoObject currentContext, String segmentName) throws KException {
 		// Special navigation cases
 		if(segmentName.equals("..")) { //$NON-NLS-1$
-			return currentContext.getParent(wsStatus.getTransaction());
+		    if (wsStatus.getRootContext().equals( currentContext )) {
+		        return null;
+		    }
+
+		    return currentContext.getParent(wsStatus.getTransaction());
 		} else if(segmentName.equals(".")) { //$NON-NLS-1$
 			return currentContext;
 		}
 		KomodoObject childContext = null;
 		try {
 			for(KomodoObject theContext : currentContext.getChildren(wsStatus.getTransaction())) {
-			    String contextName = KomodoObjectUtils.getName(wsStatus, theContext);
+			    final String contextName = wsStatus.getLabelProvider().getDisplayName( theContext );
 				if(contextName.equals(segmentName)) {
 					childContext = theContext;
 					break;
@@ -216,7 +225,7 @@ public class ContextUtils implements StringConstants {
         int nMatching = 0;
         try {
             for(KomodoObject theContext : currentContext.getChildren(wsStatus.getTransaction())) {
-                String contextName = KomodoObjectUtils.getName(wsStatus, theContext);
+                final String contextName = wsStatus.getLabelProvider().getDisplayName( theContext );
                 if(contextName.startsWith(segmentName)) {
                     nMatching++;
                     if(nMatching>1) break;
@@ -234,7 +243,7 @@ public class ContextUtils implements StringConstants {
 	 * @return the context at the specified absolute path, null if not found.
 	 */
 	private static KomodoObject getContextForAbsolutePath(WorkspaceStatus wsStatus, KomodoObject rootContext, String absolutePath) throws KException {
-	    absolutePath = convertPathToDisplayPath( absolutePath );
+	    absolutePath = wsStatus.getLabelProvider().getDisplayPath( absolutePath );
 
 	    KomodoObject resultContext = null;
 
@@ -320,17 +329,12 @@ public class ContextUtils implements StringConstants {
 //        return null;
 
 
-	    absolutePath = convertPathToDisplayPath( absolutePath );
+	    absolutePath = wsStatus.getLabelProvider().getDisplayPath( absolutePath );
 
         KomodoObject rootContext = wsStatus.getRootContext();
-        String absRootPath = null;
-        try {
-//            absRootPath = FORWARD_SLASH + KomodoObjectUtils.getFullName(wsStatus, rootContext) + FORWARD_SLASH;
-            absRootPath = KomodoObjectUtils.getFullName(wsStatus, rootContext) + FORWARD_SLASH;
-        } catch (Exception ex) {
-            return null;
-        }
-		if(absolutePath.startsWith(absRootPath)) {
+        String absRootPath = KomodoObjectUtils.getFullName( wsStatus, rootContext );
+
+        if(absolutePath.startsWith(absRootPath)) {
 			return absolutePath.substring( absRootPath.length() );
 		}
 		return null;
@@ -343,26 +347,31 @@ public class ContextUtils implements StringConstants {
 	 * @param absolutePath the supplied absolute path
 	 * @return the path relative to the root context
 	 */
-	public static String convertAbsolutePathToRelative(WorkspaceStatus wsStatus, KomodoObject context, String absolutePath) {
-        absolutePath = convertPathToDisplayPath( absolutePath );
+    public static String convertAbsolutePathToRelative( WorkspaceStatus wsStatus,
+                                                        KomodoObject context,
+                                                        final String absolutePath ) {
+        ArgCheck.isNotNull( wsStatus, "wsStatus" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( context, "context" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( absolutePath, "absolutePath" ); //$NON-NLS-1$
 
-		String absContextPath = null;
-		try {
-			absContextPath = KomodoObjectUtils.getFullName(wsStatus, context);
-		} catch (Exception ex) {
-			return null;
-		}
-		if(absolutePath.startsWith(absContextPath)) {
-			String relativePath = absolutePath.substring( absContextPath.length() );
-			if(!StringUtils.isEmpty(relativePath)) {
-				if(relativePath.startsWith(FORWARD_SLASH)) {
-					relativePath = relativePath.substring(1);
-				}
-			}
-			return relativePath;
-		}
-		return null;
-	}
+        final String absContextPath = KomodoObjectUtils.getFullName( wsStatus, context );
+        final String displayPath = wsStatus.getLabelProvider().getDisplayPath( absolutePath );
+        String path = ( StringUtils.isBlank( displayPath ) ? absolutePath : displayPath );
+
+        if ( path.startsWith( absContextPath ) ) {
+            String relativePath = path.substring( absContextPath.length() );
+
+            if ( !StringUtils.isEmpty( relativePath ) ) {
+                if ( relativePath.startsWith( FORWARD_SLASH ) ) {
+                    relativePath = relativePath.substring( 1 );
+                }
+            }
+
+            return relativePath;
+        }
+
+        return null;
+    }
 
 	/**
 	 * Breaks the path apart into its segments, using the path separator
