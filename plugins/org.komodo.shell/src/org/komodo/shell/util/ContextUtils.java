@@ -13,7 +13,6 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
-import org.komodo.spi.repository.Repository;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
@@ -23,15 +22,6 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
  * Helper methods for working with paths
  */
 public class ContextUtils implements StringConstants {
-
-    @SuppressWarnings( "javadoc" )
-    public static String KOMODO_DISPLAY_NAME = "komodo"; //$NON-NLS-1$
-    @SuppressWarnings( "javadoc" )
-    public static String ENV_DISPLAY_NAME = "environment"; //$NON-NLS-1$
-    @SuppressWarnings( "javadoc" )
-    public static String LIBRARY_DISPLAY_NAME = "library"; //$NON-NLS-1$
-    @SuppressWarnings( "javadoc" )
-    public static String WORKSPACE_DISPLAY_NAME = "workspace"; //$NON-NLS-1$
 
 	/**
 	 * A collection of grouping node names that should be removed from the display paths.
@@ -159,30 +149,6 @@ public class ContextUtils implements StringConstants {
 	}
 
 	/**
-	 * Get the context level, relative to the root context.
-	 * Examples:
-	 * tko.komodo = 0
-	 * tko.komodo-tko.workspace = 1
-	 * tko.komodo-tko.workspace-MyVdb = 2
-	 *
-	 * @param transaction the transaction
-	 * @param context the supplied context
-	 * @return the context level relative to the root.
-	 * @throws KException the exception
-	 */
-	public static int getContextLevel(Repository.UnitOfWork transaction, KomodoObject context) throws KException {
-		int contextLevel = 0;
-
-		KomodoObject parent = context.getParent(transaction);
-		while(parent!=null) {
-			contextLevel++;
-			parent = parent.getParent(transaction);
-		}
-
-		return contextLevel;
-	}
-
-	/**
 	 * Get a context child (or parent) of the current context, based on provided segment name.  Returns null if a child of supplied name
 	 * does not exist.  The supplied segment can only represent a change of one level above or below the currentContext.
 	 * @param currentContext the current context
@@ -243,7 +209,11 @@ public class ContextUtils implements StringConstants {
 	 * @return the context at the specified absolute path, null if not found.
 	 */
 	private static KomodoObject getContextForAbsolutePath(WorkspaceStatus wsStatus, KomodoObject rootContext, String absolutePath) throws KException {
-	    absolutePath = wsStatus.getLabelProvider().getDisplayPath( absolutePath );
+        final String path = wsStatus.getLabelProvider().getDisplayPath( absolutePath );
+
+        if ( !StringUtils.isBlank( path ) ) {
+            absolutePath = path;
+        }
 
 	    KomodoObject resultContext = null;
 
@@ -309,27 +279,11 @@ public class ContextUtils implements StringConstants {
 	 * @return the path relative to the root context
 	 */
 	public static String convertAbsolutePathToRootRelative(WorkspaceStatus wsStatus, String absolutePath) {
-//        absolutePath = convertPathToDisplayPath( absolutePath );
-//
-//        String absContextPath = null;
-//        try {
-//            absContextPath = context.getFullName();
-//        } catch (Exception ex) {
-//            return null;
-//        }
-//        if(absolutePath.startsWith(absContextPath)) {
-//            String relativePath = absolutePath.substring( absContextPath.length() );
-//            if(!StringUtils.isEmpty(relativePath)) {
-//                if(relativePath.startsWith(PATH_SEPARATOR)) {
-//                    relativePath = relativePath.substring(1);
-//                }
-//            }
-//            return relativePath;
-//        }
-//        return null;
+        final String path = wsStatus.getLabelProvider().getDisplayPath( absolutePath );
 
-
-	    absolutePath = wsStatus.getLabelProvider().getDisplayPath( absolutePath );
+        if ( !StringUtils.isBlank( path ) ) {
+            absolutePath = path;
+        }
 
         KomodoObject rootContext = wsStatus.getRootContext();
         String absRootPath = KomodoObjectUtils.getFullName( wsStatus, rootContext );

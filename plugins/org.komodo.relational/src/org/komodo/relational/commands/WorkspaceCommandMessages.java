@@ -61,7 +61,7 @@ public class WorkspaceCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     public enum ImportVdbCommand {
         VdbImportInProgressMsg,
         VdbImportSuccessMsg,
@@ -78,7 +78,7 @@ public class WorkspaceCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     public enum DeleteVdbCommand {
         DELETE_VDB_ERROR,
         VDB_NOT_FOUND,
@@ -139,32 +139,6 @@ public class WorkspaceCommandMessages implements StringConstants {
         INVALID_TYPE,
         NO_OBJECTS_FOUND,
         TYPE_HEADER;
-
-        @Override
-        public String toString() {
-            return getEnumName(this) + DOT + name();
-        }
-    }
-
-    public enum AddConstraintColumnCommand {
-        COLUMN_REF_ADDED,
-        COLUMN_PATH_NOT_FOUND,
-        ERROR,
-        INVALID_COLUMN_PATH,
-        INVALID_COLUMN,
-        MISSING_COLUMN_PATH;
-
-        @Override
-        public String toString() {
-            return getEnumName(this) + DOT + name();
-        }
-    }
-
-    public enum DeleteConstraintColumnCommand {
-        COLUMN_REF_REMOVED,
-        COLUMN_PATH_NOT_FOUND,
-        INVALID_COLUMN_PATH,
-        MISSING_COLUMN_PATH;
 
         @Override
         public String toString() {
