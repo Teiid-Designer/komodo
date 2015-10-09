@@ -107,7 +107,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
 
         boolean valid = true;
-        final Property property = kobject.getProperty( transaction, name );
+        final Property property = kobject.getRawProperty( transaction, name );
 
         if ( property == null ) {
             if ( expectedValue != null ) {
@@ -1337,7 +1337,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         	}
         	newPath += newName;
         }
-         
+
         try {
             getSession( transaction ).move( getAbsolutePath(), newPath );
             this.path = newPath;
