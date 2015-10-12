@@ -482,7 +482,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
             String savedPath = props.getProperty( SAVED_CONTEXT_PATH );
 
             if ( StringUtils.isBlank( savedPath ) ) {
-                savedPath = DefaultLabelProvider.WORKSPACE_PATH;
+                savedPath = KomodoObjectLabelProvider.WORKSPACE_PATH;
             }
 
             final Repository repo = getEngine().getDefaultRepository();

@@ -7,22 +7,16 @@
  */
 package org.komodo.relational.commands.tableconstraint;
 
-import static org.komodo.relational.commands.WorkspaceCommandMessages.AddConstraintColumnCommand.COLUMN_PATH_NOT_FOUND;
-import static org.komodo.relational.commands.WorkspaceCommandMessages.AddConstraintColumnCommand.COLUMN_REF_ADDED;
-import static org.komodo.relational.commands.WorkspaceCommandMessages.AddConstraintColumnCommand.INVALID_COLUMN;
-import static org.komodo.relational.commands.WorkspaceCommandMessages.AddConstraintColumnCommand.INVALID_COLUMN_PATH;
-import static org.komodo.relational.commands.WorkspaceCommandMessages.AddConstraintColumnCommand.MISSING_COLUMN_PATH;
+import static org.komodo.relational.commands.tableconstraint.TableConstraintCommandMessages.AddConstraintColumnCommand.COLUMN_PATH_NOT_FOUND;
+import static org.komodo.relational.commands.tableconstraint.TableConstraintCommandMessages.AddConstraintColumnCommand.COLUMN_REF_ADDED;
+import static org.komodo.relational.commands.tableconstraint.TableConstraintCommandMessages.AddConstraintColumnCommand.INVALID_COLUMN;
+import static org.komodo.relational.commands.tableconstraint.TableConstraintCommandMessages.AddConstraintColumnCommand.INVALID_COLUMN_PATH;
+import static org.komodo.relational.commands.tableconstraint.TableConstraintCommandMessages.AddConstraintColumnCommand.MISSING_COLUMN_PATH;
 import java.util.Arrays;
 import java.util.List;
 import org.komodo.relational.commands.FindCommand;
-import org.komodo.relational.commands.RelationalShellCommand;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.TableConstraint;
-import org.komodo.relational.model.internal.AccessPatternImpl;
-import org.komodo.relational.model.internal.ForeignKeyImpl;
-import org.komodo.relational.model.internal.IndexImpl;
-import org.komodo.relational.model.internal.PrimaryKeyImpl;
-import org.komodo.relational.model.internal.UniqueConstraintImpl;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
@@ -33,9 +27,9 @@ import org.komodo.spi.repository.Repository;
 import org.komodo.utils.StringUtils;
 
 /**
- * A shell command to add a Column to a TableConstraint.
+ * A shell command to add a column to a {@link TableConstraint}.
  */
-public final class AddConstraintColumnCommand extends RelationalShellCommand {
+public final class AddConstraintColumnCommand extends TableConstraintShellCommand {
 
     static final String NAME = "add-column"; //$NON-NLS-1$
 
@@ -65,10 +59,7 @@ public final class AddConstraintColumnCommand extends RelationalShellCommand {
             if ( column == null ) {
                 result = new CommandResultImpl( false, getMessage( COLUMN_PATH_NOT_FOUND, columnPath ), null );
             } else if ( column instanceof Column ) {
-                // initValidWsContextTypes() method assures execute is called only if current context is a TableConstraint
-                final KomodoObject kobject = getContext();
-                assert( kobject instanceof TableConstraint );
-                final TableConstraint constraint = ( TableConstraint )kobject;
+                final TableConstraint constraint = getTableConstraint();
 
                 // must be a column in the parent of the table constraint
                 final Repository.UnitOfWork transaction = getWorkspaceStatus().getTransaction();
@@ -108,27 +99,6 @@ public final class AddConstraintColumnCommand extends RelationalShellCommand {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
-     */
-    @Override
-    public boolean isValidForCurrentContext() {
-        final KomodoObject kobject = getContext();
-        final Repository.UnitOfWork uow = getTransaction();
-
-        try {
-            return AccessPatternImpl.RESOLVER.resolvable( uow, kobject )
-                   || ForeignKeyImpl.RESOLVER.resolvable( uow, kobject )
-                   || IndexImpl.RESOLVER.resolvable( uow, kobject )
-                   || PrimaryKeyImpl.RESOLVER.resolvable( uow, kobject )
-                   || UniqueConstraintImpl.RESOLVER.resolvable( uow, kobject );
-        } catch ( final Exception e ) {
-            return false;
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
      * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
      */
     @Override
@@ -137,8 +107,11 @@ public final class AddConstraintColumnCommand extends RelationalShellCommand {
         if ( getArguments().isEmpty() ) {
 
             // find columns
-            final KomodoObject parent = getContext().getParent(getTransaction());
-            final String[] columnPaths = FindCommand.query( getWorkspaceStatus(), KomodoType.COLUMN, parent.getAbsolutePath(), null );
+            final KomodoObject parent = getContext().getParent( getTransaction() );
+            final String[] columnPaths = FindCommand.query( getWorkspaceStatus(),
+                                                            KomodoType.COLUMN,
+                                                            parent.getAbsolutePath(),
+                                                            null );
 
             if ( columnPaths.length == 0 ) {
                 return -1;
