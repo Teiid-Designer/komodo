@@ -21,7 +21,6 @@ public final class TableConstraintCommandMessages implements StringConstants {
 
         COLUMN_REF_ADDED,
         COLUMN_PATH_NOT_FOUND,
-        ERROR,
         INVALID_COLUMN_PATH,
         INVALID_COLUMN,
         MISSING_COLUMN_PATH;
@@ -40,7 +39,7 @@ public final class TableConstraintCommandMessages implements StringConstants {
 
     public enum DeleteConstraintColumnCommand {
 
-        COLUMN_REF_REMOVED,
+        COLUMN_REMOVED,
         COLUMN_PATH_NOT_FOUND,
         INVALID_COLUMN_PATH,
         MISSING_COLUMN_PATH;

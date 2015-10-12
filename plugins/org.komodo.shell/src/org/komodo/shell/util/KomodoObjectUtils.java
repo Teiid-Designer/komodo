@@ -165,7 +165,7 @@ public class KomodoObjectUtils implements StringConstants {
      * @param wsStatus
      *        the workspace status (cannot be <code>null</code>)
      * @param kobject
-     *        the object whose full name (path) is being requested (cannot be <code>null</code>)
+     *        the object whose full path is being requested (cannot be <code>null</code>)
      * @return the object's full, qualified path (never empty)
      */
     public static String getFullName( final WorkspaceStatus wsStatus,
@@ -177,6 +177,47 @@ public class KomodoObjectUtils implements StringConstants {
         }
 
         return path;
+    }
+
+    /**
+     * @param wsStatus
+     *        the workspace status (cannot be <code>null</code>)
+     * @param kobject
+     *        the object whose short name is being requested (cannot be <code>null</code>)
+     * @return the object's full, qualified path (never empty)
+     */
+    public static String getShortName( final WorkspaceStatus wsStatus,
+                                      final KomodoObject kobject ) {
+        final String name = wsStatus.getLabelProvider().getDisplayName( kobject );
+
+        if ( StringUtils.isBlank( name ) ) {
+            final String[] segments = kobject.getAbsolutePath().split( FORWARD_SLASH );
+            return segments[ segments.length - 1 ];
+        }
+
+        return name;
+    }
+
+    /**
+     * Obtain the name or path of the specified object depending on the value of the
+     * {@link WorkspaceStatus#SHOW_FULL_PATH_IN_PROMPT_KEY} global property.
+     *
+     * @param wsStatus
+     *        the workspace status (cannot be <code>null</code>)
+     * @param kobject
+     *        the object whose display name is being requested (cannot be <code>null</code>)
+     * @return the object's full, qualified path (never empty)
+     */
+    public static String getDisplayName( final WorkspaceStatus wsStatus,
+                                         final KomodoObject kobject ) {
+        ArgCheck.isNotNull( wsStatus, "wsStatus" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( kobject, "kobject" ); //$NON-NLS-1$
+
+        if ( wsStatus.isShowingFullPathInPrompt() ) {
+            return getFullName( wsStatus, kobject );
+        }
+
+        return getShortName( wsStatus, kobject );
     }
 
 }

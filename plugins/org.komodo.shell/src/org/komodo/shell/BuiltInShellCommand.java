@@ -18,7 +18,6 @@ package org.komodo.shell;
 import java.io.File;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.komodo.shell.Messages.SHELL;
@@ -30,9 +29,7 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
 import org.komodo.shell.util.KomodoObjectUtils;
 import org.komodo.shell.util.PrintUtils;
-import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.repository.Descriptor;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.utils.ArgCheck;
@@ -614,33 +611,6 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
                 candidates.add( item );
             }
         }
-    }
-
-    protected boolean isCurrentTypeValid( final String... descriptorNames ) throws KException {
-        if ( ( descriptorNames == null ) || ( descriptorNames.length == 0 ) ) {
-            return true;
-        }
-
-        final List< String > validTypes = Arrays.asList( descriptorNames );
-        final KomodoObject kobject = getWorkspaceStatus().getCurrentContext();
-
-        // check primary type
-        final String primaryType = kobject.getPrimaryType( getWorkspaceStatus().getTransaction() ).getName();
-
-        if ( validTypes.contains( primaryType ) ) {
-            return true;
-        }
-
-        // check mixins
-        final Descriptor[] mixins = kobject.getDescriptors( getWorkspaceStatus().getTransaction() );
-
-        for ( final Descriptor mixin : mixins ) {
-            if ( validTypes.contains( mixin.getName() ) ) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
 }
