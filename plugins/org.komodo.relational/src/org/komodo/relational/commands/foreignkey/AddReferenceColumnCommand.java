@@ -5,40 +5,40 @@
  *
  * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
  */
-package org.komodo.relational.commands.tableconstraint;
+package org.komodo.relational.commands.foreignkey;
 
-import static org.komodo.relational.commands.tableconstraint.TableConstraintCommandMessages.AddConstraintColumnCommand.COLUMN_PATH_NOT_FOUND;
-import static org.komodo.relational.commands.tableconstraint.TableConstraintCommandMessages.AddConstraintColumnCommand.COLUMN_REF_ADDED;
-import static org.komodo.relational.commands.tableconstraint.TableConstraintCommandMessages.AddConstraintColumnCommand.INVALID_COLUMN;
-import static org.komodo.relational.commands.tableconstraint.TableConstraintCommandMessages.AddConstraintColumnCommand.INVALID_COLUMN_PATH;
-import static org.komodo.relational.commands.tableconstraint.TableConstraintCommandMessages.AddConstraintColumnCommand.MISSING_COLUMN_PATH;
-import java.util.Arrays;
+import static org.komodo.relational.commands.foreignkey.ForeignKeyCommandMessages.AddReferenceColumnCommand.COLUMN_PATH_NOT_FOUND;
+import static org.komodo.relational.commands.foreignkey.ForeignKeyCommandMessages.AddReferenceColumnCommand.COLUMN_REF_ADDED;
+import static org.komodo.relational.commands.foreignkey.ForeignKeyCommandMessages.AddReferenceColumnCommand.INVALID_COLUMN;
+import static org.komodo.relational.commands.foreignkey.ForeignKeyCommandMessages.AddReferenceColumnCommand.INVALID_COLUMN_PATH;
+import static org.komodo.relational.commands.foreignkey.ForeignKeyCommandMessages.AddReferenceColumnCommand.MISSING_COLUMN_PATH;
 import java.util.List;
+import org.komodo.relational.commands.FindCommand;
 import org.komodo.relational.model.Column;
+import org.komodo.relational.model.ForeignKey;
 import org.komodo.relational.model.Table;
-import org.komodo.relational.model.TableConstraint;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
-import org.komodo.shell.api.KomodoObjectLabelProvider;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.utils.StringUtils;
 
 /**
- * A shell command to add a column to a {@link TableConstraint}.
+ * A shell command to add a reference column to a {@link ForeignKey foreign key}.
  */
-public final class AddConstraintColumnCommand extends TableConstraintShellCommand {
+public final class AddReferenceColumnCommand extends ForeignKeyShellCommand {
 
-    static final String NAME = "add-column"; //$NON-NLS-1$
+    static final String NAME = "add-ref-column"; //$NON-NLS-1$
 
     /**
      * @param status
      *        the shell's workspace status (cannot be <code>null</code>)
      */
-    public AddConstraintColumnCommand( final WorkspaceStatus status ) {
-        super( status, NAME );
+    public AddReferenceColumnCommand( final WorkspaceStatus status ) {
+        super( NAME, status );
     }
 
     /**
@@ -59,22 +59,22 @@ public final class AddConstraintColumnCommand extends TableConstraintShellComman
             if ( column == null ) {
                 result = new CommandResultImpl( false, getMessage( COLUMN_PATH_NOT_FOUND, columnPath ), null );
             } else if ( column instanceof Column ) {
-                final TableConstraint constraint = getTableConstraint();
+                final ForeignKey foreignKey = getForeignKey();
 
-                // must be a column in the parent of the table constraint
+                // must NOT be a column in the parent of the table constraint
                 final Repository.UnitOfWork transaction = getWorkspaceStatus().getTransaction();
-                final KomodoObject parentTable = constraint.getParent( transaction );
+                final KomodoObject parentTable = foreignKey.getParent( transaction );
 
                 if ( parentTable.equals( column.getParent( transaction ) ) ) {
-                    constraint.addColumn( transaction, ( Column )column );
-                    result = new CommandResultImpl( getMessage( COLUMN_REF_ADDED, columnPath, getContext().getAbsolutePath() ) );
-                } else {
                     result = new CommandResultImpl( false,
                                                     getMessage( INVALID_COLUMN,
                                                                 getWorkspaceStatus().getLabelProvider()
                                                                                     .getDisplayPath( column.getAbsolutePath() ),
-                                                                constraint.getName( transaction ) ),
+                                                                foreignKey.getName( transaction ) ),
                                                     null );
+                } else {
+                    foreignKey.addReferencesColumn( transaction, ( Column )column );
+                    result = new CommandResultImpl( getMessage( COLUMN_REF_ADDED, columnPath, getContext().getAbsolutePath() ) );
                 }
             } else {
                 result = new CommandResultImpl( false, getMessage( INVALID_COLUMN_PATH, columnPath ), null );
@@ -107,24 +107,23 @@ public final class AddConstraintColumnCommand extends TableConstraintShellComman
         if ( getArguments().isEmpty() ) {
             final Repository.UnitOfWork uow = getTransaction();
 
-            // can only add columns of the parent table
-            final Table parent = getTableConstraint().getTable( uow );
-            final Column[] columns = parent.getColumns( uow );
+            // find all columns in workspace
+            final String[] allDisplayPaths = FindCommand.query( getWorkspaceStatus(), KomodoType.COLUMN, null, null );
 
-            if ( columns.length == 0 ) {
+            if ( allDisplayPaths.length == 0 ) {
                 return -1;
             }
 
-            final KomodoObjectLabelProvider labelProvider = getWorkspaceStatus().getLabelProvider();
+            final Table parent = getForeignKey().getTable( uow );
+            final String parentPath = parent.getAbsolutePath();
+            final String parentDisplayPath = getWorkspaceStatus().getLabelProvider().getDisplayPath( parentPath );
 
-            for ( final Column column : Arrays.asList( columns ) ) {
-                final String absolutePath = column.getAbsolutePath();
-                final String displayPath = labelProvider.getDisplayPath( column );
-
-                if ( StringUtils.isBlank( lastArgument )
-                     || absolutePath.startsWith( lastArgument )
-                     || displayPath.startsWith( lastArgument ) ) {
-                    candidates.add( displayPath );
+            // only add columns NOT found in the parent table
+            for ( final String displayPath : allDisplayPaths ) {
+                if ( !displayPath.startsWith( parentDisplayPath ) ) {
+                    if ( StringUtils.isBlank( lastArgument ) || displayPath.startsWith( lastArgument ) ) {
+                        candidates.add( displayPath );
+                    }
                 }
             }
 

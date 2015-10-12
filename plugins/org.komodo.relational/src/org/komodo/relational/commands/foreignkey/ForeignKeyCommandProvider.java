@@ -39,11 +39,9 @@ public class ForeignKeyCommandProvider implements ShellCommandProvider {
     public Map< String, Class< ? extends ShellCommand >> provideCommands() {
         final Map< String, Class< ? extends ShellCommand >> result = new HashMap<>();
 
-        // TODO add command to references column
-        // TODO add command to show references columns
-        // TODO add command to show references table
-        // TODO add command to remove references column
-        // TODO add command to set references table
+        result.put( AddReferenceColumnCommand.NAME, AddReferenceColumnCommand.class );
+        result.put( DeleteReferenceColumnCommand.NAME, DeleteReferenceColumnCommand.class );
+
         return result;
     }
 

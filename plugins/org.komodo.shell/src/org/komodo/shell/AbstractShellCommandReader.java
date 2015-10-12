@@ -203,7 +203,7 @@ public abstract class AbstractShellCommandReader implements ShellCommandReader {
     protected String getPrompt() throws Exception {
         // see if full path should be displayed
         final KomodoObject kobject = this.wsStatus.getCurrentContext();
-        final String path = KomodoObjectUtils.getFullName( this.wsStatus, kobject );
+        final String path = KomodoObjectUtils.getDisplayName( this.wsStatus, kobject );
 
         // see if type should be displayed
         if ( this.wsStatus.isShowingTypeInPrompt() && DefaultLabelProvider.shouldShowType( kobject ) ) {

@@ -14,6 +14,7 @@ import org.komodo.spi.constants.StringConstants;
 /**
  * Localized messages for {@link ForeignKey}-related shell commands.
  */
+@SuppressWarnings( "javadoc" )
 public class ForeignKeyCommandMessages implements StringConstants {
 
     private static final String BUNDLE_NAME = ( ForeignKeyCommandMessages.class.getPackage().getName() + DOT + ForeignKeyCommandMessages.class.getSimpleName().toLowerCase() );
@@ -23,14 +24,43 @@ public class ForeignKeyCommandMessages implements StringConstants {
      */
     public static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle( BUNDLE_NAME );
 
-    @SuppressWarnings( "javadoc" )
-    public enum General {
-        PLACEHOLDER;
+    public enum AddReferenceColumnCommand {
 
+        COLUMN_REF_ADDED,
+        COLUMN_PATH_NOT_FOUND,
+        INVALID_COLUMN_PATH,
+        INVALID_COLUMN,
+        MISSING_COLUMN_PATH;
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see java.lang.Enum#toString()
+         */
         @Override
         public String toString() {
-            return getEnumName(this) + DOT + name();
+            return getEnumName( this ) + DOT + name();
         }
+
+    }
+
+    public enum DeleteReferenceColumnCommand {
+
+        COLUMN_REMOVED,
+        COLUMN_PATH_NOT_FOUND,
+        INVALID_COLUMN_PATH,
+        MISSING_COLUMN_PATH;
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see java.lang.Enum#toString()
+         */
+        @Override
+        public String toString() {
+            return getEnumName( this ) + DOT + name();
+        }
+
     }
 
     private static String getEnumName(Enum<?> enumValue) {

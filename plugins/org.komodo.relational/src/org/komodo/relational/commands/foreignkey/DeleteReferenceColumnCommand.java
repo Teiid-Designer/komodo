@@ -5,17 +5,17 @@
  *
  * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
  */
-package org.komodo.relational.commands.tableconstraint;
+package org.komodo.relational.commands.foreignkey;
 
-import static org.komodo.relational.commands.tableconstraint.TableConstraintCommandMessages.DeleteConstraintColumnCommand.COLUMN_PATH_NOT_FOUND;
-import static org.komodo.relational.commands.tableconstraint.TableConstraintCommandMessages.DeleteConstraintColumnCommand.COLUMN_REMOVED;
-import static org.komodo.relational.commands.tableconstraint.TableConstraintCommandMessages.DeleteConstraintColumnCommand.INVALID_COLUMN_PATH;
-import static org.komodo.relational.commands.tableconstraint.TableConstraintCommandMessages.DeleteConstraintColumnCommand.MISSING_COLUMN_PATH;
+import static org.komodo.relational.commands.foreignkey.ForeignKeyCommandMessages.DeleteReferenceColumnCommand.COLUMN_PATH_NOT_FOUND;
+import static org.komodo.relational.commands.foreignkey.ForeignKeyCommandMessages.DeleteReferenceColumnCommand.COLUMN_REMOVED;
+import static org.komodo.relational.commands.foreignkey.ForeignKeyCommandMessages.DeleteReferenceColumnCommand.INVALID_COLUMN_PATH;
+import static org.komodo.relational.commands.foreignkey.ForeignKeyCommandMessages.DeleteReferenceColumnCommand.MISSING_COLUMN_PATH;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import org.komodo.relational.model.Column;
-import org.komodo.relational.model.TableConstraint;
+import org.komodo.relational.model.ForeignKey;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
@@ -24,18 +24,18 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.utils.StringUtils;
 
 /**
- * A shell command to remove a column from a {@link TableConstraint}.
+ * A shell command to remove a reference column from a {@link ForeignKey foreign key}.
  */
-public final class DeleteConstraintColumnCommand extends TableConstraintShellCommand {
+public final class DeleteReferenceColumnCommand extends ForeignKeyShellCommand {
 
-    static final String NAME = "delete-column"; //$NON-NLS-1$
+    static final String NAME = "delete-ref-column"; //$NON-NLS-1$
 
     /**
      * @param status
      *        the shell's workspace status (cannot be <code>null</code>)
      */
-    public DeleteConstraintColumnCommand( final WorkspaceStatus status ) {
-        super( status, NAME );
+    public DeleteReferenceColumnCommand( final WorkspaceStatus status ) {
+        super( NAME, status );
     }
 
     /**
@@ -60,12 +60,10 @@ public final class DeleteConstraintColumnCommand extends TableConstraintShellCom
                 final KomodoObject column = columnContext;
 
                 if ( column instanceof Column ) {
-                    final TableConstraint constraint = getTableConstraint();
-                    constraint.removeColumn( getWorkspaceStatus().getTransaction(), ( Column )column );
+                    final ForeignKey foreignKey = getForeignKey();
+                    foreignKey.removeReferencesColumn( getWorkspaceStatus().getTransaction(), ( Column )column );
 
-                    result = new CommandResultImpl( getMessage( COLUMN_REMOVED,
-                                                                columnPathArg,
-                                                                getContext().getAbsolutePath() ) );
+                    result = new CommandResultImpl( getMessage( COLUMN_REMOVED, columnPathArg, getContext().getAbsolutePath() ) );
                 } else {
                     result = new CommandResultImpl( false, getMessage( INVALID_COLUMN_PATH, columnPathArg ), null );
                 }
@@ -96,8 +94,8 @@ public final class DeleteConstraintColumnCommand extends TableConstraintShellCom
     public int tabCompletion( final String lastArgument,
                               final List< CharSequence > candidates ) throws Exception {
         if ( getArguments().isEmpty() ) {
-            final TableConstraint constraint = getTableConstraint();
-            final Column[] refCols = constraint.getColumns( getWorkspaceStatus().getTransaction() );
+            final ForeignKey foreignKey = getForeignKey();
+            final Column[] refCols = foreignKey.getReferencesColumns( getWorkspaceStatus().getTransaction() );
 
             // no tab-completion if no columns to remove
             if ( refCols.length == 0 ) {
