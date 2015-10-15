@@ -4,7 +4,6 @@ import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
-import org.komodo.shell.ShellCommandFactory;
 import org.komodo.shell.ShellCommandReader;
 import org.komodo.shell.ShellCommandReaderFactory;
 import org.komodo.shell.api.CommandResult;
@@ -63,10 +62,11 @@ public class PlayCommand  extends BuiltInShellCommand {
                 if ( result.isOk() ) {
                     return new CommandResultImpl( Messages.getString( Messages.PlayCommand.fileExecuted, fileNameArg ) );
                 }
+                return result;
 
-                return new CommandResultImpl( false,
-                                              Messages.getString( Messages.PlayCommand.Failure, fileNameArg ),
-                                              result.getError() );
+//                return new CommandResultImpl( false,
+//                                              Messages.getString( Messages.PlayCommand.Failure, fileNameArg ),
+//                                              result.getMessage() );
             } catch (Exception e) {
                 return new CommandResultImpl( false, Messages.getString( Messages.PlayCommand.Failure, fileNameArg ), e );
             }
@@ -89,9 +89,7 @@ public class PlayCommand  extends BuiltInShellCommand {
 		WorkspaceStatus wsStatus = getWorkspaceStatus();
 		String[] args = new String[]{"-f", commandFile}; //$NON-NLS-1$
 
-		ShellCommandFactory factory = new ShellCommandFactory();
-        factory.registerCommands(wsStatus);
-		ShellCommandReader reader = ShellCommandReaderFactory.createCommandReader(args, factory, wsStatus);
+		ShellCommandReader reader = ShellCommandReaderFactory.createCommandReader(args, wsStatus);
         reader.open();
 
         return runCommands(reader);

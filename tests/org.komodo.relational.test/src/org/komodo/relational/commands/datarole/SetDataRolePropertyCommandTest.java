@@ -15,10 +15,15 @@
  */
 package org.komodo.relational.commands.datarole;
 
+import java.io.File;
+import java.io.FileWriter;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.relational.AbstractCommandTest;
-import org.komodo.shell.util.KomodoObjectUtils;
+import org.komodo.relational.vdb.DataRole;
+import org.komodo.relational.vdb.Vdb;
+import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.shell.api.CommandResult;
 
 /**
  * Test Class to test SetDataRolePropertyCommand
@@ -26,8 +31,6 @@ import org.komodo.shell.util.KomodoObjectUtils;
  */
 @SuppressWarnings("javadoc")
 public class SetDataRolePropertyCommandTest extends AbstractCommandTest {
-
-	private static final String SET_DATA_ROLE_PROPERTY_COMMAND_1 = "setDataRolePropertyCommand_1.txt"; //$NON-NLS-1$
 
     /**
 	 * Test for SetDataRolePropertyCommand
@@ -38,12 +41,33 @@ public class SetDataRolePropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testSetProperty1() throws Exception {
-    	setup(SET_DATA_ROLE_PROPERTY_COMMAND_1, SetDataRolePropertyCommand.class);
+        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
+        cmdFile.deleteOnExit();
+        
+        FileWriter writer = new FileWriter(cmdFile);
+        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("create-vdb myVdb vdbPath" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("cd myVdb" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("add-data-role myDataRole" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("cd myDataRole" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("set-property description myDescription" + NEW_LINE);  //$NON-NLS-1$
+        writer.close();
+                
+        setup(cmdFile.getAbsolutePath(), SetDataRolePropertyCommand.class);
 
-    	execute();
+        CommandResult result = execute();
+        assertCommandResultOk(result);
 
-    	// Check WorkspaceContext
-    	assertEquals("/workspace", KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext())); //$NON-NLS-1$
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        Vdb[] vdbs = wkspMgr.findVdbs(uow);
+        
+        assertEquals(1, vdbs.length);
+        
+        DataRole[] dataRoles = vdbs[0].getDataRoles(uow);
+        assertEquals(1, dataRoles.length);
+        assertEquals("myDataRole", dataRoles[0].getName(uow)); //$NON-NLS-1$
+        
+        assertEquals("myDescription", dataRoles[0].getDescription(uow)); //$NON-NLS-1$
     }
 
 }

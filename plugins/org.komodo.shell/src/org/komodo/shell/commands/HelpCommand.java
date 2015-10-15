@@ -142,7 +142,7 @@ public class HelpCommand extends BuiltInShellCommand {
         if (command == null) {
             print( CompletionConstants.MESSAGE_INDENT, Messages.getString( SHELL.Help_INVALID_COMMAND, cmdName ) );
         } else {
-            command.setWriter( getWorkspaceStatus().getShell().getOutputWriter() );
+            command.setWriter( getWriter() );
             command.printHelp( CompletionConstants.MESSAGE_INDENT );
         }
     }

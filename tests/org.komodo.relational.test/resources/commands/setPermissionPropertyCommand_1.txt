@@ -1,2 +1,0 @@
-#go to home
-home

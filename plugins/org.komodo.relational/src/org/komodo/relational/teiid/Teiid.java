@@ -44,6 +44,11 @@ public interface Teiid extends RelationalObject {
     KomodoType IDENTIFIER = KomodoType.TEIID;
 
     /**
+     * An empty array of teiids.
+     */
+    Teiid[] NO_TEIIDS = new Teiid[0];
+
+    /**
      * @param uow the transaction
      * @return the teiid instance
      */

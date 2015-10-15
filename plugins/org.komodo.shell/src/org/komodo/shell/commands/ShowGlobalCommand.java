@@ -77,7 +77,7 @@ public class ShowGlobalCommand extends BuiltInShellCommand {
             // Print the properties
             String nameTitle = Messages.getString( SHELL.PROPERTY_NAME_HEADER );
             String valueTitle = Messages.getString( SHELL.PROPERTY_VALUE_HEADER );
-            PrintUtils.printProperties( getWorkspaceStatus(), globalProperties, nameTitle, valueTitle );
+            PrintUtils.printProperties( getWriter(), globalProperties, nameTitle, valueTitle );
 
             return CommandResult.SUCCESS;
         } catch ( final Exception e ) {

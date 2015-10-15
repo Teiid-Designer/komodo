@@ -1,3 +1,0 @@
-#go to home, then create a schema 
-home
-create-schema testSchema

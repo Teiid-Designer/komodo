@@ -301,7 +301,7 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
 
     @Test
     public void shouldNotFindTeiidsWhenWorkspaceIsEmpty() throws Exception {
-        assertThat(this.wsMgr.findTeiids(this.uow).isEmpty(), is(true));
+        assertThat(this.wsMgr.findTeiids(this.uow).length, is(0));
     }
 
     @Test

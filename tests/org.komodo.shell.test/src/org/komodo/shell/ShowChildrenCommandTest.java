@@ -15,21 +15,22 @@
  */
 package org.komodo.shell;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import java.io.File;
+import java.io.FileWriter;
 import org.junit.Test;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.commands.ShowChildrenCommand;
 
 /**
- * Test Class to test ShowStatusCommand
+ * Test Class to test ShowChildrenCommand
  *
  */
 @SuppressWarnings({"javadoc", "nls"})
 public class ShowChildrenCommandTest extends AbstractCommandTest {
 
-    private static final String SHOW_CHILDREN1 = "showChildren1.txt";
-
 	/**
-	 * Test for StatusCommand
+	 * Test for ShowChildrenCommand
 	 */
 	public ShowChildrenCommandTest( ) {
 		super();
@@ -37,15 +38,21 @@ public class ShowChildrenCommandTest extends AbstractCommandTest {
 
     @Test
     public void testShowChildren1() throws Exception {
-        setup(SHOW_CHILDREN1, ShowChildrenCommand.class);
+        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
+        cmdFile.deleteOnExit();
+        
+        FileWriter writer = new FileWriter(cmdFile);
+        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("show-children" + NEW_LINE);  //$NON-NLS-1$
+        writer.close();
+        
+        setup(cmdFile.getAbsolutePath(), ShowChildrenCommand.class);
 
-        execute();
-
-        String expectedOutput = "There are no children for Workspace \"/workspace\".\n"; //$NON-NLS-1$
+        CommandResult result = execute();
+        assertCommandResultOk(result);
 
         String writerOutput = getCommandOutput();
-        assertEquals(expectedOutput,writerOutput);
-        //assertEquals("/workspace", wsStatus.getCurrentContext().getFullName()); //$NON-NLS-1$
+        assertTrue(writerOutput.contains("There are no children"));
     }
 
 }

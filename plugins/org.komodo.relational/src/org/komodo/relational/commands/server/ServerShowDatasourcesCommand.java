@@ -62,7 +62,7 @@ public final class ServerShowDatasourcesCommand extends ServerShellCommand {
                 String name = source.getDisplayName();
                 objNames.add( name );
             }
-            PrintUtils.printList( getWorkspaceStatus(), objNames, getMessage( ListHeader ) );
+            PrintUtils.printList( getWriter(), objNames, getMessage( ListHeader ) );
             result = CommandResult.SUCCESS;
         } catch ( final Exception e ) {
             result = new CommandResultImpl( e );

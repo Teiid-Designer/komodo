@@ -15,10 +15,16 @@
  */
 package org.komodo.relational.commands.view;
 
+import java.io.File;
+import java.io.FileWriter;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.relational.AbstractCommandTest;
-import org.komodo.shell.util.KomodoObjectUtils;
+import org.komodo.relational.model.Model;
+import org.komodo.relational.model.View;
+import org.komodo.relational.vdb.Vdb;
+import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.shell.api.CommandResult;
 
 /**
  * Test Class to test UnsetViewPropertyCommand
@@ -26,8 +32,6 @@ import org.komodo.shell.util.KomodoObjectUtils;
  */
 @SuppressWarnings("javadoc")
 public class UnsetViewPropertyCommandTest extends AbstractCommandTest {
-
-	private static final String UNSET_VIEW_PROPERTY_COMMAND_1 = "unsetViewPropertyCommand_1.txt"; //$NON-NLS-1$
 
     /**
 	 * Test for UnsetViewPropertyCommand
@@ -38,12 +42,40 @@ public class UnsetViewPropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testUnsetProperty1() throws Exception {
-        setup(UNSET_VIEW_PROPERTY_COMMAND_1, UnsetViewPropertyCommand.class);
+        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
+        cmdFile.deleteOnExit();
+        
+        FileWriter writer = new FileWriter(cmdFile);
+        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("create-vdb myVdb vdbPath" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("cd myVdb" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("add-model myModel " + NEW_LINE);  //$NON-NLS-1$
+        writer.write("cd myModel" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("add-view myView" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("cd myView" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("set-property ANNOTATION myDescription" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("unset-property ANNOTATION" + NEW_LINE);  //$NON-NLS-1$
+        writer.close();
+        
+        setup(cmdFile.getAbsolutePath(), UnsetViewPropertyCommand.class);
 
-    	execute();
+        CommandResult result = execute();
+        assertCommandResultOk(result);
 
-    	// Check WorkspaceContext
-    	assertEquals("/workspace", KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext())); //$NON-NLS-1$
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        Vdb[] vdbs = wkspMgr.findVdbs(uow);
+        
+        assertEquals(1, vdbs.length);
+        
+        Model[] models = vdbs[0].getModels(uow);
+        assertEquals(1, models.length);
+        assertEquals("myModel", models[0].getName(uow)); //$NON-NLS-1$
+        
+        View[] views = models[0].getViews(uow);
+        assertEquals(1, views.length);
+        assertEquals("myView", views[0].getName(uow)); //$NON-NLS-1$
+        
+        assertEquals(null, views[0].getDescription(uow)); 
     }
 
 }

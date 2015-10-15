@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Properties;
 import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.InvalidCommandArgumentException;
+import org.komodo.shell.api.ShellCommandFactory;
 import org.komodo.shell.api.WorkspaceStatus;
 
 /**
@@ -43,13 +44,12 @@ public class ShellCommandReaderFactory {
      * line arguments and the current runtime environment.
      *
      * @param args the args
-     * @param factory the factory
      * @param wsStatus the workspace status
      * @return the shell command reader
      * @throws Exception Signals exception has occurred.
      */
-    public static ShellCommandReader createCommandReader(String[] args, ShellCommandFactory factory,
-            WorkspaceStatus wsStatus) throws Exception {
+    public static ShellCommandReader createCommandReader(String[] args, WorkspaceStatus wsStatus) throws Exception {
+        ShellCommandFactory factory = wsStatus.getCommandFactory();
         ShellCommandReader commandReader = null;
         if (args.length > 0) {
             Map<String, String> properties = new HashMap<String, String>();

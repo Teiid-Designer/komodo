@@ -15,10 +15,15 @@
  */
 package org.komodo.relational.commands.model;
 
+import java.io.File;
+import java.io.FileWriter;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.relational.AbstractCommandTest;
-import org.komodo.shell.util.KomodoObjectUtils;
+import org.komodo.relational.model.Model;
+import org.komodo.relational.vdb.Vdb;
+import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.shell.api.CommandResult;
 
 /**
  * Test Class to test SetModelPropertyCommand
@@ -26,8 +31,6 @@ import org.komodo.shell.util.KomodoObjectUtils;
  */
 @SuppressWarnings("javadoc")
 public class SetModelPropertyCommandTest extends AbstractCommandTest {
-
-	private static final String SET_MODEL_PROPERTY_COMMAND_1 = "setModelPropertyCommand_1.txt"; //$NON-NLS-1$
 
     /**
 	 * Test for SetModelPropertyCommand
@@ -38,12 +41,33 @@ public class SetModelPropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testSetProperty1() throws Exception {
-        setup(SET_MODEL_PROPERTY_COMMAND_1, SetModelPropertyCommand.class);
+        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
+        cmdFile.deleteOnExit();
+        
+        FileWriter writer = new FileWriter(cmdFile);
+        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("create-vdb myVdb vdbPath" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("cd myVdb" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("add-model myModel " + NEW_LINE);  //$NON-NLS-1$
+        writer.write("cd myModel" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("set-property description myDescription" + NEW_LINE);  //$NON-NLS-1$
+        writer.close();
+        
+        setup(cmdFile.getAbsolutePath(), SetModelPropertyCommand.class);
 
-    	execute();
+        CommandResult result = execute();
+        assertCommandResultOk(result);
 
-    	// Check WorkspaceContext
-    	assertEquals("/workspace", KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext())); //$NON-NLS-1$
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        Vdb[] vdbs = wkspMgr.findVdbs(uow);
+        
+        assertEquals(1, vdbs.length);
+        
+        Model[] models = vdbs[0].getModels(uow);
+        assertEquals(1, models.length);
+        assertEquals("myModel", models[0].getName(uow)); //$NON-NLS-1$
+        
+        assertEquals("myDescription", models[0].getDescription(uow)); //$NON-NLS-1$
     }
 
 }

@@ -15,10 +15,15 @@
  */
 package org.komodo.relational.commands.schema;
 
+import java.io.File;
+import java.io.FileWriter;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.relational.AbstractCommandTest;
-import org.komodo.shell.util.KomodoObjectUtils;
+import org.komodo.relational.model.Schema;
+import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.shell.api.CommandResult;
+import org.komodo.utils.StringUtils;
 
 /**
  * Test Class to test UnsetSchemaPropertyCommand
@@ -26,8 +31,6 @@ import org.komodo.shell.util.KomodoObjectUtils;
  */
 @SuppressWarnings("javadoc")
 public class UnsetSchemaPropertyCommandTest extends AbstractCommandTest {
-
-	private static final String UNSET_SCHEMA_PROPERTY_COMMAND_1 = "unsetSchemaPropertyCommand_1.txt"; //$NON-NLS-1$
 
     /**
 	 * Test for UnsetSchemaPropertyCommand
@@ -38,12 +41,30 @@ public class UnsetSchemaPropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testUnsetProperty1() throws Exception {
-        setup(UNSET_SCHEMA_PROPERTY_COMMAND_1, UnsetSchemaPropertyCommand.class);
+        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
+        cmdFile.deleteOnExit();
+        
+        FileWriter writer = new FileWriter(cmdFile);
+        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("create-schema testSchema" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("cd testSchema" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("set-property rendition \"CREATE FOREIGN TABLE G1 (e1 integer) OPTIONS (ANNOTATION 'test', CARDINALITY '12');\"" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("unset-property rendition" + NEW_LINE);  //$NON-NLS-1$
+        writer.close();
+        
+        setup(cmdFile.getAbsolutePath(), UnsetSchemaPropertyCommand.class);
 
-    	execute();
+        CommandResult result = execute();
+        assertCommandResultOk(result);
 
-    	// Check WorkspaceContext
-    	assertEquals("/workspace", KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext())); //$NON-NLS-1$
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        Schema[] schemas = wkspMgr.findSchemas(uow);
+        
+        assertEquals(1, schemas.length);
+        assertEquals("testSchema", schemas[0].getName(uow)); //$NON-NLS-1$
+        
+        String rendition = schemas[0].getRendition(uow);
+        assertEquals(true, StringUtils.isEmpty(rendition)); 
     }
 
 }

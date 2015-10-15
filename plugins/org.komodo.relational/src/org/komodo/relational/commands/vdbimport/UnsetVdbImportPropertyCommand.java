@@ -17,7 +17,7 @@ import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.shell.commands.SetPropertyCommand;
+import org.komodo.shell.commands.UnsetPropertyCommand;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.StringUtils;
 
@@ -26,7 +26,7 @@ import org.komodo.utils.StringUtils;
  */
 public final class UnsetVdbImportPropertyCommand extends VdbImportShellCommand {
 
-    static final String NAME = SetPropertyCommand.NAME;
+    static final String NAME = UnsetPropertyCommand.NAME;
 
     /**
      * @param status

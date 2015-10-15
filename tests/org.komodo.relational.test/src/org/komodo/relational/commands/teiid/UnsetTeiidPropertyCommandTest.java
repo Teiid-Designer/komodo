@@ -15,10 +15,14 @@
  */
 package org.komodo.relational.commands.teiid;
 
+import java.io.File;
+import java.io.FileWriter;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.relational.AbstractCommandTest;
-import org.komodo.shell.util.KomodoObjectUtils;
+import org.komodo.relational.teiid.Teiid;
+import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.shell.api.CommandResult;
 
 /**
  * Test Class to test UnsetTeiidPropertyCommand
@@ -26,8 +30,6 @@ import org.komodo.shell.util.KomodoObjectUtils;
  */
 @SuppressWarnings("javadoc")
 public class UnsetTeiidPropertyCommandTest extends AbstractCommandTest {
-
-	private static final String UNSET_TEIID_PROPERTY_COMMAND_1 = "unsetTeiidPropertyCommand_1.txt"; //$NON-NLS-1$
 
     /**
 	 * Test for UnsetTeiidPropertyCommand
@@ -38,12 +40,29 @@ public class UnsetTeiidPropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testUnsetProperty1() throws Exception {
-        setup(UNSET_TEIID_PROPERTY_COMMAND_1, UnsetTeiidPropertyCommand.class);
+        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
+        cmdFile.deleteOnExit();
+        
+        FileWriter writer = new FileWriter(cmdFile);
+        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("create-teiid testTeiid" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("cd testTeiid" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("set-property adminPort 88" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("unset-property adminPort" + NEW_LINE);  //$NON-NLS-1$
+        writer.close();
+        
+        setup(cmdFile.getAbsolutePath(), UnsetTeiidPropertyCommand.class);
 
-    	execute();
+        CommandResult result = execute();
+        assertCommandResultOk(result);
 
-    	// Check WorkspaceContext
-    	assertEquals("/workspace", KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext())); //$NON-NLS-1$
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        Teiid[] teiids = wkspMgr.findTeiids(uow);
+        
+        assertEquals(1, teiids.length);
+        assertEquals("testTeiid", teiids[0].getName(uow)); //$NON-NLS-1$
+        
+        assertEquals(9999, teiids[0].getAdminPort(uow));
     }
 
 }

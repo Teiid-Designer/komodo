@@ -16,9 +16,16 @@
 package org.komodo.relational.commands.model;
 
 import static org.junit.Assert.assertEquals;
+import java.io.File;
+import java.io.FileWriter;
 import org.junit.Test;
 import org.komodo.relational.AbstractCommandTest;
-import org.komodo.shell.util.KomodoObjectUtils;
+import org.komodo.relational.model.Function;
+import org.komodo.relational.model.Model;
+import org.komodo.relational.model.PushdownFunction;
+import org.komodo.relational.vdb.Vdb;
+import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.shell.api.CommandResult;
 
 /**
  * Test Class to test AddPushdownFunctionCommand
@@ -26,8 +33,6 @@ import org.komodo.shell.util.KomodoObjectUtils;
  */
 @SuppressWarnings("javadoc")
 public class AddPushdownFunctionCommandTest extends AbstractCommandTest {
-
-	private static final String ADD_PUSHDOWN_FUNCTION_COMMAND_1 = "addPushdownFunctionCommand_1.txt"; //$NON-NLS-1$
 
     /**
 	 * Test for AddPushdownFunctionCommand
@@ -38,12 +43,37 @@ public class AddPushdownFunctionCommandTest extends AbstractCommandTest {
 
     @Test
     public void testAdd1() throws Exception {
-        setup(ADD_PUSHDOWN_FUNCTION_COMMAND_1, AddPushdownFunctionCommand.class);
+        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
+        cmdFile.deleteOnExit();
+        
+        FileWriter writer = new FileWriter(cmdFile);
+        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("create-vdb myVdb vdbPath" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("cd myVdb" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("add-model myModel " + NEW_LINE);  //$NON-NLS-1$
+        writer.write("cd myModel" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("add-pushdown-function myPushdownFunction" + NEW_LINE);  //$NON-NLS-1$
+        writer.close();
 
-    	execute();
+        setup(cmdFile.getAbsolutePath(), AddPushdownFunctionCommand.class);
 
-    	// Check WorkspaceContext
-    	assertEquals("/workspace", KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext())); //$NON-NLS-1$
+        CommandResult result = execute();
+        assertCommandResultOk(result);
+
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        Vdb[] vdbs = wkspMgr.findVdbs(uow);
+        
+        assertEquals(vdbs.length,1);
+        
+        Model[] models = vdbs[0].getModels(uow);
+        assertEquals(1, models.length);
+        assertEquals("myModel", models[0].getName(uow)); //$NON-NLS-1$
+        
+        Function[] functions = models[0].getFunctions(uow);
+        assertEquals(1, functions.length);
+        assertEquals(true, functions[0] instanceof PushdownFunction);
+        assertEquals("myPushdownFunction", functions[0].getName(uow)); //$NON-NLS-1$
+        
     }
-
+    
 }

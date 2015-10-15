@@ -15,10 +15,14 @@
  */
 package org.komodo.relational.commands;
 
+import java.io.File;
+import java.io.FileWriter;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.relational.AbstractCommandTest;
-import org.komodo.shell.util.KomodoObjectUtils;
+import org.komodo.relational.vdb.Vdb;
+import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.shell.api.CommandResult;
 
 /**
  * Test Class to test DeleteVdbCommand
@@ -26,8 +30,6 @@ import org.komodo.shell.util.KomodoObjectUtils;
  */
 @SuppressWarnings("javadoc")
 public class DeleteVdbCommandTest extends AbstractCommandTest {
-
-	private static final String DELETE_VDB_COMMAND_1 = "deleteVdbCommand_1.txt"; //$NON-NLS-1$
 
     /**
 	 * Test for DeleteVdbCommand
@@ -38,12 +40,26 @@ public class DeleteVdbCommandTest extends AbstractCommandTest {
 
     @Test
     public void testDeleteVdb1() throws Exception {
-    	setup(DELETE_VDB_COMMAND_1, DeleteVdbCommand.class);
+        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
+        cmdFile.deleteOnExit();
+        
+        FileWriter writer = new FileWriter(cmdFile);
+        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("create-vdb testVdb1 vdbPath" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("create-vdb testVdb2 vdbPath" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("delete-vdb testVdb1" + NEW_LINE);  //$NON-NLS-1$
+        writer.close();
+        
+    	setup(cmdFile.getAbsolutePath(), DeleteVdbCommand.class);
 
-    	execute();
+        CommandResult result = execute();
+        assertCommandResultOk(result);
 
-    	// Check WorkspaceContext
-    	assertEquals("/workspace", KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext())); //$NON-NLS-1$
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        Vdb[] vdbs = wkspMgr.findVdbs(uow);
+        
+        assertEquals(1, vdbs.length);
+        assertEquals("testVdb2", vdbs[0].getName(uow)); //$NON-NLS-1$
     }
 
 }

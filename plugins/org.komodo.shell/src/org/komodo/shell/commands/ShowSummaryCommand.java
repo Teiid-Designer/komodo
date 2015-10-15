@@ -82,6 +82,8 @@ public class ShowSummaryCommand extends BuiltInShellCommand {
 
             ShellCommand showPropertiesCommand = getWorkspaceStatus().getCommand( ShowPropertiesCommand.NAME );
             ShellCommand showChildrenCommand = getWorkspaceStatus().getCommand( ShowChildrenCommand.NAME );
+            showPropertiesCommand.setWriter(getWriter());
+            showChildrenCommand.setWriter(getWriter());
             if ( theContext != null ) {
                 showPropertiesCommand.setArguments( getArguments() );
                 showChildrenCommand.setArguments( getArguments() );

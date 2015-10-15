@@ -45,6 +45,7 @@ import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.KomodoObjectLabelProvider;
 import org.komodo.shell.api.KomodoShell;
 import org.komodo.shell.api.ShellCommand;
+import org.komodo.shell.api.ShellCommandFactory;
 import org.komodo.shell.api.ShellCommandProvider;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.api.WorkspaceStatusEventHandler;
@@ -92,11 +93,10 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     /**
      * Constructor
      * @param shell parent shell
-     * @param commandFactory the command factory
      * @throws Exception error on initialisation failure
      */
-    public WorkspaceStatusImpl(KomodoShell shell, ShellCommandFactory commandFactory) throws Exception {
-        this( null, shell, commandFactory );
+    public WorkspaceStatusImpl(KomodoShell shell) throws Exception {
+        this( null, shell );
     }
 
     /**
@@ -104,19 +104,18 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
      *        the transaction to use initially in the shell (can be <code>null</code> if one should be created)
      * @param shell
      *        parent shell
-     * @param commandFactory the command factory
      * @throws Exception
      *         error on initialisation failure
      */
     public WorkspaceStatusImpl( final UnitOfWork transaction,
-                                final KomodoShell shell,
-                                final ShellCommandFactory commandFactory) throws Exception {
+                                final KomodoShell shell) throws Exception {
         this.shell = shell;
-        this.commandFactory = commandFactory;
         init(transaction);
     }
 
     private void init( final UnitOfWork transaction ) throws Exception {
+        this.commandFactory = new ShellCommandFactoryImpl();
+        this.commandFactory.registerCommands( this );
         if ( transaction == null ) {
             createTransaction("init"); //$NON-NLS-1$
         } else {
@@ -193,6 +192,11 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     @Override
     public Writer getOutputWriter() {
         return shell.getOutputWriter();
+    }
+    
+    @Override
+    public ShellCommandFactory getCommandFactory() {
+        return commandFactory;
     }
 
     /**

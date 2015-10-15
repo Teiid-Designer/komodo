@@ -15,10 +15,15 @@
  */
 package org.komodo.relational.commands.vdb;
 
+import java.io.File;
+import java.io.FileWriter;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.relational.AbstractCommandTest;
-import org.komodo.shell.util.KomodoObjectUtils;
+import org.komodo.relational.model.Model;
+import org.komodo.relational.vdb.Vdb;
+import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.shell.api.CommandResult;
 
 /**
  * Test Class to test DeleteModelCommand
@@ -26,8 +31,6 @@ import org.komodo.shell.util.KomodoObjectUtils;
  */
 @SuppressWarnings("javadoc")
 public class DeleteModelCommandTest extends AbstractCommandTest {
-
-	private static final String DELETE_MODEL_COMMAND_1 = "deleteModelCommand_1.txt"; //$NON-NLS-1$
 
     /**
 	 * Test for DeleteModelCommand
@@ -38,12 +41,31 @@ public class DeleteModelCommandTest extends AbstractCommandTest {
 
     @Test
     public void testDelete1() throws Exception {
-        setup(DELETE_MODEL_COMMAND_1, DeleteModelCommand.class);
+        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
+        cmdFile.deleteOnExit();
+        
+        FileWriter writer = new FileWriter(cmdFile);
+        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("create-vdb myVdb vdbPath" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("cd myVdb" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("add-model myModel1" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("add-model myModel2" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("delete-model myModel1" + NEW_LINE);  //$NON-NLS-1$
+        writer.close();
 
-    	execute();
+        setup(cmdFile.getAbsolutePath(), DeleteModelCommand.class);
 
-    	// Check WorkspaceContext
-    	assertEquals("/workspace", KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext())); //$NON-NLS-1$
+        CommandResult result = execute();
+        assertCommandResultOk(result);
+
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        Vdb[] vdbs = wkspMgr.findVdbs(uow);
+        
+        assertEquals(1, vdbs.length);
+        
+        Model[] models = vdbs[0].getModels(uow);
+        assertEquals(1, models.length);
+        assertEquals("myModel2", models[0].getName(uow)); //$NON-NLS-1$
     }
 
 }

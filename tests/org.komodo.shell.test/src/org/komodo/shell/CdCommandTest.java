@@ -15,8 +15,11 @@
  */
 package org.komodo.shell;
 
+import java.io.File;
+import java.io.FileWriter;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.commands.CdCommand;
 import org.komodo.shell.util.KomodoObjectUtils;
 
@@ -27,10 +30,6 @@ import org.komodo.shell.util.KomodoObjectUtils;
 @SuppressWarnings("javadoc")
 public class CdCommandTest extends AbstractCommandTest {
 
-	private static final String CD_COMMAND_REL1 = "cdCommand_Relative1.txt"; //$NON-NLS-1$
-	private static final String CD_COMMAND_ABS1 = "cdCommand_Absolute1.txt"; //$NON-NLS-1$
-    private static final String ALIAS_TEST = "cdCommand_aliases.txt"; //$NON-NLS-1$
-
     /**
 	 * Test for CdCommand
 	 */
@@ -39,34 +38,60 @@ public class CdCommandTest extends AbstractCommandTest {
 	}
 
     @Test
-    public void testCdRelative1() throws Exception {
-    	setup(CD_COMMAND_REL1, CdCommand.class);
+    public void shouldCdAbsolute() throws Exception {
+        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
+        cmdFile.deleteOnExit();
+        
+        FileWriter writer = new FileWriter(cmdFile);
+        writer.write("cd /workspace" + NEW_LINE);  //$NON-NLS-1$
+        writer.close();
+        
+    	setup(cmdFile.getAbsolutePath(), CdCommand.class);
 
-    	execute();
+        CommandResult result = execute();
+        assertCommandResultOk(result);
 
     	// Check WorkspaceContext
     	assertEquals("/workspace", KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext())); //$NON-NLS-1$
     }
 
     @Test
-    public void testCdAbsolute1() throws Exception {
-    	setup(CD_COMMAND_ABS1, CdCommand.class);
+    public void shouldCdRelative() throws Exception {
+        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
+        cmdFile.deleteOnExit();
+        
+        FileWriter writer = new FileWriter(cmdFile);
+        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("cd .." + NEW_LINE);  //$NON-NLS-1$
+        writer.close();
+        
+    	setup(cmdFile.getAbsolutePath(), CdCommand.class);
 
-    	execute();
+        CommandResult result = execute();
+        assertCommandResultOk(result);
 
     	// Check WorkspaceContext
-    	String contextName =  KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext());
-    	assertEquals("/workspace", contextName); //$NON-NLS-1$
+        String contextPath = KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext());
+        assertEquals("/", contextPath); //$NON-NLS-1$
     }
 
     @Test
-    public void testAliases() throws Exception {
-        setup(ALIAS_TEST, CdCommand.class);
+    public void shouldTestAliases() throws Exception {
+        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
+        cmdFile.deleteOnExit();
+        
+        FileWriter writer = new FileWriter(cmdFile);
+        writer.write("edit /workspace" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("goto /workspace" + NEW_LINE);  //$NON-NLS-1$
+        writer.close();
+        
+        setup(cmdFile.getAbsolutePath(), CdCommand.class);
 
-        execute();
+        CommandResult result = execute();
+        assertCommandResultOk(result);
 
-        // Check WorkspaceContext
-        assertEquals("/workspace/MyVdb",  KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext())); //$NON-NLS-1$
+        String contextPath = KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext());
+        assertEquals("/workspace", contextPath); //$NON-NLS-1$
     }
 
 }

@@ -61,7 +61,7 @@ public final class ServerShowDatasourceTypesCommand extends ServerShellCommand {
             for ( String type : types ) {
                 objNames.add( type );
             }
-            PrintUtils.printList( getWorkspaceStatus(), objNames, getMessage( ListHeader ) );
+            PrintUtils.printList( getWriter(), objNames, getMessage( ListHeader ) );
             result = CommandResult.SUCCESS;
         } catch ( final Exception e ) {
             result = new CommandResultImpl( e );

@@ -54,6 +54,8 @@ public class SetAutoCommitCommand extends BuiltInShellCommand {
                                               null );
             }
 
+            getWorkspaceStatus().setProperty(WorkspaceStatus.AUTO_COMMIT, arg);
+            
             return new CommandResultImpl( Messages.getString( GlobalPropertySet, WorkspaceStatus.AUTO_COMMIT ) );
         } catch ( final Exception e ) {
             return new CommandResultImpl( e );
@@ -77,7 +79,7 @@ public class SetAutoCommitCommand extends BuiltInShellCommand {
      */
     @Override
     public boolean isValidForCurrentContext() {
-        return !getWorkspaceStatus().isAutoCommit();
+        return true;
     }
 
     /**

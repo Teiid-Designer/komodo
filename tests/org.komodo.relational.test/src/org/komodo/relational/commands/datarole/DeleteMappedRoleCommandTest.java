@@ -15,10 +15,15 @@
  */
 package org.komodo.relational.commands.datarole;
 
+import java.io.File;
+import java.io.FileWriter;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.relational.AbstractCommandTest;
-import org.komodo.shell.util.KomodoObjectUtils;
+import org.komodo.relational.vdb.DataRole;
+import org.komodo.relational.vdb.Vdb;
+import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.shell.api.CommandResult;
 
 /**
  * Test Class to test DeleteMappedRoleCommand
@@ -26,8 +31,6 @@ import org.komodo.shell.util.KomodoObjectUtils;
  */
 @SuppressWarnings("javadoc")
 public class DeleteMappedRoleCommandTest extends AbstractCommandTest {
-
-	private static final String DELETE_MAPPED_ROLE_COMMAND_1 = "deleteMappedRoleCommand_1.txt"; //$NON-NLS-1$
 
     /**
 	 * Test for DeleteMappedRoleCommand
@@ -38,12 +41,36 @@ public class DeleteMappedRoleCommandTest extends AbstractCommandTest {
 
     @Test
     public void testSetProperty1() throws Exception {
-    	setup(DELETE_MAPPED_ROLE_COMMAND_1, DeleteMappedRoleCommand.class);
+        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
+        cmdFile.deleteOnExit();
+        
+        FileWriter writer = new FileWriter(cmdFile);
+        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("create-vdb myVdb vdbPath" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("cd myVdb" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("add-data-role myDataRole" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("cd myDataRole" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("add-mapped-role myMappedRole1" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("add-mapped-role myMappedRole2" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("delete-mapped-role myMappedRole1" + NEW_LINE);  //$NON-NLS-1$
+        writer.close();
+                
+        setup(cmdFile.getAbsolutePath(), DeleteMappedRoleCommand.class);
 
-    	execute();
+        CommandResult result = execute();
+        assertCommandResultOk(result);
 
-    	// Check WorkspaceContext
-    	assertEquals("/workspace", KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext())); //$NON-NLS-1$
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        Vdb[] vdbs = wkspMgr.findVdbs(uow);
+        assertEquals(1, vdbs.length);
+        
+        DataRole[] dataRoles = vdbs[0].getDataRoles(uow);
+        assertEquals(1, dataRoles.length);
+
+        String[] mappedRoles = dataRoles[0].getMappedRoles(uow);
+        assertEquals(1, mappedRoles.length);
+        
+        assertEquals("myMappedRole2", mappedRoles[0]); //$NON-NLS-1$
     }
 
 }

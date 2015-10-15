@@ -15,41 +15,45 @@
  */
 package org.komodo.shell;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import java.io.File;
+import java.io.FileWriter;
 import org.junit.Test;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.commands.ShowPropertyCommand;
 
 /**
- * Test Class to test ShowStatusCommand
+ * Test Class to test ShowPropertyCommand
  *
  */
 @SuppressWarnings({"javadoc", "nls"})
 public class ShowPropertyCommandTest extends AbstractCommandTest {
 
-    private static final String SHOW_STATUS1 = "showProperty1.txt";
-
 	/**
-	 * Test for StatusCommand
+	 * Test for ShowPropertyCommand
 	 */
 	public ShowPropertyCommandTest( ) {
 		super();
 	}
 
     @Test
-    public void testShowStatus1() throws Exception {
-    	setup(SHOW_STATUS1, ShowPropertyCommand.class);
+    public void testShowProperty1() throws Exception {
+        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
+        cmdFile.deleteOnExit();
+        
+        FileWriter writer = new FileWriter(cmdFile);
+        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("show-property test" + NEW_LINE);  //$NON-NLS-1$
+        writer.close();
+        
+    	setup(cmdFile.getAbsolutePath(), ShowPropertyCommand.class);
 
-    	execute();
+    	// Expect fail since 'test' is not a valid property
+    	CommandResult result = execute();
 
-    	// make sure repository URL and workspace appear, no Teiid is set, and current context path
-    	String writerOutput = getCommandOutput();
-        assertTrue(writerOutput.contains("test-local-repository-in-memory-config.json"));
-        assertTrue(writerOutput.contains("Name : komodoLocalWorkspace"));
-        assertTrue(writerOutput.contains("None set"));
-        assertTrue(writerOutput.contains("/workspace"));
-
-    	//assertEquals("/workspace", wsStatus.getCurrentContextFullName()); //$NON-NLS-1$
+    	assertEquals(false, result.isOk());
+        assertTrue(result.getMessage().contains("The property name \"test\" is invalid"));
     }
 
 }

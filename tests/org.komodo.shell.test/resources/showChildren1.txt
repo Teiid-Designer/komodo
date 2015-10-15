@@ -1,4 +1,0 @@
-#show children at the root
-show children
-
-

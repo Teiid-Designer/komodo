@@ -16,38 +16,44 @@
 package org.komodo.shell;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import java.io.File;
+import java.io.FileWriter;
 import org.junit.Test;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.commands.HomeCommand;
+import org.komodo.shell.util.KomodoObjectUtils;
 
 /**
- * Test Class to test ListCommand
+ * Test Class to test HomeCommand
  *
  */
-@SuppressWarnings({"javadoc", "nls"})
+@SuppressWarnings({"javadoc"})
 public class HomeCommandTest extends AbstractCommandTest {
 
-	private static final String HOME_COMMAND1 = "homeCommand1.txt"; //$NON-NLS-1$
-
 	/**
-	 * Test for ListCommand
+	 * Test for HomeCommand
 	 */
 	public HomeCommandTest( ) {
 		super();
 	}
 
     @Test
-    public void testHome1() throws Exception {
-    	setup(HOME_COMMAND1, HomeCommand.class);
+    public void test1() throws Exception {
+        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
+        cmdFile.deleteOnExit();
+        
+        FileWriter writer = new FileWriter(cmdFile);
+        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("home" + NEW_LINE);  //$NON-NLS-1$
+        writer.close();
+        
+    	setup(cmdFile.getAbsolutePath(), HomeCommand.class);
 
-    	execute();
+        CommandResult result = execute();
+        assertCommandResultOk(result);
 
-        // make sure no children and path appear in output
-    	String writerOutput = getCommandOutput();
-        assertTrue( writerOutput.contains( "no children" ) );
-        assertTrue( writerOutput.contains( "Workspace \"/workspace\"" ) );
-
-        //assertEquals("/workspace", wsStatus.getCurrentContextFullName()); //$NON-NLS-1$
+        String contextPath = KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext());
+        assertEquals("/", contextPath); //$NON-NLS-1$
     }
 
 }

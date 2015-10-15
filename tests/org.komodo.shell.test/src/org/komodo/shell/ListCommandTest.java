@@ -15,9 +15,11 @@
  */
 package org.komodo.shell;
 
-import static org.junit.Assert.assertEquals;
+import java.io.File;
+import java.io.FileWriter;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.commands.ListCommand;
 
 /**
@@ -26,10 +28,6 @@ import org.komodo.shell.commands.ListCommand;
  */
 @SuppressWarnings({"javadoc", "nls"})
 public class ListCommandTest extends AbstractCommandTest {
-
-	private static final String LIST_COMMAND1 = "listCommand1.txt"; //$NON-NLS-1$
-    private static final String LIST_COMMAND4 = "listCommand4.txt"; //$NON-NLS-1$
-    private static final String LIST_COMMAND5 = "listCommand5.txt"; //$NON-NLS-1$
 
 	/**
 	 * Test for ListCommand
@@ -40,42 +38,62 @@ public class ListCommandTest extends AbstractCommandTest {
 
     @Test
     public void testList1() throws Exception {
-    	setup(LIST_COMMAND1, ListCommand.class);
+        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
+        cmdFile.deleteOnExit();
+        
+        FileWriter writer = new FileWriter(cmdFile);
+        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("list" + NEW_LINE);  //$NON-NLS-1$
+        writer.close();
+        
+    	setup(cmdFile.getAbsolutePath(), ListCommand.class);
 
-    	execute();
+        CommandResult result = execute();
+        assertCommandResultOk(result);
 
-        // make sure no children and path appear in output
+        // workspace is empty
     	String writerOutput = getCommandOutput();
         assertTrue( writerOutput.contains( "no children" ) );
-        assertTrue( writerOutput.contains( "Workspace \"/workspace\"" ) );
-
-        //assertEquals("/workspace", wsStatus.getCurrentContextFullName()); //$NON-NLS-1$
     }
 
     @Test
     public void testListLsAlias() throws Exception {
-        setup(LIST_COMMAND4, ListCommand.class);
+        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
+        cmdFile.deleteOnExit();
+        
+        FileWriter writer = new FileWriter(cmdFile);
+        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("ll" + NEW_LINE);  //$NON-NLS-1$
+        writer.close();
+        
+        setup(cmdFile.getAbsolutePath(), ListCommand.class);
 
-        execute();
+        CommandResult result = execute();
+        assertCommandResultOk(result);
 
-        // make sure table name and table type appear in output
+        // workspace is empty
         String writerOutput = getCommandOutput();
-        assertTrue( writerOutput.contains( "Table1" ) );
-
-        //assertEquals("/workspace/MyVdb/Model1", wsStatus.getCurrentContextFullName()); //$NON-NLS-1$
+        assertTrue( writerOutput.contains( "no children" ) );
     }
 
     @Test
     public void testListLlAlias() throws Exception {
-        setup(LIST_COMMAND5, ListCommand.class);
+        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
+        cmdFile.deleteOnExit();
+        
+        FileWriter writer = new FileWriter(cmdFile);
+        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("ll" + NEW_LINE);  //$NON-NLS-1$
+        writer.close();
+        
+        setup(cmdFile.getAbsolutePath(), ListCommand.class);
 
-        execute();
+        CommandResult result = execute();
+        assertCommandResultOk(result);
 
-        // make sure table name and table type appear in output
+        // workspace is empty
         String writerOutput = getCommandOutput();
-        assertTrue( writerOutput.contains( "Table1" ) );
-
-        //assertEquals("/workspace/MyVdb/Model1", wsStatus.getCurrentContextFullName()); //$NON-NLS-1$
+        assertTrue( writerOutput.contains( "no children" ) );
     }
 
 }

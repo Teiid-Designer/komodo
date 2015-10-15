@@ -22,6 +22,7 @@ import org.jboss.aesh.console.Console;
 import org.jboss.aesh.console.ConsoleOutput;
 import org.jboss.aesh.console.Prompt;
 import org.jboss.aesh.console.settings.Settings;
+import org.komodo.shell.api.ShellCommandFactory;
 import org.komodo.shell.api.WorkspaceStatus;
 
 /**

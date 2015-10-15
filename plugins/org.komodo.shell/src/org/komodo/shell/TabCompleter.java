@@ -23,6 +23,7 @@ import org.komodo.core.KEngine;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.InvalidCommandArgumentException;
 import org.komodo.shell.api.ShellCommand;
+import org.komodo.shell.api.ShellCommandFactory;
 
 /**
  * Implements tab completion for the interactive

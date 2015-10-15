@@ -15,10 +15,17 @@
  */
 package org.komodo.relational.commands.permission;
 
+import java.io.File;
+import java.io.FileWriter;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.relational.AbstractCommandTest;
-import org.komodo.shell.util.KomodoObjectUtils;
+import org.komodo.relational.vdb.Condition;
+import org.komodo.relational.vdb.DataRole;
+import org.komodo.relational.vdb.Permission;
+import org.komodo.relational.vdb.Vdb;
+import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.shell.api.CommandResult;
 
 /**
  * Test Class to test AddConditionCommand
@@ -26,8 +33,6 @@ import org.komodo.shell.util.KomodoObjectUtils;
  */
 @SuppressWarnings("javadoc")
 public class AddConditionCommandTest extends AbstractCommandTest {
-
-	private static final String ADD_CONDITION_COMMAND_1 = "addConditionCommand_1.txt"; //$NON-NLS-1$
 
     /**
 	 * Test for AddConditionCommand
@@ -38,12 +43,39 @@ public class AddConditionCommandTest extends AbstractCommandTest {
 
     @Test
     public void testAdd1() throws Exception {
-        setup(ADD_CONDITION_COMMAND_1, AddConditionCommand.class);
+        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
+        cmdFile.deleteOnExit();
+        
+        FileWriter writer = new FileWriter(cmdFile);
+        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("create-vdb myVdb vdbPath" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("cd myVdb" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("add-data-role myDataRole" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("cd myDataRole" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("add-permission myPermission" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("cd myPermission" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("add-condition myCondition" + NEW_LINE);  //$NON-NLS-1$
+        writer.close();
+        
+        setup(cmdFile.getAbsolutePath(), AddConditionCommand.class);
 
-    	execute();
+        CommandResult result = execute();
+        assertCommandResultOk(result);
 
-    	// Check WorkspaceContext
-    	assertEquals("/workspace", KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext())); //$NON-NLS-1$
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        Vdb[] vdbs = wkspMgr.findVdbs(uow);
+        assertEquals(1, vdbs.length);
+        
+        DataRole[] dataRoles = vdbs[0].getDataRoles(uow);
+        assertEquals(1, dataRoles.length);
+
+        Permission[] permissions = dataRoles[0].getPermissions(uow);
+        assertEquals(1, permissions.length);
+        assertEquals("myPermission",permissions[0].getName(uow)); //$NON-NLS-1$
+        
+        Condition[] conditions = permissions[0].getConditions(uow);
+        assertEquals(1, conditions.length);
+        assertEquals("myCondition", conditions[0].getName(uow)); //$NON-NLS-1$
     }
 
 }

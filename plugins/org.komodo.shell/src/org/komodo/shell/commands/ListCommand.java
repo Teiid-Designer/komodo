@@ -78,6 +78,7 @@ public class ListCommand extends BuiltInShellCommand {
 
             ShellCommand showChildrenCommand = getWorkspaceStatus().getCommand(ShowChildrenCommand.NAME);
             showChildrenCommand.setArguments(getArguments());
+            showChildrenCommand.setWriter(getWriter());
 
             return showChildrenCommand.execute();
         } catch ( final Exception e ) {

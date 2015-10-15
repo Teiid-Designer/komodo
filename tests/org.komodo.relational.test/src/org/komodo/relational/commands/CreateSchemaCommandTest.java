@@ -16,9 +16,13 @@
 package org.komodo.relational.commands;
 
 import static org.junit.Assert.assertEquals;
+import java.io.File;
+import java.io.FileWriter;
 import org.junit.Test;
 import org.komodo.relational.AbstractCommandTest;
-import org.komodo.shell.util.KomodoObjectUtils;
+import org.komodo.relational.model.Schema;
+import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.shell.api.CommandResult;
 
 /**
  * Test Class to test CreateSchemaCommand
@@ -27,10 +31,8 @@ import org.komodo.shell.util.KomodoObjectUtils;
 @SuppressWarnings("javadoc")
 public class CreateSchemaCommandTest extends AbstractCommandTest {
 
-	private static final String CREATE_SCHEMA_COMMAND_1 = "createSchemaCommand_1.txt"; //$NON-NLS-1$
-
     /**
-	 * Test for CdCommand
+	 * Test for CreateSchemaCommand
 	 */
 	public CreateSchemaCommandTest( ) {
 		super();
@@ -38,12 +40,24 @@ public class CreateSchemaCommandTest extends AbstractCommandTest {
 
     @Test
     public void testCreateSchema1() throws Exception {
-    	setup(CREATE_SCHEMA_COMMAND_1, CreateSchemaCommand.class);
+        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
+        cmdFile.deleteOnExit();
+        
+        FileWriter writer = new FileWriter(cmdFile);
+        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("create-schema testSchema" + NEW_LINE);  //$NON-NLS-1$
+        writer.close();
+        
+    	setup(cmdFile.getAbsolutePath(), CreateSchemaCommand.class);
 
-    	execute();
-
-    	// Check WorkspaceContext
-    	assertEquals("/workspace", KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext())); //$NON-NLS-1$
+        CommandResult result = execute();
+        assertCommandResultOk(result);
+    	
+    	WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+    	Schema[] schemas = wkspMgr.findSchemas(uow);
+    	
+    	assertEquals(1, schemas.length);
+    	assertEquals("testSchema", schemas[0].getName(uow)); //$NON-NLS-1$
     }
 
 }

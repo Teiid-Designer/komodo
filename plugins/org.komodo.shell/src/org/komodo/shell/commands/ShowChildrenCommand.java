@@ -81,7 +81,7 @@ public class ShowChildrenCommand extends BuiltInShellCommand {
             WorkspaceStatus wsStatus = getWorkspaceStatus();
             KomodoObject theContext = ContextUtils.getContextForPath( wsStatus, pathArg );
 
-            PrintUtils.printChildren( wsStatus, theContext );
+            PrintUtils.printChildren( wsStatus, getWriter(), theContext );
             return CommandResult.SUCCESS;
         } catch ( final Exception e ) {
             return new CommandResultImpl( e );

@@ -41,6 +41,7 @@ public class SchemaCommandProvider implements ShellCommandProvider {
 
         result.put( SetSchemaPropertyCommand.NAME, SetSchemaPropertyCommand.class );
         result.put( UnsetSchemaPropertyCommand.NAME, UnsetSchemaPropertyCommand.class );
+        result.put( ExportCommand.NAME, ExportCommand.class );
 
         return result;
     }

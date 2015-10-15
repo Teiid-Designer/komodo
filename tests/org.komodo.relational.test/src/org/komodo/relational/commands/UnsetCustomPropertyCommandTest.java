@@ -15,10 +15,16 @@
  */
 package org.komodo.relational.commands;
 
+import java.io.File;
+import java.io.FileWriter;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import org.junit.Test;
 import org.komodo.relational.AbstractCommandTest;
-import org.komodo.shell.util.KomodoObjectUtils;
+import org.komodo.relational.vdb.Vdb;
+import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.shell.api.CommandResult;
+import org.komodo.spi.repository.Property;
 
 /**
  * Test Class to test UnsetCustomPropertyCommand
@@ -26,8 +32,6 @@ import org.komodo.shell.util.KomodoObjectUtils;
  */
 @SuppressWarnings("javadoc")
 public class UnsetCustomPropertyCommandTest extends AbstractCommandTest {
-
-	private static final String UNSET_CUSTOM_PROPERTY_COMMAND_1 = "unsetCustomPropertyCommand_1.txt"; //$NON-NLS-1$
 
     /**
 	 * Test for UnsetCustomPropertyCommand
@@ -38,12 +42,30 @@ public class UnsetCustomPropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testUnsetCustomProperty1() throws Exception {
-    	setup(UNSET_CUSTOM_PROPERTY_COMMAND_1, UnsetCustomPropertyCommand.class);
+        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
+        cmdFile.deleteOnExit();
+        
+        FileWriter writer = new FileWriter(cmdFile);
+        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("create-vdb testVdb vdbPath" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("cd testVdb" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("set-custom-property newProperty myProperty" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("unset-custom-property newProperty" + NEW_LINE);  //$NON-NLS-1$
+        writer.close();
+        
+    	setup(cmdFile.getAbsolutePath(), UnsetCustomPropertyCommand.class);
 
-    	execute();
+        CommandResult result = execute();
+        assertCommandResultOk(result);
 
-    	// Check WorkspaceContext
-    	assertEquals("/workspace", KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext())); //$NON-NLS-1$
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        Vdb[] vdbs = wkspMgr.findVdbs(uow);
+        
+        assertEquals(1, vdbs.length);
+        assertEquals("testVdb", vdbs[0].getName(uow)); //$NON-NLS-1$
+
+        Property prop = vdbs[0].getProperty(uow, "newProperty"); //$NON-NLS-1$
+        assertNull(prop);
     }
 
 }

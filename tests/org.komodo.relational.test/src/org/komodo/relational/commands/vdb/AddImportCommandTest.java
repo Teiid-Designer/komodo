@@ -15,10 +15,15 @@
  */
 package org.komodo.relational.commands.vdb;
 
+import java.io.File;
+import java.io.FileWriter;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.relational.AbstractCommandTest;
-import org.komodo.shell.util.KomodoObjectUtils;
+import org.komodo.relational.vdb.Vdb;
+import org.komodo.relational.vdb.VdbImport;
+import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.shell.api.CommandResult;
 
 /**
  * Test Class to test AddImportCommand
@@ -26,8 +31,6 @@ import org.komodo.shell.util.KomodoObjectUtils;
  */
 @SuppressWarnings("javadoc")
 public class AddImportCommandTest extends AbstractCommandTest {
-
-	private static final String ADD_IMPORT_COMMAND_1 = "addImportCommand_1.txt"; //$NON-NLS-1$
 
     /**
 	 * Test for AddImportCommand
@@ -38,12 +41,29 @@ public class AddImportCommandTest extends AbstractCommandTest {
 
     @Test
     public void testAdd1() throws Exception {
-        setup(ADD_IMPORT_COMMAND_1, AddImportCommand.class);
+        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
+        cmdFile.deleteOnExit();
+        
+        FileWriter writer = new FileWriter(cmdFile);
+        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("create-vdb myVdb vdbPath" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("cd myVdb" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("add-import myImport" + NEW_LINE);  //$NON-NLS-1$
+        writer.close();
 
-    	execute();
+        setup(cmdFile.getAbsolutePath(), AddImportCommand.class);
 
-    	// Check WorkspaceContext
-    	assertEquals("/workspace", KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext())); //$NON-NLS-1$
+        CommandResult result = execute();
+        assertCommandResultOk(result);
+
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        Vdb[] vdbs = wkspMgr.findVdbs(uow);
+        
+        assertEquals(1, vdbs.length);
+        
+        VdbImport[] imports = vdbs[0].getImports(uow);
+        assertEquals(1, imports.length);
+        assertEquals("myImport", imports[0].getName(uow)); //$NON-NLS-1$
     }
 
 }

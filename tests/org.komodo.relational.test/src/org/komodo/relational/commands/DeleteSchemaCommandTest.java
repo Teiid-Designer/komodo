@@ -15,10 +15,14 @@
  */
 package org.komodo.relational.commands;
 
+import java.io.File;
+import java.io.FileWriter;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.relational.AbstractCommandTest;
-import org.komodo.shell.util.KomodoObjectUtils;
+import org.komodo.relational.model.Schema;
+import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.shell.api.CommandResult;
 
 /**
  * Test Class to test DeleteSchemaCommand
@@ -26,8 +30,6 @@ import org.komodo.shell.util.KomodoObjectUtils;
  */
 @SuppressWarnings("javadoc")
 public class DeleteSchemaCommandTest extends AbstractCommandTest {
-
-	private static final String DELETE_SCHEMA_COMMAND_1 = "deleteSchemaCommand_1.txt"; //$NON-NLS-1$
 
     /**
 	 * Test for DeleteSchemaCommand
@@ -38,12 +40,26 @@ public class DeleteSchemaCommandTest extends AbstractCommandTest {
 
     @Test
     public void testDeleteSchema1() throws Exception {
-    	setup(DELETE_SCHEMA_COMMAND_1, DeleteSchemaCommand.class);
+        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
+        cmdFile.deleteOnExit();
+        
+        FileWriter writer = new FileWriter(cmdFile);
+        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("create-schema testSchema1" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("create-schema testSchema2" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("delete-schema testSchema1" + NEW_LINE);  //$NON-NLS-1$
+        writer.close();
+        
+    	setup(cmdFile.getAbsolutePath(), DeleteSchemaCommand.class);
 
-    	execute();
+        CommandResult result = execute();
+        assertCommandResultOk(result);
 
-    	// Check WorkspaceContext
-    	assertEquals("/workspace", KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext())); //$NON-NLS-1$
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        Schema[] schemas = wkspMgr.findSchemas(uow);
+        
+        assertEquals(1, schemas.length);
+        assertEquals("testSchema2", schemas[0].getName(uow)); //$NON-NLS-1$
     }
 
 }

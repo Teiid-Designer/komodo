@@ -15,10 +15,15 @@
  */
 package org.komodo.relational.commands.vdb;
 
+import java.io.File;
+import java.io.FileWriter;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.relational.AbstractCommandTest;
-import org.komodo.shell.util.KomodoObjectUtils;
+import org.komodo.relational.vdb.Entry;
+import org.komodo.relational.vdb.Vdb;
+import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.shell.api.CommandResult;
 
 /**
  * Test Class to test AddEntryCommand
@@ -26,8 +31,6 @@ import org.komodo.shell.util.KomodoObjectUtils;
  */
 @SuppressWarnings("javadoc")
 public class AddEntryCommandTest extends AbstractCommandTest {
-
-	private static final String ADD_ENTRY_COMMAND_1 = "addEntryCommand_1.txt"; //$NON-NLS-1$
 
     /**
 	 * Test for AddEntryCommand
@@ -38,12 +41,29 @@ public class AddEntryCommandTest extends AbstractCommandTest {
 
     @Test
     public void testAdd1() throws Exception {
-        setup(ADD_ENTRY_COMMAND_1, AddEntryCommand.class);
+        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
+        cmdFile.deleteOnExit();
+        
+        FileWriter writer = new FileWriter(cmdFile);
+        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("create-vdb myVdb vdbPath" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("cd myVdb" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("add-entry myEntry entryPath" + NEW_LINE);  //$NON-NLS-1$
+        writer.close();
 
-    	execute();
+        setup(cmdFile.getAbsolutePath(), AddEntryCommand.class);
 
-    	// Check WorkspaceContext
-    	assertEquals("/workspace", KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext())); //$NON-NLS-1$
+        CommandResult result = execute();
+        assertCommandResultOk(result);
+
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        Vdb[] vdbs = wkspMgr.findVdbs(uow);
+        
+        assertEquals(1, vdbs.length);
+        
+        Entry[] entries = vdbs[0].getEntries(uow);
+        assertEquals(1, entries.length);
+        assertEquals("myEntry", entries[0].getName(uow)); //$NON-NLS-1$
     }
 
 }

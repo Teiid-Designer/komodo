@@ -15,9 +15,12 @@
  */
 package org.komodo.relational.commands.datatyperesultset;
 
+import java.io.File;
+import java.io.FileWriter;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.relational.AbstractCommandTest;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.util.KomodoObjectUtils;
 
 /**
@@ -26,8 +29,6 @@ import org.komodo.shell.util.KomodoObjectUtils;
  */
 @SuppressWarnings("javadoc")
 public class SetDataTypeResultSetPropertyCommandTest extends AbstractCommandTest {
-
-	private static final String SET_DATATYPE_RESULTSET_PROPERTY_COMMAND_1 = "setDataTypeResultSetPropertyCommand_1.txt"; //$NON-NLS-1$
 
     /**
 	 * Test for SetDataTypeResultSetPropertyCommand
@@ -38,9 +39,18 @@ public class SetDataTypeResultSetPropertyCommandTest extends AbstractCommandTest
 
     @Test
     public void testSetProperty1() throws Exception {
-        setup(SET_DATATYPE_RESULTSET_PROPERTY_COMMAND_1, SetDataTypeResultSetPropertyCommand.class);
+        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
+        cmdFile.deleteOnExit();
+        
+        FileWriter writer = new FileWriter(cmdFile);
+        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("create-vdb testVdb1 vdbPath" + NEW_LINE);  //$NON-NLS-1$
+        writer.close();
+        
+        setup(cmdFile.getAbsolutePath(), SetDataTypeResultSetPropertyCommand.class);
 
-    	execute();
+        CommandResult result = execute();
+        assertCommandResultOk(result);
 
     	// Check WorkspaceContext
     	assertEquals("/workspace", KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext())); //$NON-NLS-1$

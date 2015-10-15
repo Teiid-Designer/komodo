@@ -467,21 +467,22 @@ public class WorkspaceManager extends RelationalObjectImpl {
      * @throws KException
      *         if an error occurs
      */
-    public List< Teiid > findTeiids( UnitOfWork transaction ) throws KException {
+    public Teiid[] findTeiids( UnitOfWork transaction ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
                          "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         final String[] paths = findByType(transaction, KomodoLexicon.Teiid.NODE_TYPE);
-        List< Teiid > result = null;
+        Teiid[] result = null;
 
         if (paths.length == 0) {
-            result = Collections.emptyList();
+            result = Teiid.NO_TEIIDS;
         } else {
-            result = new ArrayList<>(paths.length);
-
+            result = new Teiid[paths.length];
+            int i = 0;
+            
             for (final String path : paths) {
-                result.add(new TeiidImpl(transaction, getRepository(), path));
+                result[i++] = new TeiidImpl(transaction, getRepository(), path);
             }
         }
 

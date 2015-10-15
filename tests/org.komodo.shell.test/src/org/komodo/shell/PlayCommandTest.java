@@ -15,7 +15,9 @@
  */
 package org.komodo.shell;
 
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.commands.PlayCommand;
 
 @SuppressWarnings( { "javadoc", "nls" } )
@@ -69,10 +71,14 @@ public final class PlayCommandTest extends AbstractCommandTest {
 //        }
 //    }
 
-    @Test( expected = AssertionError.class )
+    @Test
     public void shouldFailToPlayNonExistentFile() throws Exception {
         setup( "bogus.txt", PlayCommand.class );
-        execute();
+        CommandResult result = execute();
+        
+        assertEquals(false, result.isOk());
+        String msg = result.getMessage();
+        assertEquals(true, msg.contains("Problem with File"));
     }
 
 }

@@ -15,10 +15,12 @@
  */
 package org.komodo.relational.commands;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import java.io.File;
+import java.io.FileWriter;
 import org.junit.Test;
 import org.komodo.relational.AbstractCommandTest;
-import org.komodo.shell.util.KomodoObjectUtils;
+import org.komodo.shell.api.CommandResult;
 
 /**
  * Test Class to test FindCommand
@@ -26,8 +28,6 @@ import org.komodo.shell.util.KomodoObjectUtils;
  */
 @SuppressWarnings("javadoc")
 public class FindCommandTest extends AbstractCommandTest {
-
-	private static final String FIND_COMMAND_1 = "findCommand_1.txt"; //$NON-NLS-1$
 
     /**
 	 * Test for FindCommand
@@ -38,12 +38,28 @@ public class FindCommandTest extends AbstractCommandTest {
 
     @Test
     public void testFind1() throws Exception {
-    	setup(FIND_COMMAND_1, FindCommand.class);
+        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
+        cmdFile.deleteOnExit();
+        
+        FileWriter writer = new FileWriter(cmdFile);
+        writer.write("set-auto-commit false" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("create-vdb testVdb1 vdbPath" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("create-vdb testVdb2 vdbPath" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("commit" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("find Vdb" + NEW_LINE);  //$NON-NLS-1$
+        writer.close();
+        
+    	setup(cmdFile.getAbsolutePath(), FindCommand.class);
 
-    	execute();
+        CommandResult result = execute();
+        assertCommandResultOk(result);
 
-    	// Check WorkspaceContext
-    	assertEquals("/workspace", KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext())); //$NON-NLS-1$
+        // Make sure the two VDBs are found
+        String writerOutput = getCommandOutput();
+        assertTrue(writerOutput.contains("Paths of the \"Vdb\" objects found in the workspace:"));  //$NON-NLS-1$
+        assertTrue(writerOutput.contains("/workspace/testVdb1"));  //$NON-NLS-1$
+        assertTrue(writerOutput.contains("/workspace/testVdb2"));  //$NON-NLS-1$
     }
 
 }

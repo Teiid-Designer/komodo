@@ -35,6 +35,7 @@ public class KomodoObjectUtils implements StringConstants {
      */
     public static List< String > getProperties(final WorkspaceStatus wsStatus, final KomodoObject kObj) throws Exception {
         KomodoObject resolvedObj = wsStatus.resolve(kObj);
+        if(resolvedObj==null) resolvedObj = kObj;
         final List< String > props = new ArrayList<>( Arrays.asList( resolvedObj.getPropertyNames( wsStatus.getTransaction() ) ) ); // props with values
         final PropertyDescriptor[] descriptors = resolvedObj.getPropertyDescriptors( wsStatus.getTransaction() );
 
@@ -86,6 +87,7 @@ public class KomodoObjectUtils implements StringConstants {
      */
     public static String getPropertyValue( final WorkspaceStatus wsStatus, final KomodoObject kObj, final String propertyName ) throws Exception {
         KomodoObject resolvedObj = wsStatus.resolve(kObj);
+        if(resolvedObj==null) resolvedObj = kObj;
         if ( resolvedObj.hasProperty( wsStatus.getTransaction(), propertyName ) ) {
             final Property property = resolvedObj.getProperty( wsStatus.getTransaction(), propertyName );
             //final Type type = property.getDescriptor( wsStatus.getTransaction() ).getType();

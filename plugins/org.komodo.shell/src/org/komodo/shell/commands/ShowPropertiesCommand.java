@@ -83,7 +83,7 @@ public class ShowPropertiesCommand extends BuiltInShellCommand {
 		    KomodoObject theContext = ContextUtils.getContextForPath(wsStatus, pathArg);
 
 		    // Print properties for the context
-		    PrintUtils.printProperties(wsStatus,wsStatus.isShowingHiddenProperties(),wsStatus.isShowingPropertyNamePrefixes(),theContext);
+		    PrintUtils.printProperties(wsStatus,getWriter(),wsStatus.isShowingHiddenProperties(),wsStatus.isShowingPropertyNamePrefixes(),theContext);
 		    return CommandResult.SUCCESS;
 		} catch (Exception e) {
             return new CommandResultImpl( e );

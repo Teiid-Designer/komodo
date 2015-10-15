@@ -246,6 +246,12 @@ public interface WorkspaceStatus extends StringConstants {
     Writer getOutputWriter();
 
     /**
+     * Get the ShellCommandFactory
+     * @return the command factory
+     */
+    ShellCommandFactory getCommandFactory();
+    
+    /**
      * @return the komodo engine
      */
     KEngine getEngine();

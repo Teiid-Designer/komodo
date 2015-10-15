@@ -88,6 +88,9 @@ import org.komodo.relational.workspace.WorkspaceManagerTest;
 
     // Workspace
     WorkspaceManagerTest.class,
+    
+    // All Command Tests
+    AllCommandTests.class
     })
 public class AllTests {
     // nothing to do

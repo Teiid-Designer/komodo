@@ -15,10 +15,14 @@
  */
 package org.komodo.relational.commands.schema;
 
+import java.io.File;
+import java.io.FileWriter;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.relational.AbstractCommandTest;
-import org.komodo.shell.util.KomodoObjectUtils;
+import org.komodo.relational.model.Schema;
+import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.shell.api.CommandResult;
 
 /**
  * Test Class to test SetSchemaPropertyCommand
@@ -26,8 +30,6 @@ import org.komodo.shell.util.KomodoObjectUtils;
  */
 @SuppressWarnings("javadoc")
 public class SetSchemaPropertyCommandTest extends AbstractCommandTest {
-
-	private static final String SET_SCHEMA_PROPERTY_COMMAND_1 = "setSchemaPropertyCommand_1.txt"; //$NON-NLS-1$
 
     /**
 	 * Test for SetSchemaPropertyCommand
@@ -38,12 +40,28 @@ public class SetSchemaPropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testSetProperty1() throws Exception {
-        setup(SET_SCHEMA_PROPERTY_COMMAND_1, SetSchemaPropertyCommand.class);
+        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
+        cmdFile.deleteOnExit();
+        
+        FileWriter writer = new FileWriter(cmdFile);
+        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("create-schema testSchema" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("cd testSchema" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("set-property rendition \"CREATE FOREIGN TABLE G1 (e1 integer) OPTIONS (ANNOTATION 'test', CARDINALITY '12');\"" + NEW_LINE);  //$NON-NLS-1$
+        writer.close();
+        
+        setup(cmdFile.getAbsolutePath(), SetSchemaPropertyCommand.class);
 
-    	execute();
+        CommandResult result = execute();
+        assertCommandResultOk(result);
 
-    	// Check WorkspaceContext
-    	assertEquals("/workspace", KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext())); //$NON-NLS-1$
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        Schema[] schemas = wkspMgr.findSchemas(uow);
+        
+        assertEquals(1, schemas.length);
+        assertEquals("testSchema", schemas[0].getName(uow)); //$NON-NLS-1$
+        
+        assertEquals("CREATE FOREIGN TABLE G1 (e1 integer) OPTIONS (ANNOTATION 'test', CARDINALITY '12');", schemas[0].getRendition(uow)); //$NON-NLS-1$
     }
 
 }

@@ -15,9 +15,11 @@
  */
 package org.komodo.shell;
 
-import static org.junit.Assert.assertEquals;
+import java.io.File;
+import java.io.FileWriter;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.commands.ShowStatusCommand;
 
 /**
@@ -26,8 +28,6 @@ import org.komodo.shell.commands.ShowStatusCommand;
  */
 @SuppressWarnings({"javadoc", "nls"})
 public class ShowStatusCommandTest extends AbstractCommandTest {
-
-    private static final String SHOW_STATUS1 = "showStatus1.txt";
 
 	/**
 	 * Test for StatusCommand
@@ -38,18 +38,24 @@ public class ShowStatusCommandTest extends AbstractCommandTest {
 
     @Test
     public void testShowStatus1() throws Exception {
-    	setup(SHOW_STATUS1, ShowStatusCommand.class);
+        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
+        cmdFile.deleteOnExit();
+        
+        FileWriter writer = new FileWriter(cmdFile);
+        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("show-status" + NEW_LINE);  //$NON-NLS-1$
+        writer.close();
+        
+    	setup(cmdFile.getAbsolutePath(), ShowStatusCommand.class);
 
-    	execute();
+        CommandResult result = execute();
+        assertCommandResultOk(result);
 
     	// make sure repository URL and workspace appear, no Teiid is set, and current context path
     	String writerOutput = getCommandOutput();
         assertTrue(writerOutput.contains("test-local-repository-in-memory-config.json"));
         assertTrue(writerOutput.contains("Name : komodoLocalWorkspace"));
-        assertTrue(writerOutput.contains("None set"));
         assertTrue(writerOutput.contains("/workspace"));
-
-    	//assertEquals("/workspace", wsStatus.getCurrentContextFullName()); //$NON-NLS-1$
     }
 
 }

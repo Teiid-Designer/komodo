@@ -30,6 +30,7 @@ import java.util.regex.Pattern;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.ShellCommand;
+import org.komodo.shell.api.ShellCommandFactory;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.KomodoObjectUtils;
 import org.komodo.spi.repository.KomodoObject;

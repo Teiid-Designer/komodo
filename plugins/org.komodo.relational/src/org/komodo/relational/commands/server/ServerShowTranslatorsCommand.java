@@ -63,7 +63,7 @@ public final class ServerShowTranslatorsCommand extends ServerShellCommand {
                 objNames.add( name );
             }
 
-            PrintUtils.printList( getWorkspaceStatus(), objNames, getMessage( ListHeader ) );
+            PrintUtils.printList( getWriter(), objNames, getMessage( ListHeader ) );
             result = CommandResult.SUCCESS;
         } catch ( final Exception e ) {
             result = new CommandResultImpl( e );

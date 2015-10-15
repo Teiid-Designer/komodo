@@ -28,9 +28,9 @@ public class ServerUtils {
      */
     public static Teiid getWorkspaceTeiidObject(WorkspaceManager wsMgr, WorkspaceStatus wsStatus, String serverName) throws KException {
         Teiid resultTeiid = null;
-        List<Teiid> teiids = wsMgr.findTeiids(wsStatus.getTransaction());
+        Teiid[] teiids = wsMgr.findTeiids(wsStatus.getTransaction());
 
-        if (teiids == null || teiids.size() == 0) {
+        if (teiids == null || teiids.length == 0) {
             return resultTeiid;
         }
 

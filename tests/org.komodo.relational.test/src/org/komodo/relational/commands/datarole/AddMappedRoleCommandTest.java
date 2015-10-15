@@ -15,10 +15,15 @@
  */
 package org.komodo.relational.commands.datarole;
 
+import java.io.File;
+import java.io.FileWriter;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.relational.AbstractCommandTest;
-import org.komodo.shell.util.KomodoObjectUtils;
+import org.komodo.relational.vdb.DataRole;
+import org.komodo.relational.vdb.Vdb;
+import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.shell.api.CommandResult;
 
 /**
  * Test Class to test AddMappedRoleCommand
@@ -26,8 +31,6 @@ import org.komodo.shell.util.KomodoObjectUtils;
  */
 @SuppressWarnings("javadoc")
 public class AddMappedRoleCommandTest extends AbstractCommandTest {
-
-	private static final String ADD_MAPPED_ROLE_COMMAND_1 = "addMappedRoleCommand_1.txt"; //$NON-NLS-1$
 
     /**
 	 * Test for AddMappedRoleCommand
@@ -38,12 +41,34 @@ public class AddMappedRoleCommandTest extends AbstractCommandTest {
 
     @Test
     public void testSetProperty1() throws Exception {
-    	setup(ADD_MAPPED_ROLE_COMMAND_1, AddMappedRoleCommand.class);
+        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
+        cmdFile.deleteOnExit();
+        
+        FileWriter writer = new FileWriter(cmdFile);
+        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("create-vdb myVdb vdbPath" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("cd myVdb" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("add-data-role myDataRole" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("cd myDataRole" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("add-mapped-role myMappedRole" + NEW_LINE);  //$NON-NLS-1$
+        writer.close();
+                
+    	setup(cmdFile.getAbsolutePath(), AddMappedRoleCommand.class);
 
-    	execute();
+        CommandResult result = execute();
+        assertCommandResultOk(result);
 
-    	// Check WorkspaceContext
-    	assertEquals("/workspace", KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext())); //$NON-NLS-1$
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        Vdb[] vdbs = wkspMgr.findVdbs(uow);
+        assertEquals(1, vdbs.length);
+        
+        DataRole[] dataRoles = vdbs[0].getDataRoles(uow);
+        assertEquals(1, dataRoles.length);
+
+        String[] mappedRoles = dataRoles[0].getMappedRoles(uow);
+        assertEquals(1, mappedRoles.length);
+        
+        assertEquals("myMappedRole", mappedRoles[0]); //$NON-NLS-1$
     }
 
 }

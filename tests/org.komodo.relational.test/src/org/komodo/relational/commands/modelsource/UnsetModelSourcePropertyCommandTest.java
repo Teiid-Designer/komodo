@@ -15,10 +15,16 @@
  */
 package org.komodo.relational.commands.modelsource;
 
+import java.io.File;
+import java.io.FileWriter;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.relational.AbstractCommandTest;
-import org.komodo.shell.util.KomodoObjectUtils;
+import org.komodo.relational.model.Model;
+import org.komodo.relational.vdb.ModelSource;
+import org.komodo.relational.vdb.Vdb;
+import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.shell.api.CommandResult;
 
 /**
  * Test Class to test UnsetModelSourcePropertyCommand
@@ -26,8 +32,6 @@ import org.komodo.shell.util.KomodoObjectUtils;
  */
 @SuppressWarnings("javadoc")
 public class UnsetModelSourcePropertyCommandTest extends AbstractCommandTest {
-
-	private static final String UNSET_MODEL_SOURCE_PROPERTY_COMMAND_1 = "unsetModelSourcePropertyCommand_1.txt"; //$NON-NLS-1$
 
     /**
 	 * Test for UnsetModelSourcePropertyCommand
@@ -38,12 +42,40 @@ public class UnsetModelSourcePropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testUnsetProperty1() throws Exception {
-        setup(UNSET_MODEL_SOURCE_PROPERTY_COMMAND_1, UnsetModelSourcePropertyCommand.class);
+        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
+        cmdFile.deleteOnExit();
+        
+        FileWriter writer = new FileWriter(cmdFile);
+        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("create-vdb myVdb vdbPath" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("cd myVdb" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("add-model myModel " + NEW_LINE);  //$NON-NLS-1$
+        writer.write("cd myModel" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("add-source mySource" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("cd mySource" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("set-property sourceJndiName myJndi" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("unset-property sourceJndiName" + NEW_LINE);  //$NON-NLS-1$
+        writer.close();
 
-    	execute();
+        setup(cmdFile.getAbsolutePath(), UnsetModelSourcePropertyCommand.class);
 
-    	// Check WorkspaceContext
-    	assertEquals("/workspace", KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext())); //$NON-NLS-1$
+        CommandResult result = execute();
+        assertCommandResultOk(result);
+
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        Vdb[] vdbs = wkspMgr.findVdbs(uow);
+        
+        assertEquals(1, vdbs.length);
+        
+        Model[] models = vdbs[0].getModels(uow);
+        assertEquals(1, models.length);
+        assertEquals("myModel", models[0].getName(uow)); //$NON-NLS-1$
+        
+        ModelSource[] sources = models[0].getSources(uow);
+        assertEquals(1, sources.length);
+        assertEquals("mySource", sources[0].getName(uow)); //$NON-NLS-1$
+        
+        assertEquals(null, sources[0].getJndiName(uow)); 
     }
 
 }

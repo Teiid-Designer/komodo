@@ -46,6 +46,7 @@ import org.komodo.shell.api.InvalidCommandArgumentException;
 import org.komodo.shell.api.KomodoShell;
 import org.komodo.shell.api.KomodoShellParent;
 import org.komodo.shell.api.ShellCommand;
+import org.komodo.shell.api.ShellCommandFactory;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.ExitCommand;
 import org.komodo.shell.commands.HelpCommand;
@@ -120,7 +121,6 @@ public class DefaultKomodoShell implements KomodoShell {
 
     private String dataDirectory;
     private WorkspaceStatus wsStatus;
-    private ShellCommandFactory factory;
     private ShellCommandReader reader;
     private boolean shutdown = false;
 
@@ -236,9 +236,8 @@ public class DefaultKomodoShell implements KomodoShell {
         // This will block and await the start of both the engine and its default repository
         startKEngine();
 
-        factory = new ShellCommandFactory();
-        wsStatus = new WorkspaceStatusImpl( this, factory );
-        factory.registerCommands( wsStatus );
+        wsStatus = new WorkspaceStatusImpl( this );
+        ShellCommandFactory factory = wsStatus.getCommandFactory();
 
         // load shell properties if they exist
         final String dataDir = getShellDataLocation();
@@ -259,7 +258,7 @@ public class DefaultKomodoShell implements KomodoShell {
             this.wsStatus.setProperties( props );
         }
 
-        reader = ShellCommandReaderFactory.createCommandReader( args, factory, wsStatus );
+        reader = ShellCommandReaderFactory.createCommandReader( args, wsStatus );
         reader.open();
 
         displayWelcomeMessage();
