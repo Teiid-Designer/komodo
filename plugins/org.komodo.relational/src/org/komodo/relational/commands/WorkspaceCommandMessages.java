@@ -146,91 +146,31 @@ public class WorkspaceCommandMessages implements StringConstants {
         }
     }
 
+    public enum UploadVdbCommand {
+
+        INVALID_OVERWRITE_ARG,
+        MISSING_INPUT_VDB_FILE_PATH,
+        MISSING_VDB_NAME,
+        VDB_INPUT_FILE_IS_EMPTY,
+        VDB_OVERWRITE_DISABLED,
+        VDB_UPLOADED;
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see java.lang.Enum#toString()
+         */
+        @Override
+        public String toString() {
+            return getEnumName( this ) + DOT + name();
+        }
+
+    }
+
     private static String getEnumName(Enum<?> enumValue) {
         String className = enumValue.getClass().getName();
         String[] components = className.split("\\$"); //$NON-NLS-1$
         return components[components.length - 1];
     }
 
-//    private WorkspaceCommandMessages() {
-//    }
-//
-//    /**
-//     * Get message string
-//     *
-//     * @param key
-//     *
-//     * @return i18n string
-//     */
-//    private static String getString(Enum<?> key) {
-//        try {
-//            return RESOURCE_BUNDLE.getString(key.toString());
-//        } catch (final Exception err) {
-//            String msg;
-//
-//            if (err instanceof NullPointerException) {
-//                msg = "<No message available>"; //$NON-NLS-1$
-//            } else if (err instanceof MissingResourceException) {
-//                msg = OPEN_ANGLE_BRACKET + "Missing message for key \"" + key + "\" in: " + BUNDLE_NAME + CLOSE_ANGLE_BRACKET; //$NON-NLS-1$ //$NON-NLS-2$
-//            } else {
-//                msg = err.getLocalizedMessage();
-//            }
-//
-//            return msg;
-//        }
-//    }
-//
-//    /**
-//     * Get message string with parameters
-//     *
-//     * @param key the enum key
-//     * @param parameters parameters
-//     *
-//     * @return i18n string
-//     */
-//    public static String getString(Enum<?> key, Object... parameters) {
-//        String text = getString(key);
-//
-//        // Check the trivial cases ...
-//        if (text == null) {
-//            return OPEN_ANGLE_BRACKET + key.toString() + CLOSE_ANGLE_BRACKET;
-//        }
-//        if (parameters == null || parameters.length == 0) {
-//            return text;
-//        }
-//
-//        return MessageFormat.format(text, parameters);
-//    }
-//
-//    /**
-//     * Look up a message in the i18n resource message bundle by key, then format the
-//     * message with the given params and return the result.
-//     * @param key the message key
-//     * @param parameters the parameters
-//     * @return the message
-//     */
-//    public static String getString(String key, Object ... parameters) {
-//        String text = null;
-//        try {
-//            text = RESOURCE_BUNDLE.getString(key);
-//        } catch (final Exception err) {
-//            if (err instanceof NullPointerException) {
-//                text = "<No message available>"; //$NON-NLS-1$
-//            } else if (err instanceof MissingResourceException) {
-//                text = OPEN_ANGLE_BRACKET + "Missing message for key \"" + key + "\" in: " + BUNDLE_NAME + CLOSE_ANGLE_BRACKET; //$NON-NLS-1$ //$NON-NLS-2$
-//            } else {
-//                text = err.getLocalizedMessage();
-//            }
-//        }
-//
-//        // Check the trivial cases ...
-//        if (text == null) {
-//            return OPEN_ANGLE_BRACKET + key + CLOSE_ANGLE_BRACKET;
-//        }
-//        if (parameters == null || parameters.length == 0) {
-//            return text;
-//        }
-//
-//        return MessageFormat.format(text, parameters);
-//    }
 }
