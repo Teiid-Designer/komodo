@@ -122,7 +122,7 @@ public final class AccessPatternImplTest extends RelationalModelTest {
     @Test
     public void shouldCreateUsingResolver() throws Exception {
         final String name = "blah";
-        final KomodoObject kobject = AccessPatternImpl.RESOLVER.create( this.uow, _repo, this.table, name, null );
+        final KomodoObject kobject = AccessPattern.RESOLVER.create( this.uow, _repo, this.table, name, null );
         assertThat( kobject, is( notNullValue() ) );
         assertThat( kobject, is( instanceOf( AccessPattern.class ) ) );
         assertThat( kobject.getName( this.uow ), is( name ) );
@@ -131,7 +131,7 @@ public final class AccessPatternImplTest extends RelationalModelTest {
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
         final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        AccessPatternImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
+        AccessPattern.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
     }
 
 }

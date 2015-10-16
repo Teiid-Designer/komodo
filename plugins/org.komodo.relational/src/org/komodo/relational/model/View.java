@@ -7,9 +7,19 @@
  */
 package org.komodo.relational.model;
 
+import org.komodo.relational.Messages;
+import org.komodo.relational.TypeResolver;
+import org.komodo.relational.Messages.Relational;
+import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.internal.AdapterFactory;
+import org.komodo.relational.model.internal.ViewImpl;
+import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateTable;
 
 /**
  * Represents a relational model view.
@@ -30,6 +40,82 @@ public interface View extends Table {
      * An empty array of views.
      */
     View[] NO_VIEWS = new View[0];
+
+    /**
+     * The resolver of a {@link View}.
+     */
+    public static final TypeResolver< View > RESOLVER = new TypeResolver< View >() {
+    
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.TypeResolver#create(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject, java.lang.String,
+         *      org.komodo.relational.RelationalProperties)
+         */
+        @Override
+        public View create( final UnitOfWork transaction,
+                            final Repository repository,
+                            final KomodoObject parent,
+                            final String id,
+                            final RelationalProperties properties ) throws KException {
+            AdapterFactory adapter = new AdapterFactory( );
+            Model parentModel = adapter.adapt( transaction, parent, Model.class );
+    
+            if ( parentModel == null ) {
+                throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
+                                                          parent.getAbsolutePath(),
+                                                          View.class.getSimpleName() ) );
+            }
+    
+            return parentModel.addView( transaction, id );
+        }
+    
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.TypeResolver#identifier()
+         */
+        @Override
+        public KomodoType identifier() {
+            return IDENTIFIER;
+        }
+    
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.TypeResolver#owningClass()
+         */
+        @Override
+        public Class< ViewImpl > owningClass() {
+            return ViewImpl.class;
+        }
+    
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.TypeResolver#resolvable(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.KomodoObject)
+         */
+        @Override
+        public boolean resolvable( final UnitOfWork transaction,
+                                   final KomodoObject kobject ) throws KException {
+            return ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, CreateTable.VIEW_STATEMENT );
+        }
+    
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.TypeResolver#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.KomodoObject)
+         */
+        @Override
+        public View resolve( final UnitOfWork transaction,
+                             final KomodoObject kobject ) throws KException {
+            return new ViewImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
+        }
+    
+    };
 
     /**
      * {@inheritDoc}

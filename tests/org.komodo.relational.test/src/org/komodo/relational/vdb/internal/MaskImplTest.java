@@ -118,7 +118,7 @@ public final class MaskImplTest extends RelationalModelTest {
     @Test
     public void shouldCreateUsingResolver() throws Exception {
         final String name = "blah";
-        final KomodoObject kobject = MaskImpl.RESOLVER.create( this.uow, _repo, this.mask.getParent( this.uow ), name, null );
+        final KomodoObject kobject = Mask.RESOLVER.create( this.uow, _repo, this.mask.getParent( this.uow ), name, null );
         assertThat( kobject, is( notNullValue() ) );
         assertThat( kobject, is( instanceOf( Mask.class ) ) );
         assertThat( kobject.getName( this.uow ), is( name ) );
@@ -127,7 +127,7 @@ public final class MaskImplTest extends RelationalModelTest {
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
         final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        MaskImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
+        Mask.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
     }
 
 }

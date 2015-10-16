@@ -153,7 +153,7 @@ public final class TranslatorImplTest extends RelationalModelTest {
         final RelationalProperties props = new RelationalProperties();
         props.add( new RelationalProperty( VdbLexicon.Translator.TYPE, "oracle" ) );
 
-        final KomodoObject kobject = TranslatorImpl.RESOLVER.create( this.uow,
+        final KomodoObject kobject = Translator.RESOLVER.create( this.uow,
                                                                      _repo,
                                                                      this.translator.getParent( this.uow ),
                                                                      name,
@@ -166,7 +166,7 @@ public final class TranslatorImplTest extends RelationalModelTest {
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
         final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        TranslatorImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", new RelationalProperties() );
+        Translator.RESOLVER.create( this.uow, _repo, bogusParent, "blah", new RelationalProperties() );
     }
 
 }

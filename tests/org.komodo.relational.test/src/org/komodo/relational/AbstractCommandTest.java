@@ -43,9 +43,11 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
     private static KEngine kEngine = KEngine.getInstance();
     protected static Path _shellDataDirectory;
 
+    @SuppressWarnings( "unused" )
     private Writer writer;
     private Writer commandWriter;
     private PlayCommand playCmd;
+    @SuppressWarnings( "unused" )
     private Class< ? extends ShellCommand > testedCommandClass;
     protected WorkspaceStatusImpl wsStatus;
 

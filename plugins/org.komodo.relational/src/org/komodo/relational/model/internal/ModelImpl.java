@@ -14,12 +14,9 @@ import org.komodo.core.KomodoLexicon;
 import org.komodo.modeshape.visitor.DdlNodeVisitor;
 import org.komodo.relational.ExcludeQNamesFilter;
 import org.komodo.relational.Messages;
+import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.Messages.Relational;
-import org.komodo.relational.RelationalProperties;
-import org.komodo.relational.internal.AdapterFactory;
-import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
-import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.model.Function;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Procedure;
@@ -31,9 +28,7 @@ import org.komodo.relational.model.UserDefinedFunction;
 import org.komodo.relational.model.View;
 import org.komodo.relational.model.VirtualProcedure;
 import org.komodo.relational.vdb.ModelSource;
-import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.internal.ModelSourceImpl;
-import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
@@ -70,82 +65,6 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
     private static final Filter PROPS_FILTER = new ExcludeQNamesFilter( KomodoLexicon.VdbModel.MODEL_DEFINITION );
 
     /**
-     * The resolver of a {@link Model}.
-     */
-    public static final TypeResolver< Model > RESOLVER = new TypeResolver< Model >() {
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.relational.internal.TypeResolver#create(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject, java.lang.String,
-         *      org.komodo.relational.RelationalProperties)
-         */
-        @Override
-        public Model create( final UnitOfWork transaction,
-                             final Repository repository,
-                             final KomodoObject parent,
-                             final String id,
-                             final RelationalProperties properties ) throws KException {
-            final AdapterFactory adapter = new AdapterFactory( repository );
-            final Vdb parentVdb = adapter.adapt( transaction, parent, Vdb.class );
-
-            if ( parentVdb == null ) {
-                throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
-                                                          parent.getAbsolutePath(),
-                                                          Model.class.getSimpleName() ) );
-            }
-
-            return parentVdb.addModel( transaction, id );
-        }
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.relational.internal.TypeResolver#identifier()
-         */
-        @Override
-        public KomodoType identifier() {
-            return IDENTIFIER;
-        }
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.relational.internal.TypeResolver#owningClass()
-         */
-        @Override
-        public Class< ModelImpl > owningClass() {
-            return ModelImpl.class;
-        }
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.relational.internal.TypeResolver#resolvable(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.KomodoObject)
-         */
-        @Override
-        public boolean resolvable( final UnitOfWork transaction,
-                                   final KomodoObject kobject ) throws KException {
-            return ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, VdbLexicon.Vdb.DECLARATIVE_MODEL );
-        }
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.relational.internal.TypeResolver#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.KomodoObject)
-         */
-        @Override
-        public Model resolve( final UnitOfWork transaction,
-                              final KomodoObject kobject ) throws KException {
-            return new ModelImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
-        }
-
-    };
-
-    /**
      * @param uow
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
@@ -169,7 +88,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
 
     @Override
     public KomodoType getTypeIdentifier( UnitOfWork uow ) {
-        return RESOLVER.identifier();
+        return Model.RESOLVER.identifier();
     }
 
     /**

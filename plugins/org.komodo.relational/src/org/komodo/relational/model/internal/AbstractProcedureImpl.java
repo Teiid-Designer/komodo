@@ -11,16 +11,12 @@ import java.util.ArrayList;
 import java.util.List;
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
-import org.komodo.relational.internal.RelationalModelFactory;
+import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.AbstractProcedure;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Parameter;
-import org.komodo.relational.model.PushdownFunction;
 import org.komodo.relational.model.StatementOption;
-import org.komodo.relational.model.StoredProcedure;
-import org.komodo.relational.model.UserDefinedFunction;
-import org.komodo.relational.model.VirtualProcedure;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Descriptor;
 import org.komodo.spi.repository.KomodoObject;
@@ -46,25 +42,6 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
      * The allowed child types.
      */
     protected static final KomodoType[] CHILD_TYPES = new KomodoType[] { Parameter.IDENTIFIER };
-
-    static Class< ? extends AbstractProcedure > getProcedureType( final UnitOfWork transaction,
-                                                                  final KomodoObject kobject ) throws KException {
-        Class< ? extends AbstractProcedure > clazz = null;
-
-        if (PushdownFunctionImpl.RESOLVER.resolvable( transaction, kobject )) {
-            clazz = PushdownFunction.class;
-        } else if (UserDefinedFunctionImpl.RESOLVER.resolvable( transaction, kobject )) {
-            clazz = UserDefinedFunction.class;
-        } else if (StoredProcedureImpl.RESOLVER.resolvable( transaction, kobject )) {
-            clazz = StoredProcedure.class;
-        } else if (VirtualProcedureImpl.RESOLVER.resolvable( transaction, kobject )) {
-            clazz = VirtualProcedure.class;
-        } else {
-            throw new KException( Messages.getString( Relational.UNEXPECTED_PROCEDURE_TYPE, kobject.getAbsolutePath() ) );
-        }
-
-        return clazz;
-    }
 
     private enum StandardOption {
 

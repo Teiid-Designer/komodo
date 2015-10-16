@@ -156,7 +156,7 @@ public class SchemaImplTest extends RelationalModelTest {
     @Test
     public void shouldCreateUsingResolver() throws Exception {
         final String name = "blah";
-        final KomodoObject kobject = SchemaImpl.RESOLVER.create( this.uow, _repo, null, name, null );
+        final KomodoObject kobject = Schema.RESOLVER.create( this.uow, _repo, null, name, null );
         assertThat( kobject, is( notNullValue() ) );
         assertThat( kobject, is( instanceOf( Schema.class ) ) );
         assertThat( kobject.getName( this.uow ), is( name ) );

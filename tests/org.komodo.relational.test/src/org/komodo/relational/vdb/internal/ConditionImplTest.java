@@ -117,7 +117,7 @@ public final class ConditionImplTest extends RelationalModelTest {
     @Test
     public void shouldCreateUsingResolver() throws Exception {
         final String name = "blah";
-        final KomodoObject kobject = ConditionImpl.RESOLVER.create( this.uow,
+        final KomodoObject kobject = Condition.RESOLVER.create( this.uow,
                                                                     _repo,
                                                                     this.condition.getParent( this.uow ),
                                                                     name,
@@ -130,7 +130,7 @@ public final class ConditionImplTest extends RelationalModelTest {
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
         final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        ConditionImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
+        Condition.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
     }
 
 }

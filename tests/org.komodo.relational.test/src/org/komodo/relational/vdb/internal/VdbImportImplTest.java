@@ -125,7 +125,7 @@ public final class VdbImportImplTest extends RelationalModelTest {
     @Test
     public void shouldCreateUsingResolver() throws Exception {
         final String name = "blah";
-        final KomodoObject kobject = VdbImportImpl.RESOLVER.create( this.uow,
+        final KomodoObject kobject = VdbImport.RESOLVER.create( this.uow,
                                                                     _repo,
                                                                     this.vdbImport.getParent( this.uow ),
                                                                     name,
@@ -138,7 +138,7 @@ public final class VdbImportImplTest extends RelationalModelTest {
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
         final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        VdbImportImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
+        VdbImport.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
     }
 
 }

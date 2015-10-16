@@ -283,7 +283,7 @@ public final class PermissionImplTest extends RelationalModelTest {
     @Test
     public void shouldCreateUsingResolver() throws Exception {
         final String name = "blah";
-        final KomodoObject kobject = PermissionImpl.RESOLVER.create( this.uow,
+        final KomodoObject kobject = Permission.RESOLVER.create( this.uow,
                                                                      _repo,
                                                                      this.permission.getParent( this.uow ),
                                                                      name,
@@ -296,7 +296,7 @@ public final class PermissionImplTest extends RelationalModelTest {
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
         final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        PermissionImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
+        Permission.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
     }
 
 }

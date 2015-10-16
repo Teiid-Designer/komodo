@@ -126,7 +126,7 @@ public final class VirtualProcedureImplTest extends RelationalModelTest {
     @Test
     public void shouldCreateUsingResolver() throws Exception {
         final String name = "blah";
-        final KomodoObject kobject = VirtualProcedureImpl.RESOLVER.create( this.uow,
+        final KomodoObject kobject = VirtualProcedure.RESOLVER.create( this.uow,
                                                                            _repo,
                                                                            this.procedure.getParent( this.uow ),
                                                                            name,
@@ -139,7 +139,7 @@ public final class VirtualProcedureImplTest extends RelationalModelTest {
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
         final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        VirtualProcedureImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
+        VirtualProcedure.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
     }
 
 }

@@ -18,9 +18,9 @@ import static org.mockito.Mockito.mock;
 import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
+import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalObject.Filter;
-import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.AccessPattern;
 import org.komodo.relational.model.Column;
@@ -887,7 +887,7 @@ public final class TableImplTest extends RelationalModelTest {
     @Test
     public void shouldCreateUsingResolver() throws Exception {
         final String name = "blah";
-        final KomodoObject kobject = TableImpl.RESOLVER.create( this.uow, _repo, this.model, name, null );
+        final KomodoObject kobject = Table.RESOLVER.create( this.uow, _repo, this.model, name, null );
         assertThat( kobject, is( notNullValue() ) );
         assertThat( kobject, is( instanceOf( Table.class ) ) );
         assertThat( kobject.getName( this.uow ), is( name ) );
@@ -896,7 +896,7 @@ public final class TableImplTest extends RelationalModelTest {
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
         final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        TableImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
+        Table.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
     }
 
 }

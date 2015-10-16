@@ -9,12 +9,20 @@ package org.komodo.relational.vdb;
 
 import java.util.Properties;
 import org.komodo.relational.RelationalObject;
+import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.TypeResolver;
 import org.komodo.relational.model.Model;
+import org.komodo.relational.vdb.internal.VdbImpl;
+import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Exportable;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
+import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 import org.w3c.dom.Document;
 
 /**
@@ -60,6 +68,76 @@ public interface Vdb extends Exportable, RelationalObject {
      * An empty array of VDBs.
      */
     Vdb[] NO_VDBS = new Vdb[0];
+
+    /**
+     * The resolver of a {@link Vdb}.
+     */
+    public static final TypeResolver< Vdb > RESOLVER = new TypeResolver< Vdb >() {
+    
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.TypeResolver#create(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject, java.lang.String,
+         *      org.komodo.relational.RelationalProperties)
+         */
+        @Override
+        public Vdb create( final UnitOfWork transaction,
+                           final Repository repository,
+                           final KomodoObject parent,
+                           final String id,
+                           final RelationalProperties properties ) throws KException {
+            final Object origFilePathValue = properties.getValue( VdbLexicon.Vdb.ORIGINAL_FILE );
+            final String origFilePath = origFilePathValue == null ? null : origFilePathValue.toString();
+            final WorkspaceManager mgr = WorkspaceManager.getInstance( repository );
+            return mgr.createVdb( transaction, parent, id, origFilePath );
+        }
+    
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.TypeResolver#identifier()
+         */
+        @Override
+        public KomodoType identifier() {
+            return IDENTIFIER;
+        }
+    
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.TypeResolver#owningClass()
+         */
+        @Override
+        public Class< VdbImpl > owningClass() {
+            return VdbImpl.class;
+        }
+    
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.TypeResolver#resolvable(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.KomodoObject)
+         */
+        @Override
+        public boolean resolvable( final UnitOfWork transaction,
+                                   final KomodoObject kobject ) throws KException {
+            return ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, VdbLexicon.Vdb.VIRTUAL_DATABASE );
+        }
+    
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.TypeResolver#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.KomodoObject)
+         */
+        @Override
+        public Vdb resolve( final UnitOfWork transaction,
+                            final KomodoObject kobject ) throws KException {
+            return new VdbImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
+        }
+    
+    };
 
     /**
      * @param transaction

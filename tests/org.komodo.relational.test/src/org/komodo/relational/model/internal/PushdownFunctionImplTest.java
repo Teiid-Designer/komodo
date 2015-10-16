@@ -139,7 +139,7 @@ public final class PushdownFunctionImplTest extends RelationalModelTest {
     @Test
     public void shouldCreateUsingResolver() throws Exception {
         final String name = "blah";
-        final KomodoObject kobject = PushdownFunctionImpl.RESOLVER.create( this.uow,
+        final KomodoObject kobject = PushdownFunction.RESOLVER.create( this.uow,
                                                                            _repo,
                                                                            this.function.getParent( this.uow ),
                                                                            name,
@@ -152,7 +152,7 @@ public final class PushdownFunctionImplTest extends RelationalModelTest {
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
         final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        PushdownFunctionImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
+        PushdownFunction.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
     }
 
 }

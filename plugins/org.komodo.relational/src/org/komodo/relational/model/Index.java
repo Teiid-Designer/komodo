@@ -7,10 +7,20 @@
  */
 package org.komodo.relational.model;
 
+import org.komodo.relational.Messages;
+import org.komodo.relational.TypeResolver;
+import org.komodo.relational.Messages.Relational;
+import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.internal.AdapterFactory;
+import org.komodo.relational.model.internal.IndexImpl;
+import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
+import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.Constraint;
 
 /**
  * Represents a relational model index.
@@ -36,6 +46,87 @@ public interface Index extends TableConstraint {
      * An empty collection of index constraints.
      */
     Index[] NO_INDEXES = new Index[0];
+
+    /**
+     * The resolver of a {@link Index}.
+     */
+    public static final TypeResolver< Index > RESOLVER = new TypeResolver< Index >() {
+    
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.TypeResolver#create(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject, java.lang.String,
+         *      org.komodo.relational.RelationalProperties)
+         */
+        @Override
+        public Index create( final UnitOfWork transaction,
+                             final Repository repository,
+                             final KomodoObject parent,
+                             final String id,
+                             final RelationalProperties properties ) throws KException {
+            final AdapterFactory adapter = new AdapterFactory( );
+            final Table parentTable = adapter.adapt( transaction, parent, Table.class );
+    
+            if ( parentTable == null ) {
+                throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
+                                                          parent.getAbsolutePath(),
+                                                          Index.class.getSimpleName() ) );
+            }
+    
+            return parentTable.addIndex( transaction, id );
+        }
+    
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.TypeResolver#identifier()
+         */
+        @Override
+        public KomodoType identifier() {
+            return IDENTIFIER;
+        }
+    
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.TypeResolver#owningClass()
+         */
+        @Override
+        public Class< IndexImpl > owningClass() {
+            return IndexImpl.class;
+        }
+    
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.TypeResolver#resolvable(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.KomodoObject)
+         */
+        @Override
+        public boolean resolvable( final UnitOfWork transaction,
+                                   final KomodoObject kobject ) throws KException {
+            return ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, Constraint.INDEX_CONSTRAINT )
+                   && ObjectImpl.validatePropertyValue( transaction,
+                                                        kobject.getRepository(),
+                                                        kobject,
+                                                        Constraint.TYPE,
+                                                        CONSTRAINT_TYPE.toValue() );
+        }
+    
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.TypeResolver#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.KomodoObject)
+         */
+        @Override
+        public Index resolve( final UnitOfWork transaction,
+                              final KomodoObject kobject ) throws KException {
+            return new IndexImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
+        }
+    
+    };
 
     /**
      * @param transaction

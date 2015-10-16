@@ -477,7 +477,7 @@ public final class ResultSetColumnImplTest extends RelationalModelTest {
     @Test
     public void shouldCreateUsingResolver() throws Exception {
         final String name = "blah";
-        final KomodoObject kobject = ResultSetColumnImpl.RESOLVER.create( this.uow, _repo, this.resultSet, name, null );
+        final KomodoObject kobject = ResultSetColumn.RESOLVER.create( this.uow, _repo, this.resultSet, name, null );
         assertThat( kobject, is( notNullValue() ) );
         assertThat( kobject, is( instanceOf( ResultSetColumn.class ) ) );
         assertThat( kobject.getName( this.uow ), is( name ) );
@@ -486,7 +486,7 @@ public final class ResultSetColumnImplTest extends RelationalModelTest {
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
         final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        ResultSetColumnImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
+        ResultSetColumn.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
     }
 
 }

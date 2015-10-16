@@ -393,7 +393,7 @@ public final class UserDefinedFunctionImplTest extends RelationalModelTest {
     @Test
     public void shouldCreateUsingResolver() throws Exception {
         final String name = "blah";
-        final KomodoObject kobject = UserDefinedFunctionImpl.RESOLVER.create( this.uow,
+        final KomodoObject kobject = UserDefinedFunction.RESOLVER.create( this.uow,
                                                                               _repo,
                                                                               this.function.getParent( this.uow ),
                                                                               name,
@@ -406,7 +406,7 @@ public final class UserDefinedFunctionImplTest extends RelationalModelTest {
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
         final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        UserDefinedFunctionImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
+        UserDefinedFunction.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
     }
 
 }

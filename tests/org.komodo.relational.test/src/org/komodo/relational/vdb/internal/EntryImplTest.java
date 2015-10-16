@@ -143,7 +143,7 @@ public final class EntryImplTest extends RelationalModelTest {
         final RelationalProperties props = new RelationalProperties();
         props.add( new RelationalProperty( VdbLexicon.Entry.PATH, "entryPath" ) );
 
-        final KomodoObject kobject = EntryImpl.RESOLVER.create( this.uow, _repo, this.entry.getParent( this.uow ), name, props );
+        final KomodoObject kobject = Entry.RESOLVER.create( this.uow, _repo, this.entry.getParent( this.uow ), name, props );
         assertThat( kobject, is( notNullValue() ) );
         assertThat( kobject, is( instanceOf( Entry.class ) ) );
         assertThat( kobject.getName( this.uow ), is( name ) );
@@ -152,7 +152,7 @@ public final class EntryImplTest extends RelationalModelTest {
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
         final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        EntryImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", new RelationalProperties() );
+        Entry.RESOLVER.create( this.uow, _repo, bogusParent, "blah", new RelationalProperties() );
     }
 
 }

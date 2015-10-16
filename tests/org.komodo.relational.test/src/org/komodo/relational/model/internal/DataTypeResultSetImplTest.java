@@ -165,7 +165,7 @@ public final class DataTypeResultSetImplTest extends RelationalModelTest {
 
     @Test
     public void shouldCreateUsingResolver() throws Exception {
-        final KomodoObject kobject = DataTypeResultSetImpl.RESOLVER.create( this.uow, _repo, this.procedure, "blah", null );
+        final KomodoObject kobject = DataTypeResultSet.RESOLVER.create( this.uow, _repo, this.procedure, "blah", null );
         assertThat( kobject, is( notNullValue() ) );
         assertThat( kobject, is( instanceOf( DataTypeResultSet.class ) ) );
         assertThat( kobject.getName( this.uow ), is( CreateProcedure.RESULT_SET ) );
@@ -174,7 +174,7 @@ public final class DataTypeResultSetImplTest extends RelationalModelTest {
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
         final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        DataTypeResultSetImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
+        DataTypeResultSet.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
     }
 
 }

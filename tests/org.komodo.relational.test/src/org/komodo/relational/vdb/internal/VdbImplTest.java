@@ -794,7 +794,7 @@ public final class VdbImplTest extends RelationalModelTest {
         final RelationalProperties props = new RelationalProperties();
         props.add( new RelationalProperty( VdbLexicon.Vdb.ORIGINAL_FILE, "/my/path/vdb.vdb" ) );
 
-        final KomodoObject kobject = VdbImpl.RESOLVER.create( this.uow, _repo, null, name, props );
+        final KomodoObject kobject = Vdb.RESOLVER.create( this.uow, _repo, null, name, props );
         assertThat( kobject, is( notNullValue() ) );
         assertThat( kobject, is( instanceOf( Vdb.class ) ) );
         assertThat( kobject.getName( this.uow ), is( name ) );

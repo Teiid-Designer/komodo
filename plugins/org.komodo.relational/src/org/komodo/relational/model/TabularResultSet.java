@@ -7,10 +7,20 @@
  */
 package org.komodo.relational.model;
 
+import org.komodo.relational.Messages;
+import org.komodo.relational.Messages.Relational;
+import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.TypeResolver;
+import org.komodo.relational.internal.AdapterFactory;
+import org.komodo.relational.model.internal.TabularResultSetImpl;
+import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
+import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
 
 /**
  * Represents a tabular result set.
@@ -26,6 +36,96 @@ public interface TabularResultSet extends ProcedureResultSet {
      * The type identifier.
      */
     int TYPE_ID = TabularResultSet.class.hashCode();
+
+    /**
+     * The resolver of a {@link TabularResultSet}.
+     */
+    public static final TypeResolver< TabularResultSet > RESOLVER = new TypeResolver< TabularResultSet >() {
+    
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.TypeResolver#create(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject, java.lang.String,
+         *      org.komodo.relational.RelationalProperties)
+         */
+        @Override
+        public TabularResultSet create( final UnitOfWork transaction,
+                                        final Repository repository,
+                                        final KomodoObject parent,
+                                        final String id,
+                                        final RelationalProperties properties ) throws KException {
+            final Class< ? extends AbstractProcedure > clazz = AbstractProcedure.Utils.getProcedureType( transaction, parent );
+            final AdapterFactory adapter = new AdapterFactory( );
+            final AbstractProcedure parentProc = adapter.adapt( transaction, parent, clazz );
+    
+            if ( parentProc == null ) {
+                throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
+                                                          parent.getAbsolutePath(),
+                                                          TabularResultSet.class.getSimpleName() ) );
+            }
+    
+            if ( parentProc instanceof StoredProcedure ) {
+                return ( ( StoredProcedure )parentProc ).setResultSet( transaction, TabularResultSet.class );
+            }
+    
+            if ( parentProc instanceof PushdownFunction ) {
+                return ( ( PushdownFunction )parentProc ).setResultSet( transaction, TabularResultSet.class );
+            }
+    
+            throw new KException( Messages.getString( Relational.UNEXPECTED_RESULT_SET_TYPE, clazz.getName() ) );
+        }
+    
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.TypeResolver#identifier()
+         */
+        @Override
+        public KomodoType identifier() {
+            return IDENTIFIER;
+        }
+    
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.TypeResolver#owningClass()
+         */
+        @Override
+        public Class< TabularResultSetImpl > owningClass() {
+            return TabularResultSetImpl.class;
+        }
+    
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.TypeResolver#resolvable(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.KomodoObject)
+         */
+        @Override
+        public boolean resolvable( final UnitOfWork transaction,
+                                   final KomodoObject kobject ) throws KException {
+            // must have the right name
+            if ( CreateProcedure.RESULT_SET.equals( kobject.getName( transaction ) ) ) {
+                return ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, CreateProcedure.RESULT_COLUMNS );
+            }
+    
+            return false;
+        }
+    
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.TypeResolver#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.KomodoObject)
+         */
+        @Override
+        public TabularResultSet resolve( final UnitOfWork transaction,
+                                         final KomodoObject kobject ) throws KException {
+            return new TabularResultSetImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
+        }
+    
+    };
 
     /**
      * @param transaction

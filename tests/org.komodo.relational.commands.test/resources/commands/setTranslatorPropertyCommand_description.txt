@@ -1,0 +1,11 @@
+#go to workspace, create a vdb with a translator
+workspace
+create-vdb myVdb vdbPath
+#
+# Add a translator
+cd myVdb
+add-translator myTranslator tType
+#
+# Set a property
+cd myTranslator
+set-property description myDescription

@@ -362,7 +362,7 @@ public final class StoredProcedureImplTest extends RelationalModelTest {
     @Test
     public void shouldCreateUsingResolver() throws Exception {
         final String name = "blah";
-        final KomodoObject kobject = StoredProcedureImpl.RESOLVER.create( this.uow,
+        final KomodoObject kobject = StoredProcedure.RESOLVER.create( this.uow,
                                                                           _repo,
                                                                           this.procedure.getParent( this.uow ),
                                                                           name,
@@ -375,7 +375,7 @@ public final class StoredProcedureImplTest extends RelationalModelTest {
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
         final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        StoredProcedureImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
+        StoredProcedure.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
     }
 
 }

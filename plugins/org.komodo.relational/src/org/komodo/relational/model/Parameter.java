@@ -7,14 +7,24 @@
  */
 package org.komodo.relational.model;
 
-import org.komodo.relational.RelationalObject;
+import org.komodo.relational.Messages;
+import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalConstants.Nullable;
+import org.komodo.relational.RelationalObject;
+import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.TypeResolver;
+import org.komodo.relational.internal.AdapterFactory;
+import org.komodo.relational.model.internal.ParameterImpl;
+import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlConstants.TeiidNonReservedWord;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlConstants.TeiidReservedWord;
+import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
 
 /**
  * Represents a relational model procedure parameter.
@@ -101,6 +111,83 @@ public interface Parameter extends OptionContainer, RelationalObject {
      * An empty array of parameters.
      */
     Parameter[] NO_PARAMETERS = new Parameter[0];
+
+    /**
+     * The resolver of a {@link Parameter}.
+     */
+    public static final TypeResolver< Parameter > RESOLVER = new TypeResolver< Parameter >() {
+    
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.TypeResolver#create(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject, java.lang.String,
+         *      org.komodo.relational.RelationalProperties)
+         */
+        @Override
+        public Parameter create( final UnitOfWork transaction,
+                                 final Repository repository,
+                                 final KomodoObject parent,
+                                 final String id,
+                                 final RelationalProperties properties ) throws KException {
+            final Class< ? extends AbstractProcedure > clazz = AbstractProcedure.Utils.getProcedureType( transaction, parent );
+            final AdapterFactory adapter = new AdapterFactory( );
+            final AbstractProcedure parentProc = adapter.adapt( transaction, parent, clazz );
+    
+            if ( parentProc == null ) {
+                throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
+                                                          parent.getAbsolutePath(),
+                                                          Parameter.class.getSimpleName() ) );
+            }
+    
+            return parentProc.addParameter( transaction, id );
+        }
+    
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.TypeResolver#identifier()
+         */
+        @Override
+        public KomodoType identifier() {
+            return IDENTIFIER;
+        }
+    
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.TypeResolver#owningClass()
+         */
+        @Override
+        public Class< ParameterImpl > owningClass() {
+            return ParameterImpl.class;
+        }
+    
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.TypeResolver#resolvable(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.KomodoObject)
+         */
+        @Override
+        public boolean resolvable( final UnitOfWork transaction,
+                                   final KomodoObject kobject ) throws KException {
+            return ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, CreateProcedure.PARAMETER );
+        }
+    
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.TypeResolver#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.KomodoObject)
+         */
+        @Override
+        public Parameter resolve( final UnitOfWork transaction,
+                                  final KomodoObject kobject ) throws KException {
+            return new ParameterImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
+        }
+    
+    };
 
     /**
      * @param transaction

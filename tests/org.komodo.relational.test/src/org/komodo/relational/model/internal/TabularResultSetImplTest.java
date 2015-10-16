@@ -113,7 +113,7 @@ public final class TabularResultSetImplTest extends RelationalModelTest {
 
     @Test
     public void shouldCreateUsingResolver() throws Exception {
-        final KomodoObject kobject = TabularResultSetImpl.RESOLVER.create( this.uow, _repo, this.procedure, "blah", null );
+        final KomodoObject kobject = TabularResultSet.RESOLVER.create( this.uow, _repo, this.procedure, "blah", null );
         assertThat( kobject, is( notNullValue() ) );
         assertThat( kobject, is( instanceOf( TabularResultSet.class ) ) );
         assertThat( kobject.getName( this.uow ), is( CreateProcedure.RESULT_SET ) );
@@ -122,7 +122,7 @@ public final class TabularResultSetImplTest extends RelationalModelTest {
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
         final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        TabularResultSetImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
+        TabularResultSet.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
     }
 
 }

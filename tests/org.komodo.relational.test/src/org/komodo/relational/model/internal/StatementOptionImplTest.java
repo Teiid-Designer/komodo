@@ -16,9 +16,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalObject.Filter;
+import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.RelationalProperty;
-import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.StatementOption;
 import org.komodo.relational.model.Table;
@@ -129,7 +129,7 @@ public final class StatementOptionImplTest extends RelationalModelTest {
         final RelationalProperties props = new RelationalProperties();
         props.add( new RelationalProperty( StandardDdlLexicon.VALUE, "optionValue" ) );
 
-        final KomodoObject kobject = StatementOptionImpl.RESOLVER.create( this.uow,
+        final KomodoObject kobject = StatementOption.RESOLVER.create( this.uow,
                                                                           _repo,
                                                                           this.option.getParent( this.uow ),
                                                                           name,
@@ -142,7 +142,7 @@ public final class StatementOptionImplTest extends RelationalModelTest {
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
         final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        StatementOptionImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", new RelationalProperties() );
+        StatementOption.RESOLVER.create( this.uow, _repo, bogusParent, "blah", new RelationalProperties() );
     }
 
 }

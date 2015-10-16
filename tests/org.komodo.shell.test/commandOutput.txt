@@ -100,3 +100,12 @@
 #  ----------
 #  Recording set on at Thu Oct 15 11:29:43 CDT 2015 - File: "./commandOutput.txt"
 #  ----------
+#  ----------
+#  Recording set on at Fri Oct 16 11:08:04 CDT 2015 - File: "./commandOutput.txt"
+#  ----------
+#  ----------
+#  Recording set off at Fri Oct 16 11:08:04 CDT 2015 - File: "./commandOutput.txt"
+#  ----------
+#  ----------
+#  Recording set on at Fri Oct 16 11:08:04 CDT 2015 - File: "./commandOutput.txt"
+#  ----------

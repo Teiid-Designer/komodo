@@ -114,7 +114,7 @@ public final class ViewImplTest extends RelationalModelTest {
     @Test
     public void shouldCreateUsingResolver() throws Exception {
         final String name = "blah";
-        final KomodoObject kobject = ViewImpl.RESOLVER.create( this.uow, _repo, this.model, name, null );
+        final KomodoObject kobject = View.RESOLVER.create( this.uow, _repo, this.model, name, null );
         assertThat( kobject, is( notNullValue() ) );
         assertThat( kobject, is( instanceOf( View.class ) ) );
         assertThat( kobject.getName( this.uow ), is( name ) );
@@ -123,7 +123,7 @@ public final class ViewImplTest extends RelationalModelTest {
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
         final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        ViewImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
+        View.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
     }
 
 }

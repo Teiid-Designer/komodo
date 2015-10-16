@@ -448,7 +448,7 @@ public final class ParameterImplTest extends RelationalModelTest {
     @Test
     public void shouldCreateUsingResolver() throws Exception {
         final String name = "blah";
-        final KomodoObject kobject = ParameterImpl.RESOLVER.create( this.uow, _repo, this.procedure, name, null );
+        final KomodoObject kobject = Parameter.RESOLVER.create( this.uow, _repo, this.procedure, name, null );
         assertThat( kobject, is( notNullValue() ) );
         assertThat( kobject, is( instanceOf( Parameter.class ) ) );
         assertThat( kobject.getName( this.uow ), is( name ) );
@@ -457,7 +457,7 @@ public final class ParameterImplTest extends RelationalModelTest {
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
         final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        ParameterImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
+        Parameter.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
     }
 
 }

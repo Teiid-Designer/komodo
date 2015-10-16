@@ -21,9 +21,17 @@
  */
 package org.komodo.relational.teiid;
 
+import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.RelationalObject;
+import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.TypeResolver;
+import org.komodo.relational.teiid.internal.TeiidImpl;
+import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.spi.runtime.TeiidInstance;
@@ -47,6 +55,74 @@ public interface Teiid extends RelationalObject {
      * An empty array of teiids.
      */
     Teiid[] NO_TEIIDS = new Teiid[0];
+
+    /**
+     * The resolver of a {@link Teiid}.
+     */
+    public static final TypeResolver< Teiid > RESOLVER = new TypeResolver< Teiid >() {
+    
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.TypeResolver#create(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject, java.lang.String,
+         *      org.komodo.relational.RelationalProperties)
+         */
+        @Override
+        public Teiid create( final UnitOfWork transaction,
+                             final Repository repository,
+                             final KomodoObject parent,
+                             final String id,
+                             final RelationalProperties properties ) throws KException {
+            final WorkspaceManager mgr = WorkspaceManager.getInstance( repository );
+            return mgr.createTeiid( transaction, parent, id );
+        }
+    
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.TypeResolver#identifier()
+         */
+        @Override
+        public KomodoType identifier() {
+            return IDENTIFIER;
+        }
+    
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.TypeResolver#owningClass()
+         */
+        @Override
+        public Class< TeiidImpl > owningClass() {
+            return TeiidImpl.class;
+        }
+    
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.TypeResolver#resolvable(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.KomodoObject)
+         */
+        @Override
+        public boolean resolvable( final UnitOfWork transaction,
+                                   final KomodoObject kobject ) throws KException {
+            return ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, KomodoLexicon.Teiid.NODE_TYPE );
+        }
+    
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.TypeResolver#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.KomodoObject)
+         */
+        @Override
+        public Teiid resolve( final UnitOfWork transaction,
+                              final KomodoObject kobject ) throws KException {
+            return new TeiidImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
+        }
+    
+    };
 
     /**
      * @param uow the transaction

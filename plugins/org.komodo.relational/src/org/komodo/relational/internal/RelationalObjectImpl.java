@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalObject;
+import org.komodo.relational.TypeResolver;
 import org.komodo.repository.Messages;
 import org.komodo.repository.Messages.Komodo;
 import org.komodo.repository.ObjectImpl;

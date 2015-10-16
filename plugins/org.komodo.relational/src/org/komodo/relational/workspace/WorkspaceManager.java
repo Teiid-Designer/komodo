@@ -21,18 +21,16 @@
  */
 package org.komodo.relational.workspace;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
+import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.RelationalProperty;
+import org.komodo.relational.TypeResolver;
 import org.komodo.relational.internal.AdapterFactory;
-import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
-import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.internal.TypeResolverRegistry;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Schema;
@@ -571,7 +569,7 @@ public class WorkspaceManager extends RelationalObjectImpl {
         ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
                          "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        AdapterFactory adapter = new AdapterFactory(getRepository());
+        AdapterFactory adapter = new AdapterFactory( );
         T kobject = adapter.adapt(transaction, object, resolvedClass);
         return kobject;
     }

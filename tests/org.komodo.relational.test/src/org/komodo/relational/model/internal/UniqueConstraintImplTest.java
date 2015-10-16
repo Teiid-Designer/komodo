@@ -113,7 +113,7 @@ public final class UniqueConstraintImplTest extends RelationalModelTest {
     @Test
     public void shouldCreateUsingResolver() throws Exception {
         final String name = "blah";
-        final KomodoObject kobject = UniqueConstraintImpl.RESOLVER.create( this.uow, _repo, this.table, name, null );
+        final KomodoObject kobject = UniqueConstraint.RESOLVER.create( this.uow, _repo, this.table, name, null );
         assertThat( kobject, is( notNullValue() ) );
         assertThat( kobject, is( instanceOf( UniqueConstraint.class ) ) );
         assertThat( kobject.getName( this.uow ), is( name ) );
@@ -122,7 +122,7 @@ public final class UniqueConstraintImplTest extends RelationalModelTest {
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
         final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        UniqueConstraintImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
+        UniqueConstraint.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
     }
 
 }

@@ -19,9 +19,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalObject.Filter;
+import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.RelationalProperty;
-import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.ForeignKey;
@@ -200,7 +200,7 @@ public final class ForeignKeyImplTest extends RelationalModelTest {
         final RelationalProperties props = new RelationalProperties();
         props.add( new RelationalProperty( Constraint.FOREIGN_KEY_CONSTRAINT, keyRefTable ) );
 
-        final KomodoObject kobject = ForeignKeyImpl.RESOLVER.create( this.uow,
+        final KomodoObject kobject = ForeignKey.RESOLVER.create( this.uow,
                                                                      _repo,
                                                                      this.parentTable,
                                                                      name,
@@ -213,7 +213,7 @@ public final class ForeignKeyImplTest extends RelationalModelTest {
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
         final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        ForeignKeyImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", new RelationalProperties() );
+        ForeignKey.RESOLVER.create( this.uow, _repo, bogusParent, "blah", new RelationalProperties() );
     }
 
 }

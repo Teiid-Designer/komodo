@@ -1,0 +1,17 @@
+#go to workspace, create a VDB with a Model
+workspace
+create-vdb myVdb vdbPath
+cd myVdb
+add-model myModel
+#
+#add a Table to a Model
+cd myModel
+add-table myTable
+#
+#add an Index to the Table
+cd myTable
+add-index myIndex
+#
+# Set a property
+cd myIndex
+set-property expression myExpression

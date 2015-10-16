@@ -134,7 +134,7 @@ public final class PrimaryKeyImplTest extends RelationalModelTest {
     @Test
     public void shouldCreateUsingResolver() throws Exception {
         final String name = "blah";
-        final KomodoObject kobject = PrimaryKeyImpl.RESOLVER.create( this.uow, _repo, this.table, name, null );
+        final KomodoObject kobject = PrimaryKey.RESOLVER.create( this.uow, _repo, this.table, name, null );
         assertThat( kobject, is( notNullValue() ) );
         assertThat( kobject, is( instanceOf( PrimaryKey.class ) ) );
         assertThat( kobject.getName( this.uow ), is( name ) );
@@ -143,7 +143,7 @@ public final class PrimaryKeyImplTest extends RelationalModelTest {
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
         final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        PrimaryKeyImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
+        PrimaryKey.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
     }
 
 }
