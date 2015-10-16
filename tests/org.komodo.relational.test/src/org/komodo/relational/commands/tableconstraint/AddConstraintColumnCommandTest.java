@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.komodo.relational.commands.foreignkey;
+package org.komodo.relational.commands.tableconstraint;
 
 import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.FileWriter;
 import org.junit.Test;
 import org.komodo.relational.AbstractCommandTest;
-import org.komodo.relational.commands.tableconstraint.AddConstraintColumnCommand;
+import org.komodo.relational.model.Column;
 import org.komodo.relational.model.ForeignKey;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Table;
+import org.komodo.relational.model.TableConstraint;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
@@ -54,14 +55,19 @@ public class AddConstraintColumnCommandTest extends AbstractCommandTest {
         writer.write("add-model refModel" + NEW_LINE);  //$NON-NLS-1$
         writer.write("cd refModel" + NEW_LINE);  //$NON-NLS-1$
         writer.write("add-table refTable" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd .." + NEW_LINE);  //$NON-NLS-1$
+        writer.write("cd refTable" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("add-column refCol1" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("add-column refCol2" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("cd ../.." + NEW_LINE);  //$NON-NLS-1$
         writer.write("add-model myModel" + NEW_LINE);  //$NON-NLS-1$
         writer.write("cd myModel" + NEW_LINE);  //$NON-NLS-1$
         writer.write("add-table myTable" + NEW_LINE);  //$NON-NLS-1$
         writer.write("cd myTable" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("add-column myCol1" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("add-column myCol2" + NEW_LINE);  //$NON-NLS-1$
         writer.write("add-foreign-key myForeignKey /workspace/myVdb/refModel/refTable" + NEW_LINE);  //$NON-NLS-1$
         writer.write("cd myForeignKey" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-column myConstraintCol /workspace/myVdb/refModel/refTable" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("add-column /workspace/myVdb/myModel/myTable/myCol1" + NEW_LINE);  //$NON-NLS-1$
         writer.close();
 
         setup(cmdFile.getAbsolutePath(), AddConstraintColumnCommand.class);
@@ -90,6 +96,11 @@ public class AddConstraintColumnCommandTest extends AbstractCommandTest {
         ForeignKey[] fks = tables[0].getForeignKeys(uow);
         assertEquals(1, fks.length);
         assertEquals("myForeignKey", fks[0].getName(uow)); //$NON-NLS-1$
+        
+        TableConstraint tConstraint = fks[0];
+        Column[] cols = tConstraint.getColumns(uow);
+        assertEquals(1, cols.length);
+        assertEquals("myCol1", cols[0].getName(uow)); //$NON-NLS-1$
     }
 
 }

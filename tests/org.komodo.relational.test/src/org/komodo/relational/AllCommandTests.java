@@ -9,9 +9,9 @@ import org.komodo.relational.commands.DeleteSchemaCommandTest;
 import org.komodo.relational.commands.DeleteTeiidCommandTest;
 import org.komodo.relational.commands.DeleteVdbCommandTest;
 import org.komodo.relational.commands.FindCommandTest;
-import org.komodo.relational.commands.ImportVdbCommandTest;
 import org.komodo.relational.commands.SetCustomPropertyCommandTest;
 import org.komodo.relational.commands.UnsetCustomPropertyCommandTest;
+import org.komodo.relational.commands.UploadVdbCommandTest;
 import org.komodo.relational.commands.column.SetColumnPropertyCommandTest;
 import org.komodo.relational.commands.column.UnsetColumnPropertyCommandTest;
 import org.komodo.relational.commands.condition.SetConditionPropertyCommandTest;
@@ -22,8 +22,6 @@ import org.komodo.relational.commands.datarole.DeleteMappedRoleCommandTest;
 import org.komodo.relational.commands.datarole.DeletePermissionCommandTest;
 import org.komodo.relational.commands.datarole.SetDataRolePropertyCommandTest;
 import org.komodo.relational.commands.datarole.UnsetDataRolePropertyCommandTest;
-import org.komodo.relational.commands.datatyperesultset.SetDataTypeResultSetPropertyCommandTest;
-import org.komodo.relational.commands.datatyperesultset.UnsetDataTypeResultSetPropertyCommandTest;
 import org.komodo.relational.commands.entry.SetEntryPropertyCommandTest;
 import org.komodo.relational.commands.entry.UnsetEntryPropertyCommandTest;
 import org.komodo.relational.commands.foreignkey.AddReferenceColumnCommandTest;
@@ -46,8 +44,6 @@ import org.komodo.relational.commands.model.DeleteTableCommandTest;
 import org.komodo.relational.commands.model.DeleteUserDefinedFunctionCommandTest;
 import org.komodo.relational.commands.model.DeleteViewCommandTest;
 import org.komodo.relational.commands.model.DeleteVirtualProcedureCommandTest;
-import org.komodo.relational.commands.model.ExportCommandTest;
-import org.komodo.relational.commands.model.ImportCommandTest;
 import org.komodo.relational.commands.model.SetModelPropertyCommandTest;
 import org.komodo.relational.commands.model.UnsetModelPropertyCommandTest;
 import org.komodo.relational.commands.modelsource.SetModelSourcePropertyCommandTest;
@@ -78,6 +74,8 @@ import org.komodo.relational.commands.table.DeleteIndexCommandTest;
 import org.komodo.relational.commands.table.DeleteUniqueConstraintCommandTest;
 import org.komodo.relational.commands.table.SetTablePropertyCommandTest;
 import org.komodo.relational.commands.table.UnsetTablePropertyCommandTest;
+import org.komodo.relational.commands.tableconstraint.AddConstraintColumnCommandTest;
+import org.komodo.relational.commands.tableconstraint.DeleteConstraintColumnCommandTest;
 import org.komodo.relational.commands.teiid.SetTeiidPropertyCommandTest;
 import org.komodo.relational.commands.teiid.UnsetTeiidPropertyCommandTest;
 import org.komodo.relational.commands.translator.SetTranslatorPropertyCommandTest;
@@ -124,6 +122,7 @@ import org.komodo.relational.commands.virtualprocedure.UnsetVirtualProcedureProp
     // Column
     SetColumnPropertyCommandTest.class,
     UnsetColumnPropertyCommandTest.class,
+    UploadVdbCommandTest.class,
 
     // Condition
     SetConditionPropertyCommandTest.class,
@@ -223,6 +222,10 @@ import org.komodo.relational.commands.virtualprocedure.UnsetVirtualProcedureProp
     DeleteUniqueConstraintCommandTest.class,
     SetTablePropertyCommandTest.class,
     UnsetTablePropertyCommandTest.class,
+
+    // TableConstraint
+    AddConstraintColumnCommandTest.class,
+    DeleteConstraintColumnCommandTest.class,
 
     // Teiid
     SetTeiidPropertyCommandTest.class,
