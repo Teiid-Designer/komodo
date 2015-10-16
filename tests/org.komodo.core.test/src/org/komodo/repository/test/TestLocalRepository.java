@@ -40,7 +40,6 @@ import org.junit.Test;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.repository.RepositoryImpl;
-import org.komodo.repository.RepositoryTools;
 import org.komodo.repository.SynchronousCallback;
 import org.komodo.repository.SynchronousNestedCallback;
 import org.komodo.spi.KException;
@@ -383,13 +382,8 @@ public class TestLocalRepository extends AbstractLocalRepositoryTest {
         assertEquals(FORWARD_SLASH + KomodoLexicon.Komodo.NODE_TYPE, komodoRoot.getAbsolutePath());
         verifyJcrNode(komodoRoot);
 
-        KomodoObject repoRoot = komodoRoot.getParent(this.uow);
-        assertNotNull(repoRoot);
-        assertEquals(FORWARD_SLASH, repoRoot.getAbsolutePath());
-        verifyJcrNode(repoRoot);
-
-        String result = RepositoryTools.traverse(this.uow, repoRoot);
-        assertNotNull(result);
+        final KomodoObject nullParent = komodoRoot.getParent( this.uow );
+        assertThat( nullParent, is( nullValue() ) );
     }
 
     @Test

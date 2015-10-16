@@ -398,27 +398,27 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
     /**
      * The root path of the repository.
      */
-    private static String REPO_ROOT = (FORWARD_SLASH);
+    public static final String REPO_ROOT = FORWARD_SLASH;
 
     /**
      * The root path of the Komodo repository.
      */
-    public static String KOMODO_ROOT = (REPO_ROOT + Komodo.NODE_TYPE);
+    public static final String KOMODO_ROOT = (REPO_ROOT + Komodo.NODE_TYPE);
 
     /**
-     * The root path of the Komodo repository library.
+     * The root path of the Komodo repository environment area.
      */
-    public static String ENV_ROOT = ( KOMODO_ROOT + FORWARD_SLASH + Komodo.ENVIRONMENT );
+    public static final String ENV_ROOT = ( KOMODO_ROOT + FORWARD_SLASH + Komodo.ENVIRONMENT );
 
     /**
-     * The root path of the Komodo repository library.
+     * The root path of the Komodo repository library area.
      */
-    public static String LIBRARY_ROOT = (KOMODO_ROOT + FORWARD_SLASH + Komodo.LIBRARY);
+    public static final String LIBRARY_ROOT = (KOMODO_ROOT + FORWARD_SLASH + Komodo.LIBRARY);
 
     /**
-     * The root path of the Komodo repository workspace.
+     * The root path of the Komodo repository workspace area.
      */
-    public static String WORKSPACE_ROOT = (KOMODO_ROOT + FORWARD_SLASH + Komodo.WORKSPACE);
+    public static final String WORKSPACE_ROOT = (KOMODO_ROOT + FORWARD_SLASH + Komodo.WORKSPACE);
 
     protected static final KLog LOGGER = KLog.getLogger();
 

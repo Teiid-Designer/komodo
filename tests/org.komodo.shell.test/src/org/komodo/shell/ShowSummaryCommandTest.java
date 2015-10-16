@@ -15,9 +15,9 @@
  */
 package org.komodo.shell;
 
+import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.FileWriter;
-import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.commands.ShowSummaryCommand;
@@ -40,19 +40,19 @@ public class ShowSummaryCommandTest extends AbstractCommandTest {
     public void testShowSummary1() throws Exception {
         File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
         cmdFile.deleteOnExit();
-        
+
         FileWriter writer = new FileWriter(cmdFile);
         writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
         writer.write("show-summary" + NEW_LINE);  //$NON-NLS-1$
         writer.close();
-        
+
     	setup(cmdFile.getAbsolutePath(), ShowSummaryCommand.class);
 
         CommandResult result = execute();
         assertCommandResultOk(result);
 
         String writerOutput = getCommandOutput();
-        assertTrue(writerOutput.contains("There are no properties for Workspace"));
+        assertTrue(writerOutput.contains("There are no properties for ObjectImpl \"/workspace\"."));
     }
 
 }

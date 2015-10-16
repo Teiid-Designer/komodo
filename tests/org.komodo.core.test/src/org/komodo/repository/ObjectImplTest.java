@@ -5,7 +5,7 @@
  *
  * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
  */
-package org.komodo.repository.test;
+package org.komodo.repository;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
@@ -15,6 +15,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -22,6 +23,8 @@ import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.Property;
+import org.komodo.spi.repository.PropertyDescriptor;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.test.utils.AbstractLocalRepositoryTest;
 import org.modeshape.jcr.JcrNtLexicon;
@@ -36,6 +39,11 @@ public final class ObjectImplTest extends AbstractLocalRepositoryTest {
     public void init() throws Exception {
         this.kobject = _repo.add( this.uow, null, NAME, null );
         commit();
+    }
+
+    @Test
+    public void komodoRootShouldNotHaveAParent() throws Exception {
+        assertThat( _repo.komodoRoot( this.uow ).getParent( this.uow ), is( ( KomodoObject )null ) );
     }
 
     @Test
@@ -80,6 +88,21 @@ public final class ObjectImplTest extends AbstractLocalRepositoryTest {
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingChildWithNullName() throws Exception {
         this.kobject.addChild( this.uow, null, null );
+    }
+
+    @Test
+    public void shouldFailAddingDescriptorToReservedPath() throws Exception {
+        final String descriptorName = "mix:referenceable";
+
+        for ( final String reservedPath : ObjectImpl.RESERVED_PATHS ) {
+            try {
+                final KomodoObject kobject = new ObjectImpl( _repo, reservedPath, 0 );
+                kobject.addDescriptor( this.uow, descriptorName );
+                fail( "addDescriptor should not be successful for path " + reservedPath );
+            } catch ( final KException e ) {
+                // expected
+            }
+        }
     }
 
     @Test( expected = KException.class )
@@ -173,6 +196,150 @@ public final class ObjectImplTest extends AbstractLocalRepositoryTest {
     }
 
     @Test
+    public void shouldNotAllowAddingChildrenAtRoot() throws Exception {
+        try {
+            final KomodoObject kobject = _repo.komodoRoot( this.uow );
+            kobject.addChild( this.uow, "blah", null );
+            fail( "Should not allow adding children at the root" );
+        } catch ( final KException e ) {
+            // expected
+        }
+    }
+
+    @Test
+    public void shouldNotAllowRemovingObjectsWithReservedPaths() throws Exception {
+        for ( final String reservedPath : ObjectImpl.RESERVED_PATHS ) {
+            try {
+                final KomodoObject kobject = new ObjectImpl( _repo, reservedPath, 0 );
+                kobject.remove( this.uow );
+                fail( "Remove should not be successful for reserved path " + reservedPath );
+            } catch ( final KException e ) {
+                // expected
+            }
+        }
+    }
+
+    @Test
+    public void shouldNotAllowRemovingChildObjectsWithReservedPaths() throws Exception {
+        final KomodoObject komodoRoot = _repo.komodoRoot( uow );
+
+        try {
+            komodoRoot.removeChild( this.uow, _repo.komodoEnvironment( this.uow ).getName( uow ) );
+            fail( "Root should not be able to remove the environment child object" );
+        } catch ( final KException e ) {
+            // expected
+        }
+
+        try {
+            komodoRoot.removeChild( this.uow, _repo.komodoLibrary( this.uow ).getName( uow ) );
+            fail( "Root should not be able to remove the library child object" );
+        } catch ( final KException e ) {
+            // expected
+        }
+
+        try {
+            komodoRoot.removeChild( this.uow, _repo.komodoWorkspace( this.uow ).getName( uow ) );
+            fail( "Root should not be able to remove the workspace child object" );
+        } catch ( final KException e ) {
+            // expected
+        }
+    }
+
+    @Test
+    public void shouldNotAllowRemovingDescriptorFromObjectWithReservedPath() throws Exception {
+        final String descriptorName = "mix:referenceable";
+
+        for ( final String reservedPath : ObjectImpl.RESERVED_PATHS ) {
+            try {
+                final KomodoObject kobject = new ObjectImpl( _repo, reservedPath, 0 );
+                kobject.removeDescriptor( this.uow, descriptorName );
+                fail( "Should not allow removing a descriptor from reserved path " + reservedPath );
+            } catch ( final KException e ) {
+                // expected
+            }
+        }
+    }
+
+    @Test
+    public void shouldNotAllowRenamingObjectWithReservedPath() throws Exception {
+        for ( final String reservedPath : ObjectImpl.RESERVED_PATHS ) {
+            try {
+                final KomodoObject kobject = new ObjectImpl( _repo, reservedPath, 0 );
+                kobject.rename( this.uow, "blah" );
+                fail( "Should not allow renaming the object at reserved path " + reservedPath );
+            } catch ( final KException e ) {
+                // expected
+            }
+        }
+    }
+
+    @Test
+    public void shouldNotAllowSettingPrimaryTypeOfObjectsWithReservedPaths() throws Exception {
+        for ( final String reservedPath : ObjectImpl.RESERVED_PATHS ) {
+            try {
+                final KomodoObject kobject = new ObjectImpl( _repo, reservedPath, 0 );
+                kobject.setPrimaryType( this.uow, "nt:unstructured" );
+                fail( "Should not allow setting primary type of the object at reserved path " + reservedPath );
+            } catch ( final KException e ) {
+                // expected
+            }
+        }
+    }
+
+    @Test
+    public void shouldNotHavePropertyWhenReservedPath() throws Exception {
+        final String propertyName = "jcr:primaryType";
+
+        for ( final String reservedPath : ObjectImpl.RESERVED_PATHS ) {
+            final KomodoObject kobject = new ObjectImpl( _repo, reservedPath, 0 );
+
+            final Property property = kobject.getProperty( this.uow, propertyName );
+            assertThat( property, is( nullValue() ) );
+
+            final Property rawProperty = kobject.getRawProperty( this.uow, propertyName );
+            assertThat( rawProperty, is( nullValue() ) );
+
+            assertThat( kobject.hasProperty( this.uow, propertyName ), is( false ) );
+            assertThat( kobject.hasRawProperty( this.uow, propertyName ), is( false ) );
+        }
+    }
+
+    @Test
+    public void shouldNotHavePropertyDescriptorWhenReservedPath() throws Exception {
+        final String propertyName = "jcr:primaryType";
+
+        for ( final String reservedPath : ObjectImpl.RESERVED_PATHS ) {
+            final KomodoObject kobject = new ObjectImpl( _repo, reservedPath, 0 );
+            final PropertyDescriptor descriptor = kobject.getPropertyDescriptor( this.uow, propertyName );
+            assertThat( descriptor, is( nullValue() ) );
+        }
+    }
+
+    @Test
+    public void shouldNotHavePropertyDescriptorsWhenReservedPath() throws Exception {
+        for ( final String reservedPath : ObjectImpl.RESERVED_PATHS ) {
+            final KomodoObject kobject = new ObjectImpl( _repo, reservedPath, 0 );
+            final PropertyDescriptor[] descriptors = kobject.getPropertyDescriptors( this.uow );
+            assertThat( descriptors.length, is( 0 ) );
+
+            final PropertyDescriptor[] rawDescriptors = kobject.getRawPropertyDescriptors( this.uow );
+            assertThat( rawDescriptors.length, is( 0 ) );
+        }
+    }
+
+    @Test
+    public void shouldNotHavePropertyNamesWhenReservedPath() throws Exception {
+        for ( final String reservedPath : ObjectImpl.RESERVED_PATHS ) {
+            final KomodoObject kobject = new ObjectImpl( _repo, reservedPath, 0 );
+            final String[] names = kobject.getPropertyNames( this.uow );
+            assertThat( names.length, is( 0 ) );
+
+            final String[] rawNames = kobject.getRawPropertyNames( this.uow );
+            assertThat( rawNames.length, is( 0 ) );
+        }
+    }
+
+    @Test
     public void shouldRemove() throws Exception {
         final KomodoObject obj = _repo.getFromWorkspace( this.uow, NAME );
         obj.remove( this.uow );
@@ -203,7 +370,7 @@ public final class ObjectImplTest extends AbstractLocalRepositoryTest {
         assertFalse(wkspNode.hasChild(transaction2, name));
 
         testNode = _repo.getFromWorkspace(transaction2, testNodePath);
-        assertNull(testNode); 
+        assertNull(testNode);
 
         KomodoObject newTestNode = wkspNode.addChild(transaction2, name, null);
 
