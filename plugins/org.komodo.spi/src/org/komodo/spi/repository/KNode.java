@@ -35,7 +35,7 @@ public interface KNode {
      * @param transaction
      *        the transaction (cannot be <code>null</code> and must have a state of
      *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED}
-     * @return the parent {@link KomodoObject Komodo object} (never <code>null</code>)
+     * @return the parent {@link KomodoObject Komodo object} (can be <code>null</code> if at the Komodo root)
      * @throws KException
      *         if an error occurs
      */

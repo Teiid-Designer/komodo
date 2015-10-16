@@ -7,7 +7,6 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -56,16 +55,7 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
         // create data directory for shell
         _shellDataDirectory = Files.createTempDirectory( "VdbBuilderDataDir" );
         System.setProperty( SystemConstants.VDB_BUILDER_DATA_DIR, _shellDataDirectory.toString() );
-        
-        final Path commandsDir = Paths.get( _shellDataDirectory.toString() + "/commands" );
-        Files.createDirectory( commandsDir );
-        
-        System.setProperty("komodo.shell.commandsDir", commandsDir.toString());
-        
-        // Copy jar into commandsDir
-        final Path source = Paths.get("../../plugins/org.komodo.relational/target/org.komodo.relational-0.0.2-SNAPSHOT.jar");
-        Files.copy( source, Paths.get(commandsDir.toString()+"/temp.jar") );
-        
+
         kEngine.setDefaultRepository(_repo);
         kEngine.start();
 
@@ -170,7 +160,7 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
             } else {
                 rollback();
             }
-            
+
             // make a transaction available to tests after the playback is over
             if ( this.uow.getState() == State.COMMITTED ) {
                 this.uow = createTransaction( "postPlaybackExecute" );
@@ -193,7 +183,7 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
             }
         }
     }
-    
+
     /**
      * Get command output.  Contains only the output of the command being tested.
      * @return the output

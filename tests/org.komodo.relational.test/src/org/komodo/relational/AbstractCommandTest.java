@@ -3,8 +3,10 @@ package org.komodo.relational;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import java.io.File;
+import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -58,16 +60,31 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
         // create data directory for shell
         _shellDataDirectory = Files.createTempDirectory( "VdbBuilderDataDir" );
         System.setProperty( SystemConstants.VDB_BUILDER_DATA_DIR, _shellDataDirectory.toString() );
-        
+
         final Path commandsDir = Paths.get( _shellDataDirectory.toString() + "/commands" );
         Files.createDirectory( commandsDir );
-        
+
         System.setProperty("komodo.shell.commandsDir", commandsDir.toString());
-        
-        // Copy jar into commandsDir
-        final Path source = Paths.get("../../plugins/org.komodo.relational/target/org.komodo.relational-0.0.2-SNAPSHOT.jar");
-        Files.copy( source, Paths.get(commandsDir.toString()+"/temp.jar") );
-        
+
+        {// find relational jar and copy over to commands directory so it can be discovered
+            final String relativeTargetPath = "../../plugins/org.komodo.relational/target";
+            final Path targetDir = Paths.get( relativeTargetPath );
+
+            try ( final DirectoryStream< Path > stream = Files.newDirectoryStream( targetDir, "org.komodo.relational*.jar" ) ) {
+                for ( final Path path : stream ) {
+                    final String pathString = path.toString();
+
+                    // make sure it is not the sources jar
+                    if ( !pathString.endsWith( "sources.jar" ) ) {
+                        Files.copy( path, Paths.get( commandsDir.toString() + '/' + path.getFileName() ) );
+                        break;
+                    }
+                }
+            } catch ( final IOException e ) {
+                Assert.fail( "Failed to copy relational jar to commands directory: " + e.getMessage() ); //$NON-NLS-1$
+            }
+        }
+
         kEngine.setDefaultRepository(_repo);
         kEngine.start();
 
@@ -172,7 +189,7 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
             } else {
                 rollback();
             }
-            
+
             // make a transaction available to tests after the playback is over
             if ( this.uow.getState() == State.COMMITTED ) {
                 this.uow = createTransaction( "postPlaybackExecute" );
@@ -195,7 +212,7 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
             }
         }
     }
-    
+
     /**
      * Get command output.  Contains only the output of the command being tested.
      * @return the output

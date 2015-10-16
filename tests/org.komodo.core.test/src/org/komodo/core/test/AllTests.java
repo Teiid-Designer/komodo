@@ -24,8 +24,8 @@ package org.komodo.core.test;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import org.komodo.repository.ObjectImplTest;
 import org.komodo.repository.search.TestObjectSearcher;
-import org.komodo.repository.test.ObjectImplTest;
 import org.komodo.repository.test.TestLocalRepository;
 import org.komodo.repository.test.TestLocalRepositoryPersistence;
 import org.komodo.repository.validation.ValidationManagerImplTest;
