@@ -25,10 +25,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.komodo.relational.internal.AdapterFactory;
+import org.komodo.relational.model.Model;
 import org.komodo.spi.KException;
-import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.json.JsonConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoObjectVisitor;
 import org.komodo.spi.repository.KomodoType;
@@ -44,7 +47,9 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 /**
  * Converts a vdb into a JSON formatted object
  */
-public class JsonVisitor implements JsonConstants, KomodoObjectVisitor, StringConstants {
+public class JsonVisitor implements JsonConstants, KomodoObjectVisitor {
+
+    private static Pattern WHITE_SPACE_PATTERN = Pattern.compile("[\\s]+"); //$NON-NLS-1$
 
     private UnitOfWork transaction;
 
@@ -56,11 +61,34 @@ public class JsonVisitor implements JsonConstants, KomodoObjectVisitor, StringCo
 
     private List<KomodoType> filter = new ArrayList<KomodoType>();
 
-    private boolean isFiltered(KomodoType type) {
-        return filter.contains(type);
+    /**
+     * Default constructor that excludes DDL and TSQL
+     */
+    public JsonVisitor() {
+        /*
+         * Filter out all ddl and tsql
+         */
+        setFilter(
+                  KomodoType.ACCESS_PATTERN,
+                  KomodoType.COLUMN,
+                  KomodoType.FOREIGN_KEY,
+                  KomodoType.PUSHDOWN_FUNCTION,
+                  KomodoType.USER_DEFINED_FUNCTION,
+                  KomodoType.INDEX,
+                  KomodoType.PARAMETER,
+                  KomodoType.PRIMARY_KEY,
+                  KomodoType.STORED_PROCEDURE,
+                  KomodoType.VIRTUAL_PROCEDURE,
+                  KomodoType.DATA_TYPE_RESULT_SET,
+                  KomodoType.RESULT_SET_COLUMN,
+                  KomodoType.TABULAR_RESULT_SET,
+                  KomodoType.STATEMENT_OPTION,
+                  KomodoType.TABLE,
+                  KomodoType.UNIQUE_CONSTRAINT,
+                  KomodoType.VIEW,
+                  KomodoType.DDL_SCHEMA,
+                  KomodoType.TSQL_SCHEMA);
     }
-
-    private static Pattern WHITE_SPACE_PATTERN = Pattern.compile("[\\s]+"); //$NON-NLS-1$
 
     private void removeTrailingComma() {
         int pos = definition.lastIndexOf(COMMA);
@@ -95,6 +123,11 @@ public class JsonVisitor implements JsonConstants, KomodoObjectVisitor, StringCo
         definition.append(OPEN_BRACE);
     }
 
+    private String encode(String value) {
+        value = value.replaceAll(COLON, UNDERSCORE + UNDERSCORE);
+        return value;
+    }
+
     private void quoted(String value) {
         if (value.contains(SPEECH_MARK)) {
             StringBuffer newValue = new StringBuffer();
@@ -107,6 +140,8 @@ public class JsonVisitor implements JsonConstants, KomodoObjectVisitor, StringCo
             }
             value = newValue.toString();
         }
+
+        value = encode(value);
 
         definition.append(SPEECH_MARK).append(value).append(SPEECH_MARK);
     }
@@ -133,7 +168,7 @@ public class JsonVisitor implements JsonConstants, KomodoObjectVisitor, StringCo
             definition.append(TAB);
     }
 
-    private void propertyValue(Object value) {
+    private void attributeValue(Object value) {
         if (value instanceof Integer || value instanceof Long ||
              value instanceof Double || value instanceof Float)
             definition.append(value);
@@ -141,13 +176,13 @@ public class JsonVisitor implements JsonConstants, KomodoObjectVisitor, StringCo
             quoted(value.toString());
     }
 
-    private void property(String name, Object value) {
+    private void attribute(String name, Object value) {
         quoted(name);
         colon();
-        propertyValue(value);
+        attributeValue(value);
     }
 
-    private void property(String name, Object[] values) {
+    private void attribute(String name, Object[] values) {
         if (values == null || values.length == 0)
             return;
 
@@ -155,7 +190,7 @@ public class JsonVisitor implements JsonConstants, KomodoObjectVisitor, StringCo
         colon();
         openSquareBracket();
         for (int i = 0; i < values.length; ++i) {
-            propertyValue(values[i]);
+            attributeValue(values[i]);
             if ((i + 1) < values.length)
                 comma();
         }
@@ -182,11 +217,11 @@ public class JsonVisitor implements JsonConstants, KomodoObjectVisitor, StringCo
         raiseIndent();
         newline();
 
-        property(REL, SELF);
+        attribute(REL, SELF);
         comma();
         newline();
 
-        property(HREF, selfLink);
+        attribute(HREF, selfLink);
         lowerIndent();
 
         newline();
@@ -202,11 +237,11 @@ public class JsonVisitor implements JsonConstants, KomodoObjectVisitor, StringCo
             raiseIndent();
             newline();
 
-            property(REL, PARENT);
+            attribute(REL, PARENT);
             comma();
             newline();
 
-            property(HREF, parentLink);
+            attribute(HREF, parentLink);
             lowerIndent();
 
             newline();
@@ -224,54 +259,131 @@ public class JsonVisitor implements JsonConstants, KomodoObjectVisitor, StringCo
         return transaction.decode(kObject.getName(transaction));
     }
 
-    private boolean ignoreProperty(String propertyName) {
-        if (propertyName.startsWith(JcrLexicon.Namespace.PREFIX))
+    private boolean hasPrefix(String attributeName) {
+        return attributeName.matches(PREFIX_PATTERN);
+    }
+
+    private boolean ignoreAttribute(String attributeName) {
+        if (attributeName.startsWith(JcrLexicon.Namespace.PREFIX))
             return true; // ignore built-in properties like primaryType and mixinTypes
 
-        if (propertyName.startsWith(ModeShapeLexicon.Namespace.PREFIX))
+        if (attributeName.startsWith(ModeShapeLexicon.Namespace.PREFIX))
             return true; // ignore built-in properties like mode:sha1
 
-        if (propertyName.equals(VdbLexicon.Vdb.ORIGINAL_FILE))
+        if (attributeName.equals(VdbLexicon.Vdb.ORIGINAL_FILE))
             return true;
 
-        if (propertyName.equals(VdbLexicon.Model.MODEL_DEFINITION))
+        if (attributeName.equals(VdbLexicon.Model.MODEL_DEFINITION))
             return true;
 
-        if (propertyName.equals(StandardDdlLexicon.DDL_EXPRESSION))
+        if (attributeName.equals(STAR))
             return true;
 
-        if (propertyName.equals(StandardDdlLexicon.DDL_LENGTH))
+        if (attributeName.equals(StandardDdlLexicon.DDL_EXPRESSION))
             return true;
 
-        if (propertyName.equals(StandardDdlLexicon.DDL_START_CHAR_INDEX))
+        if (attributeName.equals(StandardDdlLexicon.DDL_LENGTH))
             return true;
 
-        if (propertyName.equals(StandardDdlLexicon.DDL_START_COLUMN_NUMBER))
+        if (attributeName.equals(StandardDdlLexicon.DDL_START_CHAR_INDEX))
             return true;
 
-        if (propertyName.equals(StandardDdlLexicon.DDL_START_LINE_NUMBER))
+        if (attributeName.equals(StandardDdlLexicon.DDL_START_COLUMN_NUMBER))
             return true;
 
-        if (propertyName.equals(TeiidDdlLexicon.CreateTable.QUERY_EXPRESSION))
+        if (attributeName.equals(StandardDdlLexicon.DDL_START_LINE_NUMBER))
             return true;
 
-        if (propertyName.equals(TeiidDdlLexicon.CreateProcedure.STATEMENT))
+        if (attributeName.equals(TeiidDdlLexicon.CreateTable.QUERY_EXPRESSION))
+            return true;
+
+        if (attributeName.equals(TeiidDdlLexicon.CreateProcedure.STATEMENT))
             return true;
 
         return false;
     }
 
-    private void properties(KomodoObject kObject, KomodoType kType) throws Exception {
+    private boolean publishProperty(KomodoObject kObject, String propName) throws KException {
+        Property attribute = kObject.getProperty(transaction, propName);
+        if (attribute == null)
+            return false;
+
+        if (attribute.isMultiple(transaction))
+            attribute(propName, attribute.getValues(transaction));
+        else
+            attribute(propName, attribute.getValue(transaction));
+
+        return true;
+    }
+
+    private void executionProperties(KomodoObject kObject, List<String> propNames) throws KException {
+        if (propNames.isEmpty())
+            return;
+
+        quoted(PROPERTIES);
+        colon();
+        openSquareBracket();
+        raiseIndent();
+        newline();
+
+        Iterator<String> propIter = propNames.iterator();
+        while (propIter.hasNext()) {
+            String propName = propIter.next();
+            Property attribute = kObject.getProperty(transaction, propName);
+            if (attribute == null)
+                continue;
+
+            openBrace();
+            raiseIndent();
+            newline();
+
+            publishProperty(kObject, propName);
+            lowerIndent();
+            newline();
+            closeBrace();
+
+            if (propIter.hasNext()) {
+                comma();
+                newline();
+            }
+        }
+
+        lowerIndent();
+        newline();
+        closeSquareBracket();
+        comma();
+        newline();
+    }
+
+    private void exportDdl(KomodoObject kObject) throws KException {
+        AdapterFactory adapter = new AdapterFactory(kObject.getRepository());
+        Model model = adapter.adapt(transaction, kObject, Model.class);
+        if (model == null)
+            return;
+
+        Properties properties = new Properties();
+        String ddl = model.export(transaction, properties);
+        if (ddl == null || ddl.isEmpty())
+            return;
+
+        ddl = ddl.replaceAll(NEW_LINE, "\\\\n");
+
+        attribute(DDL_ATTRIBUTE, ddl);
+        comma();
+        newline();
+    }
+
+    private void attributes(KomodoObject kObject, KomodoType kType) throws Exception {
         String id = id(kObject);
-        property(ID, id);
+        attribute(ID, id);
         comma();
         newline();
 
-        property(DATA_PATH, transaction.decode(kObject.getAbsolutePath()));
+        attribute(DATA_PATH, transaction.decode(kObject.getAbsolutePath()));
         comma();
         newline();
 
-        property(TYPE, kType.getType());
+        attribute(KTYPE, kType.getType());
         comma();
         newline();
 
@@ -287,55 +399,68 @@ public class JsonVisitor implements JsonConstants, KomodoObjectVisitor, StringCo
             }
         }
 
+        //
+        // Execution properties are stored in komodo object without a prefix
+        //
+        List<String> execProperties = new ArrayList<String>();
         Iterator<String> propIter = propNames.iterator();
         while(propIter.hasNext()) {
             String propName = propIter.next();
-            Property property = kObject.getProperty(transaction, propName);
-            if (property == null)
+            if (ignoreAttribute(propName))
                 continue;
 
-            if (ignoreProperty(propName))
+            if (! hasPrefix(propName)) {
+                execProperties.add(propName);
                 continue;
+            }
 
-            if (property.isMultiple(transaction))
-                property(propName, property.getValues(transaction));
-            else
-                property(propName, property.getValue(transaction));
+            boolean published = publishProperty(kObject, propName);
 
-            if (propIter.hasNext()) {
+            if (published && propIter.hasNext()) {
                 comma();
                 newline();
             }
         }
 
+        executionProperties(kObject, execProperties);
+
+        exportDdl(kObject);
+
         String selfLink = links(id, kType.getType());
-        comma();
-        newline();
-
-        boolean hasChildren = kObject.hasChildren(transaction);
-        property(HAS_CHILDREN, Boolean.toString(hasChildren));
-
-        if (!hasChildren)
-            return;
-
         comma();
         newline();
 
         /*
          * Prepare to navigate through the children
          */
-
         String currentParentLink = this.parentLink;
         this.parentLink = selfLink;
 
         KomodoObject[] children = kObject.getChildren(transaction);
+        boolean hasChildren = false;
+        for (int i = 0; i < children.length; ++i) {
+            KomodoObject child = children[i];
+            if (isFiltered(child.getTypeIdentifier(transaction)))
+                continue;
+
+            hasChildren = true;
+            break;
+        }
+
+        attribute(HAS_CHILDREN, Boolean.toString(hasChildren));
+        if (!hasChildren)
+            return;
+
+        comma();
+        newline();
+
         for (int i = 0; i < children.length; ++i) {
             KomodoObject child = children[i];
             if (isFiltered(child.getTypeIdentifier(transaction)))
                 continue;
 
             /*
-             * Create a nested object property, eg. "PARTS" : { "id" : PARTS, "type", "Model" }
+             * Create a nested object attribute, eg. "PARTS" : { "id" : PARTS, "type", "Model" }
              */
             quoted(id(child));
             colon();
@@ -357,7 +482,11 @@ public class JsonVisitor implements JsonConstants, KomodoObjectVisitor, StringCo
 
     private void append(KomodoObject kObject) throws Exception {
         KomodoType komodoType = kObject.getTypeIdentifier(transaction);
-        properties(kObject, komodoType);
+        attributes(kObject, komodoType);
+    }
+
+    private boolean isFiltered(KomodoType type) {
+        return filter.contains(type);
     }
 
     /**

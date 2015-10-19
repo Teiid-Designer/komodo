@@ -353,5 +353,10 @@ public interface StringConstants {
    * The default local repository workspace name (cannot be empty and must match the workspace name in the config file).
    */
   String DEFAULT_LOCAL_WORKSPACE_NAME = "komodoLocalWorkspace"; //$NON-NLS-1$
+
+  /**
+   * RegExp pattern for determining a property's prefix and name
+   */
+  String PREFIX_PATTERN = "([a-zA-Z]+):(.*)"; //$NON-NLS-1$
 }
 

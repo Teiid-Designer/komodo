@@ -27,11 +27,15 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import javax.xml.parsers.SAXParserFactory;
-import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.json.JsonConstants;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.utils.KeyInValueHashMap;
+import org.komodo.spi.utils.KeyInValueHashMap.KeyFromValueAdapter;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -65,37 +69,16 @@ import com.sun.xml.xsom.visitor.XSVisitor;
 /**
  *
  */
-public class TeiidXsdReader implements XSVisitor, StringConstants {
+@SuppressWarnings( "nls" )
+public class TeiidXsdReader implements XSVisitor, JsonConstants {
 
     private static final String SCHEMA = "schema-"; //$NON-NLS-1$
 
     private static final String TEIID_VDB_XSD = "/org/komodo/teiid/client/schema/teiid-vdb.xsd"; //$NON-NLS-1$
 
-    private static final String ID = "id"; //$NON-NLS-1$
-
-    private static final String TYPE = "type"; //$NON-NLS-1$
-
-    private static final String KTYPE = "k-type"; //$NON-NLS-1$
-
-    private static final String DEFAULT_VALUE = "default-value"; //$NON-NLS-1$
-
-    private static final String DESCRIPTION = "description"; //$NON-NLS-1$
-
-    private static final String PROPERTIES = "properties"; //$NON-NLS-1$
-
     private static final String SUGGESTED = "suggested"; //$NON-NLS-1$
 
-    private static final String PROPERTY = "property"; //$NON-NLS-1$
-
-    private static final String REQUIRED = "required"; //$NON-NLS-1$
-
-    private static final String REPEATABLE = "repeatable"; //$NON-NLS-1$
-
-    private static final String LIMIT = "limit"; //$NON-NLS-1$
-
-    private static final String VALUES = "values"; //$NON-NLS-1$
-
-    private static final String CHILDREN = "children"; //$NON-NLS-1$
+    private static final String XSD_PROPERTY = "property"; //$NON-NLS-1$
 
     private ObjectMapper mapper;
 
@@ -105,9 +88,153 @@ public class TeiidXsdReader implements XSVisitor, StringConstants {
 
     private ObjectNode schemaCtx;
 
-    private String capitalize(final String line) {
-        return Character.toUpperCase(line.charAt(0)) + line.substring(1);
+    private static enum Namespaces {
+        VDB,
+        MMCORE;
+
+        @Override
+        public String toString() {
+            return name().toLowerCase() + PREFIX_SEPARATOR;
+        }
+    }
+
+    private static class AliasMapper {
+
+        private String element;
+
+        private Map<String, String> xsdKengMap = new HashMap<String, String>();
+
+        public AliasMapper(String element) {
+            this.element = element;
+        }
+
+        public String getElement() {
+            return this.element;
+        }
+
+        public String getKName(String xsdName) {
+            String kName = xsdKengMap.get(xsdName);
+            return kName == null ? xsdName : kName;
+        }
+
+        public void add(String xsdName, Namespaces prefix) {
+            xsdKengMap.put(xsdName, prefix.toString() + xsdName);
+        }
+
+        public void add(String xsdName, Namespaces prefix, String kName) {
+            xsdKengMap.put(xsdName, prefix.toString() + kName);
+        }
+    }
+
+    private static class AliasMapperAdapter implements KeyFromValueAdapter<String, AliasMapper> {
+        @Override
+        public String getKey(AliasMapper value) {
+            return value.getElement();
+        }
+    }
+
+    private static KeyInValueHashMap<String, AliasMapper> ALIAS_CACHE = new KeyInValueHashMap<>(new AliasMapperAdapter());
+
+    static {
+        AliasMapper vdbMapper = new AliasMapper("vdb");
+        vdbMapper.add("name", Namespaces.VDB);
+        vdbMapper.add("description", Namespaces.VDB);
+        vdbMapper.add("version", Namespaces.VDB);
+        vdbMapper.add("connectionType", Namespaces.VDB);
+        ALIAS_CACHE.add(vdbMapper);
+
+        AliasMapper modelMapper = new AliasMapper("model");
+        modelMapper.add("description", Namespaces.VDB);
+        modelMapper.add("visible", Namespaces.VDB);
+        modelMapper.add("path", Namespaces.VDB, "pathInVdb");
+        modelMapper.add("type", Namespaces.MMCORE, "modelType");
+        ALIAS_CACHE.add(modelMapper);
+
+        AliasMapper sourceMapper = new AliasMapper("source");
+        sourceMapper.add("translatorName", Namespaces.VDB, "sourceTranslator");
+        sourceMapper.add("connectionJndiName", Namespaces.VDB, "sourceJndiName");
+        ALIAS_CACHE.add(sourceMapper);
+
+        AliasMapper translatorMapper = new AliasMapper("translator");
+        translatorMapper.add("description", Namespaces.VDB);
+        translatorMapper.add("type", Namespaces.VDB);
+        ALIAS_CACHE.add(translatorMapper);
+
+        AliasMapper dataRoleMapper = new AliasMapper("dataRole");
+        dataRoleMapper.add("description", Namespaces.VDB);
+        dataRoleMapper.add("anyAuthenticated", Namespaces.VDB);
+        dataRoleMapper.add("allowCreateTemporaryTables", Namespaces.VDB);
+        dataRoleMapper.add("grantAll", Namespaces.VDB);
+        dataRoleMapper.add("mappedRoleName", Namespaces.VDB, "mappedRolesNames");
+        ALIAS_CACHE.add(dataRoleMapper);
+
+        AliasMapper permissionMapper = new AliasMapper("permission");
+        permissionMapper.add("resourceName", Namespaces.VDB);
+        permissionMapper.add("allowCreate", Namespaces.VDB);
+        permissionMapper.add("allowRead", Namespaces.VDB);
+        permissionMapper.add("allowUpdate", Namespaces.VDB);
+        permissionMapper.add("allowDelete", Namespaces.VDB);
+        permissionMapper.add("allowExecute", Namespaces.VDB);
+        permissionMapper.add("allowAlter", Namespaces.VDB);
+        permissionMapper.add("allowLanguage", Namespaces.VDB);
+        permissionMapper.add("allowExecute", Namespaces.VDB);
+        ALIAS_CACHE.add(permissionMapper);
+
+        AliasMapper conditionMapper = new AliasMapper("condition");
+        conditionMapper.add("constraint", Namespaces.VDB);
+        ALIAS_CACHE.add(conditionMapper);
+
+        AliasMapper maskMapper = new AliasMapper("mask");
+        maskMapper.add("order", Namespaces.VDB);
+        ALIAS_CACHE.add(maskMapper);
+
+        AliasMapper entryMapper = new AliasMapper("entry");
+        entryMapper.add("description", Namespaces.VDB);
+        entryMapper.add("path", Namespaces.VDB);
+        ALIAS_CACHE.add(entryMapper);
+
+        AliasMapper importVdbMapper = new AliasMapper("importVdb");
+        importVdbMapper.add("version", Namespaces.VDB);
+        importVdbMapper.add("importDataPolicies", Namespaces.VDB);
+        ALIAS_CACHE.add(importVdbMapper);
+    }
+
+    private String toLowerCamelCase(final String value) {
+        StringBuffer sb = new StringBuffer();
+        String[] values = value.split(HYPHEN);
+        for (int i = 0; i < values.length; ++i) {
+            String s = values[i];
+            if (i == 0) {
+                sb.append(s.toLowerCase());
+                continue;
+            }
+
+            sb.append(Character.toUpperCase(s.charAt(0)));
+            if (s.length() > 1) {
+                sb.append(s.substring(1, s.length()).toLowerCase());
+            }
+        }
+
+        return sb.toString();
      }
+
+    private String convertPropertyName(String xsdName) {
+        if (xsdName == null)
+            return xsdName;
+
+        xsdName = toLowerCamelCase(xsdName);
+        JsonNode parentIdNode = parentCtx.get(ID);
+        if (parentIdNode == null)
+            return xsdName;
+
+        String id = parentIdNode.asText();
+
+        AliasMapper aliasMapper = ALIAS_CACHE.get(id);
+        if (aliasMapper == null)
+            return xsdName;
+
+        return aliasMapper.getKName(xsdName);
+    }
 
     @Override
     public void wildcard(XSWildcard wc) {
@@ -133,7 +260,9 @@ public class TeiidXsdReader implements XSVisitor, StringConstants {
         if(annoObj == null)
             return;
 
-        parentCtx.put(DESCRIPTION, annoObj.toString());
+        String description = annoObj.toString();
+        description = description.replaceAll("[\\s]+", SPACE); //$NON-NLS-1$
+        parentCtx.put(DESCRIPTION, description);
     }
 
     @Override
@@ -175,8 +304,8 @@ public class TeiidXsdReader implements XSVisitor, StringConstants {
 
         ObjectNode propertiesCtx = parentCtx.with(PROPERTIES);
 
-        String attributeName = checkSuggestedPrefix(decl.getName());
-
+        String attributeName = convertPropertyName(decl.getName());
+        attributeName = checkSuggestedPrefix(attributeName);
         ObjectNode attrNode = propertiesCtx.with(attributeName);
 
         if (decl.getDefaultValue() != null)
@@ -197,7 +326,8 @@ public class TeiidXsdReader implements XSVisitor, StringConstants {
         attributeDecl.visit(this);
 
         ObjectNode propertiesCtx = parentCtx.with(PROPERTIES);
-        String name = checkSuggestedPrefix(use.getDecl().getName());
+        String name = convertPropertyName(attributeDecl.getName());
+        name = checkSuggestedPrefix(name);
         ObjectNode attrNode = propertiesCtx.with(name);
 
         attrNode.put(REQUIRED, Boolean.toString(use.isRequired()));
@@ -286,12 +416,14 @@ public class TeiidXsdReader implements XSVisitor, StringConstants {
         XSType type = decl.getType();
         String typeName = type.getName();
         if (type.isLocal() || typeName == null)
-            typeName = capitalize(decl.getName());
+            typeName = decl.getName();
+
+        typeName = toLowerCamelCase(typeName);
 
         ObjectNode elementNode = null;
-        if (type.getBaseType().getName().equals(PROPERTY)) {
+        if (type.getBaseType().getName().equals(XSD_PROPERTY)) {
             ObjectNode propertiesCtx = parentCtx.with(PROPERTIES);
-            elementNode = propertiesCtx.with(PROPERTY);
+            elementNode = propertiesCtx.with(XSD_PROPERTY);
             parentCtx = elementNode;
 
         } else if (type.isComplexType()) {
@@ -299,13 +431,15 @@ public class TeiidXsdReader implements XSVisitor, StringConstants {
             schemaCtx.set(typeName, elementNode);
             parentCtx = elementNode;
 
-            elementNode.put(ID, decl.getName());
+            elementNode.put(ID, toLowerCamelCase(decl.getName()));
 
-            KomodoType kType = KomodoType.getKomodoType(typeName.toLowerCase());
-            elementNode.put(KTYPE, kType.name());
+            KomodoType kType = KomodoType.getKomodoType(typeName);
+            elementNode.put(KTYPE, kType.getType());
 
-            ArrayNode children = parent.withArray(CHILDREN);
-            children.add(typeName);
+            if (parent != schemaCtx) {
+                ArrayNode children = parent.withArray(CHILDREN);
+                children.add(typeName);
+            }
 
         } else if (type.isSimpleType()) {
             //
@@ -313,7 +447,8 @@ public class TeiidXsdReader implements XSVisitor, StringConstants {
             // to the properties array
             //
             ObjectNode propertiesCtx = parentCtx.with(PROPERTIES);
-            elementNode = propertiesCtx.with(decl.getName());
+            String name = convertPropertyName(decl.getName());
+            elementNode = propertiesCtx.with(name);
             parentCtx = elementNode;
         }
 

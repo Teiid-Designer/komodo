@@ -151,4 +151,34 @@ public class TestJsonVisitor extends AbstractLocalRepositoryTest {
         assertNotNull(definition);
         validateDefinition(definition);
     }
+
+    @Test(timeout=3000000)
+    public void testJsonVisitor4() throws Exception {
+        VdbImporter importer = new VdbImporter(_repo);
+        createInitialTransaction();
+        KomodoObject workspace = _repo.komodoWorkspace(uow);
+
+        ImportOptions importOptions = new ImportOptions();
+        importOptions.setOption(OptionKeys.NAME, TestUtilities.ALL_ELEMENTS_EXAMPLE_NAME);
+        ImportMessages importMessages = new ImportMessages();
+        importer.importVdb(uow, TestUtilities.allElementsExample(), workspace, importOptions, importMessages);
+        commit();
+
+        traverse(uow, workspace.getAbsolutePath());
+
+        KomodoObject vdbNode = workspace.getChild(uow, TestUtilities.ALL_ELEMENTS_EXAMPLE_NAME, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        assertNotNull("Failed - No Vdb Created ", vdbNode);
+
+        traverse(uow, vdbNode.getAbsolutePath());
+
+        //
+        // Create visitor and visit the objects
+        //
+        JsonVisitor visitor = new JsonVisitor();
+        visitor.setFilter(KomodoType.UNKNOWN, KomodoType.TEIID);
+        String definition = visitor.visit(uow, vdbNode);
+        System.out.println(definition);
+        assertNotNull(definition);
+        validateDefinition(definition);
+    }
 }
