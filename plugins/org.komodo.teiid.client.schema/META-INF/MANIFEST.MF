@@ -13,4 +13,5 @@ Bundle-ClassPath: .,
  lib/jackson-module-jsonSchema.jar,
  lib/relaxngDatatype.jar,
  lib/xsom.jar
-Require-Bundle: org.komodo.spi
+Require-Bundle: org.komodo.spi,
+ org.komodo.utils

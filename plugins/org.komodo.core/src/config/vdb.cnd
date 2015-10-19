@@ -107,6 +107,7 @@
 
 // permission resource path is node path
 [vdb:permission] > nt:unstructured
+ - vdb:resourceName (string) mandatory
  - vdb:allowCreate (boolean) = 'false' autocreated
  - vdb:allowRead (boolean) = 'false' autocreated
  - vdb:allowUpdate (boolean) = 'false' autocreated
