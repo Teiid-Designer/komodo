@@ -36,10 +36,10 @@
                             <xs:element name="property" type="modelProperty" minOccurs="0" maxOccurs="unbounded" />
                             <xs:element name="source" minOccurs="0" maxOccurs="unbounded">
                                 <xs:annotation>
-                                    <xs:documentation>A source defines access to physical data source with its
-                                        connection-jndi-name. translator-name defines a translator. Translator is a
-                                        layer between Teiid engine and data source that knows how to convert and execute
-                                        commands native to source. Teiid offers various pre-built translators.
+                                    <xs:documentation>A source defines access to a physical data source with its
+                                        connection-jndi-name, while translator-name defines the translator. The Translator is a
+                                        layer between Teiid engine and the data source that knows how to convert and execute
+                                        commands native to the source. Teiid offers various pre-built translators.
                                     </xs:documentation>
                                 </xs:annotation>
                                 <xs:complexType>

@@ -55,7 +55,7 @@ public enum KomodoType {
     /**
      * Vdb Import
      */
-    VDB_IMPORT("import-vdb"), //$NON-NLS-1$
+    VDB_IMPORT("import-vdb", "importVdb"), //$NON-NLS-1$ //$NON-NLS-2$
 
     /**
      * Vdb Model Source
@@ -75,7 +75,7 @@ public enum KomodoType {
     /**
      * Vdb Data Role
      */
-    VDB_DATA_ROLE("data-role"), //$NON-NLS-1$
+    VDB_DATA_ROLE("data-role", "dataRole"), //$NON-NLS-1$ //$NON-NLS-2$
 
     /**
      * Vdb Make

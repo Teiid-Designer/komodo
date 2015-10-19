@@ -27,27 +27,27 @@ import static org.junit.Assert.fail;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.json.JsonConstants;
 
 @SuppressWarnings({"nls", "javadoc"})
-public class JsonVerifyParser implements JsonConstants, StringConstants {
+public class JsonVerifyParser implements JsonConstants {
 
-    private static final Pattern NAME_PROP_PATTERN = Pattern.compile("\\\"[a-zA-Z0-9_\\-:]+\\\"");
+    private static final Pattern NAME_PROP_PATTERN = Pattern.compile("\\\"[\\S_\\-:]+\\\"");
 
-    private static final Pattern ID_PATTERN = Pattern.compile("\\\"[a-zA-Z0-9_:\\-\\.]+\\\"\\,");
+    private static final Pattern ID_PATTERN = Pattern.compile("\\\"[\\S_:\\-\\.]+\\\"\\,");
 
     // More generous that ID pattern as it allows unquoted integers, forward slash and escaped speech marks
-    private static final Pattern PROPERTY_PATTERN = Pattern.compile("(\\\")?[a-zA-Z0-9_:/\\[\\]\\-\\.\\*\\\"\\\\]+(\\\")?(\\,)?");
+    private static final Pattern PROPERTY_PATTERN = Pattern.compile("(\\\")?[\\S_:/\\[\\]\\-\\.\\*\\\"\\\\ ']+(\\\")?(\\,)?");
 
     private static final Pattern PATH_PATTERN = Pattern.compile("\\\"[a-zA-Z0-9_:/\\[\\]\\-\\.]+\\\"(\\,)?");
 
     private static final Pattern TYPE_PATTERN = Pattern.compile("\\\"[a-zA-Z0-9_]+\\\"(\\,)?");
 
-    // A bare word has no speech marks surrounding it so would be in the middle of a multi-worded property value
-    private static final Pattern BARE_WORD_PATTERN = Pattern.compile("[a-zA-Z0-9_\\.'\\(\\)=;]+");
+    // Pattern where a word ends with \". With the speech mark escaped the word is not an ending phrase of a quoted clause
+    private static final Pattern NON_END_SM_WORD_PATTERN = Pattern.compile("[\\S]+\\\\\"(\\,)?");
 
-    // An end word has a single speech mark appended to it, marking the last word in a multi-worded property value
-    private static final Pattern END_WORD_PATTERN = Pattern.compile("[a-zA-Z0-9_\\.'\\(\\)=;]+\\\"(\\,)?");
+    // Pattern where a word ends with ". Describes an ending phrase of a quoted clause
+    private static final Pattern END_SM_WORD_PATTERN = Pattern.compile("([\\S]+)?\\\"(\\,)?");
 
     private StringTokenizer tokens;
 
@@ -55,12 +55,54 @@ public class JsonVerifyParser implements JsonConstants, StringConstants {
 
     private StringBuffer pastTokens = new StringBuffer();
 
+    public static void main(String[] args) {
+        JsonVerifyParser p = new JsonVerifyParser();
+        String text = "\"CREATE VIRTUAL PROCEDURE getTweets(IN query varchar) RETURNS TABLE (created_on varchar(25), from_user varchar(25), to_user varchar(25), profile_image_url varchar(25), source varchar(25), text varchar(140))" + NEW_LINE +
+        "AS" + NEW_LINE +
+        "SELECT tweet.* FROM (EXEC twitter.invokeHTTP(action => 'GET', endpoint => QUERYSTRING('', query AS q))) AS w, XMLTABLE('results' PASSING JSONTOXML('myxml', w.result) COLUMNS created_on string PATH 'created_at',  from_user string PATH 'from_user',  to_user string PATH 'to_user',  profile_image_url string PATH 'profile_image_url',  source string PATH 'source',  text string PATH 'text') AS tweet;" + NEW_LINE +
+        NEW_LINE +
+        "CREATE VIEW Tweet" + NEW_LINE +
+        "AS" + NEW_LINE +
+        "SELECT * FROM twitterview.getTweets;" + NEW_LINE +
+        " \",";
+        StringTokenizer textTokens = new StringTokenizer(text);
+        p.tokens = textTokens;
+        p.nextToken();
+        p.value(PROPERTY_PATTERN);
+    }
+
     private void nextToken() {
         pastTokens.append(currToken);
         currToken = tokens.hasMoreTokens() ? tokens.nextToken() : EMPTY_STRING;
     }
 
+    private void concatQuotedValue() {
+        if (! currToken.startsWith(SPEECH_MARK))
+            return;
+
+        StringBuffer valueTokens = new StringBuffer();
+        do {
+            if (valueTokens.length() > 0)
+                valueTokens.append(SPACE);
+
+            valueTokens.append(currToken);
+
+            Matcher matcher = END_SM_WORD_PATTERN.matcher(currToken);
+            if (matcher.matches()) {
+                matcher = NON_END_SM_WORD_PATTERN.matcher(currToken);
+                if (! matcher.matches())
+                    break;
+            }
+
+            nextToken();
+        } while (tokens.hasMoreTokens());
+
+        currToken = valueTokens.toString();
+    }
+
     private void value(Pattern pattern) {
+        concatQuotedValue();
+
         Matcher matcher = pattern.matcher(currToken);
         assertTrue("Failed to match " + currToken, matcher.matches());
         nextToken();
@@ -68,23 +110,23 @@ public class JsonVerifyParser implements JsonConstants, StringConstants {
         //
         // Deals with possibility that property value is multi-worded
         //
-        do {
-            matcher = BARE_WORD_PATTERN.matcher(currToken);
-            if (matcher.matches()) {
-                nextToken();
-                continue;
-            }
-
-            matcher = END_WORD_PATTERN.matcher(currToken);
-            if (matcher.matches()) {
-                nextToken();
-                break;
-            }
-
-            // Neither a bare word or end word so get out of this loop
-            break;
-
-        } while (tokens.hasMoreTokens());
+//        do {
+//            matcher = BARE_WORD_PATTERN.matcher(currToken);
+//            if (matcher.matches()) {
+//                nextToken();
+//                continue;
+//            }
+//
+//            matcher = END_WORD_PATTERN.matcher(currToken);
+//            if (matcher.matches()) {
+//                nextToken();
+//                break;
+//            }
+//
+//            // Neither a bare word or end word so get out of this loop
+//            break;
+//
+//        } while (tokens.hasMoreTokens());
     }
 
     private void parentValue() {
@@ -107,6 +149,19 @@ public class JsonVerifyParser implements JsonConstants, StringConstants {
         }
 
         fail(HAS_CHILDREN + " property can only be \"true\" or \"false\" but was " + currToken);
+    }
+
+    private void propertiesValue() {
+        assertEquals(OPEN_SQUARE_BRACKET, currToken);
+        nextToken();
+
+        while (tokens.hasMoreTokens()) {
+            if ((CLOSE_SQUARE_BRACKET + COMMA).equals(currToken)) {
+                nextToken();
+                return;
+            } else
+                jsonObject();
+        }
     }
 
     private void linksValue() {
@@ -151,6 +206,8 @@ public class JsonVerifyParser implements JsonConstants, StringConstants {
             value(ID_PATTERN);
         else if (HREF.equals(name))
             value(PATH_PATTERN);
+        else if (PROPERTIES.equals(name))
+            propertiesValue();
         else if (currToken.equals(OPEN_BRACE)) {
             // child object
             jsonObject();
