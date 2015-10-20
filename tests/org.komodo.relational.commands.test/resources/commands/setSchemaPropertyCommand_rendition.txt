@@ -1,8 +1,0 @@
-#go to workspace, then create a schema 
-workspace
-create-schema testSchema
-# 
-# Set a property
-cd testSchema
-set-property rendition "CREATE FOREIGN TABLE G1 (e1 integer) OPTIONS (ANNOTATION 'test', CARDINALITY '12');"
-    

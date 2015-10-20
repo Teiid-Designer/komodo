@@ -1,7 +1,0 @@
-#go to workspace, then create a vdb 
-workspace
-create-vdb testVdb vdbPath
-#
-# Set a property
-cd testVdb
-set-property version 3

@@ -228,6 +228,28 @@ public class VdbCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
+    
+    @SuppressWarnings( "javadoc" )
+    public enum UploadModelCommand {
+
+        INVALID_OVERWRITE_ARG,
+        MISSING_INPUT_MODEL_FILE_PATH,
+        MISSING_MODEL_NAME,
+        MODEL_INPUT_FILE_IS_EMPTY,
+        MODEL_OVERWRITE_DISABLED,
+        MODEL_UPLOADED;
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see java.lang.Enum#toString()
+         */
+        @Override
+        public String toString() {
+            return getEnumName( this ) + DOT + name();
+        }
+
+    }
 
     private static String getEnumName(Enum<?> enumValue) {
         String className = enumValue.getClass().getName();

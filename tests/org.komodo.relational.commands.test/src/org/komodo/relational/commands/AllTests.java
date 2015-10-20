@@ -87,6 +87,7 @@ import org.komodo.relational.commands.vdb.DeleteModelCommandTest;
 import org.komodo.relational.commands.vdb.DeleteTranslatorCommandTest;
 import org.komodo.relational.commands.vdb.SetVdbPropertyCommandTest;
 import org.komodo.relational.commands.vdb.UnsetVdbPropertyCommandTest;
+import org.komodo.relational.commands.vdb.UploadModelCommandTest;
 import org.komodo.relational.commands.vdbimport.SetVdbImportPropertyCommandTest;
 import org.komodo.relational.commands.vdbimport.UnsetVdbImportPropertyCommandTest;
 import org.komodo.relational.commands.view.SetViewPropertyCommandTest;
@@ -263,6 +264,7 @@ import org.komodo.relational.commands.virtualprocedure.UnsetVirtualProcedureProp
     org.komodo.relational.commands.vdb.ExportCommandTest.class,
     SetVdbPropertyCommandTest.class,
     UnsetVdbPropertyCommandTest.class,
+    UploadModelCommandTest.class,
 
     // VdbImport
     SetVdbImportPropertyCommandTest.class,
