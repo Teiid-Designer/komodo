@@ -9,6 +9,7 @@ package org.komodo.relational.commands.vdbimport;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.komodo.relational.commands.vdbimport.RenameChildCommand;
 import org.komodo.relational.vdb.VdbImport;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandProvider;
@@ -40,6 +41,7 @@ public class VdbImportCommandProvider implements ShellCommandProvider {
 
         result.put( SetVdbImportPropertyCommand.NAME, SetVdbImportPropertyCommand.class );
         result.put( UnsetVdbImportPropertyCommand.NAME, UnsetVdbImportPropertyCommand.class );
+        result.put( RenameChildCommand.NAME, RenameChildCommand.class );
 
         return result;
     }

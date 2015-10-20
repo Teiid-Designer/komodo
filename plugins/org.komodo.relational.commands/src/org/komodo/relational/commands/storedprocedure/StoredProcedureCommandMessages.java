@@ -27,6 +27,8 @@ public class StoredProcedureCommandMessages implements StringConstants {
     public enum General {
         MISSING_PARAMETER_NAME,
         PARAMETER_NAME,
+        MISSING_RESULT_SET_TYPE,
+        INVALID_RESULT_SET_TYPE,
         INVALID_SCHEMA_ELEMENT_TYPE_PROPERTY_VALUE;
 
         @Override
@@ -55,6 +57,26 @@ public class StoredProcedureCommandMessages implements StringConstants {
         }
     }
 
+    @SuppressWarnings( "javadoc" )
+    public enum SetResultSetCommand {
+        RESULT_SET_TYPE_SET;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum RemoveResultSetCommand {
+        RESULT_SET_REMOVED;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+    
     private static String getEnumName(Enum<?> enumValue) {
         String className = enumValue.getClass().getName();
         String[] components = className.split("\\$"); //$NON-NLS-1$

@@ -63,10 +63,6 @@ public class PlayCommand  extends BuiltInShellCommand {
                     return new CommandResultImpl( Messages.getString( Messages.PlayCommand.fileExecuted, fileNameArg ) );
                 }
                 return result;
-
-//                return new CommandResultImpl( false,
-//                                              Messages.getString( Messages.PlayCommand.Failure, fileNameArg ),
-//                                              result.getMessage() );
             } catch (Exception e) {
                 return new CommandResultImpl( false, Messages.getString( Messages.PlayCommand.Failure, fileNameArg ), e );
             }

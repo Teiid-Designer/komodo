@@ -14,7 +14,8 @@ import org.komodo.relational.Messages;
 import org.komodo.relational.commands.RelationalShellCommand;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.vdb.Vdb;
-import org.komodo.shell.CompletionConstants;
+import org.komodo.shell.CommandResultImpl;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
@@ -31,23 +32,20 @@ abstract class ServerShellCommand extends RelationalShellCommand {
     }
 
     /**
-     * Validates the existence of a connected server, and prints output
-     * depending on the problem
-     * @return 'true' if there is a default connected server
+     * Validates the existence of a connected server.
+     * @return the result
      * @throws KException the exception
      */
-    protected boolean validateHasConnectedWorkspaceServer() throws KException {
+    protected CommandResult validateHasConnectedWorkspaceServer() throws KException {
         if(!hasWorkspaceServer()) {
-            print(CompletionConstants.MESSAGE_INDENT, getMessage(NoTeiidDefined));
-            return false;
+            return new CommandResultImpl(false, getMessage(NoTeiidDefined), null );
         }
 
         Teiid teiid = getWorkspaceServer();
         if(!isConnected(teiid)) {
-            print( MESSAGE_INDENT, getMessage( ServerNotConnected ) );
-            return false;
+            return new CommandResultImpl(false, getMessage(ServerNotConnected), null );
         }
-        return true;
+        return CommandResult.SUCCESS;
     }
 
     protected boolean hasWorkspaceServer() {

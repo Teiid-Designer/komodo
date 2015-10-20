@@ -27,6 +27,8 @@ public class PushdownFunctionCommandMessages implements StringConstants {
     public enum General {
         MISSING_PARAMETER_NAME,
         PARAMETER_NAME,
+        MISSING_RESULT_SET_TYPE,
+        INVALID_RESULT_SET_TYPE,
         INVALID_DETERMINISTIC_PROPERTY_VALUE,
         INVALID_SCHEMA_ELEMENT_TYPE_PROPERTY_VALUE;
 
@@ -49,6 +51,26 @@ public class PushdownFunctionCommandMessages implements StringConstants {
     @SuppressWarnings( "javadoc" )
     public enum DeleteParameterCommand {
         PARAMETER_DELETED;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+    
+    @SuppressWarnings( "javadoc" )
+    public enum SetResultSetCommand {
+        RESULT_SET_TYPE_SET;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum RemoveResultSetCommand {
+        RESULT_SET_REMOVED;
 
         @Override
         public String toString() {

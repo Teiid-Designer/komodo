@@ -9,6 +9,7 @@ package org.komodo.relational.commands.mask;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.komodo.relational.commands.mask.RenameChildCommand;
 import org.komodo.relational.vdb.Mask;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandProvider;
@@ -40,6 +41,7 @@ public class MaskCommandProvider implements ShellCommandProvider {
 
         result.put( SetMaskPropertyCommand.NAME, SetMaskPropertyCommand.class );
         result.put( UnsetMaskPropertyCommand.NAME, UnsetMaskPropertyCommand.class );
+        result.put( RenameChildCommand.NAME, RenameChildCommand.class );
 
         return result;
     }

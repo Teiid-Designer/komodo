@@ -49,6 +49,7 @@ public class DeleteConstraintColumnCommandTest extends AbstractCommandTest {
         cmdFile.deleteOnExit();
         
         FileWriter writer = new FileWriter(cmdFile);
+        writer.write("set-auto-commit false" + NEW_LINE);  //$NON-NLS-1$
         writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
         writer.write("create-vdb myVdb vdbPath" + NEW_LINE);  //$NON-NLS-1$
         writer.write("cd myVdb" + NEW_LINE);  //$NON-NLS-1$
@@ -69,7 +70,9 @@ public class DeleteConstraintColumnCommandTest extends AbstractCommandTest {
         writer.write("cd myForeignKey" + NEW_LINE);  //$NON-NLS-1$
         writer.write("add-column /workspace/myVdb/myModel/myTable/myCol1" + NEW_LINE);  //$NON-NLS-1$
         writer.write("add-column /workspace/myVdb/myModel/myTable/myCol2" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("commit" + NEW_LINE);  //$NON-NLS-1$
         writer.write("delete-column /workspace/myVdb/myModel/myTable/myCol1" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("commit" + NEW_LINE);  //$NON-NLS-1$
         writer.close();
 
         setup(cmdFile.getAbsolutePath(), AddConstraintColumnCommand.class);

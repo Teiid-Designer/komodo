@@ -19,16 +19,16 @@ import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.shell.commands.UnsetPropertyCommand;
+import org.komodo.shell.commands.SetPropertyCommand;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.StringUtils;
 
 /**
- * A shell command to unset DataTypeResultSet properties
+ * A shell command to set DataTypeResultSet properties
  */
 public final class SetDataTypeResultSetPropertyCommand extends DataTypeResultSetShellCommand {
 
-    static final String NAME = UnsetPropertyCommand.NAME;
+    static final String NAME = SetPropertyCommand.NAME;
 
     /**
      * @param status

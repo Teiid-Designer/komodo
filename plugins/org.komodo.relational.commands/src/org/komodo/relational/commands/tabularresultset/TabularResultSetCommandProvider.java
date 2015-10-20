@@ -38,10 +38,8 @@ public class TabularResultSetCommandProvider implements ShellCommandProvider {
     public Map< String, Class< ? extends ShellCommand >> provideCommands() {
         final Map< String, Class< ? extends ShellCommand >> result = new HashMap<>();
 
-        // TODO add command to add column
-        // TODO add command to show columns
-        // TODO add command to remove column
-        // TODO add command to override rename
+        result.put( AddColumnCommand.NAME, AddColumnCommand.class );
+        result.put( DeleteColumnCommand.NAME, DeleteColumnCommand.class );
 
         return result;
     }

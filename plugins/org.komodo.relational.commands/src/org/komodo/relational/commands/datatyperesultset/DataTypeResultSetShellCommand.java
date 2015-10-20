@@ -23,6 +23,12 @@ abstract class DataTypeResultSetShellCommand extends RelationalShellCommand {
     protected static final String LENGTH = "length"; //$NON-NLS-1$
     protected static final String TYPE = "type"; //$NON-NLS-1$
 
+//    protected static final String DATATYPE_LENGTH = "datatypeLength"; //$NON-NLS-1$     
+//    protected static final String DATATYPE_NAME = "datatypeName"; //$NON-NLS-1$             
+//    protected static final String DATATYPE_PRECISION = "datatypePrecision"; //$NON-NLS-1$            
+//    protected static final String DATATYPE_SCALE = "datatypeScale"; //$NON-NLS-1$             
+//    protected static final String NULLABLE = "nullable";  //$NON-NLS-1$                      
+
     protected static final List< String > ALL_PROPS = Arrays.asList( new String[] { ARRAY, LENGTH, TYPE } );
 
     protected DataTypeResultSetShellCommand( final String name,

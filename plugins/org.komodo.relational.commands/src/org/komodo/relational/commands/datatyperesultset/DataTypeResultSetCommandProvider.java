@@ -9,6 +9,7 @@ package org.komodo.relational.commands.datatyperesultset;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.komodo.relational.commands.datatyperesultset.RenameChildCommand;
 import org.komodo.relational.model.DataTypeResultSet;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandProvider;
@@ -40,7 +41,7 @@ public class DataTypeResultSetCommandProvider implements ShellCommandProvider {
 
         result.put( SetDataTypeResultSetPropertyCommand.NAME, SetDataTypeResultSetPropertyCommand.class );
         result.put( UnsetDataTypeResultSetPropertyCommand.NAME, UnsetDataTypeResultSetPropertyCommand.class );
-        // TODO need rename command override
+        result.put( RenameChildCommand.NAME, RenameChildCommand.class );
 
         return result;
     }

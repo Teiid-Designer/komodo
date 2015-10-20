@@ -9,6 +9,8 @@ package org.komodo.relational.commands.pushdownfunction;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.komodo.relational.commands.pushdownfunction.RemoveResultSetCommand;
+import org.komodo.relational.commands.pushdownfunction.SetResultSetCommand;
 import org.komodo.relational.model.PushdownFunction;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandProvider;
@@ -40,6 +42,8 @@ public class PushdownFunctionCommandProvider implements ShellCommandProvider {
 
         result.put( AddParameterCommand.NAME, AddParameterCommand.class );
         result.put( DeleteParameterCommand.NAME, DeleteParameterCommand.class );
+        result.put( SetResultSetCommand.NAME, SetResultSetCommand.class );
+        result.put( RemoveResultSetCommand.NAME, RemoveResultSetCommand.class );
         result.put( SetPushdownFunctionPropertyCommand.NAME, SetPushdownFunctionPropertyCommand.class );
         result.put( UnsetPushdownFunctionPropertyCommand.NAME, UnsetPushdownFunctionPropertyCommand.class );
 

@@ -45,10 +45,10 @@ public final class ServerShowDatasourcesCommand extends ServerShellCommand {
         CommandResult result = null;
 
         try {
-            // Validates that a server is connected (prints output for errors)
-            boolean hasConnectedDefault = validateHasConnectedWorkspaceServer();
-            if ( !hasConnectedDefault ) {
-                return new CommandResultImpl( false, null, null );
+            // Validates that a server is connected
+            CommandResult validationResult = validateHasConnectedWorkspaceServer();
+            if ( !validationResult.isOk() ) {
+                return validationResult;
             }
 
             // Print title

@@ -9,6 +9,7 @@ package org.komodo.relational.commands.condition;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.komodo.relational.commands.condition.RenameChildCommand;
 import org.komodo.relational.vdb.Condition;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandProvider;
@@ -40,6 +41,7 @@ public class ConditionCommandProvider implements ShellCommandProvider {
 
         result.put( SetConditionPropertyCommand.NAME, SetConditionPropertyCommand.class );
         result.put( UnsetConditionPropertyCommand.NAME, UnsetConditionPropertyCommand.class );
+        result.put( RenameChildCommand.NAME, RenameChildCommand.class );
 
         return result;
     }

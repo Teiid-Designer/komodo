@@ -58,6 +58,9 @@ public class ServerCommandProvider implements ShellCommandProvider {
         result.put( ServerShowTranslatorsCommand.NAME, ServerShowTranslatorsCommand.class );
         result.put( ServerShowDatasourcesCommand.NAME, ServerShowDatasourcesCommand.class );
         result.put( ServerShowDatasourceTypesCommand.NAME, ServerShowDatasourceTypesCommand.class );
+        result.put( ServerDeployVdbCommand.NAME, ServerDeployVdbCommand.class );
+        result.put( ServerUndeployVdbCommand.NAME, ServerUndeployVdbCommand.class );
+        result.put( ServerImportVdbCommand.NAME, ServerImportVdbCommand.class );
 
         return result;
     }

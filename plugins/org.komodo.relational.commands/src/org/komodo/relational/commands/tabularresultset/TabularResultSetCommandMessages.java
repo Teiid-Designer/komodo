@@ -25,9 +25,8 @@ public class TabularResultSetCommandMessages implements StringConstants {
 
     @SuppressWarnings( "javadoc" )
     public enum General {
-        MISSING_PARAMETER_NAME,
-        PARAMETER_NAME,
-        INVALID_SCHEMA_ELEMENT_TYPE_PROPERTY_VALUE;
+        MISSING_COLUMN_NAME,
+        COLUMN_NAME;
 
         @Override
         public String toString() {
@@ -36,8 +35,8 @@ public class TabularResultSetCommandMessages implements StringConstants {
     }
 
     @SuppressWarnings( "javadoc" )
-    public enum AddParameterCommand {
-        PARAMETER_ADDED;
+    public enum AddColumnCommand {
+        COLUMN_ADDED;
 
         @Override
         public String toString() {
@@ -46,8 +45,8 @@ public class TabularResultSetCommandMessages implements StringConstants {
     }
 
     @SuppressWarnings( "javadoc" )
-    public enum DeleteParameterCommand {
-        PARAMETER_DELETED;
+    public enum DeleteColumnCommand {
+        COLUMN_DELETED;
 
         @Override
         public String toString() {

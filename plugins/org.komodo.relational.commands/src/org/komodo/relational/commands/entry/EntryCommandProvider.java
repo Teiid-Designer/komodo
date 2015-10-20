@@ -9,6 +9,7 @@ package org.komodo.relational.commands.entry;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.komodo.relational.commands.entry.RenameChildCommand;
 import org.komodo.relational.vdb.Entry;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandProvider;
@@ -40,6 +41,7 @@ public class EntryCommandProvider implements ShellCommandProvider {
 
         result.put( SetEntryPropertyCommand.NAME, SetEntryPropertyCommand.class );
         result.put( UnsetEntryPropertyCommand.NAME, UnsetEntryPropertyCommand.class );
+        result.put( RenameChildCommand.NAME, RenameChildCommand.class );
 
         return result;
     }

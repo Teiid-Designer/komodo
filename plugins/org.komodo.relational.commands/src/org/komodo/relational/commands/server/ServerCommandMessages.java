@@ -30,7 +30,10 @@ public class ServerCommandMessages implements StringConstants {
         Connected,
         NotConnected,
         serverStatusText,
-        CurrentTeiid;
+        CurrentTeiid,
+        MissingVdbName,
+        WorkspaceVdbNotFound,
+        ServerVdbNotFound;
 
         @Override
         public String toString() {
@@ -113,6 +116,38 @@ public class ServerCommandMessages implements StringConstants {
     public enum ServerShowDatasourceTypesCommand {
         InfoMessage,
         ListHeader;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+    
+    @SuppressWarnings( "javadoc" )
+    public enum ServerDeployVdbCommand {
+        VdbExportFailed,
+        VdbDeployFinished;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum ServerUndeployVdbCommand {
+        VdbUnDeployFinished;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum ServerImportVdbCommand {
+        VdbCopyToRepoFinished,
+        CanOnlyCopyDynamicVDBs;
 
         @Override
         public String toString() {

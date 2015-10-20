@@ -15,13 +15,20 @@
  */
 package org.komodo.relational.commands.datatyperesultset;
 
+import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.FileWriter;
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
+import org.komodo.relational.commands.pushdownfunction.AddParameterCommand;
+import org.komodo.relational.model.DataTypeResultSet;
+import org.komodo.relational.model.Function;
+import org.komodo.relational.model.Model;
+import org.komodo.relational.model.ProcedureResultSet;
+import org.komodo.relational.model.PushdownFunction;
+import org.komodo.relational.vdb.Vdb;
+import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
-import org.komodo.shell.util.KomodoObjectUtils;
 
 /**
  * Test Class to test SetDataTypeResultSetPropertyCommand
@@ -44,16 +51,43 @@ public class SetDataTypeResultSetPropertyCommandTest extends AbstractCommandTest
         
         FileWriter writer = new FileWriter(cmdFile);
         writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("create-vdb testVdb1 vdbPath" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("create-vdb myVdb vdbPath" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("cd myVdb" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("add-model myModel " + NEW_LINE);  //$NON-NLS-1$
+        writer.write("cd myModel" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("add-pushdown-function myPushdownFunction" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("cd myPushdownFunction" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("set-result-set DataTypeResultSet" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("cd resultSet" + NEW_LINE);  //$NON-NLS-1$
+        writer.write("set-property length 99" + NEW_LINE);  //$NON-NLS-1$
         writer.close();
-        
-        setup(cmdFile.getAbsolutePath(), SetDataTypeResultSetPropertyCommand.class);
+
+        setup(cmdFile.getAbsolutePath(), AddParameterCommand.class);
 
         CommandResult result = execute();
         assertCommandResultOk(result);
 
-    	// Check WorkspaceContext
-    	assertEquals("/workspace", KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext())); //$NON-NLS-1$
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        Vdb[] vdbs = wkspMgr.findVdbs(uow);
+        
+        assertEquals(1, vdbs.length);
+        
+        Model[] models = vdbs[0].getModels(uow);
+        assertEquals(1, models.length);
+        assertEquals("myModel", models[0].getName(uow)); //$NON-NLS-1$
+        
+        Function[] functions = models[0].getFunctions(uow);
+        assertEquals(1, functions.length);
+        assertEquals(true, functions[0] instanceof PushdownFunction);
+        assertEquals("myPushdownFunction", functions[0].getName(uow)); //$NON-NLS-1$
+        
+        ProcedureResultSet rSet = ((PushdownFunction)functions[0]).getResultSet(uow);
+        DataTypeResultSet dtResultSet = null;
+        if(rSet instanceof DataTypeResultSet) {
+            dtResultSet = (DataTypeResultSet)rSet;
+        }
+        
+        assertEquals(99,dtResultSet.getLength(uow));
     }
 
 }

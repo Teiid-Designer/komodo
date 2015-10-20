@@ -48,8 +48,11 @@ import org.komodo.relational.commands.permission.SetPermissionPropertyCommandTes
 import org.komodo.relational.commands.permission.UnsetPermissionPropertyCommandTest;
 import org.komodo.relational.commands.pushdownfunction.SetPushdownFunctionPropertyCommandTest;
 import org.komodo.relational.commands.pushdownfunction.UnsetPushdownFunctionPropertyCommandTest;
+import org.komodo.relational.commands.resultsetcolumn.SetResultSetColumnPropertyCommandTest;
+import org.komodo.relational.commands.resultsetcolumn.UnsetResultSetColumnPropertyCommandTest;
 import org.komodo.relational.commands.schema.SetSchemaPropertyCommandTest;
 import org.komodo.relational.commands.schema.UnsetSchemaPropertyCommandTest;
+import org.komodo.relational.commands.server.ServerSetCommandTest;
 import org.komodo.relational.commands.storedprocedure.SetStoredProcedurePropertyCommandTest;
 import org.komodo.relational.commands.storedprocedure.UnsetStoredProcedurePropertyCommandTest;
 import org.komodo.relational.commands.table.AddAccessPatternCommandTest;
@@ -108,11 +111,11 @@ import org.komodo.relational.commands.virtualprocedure.UnsetVirtualProcedureProp
 //    ImportVdbCommandTest.class,
     SetCustomPropertyCommandTest.class,
     UnsetCustomPropertyCommandTest.class,
+    UploadVdbCommandTest.class,
 
     // Column
     SetColumnPropertyCommandTest.class,
     UnsetColumnPropertyCommandTest.class,
-    UploadVdbCommandTest.class,
 
     // Condition
     SetConditionPropertyCommandTest.class,
@@ -127,14 +130,14 @@ import org.komodo.relational.commands.virtualprocedure.UnsetVirtualProcedureProp
     UnsetDataRolePropertyCommandTest.class,
 
     // DataTypeResultSet
-//    SetDataTypeResultSetPropertyCommandTest.class,
-//    UnsetDataTypeResultSetPropertyCommandTest.class,
+    //SetDataTypeResultSetPropertyCommandTest.class,
+    //UnsetDataTypeResultSetPropertyCommandTest.class,
 
     // Entry
     SetEntryPropertyCommandTest.class,
     UnsetEntryPropertyCommandTest.class,
 
-    // Entry
+    // ForeignKey
     AddReferenceColumnCommandTest.class,
     DeleteReferenceColumnCommandTest.class,
 
@@ -185,17 +188,28 @@ import org.komodo.relational.commands.virtualprocedure.UnsetVirtualProcedureProp
     // PushdownFunction
     org.komodo.relational.commands.pushdownfunction.AddParameterCommandTest.class,
     org.komodo.relational.commands.pushdownfunction.DeleteParameterCommandTest.class,
+    org.komodo.relational.commands.pushdownfunction.SetResultSetCommandTest.class,
+    org.komodo.relational.commands.pushdownfunction.RemoveResultSetCommandTest.class,
     SetPushdownFunctionPropertyCommandTest.class,
     UnsetPushdownFunctionPropertyCommandTest.class,
 
+    // ResultSetColumn
+    SetResultSetColumnPropertyCommandTest.class,
+    UnsetResultSetColumnPropertyCommandTest.class,
+    
     // Schema
     SetSchemaPropertyCommandTest.class,
     UnsetSchemaPropertyCommandTest.class,
     org.komodo.relational.commands.schema.ExportCommandTest.class,
 
+    // Server
+    ServerSetCommandTest.class,
+    
     // StoredProcedure
     org.komodo.relational.commands.storedprocedure.AddParameterCommandTest.class,
     org.komodo.relational.commands.storedprocedure.DeleteParameterCommandTest.class,
+    org.komodo.relational.commands.storedprocedure.SetResultSetCommandTest.class,
+    org.komodo.relational.commands.storedprocedure.RemoveResultSetCommandTest.class,
     SetStoredProcedurePropertyCommandTest.class,
     UnsetStoredProcedurePropertyCommandTest.class,
 
@@ -217,6 +231,10 @@ import org.komodo.relational.commands.virtualprocedure.UnsetVirtualProcedureProp
     AddConstraintColumnCommandTest.class,
     DeleteConstraintColumnCommandTest.class,
 
+    // TabularResultSet
+    org.komodo.relational.commands.tabularresultset.AddColumnCommandTest.class,
+    org.komodo.relational.commands.tabularresultset.DeleteColumnCommandTest.class,
+    
     // Teiid
     SetTeiidPropertyCommandTest.class,
     UnsetTeiidPropertyCommandTest.class,
