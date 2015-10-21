@@ -13,6 +13,7 @@ import java.util.List;
 import org.komodo.repository.RepositoryTools;
 import org.komodo.shell.Messages;
 import org.komodo.shell.Messages.SHELL;
+import org.komodo.shell.api.KomodoObjectLabelProvider;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
@@ -220,6 +221,54 @@ public class KomodoObjectUtils implements StringConstants {
         }
 
         return getShortName( wsStatus, kobject );
+    }
+    
+    /**
+     * Determine if the supplied KomodoObject is the root (tko:komodo)
+     *
+     * @param kObject
+     *        the KomodoObject (cannot be <code>null</code>)
+     * @return 'true' if root, 'false' if not
+     */
+    public static boolean isRoot( final KomodoObject kObject ) {
+        ArgCheck.isNotNull( kObject, "kobject" ); //$NON-NLS-1$
+
+        final String contextPath = kObject.getAbsolutePath();
+
+        // /tko:komodo
+        if ( KomodoObjectLabelProvider.ROOT_PATH.equals( contextPath ) || KomodoObjectLabelProvider.ROOT_SLASH_PATH.equals( contextPath ) ) {
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * Determine if the supplied KomodoObject is one of the root children (tko:komodo/tko:workspace, tko:komodo/tko:library, tko:komodo/tko:environment)
+     *
+     * @param kObject
+     *        the KomodoObject (cannot be <code>null</code>)
+     * @return 'true' if root child, 'false' if not
+     */
+    public static boolean isRootChild( final KomodoObject kObject ) {
+        ArgCheck.isNotNull( kObject, "kobject" ); //$NON-NLS-1$
+
+        final String contextPath = kObject.getAbsolutePath();
+
+        // /tko:komodo/workspace
+        if ( KomodoObjectLabelProvider.WORKSPACE_PATH.equals( contextPath ) || KomodoObjectLabelProvider.WORKSPACE_SLASH_PATH.equals( contextPath ) ) {
+            return true;
+        }
+
+        // /tko:komodo/library
+        if ( KomodoObjectLabelProvider.LIB_PATH.equals( contextPath ) || KomodoObjectLabelProvider.LIB_SLASH_PATH.equals( contextPath ) ) {
+            return true;
+        }
+
+        // /tko:komodo/environment
+        if ( KomodoObjectLabelProvider.ENV_PATH.equals( contextPath ) || KomodoObjectLabelProvider.ENV_SLASH_PATH.equals( contextPath ) ) {
+            return true;
+        }
+        return false;
     }
 
 }

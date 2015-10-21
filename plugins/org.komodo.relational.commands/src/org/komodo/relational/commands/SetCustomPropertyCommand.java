@@ -15,6 +15,7 @@ import org.komodo.relational.RelationalObject;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.shell.util.KomodoObjectUtils;
 
 /**
  * A shell command to set a custom property on a {@link RelationalObject}.
@@ -72,7 +73,7 @@ public final class SetCustomPropertyCommand extends RelationalShellCommand {
      */
     @Override
     public boolean isValidForCurrentContext() {
-        return ( getContext() instanceof RelationalObject );
+        return (getContext() instanceof RelationalObject) && (!KomodoObjectUtils.isRootChild(getContext()));
     }
 
     @Override

@@ -51,6 +51,10 @@ public class SetPropertyCommand extends BuiltInShellCommand {
      */
     @Override
     public boolean isValidForCurrentContext() {
+        // Not valid in root, workspace, library or environment
+        if( KomodoObjectUtils.isRoot(getContext()) || KomodoObjectUtils.isRootChild(getContext()) ) {
+            return false;
+        }
         return true;
     }
 
@@ -139,57 +143,12 @@ public class SetPropertyCommand extends BuiltInShellCommand {
         final String propertyName = isShowingPropertyNamePrefixes() ? name : KomodoObjectUtils.attachPrefix( getWorkspaceStatus(),context, name );
 
         if ( !StringUtils.isBlank( propValue ) && isMultiValuedProperty( context, propertyName ) ) {
-//            if ( Constraint.REFERENCES.equals( propertyName ) ) {
-//                setTableConstraintColumns( propValue );
-//            } else if ( Constraint.TABLE_REFERENCE_REFERENCES.equals( propertyName ) ) {
-//                setForeignKeyTableReferenceColumns( propValue );
-//            } else {
-                final String[] values = parseMultiValues( propValue );
-                context.setProperty( getWorkspaceStatus().getTransaction(), propertyName, ( Object[] )values );
-//            }
+            final String[] values = parseMultiValues( propValue );
+            context.setProperty( getWorkspaceStatus().getTransaction(), propertyName, ( Object[] )values );
         } else {
-//            if ( Constraint.TABLE_REFERENCE.equals( propertyName ) ) {
-//                setForeignKeyTableReference( propValue );
-//            } else {
-                context.setProperty( getWorkspaceStatus().getTransaction(), propertyName, propValue );
+            context.setProperty( getWorkspaceStatus().getTransaction(), propertyName, propValue );
         }
-//        }
     }
-
-//    private void setTableConstraintColumns( final String propValue ) throws Exception {
-//        final KomodoObject kobject = getContext().getKomodoObj();
-//
-//        if ( !( kobject instanceof TableConstraint ) ) {
-//            throw new Exception( Messages.getString( TABLE_COLUMNS_CANNOT_BE_SET,
-//                                                     ContextUtils.convertPathToDisplayPath( kobject.getAbsolutePath() ) ) );
-//        }
-//
-//        // first clear value if necessary
-//        if ( getContext().getPropertyValue( Constraint.REFERENCES ) != null ) {
-//            final UnsetPropertyCommand cmd = new UnsetPropertyCommand( getWorkspaceStatus() );
-//            cmd.setOutput( getWriter() );
-//            cmd.setArguments( new Arguments( Constraint.REFERENCES ) );
-//            cmd.setAutoCommit( false );
-//
-//            if ( !cmd.execute() ) {
-//                throw new Exception( Messages.getString( UNSET_TABLE_CONSTRAINT_COLUMN_FAILED, cmd ) );
-//            }
-//        }
-//
-//        // set new value by adding in one at a time using the AddConstraintColumnCommand
-//        for ( final String columnPath : parseMultiValues( propValue ) ) {
-//            final AddConstraintColumnCommand cmd = new AddConstraintColumnCommand( getWorkspaceStatus() );
-//            cmd.setOutput( getWriter() );
-//            cmd.setArguments( new Arguments( columnPath ) );
-//            cmd.setAutoCommit( false );
-//
-//            if ( !cmd.execute() ) {
-//                throw new Exception( Messages.getString( ADD_TABLE_CONSTRAINT_COLUMN_FAILED, cmd ) );
-//            }
-//        }
-//
-//        print( MESSAGE_INDENT, Messages.getString( TABLE_COLUMNS_SET, propValue ) );
-//    }
 
     private boolean isMultiValuedProperty( final KomodoObject context,
                                            final String name ) throws Exception {
@@ -315,72 +274,17 @@ public class SetPropertyCommand extends BuiltInShellCommand {
 
         if ( Type.BOOLEAN == descriptor.getType() ) {
             possibleValues = new String[] { Boolean.TRUE.toString(), Boolean.FALSE.toString() };
-//        } else if ( Constraint.REFERENCES.equals( propertyName ) ) {
-//            // show columns of parent table
-//            final KomodoObject parent = context.getKomodoObj().getParent( uow );
-//
-//            if ( parent instanceof Table ) {
-//                final Column[] columns = ( ( Table )parent ).getColumns( uow );
-//
-//                if ( columns.length != 0 ) {
-//                    possibleValues = new String[ columns.length ];
-//                    int i = 0;
-//
-//                    for ( final Column column : columns ) {
-//                        possibleValues[ i++ ] = ContextUtils.convertPathToDisplayPath( column.getAbsolutePath() );
-//                    }
-//                }
-//            }
         } else {
-//            final KomodoObject kobject = context.getKomodoObj();
-//
-//            if ( kobject instanceof ForeignKey ) {
-//                // show columns of referenced table
-//                if ( Constraint.TABLE_REFERENCE_REFERENCES.equals( propertyName ) ) {
-//                    final Table refTable = ( ( ForeignKey )kobject ).getReferencesTable( uow );
-//
-//                    // if no table reference than cannot provide columns
-//                    if ( refTable != null ) {
-//                        // provide the paths of the table reference columns
-//                        final Column[] columns = refTable.getColumns( uow );
-//                        possibleValues = new String[ columns.length ];
-//                        int i = 0;
-//
-//                        for ( final Column column : columns ) {
-//                            possibleValues[ i++ ] = ContextUtils.convertPathToDisplayPath( column.getAbsolutePath() );
-//                        }
-//                    }
-//                } else if ( Constraint.TABLE_REFERENCE.equals( propertyName ) ) {
-//                    final String[] tablePaths = FindCommand.query( getWorkspaceStatus(), KomodoType.TABLE, null, null );
-//
-//                    if ( tablePaths.length != 0 ) {
-//                        // do not include the parent table of the foreign key
-//                        final String currentTablePath = ContextUtils.convertPathToDisplayPath( kobject.getParent( uow ).getAbsolutePath() );
-//                        possibleValues = new String[ tablePaths.length - 1 ];
-//                        int i = 0;
-//                        boolean found = false;
-//
-//                        for ( final String tablePath : tablePaths ) {
-//                            if ( found ) {
-//                                possibleValues[ i++ ] = tablePath;
-//                            } else if ( currentTablePath.equals( tablePath ) ) {
-//                                found = true;
-//                            }
-//                        }
-//                    }
-//                }
-//            } else {
-                final Object[] defaultValues = descriptor.getDefaultValues();
+            final Object[] defaultValues = descriptor.getDefaultValues();
 
-                if ( defaultValues.length != 0 ) {
-                    possibleValues = new String[ defaultValues.length ];
-                    int i = 0;
+            if ( defaultValues.length != 0 ) {
+                possibleValues = new String[ defaultValues.length ];
+                int i = 0;
 
-                    for ( final Object defaultValue : defaultValues ) {
-                        possibleValues[ i++ ] = defaultValue.toString();
-                    }
+                for ( final Object defaultValue : defaultValues ) {
+                    possibleValues[ i++ ] = defaultValue.toString();
                 }
-//            }
+            }
         }
 
         if ( possibleValues.length != 0 ) {

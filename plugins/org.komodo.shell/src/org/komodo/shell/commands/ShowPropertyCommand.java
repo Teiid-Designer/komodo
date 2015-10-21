@@ -27,6 +27,7 @@ import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.Messages;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.shell.util.KomodoObjectUtils;
 import org.komodo.shell.util.PrintUtils;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.utils.StringUtils;
@@ -57,6 +58,10 @@ public class ShowPropertyCommand extends BuiltInShellCommand {
      */
     @Override
     public boolean isValidForCurrentContext() {
+        // Not valid in root, workspace, library or environment
+        if( KomodoObjectUtils.isRoot(getContext()) || KomodoObjectUtils.isRootChild(getContext()) ) {
+            return false;
+        }
         return true;
     }
 

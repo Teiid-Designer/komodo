@@ -104,14 +104,14 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
      */
     @Override
     public final CommandResult execute() {
-        // Make sure command is valid for the context
-        if ( !isValidForCurrentContext() ) {
-            return new CommandResultImpl( false, Messages.getString( SHELL.InvalidCommandForContext ), null );
-        }
-
         // make sure there aren't too many args
         if ( getArguments().size() > getMaxArgCount() ) {
             return new CommandResultImpl( false, Messages.getString( Messages.SHELL.TOO_MANY_ARGS, this ), null );
+        }
+
+        // Make sure command is valid for the context
+        if ( !isValidForCurrentContext() ) {
+            return new CommandResultImpl( false, Messages.getString( SHELL.InvalidCommandForContext ), null );
         }
 
         // execute command
@@ -417,12 +417,7 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
                  || ( !isShowingPropertyNamePrefixes() && propNames.contains( KomodoObjectUtils.attachPrefix( getWorkspaceStatus(),context, propName ) ) ) ) {
                 return true;
             }
-
-//            if(printMessage) {
-//            	print( CompletionConstants.MESSAGE_INDENT,
-//            			Messages.getString( SHELL.propertyArg_noPropertyWithThisName, propName ) );
-//            }
-        }
+       }
 
         return false;
 	}

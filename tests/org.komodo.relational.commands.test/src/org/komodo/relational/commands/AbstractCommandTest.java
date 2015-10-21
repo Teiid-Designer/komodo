@@ -45,7 +45,7 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
 
     @SuppressWarnings( "unused" )
     private Writer writer;
-    private Writer commandWriter;
+    protected Writer commandWriter;
     private PlayCommand playCmd;
     @SuppressWarnings( "unused" )
     private Class< ? extends ShellCommand > testedCommandClass;
@@ -118,13 +118,36 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
     }
 
     /**
-     * Setup the test
+     * Setup the test - a command file is supplied, and the play command is utilized.
      * @param commandFilePath the path to the file containing the command (cannot be empty)
      * @param commandClass the command being tested
      * @throws Exception
      */
     protected void setup( final String commandFilePath,
                           final Class< ? extends ShellCommand > commandClass ) throws Exception {
+        setup(commandClass);
+
+        try {
+            // setup arguments for play command
+            final String filePath = ( new File( commandFilePath ).isAbsolute() ) ? commandFilePath
+                                                                                : ( "./resources/" + commandFilePath );
+            final Arguments args = new Arguments( filePath );
+
+            // construct play command
+            this.playCmd = new PlayCommand( this.wsStatus );
+            this.playCmd.setArguments( args );
+            this.playCmd.setWriter( this.commandWriter );
+        } catch ( Exception e ) {
+            Assert.fail( "Failed - setup error: " + e.getMessage() ); //$NON-NLS-1$
+        }
+    }
+
+    /**
+     * Setup the test
+     * @param commandClass the command being tested
+     * @throws Exception
+     */
+    protected void setup( final Class< ? extends ShellCommand > commandClass ) throws Exception {
         assertEquals( RepositoryClient.State.STARTED, kEngine.getState() );
         assertEquals( Repository.State.REACHABLE, kEngine.getDefaultRepository().getState() );
 
@@ -142,21 +165,11 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
             // create writers to store the output
             this.writer = new StringWriter();
             this.commandWriter = new StringWriter();
-
-            // setup arguments for play command
-            final String filePath = ( new File( commandFilePath ).isAbsolute() ) ? commandFilePath
-                                                                                : ( "./resources/" + commandFilePath );
-            final Arguments args = new Arguments( filePath );
-
-            // construct play command
-            this.playCmd = new PlayCommand( this.wsStatus );
-            this.playCmd.setArguments( args );
-            this.playCmd.setWriter( this.commandWriter );
         } catch ( Exception e ) {
             Assert.fail( "Failed - setup error: " + e.getMessage() ); //$NON-NLS-1$
         }
     }
-
+    
     /**
      * {@inheritDoc}
      *

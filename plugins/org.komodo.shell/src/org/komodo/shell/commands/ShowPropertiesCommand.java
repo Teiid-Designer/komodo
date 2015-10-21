@@ -28,6 +28,7 @@ import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
+import org.komodo.shell.util.KomodoObjectUtils;
 import org.komodo.shell.util.PrintUtils;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.utils.StringUtils;
@@ -58,6 +59,10 @@ public class ShowPropertiesCommand extends BuiltInShellCommand {
      */
     @Override
     public boolean isValidForCurrentContext() {
+        // Not valid in root, workspace, library or environment
+        if( KomodoObjectUtils.isRoot(getContext()) || KomodoObjectUtils.isRootChild(getContext()) ) {
+            return false;
+        }
         return true;
     }
 
@@ -112,7 +117,6 @@ public class ShowPropertiesCommand extends BuiltInShellCommand {
 
             // Do not put space after it - may want to append more to the path
             return CompletionConstants.NO_APPEND_SEPARATOR;
-            // Tab completion for "property" - expects a valid property for the current context.
         }
 
     	return -1;

@@ -29,6 +29,7 @@ import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
+import org.komodo.shell.util.KomodoObjectUtils;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.utils.StringUtils;
 
@@ -57,6 +58,10 @@ public class ShowSummaryCommand extends BuiltInShellCommand {
      */
     @Override
     public boolean isValidForCurrentContext() {
+        // Not valid in root, workspace, library or environment.  No properties available for those.
+        if( KomodoObjectUtils.isRoot(getContext()) || KomodoObjectUtils.isRootChild(getContext()) ) {
+            return false;
+        }
         return true;
     }
 

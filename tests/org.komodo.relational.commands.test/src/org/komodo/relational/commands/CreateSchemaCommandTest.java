@@ -16,11 +16,15 @@
 package org.komodo.relational.commands;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.FileWriter;
 import org.junit.Test;
 import org.komodo.relational.model.Schema;
 import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.shell.CompletionConstants;
+import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
 
 /**
@@ -57,6 +61,31 @@ public class CreateSchemaCommandTest extends AbstractCommandTest {
     	
     	assertEquals(1, schemas.length);
     	assertEquals("testSchema", schemas[0].getName(uow)); //$NON-NLS-1$
+    }
+    
+    @Test
+    public void shouldDisplayHelp( ) throws Exception {
+        setup(CreateSchemaCommand.class);
+        
+        CreateSchemaCommand command = new CreateSchemaCommand(wsStatus);
+        command.setWriter( this.commandWriter );
+        command.printHelp(CompletionConstants.MESSAGE_INDENT);
+        
+        String writerOutput = getCommandOutput();
+        assertTrue(writerOutput.contains("DESCRIPTION")); //$NON-NLS-1$
+        assertTrue(writerOutput.contains(CreateSchemaCommand.NAME));
+    }
+    
+    @Test
+    public void shouldFailTooManyArgs( ) throws Exception {
+        setup(CreateSchemaCommand.class);
+        
+        CreateSchemaCommand command = new CreateSchemaCommand(wsStatus);
+        command.setArguments(new Arguments( "aName anExtraArg" ));  //$NON-NLS-1$
+        CommandResult result = command.execute();
+        
+        assertFalse(result.isOk());
+        assertTrue(result.getMessage().contains("Too many arguments were used for the command"));  //$NON-NLS-1$
     }
 
 }

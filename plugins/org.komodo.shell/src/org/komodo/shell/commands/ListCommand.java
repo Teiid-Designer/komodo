@@ -108,7 +108,6 @@ public class ListCommand extends BuiltInShellCommand {
 
             // Do not put space after it - may want to append more to the path
             return CompletionConstants.NO_APPEND_SEPARATOR;
-            // Tab completion for "property" - expects a valid property for the current context.
         }
 
         return -1;
