@@ -8,10 +8,10 @@
 package org.komodo.relational.commands.server;
 
 import static org.komodo.relational.commands.server.ServerCommandMessages.ServerShowDatasourcesCommand.InfoMessage;
-import static org.komodo.relational.commands.server.ServerCommandMessages.ServerShowDatasourcesCommand.ListHeader;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.shell.CommandResultImpl;
@@ -62,7 +62,8 @@ public final class ServerShowDatasourcesCommand extends ServerShellCommand {
                 String name = source.getDisplayName();
                 objNames.add( name );
             }
-            PrintUtils.printList( getWriter(), objNames, getMessage( ListHeader ) );
+            Collections.sort(objNames);
+            PrintUtils.printMultiLineItemList( MESSAGE_INDENT, getWriter(), objNames, 4, null );
             result = CommandResult.SUCCESS;
         } catch ( final Exception e ) {
             result = new CommandResultImpl( e );

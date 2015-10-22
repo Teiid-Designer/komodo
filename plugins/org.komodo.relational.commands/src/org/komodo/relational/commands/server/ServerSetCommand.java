@@ -7,13 +7,19 @@
  */
 package org.komodo.relational.commands.server;
 
+import java.util.ArrayList;
+import java.util.List;
 import static org.komodo.relational.commands.server.ServerCommandMessages.ServerSetCommand.MissingServerNameArg;
 import static org.komodo.relational.commands.server.ServerCommandMessages.ServerSetCommand.ServerDoesNotExist;
 import static org.komodo.relational.commands.server.ServerCommandMessages.ServerSetCommand.ServerSetSuccess;
 import org.komodo.relational.teiid.Teiid;
+import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.CommandResultImpl;
+import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
  * A shell command to set the default server name
@@ -90,6 +96,42 @@ public final class ServerSetCommand extends ServerShellCommand {
     @Override
     public final boolean isValidForCurrentContext() {
         return true;
+    }
+    
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
+     */
+    @Override
+    public int tabCompletion( final String lastArgument,
+                              final List< CharSequence > candidates ) throws Exception {
+        final Arguments args = getArguments();
+
+        final UnitOfWork uow = getTransaction();
+        final WorkspaceManager mgr = getWorkspaceManager();
+        final KomodoObject[] teiids = mgr.findTeiids(getTransaction());
+        List<String> existingTeiidNames = new ArrayList<String>(teiids.length);
+        for(KomodoObject teiid : teiids) {
+            existingTeiidNames.add(teiid.getName(uow));
+        }
+
+        if ( args.isEmpty() ) {
+            if ( lastArgument == null ) {
+                candidates.addAll( existingTeiidNames );
+            } else {
+                for ( final String item : existingTeiidNames ) {
+                    if ( item.toUpperCase().startsWith( lastArgument.toUpperCase() ) ) {
+                        candidates.add( item );
+                    }
+                }
+            }
+
+            return 0;
+        }
+
+        // no tab completion
+        return -1;
     }
 
 }

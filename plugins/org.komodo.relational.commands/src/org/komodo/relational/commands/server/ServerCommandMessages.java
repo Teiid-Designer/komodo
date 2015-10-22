@@ -32,8 +32,14 @@ public class ServerCommandMessages implements StringConstants {
         serverStatusText,
         CurrentTeiid,
         MissingVdbName,
-        WorkspaceVdbNotFound,
-        ServerVdbNotFound;
+        MissingDatasourceName,
+        MissingDatasourceTypeName,
+        MissingTranslatorName,
+        ServerDatasourceNotFound,
+        ServerDatasourceTypeNotFound,
+        ServerTranslatorNotFound,
+        ServerVdbNotFound,
+        WorkspaceVdbNotFound;
 
         @Override
         public String toString() {
@@ -116,6 +122,46 @@ public class ServerCommandMessages implements StringConstants {
     public enum ServerShowDatasourceTypesCommand {
         InfoMessage,
         ListHeader;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum ServerShowVdbCommand {
+        InfoMessage;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum ServerShowTranslatorCommand {
+        InfoMessage;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum ServerShowDatasourceCommand {
+        InfoMessage;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum ServerShowDatasourceTypeCommand {
+        InfoMessage;
 
         @Override
         public String toString() {

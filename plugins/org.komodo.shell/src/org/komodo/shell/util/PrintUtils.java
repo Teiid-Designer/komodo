@@ -83,7 +83,7 @@ public class PrintUtils implements StringConstants {
     public static void printList( final Writer writer, List<String> items, String headerTitle ) {
         int maxNameWidth = DEFAULT_WIDTH;
         for(String item : items) {
-            updateMaxNameWidth(maxNameWidth,item);
+            maxNameWidth = updateMaxNameWidth(maxNameWidth,item);
         }
 
         // Sort alphabetically
@@ -98,7 +98,47 @@ public class PrintUtils implements StringConstants {
         for ( final String name : items ) {
             print( writer, MESSAGE_INDENT, name );
         }
+    }
+    
+    /**
+     * Prints a list with multiple items per line
+     * @param indent number of spaces to indent
+     * @param writer the Writer
+     * @param items the item list
+     * @param itemsPerLine the number of items on each line
+     * @param headerTitle name for header
+     */
+    public static void printMultiLineItemList( int indent, final Writer writer, List<String> items, int itemsPerLine, String headerTitle ) {
+        StringBuffer indentBuffer = new StringBuffer();
+        for(int i=0; i<indent; i++) {
+            indentBuffer.append(StringConstants.SPACE);
+        }
+        
+        int maxNameWidth = DEFAULT_WIDTH;
+        for(String item : items) {
+            maxNameWidth = updateMaxNameWidth(maxNameWidth,item);
+        }
 
+        // Print Header first if supplied
+        if(!StringUtils.isBlank(headerTitle)) {
+            final String format = getFormat( maxNameWidth );
+            print( writer, MESSAGE_INDENT, String.format( format, headerTitle ) );
+            print( writer, MESSAGE_INDENT, String.format( format, getHeaderDelimiter( maxNameWidth ) ) );
+        }
+
+        // Print appropriate commands per line
+        int colCount = 0;
+        StringBuilder builder = new StringBuilder();
+        for (String item : items) {
+            builder.append(String.format("%-"+(maxNameWidth+5)+"s", item)); //$NON-NLS-1$ //$NON-NLS-2$
+            colCount++;
+
+            if (colCount == itemsPerLine) {
+                builder.append("\n"+indentBuffer.toString()); //$NON-NLS-1$
+                colCount = 0;
+            }
+        }
+        print(writer, MESSAGE_INDENT, builder.toString());
     }
 
     /**
@@ -383,18 +423,26 @@ public class PrintUtils implements StringConstants {
         }
     }
 
-    private static void printPropWithLongValue(Writer commandOutput, String format, String propName, String propValue, int maxValueWidth) {
+    /**
+     * Prints properties with property values longer than maxValueWidth, splitting them into separate lines
+     * @param writer the output writer
+     * @param format the format
+     * @param propName the property name
+     * @param propValue the property value
+     * @param maxValueWidth maximum width of the value
+     */
+    public static void printPropWithLongValue(Writer writer, String format, String propName, String propValue, int maxValueWidth) {
         // splits long strings into equal length lines of 'maxValueWidth' length.
         List<String> lines = splitEqually(propValue,maxValueWidth);
         boolean first = true;
         for(String line : lines) {
             // First line includes the propName
             if(first) {
-                print( commandOutput, MESSAGE_INDENT, String.format( format, propName, line ) );
+                print( writer, MESSAGE_INDENT, String.format( format, propName, line ) );
                 first = false;
             // Subsequent lines the 'name' is just a spacer
             } else {
-                print( commandOutput, MESSAGE_INDENT, String.format( format, EMPTY_STRING, line ) );
+                print( writer, MESSAGE_INDENT, String.format( format, EMPTY_STRING, line ) );
             }
         }
     }
@@ -438,10 +486,11 @@ public class PrintUtils implements StringConstants {
         return result.toString();
     }
 
-    private static void updateMaxNameWidth(int maxNameWidth, String name) {
+    private static int updateMaxNameWidth(int maxNameWidth, String name) {
         if ( maxNameWidth < name.length() ) {
             maxNameWidth = name.length();
         }
+        return maxNameWidth;
     }
 
     /**

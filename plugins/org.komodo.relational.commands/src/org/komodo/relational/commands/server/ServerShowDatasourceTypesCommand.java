@@ -8,9 +8,9 @@
 package org.komodo.relational.commands.server;
 
 import static org.komodo.relational.commands.server.ServerCommandMessages.ServerShowDatasourceTypesCommand.InfoMessage;
-import static org.komodo.relational.commands.server.ServerCommandMessages.ServerShowDatasourceTypesCommand.ListHeader;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import org.komodo.relational.RelationalObject;
@@ -61,7 +61,8 @@ public final class ServerShowDatasourceTypesCommand extends ServerShellCommand {
             for ( String type : types ) {
                 objNames.add( type );
             }
-            PrintUtils.printList( getWriter(), objNames, getMessage( ListHeader ) );
+            Collections.sort(objNames);
+            PrintUtils.printMultiLineItemList( MESSAGE_INDENT, getWriter(), objNames, 4, null );
             result = CommandResult.SUCCESS;
         } catch ( final Exception e ) {
             result = new CommandResultImpl( e );
