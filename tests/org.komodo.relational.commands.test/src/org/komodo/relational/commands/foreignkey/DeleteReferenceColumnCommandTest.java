@@ -16,8 +16,6 @@
 package org.komodo.relational.commands.foreignkey;
 
 import static org.junit.Assert.assertEquals;
-import java.io.File;
-import java.io.FileWriter;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Column;
@@ -32,76 +30,61 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test DeleteReferenceColumnCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( { "javadoc", "nls" } )
 public class DeleteReferenceColumnCommandTest extends AbstractCommandTest {
-
-    /**
-	 * Test for DeleteReferenceColumnCommand
-	 */
-	public DeleteReferenceColumnCommandTest( ) {
-		super();
-	}
 
     @Test
     public void testDelete1() throws Exception {
-        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
-        cmdFile.deleteOnExit();
-        
-        FileWriter writer = new FileWriter(cmdFile);
-        writer.write("set-auto-commit false" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("create-vdb myVdb vdbPath" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd myVdb" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-model refModel" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd refModel" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-table refTable" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd refTable" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-column refCol1" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-column refCol2" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd ../.." + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-model myModel" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd myModel" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-table myTable" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd myTable" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-foreign-key myForeignKey /workspace/myVdb/refModel/refTable" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd myForeignKey" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-ref-column /workspace/myVdb/refModel/refTable/refCol1" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-ref-column /workspace/myVdb/refModel/refTable/refCol2" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("commit" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("delete-ref-column /workspace/myVdb/refModel/refTable/refCol1" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("commit" + NEW_LINE);  //$NON-NLS-1$
-        writer.close();
-
-        setup(cmdFile.getAbsolutePath(), DeleteReferenceColumnCommand.class);
+        final String[] commands = { "workspace",
+                                    "create-vdb myVdb vdbPath",
+                                    "cd myVdb",
+                                    "add-model refModel",
+                                    "cd refModel",
+                                    "add-table refTable",
+                                    "cd refTable",
+                                    "add-column refCol1",
+                                    "add-column refCol2",
+                                    "cd ../..",
+                                    "add-model myModel",
+                                    "cd myModel",
+                                    "add-table myTable",
+                                    "cd myTable",
+                                    "add-foreign-key myForeignKey /workspace/myVdb/refModel/refTable",
+                                    "cd myForeignKey",
+                                    "add-ref-column /workspace/myVdb/refModel/refTable/refCol1",
+                                    "add-ref-column /workspace/myVdb/refModel/refTable/refCol2",
+                                    "commit", // need to commit since delete-ref-column uses search framework
+                                    "delete-ref-column /workspace/myVdb/refModel/refTable/refCol1" };
+        setup( commands );
 
         CommandResult result = execute();
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
-        Vdb[] vdbs = wkspMgr.findVdbs(uow);
-        
+        Vdb[] vdbs = wkspMgr.findVdbs(getTransaction());
+
         assertEquals(1, vdbs.length);
-        
-        Model[] models = vdbs[0].getModels(uow);
+
+        Model[] models = vdbs[0].getModels(getTransaction());
         assertEquals(2, models.length);
-        
+
         Model modelWithFk = models[0];
-        if(!modelWithFk.getName(uow).equals("myModel")) { //$NON-NLS-1$
+        if(!modelWithFk.getName(getTransaction()).equals("myModel")) {
             modelWithFk = models[1];
         }
-        assertEquals("myModel", modelWithFk.getName(uow)); //$NON-NLS-1$
-        
-        Table[] tables = modelWithFk.getTables(uow);
+        assertEquals("myModel", modelWithFk.getName(getTransaction()));
+
+        Table[] tables = modelWithFk.getTables(getTransaction());
         assertEquals(1, tables.length);
-        assertEquals("myTable", tables[0].getName(uow)); //$NON-NLS-1$
-        
-        ForeignKey[] fks = tables[0].getForeignKeys(uow);
+        assertEquals("myTable", tables[0].getName(getTransaction()));
+
+        ForeignKey[] fks = tables[0].getForeignKeys(getTransaction());
         assertEquals(1, fks.length);
-        assertEquals("myForeignKey", fks[0].getName(uow)); //$NON-NLS-1$
-        
-        Column[] refCols = fks[0].getReferencesColumns(uow);
+        assertEquals("myForeignKey", fks[0].getName(getTransaction()));
+
+        Column[] refCols = fks[0].getReferencesColumns(getTransaction());
         assertEquals(1, refCols.length);
-        assertEquals("refCol2", refCols[0].getName(uow)); //$NON-NLS-1$
+        assertEquals("refCol2", refCols[0].getName(getTransaction()));
     }
 
 }

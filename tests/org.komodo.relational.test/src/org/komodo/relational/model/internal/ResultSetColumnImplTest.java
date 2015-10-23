@@ -45,38 +45,38 @@ public final class ResultSetColumnImplTest extends RelationalModelTest {
     @Before
     public void init() throws Exception {
         final Model model = createModel();
-        final StoredProcedure procedure = model.addStoredProcedure( this.uow, "procedure" );
-        this.resultSet = procedure.setResultSet( this.uow, TabularResultSet.class );
-        this.column = this.resultSet.addColumn( this.uow, NAME );
+        final StoredProcedure procedure = model.addStoredProcedure( getTransaction(), "procedure" );
+        this.resultSet = procedure.setResultSet( getTransaction(), TabularResultSet.class );
+        this.column = this.resultSet.addColumn( getTransaction(), NAME );
         commit();
     }
 
     @Test
     public void shouldAllowEmptyDescription() throws Exception {
-        this.column.setDescription( this.uow, "blah" );
-        this.column.setDescription( this.uow, StringConstants.EMPTY_STRING );
-        assertThat( this.column.getDescription( this.uow ), is( nullValue() ) );
+        this.column.setDescription( getTransaction(), "blah" );
+        this.column.setDescription( getTransaction(), StringConstants.EMPTY_STRING );
+        assertThat( this.column.getDescription( getTransaction() ), is( nullValue() ) );
     }
 
     @Test
     public void shouldAllowEmptyNameInSource() throws Exception {
-        this.column.setNameInSource( this.uow, "blah" );
-        this.column.setNameInSource( this.uow, StringConstants.EMPTY_STRING );
-        assertThat( this.column.getNameInSource( this.uow ), is( nullValue() ) );
+        this.column.setNameInSource( getTransaction(), "blah" );
+        this.column.setNameInSource( getTransaction(), StringConstants.EMPTY_STRING );
+        assertThat( this.column.getNameInSource( getTransaction() ), is( nullValue() ) );
     }
 
     @Test
     public void shouldAllowNullDescription() throws Exception {
-        this.column.setDescription( this.uow, "blah" );
-        this.column.setDescription( this.uow, null );
-        assertThat( this.column.getDescription( this.uow ), is( nullValue() ) );
+        this.column.setDescription( getTransaction(), "blah" );
+        this.column.setDescription( getTransaction(), null );
+        assertThat( this.column.getDescription( getTransaction() ), is( nullValue() ) );
     }
 
     @Test
     public void shouldAllowNullNameInSource() throws Exception {
-        this.column.setNameInSource( this.uow, "blah" );
-        this.column.setNameInSource( this.uow, null );
-        assertThat( this.column.getNameInSource( this.uow ), is( nullValue() ) );
+        this.column.setNameInSource( getTransaction(), "blah" );
+        this.column.setNameInSource( getTransaction(), null );
+        assertThat( this.column.getNameInSource( getTransaction() ), is( nullValue() ) );
     }
 
     @Test
@@ -88,7 +88,7 @@ public final class ResultSetColumnImplTest extends RelationalModelTest {
     public void shouldFailConstructionIfNotResultSetColumn() {
         if ( RelationalObjectImpl.VALIDATE_INITIAL_STATE ) {
             try {
-                new ColumnImpl( this.uow, _repo, _repo.komodoLibrary( this.uow ).getAbsolutePath() );
+                new ColumnImpl( getTransaction(), _repo, _repo.komodoLibrary( getTransaction() ).getAbsolutePath() );
                 fail();
             } catch ( final KException e ) {
                 // expected
@@ -98,77 +98,77 @@ public final class ResultSetColumnImplTest extends RelationalModelTest {
 
     @Test( expected = KException.class )
     public void shouldFailSettingEmptyUuidWhenNeverAdded() throws Exception {
-        this.column.setUuid( this.uow, StringConstants.EMPTY_STRING );
+        this.column.setUuid( getTransaction(), StringConstants.EMPTY_STRING );
     }
 
     @Test( expected = KException.class )
     public void shouldFailSettingNullUuidWhenNeverAdded() throws Exception {
-        this.column.setUuid( this.uow, null );
+        this.column.setUuid( getTransaction(), null );
     }
 
     @Test
     public void shouldHaveCorrectName() throws Exception {
-        assertThat( this.column.getName( this.uow ), is( NAME ) );
+        assertThat( this.column.getName( getTransaction() ), is( NAME ) );
     }
 
     @Test
     public void shouldHaveCorrectTypeIdentifier() throws Exception {
-        assertThat(this.column.getTypeIdentifier( this.uow ), is(KomodoType.RESULT_SET_COLUMN));
+        assertThat(this.column.getTypeIdentifier( getTransaction() ), is(KomodoType.RESULT_SET_COLUMN));
     }
 
     @Test
     public void shouldHaveDatatypeLengthPropertyDefaultValueAfterConstruction() throws Exception {
-        assertThat( this.column.getLength( this.uow ), is( RelationalConstants.DEFAULT_LENGTH ) );
-        assertThat( this.column.hasProperty( this.uow, StandardDdlLexicon.DATATYPE_LENGTH ), is( false ) );
+        assertThat( this.column.getLength( getTransaction() ), is( RelationalConstants.DEFAULT_LENGTH ) );
+        assertThat( this.column.hasProperty( getTransaction(), StandardDdlLexicon.DATATYPE_LENGTH ), is( false ) );
     }
 
     @Test
     public void shouldHaveDatatypeNamePropertyDefaultValueAfterConstruction() throws Exception {
-        assertThat( this.column.getDatatypeName( this.uow ), is( RelationalConstants.DEFAULT_DATATYPE_NAME ) );
-        assertThat( this.column.hasProperty( this.uow, StandardDdlLexicon.DATATYPE_NAME ), is( false ) );
+        assertThat( this.column.getDatatypeName( getTransaction() ), is( RelationalConstants.DEFAULT_DATATYPE_NAME ) );
+        assertThat( this.column.hasProperty( getTransaction(), StandardDdlLexicon.DATATYPE_NAME ), is( false ) );
     }
 
     @Test
     public void shouldHaveDatatypePrecisionPropertyDefaultValueAfterConstruction() throws Exception {
-        assertThat( this.column.getPrecision( this.uow ), is( RelationalConstants.DEFAULT_PRECISION ) );
-        assertThat( this.column.hasProperty( this.uow, StandardDdlLexicon.DATATYPE_PRECISION ), is( false ) );
+        assertThat( this.column.getPrecision( getTransaction() ), is( RelationalConstants.DEFAULT_PRECISION ) );
+        assertThat( this.column.hasProperty( getTransaction(), StandardDdlLexicon.DATATYPE_PRECISION ), is( false ) );
     }
 
     @Test
     public void shouldHaveDatatypeScalePropertyDefaultValueAfterConstruction() throws Exception {
-        assertThat( this.column.getScale( this.uow ), is( RelationalConstants.DEFAULT_SCALE ) );
-        assertThat( this.column.hasProperty( this.uow, StandardDdlLexicon.DATATYPE_SCALE ), is( false ) );
+        assertThat( this.column.getScale( getTransaction() ), is( RelationalConstants.DEFAULT_SCALE ) );
+        assertThat( this.column.hasProperty( getTransaction(), StandardDdlLexicon.DATATYPE_SCALE ), is( false ) );
     }
 
     @Test
     public void shouldHaveMoreRawProperties() throws Exception {
-        final String[] filteredProps = this.column.getPropertyNames( this.uow );
-        final String[] rawProps = this.column.getRawPropertyNames( this.uow );
+        final String[] filteredProps = this.column.getPropertyNames( getTransaction() );
+        final String[] rawProps = this.column.getRawPropertyNames( getTransaction() );
         assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
     }
 
     @Test
     public void shouldHaveNullablePropertyDefaultValueAfterConstruction() throws Exception {
-        assertThat( this.column.hasProperty( this.uow, StandardDdlLexicon.NULLABLE ), is( true ) );
-        assertThat( this.column.getNullable( this.uow ), is( RelationalConstants.Nullable.DEFAULT_VALUE ) );
-        assertThat( this.column.getProperty( this.uow, StandardDdlLexicon.NULLABLE ).getStringValue( this.uow ),
+        assertThat( this.column.hasProperty( getTransaction(), StandardDdlLexicon.NULLABLE ), is( true ) );
+        assertThat( this.column.getNullable( getTransaction() ), is( RelationalConstants.Nullable.DEFAULT_VALUE ) );
+        assertThat( this.column.getProperty( getTransaction(), StandardDdlLexicon.NULLABLE ).getStringValue( getTransaction() ),
                     is( RelationalConstants.Nullable.DEFAULT_VALUE.toValue() ) );
     }
 
     @Test
     public void shouldHaveParentResultSet() throws Exception {
-        assertThat( this.column.getParent( this.uow ), is( instanceOf( TabularResultSet.class ) ) );
-        assertThat( this.column.getParent( this.uow ), is( ( KomodoObject )this.resultSet ) );
+        assertThat( this.column.getParent( getTransaction() ), is( instanceOf( TabularResultSet.class ) ) );
+        assertThat( this.column.getParent( getTransaction() ), is( ( KomodoObject )this.resultSet ) );
     }
 
     @Test( expected = UnsupportedOperationException.class )
     public void shouldNotAllowChildren() throws Exception {
-        this.column.addChild( this.uow, "blah", null );
+        this.column.addChild( getTransaction(), "blah", null );
     }
 
     @Test
     public void shouldNotContainFilteredProperties() throws Exception {
-        final String[] filteredProps = this.column.getPropertyNames( this.uow );
+        final String[] filteredProps = this.column.getPropertyNames( getTransaction() );
         final Filter[] filters = this.column.getFilters();
 
         for ( final String name : filteredProps ) {
@@ -180,111 +180,111 @@ public final class ResultSetColumnImplTest extends RelationalModelTest {
 
     @Test
     public void shouldNotCountStatementOptionsAsChildren() throws Exception {
-        this.column.setUuid( this.uow, "elvis" );
-        this.column.setStatementOption( this.uow, "sledge", "hammer" );
-        assertThat( this.column.getChildren( this.uow ).length, is( 0 ) );
+        this.column.setUuid( getTransaction(), "elvis" );
+        this.column.setStatementOption( getTransaction(), "sledge", "hammer" );
+        assertThat( this.column.getChildren( getTransaction() ).length, is( 0 ) );
     }
 
     @Test
     public void shouldNotHaveDefaultValueAfterConstruction() throws Exception {
-        assertThat( this.column.getDefaultValue( this.uow ), is( nullValue() ) );
-        assertThat( this.column.hasProperty( this.uow, StandardDdlLexicon.DEFAULT_VALUE ), is( false ) );
+        assertThat( this.column.getDefaultValue( getTransaction() ), is( nullValue() ) );
+        assertThat( this.column.hasProperty( getTransaction(), StandardDdlLexicon.DEFAULT_VALUE ), is( false ) );
     }
 
     @Test
     public void shouldRemoveDefaultValueWithEmptyString() throws Exception {
-        this.column.setDefaultValue( this.uow, "defaultValue" );
-        this.column.setDefaultValue( this.uow, StringConstants.EMPTY_STRING );
-        assertThat( this.column.getDefaultValue( this.uow ), is( nullValue() ) );
-        assertThat( this.column.hasProperty( this.uow, StandardDdlLexicon.DEFAULT_VALUE ), is( false ) );
+        this.column.setDefaultValue( getTransaction(), "defaultValue" );
+        this.column.setDefaultValue( getTransaction(), StringConstants.EMPTY_STRING );
+        assertThat( this.column.getDefaultValue( getTransaction() ), is( nullValue() ) );
+        assertThat( this.column.hasProperty( getTransaction(), StandardDdlLexicon.DEFAULT_VALUE ), is( false ) );
     }
 
     @Test
     public void shouldRemoveDefaultValueWithNull() throws Exception {
-        this.column.setDefaultValue( this.uow, "defaultValue" );
-        this.column.setDefaultValue( this.uow, null );
-        assertThat( this.column.getDefaultValue( this.uow ), is( nullValue() ) );
-        assertThat( this.column.hasProperty( this.uow, StandardDdlLexicon.DEFAULT_VALUE ), is( false ) );
+        this.column.setDefaultValue( getTransaction(), "defaultValue" );
+        this.column.setDefaultValue( getTransaction(), null );
+        assertThat( this.column.getDefaultValue( getTransaction() ), is( nullValue() ) );
+        assertThat( this.column.hasProperty( getTransaction(), StandardDdlLexicon.DEFAULT_VALUE ), is( false ) );
     }
 
     @Test
     public void shouldSetDatatypeLengthProperty() throws Exception {
         final long value = ( RelationalConstants.DEFAULT_LENGTH + 10 );
-        this.column.setLength( this.uow, value );
-        assertThat( this.column.getLength( this.uow ), is( value ) );
-        assertThat( this.column.getProperty( this.uow, StandardDdlLexicon.DATATYPE_LENGTH ).getLongValue( this.uow ), is( value ) );
+        this.column.setLength( getTransaction(), value );
+        assertThat( this.column.getLength( getTransaction() ), is( value ) );
+        assertThat( this.column.getProperty( getTransaction(), StandardDdlLexicon.DATATYPE_LENGTH ).getLongValue( getTransaction() ), is( value ) );
     }
 
     @Test
     public void shouldSetDatatypeNameProperty() throws Exception {
         final String value = "datatypename";
-        this.column.setDatatypeName( this.uow, value );
-        assertThat( this.column.getDatatypeName( this.uow ), is( value ) );
-        assertThat( this.column.getProperty( this.uow, StandardDdlLexicon.DATATYPE_NAME ).getStringValue( this.uow ), is( value ) );
+        this.column.setDatatypeName( getTransaction(), value );
+        assertThat( this.column.getDatatypeName( getTransaction() ), is( value ) );
+        assertThat( this.column.getProperty( getTransaction(), StandardDdlLexicon.DATATYPE_NAME ).getStringValue( getTransaction() ), is( value ) );
     }
 
     @Test
     public void shouldSetDatatypePrecisionProperty() throws Exception {
         final long value = 10;
-        this.column.setPrecision( this.uow, value );
-        assertThat( this.column.getPrecision( this.uow ), is( value ) );
-        assertThat( this.column.getProperty( this.uow, StandardDdlLexicon.DATATYPE_PRECISION ).getLongValue( this.uow ),
+        this.column.setPrecision( getTransaction(), value );
+        assertThat( this.column.getPrecision( getTransaction() ), is( value ) );
+        assertThat( this.column.getProperty( getTransaction(), StandardDdlLexicon.DATATYPE_PRECISION ).getLongValue( getTransaction() ),
                     is( value ) );
     }
 
     @Test
     public void shouldSetDatatypeScaleProperty() throws Exception {
         final long value = 10;
-        this.column.setScale( this.uow, value );
-        assertThat( this.column.getScale( this.uow ), is( value ) );
-        assertThat( this.column.getProperty( this.uow, StandardDdlLexicon.DATATYPE_SCALE ).getLongValue( this.uow ),
+        this.column.setScale( getTransaction(), value );
+        assertThat( this.column.getScale( getTransaction() ), is( value ) );
+        assertThat( this.column.getProperty( getTransaction(), StandardDdlLexicon.DATATYPE_SCALE ).getLongValue( getTransaction() ),
                     is( value ) );
     }
 
     @Test
     public void shouldSetDefaultValueProperty() throws Exception {
         final String value = "defaultvalue";
-        this.column.setDefaultValue( this.uow, value );
-        assertThat( this.column.getDefaultValue( this.uow ), is( value ) );
-        assertThat( this.column.getProperty( this.uow, StandardDdlLexicon.DEFAULT_VALUE ).getStringValue( this.uow ), is( value ) );
+        this.column.setDefaultValue( getTransaction(), value );
+        assertThat( this.column.getDefaultValue( getTransaction() ), is( value ) );
+        assertThat( this.column.getProperty( getTransaction(), StandardDdlLexicon.DEFAULT_VALUE ).getStringValue( getTransaction() ), is( value ) );
     }
 
     @Test
     public void shouldSetDescription() throws Exception {
         final String value = "description";
-        this.column.setDescription( this.uow, value );
-        assertThat( this.column.getDescription( this.uow ), is( value ) );
+        this.column.setDescription( getTransaction(), value );
+        assertThat( this.column.getDescription( getTransaction() ), is( value ) );
     }
 
     @Test
     public void shouldSetNameInSource() throws Exception {
         final String value = "nameInSource";
-        this.column.setNameInSource( this.uow, value );
-        assertThat( this.column.getNameInSource( this.uow ), is( value ) );
+        this.column.setNameInSource( getTransaction(), value );
+        assertThat( this.column.getNameInSource( getTransaction() ), is( value ) );
     }
 
     @Test
     public void shouldSetNullableProperty() throws Exception {
         final Nullable value = Nullable.NO_NULLS;
-        this.column.setNullable( this.uow, value );
-        assertThat( this.column.getNullable( this.uow ), is( value ) );
-        assertThat( this.column.getProperty( this.uow, StandardDdlLexicon.NULLABLE ).getStringValue( this.uow ),
+        this.column.setNullable( getTransaction(), value );
+        assertThat( this.column.getNullable( getTransaction() ), is( value ) );
+        assertThat( this.column.getProperty( getTransaction(), StandardDdlLexicon.NULLABLE ).getStringValue( getTransaction() ),
                     is( value.toValue() ) );
     }
 
     @Test
     public void shouldSetUuid() throws Exception {
         final String value = "uuid";
-        this.column.setUuid( this.uow, value );
-        assertThat( this.column.getUuid( this.uow ), is( value ) );
+        this.column.setUuid( getTransaction(), value );
+        assertThat( this.column.getUuid( getTransaction() ), is( value ) );
     }
 
     @Test
     public void shouldIncludeCustomOptionsWithPropertyDescriptors() throws Exception {
         final String customName = "blah";
-        this.column.setStatementOption( this.uow, customName, "elvis" );
+        this.column.setStatementOption( getTransaction(), customName, "elvis" );
 
-        final PropertyDescriptor[] propDescriptors = this.column.getPropertyDescriptors( this.uow );
+        final PropertyDescriptor[] propDescriptors = this.column.getPropertyDescriptors( getTransaction() );
         boolean found = false;
 
         for ( final PropertyDescriptor descriptor : propDescriptors ) {
@@ -302,14 +302,14 @@ public final class ResultSetColumnImplTest extends RelationalModelTest {
     @Test
     public void shouldIncludeOptionsWithPropertyNames() throws Exception {
         final String custom = "blah";
-        this.column.setStatementOption( this.uow, custom, "sledge" );
+        this.column.setStatementOption( getTransaction(), custom, "sledge" );
         boolean customFound = false;
 
         final String standard = this.column.getStandardOptionNames()[0];
-        this.column.setStatementOption( this.uow, standard, "hammer" );
+        this.column.setStatementOption( getTransaction(), standard, "hammer" );
         boolean standardFound = false;
 
-        for ( final String prop : this.column.getPropertyNames( this.uow ) ) {
+        for ( final String prop : this.column.getPropertyNames( getTransaction() ) ) {
             if ( custom.equals( prop ) ) {
                 if ( customFound ) {
                     fail( "Custom option included multiple times in property names" );
@@ -341,7 +341,7 @@ public final class ResultSetColumnImplTest extends RelationalModelTest {
     @Test
     public void shouldIncludeStandardOptionsWithPrimaryTypePropertyDescriptors() throws Exception {
         final String[] optionNames = this.column.getStandardOptionNames();
-        final PropertyDescriptor[] propDescriptors = this.column.getPrimaryType( this.uow ).getPropertyDescriptors( this.uow );
+        final PropertyDescriptor[] propDescriptors = this.column.getPrimaryType( getTransaction() ).getPropertyDescriptors( getTransaction() );
 
         for ( final String optionName : optionNames ) {
             boolean found = false;
@@ -362,7 +362,7 @@ public final class ResultSetColumnImplTest extends RelationalModelTest {
     @Test
     public void shouldIncludeStandardOptionsWithPropertyDescriptors() throws Exception {
         final String[] optionNames = this.column.getStandardOptionNames();
-        final PropertyDescriptor[] propDescriptors = this.column.getPropertyDescriptors( this.uow );
+        final PropertyDescriptor[] propDescriptors = this.column.getPropertyDescriptors( getTransaction() );
 
         for ( final String optionName : optionNames ) {
             boolean found = false;
@@ -383,89 +383,89 @@ public final class ResultSetColumnImplTest extends RelationalModelTest {
     @Test
     public void shouldObtainCustomOptions() throws Exception {
         final String sledge = "sledge";
-        this.column.setStatementOption( this.uow, sledge, "hammer" );
+        this.column.setStatementOption( getTransaction(), sledge, "hammer" );
 
         final String elvis = "elvis";
-        this.column.setStatementOption( this.uow, elvis, "presley" );
+        this.column.setStatementOption( getTransaction(), elvis, "presley" );
 
-        assertThat( this.column.getCustomOptions( this.uow ).length, is( 2 ) );
-        assertThat( Arrays.asList( this.column.getStatementOptionNames( this.uow ) ), hasItems( sledge, elvis ) );
+        assertThat( this.column.getCustomOptions( getTransaction() ).length, is( 2 ) );
+        assertThat( Arrays.asList( this.column.getStatementOptionNames( getTransaction() ) ), hasItems( sledge, elvis ) );
     }
 
     @Test
     public void shouldObtainPropertyDescriptorOfCustomOption() throws Exception {
         final String custom = "sledge";
-        this.column.setStatementOption( this.uow, custom, "hammer" );
+        this.column.setStatementOption( getTransaction(), custom, "hammer" );
 
-        assertThat( this.column.getPropertyDescriptor( this.uow, custom ), is( notNullValue() ) );
-        assertThat( this.column.getPropertyDescriptor( this.uow, custom ).getName(), is( custom ) );
+        assertThat( this.column.getPropertyDescriptor( getTransaction(), custom ), is( notNullValue() ) );
+        assertThat( this.column.getPropertyDescriptor( getTransaction(), custom ).getName(), is( custom ) );
     }
 
     @Test
     public void shouldObtainPropertyDescriptorOfStandardOption() throws Exception {
         final String standard = this.column.getStandardOptionNames()[0];
-        this.column.setStatementOption( this.uow, standard, "blah" );
+        this.column.setStatementOption( getTransaction(), standard, "blah" );
 
-        assertThat( this.column.getPropertyDescriptor( this.uow, standard ), is( notNullValue() ) );
-        assertThat( this.column.getPropertyDescriptor( this.uow, standard ).getName(), is( standard ) );
+        assertThat( this.column.getPropertyDescriptor( getTransaction(), standard ), is( notNullValue() ) );
+        assertThat( this.column.getPropertyDescriptor( getTransaction(), standard ).getName(), is( standard ) );
     }
 
     @Test
     public void shouldObtainStatementOptionNames() throws Exception {
         final String custom = "blah";
-        this.column.setStatementOption( this.uow, custom, "sledge" );
+        this.column.setStatementOption( getTransaction(), custom, "sledge" );
 
         final String standard = this.column.getStandardOptionNames()[0];
-        this.column.setStatementOption( this.uow, standard, "hammer" );
+        this.column.setStatementOption( getTransaction(), standard, "hammer" );
 
-        assertThat( this.column.getStatementOptionNames( this.uow ).length, is( 2 ) );
-        assertThat( Arrays.asList( this.column.getStatementOptionNames( this.uow ) ), hasItems( custom, standard ) );
+        assertThat( this.column.getStatementOptionNames( getTransaction() ).length, is( 2 ) );
+        assertThat( Arrays.asList( this.column.getStatementOptionNames( getTransaction() ) ), hasItems( custom, standard ) );
     }
 
     @Test
     public void shouldRemoveStandardOptionAsIfProperty() throws Exception {
         final String option = this.column.getStandardOptionNames()[0];
         final String value = "newValue";
-        this.column.setProperty( this.uow, option, value ); // add
-        this.column.setProperty( this.uow, option, (Object)null ); // remove
-        assertThat( this.column.hasProperty( this.uow, option ), is( false ) );
-        assertThat( this.column.hasChild( this.uow, option ), is( false ) );
+        this.column.setProperty( getTransaction(), option, value ); // add
+        this.column.setProperty( getTransaction(), option, (Object)null ); // remove
+        assertThat( this.column.hasProperty( getTransaction(), option ), is( false ) );
+        assertThat( this.column.hasChild( getTransaction(), option ), is( false ) );
     }
 
     @Test
     public void shouldSetCustomOptionAsIfProperty() throws Exception {
         final String option = "blah";
-        this.column.setStatementOption( this.uow, option, "initialValue" );
+        this.column.setStatementOption( getTransaction(), option, "initialValue" );
 
         final String value = "newValue";
-        this.column.setProperty( this.uow, option, value );
+        this.column.setProperty( getTransaction(), option, value );
 
-        assertThat( this.column.hasProperty( this.uow, option ), is( true ) );
-        assertThat( this.column.getProperty( this.uow, option ), is( instanceOf( StatementOption.class ) ) );
-        assertThat( this.column.getStatementOptions( this.uow ).length, is( 1 ) );
-        assertThat( this.column.isCustomOption( this.uow, option ), is( true ) );
+        assertThat( this.column.hasProperty( getTransaction(), option ), is( true ) );
+        assertThat( this.column.getProperty( getTransaction(), option ), is( instanceOf( StatementOption.class ) ) );
+        assertThat( this.column.getStatementOptions( getTransaction() ).length, is( 1 ) );
+        assertThat( this.column.isCustomOption( getTransaction(), option ), is( true ) );
 
-        final StatementOption statementOption = this.column.getStatementOptions( this.uow )[0];
-        assertThat( statementOption.getName( this.uow ), is( option ) );
-        assertThat( statementOption.getValue( this.uow ), is( ( Object )value ) );
+        final StatementOption statementOption = this.column.getStatementOptions( getTransaction() )[0];
+        assertThat( statementOption.getName( getTransaction() ), is( option ) );
+        assertThat( statementOption.getValue( getTransaction() ), is( ( Object )value ) );
     }
 
     @Test
     public void shouldSetStandardOptionAsIfProperty() throws Exception {
         final String option = this.column.getStandardOptionNames()[0];
-        this.column.setStatementOption( this.uow, option, "initialValue" );
+        this.column.setStatementOption( getTransaction(), option, "initialValue" );
 
         final String value = "newValue";
-        this.column.setProperty( this.uow, option, value );
+        this.column.setProperty( getTransaction(), option, value );
 
-        assertThat( this.column.hasProperty( this.uow, option ), is( true ) );
-        assertThat( this.column.getProperty( this.uow, option ), is( instanceOf( StatementOption.class ) ) );
-        assertThat( this.column.isCustomOption( this.uow, option ), is( false ) );
-        assertThat( this.column.getStatementOptions( this.uow ).length, is( 1 ) );
+        assertThat( this.column.hasProperty( getTransaction(), option ), is( true ) );
+        assertThat( this.column.getProperty( getTransaction(), option ), is( instanceOf( StatementOption.class ) ) );
+        assertThat( this.column.isCustomOption( getTransaction(), option ), is( false ) );
+        assertThat( this.column.getStatementOptions( getTransaction() ).length, is( 1 ) );
 
-        final StatementOption statementOption = this.column.getStatementOptions( this.uow )[0];
-        assertThat( statementOption.getName( this.uow ), is( option ) );
-        assertThat( statementOption.getValue( this.uow ), is( ( Object )value ) );
+        final StatementOption statementOption = this.column.getStatementOptions( getTransaction() )[0];
+        assertThat( statementOption.getName( getTransaction() ), is( option ) );
+        assertThat( statementOption.getValue( getTransaction() ), is( ( Object )value ) );
     }
 
     /*
@@ -477,16 +477,16 @@ public final class ResultSetColumnImplTest extends RelationalModelTest {
     @Test
     public void shouldCreateUsingResolver() throws Exception {
         final String name = "blah";
-        final KomodoObject kobject = ResultSetColumn.RESOLVER.create( this.uow, _repo, this.resultSet, name, null );
+        final KomodoObject kobject = ResultSetColumn.RESOLVER.create( getTransaction(), _repo, this.resultSet, name, null );
         assertThat( kobject, is( notNullValue() ) );
         assertThat( kobject, is( instanceOf( ResultSetColumn.class ) ) );
-        assertThat( kobject.getName( this.uow ), is( name ) );
+        assertThat( kobject.getName( getTransaction() ), is( name ) );
     }
 
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
-        final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        ResultSetColumn.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
+        final KomodoObject bogusParent = _repo.add( getTransaction(), null, "bogus", null );
+        ResultSetColumn.RESOLVER.create( getTransaction(), _repo, bogusParent, "blah", null );
     }
 
 }

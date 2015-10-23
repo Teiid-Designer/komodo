@@ -15,9 +15,9 @@
  */
 package org.komodo.relational.commands.vdb;
 
+import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.FileWriter;
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.vdb.Entry;
@@ -32,18 +32,11 @@ import org.komodo.shell.api.CommandResult;
 @SuppressWarnings("javadoc")
 public class AddEntryCommandTest extends AbstractCommandTest {
 
-    /**
-	 * Test for AddEntryCommand
-	 */
-	public AddEntryCommandTest( ) {
-		super();
-	}
-
     @Test
     public void testAdd1() throws Exception {
         File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
         cmdFile.deleteOnExit();
-        
+
         FileWriter writer = new FileWriter(cmdFile);
         writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
         writer.write("create-vdb myVdb vdbPath" + NEW_LINE);  //$NON-NLS-1$
@@ -51,19 +44,19 @@ public class AddEntryCommandTest extends AbstractCommandTest {
         writer.write("add-entry myEntry entryPath" + NEW_LINE);  //$NON-NLS-1$
         writer.close();
 
-        setup(cmdFile.getAbsolutePath(), AddEntryCommand.class);
+        setup( cmdFile.getAbsolutePath() );
 
         CommandResult result = execute();
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
-        Vdb[] vdbs = wkspMgr.findVdbs(uow);
-        
+        Vdb[] vdbs = wkspMgr.findVdbs(getTransaction());
+
         assertEquals(1, vdbs.length);
-        
-        Entry[] entries = vdbs[0].getEntries(uow);
+
+        Entry[] entries = vdbs[0].getEntries(getTransaction());
         assertEquals(1, entries.length);
-        assertEquals("myEntry", entries[0].getName(uow)); //$NON-NLS-1$
+        assertEquals("myEntry", entries[0].getName(getTransaction())); //$NON-NLS-1$
     }
 
 }

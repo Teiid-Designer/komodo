@@ -13,40 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.komodo.shell;
+package org.komodo.shell.commands;
 
-import java.io.File;
-import java.io.FileWriter;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
+import org.komodo.shell.AbstractCommandTest;
 import org.komodo.shell.api.CommandResult;
-import org.komodo.shell.commands.RenameCommand;
 import org.komodo.shell.util.KomodoObjectUtils;
 
 /**
- * Test Class to test RenameCommand
- *
+ * Test class for {@link CommitCommand}.
  */
-@SuppressWarnings("javadoc")
-public class RenameCommandTest extends AbstractCommandTest {
-
-    /**
-	 * Test for RenameCommand
-	 */
-	public RenameCommandTest( ) {
-		super();
-	}
+@SuppressWarnings( { "javadoc", "nls" } )
+public class CommitCommandTest extends AbstractCommandTest {
 
     @Test
     public void test1() throws Exception {
-        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
-        cmdFile.deleteOnExit();
-        
-        FileWriter writer = new FileWriter(cmdFile);
-        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
-        writer.close();
-        
-    	setup(cmdFile.getAbsolutePath(), RenameCommand.class);
+        final String[] commands = { "workspace",
+                                    "commit" };
+    	setup( commands );
 
         CommandResult result = execute();
         assertCommandResultOk(result);

@@ -36,18 +36,11 @@ import org.komodo.shell.api.CommandResult;
 @SuppressWarnings("javadoc")
 public class AddConstraintColumnCommandTest extends AbstractCommandTest {
 
-    /**
-	 * Test for AddParameterCommand
-	 */
-	public AddConstraintColumnCommandTest( ) {
-		super();
-	}
-
     @Test
     public void testAdd1() throws Exception {
         File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
         cmdFile.deleteOnExit();
-        
+
         FileWriter writer = new FileWriter(cmdFile);
         writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
         writer.write("create-vdb myVdb vdbPath" + NEW_LINE);  //$NON-NLS-1$
@@ -70,37 +63,37 @@ public class AddConstraintColumnCommandTest extends AbstractCommandTest {
         writer.write("add-column /workspace/myVdb/myModel/myTable/myCol1" + NEW_LINE);  //$NON-NLS-1$
         writer.close();
 
-        setup(cmdFile.getAbsolutePath(), AddConstraintColumnCommand.class);
+        setup( cmdFile.getAbsolutePath() );
 
         CommandResult result = execute();
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
-        Vdb[] vdbs = wkspMgr.findVdbs(uow);
-        
+        Vdb[] vdbs = wkspMgr.findVdbs(getTransaction());
+
         assertEquals(1, vdbs.length);
-        
-        Model[] models = vdbs[0].getModels(uow);
+
+        Model[] models = vdbs[0].getModels(getTransaction());
         assertEquals(2, models.length);
-        
+
         Model modelWithFk = models[0];
-        if(!modelWithFk.getName(uow).equals("myModel")) { //$NON-NLS-1$
+        if(!modelWithFk.getName(getTransaction()).equals("myModel")) { //$NON-NLS-1$
             modelWithFk = models[1];
         }
-        assertEquals("myModel", modelWithFk.getName(uow)); //$NON-NLS-1$
-        
-        Table[] tables = modelWithFk.getTables(uow);
+        assertEquals("myModel", modelWithFk.getName(getTransaction())); //$NON-NLS-1$
+
+        Table[] tables = modelWithFk.getTables(getTransaction());
         assertEquals(1, tables.length);
-        assertEquals("myTable", tables[0].getName(uow)); //$NON-NLS-1$
-        
-        ForeignKey[] fks = tables[0].getForeignKeys(uow);
+        assertEquals("myTable", tables[0].getName(getTransaction())); //$NON-NLS-1$
+
+        ForeignKey[] fks = tables[0].getForeignKeys(getTransaction());
         assertEquals(1, fks.length);
-        assertEquals("myForeignKey", fks[0].getName(uow)); //$NON-NLS-1$
-        
+        assertEquals("myForeignKey", fks[0].getName(getTransaction())); //$NON-NLS-1$
+
         TableConstraint tConstraint = fks[0];
-        Column[] cols = tConstraint.getColumns(uow);
+        Column[] cols = tConstraint.getColumns(getTransaction());
         assertEquals(1, cols.length);
-        assertEquals("myCol1", cols[0].getName(uow)); //$NON-NLS-1$
+        assertEquals("myCol1", cols[0].getName(getTransaction())); //$NON-NLS-1$
     }
 
 }

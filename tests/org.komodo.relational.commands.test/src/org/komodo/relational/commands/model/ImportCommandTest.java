@@ -15,9 +15,9 @@
  */
 package org.komodo.relational.commands.model;
 
+import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.FileWriter;
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.shell.api.CommandResult;
@@ -30,18 +30,11 @@ import org.komodo.shell.util.KomodoObjectUtils;
 @SuppressWarnings("javadoc")
 public class ImportCommandTest extends AbstractCommandTest {
 
-    /**
-	 * Test for ImportCommand
-	 */
-	public ImportCommandTest( ) {
-		super();
-	}
-
     @Test
     public void testImportDdl1() throws Exception {
         File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
         cmdFile.deleteOnExit();
-        
+
         FileWriter writer = new FileWriter(cmdFile);
         writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
         writer.write("create-vdb myVdb vdbPath" + NEW_LINE);  //$NON-NLS-1$
@@ -49,8 +42,8 @@ public class ImportCommandTest extends AbstractCommandTest {
         writer.write("add-model myModel " + NEW_LINE);  //$NON-NLS-1$
         writer.write("cd myModel" + NEW_LINE);  //$NON-NLS-1$
         writer.close();
-        
-        setup(cmdFile.getAbsolutePath(), ImportCommand.class);
+
+        setup( cmdFile.getAbsolutePath() );
 
         CommandResult result = execute();
         assertCommandResultOk(result);

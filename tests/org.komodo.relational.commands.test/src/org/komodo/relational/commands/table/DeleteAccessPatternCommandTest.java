@@ -15,9 +15,9 @@
  */
 package org.komodo.relational.commands.table;
 
+import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.FileWriter;
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.AccessPattern;
@@ -34,18 +34,11 @@ import org.komodo.shell.api.CommandResult;
 @SuppressWarnings("javadoc")
 public class DeleteAccessPatternCommandTest extends AbstractCommandTest {
 
-    /**
-	 * Test for DeleteAccessPatternCommand
-	 */
-	public DeleteAccessPatternCommandTest( ) {
-		super();
-	}
-
     @Test
     public void testDelete1() throws Exception {
         File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
         cmdFile.deleteOnExit();
-        
+
         FileWriter writer = new FileWriter(cmdFile);
         writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
         writer.write("create-vdb myVdb vdbPath" + NEW_LINE);  //$NON-NLS-1$
@@ -59,27 +52,27 @@ public class DeleteAccessPatternCommandTest extends AbstractCommandTest {
         writer.write("delete-access-pattern myAccessPattern1" + NEW_LINE);  //$NON-NLS-1$
         writer.close();
 
-        setup(cmdFile.getAbsolutePath(), DeleteAccessPatternCommand.class);
+        setup( cmdFile.getAbsolutePath() );
 
         CommandResult result = execute();
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
-        Vdb[] vdbs = wkspMgr.findVdbs(uow);
-        
+        Vdb[] vdbs = wkspMgr.findVdbs(getTransaction());
+
         assertEquals(1, vdbs.length);
-        
-        Model[] models = vdbs[0].getModels(uow);
+
+        Model[] models = vdbs[0].getModels(getTransaction());
         assertEquals(1, models.length);
-        assertEquals("myModel", models[0].getName(uow)); //$NON-NLS-1$
-        
-        Table[] tables = models[0].getTables(uow);
+        assertEquals("myModel", models[0].getName(getTransaction())); //$NON-NLS-1$
+
+        Table[] tables = models[0].getTables(getTransaction());
         assertEquals(1, tables.length);
-        assertEquals("myTable", tables[0].getName(uow)); //$NON-NLS-1$
-        
-        AccessPattern[] accessPatterns = tables[0].getAccessPatterns(uow);
+        assertEquals("myTable", tables[0].getName(getTransaction())); //$NON-NLS-1$
+
+        AccessPattern[] accessPatterns = tables[0].getAccessPatterns(getTransaction());
         assertEquals(1, accessPatterns.length);
-        assertEquals("myAccessPattern2", accessPatterns[0].getName(uow)); //$NON-NLS-1$
+        assertEquals("myAccessPattern2", accessPatterns[0].getName(getTransaction())); //$NON-NLS-1$
     }
 
 }

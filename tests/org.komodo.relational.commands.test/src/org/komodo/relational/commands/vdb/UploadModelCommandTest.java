@@ -15,8 +15,6 @@
  */
 package org.komodo.relational.commands.vdb;
 
-import java.io.File;
-import java.io.FileWriter;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
@@ -25,47 +23,32 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test UploadModelCommand
- *
+ * Test Class to test {@link UploadModelCommand}.
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( { "javadoc", "nls" } )
 public class UploadModelCommandTest extends AbstractCommandTest {
 
-    private static final String UPLOAD_MODEL = "./resources/PartsOracle.ddl"; //$NON-NLS-1$
-
-    /**
-	 * Test for UploadModelCommand
-	 */
-	public UploadModelCommandTest( ) {
-		super();
-	}
+    private static final String UPLOAD_MODEL = "./resources/PartsOracle.ddl";
 
     @Test
     public void testUploadModel1() throws Exception {
-        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
-        cmdFile.deleteOnExit();
-        
-        FileWriter writer = new FileWriter(cmdFile);
-        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("create-vdb testVdb vdbPath" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd testVdb" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("upload-model myModel " + UPLOAD_MODEL + NEW_LINE); //$NON-NLS-1$ 
-
-        writer.close();
-        
-        setup(cmdFile.getAbsolutePath(), SetVdbPropertyCommand.class);
+        final String[] commands = { "workspace",
+                                    "create-vdb testVdb vdbPath",
+                                    "cd testVdb",
+                                    "upload-model myModel " + UPLOAD_MODEL };
+        setup( commands );
 
         CommandResult result = execute();
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
-        Vdb[] vdbs = wkspMgr.findVdbs(uow);
-        
+        Vdb[] vdbs = wkspMgr.findVdbs( getTransaction() );
+
         assertEquals(1, vdbs.length);
-        assertEquals("testVdb", vdbs[0].getName(uow)); //$NON-NLS-1$
-        
-        assertEquals(1, vdbs[0].getModels(uow).length);
-        assertEquals("myModel", vdbs[0].getModels(uow)[0].getName(uow)); //$NON-NLS-1$
+        assertEquals("testVdb", vdbs[0].getName( getTransaction() ));
+
+        assertEquals(1, vdbs[0].getModels( getTransaction() ).length);
+        assertEquals("myModel", vdbs[0].getModels( getTransaction() )[0].getName( getTransaction() ));
     }
 
 }

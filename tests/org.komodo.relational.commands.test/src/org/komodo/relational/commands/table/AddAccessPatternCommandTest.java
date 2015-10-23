@@ -15,8 +15,6 @@
  */
 package org.komodo.relational.commands.table;
 
-import java.io.File;
-import java.io.FileWriter;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
@@ -28,56 +26,42 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test AddAccessPatternCommand
- *
+ * Test Class for {@link AddAccessPatternCommand}.
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( { "javadoc", "nls" } )
 public class AddAccessPatternCommandTest extends AbstractCommandTest {
-
-    /**
-	 * Test for AddAccessPatternCommand
-	 */
-	public AddAccessPatternCommandTest( ) {
-		super();
-	}
 
     @Test
     public void testAdd1() throws Exception {
-        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
-        cmdFile.deleteOnExit();
-        
-        FileWriter writer = new FileWriter(cmdFile);
-        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("create-vdb myVdb vdbPath" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd myVdb" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-model myModel" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd myModel" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-table myTable" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd myTable" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-access-pattern myAccessPattern" + NEW_LINE);  //$NON-NLS-1$
-        writer.close();
-
-        setup(cmdFile.getAbsolutePath(), AddAccessPatternCommand.class);
+        final String[] commands = { "workspace",
+                                    "create-vdb myVdb vdbPath",
+                                    "cd myVdb",
+                                    "add-model myModel",
+                                    "cd myModel",
+                                    "add-table myTable",
+                                    "cd myTable",
+                                    "add-access-pattern myAccessPattern" };
+        setup(commands);
 
         CommandResult result = execute();
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
-        Vdb[] vdbs = wkspMgr.findVdbs(uow);
-        
+        Vdb[] vdbs = wkspMgr.findVdbs(getTransaction());
+
         assertEquals(1, vdbs.length);
-        
-        Model[] models = vdbs[0].getModels(uow);
+
+        Model[] models = vdbs[0].getModels(getTransaction());
         assertEquals(1, models.length);
-        assertEquals("myModel", models[0].getName(uow)); //$NON-NLS-1$
-        
-        Table[] tables = models[0].getTables(uow);
+        assertEquals("myModel", models[0].getName(getTransaction()));
+
+        Table[] tables = models[0].getTables(getTransaction());
         assertEquals(1, tables.length);
-        assertEquals("myTable", tables[0].getName(uow)); //$NON-NLS-1$
-        
-        AccessPattern[] accessPatterns = tables[0].getAccessPatterns(uow);
+        assertEquals("myTable", tables[0].getName(getTransaction()));
+
+        AccessPattern[] accessPatterns = tables[0].getAccessPatterns(getTransaction());
         assertEquals(1, accessPatterns.length);
-        assertEquals("myAccessPattern", accessPatterns[0].getName(uow)); //$NON-NLS-1$
+        assertEquals("myAccessPattern", accessPatterns[0].getName(getTransaction()));
     }
 
 }

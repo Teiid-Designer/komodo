@@ -48,8 +48,8 @@ public final class ParameterImplTest extends RelationalModelTest {
     @Before
     public void init() throws Exception {
         final Model model = createModel();
-        this.procedure = model.addVirtualProcedure( this.uow, "procedure" );
-        this.parameter = this.procedure.addParameter( this.uow, NAME );
+        this.procedure = model.addVirtualProcedure( getTransaction(), "procedure" );
+        this.parameter = this.procedure.addParameter( getTransaction(), NAME );
         commit();
     }
 
@@ -57,40 +57,40 @@ public final class ParameterImplTest extends RelationalModelTest {
     public void shouldAddStatementOption() throws Exception {
         final String name = "statementoption";
         final String value = "statementvalue";
-        final StatementOption statementOption = this.parameter.setStatementOption( this.uow, name, value );
+        final StatementOption statementOption = this.parameter.setStatementOption( getTransaction(), name, value );
         assertThat( statementOption, is( notNullValue() ) );
-        assertThat( statementOption.getName( this.uow ), is( name ) );
-        assertThat( statementOption.getOption( this.uow ), is( value ) );
+        assertThat( statementOption.getName( getTransaction() ), is( name ) );
+        assertThat( statementOption.getOption( getTransaction() ), is( value ) );
     }
 
     @Test
     public void shouldAllowEmptyDatatypeName() throws Exception {
-        this.parameter.setDatatypeName( this.uow, StringConstants.EMPTY_STRING );
+        this.parameter.setDatatypeName( getTransaction(), StringConstants.EMPTY_STRING );
     }
 
     @Test
     public void shouldAllowEmptyDefaultValue() throws Exception {
-        this.parameter.setDefaultValue( this.uow, StringConstants.EMPTY_STRING );
+        this.parameter.setDefaultValue( getTransaction(), StringConstants.EMPTY_STRING );
     }
 
     @Test
     public void shouldAllowNullDatatypeName() throws Exception {
-        this.parameter.setDatatypeName( this.uow, null );
+        this.parameter.setDatatypeName( getTransaction(), null );
     }
 
     @Test
     public void shouldAllowNullDefaultValue() throws Exception {
-        this.parameter.setDefaultValue( this.uow, null );
+        this.parameter.setDefaultValue( getTransaction(), null );
     }
 
     @Test
     public void shouldAllowNullDirection() throws Exception {
-        this.parameter.setDirection( this.uow, null );
+        this.parameter.setDirection( getTransaction(), null );
     }
 
     @Test
     public void shouldAllowNullNullable() throws Exception {
-        this.parameter.setNullable( this.uow, null );
+        this.parameter.setNullable( getTransaction(), null );
     }
 
     @Test
@@ -100,24 +100,24 @@ public final class ParameterImplTest extends RelationalModelTest {
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingEmptyStatementOptionName() throws Exception {
-        this.parameter.setStatementOption( this.uow, StringConstants.EMPTY_STRING, "blah" );
+        this.parameter.setStatementOption( getTransaction(), StringConstants.EMPTY_STRING, "blah" );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingNullStatementOptionName() throws Exception {
-        this.parameter.setStatementOption( this.uow, null, "blah" );
+        this.parameter.setStatementOption( getTransaction(), null, "blah" );
     }
 
     @Test( expected = KException.class )
     public void shouldFailAddingNullStatementOptionValueWhenNeverAdded() throws Exception {
-        this.parameter.setStatementOption( this.uow, "blah", null );
+        this.parameter.setStatementOption( getTransaction(), "blah", null );
     }
 
     @Test
     public void shouldFailConstructionIfNotParameter() {
         if ( RelationalObjectImpl.VALIDATE_INITIAL_STATE ) {
             try {
-                new ParameterImpl( this.uow, _repo, this.procedure.getAbsolutePath() );
+                new ParameterImpl( getTransaction(), _repo, this.procedure.getAbsolutePath() );
                 fail();
             } catch ( final KException e ) {
                 // expected
@@ -127,22 +127,22 @@ public final class ParameterImplTest extends RelationalModelTest {
 
     @Test( expected = KException.class )
     public void shouldFailSettingEmptyStatementOptionValueWhenNeverAdded() throws Exception {
-        this.parameter.setStatementOption( this.uow, "blah", StringConstants.EMPTY_STRING );
+        this.parameter.setStatementOption( getTransaction(), "blah", StringConstants.EMPTY_STRING );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveEmptyStatementOptionName() throws Exception {
-        this.parameter.removeStatementOption( this.uow, StringConstants.EMPTY_STRING );
+        this.parameter.removeStatementOption( getTransaction(), StringConstants.EMPTY_STRING );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveNullStatementOptionName() throws Exception {
-        this.parameter.removeStatementOption( this.uow, null );
+        this.parameter.removeStatementOption( getTransaction(), null );
     }
 
     @Test( expected = KException.class )
     public void shouldFailTryingToRemoveUnknownStatementOption() throws Exception {
-        this.parameter.removeStatementOption( this.uow, "unknown" );
+        this.parameter.removeStatementOption( getTransaction(), "unknown" );
     }
 
     @Test
@@ -150,87 +150,87 @@ public final class ParameterImplTest extends RelationalModelTest {
         final int numStatementOptions = 5;
 
         for ( int i = 0; i < numStatementOptions; ++i ) {
-            this.parameter.setStatementOption( this.uow, "statementoption" + i, "statementvalue" + i );
+            this.parameter.setStatementOption( getTransaction(), "statementoption" + i, "statementvalue" + i );
         }
 
-        assertThat( this.parameter.getStatementOptions( this.uow ).length, is( numStatementOptions ) );
+        assertThat( this.parameter.getStatementOptions( getTransaction() ).length, is( numStatementOptions ) );
     }
 
     @Test
     public void shouldHaveCorrectDescriptor() throws Exception {
-        assertThat( this.parameter.hasDescriptor( this.uow, CreateProcedure.PARAMETER ), is( true ) );
+        assertThat( this.parameter.hasDescriptor( getTransaction(), CreateProcedure.PARAMETER ), is( true ) );
     }
 
     @Test
     public void shouldHaveCorrectTypeIdentifier() throws Exception {
-        assertThat(this.parameter.getTypeIdentifier( this.uow ), is(KomodoType.PARAMETER));
+        assertThat(this.parameter.getTypeIdentifier( getTransaction() ), is(KomodoType.PARAMETER));
     }
 
     @Test
     public void shouldHaveDatatypeLengthPropertyDefaultValueAfterConstruction() throws Exception {
-        assertThat( this.parameter.getLength( this.uow ), is( RelationalConstants.DEFAULT_LENGTH ) );
-        assertThat( this.parameter.hasProperty( this.uow, StandardDdlLexicon.DATATYPE_LENGTH ), is( false ) );
+        assertThat( this.parameter.getLength( getTransaction() ), is( RelationalConstants.DEFAULT_LENGTH ) );
+        assertThat( this.parameter.hasProperty( getTransaction(), StandardDdlLexicon.DATATYPE_LENGTH ), is( false ) );
     }
 
     @Test
     public void shouldHaveDatatypeNamePropertyDefaultValueAfterConstruction() throws Exception {
-        assertThat( this.parameter.getDatatypeName( this.uow ), is( RelationalConstants.DEFAULT_DATATYPE_NAME ) );
-        assertThat( this.parameter.hasProperty( this.uow, StandardDdlLexicon.DATATYPE_NAME ), is( false ) );
+        assertThat( this.parameter.getDatatypeName( getTransaction() ), is( RelationalConstants.DEFAULT_DATATYPE_NAME ) );
+        assertThat( this.parameter.hasProperty( getTransaction(), StandardDdlLexicon.DATATYPE_NAME ), is( false ) );
     }
 
     @Test
     public void shouldHaveDatatypePrecisionPropertyDefaultValueAfterConstruction() throws Exception {
-        assertThat( this.parameter.getPrecision( this.uow ), is( RelationalConstants.DEFAULT_PRECISION ) );
-        assertThat( this.parameter.hasProperty( this.uow, StandardDdlLexicon.DATATYPE_PRECISION ), is( false ) );
+        assertThat( this.parameter.getPrecision( getTransaction() ), is( RelationalConstants.DEFAULT_PRECISION ) );
+        assertThat( this.parameter.hasProperty( getTransaction(), StandardDdlLexicon.DATATYPE_PRECISION ), is( false ) );
     }
 
     @Test
     public void shouldHaveDatatypeScalePropertyDefaultValueAfterConstruction() throws Exception {
-        assertThat( this.parameter.getScale( this.uow ), is( RelationalConstants.DEFAULT_SCALE ) );
-        assertThat( this.parameter.hasProperty( this.uow, StandardDdlLexicon.DATATYPE_SCALE ), is( false ) );
+        assertThat( this.parameter.getScale( getTransaction() ), is( RelationalConstants.DEFAULT_SCALE ) );
+        assertThat( this.parameter.hasProperty( getTransaction(), StandardDdlLexicon.DATATYPE_SCALE ), is( false ) );
     }
 
     @Test
     public void shouldHaveDefaultResultAfterConstruction() throws Exception {
-        assertThat( this.parameter.isResult( this.uow ), is( Parameter.DEFAULT_RESULT ) );
+        assertThat( this.parameter.isResult( getTransaction() ), is( Parameter.DEFAULT_RESULT ) );
     }
 
     @Test
     public void shouldHaveDirectionPropertyDefaultValueAfterConstruction() throws Exception {
-        assertThat( this.parameter.getDirection( this.uow ), is( Direction.DEFAULT_VALUE ) );
-        assertThat( this.parameter.hasProperty( this.uow, TeiidDdlLexicon.CreateProcedure.PARAMETER_TYPE ), is( true ) );
-        assertThat( this.parameter.getProperty( this.uow, TeiidDdlLexicon.CreateProcedure.PARAMETER_TYPE ).getStringValue( this.uow ),
+        assertThat( this.parameter.getDirection( getTransaction() ), is( Direction.DEFAULT_VALUE ) );
+        assertThat( this.parameter.hasProperty( getTransaction(), TeiidDdlLexicon.CreateProcedure.PARAMETER_TYPE ), is( true ) );
+        assertThat( this.parameter.getProperty( getTransaction(), TeiidDdlLexicon.CreateProcedure.PARAMETER_TYPE ).getStringValue( getTransaction() ),
                     is( Direction.DEFAULT_VALUE.toValue() ) );
     }
 
     @Test
     public void shouldHaveMoreRawProperties() throws Exception {
-        final String[] filteredProps = this.parameter.getPropertyNames( this.uow );
-        final String[] rawProps = this.parameter.getRawPropertyNames( this.uow );
+        final String[] filteredProps = this.parameter.getPropertyNames( getTransaction() );
+        final String[] rawProps = this.parameter.getRawPropertyNames( getTransaction() );
         assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
     }
 
     @Test
     public void shouldHaveNullablePropertyDefaultValueAfterConstruction() throws Exception {
-        assertThat( this.parameter.getNullable( this.uow ), is( Nullable.DEFAULT_VALUE ) );
-        assertThat( this.parameter.hasProperty( this.uow, StandardDdlLexicon.NULLABLE ), is( true ) );
-        assertThat( this.parameter.getProperty( this.uow, StandardDdlLexicon.NULLABLE ).getStringValue( this.uow ),
+        assertThat( this.parameter.getNullable( getTransaction() ), is( Nullable.DEFAULT_VALUE ) );
+        assertThat( this.parameter.hasProperty( getTransaction(), StandardDdlLexicon.NULLABLE ), is( true ) );
+        assertThat( this.parameter.getProperty( getTransaction(), StandardDdlLexicon.NULLABLE ).getStringValue( getTransaction() ),
                     is( RelationalConstants.Nullable.DEFAULT_VALUE.toValue() ) );
     }
 
     @Test
     public void shouldHaveParentProcedureAfterConstruction() throws Exception {
-        assertThat( ( AbstractProcedure )this.parameter.getParent( this.uow ), is( this.procedure ) );
+        assertThat( ( AbstractProcedure )this.parameter.getParent( getTransaction() ), is( this.procedure ) );
     }
 
     @Test( expected = UnsupportedOperationException.class )
     public void shouldNotAllowChildren() throws Exception {
-        this.parameter.addChild( this.uow, "blah", null );
+        this.parameter.addChild( getTransaction(), "blah", null );
     }
 
     @Test
     public void shouldNotContainFilteredProperties() throws Exception {
-        final String[] filteredProps = this.parameter.getPropertyNames( this.uow );
+        final String[] filteredProps = this.parameter.getPropertyNames( getTransaction() );
         final Filter[] filters = this.parameter.getFilters();
 
         for ( final String name : filteredProps ) {
@@ -242,114 +242,114 @@ public final class ParameterImplTest extends RelationalModelTest {
 
     @Test
     public void shouldNotCountStatementOptionsAsChildren() throws Exception {
-        this.parameter.setStatementOption( this.uow, "sledge", "hammer" );
-        assertThat( this.parameter.getChildren( this.uow ).length, is( 0 ) );
+        this.parameter.setStatementOption( getTransaction(), "sledge", "hammer" );
+        assertThat( this.parameter.getChildren( getTransaction() ).length, is( 0 ) );
     }
 
     @Test
     public void shouldNotHaveDefaultValueAfterConstruction() throws Exception {
-        assertThat( this.parameter.getDefaultValue( this.uow ), is( nullValue() ) );
-        assertThat( this.parameter.hasProperty( this.uow, StandardDdlLexicon.DEFAULT_VALUE ), is( false ) );
+        assertThat( this.parameter.getDefaultValue( getTransaction() ), is( nullValue() ) );
+        assertThat( this.parameter.hasProperty( getTransaction(), StandardDdlLexicon.DEFAULT_VALUE ), is( false ) );
     }
 
     public void shouldRemoveOptionWithEmptyStatementOptionValue() throws Exception {
         final String name = "blah";
-        this.parameter.setStatementOption( this.uow, name, "blah" );
-        this.parameter.setStatementOption( this.uow, name, StringConstants.EMPTY_STRING );
-        assertThat( this.parameter.getProperty( this.uow, name ), is( nullValue() ) );
+        this.parameter.setStatementOption( getTransaction(), name, "blah" );
+        this.parameter.setStatementOption( getTransaction(), name, StringConstants.EMPTY_STRING );
+        assertThat( this.parameter.getProperty( getTransaction(), name ), is( nullValue() ) );
     }
 
     public void shouldRemoveOptionWithNullStatementOptionValue() throws Exception {
         final String name = "blah";
-        this.parameter.setStatementOption( this.uow, name, "blah" );
-        this.parameter.setStatementOption( this.uow, name, null );
-        assertThat( this.parameter.getProperty( this.uow, name ), is( nullValue() ) );
+        this.parameter.setStatementOption( getTransaction(), name, "blah" );
+        this.parameter.setStatementOption( getTransaction(), name, null );
+        assertThat( this.parameter.getProperty( getTransaction(), name ), is( nullValue() ) );
     }
 
     @Test
     public void shouldRemoveStatementOption() throws Exception {
         final String name = "statementoption";
-        this.parameter.setStatementOption( this.uow, name, "blah" );
-        this.parameter.removeStatementOption( this.uow, name );
-        assertThat( this.parameter.getStatementOptions( this.uow ).length, is( 0 ) );
+        this.parameter.setStatementOption( getTransaction(), name, "blah" );
+        this.parameter.removeStatementOption( getTransaction(), name );
+        assertThat( this.parameter.getStatementOptions( getTransaction() ).length, is( 0 ) );
     }
 
     @Test
     public void shouldSetDatatypeLengthProperty() throws Exception {
         final long value = 10;
-        this.parameter.setLength( this.uow, value );
-        assertThat( this.parameter.getLength( this.uow ), is( value ) );
-        assertThat( this.parameter.getProperty( this.uow, StandardDdlLexicon.DATATYPE_LENGTH ).getLongValue( this.uow ),
+        this.parameter.setLength( getTransaction(), value );
+        assertThat( this.parameter.getLength( getTransaction() ), is( value ) );
+        assertThat( this.parameter.getProperty( getTransaction(), StandardDdlLexicon.DATATYPE_LENGTH ).getLongValue( getTransaction() ),
                     is( value ) );
     }
 
     @Test
     public void shouldSetDatatypeNameProperty() throws Exception {
         final String value = "datatypename";
-        this.parameter.setDatatypeName( this.uow, value );
-        assertThat( this.parameter.getDatatypeName( this.uow ), is( value ) );
-        assertThat( this.parameter.getProperty( this.uow, StandardDdlLexicon.DATATYPE_NAME ).getStringValue( this.uow ),
+        this.parameter.setDatatypeName( getTransaction(), value );
+        assertThat( this.parameter.getDatatypeName( getTransaction() ), is( value ) );
+        assertThat( this.parameter.getProperty( getTransaction(), StandardDdlLexicon.DATATYPE_NAME ).getStringValue( getTransaction() ),
                     is( value ) );
     }
 
     @Test
     public void shouldSetDatatypePrecisionProperty() throws Exception {
         final long value = 10;
-        this.parameter.setPrecision( this.uow, value );
-        assertThat( this.parameter.getPrecision( this.uow ), is( value ) );
-        assertThat( this.parameter.getProperty( this.uow, StandardDdlLexicon.DATATYPE_PRECISION ).getLongValue( this.uow ),
+        this.parameter.setPrecision( getTransaction(), value );
+        assertThat( this.parameter.getPrecision( getTransaction() ), is( value ) );
+        assertThat( this.parameter.getProperty( getTransaction(), StandardDdlLexicon.DATATYPE_PRECISION ).getLongValue( getTransaction() ),
                     is( value ) );
     }
 
     @Test
     public void shouldSetDatatypeScaleProperty() throws Exception {
         final long value = 10;
-        this.parameter.setScale( this.uow, value );
-        assertThat( this.parameter.getScale( this.uow ), is( value ) );
-        assertThat( this.parameter.getProperty( this.uow, StandardDdlLexicon.DATATYPE_SCALE ).getLongValue( this.uow ),
+        this.parameter.setScale( getTransaction(), value );
+        assertThat( this.parameter.getScale( getTransaction() ), is( value ) );
+        assertThat( this.parameter.getProperty( getTransaction(), StandardDdlLexicon.DATATYPE_SCALE ).getLongValue( getTransaction() ),
                     is( value ) );
     }
 
     @Test
     public void shouldSetDefaultValueProperty() throws Exception {
         final String value = "defaultvalue";
-        this.parameter.setDefaultValue( this.uow, value );
-        assertThat( this.parameter.getDefaultValue( this.uow ), is( value ) );
-        assertThat( this.parameter.getProperty( this.uow, StandardDdlLexicon.DEFAULT_VALUE ).getStringValue( this.uow ),
+        this.parameter.setDefaultValue( getTransaction(), value );
+        assertThat( this.parameter.getDefaultValue( getTransaction() ), is( value ) );
+        assertThat( this.parameter.getProperty( getTransaction(), StandardDdlLexicon.DEFAULT_VALUE ).getStringValue( getTransaction() ),
                     is( value ) );
     }
 
     @Test
     public void shouldSetDirectionProperty() throws Exception {
         final Direction value = Direction.IN_OUT;
-        this.parameter.setDirection( this.uow, value );
-        assertThat( this.parameter.getDirection( this.uow ), is( value ) );
-        assertThat( this.parameter.getProperty( this.uow, TeiidDdlLexicon.CreateProcedure.PARAMETER_TYPE ).getStringValue( this.uow ),
+        this.parameter.setDirection( getTransaction(), value );
+        assertThat( this.parameter.getDirection( getTransaction() ), is( value ) );
+        assertThat( this.parameter.getProperty( getTransaction(), TeiidDdlLexicon.CreateProcedure.PARAMETER_TYPE ).getStringValue( getTransaction() ),
                     is( value.toValue() ) );
     }
 
     @Test
     public void shouldSetNullableProperty() throws Exception {
         final Nullable value = Nullable.NO_NULLS;
-        this.parameter.setNullable( this.uow, value );
-        assertThat( this.parameter.getNullable( this.uow ), is( value ) );
-        assertThat( this.parameter.getProperty( this.uow, StandardDdlLexicon.NULLABLE ).getStringValue( this.uow ),
+        this.parameter.setNullable( getTransaction(), value );
+        assertThat( this.parameter.getNullable( getTransaction() ), is( value ) );
+        assertThat( this.parameter.getProperty( getTransaction(), StandardDdlLexicon.NULLABLE ).getStringValue( getTransaction() ),
                     is( value.toValue() ) );
     }
 
     @Test
     public void shouldSetResult() throws Exception {
         final boolean value = !Parameter.DEFAULT_RESULT;
-        this.parameter.setResult( this.uow, value );
-        assertThat( this.parameter.isResult( this.uow ), is( value ) );
+        this.parameter.setResult( getTransaction(), value );
+        assertThat( this.parameter.isResult( getTransaction() ), is( value ) );
     }
 
     @Test
     public void shouldIncludeCustomOptionsWithPropertyDescriptors() throws Exception {
         final String customName = "blah";
-        this.parameter.setStatementOption( this.uow, customName, "elvis" );
+        this.parameter.setStatementOption( getTransaction(), customName, "elvis" );
 
-        final PropertyDescriptor[] propDescriptors = this.parameter.getPropertyDescriptors( this.uow );
+        final PropertyDescriptor[] propDescriptors = this.parameter.getPropertyDescriptors( getTransaction() );
         boolean found = false;
 
         for ( final PropertyDescriptor descriptor : propDescriptors ) {
@@ -367,10 +367,10 @@ public final class ParameterImplTest extends RelationalModelTest {
     @Test
     public void shouldIncludeCustomOptionsWithPropertyNames() throws Exception {
         final String custom = "blah";
-        this.parameter.setStatementOption( this.uow, custom, "sledge" );
+        this.parameter.setStatementOption( getTransaction(), custom, "sledge" );
         boolean customFound = false;
 
-        for ( final String prop : this.parameter.getPropertyNames( this.uow ) ) {
+        for ( final String prop : this.parameter.getPropertyNames( getTransaction() ) ) {
             if ( custom.equals( prop ) ) {
                 if ( customFound ) {
                     fail( "Custom option included multiple times in property names" );
@@ -389,49 +389,49 @@ public final class ParameterImplTest extends RelationalModelTest {
     @Test
     public void shouldObtainCustomOptions() throws Exception {
         final String sledge = "sledge";
-        this.parameter.setStatementOption( this.uow, sledge, "hammer" );
+        this.parameter.setStatementOption( getTransaction(), sledge, "hammer" );
 
         final String elvis = "elvis";
-        this.parameter.setStatementOption( this.uow, elvis, "presley" );
+        this.parameter.setStatementOption( getTransaction(), elvis, "presley" );
 
-        assertThat( this.parameter.getCustomOptions( this.uow ).length, is( 2 ) );
-        assertThat( Arrays.asList( this.parameter.getStatementOptionNames( this.uow ) ), hasItems( sledge, elvis ) );
+        assertThat( this.parameter.getCustomOptions( getTransaction() ).length, is( 2 ) );
+        assertThat( Arrays.asList( this.parameter.getStatementOptionNames( getTransaction() ) ), hasItems( sledge, elvis ) );
     }
 
     @Test
     public void shouldObtainPropertyDescriptorOfCustomOption() throws Exception {
         final String custom = "sledge";
-        this.parameter.setStatementOption( this.uow, custom, "hammer" );
+        this.parameter.setStatementOption( getTransaction(), custom, "hammer" );
 
-        assertThat( this.parameter.getPropertyDescriptor( this.uow, custom ), is( notNullValue() ) );
-        assertThat( this.parameter.getPropertyDescriptor( this.uow, custom ).getName(), is( custom ) );
+        assertThat( this.parameter.getPropertyDescriptor( getTransaction(), custom ), is( notNullValue() ) );
+        assertThat( this.parameter.getPropertyDescriptor( getTransaction(), custom ).getName(), is( custom ) );
     }
 
     @Test
     public void shouldObtainStatementOptionNames() throws Exception {
         final String custom = "blah";
-        this.parameter.setStatementOption( this.uow, custom, "sledge" );
+        this.parameter.setStatementOption( getTransaction(), custom, "sledge" );
 
-        assertThat( this.parameter.getStatementOptionNames( this.uow ).length, is( 1 ) );
-        assertThat( Arrays.asList( this.parameter.getStatementOptionNames( this.uow ) ), hasItem( custom ) );
+        assertThat( this.parameter.getStatementOptionNames( getTransaction() ).length, is( 1 ) );
+        assertThat( Arrays.asList( this.parameter.getStatementOptionNames( getTransaction() ) ), hasItem( custom ) );
     }
 
     @Test
     public void shouldSetCustomOptionAsIfProperty() throws Exception {
         final String option = "blah";
-        this.parameter.setStatementOption( this.uow, option, "initialValue" );
+        this.parameter.setStatementOption( getTransaction(), option, "initialValue" );
 
         final String value = "newValue";
-        this.parameter.setProperty( this.uow, option, value );
+        this.parameter.setProperty( getTransaction(), option, value );
 
-        assertThat( this.parameter.hasProperty( this.uow, option ), is( true ) );
-        assertThat( this.parameter.getProperty( this.uow, option ), is( instanceOf( StatementOption.class ) ) );
-        assertThat( this.parameter.getStatementOptions( this.uow ).length, is( 1 ) );
-        assertThat( this.parameter.isCustomOption( this.uow, option ), is( true ) );
+        assertThat( this.parameter.hasProperty( getTransaction(), option ), is( true ) );
+        assertThat( this.parameter.getProperty( getTransaction(), option ), is( instanceOf( StatementOption.class ) ) );
+        assertThat( this.parameter.getStatementOptions( getTransaction() ).length, is( 1 ) );
+        assertThat( this.parameter.isCustomOption( getTransaction(), option ), is( true ) );
 
-        final StatementOption statementOption = this.parameter.getStatementOptions( this.uow )[0];
-        assertThat( statementOption.getName( this.uow ), is( option ) );
-        assertThat( statementOption.getValue( this.uow ), is( ( Object )value ) );
+        final StatementOption statementOption = this.parameter.getStatementOptions( getTransaction() )[0];
+        assertThat( statementOption.getName( getTransaction() ), is( option ) );
+        assertThat( statementOption.getValue( getTransaction() ), is( ( Object )value ) );
     }
 
     @Test
@@ -448,16 +448,16 @@ public final class ParameterImplTest extends RelationalModelTest {
     @Test
     public void shouldCreateUsingResolver() throws Exception {
         final String name = "blah";
-        final KomodoObject kobject = Parameter.RESOLVER.create( this.uow, _repo, this.procedure, name, null );
+        final KomodoObject kobject = Parameter.RESOLVER.create( getTransaction(), _repo, this.procedure, name, null );
         assertThat( kobject, is( notNullValue() ) );
         assertThat( kobject, is( instanceOf( Parameter.class ) ) );
-        assertThat( kobject.getName( this.uow ), is( name ) );
+        assertThat( kobject.getName( getTransaction() ), is( name ) );
     }
 
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
-        final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        Parameter.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
+        final KomodoObject bogusParent = _repo.add( getTransaction(), null, "bogus", null );
+        Parameter.RESOLVER.create( getTransaction(), _repo, bogusParent, "blah", null );
     }
 
 }

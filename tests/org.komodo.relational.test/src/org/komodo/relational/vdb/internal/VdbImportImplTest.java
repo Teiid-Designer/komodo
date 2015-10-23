@@ -32,7 +32,7 @@ public final class VdbImportImplTest extends RelationalModelTest {
     @Before
     public void init() throws Exception {
         final Vdb vdb = createVdb();
-        this.vdbImport = vdb.addImport( this.uow, "vdbToImport" );
+        this.vdbImport = vdb.addImport( getTransaction(), "vdbToImport" );
         commit();
     }
 
@@ -45,7 +45,7 @@ public final class VdbImportImplTest extends RelationalModelTest {
     public void shouldFailConstructionIfNotVdbImport() {
         if ( RelationalObjectImpl.VALIDATE_INITIAL_STATE ) {
             try {
-                new VdbImportImpl( this.uow, _repo, this.vdbImport.getParent( this.uow ).getAbsolutePath() );
+                new VdbImportImpl( getTransaction(), _repo, this.vdbImport.getParent( getTransaction() ).getAbsolutePath() );
                 fail();
             } catch ( final KException e ) {
                 // expected
@@ -55,44 +55,44 @@ public final class VdbImportImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveCorrectPrimaryType() throws Exception {
-        assertThat( this.vdbImport.getPrimaryType( this.uow ).getName(), is( VdbLexicon.ImportVdb.IMPORT_VDB ) );
+        assertThat( this.vdbImport.getPrimaryType( getTransaction() ).getName(), is( VdbLexicon.ImportVdb.IMPORT_VDB ) );
     }
 
     @Test
     public void shouldHaveCorrectTypeIdentifier() throws Exception {
-        assertThat(this.vdbImport.getTypeIdentifier( this.uow ), is(KomodoType.VDB_IMPORT));
+        assertThat(this.vdbImport.getTypeIdentifier( getTransaction() ), is(KomodoType.VDB_IMPORT));
     }
 
     @Test
     public void shouldHaveDefaultImportDataPoliciesAfterConstruction() throws Exception {
-        assertThat( this.vdbImport.isImportDataPolicies( this.uow ), is( VdbImport.DEFAULT_IMPORT_DATA_POLICIES ) );
+        assertThat( this.vdbImport.isImportDataPolicies( getTransaction() ), is( VdbImport.DEFAULT_IMPORT_DATA_POLICIES ) );
     }
 
     @Test
     public void shouldHaveDefaultImportDataPoliciesValueAfterConstruction() throws Exception {
-        assertThat( this.vdbImport.isImportDataPolicies( this.uow ), is( VdbImport.DEFAULT_IMPORT_DATA_POLICIES ) );
+        assertThat( this.vdbImport.isImportDataPolicies( getTransaction() ), is( VdbImport.DEFAULT_IMPORT_DATA_POLICIES ) );
     }
 
     @Test
     public void shouldHaveMoreRawProperties() throws Exception {
-        final String[] filteredProps = this.vdbImport.getPropertyNames( this.uow );
-        final String[] rawProps = this.vdbImport.getRawPropertyNames( this.uow );
+        final String[] filteredProps = this.vdbImport.getPropertyNames( getTransaction() );
+        final String[] rawProps = this.vdbImport.getRawPropertyNames( getTransaction() );
         assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
     }
 
     @Test
     public void shouldHaveParentVdb() throws Exception {
-        assertThat( this.vdbImport.getParent( this.uow ), is( instanceOf( Vdb.class ) ) );
+        assertThat( this.vdbImport.getParent( getTransaction() ), is( instanceOf( Vdb.class ) ) );
     }
 
     @Test( expected = UnsupportedOperationException.class )
     public void shouldNotAllowChildren() throws Exception {
-        this.vdbImport.addChild( this.uow, "blah", null );
+        this.vdbImport.addChild( getTransaction(), "blah", null );
     }
 
     @Test
     public void shouldNotContainFilteredProperties() throws Exception {
-        final String[] filteredProps = this.vdbImport.getPropertyNames( this.uow );
+        final String[] filteredProps = this.vdbImport.getPropertyNames( getTransaction() );
         final Filter[] filters = this.vdbImport.getFilters();
 
         for ( final String name : filteredProps ) {
@@ -105,15 +105,15 @@ public final class VdbImportImplTest extends RelationalModelTest {
     @Test
     public void shouldSetImportDataPoliciesValue() throws Exception {
         final boolean newValue = !VdbImport.DEFAULT_IMPORT_DATA_POLICIES;
-        this.vdbImport.setImportDataPolicies( this.uow, newValue );
-        assertThat( this.vdbImport.isImportDataPolicies( this.uow ), is( newValue ) );
+        this.vdbImport.setImportDataPolicies( getTransaction(), newValue );
+        assertThat( this.vdbImport.isImportDataPolicies( getTransaction() ), is( newValue ) );
     }
 
     @Test
     public void shouldSetVersion() throws Exception {
         final int newValue = ( Vdb.DEFAULT_VERSION + 10 );
-        this.vdbImport.setVersion( this.uow, newValue );
-        assertThat( this.vdbImport.getVersion( this.uow ), is( newValue ) );
+        this.vdbImport.setVersion( getTransaction(), newValue );
+        assertThat( this.vdbImport.getVersion( getTransaction() ), is( newValue ) );
     }
 
     /*
@@ -125,20 +125,20 @@ public final class VdbImportImplTest extends RelationalModelTest {
     @Test
     public void shouldCreateUsingResolver() throws Exception {
         final String name = "blah";
-        final KomodoObject kobject = VdbImport.RESOLVER.create( this.uow,
+        final KomodoObject kobject = VdbImport.RESOLVER.create( getTransaction(),
                                                                     _repo,
-                                                                    this.vdbImport.getParent( this.uow ),
+                                                                    this.vdbImport.getParent( getTransaction() ),
                                                                     name,
                                                                     null );
         assertThat( kobject, is( notNullValue() ) );
         assertThat( kobject, is( instanceOf( VdbImport.class ) ) );
-        assertThat( kobject.getName( this.uow ), is( name ) );
+        assertThat( kobject.getName( getTransaction() ), is( name ) );
     }
 
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
-        final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        VdbImport.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
+        final KomodoObject bogusParent = _repo.add( getTransaction(), null, "bogus", null );
+        VdbImport.RESOLVER.create( getTransaction(), _repo, bogusParent, "blah", null );
     }
 
 }

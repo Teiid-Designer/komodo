@@ -15,11 +15,9 @@
  */
 package org.komodo.relational.commands;
 
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import java.io.File;
-import java.io.FileWriter;
+import static org.junit.Assert.assertThat;
 import org.junit.Test;
 import org.komodo.relational.model.Schema;
 import org.komodo.relational.workspace.WorkspaceManager;
@@ -28,64 +26,46 @@ import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test CreateSchemaCommand
- *
+ * Test Class to test {@link CreateSchemaCommand}.
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( { "javadoc", "nls" } )
 public class CreateSchemaCommandTest extends AbstractCommandTest {
-
-    /**
-	 * Test for CreateSchemaCommand
-	 */
-	public CreateSchemaCommandTest( ) {
-		super();
-	}
 
     @Test
     public void testCreateSchema1() throws Exception {
-        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
-        cmdFile.deleteOnExit();
-        
-        FileWriter writer = new FileWriter(cmdFile);
-        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("create-schema testSchema" + NEW_LINE);  //$NON-NLS-1$
-        writer.close();
-        
-    	setup(cmdFile.getAbsolutePath(), CreateSchemaCommand.class);
+        final String[] commands = { "workspace",
+                                    "create-schema testSchema" };
+        setup( commands  );
 
         CommandResult result = execute();
         assertCommandResultOk(result);
-    	
+
     	WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
-    	Schema[] schemas = wkspMgr.findSchemas(uow);
-    	
+    	Schema[] schemas = wkspMgr.findSchemas(getTransaction());
+
     	assertEquals(1, schemas.length);
-    	assertEquals("testSchema", schemas[0].getName(uow)); //$NON-NLS-1$
+    	assertEquals("testSchema", schemas[0].getName(getTransaction()));
     }
-    
+
     @Test
     public void shouldDisplayHelp( ) throws Exception {
-        setup(CreateSchemaCommand.class);
-        
         CreateSchemaCommand command = new CreateSchemaCommand(wsStatus);
         command.setWriter( this.commandWriter );
         command.printHelp(CompletionConstants.MESSAGE_INDENT);
-        
+
         String writerOutput = getCommandOutput();
-        assertTrue(writerOutput.contains("DESCRIPTION")); //$NON-NLS-1$
-        assertTrue(writerOutput.contains(CreateSchemaCommand.NAME));
+        assertThat( writerOutput, !writerOutput.contains( CreateSchemaCommand.class.getSimpleName() + ".help" ), is( true ) );
+        assertThat( writerOutput, writerOutput.contains( CreateSchemaCommand.NAME ), is( true ) );
     }
-    
+
     @Test
     public void shouldFailTooManyArgs( ) throws Exception {
-        setup(CreateSchemaCommand.class);
-        
         CreateSchemaCommand command = new CreateSchemaCommand(wsStatus);
         command.setArguments(new Arguments( "aName anExtraArg" ));  //$NON-NLS-1$
         CommandResult result = command.execute();
-        
-        assertFalse(result.isOk());
-        assertTrue(result.getMessage().contains("Too many arguments were used for the command"));  //$NON-NLS-1$
+
+        assertThat( result.isOk(), is( false ) );
+        assertThat( result.getMessage(), result.getMessage().contains( CreateSchemaCommand.NAME ), is( true ) );
     }
 
 }

@@ -183,21 +183,24 @@ public final class ForeignKeyImpl extends TableConstraintImpl implements Foreign
             throw new KException( Messages.getString( Relational.REFERENCED_COLUMN_NOT_FOUND, columnId ) );
         }
 
+        setProperty( transaction, Constraint.TABLE_REFERENCE_REFERENCES, ( Object[] )null );
+
         boolean found = false;
-        final Column[] updated = new Column[ current.length - 1 ];
-        int i = 0;
+//        final Column[] updated = new Column[ current.length - 1 ];
+//        int i = 0;
 
         for ( final Column column : current ) {
             if ( column.equals( removeReferencesColumn ) ) {
                 found = true;
             } else {
-                updated[i] = column;
-                ++i;
+                addReferencesColumn( transaction, column );
+//                updated[i] = column;
+//                ++i;
             }
         }
 
         if ( found ) {
-            setProperty( transaction, Constraint.TABLE_REFERENCE_REFERENCES, ( Object[] )updated );
+//            setProperty( transaction, Constraint.TABLE_REFERENCE_REFERENCES, ( Object[] )updated );
         } else {
             throw new KException( Messages.getString( Relational.REFERENCED_COLUMN_NOT_FOUND, columnId ) );
         }

@@ -15,8 +15,6 @@
  */
 package org.komodo.relational.commands;
 
-import java.io.File;
-import java.io.FileWriter;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.relational.model.Schema;
@@ -27,41 +25,28 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test DeleteSchemaCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( { "javadoc", "nls" } )
 public class DeleteSchemaCommandTest extends AbstractCommandTest {
-
-    /**
-	 * Test for DeleteSchemaCommand
-	 */
-	public DeleteSchemaCommandTest( ) {
-		super();
-	}
 
     @Test
     public void testDeleteSchema1() throws Exception {
-        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
-        cmdFile.deleteOnExit();
-        
-        FileWriter writer = new FileWriter(cmdFile);
-        writer.write("set-auto-commit false" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("create-schema testSchema1" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("create-schema testSchema2" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("commit" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("delete-schema testSchema1" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("commit" + NEW_LINE);  //$NON-NLS-1$
-        writer.close();
-        
-    	setup(cmdFile.getAbsolutePath(), DeleteSchemaCommand.class);
+        final String[] commands = { "set-auto-commit false",
+                                    "workspace",
+                                    "create-schema testSchema1",
+                                    "create-schema testSchema2",
+                                    "commit",
+                                    "delete-schema testSchema1",
+                                    "commit" };
+        setup( commands );
 
         CommandResult result = execute();
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
-        Schema[] schemas = wkspMgr.findSchemas(uow);
-        
+        Schema[] schemas = wkspMgr.findSchemas(getTransaction());
+
         assertEquals(1, schemas.length);
-        assertEquals("testSchema2", schemas[0].getName(uow)); //$NON-NLS-1$
+        assertEquals("testSchema2", schemas[0].getName(getTransaction()));
     }
 
 }

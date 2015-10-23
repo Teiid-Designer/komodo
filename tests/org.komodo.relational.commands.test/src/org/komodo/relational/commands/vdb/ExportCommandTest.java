@@ -38,20 +38,14 @@ public class ExportCommandTest extends AbstractCommandTest {
 
     private static final String TWEET_VDB = "./resources/tweet-example-vdb.xml";  //$NON-NLS-1$
     private static final String ALL_ELEMENTS_VDB = "./resources/teiid-vdb-all-elements.xml";  //$NON-NLS-1$
-    /**
-	 * Test for ExportCommand
-	 */
-	public ExportCommandTest( ) {
-		super();
-	}
 
     private KomodoObject addTweetVdbExample() throws KException, Exception {
         KomodoObject tweet = null;
 
         try {
             createInitialTransaction();
-            KomodoObject kWorkspace = _repo.komodoWorkspace(uow);
-            tweet = TestUtilities.createTweetExampleNode(uow, kWorkspace);
+            KomodoObject kWorkspace = _repo.komodoWorkspace(getTransaction());
+            tweet = TestUtilities.createTweetExampleNode(getTransaction(), kWorkspace);
         } finally {
             commit();
         }
@@ -60,7 +54,7 @@ public class ExportCommandTest extends AbstractCommandTest {
 
         try {
             createInitialTransaction();
-            traverse(uow, tweet.getAbsolutePath());
+            traverse(getTransaction(), tweet.getAbsolutePath());
         } finally {
             commit();
         }
@@ -73,8 +67,8 @@ public class ExportCommandTest extends AbstractCommandTest {
 
         try {
             createInitialTransaction();
-            KomodoObject kWorkspace = _repo.komodoWorkspace(uow);
-            tweet = TestUtilities.createAllElementsExampleNode(uow, kWorkspace);
+            KomodoObject kWorkspace = _repo.komodoWorkspace(getTransaction());
+            tweet = TestUtilities.createAllElementsExampleNode(getTransaction(), kWorkspace);
         } finally {
             commit();
         }
@@ -83,7 +77,7 @@ public class ExportCommandTest extends AbstractCommandTest {
 
         try {
             createInitialTransaction();
-            traverse(uow, tweet.getAbsolutePath());
+            traverse(getTransaction(), tweet.getAbsolutePath());
         } finally {
             commit();
         }
@@ -121,14 +115,14 @@ public class ExportCommandTest extends AbstractCommandTest {
             createInitialTransaction();
             writer = new FileWriter(exportCmdFile);
             writer.write("workspace " + NEW_LINE); //$NON-NLS-1$
-            writer.write("cd " + tweetVdb.getName(uow) + NEW_LINE);  //$NON-NLS-1$
+            writer.write("cd " + tweetVdb.getName(getTransaction()) + NEW_LINE);  //$NON-NLS-1$
             writer.write("export-vdb " + exportDest.getAbsolutePath() + NEW_LINE); //$NON-NLS-1$
             writer.close();
 
             //
             // Setup the export instructions
             //
-            setup(exportCmdFile.getAbsolutePath(), ExportCommand.class);
+            setup( exportCmdFile.getAbsolutePath() );
 
             //
             // Execute the commands
@@ -152,7 +146,7 @@ public class ExportCommandTest extends AbstractCommandTest {
                 writer.close();
         }
     }
-    
+
     @Test
     public void testExportCommandAllElementsVdb() throws Exception {
         FileWriter writer = null;
@@ -183,14 +177,14 @@ public class ExportCommandTest extends AbstractCommandTest {
             createInitialTransaction();
             writer = new FileWriter(exportCmdFile);
             writer.write("workspace " + NEW_LINE); //$NON-NLS-1$
-            writer.write("cd " + allElementsVdb.getName(uow) + NEW_LINE);  //$NON-NLS-1$
-            writer.write("export-vdb " + exportDest.getAbsolutePath() + NEW_LINE); //$NON-NLS-1$ 
+            writer.write("cd " + allElementsVdb.getName(getTransaction()) + NEW_LINE);  //$NON-NLS-1$
+            writer.write("export-vdb " + exportDest.getAbsolutePath() + NEW_LINE); //$NON-NLS-1$
             writer.close();
 
             //
             // Setup the export instructions
             //
-            setup(exportCmdFile.getAbsolutePath(), ExportCommand.class);
+            setup( exportCmdFile.getAbsolutePath() );
 
             //
             // Execute the commands
@@ -202,7 +196,7 @@ public class ExportCommandTest extends AbstractCommandTest {
 
             Document vdbDocument = TestUtilities.createDocument(new FileInputStream(exportDest));
             assertNotNull(vdbDocument);
-            
+
             InputStream allElementsExample = new FileInputStream(new File(ALL_ELEMENTS_VDB));
             Document allElementsDocument = TestUtilities.createDocument(allElementsExample);
 

@@ -13,46 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.komodo.shell;
+package org.komodo.shell.commands;
 
 import static org.junit.Assert.assertTrue;
-import java.io.File;
-import java.io.FileWriter;
 import org.junit.Test;
+import org.komodo.shell.AbstractCommandTest;
 import org.komodo.shell.api.CommandResult;
-import org.komodo.shell.commands.ShowSummaryCommand;
 
 /**
- * Test Class to test ShowSummaryCommand
- *
+ * Test Class to test {@link ShowChildrenCommand}.
  */
 @SuppressWarnings({"javadoc", "nls"})
-public class ShowSummaryCommandTest extends AbstractCommandTest {
-
-	/**
-	 * Test for ShowSummaryCommand
-	 */
-	public ShowSummaryCommandTest( ) {
-		super();
-	}
+public class ShowChildrenCommandTest extends AbstractCommandTest {
 
     @Test
-    public void testShowSummary1() throws Exception {
-        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
-        cmdFile.deleteOnExit();
-
-        FileWriter writer = new FileWriter(cmdFile);
-        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("show-summary" + NEW_LINE);  //$NON-NLS-1$
-        writer.close();
-
-    	setup(cmdFile.getAbsolutePath(), ShowSummaryCommand.class);
+    public void testShowChildren1() throws Exception {
+        final String[] commands = { "workspace",
+                                    "show-children" };
+        setup( commands );
 
         CommandResult result = execute();
         assertCommandResultOk(result);
 
         String writerOutput = getCommandOutput();
-        assertTrue(writerOutput.contains("There are no properties for ObjectImpl \"/workspace\"."));
+        assertTrue(writerOutput.contains("There are no children"));
     }
 
 }

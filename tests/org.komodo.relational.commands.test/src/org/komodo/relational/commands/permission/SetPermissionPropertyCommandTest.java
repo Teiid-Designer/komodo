@@ -15,9 +15,9 @@
  */
 package org.komodo.relational.commands.permission;
 
+import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.FileWriter;
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.vdb.DataRole;
@@ -33,18 +33,11 @@ import org.komodo.shell.api.CommandResult;
 @SuppressWarnings("javadoc")
 public class SetPermissionPropertyCommandTest extends AbstractCommandTest {
 
-    /**
-	 * Test for SetPermissionPropertyCommand
-	 */
-	public SetPermissionPropertyCommandTest( ) {
-		super();
-	}
-
     @Test
     public void testSetProperty1() throws Exception {
         File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
         cmdFile.deleteOnExit();
-        
+
         FileWriter writer = new FileWriter(cmdFile);
         writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
         writer.write("create-vdb myVdb vdbPath" + NEW_LINE);  //$NON-NLS-1$
@@ -55,24 +48,24 @@ public class SetPermissionPropertyCommandTest extends AbstractCommandTest {
         writer.write("cd myPermission" + NEW_LINE);  //$NON-NLS-1$
         writer.write("set-property allowAlter true" + NEW_LINE);  //$NON-NLS-1$
         writer.close();
-        
-        setup(cmdFile.getAbsolutePath(), SetPermissionPropertyCommand.class);
+
+        setup( cmdFile.getAbsolutePath() );
 
         CommandResult result = execute();
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
-        Vdb[] vdbs = wkspMgr.findVdbs(uow);
+        Vdb[] vdbs = wkspMgr.findVdbs(getTransaction());
         assertEquals(1, vdbs.length);
-        
-        DataRole[] dataRoles = vdbs[0].getDataRoles(uow);
+
+        DataRole[] dataRoles = vdbs[0].getDataRoles(getTransaction());
         assertEquals(1, dataRoles.length);
 
-        Permission[] permissions = dataRoles[0].getPermissions(uow);
+        Permission[] permissions = dataRoles[0].getPermissions(getTransaction());
         assertEquals(1, permissions.length);
-        assertEquals("myPermission", permissions[0].getName(uow)); //$NON-NLS-1$
-        
-        assertEquals(true, permissions[0].isAllowAlter(uow));
+        assertEquals("myPermission", permissions[0].getName(getTransaction())); //$NON-NLS-1$
+
+        assertEquals(true, permissions[0].isAllowAlter(getTransaction()));
     }
 
 }

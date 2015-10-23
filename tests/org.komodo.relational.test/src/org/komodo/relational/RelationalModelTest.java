@@ -32,11 +32,11 @@ public class RelationalModelTest extends AbstractLocalRepositoryTest {
                                  final String vdbPath,
                                  final String modelName ) throws Exception {
         final WorkspaceManager mgr = WorkspaceManager.getInstance( _repo );
-        final Vdb vdb = mgr.createVdb( this.uow, null, vdbName, vdbPath );
-        final Model model = vdb.addModel( this.uow, modelName );
+        final Vdb vdb = mgr.createVdb( getTransaction(), null, vdbName, vdbPath );
+        final Model model = vdb.addModel( getTransaction(), modelName );
 
-        assertThat( model.getPrimaryType( this.uow ).getName(), is( VdbLexicon.Vdb.DECLARATIVE_MODEL ) );
-        assertThat( model.getName( this.uow ), is( modelName ) );
+        assertThat( model.getPrimaryType( getTransaction() ).getName(), is( VdbLexicon.Vdb.DECLARATIVE_MODEL ) );
+        assertThat( model.getName( getTransaction() ), is( modelName ) );
         return model;
     }
 
@@ -49,9 +49,9 @@ public class RelationalModelTest extends AbstractLocalRepositoryTest {
                                  final String modelName,
                                  final String tableName ) throws Exception {
         final WorkspaceManager mgr = WorkspaceManager.getInstance( _repo );
-        final Vdb vdb = mgr.createVdb( this.uow, null, vdbName, vdbPath );
-        final Model model = vdb.addModel( this.uow, modelName );
-        return model.addTable( this.uow, tableName );
+        final Vdb vdb = mgr.createVdb( getTransaction(), null, vdbName, vdbPath );
+        final Model model = vdb.addModel( getTransaction(), modelName );
+        return model.addTable( getTransaction(), tableName );
     }
 
     protected Vdb createVdb() throws Exception {
@@ -71,11 +71,11 @@ public class RelationalModelTest extends AbstractLocalRepositoryTest {
                              final KomodoObject parent,
                              final String originalFilePath ) throws Exception {
         final WorkspaceManager mgr = WorkspaceManager.getInstance( _repo );
-        final Vdb vdb = mgr.createVdb( this.uow, parent, vdbName, originalFilePath );
+        final Vdb vdb = mgr.createVdb( getTransaction(), parent, vdbName, originalFilePath );
 
-        assertThat( vdb.getPrimaryType( this.uow ).getName(), is( VdbLexicon.Vdb.VIRTUAL_DATABASE ) );
-        assertThat( vdb.getName( this.uow ), is( vdbName ) );
-        assertThat( vdb.getOriginalFilePath( this.uow ), is( originalFilePath ) );
+        assertThat( vdb.getPrimaryType( getTransaction() ).getName(), is( VdbLexicon.Vdb.VIRTUAL_DATABASE ) );
+        assertThat( vdb.getName( getTransaction() ), is( vdbName ) );
+        assertThat( vdb.getOriginalFilePath( getTransaction() ), is( originalFilePath ) );
         return vdb;
     }
     
@@ -90,10 +90,10 @@ public class RelationalModelTest extends AbstractLocalRepositoryTest {
     protected Teiid createTeiid( final String teiidName,
                                  final KomodoObject parent ) throws Exception {
         final WorkspaceManager mgr = WorkspaceManager.getInstance( _repo );
-        final Teiid teiid = mgr.createTeiid( this.uow, parent, teiidName );
+        final Teiid teiid = mgr.createTeiid( getTransaction(), parent, teiidName );
 
-        assertThat( teiid.getPrimaryType( this.uow ).getName(), is( KomodoLexicon.Teiid.NODE_TYPE ) );
-        assertThat( teiid.getName( this.uow ), is( teiidName ) );
+        assertThat( teiid.getPrimaryType( getTransaction() ).getName(), is( KomodoLexicon.Teiid.NODE_TYPE ) );
+        assertThat( teiid.getName( getTransaction() ), is( teiidName ) );
         return teiid;
     }
 

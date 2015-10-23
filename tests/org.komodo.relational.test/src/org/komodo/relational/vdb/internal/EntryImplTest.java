@@ -36,7 +36,7 @@ public final class EntryImplTest extends RelationalModelTest {
     @Before
     public void init() throws Exception {
         final Vdb vdb = createVdb();
-        this.entry = vdb.addEntry( this.uow, "entry", "path" );
+        this.entry = vdb.addEntry( getTransaction(), "entry", "path" );
         commit();
     }
 
@@ -49,7 +49,7 @@ public final class EntryImplTest extends RelationalModelTest {
     public void shouldFailConstructionIfNotEntry() {
         if ( RelationalObjectImpl.VALIDATE_INITIAL_STATE ) {
             try {
-                new EntryImpl( this.uow, _repo, this.entry.getParent( this.uow ).getAbsolutePath() );
+                new EntryImpl( getTransaction(), _repo, this.entry.getParent( getTransaction() ).getAbsolutePath() );
                 fail();
             } catch ( final KException e ) {
                 // expected
@@ -59,49 +59,49 @@ public final class EntryImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveCorrectPrimaryType() throws Exception {
-        assertThat( this.entry.getPrimaryType( this.uow ).getName(), is( VdbLexicon.Entry.ENTRY ) );
+        assertThat( this.entry.getPrimaryType( getTransaction() ).getName(), is( VdbLexicon.Entry.ENTRY ) );
     }
 
     @Test
     public void shouldHaveCorrectTypeIdentifier() throws Exception {
-        assertThat(this.entry.getTypeIdentifier( this.uow ), is(KomodoType.VDB_ENTRY));
+        assertThat(this.entry.getTypeIdentifier( getTransaction() ), is(KomodoType.VDB_ENTRY));
     }
 
     @Test
     public void shouldHaveMoreRawProperties() throws Exception {
-        final String[] filteredProps = this.entry.getPropertyNames( this.uow );
-        final String[] rawProps = this.entry.getRawPropertyNames( this.uow );
+        final String[] filteredProps = this.entry.getPropertyNames( getTransaction() );
+        final String[] rawProps = this.entry.getRawPropertyNames( getTransaction() );
         assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
     }
 
     @Test
     public void shouldHaveParentVdb() throws Exception {
-        assertThat( this.entry.getParent( this.uow ), is( instanceOf( Vdb.class ) ) );
+        assertThat( this.entry.getParent( getTransaction() ), is( instanceOf( Vdb.class ) ) );
     }
 
     @Test
     public void shouldHavePathAfterConstruction() throws Exception {
-        assertThat( this.entry.getPath( this.uow ), is( notNullValue() ) );
+        assertThat( this.entry.getPath( getTransaction() ), is( notNullValue() ) );
     }
 
     @Test( expected = UnsupportedOperationException.class )
     public void shouldNotAllowChildren() throws Exception {
-        this.entry.addChild( this.uow, "blah", null );
+        this.entry.addChild( getTransaction(), "blah", null );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToSetEmptyPPath() throws Exception {
-        this.entry.setPath( this.uow, StringConstants.EMPTY_STRING );
+        this.entry.setPath( getTransaction(), StringConstants.EMPTY_STRING );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToSetNullPath() throws Exception {
-        this.entry.setPath( this.uow, null );
+        this.entry.setPath( getTransaction(), null );
     }
 
     @Test
     public void shouldNotContainFilteredProperties() throws Exception {
-        final String[] filteredProps = this.entry.getPropertyNames( this.uow );
+        final String[] filteredProps = this.entry.getPropertyNames( getTransaction() );
         final Filter[] filters = this.entry.getFilters();
 
         for ( final String name : filteredProps ) {
@@ -113,21 +113,21 @@ public final class EntryImplTest extends RelationalModelTest {
 
     @Test
     public void shouldNotHaveDescriptionAfterConstruction() throws Exception {
-        assertThat( this.entry.getDescription( this.uow ), is( nullValue() ) );
+        assertThat( this.entry.getDescription( getTransaction() ), is( nullValue() ) );
     }
 
     @Test
     public void shouldSetDescription() throws Exception {
         final String newValue = "newDescription";
-        this.entry.setDescription( this.uow, newValue );
-        assertThat( this.entry.getDescription( this.uow ), is( newValue ) );
+        this.entry.setDescription( getTransaction(), newValue );
+        assertThat( this.entry.getDescription( getTransaction() ), is( newValue ) );
     }
 
     @Test
     public void shouldSetPath() throws Exception {
         final String newValue = "newPath";
-        this.entry.setPath( this.uow, newValue );
-        assertThat( this.entry.getPath( this.uow ), is( newValue ) );
+        this.entry.setPath( getTransaction(), newValue );
+        assertThat( this.entry.getPath( getTransaction() ), is( newValue ) );
     }
 
     /*
@@ -143,16 +143,16 @@ public final class EntryImplTest extends RelationalModelTest {
         final RelationalProperties props = new RelationalProperties();
         props.add( new RelationalProperty( VdbLexicon.Entry.PATH, "entryPath" ) );
 
-        final KomodoObject kobject = Entry.RESOLVER.create( this.uow, _repo, this.entry.getParent( this.uow ), name, props );
+        final KomodoObject kobject = Entry.RESOLVER.create( getTransaction(), _repo, this.entry.getParent( getTransaction() ), name, props );
         assertThat( kobject, is( notNullValue() ) );
         assertThat( kobject, is( instanceOf( Entry.class ) ) );
-        assertThat( kobject.getName( this.uow ), is( name ) );
+        assertThat( kobject.getName( getTransaction() ), is( name ) );
     }
 
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
-        final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        Entry.RESOLVER.create( this.uow, _repo, bogusParent, "blah", new RelationalProperties() );
+        final KomodoObject bogusParent = _repo.add( getTransaction(), null, "bogus", null );
+        Entry.RESOLVER.create( getTransaction(), _repo, bogusParent, "blah", new RelationalProperties() );
     }
 
 }

@@ -15,9 +15,9 @@
  */
 package org.komodo.relational.commands.vdbimport;
 
+import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.FileWriter;
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.vdb.Vdb;
@@ -32,18 +32,11 @@ import org.komodo.shell.api.CommandResult;
 @SuppressWarnings("javadoc")
 public class UnsetVdbImportPropertyCommandTest extends AbstractCommandTest {
 
-    /**
-	 * Test for UnsetVdbImportPropertyCommand
-	 */
-	public UnsetVdbImportPropertyCommandTest( ) {
-		super();
-	}
-
     @Test
     public void testUnsetProperty1() throws Exception {
         File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
         cmdFile.deleteOnExit();
-        
+
         FileWriter writer = new FileWriter(cmdFile);
         writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
         writer.write("create-vdb myVdb vdbPath" + NEW_LINE);  //$NON-NLS-1$
@@ -54,21 +47,21 @@ public class UnsetVdbImportPropertyCommandTest extends AbstractCommandTest {
         writer.write("unset-property version" + NEW_LINE);  //$NON-NLS-1$
         writer.close();
 
-        setup(cmdFile.getAbsolutePath(), UnsetVdbImportPropertyCommand.class);
+        setup( cmdFile.getAbsolutePath() );
 
         CommandResult result = execute();
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
-        Vdb[] vdbs = wkspMgr.findVdbs(uow);
-        
+        Vdb[] vdbs = wkspMgr.findVdbs(getTransaction());
+
         assertEquals(1, vdbs.length);
-        
-        VdbImport[] imports = vdbs[0].getImports(uow);
+
+        VdbImport[] imports = vdbs[0].getImports(getTransaction());
         assertEquals(1, imports.length);
-        assertEquals("myImport", imports[0].getName(uow)); //$NON-NLS-1$
-        
-        assertEquals(1, imports[0].getVersion(uow)); 
+        assertEquals("myImport", imports[0].getName(getTransaction())); //$NON-NLS-1$
+
+        assertEquals(1, imports[0].getVersion(getTransaction()));
     }
 
 }

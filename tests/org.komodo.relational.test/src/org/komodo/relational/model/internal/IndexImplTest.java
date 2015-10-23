@@ -43,34 +43,34 @@ public final class IndexImplTest extends RelationalModelTest {
     @Before
     public void init() throws Exception {
         this.table = createTable();
-        this.index = this.table.addIndex( this.uow, NAME );
+        this.index = this.table.addIndex( getTransaction(), NAME );
         commit();
     }
 
     @Test
     public void shouldAddColumns() throws Exception {
-        final Column columnA = RelationalModelFactory.createColumn( this.uow, _repo, mock( Table.class ), "columnA" );
-        this.index.addColumn( this.uow, columnA );
+        final Column columnA = RelationalModelFactory.createColumn( getTransaction(), _repo, mock( Table.class ), "columnA" );
+        this.index.addColumn( getTransaction(), columnA );
 
-        final Column columnB = RelationalModelFactory.createColumn( this.uow, _repo, mock( Table.class ), "columnB" );
-        this.index.addColumn( this.uow, columnB );
+        final Column columnB = RelationalModelFactory.createColumn( getTransaction(), _repo, mock( Table.class ), "columnB" );
+        this.index.addColumn( getTransaction(), columnB );
 
         commit(); // must commit so that query used in next method will work
 
-        assertThat( this.index.getColumns( this.uow ).length, is( 2 ) );
-        assertThat( Arrays.asList( this.index.getColumns( this.uow ) ), hasItems( columnA, columnB ) );
+        assertThat( this.index.getColumns( getTransaction() ).length, is( 2 ) );
+        assertThat( Arrays.asList( this.index.getColumns( getTransaction() ) ), hasItems( columnA, columnB ) );
     }
 
     @Test
     public void shouldAllowEmptyExpression() throws Exception {
-        this.index.setExpression( this.uow, EMPTY_STRING );
-        assertThat( this.index.getExpression( this.uow ), is( nullValue() ) );
+        this.index.setExpression( getTransaction(), EMPTY_STRING );
+        assertThat( this.index.getExpression( getTransaction() ), is( nullValue() ) );
     }
 
     @Test
     public void shouldAllowNullExpression() throws Exception {
-        this.index.setExpression( this.uow, null );
-        assertThat( this.index.getExpression( this.uow ), is( nullValue() ) );
+        this.index.setExpression( getTransaction(), null );
+        assertThat( this.index.getExpression( getTransaction() ), is( nullValue() ) );
     }
 
     @Test
@@ -82,7 +82,7 @@ public final class IndexImplTest extends RelationalModelTest {
     public void shouldFailConstructionIfNotIndex() {
         if ( RelationalObjectImpl.VALIDATE_INITIAL_STATE ) {
             try {
-                new IndexImpl( this.uow, _repo, this.table.getAbsolutePath() );
+                new IndexImpl( getTransaction(), _repo, this.table.getAbsolutePath() );
                 fail();
             } catch ( final KException e ) {
                 // expected
@@ -93,36 +93,36 @@ public final class IndexImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveCorrectConstraintType() throws Exception {
         assertThat( this.index.getConstraintType(), is( TableConstraint.ConstraintType.INDEX ) );
-        assertThat( this.index.getRawProperty( this.uow, TeiidDdlLexicon.Constraint.TYPE ).getStringValue( this.uow ),
+        assertThat( this.index.getRawProperty( getTransaction(), TeiidDdlLexicon.Constraint.TYPE ).getStringValue( getTransaction() ),
                     is( TableConstraint.ConstraintType.INDEX.toValue() ) );
     }
 
     @Test
     public void shouldHaveCorrectTypeIdentifier() throws Exception {
-        assertThat(this.index.getTypeIdentifier( this.uow ), is(KomodoType.INDEX));
+        assertThat(this.index.getTypeIdentifier( getTransaction() ), is(KomodoType.INDEX));
     }
 
     @Test
     public void shouldHaveMoreRawProperties() throws Exception {
-        final String[] filteredProps = this.index.getPropertyNames( this.uow );
-        final String[] rawProps = this.index.getRawPropertyNames( this.uow );
+        final String[] filteredProps = this.index.getPropertyNames( getTransaction() );
+        final String[] rawProps = this.index.getRawPropertyNames( getTransaction() );
         assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
     }
 
     @Test
     public void shouldHaveParentTableAfterConstruction() throws Exception {
-        assertThat( this.index.getParent( this.uow ), is( instanceOf( Table.class ) ) );
-        assertThat( this.index.getTable( this.uow ), is( this.table ) );
+        assertThat( this.index.getParent( getTransaction() ), is( instanceOf( Table.class ) ) );
+        assertThat( this.index.getTable( getTransaction() ), is( this.table ) );
     }
 
     @Test( expected = UnsupportedOperationException.class )
     public void shouldNotAllowChildren() throws Exception {
-        this.index.addChild( this.uow, "blah", null );
+        this.index.addChild( getTransaction(), "blah", null );
     }
 
     @Test
     public void shouldNotContainFilteredProperties() throws Exception {
-        final String[] filteredProps = this.index.getPropertyNames( this.uow );
+        final String[] filteredProps = this.index.getPropertyNames( getTransaction() );
         final Filter[] filters = this.index.getFilters();
 
         for ( final String name : filteredProps ) {
@@ -134,29 +134,29 @@ public final class IndexImplTest extends RelationalModelTest {
 
     @Test
     public void shouldNotHaveExpressionAfterConstruction() throws Exception {
-        assertThat( this.index.getExpression( this.uow ), is( nullValue() ) );
-        assertThat( this.index.hasProperty( this.uow, TeiidDdlLexicon.Constraint.EXPRESSION ), is( false ) );
+        assertThat( this.index.getExpression( getTransaction() ), is( nullValue() ) );
+        assertThat( this.index.hasProperty( getTransaction(), TeiidDdlLexicon.Constraint.EXPRESSION ), is( false ) );
     }
 
     @Test
     public void shouldRemoveExpressionWithEmptyString() throws Exception {
-        this.index.setExpression( this.uow, "expression" );
-        this.index.setExpression( this.uow, StringConstants.EMPTY_STRING );
-        assertThat( this.index.getExpression( this.uow ), is( nullValue() ) );
+        this.index.setExpression( getTransaction(), "expression" );
+        this.index.setExpression( getTransaction(), StringConstants.EMPTY_STRING );
+        assertThat( this.index.getExpression( getTransaction() ), is( nullValue() ) );
     }
 
     @Test
     public void shouldRemoveExpressionWithNull() throws Exception {
-        this.index.setExpression( this.uow, "expression" );
-        this.index.setExpression( this.uow, null );
-        assertThat( this.index.getExpression( this.uow ), is( nullValue() ) );
+        this.index.setExpression( getTransaction(), "expression" );
+        this.index.setExpression( getTransaction(), null );
+        assertThat( this.index.getExpression( getTransaction() ), is( nullValue() ) );
     }
 
     @Test
     public void shouldSetExpression() throws Exception {
         final String value = "expression";
-        this.index.setExpression( this.uow, value );
-        assertThat( this.index.getExpression( this.uow ), is( value ) );
+        this.index.setExpression( getTransaction(), value );
+        assertThat( this.index.getExpression( getTransaction() ), is( value ) );
     }
 
     /*
@@ -168,16 +168,16 @@ public final class IndexImplTest extends RelationalModelTest {
     @Test
     public void shouldCreateUsingResolver() throws Exception {
         final String name = "blah";
-        final KomodoObject kobject = Index.RESOLVER.create( this.uow, _repo, this.table, name, null );
+        final KomodoObject kobject = Index.RESOLVER.create( getTransaction(), _repo, this.table, name, null );
         assertThat( kobject, is( notNullValue() ) );
         assertThat( kobject, is( instanceOf( Index.class ) ) );
-        assertThat( kobject.getName( this.uow ), is( name ) );
+        assertThat( kobject.getName( getTransaction() ), is( name ) );
     }
 
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
-        final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        Index.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
+        final KomodoObject bogusParent = _repo.add( getTransaction(), null, "bogus", null );
+        Index.RESOLVER.create( getTransaction(), _repo, bogusParent, "blah", null );
     }
 
 }

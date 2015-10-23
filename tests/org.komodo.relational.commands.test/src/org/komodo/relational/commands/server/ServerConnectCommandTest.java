@@ -29,32 +29,25 @@ import org.komodo.shell.api.CommandResult;
 @SuppressWarnings({"javadoc", "nls"})
 public class ServerConnectCommandTest extends AbstractCommandTest {
 
-    /**
-	 * Test for ServerConnectCommand
-	 */
-	public ServerConnectCommandTest( ) {
-		super();
-	}
-
     @Test
     public void shouldFailNoLocalhostFound() throws Exception {
-        File cmdFile = File.createTempFile("TestCommand", ".txt");  
+        File cmdFile = File.createTempFile("TestCommand", ".txt");
         cmdFile.deleteOnExit();
-        
+
         FileWriter writer = new FileWriter(cmdFile);
         writer.write("set-auto-commit false" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("workspace" + NEW_LINE);  
-        writer.write("create-teiid myTeiid" + NEW_LINE);  
-        writer.write("commit" + NEW_LINE);  
-        writer.write("set-server myTeiid" + NEW_LINE);  
+        writer.write("workspace" + NEW_LINE);
+        writer.write("create-teiid myTeiid" + NEW_LINE);
+        writer.write("commit" + NEW_LINE);
+        writer.write("set-server myTeiid" + NEW_LINE);
         writer.write("server-connect" + NEW_LINE);  //$NON-NLS-1$
         writer.close();
 
-        setup(cmdFile.getAbsolutePath(), ServerSetCommand.class);
+        setup( cmdFile.getAbsolutePath() );
 
         CommandResult result = execute();
         String msg = result.getMessage();
-        
+
         assertTrue(msg.contains("localhost is not available"));
     }
 

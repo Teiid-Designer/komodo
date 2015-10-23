@@ -3,6 +3,7 @@ package org.komodo.shell;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.file.Files;
@@ -11,19 +12,18 @@ import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.komodo.core.KEngine;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.InvalidCommandArgumentException;
 import org.komodo.shell.api.KomodoShell;
-import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.commands.PlayCommand;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.constants.SystemConstants;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
-import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.spi.repository.RepositoryClient;
 import org.komodo.test.utils.AbstractLocalRepositoryTest;
 import org.komodo.utils.FileUtils;
@@ -42,8 +42,6 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
     private Writer writer;
     private Writer commandWriter;
     private PlayCommand playCmd;
-    @SuppressWarnings( "unused" )
-    private Class< ? extends ShellCommand > testedCommandClass;
     protected WorkspaceStatusImpl wsStatus;
 
     /**
@@ -88,14 +86,8 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
         assertEquals(Repository.State.NOT_REACHABLE, _repo.getState());
     }
 
-    /**
-     * Setup the test
-     * @param commandFilePath the path to the file containing the command (cannot be empty)
-     * @param commandClass the command being tested
-     * @throws Exception
-     */
-    protected void setup( final String commandFilePath,
-                          final Class< ? extends ShellCommand > commandClass ) throws Exception {
+    @Before
+    public void beforeEach() throws Exception {
         assertEquals( RepositoryClient.State.STARTED, kEngine.getState() );
         assertEquals( Repository.State.REACHABLE, kEngine.getDefaultRepository().getState() );
 
@@ -103,29 +95,40 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
         Mockito.when( komodoShell.getEngine() ).thenReturn( kEngine );
         Mockito.when( komodoShell.getInputStream() ).thenReturn( System.in );
         Mockito.when( komodoShell.getOutputWriter() ).thenReturn( new StringWriter() );
-        Mockito.when( komodoShell.getShellDataLocation() ).thenReturn( getLoggingDirectory().toString() );
-        Mockito.when( komodoShell.getShellPropertiesFile()).thenReturn( "vdbbuilderShell.properties");
+        Mockito.when( komodoShell.getShellDataLocation() ).thenReturn( _shellDataDirectory.toString() );
+        Mockito.when( komodoShell.getShellPropertiesFile() ).thenReturn( "vdbbuilderShell.properties" );
 
-        this.wsStatus = new WorkspaceStatusImpl( this.uow, komodoShell );
-        this.testedCommandClass = commandClass;
+        this.wsStatus = new WorkspaceStatusImpl( super.getTransaction(), komodoShell );
+    }
 
-        try {
-            // create writers to store the output
-            this.writer = new StringWriter();
-            this.commandWriter = new StringWriter();
+    protected void setup( final String[] commands ) throws Exception {
+        final File cmdFile = File.createTempFile( "TestCommand", ".txt" ); //$NON-NLS-1$  //$NON-NLS-2$
+        cmdFile.deleteOnExit();
 
-            // setup arguments for play command
-            final String filePath = ( new File( commandFilePath ).isAbsolute() ) ? commandFilePath
-                                                                                : ( "./resources/" + commandFilePath );
-            final Arguments args = new Arguments( filePath );
-
-            // construct play command
-            this.playCmd = new PlayCommand( this.wsStatus );
-            this.playCmd.setArguments( args );
-            this.playCmd.setWriter( this.commandWriter );
-        } catch ( Exception e ) {
-            Assert.fail( "Failed - setup error: " + e.getMessage() ); //$NON-NLS-1$
+        try ( final FileWriter writer = new FileWriter( cmdFile ) ) {
+            for ( final String command : commands ) {
+                writer.write( command + NEW_LINE );
+            }
         }
+
+        final String commandFilePath = cmdFile.getAbsolutePath();
+        setup( commandFilePath );
+    }
+
+    protected void setup( final String commandFilePath ) throws Exception {
+        // create writers to store the output
+        this.writer = new StringWriter();
+        this.commandWriter = new StringWriter();
+
+        // setup arguments for play command
+        final String filePath = ( new File( commandFilePath ).isAbsolute() ) ? commandFilePath
+                                                                             : ( "./resources/" + commandFilePath );
+        final Arguments args = new Arguments( filePath );
+
+        // construct play command
+        this.playCmd = new PlayCommand( this.wsStatus );
+        this.playCmd.setArguments( args );
+        this.playCmd.setWriter( this.commandWriter );
     }
 
     /**
@@ -135,11 +138,17 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
      */
     @Override
     protected void commit() throws Exception {
-        if(!this.uow.getState().equals(UnitOfWork.State.COMMITTED)) {
-            super.commit();
-        }
-        if (wsStatus == null)
-            return;
+        this.wsStatus.commit( getClass().getSimpleName() );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.test.utils.AbstractLocalRepositoryTest#rollback()
+     */
+    @Override
+    protected final void rollback() throws Exception {
+        this.wsStatus.rollback( getClass().getSimpleName() );
     }
 
     @After
@@ -161,12 +170,6 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
                 commit();
             } else {
                 rollback();
-            }
-
-            // make a transaction available to tests after the playback is over
-            if ( this.uow.getState() == State.COMMITTED ) {
-                this.uow = createTransaction( "postPlaybackExecute" );
-                this.wsStatus.setTransaction( this.uow );
             }
         } catch ( InvalidCommandArgumentException e ) {
             Assert.fail( "Failed - invalid command: " + e.getMessage() ); //$NON-NLS-1$
@@ -205,6 +208,16 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
             sb.append(StringConstants.SPACE);
         }
         return sb.toString();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.test.utils.AbstractLocalRepositoryTest#getTransaction()
+     */
+    @Override
+    protected UnitOfWork getTransaction() {
+        return this.wsStatus.getTransaction();
     }
 
 }

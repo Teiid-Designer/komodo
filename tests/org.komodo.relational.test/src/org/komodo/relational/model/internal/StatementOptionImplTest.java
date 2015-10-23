@@ -38,7 +38,7 @@ public final class StatementOptionImplTest extends RelationalModelTest {
     @Before
     public void init() throws Exception {
         final Table table = createTable();
-        this.option = RelationalModelFactory.createStatementOption( this.uow, _repo, table, NAME, "initialValue" );
+        this.option = RelationalModelFactory.createStatementOption( getTransaction(), _repo, table, NAME, "initialValue" );
         commit();
     }
 
@@ -51,7 +51,7 @@ public final class StatementOptionImplTest extends RelationalModelTest {
     public void shouldFailConstructionIfNotStatementOption() {
         if ( RelationalObjectImpl.VALIDATE_INITIAL_STATE ) {
             try {
-                new StatementOptionImpl( this.uow, _repo, _repo.komodoLibrary( this.uow ).getAbsolutePath() );
+                new StatementOptionImpl( getTransaction(), _repo, _repo.komodoLibrary( getTransaction() ).getAbsolutePath() );
                 fail();
             } catch ( final KException e ) {
                 // expected
@@ -61,44 +61,44 @@ public final class StatementOptionImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveCorrectDescriptor() throws Exception {
-        assertThat( this.option.hasDescriptor( this.uow, StandardDdlLexicon.TYPE_STATEMENT_OPTION ), is( true ) );
+        assertThat( this.option.hasDescriptor( getTransaction(), StandardDdlLexicon.TYPE_STATEMENT_OPTION ), is( true ) );
     }
 
     @Test
     public void shouldHaveCorrectTypeIdentifier() throws Exception {
-        assertThat(this.option.getTypeIdentifier( this.uow ), is(KomodoType.STATEMENT_OPTION));
+        assertThat(this.option.getTypeIdentifier( getTransaction() ), is(KomodoType.STATEMENT_OPTION));
     }
 
     @Test
     public void shouldHaveCorrectName() throws Exception {
-        assertThat( this.option.getName( this.uow ), is( NAME ) );
+        assertThat( this.option.getName( getTransaction() ), is( NAME ) );
     }
 
     @Test
     public void shouldHaveMoreRawProperties() throws Exception {
-        final String[] filteredProps = this.option.getPropertyNames( this.uow );
-        final String[] rawProps = this.option.getRawPropertyNames( this.uow );
+        final String[] filteredProps = this.option.getPropertyNames( getTransaction() );
+        final String[] rawProps = this.option.getRawPropertyNames( getTransaction() );
         assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
     }
 
     @Test( expected = UnsupportedOperationException.class )
     public void shouldNotAllowChildren() throws Exception {
-        this.option.addChild( this.uow, "blah", null );
+        this.option.addChild( getTransaction(), "blah", null );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldNotAllowEmptyOptionValueProperty() throws Exception {
-        this.option.setOption( this.uow, StringConstants.EMPTY_STRING );
+        this.option.setOption( getTransaction(), StringConstants.EMPTY_STRING );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldNotAllowNullOptionValueProperty() throws Exception {
-        this.option.setOption( this.uow, null );
+        this.option.setOption( getTransaction(), null );
     }
 
     @Test
     public void shouldNotContainFilteredProperties() throws Exception {
-        final String[] filteredProps = this.option.getPropertyNames( this.uow );
+        final String[] filteredProps = this.option.getPropertyNames( getTransaction() );
         final Filter[] filters = this.option.getFilters();
 
         for ( final String name : filteredProps ) {
@@ -111,9 +111,9 @@ public final class StatementOptionImplTest extends RelationalModelTest {
     @Test
     public void shouldSetOptionValueProperty() throws Exception {
         final String value = "optionvalue";
-        this.option.setOption( this.uow, value );
-        assertThat( this.option.getOption( this.uow ), is( value ) );
-        assertThat( this.option.getProperty( this.uow, StandardDdlLexicon.VALUE ).getStringValue( this.uow ), is( value ) );
+        this.option.setOption( getTransaction(), value );
+        assertThat( this.option.getOption( getTransaction() ), is( value ) );
+        assertThat( this.option.getProperty( getTransaction(), StandardDdlLexicon.VALUE ).getStringValue( getTransaction() ), is( value ) );
     }
 
     /*
@@ -129,20 +129,20 @@ public final class StatementOptionImplTest extends RelationalModelTest {
         final RelationalProperties props = new RelationalProperties();
         props.add( new RelationalProperty( StandardDdlLexicon.VALUE, "optionValue" ) );
 
-        final KomodoObject kobject = StatementOption.RESOLVER.create( this.uow,
+        final KomodoObject kobject = StatementOption.RESOLVER.create( getTransaction(),
                                                                           _repo,
-                                                                          this.option.getParent( this.uow ),
+                                                                          this.option.getParent( getTransaction() ),
                                                                           name,
                                                                           props );
         assertThat( kobject, is( notNullValue() ) );
         assertThat( kobject, is( instanceOf( StatementOption.class ) ) );
-        assertThat( kobject.getName( this.uow ), is( name ) );
+        assertThat( kobject.getName( getTransaction() ), is( name ) );
     }
 
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
-        final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        StatementOption.RESOLVER.create( this.uow, _repo, bogusParent, "blah", new RelationalProperties() );
+        final KomodoObject bogusParent = _repo.add( getTransaction(), null, "bogus", null );
+        StatementOption.RESOLVER.create( getTransaction(), _repo, bogusParent, "blah", new RelationalProperties() );
     }
 
 }

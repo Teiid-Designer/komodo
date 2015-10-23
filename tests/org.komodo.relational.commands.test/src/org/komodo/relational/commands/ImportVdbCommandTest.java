@@ -15,8 +15,6 @@
  */
 package org.komodo.relational.commands;
 
-import java.io.File;
-import java.io.FileWriter;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.shell.api.CommandResult;
@@ -26,33 +24,20 @@ import org.komodo.shell.util.KomodoObjectUtils;
  * Test Class to test ImportVdbCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( { "javadoc", "nls" } )
 public class ImportVdbCommandTest extends AbstractCommandTest {
-
-    /**
-	 * Test for ImportVdbCommand
-	 */
-	public ImportVdbCommandTest( ) {
-		super();
-	}
 
     @Test
     public void testImportVdb1() throws Exception {
-        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
-        cmdFile.deleteOnExit();
-        
-        FileWriter writer = new FileWriter(cmdFile);
-        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("create-vdb testVdb1 vdbPath" + NEW_LINE);  //$NON-NLS-1$
-        writer.close();
-        
-    	setup(cmdFile.getAbsolutePath(), ImportVdbCommand.class);
+        final String[] commands = { "workspace",
+                                    "create-vdb testVdb1 vdbPath" };
+        setup( commands );
 
         CommandResult result = execute();
         assertCommandResultOk(result);
 
     	// Check WorkspaceContext
-    	assertEquals("/workspace", KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext())); //$NON-NLS-1$
+    	assertEquals("/workspace", KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext()));
     }
 
 }

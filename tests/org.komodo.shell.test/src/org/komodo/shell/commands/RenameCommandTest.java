@@ -13,45 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.komodo.shell;
+package org.komodo.shell.commands;
 
 import static org.junit.Assert.assertEquals;
-import java.io.File;
-import java.io.FileWriter;
 import org.junit.Test;
+import org.komodo.shell.AbstractCommandTest;
 import org.komodo.shell.api.CommandResult;
-import org.komodo.shell.commands.SetAutoCommitCommand;
+import org.komodo.shell.util.KomodoObjectUtils;
 
 /**
- * Test Class to test SetAutoCommitCommand
- *
+ * Test Class to test {@link RenameCommand}.
  */
-@SuppressWarnings("javadoc")
-public class SetAutoCommitCommandTest extends AbstractCommandTest {
-
-    /**
-	 * Test for SetAutoCommitCommand
-	 */
-	public SetAutoCommitCommandTest( ) {
-		super();
-	}
+@SuppressWarnings( { "javadoc", "nls" } )
+public class RenameCommandTest extends AbstractCommandTest {
 
     @Test
     public void test1() throws Exception {
-        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
-        cmdFile.deleteOnExit();
-        
-        FileWriter writer = new FileWriter(cmdFile);
-        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("set-auto-commit false" + NEW_LINE);  //$NON-NLS-1$
-        writer.close();
-        
-    	setup(cmdFile.getAbsolutePath(), SetAutoCommitCommand.class);
+        final String[] commands = { "workspace" };
+    	setup( commands );
 
         CommandResult result = execute();
         assertCommandResultOk(result);
 
-    	assertEquals(false, wsStatus.isAutoCommit());
+    	// Check WorkspaceContext
+    	assertEquals("/workspace", KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext()));
     }
 
 }
