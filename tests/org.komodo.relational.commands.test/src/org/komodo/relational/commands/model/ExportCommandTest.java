@@ -34,31 +34,24 @@ import org.komodo.test.utils.TestUtilities;
 @SuppressWarnings("javadoc")
 public class ExportCommandTest extends AbstractCommandTest {
 
-    private final static String ALL_ELEMENTS_MODEL_TWO_DDL = EMPTY_STRING + "CREATE VIEW Test" + NEW_LINE + //$NON-NLS-1$ 
+    private final static String ALL_ELEMENTS_MODEL_TWO_DDL = EMPTY_STRING + "CREATE VIEW Test" + NEW_LINE + //$NON-NLS-1$
                                                              "AS" + NEW_LINE + "SELECT * FROM Test.getTest;";  //$NON-NLS-1$ //$NON-NLS-2$
 
-    private final static String TWITTER_VIEW_MODEL_DDL = EMPTY_STRING + 
-                                                         "CREATE VIRTUAL PROCEDURE getTweets(IN query varchar) RETURNS TABLE " +  //$NON-NLS-1$ 
-                                                         "(created_on varchar(25), from_user varchar(25), to_user varchar(25), profile_image_url " +  //$NON-NLS-1$ 
-                                                         "varchar(25), source varchar(25), text varchar(140))" + NEW_LINE +  //$NON-NLS-1$ 
-                                                         "AS" + NEW_LINE +  //$NON-NLS-1$ 
-                                                         "SELECT tweet.* FROM (EXEC twitter.invokeHTTP(action => 'GET', endpoint => QUERYSTRING('', query AS q))) AS w, XMLTABLE('results' PASSING JSONTOXML('myxml', w.result) COLUMNS created_on string PATH 'created_at',  from_user string PATH 'from_user',  to_user string PATH 'to_user',  profile_image_url string PATH 'profile_image_url',  source string PATH 'source',  text string PATH 'text') AS tweet;" + NEW_LINE + //$NON-NLS-1$  
-                                                         NEW_LINE + "CREATE VIEW Tweet" + NEW_LINE + "AS" + NEW_LINE + "SELECT * FROM twitterview.getTweets;"; //$NON-NLS-1$  //$NON-NLS-2$ //$NON-NLS-3$ 
-
-    /**
-	 * Test for ExportCommand
-	 */
-	public ExportCommandTest( ) {
-		super();
-	}
+    private final static String TWITTER_VIEW_MODEL_DDL = EMPTY_STRING +
+                                                         "CREATE VIRTUAL PROCEDURE getTweets(IN query varchar) RETURNS TABLE " +  //$NON-NLS-1$
+                                                         "(created_on varchar(25), from_user varchar(25), to_user varchar(25), profile_image_url " +  //$NON-NLS-1$
+                                                         "varchar(25), source varchar(25), text varchar(140))" + NEW_LINE +  //$NON-NLS-1$
+                                                         "AS" + NEW_LINE +  //$NON-NLS-1$
+                                                         "SELECT tweet.* FROM (EXEC twitter.invokeHTTP(action => 'GET', endpoint => QUERYSTRING('', query AS q))) AS w, XMLTABLE('results' PASSING JSONTOXML('myxml', w.result) COLUMNS created_on string PATH 'created_at',  from_user string PATH 'from_user',  to_user string PATH 'to_user',  profile_image_url string PATH 'profile_image_url',  source string PATH 'source',  text string PATH 'text') AS tweet;" + NEW_LINE + //$NON-NLS-1$
+                                                         NEW_LINE + "CREATE VIEW Tweet" + NEW_LINE + "AS" + NEW_LINE + "SELECT * FROM twitterview.getTweets;"; //$NON-NLS-1$  //$NON-NLS-2$ //$NON-NLS-3$
 
     private KomodoObject addTweetVdbExample() throws KException, Exception {
         KomodoObject tweet = null;
 
         try {
-            createInitialTransaction();
-            KomodoObject kWorkspace = _repo.komodoWorkspace(uow);
-            tweet = TestUtilities.createTweetExampleNode(uow, kWorkspace);
+//            createInitialTransaction();
+            KomodoObject kWorkspace = _repo.komodoWorkspace(getTransaction());
+            tweet = TestUtilities.createTweetExampleNode(getTransaction(), kWorkspace);
         } finally {
             commit();
         }
@@ -66,8 +59,8 @@ public class ExportCommandTest extends AbstractCommandTest {
         assertNotNull(tweet);
 
         try {
-            createInitialTransaction();
-            traverse(uow, tweet.getAbsolutePath());
+//            createInitialTransaction();
+            traverse(getTransaction(), tweet.getAbsolutePath());
         } finally {
             commit();
         }
@@ -80,8 +73,8 @@ public class ExportCommandTest extends AbstractCommandTest {
 
         try {
             createInitialTransaction();
-            KomodoObject kWorkspace = _repo.komodoWorkspace(uow);
-            tweet = TestUtilities.createAllElementsExampleNode(uow, kWorkspace);
+            KomodoObject kWorkspace = _repo.komodoWorkspace(getTransaction());
+            tweet = TestUtilities.createAllElementsExampleNode(getTransaction(), kWorkspace);
         } finally {
             commit();
         }
@@ -90,7 +83,7 @@ public class ExportCommandTest extends AbstractCommandTest {
 
         try {
             createInitialTransaction();
-            traverse(uow, tweet.getAbsolutePath());
+            traverse(getTransaction(), tweet.getAbsolutePath());
         } finally {
             commit();
         }
@@ -133,7 +126,7 @@ public class ExportCommandTest extends AbstractCommandTest {
             createInitialTransaction();
             writer = new FileWriter(exportCmdFile);
             writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
-            writer.write("cd " + tweetVdb.getName(uow) + NEW_LINE);  //$NON-NLS-1$
+            writer.write("cd " + tweetVdb.getName(getTransaction()) + NEW_LINE);  //$NON-NLS-1$
             writer.write("cd twitterview" + NEW_LINE);  //$NON-NLS-1$
             writer.write("export-ddl " + exportDest.getAbsolutePath() + NEW_LINE);  //$NON-NLS-1$
             writer.close();
@@ -141,7 +134,7 @@ public class ExportCommandTest extends AbstractCommandTest {
             //
             // Setup the export instructions
             //
-            setup(exportCmdFile.getAbsolutePath(), ExportCommand.class);
+            setup( exportCmdFile.getAbsolutePath() );
 
             //
             // Execute the commands
@@ -160,7 +153,7 @@ public class ExportCommandTest extends AbstractCommandTest {
                 writer.close();
         }
     }
-    
+
     /**
      * Test export of Physical model -> xml
      *
@@ -196,7 +189,7 @@ public class ExportCommandTest extends AbstractCommandTest {
             createInitialTransaction();
             writer = new FileWriter(exportCmdFile);
             writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
-            writer.write("cd " + allElementsVdb.getName(uow) + NEW_LINE);  //$NON-NLS-1$
+            writer.write("cd " + allElementsVdb.getName(getTransaction()) + NEW_LINE);  //$NON-NLS-1$
             writer.write("cd model-one" + NEW_LINE);  //$NON-NLS-1$
             writer.write("export-ddl " + exportDest.getAbsolutePath() + NEW_LINE);  //$NON-NLS-1$
             writer.close();
@@ -204,7 +197,7 @@ public class ExportCommandTest extends AbstractCommandTest {
             //
             // Setup the export instructions
             //
-            setup(exportCmdFile.getAbsolutePath(), ExportCommand.class);
+            setup( exportCmdFile.getAbsolutePath() );
 
             //
             // Execute the commands
@@ -212,7 +205,7 @@ public class ExportCommandTest extends AbstractCommandTest {
             CommandResult result = execute();
             assertTrue(exportDest.exists());
             assertTrue(!result.isOk());
-            
+
             String message = result.getMessage();
             assertEquals("There is no DDL content to output.",message); //$NON-NLS-1$
         } finally {
@@ -258,7 +251,7 @@ public class ExportCommandTest extends AbstractCommandTest {
             createInitialTransaction();
             writer = new FileWriter(exportCmdFile);
             writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
-            writer.write("cd " + allElementsVdb.getName(uow) + NEW_LINE);  //$NON-NLS-1$
+            writer.write("cd " + allElementsVdb.getName(getTransaction()) + NEW_LINE);  //$NON-NLS-1$
             writer.write("cd model-two" + NEW_LINE);  //$NON-NLS-1$
             writer.write("export-ddl " + exportDest.getAbsolutePath() + NEW_LINE);  //$NON-NLS-1$
             writer.close();
@@ -266,7 +259,7 @@ public class ExportCommandTest extends AbstractCommandTest {
             //
             // Setup the export instructions
             //
-            setup(exportCmdFile.getAbsolutePath(), ExportCommand.class);
+            setup( exportCmdFile.getAbsolutePath() );
 
             //
             // Execute the commands

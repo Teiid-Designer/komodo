@@ -29,32 +29,25 @@ import org.komodo.shell.api.CommandResult;
 @SuppressWarnings({"javadoc", "nls"})
 public class ServerDisconnectCommandTest extends AbstractCommandTest {
 
-    /**
-	 * Test for ServerDisconnectCommand
-	 */
-	public ServerDisconnectCommandTest( ) {
-		super();
-	}
-
     @Test
     public void shouldFailNoServerConnected() throws Exception {
-        File cmdFile = File.createTempFile("TestCommand", ".txt");  
+        File cmdFile = File.createTempFile("TestCommand", ".txt");
         cmdFile.deleteOnExit();
-        
+
         FileWriter writer = new FileWriter(cmdFile);
         writer.write("set-auto-commit false" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("workspace" + NEW_LINE);  
-        writer.write("create-teiid myTeiid" + NEW_LINE);  
+        writer.write("workspace" + NEW_LINE);
+        writer.write("create-teiid myTeiid" + NEW_LINE);
         writer.write("commit" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("set-server myTeiid" + NEW_LINE);  
+        writer.write("set-server myTeiid" + NEW_LINE);
         writer.write("server-disconnect" + NEW_LINE);  //$NON-NLS-1$
         writer.close();
 
-        setup(cmdFile.getAbsolutePath(), ServerSetCommand.class);
+        setup( cmdFile.getAbsolutePath() );
 
         CommandResult result = execute();
         String msg = result.getMessage();
-        
+
         assertEquals("something", msg);
     }
 

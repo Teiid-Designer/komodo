@@ -33,47 +33,40 @@ import org.komodo.spi.repository.KomodoObject;
 @SuppressWarnings({"javadoc", "nls"})
 public class ServerSetCommandTest extends AbstractCommandTest {
 
-    /**
-	 * Test for ServerSetCommand
-	 */
-	public ServerSetCommandTest( ) {
-		super();
-	}
-
     @Test
     public void testSet() throws Exception {
-        File cmdFile = File.createTempFile("TestCommand", ".txt");  
+        File cmdFile = File.createTempFile("TestCommand", ".txt");
         cmdFile.deleteOnExit();
-        
+
         FileWriter writer = new FileWriter(cmdFile);
         writer.write("set-auto-commit false" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("workspace" + NEW_LINE);  
-        writer.write("create-teiid myTeiid" + NEW_LINE);  
+        writer.write("workspace" + NEW_LINE);
+        writer.write("create-teiid myTeiid" + NEW_LINE);
         writer.write("commit" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("set-server myTeiid" + NEW_LINE);  
+        writer.write("set-server myTeiid" + NEW_LINE);
         writer.write("commit" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("show-global" + NEW_LINE);  
+        writer.write("show-global" + NEW_LINE);
         writer.close();
 
-        setup(cmdFile.getAbsolutePath(), ServerSetCommand.class);
+        setup( cmdFile.getAbsolutePath() );
 
         CommandResult result = execute();
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
-        Teiid[] teiids = wkspMgr.findTeiids(uow);
-        
+        Teiid[] teiids = wkspMgr.findTeiids(getTransaction());
+
         assertEquals(1, teiids.length);
-        assertEquals("myTeiid", teiids[0].getName(uow)); 
-        
+        assertEquals("myTeiid", teiids[0].getName(getTransaction()));
+
         // Make sure the server has been set
         boolean hasServerObject = false;
         KomodoObject serverObj = wsStatus.getStateObjects().get(ServerCommandProvider.SERVER_DEFAULT_KEY);
-        if(serverObj!=null && Teiid.RESOLVER.resolvable(uow, serverObj)) {
+        if(serverObj!=null && Teiid.RESOLVER.resolvable(getTransaction(), serverObj)) {
             hasServerObject = true;
         }
         assertTrue(hasServerObject);
-        assertEquals("myTeiid",serverObj.getName(uow));
+        assertEquals("myTeiid",serverObj.getName(getTransaction()));
     }
 
 }

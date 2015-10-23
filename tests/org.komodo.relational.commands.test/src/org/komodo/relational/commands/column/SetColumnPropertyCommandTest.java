@@ -15,9 +15,9 @@
  */
 package org.komodo.relational.commands.column;
 
+import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.FileWriter;
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Column;
@@ -34,18 +34,11 @@ import org.komodo.shell.api.CommandResult;
 @SuppressWarnings("javadoc")
 public class SetColumnPropertyCommandTest extends AbstractCommandTest {
 
-    /**
-	 * Test for SetColumnPropertyCommand
-	 */
-	public SetColumnPropertyCommandTest( ) {
-		super();
-	}
-
     @Test
     public void testSetProperty1() throws Exception {
         File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
         cmdFile.deleteOnExit();
-        
+
         FileWriter writer = new FileWriter(cmdFile);
         writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
         writer.write("create-vdb myVdb vdbPath" + NEW_LINE);  //$NON-NLS-1$
@@ -58,30 +51,30 @@ public class SetColumnPropertyCommandTest extends AbstractCommandTest {
         writer.write("cd myColumn" + NEW_LINE);  //$NON-NLS-1$
         writer.write("set-property NAMEINSOURCE myNameInSource" + NEW_LINE);  //$NON-NLS-1$
         writer.close();
-        
-    	setup(cmdFile.getAbsolutePath(), SetColumnPropertyCommand.class);
+
+    	setup( cmdFile.getAbsolutePath() );
 
         CommandResult result = execute();
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
-        Vdb[] vdbs = wkspMgr.findVdbs(uow);
-        
+        Vdb[] vdbs = wkspMgr.findVdbs(getTransaction());
+
         assertEquals(vdbs.length,1);
-        
-        Model[] models = vdbs[0].getModels(uow);
+
+        Model[] models = vdbs[0].getModels(getTransaction());
         assertEquals(1, models.length,1);
-        assertEquals("myModel", models[0].getName(uow)); //$NON-NLS-1$
-        
-        Table[] tables = models[0].getTables(uow);
+        assertEquals("myModel", models[0].getName(getTransaction())); //$NON-NLS-1$
+
+        Table[] tables = models[0].getTables(getTransaction());
         assertEquals(1, tables.length);
-        assertEquals("myTable", tables[0].getName(uow)); //$NON-NLS-1$
-        
-        Column[] columns = tables[0].getColumns(uow);
+        assertEquals("myTable", tables[0].getName(getTransaction())); //$NON-NLS-1$
+
+        Column[] columns = tables[0].getColumns(getTransaction());
         assertEquals(1, columns.length);
-        assertEquals("myColumn", columns[0].getName(uow)); //$NON-NLS-1$
-        
-        String nameInSource = columns[0].getNameInSource(uow);
+        assertEquals("myColumn", columns[0].getName(getTransaction())); //$NON-NLS-1$
+
+        String nameInSource = columns[0].getNameInSource(getTransaction());
         assertEquals("myNameInSource", nameInSource); //$NON-NLS-1$
     }
 

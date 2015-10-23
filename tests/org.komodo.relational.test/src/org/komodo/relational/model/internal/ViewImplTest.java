@@ -34,7 +34,7 @@ public final class ViewImplTest extends RelationalModelTest {
     @Before
     public void init() throws Exception {
         this.model = createModel();
-        this.view = this.model.addView( this.uow, "view" );
+        this.view = this.model.addView( getTransaction(), "view" );
         commit();
     }
 
@@ -42,7 +42,7 @@ public final class ViewImplTest extends RelationalModelTest {
     public void shouldFailConstructionIfNotView() {
         if ( RelationalObjectImpl.VALIDATE_INITIAL_STATE ) {
             try {
-                new ViewImpl( this.uow, _repo, _repo.komodoLibrary( this.uow ).getAbsolutePath() );
+                new ViewImpl( getTransaction(), _repo, _repo.komodoLibrary( getTransaction() ).getAbsolutePath() );
                 fail();
             } catch ( final KException e ) {
                 // expected
@@ -52,50 +52,50 @@ public final class ViewImplTest extends RelationalModelTest {
 
     @Test( expected = UnsupportedOperationException.class )
     public void shouldFailWhenAddingForeignKey() throws KException {
-        this.view.addForeignKey( this.uow, "blah", mock( Table.class ) );
+        this.view.addForeignKey( getTransaction(), "blah", mock( Table.class ) );
     }
 
     @Test( expected = UnsupportedOperationException.class )
     public void shouldFailWhenAddingUniqueConstraint() throws KException {
-        this.view.addUniqueConstraint( this.uow, "blah" );
+        this.view.addUniqueConstraint( getTransaction(), "blah" );
     }
 
     @Test( expected = UnsupportedOperationException.class )
     public void shouldFailWhenRemovingForeignKey() throws KException {
-        this.view.removeForeignKey( this.uow, "blah" );
+        this.view.removeForeignKey( getTransaction(), "blah" );
     }
 
     @Test( expected = UnsupportedOperationException.class )
     public void shouldFailWhenRemovingUniqueConstraint() throws KException {
-        this.view.removeUniqueConstraint( this.uow, "blah" );
+        this.view.removeUniqueConstraint( getTransaction(), "blah" );
     }
 
     @Test( expected = UnsupportedOperationException.class )
     public void shouldFailWhenSettingPrimaryKey() throws KException {
-        this.view.setPrimaryKey( this.uow, "blah" );
+        this.view.setPrimaryKey( getTransaction(), "blah" );
     }
 
     @Test
     public void shouldHaveCorrectTypeIdentifier() throws Exception {
-        assertThat(this.view.getTypeIdentifier( this.uow ), is(KomodoType.VIEW));
+        assertThat(this.view.getTypeIdentifier( getTransaction() ), is(KomodoType.VIEW));
     }
 
     @Test
     public void shouldHaveMoreRawProperties() throws Exception {
-        final String[] filteredProps = this.view.getPropertyNames( this.uow );
-        final String[] rawProps = this.view.getRawPropertyNames( this.uow );
+        final String[] filteredProps = this.view.getPropertyNames( getTransaction() );
+        final String[] rawProps = this.view.getRawPropertyNames( getTransaction() );
         assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
     }
 
     @Test
     public void shouldHaveParentModel() throws Exception {
-        assertThat( this.view.getParent( this.uow ), is( instanceOf( Model.class ) ) );
-        assertThat( this.view.getParent( this.uow ), is( ( KomodoObject )this.model ) );
+        assertThat( this.view.getParent( getTransaction() ), is( instanceOf( Model.class ) ) );
+        assertThat( this.view.getParent( getTransaction() ), is( ( KomodoObject )this.model ) );
     }
 
     @Test
     public void shouldNotContainFilteredProperties() throws Exception {
-        final String[] filteredProps = this.view.getPropertyNames( this.uow );
+        final String[] filteredProps = this.view.getPropertyNames( getTransaction() );
         final Filter[] filters = this.view.getFilters();
 
         for ( final String name : filteredProps ) {
@@ -114,16 +114,16 @@ public final class ViewImplTest extends RelationalModelTest {
     @Test
     public void shouldCreateUsingResolver() throws Exception {
         final String name = "blah";
-        final KomodoObject kobject = View.RESOLVER.create( this.uow, _repo, this.model, name, null );
+        final KomodoObject kobject = View.RESOLVER.create( getTransaction(), _repo, this.model, name, null );
         assertThat( kobject, is( notNullValue() ) );
         assertThat( kobject, is( instanceOf( View.class ) ) );
-        assertThat( kobject.getName( this.uow ), is( name ) );
+        assertThat( kobject.getName( getTransaction() ), is( name ) );
     }
 
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
-        final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        View.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
+        final KomodoObject bogusParent = _repo.add( getTransaction(), null, "bogus", null );
+        View.RESOLVER.create( getTransaction(), _repo, bogusParent, "blah", null );
     }
 
 }

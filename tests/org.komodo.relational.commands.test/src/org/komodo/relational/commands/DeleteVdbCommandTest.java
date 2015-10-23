@@ -15,8 +15,6 @@
  */
 package org.komodo.relational.commands;
 
-import java.io.File;
-import java.io.FileWriter;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.relational.vdb.Vdb;
@@ -27,41 +25,28 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test DeleteVdbCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( { "javadoc", "nls" } )
 public class DeleteVdbCommandTest extends AbstractCommandTest {
-
-    /**
-	 * Test for DeleteVdbCommand
-	 */
-	public DeleteVdbCommandTest( ) {
-		super();
-	}
 
     @Test
     public void testDeleteVdb1() throws Exception {
-        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
-        cmdFile.deleteOnExit();
-        
-        FileWriter writer = new FileWriter(cmdFile);
-        writer.write("set-auto-commit false" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("create-vdb testVdb1 vdbPath" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("create-vdb testVdb2 vdbPath" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("commit" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("delete-vdb testVdb1" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("commit" + NEW_LINE);  //$NON-NLS-1$
-        writer.close();
-        
-    	setup(cmdFile.getAbsolutePath(), DeleteVdbCommand.class);
+        final String[] commands = { "set-auto-commit false",
+                                    "workspace",
+                                    "create-vdb testVdb1 vdbPath",
+                                    "create-vdb testVdb2 vdbPath",
+                                    "commit",
+                                    "delete-vdb testVdb1",
+                                    "commit" };
+        setup( commands );
 
         CommandResult result = execute();
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
-        Vdb[] vdbs = wkspMgr.findVdbs(uow);
-        
+        Vdb[] vdbs = wkspMgr.findVdbs(getTransaction());
+
         assertEquals(1, vdbs.length);
-        assertEquals("testVdb2", vdbs[0].getName(uow)); //$NON-NLS-1$
+        assertEquals("testVdb2", vdbs[0].getName(getTransaction()));
     }
 
 }

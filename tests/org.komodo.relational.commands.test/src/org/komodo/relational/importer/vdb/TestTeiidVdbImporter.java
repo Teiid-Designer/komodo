@@ -30,7 +30,6 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
@@ -156,31 +155,31 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
     protected void runImporter(Repository repository, File file, KomodoObject parentObject, ImportOptions importOptions,
                                ImportMessages importMessages) throws Exception {
         VdbImporter importer = new VdbImporter(_repo);
-        KomodoObject workspace = _repo.komodoWorkspace(uow);
-        importer.importVdb(uow, file, workspace, importOptions, importMessages);
+        KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
+        importer.importVdb(getTransaction(), file, workspace, importOptions, importMessages);
     }
 
     @Override
     protected void runImporter(Repository repository, InputStream inputStream, KomodoObject parentObject,
                                ImportOptions importOptions, ImportMessages importMessages) throws Exception {
         VdbImporter importer = new VdbImporter(_repo);
-        KomodoObject workspace = _repo.komodoWorkspace(uow);
-        importer.importVdb(uow, inputStream, workspace, importOptions, importMessages);
+        KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
+        importer.importVdb(getTransaction(), inputStream, workspace, importOptions, importMessages);
     }
 
 	// Commit Transaction and handle Importer errors, adding to import messages.  Then start a new transaction.
 	private void commitHandleErrors(ImportMessages importMessages) throws Exception {
-    	// Commit the transaction and handle any import exceptions
-    	this.uow.commit();
-        this.callback.await( TIME_TO_WAIT, TimeUnit.MINUTES );
-    	if(this.callback.hasError()) {
-    		importMessages.addErrorMessage(callback.error());
-    	}
-        // create new transaction
-        this.callback = new SynchronousCallback();
-        this.uow = createTransaction(callback);
+        // cache current callback as a new one will be created when the commit occurs
+        final SynchronousCallback testCallback = this.callback;
+
+        // Commit the transaction and handle any import exceptions
+        commit();
+
+        if ( testCallback.hasError() ) {
+            importMessages.addErrorMessage( testCallback.error() );
+        }
 	}
-	
+
     /**
      * Test Error condition - bad VDB file name supplied
      * Expected Outcome - Error message saying that the supplied file is not found
@@ -189,7 +188,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
     public void testBadVdbFile() throws Exception {
         ImportOptions importOptions = new ImportOptions();
         ImportMessages importMessages = new ImportMessages();
-        executeImporter(new File("unknown.xml"), _repo.komodoWorkspace(uow), importOptions, importMessages);
+        executeImporter(new File("unknown.xml"), _repo.komodoWorkspace(getTransaction()), importOptions, importMessages);
 
         // Should have 1 error message - file not found
         assertEquals(1, importMessages.getErrorMessages().size());
@@ -221,7 +220,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
 
-        executeImporter(tmpFile, _repo.komodoWorkspace(uow), importOptions, importMessages);
+        executeImporter(tmpFile, _repo.komodoWorkspace(getTransaction()), importOptions, importMessages);
 
         // Set back to readable
         tmpFile.setReadable(true);
@@ -251,7 +250,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
 
-        executeImporter(tmpFile, _repo.komodoWorkspace(uow), importOptions, importMessages);
+        executeImporter(tmpFile, _repo.komodoWorkspace(getTransaction()), importOptions, importMessages);
 
         // Should have 1 error message - empty content string
         assertEquals(1, importMessages.getErrorMessages().size());
@@ -282,7 +281,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
          *      @vdb:description=Shows how to call Web Services
          *      @UseConnectorMetadata=cached
          */
-        verify(tweetNode.getParent(this.uow), TestUtilities.TWEET_EXAMPLE_NAME, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        verify(tweetNode.getParent(getTransaction()), TestUtilities.TWEET_EXAMPLE_NAME, VdbLexicon.Vdb.VIRTUAL_DATABASE);
         verifyMixinType(tweetNode, "mix:referenceable");
         verifyProperty(tweetNode, VdbLexicon.Vdb.NAME, "twitter");
         verifyProperty(tweetNode, VdbLexicon.Vdb.DESCRIPTION, "Shows how to call Web Services");
@@ -383,18 +382,18 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
 
-        KomodoObject workspace = _repo.komodoWorkspace(uow);
+        KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
         executeImporter(vdbStream, workspace, importOptions, importMessages);
 
     	// Commit the transaction and handle any import exceptions
     	commitHandleErrors(importMessages);
-    	
+
         // Test that a vdb was created
-        KomodoObject vdbNode = workspace.getChild(uow, TestUtilities.TWEET_EXAMPLE_NAME, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        KomodoObject vdbNode = workspace.getChild(getTransaction(), TestUtilities.TWEET_EXAMPLE_NAME, VdbLexicon.Vdb.VIRTUAL_DATABASE);
         assertNotNull("Failed - No Vdb Created ", vdbNode);
 
         // Test vdb name
-        String vdbName = vdbNode.getName(this.uow);
+        String vdbName = vdbNode.getName(getTransaction());
         assertEquals(importOptions.getOption(OptionKeys.NAME), vdbName);
 
         // verify the node contents
@@ -418,12 +417,12 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
 
-        KomodoObject workspace = _repo.komodoWorkspace(uow);
+        KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
         executeImporter(vdbStream, workspace, importOptions, importMessages);
 
     	// Commit the transaction and handle any import exceptions
     	commitHandleErrors(importMessages);
-    	
+
         // Error messages - expect error that the node already exists
         List<String> errorMessages = importMessages.getErrorMessages();
         assertEquals(1, errorMessages.size());
@@ -443,14 +442,14 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
 
-        KomodoObject workspace = _repo.komodoWorkspace(uow);
+        KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
         executeImporter(vdbStream, workspace, importOptions, importMessages);
-        
+
     	// Commit the transaction and handle any import exceptions
     	commitHandleErrors(importMessages);
-    	
+
     	// Retrieve vdb after import
-        KomodoObject vdbNode = workspace.getChild(uow, TestUtilities.TWEET_EXAMPLE_NAME, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        KomodoObject vdbNode = workspace.getChild(getTransaction(), TestUtilities.TWEET_EXAMPLE_NAME, VdbLexicon.Vdb.VIRTUAL_DATABASE);
         assertNotNull(vdbNode);
 
         // Error messages - expect parser error
@@ -471,22 +470,22 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
         KLog.getLogger().debug("\n\n=== Editing tweet example ===");
 
-        KomodoObject vdbNode = _repo.getFromWorkspace(uow, TestUtilities.TWEET_EXAMPLE_NAME);
+        KomodoObject vdbNode = _repo.getFromWorkspace(getTransaction(), TestUtilities.TWEET_EXAMPLE_NAME);
         assertNotNull(vdbNode);
         WorkspaceManager wkspManager = WorkspaceManager.getInstance(_repo);
 
-        KomodoObject twitterView = vdbNode.getChild(uow, TWITTER_VIEW_MODEL);
-        Model model = wkspManager.resolve(uow, twitterView, Model.class);
+        KomodoObject twitterView = vdbNode.getChild(getTransaction(), TWITTER_VIEW_MODEL);
+        Model model = wkspManager.resolve(getTransaction(), twitterView, Model.class);
         commit();
 
         // Set the model defintion of tweetview to alternative
-        model.setModelDefinition(uow, TWEET_EXAMPLE_REIMPORT_DDL);
-        
+        model.setModelDefinition(getTransaction(), TWEET_EXAMPLE_REIMPORT_DDL);
+
         // Commit the transaction, handling any import message
         ImportMessages importMessages = new ImportMessages();
         commitHandleErrors(importMessages);
 
-        KomodoObject[] tweets = twitterView.getChildren(uow, "Tweet");
+        KomodoObject[] tweets = twitterView.getChildren(getTransaction(), "Tweet");
         assertEquals(1, tweets.length);
 
         /*
@@ -517,25 +516,25 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
         KLog.getLogger().debug("\n\n=== Editing tweet example ===");
 
-        KomodoObject vdbNode = _repo.getFromWorkspace(uow, TestUtilities.TWEET_EXAMPLE_NAME);
+        KomodoObject vdbNode = _repo.getFromWorkspace(getTransaction(), TestUtilities.TWEET_EXAMPLE_NAME);
         assertNotNull(vdbNode);
 
-        KomodoObject twitterView = vdbNode.getChild(uow, TWITTER_VIEW_MODEL);
-        KomodoObject[] tweets = twitterView.getChildren(uow, "Tweet");
+        KomodoObject twitterView = vdbNode.getChild(getTransaction(), TWITTER_VIEW_MODEL);
+        KomodoObject[] tweets = twitterView.getChildren(getTransaction(), "Tweet");
         assertEquals(1, tweets.length);
 
         KomodoObject tweet = verify(twitterView, "Tweet");
         commit();
 
         // Change the value of the query expression for the tweet node
-        tweet.setProperty(uow, TeiidDdlLexicon.CreateTable.QUERY_EXPRESSION, TWEET_QUERY_1);
+        tweet.setProperty(getTransaction(), TeiidDdlLexicon.CreateTable.QUERY_EXPRESSION, TWEET_QUERY_1);
 
         // Commit the transaction, handling any import message
         ImportMessages importMessages = new ImportMessages();
         commitHandleErrors(importMessages);
 
         assertFalse(importMessages.hasError());
-        traverse(uow, tweet.getAbsolutePath());
+        traverse(getTransaction(), tweet.getAbsolutePath());
 
         KomodoObject tweetQuery = verify(tweet, TeiidSqlLexicon.Query.ID);
         verify(tweetQuery, TeiidSqlLexicon.From.ID, JcrConstants.NT_UNSTRUCTURED, TeiidSqlLexicon.From.ID);
@@ -553,7 +552,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         KLog.getLogger().debug("\n\n=== Reimporting edited tweet example ===");
 
         // Set up the vdb reimport stream
-        InputStream vdbStream = TestUtilities.getResourceAsStream(getClass(), VDB_DIRECTORY, TWEET_EXAMPLE_REIMPORT); 
+        InputStream vdbStream = TestUtilities.getResourceAsStream(getClass(), VDB_DIRECTORY, TWEET_EXAMPLE_REIMPORT);
 
         // ImportOption - Handle existing node set to OVERWRITE by default
         ImportOptions importOptions = new ImportOptions();
@@ -562,18 +561,18 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
 
-        KomodoObject workspace = _repo.komodoWorkspace(uow);
+        KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
         executeImporter(vdbStream, workspace, importOptions, importMessages);
-        
+
         // Commit the transaction, handling any import message
         commitHandleErrors(importMessages);
 
         // Test that a vdb was created
-        KomodoObject vdbNode = workspace.getChild(uow, TestUtilities.TWEET_EXAMPLE_NAME, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        KomodoObject vdbNode = workspace.getChild(getTransaction(), TestUtilities.TWEET_EXAMPLE_NAME, VdbLexicon.Vdb.VIRTUAL_DATABASE);
         assertNotNull("Failed - No Vdb Created ",vdbNode);
 
         // Test vdb name
-        String vdbName = vdbNode.getName(uow);
+        String vdbName = vdbNode.getName(getTransaction());
         assertEquals(importOptions.getOption(OptionKeys.NAME), vdbName);
 
         verifyTweetExampleNode(vdbNode, WARBLE_MODEL, WARBLE_VIEW_MODEL, TWEET_EXAMPLE_REIMPORT_DDL);
@@ -598,7 +597,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
          *      @vdb-property2=vdb-value2
          *      @vdb-property=vdb-value
          */
-        KomodoObject myVdbExample = verify(allElementsNode.getParent(this.uow),
+        KomodoObject myVdbExample = verify(allElementsNode.getParent(getTransaction()),
                                                                     TestUtilities.ALL_ELEMENTS_EXAMPLE_NAME + TestUtilities.ALL_ELEMENTS_EXAMPLE_SUFFIX,
                                                                     VdbLexicon.Vdb.VIRTUAL_DATABASE,
                                                                     "mix:referenceable");
@@ -830,18 +829,18 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
 
-        KomodoObject workspace = _repo.komodoWorkspace(uow);
+        KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
         executeImporter(vdbStream, workspace, importOptions, importMessages);
 
         // Commit the transaction, handling any import message
         commitHandleErrors(importMessages);
 
         // Test that a vdb was created
-        KomodoObject vdbNode = workspace.getChild(uow, TestUtilities.ALL_ELEMENTS_EXAMPLE_NAME + TestUtilities.ALL_ELEMENTS_EXAMPLE_SUFFIX, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        KomodoObject vdbNode = workspace.getChild(getTransaction(), TestUtilities.ALL_ELEMENTS_EXAMPLE_NAME + TestUtilities.ALL_ELEMENTS_EXAMPLE_SUFFIX, VdbLexicon.Vdb.VIRTUAL_DATABASE);
         assertNotNull("Failed - No Vdb Created ", vdbNode);
 
         // Test vdb name
-        String vdbName = vdbNode.getName(this.uow);
+        String vdbName = vdbNode.getName(getTransaction());
         assertEquals(importOptions.getOption(OptionKeys.NAME), vdbName);
 
         verifyAllElementsExampleNode(vdbNode);
@@ -860,57 +859,57 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
 
-        KomodoObject workspace = _repo.komodoWorkspace(uow);
+        KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
         executeImporter(vdbStream, workspace, importOptions, importMessages);
 
         // Commit the transaction, handling any import message
         commitHandleErrors(importMessages);
 
         // Test that a vdb was created
-        KomodoObject vdbNode = workspace.getChild(uow, BOOKS_EXAMPLE_FULL, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        KomodoObject vdbNode = workspace.getChild(getTransaction(), BOOKS_EXAMPLE_FULL, VdbLexicon.Vdb.VIRTUAL_DATABASE);
         assertNotNull("Failed - No Vdb Created ", vdbNode);
 
         // Test vdb name
-        String vdbName = vdbNode.getName(this.uow);
+        String vdbName = vdbNode.getName(getTransaction());
         assertEquals(importOptions.getOption(OptionKeys.NAME), vdbName);
 
         assertNotNull(vdbNode);
 
-        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(this.uow, vdbNode, Vdb.class);
+        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(getTransaction(), vdbNode, Vdb.class);
 
         assertNotNull(vdb);
-        String desc = vdb.getDescription(this.uow);
+        String desc = vdb.getDescription(getTransaction());
         assertEquals("Sample vdb that demonstrates various vdb manifest properties including data role with permissions", desc);
 
-        assertNotNull(vdb.getProperty(this.uow, "vdb:preview"));
-        assertEquals("false", vdb.getProperty(this.uow, "vdb:preview").getValue(this.uow).toString());
-        assertNotNull(vdb.getProperty(this.uow, "query-timeout"));
-        assertEquals("256000", vdb.getProperty(this.uow, "query-timeout").getValue(this.uow).toString());
-        assertNotNull(vdb.getProperty(this.uow, "allowed-languages"));
-        assertEquals("java, pascal", vdb.getProperty(this.uow, "allowed-languages").getValue(this.uow).toString());
-        assertNotNull(vdb.getProperty(this.uow, "authentication-type"));
-        assertEquals("USERPASSWORD", vdb.getProperty(this.uow, "authentication-type").getValue(this.uow).toString());
+        assertNotNull(vdb.getProperty(getTransaction(), "vdb:preview"));
+        assertEquals("false", vdb.getProperty(getTransaction(), "vdb:preview").getValue(getTransaction()).toString());
+        assertNotNull(vdb.getProperty(getTransaction(), "query-timeout"));
+        assertEquals("256000", vdb.getProperty(getTransaction(), "query-timeout").getValue(getTransaction()).toString());
+        assertNotNull(vdb.getProperty(getTransaction(), "allowed-languages"));
+        assertEquals("java, pascal", vdb.getProperty(getTransaction(), "allowed-languages").getValue(getTransaction()).toString());
+        assertNotNull(vdb.getProperty(getTransaction(), "authentication-type"));
+        assertEquals("USERPASSWORD", vdb.getProperty(getTransaction(), "authentication-type").getValue(getTransaction()).toString());
 
-        assertEquals(2, vdb.getModels(this.uow).length);
+        assertEquals(2, vdb.getModels(getTransaction()).length);
 
-        assertEquals(1, vdb.getDataRoles(this.uow).length);
-        DataRole dataRole = WorkspaceManager.getInstance(_repo).resolve(this.uow,  vdb.getDataRoles(this.uow)[0], DataRole.class);
-    	assertEquals("publishers-only", dataRole.getName(this.uow));
-    	assertNotNull(dataRole.getProperty(this.uow, "vdb:grantAll"));
-        assertEquals("true", dataRole.getProperty(this.uow, "vdb:grantAll").getValue(this.uow).toString());
-        assertEquals(8, dataRole.getPermissions(this.uow).length);
-        assertEquals(2, dataRole.getMappedRoles(this.uow).length);
+        assertEquals(1, vdb.getDataRoles(getTransaction()).length);
+        DataRole dataRole = WorkspaceManager.getInstance(_repo).resolve(getTransaction(),  vdb.getDataRoles(getTransaction())[0], DataRole.class);
+    	assertEquals("publishers-only", dataRole.getName(getTransaction()));
+    	assertNotNull(dataRole.getProperty(getTransaction(), "vdb:grantAll"));
+        assertEquals("true", dataRole.getProperty(getTransaction(), "vdb:grantAll").getValue(getTransaction()).toString());
+        assertEquals(8, dataRole.getPermissions(getTransaction()).length);
+        assertEquals(2, dataRole.getMappedRoles(getTransaction()).length);
 
-        assertEquals(1, vdb.getTranslators(this.uow).length);
-        Translator translator = WorkspaceManager.getInstance(_repo).resolve(this.uow,  vdb.getTranslators(this.uow)[0], Translator.class);
-    	assertEquals("books_db2", translator.getName(this.uow));
-    	assertEquals("db2", translator.getType(this.uow));
-    	assertNotNull(translator.getProperty(this.uow, "requiresCriteria"));
-        assertEquals("true", translator.getProperty(this.uow, "requiresCriteria").getValue(this.uow).toString());
-        assertNotNull(translator.getProperty(this.uow, "supportsCommonTableExpressions"));
-        assertEquals("false", translator.getProperty(this.uow, "supportsCommonTableExpressions").getValue(this.uow).toString());
-        assertNotNull(translator.getProperty(this.uow, "MaxDependentInPredicates"));
-        assertEquals("25", translator.getProperty(this.uow, "MaxDependentInPredicates").getValue(this.uow).toString());
+        assertEquals(1, vdb.getTranslators(getTransaction()).length);
+        Translator translator = WorkspaceManager.getInstance(_repo).resolve(getTransaction(),  vdb.getTranslators(getTransaction())[0], Translator.class);
+    	assertEquals("books_db2", translator.getName(getTransaction()));
+    	assertEquals("db2", translator.getType(getTransaction()));
+    	assertNotNull(translator.getProperty(getTransaction(), "requiresCriteria"));
+        assertEquals("true", translator.getProperty(getTransaction(), "requiresCriteria").getValue(getTransaction()).toString());
+        assertNotNull(translator.getProperty(getTransaction(), "supportsCommonTableExpressions"));
+        assertEquals("false", translator.getProperty(getTransaction(), "supportsCommonTableExpressions").getValue(getTransaction()).toString());
+        assertNotNull(translator.getProperty(getTransaction(), "MaxDependentInPredicates"));
+        assertEquals("25", translator.getProperty(getTransaction(), "MaxDependentInPredicates").getValue(getTransaction()).toString());
     }
 
 
@@ -927,25 +926,25 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
 
-        KomodoObject workspace = _repo.komodoWorkspace(uow);
+        KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
         executeImporter(vdbStream, workspace, importOptions, importMessages);
 
         // Commit the transaction, handling any import message
         commitHandleErrors(importMessages);
 
         // Test that a vdb was created
-        KomodoObject vdbNode = workspace.getChild(uow, BOOKS_EXAMPLE_PROPS_ONLY, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        KomodoObject vdbNode = workspace.getChild(getTransaction(), BOOKS_EXAMPLE_PROPS_ONLY, VdbLexicon.Vdb.VIRTUAL_DATABASE);
         assertNotNull("Failed - No Vdb Created ", vdbNode);
 
         // Test vdb name
-        String vdbName = vdbNode.getName(this.uow);
+        String vdbName = vdbNode.getName(getTransaction());
         assertEquals(importOptions.getOption(OptionKeys.NAME), vdbName);
         assertNotNull(vdbNode);
 
-        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(this.uow, vdbNode, Vdb.class);
+        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(getTransaction(), vdbNode, Vdb.class);
 
         assertNotNull(vdb);
-        String desc = vdb.getDescription(this.uow);
+        String desc = vdb.getDescription(getTransaction());
         assertEquals("Sample vdb that demonstrates various vdb manifest properties only", desc);
 
         // VDB Properties
@@ -960,16 +959,16 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 			    <property name="validationDateTime" value="Wed Apr 22 08:36:34 CDT 2015"/>
 			    <property name="validationVersion" value="8.7.1"/>
          */
-        assertNotNull(vdb.getProperty(this.uow, "vdb:preview"));
-        assertEquals("false", vdb.getProperty(this.uow, "vdb:preview").getValue(this.uow).toString());
-        assertNotNull(vdb.getProperty(this.uow, "query-timeout"));
-        assertEquals("256000", vdb.getProperty(this.uow, "query-timeout").getValue(this.uow).toString());
-        assertNotNull(vdb.getProperty(this.uow, "allowed-languages"));
-        assertEquals("java, pascal", vdb.getProperty(this.uow, "allowed-languages").getValue(this.uow).toString());
-        assertNotNull(vdb.getProperty(this.uow, "authentication-type"));
-        assertEquals("USERPASSWORD", vdb.getProperty(this.uow, "authentication-type").getValue(this.uow).toString());
+        assertNotNull(vdb.getProperty(getTransaction(), "vdb:preview"));
+        assertEquals("false", vdb.getProperty(getTransaction(), "vdb:preview").getValue(getTransaction()).toString());
+        assertNotNull(vdb.getProperty(getTransaction(), "query-timeout"));
+        assertEquals("256000", vdb.getProperty(getTransaction(), "query-timeout").getValue(getTransaction()).toString());
+        assertNotNull(vdb.getProperty(getTransaction(), "allowed-languages"));
+        assertEquals("java, pascal", vdb.getProperty(getTransaction(), "allowed-languages").getValue(getTransaction()).toString());
+        assertNotNull(vdb.getProperty(getTransaction(), "authentication-type"));
+        assertEquals("USERPASSWORD", vdb.getProperty(getTransaction(), "authentication-type").getValue(getTransaction()).toString());
 
-        assertEquals(0, vdb.getModels(this.uow).length);
+        assertEquals(0, vdb.getModels(getTransaction()).length);
 
     }
 
@@ -985,29 +984,29 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
 
-        KomodoObject workspace = _repo.komodoWorkspace(uow);
+        KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
         executeImporter(vdbStream, workspace, importOptions, importMessages);
 
         // Commit the transaction, handling any import message
         commitHandleErrors(importMessages);
 
         // Test that a vdb was created
-        KomodoObject vdbNode = workspace.getChild(uow, BOOKS_EXAMPLE_SOURCE_MODEL_ONLY, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        KomodoObject vdbNode = workspace.getChild(getTransaction(), BOOKS_EXAMPLE_SOURCE_MODEL_ONLY, VdbLexicon.Vdb.VIRTUAL_DATABASE);
         assertNotNull("Failed - No Vdb Created ", vdbNode);
 
         // Test vdb name
-        String vdbName = vdbNode.getName(this.uow);
+        String vdbName = vdbNode.getName(getTransaction());
         assertEquals(importOptions.getOption(OptionKeys.NAME), vdbName);
         assertNotNull(vdbNode);
 
-        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(this.uow, vdbNode, Vdb.class);
+        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(getTransaction(), vdbNode, Vdb.class);
 
         assertNotNull(vdb);
-        String desc = vdb.getDescription(this.uow);
+        String desc = vdb.getDescription(getTransaction());
         assertEquals("Sample vdb that includes this description and a single pass-through source model", desc);
 
-        assertEquals(1, vdb.getModels(this.uow).length);
-        assertNotNull("BooksSource", vdb.getModels(this.uow)[0].getName(this.uow));
+        assertEquals(1, vdb.getModels(getTransaction()).length);
+        assertNotNull("BooksSource", vdb.getModels(getTransaction())[0].getName(getTransaction()));
 
     }
 
@@ -1023,30 +1022,30 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
 
-        KomodoObject workspace = _repo.komodoWorkspace(uow);
+        KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
         executeImporter(vdbStream, workspace, importOptions, importMessages);
 
         // Commit the transaction, handling any import message
         commitHandleErrors(importMessages);
 
         // Test that a vdb was created
-        KomodoObject vdbNode = workspace.getChild(uow, BOOKS_EXAMPLE_SOURCE_WITH_ROLES, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        KomodoObject vdbNode = workspace.getChild(getTransaction(), BOOKS_EXAMPLE_SOURCE_WITH_ROLES, VdbLexicon.Vdb.VIRTUAL_DATABASE);
         assertNotNull("Failed - No Vdb Created ", vdbNode);
 
         // Test vdb name
-        String vdbName = vdbNode.getName(this.uow);
+        String vdbName = vdbNode.getName(getTransaction());
         assertEquals(importOptions.getOption(OptionKeys.NAME), vdbName);
         assertNotNull(vdbNode);
 
-        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(this.uow, vdbNode, Vdb.class);
+        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(getTransaction(), vdbNode, Vdb.class);
 
         assertNotNull(vdb);
-        String desc = vdb.getDescription(this.uow);
+        String desc = vdb.getDescription(getTransaction());
         assertEquals("Sample vdb that includes this description, a single pass-through source model with data roles", desc);
 
-        assertEquals(1, vdb.getModels(this.uow).length);
-        assertNotNull("BooksSource", vdb.getModels(this.uow)[0].getName(this.uow));
-        assertEquals(1, vdb.getDataRoles(this.uow).length);
+        assertEquals(1, vdb.getModels(getTransaction()).length);
+        assertNotNull("BooksSource", vdb.getModels(getTransaction())[0].getName(getTransaction()));
+        assertEquals(1, vdb.getDataRoles(getTransaction()).length);
     	/*
 	        <data-role name="publishers-only" any-authenticated="false" allow-create-temporary-tables="false" grant-all="true">
 		        <description>publishers can both read and update book info</description>
@@ -1079,12 +1078,12 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 		    </data-role>
         */
 
-        DataRole dataRole = WorkspaceManager.getInstance(_repo).resolve(this.uow,  vdb.getDataRoles(this.uow)[0], DataRole.class);
-    	assertEquals("publishers-only", dataRole.getName(this.uow));
-    	assertNotNull(dataRole.getProperty(this.uow, "vdb:grantAll"));
-        assertEquals("true", dataRole.getProperty(this.uow, "vdb:grantAll").getValue(this.uow).toString());
-        assertEquals(8, dataRole.getPermissions(this.uow).length);
-        assertEquals(2, dataRole.getMappedRoles(this.uow).length);
+        DataRole dataRole = WorkspaceManager.getInstance(_repo).resolve(getTransaction(),  vdb.getDataRoles(getTransaction())[0], DataRole.class);
+    	assertEquals("publishers-only", dataRole.getName(getTransaction()));
+    	assertNotNull(dataRole.getProperty(getTransaction(), "vdb:grantAll"));
+        assertEquals("true", dataRole.getProperty(getTransaction(), "vdb:grantAll").getValue(getTransaction()).toString());
+        assertEquals(8, dataRole.getPermissions(getTransaction()).length);
+        assertEquals(2, dataRole.getMappedRoles(getTransaction()).length);
     }
 
     @Test
@@ -1099,31 +1098,31 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
 
-        KomodoObject workspace = _repo.komodoWorkspace(uow);
+        KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
         executeImporter(vdbStream, workspace, importOptions, importMessages);
 
         // Commit the transaction, handling any import message
         commitHandleErrors(importMessages);
 
         // Test that a vdb was created
-        KomodoObject vdbNode = workspace.getChild(uow, BOOKS_EXAMPLE_VIRTUAL_MODEL_ONLY, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        KomodoObject vdbNode = workspace.getChild(getTransaction(), BOOKS_EXAMPLE_VIRTUAL_MODEL_ONLY, VdbLexicon.Vdb.VIRTUAL_DATABASE);
         assertNotNull("Failed - No Vdb Created ", vdbNode);
 
         // Test vdb name
-        String vdbName = vdbNode.getName(this.uow);
+        String vdbName = vdbNode.getName(getTransaction());
         assertEquals(importOptions.getOption(OptionKeys.NAME), vdbName);
         assertNotNull(vdbNode);
 
-        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(this.uow, vdbNode, Vdb.class);
+        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(getTransaction(), vdbNode, Vdb.class);
 
         assertNotNull(vdb);
-        assertEquals("BooksVirtualModelOnly", vdb.getVdbName(this.uow));
-        String desc = vdb.getDescription(this.uow);
+        assertEquals("BooksVirtualModelOnly", vdb.getVdbName(getTransaction()));
+        String desc = vdb.getDescription(getTransaction());
         assertEquals("Sample vdb that contains simple VIRTUAL model and single view", desc);
 
-        assertEquals(1, vdb.getModels(this.uow).length);
-        assertNotNull("BooksView", vdb.getModels(this.uow)[0].getName(this.uow));
-        assertEquals(0, vdb.getDataRoles(this.uow).length);
+        assertEquals(1, vdb.getModels(getTransaction()).length);
+        assertNotNull("BooksView", vdb.getModels(getTransaction())[0].getName(getTransaction()));
+        assertEquals(0, vdb.getDataRoles(getTransaction()).length);
 
     }
 
@@ -1139,22 +1138,22 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
 
-        KomodoObject workspace = _repo.komodoWorkspace(uow);
+        KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
         executeImporter(vdbStream, workspace, importOptions, importMessages);
 
         // Commit the transaction, handling any import message
         commitHandleErrors(importMessages);
 
         // Test that a vdb was created
-        KomodoObject vdbNode = workspace.getChild(uow, BOOKS_EXAMPLE_TRANSLATORS_ONLY, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        KomodoObject vdbNode = workspace.getChild(getTransaction(), BOOKS_EXAMPLE_TRANSLATORS_ONLY, VdbLexicon.Vdb.VIRTUAL_DATABASE);
         assertNotNull("Failed - No Vdb Created ", vdbNode);
 
         // Test vdb name
-        String vdbName = vdbNode.getName(this.uow);
+        String vdbName = vdbNode.getName(getTransaction());
         assertEquals(importOptions.getOption(OptionKeys.NAME), vdbName);
         assertNotNull(vdbNode);
 
-        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(this.uow, vdbNode, Vdb.class);
+        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(getTransaction(), vdbNode, Vdb.class);
 
         /*
 		    <description>Sample vdb containing only a tranlator override element</description>
@@ -1165,22 +1164,22 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 		    </translator>
          */
         assertNotNull(vdb);
-        assertEquals("BooksExampleTranslatorOverride", vdb.getVdbName(this.uow));
-        String desc = vdb.getDescription(this.uow);
+        assertEquals("BooksExampleTranslatorOverride", vdb.getVdbName(getTransaction()));
+        String desc = vdb.getDescription(getTransaction());
         assertEquals("Sample vdb containing only a tranlator override element", desc);
 
-        assertEquals(0, vdb.getModels(this.uow).length);
-        assertEquals(1, vdb.getTranslators(this.uow).length);
-        Translator translator = WorkspaceManager.getInstance(_repo).resolve(this.uow,  vdb.getTranslators(this.uow)[0], Translator.class);
-    	assertEquals("books_db2", translator.getName(this.uow));
-    	assertEquals("db2", translator.getType(this.uow));
+        assertEquals(0, vdb.getModels(getTransaction()).length);
+        assertEquals(1, vdb.getTranslators(getTransaction()).length);
+        Translator translator = WorkspaceManager.getInstance(_repo).resolve(getTransaction(),  vdb.getTranslators(getTransaction())[0], Translator.class);
+    	assertEquals("books_db2", translator.getName(getTransaction()));
+    	assertEquals("db2", translator.getType(getTransaction()));
 
-    	assertNotNull(translator.getProperty(this.uow, "requiresCriteria"));
-        assertEquals("true", translator.getProperty(this.uow, "requiresCriteria").getValue(this.uow).toString());
-        assertNotNull(translator.getProperty(this.uow, "supportsCommonTableExpressions"));
-        assertEquals("false", translator.getProperty(this.uow, "supportsCommonTableExpressions").getValue(this.uow).toString());
-        assertNotNull(translator.getProperty(this.uow, "MaxDependentInPredicates"));
-        assertEquals("25", translator.getProperty(this.uow, "MaxDependentInPredicates").getValue(this.uow).toString());
+    	assertNotNull(translator.getProperty(getTransaction(), "requiresCriteria"));
+        assertEquals("true", translator.getProperty(getTransaction(), "requiresCriteria").getValue(getTransaction()).toString());
+        assertNotNull(translator.getProperty(getTransaction(), "supportsCommonTableExpressions"));
+        assertEquals("false", translator.getProperty(getTransaction(), "supportsCommonTableExpressions").getValue(getTransaction()).toString());
+        assertNotNull(translator.getProperty(getTransaction(), "MaxDependentInPredicates"));
+        assertEquals("25", translator.getProperty(getTransaction(), "MaxDependentInPredicates").getValue(getTransaction()).toString());
 
     }
 
@@ -1196,42 +1195,42 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
 
-        KomodoObject workspace = _repo.komodoWorkspace(uow);
+        KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
         executeImporter(vdbStream, workspace, importOptions, importMessages);
 
         // Commit the transaction, handling any import message
         commitHandleErrors(importMessages);
 
         // Test that a vdb was created
-        KomodoObject vdbNode = workspace.getChild(uow, DYNAMIC_CUSTOMER_VDB_NAME, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        KomodoObject vdbNode = workspace.getChild(getTransaction(), DYNAMIC_CUSTOMER_VDB_NAME, VdbLexicon.Vdb.VIRTUAL_DATABASE);
         assertNotNull("Failed - No Vdb Created ", vdbNode);
 
         // Test vdb name
-        String vdbName = vdbNode.getName(uow);
+        String vdbName = vdbNode.getName(getTransaction());
         assertEquals(importOptions.getOption(OptionKeys.NAME), vdbName);
 
         assertNotNull(vdbNode);
 
-        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(uow, vdbNode, Vdb.class);
+        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(getTransaction(), vdbNode, Vdb.class);
 
         assertNotNull(vdb);
-        String desc = vdb.getDescription(uow);
+        String desc = vdb.getDescription(getTransaction());
         assertEquals("Customer Dynamic VDB", desc);
 
-        assertNotNull(vdb.getProperty(this.uow, "UseConnectorMetadata"));
-        assertEquals("true", vdb.getProperty(this.uow, "UseConnectorMetadata").getValue(this.uow).toString());
+        assertNotNull(vdb.getProperty(getTransaction(), "UseConnectorMetadata"));
+        assertEquals("true", vdb.getProperty(getTransaction(), "UseConnectorMetadata").getValue(getTransaction()).toString());
 
-        Model[] models = vdb.getModels(uow);
+        Model[] models = vdb.getModels(getTransaction());
         assertEquals(1, models.length);
         Model model = models[0];
-        assertEquals("ProductsMySQL_Dynamic", model.getName(uow));
+        assertEquals("ProductsMySQL_Dynamic", model.getName(getTransaction()));
 
-        ModelSource[] sources = model.getSources(uow);
+        ModelSource[] sources = model.getSources(getTransaction());
         assertEquals(1, sources.length);
         ModelSource source = sources[0];
-        assertEquals("CustomerAccounts", source.getName(uow));
-        assertEquals("mysql", source.getTranslatorName(uow));
-        assertEquals("java:/CustomerAccounts", source.getJndiName(uow));
+        assertEquals("CustomerAccounts", source.getName(getTransaction()));
+        assertEquals("mysql", source.getTranslatorName(getTransaction()));
+        assertEquals("java:/CustomerAccounts", source.getJndiName(getTransaction()));
     }
 
     @Test
@@ -1246,29 +1245,29 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
 
-        KomodoObject workspace = _repo.komodoWorkspace(uow);
+        KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
         executeImporter(vdbStream, workspace, importOptions, importMessages);
 
         // Commit the transaction, handling any import message
         commitHandleErrors(importMessages);
 
         // Test that a vdb was created
-        KomodoObject vdbNode = workspace.getChild(uow, PARTS_DYNAMIC_VDB_NAME, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        KomodoObject vdbNode = workspace.getChild(getTransaction(), PARTS_DYNAMIC_VDB_NAME, VdbLexicon.Vdb.VIRTUAL_DATABASE);
         assertNotNull("Failed - No Vdb Created ", vdbNode);
 
         // Test vdb name
-        String vdbName = vdbNode.getName(uow);
+        String vdbName = vdbNode.getName(getTransaction());
         assertEquals(importOptions.getOption(OptionKeys.NAME), vdbName);
 
         assertNotNull(vdbNode);
 
-        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(uow, vdbNode, Vdb.class);
+        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(getTransaction(), vdbNode, Vdb.class);
 
         assertNotNull(vdb);
-        String connType = vdb.getConnectionType(uow);
+        String connType = vdb.getConnectionType(getTransaction());
         assertEquals("BY_VERSION", connType);
 
-        Model[] models = vdb.getModels(uow);
+        Model[] models = vdb.getModels(getTransaction());
         assertEquals(2, models.length);
         for (Model model : models) {
             //
@@ -1278,16 +1277,16 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
             verifyProperty(model, VdbLexicon.Model.METADATA_TYPE, "DDL");
 
-            if ("PartsViewModel".equals(model.getName(uow))) {
-                assertEquals(Type.VIRTUAL, model.getModelType(uow));
-                assertEquals(PARTS_DYNAMIC_PARTSVIEW_DDL, model.getModelDefinition(uow));
+            if ("PartsViewModel".equals(model.getName(getTransaction()))) {
+                assertEquals(Type.VIRTUAL, model.getModelType(getTransaction()));
+                assertEquals(PARTS_DYNAMIC_PARTSVIEW_DDL, model.getModelDefinition(getTransaction()));
 
                 // Ddl Sequenced
                 verify(model, "PartsSummary", JcrConstants.NT_UNSTRUCTURED, TeiidDdlLexicon.CreateTable.VIEW_STATEMENT);
 
-            } else if ("PartsSS".equals(model.getName(uow))) {
-                assertEquals(Type.PHYSICAL, model.getModelType(uow));
-                assertEquals(PARTS_DYNAMIC_PARTSS_DDL, model.getModelDefinition(uow));
+            } else if ("PartsSS".equals(model.getName(getTransaction()))) {
+                assertEquals(Type.PHYSICAL, model.getModelType(getTransaction()));
+                assertEquals(PARTS_DYNAMIC_PARTSS_DDL, model.getModelDefinition(getTransaction()));
 
                 // Ddl Sequenced
                 verify(model, "PARTS", JcrConstants.NT_UNSTRUCTURED, TeiidDdlLexicon.CreateTable.TABLE_STATEMENT);
@@ -1307,38 +1306,38 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
 
-        KomodoObject workspace = _repo.komodoWorkspace(uow);
+        KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
         executeImporter(vdbStream, workspace, importOptions, importMessages);
 
         // Commit the transaction, handling any import message
         commitHandleErrors(importMessages);
 
         // Test that a vdb was created
-        KomodoObject vdbNode = workspace.getChild(uow, PORTFOLIO_VDB_NAME, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        KomodoObject vdbNode = workspace.getChild(getTransaction(), PORTFOLIO_VDB_NAME, VdbLexicon.Vdb.VIRTUAL_DATABASE);
         assertNotNull("Failed - No Vdb Created ", vdbNode);
 
         // Test vdb name
-        String vdbName = vdbNode.getName(uow);
+        String vdbName = vdbNode.getName(getTransaction());
         assertEquals(importOptions.getOption(OptionKeys.NAME), vdbName);
 
         assertNotNull(vdbNode);
 
         WorkspaceManager manager = WorkspaceManager.getInstance(_repo);
-        Vdb vdb = manager.resolve(uow, vdbNode, Vdb.class);
+        Vdb vdb = manager.resolve(getTransaction(), vdbNode, Vdb.class);
 
         assertNotNull(vdb);
-        String desc = vdb.getDescription(uow);
+        String desc = vdb.getDescription(getTransaction());
         assertEquals("The Portfolio Dynamic VDB", desc);
 
-        assertNotNull(vdb.getProperty(this.uow, "UseConnectorMetadata"));
-        assertEquals("true", vdb.getProperty(this.uow, "UseConnectorMetadata").getValue(this.uow).toString());
+        assertNotNull(vdb.getProperty(getTransaction(), "UseConnectorMetadata"));
+        assertEquals("true", vdb.getProperty(getTransaction(), "UseConnectorMetadata").getValue(getTransaction()).toString());
 
-        Model[] models = vdb.getModels(uow);
+        Model[] models = vdb.getModels(getTransaction());
         assertEquals(5, models.length);
 
-        Model model = manager.resolve(uow, vdb.getChild(uow, "StocksMatModel"), Model.class);
+        Model model = manager.resolve(getTransaction(), vdb.getChild(getTransaction(), "StocksMatModel"), Model.class);
         verifyProperty(model, VdbLexicon.Model.METADATA_TYPE, "DDL");
-        assertEquals(Type.VIRTUAL, model.getModelType(uow));
+        assertEquals(Type.VIRTUAL, model.getModelType(getTransaction()));
 
         // Ddl Sequenced
         verify(model, "stockPricesMatView", JcrConstants.NT_UNSTRUCTURED, TeiidDdlLexicon.CreateTable.VIEW_STATEMENT);

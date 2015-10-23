@@ -15,9 +15,9 @@
  */
 package org.komodo.relational.commands.teiid;
 
+import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.FileWriter;
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.teiid.Teiid;
@@ -31,18 +31,11 @@ import org.komodo.shell.api.CommandResult;
 @SuppressWarnings("javadoc")
 public class UnsetTeiidPropertyCommandTest extends AbstractCommandTest {
 
-    /**
-	 * Test for UnsetTeiidPropertyCommand
-	 */
-	public UnsetTeiidPropertyCommandTest( ) {
-		super();
-	}
-
     @Test
     public void testUnsetProperty1() throws Exception {
         File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
         cmdFile.deleteOnExit();
-        
+
         FileWriter writer = new FileWriter(cmdFile);
         writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
         writer.write("create-teiid testTeiid" + NEW_LINE);  //$NON-NLS-1$
@@ -50,19 +43,19 @@ public class UnsetTeiidPropertyCommandTest extends AbstractCommandTest {
         writer.write("set-property adminPort 88" + NEW_LINE);  //$NON-NLS-1$
         writer.write("unset-property adminPort" + NEW_LINE);  //$NON-NLS-1$
         writer.close();
-        
-        setup(cmdFile.getAbsolutePath(), UnsetTeiidPropertyCommand.class);
+
+        setup( cmdFile.getAbsolutePath() );
 
         CommandResult result = execute();
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
-        Teiid[] teiids = wkspMgr.findTeiids(uow);
-        
+        Teiid[] teiids = wkspMgr.findTeiids(getTransaction());
+
         assertEquals(1, teiids.length);
-        assertEquals("testTeiid", teiids[0].getName(uow)); //$NON-NLS-1$
-        
-        assertEquals(9999, teiids[0].getAdminPort(uow));
+        assertEquals("testTeiid", teiids[0].getName(getTransaction())); //$NON-NLS-1$
+
+        assertEquals(9999, teiids[0].getAdminPort(getTransaction()));
     }
 
 }

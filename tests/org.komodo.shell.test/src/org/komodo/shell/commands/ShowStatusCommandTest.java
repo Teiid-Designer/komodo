@@ -13,48 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.komodo.shell;
+package org.komodo.shell.commands;
 
-import java.io.File;
-import java.io.FileWriter;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
+import org.komodo.shell.AbstractCommandTest;
 import org.komodo.shell.api.CommandResult;
-import org.komodo.shell.commands.ShowGlobalCommand;
 
 /**
- * Test Class to test ShowGlobalCommand
- *
+ * Test Class to test {@link ShowStatusCommand}.
  */
 @SuppressWarnings({"javadoc", "nls"})
-public class ShowGlobalCommandTest extends AbstractCommandTest {
-
-	/**
-	 * Test for ShowGlobalCommand
-	 */
-	public ShowGlobalCommandTest( ) {
-		super();
-	}
+public class ShowStatusCommandTest extends AbstractCommandTest {
 
     @Test
-    public void testShowGlobal1() throws Exception {
-        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
-        cmdFile.deleteOnExit();
-        
-        FileWriter writer = new FileWriter(cmdFile);
-        writer.write("show-global" + NEW_LINE);  //$NON-NLS-1$
-        writer.close();
-        
-    	setup(cmdFile.getAbsolutePath(), ShowGlobalCommand.class);
+    public void testShowStatus1() throws Exception {
+        final String[] commands = { "workspace",
+                                    "show-status" };
+    	setup( commands );
 
         CommandResult result = execute();
         assertCommandResultOk(result);
 
     	// make sure repository URL and workspace appear, no Teiid is set, and current context path
     	String writerOutput = getCommandOutput();
-        assertTrue(writerOutput.contains("Global shell properties"));
-        assertTrue(writerOutput.contains("AUTO_COMMIT"));
-        assertTrue(writerOutput.contains("SHOW_TYPE_IN_PROMPT"));
+        assertTrue(writerOutput.contains("test-local-repository-in-memory-config.json"));
+        assertTrue(writerOutput.contains("Name : komodoLocalWorkspace"));
+        assertTrue(writerOutput.contains("/workspace"));
     }
 
 }

@@ -29,7 +29,6 @@ import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
-import org.komodo.shell.util.KomodoObjectUtils;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.utils.StringUtils;
 
@@ -58,10 +57,6 @@ public class ShowSummaryCommand extends BuiltInShellCommand {
      */
     @Override
     public boolean isValidForCurrentContext() {
-        // Not valid in root, workspace, library or environment.  No properties available for those.
-        if( KomodoObjectUtils.isRoot(getContext()) || KomodoObjectUtils.isRootChild(getContext()) ) {
-            return false;
-        }
         return true;
     }
 
@@ -85,29 +80,43 @@ public class ShowSummaryCommand extends BuiltInShellCommand {
             WorkspaceStatus wsStatus = getWorkspaceStatus();
             KomodoObject theContext = ContextUtils.getContextForPath( wsStatus, pathArg );
 
-            ShellCommand showPropertiesCommand = getWorkspaceStatus().getCommand( ShowPropertiesCommand.NAME );
-            ShellCommand showChildrenCommand = getWorkspaceStatus().getCommand( ShowChildrenCommand.NAME );
-            showPropertiesCommand.setWriter(getWriter());
-            showChildrenCommand.setWriter(getWriter());
-            if ( theContext != null ) {
-                showPropertiesCommand.setArguments( getArguments() );
-                showChildrenCommand.setArguments( getArguments() );
+            ShellCommand showChildrenCommand = null;
+
+            if ( isShowChildrenCommandIsValid() ) {
+                showChildrenCommand = getShowChildrenCommand();
+                showChildrenCommand.setWriter( getWriter() );
+
+                if ( theContext != null ) {
+                    showChildrenCommand.setArguments( getArguments() );
+                }
             }
 
-            CommandResult result = showPropertiesCommand.execute();
+            ShellCommand showPropertiesCommand = null;
 
-            if (!result.isOk()) {
-                return result;
+            if ( isShowPropertiesCommandIsValid() ) {
+                showPropertiesCommand = getShowPropertiesCommand();
+                showPropertiesCommand.setWriter( getWriter() );
+
+                if ( theContext != null ) {
+                    showPropertiesCommand.setArguments( getArguments() );
+                }
             }
 
-            print();
-            result = showChildrenCommand.execute();
+            if ( showPropertiesCommand != null ) {
+                final CommandResult result = showPropertiesCommand.execute();
 
-            if (!result.isOk()) {
-                return result;
+                if ( !result.isOk() ) {
+                    return result;
+                }
+
+                print();
             }
 
-            return CommandResult.SUCCESS;
+            if ( showChildrenCommand != null ) {
+                return showChildrenCommand.execute();
+            }
+
+            return CommandResult.FAIL;
         } catch ( final Exception e ) {
             return new CommandResultImpl( e );
         }
@@ -121,6 +130,22 @@ public class ShowSummaryCommand extends BuiltInShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 1;
+    }
+
+    private ShellCommand getShowChildrenCommand() throws Exception {
+        return getWorkspaceStatus().getCommand( ShowChildrenCommand.NAME );
+    }
+
+    private ShellCommand getShowPropertiesCommand() throws Exception {
+        return getWorkspaceStatus().getCommand( ShowPropertiesCommand.NAME );
+    }
+
+    private boolean isShowChildrenCommandIsValid() throws Exception {
+        return ShowChildrenCommand.NAME.equals( getShowChildrenCommand().getName() );
+    }
+
+    private boolean isShowPropertiesCommandIsValid() throws Exception {
+        return ShowPropertiesCommand.NAME.equals( getShowPropertiesCommand().getName() );
     }
 
     /**

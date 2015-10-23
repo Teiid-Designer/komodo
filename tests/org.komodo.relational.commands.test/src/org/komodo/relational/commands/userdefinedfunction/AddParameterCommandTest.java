@@ -15,9 +15,9 @@
  */
 package org.komodo.relational.commands.userdefinedfunction;
 
+import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.FileWriter;
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Function;
@@ -35,18 +35,11 @@ import org.komodo.shell.api.CommandResult;
 @SuppressWarnings("javadoc")
 public class AddParameterCommandTest extends AbstractCommandTest {
 
-    /**
-	 * Test for AddParameterCommand
-	 */
-	public AddParameterCommandTest( ) {
-		super();
-	}
-
     @Test
     public void testAdd1() throws Exception {
         File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
         cmdFile.deleteOnExit();
-        
+
         FileWriter writer = new FileWriter(cmdFile);
         writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
         writer.write("create-vdb myVdb vdbPath" + NEW_LINE);  //$NON-NLS-1$
@@ -57,29 +50,29 @@ public class AddParameterCommandTest extends AbstractCommandTest {
         writer.write("cd myUserDefinedFunction" + NEW_LINE);  //$NON-NLS-1$
         writer.write("add-parameter myParameter" + NEW_LINE);  //$NON-NLS-1$
         writer.close();
-        
-        setup(cmdFile.getAbsolutePath(), AddParameterCommand.class);
+
+        setup( cmdFile.getAbsolutePath() );
 
         CommandResult result = execute();
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
-        Vdb[] vdbs = wkspMgr.findVdbs(uow);
-        
+        Vdb[] vdbs = wkspMgr.findVdbs(getTransaction());
+
         assertEquals(vdbs.length,1);
-        
-        Model[] models = vdbs[0].getModels(uow);
+
+        Model[] models = vdbs[0].getModels(getTransaction());
         assertEquals(1, models.length);
-        assertEquals("myModel", models[0].getName(uow)); //$NON-NLS-1$
-        
-        Function[] functions = models[0].getFunctions(uow);
+        assertEquals("myModel", models[0].getName(getTransaction())); //$NON-NLS-1$
+
+        Function[] functions = models[0].getFunctions(getTransaction());
         assertEquals(1, functions.length);
         assertEquals(true, functions[0] instanceof UserDefinedFunction);
-        assertEquals("myUserDefinedFunction", functions[0].getName(uow)); //$NON-NLS-1$
-        
-        Parameter[] params = functions[0].getParameters(uow);
+        assertEquals("myUserDefinedFunction", functions[0].getName(getTransaction())); //$NON-NLS-1$
+
+        Parameter[] params = functions[0].getParameters(getTransaction());
         assertEquals(1, params.length);
-        assertEquals("myParameter", params[0].getName(uow)); //$NON-NLS-1$
+        assertEquals("myParameter", params[0].getName(getTransaction())); //$NON-NLS-1$
     }
 
 }

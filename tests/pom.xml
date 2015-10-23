@@ -13,17 +13,18 @@
 	<packaging>pom</packaging>
 	<modules>
     <module>org.komodo.test.utils</module>
-
+<!--
     <module>org.komodo.core.test</module>
     <module>org.komodo.eclipse.test.utils</module>
     <module>org.komodo.teiid.client.test</module>
     <module>org.komodo.utils.test</module>
     <module>org.komodo.relational.test</module>
-    <module>org.komodo.relational.commands.test</module>
+-->    
     <module>org.komodo.shell.test</module>
-
+    <module>org.komodo.relational.commands.test</module>
+<!--
     <module>org.komodo.modeshape.teiid.sql.sequencer.test</module>
     <module>org.komodo.modeshape.vdb.test</module>
-
+-->
   </modules>
 </project>

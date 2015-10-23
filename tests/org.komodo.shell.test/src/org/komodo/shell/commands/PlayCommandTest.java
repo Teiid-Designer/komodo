@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.komodo.shell;
+package org.komodo.shell.commands;
 
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
+import org.komodo.shell.AbstractCommandTest;
 import org.komodo.shell.api.CommandResult;
-import org.komodo.shell.commands.PlayCommand;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class PlayCommandTest extends AbstractCommandTest {
@@ -73,9 +73,9 @@ public final class PlayCommandTest extends AbstractCommandTest {
 
     @Test
     public void shouldFailToPlayNonExistentFile() throws Exception {
-        setup( "bogus.txt", PlayCommand.class );
+        setup( "bogus.txt" );
         CommandResult result = execute();
-        
+
         assertEquals(false, result.isOk());
         String msg = result.getMessage();
         assertEquals(true, msg.contains("Problem with File"));

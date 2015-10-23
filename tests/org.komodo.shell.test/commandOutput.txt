@@ -109,3 +109,111 @@
 #  ----------
 #  Recording set on at Fri Oct 16 11:08:04 CDT 2015 - File: "./commandOutput.txt"
 #  ----------
+#  ----------
+#  Recording set on at Sun Oct 18 07:05:58 CDT 2015 - File: "./commandOutput.txt"
+#  ----------
+#  ----------
+#  Recording set off at Sun Oct 18 07:05:58 CDT 2015 - File: "./commandOutput.txt"
+#  ----------
+#  ----------
+#  Recording set on at Sun Oct 18 07:05:58 CDT 2015 - File: "./commandOutput.txt"
+#  ----------
+#  ----------
+#  Recording set on at Mon Oct 19 11:24:14 CDT 2015 - File: "./commandOutput.txt"
+#  ----------
+#  ----------
+#  Recording set off at Mon Oct 19 11:24:14 CDT 2015 - File: "./commandOutput.txt"
+#  ----------
+#  ----------
+#  Recording set on at Mon Oct 19 11:24:14 CDT 2015 - File: "./commandOutput.txt"
+#  ----------
+#  ----------
+#  Recording set on at Mon Oct 19 11:36:57 CDT 2015 - File: "./commandOutput.txt"
+#  ----------
+#  ----------
+#  Recording set off at Mon Oct 19 11:36:57 CDT 2015 - File: "./commandOutput.txt"
+#  ----------
+#  ----------
+#  Recording set on at Mon Oct 19 11:36:57 CDT 2015 - File: "./commandOutput.txt"
+#  ----------
+#  ----------
+#  Recording set on at Mon Oct 19 11:50:35 CDT 2015 - File: "./commandOutput.txt"
+#  ----------
+#  ----------
+#  Recording set off at Mon Oct 19 11:50:35 CDT 2015 - File: "./commandOutput.txt"
+#  ----------
+#  ----------
+#  Recording set on at Mon Oct 19 11:50:35 CDT 2015 - File: "./commandOutput.txt"
+#  ----------
+#  ----------
+#  Recording set on at Mon Oct 19 12:16:01 CDT 2015 - File: "./commandOutput.txt"
+#  ----------
+#  ----------
+#  Recording set off at Mon Oct 19 12:16:01 CDT 2015 - File: "./commandOutput.txt"
+#  ----------
+#  ----------
+#  Recording set on at Mon Oct 19 12:16:01 CDT 2015 - File: "./commandOutput.txt"
+#  ----------
+#  ----------
+#  Recording set on at Mon Oct 19 14:46:02 CDT 2015 - File: "./commandOutput.txt"
+#  ----------
+#  ----------
+#  Recording set off at Mon Oct 19 14:46:02 CDT 2015 - File: "./commandOutput.txt"
+#  ----------
+#  ----------
+#  Recording set on at Mon Oct 19 14:46:02 CDT 2015 - File: "./commandOutput.txt"
+#  ----------
+#  ----------
+#  Recording set on at Mon Oct 19 14:53:28 CDT 2015 - File: "./commandOutput.txt"
+#  ----------
+#  ----------
+#  Recording set off at Mon Oct 19 14:53:28 CDT 2015 - File: "./commandOutput.txt"
+#  ----------
+#  ----------
+#  Recording set on at Mon Oct 19 14:53:28 CDT 2015 - File: "./commandOutput.txt"
+#  ----------
+#  ----------
+#  Recording set on at Mon Oct 19 15:12:42 CDT 2015 - File: "./commandOutput.txt"
+#  ----------
+#  ----------
+#  Recording set off at Mon Oct 19 15:12:42 CDT 2015 - File: "./commandOutput.txt"
+#  ----------
+#  ----------
+#  Recording set on at Mon Oct 19 15:12:42 CDT 2015 - File: "./commandOutput.txt"
+#  ----------
+#  ----------
+#  Recording set on at Mon Oct 19 15:27:50 CDT 2015 - File: "./commandOutput.txt"
+#  ----------
+#  ----------
+#  Recording set off at Mon Oct 19 15:27:50 CDT 2015 - File: "./commandOutput.txt"
+#  ----------
+#  ----------
+#  Recording set on at Mon Oct 19 15:27:50 CDT 2015 - File: "./commandOutput.txt"
+#  ----------
+#  ----------
+#  Recording set on at Tue Oct 20 11:08:38 CDT 2015 - File: "./commandOutput.txt"
+#  ----------
+#  ----------
+#  Recording set off at Tue Oct 20 11:08:38 CDT 2015 - File: "./commandOutput.txt"
+#  ----------
+#  ----------
+#  Recording set on at Tue Oct 20 11:08:38 CDT 2015 - File: "./commandOutput.txt"
+#  ----------
+#  ----------
+#  Recording set on at Tue Oct 20 11:36:43 CDT 2015 - File: "./commandOutput.txt"
+#  ----------
+#  ----------
+#  Recording set off at Tue Oct 20 11:36:43 CDT 2015 - File: "./commandOutput.txt"
+#  ----------
+#  ----------
+#  Recording set on at Tue Oct 20 11:36:43 CDT 2015 - File: "./commandOutput.txt"
+#  ----------
+#  ----------
+#  Recording set on at Tue Oct 20 11:42:47 CDT 2015 - File: "./commandOutput.txt"
+#  ----------
+#  ----------
+#  Recording set off at Tue Oct 20 11:42:47 CDT 2015 - File: "./commandOutput.txt"
+#  ----------
+#  ----------
+#  Recording set on at Tue Oct 20 11:42:47 CDT 2015 - File: "./commandOutput.txt"
+#  ----------

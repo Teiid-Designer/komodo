@@ -16,8 +16,6 @@
 package org.komodo.relational.commands.tabularresultset;
 
 import static org.junit.Assert.assertEquals;
-import java.io.File;
-import java.io.FileWriter;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.commands.pushdownfunction.AddParameterCommand;
@@ -32,65 +30,52 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test AddColumnCommand
+ * Test class for {@link AddParameterCommand}.
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( { "javadoc", "nls" } )
 public class AddColumnCommandTest extends AbstractCommandTest {
-
-    /**
-	 * Test for AddColumnCommand
-	 */
-	public AddColumnCommandTest( ) {
-		super();
-	}
 
     @Test
     public void testAdd1() throws Exception {
-        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
-        cmdFile.deleteOnExit();
-        
-        FileWriter writer = new FileWriter(cmdFile);
-        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("create-vdb myVdb vdbPath" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd myVdb" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-model myModel " + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd myModel" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-pushdown-function myPushdownFunction" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd myPushdownFunction" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("set-result-set TabularResultSet" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd resultSet" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-column myColumn" + NEW_LINE);  //$NON-NLS-1$
-        writer.close();
-
-        setup(cmdFile.getAbsolutePath(), AddParameterCommand.class);
+        final String[] commands = { "workspace",
+                                    "create-vdb myVdb vdbPath",
+                                    "cd myVdb",
+                                    "add-model myModel ",
+                                    "cd myModel",
+                                    "add-pushdown-function myPushdownFunction",
+                                    "cd myPushdownFunction",
+                                    "set-result-set TabularResultSet",
+                                    "cd resultSet",
+                                    "add-column myColumn" };
+        setup( commands );
 
         CommandResult result = execute();
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
-        Vdb[] vdbs = wkspMgr.findVdbs(uow);
-        
+        Vdb[] vdbs = wkspMgr.findVdbs(getTransaction());
+
         assertEquals(1, vdbs.length);
-        
-        Model[] models = vdbs[0].getModels(uow);
+
+        Model[] models = vdbs[0].getModels(getTransaction());
         assertEquals(1, models.length);
-        assertEquals("myModel", models[0].getName(uow)); //$NON-NLS-1$
-        
-        Function[] functions = models[0].getFunctions(uow);
+        assertEquals("myModel", models[0].getName(getTransaction()));
+
+        Function[] functions = models[0].getFunctions(getTransaction());
         assertEquals(1, functions.length);
         assertEquals(true, functions[0] instanceof PushdownFunction);
-        assertEquals("myPushdownFunction", functions[0].getName(uow)); //$NON-NLS-1$
-        
-        ProcedureResultSet rSet = ((PushdownFunction)functions[0]).getResultSet(uow);
+        assertEquals("myPushdownFunction", functions[0].getName(getTransaction()));
+
+        ProcedureResultSet rSet = ((PushdownFunction)functions[0]).getResultSet(getTransaction());
         TabularResultSet tabularResultSet = null;
         if(rSet instanceof TabularResultSet) {
             tabularResultSet = (TabularResultSet)rSet;
         }
-        
-        ResultSetColumn[] cols = tabularResultSet.getColumns(uow);
+
+        ResultSetColumn[] cols = tabularResultSet.getColumns(getTransaction());
         assertEquals(1,cols.length);
-        assertEquals("myColumn", cols[0].getName(uow)); //$NON-NLS-1$
+        assertEquals("myColumn", cols[0].getName(getTransaction()));
     }
 
 }

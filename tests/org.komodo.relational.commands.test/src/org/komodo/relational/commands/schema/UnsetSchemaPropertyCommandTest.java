@@ -15,9 +15,9 @@
  */
 package org.komodo.relational.commands.schema;
 
+import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.FileWriter;
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Schema;
@@ -32,18 +32,11 @@ import org.komodo.utils.StringUtils;
 @SuppressWarnings("javadoc")
 public class UnsetSchemaPropertyCommandTest extends AbstractCommandTest {
 
-    /**
-	 * Test for UnsetSchemaPropertyCommand
-	 */
-	public UnsetSchemaPropertyCommandTest( ) {
-		super();
-	}
-
     @Test
     public void testUnsetProperty1() throws Exception {
         File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
         cmdFile.deleteOnExit();
-        
+
         FileWriter writer = new FileWriter(cmdFile);
         writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
         writer.write("create-schema testSchema" + NEW_LINE);  //$NON-NLS-1$
@@ -51,20 +44,20 @@ public class UnsetSchemaPropertyCommandTest extends AbstractCommandTest {
         writer.write("set-property rendition \"CREATE FOREIGN TABLE G1 (e1 integer) OPTIONS (ANNOTATION 'test', CARDINALITY '12');\"" + NEW_LINE);  //$NON-NLS-1$
         writer.write("unset-property rendition" + NEW_LINE);  //$NON-NLS-1$
         writer.close();
-        
-        setup(cmdFile.getAbsolutePath(), UnsetSchemaPropertyCommand.class);
+
+        setup( cmdFile.getAbsolutePath() );
 
         CommandResult result = execute();
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
-        Schema[] schemas = wkspMgr.findSchemas(uow);
-        
+        Schema[] schemas = wkspMgr.findSchemas(getTransaction());
+
         assertEquals(1, schemas.length);
-        assertEquals("testSchema", schemas[0].getName(uow)); //$NON-NLS-1$
-        
-        String rendition = schemas[0].getRendition(uow);
-        assertEquals(true, StringUtils.isEmpty(rendition)); 
+        assertEquals("testSchema", schemas[0].getName(getTransaction())); //$NON-NLS-1$
+
+        String rendition = schemas[0].getRendition(getTransaction());
+        assertEquals(true, StringUtils.isEmpty(rendition));
     }
 
 }

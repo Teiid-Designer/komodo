@@ -36,7 +36,7 @@ public final class UniqueConstraintImplTest extends RelationalModelTest {
     @Before
     public void init() throws Exception {
         this.table = createTable();
-        this.uniqueConstraint = this.table.addUniqueConstraint( this.uow, NAME );
+        this.uniqueConstraint = this.table.addUniqueConstraint( getTransaction(), NAME );
         commit();
     }
 
@@ -49,7 +49,7 @@ public final class UniqueConstraintImplTest extends RelationalModelTest {
     public void shouldFailConstructionIfNotUniqueConstraint() {
         if ( RelationalObjectImpl.VALIDATE_INITIAL_STATE ) {
             try {
-                new UniqueConstraintImpl( this.uow, _repo, this.table.getAbsolutePath() );
+                new UniqueConstraintImpl( getTransaction(), _repo, this.table.getAbsolutePath() );
                 fail();
             } catch ( final KException e ) {
                 // expected
@@ -60,41 +60,41 @@ public final class UniqueConstraintImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveCorrectConstraintType() throws Exception {
         assertThat( this.uniqueConstraint.getConstraintType(), is( TableConstraint.ConstraintType.UNIQUE ) );
-        assertThat( this.uniqueConstraint.getRawProperty( this.uow, TeiidDdlLexicon.Constraint.TYPE ).getStringValue( this.uow ),
+        assertThat( this.uniqueConstraint.getRawProperty( getTransaction(), TeiidDdlLexicon.Constraint.TYPE ).getStringValue( getTransaction() ),
                     is( TableConstraint.ConstraintType.UNIQUE.toValue() ) );
     }
 
     @Test
     public void shouldHaveCorrectDescriptor() throws Exception {
-        assertThat( this.uniqueConstraint.hasDescriptor( this.uow, TeiidDdlLexicon.Constraint.TABLE_ELEMENT ), is( true ) );
+        assertThat( this.uniqueConstraint.hasDescriptor( getTransaction(), TeiidDdlLexicon.Constraint.TABLE_ELEMENT ), is( true ) );
     }
 
     @Test
     public void shouldHaveCorrectTypeIdentifier() throws Exception {
-        assertThat(this.uniqueConstraint.getTypeIdentifier( this.uow ), is(KomodoType.UNIQUE_CONSTRAINT));
+        assertThat(this.uniqueConstraint.getTypeIdentifier( getTransaction() ), is(KomodoType.UNIQUE_CONSTRAINT));
     }
 
     @Test
     public void shouldHaveMoreRawProperties() throws Exception {
-        final String[] filteredProps = this.uniqueConstraint.getPropertyNames( this.uow );
-        final String[] rawProps = this.uniqueConstraint.getRawPropertyNames( this.uow );
+        final String[] filteredProps = this.uniqueConstraint.getPropertyNames( getTransaction() );
+        final String[] rawProps = this.uniqueConstraint.getRawPropertyNames( getTransaction() );
         assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
     }
 
     @Test
     public void shouldHaveParentTableAfterConstruction() throws Exception {
-        assertThat( this.uniqueConstraint.getParent( this.uow ), is( instanceOf( Table.class ) ) );
-        assertThat( this.uniqueConstraint.getTable( this.uow ), is( this.table ) );
+        assertThat( this.uniqueConstraint.getParent( getTransaction() ), is( instanceOf( Table.class ) ) );
+        assertThat( this.uniqueConstraint.getTable( getTransaction() ), is( this.table ) );
     }
 
     @Test( expected = UnsupportedOperationException.class )
     public void shouldNotAllowChildren() throws Exception {
-        this.uniqueConstraint.addChild( this.uow, "blah", null );
+        this.uniqueConstraint.addChild( getTransaction(), "blah", null );
     }
 
     @Test
     public void shouldNotContainFilteredProperties() throws Exception {
-        final String[] filteredProps = this.uniqueConstraint.getPropertyNames( this.uow );
+        final String[] filteredProps = this.uniqueConstraint.getPropertyNames( getTransaction() );
         final Filter[] filters = this.uniqueConstraint.getFilters();
 
         for ( final String name : filteredProps ) {
@@ -113,16 +113,16 @@ public final class UniqueConstraintImplTest extends RelationalModelTest {
     @Test
     public void shouldCreateUsingResolver() throws Exception {
         final String name = "blah";
-        final KomodoObject kobject = UniqueConstraint.RESOLVER.create( this.uow, _repo, this.table, name, null );
+        final KomodoObject kobject = UniqueConstraint.RESOLVER.create( getTransaction(), _repo, this.table, name, null );
         assertThat( kobject, is( notNullValue() ) );
         assertThat( kobject, is( instanceOf( UniqueConstraint.class ) ) );
-        assertThat( kobject.getName( this.uow ), is( name ) );
+        assertThat( kobject.getName( getTransaction() ), is( name ) );
     }
 
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
-        final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        UniqueConstraint.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
+        final KomodoObject bogusParent = _repo.add( getTransaction(), null, "bogus", null );
+        UniqueConstraint.RESOLVER.create( getTransaction(), _repo, bogusParent, "blah", null );
     }
 
 }

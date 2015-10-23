@@ -29,11 +29,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.ServiceLoader;
 import java.util.Set;
+import java.util.Map.Entry;
 import org.komodo.core.KEngine;
 import org.komodo.shell.Messages.SHELL;
+import org.komodo.shell.ShellCommandFactoryImpl.CommandNotFoundCommand;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandFactory;
@@ -63,6 +64,7 @@ import org.komodo.shell.commands.UnsetPropertyCommand;
 import org.komodo.shell.commands.WorkspaceCommand;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.FileUtils;
+import org.komodo.utils.KLog;
 
 /**
  * Factory used to create shell commands.
@@ -75,9 +77,10 @@ import org.komodo.utils.FileUtils;
  */
 public class ShellCommandFactoryImpl implements ShellCommandFactory {
 
+    private static final KLog LOGGER = KLog.getLogger();
     private static final String BUILT_IN_PROVIDER_ID = "KOMODO_BUILT_IN"; //$NON-NLS-1$
 
-    private static ShellCommand _commandNotFound;
+    private static CommandNotFoundCommand _commandNotFound;
 
     // key = command name, value = {key = provider ID, value = command}
     private final Map< String, Map< String, ShellCommand > > commandMap;
@@ -87,9 +90,10 @@ public class ShellCommandFactoryImpl implements ShellCommandFactory {
      * @throws Exception
      *         if a built-in command cannot be created or if an error occurs
      */
-    public ShellCommandFactoryImpl( ) throws Exception {
+    public ShellCommandFactoryImpl(final WorkspaceStatus wsStatus ) throws Exception {
         this.commandMap = new HashMap<>();
         discoverProviders();
+        registerCommands( wsStatus );
     }
 
     /**
@@ -144,6 +148,8 @@ public class ShellCommandFactoryImpl implements ShellCommandFactory {
     private void registerContributedCommands( final WorkspaceStatus wsStatus ) {
         for ( final ShellCommandProvider provider : this.providers ) {
             final Map< String, Class< ? extends ShellCommand > > commands = provider.provideCommands();
+            LOGGER.debug( "ShellCommandFactory.registerContributedCommands: ShellCommandProvider \"{0}\" is contributing {1} commands", //$NON-NLS-1$
+                          ( ( commands == null ) ? 0 : commands.size() ) );
 
             if ( ( commands != null ) && !commands.isEmpty() ) {
                 final String providerId = provider.getClass().getName();
@@ -170,6 +176,7 @@ public class ShellCommandFactoryImpl implements ShellCommandFactory {
         // Find providers in the user's commands directory
         final String userHome = System.getProperty( "user.home", "/" ); //$NON-NLS-1$ //$NON-NLS-2$
         final String commandsDirName = System.getProperty( "komodo.shell.commandsDir", userHome + "/.komodo/commands" ); //$NON-NLS-1$ //$NON-NLS-2$
+        LOGGER.debug( "ShellCommandFactory: commands directory is \"{0}\"", commandsDirName ); //$NON-NLS-1$
         final File commandsDir = new File( commandsDirName );
 
         if ( !commandsDir.exists() ) {
@@ -182,7 +189,9 @@ public class ShellCommandFactoryImpl implements ShellCommandFactory {
                 final List< URL > jarURLs = new ArrayList< >( jarFiles.size() );
 
                 for ( final File jarFile : jarFiles ) {
-                    jarURLs.add( jarFile.toURI().toURL() );
+                    final URL jarUrl = jarFile.toURI().toURL();
+                    jarURLs.add( jarUrl );
+                    LOGGER.debug( "ShellCommandFactory: adding discovered jar \"{0}\"", jarUrl ); //$NON-NLS-1$
                 }
 
                 final URL[] urls = jarURLs.toArray( new URL[ jarURLs.size() ] );
@@ -198,6 +207,7 @@ public class ShellCommandFactoryImpl implements ShellCommandFactory {
             for ( final ShellCommandProvider provider : ServiceLoader.load( ShellCommandProvider.class, classLoader ) ) {
                 if ( !Modifier.isAbstract( provider.getClass().getModifiers() ) ) {
                     this.providers.add( provider );
+                    LOGGER.debug( "ShellCommandFactory: adding ShellCommandProvider \"{0}\"", provider.getClass() ); //$NON-NLS-1$
                 }
             }
         }
@@ -219,6 +229,9 @@ public class ShellCommandFactoryImpl implements ShellCommandFactory {
         }
 
         commands.put( providerId, command );
+        LOGGER.debug( "ShellCommandFactory.registerCommand: ShellCommandProvider \"{0}\", command: {1}", //$NON-NLS-1$
+                      providerId,
+                      commandClass );
     }
 
     /**
@@ -250,6 +263,7 @@ public class ShellCommandFactoryImpl implements ShellCommandFactory {
         }
 
         // command can't be found
+        _commandNotFound.command = commandName;
         return _commandNotFound;
     }
 
@@ -326,6 +340,8 @@ public class ShellCommandFactoryImpl implements ShellCommandFactory {
 
     class CommandNotFoundCommand extends BuiltInShellCommand {
 
+        public String command;
+
         /**
          * @param wsStatus
          *        the workspace status (cannot be <code>null</code>)
@@ -349,7 +365,7 @@ public class ShellCommandFactoryImpl implements ShellCommandFactory {
          */
         @Override
         public void printUsage(int indent) {
-            print( CompletionConstants.MESSAGE_INDENT, Messages.getString( SHELL.COMMAND_NOT_FOUND ) );
+            print( CompletionConstants.MESSAGE_INDENT, Messages.getString( SHELL.COMMAND_NOT_FOUND, this.command ) );
         }
 
         /**
@@ -357,7 +373,7 @@ public class ShellCommandFactoryImpl implements ShellCommandFactory {
          */
         @Override
         public void printHelp(int indent) {
-            print( CompletionConstants.MESSAGE_INDENT, Messages.getString( SHELL.COMMAND_NOT_FOUND ) );
+            print( CompletionConstants.MESSAGE_INDENT, Messages.getString( SHELL.COMMAND_NOT_FOUND, this.command ) );
         }
 
         /**
@@ -367,7 +383,7 @@ public class ShellCommandFactoryImpl implements ShellCommandFactory {
          */
         @Override
         protected CommandResult doExecute() {
-            return new CommandResultImpl( false, Messages.getString( SHELL.COMMAND_NOT_FOUND ), null );
+            return new CommandResultImpl( false, Messages.getString( SHELL.COMMAND_NOT_FOUND, this.command ), null );
         }
 
         /**

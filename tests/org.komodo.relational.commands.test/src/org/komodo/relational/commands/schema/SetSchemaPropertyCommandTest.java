@@ -15,9 +15,9 @@
  */
 package org.komodo.relational.commands.schema;
 
+import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.FileWriter;
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Schema;
@@ -31,37 +31,30 @@ import org.komodo.shell.api.CommandResult;
 @SuppressWarnings("javadoc")
 public class SetSchemaPropertyCommandTest extends AbstractCommandTest {
 
-    /**
-	 * Test for SetSchemaPropertyCommand
-	 */
-	public SetSchemaPropertyCommandTest( ) {
-		super();
-	}
-
     @Test
     public void testSetProperty1() throws Exception {
         File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
         cmdFile.deleteOnExit();
-        
+
         FileWriter writer = new FileWriter(cmdFile);
         writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
         writer.write("create-schema testSchema" + NEW_LINE);  //$NON-NLS-1$
         writer.write("cd testSchema" + NEW_LINE);  //$NON-NLS-1$
         writer.write("set-property rendition \"CREATE FOREIGN TABLE G1 (e1 integer) OPTIONS (ANNOTATION 'test', CARDINALITY '12');\"" + NEW_LINE);  //$NON-NLS-1$
         writer.close();
-        
-        setup(cmdFile.getAbsolutePath(), SetSchemaPropertyCommand.class);
+
+        setup( cmdFile.getAbsolutePath() );
 
         CommandResult result = execute();
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
-        Schema[] schemas = wkspMgr.findSchemas(uow);
-        
+        Schema[] schemas = wkspMgr.findSchemas(getTransaction());
+
         assertEquals(1, schemas.length);
-        assertEquals("testSchema", schemas[0].getName(uow)); //$NON-NLS-1$
-        
-        assertEquals("CREATE FOREIGN TABLE G1 (e1 integer) OPTIONS (ANNOTATION 'test', CARDINALITY '12');", schemas[0].getRendition(uow)); //$NON-NLS-1$
+        assertEquals("testSchema", schemas[0].getName(getTransaction())); //$NON-NLS-1$
+
+        assertEquals("CREATE FOREIGN TABLE G1 (e1 integer) OPTIONS (ANNOTATION 'test', CARDINALITY '12');", schemas[0].getRendition(getTransaction())); //$NON-NLS-1$
     }
 
 }

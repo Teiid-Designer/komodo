@@ -37,7 +37,7 @@ public final class DataRoleImplTest extends RelationalModelTest {
     @Before
     public void init() throws Exception {
         final Vdb vdb = createVdb();
-        this.dataRole = vdb.addDataRole( this.uow, "dataRole" );
+        this.dataRole = vdb.addDataRole( getTransaction(), "dataRole" );
         commit();
     }
 
@@ -45,7 +45,7 @@ public final class DataRoleImplTest extends RelationalModelTest {
     public void shouldFailConstructionIfNotDataRole() {
         if ( RelationalObjectImpl.VALIDATE_INITIAL_STATE ) {
             try {
-                new DataRoleImpl( this.uow, _repo, this.dataRole.getParent( this.uow ).getAbsolutePath() );
+                new DataRoleImpl( getTransaction(), _repo, this.dataRole.getParent( getTransaction() ).getAbsolutePath() );
                 fail();
             } catch ( final KException e ) {
                 // expected
@@ -56,33 +56,33 @@ public final class DataRoleImplTest extends RelationalModelTest {
     @Test
     public void shouldAddMappedRole() throws Exception {
         final String name = "role";
-        final String[] mappedRoles = this.dataRole.addMappedRole( this.uow, name );
+        final String[] mappedRoles = this.dataRole.addMappedRole( getTransaction(), name );
 
         assertThat( mappedRoles, is( notNullValue() ) );
-        assertThat( this.dataRole.getMappedRoles( this.uow ).length, is( 1 ) );
-        assertThat( this.dataRole.getMappedRoles( this.uow )[0], is( name ) );
+        assertThat( this.dataRole.getMappedRoles( getTransaction() ).length, is( 1 ) );
+        assertThat( this.dataRole.getMappedRoles( getTransaction() )[0], is( name ) );
     }
 
     @Test
     public void shouldAddMultipleMappedRoles() throws Exception {
-        this.dataRole.addMappedRole( this.uow, "roleA" );
-        this.dataRole.addMappedRole( this.uow, "roleB" );
+        this.dataRole.addMappedRole( getTransaction(), "roleA" );
+        this.dataRole.addMappedRole( getTransaction(), "roleB" );
 
-        assertThat( this.dataRole.getMappedRoles( this.uow ).length, is( 2 ) );
+        assertThat( this.dataRole.getMappedRoles( getTransaction() ).length, is( 2 ) );
     }
 
     @Test
     public void shouldAddPermission() throws Exception {
         final String name = "permission";
-        final Permission permission = this.dataRole.addPermission( this.uow, name );
+        final Permission permission = this.dataRole.addPermission( getTransaction(), name );
         assertThat( permission, is( notNullValue() ) );
-        assertThat( this.dataRole.getPermissions( this.uow ).length, is( 1 ) );
+        assertThat( this.dataRole.getPermissions( getTransaction() ).length, is( 1 ) );
 
-        final Permission added = this.dataRole.getPermissions( this.uow )[0];
+        final Permission added = this.dataRole.getPermissions( getTransaction() )[0];
         assertThat( added, is( permission ) );
-        assertThat( added.getName( this.uow ), is( name ) );
-        assertThat( added.getPrimaryType( this.uow ).getName(), is( VdbLexicon.DataRole.Permission.PERMISSION ) );
-        assertThat( this.dataRole.getChildren( this.uow )[0], is( instanceOf( Permission.class ) ) );
+        assertThat( added.getName( getTransaction() ), is( name ) );
+        assertThat( added.getPrimaryType( getTransaction() ).getName(), is( VdbLexicon.DataRole.Permission.PERMISSION ) );
+        assertThat( this.dataRole.getChildren( getTransaction() )[0], is( instanceOf( Permission.class ) ) );
     }
 
     @Test
@@ -93,71 +93,71 @@ public final class DataRoleImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveCorrectPrimaryType() throws Exception {
-        assertThat( this.dataRole.getPrimaryType( this.uow ).getName(), is( VdbLexicon.DataRole.DATA_ROLE ) );
+        assertThat( this.dataRole.getPrimaryType( getTransaction() ).getName(), is( VdbLexicon.DataRole.DATA_ROLE ) );
     }
 
     @Test
     public void shouldHaveCorrectTypeIdentifier() throws Exception {
-        assertThat(this.dataRole.getTypeIdentifier( this.uow ), is(KomodoType.VDB_DATA_ROLE));
+        assertThat(this.dataRole.getTypeIdentifier( getTransaction() ), is(KomodoType.VDB_DATA_ROLE));
     }
 
     @Test
     public void shouldHaveDefaultAllowCreateTempTablesValueAfterConstruction() throws Exception {
-        assertThat( this.dataRole.isAllowCreateTempTables( this.uow ), is( DataRole.DEFAULT_ALLOW_CREATE_TEMP_TABLES ) );
+        assertThat( this.dataRole.isAllowCreateTempTables( getTransaction() ), is( DataRole.DEFAULT_ALLOW_CREATE_TEMP_TABLES ) );
     }
 
     @Test
     public void shouldHaveDefaultAnyAuthenticatedValueAfterConstruction() throws Exception {
-        assertThat( this.dataRole.isAnyAuthenticated( this.uow ), is( DataRole.DEFAULT_ANY_AUTHENTICATED ) );
+        assertThat( this.dataRole.isAnyAuthenticated( getTransaction() ), is( DataRole.DEFAULT_ANY_AUTHENTICATED ) );
     }
 
     @Test
     public void shouldHaveDefaultGrantAllValueAfterConstruction() throws Exception {
-        assertThat( this.dataRole.isGrantAll( this.uow ), is( DataRole.DEFAULT_GRANT_ALL ) );
+        assertThat( this.dataRole.isGrantAll( getTransaction() ), is( DataRole.DEFAULT_GRANT_ALL ) );
     }
 
     @Test
     public void shouldHaveMoreRawProperties() throws Exception {
-        final String[] filteredProps = this.dataRole.getPropertyNames( this.uow );
-        final String[] rawProps = this.dataRole.getRawPropertyNames( this.uow );
+        final String[] filteredProps = this.dataRole.getPropertyNames( getTransaction() );
+        final String[] rawProps = this.dataRole.getRawPropertyNames( getTransaction() );
         assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
     }
 
     @Test
     public void shouldHaveParentVdb() throws Exception {
-        assertThat( this.dataRole.getParent( this.uow ), is( instanceOf( Vdb.class ) ) );
+        assertThat( this.dataRole.getParent( getTransaction() ), is( instanceOf( Vdb.class ) ) );
     }
 
     @Test
     public void shouldHaveStrongTypedChildren() throws Exception {
-        this.dataRole.addPermission( this.uow, "permission" );
-        assertThat( this.dataRole.getChildren( this.uow ).length, is( 1 ) );
-        assertThat( this.dataRole.getChildren( this.uow )[0], is( instanceOf( Permission.class ) ) );
+        this.dataRole.addPermission( getTransaction(), "permission" );
+        assertThat( this.dataRole.getChildren( getTransaction() ).length, is( 1 ) );
+        assertThat( this.dataRole.getChildren( getTransaction() )[0], is( instanceOf( Permission.class ) ) );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToAddEmptyMappedRole() throws Exception {
-        this.dataRole.addMappedRole( this.uow, StringConstants.EMPTY_STRING );
+        this.dataRole.addMappedRole( getTransaction(), StringConstants.EMPTY_STRING );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToAddEmptyPermission() throws Exception {
-        this.dataRole.addPermission( this.uow, StringConstants.EMPTY_STRING );
+        this.dataRole.addPermission( getTransaction(), StringConstants.EMPTY_STRING );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToAddNullMappedRole() throws Exception {
-        this.dataRole.addMappedRole( this.uow, null );
+        this.dataRole.addMappedRole( getTransaction(), null );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToAddNullPermission() throws Exception {
-        this.dataRole.addPermission( this.uow, null );
+        this.dataRole.addPermission( getTransaction(), null );
     }
 
     @Test
     public void shouldNotContainFilteredProperties() throws Exception {
-        final String[] filteredProps = this.dataRole.getPropertyNames( this.uow );
+        final String[] filteredProps = this.dataRole.getPropertyNames( getTransaction() );
         final Filter[] filters = this.dataRole.getFilters();
 
         for ( final String name : filteredProps ) {
@@ -169,67 +169,67 @@ public final class DataRoleImplTest extends RelationalModelTest {
 
     @Test
     public void shouldNotHaveDescriptionAfterConstruction() throws Exception {
-        assertThat( this.dataRole.getDescription( this.uow ), is( nullValue() ) );
+        assertThat( this.dataRole.getDescription( getTransaction() ), is( nullValue() ) );
     }
 
     @Test
     public void shouldNotHaveMappedRolesAfterConstruction() throws Exception {
-        assertThat( this.dataRole.getMappedRoles( this.uow ), is( notNullValue() ) );
-        assertThat( this.dataRole.getMappedRoles( this.uow ).length, is( 0 ) );
+        assertThat( this.dataRole.getMappedRoles( getTransaction() ), is( notNullValue() ) );
+        assertThat( this.dataRole.getMappedRoles( getTransaction() ).length, is( 0 ) );
     }
 
     @Test
     public void shouldNotHavePermissionsAfterConstruction() throws Exception {
-        assertThat( this.dataRole.getPermissions( this.uow ), is( notNullValue() ) );
-        assertThat( this.dataRole.getPermissions( this.uow ).length, is( 0 ) );
+        assertThat( this.dataRole.getPermissions( getTransaction() ), is( notNullValue() ) );
+        assertThat( this.dataRole.getPermissions( getTransaction() ).length, is( 0 ) );
     }
 
     @Test
     public void shouldRemoveMappedRole() throws Exception {
         final String name = "role";
-        this.dataRole.addMappedRole( this.uow, name );
-        assertThat( this.dataRole.getMappedRoles( this.uow ).length, is( 1 ) );
+        this.dataRole.addMappedRole( getTransaction(), name );
+        assertThat( this.dataRole.getMappedRoles( getTransaction() ).length, is( 1 ) );
 
-        this.dataRole.removeMappedRole( this.uow, name );
-        assertThat( this.dataRole.getMappedRoles( this.uow ).length, is( 0 ) );
+        this.dataRole.removeMappedRole( getTransaction(), name );
+        assertThat( this.dataRole.getMappedRoles( getTransaction() ).length, is( 0 ) );
     }
 
     @Test
     public void shouldRemovePermission() throws Exception {
         final String name = "permission";
-        this.dataRole.addPermission( this.uow, name );
-        assertThat( this.dataRole.getPermissions( this.uow ).length, is( 1 ) );
+        this.dataRole.addPermission( getTransaction(), name );
+        assertThat( this.dataRole.getPermissions( getTransaction() ).length, is( 1 ) );
 
-        this.dataRole.removePermission( this.uow, name );
-        assertThat( this.dataRole.getPermissions( this.uow ).length, is( 0 ) );
+        this.dataRole.removePermission( getTransaction(), name );
+        assertThat( this.dataRole.getPermissions( getTransaction() ).length, is( 0 ) );
     }
 
     @Test
     public void shouldSetAllowCreateTempTablesValue() throws Exception {
         final boolean newValue = !DataRole.DEFAULT_ALLOW_CREATE_TEMP_TABLES;
-        this.dataRole.setAllowCreateTempTables( this.uow, newValue );
-        assertThat( this.dataRole.isAllowCreateTempTables( this.uow ), is( newValue ) );
+        this.dataRole.setAllowCreateTempTables( getTransaction(), newValue );
+        assertThat( this.dataRole.isAllowCreateTempTables( getTransaction() ), is( newValue ) );
     }
 
     @Test
     public void shouldSetAnyAuthenticatedValue() throws Exception {
         final boolean newValue = !DataRole.DEFAULT_ANY_AUTHENTICATED;
-        this.dataRole.setAnyAuthenticated( this.uow, newValue );
-        assertThat( this.dataRole.isAnyAuthenticated( this.uow ), is( newValue ) );
+        this.dataRole.setAnyAuthenticated( getTransaction(), newValue );
+        assertThat( this.dataRole.isAnyAuthenticated( getTransaction() ), is( newValue ) );
     }
 
     @Test
     public void shouldSetDescription() throws Exception {
         final String newValue = "newDescription";
-        this.dataRole.setDescription( this.uow, newValue );
-        assertThat( this.dataRole.getDescription( this.uow ), is( newValue ) );
+        this.dataRole.setDescription( getTransaction(), newValue );
+        assertThat( this.dataRole.getDescription( getTransaction() ), is( newValue ) );
     }
 
     @Test
     public void shouldSetGrantAllValue() throws Exception {
         final boolean newValue = !DataRole.DEFAULT_GRANT_ALL;
-        this.dataRole.setGrantAll( this.uow, newValue );
-        assertThat( this.dataRole.isGrantAll( this.uow ), is( newValue ) );
+        this.dataRole.setGrantAll( getTransaction(), newValue );
+        assertThat( this.dataRole.isGrantAll( getTransaction() ), is( newValue ) );
     }
 
     /*
@@ -241,20 +241,20 @@ public final class DataRoleImplTest extends RelationalModelTest {
     @Test
     public void shouldCreateUsingResolver() throws Exception {
         final String name = "blah";
-        final KomodoObject kobject = DataRole.RESOLVER.create( this.uow,
+        final KomodoObject kobject = DataRole.RESOLVER.create( getTransaction(),
                                                                    _repo,
-                                                                   this.dataRole.getParent( this.uow ),
+                                                                   this.dataRole.getParent( getTransaction() ),
                                                                    name,
                                                                    null );
         assertThat( kobject, is( notNullValue() ) );
         assertThat( kobject, is( instanceOf( DataRole.class ) ) );
-        assertThat( kobject.getName( this.uow ), is( name ) );
+        assertThat( kobject.getName( getTransaction() ), is( name ) );
     }
 
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
-        final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        DataRole.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
+        final KomodoObject bogusParent = _repo.add( getTransaction(), null, "bogus", null );
+        DataRole.RESOLVER.create( getTransaction(), _repo, bogusParent, "blah", null );
     }
 
 }

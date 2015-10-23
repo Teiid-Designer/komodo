@@ -48,177 +48,177 @@ public final class ModelImplTest extends RelationalModelTest {
     @Test
     public void shouldAddPushdownFunction() throws Exception {
         final String name = "function";
-        final PushdownFunction function = this.model.addPushdownFunction( this.uow, name );
+        final PushdownFunction function = this.model.addPushdownFunction( getTransaction(), name );
         assertThat( function, is( notNullValue() ) );
-        assertThat( function.getName( this.uow ), is( name ) );
-        assertThat( this.model.getFunctions( this.uow ).length, is( 1 ) );
-        assertThat( this.model.getChildren( this.uow )[0], is( instanceOf( PushdownFunction.class ) ) );
+        assertThat( function.getName( getTransaction() ), is( name ) );
+        assertThat( this.model.getFunctions( getTransaction() ).length, is( 1 ) );
+        assertThat( this.model.getChildren( getTransaction() )[0], is( instanceOf( PushdownFunction.class ) ) );
     }
 
     @Test
     public void shouldAddSource() throws Exception {
         final String name = "source";
-        final ModelSource source = this.model.addSource( this.uow, name );
+        final ModelSource source = this.model.addSource( getTransaction(), name );
         assertThat( source, is( notNullValue() ) );
-        assertThat( source.getName( this.uow ), is( name ) );
-        assertThat( this.model.getSources( this.uow ).length, is( 1 ) );
-        assertThat( this.model.getChildren( this.uow )[0], is( instanceOf( ModelSource.class ) ) );
+        assertThat( source.getName( getTransaction() ), is( name ) );
+        assertThat( this.model.getSources( getTransaction() ).length, is( 1 ) );
+        assertThat( this.model.getChildren( getTransaction() )[0], is( instanceOf( ModelSource.class ) ) );
     }
 
     @Test
     public void shouldAddStoredProcedure() throws Exception {
         final String name = "procedure";
-        final StoredProcedure procedure = this.model.addStoredProcedure( this.uow, name );
+        final StoredProcedure procedure = this.model.addStoredProcedure( getTransaction(), name );
         assertThat( procedure, is( notNullValue() ) );
-        assertThat( procedure.getName( this.uow ), is( name ) );
-        assertThat( this.model.getProcedures( this.uow ).length, is( 1 ) );
-        assertThat( this.model.getChildren( this.uow )[0], is( instanceOf( StoredProcedure.class ) ) );
+        assertThat( procedure.getName( getTransaction() ), is( name ) );
+        assertThat( this.model.getProcedures( getTransaction() ).length, is( 1 ) );
+        assertThat( this.model.getChildren( getTransaction() )[0], is( instanceOf( StoredProcedure.class ) ) );
     }
 
     @Test
     public void shouldAddTable() throws Exception {
         final String name = "table";
-        final Table table = this.model.addTable( this.uow, name );
+        final Table table = this.model.addTable( getTransaction(), name );
         assertThat( table, is( notNullValue() ) );
-        assertThat( table.getName( this.uow ), is( name ) );
-        assertThat( this.model.getTables( this.uow ).length, is( 1 ) );
-        assertThat( this.model.getChildren( this.uow )[0], is( instanceOf( Table.class ) ) );
+        assertThat( table.getName( getTransaction() ), is( name ) );
+        assertThat( this.model.getTables( getTransaction() ).length, is( 1 ) );
+        assertThat( this.model.getChildren( getTransaction() )[0], is( instanceOf( Table.class ) ) );
     }
 
     @Test
     public void shouldAddUserDefinedFunction() throws Exception {
         final String name = "function";
-        final UserDefinedFunction function = this.model.addUserDefinedFunction( this.uow, name );
+        final UserDefinedFunction function = this.model.addUserDefinedFunction( getTransaction(), name );
         assertThat( function, is( notNullValue() ) );
-        assertThat( function.getName( this.uow ), is( name ) );
-        assertThat( this.model.getFunctions( this.uow ).length, is( 1 ) );
-        assertThat( this.model.getChildren( this.uow )[0], is( instanceOf( UserDefinedFunction.class ) ) );
+        assertThat( function.getName( getTransaction() ), is( name ) );
+        assertThat( this.model.getFunctions( getTransaction() ).length, is( 1 ) );
+        assertThat( this.model.getChildren( getTransaction() )[0], is( instanceOf( UserDefinedFunction.class ) ) );
     }
 
     @Test
     public void shouldAddView() throws Exception {
         final String name = "view";
-        final View view = this.model.addView( this.uow, name );
+        final View view = this.model.addView( getTransaction(), name );
         assertThat( view, is( notNullValue() ) );
-        assertThat( view.getName( this.uow ), is( name ) );
-        assertThat( this.model.getViews( this.uow ).length, is( 1 ) );
-        assertThat( this.model.getChildren( this.uow )[0], is( instanceOf( View.class ) ) );
+        assertThat( view.getName( getTransaction() ), is( name ) );
+        assertThat( this.model.getViews( getTransaction() ).length, is( 1 ) );
+        assertThat( this.model.getChildren( getTransaction() )[0], is( instanceOf( View.class ) ) );
     }
 
     @Test
     public void shouldAddVirtualProcedure() throws Exception {
         final String name = "procedure";
-        final VirtualProcedure procedure = this.model.addVirtualProcedure( this.uow, name );
+        final VirtualProcedure procedure = this.model.addVirtualProcedure( getTransaction(), name );
         assertThat( procedure, is( notNullValue() ) );
-        assertThat( procedure.getName( this.uow ), is( name ) );
-        assertThat( this.model.getProcedures( this.uow ).length, is( 1 ) );
-        assertThat( this.model.getChildren( this.uow )[0], is( instanceOf( VirtualProcedure.class ) ) );
+        assertThat( procedure.getName( getTransaction() ), is( name ) );
+        assertThat( this.model.getProcedures( getTransaction() ).length, is( 1 ) );
+        assertThat( this.model.getChildren( getTransaction() )[0], is( instanceOf( VirtualProcedure.class ) ) );
     }
 
     @Test
     public void shouldAllowEmptyDescriptionWhenRemoving() throws Exception {
-        this.model.setDescription( this.uow, "blah" );
-        this.model.setDescription( this.uow, StringConstants.EMPTY_STRING );
-        assertThat( this.model.getDescription( this.uow ), is( nullValue() ) );
+        this.model.setDescription( getTransaction(), "blah" );
+        this.model.setDescription( getTransaction(), StringConstants.EMPTY_STRING );
+        assertThat( this.model.getDescription( getTransaction() ), is( nullValue() ) );
     }
 
     @Test
     public void shouldAllowNullDescriptionWhenRemoving() throws Exception {
-        this.model.setDescription( this.uow, "blah" );
-        this.model.setDescription( this.uow, null );
-        assertThat( this.model.getDescription( this.uow ), is( nullValue() ) );
+        this.model.setDescription( getTransaction(), "blah" );
+        this.model.setDescription( getTransaction(), null );
+        assertThat( this.model.getDescription( getTransaction() ), is( nullValue() ) );
     }
 
     @Test
     public void shouldAllowNullModelTypeWhenSettingToDefaultValue() throws Exception {
-        this.model.setModelType( this.uow, Type.VIRTUAL );
-        this.model.setModelType( this.uow, null );
-        assertThat( this.model.getModelType( this.uow ), is( Type.DEFAULT_VALUE ) );
+        this.model.setModelType( getTransaction(), Type.VIRTUAL );
+        this.model.setModelType( getTransaction(), null );
+        assertThat( this.model.getModelType( getTransaction() ), is( Type.DEFAULT_VALUE ) );
     }
 
     @Test
     public void shouldClearMetadataTypeWhenClearingModelDefinition() throws Exception {
-        this.model.setMetadataType( this.uow, "blah" );
-        this.model.setModelDefinition( this.uow, "blah blah blah" );
-        this.model.setModelDefinition( this.uow, EMPTY_STRING );
-        assertThat( this.model.getMetadataType( this.uow ), is( EMPTY_STRING ) );
+        this.model.setMetadataType( getTransaction(), "blah" );
+        this.model.setModelDefinition( getTransaction(), "blah blah blah" );
+        this.model.setModelDefinition( getTransaction(), EMPTY_STRING );
+        assertThat( this.model.getMetadataType( getTransaction() ), is( EMPTY_STRING ) );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingEmptyPushdownFunctionName() throws Exception {
-        this.model.addPushdownFunction( this.uow, EMPTY_STRING );
+        this.model.addPushdownFunction( getTransaction(), EMPTY_STRING );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingEmptySourceName() throws Exception {
-        this.model.addSource( this.uow, EMPTY_STRING );
+        this.model.addSource( getTransaction(), EMPTY_STRING );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingEmptyStoredProcedureName() throws Exception {
-        this.model.addStoredProcedure( this.uow, EMPTY_STRING );
+        this.model.addStoredProcedure( getTransaction(), EMPTY_STRING );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingEmptyTableName() throws Exception {
-        this.model.addTable( this.uow, EMPTY_STRING );
+        this.model.addTable( getTransaction(), EMPTY_STRING );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingEmptyUserDefinedFunctionName() throws Exception {
-        this.model.addUserDefinedFunction( this.uow, EMPTY_STRING );
+        this.model.addUserDefinedFunction( getTransaction(), EMPTY_STRING );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingEmptyViewName() throws Exception {
-        this.model.addView( this.uow, EMPTY_STRING );
+        this.model.addView( getTransaction(), EMPTY_STRING );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingEmptyVirtualProcedureName() throws Exception {
-        this.model.addVirtualProcedure( this.uow, EMPTY_STRING );
+        this.model.addVirtualProcedure( getTransaction(), EMPTY_STRING );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingNullPushdownFunctionName() throws Exception {
-        this.model.addPushdownFunction( this.uow, null );
+        this.model.addPushdownFunction( getTransaction(), null );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingNullSourceName() throws Exception {
-        this.model.addSource( this.uow, null );
+        this.model.addSource( getTransaction(), null );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingNullStoredProcedureName() throws Exception {
-        this.model.addStoredProcedure( this.uow, null );
+        this.model.addStoredProcedure( getTransaction(), null );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingNullTableName() throws Exception {
-        this.model.addTable( this.uow, null );
+        this.model.addTable( getTransaction(), null );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingNullUserDefinedFunctionName() throws Exception {
-        this.model.addUserDefinedFunction( this.uow, null );
+        this.model.addUserDefinedFunction( getTransaction(), null );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingNullViewName() throws Exception {
-        this.model.addView( this.uow, null );
+        this.model.addView( getTransaction(), null );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingNullVirtualProcedureName() throws Exception {
-        this.model.addVirtualProcedure( this.uow, null );
+        this.model.addVirtualProcedure( getTransaction(), null );
     }
 
     @Test
     public void shouldFailConstructionIfNotModel() {
         if ( RelationalObjectImpl.VALIDATE_INITIAL_STATE ) {
             try {
-                new ModelImpl( this.uow, _repo, _repo.komodoLibrary( this.uow ).getAbsolutePath() );
+                new ModelImpl( getTransaction(), _repo, _repo.komodoLibrary( getTransaction() ).getAbsolutePath() );
                 fail();
             } catch ( final KException e ) {
                 // expected
@@ -228,77 +228,77 @@ public final class ModelImplTest extends RelationalModelTest {
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveEmptyFunctionName() throws Exception {
-        this.model.removeFunction( this.uow, EMPTY_STRING );
+        this.model.removeFunction( getTransaction(), EMPTY_STRING );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveEmptyProcedureName() throws Exception {
-        this.model.removeProcedure( this.uow, EMPTY_STRING );
+        this.model.removeProcedure( getTransaction(), EMPTY_STRING );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveEmptySourceName() throws Exception {
-        this.model.removeSource( this.uow, EMPTY_STRING );
+        this.model.removeSource( getTransaction(), EMPTY_STRING );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveEmptyTableName() throws Exception {
-        this.model.removeTable( this.uow, EMPTY_STRING );
+        this.model.removeTable( getTransaction(), EMPTY_STRING );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveEmptyViewName() throws Exception {
-        this.model.removeView( this.uow, EMPTY_STRING );
+        this.model.removeView( getTransaction(), EMPTY_STRING );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveNullFunctionName() throws Exception {
-        this.model.removeFunction( this.uow, null );
+        this.model.removeFunction( getTransaction(), null );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveNullProcedureName() throws Exception {
-        this.model.removeProcedure( this.uow, null );
+        this.model.removeProcedure( getTransaction(), null );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveNullSourceName() throws Exception {
-        this.model.removeSource( this.uow, null );
+        this.model.removeSource( getTransaction(), null );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveNullTableName() throws Exception {
-        this.model.removeTable( this.uow, null );
+        this.model.removeTable( getTransaction(), null );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailTryingToRemoveNullViewName() throws Exception {
-        this.model.removeView( this.uow, null );
+        this.model.removeView( getTransaction(), null );
     }
 
     @Test( expected = KException.class )
     public void shouldFailTryingToRemoveUnknownFunction() throws Exception {
-        this.model.removeFunction( this.uow, "unknown" );
+        this.model.removeFunction( getTransaction(), "unknown" );
     }
 
     @Test( expected = KException.class )
     public void shouldFailTryingToRemoveUnknownProcedure() throws Exception {
-        this.model.removeProcedure( this.uow, "unknown" );
+        this.model.removeProcedure( getTransaction(), "unknown" );
     }
 
     @Test( expected = KException.class )
     public void shouldFailTryingToRemoveUnknownSource() throws Exception {
-        this.model.removeSource( this.uow, "unknown" );
+        this.model.removeSource( getTransaction(), "unknown" );
     }
 
     @Test( expected = KException.class )
     public void shouldFailTryingToRemoveUnknownTable() throws Exception {
-        this.model.removeTable( this.uow, "unknown" );
+        this.model.removeTable( getTransaction(), "unknown" );
     }
 
     @Test( expected = KException.class )
     public void shouldFailTryingToRemoveUnknownView() throws Exception {
-        this.model.removeView( this.uow, "unknown" );
+        this.model.removeView( getTransaction(), "unknown" );
     }
 
     @Test
@@ -306,12 +306,12 @@ public final class ModelImplTest extends RelationalModelTest {
         final int loops = 5;
 
         for ( int i = 0; i < loops; ++i ) {
-            this.model.addPushdownFunction( this.uow, "pushdownFunction" + i );
-            this.model.addUserDefinedFunction( this.uow, "udf" + i );
-            this.model.addStoredProcedure( this.uow, "procedure" + i ); // these should not count
+            this.model.addPushdownFunction( getTransaction(), "pushdownFunction" + i );
+            this.model.addUserDefinedFunction( getTransaction(), "udf" + i );
+            this.model.addStoredProcedure( getTransaction(), "procedure" + i ); // these should not count
         }
 
-        assertThat( this.model.getFunctions( this.uow ).length, is( loops * 2 ) );
+        assertThat( this.model.getFunctions( getTransaction() ).length, is( loops * 2 ) );
     }
 
     @Test
@@ -319,12 +319,12 @@ public final class ModelImplTest extends RelationalModelTest {
         final int loops = 5;
 
         for ( int i = 0; i < loops; ++i ) {
-            this.model.addStoredProcedure( this.uow, "storedProcedure" + i );
-            this.model.addVirtualProcedure( this.uow, "virtualProcedure" + i );
-            this.model.addPushdownFunction( this.uow, "pushdownFunction" + i ); // these should not count
+            this.model.addStoredProcedure( getTransaction(), "storedProcedure" + i );
+            this.model.addVirtualProcedure( getTransaction(), "virtualProcedure" + i );
+            this.model.addPushdownFunction( getTransaction(), "pushdownFunction" + i ); // these should not count
         }
 
-        assertThat( this.model.getProcedures( this.uow ).length, is( loops * 2 ) );
+        assertThat( this.model.getProcedures( getTransaction() ).length, is( loops * 2 ) );
     }
 
     @Test
@@ -332,10 +332,10 @@ public final class ModelImplTest extends RelationalModelTest {
         final int numSources = 5;
 
         for ( int i = 0; i < numSources; ++i ) {
-            this.model.addSource( this.uow, "source" + i );
+            this.model.addSource( getTransaction(), "source" + i );
         }
 
-        assertThat( this.model.getSources( this.uow ).length, is( numSources ) );
+        assertThat( this.model.getSources( getTransaction() ).length, is( numSources ) );
     }
 
     @Test
@@ -343,10 +343,10 @@ public final class ModelImplTest extends RelationalModelTest {
         final int numTables = 5;
 
         for ( int i = 0; i < numTables; ++i ) {
-            this.model.addTable( this.uow, "table" + i );
+            this.model.addTable( getTransaction(), "table" + i );
         }
 
-        assertThat( this.model.getTables( this.uow ).length, is( numTables ) );
+        assertThat( this.model.getTables( getTransaction() ).length, is( numTables ) );
     }
 
     @Test
@@ -354,10 +354,10 @@ public final class ModelImplTest extends RelationalModelTest {
         final int numViews = 5;
 
         for ( int i = 0; i < numViews; ++i ) {
-            this.model.addView( this.uow, "view" + i );
+            this.model.addView( getTransaction(), "view" + i );
         }
 
-        assertThat( this.model.getViews( this.uow ).length, is( numViews ) );
+        assertThat( this.model.getViews( getTransaction() ).length, is( numViews ) );
     }
 
     @Test
@@ -375,27 +375,27 @@ public final class ModelImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveCorrectTypeIdentifier() throws Exception {
-        assertThat(this.model.getTypeIdentifier( this.uow ), is(KomodoType.MODEL));
+        assertThat(this.model.getTypeIdentifier( getTransaction() ), is(KomodoType.MODEL));
     }
 
     @Test
     public void shouldHaveMoreRawProperties() throws Exception {
-        final String[] filteredProps = this.model.getPropertyNames( this.uow );
-        final String[] rawProps = this.model.getRawPropertyNames( this.uow );
+        final String[] filteredProps = this.model.getPropertyNames( getTransaction() );
+        final String[] rawProps = this.model.getRawPropertyNames( getTransaction() );
         assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
     }
 
     @Test
     public void shouldHaveStrongTypeChildren() throws Exception {
-        this.model.addUserDefinedFunction( this.uow, "udf" );
-        this.model.addPushdownFunction( this.uow, "pushdownFunction" );
-        this.model.addStoredProcedure( this.uow, "storedProcedure" );
-        this.model.addVirtualProcedure( this.uow, "virtualProcedure" );
-        this.model.addTable( this.uow, "table" );
-        this.model.addView( this.uow, "view" );
-        this.model.addSource( this.uow, "source" );
+        this.model.addUserDefinedFunction( getTransaction(), "udf" );
+        this.model.addPushdownFunction( getTransaction(), "pushdownFunction" );
+        this.model.addStoredProcedure( getTransaction(), "storedProcedure" );
+        this.model.addVirtualProcedure( getTransaction(), "virtualProcedure" );
+        this.model.addTable( getTransaction(), "table" );
+        this.model.addView( getTransaction(), "view" );
+        this.model.addSource( getTransaction(), "source" );
 
-        final KomodoObject[] kids = this.model.getChildren( this.uow );
+        final KomodoObject[] kids = this.model.getChildren( getTransaction() );
         assertThat( kids.length, is( 7 ) );
 
         boolean foundUdf = false;
@@ -465,7 +465,7 @@ public final class ModelImplTest extends RelationalModelTest {
 
     @Test
     public void shouldNotContainFilteredProperties() throws Exception {
-        final String[] filteredProps = this.model.getPropertyNames( this.uow );
+        final String[] filteredProps = this.model.getPropertyNames( getTransaction() );
         final Filter[] filters = this.model.getFilters();
 
         for ( final String name : filteredProps ) {
@@ -478,92 +478,92 @@ public final class ModelImplTest extends RelationalModelTest {
     @Test
     public void shouldRemovePushdownFunction() throws Exception {
         final String name = "function";
-        this.model.addPushdownFunction( this.uow, name );
-        this.model.removeFunction( this.uow, name );
-        assertThat( this.model.getFunctions( this.uow ).length, is( 0 ) );
+        this.model.addPushdownFunction( getTransaction(), name );
+        this.model.removeFunction( getTransaction(), name );
+        assertThat( this.model.getFunctions( getTransaction() ).length, is( 0 ) );
     }
 
     @Test
     public void shouldRemoveSource() throws Exception {
         final String name = "source";
-        this.model.addSource( this.uow, name );
-        this.model.removeSource( this.uow, name );
-        assertThat( this.model.getSources( this.uow ).length, is( 0 ) );
+        this.model.addSource( getTransaction(), name );
+        this.model.removeSource( getTransaction(), name );
+        assertThat( this.model.getSources( getTransaction() ).length, is( 0 ) );
     }
 
     @Test
     public void shouldRemoveStoredProcedure() throws Exception {
         final String name = "procedure";
-        this.model.addStoredProcedure( this.uow, name );
-        this.model.removeProcedure( this.uow, name );
-        assertThat( this.model.getProcedures( this.uow ).length, is( 0 ) );
+        this.model.addStoredProcedure( getTransaction(), name );
+        this.model.removeProcedure( getTransaction(), name );
+        assertThat( this.model.getProcedures( getTransaction() ).length, is( 0 ) );
     }
 
     @Test
     public void shouldRemoveTable() throws Exception {
         final String name = "table";
-        this.model.addTable( this.uow, name );
-        this.model.removeTable( this.uow, name );
-        assertThat( this.model.getTables( this.uow ).length, is( 0 ) );
+        this.model.addTable( getTransaction(), name );
+        this.model.removeTable( getTransaction(), name );
+        assertThat( this.model.getTables( getTransaction() ).length, is( 0 ) );
     }
 
     @Test
     public void shouldRemoveUserDefinedFunction() throws Exception {
         final String name = "function";
-        this.model.addUserDefinedFunction( this.uow, name );
-        this.model.removeFunction( this.uow, name );
-        assertThat( this.model.getFunctions( this.uow ).length, is( 0 ) );
+        this.model.addUserDefinedFunction( getTransaction(), name );
+        this.model.removeFunction( getTransaction(), name );
+        assertThat( this.model.getFunctions( getTransaction() ).length, is( 0 ) );
     }
 
     @Test
     public void shouldRemoveView() throws Exception {
         final String name = "view";
-        this.model.addView( this.uow, name );
-        this.model.removeView( this.uow, name );
-        assertThat( this.model.getViews( this.uow ).length, is( 0 ) );
+        this.model.addView( getTransaction(), name );
+        this.model.removeView( getTransaction(), name );
+        assertThat( this.model.getViews( getTransaction() ).length, is( 0 ) );
     }
 
     @Test
     public void shouldRemoveVirtualProcedure() throws Exception {
         final String name = "procedure";
-        this.model.addVirtualProcedure( this.uow, name );
-        this.model.removeProcedure( this.uow, name );
-        assertThat( this.model.getProcedures( this.uow ).length, is( 0 ) );
+        this.model.addVirtualProcedure( getTransaction(), name );
+        this.model.removeProcedure( getTransaction(), name );
+        assertThat( this.model.getProcedures( getTransaction() ).length, is( 0 ) );
     }
 
     @Test
     public void shouldSetDescription() throws Exception {
         final String value = "description";
-        this.model.setDescription( this.uow, value );
-        assertThat( this.model.getDescription( this.uow ), is( value ) );
+        this.model.setDescription( getTransaction(), value );
+        assertThat( this.model.getDescription( getTransaction() ), is( value ) );
     }
 
     @Test
     public void shouldSetMetadataType() throws Exception {
         final String value = "metadataType";
-        this.model.setMetadataType( this.uow, value );
-        assertThat( this.model.getMetadataType( this.uow ), is( value ) );
+        this.model.setMetadataType( getTransaction(), value );
+        assertThat( this.model.getMetadataType( getTransaction() ), is( value ) );
     }
 
     @Test
     public void shouldSetMetadataTypeToDefaultWhenSettingModelDefinition() throws Exception {
-        this.model.setMetadataType( this.uow, EMPTY_STRING );
-        this.model.setModelDefinition( this.uow, "blah blah blah" );
-        assertThat( this.model.getMetadataType( this.uow ), is( Model.DEFAULT_METADATA_TYPE ) );
+        this.model.setMetadataType( getTransaction(), EMPTY_STRING );
+        this.model.setModelDefinition( getTransaction(), "blah blah blah" );
+        assertThat( this.model.getMetadataType( getTransaction() ), is( Model.DEFAULT_METADATA_TYPE ) );
     }
 
     @Test
     public void shouldSetModelType() throws Exception {
         final Type value = Type.VIRTUAL;
-        this.model.setModelType( this.uow, value );
-        assertThat( this.model.getModelType( this.uow ), is( value ) );
+        this.model.setModelType( getTransaction(), value );
+        assertThat( this.model.getModelType( getTransaction() ), is( value ) );
     }
 
     @Test
     public void shouldSetVisible() throws Exception {
         final boolean value = !Model.DEFAULT_VISIBLE;
-        this.model.setVisible( this.uow, value );
-        assertThat( this.model.isVisible( this.uow ), is( value ) );
+        this.model.setVisible( getTransaction(), value );
+        assertThat( this.model.isVisible( getTransaction() ), is( value ) );
     }
 
     /*
@@ -575,16 +575,16 @@ public final class ModelImplTest extends RelationalModelTest {
     @Test
     public void shouldCreateUsingResolver() throws Exception {
         final String name = "blah";
-        final KomodoObject kobject = Model.RESOLVER.create( this.uow, _repo, this.model.getParent( this.uow ), name, null );
+        final KomodoObject kobject = Model.RESOLVER.create( getTransaction(), _repo, this.model.getParent( getTransaction() ), name, null );
         assertThat( kobject, is( notNullValue() ) );
         assertThat( kobject, is( instanceOf( Model.class ) ) );
-        assertThat( kobject.getName( this.uow ), is( name ) );
+        assertThat( kobject.getName( getTransaction() ), is( name ) );
     }
 
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
-        final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        Model.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
+        final KomodoObject bogusParent = _repo.add( getTransaction(), null, "bogus", null );
+        Model.RESOLVER.create( getTransaction(), _repo, bogusParent, "blah", null );
     }
 
 }

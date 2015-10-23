@@ -114,8 +114,8 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     }
 
     private void init( final UnitOfWork transaction ) throws Exception {
-        this.commandFactory = new ShellCommandFactoryImpl();
-        this.commandFactory.registerCommands( this );
+        this.commandFactory = new ShellCommandFactoryImpl(this);
+
         if ( transaction == null ) {
             createTransaction("init"); //$NON-NLS-1$
         } else {
@@ -170,7 +170,9 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     private void createTransaction(final String source ) throws Exception {
         final Repository repo = getEngine().getDefaultRepository();
         this.callback = new SynchronousCallback();
-        this.uow = repo.createTransaction( ( getClass().getSimpleName() + ':' + source + '-' + this.count++ ), false, callback );
+        this.uow = repo.createTransaction( ( getClass().getSimpleName() + ':' + source + '-' + this.count++ ),
+                                                            false,
+                                                            this.callback );
         KLog.getLogger().debug( "WorkspaceStatusImpl.createTransaction: " + this.uow.getName() ); //$NON-NLS-1$
     }
 
@@ -193,7 +195,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     public Writer getOutputWriter() {
         return shell.getOutputWriter();
     }
-    
+
     @Override
     public ShellCommandFactory getCommandFactory() {
         return commandFactory;
@@ -227,8 +229,9 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         this.uow.commit();
 
         final boolean success = this.callback.await( 3, TimeUnit.MINUTES );
+
         if ( success ) {
-            final KException error = uow.getError();
+            final KException error = this.uow.getError();
             final State txState = this.uow.getState();
 
             if ( ( error != null ) || !State.COMMITTED.equals( txState ) ) {
@@ -239,7 +242,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         }
 
         // create new transaction
-        createTransaction(source);
+        createTransaction( source );
     }
 
     /**
@@ -266,7 +269,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         }
 
         // create new transaction
-        createTransaction(source);
+        createTransaction( source );
     }
 
     @Override

@@ -37,8 +37,8 @@ public final class DataTypeResultSetImplTest extends RelationalModelTest {
     @Before
     public void init() throws Exception {
         final Model model = createModel();
-        this.procedure = model.addStoredProcedure( this.uow, "procedure" );
-        this.resultSet = this.procedure.setResultSet( this.uow, DataTypeResultSet.class );
+        this.procedure = model.addStoredProcedure( getTransaction(), "procedure" );
+        this.resultSet = this.procedure.setResultSet( getTransaction(), DataTypeResultSet.class );
         commit();
     }
 
@@ -51,7 +51,7 @@ public final class DataTypeResultSetImplTest extends RelationalModelTest {
     public void shouldFailConstructionIfNotDataTypeResultSet() {
         if ( RelationalObjectImpl.VALIDATE_INITIAL_STATE ) {
             try {
-                new DataTypeResultSetImpl( this.uow, _repo, this.procedure.getAbsolutePath() );
+                new DataTypeResultSetImpl( getTransaction(), _repo, this.procedure.getAbsolutePath() );
                 fail();
             } catch ( final KException e ) {
                 // expected
@@ -62,63 +62,63 @@ public final class DataTypeResultSetImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveCorrectDisplayString() throws Exception {
         // STRING
-        assertThat( this.resultSet.getDisplayString( this.uow ), is( "STRING" ) );
+        assertThat( this.resultSet.getDisplayString( getTransaction() ), is( "STRING" ) );
 
         // STRING(50)
-        this.resultSet.setLength( this.uow, 50 );
-        assertThat( this.resultSet.getDisplayString( this.uow ), is( "STRING(50)" ) );
+        this.resultSet.setLength( getTransaction(), 50 );
+        assertThat( this.resultSet.getDisplayString( getTransaction() ), is( "STRING(50)" ) );
 
         // STRING(50)[]
-        this.resultSet.setArray( this.uow, true );
-        assertThat( this.resultSet.getDisplayString( this.uow ), is( "STRING(50)[]" ) );
+        this.resultSet.setArray( getTransaction(), true );
+        assertThat( this.resultSet.getDisplayString( getTransaction() ), is( "STRING(50)[]" ) );
     }
 
     @Test
     public void shouldHaveCorrectName() throws Exception {
-        assertThat( this.resultSet.getName( this.uow ), is( CreateProcedure.RESULT_SET ) );
+        assertThat( this.resultSet.getName( getTransaction() ), is( CreateProcedure.RESULT_SET ) );
     }
 
     @Test
     public void shouldHaveCorrectTypeIdentifier() throws Exception {
-        assertThat(this.resultSet.getTypeIdentifier( this.uow ), is(KomodoType.DATA_TYPE_RESULT_SET));
+        assertThat(this.resultSet.getTypeIdentifier( getTransaction() ), is(KomodoType.DATA_TYPE_RESULT_SET));
     }
 
     @Test
     public void shouldHaveDatatypeLengthPropertyDefaultValueAfterConstruction() throws Exception {
-        assertThat( this.resultSet.getLength( this.uow ), is( RelationalConstants.DEFAULT_LENGTH ) );
-        assertThat( this.resultSet.hasProperty( this.uow, StandardDdlLexicon.DATATYPE_LENGTH ), is( false ) );
+        assertThat( this.resultSet.getLength( getTransaction() ), is( RelationalConstants.DEFAULT_LENGTH ) );
+        assertThat( this.resultSet.hasProperty( getTransaction(), StandardDdlLexicon.DATATYPE_LENGTH ), is( false ) );
     }
 
     @Test
     public void shouldHaveDefaultTypeAfterConstruction() throws Exception {
-        assertThat( this.resultSet.getType( this.uow ), is( Type.DEFAULT_VALUE ) );
+        assertThat( this.resultSet.getType( getTransaction() ), is( Type.DEFAULT_VALUE ) );
     }
 
     @Test
     public void shouldHaveMoreRawProperties() throws Exception {
-        final String[] filteredProps = this.resultSet.getPropertyNames( this.uow );
-        final String[] rawProps = this.resultSet.getRawPropertyNames( this.uow );
+        final String[] filteredProps = this.resultSet.getPropertyNames( getTransaction() );
+        final String[] rawProps = this.resultSet.getRawPropertyNames( getTransaction() );
         assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
     }
 
     @Test( expected = UnsupportedOperationException.class )
     public void shouldNotAllowChildren() throws Exception {
-        this.resultSet.addChild( this.uow, "blah", null );
+        this.resultSet.addChild( getTransaction(), "blah", null );
     }
 
     @Test( expected = UnsupportedOperationException.class )
     public void shouldNotAllowRename() throws Exception {
-        this.resultSet.rename( this.uow, "newName" );
+        this.resultSet.rename( getTransaction(), "newName" );
     }
 
     @Test
     public void shouldNotBeAnArrayAfterConstruction() throws Exception {
-        assertThat( this.resultSet.isArray( this.uow ), is( false ) );
+        assertThat( this.resultSet.isArray( getTransaction() ), is( false ) );
     }
 
     @Test
     public void shouldNotContainFilteredProperties() throws Exception {
-        final String[] filteredProps = this.resultSet.getPropertyNames( this.uow );
+        final String[] filteredProps = this.resultSet.getPropertyNames( getTransaction() );
         final Filter[] filters = this.resultSet.getFilters();
 
         for ( final String name : filteredProps ) {
@@ -130,31 +130,31 @@ public final class DataTypeResultSetImplTest extends RelationalModelTest {
 
     @Test
     public void shouldSetArray() throws Exception {
-        this.resultSet.setArray( this.uow, true );
-        assertThat( this.resultSet.isArray( this.uow ), is( true ) );
+        this.resultSet.setArray( getTransaction(), true );
+        assertThat( this.resultSet.isArray( getTransaction() ), is( true ) );
     }
 
     @Test
     public void shouldSetDatatypeLengthProperty() throws Exception {
         final long value = ( RelationalConstants.DEFAULT_LENGTH + 10 );
-        this.resultSet.setLength( this.uow, value );
-        assertThat( this.resultSet.getLength( this.uow ), is( value ) );
-        assertThat( this.resultSet.getProperty( this.uow, StandardDdlLexicon.DATATYPE_LENGTH ).getLongValue( this.uow ),
+        this.resultSet.setLength( getTransaction(), value );
+        assertThat( this.resultSet.getLength( getTransaction() ), is( value ) );
+        assertThat( this.resultSet.getProperty( getTransaction(), StandardDdlLexicon.DATATYPE_LENGTH ).getLongValue( getTransaction() ),
                     is( value ) );
     }
 
     @Test
     public void shouldSetType() throws Exception {
         final Type value = Type.BIGDECIMAL;
-        this.resultSet.setType( this.uow, value );
-        assertThat( this.resultSet.getType( this.uow ), is( value ) );
+        this.resultSet.setType( getTransaction(), value );
+        assertThat( this.resultSet.getType( getTransaction() ), is( value ) );
     }
 
     @Test
     public void shouldSetTypeToDefaultWhenNull() throws Exception {
-        this.resultSet.setType( this.uow, Type.BIGDECIMAL );
-        this.resultSet.setType( this.uow, null );
-        assertThat( this.resultSet.getType( this.uow ), is( Type.DEFAULT_VALUE ) );
+        this.resultSet.setType( getTransaction(), Type.BIGDECIMAL );
+        this.resultSet.setType( getTransaction(), null );
+        assertThat( this.resultSet.getType( getTransaction() ), is( Type.DEFAULT_VALUE ) );
     }
 
     /*
@@ -165,16 +165,16 @@ public final class DataTypeResultSetImplTest extends RelationalModelTest {
 
     @Test
     public void shouldCreateUsingResolver() throws Exception {
-        final KomodoObject kobject = DataTypeResultSet.RESOLVER.create( this.uow, _repo, this.procedure, "blah", null );
+        final KomodoObject kobject = DataTypeResultSet.RESOLVER.create( getTransaction(), _repo, this.procedure, "blah", null );
         assertThat( kobject, is( notNullValue() ) );
         assertThat( kobject, is( instanceOf( DataTypeResultSet.class ) ) );
-        assertThat( kobject.getName( this.uow ), is( CreateProcedure.RESULT_SET ) );
+        assertThat( kobject.getName( getTransaction() ), is( CreateProcedure.RESULT_SET ) );
     }
 
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
-        final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        DataTypeResultSet.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
+        final KomodoObject bogusParent = _repo.add( getTransaction(), null, "bogus", null );
+        DataTypeResultSet.RESOLVER.create( getTransaction(), _repo, bogusParent, "blah", null );
     }
 
 }

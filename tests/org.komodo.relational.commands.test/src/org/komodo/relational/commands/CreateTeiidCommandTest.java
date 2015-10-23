@@ -15,8 +15,6 @@
  */
 package org.komodo.relational.commands;
 
-import java.io.File;
-import java.io.FileWriter;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.relational.teiid.Teiid;
@@ -27,36 +25,23 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test CreateTeiidCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( { "javadoc", "nls" } )
 public class CreateTeiidCommandTest extends AbstractCommandTest {
-
-    /**
-	 * Test for CreateTeiidCommand
-	 */
-	public CreateTeiidCommandTest( ) {
-		super();
-	}
 
     @Test
     public void testCreateTeiid1() throws Exception {
-        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
-        cmdFile.deleteOnExit();
-        
-        FileWriter writer = new FileWriter(cmdFile);
-        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("create-teiid testTeiid" + NEW_LINE);  //$NON-NLS-1$
-        writer.close();
-        
-    	setup(cmdFile.getAbsolutePath(), CreateTeiidCommand.class);
+        final String[] commands = { "workspace",
+                                    "create-teiid testTeiid" };
+        setup( commands  );
 
         CommandResult result = execute();
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
-        Teiid[] teiids = wkspMgr.findTeiids(uow);
-        
+        Teiid[] teiids = wkspMgr.findTeiids(getTransaction());
+
         assertEquals(1, teiids.length);
-        assertEquals("testTeiid", teiids[0].getName(uow)); //$NON-NLS-1$
+        assertEquals("testTeiid", teiids[0].getName(getTransaction()));
     }
 
 }

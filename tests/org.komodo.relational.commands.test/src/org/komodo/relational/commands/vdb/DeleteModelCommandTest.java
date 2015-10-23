@@ -15,9 +15,9 @@
  */
 package org.komodo.relational.commands.vdb;
 
+import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.FileWriter;
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Model;
@@ -32,18 +32,11 @@ import org.komodo.shell.api.CommandResult;
 @SuppressWarnings("javadoc")
 public class DeleteModelCommandTest extends AbstractCommandTest {
 
-    /**
-	 * Test for DeleteModelCommand
-	 */
-	public DeleteModelCommandTest( ) {
-		super();
-	}
-
     @Test
     public void testDelete1() throws Exception {
         File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
         cmdFile.deleteOnExit();
-        
+
         FileWriter writer = new FileWriter(cmdFile);
         writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
         writer.write("create-vdb myVdb vdbPath" + NEW_LINE);  //$NON-NLS-1$
@@ -53,19 +46,19 @@ public class DeleteModelCommandTest extends AbstractCommandTest {
         writer.write("delete-model myModel1" + NEW_LINE);  //$NON-NLS-1$
         writer.close();
 
-        setup(cmdFile.getAbsolutePath(), DeleteModelCommand.class);
+        setup( cmdFile.getAbsolutePath() );
 
         CommandResult result = execute();
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
-        Vdb[] vdbs = wkspMgr.findVdbs(uow);
-        
+        Vdb[] vdbs = wkspMgr.findVdbs(getTransaction());
+
         assertEquals(1, vdbs.length);
-        
-        Model[] models = vdbs[0].getModels(uow);
+
+        Model[] models = vdbs[0].getModels(getTransaction());
         assertEquals(1, models.length);
-        assertEquals("myModel2", models[0].getName(uow)); //$NON-NLS-1$
+        assertEquals("myModel2", models[0].getName(getTransaction())); //$NON-NLS-1$
     }
 
 }

@@ -15,8 +15,6 @@
  */
 package org.komodo.relational.commands;
 
-import java.io.File;
-import java.io.FileWriter;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.relational.teiid.Teiid;
@@ -27,41 +25,28 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test DeleteTeiidCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( { "javadoc", "nls" } )
 public class DeleteTeiidCommandTest extends AbstractCommandTest {
-
-    /**
-	 * Test for DeleteTeiidCommand
-	 */
-	public DeleteTeiidCommandTest( ) {
-		super();
-	}
 
     @Test
     public void testDeleteTeiid1() throws Exception {
-        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
-        cmdFile.deleteOnExit();
-        
-        FileWriter writer = new FileWriter(cmdFile);
-        writer.write("set-auto-commit false" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("create-teiid testTeiid1" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("create-teiid testTeiid2" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("commit" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("delete-teiid testTeiid1" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("commit" + NEW_LINE);  //$NON-NLS-1$
-        writer.close();
-        
-    	setup(cmdFile.getAbsolutePath(), DeleteTeiidCommand.class);
+        final String[] commands = { "set-auto-commit false",
+                                    "workspace",
+                                    "create-teiid testTeiid1",
+                                    "create-teiid testTeiid2",
+                                    "commit",
+                                    "delete-teiid testTeiid1",
+                                    "commit" };
+        setup( commands );
 
         CommandResult result = execute();
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
-        Teiid[] teiids = wkspMgr.findTeiids(uow);
-        
+        Teiid[] teiids = wkspMgr.findTeiids(getTransaction());
+
         assertEquals(1,teiids.length);
-        assertEquals("testTeiid2",teiids[0].getName(uow)); //$NON-NLS-1$
+        assertEquals("testTeiid2",teiids[0].getName(getTransaction()));
     }
 
 }

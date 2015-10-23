@@ -75,18 +75,18 @@ public class TestJsonVisitor extends AbstractLocalRepositoryTest {
     @Test(timeout=3000000)
     public void testJsonVisitor1() throws Exception {
         createInitialTransaction();
-        KomodoObject kWorkspace = _repo.komodoWorkspace(uow);
-        KomodoObject twitterExampleNode = TestUtilities.createTweetExampleNode(uow, kWorkspace);
+        KomodoObject kWorkspace = _repo.komodoWorkspace(getTransaction());
+        KomodoObject twitterExampleNode = TestUtilities.createTweetExampleNode(getTransaction(), kWorkspace);
         commit();
 
-        traverse(uow, twitterExampleNode.getAbsolutePath());
+        traverse(getTransaction(), twitterExampleNode.getAbsolutePath());
 
         //
         // Create visitor and visit the objects
         //
         JsonVisitor visitor = new JsonVisitor();
         visitor.setFilter(KomodoType.UNKNOWN, KomodoType.TEIID);
-        String definition = visitor.visit(uow, twitterExampleNode);
+        String definition = visitor.visit(getTransaction(), twitterExampleNode);
         System.out.println(definition);
 
         validateDefinition(definition);
@@ -96,27 +96,27 @@ public class TestJsonVisitor extends AbstractLocalRepositoryTest {
     public void testJsonVisitor2() throws Exception {
         VdbImporter importer = new VdbImporter(_repo);
         createInitialTransaction();
-        KomodoObject workspace = _repo.komodoWorkspace(uow);
+        KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
 
         ImportOptions importOptions = new ImportOptions();
         importOptions.setOption(OptionKeys.NAME, TestUtilities.PORTFOLIO_VDB_NAME);
         ImportMessages importMessages = new ImportMessages();
-        importer.importVdb(uow, TestUtilities.portfolioExample(), workspace, importOptions, importMessages);
+        importer.importVdb(getTransaction(), TestUtilities.portfolioExample(), workspace, importOptions, importMessages);
         commit();
 
-        traverse(uow, workspace.getAbsolutePath());
+        traverse(getTransaction(), workspace.getAbsolutePath());
 
-        KomodoObject vdbNode = workspace.getChild(uow, TestUtilities.PORTFOLIO_VDB_NAME, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        KomodoObject vdbNode = workspace.getChild(getTransaction(), TestUtilities.PORTFOLIO_VDB_NAME, VdbLexicon.Vdb.VIRTUAL_DATABASE);
         assertNotNull("Failed - No Vdb Created ", vdbNode);
 
-        traverse(uow, vdbNode.getAbsolutePath());
+        traverse(getTransaction(), vdbNode.getAbsolutePath());
 
         //
         // Create visitor and visit the objects
         //
         JsonVisitor visitor = new JsonVisitor();
         visitor.setFilter(KomodoType.UNKNOWN, KomodoType.TEIID);
-        String definition = visitor.visit(uow, vdbNode);
+        String definition = visitor.visit(getTransaction(), vdbNode);
         System.out.println(definition);
         assertNotNull(definition);
         validateDefinition(definition);
@@ -126,27 +126,27 @@ public class TestJsonVisitor extends AbstractLocalRepositoryTest {
     public void testJsonVisitor3() throws Exception {
         VdbImporter importer = new VdbImporter(_repo);
         createInitialTransaction();
-        KomodoObject workspace = _repo.komodoWorkspace(uow);
+        KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
 
         ImportOptions importOptions = new ImportOptions();
         importOptions.setOption(OptionKeys.NAME, TestUtilities.PARTS_VDB_NAME);
         ImportMessages importMessages = new ImportMessages();
-        importer.importVdb(uow, TestUtilities.partsExample(), workspace, importOptions, importMessages);
+        importer.importVdb(getTransaction(), TestUtilities.partsExample(), workspace, importOptions, importMessages);
         commit();
 
-        traverse(uow, workspace.getAbsolutePath());
+        traverse(getTransaction(), workspace.getAbsolutePath());
 
-        KomodoObject vdbNode = workspace.getChild(uow, TestUtilities.PARTS_VDB_NAME, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        KomodoObject vdbNode = workspace.getChild(getTransaction(), TestUtilities.PARTS_VDB_NAME, VdbLexicon.Vdb.VIRTUAL_DATABASE);
         assertNotNull("Failed - No Vdb Created ", vdbNode);
 
-        traverse(uow, vdbNode.getAbsolutePath());
+        traverse(getTransaction(), vdbNode.getAbsolutePath());
 
         //
         // Create visitor and visit the objects
         //
         JsonVisitor visitor = new JsonVisitor();
         visitor.setFilter(KomodoType.UNKNOWN, KomodoType.TEIID);
-        String definition = visitor.visit(uow, vdbNode);
+        String definition = visitor.visit(getTransaction(), vdbNode);
         System.out.println(definition);
         assertNotNull(definition);
         validateDefinition(definition);

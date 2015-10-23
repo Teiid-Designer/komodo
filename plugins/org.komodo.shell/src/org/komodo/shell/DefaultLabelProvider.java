@@ -17,6 +17,7 @@ import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.utils.ArgCheck;
+import org.komodo.utils.StringUtils;
 
 /**
  * The default path label provider: removes the namespace prefix from path segments when providing display text; and (2) uses
@@ -109,6 +110,10 @@ public class DefaultLabelProvider implements KomodoObjectLabelProvider {
         ArgCheck.isNotEmpty( repositoryAbsolutePath, "repositoryAbsolutePath" ); //$NON-NLS-1$
 
         if ( !repositoryAbsolutePath.startsWith( ROOT_PATH ) ) {
+            if ( !StringUtils.isBlank( getPath( repositoryAbsolutePath ) ) ) {
+                return repositoryAbsolutePath;
+            }
+
             return null;
         }
 

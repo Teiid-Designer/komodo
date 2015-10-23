@@ -94,24 +94,24 @@ public abstract class AbstractImporterTest extends AbstractLocalRepositoryTest {
             KLog.getLogger().debug(importMessages.errorMessagesToString());
         }
 
-        traverse(this.uow, parentObject.getAbsolutePath());
+        traverse(getTransaction(), parentObject.getAbsolutePath());
 
     }
 
     protected String enc(String input) throws Exception {
-        return ( ( JcrSession )session( this.uow ) ).encode( input );
+        return ( ( JcrSession )session( getTransaction() ) ).encode( input );
     }
 
     protected void verifyProperty(KomodoObject node, String propertyName, String... expectedValues) throws Exception {
-        Property property = node.getRawProperty(this.uow, propertyName);
+        Property property = node.getRawProperty(getTransaction(), propertyName);
         assertNotNull(property);
 
         List<String> values;
-        if (property.isMultiple(this.uow))
-            values = Arrays.asList(property.getStringValues(this.uow));
+        if (property.isMultiple(getTransaction()))
+            values = Arrays.asList(property.getStringValues(getTransaction()));
         else {
             values = new ArrayList<String>();
-            values.add(property.getStringValue(this.uow));
+            values.add(property.getStringValue(getTransaction()));
         }
 
         assertEquals(expectedValues.length, values.size());
@@ -125,15 +125,15 @@ public abstract class AbstractImporterTest extends AbstractLocalRepositoryTest {
     }
 
     protected void verifyMixinType(KomodoObject node, String... expectedValues) throws Exception {
-        Property property = node.getRawProperty(this.uow, JCR_MIXIN_TYPES);
+        Property property = node.getRawProperty(getTransaction(), JCR_MIXIN_TYPES);
         assertNotNull(property);
 
         List<String> values;
-        if (property.isMultiple(this.uow))
-            values = Arrays.asList(property.getStringValues(this.uow));
+        if (property.isMultiple(getTransaction()))
+            values = Arrays.asList(property.getStringValues(getTransaction()));
         else {
             values = new ArrayList<String>();
-            values.add(property.getStringValue(this.uow));
+            values.add(property.getStringValue(getTransaction()));
         }
 
         assertEquals(expectedValues.length, values.size());
@@ -157,9 +157,9 @@ public abstract class AbstractImporterTest extends AbstractLocalRepositoryTest {
             indexExp = OPEN_SQUARE_BRACKET + index + CLOSE_SQUARE_BRACKET;
 
         KomodoObject childNode = null;
-        if (parentNode.hasChild(this.uow, relativePath)) {
-            childNode = parentNode.getChild(this.uow, relativePath + indexExp);
-        } else childNode = parentNode.getChild(this.uow, enc(relativePath) + indexExp);
+        if (parentNode.hasChild(getTransaction(), relativePath)) {
+            childNode = parentNode.getChild(getTransaction(), relativePath + indexExp);
+        } else childNode = parentNode.getChild(getTransaction(), enc(relativePath) + indexExp);
         assertNotNull(childNode);
 
         verifyBaseProperties(childNode, primaryType, mixinType);

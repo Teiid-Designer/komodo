@@ -46,30 +46,74 @@ public class PlayCommand  extends BuiltInShellCommand {
     @Override
     protected CommandResult doExecute() {
         try {
-            String fileNameArg = requiredArgument(0, Messages.getString(Messages.PlayCommand.InvalidArgMsg_FileName));
+            String fileNameArg = requiredArgument( 0, Messages.getString( Messages.PlayCommand.InvalidArgMsg_FileName ) );
 
             // Validate the supplied path
-            String validationResult = validateReadableFileArg(fileNameArg);
-            if(!CompletionConstants.OK.equals(validationResult)) {
+            String validationResult = validateReadableFileArg( fileNameArg );
+            if ( !CompletionConstants.OK.equals( validationResult ) ) {
                 return new CommandResultImpl( false,
-                                              Messages.getString( Messages.SHELL.FileNotAccessible, fileNameArg, validationResult ),
+                                              Messages.getString( Messages.SHELL.FileNotAccessible,
+                                                                  fileNameArg,
+                                                                  validationResult ),
                                               null );
             }
 
-            try {
-                final CommandResult result = playFile( fileNameArg );
+            final WorkspaceStatus wsStatus = getWorkspaceStatus();
+            boolean saveAutoCommit = wsStatus.isAutoCommit(); // save current value
 
-                if ( result.isOk() ) {
-                    return new CommandResultImpl( Messages.getString( Messages.PlayCommand.fileExecuted, fileNameArg ) );
+            try {
+                // turn auto-commit off for batch
+                if ( saveAutoCommit ) {
+                    wsStatus.setProperty( WorkspaceStatus.AUTO_COMMIT, Boolean.FALSE.toString() );
                 }
-                return result;
-            } catch (Exception e) {
+
+                { // play file
+                    String[] args = new String[] { "-f", fileNameArg }; //$NON-NLS-1$
+
+                    ShellCommandReader reader = ShellCommandReaderFactory.createCommandReader( args, wsStatus );
+                    reader.open();
+
+                    while ( true ) {
+                        final ShellCommand command = reader.read();
+
+                        if ( ( command == null ) || ( command instanceof ExitCommand ) ) {
+                            break;
+                        }
+
+                        command.setWriter( getWriter() );
+                        final CommandResult result = command.execute();
+
+                        if ( !result.isOk() ) {
+                            return result;
+                        }
+
+                        // check to see if auto-commit command was used in batch
+                        if ( command instanceof SetGlobalPropertyCommand ) {
+                            if ( WorkspaceStatus.AUTO_COMMIT.equals( command.getArguments().get( 0 ) ) ) {
+                                final boolean newValue = Boolean.parseBoolean( command.getArguments().get( 1 ) );
+
+                                if ( saveAutoCommit != newValue ) {
+                                    saveAutoCommit = newValue;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                return new CommandResultImpl( Messages.getString( Messages.PlayCommand.fileExecuted, fileNameArg ) );
+            } catch ( Exception e ) {
                 return new CommandResultImpl( false, Messages.getString( Messages.PlayCommand.Failure, fileNameArg ), e );
+            } finally {
+                // if AUTO_COMMIT if different (script could've changed value also)
+                if ( getWorkspaceStatus().isAutoCommit() != saveAutoCommit ) {
+                    getWorkspaceStatus().setProperty( WorkspaceStatus.AUTO_COMMIT,
+                                                      Boolean.toString( getWorkspaceStatus().isAutoCommit() ) );
+                }
             }
         } catch ( final Exception e ) {
             return new CommandResultImpl( e );
         }
-	}
+    }
 
     /**
      * {@inheritDoc}
@@ -80,34 +124,5 @@ public class PlayCommand  extends BuiltInShellCommand {
     protected int getMaxArgCount() {
         return 1;
     }
-
-	private CommandResult playFile(String commandFile ) throws Exception {
-		WorkspaceStatus wsStatus = getWorkspaceStatus();
-		String[] args = new String[]{"-f", commandFile}; //$NON-NLS-1$
-
-		ShellCommandReader reader = ShellCommandReaderFactory.createCommandReader(args, wsStatus);
-        reader.open();
-
-        return runCommands(reader);
-	}
-
-	private CommandResult runCommands(ShellCommandReader reader) throws Exception {
-        while ( true ) {
-			final ShellCommand command = reader.read();
-
-            if ( ( command == null ) || ( command instanceof ExitCommand ) ) {
-                break;
-            }
-
-            command.setWriter( getWriter() );
-            final CommandResult result = command.execute();
-
-            if ( !result.isOk() ) {
-                return result;
-            }
-		}
-
-        return CommandResult.SUCCESS;
-	}
 
 }
