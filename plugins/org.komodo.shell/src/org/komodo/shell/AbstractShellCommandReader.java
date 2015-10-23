@@ -23,17 +23,17 @@ package org.komodo.shell;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintStream;
 import java.io.Writer;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.Arguments;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.ShellCommand;
+import org.komodo.shell.api.ShellCommandFactory;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.shell.commands.NoOpCommand;
+import org.komodo.shell.util.KomodoObjectUtils;
+import org.komodo.spi.repository.KomodoObject;
 
 /**
  * Abstract class for all shell command readers.
@@ -47,8 +47,6 @@ public abstract class AbstractShellCommandReader implements ShellCommandReader {
 
 	private final WorkspaceStatus wsStatus;
 	private final ShellCommandFactory factory;
-	private final InputStream inStream;
-	private final PrintStream outStream;
     private Map<String, String> properties;
 
     /**
@@ -57,11 +55,9 @@ public abstract class AbstractShellCommandReader implements ShellCommandReader {
      * @param factory the factory
      * @param wsStatus the workspace status
      */
-    public AbstractShellCommandReader(ShellCommandFactory factory, WorkspaceStatus wsStatus) {
-    	this.factory = factory;
-    	this.wsStatus = wsStatus;
-        this.inStream = wsStatus.getInputStream();
-        this.outStream = wsStatus.getOutputStream();
+    public AbstractShellCommandReader( final ShellCommandFactory factory,
+                                       final WorkspaceStatus wsStatus) {
+        this( factory, wsStatus, null );
     }
 
     /**
@@ -76,8 +72,6 @@ public abstract class AbstractShellCommandReader implements ShellCommandReader {
         this.factory = factory;
         this.wsStatus = wsStatus;
         this.properties = properties;
-        this.inStream = wsStatus.getInputStream();
-        this.outStream = wsStatus.getOutputStream();
     }
 
 	/**
@@ -113,7 +107,7 @@ public abstract class AbstractShellCommandReader implements ShellCommandReader {
 		// Create the command.
 		ShellCommand command = factory.getCommand(commandName);
 		command.setArguments(arguments);
-		command.setOutput(getCommandOutput());
+		command.setWriter(getOutputWriter());
 		return command;
 	}
 
@@ -139,16 +133,6 @@ public abstract class AbstractShellCommandReader implements ShellCommandReader {
 
         return filtered;
     }
-
-	/**
-     * Gets the output stream that should be used by commands when they need to
-     * print a message to the console.
-     *
-     * @return the command output
-     */
-	protected Writer getCommandOutput() {
-		return new OutputStreamWriter(outStream);
-	}
 
 	/**
      * Reads a single line from the input source (e.g. user input) and returns
@@ -193,15 +177,18 @@ public abstract class AbstractShellCommandReader implements ShellCommandReader {
 	 * @return input stream for receiving commands inputted into the console
 	 */
 	public InputStream getInputStream() {
-	    return inStream;
+	    return this.wsStatus.getInputStream();
 	}
 
-	/**
-	 * @return output stream for printing messages to the console
-	 */
-	public PrintStream getOutputStream() {
-	    return outStream;
-	}
+    /**
+     * Gets the output stream that should be used by commands when they need to
+     * print a message to the console.
+     *
+     * @return the command output
+     */
+    protected Writer getOutputWriter() {
+        return this.wsStatus.getOutputWriter();
+    }
 
 	/**
      * Checks if is batch.
@@ -216,28 +203,83 @@ public abstract class AbstractShellCommandReader implements ShellCommandReader {
 
     protected String getPrompt() throws Exception {
         // see if full path should be displayed
-        String path = null;
-
-        try {
-            if ( getWorkspaceStatus().isShowingFullPathInPrompt() ) {
-                path = getWorkspaceStatus().getCurrentContext().getFullName();
-            } else {
-                path = getWorkspaceStatus().getCurrentContext().getName();
-            }
-        } catch ( final Exception e ) {
-            // problem getting context name
-            path = Messages.getString( SHELL.PATH_NOT_FOUND,
-                                       getWorkspaceStatus().getCurrentContext().getKomodoObj().getAbsolutePath() );
-            return Messages.getString( Messages.SHELL.PROMPT, path );
-        }
-
-        assert ( path != null );
+        final KomodoObject kobject = this.wsStatus.getCurrentContext();
+        final String path = KomodoObjectUtils.getDisplayName( this.wsStatus, kobject );
 
         // see if type should be displayed
-        if ( getWorkspaceStatus().isShowingTypeInPrompt() ) {
-            return Messages.getString( Messages.SHELL.PROMPT_WITH_TYPE, path, getWorkspaceStatus().getCurrentContext().getType() );
+        if ( this.wsStatus.isShowingTypeInPrompt() && DefaultLabelProvider.shouldShowType( kobject ) ) {
+            return Messages.getString( Messages.SHELL.PROMPT_WITH_TYPE, path, this.wsStatus.getTypeDisplay( kobject ) );
         }
 
         return Messages.getString( Messages.SHELL.PROMPT, path );
     }
+
+    class NoOpCommand extends BuiltInShellCommand {
+
+        /**
+         * @param wsStatus
+         *        the workspace status (cannot be <code>null</code>)
+         */
+        public NoOpCommand( final WorkspaceStatus wsStatus ) {
+            super( wsStatus, "no-op" ); //$NON-NLS-1$
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.shell.BuiltInShellCommand#doExecute()
+         */
+        @Override
+        protected CommandResult doExecute() {
+            return CommandResult.SUCCESS;
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+         */
+        @Override
+        protected int getMaxArgCount() {
+            return Integer.MAX_VALUE; // set high as we don't want this to fail max num arg check
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.shell.BuiltInShellCommand#isOverridable()
+         */
+        @Override
+        public boolean isOverridable() {
+            return false;
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
+         */
+        @Override
+        public boolean isValidForCurrentContext() {
+            return true;
+        }
+
+        /**
+         * @see org.komodo.shell.api.ShellCommand#printHelp(int indent)
+         */
+        @Override
+        public void printHelp( final int indent ) {
+            // Nothing to do
+        }
+
+        /**
+         * @see org.komodo.shell.api.ShellCommand#printUsage(int indent)
+         */
+        @Override
+        public void printUsage( final int indent ) {
+            // Nothing to do
+        }
+
+    }
+
 }

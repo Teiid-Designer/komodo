@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<vdb name="Books_Props_Only" version="1">
+    <description>Sample vdb that demonstrates various vdb manifest properties only</description>
+    <property name="preview" value="false"/>
+    <property name="query-timeout" value="256000"/>
+    <property name="allowed-languages" value="java, pascal"/>
+    <property name="security-domain" value="custom-security"/>
+    <property name="gss-pattern" value="%abc&amp;a-b"/>
+    <property name="password-pattern" value="$xyz1-9"/>
+    <property name="authentication-type" value="USERPASSWORD"/>
+    <property name="validationDateTime" value="Wed Apr 22 08:36:34 CDT 2015"/>
+    <property name="validationVersion" value="8.7.1"/>
+</vdb>

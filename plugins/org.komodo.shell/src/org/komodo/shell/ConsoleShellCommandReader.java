@@ -18,6 +18,7 @@ package org.komodo.shell;
 import java.io.Console;
 import java.io.IOException;
 import java.util.Map;
+import org.komodo.shell.api.ShellCommandFactory;
 import org.komodo.shell.api.WorkspaceStatus;
 
 /**

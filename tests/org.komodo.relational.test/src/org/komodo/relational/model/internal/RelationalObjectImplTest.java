@@ -41,7 +41,7 @@ public final class RelationalObjectImplTest extends RelationalModelTest {
     @Before
     public void init() throws Exception {
         final KomodoObject model = createModel();
-        this.robject = new RelationalTestObject( this.uow, model.getRepository(), model.getAbsolutePath() );
+        this.robject = new RelationalTestObject( getTransaction(), model.getRepository(), model.getAbsolutePath() );
         commit();
     }
 
@@ -49,7 +49,7 @@ public final class RelationalObjectImplTest extends RelationalModelTest {
     public void shouldFilterJcrNamespace() throws Exception {
         this.robject.setFilters( new RelationalObject.Filter[] { RelationalObject.JCR_FILTER } );
 
-        for ( final PropertyDescriptor descriptor : this.robject.getPropertyDescriptors( this.uow ) ) {
+        for ( final PropertyDescriptor descriptor : this.robject.getPropertyDescriptors( getTransaction() ) ) {
             if ( descriptor.getName().startsWith( JcrLexicon.Namespace.PREFIX ) ) {
                 fail();
             }
@@ -58,10 +58,10 @@ public final class RelationalObjectImplTest extends RelationalModelTest {
 
     @Test
     public void shouldFilterMixNamespace() throws Exception {
-        this.robject.addDescriptor( this.uow, JcrMixLexicon.CREATED.getString() );
+        this.robject.addDescriptor( getTransaction(), JcrMixLexicon.CREATED.getString() );
         this.robject.setFilters( new RelationalObject.Filter[] { RelationalObject.MIX_FILTER } );
 
-        for ( final Descriptor descriptor : this.robject.getDescriptors( this.uow ) ) {
+        for ( final Descriptor descriptor : this.robject.getDescriptors( getTransaction() ) ) {
             if ( descriptor.getName().startsWith( JcrMixLexicon.Namespace.PREFIX ) ) {
                 fail();
             }
@@ -72,7 +72,7 @@ public final class RelationalObjectImplTest extends RelationalModelTest {
     public void shouldFilterModeNamespace() throws Exception {
         this.robject.setFilters( new RelationalObject.Filter[] { RelationalObject.MODE_FILTER } );
 
-        for ( final PropertyDescriptor descriptor : this.robject.getPropertyDescriptors( this.uow ) ) {
+        for ( final PropertyDescriptor descriptor : this.robject.getPropertyDescriptors( getTransaction() ) ) {
             if ( descriptor.getName().startsWith( ModeShapeLexicon.Namespace.PREFIX ) ) {
                 fail();
             }
@@ -83,7 +83,7 @@ public final class RelationalObjectImplTest extends RelationalModelTest {
     public void shouldFilterResidual() throws Exception {
         this.robject.setFilters( new RelationalObject.Filter[] { RelationalObject.RESIDUAL_FILTER } );
 
-        for ( final PropertyDescriptor descriptor : this.robject.getPropertyDescriptors( this.uow ) ) {
+        for ( final PropertyDescriptor descriptor : this.robject.getPropertyDescriptors( getTransaction() ) ) {
             if ( "*".equals( descriptor.getName() ) ) {
                 fail();
             }

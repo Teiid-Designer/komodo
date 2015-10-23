@@ -19,9 +19,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalObject.Filter;
+import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.RelationalProperty;
-import org.komodo.relational.internal.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.ForeignKey;
@@ -48,27 +48,27 @@ public final class ForeignKeyImplTest extends RelationalModelTest {
     public void init() throws Exception {
         final Vdb vdb = createVdb();
         final Model model = createModel();
-        this.parentTable = model.addTable( this.uow, "parentTable" );
+        this.parentTable = model.addTable( getTransaction(), "parentTable" );
 
-        final Model refModel = vdb.addModel( this.uow, "refModel" );
-        this.refTable = refModel.addTable( this.uow, "refTable" );
+        final Model refModel = vdb.addModel( getTransaction(), "refModel" );
+        this.refTable = refModel.addTable( getTransaction(), "refTable" );
 
-        this.foreignKey = this.parentTable.addForeignKey( this.uow, NAME, this.refTable );
+        this.foreignKey = this.parentTable.addForeignKey( getTransaction(), NAME, this.refTable );
         commit();
     }
 
     @Test
     public void shouldAddReferencesColumns() throws Exception {
-        final Column columnA = RelationalModelFactory.createColumn( this.uow, _repo, this.refTable, "columnRefA" );
-        this.foreignKey.addReferencesColumn( this.uow, columnA );
+        final Column columnA = RelationalModelFactory.createColumn( getTransaction(), _repo, this.refTable, "columnRefA" );
+        this.foreignKey.addReferencesColumn( getTransaction(), columnA );
 
-        final Column columnB = RelationalModelFactory.createColumn( this.uow, _repo, this.refTable, "columnRefB" );
-        this.foreignKey.addReferencesColumn( this.uow, columnB );
+        final Column columnB = RelationalModelFactory.createColumn( getTransaction(), _repo, this.refTable, "columnRefB" );
+        this.foreignKey.addReferencesColumn( getTransaction(), columnB );
 
         commit(); // must commit so that query used in getReferencesColumns will work
 
-        assertThat( this.foreignKey.getReferencesColumns( this.uow ).length, is( 2 ) );
-        assertThat( Arrays.asList( this.foreignKey.getReferencesColumns( this.uow ) ), hasItems( columnA, columnB ) );
+        assertThat( this.foreignKey.getReferencesColumns( getTransaction() ).length, is( 2 ) );
+        assertThat( Arrays.asList( this.foreignKey.getReferencesColumns( getTransaction() ) ), hasItems( columnA, columnB ) );
     }
 
     @Test
@@ -78,19 +78,19 @@ public final class ForeignKeyImplTest extends RelationalModelTest {
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingNullColumn() throws Exception {
-        this.foreignKey.addColumn( this.uow, null );
+        this.foreignKey.addColumn( getTransaction(), null );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailAddingNullReferencesColumn() throws Exception {
-        this.foreignKey.addReferencesColumn( this.uow, null );
+        this.foreignKey.addReferencesColumn( getTransaction(), null );
     }
 
     @Test
     public void shouldFailConstructionIfNotForeignKey() {
         if ( RelationalObjectImpl.VALIDATE_INITIAL_STATE ) {
             try {
-                new ForeignKeyImpl( this.uow, _repo, this.parentTable.getAbsolutePath() );
+                new ForeignKeyImpl( getTransaction(), _repo, this.parentTable.getAbsolutePath() );
                 fail();
             } catch ( final KException e ) {
                 // expected
@@ -101,51 +101,51 @@ public final class ForeignKeyImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveCorrectConstraintType() throws Exception {
         assertThat( this.foreignKey.getConstraintType(), is( TableConstraint.ConstraintType.FOREIGN_KEY ) );
-        assertThat( this.foreignKey.getRawProperty( this.uow, TeiidDdlLexicon.Constraint.TYPE ).getStringValue( this.uow ),
+        assertThat( this.foreignKey.getRawProperty( getTransaction(), TeiidDdlLexicon.Constraint.TYPE ).getStringValue( getTransaction() ),
                     is( TableConstraint.ConstraintType.FOREIGN_KEY.toValue() ) );
     }
 
     @Test
     public void shouldHaveCorrectDescriptor() throws Exception {
-        assertThat( this.foreignKey.hasDescriptor( this.uow, Constraint.FOREIGN_KEY_CONSTRAINT ), is( true ) );
+        assertThat( this.foreignKey.hasDescriptor( getTransaction(), Constraint.FOREIGN_KEY_CONSTRAINT ), is( true ) );
     }
 
     @Test
     public void shouldHaveCorrectTypeIdentifier() throws Exception {
-        assertThat(this.foreignKey.getTypeIdentifier( this.uow ), is(KomodoType.FOREIGN_KEY));
+        assertThat(this.foreignKey.getTypeIdentifier( getTransaction() ), is(KomodoType.FOREIGN_KEY));
     }
 
     @Test
     public void shouldHaveMoreRawProperties() throws Exception {
-        final String[] filteredProps = this.foreignKey.getPropertyNames( this.uow );
-        final String[] rawProps = this.foreignKey.getRawPropertyNames( this.uow );
+        final String[] filteredProps = this.foreignKey.getPropertyNames( getTransaction() );
+        final String[] rawProps = this.foreignKey.getRawPropertyNames( getTransaction() );
         assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
     }
 
     @Test
     public void shouldHaveParentTableAfterConstruction() throws Exception {
-        assertThat( this.foreignKey.getParent( this.uow ), is( instanceOf( Table.class ) ) );
-        assertThat( this.foreignKey.getTable( this.uow ), is( this.parentTable ) );
+        assertThat( this.foreignKey.getParent( getTransaction() ), is( instanceOf( Table.class ) ) );
+        assertThat( this.foreignKey.getTable( getTransaction() ), is( this.parentTable ) );
     }
 
     @Test
     public void shouldHaveReferencesTableAfterConstruction() throws Exception {
-        assertThat( this.foreignKey.getReferencesTable( this.uow ), is( this.refTable ) );
+        assertThat( this.foreignKey.getReferencesTable( getTransaction() ), is( this.refTable ) );
     }
 
     @Test( expected = UnsupportedOperationException.class )
     public void shouldNotAllowChildren() throws Exception {
-        this.foreignKey.addChild( this.uow, "blah", null );
+        this.foreignKey.addChild( getTransaction(), "blah", null );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldNotAllowNullTableReference() throws Exception {
-        this.foreignKey.setReferencesTable( this.uow, null );
+        this.foreignKey.setReferencesTable( getTransaction(), null );
     }
 
     @Test
     public void shouldNotContainFilteredProperties() throws Exception {
-        final String[] filteredProps = this.foreignKey.getPropertyNames( this.uow );
+        final String[] filteredProps = this.foreignKey.getPropertyNames( getTransaction() );
         final Filter[] filters = this.foreignKey.getFilters();
 
         for ( final String name : filteredProps ) {
@@ -157,33 +157,33 @@ public final class ForeignKeyImplTest extends RelationalModelTest {
 
     @Test
     public void shouldNotHaveColumnReferencesAfterConstruction() throws Exception {
-        assertThat( this.foreignKey.getReferencesColumns( this.uow ), is( notNullValue() ) );
-        assertThat( this.foreignKey.getReferencesColumns( this.uow ).length, is( 0 ) );
+        assertThat( this.foreignKey.getReferencesColumns( getTransaction() ), is( notNullValue() ) );
+        assertThat( this.foreignKey.getReferencesColumns( getTransaction() ).length, is( 0 ) );
     }
 
     @Test
     public void shouldNotHaveColumnsAfterConstruction() throws Exception {
-        assertThat( this.foreignKey.getColumns( this.uow ), is( notNullValue() ) );
-        assertThat( this.foreignKey.getColumns( this.uow ).length, is( 0 ) );
+        assertThat( this.foreignKey.getColumns( getTransaction() ), is( notNullValue() ) );
+        assertThat( this.foreignKey.getColumns( getTransaction() ).length, is( 0 ) );
     }
 
     @Test
     public void shouldRemoveReferencesColumn() throws Exception {
-        final Column columnA = RelationalModelFactory.createColumn( this.uow, _repo, this.refTable, "removeRefColumnA" );
-        this.foreignKey.addReferencesColumn( this.uow, columnA );
+        final Column columnA = RelationalModelFactory.createColumn( getTransaction(), _repo, this.refTable, "removeRefColumnA" );
+        this.foreignKey.addReferencesColumn( getTransaction(), columnA );
         commit(); // must commit so that query used in next method will work
 
-        this.foreignKey.removeReferencesColumn( this.uow, columnA );
-        assertThat( this.foreignKey.getReferencesColumns( this.uow ).length, is( 0 ) );
+        this.foreignKey.removeReferencesColumn( getTransaction(), columnA );
+        assertThat( this.foreignKey.getReferencesColumns( getTransaction() ).length, is( 0 ) );
     }
 
     @Test
     public void shouldSetTableReference() throws Exception {
-        final Table newTable = RelationalModelFactory.createTable( this.uow, _repo, mock( Model.class ), "newTable" );
-        this.foreignKey.setReferencesTable( this.uow, newTable );
+        final Table newTable = RelationalModelFactory.createTable( getTransaction(), _repo, mock( Model.class ), "newTable" );
+        this.foreignKey.setReferencesTable( getTransaction(), newTable );
         commit(); // must commit so that query used in next method will work
 
-        assertThat( this.foreignKey.getReferencesTable( this.uow ), is( newTable ) );
+        assertThat( this.foreignKey.getReferencesTable( getTransaction() ), is( newTable ) );
     }
 
     /*
@@ -200,20 +200,20 @@ public final class ForeignKeyImplTest extends RelationalModelTest {
         final RelationalProperties props = new RelationalProperties();
         props.add( new RelationalProperty( Constraint.FOREIGN_KEY_CONSTRAINT, keyRefTable ) );
 
-        final KomodoObject kobject = ForeignKeyImpl.RESOLVER.create( this.uow,
+        final KomodoObject kobject = ForeignKey.RESOLVER.create( getTransaction(),
                                                                      _repo,
                                                                      this.parentTable,
                                                                      name,
                                                                      props );
         assertThat( kobject, is( notNullValue() ) );
         assertThat( kobject, is( instanceOf( ForeignKey.class ) ) );
-        assertThat( kobject.getName( this.uow ), is( name ) );
+        assertThat( kobject.getName( getTransaction() ), is( name ) );
     }
 
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
-        final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        ForeignKeyImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", new RelationalProperties() );
+        final KomodoObject bogusParent = _repo.add( getTransaction(), null, "bogus", null );
+        ForeignKey.RESOLVER.create( getTransaction(), _repo, bogusParent, "blah", new RelationalProperties() );
     }
 
 }

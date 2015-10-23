@@ -1,7 +1,0 @@
-# Tests the UnsetPropertyCommand for a multi-valued property
-create vdb MyVdb
-cd MyVdb
-create vdbdatarole MyDataRole
-cd MyDataRole
-set property vdb:mappedRoleNames admin,tester,user
-unset vdb:mappedRoleNames

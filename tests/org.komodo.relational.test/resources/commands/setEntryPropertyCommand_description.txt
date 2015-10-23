@@ -1,0 +1,11 @@
+#go to workspace, create a vdb with an entry
+workspace
+create-vdb myVdb vdbPath
+#
+# Add Entry
+cd myVdb
+add-entry myEntry entryPath
+#
+# Set entry property
+cd myEntry
+set-property description myDescription

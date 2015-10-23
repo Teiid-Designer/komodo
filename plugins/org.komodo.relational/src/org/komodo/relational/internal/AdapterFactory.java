@@ -21,9 +21,9 @@
  */
 package org.komodo.relational.internal;
 
+import org.komodo.relational.TypeResolver;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
-import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.ArgCheck;
@@ -34,14 +34,9 @@ import org.komodo.utils.ArgCheck;
  */
 public class AdapterFactory {
 
-    private final Repository repository;
-
     /**
-     * @param repository the repository
      */
-    public AdapterFactory(Repository repository) {
-        ArgCheck.isNotNull(repository);
-        this.repository = repository;
+    public AdapterFactory() {
     }
 
     /**

@@ -1,0 +1,17 @@
+#go to workspace, create a VDB with a Model
+workspace
+create-vdb myVdb vdbPath
+cd myVdb
+add-model myModel
+#
+#add a Table to a Model
+cd myModel
+add-table myTable
+#
+#add a Column to the Table
+cd myTable
+add-column myColumn
+#
+# Set a property
+cd myColumn
+set-property NAMEINSOURCE myNameInSource

@@ -23,16 +23,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import org.komodo.shell.Messages.SHELL;
+import org.komodo.shell.api.InvalidCommandArgumentException;
+import org.komodo.shell.api.ShellCommandFactory;
 import org.komodo.shell.api.WorkspaceStatus;
 
 /**
  * Class that acts as factory method class. It includes the method that depends
  * the kind of arguments passed generates the specific implementation of the
  * ShellCommandReader
- * 
+ *
  * This class adapted from https://github.com/Governance/s-ramp/blob/master/s-ramp-shell
  * - altered to use different Messages class
- * 
+ *
  * @author David Virgil Naranjo
  */
 public class ShellCommandReaderFactory {
@@ -42,13 +44,12 @@ public class ShellCommandReaderFactory {
      * line arguments and the current runtime environment.
      *
      * @param args the args
-     * @param factory the factory
      * @param wsStatus the workspace status
      * @return the shell command reader
      * @throws Exception Signals exception has occurred.
      */
-    public static ShellCommandReader createCommandReader(String[] args, ShellCommandFactory factory,
-            WorkspaceStatus wsStatus) throws Exception {
+    public static ShellCommandReader createCommandReader(String[] args, WorkspaceStatus wsStatus) throws Exception {
+        ShellCommandFactory factory = wsStatus.getCommandFactory();
         ShellCommandReader commandReader = null;
         if (args.length > 0) {
             Map<String, String> properties = new HashMap<String, String>();
@@ -106,7 +107,7 @@ public class ShellCommandReaderFactory {
                 propertyFileArg = false;
                 try {
                     properties.putAll(getPropertiesFromFile(argument, index));
-                } catch (ShellArgumentException sae) {
+                } catch (InvalidCommandArgumentException sae) {
                     throw new Exception("Error Argument: " + argument + " index: " + i + " " //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
                             + sae.getMessage());
                 }
@@ -123,10 +124,10 @@ public class ShellCommandReaderFactory {
      * @param filePath the file path
      * @param index the index
      * @return the properties from file
-     * @throws ShellArgumentException the shell argument exception
+     * @throws InvalidCommandArgumentException the shell argument exception
      */
     private static Map<String, String> getPropertiesFromFile(String filePath, int index)
-            throws ShellArgumentException {
+            throws InvalidCommandArgumentException {
         Map<String, String> properties = new HashMap<String, String>();
         File f = new File(filePath);
 
@@ -135,10 +136,10 @@ public class ShellCommandReaderFactory {
             try {
             props.load(new FileInputStream(f));
         } catch (FileNotFoundException e) {
-            throw new ShellArgumentException(index,
+            throw new InvalidCommandArgumentException(index,
                     Messages.getString(SHELL.InvalidArgMsg_propertiesFile_not_exist));
         } catch (IOException e) {
-                throw new ShellArgumentException(index,
+                throw new InvalidCommandArgumentException(index,
                         Messages.getString(SHELL.InvalidArgMsg_propertiesFile_not_exist) + ": " //$NON-NLS-1$
                             + e.getMessage());
             }

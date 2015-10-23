@@ -1,0 +1,17 @@
+#go to workspace, create a VDB with a DataRole and Permission
+workspace
+create-vdb myVdb vdbPath
+cd myVdb
+add-data-role myDataRole
+#
+#add a Permission to the DataRole
+cd myDataRole
+add-permission myPermission
+#
+#add a Condition to the Permission
+cd myPermission
+add-condition myCondition
+#
+#set a property on the Condition
+cd myCondition
+set-property constraint true

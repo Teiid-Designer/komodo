@@ -35,7 +35,7 @@ public final class PushdownFunctionImplTest extends RelationalModelTest {
     @Before
     public void init() throws Exception {
         final Model model = createModel();
-        this.function = model.addPushdownFunction( this.uow, "function" );
+        this.function = model.addPushdownFunction( getTransaction(), "function" );
         commit();
     }
 
@@ -43,7 +43,7 @@ public final class PushdownFunctionImplTest extends RelationalModelTest {
     public void shouldFailConstructionIfNotPushdownFunction() {
         if ( RelationalObjectImpl.VALIDATE_INITIAL_STATE ) {
             try {
-                new PushdownFunctionImpl( this.uow, _repo, _repo.komodoLibrary( this.uow ).getAbsolutePath() );
+                new PushdownFunctionImpl( getTransaction(), _repo, _repo.komodoLibrary( getTransaction() ).getAbsolutePath() );
                 fail();
             } catch ( final KException e ) {
                 // expected
@@ -53,43 +53,43 @@ public final class PushdownFunctionImplTest extends RelationalModelTest {
 
     @Test( expected = KException.class )
     public void shouldFailRemovingResultSetIfOneDoesNotExist() throws Exception {
-        this.function.removeResultSet( this.uow );
+        this.function.removeResultSet( getTransaction() );
     }
 
     @Test
     public void shouldGetOnlyResultSetWhenGettingChildren() throws Exception {
-        final TabularResultSet resultSet = this.function.setResultSet( this.uow, TabularResultSet.class );
-        assertThat( this.function.getChildren( this.uow ).length, is( 1 ) );
-        assertThat( this.function.getChildren( this.uow )[0], is( ( KomodoObject )resultSet ) );
+        final TabularResultSet resultSet = this.function.setResultSet( getTransaction(), TabularResultSet.class );
+        assertThat( this.function.getChildren( getTransaction() ).length, is( 1 ) );
+        assertThat( this.function.getChildren( getTransaction() )[0], is( ( KomodoObject )resultSet ) );
     }
 
     @Test
     public void shouldGetChildren() throws Exception {
-        this.function.addParameter( this.uow, "param" );
-        this.function.setResultSet( this.uow, DataTypeResultSet.class );
-        assertThat( this.function.getChildren( this.uow ).length, is( 2 ) );
+        this.function.addParameter( getTransaction(), "param" );
+        this.function.setResultSet( getTransaction(), DataTypeResultSet.class );
+        assertThat( this.function.getChildren( getTransaction() ).length, is( 2 ) );
     }
 
     @Test
     public void shouldHaveCorrectSchemaElementType() throws Exception {
-        assertThat( this.function.getSchemaElementType( this.uow ), is( SchemaElementType.FOREIGN ) );
+        assertThat( this.function.getSchemaElementType( getTransaction() ), is( SchemaElementType.FOREIGN ) );
     }
 
     @Test
     public void shouldHaveCorrectTypeIdentifier() throws Exception {
-        assertThat(this.function.getTypeIdentifier( this.uow ), is(KomodoType.PUSHDOWN_FUNCTION));
+        assertThat(this.function.getTypeIdentifier( getTransaction() ), is(KomodoType.PUSHDOWN_FUNCTION));
     }
 
     @Test
     public void shouldHaveMoreRawProperties() throws Exception {
-        final String[] filteredProps = this.function.getPropertyNames( this.uow );
-        final String[] rawProps = this.function.getRawPropertyNames( this.uow );
+        final String[] filteredProps = this.function.getPropertyNames( getTransaction() );
+        final String[] rawProps = this.function.getRawPropertyNames( getTransaction() );
         assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
     }
 
     @Test
     public void shouldNotContainFilteredProperties() throws Exception {
-        final String[] filteredProps = this.function.getPropertyNames( this.uow );
+        final String[] filteredProps = this.function.getPropertyNames( getTransaction() );
         final Filter[] filters = this.function.getFilters();
 
         for ( final String name : filteredProps ) {
@@ -101,33 +101,33 @@ public final class PushdownFunctionImplTest extends RelationalModelTest {
 
     @Test
     public void shouldNotCountStatementOptionsAsChildren() throws Exception {
-        this.function.setAggregate( this.uow, true );
-        this.function.setStatementOption( this.uow, "sledge", "hammer" );
-        assertThat( this.function.getChildren( this.uow ).length, is( 0 ) );
+        this.function.setAggregate( getTransaction(), true );
+        this.function.setStatementOption( getTransaction(), "sledge", "hammer" );
+        assertThat( this.function.getChildren( getTransaction() ).length, is( 0 ) );
     }
 
     @Test
     public void shouldNotHaveResultSetAfterConstruction() throws Exception {
-        assertThat( this.function.getResultSet( this.uow ), is( nullValue() ) );
+        assertThat( this.function.getResultSet( getTransaction() ), is( nullValue() ) );
     }
 
     @Test
     public void shouldRemoveResultSet() throws Exception {
-        this.function.setResultSet( this.uow, TabularResultSet.class );
-        this.function.removeResultSet( this.uow );
-        assertThat( this.function.getResultSet( this.uow ), is( nullValue() ) );
+        this.function.setResultSet( getTransaction(), TabularResultSet.class );
+        this.function.removeResultSet( getTransaction() );
+        assertThat( this.function.getResultSet( getTransaction() ), is( nullValue() ) );
     }
 
     @Test
     public void shouldSetDataTypeResultSet() throws Exception {
-        assertThat( this.function.setResultSet( this.uow, DataTypeResultSet.class ), is( notNullValue() ) );
-        assertThat( this.function.getResultSet( this.uow ), is( instanceOf( DataTypeResultSet.class ) ) );
+        assertThat( this.function.setResultSet( getTransaction(), DataTypeResultSet.class ), is( notNullValue() ) );
+        assertThat( this.function.getResultSet( getTransaction() ), is( instanceOf( DataTypeResultSet.class ) ) );
     }
 
     @Test
     public void shouldSetTabularResultSet() throws Exception {
-        assertThat( this.function.setResultSet( this.uow, TabularResultSet.class ), is( notNullValue() ) );
-        assertThat( this.function.getResultSet( this.uow ), is( instanceOf( TabularResultSet.class ) ) );
+        assertThat( this.function.setResultSet( getTransaction(), TabularResultSet.class ), is( notNullValue() ) );
+        assertThat( this.function.getResultSet( getTransaction() ), is( instanceOf( TabularResultSet.class ) ) );
     }
 
     /*
@@ -139,20 +139,20 @@ public final class PushdownFunctionImplTest extends RelationalModelTest {
     @Test
     public void shouldCreateUsingResolver() throws Exception {
         final String name = "blah";
-        final KomodoObject kobject = PushdownFunctionImpl.RESOLVER.create( this.uow,
+        final KomodoObject kobject = PushdownFunction.RESOLVER.create( getTransaction(),
                                                                            _repo,
-                                                                           this.function.getParent( this.uow ),
+                                                                           this.function.getParent( getTransaction() ),
                                                                            name,
                                                                            null );
         assertThat( kobject, is( notNullValue() ) );
         assertThat( kobject, is( instanceOf( PushdownFunction.class ) ) );
-        assertThat( kobject.getName( this.uow ), is( name ) );
+        assertThat( kobject.getName( getTransaction() ), is( name ) );
     }
 
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
-        final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        PushdownFunctionImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
+        final KomodoObject bogusParent = _repo.add( getTransaction(), null, "bogus", null );
+        PushdownFunction.RESOLVER.create( getTransaction(), _repo, bogusParent, "blah", null );
     }
 
 }

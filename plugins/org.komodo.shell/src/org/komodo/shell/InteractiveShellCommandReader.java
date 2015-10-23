@@ -22,8 +22,8 @@ import org.jboss.aesh.console.Console;
 import org.jboss.aesh.console.ConsoleOutput;
 import org.jboss.aesh.console.Prompt;
 import org.jboss.aesh.console.settings.Settings;
+import org.komodo.shell.api.ShellCommandFactory;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.shell.api.WorkspaceStatusEventHandler;
 
 /**
  * An implementation of the {@link ShellCommandReader} that uses JLine to provide
@@ -31,14 +31,14 @@ import org.komodo.shell.api.WorkspaceStatusEventHandler;
  * and ansi output.
  *
  * This class adapted from https://github.com/Governance/s-ramp/blob/master/s-ramp-shell
- * - altered to use WorkspaceStatus and WorkspaceStatusEventHandler
+ * - altered to use WorkspaceStatus
  *
  * @author eric.wittmann@redhat.com
  */
-public class InteractiveShellCommandReader extends AbstractShellCommandReader implements WorkspaceStatusEventHandler {
+public class InteractiveShellCommandReader extends AbstractShellCommandReader {
 
 	private static final String ANSI_BOLD_RED = "\033[1m\033[31m"; //$NON-NLS-1$
-	private static final String ANSI_BOLD_GREEN = "\033[1m\033[32m"; //$NON-NLS-1$
+	//private static final String ANSI_BOLD_GREEN = "\033[1m\033[32m"; //$NON-NLS-1$
 	private static final String ANSI_RESET = "\033[0m "; //$NON-NLS-1$
 
     private Console consoleReader;
@@ -50,7 +50,6 @@ public class InteractiveShellCommandReader extends AbstractShellCommandReader im
 	 */
 	public InteractiveShellCommandReader(ShellCommandFactory factory, WorkspaceStatus wsStatus) {
 		super(factory, wsStatus);
-		wsStatus.addHandler(this);
 	}
 
 	/**
@@ -79,15 +78,15 @@ public class InteractiveShellCommandReader extends AbstractShellCommandReader im
 	/**
 	 * Creates the ANSI compatible prompt.
 	 */
-	private String connectedAnsiPrompt(String serverName) throws Exception {
-		return ANSI_BOLD_GREEN + getPrompt() + " " + serverName + " > " + ANSI_RESET; //$NON-NLS-1$ //$NON-NLS-2$
-	}
+//	private String connectedAnsiPrompt(String serverName) throws Exception {
+//		return ANSI_BOLD_GREEN + getPrompt() + " " + serverName + " > " + ANSI_RESET; //$NON-NLS-1$ //$NON-NLS-2$
+//	}
 
 	private Prompt doGetPrompt() throws Exception {
-	    if(getWorkspaceStatus().hasConnectedTeiid()) {
-	        String serverName = getWorkspaceStatus().getTeiid().getName(getWorkspaceStatus().getTransaction());
-	        return new Prompt(connectedAnsiPrompt(serverName));
-	    }
+//	    if(getWorkspaceStatus().hasConnectedTeiid()) {
+//	        String serverName = getWorkspaceStatus().getTeiid().getName(getWorkspaceStatus().getTransaction());
+//	        return new Prompt(connectedAnsiPrompt(serverName));
+//	    }
 	    return new Prompt(defaultAnsiPrompt());
 	}
 
@@ -105,10 +104,10 @@ public class InteractiveShellCommandReader extends AbstractShellCommandReader im
 	}
 
 	/**
-	 * @see org.komodo.common.shell.AbstractShellCommandReader#getCommandOutput()
+	 * @see org.komodo.common.shell.AbstractShellCommandReader#getOutputWriter()
 	 */
 	@Override
-	protected Writer getCommandOutput() {
+	protected Writer getOutputWriter() {
         return new OutputStreamWriter(Settings.getInstance().getStdOut());
 	}
 
@@ -118,14 +117,6 @@ public class InteractiveShellCommandReader extends AbstractShellCommandReader im
 	@Override
 	public void close() throws IOException {
         consoleReader.stop();
-	}
-
-	/**
-	 * @see org.komodo.shell.api.WorkspaceStatusEventHandler#workspaceContextChanged()
-	 */
-	@Override
-	public void workspaceContextChanged() throws Exception {
-	    // nothing to do
 	}
 
 	/**

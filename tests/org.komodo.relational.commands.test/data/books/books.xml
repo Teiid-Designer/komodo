@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<vdb name="BooksExample" version="1">
+    <description>Sample vdb that demonstrates various vdb manifest properties including data role with permissions</description>
+    <property name="preview" value="false"/>
+    <property name="query-timeout" value="256000"/>
+    <property name="allowed-languages" value="java, pascal"/>
+    <property name="security-domain" value="custom-security"/>
+    <property name="gss-pattern" value="%abc&amp;a-b"/>
+    <property name="password-pattern" value="$xyz1-9"/>
+    <property name="authentication-type" value="USERPASSWORD"/>
+    <property name="validationDateTime" value="Wed Apr 22 08:36:34 CDT 2015"/>
+    <property name="validationVersion" value="8.7.1"/>
+    <model name="BooksView" type="VIRTUAL" visible="true">
+        <metadata type="DDL"><![CDATA[
+CREATE VIEW bookInfo (
+	ISBN string(255),
+	TITLE string(255),
+	SUBTITLE string(255),
+	PUBLISHER long,
+	PUBLISH_YEAR long,
+	EDITION long,
+	TYPE string(255),
+	NAME string(255),
+	LOCATION string(255)
+	) AS
+	SELECT
+		BooksSource.BOOKS.ISBN, BooksSource.BOOKS.TITLE, BooksSource.BOOKS.SUBTITLE, BooksSource.BOOKS.PUBLISHER, BooksSource.BOOKS.PUBLISH_YEAR, BooksSource.BOOKS.EDITION, BooksSource.BOOKS.TYPE, BooksSource.PUBLISHERS.NAME, BooksSource.PUBLISHERS.LOCATION
+	FROM
+		BooksSource.BOOKS, BooksSource.PUBLISHERS
+	WHERE
+		PUBLISHER = PUBLISHER_ID;
+        ]]> </metadata>
+    </model>
+    <model name="BooksSource" type="PHYSICAL" visible="true">
+        <source name="BooksSource" connection-jndi-name="BooksSource" translator-name="db2"/>
+    </model>
+    <translator name="books_db2" type="db2" description="">
+        <property name="requiresCriteria" value="true"/>
+        <property name="supportsCommonTableExpressions" value="false"/>
+        <property name="MaxDependentInPredicates" value="25"/>
+    </translator>
+    <data-role name="publishers-only" any-authenticated="false" allow-create-temporary-tables="false" grant-all="true">
+        <description>publishers can both read and update book info</description>
+        <permission>
+            <resource-name>BooksView.bookInfo</resource-name>
+            <condition constraint="true">publisher_id=publisher()</condition>
+        </permission>
+        <permission>
+            <resource-name>BooksView.bookInfo.PUBLISHER</resource-name>
+            <mask order="0">CASE WHEN publisher_id=publisher() THEN publisher_id END</mask>
+        </permission>
+        <permission>
+            <resource-name>BooksView</resource-name>
+            <allow-create>false</allow-create>
+            <allow-read>true</allow-read>
+            <allow-update>true</allow-update>
+            <allow-delete>false</allow-delete>
+            <allow-execute>false</allow-execute>
+            <allow-alter>false</allow-alter>
+        </permission>
+        <permission>
+            <resource-name>java</resource-name>
+            <allow-language>true</allow-language>
+        </permission>
+        <permission>
+            <resource-name>sysadmin</resource-name>
+            <allow-create>false</allow-create>
+            <allow-read>true</allow-read>
+            <allow-update>false</allow-update>
+            <allow-delete>false</allow-delete>
+            <allow-execute>false</allow-execute>
+            <allow-alter>false</allow-alter>
+        </permission>
+        <permission>
+            <resource-name>BooksSource</resource-name>
+            <allow-create>false</allow-create>
+            <allow-read>true</allow-read>
+            <allow-update>false</allow-update>
+            <allow-delete>false</allow-delete>
+            <allow-execute>false</allow-execute>
+            <allow-alter>false</allow-alter>
+        </permission>
+        <permission>
+            <resource-name>BooksSource.AUTHORS</resource-name>
+            <allow-update>false</allow-update>
+        </permission>
+        <permission>
+            <resource-name>BooksSource.BOOK_AUTHORS</resource-name>
+            <allow-update>false</allow-update>
+        </permission>
+        <mapped-role-name>full-time-publishers</mapped-role-name>
+        <mapped-role-name>part-time-publishers</mapped-role-name>
+    </data-role>
+</vdb>

@@ -7,6 +7,7 @@
  */
 package org.komodo.repository;
 
+import static org.komodo.repository.Messages.Komodo.ERROR_REPO_HAS_CHANGES;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -18,6 +19,7 @@ import java.util.Set;
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.PropertyIterator;
+import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.Value;
 import javax.jcr.ValueFactory;
@@ -309,6 +311,24 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
         /**
          * {@inheritDoc}
          *
+         * @see org.komodo.spi.repository.Repository.UnitOfWork#hasChanges()
+         */
+        @Override
+        public boolean hasChanges() throws KException {
+            if ( this.state == State.NOT_STARTED ) {
+                try {
+                    return ( ( this.session != null ) && this.session.isLive() && this.session.hasPendingChanges() );
+                } catch ( final RepositoryException e ) {
+                    throw new KException( Messages.getString( ERROR_REPO_HAS_CHANGES, this.name ), e );
+                }
+            }
+
+            return false;
+        }
+
+        /**
+         * {@inheritDoc}
+         *
          * @see org.komodo.spi.repository.Repository.UnitOfWork#isRollbackOnly()
          */
         @Override
@@ -378,27 +398,27 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
     /**
      * The root path of the repository.
      */
-    private static String REPO_ROOT = (FORWARD_SLASH);
+    public static final String REPO_ROOT = FORWARD_SLASH;
 
     /**
      * The root path of the Komodo repository.
      */
-    public static String KOMODO_ROOT = (REPO_ROOT + Komodo.NODE_TYPE);
+    public static final String KOMODO_ROOT = (REPO_ROOT + Komodo.NODE_TYPE);
 
     /**
-     * The root path of the Komodo repository library.
+     * The root path of the Komodo repository environment area.
      */
-    public static String ENV_ROOT = ( KOMODO_ROOT + FORWARD_SLASH + Komodo.ENVIRONMENT );
+    public static final String ENV_ROOT = ( KOMODO_ROOT + FORWARD_SLASH + Komodo.ENVIRONMENT );
 
     /**
-     * The root path of the Komodo repository library.
+     * The root path of the Komodo repository library area.
      */
-    public static String LIBRARY_ROOT = (KOMODO_ROOT + FORWARD_SLASH + Komodo.LIBRARY);
+    public static final String LIBRARY_ROOT = (KOMODO_ROOT + FORWARD_SLASH + Komodo.LIBRARY);
 
     /**
-     * The root path of the Komodo repository workspace.
+     * The root path of the Komodo repository workspace area.
      */
-    public static String WORKSPACE_ROOT = (KOMODO_ROOT + FORWARD_SLASH + Komodo.WORKSPACE);
+    public static final String WORKSPACE_ROOT = (KOMODO_ROOT + FORWARD_SLASH + Komodo.WORKSPACE);
 
     protected static final KLog LOGGER = KLog.getLogger();
 

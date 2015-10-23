@@ -1,0 +1,13 @@
+#go to workspace, create a VDB with a DataRole
+workspace
+create-vdb myVdb vdbPath
+cd myVdb
+add-data-role myDataRole
+#
+#add a Permission to the DataRole
+cd myDataRole
+add-permission myPermission
+#
+# Set a property
+cd myPermission
+set-property allowAlter true

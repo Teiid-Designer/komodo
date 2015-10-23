@@ -7,11 +7,22 @@
  */
 package org.komodo.relational.vdb;
 
+import org.komodo.relational.Messages;
+import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalObject;
+import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.TypeResolver;
+import org.komodo.relational.internal.AdapterFactory;
+import org.komodo.relational.model.Model;
+import org.komodo.relational.vdb.internal.ModelSourceImpl;
+import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
+import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 /**
  * Represents a VDB model source.
@@ -32,6 +43,82 @@ public interface ModelSource extends RelationalObject {
      * An empty array of model sources.
      */
     ModelSource[] NO_SOURCES = new ModelSource[0];
+
+    /**
+     * The resolver of a {@link ModelSource}.
+     */
+    public static final TypeResolver< ModelSource > RESOLVER = new TypeResolver< ModelSource >() {
+    
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.TypeResolver#create(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject, java.lang.String,
+         *      org.komodo.relational.RelationalProperties)
+         */
+        @Override
+        public ModelSource create( final UnitOfWork transaction,
+                                   final Repository repository,
+                                   final KomodoObject parent,
+                                   final String id,
+                                   final RelationalProperties properties ) throws KException {
+            final AdapterFactory adapter = new AdapterFactory( );
+            final Model parentModel = adapter.adapt( transaction, parent, Model.class );
+    
+            if ( parentModel == null ) {
+                throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
+                                                          parent.getAbsolutePath(),
+                                                          ModelSource.class.getSimpleName() ) );
+            }
+    
+            return parentModel.addSource( transaction, id );
+        }
+    
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.TypeResolver#identifier()
+         */
+        @Override
+        public KomodoType identifier() {
+            return IDENTIFIER;
+        }
+    
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.TypeResolver#owningClass()
+         */
+        @Override
+        public Class< ModelSourceImpl > owningClass() {
+            return ModelSourceImpl.class;
+        }
+    
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.TypeResolver#resolvable(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.KomodoObject)
+         */
+        @Override
+        public boolean resolvable( final UnitOfWork transaction,
+                                   final KomodoObject kobject ) throws KException {
+            return ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, VdbLexicon.Source.SOURCE );
+        }
+    
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.TypeResolver#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.KomodoObject)
+         */
+        @Override
+        public ModelSource resolve( final UnitOfWork transaction,
+                                    final KomodoObject kobject ) throws KException {
+            return new ModelSourceImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
+        }
+    
+    };
 
     /**
      * @param transaction

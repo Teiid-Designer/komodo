@@ -29,4 +29,7 @@ public interface CompletionConstants {
     
     @SuppressWarnings("javadoc")
     public static final int MESSAGE_INDENT = 5;
+
+    @SuppressWarnings("javadoc")
+    public static final String OK = "OK"; //$NON-NLS-1$
 }

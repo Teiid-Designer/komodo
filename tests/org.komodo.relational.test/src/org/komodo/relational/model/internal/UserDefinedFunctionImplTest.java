@@ -38,7 +38,7 @@ public final class UserDefinedFunctionImplTest extends RelationalModelTest {
     @Before
     public void init() throws Exception {
         final Model model = createModel();
-        this.function = model.addUserDefinedFunction( this.uow, "function" );
+        this.function = model.addUserDefinedFunction( getTransaction(), "function" );
         commit();
     }
 
@@ -46,7 +46,7 @@ public final class UserDefinedFunctionImplTest extends RelationalModelTest {
     public void shouldFailConstructionIfNotUserDefinedFunction() {
         if ( RelationalObjectImpl.VALIDATE_INITIAL_STATE ) {
             try {
-                new UserDefinedFunctionImpl( this.uow, _repo, _repo.komodoLibrary( this.uow ).getAbsolutePath() );
+                new UserDefinedFunctionImpl( getTransaction(), _repo, _repo.komodoLibrary( getTransaction() ).getAbsolutePath() );
                 fail();
             } catch ( final KException e ) {
                 // expected
@@ -56,24 +56,24 @@ public final class UserDefinedFunctionImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveCorrectSchemaElementType() throws Exception {
-        assertThat( this.function.getSchemaElementType( this.uow ), is( SchemaElementType.VIRTUAL ) );
+        assertThat( this.function.getSchemaElementType( getTransaction() ), is( SchemaElementType.VIRTUAL ) );
     }
 
     @Test
     public void shouldHaveCorrectTypeIdentifier() throws Exception {
-        assertThat(this.function.getTypeIdentifier( this.uow ), is(KomodoType.USER_DEFINED_FUNCTION));
+        assertThat(this.function.getTypeIdentifier( getTransaction() ), is(KomodoType.USER_DEFINED_FUNCTION));
     }
 
     @Test
     public void shouldHaveMoreRawProperties() throws Exception {
-        final String[] filteredProps = this.function.getPropertyNames( this.uow );
-        final String[] rawProps = this.function.getRawPropertyNames( this.uow );
+        final String[] filteredProps = this.function.getPropertyNames( getTransaction() );
+        final String[] rawProps = this.function.getRawPropertyNames( getTransaction() );
         assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
     }
 
     @Test
     public void shouldNotContainFilteredProperties() throws Exception {
-        final String[] filteredProps = this.function.getPropertyNames( this.uow );
+        final String[] filteredProps = this.function.getPropertyNames( getTransaction() );
         final Filter[] filters = this.function.getFilters();
 
         for ( final String name : filteredProps ) {
@@ -89,33 +89,33 @@ public final class UserDefinedFunctionImplTest extends RelationalModelTest {
 
     @Test
     public void shouldAllowEmptyCategoryWhenRemoving() throws Exception {
-        this.function.setCategory( this.uow, "blah" );
-        this.function.setCategory( this.uow, StringConstants.EMPTY_STRING );
-        assertThat( this.function.getCategory( this.uow ), is( nullValue() ) );
+        this.function.setCategory( getTransaction(), "blah" );
+        this.function.setCategory( getTransaction(), StringConstants.EMPTY_STRING );
+        assertThat( this.function.getCategory( getTransaction() ), is( nullValue() ) );
     }
 
     @Test
     public void shouldAllowNullCategoryWhenRemoving() throws Exception {
-        this.function.setCategory( this.uow, "blah" );
-        this.function.setCategory( this.uow, null );
-        assertThat( this.function.getCategory( this.uow ), is( nullValue() ) );
+        this.function.setCategory( getTransaction(), "blah" );
+        this.function.setCategory( getTransaction(), null );
+        assertThat( this.function.getCategory( getTransaction() ), is( nullValue() ) );
     }
 
     @Test( expected = KException.class )
     public void shouldNotAllowEmptyCategoryIfNotSet() throws Exception {
-        this.function.setCategory( this.uow, StringConstants.EMPTY_STRING );
+        this.function.setCategory( getTransaction(), StringConstants.EMPTY_STRING );
     }
 
     @Test( expected = KException.class )
     public void shouldNotAllowNullCategoryIfNotSet() throws Exception {
-        this.function.setCategory( this.uow, null );
+        this.function.setCategory( getTransaction(), null );
     }
 
     @Test
     public void shouldSetCategory() throws Exception {
         final String value = "category";
-        this.function.setCategory( this.uow, value );
-        assertThat( this.function.getCategory( this.uow ), is( value ) );
+        this.function.setCategory( getTransaction(), value );
+        assertThat( this.function.getCategory( getTransaction() ), is( value ) );
     }
 
     /////////////////////////////////////////////////
@@ -124,40 +124,40 @@ public final class UserDefinedFunctionImplTest extends RelationalModelTest {
 
     @Test
     public void shouldAllowEmptyJavaClassWhenRemoving() throws Exception {
-        this.function.setJavaClass( this.uow, "blah" );
-        this.function.setJavaClass( this.uow, StringConstants.EMPTY_STRING );
-        assertThat( this.function.getJavaClass( this.uow ), is( nullValue() ) );
+        this.function.setJavaClass( getTransaction(), "blah" );
+        this.function.setJavaClass( getTransaction(), StringConstants.EMPTY_STRING );
+        assertThat( this.function.getJavaClass( getTransaction() ), is( nullValue() ) );
     }
 
     @Test
     public void shouldAllowNullJavaClassWhenRemoving() throws Exception {
-        this.function.setJavaClass( this.uow, "blah" );
-        this.function.setJavaClass( this.uow, null );
-        assertThat( this.function.getJavaClass( this.uow ), is( nullValue() ) );
+        this.function.setJavaClass( getTransaction(), "blah" );
+        this.function.setJavaClass( getTransaction(), null );
+        assertThat( this.function.getJavaClass( getTransaction() ), is( nullValue() ) );
     }
 
     @Test( expected = KException.class )
     public void shouldNotAllowEmptyJavaClassIfNotSet() throws Exception {
-        this.function.setJavaClass( this.uow, StringConstants.EMPTY_STRING );
+        this.function.setJavaClass( getTransaction(), StringConstants.EMPTY_STRING );
     }
 
     @Test( expected = KException.class )
     public void shouldNotAllowNullJavaClassIfNotSet() throws Exception {
-        this.function.setJavaClass( this.uow, null );
+        this.function.setJavaClass( getTransaction(), null );
     }
 
     @Test
     public void shouldNotCountStatementOptionsAsChildren() throws Exception {
-        this.function.setCategory( this.uow, "blah" );
-        this.function.setStatementOption( this.uow, "sledge", "hammer" );
-        assertThat( this.function.getChildren( this.uow ).length, is( 0 ) );
+        this.function.setCategory( getTransaction(), "blah" );
+        this.function.setStatementOption( getTransaction(), "sledge", "hammer" );
+        assertThat( this.function.getChildren( getTransaction() ).length, is( 0 ) );
     }
 
     @Test
     public void shouldSetJavaClass() throws Exception {
         final String value = "javaClass";
-        this.function.setJavaClass( this.uow, value );
-        assertThat( this.function.getJavaClass( this.uow ), is( value ) );
+        this.function.setJavaClass( getTransaction(), value );
+        assertThat( this.function.getJavaClass( getTransaction() ), is( value ) );
     }
 
     /////////////////////////////////////////////////
@@ -166,41 +166,41 @@ public final class UserDefinedFunctionImplTest extends RelationalModelTest {
 
     @Test
     public void shouldAllowEmptyJavaMethodWhenRemoving() throws Exception {
-        this.function.setJavaMethod( this.uow, "blah" );
-        this.function.setJavaMethod( this.uow, StringConstants.EMPTY_STRING );
-        assertThat( this.function.getJavaMethod( this.uow ), is( nullValue() ) );
+        this.function.setJavaMethod( getTransaction(), "blah" );
+        this.function.setJavaMethod( getTransaction(), StringConstants.EMPTY_STRING );
+        assertThat( this.function.getJavaMethod( getTransaction() ), is( nullValue() ) );
     }
 
     @Test
     public void shouldAllowNullJavaMethodWhenRemoving() throws Exception {
-        this.function.setJavaMethod( this.uow, "blah" );
-        this.function.setJavaMethod( this.uow, null );
-        assertThat( this.function.getJavaMethod( this.uow ), is( nullValue() ) );
+        this.function.setJavaMethod( getTransaction(), "blah" );
+        this.function.setJavaMethod( getTransaction(), null );
+        assertThat( this.function.getJavaMethod( getTransaction() ), is( nullValue() ) );
     }
 
     @Test( expected = KException.class )
     public void shouldNotAllowEmptyJavaMethodIfNotSet() throws Exception {
-        this.function.setJavaMethod( this.uow, StringConstants.EMPTY_STRING );
+        this.function.setJavaMethod( getTransaction(), StringConstants.EMPTY_STRING );
     }
 
     @Test( expected = KException.class )
     public void shouldNotAllowNullJavaMethodIfNotSet() throws Exception {
-        this.function.setJavaMethod( this.uow, null );
+        this.function.setJavaMethod( getTransaction(), null );
     }
 
     @Test
     public void shouldSetJavaMethod() throws Exception {
         final String value = "javaMethod";
-        this.function.setJavaMethod( this.uow, value );
-        assertThat( this.function.getJavaMethod( this.uow ), is( value ) );
+        this.function.setJavaMethod( getTransaction(), value );
+        assertThat( this.function.getJavaMethod( getTransaction() ), is( value ) );
     }
 
     @Test
     public void shouldIncludeCustomOptionsWithPropertyDescriptors() throws Exception {
         final String customName = "blah";
-        this.function.setStatementOption( this.uow, customName, "elvis" );
+        this.function.setStatementOption( getTransaction(), customName, "elvis" );
 
-        final PropertyDescriptor[] propDescriptors = this.function.getPropertyDescriptors( this.uow );
+        final PropertyDescriptor[] propDescriptors = this.function.getPropertyDescriptors( getTransaction() );
         boolean found = false;
 
         for ( final PropertyDescriptor descriptor : propDescriptors ) {
@@ -218,14 +218,14 @@ public final class UserDefinedFunctionImplTest extends RelationalModelTest {
     @Test
     public void shouldIncludeOptionsWithPropertyNames() throws Exception {
         final String custom = "blah";
-        this.function.setStatementOption( this.uow, custom, "sledge" );
+        this.function.setStatementOption( getTransaction(), custom, "sledge" );
         boolean customFound = false;
 
         final String standard = this.function.getStandardOptionNames()[0];
-        this.function.setStatementOption( this.uow, standard, "hammer" );
+        this.function.setStatementOption( getTransaction(), standard, "hammer" );
         boolean standardFound = false;
 
-        for ( final String prop : this.function.getPropertyNames( this.uow ) ) {
+        for ( final String prop : this.function.getPropertyNames( getTransaction() ) ) {
             if ( custom.equals( prop ) ) {
                 if ( customFound ) {
                     fail( "Custom option included multiple times in property names" );
@@ -257,7 +257,7 @@ public final class UserDefinedFunctionImplTest extends RelationalModelTest {
     @Test
     public void shouldIncludeStandardOptionsWithPrimaryTypePropertyDescriptors() throws Exception {
         final String[] optionNames = this.function.getStandardOptionNames();
-        final PropertyDescriptor[] propDescriptors = this.function.getPrimaryType( this.uow ).getPropertyDescriptors( this.uow );
+        final PropertyDescriptor[] propDescriptors = this.function.getPrimaryType( getTransaction() ).getPropertyDescriptors( getTransaction() );
 
         for ( final String optionName : optionNames ) {
             boolean found = false;
@@ -278,7 +278,7 @@ public final class UserDefinedFunctionImplTest extends RelationalModelTest {
     @Test
     public void shouldIncludeStandardOptionsWithPropertyDescriptors() throws Exception {
         final String[] optionNames = this.function.getStandardOptionNames();
-        final PropertyDescriptor[] propDescriptors = this.function.getPropertyDescriptors( this.uow );
+        final PropertyDescriptor[] propDescriptors = this.function.getPropertyDescriptors( getTransaction() );
 
         for ( final String optionName : optionNames ) {
             boolean found = false;
@@ -299,89 +299,89 @@ public final class UserDefinedFunctionImplTest extends RelationalModelTest {
     @Test
     public void shouldObtainCustomOptions() throws Exception {
         final String sledge = "sledge";
-        this.function.setStatementOption( this.uow, sledge, "hammer" );
+        this.function.setStatementOption( getTransaction(), sledge, "hammer" );
 
         final String elvis = "elvis";
-        this.function.setStatementOption( this.uow, elvis, "presley" );
+        this.function.setStatementOption( getTransaction(), elvis, "presley" );
 
-        assertThat( this.function.getCustomOptions( this.uow ).length, is( 2 ) );
-        assertThat( Arrays.asList( this.function.getStatementOptionNames( this.uow ) ), hasItems( sledge, elvis ) );
+        assertThat( this.function.getCustomOptions( getTransaction() ).length, is( 2 ) );
+        assertThat( Arrays.asList( this.function.getStatementOptionNames( getTransaction() ) ), hasItems( sledge, elvis ) );
     }
 
     @Test
     public void shouldObtainPropertyDescriptorOfCustomOption() throws Exception {
         final String custom = "sledge";
-        this.function.setStatementOption( this.uow, custom, "hammer" );
+        this.function.setStatementOption( getTransaction(), custom, "hammer" );
 
-        assertThat( this.function.getPropertyDescriptor( this.uow, custom ), is( notNullValue() ) );
-        assertThat( this.function.getPropertyDescriptor( this.uow, custom ).getName(), is( custom ) );
+        assertThat( this.function.getPropertyDescriptor( getTransaction(), custom ), is( notNullValue() ) );
+        assertThat( this.function.getPropertyDescriptor( getTransaction(), custom ).getName(), is( custom ) );
     }
 
     @Test
     public void shouldObtainPropertyDescriptorOfStandardOption() throws Exception {
         final String standard = this.function.getStandardOptionNames()[0];
-        this.function.setStatementOption( this.uow, standard, "blah" );
+        this.function.setStatementOption( getTransaction(), standard, "blah" );
 
-        assertThat( this.function.getPropertyDescriptor( this.uow, standard ), is( notNullValue() ) );
-        assertThat( this.function.getPropertyDescriptor( this.uow, standard ).getName(), is( standard ) );
+        assertThat( this.function.getPropertyDescriptor( getTransaction(), standard ), is( notNullValue() ) );
+        assertThat( this.function.getPropertyDescriptor( getTransaction(), standard ).getName(), is( standard ) );
     }
 
     @Test
     public void shouldObtainStatementOptionNames() throws Exception {
         final String custom = "blah";
-        this.function.setStatementOption( this.uow, custom, "sledge" );
+        this.function.setStatementOption( getTransaction(), custom, "sledge" );
 
         final String standard = this.function.getStandardOptionNames()[0];
-        this.function.setStatementOption( this.uow, standard, "hammer" );
+        this.function.setStatementOption( getTransaction(), standard, "hammer" );
 
-        assertThat( this.function.getStatementOptionNames( this.uow ).length, is( 2 ) );
-        assertThat( Arrays.asList( this.function.getStatementOptionNames( this.uow ) ), hasItems( custom, standard ) );
+        assertThat( this.function.getStatementOptionNames( getTransaction() ).length, is( 2 ) );
+        assertThat( Arrays.asList( this.function.getStatementOptionNames( getTransaction() ) ), hasItems( custom, standard ) );
     }
 
     @Test
     public void shouldRemoveStandardOptionAsIfProperty() throws Exception {
         final String option = this.function.getStandardOptionNames()[0];
         final String value = "newValue";
-        this.function.setProperty( this.uow, option, value ); // add
-        this.function.setProperty( this.uow, option, (Object)null ); // remove
-        assertThat( this.function.hasProperty( this.uow, option ), is( false ) );
-        assertThat( this.function.hasChild( this.uow, option ), is( false ) );
+        this.function.setProperty( getTransaction(), option, value ); // add
+        this.function.setProperty( getTransaction(), option, (Object)null ); // remove
+        assertThat( this.function.hasProperty( getTransaction(), option ), is( false ) );
+        assertThat( this.function.hasChild( getTransaction(), option ), is( false ) );
     }
 
     @Test
     public void shouldSetCustomOptionAsIfProperty() throws Exception {
         final String option = "blah";
-        this.function.setStatementOption( this.uow, option, "initialValue" );
+        this.function.setStatementOption( getTransaction(), option, "initialValue" );
 
         final String value = "newValue";
-        this.function.setProperty( this.uow, option, value );
+        this.function.setProperty( getTransaction(), option, value );
 
-        assertThat( this.function.hasProperty( this.uow, option ), is( true ) );
-        assertThat( this.function.getProperty( this.uow, option ), is( instanceOf( StatementOption.class ) ) );
-        assertThat( this.function.getStatementOptions( this.uow ).length, is( 1 ) );
-        assertThat( this.function.isCustomOption( this.uow, option ), is( true ) );
+        assertThat( this.function.hasProperty( getTransaction(), option ), is( true ) );
+        assertThat( this.function.getProperty( getTransaction(), option ), is( instanceOf( StatementOption.class ) ) );
+        assertThat( this.function.getStatementOptions( getTransaction() ).length, is( 1 ) );
+        assertThat( this.function.isCustomOption( getTransaction(), option ), is( true ) );
 
-        final StatementOption statementOption = this.function.getStatementOptions( this.uow )[0];
-        assertThat( statementOption.getName( this.uow ), is( option ) );
-        assertThat( statementOption.getValue( this.uow ), is( ( Object )value ) );
+        final StatementOption statementOption = this.function.getStatementOptions( getTransaction() )[0];
+        assertThat( statementOption.getName( getTransaction() ), is( option ) );
+        assertThat( statementOption.getValue( getTransaction() ), is( ( Object )value ) );
     }
 
     @Test
     public void shouldSetStandardOptionAsIfProperty() throws Exception {
         final String option = this.function.getStandardOptionNames()[0];
-        this.function.setStatementOption( this.uow, option, "initialValue" );
+        this.function.setStatementOption( getTransaction(), option, "initialValue" );
 
         final String value = "newValue";
-        this.function.setProperty( this.uow, option, value );
+        this.function.setProperty( getTransaction(), option, value );
 
-        assertThat( this.function.hasProperty( this.uow, option ), is( true ) );
-        assertThat( this.function.getProperty( this.uow, option ), is( instanceOf( StatementOption.class ) ) );
-        assertThat( this.function.isCustomOption( this.uow, option ), is( false ) );
-        assertThat( this.function.getStatementOptions( this.uow ).length, is( 1 ) );
+        assertThat( this.function.hasProperty( getTransaction(), option ), is( true ) );
+        assertThat( this.function.getProperty( getTransaction(), option ), is( instanceOf( StatementOption.class ) ) );
+        assertThat( this.function.isCustomOption( getTransaction(), option ), is( false ) );
+        assertThat( this.function.getStatementOptions( getTransaction() ).length, is( 1 ) );
 
-        final StatementOption statementOption = this.function.getStatementOptions( this.uow )[0];
-        assertThat( statementOption.getName( this.uow ), is( option ) );
-        assertThat( statementOption.getValue( this.uow ), is( ( Object )value ) );
+        final StatementOption statementOption = this.function.getStatementOptions( getTransaction() )[0];
+        assertThat( statementOption.getName( getTransaction() ), is( option ) );
+        assertThat( statementOption.getValue( getTransaction() ), is( ( Object )value ) );
     }
 
     /*
@@ -393,20 +393,20 @@ public final class UserDefinedFunctionImplTest extends RelationalModelTest {
     @Test
     public void shouldCreateUsingResolver() throws Exception {
         final String name = "blah";
-        final KomodoObject kobject = UserDefinedFunctionImpl.RESOLVER.create( this.uow,
+        final KomodoObject kobject = UserDefinedFunction.RESOLVER.create( getTransaction(),
                                                                               _repo,
-                                                                              this.function.getParent( this.uow ),
+                                                                              this.function.getParent( getTransaction() ),
                                                                               name,
                                                                               null );
         assertThat( kobject, is( notNullValue() ) );
         assertThat( kobject, is( instanceOf( UserDefinedFunction.class ) ) );
-        assertThat( kobject.getName( this.uow ), is( name ) );
+        assertThat( kobject.getName( getTransaction() ), is( name ) );
     }
 
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
-        final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        UserDefinedFunctionImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
+        final KomodoObject bogusParent = _repo.add( getTransaction(), null, "bogus", null );
+        UserDefinedFunction.RESOLVER.create( getTransaction(), _repo, bogusParent, "blah", null );
     }
 
 }

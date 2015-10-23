@@ -7,21 +7,13 @@
  */
 package org.komodo.relational.model.internal;
 
-import org.komodo.relational.Messages;
-import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalConstants;
 import org.komodo.relational.RelationalConstants.Nullable;
-import org.komodo.relational.RelationalProperties;
-import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.internal.RelationalChildRestrictedObject;
-import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.model.ResultSetColumn;
 import org.komodo.relational.model.StatementOption;
-import org.komodo.relational.model.TabularResultSet;
-import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Descriptor;
-import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.PropertyDescriptor;
@@ -31,7 +23,6 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.StringUtils;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
 
 /**
  * An implementation of a relational model tabular result set column.
@@ -75,82 +66,6 @@ public final class ResultSetColumnImpl extends RelationalChildRestrictedObject i
         }
 
     }
-
-    /**
-     * The resolver of a {@link ResultSetColumn}.
-     */
-    public static final TypeResolver< ResultSetColumn > RESOLVER = new TypeResolver< ResultSetColumn >() {
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.relational.internal.TypeResolver#create(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject, java.lang.String,
-         *      org.komodo.relational.RelationalProperties)
-         */
-        @Override
-        public ResultSetColumn create( final UnitOfWork transaction,
-                                       final Repository repository,
-                                       final KomodoObject parent,
-                                       final String id,
-                                       final RelationalProperties properties ) throws KException {
-            final AdapterFactory adapter = new AdapterFactory( repository );
-            final TabularResultSet parentResultSet = adapter.adapt( transaction, parent, TabularResultSet.class );
-
-            if ( parentResultSet == null ) {
-                throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
-                                                          parent.getAbsolutePath(),
-                                                          ResultSetColumn.class.getSimpleName() ) );
-            }
-
-            return parentResultSet.addColumn( transaction, id );
-        }
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.relational.internal.TypeResolver#identifier()
-         */
-        @Override
-        public KomodoType identifier() {
-            return IDENTIFIER;
-        }
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.relational.internal.TypeResolver#owningClass()
-         */
-        @Override
-        public Class< ResultSetColumnImpl > owningClass() {
-            return ResultSetColumnImpl.class;
-        }
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.relational.internal.TypeResolver#resolvable(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.KomodoObject)
-         */
-        @Override
-        public boolean resolvable( final UnitOfWork transaction,
-                                   final KomodoObject kobject ) throws KException {
-            return ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, CreateProcedure.RESULT_COLUMN );
-        }
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.relational.internal.TypeResolver#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.KomodoObject)
-         */
-        @Override
-        public ResultSetColumn resolve( final UnitOfWork transaction,
-                                        final KomodoObject kobject ) throws KException {
-            return new ResultSetColumnImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
-        }
-
-    };
 
     /**
      * @param uow
@@ -376,7 +291,7 @@ public final class ResultSetColumnImpl extends RelationalChildRestrictedObject i
      */
     @Override
     public KomodoType getTypeIdentifier( final UnitOfWork uow ) {
-        return RESOLVER.identifier();
+        return ResultSetColumn.RESOLVER.identifier();
     }
 
     /**

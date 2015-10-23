@@ -224,23 +224,23 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
         assertNotNull(_repo);
 
         // Create the komodo workspace
-        KomodoObject workspace = _repo.komodoWorkspace(this.uow);
+        KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
         assertNotNull(workspace);
 
-        workspace.addChild(this.uow, "test1", KomodoLexicon.VdbModel.NODE_TYPE);
-        workspace.addChild(this.uow, "test2", KomodoLexicon.VdbModel.NODE_TYPE);
-        workspace.addChild(this.uow, "test3", KomodoLexicon.VdbModel.NODE_TYPE);
-        workspace.addChild(this.uow, "test4", KomodoLexicon.VdbModel.NODE_TYPE);
-        workspace.addChild(this.uow, "test5", KomodoLexicon.VdbModel.NODE_TYPE);
+        workspace.addChild(getTransaction(), "test1", KomodoLexicon.VdbModel.NODE_TYPE);
+        workspace.addChild(getTransaction(), "test2", KomodoLexicon.VdbModel.NODE_TYPE);
+        workspace.addChild(getTransaction(), "test3", KomodoLexicon.VdbModel.NODE_TYPE);
+        workspace.addChild(getTransaction(), "test4", KomodoLexicon.VdbModel.NODE_TYPE);
+        workspace.addChild(getTransaction(), "test5", KomodoLexicon.VdbModel.NODE_TYPE);
 
-        KomodoObject[] testNodes = workspace.getChildrenOfType(this.uow, KomodoLexicon.VdbModel.NODE_TYPE);
+        KomodoObject[] testNodes = workspace.getChildrenOfType(getTransaction(), KomodoLexicon.VdbModel.NODE_TYPE);
         assertEquals(5, testNodes.length);
 
         commit(); // must commit for search queries to work
 
         ObjectSearcher os = new ObjectSearcher(_repo);
         os.addFromType(KomodoLexicon.VdbModel.NODE_TYPE);
-        List<KomodoObject> searchObjects = os.searchObjects(this.uow);
+        List<KomodoObject> searchObjects = os.searchObjects(getTransaction());
         assertEquals(testNodes.length, searchObjects.size());
     }
 
@@ -249,19 +249,19 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
         assertNotNull(_repo);
 
         // Create the komodo workspace
-        KomodoObject workspace = _repo.komodoWorkspace(this.uow);
+        KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
         assertNotNull(workspace);
 
         for (int i = 1; i < 6; ++i) {
-            KomodoObject child = workspace.addChild(this.uow, "test" + i, KomodoLexicon.VdbModel.NODE_TYPE);
-            child.setProperty(this.uow, KomodoLexicon.VdbModel.MODEL_DEFINITION, "DDL");
+            KomodoObject child = workspace.addChild(getTransaction(), "test" + i, KomodoLexicon.VdbModel.NODE_TYPE);
+            child.setProperty(getTransaction(), KomodoLexicon.VdbModel.MODEL_DEFINITION, "DDL");
         }
 
-        KomodoObject[] testNodes = workspace.getChildrenOfType(this.uow, KomodoLexicon.VdbModel.NODE_TYPE);
+        KomodoObject[] testNodes = workspace.getChildrenOfType(getTransaction(), KomodoLexicon.VdbModel.NODE_TYPE);
         assertEquals(5, testNodes.length);
         for (KomodoObject testKO : testNodes) {
-            Property property = testKO.getProperty(this.uow, KomodoLexicon.VdbModel.MODEL_DEFINITION);
-            assertEquals("DDL", property.getStringValue(this.uow));
+            Property property = testKO.getProperty(getTransaction(), KomodoLexicon.VdbModel.MODEL_DEFINITION);
+            assertEquals("DDL", property.getStringValue(getTransaction()));
         }
 
         ObjectSearcher os = new ObjectSearcher(_repo);
@@ -274,14 +274,14 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
 
         commit(); // must commit for search queries to work
 
-        List<KomodoObject> searchObjects = os.searchObjects(this.uow);
+        List<KomodoObject> searchObjects = os.searchObjects(getTransaction());
         assertEquals(testNodes.length, searchObjects.size());
         for (KomodoObject searchObject : searchObjects) {
-            String name = searchObject.getName(this.uow);
+            String name = searchObject.getName(getTransaction());
             assertTrue(name.startsWith("test"));
 
-            Property property = searchObject.getProperty(this.uow, KomodoLexicon.VdbModel.MODEL_DEFINITION);
-            assertEquals("DDL", property.getStringValue(this.uow));
+            Property property = searchObject.getProperty(getTransaction(), KomodoLexicon.VdbModel.MODEL_DEFINITION);
+            assertEquals("DDL", property.getStringValue(getTransaction()));
         }
     }
 
@@ -291,24 +291,24 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
         assertNotNull(_repo);
 
         // Create the komodo workspace
-        KomodoObject workspace = _repo.komodoWorkspace(this.uow);
+        KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
         assertNotNull(workspace);
 
-        KomodoObject testModel1 = workspace.addChild(this.uow, "TestModel1", KomodoLexicon.VdbModel.NODE_TYPE);
-        KomodoObject testModel2 = workspace.addChild(this.uow, "TestModel2", KomodoLexicon.VdbModel.NODE_TYPE);
+        KomodoObject testModel1 = workspace.addChild(getTransaction(), "TestModel1", KomodoLexicon.VdbModel.NODE_TYPE);
+        KomodoObject testModel2 = workspace.addChild(getTransaction(), "TestModel2", KomodoLexicon.VdbModel.NODE_TYPE);
 
         for (int i = 1; i <= sourceTotal; ++i) {
-            testModel1.addChild(this.uow, "TestModelSource1-" + i, KomodoLexicon.VdbModelSource.NODE_TYPE);
+            testModel1.addChild(getTransaction(), "TestModelSource1-" + i, KomodoLexicon.VdbModelSource.NODE_TYPE);
         }
 
-        KomodoObject[] testNodes = testModel1.getChildrenOfType(this.uow, KomodoLexicon.VdbModelSource.NODE_TYPE);
+        KomodoObject[] testNodes = testModel1.getChildrenOfType(getTransaction(), KomodoLexicon.VdbModelSource.NODE_TYPE);
         assertEquals(sourceTotal, testNodes.length);
 
         for (int i = 1; i <= sourceTotal; ++i) {
-            testModel2.addChild(this.uow, "TestModelSource2-" + i, KomodoLexicon.VdbModelSource.NODE_TYPE);
+            testModel2.addChild(getTransaction(), "TestModelSource2-" + i, KomodoLexicon.VdbModelSource.NODE_TYPE);
         }
 
-        testNodes = testModel2.getChildrenOfType(this.uow, KomodoLexicon.VdbModelSource.NODE_TYPE);
+        testNodes = testModel2.getChildrenOfType(getTransaction(), KomodoLexicon.VdbModelSource.NODE_TYPE);
         assertEquals(sourceTotal, testNodes.length);
 
         commit(); // must commit for search queries to work
@@ -328,11 +328,11 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
                                      testModel1.getAbsolutePath() + "/%'";
         assertEquals(expected, os.toString());
 
-        List<KomodoObject> searchObjects = os.searchObjects(this.uow);
+        List<KomodoObject> searchObjects = os.searchObjects(getTransaction());
         assertEquals(sourceTotal, searchObjects.size());
 
         for (KomodoObject searchObject : searchObjects) {
-            String name = searchObject.getName(this.uow);
+            String name = searchObject.getName(getTransaction());
             assertTrue(name.startsWith("TestModelSource1-"));
         }
 
@@ -342,7 +342,7 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
         os = new ObjectSearcher(_repo);
         os.addFromType(KomodoLexicon.VdbModelSource.NODE_TYPE);
         os.addWhereParentClause(null, null, workspace.getAbsolutePath());
-        searchObjects = os.searchObjects(this.uow);
+        searchObjects = os.searchObjects(getTransaction());
         assertEquals(sourceTotal * 2, searchObjects.size());
     }
 
@@ -351,24 +351,24 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
         assertNotNull(_repo);
 
         // Create the komodo workspace
-        KomodoObject workspace = _repo.komodoWorkspace(this.uow);
+        KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
         assertNotNull(workspace);
 
         for (int i = 1; i < 6; ++i) {
-            KomodoObject child = workspace.addChild(this.uow, "test" + i, KomodoLexicon.VdbModel.NODE_TYPE);
-            child.setProperty(this.uow, KomodoLexicon.VdbModel.MODEL_DEFINITION, "DDL");
+            KomodoObject child = workspace.addChild(getTransaction(), "test" + i, KomodoLexicon.VdbModel.NODE_TYPE);
+            child.setProperty(getTransaction(), KomodoLexicon.VdbModel.MODEL_DEFINITION, "DDL");
         }
 
         for (int i = 6; i < 11; ++i) {
-            KomodoObject child = workspace.addChild(this.uow, "test" + i, KomodoLexicon.VdbModel.NODE_TYPE);
-            child.setProperty(this.uow, KomodoLexicon.VdbModel.MODEL_DEFINITION, "TEIIDSQL");
+            KomodoObject child = workspace.addChild(getTransaction(), "test" + i, KomodoLexicon.VdbModel.NODE_TYPE);
+            child.setProperty(getTransaction(), KomodoLexicon.VdbModel.MODEL_DEFINITION, "TEIIDSQL");
         }
 
-        KomodoObject[] testNodes = workspace.getChildrenOfType(this.uow, KomodoLexicon.VdbModel.NODE_TYPE);
+        KomodoObject[] testNodes = workspace.getChildrenOfType(getTransaction(), KomodoLexicon.VdbModel.NODE_TYPE);
         assertEquals(10, testNodes.length);
         for (KomodoObject testKO : testNodes) {
-            Property property = testKO.getProperty(this.uow, KomodoLexicon.VdbModel.MODEL_DEFINITION);
-            assertTrue(property.getStringValue(this.uow).equals("DDL") || property.getStringValue(this.uow).equals("TEIIDSQL"));
+            Property property = testKO.getProperty(getTransaction(), KomodoLexicon.VdbModel.MODEL_DEFINITION);
+            assertTrue(property.getStringValue(getTransaction()).equals("DDL") || property.getStringValue(getTransaction()).equals("TEIIDSQL"));
         }
 
         ObjectSearcher os = new ObjectSearcher(_repo);
@@ -384,21 +384,21 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
 
         commit(); // must commit for search queries to work
 
-        List<KomodoObject> searchObjects = os.searchObjects(this.uow);
+        List<KomodoObject> searchObjects = os.searchObjects(getTransaction());
         assertEquals(testNodes.length, searchObjects.size());
         for (KomodoObject searchObject : searchObjects) {
-            String name = searchObject.getName(this.uow);
+            String name = searchObject.getName(getTransaction());
             assertTrue(name.startsWith("test"));
 
             String indexStr = name.substring(4);
             int index = Integer.parseInt(indexStr);
             assertTrue(index > 0 && index < 11);
 
-            Property property = searchObject.getProperty(this.uow, KomodoLexicon.VdbModel.MODEL_DEFINITION);
+            Property property = searchObject.getProperty(getTransaction(), KomodoLexicon.VdbModel.MODEL_DEFINITION);
             if (index < 6)
-                assertEquals("DDL", property.getStringValue(this.uow));
+                assertEquals("DDL", property.getStringValue(getTransaction()));
             else
-                assertEquals("TEIIDSQL", property.getStringValue(this.uow));
+                assertEquals("TEIIDSQL", property.getStringValue(getTransaction()));
         }
     }
 
@@ -407,10 +407,10 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
         assertNotNull(_repo);
 
         // Create the komodo workspace
-        KomodoObject workspace = _repo.komodoWorkspace(this.uow);
+        KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
         assertNotNull(workspace);
 
-        System.out.println(RepositoryTools.traverse(this.uow, workspace.getParent(this.uow)));
+        System.out.println(RepositoryTools.traverse(getTransaction(), workspace.getParent(getTransaction())));
 
         commit(); // must commit for search queries to work
 
@@ -422,7 +422,7 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
                                      "WHERE PATH(nt) = '" + workspace.getAbsolutePath() + "'";
         assertEquals(expected, os.toString());
 
-        List<KomodoObject> searchObjects = os.searchObjects(this.uow);
+        List<KomodoObject> searchObjects = os.searchObjects(getTransaction());
         assertEquals(1, searchObjects.size());
 
         assertEquals(workspace.getAbsolutePath(), searchObjects.iterator().next().getAbsolutePath());

@@ -187,6 +187,13 @@ public interface Repository {
         State getState();
 
         /**
+         * @return <code>true</code> if the transaction contains operations that change the state of the repository
+         * @throws KException
+         *         if there is an error determining if there are unsaved changeds
+         */
+        boolean hasChanges() throws KException;
+
+        /**
          * @return <code>true</code> if only rollback is allowed
          */
         boolean isRollbackOnly();

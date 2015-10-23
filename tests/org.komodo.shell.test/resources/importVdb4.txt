@@ -1,5 +1,0 @@
-# import VDB SvcSourceVdb_SalesforceDS-vdb.xml
-# SvcSourceVdb_SalesforceDS-vdb has a single physical model - salesforce translator and jndi definition
-#
-import vdb ./resources/vdbs/SvcSourceVdb_SalesforceDS-vdb.xml
-show children

@@ -1,5 +1,0 @@
-# import VDB AzureService-vdb.xml
-# AzureService-vdb.xml has a single virtual model and one import vdb
-#
-import vdb ./resources/vdbs/AzureService-vdb.xml
-show children

@@ -12,17 +12,10 @@ import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import org.komodo.relational.Messages;
-import org.komodo.relational.Messages.Relational;
-import org.komodo.relational.RelationalProperties;
-import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.internal.RelationalChildRestrictedObject;
-import org.komodo.relational.internal.TypeResolver;
-import org.komodo.relational.model.OptionContainer;
 import org.komodo.relational.model.StatementOption;
-import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyDescriptor;
 import org.komodo.spi.repository.PropertyValueType;
@@ -107,87 +100,6 @@ public final class StatementOptionImpl extends RelationalChildRestrictedObject i
         }
 
     }
-
-    /**
-     * The resolver of a {@link StatementOption}.
-     */
-    public static final TypeResolver< StatementOption > RESOLVER = new TypeResolver< StatementOption >() {
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.relational.internal.TypeResolver#create(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject, java.lang.String,
-         *      org.komodo.relational.RelationalProperties)
-         */
-        @Override
-        public StatementOption create( final UnitOfWork transaction,
-                                       final Repository repository,
-                                       final KomodoObject parent,
-                                       final String id,
-                                       final RelationalProperties properties ) throws KException {
-            final AdapterFactory adapter = new AdapterFactory( repository );
-            final Object optionValueValue = properties.getValue( StandardDdlLexicon.VALUE );
-            final String optionValue = optionValueValue == null ? null : optionValueValue.toString();
-            final OptionContainer parentContainer = adapter.adapt( transaction, parent, OptionContainer.class );
-
-            if ( parentContainer == null ) {
-                throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
-                                                          parent.getAbsolutePath(),
-                                                          StatementOption.class.getSimpleName() ) );
-            }
-
-            return parentContainer.setStatementOption( transaction, id, optionValue );
-        }
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.relational.internal.TypeResolver#identifier()
-         */
-        @Override
-        public KomodoType identifier() {
-            return IDENTIFIER;
-        }
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.relational.internal.TypeResolver#owningClass()
-         */
-        @Override
-        public Class< StatementOptionImpl > owningClass() {
-            return StatementOptionImpl.class;
-        }
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.relational.internal.TypeResolver#resolvable(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.KomodoObject)
-         */
-        @Override
-        public boolean resolvable( final UnitOfWork transaction,
-                                   final KomodoObject kobject ) throws KException {
-            return ObjectImpl.validateType( transaction,
-                                            kobject.getRepository(),
-                                            kobject,
-                                            StandardDdlLexicon.TYPE_STATEMENT_OPTION );
-        }
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.relational.internal.TypeResolver#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.KomodoObject)
-         */
-        @Override
-        public StatementOption resolve( final UnitOfWork transaction,
-                                        final KomodoObject kobject ) throws KException {
-            return new StatementOptionImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
-        }
-
-    };
 
     private PropertyDescriptor descriptor;
 
@@ -383,7 +295,7 @@ public final class StatementOptionImpl extends RelationalChildRestrictedObject i
      */
     @Override
     public KomodoType getTypeIdentifier( final UnitOfWork transaction ) {
-        return RESOLVER.identifier();
+        return StatementOption.RESOLVER.identifier();
     }
 
     /**

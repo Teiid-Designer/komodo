@@ -1,0 +1,13 @@
+#go to workspace, create a VDB with a Model
+workspace
+create-vdb myVdb vdbPath
+cd myVdb
+add-model myModel
+#
+#add a VirtualProcedure to a Model
+cd myModel
+add-virtual-procedure myVirtualProcedure
+#
+# Set a property
+cd myVirtualProcedure
+set-property name-in-source myNameInSource

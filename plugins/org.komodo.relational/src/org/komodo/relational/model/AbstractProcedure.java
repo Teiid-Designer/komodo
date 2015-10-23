@@ -7,8 +7,11 @@
  */
 package org.komodo.relational.model;
 
+import org.komodo.relational.Messages;
 import org.komodo.relational.RelationalObject;
+import org.komodo.relational.Messages.Relational;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 
@@ -17,6 +20,30 @@ import org.komodo.spi.repository.Repository.UnitOfWork.State;
  */
 public interface AbstractProcedure extends OptionContainer, RelationalObject, SchemaElement {
 
+    /**
+     * Utils for accessing procedure type
+     */
+    class Utils {
+        static Class< ? extends AbstractProcedure > getProcedureType( final UnitOfWork transaction,
+                                                                      final KomodoObject kobject ) throws KException {
+            Class< ? extends AbstractProcedure > clazz = null;
+
+            if (PushdownFunction.RESOLVER.resolvable( transaction, kobject )) {
+                clazz = PushdownFunction.class;
+            } else if (UserDefinedFunction.RESOLVER.resolvable( transaction, kobject )) {
+                clazz = UserDefinedFunction.class;
+            } else if (StoredProcedure.RESOLVER.resolvable( transaction, kobject )) {
+                clazz = StoredProcedure.class;
+            } else if (VirtualProcedure.RESOLVER.resolvable( transaction, kobject )) {
+                clazz = VirtualProcedure.class;
+            } else {
+                throw new KException( Messages.getString( Relational.UNEXPECTED_PROCEDURE_TYPE, kobject.getAbsolutePath() ) );
+            }
+
+            return clazz;
+        }
+    }
+    
     /**
      * The default value of this table's update count. Value is {@value} .
      */

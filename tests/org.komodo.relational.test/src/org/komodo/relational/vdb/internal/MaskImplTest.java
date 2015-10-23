@@ -35,9 +35,9 @@ public final class MaskImplTest extends RelationalModelTest {
     @Before
     public void init() throws Exception {
         final Vdb vdb = createVdb();
-        final DataRole dataRole = vdb.addDataRole( this.uow, "dataRole" );
-        final Permission permission = dataRole.addPermission( this.uow, "permission" );
-        this.mask = permission.addMask( this.uow, "mask" );
+        final DataRole dataRole = vdb.addDataRole( getTransaction(), "dataRole" );
+        final Permission permission = dataRole.addPermission( getTransaction(), "permission" );
+        this.mask = permission.addMask( getTransaction(), "mask" );
         commit();
     }
 
@@ -50,7 +50,7 @@ public final class MaskImplTest extends RelationalModelTest {
     public void shouldFailConstructionIfNotMask() {
         if ( RelationalObjectImpl.VALIDATE_INITIAL_STATE ) {
             try {
-                new MaskImpl( this.uow, _repo, this.mask.getParent( this.uow ).getAbsolutePath() );
+                new MaskImpl( getTransaction(), _repo, this.mask.getParent( getTransaction() ).getAbsolutePath() );
                 fail();
             } catch ( final KException e ) {
                 // expected
@@ -60,34 +60,34 @@ public final class MaskImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveCorrectPrimaryType() throws Exception {
-        assertThat( this.mask.getPrimaryType( this.uow ).getName(), is( VdbLexicon.DataRole.Permission.Mask.MASK ) );
+        assertThat( this.mask.getPrimaryType( getTransaction() ).getName(), is( VdbLexicon.DataRole.Permission.Mask.MASK ) );
     }
 
     @Test
     public void shouldHaveCorrectTypeIdentifier() throws Exception {
-        assertThat(this.mask.getTypeIdentifier( this.uow ), is(KomodoType.VDB_MASK));
+        assertThat(this.mask.getTypeIdentifier( getTransaction() ), is(KomodoType.VDB_MASK));
     }
 
     @Test
     public void shouldHaveMoreRawProperties() throws Exception {
-        final String[] filteredProps = this.mask.getPropertyNames( this.uow );
-        final String[] rawProps = this.mask.getRawPropertyNames( this.uow );
+        final String[] filteredProps = this.mask.getPropertyNames( getTransaction() );
+        final String[] rawProps = this.mask.getRawPropertyNames( getTransaction() );
         assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
     }
 
     @Test
     public void shouldHaveParentPermission() throws Exception {
-        assertThat( this.mask.getParent( this.uow ), is( instanceOf( Permission.class ) ) );
+        assertThat( this.mask.getParent( getTransaction() ), is( instanceOf( Permission.class ) ) );
     }
 
     @Test( expected = UnsupportedOperationException.class )
     public void shouldNotAllowChildren() throws Exception {
-        this.mask.addChild( this.uow, "blah", null );
+        this.mask.addChild( getTransaction(), "blah", null );
     }
 
     @Test
     public void shouldNotContainFilteredProperties() throws Exception {
-        final String[] filteredProps = this.mask.getPropertyNames( this.uow );
+        final String[] filteredProps = this.mask.getPropertyNames( getTransaction() );
         final Filter[] filters = this.mask.getFilters();
 
         for ( final String name : filteredProps ) {
@@ -99,14 +99,14 @@ public final class MaskImplTest extends RelationalModelTest {
 
     @Test
     public void shouldNotHaveOrderAfterConstruction() throws Exception {
-        assertThat( this.mask.getOrder( this.uow ), is( nullValue() ) );
+        assertThat( this.mask.getOrder( getTransaction() ), is( nullValue() ) );
     }
 
     @Test
     public void shouldSetOrder() throws Exception {
         final String newValue = "newOrder";
-        this.mask.setOrder( this.uow, newValue );
-        assertThat( this.mask.getOrder( this.uow ), is( newValue ) );
+        this.mask.setOrder( getTransaction(), newValue );
+        assertThat( this.mask.getOrder( getTransaction() ), is( newValue ) );
     }
 
     /*
@@ -118,16 +118,16 @@ public final class MaskImplTest extends RelationalModelTest {
     @Test
     public void shouldCreateUsingResolver() throws Exception {
         final String name = "blah";
-        final KomodoObject kobject = MaskImpl.RESOLVER.create( this.uow, _repo, this.mask.getParent( this.uow ), name, null );
+        final KomodoObject kobject = Mask.RESOLVER.create( getTransaction(), _repo, this.mask.getParent( getTransaction() ), name, null );
         assertThat( kobject, is( notNullValue() ) );
         assertThat( kobject, is( instanceOf( Mask.class ) ) );
-        assertThat( kobject.getName( this.uow ), is( name ) );
+        assertThat( kobject.getName( getTransaction() ), is( name ) );
     }
 
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
-        final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        MaskImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
+        final KomodoObject bogusParent = _repo.add( getTransaction(), null, "bogus", null );
+        Mask.RESOLVER.create( getTransaction(), _repo, bogusParent, "blah", null );
     }
 
 }

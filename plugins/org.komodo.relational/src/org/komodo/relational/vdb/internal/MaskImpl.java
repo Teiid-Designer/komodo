@@ -7,15 +7,8 @@
  */
 package org.komodo.relational.vdb.internal;
 
-import org.komodo.relational.Messages;
-import org.komodo.relational.Messages.Relational;
-import org.komodo.relational.RelationalProperties;
-import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.internal.RelationalChildRestrictedObject;
-import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.vdb.Mask;
-import org.komodo.relational.vdb.Permission;
-import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
@@ -30,85 +23,6 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
  * An implementation of a VDB permission mask.
  */
 public final class MaskImpl extends RelationalChildRestrictedObject implements Mask {
-
-    /**
-     * The resolver of a {@link Mask}.
-     */
-    public static final TypeResolver< Mask > RESOLVER = new TypeResolver< Mask >() {
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.relational.internal.TypeResolver#create(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject, java.lang.String,
-         *      org.komodo.relational.RelationalProperties)
-         */
-        @Override
-        public Mask create( final UnitOfWork transaction,
-                            final Repository repository,
-                            final KomodoObject parent,
-                            final String id,
-                            final RelationalProperties properties ) throws KException {
-            final AdapterFactory adapter = new AdapterFactory( parent.getRepository() );
-            final Permission parentPerm = adapter.adapt( transaction, parent, Permission.class );
-
-            if ( parentPerm == null ) {
-                throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
-                                                          parent.getAbsolutePath(),
-                                                          Mask.class.getSimpleName() ) );
-            }
-
-            return parentPerm.addMask( transaction, id );
-        }
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.relational.internal.TypeResolver#identifier()
-         */
-        @Override
-        public KomodoType identifier() {
-            return IDENTIFIER;
-        }
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.relational.internal.TypeResolver#owningClass()
-         */
-        @Override
-        public Class< MaskImpl > owningClass() {
-            return MaskImpl.class;
-        }
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.relational.internal.TypeResolver#resolvable(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.KomodoObject)
-         */
-        @Override
-        public boolean resolvable( final UnitOfWork transaction,
-                                   final KomodoObject kobject ) throws KException {
-            return ObjectImpl.validateType( transaction,
-                                            kobject.getRepository(),
-                                            kobject,
-                                            VdbLexicon.DataRole.Permission.Mask.MASK );
-        }
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.relational.internal.TypeResolver#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.KomodoObject)
-         */
-        @Override
-        public Mask resolve( final UnitOfWork transaction,
-                             final KomodoObject kobject ) throws KException {
-            return new MaskImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
-        }
-
-    };
 
     /**
      * @param uow
@@ -128,7 +42,7 @@ public final class MaskImpl extends RelationalChildRestrictedObject implements M
 
     @Override
     public KomodoType getTypeIdentifier(UnitOfWork uow) {
-        return RESOLVER.identifier();
+        return Mask.RESOLVER.identifier();
     }
 
     /**

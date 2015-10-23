@@ -16,21 +16,23 @@
 package org.komodo.shell;
 
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.komodo.shell.Messages.SHELL;
-import org.komodo.shell.api.AbstractShellCommand;
 import org.komodo.shell.api.Arguments;
-import org.komodo.shell.api.WorkspaceContext;
+import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.InvalidCommandArgumentException;
+import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.ContextUtils;
+import org.komodo.shell.util.KomodoObjectUtils;
+import org.komodo.shell.util.PrintUtils;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.Repository;
 import org.komodo.utils.ArgCheck;
-import org.komodo.utils.StringNameValidator;
 import org.komodo.utils.StringUtils;
 
 /**
@@ -40,72 +42,36 @@ import org.komodo.utils.StringUtils;
  * - altered to use different Messages class
  *
  */
-public abstract class BuiltInShellCommand extends AbstractShellCommand {
+public abstract class BuiltInShellCommand implements ShellCommand, StringConstants {
 
-    /**
-     * @param context
-     *        the associated context (cannot be null)
-     * @param propertyName
-     *        the name whose namespace prefix is being attached (cannot be empty)
-     * @return the property name with the namespace prefix attached (never empty)
-     * @throws Exception
-     *         if an error occurs
-     */
-    protected static String attachPrefix( final WorkspaceContext context,
-                                          final String propertyName ) throws Exception {
-        ArgCheck.isNotNull( context, "context" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( propertyName, "propertyName" ); //$NON-NLS-1$
+    protected static final String trueString = Boolean.TRUE.toString();
+    protected static final String falseString = Boolean.FALSE.toString();
 
-        for ( final String name : context.getProperties() ) {
-            if ( propertyName.equals( removePrefix( name ) ) ) {
-                return name;
-            }
-        }
-
-        return propertyName;
-    }
-
-    /**
-     * @param propertyName
-     *        the property name whose namespace prefix is being removed (cannot be empty)
-     * @return the name without the namespace prefix (never empty)
-     */
-    protected static String removePrefix( final String propertyName ) {
-        ArgCheck.isNotEmpty( propertyName, "qname" ); //$NON-NLS-1$
-        final int index = propertyName.indexOf( ':' );
-
-        if ( index == -1 ) {
-            return propertyName;
-        }
-
-        if ( index < propertyName.length() ) {
-            return propertyName.substring( index + 1 );
-        }
-
-        return propertyName;
-    }
-
-	private final StringNameValidator nameValidator = new StringNameValidator();
     private final String name;
+    private WorkspaceStatus wsStatus;
+    private Arguments arguments;
+    private Writer writer;
+
+    //private final StringNameValidator nameValidator = new StringNameValidator();
     private final String[] aliases;
 
     /**
      * Constructs a command.
      *
-     * @param status
+     * @param workspaceStatus
      *        the workspace status (cannot be <code>null</code>)
      * @param names
      *        the command name and then any aliases (cannot be <code>null</code>, empty, or have a <code>null</code> first
      *        element)
      */
-	public BuiltInShellCommand(final WorkspaceStatus status,
-	                           final String... names ) {
-		super(status);
+    public BuiltInShellCommand(final WorkspaceStatus workspaceStatus,
+                               final String... names ) {
 
-		ArgCheck.isNotEmpty( names, "names" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( names[0], "names[0]" ); //$NON-NLS-1$
-
+        ArgCheck.isNotEmpty( names, "names" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( workspaceStatus, "workspaceStatus" ); //$NON-NLS-1$
         this.name = names[0];
+        this.wsStatus = workspaceStatus;
+        this.arguments = new Arguments();
 
         // save aliases if necessary
         if ( names.length == 1 ) {
@@ -124,9 +90,50 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
                 this.aliases[i++] = alias;
             }
         }
+    }
 
-        initValidWsContextTypes();
-	}
+    /**
+     * @return the command result (cannot be <code>null</code>)
+     */
+    protected abstract CommandResult doExecute();
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommand#execute()
+     */
+    @Override
+    public final CommandResult execute() {
+        // make sure there aren't too many args
+        if ( getArguments().size() > getMaxArgCount() ) {
+            return new CommandResultImpl( false, Messages.getString( Messages.SHELL.TOO_MANY_ARGS, this ), null );
+        }
+
+        // Make sure command is valid for the context
+        if ( !isValidForCurrentContext() ) {
+            return new CommandResultImpl( false, Messages.getString( SHELL.InvalidCommandForContext ), null );
+        }
+
+        // execute command
+        final CommandResult result = doExecute();
+
+        // return result
+        assert (result != null);
+        return result;
+    }
+
+    /**
+     * @return the maximum number of arguments allowed
+     */
+    protected abstract int getMaxArgCount();
+
+    /**
+     * @see org.komodo.shell.api.ShellCommand#getName()
+     */
+    @Override
+    public final String getName() {
+        return this.name;
+    }
 
     /**
      * {@inheritDoc}
@@ -138,23 +145,124 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
         return this.aliases;
     }
 
-	protected WorkspaceContext getContext() {
-	    return getWorkspaceStatus().getCurrentContext();
-	}
+    @Override
+    public WorkspaceStatus getWorkspaceStatus() {
+        return this.wsStatus;
+    }
 
     /**
-     * @see org.komodo.shell.api.ShellCommand#getName()
+     * @see org.komodo.shell.api.ShellCommand#setArguments(Arguments)
      */
     @Override
-    public final String getName() {
-        return this.name;
+    public void setArguments( final Arguments newArguments ) {
+        this.arguments = ( ( newArguments == null ) ? new Arguments() : newArguments );
     }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommand#getArguments()
+     */
+    @Override
+    public Arguments getArguments() {
+        return this.arguments;
+    }
+
+    /**
+     * Returns the argument at the given index.  Throws an exception if the argument
+     * does not exist.
+     * @param argIndex
+     * @param message
+     * @throws InvalidCommandArgumentException
+     */
+    protected String requiredArgument(int argIndex, String message) throws InvalidCommandArgumentException {
+        if (getArguments().size() <= argIndex) {
+            throw new InvalidCommandArgumentException(argIndex, message);
+        }
+        return getArguments().get(argIndex);
+    }
+
+    /**
+     * Returns the optional argument at the given index.  Returns null if the argument
+     * does not exist.
+     * @param argIndex
+     */
+    protected String optionalArgument(int argIndex) {
+        return optionalArgument(argIndex, null);
+    }
+
+    /**
+     * Returns the optional argument at the given index.  Returns the given default value if
+     * the argument does not exist.
+     * @param argIndex
+     * @param defaultValue
+     */
+    protected String optionalArgument(int argIndex, String defaultValue) {
+        if (getArguments().size() <= argIndex) {
+            return defaultValue;
+        }
+        return getArguments().get(argIndex);
+    }
+
+    /**
+     * @param output the output to set
+     */
+    @Override
+    public void setWriter(Writer output) {
+        this.writer = output;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommand#getWriter()
+     */
+    @Override
+    public Writer getWriter() {
+        return this.writer;
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Value is {@value}.
+     *
+     * @see org.komodo.shell.api.ShellCommand#isEnabled()
+     */
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Defaults to {@value}.
+     *
+     * @see org.komodo.shell.api.ShellCommand#isOverridable()
+     */
+    @Override
+    public boolean isOverridable() {
+        return true;
+    }
+
+    /**
+     * @see org.komodo.shell.api.ShellCommand#tabCompletion(java.lang.String, java.util.List)
+     */
+    @Override
+    public int tabCompletion(String lastArgument, List<CharSequence> candidates) throws Exception {
+        return -1;
+    }
+
+	protected KomodoObject getContext() {
+	    return getWorkspaceStatus().getCurrentContext();
+	}
 
 	protected boolean isShowingPropertyNamePrefixes() {
 	    return getWorkspaceStatus().isShowingPropertyNamePrefixes();
 	}
 
-    /**
+	/**
      * @see org.komodo.shell.api.ShellCommand#printUsage(int indent)
      */
     @Override
@@ -212,8 +320,7 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
     }
 
     protected void printHelpDescription( final int indent ) {
-        print( indent,
-               Messages.getString( SHELL.HelpDescription, getName(), Messages.getString( getClass().getSimpleName() + ".help" ) ) ); //$NON-NLS-1$
+        print( indent, Messages.getString( getClass().getSimpleName() + ".help", getName() ) ); //$NON-NLS-1$
     }
 
     protected void printHelpExamples( final int indent ) {
@@ -228,14 +335,10 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
         print( 0, StringConstants.EMPTY_STRING );
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.ShellCommand#record()
-     */
-    @Override
-    public void record() {
-    	recordToFile(toString());
+    protected void print( final int indent,
+                          final String formattedMessage,
+                          final Object... params ) {
+        PrintUtils.print( getWriter(), indent, formattedMessage, params );
     }
 
     /**
@@ -255,122 +358,46 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
         return buff.toString();
     }
 
-    /**
-     * @see org.komodo.shell.api.ShellCommand#recordComment(String)
-     */
-    @Override
-    public void recordComment(String comment) {
-    	recordToFile("# "+comment);  //$NON-NLS-1$
-    }
-
-    /**
-     * Write the supplied line to the recording output file.
-     * @param line the line to output
-     */
-    private void recordToFile(String line) {
-    	File outputFile = getWorkspaceStatus().getRecordingOutputFile();
-    	if(outputFile!=null) {
-    		FileWriter recordingFileWriter = null;
-    		try {
-    			// Create file if it doesnt exist
-            	outputFile.createNewFile();
-				recordingFileWriter = new FileWriter(outputFile,true);
-				recordingFileWriter.write(line+"\n"); //$NON-NLS-1$
-				recordingFileWriter.flush();
-			} catch (IOException ex) {
-	            print(0,"*** Could not create or write to the specifed recording file - "+outputFile); //$NON-NLS-1$
-			}
-    	    finally {
-    	        try {
-    	        	recordingFileWriter.close();
-    	        } catch (final IOException ignored) {
-    	            // ignore
-    	        }
-    	    }
-        // Print error message if the recording file was not defined
-    	} else {
-            print(0,"*** Recording file not defined in startup properties"); //$NON-NLS-1$
-    	}
-    }
-
-    /**
-     * Validate whether the supplied name is valid for the supplied type
-     * @param name the name
-     * @param kType the komodo object type
-     * @return 'true' if valid, 'false' if not.
-     */
-    protected boolean validateObjectName(String name, KomodoType kType) {
-    	boolean isValid = nameValidator.isValidName(name);
-    	if(!isValid) {
-            print(CompletionConstants.MESSAGE_INDENT,Messages.getString("BuiltInShellCommand.objectNameNotValid",name)); //$NON-NLS-1$
-    		return false;
-    	}
-        return true;
-    }
-
 	/**
 	 * Validates that the supplied path argument is a readable file.
 	 * @param filePathArg the path to test
-	 * @return 'true' if the path is valid readable file, 'false' if not.
+	 * @return "OK" if the path is valid readable file, other error message if not
 	 */
-	public boolean validateReadableFileArg(String filePathArg) {
+	public String validateReadableFileArg(String filePathArg) {
 		String filePath = filePathArg.trim();
 
         // Check the fileName arg validity
         File theFile = new File(filePath);
         if(!theFile.exists()) {
-        	print(CompletionConstants.MESSAGE_INDENT, Messages.getString("BuiltInShellCommand.FileNotFound", filePath)); //$NON-NLS-1$
-        	return false;
+            return Messages.getString(SHELL.FileNotFound, filePath);
         } else if(!theFile.isFile()) {
-        	print(CompletionConstants.MESSAGE_INDENT, Messages.getString("BuiltInShellCommand.FileArgNotAFile", filePath)); //$NON-NLS-1$
-        	return false;
+            return Messages.getString(SHELL.FileArgNotAFile, filePath);
         } else if(!theFile.canRead()) {
-        	print(CompletionConstants.MESSAGE_INDENT, Messages.getString("BuiltInShellCommand.FileNotReadable", filePath)); //$NON-NLS-1$
-        	return false;
+            return Messages.getString(SHELL.FileCannotRead, filePath);
         }
 
-		return true;
+		return CompletionConstants.OK;
 	}
 
 	/**
 	 * Validates whether the supplied path is valid.  If the path is relative this takes into account the
-	 * current context.  If invalid an error message is printed out.
+	 * current context.  If valid 'Ok' is returned, otherwise the appropriate error message.
 	 * @param pathArg the path to test
-	 * @return 'true' if the path is valid, 'false' if not.
+	 * @return result message - "ok" if the path is valid, "error message" if not.
 	 */
-	public boolean validatePath(String pathArg) {
+	public String validatePath(String pathArg) {
 		String path = pathArg.trim();
 		if(path.length()==0) {
-            print(CompletionConstants.MESSAGE_INDENT,Messages.getString("BuiltInShellCommand.locationArg_empty")); //$NON-NLS-1$
-			return false;
+		    return Messages.getString(SHELL.locationArg_empty);
 		}
 
 		WorkspaceStatus wsStatus = getWorkspaceStatus();
-		WorkspaceContext newContext = ContextUtils.getContextForPath(wsStatus, pathArg);
+		KomodoObject newContext = ContextUtils.getContextForPath(wsStatus, pathArg);
 
 		if(newContext==null) {
-            print(CompletionConstants.MESSAGE_INDENT,Messages.getString("BuiltInShellCommand.locationArg_noContextWithThisName", path)); //$NON-NLS-1$
-			return false;
+		    return Messages.getString(SHELL.locationArg_noContextWithThisName, path);
 		}
-		return true;
-	}
-
-	/**
-	 * Validates whether the supplied object type is a valid child for the supplied context.
-	 * If invalid an error message is printed out.
-	 * @param objType the object type
-	 * @param context the workspace context
-	 * @return 'true' if the child type is valid for the context, 'false' if not.
-	 * @exception Exception the exception
-	 */
-	public boolean validateChildType(String objType, WorkspaceContext context) throws Exception {
-		List<String> allowableChildTypes = context.getAllowableChildTypes();
-
-		if(!allowableChildTypes.contains(objType.toLowerCase())) {
-            print(CompletionConstants.MESSAGE_INDENT,Messages.getString("BuiltInShellCommand.typeArg_childTypeNotAllowed", objType, context.getFullName())); //$NON-NLS-1$
-			return false;
-		}
-		return true;
+		return CompletionConstants.OK;
 	}
 
 	/**
@@ -378,26 +405,19 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
 	 * If invalid an error message is printed out.
 	 * @param propName the property name
 	 * @param context the workspace context
-	 * @param printMessage specify whether output message printed
 	 * @return 'true' if the property is valid for the context, 'false' if not.
 	 * @exception Exception the exception
 	 */
     public boolean validateProperty( final String propName,
-                                     final WorkspaceContext context,
-                                     final boolean printMessage) throws Exception {
+                                     final KomodoObject context) throws Exception {
         if ( !StringUtils.isEmpty( propName ) ) {
-            final List< String > propNames = context.getProperties();
+            final List< String > propNames = KomodoObjectUtils.getProperties(getWorkspaceStatus(),context);
 
             if ( propNames.contains( propName )
-                 || ( !isShowingPropertyNamePrefixes() && propNames.contains( attachPrefix( context, propName ) ) ) ) {
+                 || ( !isShowingPropertyNamePrefixes() && propNames.contains( KomodoObjectUtils.attachPrefix( getWorkspaceStatus(),context, propName ) ) ) ) {
                 return true;
             }
-            
-            if(printMessage) {
-            	print( CompletionConstants.MESSAGE_INDENT,
-            			Messages.getString( "BuiltInShellCommand.propertyArg_noPropertyWithThisName", propName ) ); //$NON-NLS-1$
-            }
-        }
+       }
 
         return false;
 	}
@@ -410,7 +430,7 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
 	 * @param context the workspace context
 	 * @return 'true' if the property is valid for the context, 'false' if not.
 	 */
-	public boolean validatePropertyValue(String propName, String propValue, WorkspaceContext context) {
+	public boolean validatePropertyValue(String propName, String propValue, KomodoObject context) {
 		// TODO: add logic to test
 		return true;
 	}
@@ -422,15 +442,15 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
 	 * @return 'true' if valid, 'false' if not.
 	 * @throws Exception exception if problem getting the value.
 	 */
-	public boolean validatePropertyName(WorkspaceContext context, String propName) throws Exception {
-		final boolean exists = context.getProperties().contains( propName );
-
-        if ( !exists ) {
-            print(CompletionConstants.MESSAGE_INDENT,Messages.getString("BuiltInShellCommand.propertyArg_noPropertyWithThisName", propName)); //$NON-NLS-1$
-			return false;
-		}
-		return true;
-	}
+//	public boolean validatePropertyName(KomodoObject context, String propName) throws Exception {
+//		final boolean exists = KomodoObjectUtils.getProperties(getWorkspaceStatus(),context).contains( propName );
+//
+//        if ( !exists ) {
+//            print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.propertyArg_noPropertyWithThisName, propName));
+//			return false;
+//		}
+//		return true;
+//	}
 
     /**
      * Updates the candidates for tab completion, given the currentContext and path
@@ -440,21 +460,23 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
      * @param lastArgument the last arg
      * @throws Exception the exception
      */
-    public void updateTabCompleteCandidatesForPath(List<CharSequence> candidates, WorkspaceContext currentContext, boolean includeGoUp, String lastArgument) throws Exception {
+    public void updateTabCompleteCandidatesForPath(List<CharSequence> candidates, KomodoObject currentContext, boolean includeGoUp, String lastArgument) throws Exception {
     	// List of potentials completions
     	List<String> potentialsList = new ArrayList<String>();
     	// Only offer '..' if below the root
-    	if( (!currentContext.getType().equalsIgnoreCase(KomodoType.WORKSPACE.getType())) && includeGoUp ) {
+        if ( ( currentContext.getParent( this.wsStatus.getTransaction() ) != null ) && includeGoUp ) {
     		potentialsList.add(StringConstants.DOT_DOT);
     	}
 
+    	Repository.UnitOfWork transaction = getWorkspaceStatus().getTransaction();
     	// --------------------------------------------------------------
     	// No arg - offer children relative current context.
     	// --------------------------------------------------------------
     	if(lastArgument==null) {
-    		List<WorkspaceContext> children = currentContext.getChildren();
-    		for(WorkspaceContext wsContext : children) {
-    			potentialsList.add(wsContext.getName()+ContextUtils.PATH_SEPARATOR);
+    	    KomodoObject[] children = currentContext.getChildren(transaction);
+    		for(KomodoObject wsContext : children) {
+    		    final String contextName = this.wsStatus.getLabelProvider().getDisplayName( wsContext );
+    			potentialsList.add(contextName+FORWARD_SLASH);
     		}
     		candidates.addAll(potentialsList);
     		// --------------------------------------------------------------
@@ -464,27 +486,27 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
     		// --------------------------------------------
     		// Absolute Path Arg handling
     		// --------------------------------------------
-    		if( lastArgument.startsWith(ContextUtils.PATH_SEPARATOR) ) {
+    		if( lastArgument.startsWith(FORWARD_SLASH) ) {
     			// If not the full absolute root, then provide it
     			if(!ContextUtils.isAbsolutePath(lastArgument)) {
-    				potentialsList.add(ContextUtils.PATH_SEPARATOR+WorkspaceContext.WORKSPACE_ROOT_DISPLAY_NAME+ContextUtils.PATH_SEPARATOR);
+    				potentialsList.add(FORWARD_SLASH);
     				updateCandidates(candidates,potentialsList,lastArgument);
     		    // Starts with correct root - provide next option
     			} else {
-    				String relativePath = ContextUtils.convertAbsolutePathToRootRelative(lastArgument);
-    				WorkspaceContext deepestMatchingContext = ContextUtils.getDeepestMatchingContextRelative(getWorkspaceStatus().getWorkspaceContext(), relativePath);
+    				String relativePath = ContextUtils.convertAbsolutePathToRootRelative(wsStatus,lastArgument);
+    				KomodoObject deepestMatchingContext = ContextUtils.getDeepestMatchingContextRelative(getWorkspaceStatus(),getWorkspaceStatus().getRootContext(), relativePath);
 
     				// Get children of deepest context match to form potentialsList
-    				List<WorkspaceContext> children = deepestMatchingContext.getChildren();
-    				if(!children.isEmpty()) {
+    				KomodoObject[] children = deepestMatchingContext.getChildren(transaction);
+    				if(children.length != 0) {
     					// Get all children as potentials
-    					for(WorkspaceContext childContext : children) {
-    						String absolutePath = childContext.getFullName();
-    						potentialsList.add(absolutePath+ContextUtils.PATH_SEPARATOR);
+    					for(KomodoObject childContext : children) {
+                            final String absolutePath = KomodoObjectUtils.getFullName( this.wsStatus, childContext );
+    						potentialsList.add(absolutePath+FORWARD_SLASH);
     					}
     				} else {
-    					String absolutePath = deepestMatchingContext.getFullName();
-    					potentialsList.add(absolutePath+ContextUtils.PATH_SEPARATOR);
+                        final String absolutePath = KomodoObjectUtils.getFullName( this.wsStatus, deepestMatchingContext );
+    					potentialsList.add(absolutePath+FORWARD_SLASH);
     				}
     				updateCandidates(candidates, potentialsList, lastArgument);
     			}
@@ -493,21 +515,21 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
     			// -------------------------------------------
     		} else {
     			// Deepest matching context for relative path
-    			WorkspaceContext deepestMatchingContext = ContextUtils.getDeepestMatchingContextRelative(currentContext, lastArgument);
+    		    KomodoObject deepestMatchingContext = ContextUtils.getDeepestMatchingContextRelative(getWorkspaceStatus(), currentContext, lastArgument);
 
     			// Get children of deepest context match to form potentialsList
-    			List<WorkspaceContext> children = deepestMatchingContext.getChildren();
-    			if(!children.isEmpty()) {
+    		    KomodoObject[] children = deepestMatchingContext.getChildren(getWorkspaceStatus().getTransaction());
+    			if(children.length!=0) {
     				// Get all children as potentials
-    				for(WorkspaceContext childContext : children) {
-    					String absolutePath = childContext.getFullName();
-    					String relativePath = ContextUtils.convertAbsolutePathToRelative(currentContext, absolutePath);
-    					potentialsList.add(relativePath+ContextUtils.PATH_SEPARATOR);
+    				for(KomodoObject childContext : children) {
+                        final String absolutePath = KomodoObjectUtils.getFullName( this.wsStatus, childContext );
+    					String relativePath = ContextUtils.convertAbsolutePathToRelative(getWorkspaceStatus(), currentContext, absolutePath);
+    					potentialsList.add(relativePath+FORWARD_SLASH);
     				}
     			} else {
-    				String absolutePath = deepestMatchingContext.getFullName();
-    				String relativePath = ContextUtils.convertAbsolutePathToRelative(currentContext, absolutePath);
-    				potentialsList.add(relativePath+ContextUtils.PATH_SEPARATOR);
+                    final String absolutePath = KomodoObjectUtils.getFullName( this.wsStatus, deepestMatchingContext );
+    				String relativePath = ContextUtils.convertAbsolutePathToRelative(getWorkspaceStatus(), currentContext, absolutePath);
+    				potentialsList.add(relativePath+FORWARD_SLASH);
     			}
     			updateCandidates(candidates, potentialsList, lastArgument);
     		}
@@ -522,12 +544,12 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
      * @param propArg the propName for completion
      * @throws Exception the exception
      */
-    public void updateTabCompleteCandidatesForProperty(List<CharSequence> candidates, WorkspaceContext context, String propArg) throws Exception {
+    public void updateTabCompleteCandidatesForProperty(List<CharSequence> candidates, KomodoObject context, String propArg) throws Exception {
 		// List of potentials completions
 		List<String> potentials = null;
 
 		// Context properties
-		final List<String> propNames = context.getProperties();  // All properties
+		final List<String> propNames = KomodoObjectUtils.getProperties(getWorkspaceStatus(),context);  // All properties
 
         if ( isShowingPropertyNamePrefixes() ) {
             potentials = propNames;
@@ -536,7 +558,7 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
 
             // strip off prefix
             for ( final String name : propNames ) {
-                potentials.add( removePrefix( name ) );
+                potentials.add( KomodoObjectUtils.removePrefix( name ) );
             }
         }
 
@@ -546,6 +568,17 @@ public abstract class BuiltInShellCommand extends AbstractShellCommand {
             candidates.addAll( potentials );
         } else {
             updateCandidates( candidates, potentials, propArg );
+        }
+    }
+
+    protected void updateCandidatesForBooleanProperty( final String lastArgument,
+                                                       final List< CharSequence > candidates ) {
+        if ( StringUtils.isBlank( lastArgument ) || trueString.startsWith( lastArgument ) ) {
+            candidates.add( Boolean.TRUE.toString() );
+        }
+
+        if ( StringUtils.isBlank( lastArgument ) || falseString.startsWith( lastArgument ) ) {
+            candidates.add( Boolean.FALSE.toString() );
         }
     }
 

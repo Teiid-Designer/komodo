@@ -40,7 +40,7 @@ public final class StoredProcedureImplTest extends RelationalModelTest {
     @Before
     public void init() throws Exception {
         final Model model = createModel();
-        this.procedure = model.addStoredProcedure( this.uow, "procedure" );
+        this.procedure = model.addStoredProcedure( getTransaction(), "procedure" );
         commit();
     }
 
@@ -48,7 +48,7 @@ public final class StoredProcedureImplTest extends RelationalModelTest {
     public void shouldFailConstructionIfNotStoredProcedure() {
         if ( RelationalObjectImpl.VALIDATE_INITIAL_STATE ) {
             try {
-                new StoredProcedureImpl( this.uow, _repo, _repo.komodoLibrary( this.uow ).getAbsolutePath() );
+                new StoredProcedureImpl( getTransaction(), _repo, _repo.komodoLibrary( getTransaction() ).getAbsolutePath() );
                 fail();
             } catch ( final KException e ) {
                 // expected
@@ -58,58 +58,58 @@ public final class StoredProcedureImplTest extends RelationalModelTest {
 
     @Test( expected = KException.class )
     public void shouldFailRemovingResultSetIfOneDoesNotExist() throws Exception {
-        this.procedure.removeResultSet( this.uow );
+        this.procedure.removeResultSet( getTransaction() );
     }
 
     @Test( expected = KException.class )
     public void shouldFailSettingNativeQueryWithEmptyValueWhenItWasNeverAdded() throws Exception {
-        this.procedure.setNativeQuery( this.uow, StringConstants.EMPTY_STRING );
+        this.procedure.setNativeQuery( getTransaction(), StringConstants.EMPTY_STRING );
     }
 
     @Test( expected = KException.class )
     public void shouldFailSettingNullNativeQueryWhenNeverAdded() throws Exception {
-        this.procedure.setNativeQuery( this.uow, null );
+        this.procedure.setNativeQuery( getTransaction(), null );
     }
 
     @Test
     public void shouldGetOnlyResultSetWhenGettingChildren() throws Exception {
-        final TabularResultSet resultSet = this.procedure.setResultSet( this.uow, TabularResultSet.class );
-        assertThat( this.procedure.getChildren( this.uow ).length, is( 1 ) );
-        assertThat( this.procedure.getChildren( this.uow )[0], is( ( KomodoObject )resultSet ) );
+        final TabularResultSet resultSet = this.procedure.setResultSet( getTransaction(), TabularResultSet.class );
+        assertThat( this.procedure.getChildren( getTransaction() ).length, is( 1 ) );
+        assertThat( this.procedure.getChildren( getTransaction() )[0], is( ( KomodoObject )resultSet ) );
     }
 
     @Test
     public void shouldGetChildren() throws Exception {
-        this.procedure.addParameter( this.uow, "param" );
-        this.procedure.setResultSet( this.uow, DataTypeResultSet.class );
-        assertThat( this.procedure.getChildren( this.uow ).length, is( 2 ) );
+        this.procedure.addParameter( getTransaction(), "param" );
+        this.procedure.setResultSet( getTransaction(), DataTypeResultSet.class );
+        assertThat( this.procedure.getChildren( getTransaction() ).length, is( 2 ) );
     }
 
     @Test
     public void shouldHaveCorrectSchemaElementType() throws Exception {
-        assertThat( this.procedure.getSchemaElementType( this.uow ), is( SchemaElementType.FOREIGN ) );
+        assertThat( this.procedure.getSchemaElementType( getTransaction() ), is( SchemaElementType.FOREIGN ) );
     }
 
     @Test
     public void shouldHaveCorrectTypeIdentifier() throws Exception {
-        assertThat(this.procedure.getTypeIdentifier( this.uow ), is(KomodoType.STORED_PROCEDURE));
+        assertThat(this.procedure.getTypeIdentifier( getTransaction() ), is(KomodoType.STORED_PROCEDURE));
     }
 
     @Test
     public void shouldHaveDefaultNonPreparedAfterConstruction() throws Exception {
-        assertThat( this.procedure.isNonPrepared( this.uow ), is( StoredProcedure.DEFAULT_NON_PREPARED ) );
+        assertThat( this.procedure.isNonPrepared( getTransaction() ), is( StoredProcedure.DEFAULT_NON_PREPARED ) );
     }
 
     @Test
     public void shouldHaveMoreRawProperties() throws Exception {
-        final String[] filteredProps = this.procedure.getPropertyNames( this.uow );
-        final String[] rawProps = this.procedure.getRawPropertyNames( this.uow );
+        final String[] filteredProps = this.procedure.getPropertyNames( getTransaction() );
+        final String[] rawProps = this.procedure.getRawPropertyNames( getTransaction() );
         assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
     }
 
     @Test
     public void shouldNotContainFilteredProperties() throws Exception {
-        final String[] filteredProps = this.procedure.getPropertyNames( this.uow );
+        final String[] filteredProps = this.procedure.getPropertyNames( getTransaction() );
         final Filter[] filters = this.procedure.getFilters();
 
         for ( final String name : filteredProps ) {
@@ -121,55 +121,55 @@ public final class StoredProcedureImplTest extends RelationalModelTest {
 
     @Test
     public void shouldNotCountStatementOptionsAsChildren() throws Exception {
-        this.procedure.setNativeQuery( this.uow, "blah" );
-        this.procedure.setStatementOption( this.uow, "sledge", "hammer" );
-        assertThat( this.procedure.getChildren( this.uow ).length, is( 0 ) );
+        this.procedure.setNativeQuery( getTransaction(), "blah" );
+        this.procedure.setStatementOption( getTransaction(), "sledge", "hammer" );
+        assertThat( this.procedure.getChildren( getTransaction() ).length, is( 0 ) );
     }
 
     @Test
     public void shouldNotHaveResultSetAfterConstruction() throws Exception {
-        assertThat( this.procedure.getResultSet( this.uow ), is( nullValue() ) );
+        assertThat( this.procedure.getResultSet( getTransaction() ), is( nullValue() ) );
     }
 
     @Test
     public void shouldRemoveResultSet() throws Exception {
-        this.procedure.setResultSet( this.uow, TabularResultSet.class );
-        this.procedure.removeResultSet( this.uow );
-        assertThat( this.procedure.getResultSet( this.uow ), is( nullValue() ) );
+        this.procedure.setResultSet( getTransaction(), TabularResultSet.class );
+        this.procedure.removeResultSet( getTransaction() );
+        assertThat( this.procedure.getResultSet( getTransaction() ), is( nullValue() ) );
     }
 
     @Test
     public void shouldSetDataTypeResultSet() throws Exception {
-        assertThat( this.procedure.setResultSet( this.uow, DataTypeResultSet.class ), is( notNullValue() ) );
-        assertThat( this.procedure.getResultSet( this.uow ), is( instanceOf( DataTypeResultSet.class ) ) );
+        assertThat( this.procedure.setResultSet( getTransaction(), DataTypeResultSet.class ), is( notNullValue() ) );
+        assertThat( this.procedure.getResultSet( getTransaction() ), is( instanceOf( DataTypeResultSet.class ) ) );
     }
 
     @Test
     public void shouldSetNativeQuery() throws Exception {
         final String value = "nativeQuery";
-        this.procedure.setNativeQuery( this.uow, value );
-        assertThat( this.procedure.getNativeQuery( this.uow ), is( value ) );
+        this.procedure.setNativeQuery( getTransaction(), value );
+        assertThat( this.procedure.getNativeQuery( getTransaction() ), is( value ) );
     }
 
     @Test
     public void shouldSetNonPrepared() throws Exception {
         final boolean value = !StoredProcedure.DEFAULT_NON_PREPARED;
-        this.procedure.setNonPrepared( this.uow, value );
-        assertThat( this.procedure.isNonPrepared( this.uow ), is( value ) );
+        this.procedure.setNonPrepared( getTransaction(), value );
+        assertThat( this.procedure.isNonPrepared( getTransaction() ), is( value ) );
     }
 
     @Test
     public void shouldSetTabularResultSet() throws Exception {
-        assertThat( this.procedure.setResultSet( this.uow, TabularResultSet.class ), is( notNullValue() ) );
-        assertThat( this.procedure.getResultSet( this.uow ), is( instanceOf( TabularResultSet.class ) ) );
+        assertThat( this.procedure.setResultSet( getTransaction(), TabularResultSet.class ), is( notNullValue() ) );
+        assertThat( this.procedure.getResultSet( getTransaction() ), is( instanceOf( TabularResultSet.class ) ) );
     }
 
     @Test
     public void shouldIncludeCustomOptionsWithPropertyDescriptors() throws Exception {
         final String customName = "blah";
-        this.procedure.setStatementOption( this.uow, customName, "elvis" );
+        this.procedure.setStatementOption( getTransaction(), customName, "elvis" );
 
-        final PropertyDescriptor[] propDescriptors = this.procedure.getPropertyDescriptors( this.uow );
+        final PropertyDescriptor[] propDescriptors = this.procedure.getPropertyDescriptors( getTransaction() );
         boolean found = false;
 
         for ( final PropertyDescriptor descriptor : propDescriptors ) {
@@ -187,14 +187,14 @@ public final class StoredProcedureImplTest extends RelationalModelTest {
     @Test
     public void shouldIncludeOptionsWithPropertyNames() throws Exception {
         final String custom = "blah";
-        this.procedure.setStatementOption( this.uow, custom, "sledge" );
+        this.procedure.setStatementOption( getTransaction(), custom, "sledge" );
         boolean customFound = false;
 
         final String standard = this.procedure.getStandardOptionNames()[0];
-        this.procedure.setStatementOption( this.uow, standard, "hammer" );
+        this.procedure.setStatementOption( getTransaction(), standard, "hammer" );
         boolean standardFound = false;
 
-        for ( final String prop : this.procedure.getPropertyNames( this.uow ) ) {
+        for ( final String prop : this.procedure.getPropertyNames( getTransaction() ) ) {
             if ( custom.equals( prop ) ) {
                 if ( customFound ) {
                     fail( "Custom option included multiple times in property names" );
@@ -226,7 +226,7 @@ public final class StoredProcedureImplTest extends RelationalModelTest {
     @Test
     public void shouldIncludeStandardOptionsWithPrimaryTypePropertyDescriptors() throws Exception {
         final String[] optionNames = this.procedure.getStandardOptionNames();
-        final PropertyDescriptor[] propDescriptors = this.procedure.getPrimaryType( this.uow ).getPropertyDescriptors( this.uow );
+        final PropertyDescriptor[] propDescriptors = this.procedure.getPrimaryType( getTransaction() ).getPropertyDescriptors( getTransaction() );
 
         for ( final String optionName : optionNames ) {
             boolean found = false;
@@ -247,7 +247,7 @@ public final class StoredProcedureImplTest extends RelationalModelTest {
     @Test
     public void shouldIncludeStandardOptionsWithPropertyDescriptors() throws Exception {
         final String[] optionNames = this.procedure.getStandardOptionNames();
-        final PropertyDescriptor[] propDescriptors = this.procedure.getPropertyDescriptors( this.uow );
+        final PropertyDescriptor[] propDescriptors = this.procedure.getPropertyDescriptors( getTransaction() );
 
         for ( final String optionName : optionNames ) {
             boolean found = false;
@@ -268,89 +268,89 @@ public final class StoredProcedureImplTest extends RelationalModelTest {
     @Test
     public void shouldObtainCustomOptions() throws Exception {
         final String sledge = "sledge";
-        this.procedure.setStatementOption( this.uow, sledge, "hammer" );
+        this.procedure.setStatementOption( getTransaction(), sledge, "hammer" );
 
         final String elvis = "elvis";
-        this.procedure.setStatementOption( this.uow, elvis, "presley" );
+        this.procedure.setStatementOption( getTransaction(), elvis, "presley" );
 
-        assertThat( this.procedure.getCustomOptions( this.uow ).length, is( 2 ) );
-        assertThat( Arrays.asList( this.procedure.getStatementOptionNames( this.uow ) ), hasItems( sledge, elvis ) );
+        assertThat( this.procedure.getCustomOptions( getTransaction() ).length, is( 2 ) );
+        assertThat( Arrays.asList( this.procedure.getStatementOptionNames( getTransaction() ) ), hasItems( sledge, elvis ) );
     }
 
     @Test
     public void shouldObtainPropertyDescriptorOfCustomOption() throws Exception {
         final String custom = "sledge";
-        this.procedure.setStatementOption( this.uow, custom, "hammer" );
+        this.procedure.setStatementOption( getTransaction(), custom, "hammer" );
 
-        assertThat( this.procedure.getPropertyDescriptor( this.uow, custom ), is( notNullValue() ) );
-        assertThat( this.procedure.getPropertyDescriptor( this.uow, custom ).getName(), is( custom ) );
+        assertThat( this.procedure.getPropertyDescriptor( getTransaction(), custom ), is( notNullValue() ) );
+        assertThat( this.procedure.getPropertyDescriptor( getTransaction(), custom ).getName(), is( custom ) );
     }
 
     @Test
     public void shouldObtainPropertyDescriptorOfStandardOption() throws Exception {
         final String standard = this.procedure.getStandardOptionNames()[0];
-        this.procedure.setStatementOption( this.uow, standard, "blah" );
+        this.procedure.setStatementOption( getTransaction(), standard, "blah" );
 
-        assertThat( this.procedure.getPropertyDescriptor( this.uow, standard ), is( notNullValue() ) );
-        assertThat( this.procedure.getPropertyDescriptor( this.uow, standard ).getName(), is( standard ) );
+        assertThat( this.procedure.getPropertyDescriptor( getTransaction(), standard ), is( notNullValue() ) );
+        assertThat( this.procedure.getPropertyDescriptor( getTransaction(), standard ).getName(), is( standard ) );
     }
 
     @Test
     public void shouldObtainStatementOptionNames() throws Exception {
         final String custom = "blah";
-        this.procedure.setStatementOption( this.uow, custom, "sledge" );
+        this.procedure.setStatementOption( getTransaction(), custom, "sledge" );
 
         final String standard = this.procedure.getStandardOptionNames()[0];
-        this.procedure.setStatementOption( this.uow, standard, "hammer" );
+        this.procedure.setStatementOption( getTransaction(), standard, "hammer" );
 
-        assertThat( this.procedure.getStatementOptionNames( this.uow ).length, is( 2 ) );
-        assertThat( Arrays.asList( this.procedure.getStatementOptionNames( this.uow ) ), hasItems( custom, standard ) );
+        assertThat( this.procedure.getStatementOptionNames( getTransaction() ).length, is( 2 ) );
+        assertThat( Arrays.asList( this.procedure.getStatementOptionNames( getTransaction() ) ), hasItems( custom, standard ) );
     }
 
     @Test
     public void shouldRemoveStandardOptionAsIfProperty() throws Exception {
         final String option = this.procedure.getStandardOptionNames()[0];
         final String value = "newValue";
-        this.procedure.setProperty( this.uow, option, value ); // add
-        this.procedure.setProperty( this.uow, option, (Object)null ); // remove
-        assertThat( this.procedure.hasProperty( this.uow, option ), is( false ) );
-        assertThat( this.procedure.hasChild( this.uow, option ), is( false ) );
+        this.procedure.setProperty( getTransaction(), option, value ); // add
+        this.procedure.setProperty( getTransaction(), option, (Object)null ); // remove
+        assertThat( this.procedure.hasProperty( getTransaction(), option ), is( false ) );
+        assertThat( this.procedure.hasChild( getTransaction(), option ), is( false ) );
     }
 
     @Test
     public void shouldSetCustomOptionAsIfProperty() throws Exception {
         final String option = "blah";
-        this.procedure.setStatementOption( this.uow, option, "initialValue" );
+        this.procedure.setStatementOption( getTransaction(), option, "initialValue" );
 
         final String value = "newValue";
-        this.procedure.setProperty( this.uow, option, value );
+        this.procedure.setProperty( getTransaction(), option, value );
 
-        assertThat( this.procedure.hasProperty( this.uow, option ), is( true ) );
-        assertThat( this.procedure.getProperty( this.uow, option ), is( instanceOf( StatementOption.class ) ) );
-        assertThat( this.procedure.getStatementOptions( this.uow ).length, is( 1 ) );
-        assertThat( this.procedure.isCustomOption( this.uow, option ), is( true ) );
+        assertThat( this.procedure.hasProperty( getTransaction(), option ), is( true ) );
+        assertThat( this.procedure.getProperty( getTransaction(), option ), is( instanceOf( StatementOption.class ) ) );
+        assertThat( this.procedure.getStatementOptions( getTransaction() ).length, is( 1 ) );
+        assertThat( this.procedure.isCustomOption( getTransaction(), option ), is( true ) );
 
-        final StatementOption statementOption = this.procedure.getStatementOptions( this.uow )[0];
-        assertThat( statementOption.getName( this.uow ), is( option ) );
-        assertThat( statementOption.getValue( this.uow ), is( ( Object )value ) );
+        final StatementOption statementOption = this.procedure.getStatementOptions( getTransaction() )[0];
+        assertThat( statementOption.getName( getTransaction() ), is( option ) );
+        assertThat( statementOption.getValue( getTransaction() ), is( ( Object )value ) );
     }
 
     @Test
     public void shouldSetStandardOptionAsIfProperty() throws Exception {
         final String option = this.procedure.getStandardOptionNames()[0];
-        this.procedure.setStatementOption( this.uow, option, "initialValue" );
+        this.procedure.setStatementOption( getTransaction(), option, "initialValue" );
 
         final String value = "newValue";
-        this.procedure.setProperty( this.uow, option, value );
+        this.procedure.setProperty( getTransaction(), option, value );
 
-        assertThat( this.procedure.hasProperty( this.uow, option ), is( true ) );
-        assertThat( this.procedure.getProperty( this.uow, option ), is( instanceOf( StatementOption.class ) ) );
-        assertThat( this.procedure.isCustomOption( this.uow, option ), is( false ) );
-        assertThat( this.procedure.getStatementOptions( this.uow ).length, is( 1 ) );
+        assertThat( this.procedure.hasProperty( getTransaction(), option ), is( true ) );
+        assertThat( this.procedure.getProperty( getTransaction(), option ), is( instanceOf( StatementOption.class ) ) );
+        assertThat( this.procedure.isCustomOption( getTransaction(), option ), is( false ) );
+        assertThat( this.procedure.getStatementOptions( getTransaction() ).length, is( 1 ) );
 
-        final StatementOption statementOption = this.procedure.getStatementOptions( this.uow )[0];
-        assertThat( statementOption.getName( this.uow ), is( option ) );
-        assertThat( statementOption.getValue( this.uow ), is( ( Object )value ) );
+        final StatementOption statementOption = this.procedure.getStatementOptions( getTransaction() )[0];
+        assertThat( statementOption.getName( getTransaction() ), is( option ) );
+        assertThat( statementOption.getValue( getTransaction() ), is( ( Object )value ) );
     }
 
     /*
@@ -362,20 +362,20 @@ public final class StoredProcedureImplTest extends RelationalModelTest {
     @Test
     public void shouldCreateUsingResolver() throws Exception {
         final String name = "blah";
-        final KomodoObject kobject = StoredProcedureImpl.RESOLVER.create( this.uow,
+        final KomodoObject kobject = StoredProcedure.RESOLVER.create( getTransaction(),
                                                                           _repo,
-                                                                          this.procedure.getParent( this.uow ),
+                                                                          this.procedure.getParent( getTransaction() ),
                                                                           name,
                                                                           null );
         assertThat( kobject, is( notNullValue() ) );
         assertThat( kobject, is( instanceOf( StoredProcedure.class ) ) );
-        assertThat( kobject.getName( this.uow ), is( name ) );
+        assertThat( kobject.getName( getTransaction() ), is( name ) );
     }
 
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
-        final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        StoredProcedureImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
+        final KomodoObject bogusParent = _repo.add( getTransaction(), null, "bogus", null );
+        StoredProcedure.RESOLVER.create( getTransaction(), _repo, bogusParent, "blah", null );
     }
 
 }

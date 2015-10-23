@@ -23,7 +23,7 @@ import org.komodo.core.KEngine;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.InvalidCommandArgumentException;
 import org.komodo.shell.api.ShellCommand;
-import org.komodo.shell.commands.CommandNotFoundCommand;
+import org.komodo.shell.api.ShellCommandFactory;
 
 /**
  * Implements tab completion for the interactive
@@ -54,7 +54,7 @@ public class TabCompleter implements Completion {
     	String buffer = completeOperation.getBuffer();
     	List<String> allCommandsForContext = new ArrayList<String>();
         try {
-            allCommandsForContext.addAll(factory.getCommandsForCurrentContext());
+            allCommandsForContext.addAll(factory.getCommandNamesForCurrentContext());
         } catch (Exception ex) {
             KEngine.getInstance().getErrorHandler().error(ex.getMessage(), ex);
         }
@@ -96,7 +96,7 @@ public class TabCompleter implements Completion {
 
     		// In case it is a command then we print the tabCompletion
     		// specific of the command
-    		if (command != null && !(command instanceof CommandNotFoundCommand)) {
+    		if (command != null) {
     			command.setArguments(arguments);
 
     			List<CharSequence> list = new ArrayList<CharSequence>();

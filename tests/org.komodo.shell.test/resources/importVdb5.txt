@@ -1,4 +1,0 @@
-# import VDB importProps-vdb.xml
-#
-import vdb ./resources/vdbs/importProps-vdb.xml
-show children

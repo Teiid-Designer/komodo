@@ -1,0 +1,13 @@
+#go to workspace, create a VDB with a Model
+workspace
+create-vdb myVdb vdbPath
+cd myVdb
+add-model myModel
+#
+#add a PushdownFunction to a Model
+cd myModel
+add-pushdown-function myPushdownFunction
+#
+# Set a property
+cd myPushdownFunction
+set-property NAMEINSOURCE myNameInSource

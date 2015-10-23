@@ -36,7 +36,7 @@ public final class TranslatorImplTest extends RelationalModelTest {
     @Before
     public void init() throws Exception {
         final Vdb vdb = createVdb();
-        this.translator = vdb.addTranslator( this.uow, "translator", "type" );
+        this.translator = vdb.addTranslator( getTransaction(), "translator", "type" );
         commit();
     }
 
@@ -49,7 +49,7 @@ public final class TranslatorImplTest extends RelationalModelTest {
     public void shouldFailConstructionIfNotTranslator() {
         if ( RelationalObjectImpl.VALIDATE_INITIAL_STATE ) {
             try {
-                new TranslatorImpl( this.uow, _repo, this.translator.getParent( this.uow ).getAbsolutePath() );
+                new TranslatorImpl( getTransaction(), _repo, this.translator.getParent( getTransaction() ).getAbsolutePath() );
                 fail();
             } catch ( final KException e ) {
                 // expected
@@ -59,49 +59,49 @@ public final class TranslatorImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveCorrectPrimaryType() throws Exception {
-        assertThat( this.translator.getPrimaryType( this.uow ).getName(), is( VdbLexicon.Translator.TRANSLATOR ) );
+        assertThat( this.translator.getPrimaryType( getTransaction() ).getName(), is( VdbLexicon.Translator.TRANSLATOR ) );
     }
 
     @Test
     public void shouldHaveCorrectTypeIdentifier() throws Exception {
-        assertThat(this.translator.getTypeIdentifier( this.uow ), is(KomodoType.VDB_TRANSLATOR));
+        assertThat(this.translator.getTypeIdentifier( getTransaction() ), is(KomodoType.VDB_TRANSLATOR));
     }
 
     @Test
     public void shouldHaveMoreRawProperties() throws Exception {
-        final String[] filteredProps = this.translator.getPropertyNames( this.uow );
-        final String[] rawProps = this.translator.getRawPropertyNames( this.uow );
+        final String[] filteredProps = this.translator.getPropertyNames( getTransaction() );
+        final String[] rawProps = this.translator.getRawPropertyNames( getTransaction() );
         assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
     }
 
     @Test
     public void shouldHaveParentVdb() throws Exception {
-        assertThat( this.translator.getParent( this.uow ), is( instanceOf( Vdb.class ) ) );
+        assertThat( this.translator.getParent( getTransaction() ), is( instanceOf( Vdb.class ) ) );
     }
 
     @Test
     public void shouldHaveTypeAfterConstruction() throws Exception {
-        assertThat( this.translator.getType( this.uow ), is( notNullValue() ) );
+        assertThat( this.translator.getType( getTransaction() ), is( notNullValue() ) );
     }
 
     @Test( expected = UnsupportedOperationException.class )
     public void shouldNotAllowChildren() throws Exception {
-        this.translator.addChild( this.uow, "blah", null );
+        this.translator.addChild( getTransaction(), "blah", null );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToSetEmptyType() throws Exception {
-        this.translator.setType( this.uow, StringConstants.EMPTY_STRING );
+        this.translator.setType( getTransaction(), StringConstants.EMPTY_STRING );
     }
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldNotBeAbleToSetNullType() throws Exception {
-        this.translator.setType( this.uow, null );
+        this.translator.setType( getTransaction(), null );
     }
 
     @Test
     public void shouldNotContainFilteredProperties() throws Exception {
-        final String[] filteredProps = this.translator.getPropertyNames( this.uow );
+        final String[] filteredProps = this.translator.getPropertyNames( getTransaction() );
         final Filter[] filters = this.translator.getFilters();
 
         for ( final String name : filteredProps ) {
@@ -113,31 +113,31 @@ public final class TranslatorImplTest extends RelationalModelTest {
 
     @Test
     public void shouldNotHaveDescriptionAfterConstruction() throws Exception {
-        assertThat( this.translator.getDescription( this.uow ), is( nullValue() ) );
+        assertThat( this.translator.getDescription( getTransaction() ), is( nullValue() ) );
     }
 
     @Test
     public void shouldSetCustomProperty() throws Exception {
         final String propName = "custom";
         final String propValue = "value";
-        this.translator.setProperty( this.uow, propName, propValue );
+        this.translator.setProperty( getTransaction(), propName, propValue );
 
-        assertThat( this.translator.getProperty( this.uow, propName ), is( notNullValue() ) );
-        assertThat( this.translator.getProperty( this.uow, propName ).getStringValue( this.uow ), is( propValue ) );
+        assertThat( this.translator.getProperty( getTransaction(), propName ), is( notNullValue() ) );
+        assertThat( this.translator.getProperty( getTransaction(), propName ).getStringValue( getTransaction() ), is( propValue ) );
     }
 
     @Test
     public void shouldSetDescription() throws Exception {
         final String newValue = "newDescription";
-        this.translator.setDescription( this.uow, newValue );
-        assertThat( this.translator.getDescription( this.uow ), is( newValue ) );
+        this.translator.setDescription( getTransaction(), newValue );
+        assertThat( this.translator.getDescription( getTransaction() ), is( newValue ) );
     }
 
     @Test
     public void shouldSetType() throws Exception {
         final String newValue = "newType";
-        this.translator.setType( this.uow, newValue );
-        assertThat( this.translator.getType( this.uow ), is( newValue ) );
+        this.translator.setType( getTransaction(), newValue );
+        assertThat( this.translator.getType( getTransaction() ), is( newValue ) );
     }
 
     /*
@@ -153,20 +153,20 @@ public final class TranslatorImplTest extends RelationalModelTest {
         final RelationalProperties props = new RelationalProperties();
         props.add( new RelationalProperty( VdbLexicon.Translator.TYPE, "oracle" ) );
 
-        final KomodoObject kobject = TranslatorImpl.RESOLVER.create( this.uow,
+        final KomodoObject kobject = Translator.RESOLVER.create( getTransaction(),
                                                                      _repo,
-                                                                     this.translator.getParent( this.uow ),
+                                                                     this.translator.getParent( getTransaction() ),
                                                                      name,
                                                                      props );
         assertThat( kobject, is( notNullValue() ) );
         assertThat( kobject, is( instanceOf( Translator.class ) ) );
-        assertThat( kobject.getName( this.uow ), is( name ) );
+        assertThat( kobject.getName( getTransaction() ), is( name ) );
     }
 
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
-        final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        TranslatorImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", new RelationalProperties() );
+        final KomodoObject bogusParent = _repo.add( getTransaction(), null, "bogus", null );
+        Translator.RESOLVER.create( getTransaction(), _repo, bogusParent, "blah", new RelationalProperties() );
     }
 
 }

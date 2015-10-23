@@ -1,5 +1,0 @@
-# create three models within workspace.
-create vdb vdb_test_1
-cd vdb_test_1
-create model model_1
-cd model_1

@@ -21,18 +21,16 @@
  */
 package org.komodo.relational.workspace;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
+import org.komodo.relational.RelationalModelFactory;
+import org.komodo.relational.RelationalObject;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.RelationalProperty;
+import org.komodo.relational.TypeResolver;
 import org.komodo.relational.internal.AdapterFactory;
-import org.komodo.relational.internal.RelationalModelFactory;
-import org.komodo.relational.internal.RelationalObjectImpl;
-import org.komodo.relational.internal.TypeResolver;
 import org.komodo.relational.internal.TypeResolverRegistry;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Schema;
@@ -42,6 +40,7 @@ import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.teiid.internal.TeiidImpl;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.internal.VdbImpl;
+import org.komodo.repository.ObjectImpl;
 import org.komodo.repository.RepositoryImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
@@ -62,7 +61,7 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 /**
  *
  */
-public class WorkspaceManager extends RelationalObjectImpl {
+public class WorkspaceManager extends ObjectImpl implements RelationalObject {
 
     /**
      * The allowed child types.
@@ -135,6 +134,26 @@ public class WorkspaceManager extends RelationalObjectImpl {
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.relational.RelationalObject#getFilters()
+     */
+    @Override
+    public Filter[] getFilters() {
+        return RelationalObject.NO_FILTERS;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.RelationalObject#getTypeDisplayName()
+     */
+    @Override
+    public String getTypeDisplayName() {
+        return Messages.getString( WorkspaceManager.class.getSimpleName() + ".typeName" ); //$NON-NLS-1$
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.repository.ObjectImpl#getTypeId()
      */
     @Override
@@ -160,7 +179,7 @@ public class WorkspaceManager extends RelationalObjectImpl {
     }
 
     private WorkspaceManager(UnitOfWork uow, Repository repository ) throws KException {
-        super(uow, repository, RepositoryImpl.WORKSPACE_ROOT);
+        super( repository, RepositoryImpl.WORKSPACE_ROOT, 0 );
 
         repository.addObserver(new RepositoryObserver() {
 
@@ -467,21 +486,22 @@ public class WorkspaceManager extends RelationalObjectImpl {
      * @throws KException
      *         if an error occurs
      */
-    public List< Teiid > findTeiids( UnitOfWork transaction ) throws KException {
+    public Teiid[] findTeiids( UnitOfWork transaction ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
                          "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         final String[] paths = findByType(transaction, KomodoLexicon.Teiid.NODE_TYPE);
-        List< Teiid > result = null;
+        Teiid[] result = null;
 
         if (paths.length == 0) {
-            result = Collections.emptyList();
+            result = Teiid.NO_TEIIDS;
         } else {
-            result = new ArrayList<>(paths.length);
+            result = new Teiid[paths.length];
+            int i = 0;
 
             for (final String path : paths) {
-                result.add(new TeiidImpl(transaction, getRepository(), path));
+                result[i++] = new TeiidImpl(transaction, getRepository(), path);
             }
         }
 
@@ -570,9 +590,19 @@ public class WorkspaceManager extends RelationalObjectImpl {
         ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
                          "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        AdapterFactory adapter = new AdapterFactory(getRepository());
+        AdapterFactory adapter = new AdapterFactory( );
         T kobject = adapter.adapt(transaction, object, resolvedClass);
         return kobject;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.RelationalObject#setFilters(org.komodo.relational.RelationalObject.Filter[])
+     */
+    @Override
+    public void setFilters( Filter[] newFilters ) {
+        // filters not allowed
     }
 
     private void validateWorkspaceMember( final UnitOfWork uow,

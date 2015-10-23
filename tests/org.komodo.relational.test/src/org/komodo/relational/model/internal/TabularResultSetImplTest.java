@@ -37,25 +37,25 @@ public final class TabularResultSetImplTest extends RelationalModelTest {
     @Before
     public void init() throws Exception {
         final Model model = createModel();
-        this.procedure = model.addStoredProcedure( this.uow, "procedure" );
-        this.resultSet = this.procedure.setResultSet( this.uow, TabularResultSet.class );
+        this.procedure = model.addStoredProcedure( getTransaction(), "procedure" );
+        this.resultSet = this.procedure.setResultSet( getTransaction(), TabularResultSet.class );
         commit();
     }
 
     @Test
     public void shouldAddColumn() throws Exception {
         final String resultSetColumnName = "resultSetColumn";
-        final ResultSetColumn resultSetColumn = this.resultSet.addColumn( this.uow, resultSetColumnName );
-        assertThat( this.resultSet.getColumns( this.uow ).length, is( 1 ) );
-        assertThat( resultSetColumn.getName( this.uow ), is( resultSetColumnName ) );
-        assertThat( this.resultSet.getChildren( this.uow )[0], is( instanceOf( ResultSetColumn.class ) ) );
+        final ResultSetColumn resultSetColumn = this.resultSet.addColumn( getTransaction(), resultSetColumnName );
+        assertThat( this.resultSet.getColumns( getTransaction() ).length, is( 1 ) );
+        assertThat( resultSetColumn.getName( getTransaction() ), is( resultSetColumnName ) );
+        assertThat( this.resultSet.getChildren( getTransaction() )[0], is( instanceOf( ResultSetColumn.class ) ) );
     }
 
     @Test
     public void shouldFailConstructionIfNotTabularResultSet() {
         if ( RelationalObjectImpl.VALIDATE_INITIAL_STATE ) {
             try {
-                new TabularResultSetImpl( this.uow, _repo, this.procedure.getAbsolutePath() );
+                new TabularResultSetImpl( getTransaction(), _repo, this.procedure.getAbsolutePath() );
                 fail();
             } catch ( final KException e ) {
                 // expected
@@ -71,24 +71,24 @@ public final class TabularResultSetImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveCorrectTypeIdentifier() throws Exception {
-        assertThat(this.resultSet.getTypeIdentifier( this.uow ), is(KomodoType.TABULAR_RESULT_SET));
+        assertThat(this.resultSet.getTypeIdentifier( getTransaction() ), is(KomodoType.TABULAR_RESULT_SET));
     }
 
     @Test
     public void shouldHaveMoreRawProperties() throws Exception {
-        final String[] filteredProps = this.resultSet.getPropertyNames( this.uow );
-        final String[] rawProps = this.resultSet.getRawPropertyNames( this.uow );
+        final String[] filteredProps = this.resultSet.getPropertyNames( getTransaction() );
+        final String[] rawProps = this.resultSet.getRawPropertyNames( getTransaction() );
         assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
     }
 
     @Test( expected = UnsupportedOperationException.class )
     public void shouldNotAllowRename() throws Exception {
-        this.resultSet.rename( this.uow, "newName" );
+        this.resultSet.rename( getTransaction(), "newName" );
     }
 
     @Test
     public void shouldNotContainFilteredProperties() throws Exception {
-        final String[] filteredProps = this.resultSet.getPropertyNames( this.uow );
+        final String[] filteredProps = this.resultSet.getPropertyNames( getTransaction() );
         final Filter[] filters = this.resultSet.getFilters();
 
         for ( final String name : filteredProps ) {
@@ -100,9 +100,9 @@ public final class TabularResultSetImplTest extends RelationalModelTest {
 
     @Test
     public void shouldObtainStrongTypedChildren() throws Exception {
-        this.resultSet.addColumn( this.uow, "resultSetColumn" );
-        assertThat( this.resultSet.getChildren( this.uow ).length, is( 1 ) );
-        assertThat( this.resultSet.getChildren( this.uow )[0], is( instanceOf( ResultSetColumn.class ) ) );
+        this.resultSet.addColumn( getTransaction(), "resultSetColumn" );
+        assertThat( this.resultSet.getChildren( getTransaction() ).length, is( 1 ) );
+        assertThat( this.resultSet.getChildren( getTransaction() )[0], is( instanceOf( ResultSetColumn.class ) ) );
     }
 
     /*
@@ -113,16 +113,16 @@ public final class TabularResultSetImplTest extends RelationalModelTest {
 
     @Test
     public void shouldCreateUsingResolver() throws Exception {
-        final KomodoObject kobject = TabularResultSetImpl.RESOLVER.create( this.uow, _repo, this.procedure, "blah", null );
+        final KomodoObject kobject = TabularResultSet.RESOLVER.create( getTransaction(), _repo, this.procedure, "blah", null );
         assertThat( kobject, is( notNullValue() ) );
         assertThat( kobject, is( instanceOf( TabularResultSet.class ) ) );
-        assertThat( kobject.getName( this.uow ), is( CreateProcedure.RESULT_SET ) );
+        assertThat( kobject.getName( getTransaction() ), is( CreateProcedure.RESULT_SET ) );
     }
 
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
-        final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        TabularResultSetImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
+        final KomodoObject bogusParent = _repo.add( getTransaction(), null, "bogus", null );
+        TabularResultSet.RESOLVER.create( getTransaction(), _repo, bogusParent, "blah", null );
     }
 
 }

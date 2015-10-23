@@ -1,5 +1,0 @@
-#create a vdb and a model, then cd into it
-create vdb MyVdb
-cd MyVdb
-create model MyModel
-cd MyModel

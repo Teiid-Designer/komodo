@@ -16,16 +16,16 @@
 package org.komodo.shell.api;
 
 import java.util.ArrayList;
-
-import org.komodo.shell.api.Messages;
 import org.komodo.shell.api.Messages.SHELLAPI;
+import org.komodo.spi.constants.StringConstants;
+import org.komodo.utils.StringUtils;
 
 /**
  * A class that can parse the arguments that should be passed to a command.
- * 
+ *
  * This class adapted from classes at https://github.com/Governance/s-ramp/blob/master/s-ramp-shell-api
  * - altered to use different Messages class
- * 
+ *
  * @author eric.wittmann@redhat.com
  */
 public class Arguments extends ArrayList<String> {
@@ -34,9 +34,15 @@ public class Arguments extends ArrayList<String> {
 
 	private boolean partialLastArgumentAllowed = false;
 
+    /**
+     * Constructs empty arguments.
+     */
+    public Arguments() {
+        // nothing to do
+    }
+
 	/**
-	 * Constructor.
-	 * @param arguments arguments
+     * @param arguments the command arguments (can be empty)
 	 * @throws InvalidCommandArgumentException the exception
 	 */
 	public Arguments(String arguments) throws InvalidCommandArgumentException {
@@ -44,13 +50,13 @@ public class Arguments extends ArrayList<String> {
 	}
 
     /**
-     * Constructor.
-     * @param arguments arguments
+     * @param arguments the command arguments (can be empty)
      * @param partialLastArgumentAllowed is partial last arg allowed
      * @throws InvalidCommandArgumentException the exception
      */
     public Arguments(String arguments, boolean partialLastArgumentAllowed) throws InvalidCommandArgumentException {
         this.partialLastArgumentAllowed = partialLastArgumentAllowed;
+        arguments = ( StringUtils.isBlank( arguments ) ? StringConstants.EMPTY_STRING : arguments );
         parseArguments(arguments);
     }
 
@@ -93,7 +99,7 @@ public class Arguments extends ArrayList<String> {
 		} else if (state == ScannerState.scanningForEndQuote && partialLastArgumentAllowed) {
             add(arguments.substring(startPos+1));
 		} else if (state == ScannerState.scanningForEndQuote && !partialLastArgumentAllowed) {
-		    throw new InvalidCommandArgumentException(size(), Messages.getString(SHELLAPI.invalid_final_arg)); 
+		    throw new InvalidCommandArgumentException(size(), Messages.getString(SHELLAPI.invalid_final_arg));
 		}
 	}
 

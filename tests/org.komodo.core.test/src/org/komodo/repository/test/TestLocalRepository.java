@@ -40,7 +40,6 @@ import org.junit.Test;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.repository.RepositoryImpl;
-import org.komodo.repository.RepositoryTools;
 import org.komodo.repository.SynchronousCallback;
 import org.komodo.repository.SynchronousNestedCallback;
 import org.komodo.spi.KException;
@@ -66,12 +65,12 @@ public class TestLocalRepository extends AbstractLocalRepositoryTest {
     }
 
     private String getPrimaryType( final KomodoObject kobject ) throws Exception {
-        return kobject.getPrimaryType(this.uow).getName();
+        return kobject.getPrimaryType(getTransaction()).getName();
     }
 
     private boolean hasMixin( final String mixin,
                               final KomodoObject kobject ) throws Exception {
-        for (final Descriptor descriptor : kobject.getDescriptors(this.uow)) {
+        for (final Descriptor descriptor : kobject.getDescriptors(getTransaction())) {
             if (descriptor.getName().equals(mixin)) {
                 return true;
             }
@@ -91,7 +90,7 @@ public class TestLocalRepository extends AbstractLocalRepositoryTest {
     @Test
     public void shouldRespondWithCallback() throws Exception {
         // Ensure the workspace is created first and in a different transaction
-        _repo.komodoWorkspace(this.uow);
+        _repo.komodoWorkspace(getTransaction());
         commit();
 
         final Boolean[] callbackCalled = new Boolean[1];
@@ -115,15 +114,14 @@ public class TestLocalRepository extends AbstractLocalRepositoryTest {
         };
 
         SynchronousCallback callback = new SynchronousNestedCallback(delegate);
+        useCustomCallback( callback, false );
 
-        String name = "shouldRespondWithCallback";
-        UnitOfWork transaction = createTransaction(name, callback);
         //
         // Create a single test node with no relationship to the sequencers or
         // with any relevant properties
         //
-        _repo.add(transaction, RepositoryImpl.WORKSPACE_ROOT, "Test1", null);
-        transaction.commit();
+        _repo.add( getTransaction(), RepositoryImpl.WORKSPACE_ROOT, "Test1", null );
+        commit();
 
         //
         // Stop the test from completing prior to the callback returning
@@ -139,7 +137,7 @@ public class TestLocalRepository extends AbstractLocalRepositoryTest {
         // Create a single test node with no relationship to the sequencers or
         // with any relevant properties
         //
-        _repo.add(this.uow, RepositoryImpl.WORKSPACE_ROOT, "Test1", null);
+        _repo.add(getTransaction(), RepositoryImpl.WORKSPACE_ROOT, "Test1", null);
         commit();
     }
 
@@ -154,11 +152,11 @@ public class TestLocalRepository extends AbstractLocalRepositoryTest {
     @Test
     public void shouldRespondWithCallback2() throws Exception {
         // Ensure the workspace is created first and in a different transaction
-        _repo.komodoWorkspace(this.uow);
+        _repo.komodoWorkspace(getTransaction());
         commit();
 
         // Create the test object to test the addition of a property
-        KomodoObject testObject = _repo.add(this.uow, RepositoryImpl.WORKSPACE_ROOT, "Test1", null);
+        KomodoObject testObject = _repo.add(getTransaction(), RepositoryImpl.WORKSPACE_ROOT, "Test1", null);
         assertNotNull(testObject);
         commit();
 
@@ -182,16 +180,15 @@ public class TestLocalRepository extends AbstractLocalRepositoryTest {
             }
         };
 
-        SynchronousCallback callback = new SynchronousNestedCallback(delegate);
+        final SynchronousCallback callback = new SynchronousNestedCallback( delegate );
+        useCustomCallback( callback, false );
 
-        String name = "shouldRespondWithCallback";
-        UnitOfWork transaction = createTransaction(name, callback);
         //
         // Create a single test node with no relationship to the sequencers or
         // with any relevant properties
         //
-        testObject.setProperty(transaction, "TestProperty1", "My property value");
-        transaction.commit();
+        testObject.setProperty(getTransaction(), "TestProperty1", "My property value");
+        commit();
 
         //
         // Stop the test from completing prior to the callback returning
@@ -209,12 +206,12 @@ public class TestLocalRepository extends AbstractLocalRepositoryTest {
     public void shouldAddWorkspaceItemAtRoot() throws Exception {
         // setup
         final String name = this.name.getMethodName();
-        final KomodoObject rootNode = _repo.add(this.uow, null, name, null);
+        final KomodoObject rootNode = _repo.add(getTransaction(), null, name, null);
         commit();
 
         // tests
         assertThat(rootNode, is(notNullValue()));
-        assertThat(rootNode.getName(this.uow), is(name));
+        assertThat(rootNode.getName(getTransaction()), is(name));
         assertThat(rootNode.getAbsolutePath(), is(RepositoryImpl.WORKSPACE_ROOT + FORWARD_SLASH + name));
     }
 
@@ -250,17 +247,17 @@ public class TestLocalRepository extends AbstractLocalRepositoryTest {
 
     @Test( expected = KException.class )
     public void shouldFailToAddWorkspaceItemToNonexistingParent() throws Exception {
-        _repo.add(this.uow, "does-not-exist", "shouldFailToAddWorkspaceItemToNonexistingParent", null);
+        _repo.add(getTransaction(), "does-not-exist", "shouldFailToAddWorkspaceItemToNonexistingParent", null);
     }
 
     @Test( expected = KException.class )
     public void shouldFailToImportNonExistentResource() throws Exception {
-        _repo.importFile(this.uow, new File("resources/bogus.xml"), "shouldFailToImportNonExistentResource", null);
+        _repo.importFile(getTransaction(), new File("resources/bogus.xml"), "shouldFailToImportNonExistentResource", null);
     }
 
     @Test( expected = KException.class )
     public void shouldFailToRemoveWorkspaceItemThatDoesNotExist() throws Exception {
-        _repo.remove(this.uow, "shouldFailToRemoveWorkspaceItemThatDoesNotExist");
+        _repo.remove(getTransaction(), "shouldFailToRemoveWorkspaceItemThatDoesNotExist");
     }
 
     @Test
@@ -272,7 +269,7 @@ public class TestLocalRepository extends AbstractLocalRepositoryTest {
 
     @Test
     public void shouldGetNullWhenWorkspaceItemDoesNotExist() throws Exception {
-        final KomodoObject doesNotExist = _repo.getFromWorkspace(this.uow, "shouldGetNullWhenWorkspaceItemDoesNotExist");
+        final KomodoObject doesNotExist = _repo.getFromWorkspace(getTransaction(), "shouldGetNullWhenWorkspaceItemDoesNotExist");
         assertThat(doesNotExist, is(nullValue()));
     }
 
@@ -283,16 +280,16 @@ public class TestLocalRepository extends AbstractLocalRepositoryTest {
 
     @Test
     public void shouldGetWorkspaceRoot() throws Exception {
-        final KomodoObject rootNode = _repo.getFromWorkspace(this.uow, null);
+        final KomodoObject rootNode = _repo.getFromWorkspace(getTransaction(), null);
         assertThat(rootNode, is(notNullValue()));
-        assertThat(rootNode.getName(this.uow), is(KomodoLexicon.Komodo.WORKSPACE));
+        assertThat(rootNode.getName(getTransaction()), is(KomodoLexicon.Komodo.WORKSPACE));
     }
 
     @Test( timeout = 60000 )
     public void shouldImportFile() throws Exception {
         // setup
         final String name = this.name.getMethodName();
-        final KomodoObject kobject = _repo.importFile(this.uow, new File("resources/bare-bones.xml"), name, null);
+        final KomodoObject kobject = _repo.importFile(getTransaction(), new File("resources/bare-bones.xml"), name, null);
         commit();
 
         // tests
@@ -300,12 +297,12 @@ public class TestLocalRepository extends AbstractLocalRepositoryTest {
         assertThat(kobject.getAbsolutePath(), is(RepositoryImpl.WORKSPACE_ROOT + FORWARD_SLASH + name));
         assertThat(kobject.getIndex(), is(0));
         assertThat(hasMixin(KomodoLexicon.WorkspaceItem.MIXIN_TYPE, kobject), is(true));
-        assertThat(kobject.getName(this.uow), is(name));
-        assertThat(kobject.getParent(this.uow), is(notNullValue()));
+        assertThat(kobject.getName(getTransaction()), is(name));
+        assertThat(kobject.getParent(getTransaction()), is(notNullValue()));
         assertThat(getPrimaryType(kobject), is(JcrNtLexicon.UNSTRUCTURED.getString()));
         assertThat(kobject.getRepository(), is((Repository)_repo));
-        assertThat(kobject.hasChild(this.uow, KomodoLexicon.WorkspaceItem.ORIGINAL_FILE), is(true));
-        assertThat(kobject.getChild(this.uow, KomodoLexicon.WorkspaceItem.ORIGINAL_FILE).getPrimaryType(this.uow).getName(),
+        assertThat(kobject.hasChild(getTransaction(), KomodoLexicon.WorkspaceItem.ORIGINAL_FILE), is(true));
+        assertThat(kobject.getChild(getTransaction(), KomodoLexicon.WorkspaceItem.ORIGINAL_FILE).getPrimaryType(getTransaction()).getName(),
                    is(JcrNtLexicon.FILE.getString()));
     }
 
@@ -315,19 +312,19 @@ public class TestLocalRepository extends AbstractLocalRepositoryTest {
         final String item2 = "shouldNotRemoveExistingItemsIfTryingToRemoveItemThatDoesNotExist-2";
 
         // setup
-        _repo.add( this.uow, null, item1, null );
+        _repo.add( getTransaction(), null, item1, null );
         commit();
 
         try {
-            _repo.remove(this.uow,
+            _repo.remove(getTransaction(),
                          item1,
                          item2,
                          "shouldNotRemoveExistingItemsIfTryingToRemoveItemThatDoesNotExist-doesNotExist");
             fail();
         } catch (final KException e) {
             // tests
-            assertThat(_repo.getFromWorkspace(this.uow, item1), is(notNullValue()));
-            assertThat(_repo.getFromWorkspace(this.uow, item2), is(nullValue()));
+            assertThat(_repo.getFromWorkspace(getTransaction(), item1), is(notNullValue()));
+            assertThat(_repo.getFromWorkspace(getTransaction(), item2), is(nullValue()));
         }
     }
 
@@ -335,28 +332,28 @@ public class TestLocalRepository extends AbstractLocalRepositoryTest {
     public void shouldRemoveMultipleWorkspaceRootItems() throws Exception {
         // setup
         final String item1 = "shouldRemoveMultipleWorkspaceRootItems-1";
-        _repo.add(this.uow, null, item1, null);
+        _repo.add(getTransaction(), null, item1, null);
         final String item2 = "shouldRemoveMultipleWorkspaceRootItems-2";
-        _repo.add(this.uow, null, item2, null);
+        _repo.add(getTransaction(), null, item2, null);
         commit();
 
-        _repo.remove(this.uow, item1, item2);
+        _repo.remove(getTransaction(), item1, item2);
         commit();
 
         // tests
-        assertThat(_repo.getFromWorkspace(this.uow, item1), is(nullValue()));
-        assertThat(_repo.getFromWorkspace(this.uow, item2), is(nullValue()));
+        assertThat(_repo.getFromWorkspace(getTransaction(), item1), is(nullValue()));
+        assertThat(_repo.getFromWorkspace(getTransaction(), item2), is(nullValue()));
     }
 
     @Test
     public void shouldRemoveWorkspaceRootItem() throws Exception {
         // setup
         final String name = this.name.getMethodName();
-        _repo.add(this.uow, null, name, null);
-        _repo.remove(this.uow, name);
+        _repo.add(getTransaction(), null, name, null);
+        _repo.remove(getTransaction(), name);
 
         // tests
-        assertThat(_repo.getFromWorkspace(this.uow, name), is(nullValue()));
+        assertThat(_repo.getFromWorkspace(getTransaction(), name), is(nullValue()));
     }
 
     private void verifyJcrNode(KomodoObject kObject) throws Exception {
@@ -365,107 +362,102 @@ public class TestLocalRepository extends AbstractLocalRepositoryTest {
 
         Method nodeMethod = ObjectImpl.class.getDeclaredMethod("node", UnitOfWork.class);
         nodeMethod.setAccessible(true);
-        Object node = nodeMethod.invoke(objImpl, this.uow);
+        Object node = nodeMethod.invoke(objImpl, getTransaction());
         assertTrue(node instanceof Node);
     }
 
     @Test
     public void shouldTraverseEntireRepository() throws Exception {
-        KomodoObject komodoWksp = _repo.komodoWorkspace(this.uow);
+        KomodoObject komodoWksp = _repo.komodoWorkspace(getTransaction());
         assertNotNull(komodoWksp);
         assertEquals(FORWARD_SLASH + KomodoLexicon.Komodo.NODE_TYPE +
                              FORWARD_SLASH + KomodoLexicon.Komodo.WORKSPACE,
                              komodoWksp.getAbsolutePath());
         verifyJcrNode(komodoWksp);
 
-        KomodoObject komodoRoot = komodoWksp.getParent(this.uow);
+        KomodoObject komodoRoot = komodoWksp.getParent(getTransaction());
         assertNotNull(komodoRoot);
         assertEquals(FORWARD_SLASH + KomodoLexicon.Komodo.NODE_TYPE, komodoRoot.getAbsolutePath());
         verifyJcrNode(komodoRoot);
 
-        KomodoObject repoRoot = komodoRoot.getParent(this.uow);
-        assertNotNull(repoRoot);
-        assertEquals(FORWARD_SLASH, repoRoot.getAbsolutePath());
-        verifyJcrNode(repoRoot);
-
-        String result = RepositoryTools.traverse(this.uow, repoRoot);
-        assertNotNull(result);
+        final KomodoObject nullParent = komodoRoot.getParent( getTransaction() );
+        assertThat( nullParent, is( nullValue() ) );
     }
 
     @Test
     public void shouldSearchForPrimaryType() throws Exception {
-        KomodoObject komodoWksp = _repo.komodoWorkspace(this.uow);
+        KomodoObject komodoWksp = _repo.komodoWorkspace(getTransaction());
         assertNotNull(komodoWksp);
 
         // Setup up 10 nodes to find
         for (int i = 1; i < 6; ++i) {
-            KomodoObject child = komodoWksp.addChild(this.uow, "test" + i, KomodoLexicon.VdbModel.NODE_TYPE);
-            child.setProperty(this.uow, KomodoLexicon.VdbModel.MODEL_DEFINITION, "DDL");
+            KomodoObject child = komodoWksp.addChild(getTransaction(), "test" + i, KomodoLexicon.VdbModel.NODE_TYPE);
+            child.setProperty(getTransaction(), KomodoLexicon.VdbModel.MODEL_DEFINITION, "DDL");
         }
 
         for (int i = 6; i < 11; ++i) {
-            KomodoObject child = komodoWksp.addChild(this.uow, "test" + i, KomodoLexicon.VdbModel.NODE_TYPE);
-            child.setProperty(this.uow, KomodoLexicon.VdbModel.MODEL_DEFINITION, "TEIIDSQL");
+            KomodoObject child = komodoWksp.addChild(getTransaction(), "test" + i, KomodoLexicon.VdbModel.NODE_TYPE);
+            child.setProperty(getTransaction(), KomodoLexicon.VdbModel.MODEL_DEFINITION, "TEIIDSQL");
         }
 
-        KomodoObject[] testNodes = komodoWksp.getChildrenOfType(this.uow, KomodoLexicon.VdbModel.NODE_TYPE);
+        KomodoObject[] testNodes = komodoWksp.getChildrenOfType(getTransaction(), KomodoLexicon.VdbModel.NODE_TYPE);
         assertEquals(10, testNodes.length);
         for (KomodoObject testKO : testNodes) {
-            Property property = testKO.getProperty(this.uow, KomodoLexicon.VdbModel.MODEL_DEFINITION);
-            assertTrue(property.getStringValue(this.uow).equals("DDL") || property.getStringValue(this.uow).equals("TEIIDSQL"));
+            Property property = testKO.getProperty(getTransaction(), KomodoLexicon.VdbModel.MODEL_DEFINITION);
+            assertTrue(property.getStringValue(getTransaction()).equals("DDL") || property.getStringValue(getTransaction()).equals("TEIIDSQL"));
         }
 
         commit(); // session save needed before query
 
         // Perform the search
-        List<KomodoObject> results = _repo.searchByType(this.uow, KomodoLexicon.VdbModel.NODE_TYPE);
+        List<KomodoObject> results = _repo.searchByType(getTransaction(), KomodoLexicon.VdbModel.NODE_TYPE);
 
         // Validate the results are as exepcted
         assertEquals(testNodes.length, results.size());
         for (KomodoObject searchObject : results) {
-            String name = searchObject.getName(this.uow);
+            String name = searchObject.getName(getTransaction());
             assertTrue(name.startsWith("test"));
 
             String indexStr = name.substring(4);
             int index = Integer.parseInt(indexStr);
             assertTrue(index > 0 && index < 11);
 
-            Property property = searchObject.getProperty(this.uow, KomodoLexicon.VdbModel.MODEL_DEFINITION);
+            Property property = searchObject.getProperty(getTransaction(), KomodoLexicon.VdbModel.MODEL_DEFINITION);
             if (index < 6)
-                assertEquals("DDL", property.getStringValue(this.uow));
+                assertEquals("DDL", property.getStringValue(getTransaction()));
             else
-                assertEquals("TEIIDSQL", property.getStringValue(this.uow));
+                assertEquals("TEIIDSQL", property.getStringValue(getTransaction()));
         }
     }
 
     @Test
     public void shouldSearchForKeyword() throws Exception {
-        KomodoObject komodoWksp = _repo.komodoWorkspace(this.uow);
+        KomodoObject komodoWksp = _repo.komodoWorkspace(getTransaction());
         assertNotNull(komodoWksp);
 
         // Setup up 10 nodes to find
         for (int i = 1; i < 6; ++i) {
-            KomodoObject child = komodoWksp.addChild(this.uow, "test" + i, KomodoLexicon.VdbModel.NODE_TYPE);
-            child.setProperty(this.uow, KomodoLexicon.VdbModel.MODEL_DEFINITION, "DDL");
+            KomodoObject child = komodoWksp.addChild(getTransaction(), "test" + i, KomodoLexicon.VdbModel.NODE_TYPE);
+            child.setProperty(getTransaction(), KomodoLexicon.VdbModel.MODEL_DEFINITION, "DDL");
         }
 
         for (int i = 6; i < 11; ++i) {
-            KomodoObject child = komodoWksp.addChild(this.uow, "test" + i, KomodoLexicon.VdbModel.NODE_TYPE);
-            child.setProperty(this.uow, KomodoLexicon.VdbModel.MODEL_DEFINITION, "TEIIDSQL");
+            KomodoObject child = komodoWksp.addChild(getTransaction(), "test" + i, KomodoLexicon.VdbModel.NODE_TYPE);
+            child.setProperty(getTransaction(), KomodoLexicon.VdbModel.MODEL_DEFINITION, "TEIIDSQL");
         }
 
-        KomodoObject[] testNodes = komodoWksp.getChildrenOfType(this.uow, KomodoLexicon.VdbModel.NODE_TYPE);
+        KomodoObject[] testNodes = komodoWksp.getChildrenOfType(getTransaction(), KomodoLexicon.VdbModel.NODE_TYPE);
         assertEquals(10, testNodes.length);
         for (KomodoObject testKO : testNodes) {
-            Property property = testKO.getProperty(this.uow, KomodoLexicon.VdbModel.MODEL_DEFINITION);
-            assertTrue(property.getStringValue(this.uow).equals("DDL") || property.getStringValue(this.uow).equals("TEIIDSQL"));
+            Property property = testKO.getProperty(getTransaction(), KomodoLexicon.VdbModel.MODEL_DEFINITION);
+            assertTrue(property.getStringValue(getTransaction()).equals("DDL") || property.getStringValue(getTransaction()).equals("TEIIDSQL"));
         }
 
         commit(); // session save needed before query
 
         // Perform the search
         List<KomodoObject> results = _repo.searchByKeyword(
-                                                           this.uow, KomodoLexicon.VdbModel.NODE_TYPE,
+                                                           getTransaction(), KomodoLexicon.VdbModel.NODE_TYPE,
                                                            KomodoLexicon.VdbModel.MODEL_DEFINITION,
                                                            KeywordCriteria.ANY,
                                                            "DDL");
@@ -473,51 +465,51 @@ public class TestLocalRepository extends AbstractLocalRepositoryTest {
         // Validate the results are as expected
         assertEquals(5, results.size());
         for (KomodoObject searchObject : results) {
-            String name = searchObject.getName(this.uow);
+            String name = searchObject.getName(getTransaction());
             assertTrue(name.startsWith("test"));
 
             String indexStr = name.substring(4);
             int index = Integer.parseInt(indexStr);
             assertTrue(index > 0 && index < 11);
 
-            Property property = searchObject.getProperty(this.uow, KomodoLexicon.VdbModel.MODEL_DEFINITION);
+            Property property = searchObject.getProperty(getTransaction(), KomodoLexicon.VdbModel.MODEL_DEFINITION);
             if (index < 6)
-                assertEquals("DDL", property.getStringValue(this.uow));
+                assertEquals("DDL", property.getStringValue(getTransaction()));
         }
     }
 
     @Test
     public void shouldSearchForPath() throws Exception {
-        KomodoObject komodoWksp = _repo.komodoWorkspace(this.uow);
+        KomodoObject komodoWksp = _repo.komodoWorkspace(getTransaction());
         assertNotNull(komodoWksp);
 
         // Setup up 10 nodes to find
         for (int i = 1; i <= 5; ++i) {
-            KomodoObject child = komodoWksp.addChild(this.uow, "test" + i, KomodoLexicon.VdbModel.NODE_TYPE);
-            child.setProperty(this.uow, KomodoLexicon.VdbModel.MODEL_DEFINITION, "DDL");
+            KomodoObject child = komodoWksp.addChild(getTransaction(), "test" + i, KomodoLexicon.VdbModel.NODE_TYPE);
+            child.setProperty(getTransaction(), KomodoLexicon.VdbModel.MODEL_DEFINITION, "DDL");
         }
 
-        KomodoObject[] testNodes = komodoWksp.getChildrenOfType(this.uow, KomodoLexicon.VdbModel.NODE_TYPE);
+        KomodoObject[] testNodes = komodoWksp.getChildrenOfType(getTransaction(), KomodoLexicon.VdbModel.NODE_TYPE);
         assertEquals(5, testNodes.length);
         for (KomodoObject testKO : testNodes) {
-            Property property = testKO.getProperty(this.uow, KomodoLexicon.VdbModel.MODEL_DEFINITION);
-            assertTrue(property.getStringValue(this.uow).equals("DDL") || property.getStringValue(this.uow).equals("TEIIDSQL"));
+            Property property = testKO.getProperty(getTransaction(), KomodoLexicon.VdbModel.MODEL_DEFINITION);
+            assertTrue(property.getStringValue(getTransaction()).equals("DDL") || property.getStringValue(getTransaction()).equals("TEIIDSQL"));
         }
 
         commit(); // session save needed before query
 
         // Perform the search
         for (int i = 1; i <= 5; ++i) {
-            List<KomodoObject> results = _repo.searchByPath(this.uow,
+            List<KomodoObject> results = _repo.searchByPath(getTransaction(),
                                                            komodoWksp.getAbsolutePath() + File.separator + "test" + i);
             // Validate the results are as expected
             assertEquals(1, results.size());
             KomodoObject searchObject = results.iterator().next();
-            String name = searchObject.getName(this.uow);
+            String name = searchObject.getName(getTransaction());
             assertEquals("test" + i, name);
 
-            Property property = searchObject.getProperty(this.uow, KomodoLexicon.VdbModel.MODEL_DEFINITION);
-            assertEquals("DDL", property.getStringValue(this.uow));
+            Property property = searchObject.getProperty(getTransaction(), KomodoLexicon.VdbModel.MODEL_DEFINITION);
+            assertEquals("DDL", property.getStringValue(getTransaction()));
         }
     }
 }
