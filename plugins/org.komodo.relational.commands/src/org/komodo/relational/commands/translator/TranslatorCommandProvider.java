@@ -7,9 +7,8 @@
 */
 package org.komodo.relational.commands.translator;
 
-import java.util.HashMap;
-import java.util.Map;
-import org.komodo.relational.commands.translator.RenameChildCommand;
+import java.util.HashSet;
+import java.util.Set;
 import org.komodo.relational.vdb.Translator;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandProvider;
@@ -36,12 +35,12 @@ public class TranslatorCommandProvider implements ShellCommandProvider {
      * @see org.komodo.shell.api.ShellCommandProvider#provideCommands()
      */
     @Override
-    public Map< String, Class< ? extends ShellCommand >> provideCommands() {
-        final Map< String, Class< ? extends ShellCommand >> result = new HashMap<>();
+    public Set< Class< ? extends ShellCommand > > provideCommands() {
+        final Set< Class< ? extends ShellCommand > > result = new HashSet< >();
 
-        result.put( SetTranslatorPropertyCommand.NAME, SetTranslatorPropertyCommand.class );
-        result.put( UnsetTranslatorPropertyCommand.NAME, UnsetTranslatorPropertyCommand.class );
-        result.put( RenameChildCommand.NAME, RenameChildCommand.class );
+        result.add( SetTranslatorPropertyCommand.class );
+        result.add( UnsetTranslatorPropertyCommand.class );
+        result.add( RenameChildCommand.class );
 
         return result;
     }

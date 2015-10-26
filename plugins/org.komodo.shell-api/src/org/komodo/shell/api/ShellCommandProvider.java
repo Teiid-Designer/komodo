@@ -15,7 +15,7 @@
  */
 package org.komodo.shell.api;
 
-import java.util.Map;
+import java.util.Set;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
@@ -26,11 +26,12 @@ import org.komodo.spi.repository.Repository;
  */
 public interface ShellCommandProvider {
 
-	/**
-	 * Called to get the collection of commands contributed by the provider.
-	 * @return the map of commands
-	 */
-	public Map<String, Class<? extends ShellCommand>> provideCommands();
+    /**
+     * Called to get the collection of commands contributed by the provider.
+     *
+     * @return the provided commands (can be <code>null</code> or empty)
+     */
+    public Set< Class< ? extends ShellCommand > > provideCommands();
 
     /**
      * Resolve the supplied KomodoObject

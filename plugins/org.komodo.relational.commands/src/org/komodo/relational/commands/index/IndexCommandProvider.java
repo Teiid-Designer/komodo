@@ -7,8 +7,8 @@
 */
 package org.komodo.relational.commands.index;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 import org.komodo.relational.model.Index;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandProvider;
@@ -35,11 +35,11 @@ public class IndexCommandProvider implements ShellCommandProvider {
      * @see org.komodo.shell.api.ShellCommandProvider#provideCommands()
      */
     @Override
-    public Map< String, Class< ? extends ShellCommand >> provideCommands() {
-        final Map< String, Class< ? extends ShellCommand >> result = new HashMap<>();
+    public Set< Class< ? extends ShellCommand > > provideCommands() {
+        final Set< Class< ? extends ShellCommand > > result = new HashSet< >();
 
-        result.put( SetIndexPropertyCommand.NAME, SetIndexPropertyCommand.class );
-        result.put( UnsetIndexPropertyCommand.NAME, UnsetIndexPropertyCommand.class );
+        result.add( SetIndexPropertyCommand.class );
+        result.add( UnsetIndexPropertyCommand.class );
 
         return result;
     }

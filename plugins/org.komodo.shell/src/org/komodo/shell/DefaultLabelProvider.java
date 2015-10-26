@@ -199,7 +199,6 @@ public class DefaultLabelProvider implements KomodoObjectLabelProvider {
             return ROOT_PATH;
         }
 
-        final Repository.UnitOfWork uow = this.status.getTransaction();
         KomodoObject kobject = null;
 
         try {
@@ -212,16 +211,16 @@ public class DefaultLabelProvider implements KomodoObjectLabelProvider {
                 }
 
                 if ( this.status.isShowingPropertyNamePrefixes() ) {
-                    if ( parent.hasChild( uow, segment ) ) {
-                        kobject = parent.getChild( uow, segment );
+                    if ( parent.hasChild( this.status.getTransaction(), segment ) ) {
+                        kobject = parent.getChild( this.status.getTransaction(), segment );
                         parent = kobject;
                     } else {
                         return null; // no child with that name
                     }
                 } else {
                     // loop through children and take first one with local name match
-                    for ( final KomodoObject kid : parent.getChildren( uow ) ) {
-                        final String name = kid.getName( uow );
+                    for ( final KomodoObject kid : parent.getChildren( this.status.getTransaction() ) ) {
+                        final String name = kid.getName( this.status.getTransaction() );
                         final int index = name.indexOf( StringConstants.COLON );
 
                         if ( index == -1 ) {

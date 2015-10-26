@@ -141,6 +141,23 @@ public class Messages implements StringConstants {
 
     }
 
+    public enum AddChildCommand {
+
+        CHILD_ADDED,
+        MISSING_CHILD_NAME;
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see java.lang.Enum#toString()
+         */
+        @Override
+        public String toString() {
+            return getEnumName( this ) + DOT + name();
+        }
+
+    }
+
     public enum StatusCommand {
         Separator,
         Connected,
@@ -227,8 +244,6 @@ public class Messages implements StringConstants {
     public enum ShowStatusCommand {
         CurrentRepoUrl,
         CurrentRepoName,
-        NoCurrentTeiid,
-        CurrentTeiid,
         CurrentContext;
 
         @Override

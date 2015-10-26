@@ -49,11 +49,11 @@ public final class ServerDisconnectCommand extends ServerShellCommand {
 
         try {
             Teiid teiid = getWorkspaceServer();
-            TeiidInstance teiidInstance = teiid.getTeiidInstance( getWorkspaceStatus().getTransaction() );
+            TeiidInstance teiidInstance = teiid.getTeiidInstance( getTransaction() );
 
             if ( teiidInstance.isConnected() ) {
                 print( CompletionConstants.MESSAGE_INDENT,
-                       getMessage( AttemptingToDisconnect, teiid.getName( getWorkspaceStatus().getTransaction() ) ) );
+                       getMessage( AttemptingToDisconnect, teiid.getName( getTransaction() ) ) );
 
                 teiidInstance.disconnect();
                 result = new CommandResultImpl( getMessage( DisconnectSuccessMsg, teiid.getName( getTransaction() ) ) );

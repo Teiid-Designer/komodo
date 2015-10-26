@@ -17,7 +17,6 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
-import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
  * A base class for shell command's relating to relational objects.
@@ -61,10 +60,6 @@ public abstract class RelationalShellCommand extends BuiltInShellCommand {
 
     protected Repository getRepository() throws KException {
         return getWorkspaceStatus().getCurrentContext().getRepository();
-    }
-
-    protected UnitOfWork getTransaction() {
-        return getWorkspaceStatus().getTransaction();
     }
 
     protected WorkspaceManager getWorkspaceManager() throws KException {

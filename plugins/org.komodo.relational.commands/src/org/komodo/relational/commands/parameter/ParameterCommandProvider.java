@@ -7,8 +7,8 @@
 */
 package org.komodo.relational.commands.parameter;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 import org.komodo.relational.model.Parameter;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandProvider;
@@ -35,11 +35,11 @@ public class ParameterCommandProvider implements ShellCommandProvider {
      * @see org.komodo.shell.api.ShellCommandProvider#provideCommands()
      */
     @Override
-    public Map< String, Class< ? extends ShellCommand >> provideCommands() {
-        final Map< String, Class< ? extends ShellCommand >> result = new HashMap<>();
+    public Set< Class< ? extends ShellCommand > > provideCommands() {
+        final Set< Class< ? extends ShellCommand > > result = new HashSet< >();
 
-        result.put( SetParameterPropertyCommand.NAME, SetParameterPropertyCommand.class );
-        result.put( UnsetParameterPropertyCommand.NAME, UnsetParameterPropertyCommand.class );
+        result.add( SetParameterPropertyCommand.class );
+        result.add( UnsetParameterPropertyCommand.class );
 
         return result;
     }

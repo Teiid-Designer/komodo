@@ -93,10 +93,10 @@ public class RenameCommand extends BuiltInShellCommand {
      */
     private boolean validateNotDuplicateType(KomodoObject objToRename, String newName, KomodoObject targetObject) throws Exception {
         boolean hasExistingWithName = false;
-        KomodoObject[] objsOfType = targetObject.getChildrenOfType(getWorkspaceStatus().getTransaction(), objToRename.getTypeIdentifier(getWorkspaceStatus().getTransaction()).getType());
+        KomodoObject[] objsOfType = targetObject.getChildrenOfType(getTransaction(), objToRename.getTypeIdentifier(getTransaction()).getType());
 
         for(KomodoObject kObj : objsOfType) {
-            String kObjName = kObj.getName(getWorkspaceStatus().getTransaction());
+            String kObjName = kObj.getName(getTransaction());
             if(kObjName.equals(newName)) {
                 hasExistingWithName = true;
                 break;
@@ -116,7 +116,7 @@ public class RenameCommand extends BuiltInShellCommand {
         if( origObject != null ) {
         	String parentAbsPath = targetObject.getAbsolutePath();
         	String newChildPath = parentAbsPath + FORWARD_SLASH + newShortName;
-        	origObject.rename(getWorkspaceStatus().getTransaction(), newChildPath);
+        	origObject.rename( getTransaction(), newChildPath );
         } else {
         	throw new Exception(Messages.getString(Messages.RenameCommand.cannotRename_objectDoesNotExist, origObject));
         }
@@ -130,9 +130,9 @@ public class RenameCommand extends BuiltInShellCommand {
         if (getArguments().isEmpty()) {
 			// List of potential completions
 			List<String> potentialsList = new ArrayList<String>();
-			KomodoObject[] children = getWorkspaceStatus().getCurrentContext().getChildren(getWorkspaceStatus().getTransaction());
+			KomodoObject[] children = getWorkspaceStatus().getCurrentContext().getChildren( getTransaction() );
 			for(KomodoObject wsContext : children) {
-				potentialsList.add(wsContext.getName(getWorkspaceStatus().getTransaction()));
+				potentialsList.add(wsContext.getName( getTransaction() ));
 			}
     		// --------------------------------------------------------------
     		// No arg - offer children relative to current context.
@@ -165,7 +165,7 @@ public class RenameCommand extends BuiltInShellCommand {
         KomodoObject context = getContext();
         KomodoObject parent = null;
         try {
-            parent = context.getParent(getWorkspaceStatus().getTransaction());
+            parent = context.getParent( getTransaction() );
         } catch (KException ex) {
             // Exception, parent false
         }

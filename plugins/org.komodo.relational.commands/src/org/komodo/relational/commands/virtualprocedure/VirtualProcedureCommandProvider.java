@@ -7,8 +7,8 @@
 */
 package org.komodo.relational.commands.virtualprocedure;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 import org.komodo.relational.model.VirtualProcedure;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandProvider;
@@ -35,13 +35,13 @@ public class VirtualProcedureCommandProvider implements ShellCommandProvider {
      * @see org.komodo.shell.api.ShellCommandProvider#provideCommands()
      */
     @Override
-    public Map< String, Class< ? extends ShellCommand >> provideCommands() {
-        final Map< String, Class< ? extends ShellCommand >> result = new HashMap<>();
+    public Set< Class< ? extends ShellCommand > > provideCommands() {
+        final Set< Class< ? extends ShellCommand > > result = new HashSet< >();
 
-        result.put( AddParameterCommand.NAME, AddParameterCommand.class );
-        result.put( DeleteParameterCommand.NAME, DeleteParameterCommand.class );
-        result.put( SetVirtualProcedurePropertyCommand.NAME, SetVirtualProcedurePropertyCommand.class );
-        result.put( UnsetVirtualProcedurePropertyCommand.NAME, UnsetVirtualProcedurePropertyCommand.class );
+        result.add( AddParameterCommand.class );
+        result.add( DeleteParameterCommand.class );
+        result.add( SetVirtualProcedurePropertyCommand.class );
+        result.add( UnsetVirtualProcedurePropertyCommand.class );
 
         return result;
     }

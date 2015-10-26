@@ -30,8 +30,6 @@ public interface KomodoObject extends KNode {
      *        the name of the new child being added (cannot be empty)
      * @param primaryType
      *        the primary type of the child or <code>null</code> if type is <code>nt:unstructured</code>
-     * @param saveSession
-     *        <code>true</code> if the session should be saved after creating the Komodo object
      * @return the new object (never <code>null</code>)
      * @throws KException
      *         if an error occurs

@@ -216,6 +216,12 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
                 commit();
             } else {
                 rollback();
+
+                if ( result.getError() != null ) {
+                    throw result.getError();
+                }
+
+                Assert.fail( "Failed : " + result.getMessage() ); //$NON-NLS-1$
             }
         } catch ( InvalidCommandArgumentException e ) {
             Assert.fail( "Failed - invalid command: " + e.getMessage() ); //$NON-NLS-1$

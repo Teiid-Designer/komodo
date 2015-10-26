@@ -250,7 +250,7 @@ public interface WorkspaceStatus extends StringConstants {
      * @return the command factory
      */
     ShellCommandFactory getCommandFactory();
-    
+
     /**
      * @return the komodo engine
      */
@@ -282,6 +282,9 @@ public interface WorkspaceStatus extends StringConstants {
     void rollback( final String source ) throws Exception;
 
     /**
+     * The transaction should <strong>NEVER</strong> be cached by a caller since they can be committed by a command or the shell
+     * framework at any time leaving the cached transaction in a state where it cannot be used.
+     *
      * @return the current transaction (never <code>null</code>)
      */
     UnitOfWork getTransaction();

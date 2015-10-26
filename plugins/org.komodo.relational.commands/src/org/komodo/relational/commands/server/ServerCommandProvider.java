@@ -11,9 +11,9 @@ import static org.komodo.relational.commands.server.ServerCommandMessages.Common
 import static org.komodo.relational.commands.server.ServerCommandMessages.Common.CurrentTeiid;
 import static org.komodo.relational.commands.server.ServerCommandMessages.Common.NotConnected;
 import static org.komodo.relational.commands.server.ServerCommandMessages.Common.serverStatusText;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 import org.komodo.relational.Messages;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.workspace.WorkspaceManager;
@@ -48,23 +48,23 @@ public class ServerCommandProvider implements ShellCommandProvider {
      * @see org.komodo.shell.api.ShellCommandProvider#provideCommands()
      */
     @Override
-    public Map< String, Class< ? extends ShellCommand >> provideCommands() {
-        final Map< String, Class< ? extends ShellCommand >> result = new HashMap<>();
+    public Set< Class< ? extends ShellCommand > > provideCommands() {
+        final Set< Class< ? extends ShellCommand > > result = new HashSet< >();
 
-        result.put( ServerConnectCommand.NAME, ServerConnectCommand.class );
-        result.put( ServerDisconnectCommand.NAME, ServerDisconnectCommand.class );
-        result.put( ServerSetCommand.NAME, ServerSetCommand.class );
-        result.put( ServerShowVdbsCommand.NAME, ServerShowVdbsCommand.class );
-        result.put( ServerShowTranslatorsCommand.NAME, ServerShowTranslatorsCommand.class );
-        result.put( ServerShowDatasourcesCommand.NAME, ServerShowDatasourcesCommand.class );
-        result.put( ServerShowDatasourceTypesCommand.NAME, ServerShowDatasourceTypesCommand.class );
-        result.put( ServerDeployVdbCommand.NAME, ServerDeployVdbCommand.class );
-        result.put( ServerUndeployVdbCommand.NAME, ServerUndeployVdbCommand.class );
-        result.put( ServerImportVdbCommand.NAME, ServerImportVdbCommand.class );
-        result.put( ServerShowVdbCommand.NAME, ServerShowVdbCommand.class );
-        result.put( ServerShowTranslatorCommand.NAME, ServerShowTranslatorCommand.class );
-        result.put( ServerShowDatasourceCommand.NAME, ServerShowDatasourceCommand.class );
-        result.put( ServerShowDatasourceTypeCommand.NAME, ServerShowDatasourceTypeCommand.class );
+        result.add( ServerConnectCommand.class );
+        result.add( ServerDisconnectCommand.class );
+        result.add( ServerSetCommand.class );
+        result.add( ServerShowVdbsCommand.class );
+        result.add( ServerShowTranslatorsCommand.class );
+        result.add( ServerShowDatasourcesCommand.class );
+        result.add( ServerShowDatasourceTypesCommand.class );
+        result.add( ServerDeployVdbCommand.class );
+        result.add( ServerUndeployVdbCommand.class );
+        result.add( ServerImportVdbCommand.class );
+        result.add( ServerShowVdbCommand.class );
+        result.add( ServerShowTranslatorCommand.class );
+        result.add( ServerShowDatasourceCommand.class );
+        result.add( ServerShowDatasourceTypeCommand.class );
 
         return result;
     }

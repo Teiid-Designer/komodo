@@ -61,7 +61,7 @@ public final class DeleteReferenceColumnCommand extends ForeignKeyShellCommand {
 
                 if ( column instanceof Column ) {
                     final ForeignKey foreignKey = getForeignKey();
-                    foreignKey.removeReferencesColumn( getWorkspaceStatus().getTransaction(), ( Column )column );
+                    foreignKey.removeReferencesColumn( getTransaction(), ( Column )column );
 
                     result = new CommandResultImpl( getMessage( COLUMN_REMOVED, columnPathArg, getContext().getAbsolutePath() ) );
                 } else {
@@ -95,7 +95,7 @@ public final class DeleteReferenceColumnCommand extends ForeignKeyShellCommand {
                               final List< CharSequence > candidates ) throws Exception {
         if ( getArguments().isEmpty() ) {
             final ForeignKey foreignKey = getForeignKey();
-            final Column[] refCols = foreignKey.getReferencesColumns( getWorkspaceStatus().getTransaction() );
+            final Column[] refCols = foreignKey.getReferencesColumns( getTransaction() );
 
             // no tab-completion if no columns to remove
             if ( refCols.length == 0 ) {

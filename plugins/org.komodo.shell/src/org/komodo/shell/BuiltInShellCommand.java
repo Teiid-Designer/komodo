@@ -31,7 +31,7 @@ import org.komodo.shell.util.KomodoObjectUtils;
 import org.komodo.shell.util.PrintUtils;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
-import org.komodo.spi.repository.Repository;
+import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
 
@@ -143,6 +143,10 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
     @Override
     public final String[] getAliases() {
         return this.aliases;
+    }
+
+    protected UnitOfWork getTransaction() {
+        return getWorkspaceStatus().getTransaction();
     }
 
     @Override
@@ -464,16 +468,15 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
     	// List of potentials completions
     	List<String> potentialsList = new ArrayList<String>();
     	// Only offer '..' if below the root
-        if ( ( currentContext.getParent( this.wsStatus.getTransaction() ) != null ) && includeGoUp ) {
+        if ( ( currentContext.getParent( getTransaction() ) != null ) && includeGoUp ) {
     		potentialsList.add(StringConstants.DOT_DOT);
     	}
 
-    	Repository.UnitOfWork transaction = getWorkspaceStatus().getTransaction();
     	// --------------------------------------------------------------
     	// No arg - offer children relative current context.
     	// --------------------------------------------------------------
     	if(lastArgument==null) {
-    	    KomodoObject[] children = currentContext.getChildren(transaction);
+    	    KomodoObject[] children = currentContext.getChildren( getTransaction() );
     		for(KomodoObject wsContext : children) {
     		    final String contextName = this.wsStatus.getLabelProvider().getDisplayName( wsContext );
     			potentialsList.add(contextName+FORWARD_SLASH);
@@ -497,7 +500,7 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
     				KomodoObject deepestMatchingContext = ContextUtils.getDeepestMatchingContextRelative(getWorkspaceStatus(),getWorkspaceStatus().getRootContext(), relativePath);
 
     				// Get children of deepest context match to form potentialsList
-    				KomodoObject[] children = deepestMatchingContext.getChildren(transaction);
+    				KomodoObject[] children = deepestMatchingContext.getChildren( getTransaction() );
     				if(children.length != 0) {
     					// Get all children as potentials
     					for(KomodoObject childContext : children) {
@@ -518,7 +521,7 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
     		    KomodoObject deepestMatchingContext = ContextUtils.getDeepestMatchingContextRelative(getWorkspaceStatus(), currentContext, lastArgument);
 
     			// Get children of deepest context match to form potentialsList
-    		    KomodoObject[] children = deepestMatchingContext.getChildren(getWorkspaceStatus().getTransaction());
+    		    KomodoObject[] children = deepestMatchingContext.getChildren( getTransaction() );
     			if(children.length!=0) {
     				// Get all children as potentials
     				for(KomodoObject childContext : children) {

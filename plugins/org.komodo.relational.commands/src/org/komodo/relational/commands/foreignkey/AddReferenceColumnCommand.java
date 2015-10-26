@@ -62,18 +62,17 @@ public final class AddReferenceColumnCommand extends ForeignKeyShellCommand {
                 final ForeignKey foreignKey = getForeignKey();
 
                 // must NOT be a column in the parent of the table constraint
-                final Repository.UnitOfWork transaction = getWorkspaceStatus().getTransaction();
-                final KomodoObject parentTable = foreignKey.getParent( transaction );
+                final KomodoObject parentTable = foreignKey.getParent( getTransaction() );
 
-                if ( parentTable.equals( column.getParent( transaction ) ) ) {
+                if ( parentTable.equals( column.getParent( getTransaction() ) ) ) {
                     result = new CommandResultImpl( false,
                                                     getMessage( INVALID_COLUMN,
                                                                 getWorkspaceStatus().getLabelProvider()
                                                                                     .getDisplayPath( column.getAbsolutePath() ),
-                                                                foreignKey.getName( transaction ) ),
+                                                                foreignKey.getName( getTransaction() ) ),
                                                     null );
                 } else {
-                    foreignKey.addReferencesColumn( transaction, ( Column )column );
+                    foreignKey.addReferencesColumn( getTransaction(), ( Column )column );
                     result = new CommandResultImpl( getMessage( COLUMN_REF_ADDED, columnPath, getContext().getAbsolutePath() ) );
                 }
             } else {

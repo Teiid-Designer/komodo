@@ -7,8 +7,8 @@
 */
 package org.komodo.relational.commands.vdb;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandProvider;
@@ -35,33 +35,33 @@ public class VdbCommandProvider implements ShellCommandProvider {
      * @see org.komodo.shell.api.ShellCommandProvider#provideCommands()
      */
     @Override
-    public Map< String, Class< ? extends ShellCommand >> provideCommands() {
-        final Map< String, Class< ? extends ShellCommand >> result = new HashMap<>();
+    public Set< Class< ? extends ShellCommand > > provideCommands() {
+        final Set< Class< ? extends ShellCommand > > result = new HashSet< >();
 
-        result.put( AddDataRoleCommand.NAME, AddDataRoleCommand.class );
-        result.put( AddEntryCommand.NAME, AddEntryCommand.class );
-        result.put( AddImportCommand.NAME, AddImportCommand.class );
-        result.put( AddModelCommand.NAME, AddModelCommand.class );
-        result.put( AddTranslatorCommand.NAME, AddTranslatorCommand.class );
+        result.add( AddDataRoleCommand.class );
+        result.add( AddEntryCommand.class );
+        result.add( AddImportCommand.class );
+        result.add( AddModelCommand.class );
+        result.add( AddTranslatorCommand.class );
 
-        result.put( DeleteDataRoleCommand.NAME, DeleteDataRoleCommand.class );
-        result.put( DeleteEntryCommand.NAME, DeleteEntryCommand.class );
-        result.put( DeleteImportCommand.NAME, DeleteImportCommand.class );
-        result.put( DeleteModelCommand.NAME, DeleteModelCommand.class );
-        result.put( DeleteTranslatorCommand.NAME, DeleteTranslatorCommand.class );
+        result.add( DeleteDataRoleCommand.class );
+        result.add( DeleteEntryCommand.class );
+        result.add( DeleteImportCommand.class );
+        result.add( DeleteModelCommand.class );
+        result.add( DeleteTranslatorCommand.class );
 
-        result.put( ShowDataRolesCommand.NAME, ShowDataRolesCommand.class );
-        result.put( ShowEntriesCommand.NAME, ShowEntriesCommand.class );
-        result.put( ShowImportsCommand.NAME, ShowImportsCommand.class );
-        result.put( ShowModelsCommand.NAME, ShowModelsCommand.class );
-        result.put( ShowTranslatorsCommand.NAME, ShowTranslatorsCommand.class );
+        result.add( ShowDataRolesCommand.class );
+        result.add( ShowEntriesCommand.class );
+        result.add( ShowImportsCommand.class );
+        result.add( ShowModelsCommand.class );
+        result.add( ShowTranslatorsCommand.class );
 
-        result.put( ShowVdbCommand.NAME, ShowVdbCommand.class );
-        result.put( SetVdbPropertyCommand.NAME, SetVdbPropertyCommand.class );
-        result.put( ExportCommand.NAME, ExportCommand.class );
-        result.put( UnsetVdbPropertyCommand.NAME, UnsetVdbPropertyCommand.class );
-        
-        result.put( UploadModelCommand.NAME, UploadModelCommand.class );
+        result.add( ShowVdbCommand.class );
+        result.add( SetVdbPropertyCommand.class );
+        result.add( ExportCommand.class );
+        result.add( UnsetVdbPropertyCommand.class );
+
+        result.add( UploadModelCommand.class );
 
         return result;
     }

@@ -18,10 +18,10 @@ package org.komodo.shell.commands;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import org.junit.Test;
-import org.komodo.repository.ObjectImpl;
 import org.komodo.shell.AbstractCommandTest;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.KomodoObjectLabelProvider;
+import org.komodo.spi.repository.KomodoObject;
 
 /**
  * Test Class to test {@link ShowSummaryCommand}.
@@ -39,7 +39,7 @@ public class ShowSummaryCommandTest extends AbstractCommandTest {
         assertCommandResultOk(result);
 
         String writerOutput = getCommandOutput();
-        assertThat( writerOutput, writerOutput.contains( ObjectImpl.class.getSimpleName()
+        assertThat( writerOutput, writerOutput.contains( KomodoObject.class.getSimpleName()
                                                          + " \""
                                                          + KomodoObjectLabelProvider.LIB_DISPLAY_PATH
                                                          + "\"" ),
@@ -55,7 +55,7 @@ public class ShowSummaryCommandTest extends AbstractCommandTest {
         assertCommandResultOk(result);
 
         String writerOutput = getCommandOutput();
-        assertThat( writerOutput, writerOutput.contains( ObjectImpl.class.getSimpleName()
+        assertThat( writerOutput, writerOutput.contains( KomodoObject.class.getSimpleName()
                                                          + " \""
                                                          + KomodoObjectLabelProvider.ROOT_DISPLAY_NAME
                                                          + "\"" ),
@@ -72,7 +72,7 @@ public class ShowSummaryCommandTest extends AbstractCommandTest {
         assertCommandResultOk(result);
 
         String writerOutput = getCommandOutput();
-        assertThat( writerOutput, writerOutput.contains( ObjectImpl.class.getSimpleName()
+        assertThat( writerOutput, writerOutput.contains( KomodoObject.class.getSimpleName()
                                                          + " \""
                                                          + KomodoObjectLabelProvider.WORKSPACE_DISPLAY_PATH
                                                          + "\"" ),

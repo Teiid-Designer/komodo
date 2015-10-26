@@ -69,7 +69,7 @@ public class UnsetPropertyCommand extends BuiltInShellCommand {
 
             // remove the property by setting its value to null
             final String propertyName = ( !isShowingPropertyNamePrefixes() ? KomodoObjectUtils.attachPrefix( getWorkspaceStatus(),context, propNameArg ) : propNameArg );
-            context.setProperty( getWorkspaceStatus().getTransaction(),propertyName, (Object[])null );
+            context.setProperty( getTransaction(),propertyName, (Object[])null );
 
             return new CommandResultImpl( getString( "propertyUnset", propNameArg ) ); //$NON-NLS-1$
         } catch ( final Exception e ) {
