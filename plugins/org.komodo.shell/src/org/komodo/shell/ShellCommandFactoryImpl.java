@@ -29,39 +29,17 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.ServiceLoader;
 import java.util.Set;
-import java.util.Map.Entry;
+import java.util.TreeSet;
 import org.komodo.core.KEngine;
 import org.komodo.shell.Messages.SHELL;
-import org.komodo.shell.ShellCommandFactoryImpl.CommandNotFoundCommand;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandFactory;
 import org.komodo.shell.api.ShellCommandProvider;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.shell.commands.CdCommand;
-import org.komodo.shell.commands.CommitCommand;
-import org.komodo.shell.commands.ExitCommand;
-import org.komodo.shell.commands.HelpCommand;
-import org.komodo.shell.commands.HomeCommand;
-import org.komodo.shell.commands.LibraryCommand;
-import org.komodo.shell.commands.ListCommand;
-import org.komodo.shell.commands.PlayCommand;
-import org.komodo.shell.commands.RenameCommand;
-import org.komodo.shell.commands.RollbackCommand;
-import org.komodo.shell.commands.SetAutoCommitCommand;
-import org.komodo.shell.commands.SetGlobalPropertyCommand;
-import org.komodo.shell.commands.SetPropertyCommand;
-import org.komodo.shell.commands.SetRecordCommand;
-import org.komodo.shell.commands.ShowChildrenCommand;
-import org.komodo.shell.commands.ShowGlobalCommand;
-import org.komodo.shell.commands.ShowPropertiesCommand;
-import org.komodo.shell.commands.ShowPropertyCommand;
-import org.komodo.shell.commands.ShowStatusCommand;
-import org.komodo.shell.commands.ShowSummaryCommand;
-import org.komodo.shell.commands.UnsetPropertyCommand;
-import org.komodo.shell.commands.WorkspaceCommand;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.FileUtils;
 import org.komodo.utils.KLog;
@@ -78,98 +56,61 @@ import org.komodo.utils.KLog;
 public class ShellCommandFactoryImpl implements ShellCommandFactory {
 
     private static final KLog LOGGER = KLog.getLogger();
-    private static final String BUILT_IN_PROVIDER_ID = "KOMODO_BUILT_IN"; //$NON-NLS-1$
+    private static final String BUILT_IN_PROVIDER_ID = BuiltInShellCommandProvider.class.getName();
 
     private static CommandNotFoundCommand _commandNotFound;
 
     // key = command name, value = {key = provider ID, value = command}
     private final Map< String, Map< String, ShellCommand > > commandMap;
-    private Collection<ShellCommandProvider> providers = new ArrayList<>();
+    private Set<ShellCommandProvider> providers;
 
     /**
+     * @param wsStatus
+     *        the workspace status (cannot be <code>null</code>)
      * @throws Exception
      *         if a built-in command cannot be created or if an error occurs
      */
     public ShellCommandFactoryImpl(final WorkspaceStatus wsStatus ) throws Exception {
-        this.commandMap = new HashMap<>();
-        discoverProviders();
-        registerCommands( wsStatus );
-    }
-
-    /**
-     * @return the command providers (never <code>null</code>)
-     */
-    @Override
-    public Collection<ShellCommandProvider> getCommandProviders() {
-        return providers;
-    }
-
-    /**
-     * Registers all built-in and discovered commands.
-     *
-     * @param wsStatus
-     *        the workspace status (cannot be <code>null</code>)
-     * @throws Exception
-     *         if an error occurs
-     */
-    @Override
-    public void registerCommands( final WorkspaceStatus wsStatus ) throws Exception {
         ArgCheck.isNotNull( wsStatus, "wsStatus" ); //$NON-NLS-1$
+
+        this.commandMap = new HashMap<>();
         _commandNotFound = new CommandNotFoundCommand( wsStatus );
 
-        // register built-in commands
-        registerCommand( BUILT_IN_PROVIDER_ID, CdCommand.class, wsStatus );
-        registerCommand( BUILT_IN_PROVIDER_ID, CommitCommand.class, wsStatus );
-        registerCommand( BUILT_IN_PROVIDER_ID, ExitCommand.class, wsStatus );
-        registerCommand( BUILT_IN_PROVIDER_ID, HelpCommand.class, wsStatus );
-        registerCommand( BUILT_IN_PROVIDER_ID, HomeCommand.class, wsStatus );
-        registerCommand( BUILT_IN_PROVIDER_ID, LibraryCommand.class, wsStatus );
-        registerCommand( BUILT_IN_PROVIDER_ID, ListCommand.class, wsStatus );
-        registerCommand( BUILT_IN_PROVIDER_ID, PlayCommand.class, wsStatus );
-        registerCommand( BUILT_IN_PROVIDER_ID, RenameCommand.class, wsStatus );
-        registerCommand( BUILT_IN_PROVIDER_ID, RollbackCommand.class, wsStatus );
-        registerCommand( BUILT_IN_PROVIDER_ID, SetAutoCommitCommand.class, wsStatus );
-        registerCommand( BUILT_IN_PROVIDER_ID, SetGlobalPropertyCommand.class, wsStatus );
-        registerCommand( BUILT_IN_PROVIDER_ID, SetPropertyCommand.class, wsStatus );
-        registerCommand( BUILT_IN_PROVIDER_ID, SetRecordCommand.class, wsStatus );
-        registerCommand( BUILT_IN_PROVIDER_ID, ShowChildrenCommand.class, wsStatus );
-        registerCommand( BUILT_IN_PROVIDER_ID, ShowGlobalCommand.class, wsStatus );
-        registerCommand( BUILT_IN_PROVIDER_ID, ShowPropertiesCommand.class, wsStatus );
-        registerCommand( BUILT_IN_PROVIDER_ID, ShowPropertyCommand.class, wsStatus );
-        registerCommand( BUILT_IN_PROVIDER_ID, ShowStatusCommand.class, wsStatus );
-        registerCommand( BUILT_IN_PROVIDER_ID, ShowSummaryCommand.class, wsStatus );
-        registerCommand( BUILT_IN_PROVIDER_ID, UnsetPropertyCommand.class, wsStatus );
-        registerCommand( BUILT_IN_PROVIDER_ID, WorkspaceCommand.class, wsStatus );
-
-        // register any commands contributed by command providers
-        registerContributedCommands( wsStatus );
+        discoverProviders( wsStatus );
     }
 
-    private void registerContributedCommands( final WorkspaceStatus wsStatus ) {
-        for ( final ShellCommandProvider provider : this.providers ) {
-            final Map< String, Class< ? extends ShellCommand > > commands = provider.provideCommands();
-            LOGGER.debug( "ShellCommandFactory.registerContributedCommands: ShellCommandProvider \"{0}\" is contributing {1} commands", //$NON-NLS-1$
-                          ( ( commands == null ) ? 0 : commands.size() ) );
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommandFactory#getCommandProviders()
+     */
+    @Override
+    public Set< ShellCommandProvider > getCommandProviders() {
+        return this.providers;
+    }
 
-            if ( ( commands != null ) && !commands.isEmpty() ) {
-                final String providerId = provider.getClass().getName();
+    private void registerContributedCommands( final ShellCommandProvider provider,
+                                              final WorkspaceStatus wsStatus ) {
+        final Collection< Class< ? extends ShellCommand > > commandClasses = provider.provideCommands();
+        LOGGER.debug( "ShellCommandFactory.registerContributedCommands: ShellCommandProvider \"{0}\" is contributing {1} commands", //$NON-NLS-1$
+                      ( ( commandClasses == null ) ? 0 : commandClasses.size() ) );
 
-                for ( final Map.Entry< String, Class< ? extends ShellCommand > > entry : commands.entrySet() ) {
-                    final Class< ? extends ShellCommand > commandClass = entry.getValue();
+        if ( ( commandClasses != null ) && !commandClasses.isEmpty() ) {
+            final String providerId = provider.getClass().getName();
 
-                    if ( commandClass != null ) {
-                        try {
-                            registerCommand( providerId, commandClass, wsStatus );
-                        } catch ( final Exception e ) {
-                            KEngine.getInstance().getErrorHandler().error( e );
-                        }
+            for ( final Class< ? extends ShellCommand > commandClass : commandClasses ) {
+                if ( commandClass != null ) {
+                    try {
+                        registerCommand( providerId, commandClass, wsStatus );
+                    } catch ( final Exception e ) {
+                        KEngine.getInstance().getErrorHandler().error( e );
                     }
                 }
             }
         }
     }
 
-    private void discoverProviders() {
+    private void discoverProviders( final WorkspaceStatus wsStatus ) {
         final List< ClassLoader > commandClassloaders = new ArrayList< >();
         commandClassloaders.add( Thread.currentThread().getContextClassLoader() );
 
@@ -202,15 +143,25 @@ public class ShellCommandFactoryImpl implements ShellCommandFactory {
             }
         }
 
+        // add built-in provider and discover other providers
+        final Set< ShellCommandProvider > tempProviders = new HashSet< >();
+        final ShellCommandProvider builtInProvider = new BuiltInShellCommandProvider();
+        tempProviders.add( builtInProvider );
+        registerContributedCommands( builtInProvider, wsStatus );
+
         // iterate through the ClassLoaders and use the Java ServiceLoader mechanism to load the providers
         for ( final ClassLoader classLoader : commandClassloaders ) {
             for ( final ShellCommandProvider provider : ServiceLoader.load( ShellCommandProvider.class, classLoader ) ) {
                 if ( !Modifier.isAbstract( provider.getClass().getModifiers() ) ) {
-                    this.providers.add( provider );
-                    LOGGER.debug( "ShellCommandFactory: adding ShellCommandProvider \"{0}\"", provider.getClass() ); //$NON-NLS-1$
+                    tempProviders.add( provider );
+                    LOGGER.debug( "ShellCommandFactory: adding ShellCommandProvider \"{0}\"", provider.getClass().getName() ); //$NON-NLS-1$
+                    registerContributedCommands( provider, wsStatus );
                 }
             }
         }
+
+        LOGGER.debug( "ShellCommandFactory: found \"{0}\" ShellCommandProviders", tempProviders.size() ); //$NON-NLS-1$
+        this.providers = Collections.unmodifiableSet( tempProviders );
     }
 
     private void registerCommand( final String providerId,
@@ -320,22 +271,19 @@ public class ShellCommandFactoryImpl implements ShellCommandFactory {
     }
 
     /**
-     * Get valid command names for the current context.
+     * {@inheritDoc}
      *
-     * @return a list of commands for current context (never <code>null</code>)
-     * @throws Exception
-     *         if error occurs
+     * @see org.komodo.shell.api.ShellCommandFactory#getCommandNamesForCurrentContext()
      */
     @Override
-    public List< String > getCommandNamesForCurrentContext() throws Exception {
-        final List< String > commandList = new ArrayList< String >();
+    public Set< String > getCommandNamesForCurrentContext() throws Exception {
+        final Set< String > commandNames = new TreeSet< >();
 
         for ( final ShellCommand possible : getCommandsForCurrentContext() ) {
-            commandList.add( possible.getName() );
+            commandNames.add( possible.getName() );
         }
 
-        Collections.sort( commandList );
-        return commandList;
+        return commandNames;
     }
 
     class CommandNotFoundCommand extends BuiltInShellCommand {

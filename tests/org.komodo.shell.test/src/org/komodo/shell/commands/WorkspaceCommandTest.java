@@ -19,7 +19,6 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.shell.AbstractCommandTest;
 import org.komodo.shell.api.CommandResult;
-import org.komodo.shell.commands.WorkspaceCommand;
 import org.komodo.shell.util.KomodoObjectUtils;
 
 /**

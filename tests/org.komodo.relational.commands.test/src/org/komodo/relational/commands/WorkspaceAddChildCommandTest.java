@@ -13,30 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.komodo.shell.commands;
+package org.komodo.relational.commands;
 
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
-import org.komodo.shell.AbstractCommandTest;
-import org.komodo.shell.api.CommandResult;
-import org.komodo.shell.util.KomodoObjectUtils;
 
 /**
- * Test Class to test {@link ExitCommand}.
+ * Test Class to test {@link WorkspaceAddChildCommand}.
  */
 @SuppressWarnings( { "javadoc", "nls" } )
-public class ExitCommandTest extends AbstractCommandTest {
+public class WorkspaceAddChildCommandTest extends AbstractCommandTest {
 
-    @Test
-    public void test1() throws Exception {
-        final String[] commands = { "workspace" };
-    	setup( commands );
-
-        CommandResult result = execute();
-        assertCommandResultOk(result);
-
-    	// Check WorkspaceContext
-    	assertEquals("/workspace", KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext()));
+    @Test( expected = AssertionError.class )
+    public void shouldNotBeAvailableAtWorkspace() throws Exception {
+        final String[] commands = { "workspace",
+                                    "add-child blah" };
+        setup( commands );
+        execute();
     }
 
 }

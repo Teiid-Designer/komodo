@@ -7,8 +7,8 @@
 */
 package org.komodo.relational.commands.datarole;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandProvider;
@@ -35,15 +35,15 @@ public class DataRoleCommandProvider implements ShellCommandProvider {
      * @see org.komodo.shell.api.ShellCommandProvider#provideCommands()
      */
     @Override
-    public Map< String, Class< ? extends ShellCommand >> provideCommands() {
-        final Map< String, Class< ? extends ShellCommand >> result = new HashMap<>();
+    public Set< Class< ? extends ShellCommand > > provideCommands() {
+        final Set< Class< ? extends ShellCommand > > result = new HashSet< >();
 
-        result.put( AddMappedRoleCommand.NAME, AddMappedRoleCommand.class );
-        result.put( AddPermissionCommand.NAME, AddPermissionCommand.class );
-        result.put( DeleteMappedRoleCommand.NAME, DeleteMappedRoleCommand.class );
-        result.put( DeletePermissionCommand.NAME, DeletePermissionCommand.class );
-        result.put( SetDataRolePropertyCommand.NAME, SetDataRolePropertyCommand.class );
-        result.put( UnsetDataRolePropertyCommand.NAME, UnsetDataRolePropertyCommand.class );
+        result.add( AddMappedRoleCommand.class );
+        result.add( AddPermissionCommand.class );
+        result.add( DeleteMappedRoleCommand.class );
+        result.add( DeletePermissionCommand.class );
+        result.add( SetDataRolePropertyCommand.class );
+        result.add( UnsetDataRolePropertyCommand.class );
 
         return result;
     }

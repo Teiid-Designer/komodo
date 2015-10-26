@@ -62,18 +62,17 @@ public final class AddConstraintColumnCommand extends TableConstraintShellComman
                 final TableConstraint constraint = getTableConstraint();
 
                 // must be a column in the parent of the table constraint
-                final Repository.UnitOfWork transaction = getWorkspaceStatus().getTransaction();
-                final KomodoObject parentTable = constraint.getParent( transaction );
+                final KomodoObject parentTable = constraint.getParent( getTransaction() );
 
-                if ( parentTable.equals( column.getParent( transaction ) ) ) {
-                    constraint.addColumn( transaction, ( Column )column );
+                if ( parentTable.equals( column.getParent( getTransaction() ) ) ) {
+                    constraint.addColumn( getTransaction(), ( Column )column );
                     result = new CommandResultImpl( getMessage( COLUMN_REF_ADDED, columnPath, getContext().getAbsolutePath() ) );
                 } else {
                     result = new CommandResultImpl( false,
                                                     getMessage( INVALID_COLUMN,
                                                                 getWorkspaceStatus().getLabelProvider()
                                                                                     .getDisplayPath( column.getAbsolutePath() ),
-                                                                constraint.getName( transaction ) ),
+                                                                constraint.getName( getTransaction() ) ),
                                                     null );
                 }
             } else {

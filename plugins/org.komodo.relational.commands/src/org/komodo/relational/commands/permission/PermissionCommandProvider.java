@@ -7,8 +7,8 @@
 */
 package org.komodo.relational.commands.permission;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 import org.komodo.relational.vdb.Permission;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandProvider;
@@ -35,15 +35,15 @@ public class PermissionCommandProvider implements ShellCommandProvider {
      * @see org.komodo.shell.api.ShellCommandProvider#provideCommands()
      */
     @Override
-    public Map< String, Class< ? extends ShellCommand >> provideCommands() {
-        final Map< String, Class< ? extends ShellCommand >> result = new HashMap<>();
+    public Set< Class< ? extends ShellCommand > > provideCommands() {
+        final Set< Class< ? extends ShellCommand > > result = new HashSet< >();
 
-        result.put( AddConditionCommand.NAME, AddConditionCommand.class );
-        result.put( AddMaskCommand.NAME, AddMaskCommand.class );
-        result.put( DeleteConditionCommand.NAME, DeleteConditionCommand.class );
-        result.put( DeleteMaskCommand.NAME, DeleteMaskCommand.class );
-        result.put( SetPermissionPropertyCommand.NAME, SetPermissionPropertyCommand.class );
-        result.put( UnsetPermissionPropertyCommand.NAME, UnsetPermissionPropertyCommand.class );
+        result.add( AddConditionCommand.class );
+        result.add( AddMaskCommand.class );
+        result.add( DeleteConditionCommand.class );
+        result.add( DeleteMaskCommand.class );
+        result.add( SetPermissionPropertyCommand.class );
+        result.add( UnsetPermissionPropertyCommand.class );
 
         return result;
     }

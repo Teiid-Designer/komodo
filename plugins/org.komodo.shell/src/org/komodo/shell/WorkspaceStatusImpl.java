@@ -55,6 +55,7 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
+import org.komodo.spi.repository.Repository.UnitOfWorkListener;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.KLog;
 import org.komodo.utils.StringUtils;
@@ -64,6 +65,11 @@ import org.komodo.utils.StringUtils;
  */
 public class WorkspaceStatusImpl implements WorkspaceStatus {
 
+    /**
+     * A transaction commit/rollback source for when the transaction was called directly not going through the WorkspaceStatus.
+     */
+    static final String UNKNOWN_SOURCE = WorkspaceStatusTransaction.class.getSimpleName();
+
     private static final String SAVED_CONTEXT_PATH = "SAVED_CONTEXT_PATH"; //$NON-NLS-1$
     private static final List< String > HIDDEN_PROPS = Arrays.asList( new String[] { SAVED_CONTEXT_PATH } );
 
@@ -72,7 +78,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     /* Root Context */
     private KomodoObject rootContext;
 
-    private UnitOfWork uow; // the current transaction
+    private WorkspaceStatusTransaction uow; // the current transaction
     private SynchronousCallback callback;
 
     private int count = 0; // commit count
@@ -119,7 +125,8 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         if ( transaction == null ) {
             createTransaction("init"); //$NON-NLS-1$
         } else {
-            this.uow = transaction;
+            this.uow = ( ( transaction instanceof WorkspaceStatusTransaction ) ? ( WorkspaceStatusTransaction )transaction
+                                                                               : new WorkspaceStatusTransaction( transaction ) );
             Repository.UnitOfWorkListener uowListener = transaction.getCallback();
             if(uowListener!=null && uowListener instanceof SynchronousCallback) {
                 this.callback = (SynchronousCallback)uowListener;
@@ -170,9 +177,10 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     private void createTransaction(final String source ) throws Exception {
         final Repository repo = getEngine().getDefaultRepository();
         this.callback = new SynchronousCallback();
-        this.uow = repo.createTransaction( ( getClass().getSimpleName() + ':' + source + '-' + this.count++ ),
-                                                            false,
-                                                            this.callback );
+        final UnitOfWork transaction = repo.createTransaction( ( getClass().getSimpleName() + ':' + source + '-' + this.count++ ),
+                                                               false,
+                                                               this.callback );
+        this.uow = new WorkspaceStatusTransaction( transaction );
         KLog.getLogger().debug( "WorkspaceStatusImpl.createTransaction: " + this.uow.getName() ); //$NON-NLS-1$
     }
 
@@ -220,29 +228,39 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     public void setTransaction( final UnitOfWork transaction ) {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        this.uow = transaction;
+        this.uow = ( ( transaction instanceof WorkspaceStatusTransaction ) ? ( WorkspaceStatusTransaction )transaction
+                                                                           : new WorkspaceStatusTransaction( transaction ) );
     }
 
     @Override
     public void commit( final String source ) throws Exception {
         final String txName = this.uow.getName();
-        this.uow.commit();
+        this.uow.getDelegate().commit();
 
-        final boolean success = this.callback.await( 3, TimeUnit.MINUTES );
+        try {
+            final boolean success = this.callback.await( 3, TimeUnit.MINUTES );
 
-        if ( success ) {
-            final KException error = this.uow.getError();
-            final State txState = this.uow.getState();
+            if ( success ) {
+                final KException error = this.uow.getError();
+                final State txState = this.uow.getState();
 
-            if ( ( error != null ) || !State.COMMITTED.equals( txState ) ) {
-                throw new KException( Messages.getString( SHELL.TRANSACTION_COMMIT_ERROR, txName ), error );
+                if ( ( error != null ) || !State.COMMITTED.equals( txState ) ) {
+                    throw new KException( Messages.getString( SHELL.TRANSACTION_COMMIT_ERROR, txName ), error );
+                }
+            } else {
+                throw new KException( Messages.getString( SHELL.TRANSACTION_TIMEOUT, txName ) );
             }
-        } else {
-            throw new KException( Messages.getString( SHELL.TRANSACTION_TIMEOUT, txName ) );
-        }
 
-        // create new transaction
-        createTransaction( source );
+            // create new transaction
+            createTransaction( source );
+        } catch ( final Exception e ) {
+            if ( UNKNOWN_SOURCE.equals( source ) ) {
+                this.uow.getCallback().errorOccurred( e );
+                KLog.getLogger().debug( "{0}.commit error: ", e, UNKNOWN_SOURCE ); //$NON-NLS-1$
+            } else {
+                throw e;
+            }
+        }
     }
 
     /**
@@ -253,23 +271,32 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     @Override
     public void rollback( final String source ) throws Exception {
         final String txName = this.uow.getName();
-        this.uow.rollback();
+        this.uow.getDelegate().rollback();
 
-        final boolean success = this.callback.await( 3, TimeUnit.MINUTES );
+        try {
+            final boolean success = this.callback.await( 3, TimeUnit.MINUTES );
 
-        if ( success ) {
-            final KException error = uow.getError();
-            final State txState = this.uow.getState();
+            if ( success ) {
+                final KException error = uow.getError();
+                final State txState = this.uow.getState();
 
-            if ( ( error != null ) || !State.ROLLED_BACK.equals( txState ) ) {
-                throw new KException( Messages.getString( SHELL.TRANSACTION_ROLLBACK_ERROR, txName ), error );
+                if ( ( error != null ) || !State.ROLLED_BACK.equals( txState ) ) {
+                    throw new KException( Messages.getString( SHELL.TRANSACTION_ROLLBACK_ERROR, txName ), error );
+                }
+            } else {
+                throw new KException( Messages.getString( SHELL.TRANSACTION_TIMEOUT, txName ) );
             }
-        } else {
-            throw new KException( Messages.getString( SHELL.TRANSACTION_TIMEOUT, txName ) );
-        }
 
-        // create new transaction
-        createTransaction( source );
+            // create new transaction
+            createTransaction( source );
+        } catch ( final Exception e ) {
+            if ( UNKNOWN_SOURCE.equals( source ) ) {
+                this.uow.getCallback().errorOccurred( e );
+                KLog.getLogger().debug( "{0}.rollback error: ", e, UNKNOWN_SOURCE ); //$NON-NLS-1$
+            } else {
+                throw e;
+            }
+        }
     }
 
     @Override
@@ -613,17 +640,33 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
 
     @Override
     public String getTypeDisplay ( final KomodoObject kObj ) {
-        if(!this.commandFactory.getCommandProviders().isEmpty()) {
-            for(ShellCommandProvider provider : this.commandFactory.getCommandProviders()) {
-                String typeString = null;
-                try {
-                    typeString = provider.getTypeDisplay(getTransaction(), kObj);
-                } catch (KException ex) {
-                    KLog.getLogger().error( "ShellCommandProvider.getTypeDisplay error in provider \"{0}\"", ex, provider ); //$NON-NLS-1$
+        if ( !this.commandFactory.getCommandProviders().isEmpty() ) {
+            ShellCommandProvider defaultProvider = null;
+
+            try {
+                for ( ShellCommandProvider provider : this.commandFactory.getCommandProviders() ) {
+                    try {
+                        if ( provider instanceof BuiltInShellCommandProvider ) {
+                            defaultProvider = provider;
+                            continue;
+                        }
+
+                        String typeString = provider.getTypeDisplay( getTransaction(), kObj );
+                        if ( typeString != null ) return typeString;
+                    } catch ( final Exception e ) {
+                        KLog.getLogger().error( "WorkspaceStatusImpl.getTypeDisplay error in provider \"{0}\"", e, provider ); //$NON-NLS-1$
+                        // continue on to next provider
+                    }
                 }
-                if(typeString!=null) return typeString;
+
+                return defaultProvider.getTypeDisplay( getTransaction(), kObj );
+            } catch ( KException ex ) {
+                KLog.getLogger().error( "WorkspaceStatusImpl.getTypeDisplay error in built-in provider", ex ); //$NON-NLS-1$
             }
         }
+
+        assert false;
+        KLog.getLogger().error( "WorkspaceStatusImpl.getTypeDisplay: no type display found for \"{0}\"", kObj.getAbsolutePath() ); //$NON-NLS-1$
         return kObj.getClass().getSimpleName();
     }
 
@@ -685,6 +728,128 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     public boolean isAutoCommit() {
         assert ( this.wsProperties.containsKey( AUTO_COMMIT ) );
         return Boolean.parseBoolean( this.wsProperties.getProperty( AUTO_COMMIT ) );
+    }
+
+    /**
+     * A class to make sure commit and rollback is not called directly on the UnitOfWork. We want associated WorkspaceStatus
+     * methods to be called instead.
+     */
+    class WorkspaceStatusTransaction extends RepositoryImpl.UnitOfWorkImpl {
+
+        private final UnitOfWork delegate;
+
+        WorkspaceStatusTransaction( final UnitOfWork delegate ) {
+            super( delegate.getName(),
+                   ( ( RepositoryImpl.UnitOfWorkImpl )delegate ).getSession(),
+                   delegate.isRollbackOnly(),
+                   delegate.getCallback() );
+            this.delegate = delegate;
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.spi.repository.Repository.UnitOfWork#commit()
+         */
+        @Override
+        public void commit() {
+            try {
+                WorkspaceStatusImpl.this.commit( UNKNOWN_SOURCE );
+            } catch ( final Exception e ) {
+                assert false;
+                // should be handled in main class rollback
+            }
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.spi.repository.Repository.UnitOfWork#decode(java.lang.String)
+         */
+        @Override
+        public String decode( final String encoded ) {
+            return this.delegate.decode( encoded );
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.spi.repository.Repository.UnitOfWork#getCallback()
+         */
+        @Override
+        public UnitOfWorkListener getCallback() {
+            return this.delegate.getCallback();
+        }
+
+        UnitOfWork getDelegate() {
+            return this.delegate;
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.spi.repository.Repository.UnitOfWork#getError()
+         */
+        @Override
+        public KException getError() {
+            return this.delegate.getError();
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.spi.repository.Repository.UnitOfWork#getName()
+         */
+        @Override
+        public String getName() {
+            return this.delegate.getName();
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.spi.repository.Repository.UnitOfWork#getState()
+         */
+        @Override
+        public State getState() {
+            return this.delegate.getState();
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.spi.repository.Repository.UnitOfWork#hasChanges()
+         */
+        @Override
+        public boolean hasChanges() throws KException {
+            return this.delegate.hasChanges();
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.spi.repository.Repository.UnitOfWork#isRollbackOnly()
+         */
+        @Override
+        public boolean isRollbackOnly() {
+            return this.delegate.isRollbackOnly();
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.spi.repository.Repository.UnitOfWork#rollback()
+         */
+        @Override
+        public void rollback() {
+            try {
+                WorkspaceStatusImpl.this.rollback( UNKNOWN_SOURCE );
+            } catch ( final Exception e ) {
+                assert false;
+                // should be handled in main class rollback
+            }
+        }
+
     }
 
 }

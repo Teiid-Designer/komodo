@@ -89,7 +89,7 @@ public final class ImportCommand extends ModelShellCommand {
             }
 
             // Setup the import
-            importDdl(getWorkspaceStatus().getTransaction(), ddlFile, tempSchema, importOptions, importMessages);
+            importDdl(getTransaction(), ddlFile, tempSchema, importOptions, importMessages);
 
             if(!importMessages.hasError()) {
 

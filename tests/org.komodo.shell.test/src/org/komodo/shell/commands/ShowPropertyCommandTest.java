@@ -15,11 +15,8 @@
  */
 package org.komodo.shell.commands;
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
 import org.junit.Test;
 import org.komodo.shell.AbstractCommandTest;
-import org.komodo.shell.api.CommandResult;
 
 /**
  * Test Class to test {@link ShowPropertyCommand}.
@@ -27,36 +24,27 @@ import org.komodo.shell.api.CommandResult;
 @SuppressWarnings({"javadoc", "nls"})
 public class ShowPropertyCommandTest extends AbstractCommandTest {
 
-    @Test
+    @Test( expected = AssertionError.class )
     public void shouldNotBeAvailableAtLibrary() throws Exception {
         final String[] commands = { "library",
                                     "show-property test" };
         setup( commands );
-
-        final CommandResult result = execute();
-        assertThat( result.isOk(), is( false ) );
-        assertThat( result.getMessage(), result.getMessage().contains( ShowPropertyCommand.NAME ), is( true ) );
+        execute();
     }
 
-    @Test
+    @Test( expected = AssertionError.class )
     public void shouldNotBeAvailableAtRoot() throws Exception {
         final String[] commands = { "show-property test" };
         setup( commands );
-
-        final CommandResult result = execute();
-        assertThat( result.isOk(), is( false ) );
-        assertThat( result.getMessage(), result.getMessage().contains( ShowPropertyCommand.NAME ), is( true ) );
+        execute();
     }
 
-    @Test
+    @Test( expected = AssertionError.class )
     public void shouldNotBeAvailableAtWorkspace() throws Exception {
         final String[] commands = { "workspace",
                                     "show-property test" };
         setup( commands );
-
-        final CommandResult result = execute();
-        assertThat( result.isOk(), is( false ) );
-        assertThat( result.getMessage(), result.getMessage().contains( ShowPropertyCommand.NAME ), is( true ) );
+        execute();
     }
 
 }

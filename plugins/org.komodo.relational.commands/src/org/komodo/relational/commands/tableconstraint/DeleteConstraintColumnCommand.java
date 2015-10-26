@@ -61,7 +61,7 @@ public final class DeleteConstraintColumnCommand extends TableConstraintShellCom
 
                 if ( column instanceof Column ) {
                     final TableConstraint constraint = getTableConstraint();
-                    constraint.removeColumn( getWorkspaceStatus().getTransaction(), ( Column )column );
+                    constraint.removeColumn( getTransaction(), ( Column )column );
 
                     result = new CommandResultImpl( getMessage( COLUMN_REMOVED,
                                                                 columnPathArg,
@@ -97,7 +97,7 @@ public final class DeleteConstraintColumnCommand extends TableConstraintShellCom
                               final List< CharSequence > candidates ) throws Exception {
         if ( getArguments().isEmpty() ) {
             final TableConstraint constraint = getTableConstraint();
-            final Column[] refCols = constraint.getColumns( getWorkspaceStatus().getTransaction() );
+            final Column[] refCols = constraint.getColumns( getTransaction() );
 
             // no tab-completion if no columns to remove
             if ( refCols.length == 0 ) {

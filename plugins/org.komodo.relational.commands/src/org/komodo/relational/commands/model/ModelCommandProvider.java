@@ -7,8 +7,8 @@
 */
 package org.komodo.relational.commands.model;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 import org.komodo.relational.model.Model;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandProvider;
@@ -35,29 +35,29 @@ public class ModelCommandProvider implements ShellCommandProvider {
      * @see org.komodo.shell.api.ShellCommandProvider#provideCommands()
      */
     @Override
-    public Map< String, Class< ? extends ShellCommand >> provideCommands() {
-        final Map< String, Class< ? extends ShellCommand >> result = new HashMap<>();
+    public Set< Class< ? extends ShellCommand > > provideCommands() {
+        final Set< Class< ? extends ShellCommand > > result = new HashSet< >();
 
-        result.put( AddPushdownFunctionCommand.NAME, AddPushdownFunctionCommand.class );
-        result.put( AddSourceCommand.NAME, AddSourceCommand.class );
-        result.put( AddStoredProcedureCommand.NAME, AddStoredProcedureCommand.class );
-        result.put( AddTableCommand.NAME, AddTableCommand.class );
-        result.put( AddUserDefinedFunctionCommand.NAME, AddUserDefinedFunctionCommand.class );
-        result.put( AddViewCommand.NAME, AddViewCommand.class );
-        result.put( AddVirtualProcedureCommand.NAME, AddVirtualProcedureCommand.class );
+        result.add( AddPushdownFunctionCommand.class );
+        result.add( AddSourceCommand.class );
+        result.add( AddStoredProcedureCommand.class );
+        result.add( AddTableCommand.class );
+        result.add( AddUserDefinedFunctionCommand.class );
+        result.add( AddViewCommand.class );
+        result.add( AddVirtualProcedureCommand.class );
 
-        result.put( DeletePushdownFunctionCommand.NAME, DeletePushdownFunctionCommand.class );
-        result.put( DeleteSourceCommand.NAME, DeleteSourceCommand.class );
-        result.put( DeleteStoredProcedureCommand.NAME, DeleteStoredProcedureCommand.class );
-        result.put( DeleteTableCommand.NAME, DeleteTableCommand.class );
-        result.put( DeleteUserDefinedFunctionCommand.NAME, DeleteUserDefinedFunctionCommand.class );
-        result.put( DeleteViewCommand.NAME, DeleteViewCommand.class );
-        result.put( DeleteVirtualProcedureCommand.NAME, DeleteVirtualProcedureCommand.class );
+        result.add( DeletePushdownFunctionCommand.class );
+        result.add( DeleteSourceCommand.class );
+        result.add( DeleteStoredProcedureCommand.class );
+        result.add( DeleteTableCommand.class );
+        result.add( DeleteUserDefinedFunctionCommand.class );
+        result.add( DeleteViewCommand.class );
+        result.add( DeleteVirtualProcedureCommand.class );
 
-        result.put( SetModelPropertyCommand.NAME, SetModelPropertyCommand.class );
-        result.put( UnsetModelPropertyCommand.NAME, UnsetModelPropertyCommand.class );
-        result.put( ExportCommand.NAME, ExportCommand.class );
-        result.put( ImportCommand.NAME, ImportCommand.class );
+        result.add( SetModelPropertyCommand.class );
+        result.add( UnsetModelPropertyCommand.class );
+        result.add( ExportCommand.class );
+        result.add( ImportCommand.class );
 
         return result;
     }

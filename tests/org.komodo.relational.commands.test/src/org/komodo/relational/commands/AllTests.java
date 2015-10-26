@@ -113,6 +113,9 @@ import org.komodo.relational.commands.virtualprocedure.UnsetVirtualProcedureProp
     SetCustomPropertyCommandTest.class,
     UnsetCustomPropertyCommandTest.class,
     UploadVdbCommandTest.class,
+    WorkspaceAddChildCommandTest.class,
+    WorkspaceSetPropertyCommandTest.class,
+    WorkspaceUnsetPropertyCommandTest.class,
 
     // Column
     SetColumnPropertyCommandTest.class,
@@ -145,7 +148,7 @@ import org.komodo.relational.commands.virtualprocedure.UnsetVirtualProcedureProp
     // Index
     SetIndexPropertyCommandTest.class,
     UnsetIndexPropertyCommandTest.class,
-    
+
     // Mask
     SetMaskPropertyCommandTest.class,
     UnsetMaskPropertyCommandTest.class,
@@ -197,7 +200,7 @@ import org.komodo.relational.commands.virtualprocedure.UnsetVirtualProcedureProp
     // ResultSetColumn
     SetResultSetColumnPropertyCommandTest.class,
     UnsetResultSetColumnPropertyCommandTest.class,
-    
+
     // Schema
     SetSchemaPropertyCommandTest.class,
     UnsetSchemaPropertyCommandTest.class,
@@ -205,7 +208,7 @@ import org.komodo.relational.commands.virtualprocedure.UnsetVirtualProcedureProp
 
     // Server
     ServerSetCommandTest.class,
-    
+
     // StoredProcedure
     org.komodo.relational.commands.storedprocedure.AddParameterCommandTest.class,
     org.komodo.relational.commands.storedprocedure.DeleteParameterCommandTest.class,
@@ -235,7 +238,7 @@ import org.komodo.relational.commands.virtualprocedure.UnsetVirtualProcedureProp
     // TabularResultSet
     org.komodo.relational.commands.tabularresultset.AddColumnCommandTest.class,
     org.komodo.relational.commands.tabularresultset.DeleteColumnCommandTest.class,
-    
+
     // Teiid
     SetTeiidPropertyCommandTest.class,
     UnsetTeiidPropertyCommandTest.class,

@@ -15,29 +15,20 @@
  */
 package org.komodo.relational.commands;
 
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
-import org.komodo.shell.api.CommandResult;
-import org.komodo.shell.util.KomodoObjectUtils;
 
 /**
- * Test Class to test WorkspaceUnsetPropertyCommand
- *
+ * Test Class to test {@link WorkspaceUnsetPropertyCommand}.
  */
 @SuppressWarnings( { "javadoc", "nls" } )
 public class WorkspaceUnsetPropertyCommandTest extends AbstractCommandTest {
 
-    @Test
-    public void testUnsetProperty1() throws Exception {
+    @Test( expected = AssertionError.class )
+    public void shouldNotBeAvailableAtWorkspace() throws Exception {
         final String[] commands = { "workspace",
-                                    "create-vdb testVdb1 vdbPath" };
+                                    "unset-property blah" };
         setup( commands );
-
-        CommandResult result = execute();
-        assertCommandResultOk(result);
-
-    	// Check WorkspaceContext
-    	assertEquals("/workspace", KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext()));
+        execute();
     }
 
 }

@@ -7,8 +7,8 @@
 */
 package org.komodo.relational.commands.table;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 import org.komodo.relational.model.Table;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandProvider;
@@ -35,23 +35,23 @@ public class TableCommandProvider implements ShellCommandProvider {
      * @see org.komodo.shell.api.ShellCommandProvider#provideCommands()
      */
     @Override
-    public Map< String, Class< ? extends ShellCommand >> provideCommands() {
-        final Map< String, Class< ? extends ShellCommand >> result = new HashMap<>();
+    public Set< Class< ? extends ShellCommand > > provideCommands() {
+        final Set< Class< ? extends ShellCommand > > result = new HashSet< >();
 
-        result.put( AddAccessPatternCommand.NAME, AddAccessPatternCommand.class );
-        result.put( AddColumnCommand.NAME, AddColumnCommand.class );
-        result.put( AddForeignKeyCommand.NAME, AddForeignKeyCommand.class );
-        result.put( AddIndexCommand.NAME, AddIndexCommand.class );
-        result.put( AddUniqueConstraintCommand.NAME, AddUniqueConstraintCommand.class );
+        result.add( AddAccessPatternCommand.class );
+        result.add( AddColumnCommand.class );
+        result.add( AddForeignKeyCommand.class );
+        result.add( AddIndexCommand.class );
+        result.add( AddUniqueConstraintCommand.class );
 
-        result.put( DeleteAccessPatternCommand.NAME, DeleteAccessPatternCommand.class );
-        result.put( DeleteColumnCommand.NAME, DeleteColumnCommand.class );
-        result.put( DeleteForeignKeyCommand.NAME, DeleteForeignKeyCommand.class );
-        result.put( DeleteIndexCommand.NAME, DeleteIndexCommand.class );
-        result.put( DeleteUniqueConstraintCommand.NAME, DeleteUniqueConstraintCommand.class );
+        result.add( DeleteAccessPatternCommand.class );
+        result.add( DeleteColumnCommand.class );
+        result.add( DeleteForeignKeyCommand.class );
+        result.add( DeleteIndexCommand.class );
+        result.add( DeleteUniqueConstraintCommand.class );
 
-        result.put( SetTablePropertyCommand.NAME, SetTablePropertyCommand.class );
-        result.put( UnsetTablePropertyCommand.NAME, UnsetTablePropertyCommand.class );
+        result.add( SetTablePropertyCommand.class );
+        result.add( UnsetTablePropertyCommand.class );
 
         return result;
     }

@@ -9,10 +9,10 @@ package org.komodo.relational.commands;
 
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.INPUT_FILE_ERROR;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.MISSING_INPUT_FILE_NAME;
+import static org.komodo.relational.commands.WorkspaceCommandMessages.ImportVdbCommand.DeleteTempVdbFailedMsg;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.ImportVdbCommand.ImportFailedMsg;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.ImportVdbCommand.VdbImportInProgressMsg;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.ImportVdbCommand.VdbImportSuccessMsg;
-import static org.komodo.relational.commands.WorkspaceCommandMessages.ImportVdbCommand.DeleteTempVdbFailedMsg;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.ImportVdbCommand.cannotImport_wouldCreateDuplicate;
 import java.io.File;
 import java.util.concurrent.TimeUnit;
@@ -72,7 +72,7 @@ public final class ImportVdbCommand extends WorkspaceShellCommand {
             if(!CompletionConstants.OK.equals(validationResult)) {
                 return new CommandResultImpl( false, getWorkspaceMessage( INPUT_FILE_ERROR, fileName, validationResult ), null );
             }
-            
+
             // The import will be performed using the VDB filename.  If successful, it will be renamed to the VDB name
             File vdbFile = new File(fileName);
             ImportOptions importOptions = new ImportOptions();
@@ -83,20 +83,20 @@ public final class ImportVdbCommand extends WorkspaceShellCommand {
             if(!CompletionConstants.OK.equals(validationMessage)) {
                 return new CommandResultImpl( false, getWorkspaceMessage( INPUT_FILE_ERROR, fileName, validationResult ), null );
             }
-            
+
             // Set up the import.
             ImportMessages importMessages = new ImportMessages();
             importVdb(getTransaction(), vdbFile, getContext(), importOptions, importMessages);
 
             if(!importMessages.hasError()) {
-                
+
                 print(CompletionConstants.MESSAGE_INDENT, getMessage(VdbImportInProgressMsg, vdbFile));
-                
+
                 WorkspaceStatus wsStatus = getWorkspaceStatus();
                 KomodoObject theVdb = null;
                 // The commit will initiate sequencing
                 commitImport(ImportVdbCommand.class.getSimpleName(), importMessages);
-                
+
                 // No sequencing problems.
                 if(!importMessages.hasError()) {
                     // Get the created VDB
@@ -105,7 +105,7 @@ public final class ImportVdbCommand extends WorkspaceShellCommand {
                     if(theVdb==null) {
                         return new CommandResultImpl( false, getMessage( ImportFailedMsg, fileName ), null );
                     }
-                    
+
                     // Want to rename it to the actual VDB name...
                     String vdbName = ((Vdb)theVdb).getVdbName(getTransaction());
                     validationResult = validateNotDuplicate(vdbName, KomodoType.VDB, parentObj);
@@ -116,25 +116,25 @@ public final class ImportVdbCommand extends WorkspaceShellCommand {
                             return deleteResult;
                         }
                     } else {
-                        theVdb.rename(wsStatus.getTransaction(), vdbName);
-                        print(CompletionConstants.MESSAGE_INDENT, getMessage(VdbImportSuccessMsg, fileName)); 
+                        theVdb.rename(getTransaction(), vdbName);
+                        print(CompletionConstants.MESSAGE_INDENT, getMessage(VdbImportSuccessMsg, fileName));
                     }
                 // Error here means there was a sequencing problem.  The VDB was created, so need to delete it.
                 } else {
                     print(CompletionConstants.MESSAGE_INDENT, getMessage(ImportFailedMsg, fileName));
                     print(CompletionConstants.MESSAGE_INDENT, importMessages.errorMessagesToString());
-                    
+
                     CommandResult deleteResult = deleteVdb(vdbFile.getName());
                     if(deleteResult!=null) {
                         return deleteResult;
                     }
                 }
-                
+
             } else {
                 print(CompletionConstants.MESSAGE_INDENT, getMessage(ImportFailedMsg, fileName));
                 print(CompletionConstants.MESSAGE_INDENT, importMessages.errorMessagesToString());
             }
-            
+
             return new CommandResultImpl( false, getWorkspaceMessage( INPUT_FILE_ERROR, fileName ), null );
         } catch ( final Exception e ) {
             return new CommandResultImpl( false, Messages.getString( SHELL.CommandFailure, NAME ), e );
@@ -161,7 +161,7 @@ public final class ImportVdbCommand extends WorkspaceShellCommand {
         // Import - (sequencing will not initiate until we commit the transaction)
         importer.importVdb(uow, vdbFile, parentObj, importOptions, importMessages);
     }
-    
+
     private void commitImport( final String source, ImportMessages importMessages ) throws Exception {
         UnitOfWork trans = getTransaction();
         final String txName = trans.getName();
@@ -189,7 +189,7 @@ public final class ImportVdbCommand extends WorkspaceShellCommand {
             throw new KException( Messages.getString( SHELL.TRANSACTION_TIMEOUT, txName ) );
         }
     }
-    
+
     /*
      * Delete the VDB with the provided name
      */
@@ -204,7 +204,7 @@ public final class ImportVdbCommand extends WorkspaceShellCommand {
         }
         return result;
     }
-    
+
     /**
      * Validates whether another child of the same name and type already exists
      * @param objName the name of the object
@@ -215,7 +215,7 @@ public final class ImportVdbCommand extends WorkspaceShellCommand {
     private String validateNotDuplicate(String objName, KomodoType kType, KomodoObject parentObj) throws Exception {
         // Get all children of desired type
         KomodoObject[] children = parentObj.getChildrenOfType(getTransaction(), kType.getType());
-        
+
         // look for child with matching name
         KomodoObject child = null;
         for(KomodoObject kObj : children) {
@@ -231,7 +231,7 @@ public final class ImportVdbCommand extends WorkspaceShellCommand {
         }
         return CompletionConstants.OK;
     }
-    
+
     /**
      * {@inheritDoc}
      *

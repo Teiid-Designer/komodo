@@ -27,7 +27,6 @@ import org.komodo.shell.Messages;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.InvalidCommandArgumentException;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.StringUtils;
 
 /**
@@ -87,10 +86,9 @@ public final class ExitCommand extends BuiltInShellCommand {
             boolean save = ( hasArg && SAVE_ARGS.contains( arg ) );
 
             final WorkspaceStatus wsStatus = getWorkspaceStatus();
-            final UnitOfWork uow = wsStatus.getTransaction();
             boolean doExit = false;
 
-            if ( uow.hasChanges() ) {
+            if ( getTransaction().hasChanges() ) {
                 if ( force ) {
                     wsStatus.rollback( ExitCommand.class.getName() );
                     doExit = true;

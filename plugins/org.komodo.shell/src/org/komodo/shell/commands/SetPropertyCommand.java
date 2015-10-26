@@ -144,16 +144,16 @@ public class SetPropertyCommand extends BuiltInShellCommand {
 
         if ( !StringUtils.isBlank( propValue ) && isMultiValuedProperty( context, propertyName ) ) {
             final String[] values = parseMultiValues( propValue );
-            context.setProperty( getWorkspaceStatus().getTransaction(), propertyName, ( Object[] )values );
+            context.setProperty( getTransaction(), propertyName, ( Object[] )values );
         } else {
-            context.setProperty( getWorkspaceStatus().getTransaction(), propertyName, propValue );
+            context.setProperty( getTransaction(), propertyName, propValue );
         }
     }
 
     private boolean isMultiValuedProperty( final KomodoObject context,
                                            final String name ) throws Exception {
         final String propertyName = isShowingPropertyNamePrefixes() ? name : KomodoObjectUtils.attachPrefix( getWorkspaceStatus(),context, name );
-        final PropertyDescriptor descriptor = context.getPropertyDescriptor( getWorkspaceStatus().getTransaction(),
+        final PropertyDescriptor descriptor = context.getPropertyDescriptor( getTransaction(),
                                                                                             propertyName );
         return ( ( descriptor == null ) ? false : descriptor.isMultiple() );
     }
@@ -164,13 +164,13 @@ public class SetPropertyCommand extends BuiltInShellCommand {
         assert isMultiValuedProperty( context, name );
 
         final String propertyName = isShowingPropertyNamePrefixes() ? name : KomodoObjectUtils.attachPrefix( getWorkspaceStatus(),context, name );
-        final Property property = context.getProperty( getWorkspaceStatus().getTransaction(), propertyName );
-        final Repository.UnitOfWork uow = getWorkspaceStatus().getTransaction();
+        final Property property = context.getProperty( getTransaction(), propertyName );
+        final Repository.UnitOfWork uow = getTransaction();
         final StringBuilder result = new StringBuilder();
         boolean quoted = false;
         boolean firstTime = true;
 
-        for ( final Object value : property.getValues( getWorkspaceStatus().getTransaction() ) ) {
+        for ( final Object value : property.getValues( getTransaction() ) ) {
             if ( !firstTime ) {
                 result.append( ',' );
             } else {
@@ -239,7 +239,7 @@ public class SetPropertyCommand extends BuiltInShellCommand {
             final String propName = isShowingPropertyNamePrefixes() ? propArg : KomodoObjectUtils.attachPrefix( getWorkspaceStatus(),context, propArg );
 
             if ( isMultiValuedProperty( context, propName ) ) {
-                if ( context.hasProperty( getWorkspaceStatus().getTransaction(), propName ) ) {
+                if ( context.hasProperty( getTransaction(), propName ) ) {
                     // concat current multi-values as a string
                     final String value = concatMultiValues( context, propName );
                     candidates.add( value );
@@ -262,9 +262,8 @@ public class SetPropertyCommand extends BuiltInShellCommand {
                                     final String lastArgument,
                                     final List< CharSequence > candidates ) throws Exception {
         final WorkspaceStatus wsStatus = getWorkspaceStatus();
-        final Repository.UnitOfWork uow = wsStatus.getTransaction();
         final String propertyName = isShowingPropertyNamePrefixes() ? name : KomodoObjectUtils.attachPrefix( getWorkspaceStatus(),context, name );
-        final PropertyDescriptor descriptor = context.getPropertyDescriptor( uow, propertyName );
+        final PropertyDescriptor descriptor = context.getPropertyDescriptor( getTransaction(), propertyName );
 
         if ( descriptor == null ) {
             return;

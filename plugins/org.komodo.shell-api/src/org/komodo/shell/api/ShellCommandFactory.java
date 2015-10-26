@@ -7,8 +7,7 @@
 */
 package org.komodo.shell.api;
 
-import java.util.Collection;
-import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -16,35 +15,24 @@ import java.util.List;
 public interface ShellCommandFactory {
 
     /**
-     * @return the command providers (never <code>null</code>)
+     * @return an unmodifiable collection of command providers (never <code>null</code>)
      */
-    Collection<ShellCommandProvider> getCommandProviders();
-    
+    Set< ShellCommandProvider > getCommandProviders();
+
     /**
      * @param commandName
      *        the name of the available command being requested (cannot be empty)
      * @return the specified command or a "command not found" command (never <code>null</code>)
-     * @throws Exception if an error occurs
-     */
-    ShellCommand getCommand( final String commandName ) throws Exception;
-    
-    /**
-     * Get valid command names for the current context.
-     *
-     * @return a list of commands for current context (never <code>null</code>)
-     * @throws Exception
-     *         if error occurs
-     */
-    List< String > getCommandNamesForCurrentContext() throws Exception;
-    
-    /**
-     * Registers all built-in and discovered commands.
-     *
-     * @param wsStatus
-     *        the workspace status (cannot be <code>null</code>)
      * @throws Exception
      *         if an error occurs
      */
-    public void registerCommands( final WorkspaceStatus wsStatus ) throws Exception;
+    ShellCommand getCommand( final String commandName ) throws Exception;
+
+    /**
+     * @return a sorted collection of the valid command names for the current context (never <code>null</code>)
+     * @throws Exception
+     *         if error occurs
+     */
+    Set< String > getCommandNamesForCurrentContext() throws Exception;
 
 }

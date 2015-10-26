@@ -37,7 +37,8 @@ public class HelpCommandTest extends AbstractCommandTest {
 
         // check help text
         String writerOutput = getCommandOutput();
-        assertTrue(writerOutput.contains("VDB Builder Shell supports the following commands at this workspace context"));
+        assertTrue(writerOutput,
+                   writerOutput.contains("The following commands are supported at this context"));
     }
 
     @Test

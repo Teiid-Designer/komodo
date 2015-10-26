@@ -7,8 +7,8 @@
  */
 package org.komodo.relational.commands;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandProvider;
@@ -36,22 +36,23 @@ public class WorkspaceCommandProvider implements ShellCommandProvider {
      * @see org.komodo.shell.api.ShellCommandProvider#provideCommands()
      */
     @Override
-    public Map< String, Class< ? extends ShellCommand >> provideCommands() {
-        final Map< String, Class< ? extends ShellCommand >> result = new HashMap<>();
+    public Set< Class< ? extends ShellCommand > > provideCommands() {
+        final Set< Class< ? extends ShellCommand > > result = new HashSet< >();
 
-        result.put( CreateSchemaCommand.NAME, CreateSchemaCommand.class );
-        result.put( CreateTeiidCommand.NAME, CreateTeiidCommand.class );
-        result.put( CreateVdbCommand.NAME, CreateVdbCommand.class );
-        result.put( ImportVdbCommand.NAME, ImportVdbCommand.class );
-        result.put( DeleteSchemaCommand.NAME, DeleteSchemaCommand.class );
-        result.put( DeleteTeiidCommand.NAME, DeleteTeiidCommand.class );
-        result.put( DeleteVdbCommand.NAME, DeleteVdbCommand.class );
-        result.put( FindCommand.NAME, FindCommand.class );
-        result.put( SetCustomPropertyCommand.NAME, SetCustomPropertyCommand.class );
-        result.put( UploadVdbCommand.NAME, UploadVdbCommand.class );
-        result.put( UnsetCustomPropertyCommand.NAME, UnsetCustomPropertyCommand.class );
-        result.put( WorkspaceSetPropertyCommand.NAME, WorkspaceSetPropertyCommand.class );
-        result.put( WorkspaceUnsetPropertyCommand.NAME, WorkspaceUnsetPropertyCommand.class );
+        result.add( CreateSchemaCommand.class );
+        result.add( CreateTeiidCommand.class );
+        result.add( CreateVdbCommand.class );
+        result.add( DeleteSchemaCommand.class );
+        result.add( DeleteTeiidCommand.class );
+        result.add( DeleteVdbCommand.class );
+        result.add( FindCommand.class );
+        result.add( ImportVdbCommand.class );
+        result.add( SetCustomPropertyCommand.class );
+        result.add( UploadVdbCommand.class );
+        result.add( UnsetCustomPropertyCommand.class );
+        result.add( WorkspaceAddChildCommand.class );
+        result.add( WorkspaceSetPropertyCommand.class );
+        result.add( WorkspaceUnsetPropertyCommand.class );
 
         return result;
     }

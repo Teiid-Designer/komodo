@@ -7,8 +7,8 @@
 */
 package org.komodo.relational.commands.tableconstraint;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 import org.komodo.relational.model.AccessPattern;
 import org.komodo.relational.model.ForeignKey;
 import org.komodo.relational.model.Index;
@@ -75,11 +75,11 @@ public class TableConstraintCommandProvider implements ShellCommandProvider {
      * @see org.komodo.shell.api.ShellCommandProvider#provideCommands()
      */
     @Override
-    public Map< String, Class< ? extends ShellCommand > > provideCommands() {
-        final Map< String, Class< ? extends ShellCommand > > result = new HashMap< >();
+    public Set< Class< ? extends ShellCommand > > provideCommands() {
+        final Set< Class< ? extends ShellCommand > > result = new HashSet< >();
 
-        result.put( AddConstraintColumnCommand.NAME, AddConstraintColumnCommand.class );
-        result.put( DeleteConstraintColumnCommand.NAME, DeleteConstraintColumnCommand.class );
+        result.add( AddConstraintColumnCommand.class );
+        result.add( DeleteConstraintColumnCommand.class );
 
         return result;
     }
