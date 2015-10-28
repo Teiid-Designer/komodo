@@ -285,38 +285,40 @@ public class DefaultKomodoShell implements KomodoShell {
                     final CommandResult result = command.execute();
                     KLog.getLogger().debug( "Command: {0}, Succeeded: {1}", command, result.isOk() ); //$NON-NLS-1$
 
-                    // record
-                    if ( result.isOk() && this.wsStatus.getRecordingStatus() && !( command instanceof SetRecordCommand ) ) {
-                        writeCommandToRecordingFile( command );
-                    }
-
-                    // persist
-                    if ( this.wsStatus.isAutoCommit() ) {
-                        if ( result.isOk() && result.isPersistable() ) {
-                            this.wsStatus.commit( command.getClass().getSimpleName() );
-                        } else if ( !result.isOk() && result.isPersistable() ) {
-                            this.wsStatus.rollback( command.getClass().getSimpleName() );
-                        }
-                    }
-
                     // display command execution message
                     if ( !StringUtils.isBlank( result.getMessage() ) ) {
                         PrintUtils.print( getOutputWriter(), CompletionConstants.MESSAGE_INDENT, result.getMessage() );
                     }
 
-                    // log error and shutdown if necessary
-                    if ( result.getError() != null ) {
-                        final String errorMsg = Messages.getString( SHELL.CommandFailure, command.toString() )
-                                                + ' '
-                                                + result.getError().getLocalizedMessage();
-                        PrintUtils.print( getOutputWriter(), CompletionConstants.MESSAGE_INDENT, errorMsg );
+                    if ( result.isOk() ) {
+                        // record
+                        if ( this.wsStatus.getRecordingStatus() && !( command instanceof SetRecordCommand ) ) {
+                            writeCommandToRecordingFile( command );
+                        }
 
-                        if ( this.reader.isBatch() ) {
+                        // persist
+                        if ( this.wsStatus.isAutoCommit() && result.isPersistable() ) {
+                            this.wsStatus.commit( command.getClass().getSimpleName() );
+                        }
+                    } else {
+                        // log error
+                        if ( result.getError() != null ) {
+                            final String errorMsg = Messages.getString( SHELL.CommandFailure, command.toString() )
+                                                    + ' '
+                                                    + result.getError().getLocalizedMessage();
                             KLog.getLogger().error( errorMsg, result.getError() );
-                            shutdown();
-                        } else if ( ExitCommand.NAME.equals( command.getName() )
-                                    && ( !( result.getError() instanceof InvalidCommandArgumentException ) ) ) {
-                            KLog.getLogger().error( errorMsg, result.getError() );
+                            PrintUtils.print( getOutputWriter(), CompletionConstants.MESSAGE_INDENT, errorMsg );
+                        }
+
+                        // rollback
+                        if ( result.isPersistable() ) {
+                            this.wsStatus.rollback( command.getClass().getSimpleName() );
+                        }
+
+                        // shutdown if necessary
+                        if ( this.reader.isBatch()
+                             || ( ExitCommand.NAME.equals( command.getName() )
+                                  && ( !( result.getError() instanceof InvalidCommandArgumentException ) ) ) ) {
                             done = true;
 
                             if ( !this.shutdown ) {
@@ -334,12 +336,44 @@ public class DefaultKomodoShell implements KomodoShell {
                     PrintUtils.print( getOutputWriter(), CompletionConstants.MESSAGE_INDENT, Messages.getString( SHELL.USAGE ) );
                     command.printUsage( CompletionConstants.MESSAGE_INDENT );
                 }
-                if ( reader.isBatch() ) shutdown();
-            } catch ( Exception e ) {
-                String msg = "Exception Occurred: " //$NON-NLS-1$
-                             + ( e.getLocalizedMessage() == null ? e.getClass().getSimpleName() : e.getLocalizedMessage() );
+
+                if ( this.reader.isBatch() ) {
+                    done = true;
+
+                    if ( !this.shutdown ) {
+                        shutdown();
+                    }
+                }
+            } catch ( final Exception e ) {
+                // transaction name could have information about error (see WorkspaceStatusImpl commit and rollback)
+                String msg = ( this.wsStatus.getTransaction().getName() + ':' );
+
+                // log
+                msg += ( ( e.getLocalizedMessage() == null ) ? e.getClass().getSimpleName() : e.getLocalizedMessage() );
                 displayMessage( msgIndentStr + msg + NEW_LINE );
-                if ( reader.isBatch() ) shutdown();
+
+                { // print out error message for causes of error
+                    Throwable error = e;
+
+                    while ( error.getCause() != null ) {
+                        error = error.getCause();
+                        displayMessage( msgIndentStr + error.getLocalizedMessage() + NEW_LINE );
+                    }
+                }
+
+                KLog.getLogger().debug( msg, e );
+
+                // rollback
+                this.wsStatus.rollback( DefaultKomodoShell.class.getSimpleName() );
+
+                // exit
+                if ( this.reader.isBatch() ) {
+                    done = true;
+
+                    if ( !this.shutdown ) {
+                        shutdown();
+                    }
+                }
             }
         }
     }
@@ -415,6 +449,9 @@ public class DefaultKomodoShell implements KomodoShell {
 
             this.wsStatus.getProperties().store( new FileOutputStream( propFile.toString() ), null );
             this.wsStatus.closeRecordingWriter();
+
+            // should not have any changes at this point unless user ctrl-c
+            this.wsStatus.rollback( DefaultKomodoShell.class.getSimpleName() );
         } catch ( final Exception e ) {
             displayMessage( "Error during shutdown saving workspace status: " + e.getLocalizedMessage() ); //$NON-NLS-1$
         }

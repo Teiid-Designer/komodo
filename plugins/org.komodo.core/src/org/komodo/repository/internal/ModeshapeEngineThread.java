@@ -306,7 +306,7 @@ public class ModeshapeEngineThread extends Thread implements StringConstants {
                 @Override
                 public void sequencingError(Exception exception) {
                     try {
-                        LOGGER.error(Messages.getString(Messages.Komodo.SEQUENCING_ERROR_TRYING_TO_COMMIT, exception, commitRequest.getName()));
+                        LOGGER.debug(Messages.getString(Messages.Komodo.SEQUENCING_ERROR_TRYING_TO_COMMIT, exception, commitRequest.getName()));
                         errorCallback(request, exception);
                     } finally {
                         logoutSession(session);

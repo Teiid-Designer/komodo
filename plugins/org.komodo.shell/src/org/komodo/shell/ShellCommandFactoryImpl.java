@@ -93,6 +93,7 @@ public class ShellCommandFactoryImpl implements ShellCommandFactory {
                                               final WorkspaceStatus wsStatus ) {
         final Collection< Class< ? extends ShellCommand > > commandClasses = provider.provideCommands();
         LOGGER.debug( "ShellCommandFactory.registerContributedCommands: ShellCommandProvider \"{0}\" is contributing {1} commands", //$NON-NLS-1$
+                      provider.getClass().getSimpleName(),
                       ( ( commandClasses == null ) ? 0 : commandClasses.size() ) );
 
         if ( ( commandClasses != null ) && !commandClasses.isEmpty() ) {
@@ -127,17 +128,21 @@ public class ShellCommandFactoryImpl implements ShellCommandFactory {
         if ( commandsDir.isDirectory() ) {
             try {
                 final Collection< File > jarFiles = FileUtils.getFilesForPattern( commandsDir.getCanonicalPath(), "", ".jar" ); //$NON-NLS-1$ //$NON-NLS-2$
-                final List< URL > jarURLs = new ArrayList< >( jarFiles.size() );
 
-                for ( final File jarFile : jarFiles ) {
-                    final URL jarUrl = jarFile.toURI().toURL();
-                    jarURLs.add( jarUrl );
-                    LOGGER.debug( "ShellCommandFactory: adding discovered jar \"{0}\"", jarUrl ); //$NON-NLS-1$
+                if ( !jarFiles.isEmpty() ) {
+                    final List< URL > jarURLs = new ArrayList< >( jarFiles.size() );
+
+                    for ( final File jarFile : jarFiles ) {
+                        final URL jarUrl = jarFile.toURI().toURL();
+                        jarURLs.add( jarUrl );
+                        LOGGER.debug( "ShellCommandFactory: adding discovered jar \"{0}\"", jarUrl ); //$NON-NLS-1$
+                    }
+
+                    final URL[] urls = jarURLs.toArray( new URL[ jarURLs.size() ] );
+                    final ClassLoader extraCommandsCL = new URLClassLoader( urls,
+                                                                            Thread.currentThread().getContextClassLoader() );
+                    commandClassloaders.add( extraCommandsCL );
                 }
-
-                final URL[] urls = jarURLs.toArray( new URL[ jarURLs.size() ] );
-                final ClassLoader extraCommandsCL = new URLClassLoader( urls, Thread.currentThread().getContextClassLoader() );
-                commandClassloaders.add( extraCommandsCL );
             } catch ( final IOException e ) {
                 KEngine.getInstance().getErrorHandler().error( e );
             }

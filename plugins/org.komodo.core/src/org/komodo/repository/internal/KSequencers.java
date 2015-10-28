@@ -298,14 +298,14 @@ public class KSequencers implements SQLConstants, EventListener, KSequencerContr
             if (StandardDdlLexicon.TYPE_UNKNOWN_STATEMENT.equals(type.getName())) {
                 Property property = node.getProperty(StandardDdlLexicon.DDL_EXPRESSION);
                 String invalidDdl = property.getString();
-                throw new Exception(Messages.getString(Messages.KSequencers.Unknown_Message) + NEW_LINE + invalidDdl); 
+                throw new Exception(Messages.getString(Messages.KSequencers.Unknown_Message) + NEW_LINE + invalidDdl);
             }
 
             if (StandardDdlLexicon.TYPE_PROBLEM.equals(type.getName())) {
                 Property problemLevel = node.getProperty(StandardDdlLexicon.PROBLEM_LEVEL);
                 Property problemMsg = node.getProperty(StandardDdlLexicon.MESSAGE);
 
-                throw new Exception(Messages.getString(Messages.KSequencers.Problem_Message, problemLevel) + NEW_LINE + problemMsg); 
+                throw new Exception(Messages.getString(Messages.KSequencers.Problem_Message, problemLevel) + NEW_LINE + problemMsg);
             }
         }
 
@@ -418,7 +418,7 @@ public class KSequencers implements SQLConstants, EventListener, KSequencerContr
             if (eventUserData == null || ! eventUserData.startsWith(listener.id()))
                 continue; // Listener is not listening for this event
 
-            KLog.getLogger().error("KSequencers error. Notifying " + listener + " of exception", exception); //$NON-NLS-1$ //$NON-NLS-2$
+            KLog.getLogger().debug("KSequencers error. Notifying " + listener + " of exception", exception); //$NON-NLS-1$ //$NON-NLS-2$
             listener.sequencingError(exception);
         }
     }

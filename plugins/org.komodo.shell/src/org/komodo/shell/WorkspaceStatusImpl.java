@@ -234,6 +234,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
 
     @Override
     public void commit( final String source ) throws Exception {
+        String newTxName = source;
         final String txName = this.uow.getName();
         this.uow.getDelegate().commit();
 
@@ -242,24 +243,42 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
 
             if ( success ) {
                 final KException error = this.uow.getError();
-                final State txState = this.uow.getState();
 
-                if ( ( error != null ) || !State.COMMITTED.equals( txState ) ) {
+                if ( error != null ) {
+                    newTxName += "__commitSuccessWithError"; //$NON-NLS-1$
                     throw new KException( Messages.getString( SHELL.TRANSACTION_COMMIT_ERROR, txName ), error );
                 }
+
+                final Throwable callbackError = this.callback.error();
+
+                if ( callbackError != null ) {
+                    newTxName += "__commitSuccessWithCallbackError"; //$NON-NLS-1$
+                    throw new KException( Messages.getString( SHELL.TRANSACTION_COMMIT_ERROR, txName ), callbackError );
+                }
+
+                final State txState = this.uow.getState();
+
+                if ( !State.COMMITTED.equals( txState ) ) {
+                    newTxName += ( "__commitSuccessWrongState:" + txState ); //$NON-NLS-1$
+                    throw new KException( Messages.getString( SHELL.TRANSACTION_COMMIT_ERROR, txName ) );
+                }
             } else {
+                newTxName += "__commitFail"; //$NON-NLS-1$
                 throw new KException( Messages.getString( SHELL.TRANSACTION_TIMEOUT, txName ) );
             }
-
-            // create new transaction
-            createTransaction( source );
         } catch ( final Exception e ) {
+            if ( newTxName.equals( source ) ) {
+                newTxName += "__commitException"; //$NON-NLS-1$
+            }
+
             if ( UNKNOWN_SOURCE.equals( source ) ) {
                 this.uow.getCallback().errorOccurred( e );
                 KLog.getLogger().debug( "{0}.commit error: ", e, UNKNOWN_SOURCE ); //$NON-NLS-1$
             } else {
                 throw e;
             }
+        } finally {
+            createTransaction( newTxName );
         }
     }
 
@@ -270,6 +289,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
      */
     @Override
     public void rollback( final String source ) throws Exception {
+        String newTxName = source;
         final String txName = this.uow.getName();
         this.uow.getDelegate().rollback();
 
@@ -278,24 +298,42 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
 
             if ( success ) {
                 final KException error = uow.getError();
-                final State txState = this.uow.getState();
 
-                if ( ( error != null ) || !State.ROLLED_BACK.equals( txState ) ) {
+                if ( error != null ) {
+                    newTxName += "__rollbackSuccessWithError"; //$NON-NLS-1$
                     throw new KException( Messages.getString( SHELL.TRANSACTION_ROLLBACK_ERROR, txName ), error );
                 }
+
+                final Throwable callbackError = this.callback.error();
+
+                if ( callbackError != null ) {
+                    newTxName += "__rollbackSuccessWithCallbackError"; //$NON-NLS-1$
+                    throw new KException( Messages.getString( SHELL.TRANSACTION_ROLLBACK_ERROR, txName ), callbackError );
+                }
+
+                final State txState = this.uow.getState();
+
+                if ( !State.ROLLED_BACK.equals( txState ) ) {
+                    newTxName += ( "__rollbackSuccessWrongState:" + txState ); //$NON-NLS-1$
+                    throw new KException( Messages.getString( SHELL.TRANSACTION_ROLLBACK_ERROR, txName ) );
+                }
             } else {
+                newTxName += "__rollbackFail"; //$NON-NLS-1$
                 throw new KException( Messages.getString( SHELL.TRANSACTION_TIMEOUT, txName ) );
             }
-
-            // create new transaction
-            createTransaction( source );
         } catch ( final Exception e ) {
+            if ( newTxName.equals( source ) ) {
+                newTxName += "__rollbackException"; //$NON-NLS-1$
+            }
+
             if ( UNKNOWN_SOURCE.equals( source ) ) {
                 this.uow.getCallback().errorOccurred( e );
                 KLog.getLogger().debug( "{0}.rollback error: ", e, UNKNOWN_SOURCE ); //$NON-NLS-1$
             } else {
                 throw e;
             }
+        } finally {
+            createTransaction( newTxName );
         }
     }
 
