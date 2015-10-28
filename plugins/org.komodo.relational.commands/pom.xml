@@ -14,21 +14,61 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 	<dependencies>
 	    <dependency>
             <groupId>org.jboss.tools.komodo.plugins</groupId>
+            <artifactId>org.komodo.core</artifactId>
+            <version>${version}</version>
+        </dependency>
+	    <dependency>
+            <groupId>org.jboss.tools.komodo.plugins</groupId>
+            <artifactId>org.komodo.importer</artifactId>
+            <version>${version}</version>
+        </dependency>
+	    <dependency>
+            <groupId>org.jboss.tools.komodo.plugins.libs</groupId>
+            <artifactId>org.komodo.modeshape.lib</artifactId>
+            <version>${version}</version>
+        </dependency>
+	    <dependency>
+            <groupId>org.jboss.tools.komodo.plugins</groupId>
             <artifactId>org.komodo.modeshape.teiid.sql.sequencer</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
+            <version>${version}</version>
         </dependency>
 	    <dependency>
             <groupId>org.jboss.tools.komodo.plugins</groupId>
             <artifactId>org.komodo.modeshape.vdb</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
+            <version>${version}</version>
         </dependency>
 	    <dependency>
             <groupId>org.jboss.tools.komodo.plugins</groupId>
             <artifactId>org.komodo.relational</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
+            <version>${version}</version>
+        </dependency>
+	    <dependency>
+            <groupId>org.jboss.tools.komodo.plugins</groupId>
+            <artifactId>org.komodo.shell</artifactId>
+            <version>${version}</version>
+        </dependency>
+	    <dependency>
+            <groupId>org.jboss.tools.komodo.plugins</groupId>
+            <artifactId>org.komodo.shell-api</artifactId>
+            <version>${version}</version>
+        </dependency>
+	    <dependency>
+            <groupId>org.jboss.tools.komodo.plugins</groupId>
+            <artifactId>org.komodo.spi</artifactId>
+            <version>${version}</version>
+        </dependency>
+	    <dependency>
+            <groupId>org.jboss.tools.komodo.plugins</groupId>
+            <artifactId>org.komodo.teiid.client</artifactId>
+            <version>${version}</version>
+        </dependency>
+	    <dependency>
+            <groupId>org.jboss.tools.komodo.plugins</groupId>
+            <artifactId>org.komodo.utils</artifactId>
+            <version>${version}</version>
         </dependency>
 	</dependencies>
-	
+
     <build>
         <plugins>
             <plugin>
@@ -42,53 +82,24 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
                     <target>1.7</target>
                 </configuration>
             </plugin>
-<!--
+
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <configuration>
-
-                    <descriptors>
-                        <descriptor>assembly/with-dependencies.xml</descriptor>
-                    </descriptors>
-
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                </configuration>
+                <version>2.6</version>
                 <executions>
                     <execution>
-                        <id>make-assembly</id>
-                        <phase>package</phase>
+                        <phase>verify</phase>
                         <goals>
                             <goal>single</goal>
                         </goals>
-                    </execution>
-                </executions> 
-            </plugin>
--->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
                         <configuration>
-                            <minimizeJar>true</minimizeJar>
-                            <finalName>${artifactId}-${version}-with-dependencies</finalName>
-<!--
-                            <artifactSet>
-                                <includes>
-                                    <include>*:org.komodo.relational</include>
-                                </includes>
-                            </artifactSet>
--->
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
                         </configuration>
                     </execution>
-                </executions>
-            </plugin>
+                </executions> 
+             </plugin>
 
         </plugins>
     </build>
