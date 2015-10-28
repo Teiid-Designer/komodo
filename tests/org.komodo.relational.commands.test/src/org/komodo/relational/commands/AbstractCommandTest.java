@@ -33,7 +33,6 @@ import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.RepositoryClient;
 import org.komodo.test.utils.AbstractLocalRepositoryTest;
-import org.komodo.utils.FileUtils;
 import org.komodo.utils.KLog;
 import org.mockito.Mockito;
 
@@ -41,55 +40,69 @@ import org.mockito.Mockito;
 public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
 
     private static final KLog LOGGER = KLog.getLogger();
+    private static final Path SHELL_DATA_DIRECTORY;
 
     private static KEngine kEngine = KEngine.getInstance();
-    private static Path _shellDataDirectory;
+
+    static {
+        Path tempDataDir = null;
+
+        // create data directory for shell
+        try {
+            tempDataDir = Files.createTempDirectory( "VdbBuilderDataDir" );
+            tempDataDir.toFile().deleteOnExit();
+            System.setProperty( SystemConstants.VDB_BUILDER_DATA_DIR, tempDataDir.toString() );
+            LOGGER.debug( "AbstractCommandTest:_shellDataDirectory = {0}", tempDataDir );
+
+            final Path commandsDir = Paths.get( tempDataDir.toString() + "/commands" );
+            commandsDir.toFile().deleteOnExit();
+            Files.createDirectory( commandsDir );
+
+            System.setProperty( "komodo.shell.commandsDir", commandsDir.toString() );
+            LOGGER.debug( "AbstractCommandTest: commands directory is {0}", commandsDir );
+
+            {// find relational command provider jar and copy over to commands directory so it can be discovered
+                final String relativeTargetPath = "../../plugins/org.komodo.relational.commands/target";
+                final Path targetDir = Paths.get( relativeTargetPath );
+                LOGGER.debug( "AbstractCommandTest: Looking for jar here: {0}", targetDir );
+
+                try ( final DirectoryStream< Path > stream = Files.newDirectoryStream( targetDir, "*-with-dependencies.jar" ) ) {
+                    final Iterator< Path > itr = stream.iterator();
+
+                    if ( itr.hasNext() ) {
+                        final Path path = itr.next();
+                        final String pathString = path.toString();
+                        LOGGER.debug( "AbstractCommandTest: found jar {0}", pathString );
+
+                        if ( itr.hasNext() ) {
+                            Assert.fail( "*** Found more than one relational command provider jar ***" ); //$NON-NLS-1$
+                        }
+
+                        // copy
+                        Path filePath = Paths.get( commandsDir.toString() + '/' + path.getFileName() );
+                        Files.copy( path, filePath );
+                        filePath.toFile().deleteOnExit();
+                        LOGGER.debug( "AbstractCommandTest: copying jar to {0}",
+                                      ( commandsDir.toString() + '/' + path.getFileName() ) );
+                    } else {
+                        Assert.fail( "*** Failed to find relational command provider jar ***" ); //$NON-NLS-1$
+                    }
+                } catch ( final IOException e ) {
+                    Assert.fail( "Failed to copy jar to commands directory: " + e.getMessage() ); //$NON-NLS-1$
+                }
+            }
+        } catch ( final Exception e ) {
+            Assert.fail( e.getLocalizedMessage() );
+        }
+
+        SHELL_DATA_DIRECTORY = tempDataDir;
+    }
 
     @BeforeClass
     public static void startKEngine() throws Exception {
         assertNotNull( _repo );
         final long startTime = System.currentTimeMillis();
         LOGGER.debug( "AbstractCommandTest:startKEngine" );
-
-        // create data directory for shell
-        _shellDataDirectory = Files.createTempDirectory( "VdbBuilderDataDir" );
-        System.setProperty( SystemConstants.VDB_BUILDER_DATA_DIR, _shellDataDirectory.toString() );
-        LOGGER.debug( "AbstractCommandTest:_shellDataDirectory = {0}", _shellDataDirectory );
-
-        final Path commandsDir = Paths.get( _shellDataDirectory.toString() + "/commands" );
-        Files.createDirectory( commandsDir );
-
-        System.setProperty( "komodo.shell.commandsDir", commandsDir.toString() );
-        LOGGER.debug( "AbstractCommandTest: commands directory is {0}", commandsDir );
-
-        {// find relational command provider jar and copy over to commands directory so it can be discovered
-            final String relativeTargetPath = "../../plugins/org.komodo.relational.commands/target";
-            final Path targetDir = Paths.get( relativeTargetPath );
-            LOGGER.debug( "AbstractCommandTest: Looking for jar here: {0}", targetDir );
-
-            try ( final DirectoryStream< Path > stream = Files.newDirectoryStream( targetDir, "*-with-dependencies.jar" ) ) {
-                final Iterator< Path > itr = stream.iterator();
-
-                if ( itr.hasNext() ) {
-                    final Path path = itr.next();
-                    final String pathString = path.toString();
-                    LOGGER.debug( "AbstractCommandTest: found jar {0}", pathString );
-
-                    if ( itr.hasNext() ) {
-                        Assert.fail( "*** Found more than one relational command provider jar ***" ); //$NON-NLS-1$
-                    }
-
-                    // copy
-                    Files.copy( path, Paths.get( commandsDir.toString() + '/' + path.getFileName() ) );
-                    LOGGER.debug( "AbstractCommandTest: copying jar to {0}",
-                                  ( commandsDir.toString() + '/' + path.getFileName() ) );
-                } else {
-                    Assert.fail( "*** Failed to find relational command provider jar ***" ); //$NON-NLS-1$
-                }
-            } catch ( final IOException e ) {
-                Assert.fail( "Failed to copy jar to commands directory: " + e.getMessage() ); //$NON-NLS-1$
-            }
-        }
 
         kEngine.setDefaultRepository( _repo );
         kEngine.start();
@@ -103,9 +116,6 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
     @AfterClass
     public static void stopKEngine() throws Exception {
         assertNotNull( kEngine );
-
-        // delete data directory
-        FileUtils.removeDirectoryAndChildren( _shellDataDirectory.toFile() );
 
         // Reset the latch to signal when repo has been shutdown
         _repoObserver.resetLatch();
@@ -136,7 +146,7 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
         Mockito.when( komodoShell.getEngine() ).thenReturn( kEngine );
         Mockito.when( komodoShell.getInputStream() ).thenReturn( System.in );
         Mockito.when( komodoShell.getOutputWriter() ).thenReturn( new StringWriter() );
-        Mockito.when( komodoShell.getShellDataLocation() ).thenReturn( _shellDataDirectory.toString() );
+        Mockito.when( komodoShell.getShellDataLocation() ).thenReturn( SHELL_DATA_DIRECTORY.toString() );
         Mockito.when( komodoShell.getShellPropertiesFile() ).thenReturn( "vdbbuilderShell.properties" );
 
         this.wsStatus = new WorkspaceStatusImpl( super.getTransaction(), komodoShell );
@@ -155,7 +165,7 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
 
     protected void setup( final String commandFilePath ) throws Exception {
         final String filePath = ( new File( commandFilePath ).isAbsolute() ) ? commandFilePath
-                                                                             : ( "./resources/" + commandFilePath );
+            : ( "./resources/" + commandFilePath );
         final Arguments args = new Arguments( filePath );
 
         // construct play command

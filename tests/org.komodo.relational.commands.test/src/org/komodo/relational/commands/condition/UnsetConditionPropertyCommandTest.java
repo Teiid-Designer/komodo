@@ -16,8 +16,6 @@
 package org.komodo.relational.commands.condition;
 
 import static org.junit.Assert.assertEquals;
-import java.io.File;
-import java.io.FileWriter;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.vdb.Condition;
@@ -31,29 +29,23 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test UnsetConditionPropertyCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( {"javadoc", "nls"} )
 public class UnsetConditionPropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testUnsetProperty1() throws Exception {
-        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
-        cmdFile.deleteOnExit();
-
-        FileWriter writer = new FileWriter(cmdFile);
-        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("create-vdb myVdb vdbPath" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd myVdb" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-data-role myDataRole " + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd myDataRole" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-permission myPermission" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd myPermission" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-condition myCondition" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd myCondition" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("set-property constraint true" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("unset-property constraint" + NEW_LINE);  //$NON-NLS-1$
-        writer.close();
-
-    	setup( cmdFile.getAbsolutePath() );
+        final String[] commands = { "workspace",
+            "create-vdb myVdb vdbPath",
+            "cd myVdb",
+            "add-data-role myDataRole",
+            "cd myDataRole",
+            "add-permission myPermission",
+            "cd myPermission",
+            "add-condition myCondition",
+            "cd myCondition",
+            "set-property constraint true",
+            "unset-property constraint"};
+        setup( commands );
 
         CommandResult result = execute();
         assertCommandResultOk(result);

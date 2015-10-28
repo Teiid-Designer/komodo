@@ -15,7 +15,6 @@ import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.shell.util.ContextUtils;
 import org.komodo.shell.util.KomodoObjectUtils;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
@@ -24,7 +23,6 @@ import org.komodo.spi.repository.PropertyDescriptor;
 import org.komodo.spi.repository.PropertyDescriptor.Type;
 import org.komodo.spi.repository.Repository;
 import org.komodo.utils.StringUtils;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.Constraint;
 
 /**
  * SetPropertyCommand - sets property value on a KomodoObject.
@@ -81,9 +79,7 @@ public class SetPropertyCommand extends BuiltInShellCommand {
             }
 
             // Get the context for object.  otherwise use current context
-            final KomodoObject context = StringUtils.isEmpty( pathArg ) ? getContext()
-                : ContextUtils.getContextForPath( getWorkspaceStatus(),
-                                                  pathArg );
+            final KomodoObject context = StringUtils.isEmpty( pathArg ) ? getContext() : getWorkspaceStatus().getContextForDisplayPath(pathArg);
 
             // Validate the type is valid for the context
             if (!validateProperty(propNameArg,context)) {
@@ -243,9 +239,6 @@ public class SetPropertyCommand extends BuiltInShellCommand {
                     // concat current multi-values as a string
                     final String value = concatMultiValues( context, propName );
                     candidates.add( value );
-                } else if ( Constraint.REFERENCES.equals( propName )
-                            || Constraint.TABLE_REFERENCE_REFERENCES.equals( propName ) ) {
-                    //provideCandidates( context, propName, lastArgument, candidates );
                 }
             } else {
                 provideCandidates( context, propName, lastArgument, candidates );
@@ -261,7 +254,6 @@ public class SetPropertyCommand extends BuiltInShellCommand {
                                     final String name,
                                     final String lastArgument,
                                     final List< CharSequence > candidates ) throws Exception {
-        final WorkspaceStatus wsStatus = getWorkspaceStatus();
         final String propertyName = isShowingPropertyNamePrefixes() ? name : KomodoObjectUtils.attachPrefix( getWorkspaceStatus(),context, name );
         final PropertyDescriptor descriptor = context.getPropertyDescriptor( getTransaction(), propertyName );
 

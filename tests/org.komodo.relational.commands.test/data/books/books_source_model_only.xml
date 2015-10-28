@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<vdb name="Books_Source_Model_Only" version="1">
-    <description>Sample vdb that includes this description and a single pass-through source model</description>
-    <model name="BooksSource" type="PHYSICAL" visible="true">
-        <source name="BooksSource" connection-jndi-name="BooksSource" translator-name="db2"/>
-    </model>
-</vdb>

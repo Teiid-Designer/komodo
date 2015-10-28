@@ -31,7 +31,7 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test UnsetUserDefinedFunctionPropertyCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( {"javadoc", "nls"} )
 public class UnsetUserDefinedFunctionPropertyCommandTest extends AbstractCommandTest {
 
     @Test

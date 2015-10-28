@@ -16,8 +16,6 @@
 package org.komodo.relational.commands.foreignkey;
 
 import static org.junit.Assert.assertEquals;
-import java.io.File;
-import java.io.FileWriter;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Column;
@@ -32,35 +30,30 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test AddReferenceColumnCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( {"javadoc", "nls"} )
 public class AddReferenceColumnCommandTest extends AbstractCommandTest {
 
     @Test
     public void testAdd1() throws Exception {
-        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
-        cmdFile.deleteOnExit();
-
-        FileWriter writer = new FileWriter(cmdFile);
-        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("create-vdb myVdb vdbPath" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd myVdb" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-model refModel" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd refModel" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-table refTable" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd refTable" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-column refCol1" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-column refCol2" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd ../.." + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-model myModel" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd myModel" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-table myTable" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd myTable" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-foreign-key myForeignKey /workspace/myVdb/refModel/refTable" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd myForeignKey" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-ref-column /workspace/myVdb/refModel/refTable/refCol1" + NEW_LINE);  //$NON-NLS-1$
-        writer.close();
-
-        setup( cmdFile.getAbsolutePath() );
+        final String[] commands = { "workspace",
+            "create-vdb myVdb vdbPath",
+            "cd myVdb",
+            "add-model refModel",
+            "cd refModel",
+            "add-table refTable",
+            "cd refTable",
+            "add-column refCol1",
+            "add-column refCol2",
+            "cd ../..",
+            "add-model myModel",
+            "cd myModel",
+            "add-table myTable",
+            "cd myTable",
+            "add-foreign-key myForeignKey /workspace/myVdb/refModel/refTable",
+            "cd myForeignKey",
+            "add-ref-column /workspace/myVdb/refModel/refTable/refCol1" };
+        
+        setup( commands );
 
     	CommandResult result = execute();
     	assertCommandResultOk(result);

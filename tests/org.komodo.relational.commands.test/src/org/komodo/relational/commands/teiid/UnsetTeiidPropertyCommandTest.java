@@ -28,7 +28,7 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test UnsetTeiidPropertyCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( {"javadoc", "nls"} )
 public class UnsetTeiidPropertyCommandTest extends AbstractCommandTest {
 
     @Test

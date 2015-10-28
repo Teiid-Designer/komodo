@@ -1,46 +1,51 @@
 /*
  * JBoss, Home of Professional Open Source.
-*
-* See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
-*
-* See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
-*/
-package org.komodo.shell;
+ *
+ * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
+ *
+ * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
+ */
+package org.komodo.relational.commands;
 
-import static org.komodo.spi.constants.StringConstants.COLON;
 import static org.komodo.spi.constants.StringConstants.EMPTY_STRING;
 import static org.komodo.spi.constants.StringConstants.FORWARD_SLASH;
+import java.util.Arrays;
+import java.util.List;
 import org.komodo.repository.ObjectImpl;
-import org.komodo.shell.api.KomodoObjectLabelProvider;
-import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.shell.DefaultLabelProvider;
+import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.utils.ArgCheck;
-import org.komodo.utils.StringUtils;
+import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 /**
- * The default path label provider: removes the namespace prefix from path segments when providing display text; and (2) uses
- * first matching child when providing path.
+ * A label provider for relational objects.
  */
-public class DefaultLabelProvider implements KomodoObjectLabelProvider {
+public class RelationalLabelProvider extends DefaultLabelProvider {
+
+    private static final String TKO_PREFIX = "tko:"; //$NON-NLS-1$
+    
+    /**
+     * A collection of grouping node names that should be removed from the display paths.
+     */
+    private static final List< String > GROUPING_NODES = Arrays.asList( new String[] { VdbLexicon.DataRole.PERMISSIONS,
+                                                                                       VdbLexicon.DataRole.Permission.CONDITIONS,
+                                                                                       VdbLexicon.DataRole.Permission.MASKS,
+                                                                                       VdbLexicon.Vdb.DATA_ROLES,
+                                                                                       VdbLexicon.Vdb.TRANSLATORS,
+                                                                                       VdbLexicon.Vdb.SOURCES,
+                                                                                       VdbLexicon.Vdb.ENTRIES,
+                                                                                       VdbLexicon.Vdb.IMPORT_VDBS} );
+
 
     /**
-     * @param kobject
-     *        the object being tested (cannot be <code>null</code>)
-     * @return <code>true</code> if the type should be shown to the user
+     * Constructs a command provider for workspace shell commands.
      */
-    protected static boolean shouldShowType( final KomodoObject kobject ) {
-        ArgCheck.isNotNull( kobject, "kobject" ); //$NON-NLS-1$
-        final String path = kobject.getAbsolutePath();
-        return ( !ROOT_PATH.equals( path )
-                 && !ENV_PATH.equals( path )
-                 && !LIB_PATH.equals( path )
-                 && !WORKSPACE_PATH.equals( path ) );
+    public RelationalLabelProvider() {
+        // nothing to do
     }
-
-    protected Repository repository;
-    protected WorkspaceStatus status;
 
     /**
      * {@inheritDoc}
@@ -51,55 +56,20 @@ public class DefaultLabelProvider implements KomodoObjectLabelProvider {
     public String getDisplayName( final KomodoObject kobject ) {
         ArgCheck.isNotNull( kobject, "kobject" ); //$NON-NLS-1$
 
-        final String path = kobject.getAbsolutePath();
-
-        // /tko:komodo
-        if ( ROOT_PATH.equals( path ) || ROOT_SLASH_PATH.equals( path ) ) {
-            return ROOT_DISPLAY_NAME;
+        // Null returned if grouping node
+        final Repository.UnitOfWork uow = this.status.getTransaction();
+        String nodeName = null;
+        try {
+            nodeName = kobject.getName(uow);
+        } catch (KException ex) {
+            // node exception
         }
-
-        // /tko:komodo/workspace
-        if ( WORKSPACE_PATH.equals( path ) || WORKSPACE_SLASH_PATH.equals( path ) ) {
-            return WORKSPACE_DISPLAY_NAME;
+        if(GROUPING_NODES.contains( nodeName )) {
+            return null;
         }
-
-        // /tko:komodo/library
-        if ( LIB_PATH.equals( path ) || LIB_SLASH_PATH.equals( path ) ) {
-            return LIB_DISPLAY_NAME;
-        }
-
-        // /tko:komodo/environment
-        if ( ENV_PATH.equals( path ) || ENV_SLASH_PATH.equals( path ) ) {
-            return ENV_DISPLAY_NAME;
-        }
-
-        final String[] segments = path.split( FORWARD_SLASH );
-        final String lastSegment = segments[ segments.length - 1 ];
-
-        if ( this.status.isShowingPropertyNamePrefixes() ) {
-            final int index = lastSegment.indexOf( COLON );
-
-            if ( index == -1 ) {
-                return lastSegment;
-            }
-
-            return lastSegment.substring( index + 1 );
-        }
-
-        return lastSegment;
+        return super.getDisplayName(kobject);
     }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.KomodoObjectLabelProvider#getDisplayPath(org.komodo.spi.repository.KomodoObject)
-     */
-    @Override
-    public String getDisplayPath( final KomodoObject kobject ) {
-        ArgCheck.isNotNull( kobject, "kobject" ); //$NON-NLS-1$
-        return getDisplayPath( kobject.getAbsolutePath() );
-    }
-
+    
     /**
      * {@inheritDoc}
      *
@@ -110,10 +80,6 @@ public class DefaultLabelProvider implements KomodoObjectLabelProvider {
         ArgCheck.isNotEmpty( repositoryAbsolutePath, "repositoryAbsolutePath" ); //$NON-NLS-1$
 
         if ( !repositoryAbsolutePath.startsWith( ROOT_PATH ) ) {
-            if ( !StringUtils.isBlank( getPath( repositoryAbsolutePath ) ) ) {
-                return repositoryAbsolutePath;
-            }
-
             return null;
         }
 
@@ -142,25 +108,23 @@ public class DefaultLabelProvider implements KomodoObjectLabelProvider {
         boolean firstTime = true;
 
         for ( final String segment : relativePath.split( FORWARD_SLASH ) ) {
-            if ( EMPTY_STRING.equals( segment ) || ROOT_PATH.equals( segment ) ) {
+            if ( EMPTY_STRING.equals( segment ) ) {
                 continue;
             }
 
-            if ( firstTime ) {
-                firstTime = false;
-            } else {
+            final boolean skip = GROUPING_NODES.contains( segment );
+
+            if ( !firstTime && !skip ) {
                 displayPath.append( FORWARD_SLASH );
+            } else {
+                firstTime = false;
             }
 
-            if ( this.status.isShowingPropertyNamePrefixes() ) {
-                displayPath.append( segment );
-            } else {
-                final int index = segment.indexOf( StringConstants.COLON );
-
-                if ( index == -1 ) {
-                    displayPath.append( segment );
+            if ( !skip ) {
+                if(segment.startsWith(TKO_PREFIX)) {
+                    displayPath.append(segment.substring(TKO_PREFIX.length()));
                 } else {
-                    displayPath.append( segment.substring( index + 1 ) );
+                    displayPath.append( segment );
                 }
             }
         }
@@ -171,17 +135,7 @@ public class DefaultLabelProvider implements KomodoObjectLabelProvider {
 
         return displayPath.toString();
     }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.KomodoObjectLabelProvider#getId()
-     */
-    @Override
-    public String getId() {
-        return DefaultLabelProvider.class.getName();
-    }
-
+    
     /**
      * {@inheritDoc}
      *
@@ -213,7 +167,11 @@ public class DefaultLabelProvider implements KomodoObjectLabelProvider {
                 if (StringConstants.DOT_DOT.equals(segment)) {
                     KomodoObject theParent = parent.getParent(this.status.getTransaction());
                     if(theParent!=null) {
-                        parent = theParent;
+                        if(GROUPING_NODES.contains(theParent.getName(this.status.getTransaction()))) {
+                            parent = theParent.getParent(this.status.getTransaction());
+                        } else {
+                            parent = theParent;
+                        }
                         continue;
                     }
                 }
@@ -226,7 +184,8 @@ public class DefaultLabelProvider implements KomodoObjectLabelProvider {
                         return null; // no child with that name
                     }
                 } else {
-                    // loop through children and take first one with local name match
+                    // loop through children and take first one with local name match.  skip grouping nodes
+                    boolean childFound = false;
                     for ( final KomodoObject kid : parent.getChildren( this.status.getTransaction() ) ) {
                         final String name = kid.getName( this.status.getTransaction() );
                         final int index = name.indexOf( StringConstants.COLON );
@@ -235,16 +194,27 @@ public class DefaultLabelProvider implements KomodoObjectLabelProvider {
                             if ( segment.equals( name ) ) {
                                 kobject = kid;
                                 parent = kobject;
+                                childFound = true;
+                                break;
+                            }
+                        } else if (GROUPING_NODES.contains( name )) {
+                            KomodoObject[] children = kid.getChildren(this.status.getTransaction(), segment);
+                            if(children.length>0) {
+                                kobject = children[0];
+                                parent = kobject;
+                                childFound = true;
                                 break;
                             }
                         } else {
                             if ( segment.equals( name.substring( index + 1 ) ) ) {
                                 kobject = kid;
                                 parent = kobject;
+                                childFound = true;
                                 break;
                             }
                         }
                     }
+                    if(!childFound) return null;
                 }
             }
 
@@ -257,27 +227,5 @@ public class DefaultLabelProvider implements KomodoObjectLabelProvider {
             return null;
         }
     }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.KomodoObjectLabelProvider#setRepository(org.komodo.spi.repository.Repository)
-     */
-    @Override
-    public void setRepository( final Repository repository ) {
-        assert( repository != null );
-        this.repository = repository;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.KomodoObjectLabelProvider#setWorkspaceStatus(org.komodo.shell.api.WorkspaceStatus)
-     */
-    @Override
-    public void setWorkspaceStatus( final WorkspaceStatus status ) {
-        assert( status != null );
-        this.status = status;
-    }
-
+    
 }

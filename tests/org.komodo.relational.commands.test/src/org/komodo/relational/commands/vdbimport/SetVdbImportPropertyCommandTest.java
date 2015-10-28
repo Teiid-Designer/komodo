@@ -29,7 +29,7 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test SetVdbImportPropertyCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( {"javadoc", "nls"} )
 public class SetVdbImportPropertyCommandTest extends AbstractCommandTest {
 
     @Test

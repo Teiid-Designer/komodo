@@ -29,7 +29,6 @@ import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.Messages;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.shell.util.KomodoObjectUtils;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 
@@ -101,7 +100,7 @@ public class ShowStatusCommand extends BuiltInShellCommand {
 
         // Current Context
         KomodoObject currentContext = wsStatus.getCurrentContext();
-        final String path = KomodoObjectUtils.getFullName( wsStatus, currentContext );
+        final String path = wsStatus.getDisplayPath(currentContext);
         print(MESSAGE_INDENT, Messages.getString(Messages.ShowStatusCommand.CurrentContext, path));
 
         // Get additional provided statuses for current context

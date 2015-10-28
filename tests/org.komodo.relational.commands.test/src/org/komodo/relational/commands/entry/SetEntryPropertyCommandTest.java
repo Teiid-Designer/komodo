@@ -16,8 +16,6 @@
 package org.komodo.relational.commands.entry;
 
 import static org.junit.Assert.assertEquals;
-import java.io.File;
-import java.io.FileWriter;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.vdb.Entry;
@@ -29,24 +27,19 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test SetEntryPropertyCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( {"javadoc", "nls"} )
 public class SetEntryPropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testSetProperty1() throws Exception {
-        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
-        cmdFile.deleteOnExit();
+        final String[] commands = { "workspace",
+            "create-vdb myVdb vdbPath",
+            "cd myVdb",
+            "add-entry myEntry entryPath",
+            "cd myEntry",
+            "set-property description myDescription"};
 
-        FileWriter writer = new FileWriter(cmdFile);
-        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("create-vdb myVdb vdbPath" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd myVdb" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-entry myEntry entryPath" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd myEntry" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("set-property description myDescription" + NEW_LINE);  //$NON-NLS-1$
-        writer.close();
-
-        setup( cmdFile.getAbsolutePath() );
+        setup( commands );
 
         CommandResult result = execute();
         assertCommandResultOk(result);

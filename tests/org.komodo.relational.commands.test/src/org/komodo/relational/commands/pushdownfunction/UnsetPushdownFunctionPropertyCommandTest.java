@@ -31,7 +31,7 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test UnsetPushdownFunctionPropertyCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( {"javadoc", "nls"} )
 public class UnsetPushdownFunctionPropertyCommandTest extends AbstractCommandTest {
 
     @Test

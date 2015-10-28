@@ -34,7 +34,7 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test DeleteColumnCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( {"javadoc", "nls"} )
 public class DeleteColumnCommandTest extends AbstractCommandTest {
 
     @Test

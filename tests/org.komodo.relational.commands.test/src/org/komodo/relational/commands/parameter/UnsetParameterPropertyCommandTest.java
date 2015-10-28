@@ -32,7 +32,7 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test UnsetParameterPropertyCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( {"javadoc", "nls"} )
 public class UnsetParameterPropertyCommandTest extends AbstractCommandTest {
 
     @Test

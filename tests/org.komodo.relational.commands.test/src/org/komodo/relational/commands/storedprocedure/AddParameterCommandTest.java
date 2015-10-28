@@ -32,7 +32,7 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test AddParameterCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( {"javadoc", "nls"} )
 public class AddParameterCommandTest extends AbstractCommandTest {
 
     @Test

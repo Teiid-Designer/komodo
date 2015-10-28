@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.tableconstraint;
 
-import static org.komodo.relational.commands.tableconstraint.TableConstraintCommandMessages.AddConstraintColumnCommand.COLUMN_PATH_NOT_FOUND;
 import static org.komodo.relational.commands.tableconstraint.TableConstraintCommandMessages.AddConstraintColumnCommand.COLUMN_REF_ADDED;
 import static org.komodo.relational.commands.tableconstraint.TableConstraintCommandMessages.AddConstraintColumnCommand.INVALID_COLUMN;
 import static org.komodo.relational.commands.tableconstraint.TableConstraintCommandMessages.AddConstraintColumnCommand.INVALID_COLUMN_PATH;
@@ -17,11 +16,11 @@ import java.util.List;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.TableConstraint;
+import org.komodo.repository.ObjectImpl;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.KomodoObjectLabelProvider;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.shell.util.ContextUtils;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.utils.StringUtils;
@@ -53,19 +52,35 @@ public final class AddConstraintColumnCommand extends TableConstraintShellComman
         try {
             final String columnPath = requiredArgument( 0, getMessage( MISSING_COLUMN_PATH ) );
 
-            // get reference of the column at the specified path
-            final KomodoObject column = ContextUtils.getContextForPath( getWorkspaceStatus(), columnPath );
+            Column column = null;
+            { // see if valid column
+                String repoPath = getWorkspaceStatus().getLabelProvider().getPath( columnPath );
 
-            if ( column == null ) {
-                result = new CommandResultImpl( false, getMessage( COLUMN_PATH_NOT_FOUND, columnPath ), null );
-            } else if ( column instanceof Column ) {
+                if ( StringUtils.isBlank( repoPath ) ) {
+                    repoPath = columnPath;
+                }
+
+                final KomodoObject possible = new ObjectImpl( getRepository(), repoPath, 0 );
+
+                try {
+                    if ( Column.RESOLVER.resolvable( getTransaction(), possible ) ) {
+                        column = Column.RESOLVER.resolve( getTransaction(), possible );
+                    } else {
+                        result = new CommandResultImpl( false, getMessage( INVALID_COLUMN_PATH, columnPath ), null );
+                    }
+                } catch ( final Exception e ) {
+                    result = new CommandResultImpl( false, getMessage( INVALID_COLUMN_PATH, columnPath ), null );
+                }
+            }
+            
+            if(column!=null) {
                 final TableConstraint constraint = getTableConstraint();
 
                 // must be a column in the parent of the table constraint
                 final KomodoObject parentTable = constraint.getParent( getTransaction() );
 
                 if ( parentTable.equals( column.getParent( getTransaction() ) ) ) {
-                    constraint.addColumn( getTransaction(), ( Column )column );
+                    constraint.addColumn( getTransaction(), column );
                     result = new CommandResultImpl( getMessage( COLUMN_REF_ADDED, columnPath, getContext().getAbsolutePath() ) );
                 } else {
                     result = new CommandResultImpl( false,
@@ -75,8 +90,6 @@ public final class AddConstraintColumnCommand extends TableConstraintShellComman
                                                                 constraint.getName( getTransaction() ) ),
                                                     null );
                 }
-            } else {
-                result = new CommandResultImpl( false, getMessage( INVALID_COLUMN_PATH, columnPath ), null );
             }
         } catch ( final Exception e ) {
             result = new CommandResultImpl( e );

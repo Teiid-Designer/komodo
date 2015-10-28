@@ -29,7 +29,7 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test SetTranslatorPropertyCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( {"javadoc", "nls"} )
 public class SetTranslatorPropertyCommandTest extends AbstractCommandTest {
 
     @Test

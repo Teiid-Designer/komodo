@@ -30,7 +30,7 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test SetTablePropertyCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( {"javadoc", "nls"} )
 public class SetTablePropertyCommandTest extends AbstractCommandTest {
 
     @Test

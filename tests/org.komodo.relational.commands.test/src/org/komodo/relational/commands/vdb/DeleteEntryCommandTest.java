@@ -29,7 +29,7 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test DeleteEntryCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( {"javadoc", "nls"} )
 public class DeleteEntryCommandTest extends AbstractCommandTest {
 
     @Test

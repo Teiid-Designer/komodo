@@ -31,7 +31,7 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test AddConditionCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( {"javadoc", "nls"} )
 public class AddConditionCommandTest extends AbstractCommandTest {
 
     @Test

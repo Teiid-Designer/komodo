@@ -29,7 +29,7 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test DeleteTranslatorCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( {"javadoc", "nls"} )
 public class DeleteTranslatorCommandTest extends AbstractCommandTest {
 
     @Test

@@ -27,14 +27,19 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
+import java.lang.reflect.Modifier;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.komodo.core.KEngine;
@@ -57,6 +62,7 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.spi.repository.Repository.UnitOfWorkListener;
 import org.komodo.utils.ArgCheck;
+import org.komodo.utils.FileUtils;
 import org.komodo.utils.KLog;
 import org.komodo.utils.StringUtils;
 
@@ -65,6 +71,7 @@ import org.komodo.utils.StringUtils;
  */
 public class WorkspaceStatusImpl implements WorkspaceStatus {
 
+    private static final KLog LOGGER = KLog.getLogger();
     /**
      * A transaction commit/rollback source for when the transaction was called directly not going through the WorkspaceStatus.
      */
@@ -94,7 +101,8 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
 
     private Map<String,KomodoObject> stateObjects = new HashMap<String,KomodoObject>();
 
-    private KomodoObjectLabelProvider labelProvider;
+    private KomodoObjectLabelProvider defaultLabelProvider;
+    private Collection<KomodoObjectLabelProvider> alternateLabelProviders = new ArrayList<>();
 
     /**
      * Constructor
@@ -141,9 +149,12 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         // initialize the global properties
         initGlobalProperties();
 
-        this.labelProvider = new DefaultLabelProvider();
-        this.labelProvider.setRepository( repo );
-        this.labelProvider.setWorkspaceStatus( this );
+        this.defaultLabelProvider = new DefaultLabelProvider();
+        this.defaultLabelProvider.setRepository( repo );
+        this.defaultLabelProvider.setWorkspaceStatus( this );
+        
+        // Discover any other label providers
+        discoverLabelProviders();
     }
 
     private void initGlobalProperties() throws KException {
@@ -358,6 +369,16 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         return this.currentContext;
     }
 
+    @Override
+    public String getCurrentContextDisplayPath() {
+        return getLabelProvider().getDisplayPath(this.currentContext);
+    }
+
+    @Override
+    public String getDisplayPath(KomodoObject context) {
+        return getLabelProvider().getDisplayPath(context);
+    }
+    
     @Override
     public KomodoObject getRootContext() {
         return this.rootContext;
@@ -673,7 +694,20 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
      */
     @Override
     public KomodoObjectLabelProvider getLabelProvider() {
-        return this.labelProvider;
+        // If an alternate provider yields a path for this KomodoObject, it is used.  Otherwise, the defaultProvider is used.
+        KomodoObjectLabelProvider resultLabelProvider = null;
+        if(!this.alternateLabelProviders.isEmpty()) {
+            for(KomodoObjectLabelProvider altProvider : this.alternateLabelProviders) {
+                if( !StringUtils.isEmpty(altProvider.getDisplayPath(getCurrentContext())) ) {
+                    resultLabelProvider = altProvider;
+                    break;
+                }
+            }
+        }
+        if(resultLabelProvider!=null) {
+            return resultLabelProvider;
+        }
+        return defaultLabelProvider;
     }
 
     @Override
@@ -766,6 +800,58 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     public boolean isAutoCommit() {
         assert ( this.wsProperties.containsKey( AUTO_COMMIT ) );
         return Boolean.parseBoolean( this.wsProperties.getProperty( AUTO_COMMIT ) );
+    }
+    
+    private void discoverLabelProviders( ) {
+        final List< ClassLoader > commandClassloaders = new ArrayList< >();
+        commandClassloaders.add( Thread.currentThread().getContextClassLoader() );
+
+        // Find providers in the user's commands directory
+        final String userHome = System.getProperty( "user.home", "/" ); //$NON-NLS-1$ //$NON-NLS-2$
+        final String commandsDirName = System.getProperty( "komodo.shell.commandsDir", userHome + "/.komodo/commands" ); //$NON-NLS-1$ //$NON-NLS-2$
+        LOGGER.debug( "WorkspaceStatusImpl: commands directory is \"{0}\"", commandsDirName ); //$NON-NLS-1$
+        final File commandsDir = new File( commandsDirName );
+
+        if ( !commandsDir.exists() ) {
+            commandsDir.mkdirs();
+        }
+
+        if ( commandsDir.isDirectory() ) {
+            try {
+                final Collection< File > jarFiles = FileUtils.getFilesForPattern( commandsDir.getCanonicalPath(), "", ".jar" ); //$NON-NLS-1$ //$NON-NLS-2$
+
+                if ( !jarFiles.isEmpty() ) {
+                    final List< URL > jarURLs = new ArrayList< >( jarFiles.size() );
+
+                    for ( final File jarFile : jarFiles ) {
+                        final URL jarUrl = jarFile.toURI().toURL();
+                        jarURLs.add( jarUrl );
+                        LOGGER.debug( "WorkspaceStatusImpl: adding discovered jar \"{0}\"", jarUrl ); //$NON-NLS-1$
+                    }
+
+                    final URL[] urls = jarURLs.toArray( new URL[ jarURLs.size() ] );
+                    final ClassLoader extraCommandsCL = new URLClassLoader( urls,
+                                                                            Thread.currentThread().getContextClassLoader() );
+                    commandClassloaders.add( extraCommandsCL );
+                }
+            } catch ( final IOException e ) {
+                KEngine.getInstance().getErrorHandler().error( e );
+            }
+        }
+
+        // iterate through the ClassLoaders and use the Java ServiceLoader mechanism to load the providers
+        for ( final ClassLoader classLoader : commandClassloaders ) {
+            for ( final KomodoObjectLabelProvider provider : ServiceLoader.load( KomodoObjectLabelProvider.class, classLoader ) ) {
+                if ( !Modifier.isAbstract( provider.getClass().getModifiers() ) ) {
+                    provider.setRepository(getEngine().getDefaultRepository());
+                    provider.setWorkspaceStatus(this);
+                    LOGGER.debug( "WorkspaceStatusImpl: adding LabelProvider \"{0}\"", provider.getClass().getName() ); //$NON-NLS-1$
+                    this.alternateLabelProviders.add( provider );
+                }
+            }
+        }
+        
+        LOGGER.debug( "WorkspaceStatusImpl: found \"{0}\" LabelProviders", alternateLabelProviders.size() ); //$NON-NLS-1$
     }
 
     /**
@@ -888,6 +974,88 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
             }
         }
 
+    }
+
+    /* (non-Javadoc)
+     * @see org.komodo.shell.api.WorkspaceStatus#getContextForDisplayPath(java.lang.String)
+     */
+    @Override
+    public KomodoObject getContextForDisplayPath(String displayPath) {
+        if(StringUtils.isBlank(displayPath)) return getCurrentContext();
+
+        // check path for cd into root options
+        if ( displayPath.equals( FORWARD_SLASH ) ) {
+            return getRootContext();
+        }
+
+        // If supplied path doesnt start with FORWARD_SLASH, it should be relative to current context
+        String entireDisplayPath = displayPath;
+        if(!displayPath.startsWith(FORWARD_SLASH)) {
+            entireDisplayPath = getCurrentContextDisplayPath()+FORWARD_SLASH+displayPath;
+        }
+        
+        entireDisplayPath = removePathDots(entireDisplayPath);
+        // check path for cd into root options
+        if ( entireDisplayPath.equals( FORWARD_SLASH ) ) {
+            return getRootContext();
+        }
+        
+        String repoPath = getLabelProvider().getPath(entireDisplayPath);
+        if(repoPath==null) return null;
+        
+        KomodoObject resultObject = null;
+        try {
+            resultObject = getRootContext().getRepository().getFromWorkspace(getTransaction(), repoPath);
+        } catch (KException ex) {
+            // Failed to locate the object
+        }
+
+        if(resultObject!=null) {
+            try {
+                final KomodoObject resolved = resolve( resultObject );
+
+                if ( resolved != null ) {
+                    return resolved;
+                }
+            } catch (KException ex) {
+                LOGGER.debug( "WorkspaceStatusImpl: problem resolving object" ); //$NON-NLS-1$
+            }
+        }
+        return resultObject;
+    }
+    
+    /*
+     * Remove '..' and '.' segments from a display path
+     */
+    private String removePathDots(String absoluteDisplayPath) {
+        ArgCheck.isNotNull(absoluteDisplayPath);
+        String[] segments = absoluteDisplayPath.split(FORWARD_SLASH);
+        
+        List<String> newSegments = new ArrayList<String>();
+        for(String segment : segments) {
+            // Dot stays in same place
+            if(segment.equals(DOT) || StringUtils.isBlank(segment)) {
+                continue;
+            // Dot dot go up
+            } else if(segment.equals(DOT_DOT)) {
+                if(newSegments.size()>0) {
+                    newSegments.remove(newSegments.size()-1);
+                }
+            } else {
+                newSegments.add(segment);
+            }
+        }
+        
+        // Construct the new path without dots
+        StringBuilder sb = new StringBuilder(FORWARD_SLASH);
+        for(int i=0; i<newSegments.size(); i++) {
+            sb.append(newSegments.get(i));
+            if(i != newSegments.size()-1) {
+                sb.append(FORWARD_SLASH);
+            }
+        }
+        
+        return sb.toString();
     }
 
 }

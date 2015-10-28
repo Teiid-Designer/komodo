@@ -170,11 +170,31 @@ public interface WorkspaceStatus extends StringConstants {
 	 */
 	void setCurrentContext(KomodoObject context) throws Exception;
 
-	/**
-	 * Get the current workspace context
-	 * @return the current workspace context
-	 */
-	KomodoObject getCurrentContext();
+    /**
+     * Get the current workspace context
+     * @return the current workspace context
+     */
+    KomodoObject getCurrentContext();
+    
+    /**
+     * Get the context at the supplied display path
+     * @param displayPath the display path
+     * @return the context, null if not found.
+     */
+    KomodoObject getContextForDisplayPath(String displayPath);
+    
+    /**
+     * Get the display path for the supplied context
+     * @param kObj the context
+     * @return the display path
+     */
+    String getDisplayPath(KomodoObject kObj);
+
+    /**
+     * Get the display path for the current workspace context
+     * @return the display path
+     */
+    String getCurrentContextDisplayPath();
 
     /**
      * Close the recording output file if open
@@ -330,6 +350,7 @@ public interface WorkspaceStatus extends StringConstants {
     < T extends KomodoObject > T resolve ( final KomodoObject kObj ) throws KException;
 
     /**
+     * Get the label provider
      * @return the current label provider (never <code>null</code>)
      */
     KomodoObjectLabelProvider getLabelProvider();

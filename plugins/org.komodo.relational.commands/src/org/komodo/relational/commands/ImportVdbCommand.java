@@ -92,7 +92,6 @@ public final class ImportVdbCommand extends WorkspaceShellCommand {
 
                 print(CompletionConstants.MESSAGE_INDENT, getMessage(VdbImportInProgressMsg, vdbFile));
 
-                WorkspaceStatus wsStatus = getWorkspaceStatus();
                 KomodoObject theVdb = null;
                 // The commit will initiate sequencing
                 commitImport(ImportVdbCommand.class.getSimpleName(), importMessages);

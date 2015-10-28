@@ -19,7 +19,6 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.shell.AbstractCommandTest;
 import org.komodo.shell.api.CommandResult;
-import org.komodo.shell.util.KomodoObjectUtils;
 
 /**
  * Test class for {@link CommitCommand}.
@@ -37,7 +36,7 @@ public class CommitCommandTest extends AbstractCommandTest {
         assertCommandResultOk(result);
 
     	// Check WorkspaceContext
-    	assertEquals("/workspace", KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext())); //$NON-NLS-1$
+    	assertEquals("/workspace", wsStatus.getCurrentContextDisplayPath()); //$NON-NLS-1$
     }
 
 }

@@ -7,19 +7,18 @@
  */
 package org.komodo.relational.commands.foreignkey;
 
-import static org.komodo.relational.commands.foreignkey.ForeignKeyCommandMessages.DeleteReferenceColumnCommand.COLUMN_PATH_NOT_FOUND;
 import static org.komodo.relational.commands.foreignkey.ForeignKeyCommandMessages.DeleteReferenceColumnCommand.COLUMN_REMOVED;
-import static org.komodo.relational.commands.foreignkey.ForeignKeyCommandMessages.DeleteReferenceColumnCommand.INVALID_COLUMN_PATH;
 import static org.komodo.relational.commands.foreignkey.ForeignKeyCommandMessages.DeleteReferenceColumnCommand.MISSING_COLUMN_PATH;
+import static org.komodo.relational.commands.tableconstraint.TableConstraintCommandMessages.AddConstraintColumnCommand.INVALID_COLUMN_PATH;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.ForeignKey;
+import org.komodo.repository.ObjectImpl;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.shell.util.ContextUtils;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.utils.StringUtils;
 
@@ -50,23 +49,33 @@ public final class DeleteReferenceColumnCommand extends ForeignKeyShellCommand {
         try {
             final String columnPathArg = requiredArgument( 0, getMessage( MISSING_COLUMN_PATH ) );
 
-            // get selected column and remove
-            final KomodoObject columnContext = ContextUtils.getContextForPath( getWorkspaceStatus(), columnPathArg );
+            // get reference of the column at the specified path
+            Column column = null;
+            { // see if valid column
+                String repoPath = getWorkspaceStatus().getLabelProvider().getPath( columnPathArg );
 
-            if ( columnContext == null ) {
-                result = new CommandResultImpl( false, getMessage( COLUMN_PATH_NOT_FOUND, columnPathArg ), null );
-            } else {
+                if ( StringUtils.isBlank( repoPath ) ) {
+                    repoPath = columnPathArg;
+                }
 
-                final KomodoObject column = columnContext;
+                final KomodoObject possible = new ObjectImpl( getRepository(), repoPath, 0 );
 
-                if ( column instanceof Column ) {
-                    final ForeignKey foreignKey = getForeignKey();
-                    foreignKey.removeReferencesColumn( getTransaction(), ( Column )column );
-
-                    result = new CommandResultImpl( getMessage( COLUMN_REMOVED, columnPathArg, getContext().getAbsolutePath() ) );
-                } else {
+                try {
+                    if ( Column.RESOLVER.resolvable( getTransaction(), possible ) ) {
+                        column = Column.RESOLVER.resolve( getTransaction(), possible );
+                    } else {
+                        result = new CommandResultImpl( false, getMessage( INVALID_COLUMN_PATH, columnPathArg ), null );
+                    }
+                } catch ( final Exception e ) {
                     result = new CommandResultImpl( false, getMessage( INVALID_COLUMN_PATH, columnPathArg ), null );
                 }
+            }
+
+            if ( column != null ) {
+                final ForeignKey foreignKey = getForeignKey();
+                foreignKey.removeReferencesColumn( getTransaction(), column );
+
+                result = new CommandResultImpl( getMessage( COLUMN_REMOVED, columnPathArg, getContext().getAbsolutePath() ) );
             }
         } catch ( final Exception e ) {
             result = new CommandResultImpl( e );

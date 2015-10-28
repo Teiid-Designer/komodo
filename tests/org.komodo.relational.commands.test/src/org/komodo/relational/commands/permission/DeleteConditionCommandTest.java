@@ -31,7 +31,7 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test DeleteConditionCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( {"javadoc", "nls"} )
 public class DeleteConditionCommandTest extends AbstractCommandTest {
 
     @Test

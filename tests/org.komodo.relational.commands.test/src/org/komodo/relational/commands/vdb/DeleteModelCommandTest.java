@@ -29,7 +29,7 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test DeleteModelCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( {"javadoc", "nls"} )
 public class DeleteModelCommandTest extends AbstractCommandTest {
 
     @Test

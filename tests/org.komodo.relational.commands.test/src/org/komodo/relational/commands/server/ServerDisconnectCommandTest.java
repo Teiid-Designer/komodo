@@ -26,7 +26,7 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test ServerDisconnectCommand
  *
  */
-@SuppressWarnings({"javadoc", "nls"})
+@SuppressWarnings( {"javadoc", "nls"} )
 public class ServerDisconnectCommandTest extends AbstractCommandTest {
 
     @Test

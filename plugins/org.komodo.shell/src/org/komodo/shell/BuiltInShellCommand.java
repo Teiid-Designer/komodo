@@ -26,9 +26,9 @@ import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.InvalidCommandArgumentException;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.shell.util.ContextUtils;
 import org.komodo.shell.util.KomodoObjectUtils;
 import org.komodo.shell.util.PrintUtils;
+import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -386,20 +386,36 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
 	/**
 	 * Validates whether the supplied path is valid.  If the path is relative this takes into account the
 	 * current context.  If valid 'Ok' is returned, otherwise the appropriate error message.
-	 * @param pathArg the path to test
+	 * @param displayPath the path to test, never null.
 	 * @return result message - "ok" if the path is valid, "error message" if not.
 	 */
-	public String validatePath(String pathArg) {
-		String path = pathArg.trim();
-		if(path.length()==0) {
+	public String validatePath(String displayPath) {
+        ArgCheck.isNotNull(displayPath, "displayPath"); //$NON-NLS-1$
+        
+        displayPath = displayPath.trim();
+		if(displayPath.trim().length()==0) {
 		    return Messages.getString(SHELL.locationArg_empty);
 		}
 
-		WorkspaceStatus wsStatus = getWorkspaceStatus();
-		KomodoObject newContext = ContextUtils.getContextForPath(wsStatus, pathArg);
+		// If supplied path doesnt start with FORWARD_SLASH, it should be relative to current context
+		String entireDisplayPath = displayPath;
+		if(!displayPath.startsWith(FORWARD_SLASH)) {
+            entireDisplayPath = getWorkspaceStatus().getCurrentContextDisplayPath()+FORWARD_SLASH+displayPath;
+		}
+		
+		// Try to locate the object at the specified path
+        KomodoObject newContext = null;
+        String repoPath = getWorkspaceStatus().getLabelProvider().getPath(entireDisplayPath);
+        if(!StringUtils.isBlank(repoPath)) {
+            try {
+                newContext = wsStatus.getRootContext().getRepository().getFromWorkspace(getTransaction(), repoPath);
+            } catch (KException ex) {
+                return Messages.getString(SHELL.locationArg_noContextWithThisName, displayPath);
+            }
+        }
 
 		if(newContext==null) {
-		    return Messages.getString(SHELL.locationArg_noContextWithThisName, path);
+		    return Messages.getString(SHELL.locationArg_noContextWithThisName, displayPath);
 		}
 		return CompletionConstants.OK;
 	}
@@ -490,54 +506,184 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
     		// Absolute Path Arg handling
     		// --------------------------------------------
     		if( lastArgument.startsWith(FORWARD_SLASH) ) {
-    			// If not the full absolute root, then provide it
-    			if(!ContextUtils.isAbsolutePath(lastArgument)) {
-    				potentialsList.add(FORWARD_SLASH);
-    				updateCandidates(candidates,potentialsList,lastArgument);
-    		    // Starts with correct root - provide next option
-    			} else {
-    				String relativePath = ContextUtils.convertAbsolutePathToRootRelative(wsStatus,lastArgument);
-    				KomodoObject deepestMatchingContext = ContextUtils.getDeepestMatchingContextRelative(getWorkspaceStatus(),getWorkspaceStatus().getRootContext(), relativePath);
+    		    String relativePath = lastArgument.substring(FORWARD_SLASH.length());
+                ContextPathPair contextPathPair = getMatchingContextAndPathRelative(getWorkspaceStatus(), getWorkspaceStatus().getRootContext(), relativePath);
+                KomodoObject deepestMatchingContext = contextPathPair.getContext();
 
-    				// Get children of deepest context match to form potentialsList
-    				KomodoObject[] children = deepestMatchingContext.getChildren( getTransaction() );
-    				if(children.length != 0) {
-    					// Get all children as potentials
-    					for(KomodoObject childContext : children) {
-                            final String absolutePath = KomodoObjectUtils.getFullName( this.wsStatus, childContext );
-    						potentialsList.add(absolutePath+FORWARD_SLASH);
-    					}
-    				} else {
-                        final String absolutePath = KomodoObjectUtils.getFullName( this.wsStatus, deepestMatchingContext );
-    					potentialsList.add(absolutePath+FORWARD_SLASH);
-    				}
-    				updateCandidates(candidates, potentialsList, lastArgument);
-    			}
-    			// -------------------------------------------
-    			// Relative Path Arg handling
-    			// -------------------------------------------
+    		    // Get children of deepest context match to form potentialsList
+    		    KomodoObject[] children = deepestMatchingContext.getChildren(getTransaction());
+    		    if(children.length != 0) {
+    		        // Get all children as potentials
+    		        for(KomodoObject childContext : children) {
+    		            final String absolutePath = this.wsStatus.getDisplayPath(childContext);
+    		            potentialsList.add(absolutePath+FORWARD_SLASH);
+    		        }
+    		    } else {
+    		        final String absolutePath = this.wsStatus.getDisplayPath(deepestMatchingContext);
+    		        potentialsList.add(absolutePath+FORWARD_SLASH);
+    		    }
+    		    updateCandidates(candidates, potentialsList, lastArgument);
+    		// -------------------------------------------
+    		// Relative Path Arg handling
+    		// -------------------------------------------
     		} else {
     			// Deepest matching context for relative path
-    		    KomodoObject deepestMatchingContext = ContextUtils.getDeepestMatchingContextRelative(getWorkspaceStatus(), currentContext, lastArgument);
-
+    		    ContextPathPair contextPathPair = getMatchingContextAndPathRelative(getWorkspaceStatus(), currentContext, lastArgument);
+    		    KomodoObject deepestMatchingContext = contextPathPair.getContext();
+    		    String deepestMatchingPath = contextPathPair.getPath();
+    		    
     			// Get children of deepest context match to form potentialsList
     		    KomodoObject[] children = deepestMatchingContext.getChildren( getTransaction() );
     			if(children.length!=0) {
     				// Get all children as potentials
     				for(KomodoObject childContext : children) {
-                        final String absolutePath = KomodoObjectUtils.getFullName( this.wsStatus, childContext );
-    					String relativePath = ContextUtils.convertAbsolutePathToRelative(getWorkspaceStatus(), currentContext, absolutePath);
-    					potentialsList.add(relativePath+FORWARD_SLASH);
+                        final String absolutePath = this.wsStatus.getDisplayPath(childContext);
+    					String relativePath = convertAbsoluteDisplayPathToRelative(getWorkspaceStatus(), deepestMatchingContext, absolutePath);
+    					if(!StringUtils.isBlank(deepestMatchingPath) && lastArgument.startsWith(deepestMatchingPath)) {
+    					    potentialsList.add(deepestMatchingPath+FORWARD_SLASH+relativePath+FORWARD_SLASH);
+    					} else {
+    					    potentialsList.add(relativePath+FORWARD_SLASH);
+    					}
     				}
     			} else {
-                    final String absolutePath = KomodoObjectUtils.getFullName( this.wsStatus, deepestMatchingContext );
-    				String relativePath = ContextUtils.convertAbsolutePathToRelative(getWorkspaceStatus(), currentContext, absolutePath);
-    				potentialsList.add(relativePath+FORWARD_SLASH);
+                    final String absolutePath = this.wsStatus.getDisplayPath(deepestMatchingContext);
+    				String relativePath = convertAbsoluteDisplayPathToRelative(getWorkspaceStatus(), deepestMatchingContext, absolutePath);
+                    if(!StringUtils.isBlank(deepestMatchingPath) && lastArgument.startsWith(deepestMatchingPath)) {
+                        potentialsList.add(deepestMatchingPath+FORWARD_SLASH+relativePath+FORWARD_SLASH);
+                    } else {
+                        potentialsList.add(relativePath+FORWARD_SLASH);
+                    }
     			}
     			updateCandidates(candidates, potentialsList, lastArgument);
     		}
 
     	}
+    }
+    
+    /**
+     * Get the deepest matching context along the supplied relative path.  If there is no such context, the current context is returned.
+     * @param wsStatus the WorkspaceStatus
+     * @param currentContext the current context
+     * @param relativeDisplayPath the path relative to current context
+     * @return the context at the deepest matching segment in the specified relative path, if none match - current context is returned.
+     * @throws KException the exception
+     */
+    protected ContextPathPair getMatchingContextAndPathRelative(WorkspaceStatus wsStatus, KomodoObject currentContext, String relativeDisplayPath) throws KException {
+        ContextPathPair result = new ContextPathPair();
+
+        String currentPath = EMPTY_STRING;
+        if(!StringUtils.isEmpty(relativeDisplayPath)) {
+            String[] segments = relativeDisplayPath.split(FORWARD_SLASH);
+            int nSegments = segments.length;
+            for(int i=0; i<nSegments; i++) {
+                String segment = segments[i];
+                currentPath = currentPath + segment;
+                if(hasMultipleChildrenStartingWith(wsStatus,currentContext,segment)) {
+                    result.setContext(currentContext);
+                    int segLength = segment.length();
+                    boolean hasFwdSlash = currentPath.contains(FORWARD_SLASH);
+                    String prevPath = hasFwdSlash ? currentPath.substring(0, currentPath.length()-segLength-1) : currentPath.substring(0, currentPath.length()-segLength);
+                    result.setPath(prevPath);
+                    break;
+                } else {
+                    String currContextPath = wsStatus.getLabelProvider().getDisplayPath(currentContext);
+                    String displayPath = currContextPath + FORWARD_SLASH + segment;
+                    KomodoObject theContext = wsStatus.getContextForDisplayPath(displayPath);
+
+                    if(theContext==null) {
+                        result.setContext(currentContext);
+                        int segLength = segment.length();
+                        boolean hasFwdSlash = currentPath.contains(FORWARD_SLASH);
+                        String prevPath = hasFwdSlash ? currentPath.substring(0, currentPath.length()-segLength-1) : currentPath.substring(0, currentPath.length()-segLength);
+                        result.setPath(prevPath);
+                        break;
+                    } else {
+                        currentContext = theContext;
+                        result.setContext(currentContext);
+                        result.setPath(currentPath);
+                        currentPath = currentPath + FORWARD_SLASH;  // Add separator prior to next iteration
+                    }
+                }
+            }
+        } else {
+            result.setContext(currentContext);
+            result.setPath(EMPTY_STRING);
+        }
+        return result;
+    }
+    
+    private class ContextPathPair {
+        private KomodoObject context;
+        private String path;
+        
+        public void setContext(KomodoObject context) {
+            this.context = context;
+        }
+        public void setPath(String path) {
+            this.path = path;
+        }
+        public KomodoObject getContext() {
+            return this.context;
+        }
+        public String getPath() {
+            
+            return this.path;
+        }
+    }
+    
+    /**
+     * Determine if the supplied context has multiple children that start with the segmentName
+     * @param currentContext the current context
+     * @param segmentName the name of the context to find
+     * @return 'true' if multiple matching, 'false' if not.
+     */
+    private static boolean hasMultipleChildrenStartingWith(final WorkspaceStatus wsStatus, KomodoObject currentContext, String segmentName) {
+        int nMatching = 0;
+        try {
+            for(KomodoObject theContext : currentContext.getChildren(wsStatus.getTransaction())) {
+                final String contextName = wsStatus.getLabelProvider().getDisplayName( theContext );
+                if(contextName.startsWith(segmentName)) {
+                    nMatching++;
+                    if(nMatching>1) break;
+                }
+            }
+        } catch (Exception e) {
+            // Handle exception
+        }
+        return nMatching>1;
+    }
+    
+    /**
+     * convert the supplied absolute path to a path relative to the supplied context
+     * @param wsStatus the WorkspaceContext
+     * @param context the context
+     * @param absolutePath the supplied absolute path
+     * @return the path relative to the root context
+     */
+    private String convertAbsoluteDisplayPathToRelative( WorkspaceStatus wsStatus,
+                                                         KomodoObject context,
+                                                         final String absolutePath ) {
+        ArgCheck.isNotNull( wsStatus, "wsStatus" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( context, "context" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( absolutePath, "absolutePath" ); //$NON-NLS-1$
+
+        final String absContextPath = wsStatus.getDisplayPath(context);
+        final String displayPath = wsStatus.getLabelProvider().getDisplayPath( absolutePath );
+        String path = ( StringUtils.isBlank( displayPath ) ? absolutePath : displayPath );
+
+        if ( path.startsWith( absContextPath ) ) {
+            String relativePath = path.substring( absContextPath.length() );
+
+            if ( !StringUtils.isEmpty( relativePath ) ) {
+                if ( relativePath.startsWith( FORWARD_SLASH ) ) {
+                    relativePath = relativePath.substring( 1 );
+                }
+            }
+
+            return relativePath;
+        }
+
+        return null;
     }
 
     /**

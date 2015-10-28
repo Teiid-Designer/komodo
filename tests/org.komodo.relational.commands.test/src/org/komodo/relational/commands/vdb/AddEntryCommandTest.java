@@ -29,7 +29,7 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test AddEntryCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( {"javadoc", "nls"} )
 public class AddEntryCommandTest extends AbstractCommandTest {
 
     @Test

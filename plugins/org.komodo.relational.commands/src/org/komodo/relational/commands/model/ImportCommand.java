@@ -31,7 +31,6 @@ import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.CdCommand;
 import org.komodo.shell.commands.RenameCommand;
-import org.komodo.shell.util.KomodoObjectUtils;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
@@ -88,6 +87,7 @@ public final class ImportCommand extends ModelShellCommand {
                 return new CommandResultImpl( false, getMessage( ErrorCreatingTempNode, TEMP_IMPORT_CONTEXT ), null );
             }
 
+            WorkspaceStatus wsStatus = getWorkspaceStatus();
             // Setup the import
             importDdl(getTransaction(), ddlFile, tempSchema, importOptions, importMessages);
 
@@ -104,13 +104,13 @@ public final class ImportCommand extends ModelShellCommand {
                     KomodoObject[] children = tempSchema.getChildren(getTransaction());
                     for(KomodoObject child : children) {
                         RenameCommand renameCommand = new RenameCommand(getWorkspaceStatus());
-                        String oldFullName = KomodoObjectUtils.getFullName(getWorkspaceStatus(), child);
-                        String contextName = KomodoObjectUtils.getFullName(getWorkspaceStatus(), getContext());
+                        String oldFullName = wsStatus.getDisplayPath(child);
+                        String contextName = wsStatus.getDisplayPath(getContext());
                         renameCommand.setArguments(new Arguments( oldFullName + StringConstants.SPACE + contextName + StringConstants.FORWARD_SLASH + child.getName(getTransaction()) ));
                         renameCommand.execute();
                     }
                     // Clean up the temp schema
-                    deleteSchema(KomodoObjectUtils.getFullName(getWorkspaceStatus(), tempSchema));
+                    deleteSchema(wsStatus.getDisplayPath(tempSchema));
 
                     return new CommandResultImpl( true, getMessage( DdlImportSuccessMsg, fileName ), null );
                 // Problem with the import.  Fail and delete all the parents children
@@ -118,13 +118,13 @@ public final class ImportCommand extends ModelShellCommand {
                     print(CompletionConstants.MESSAGE_INDENT, getMessage(ImportFailedMsg, fileName));
                     print(CompletionConstants.MESSAGE_INDENT, importMessages.errorMessagesToString());
 
-                    deleteSchema(KomodoObjectUtils.getFullName(getWorkspaceStatus(), tempSchema));
+                    deleteSchema(wsStatus.getDisplayPath(tempSchema));
                 }
             } else {
                 print(CompletionConstants.MESSAGE_INDENT, getMessage(ImportFailedMsg, fileName));
                 print(CompletionConstants.MESSAGE_INDENT, importMessages.errorMessagesToString());
 
-                deleteSchema(KomodoObjectUtils.getFullName(getWorkspaceStatus(), tempSchema));
+                deleteSchema(wsStatus.getDisplayPath(tempSchema));
             }
 
             return new CommandResultImpl( false, getWorkspaceMessage( INPUT_FILE_ERROR, fileName ), null );
@@ -218,7 +218,7 @@ public final class ImportCommand extends ModelShellCommand {
             }
 
             // Cd back into the original Context
-            String path = KomodoObjectUtils.getFullName(getWorkspaceStatus(), origContext);
+            String path = getWorkspaceStatus().getDisplayPath(origContext);
             cdCommand.setArguments(new Arguments(path));
             cdCommand.execute();
         } catch (Exception e) {

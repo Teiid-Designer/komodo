@@ -30,7 +30,7 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test SetModelSourcePropertyCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( {"javadoc", "nls"} )
 public class SetModelSourcePropertyCommandTest extends AbstractCommandTest {
 
     @Test

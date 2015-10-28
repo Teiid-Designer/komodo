@@ -31,7 +31,7 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test AddIndexCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( {"javadoc", "nls"} )
 public class AddIndexCommandTest extends AbstractCommandTest {
 
     @Test

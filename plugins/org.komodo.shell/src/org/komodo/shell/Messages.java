@@ -155,7 +155,22 @@ public class Messages implements StringConstants {
         public String toString() {
             return getEnumName( this ) + DOT + name();
         }
+    }
 
+    public enum DeleteChildCommand {
+
+        CHILD_DELETED,
+        MISSING_CHILD_NAME;
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see java.lang.Enum#toString()
+         */
+        @Override
+        public String toString() {
+            return getEnumName( this ) + DOT + name();
+        }
     }
 
     public enum StatusCommand {

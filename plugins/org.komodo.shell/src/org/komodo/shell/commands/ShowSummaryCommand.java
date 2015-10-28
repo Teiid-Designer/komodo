@@ -28,7 +28,6 @@ import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.shell.util.ContextUtils;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.utils.StringUtils;
 
@@ -78,7 +77,10 @@ public class ShowSummaryCommand extends BuiltInShellCommand {
             }
 
             WorkspaceStatus wsStatus = getWorkspaceStatus();
-            KomodoObject theContext = ContextUtils.getContextForPath( wsStatus, pathArg );
+            KomodoObject theContext = getContext();
+            if(pathArg!=null) {
+                theContext = wsStatus.getContextForDisplayPath( pathArg );
+            }
 
             ShellCommand showChildrenCommand = null;
 

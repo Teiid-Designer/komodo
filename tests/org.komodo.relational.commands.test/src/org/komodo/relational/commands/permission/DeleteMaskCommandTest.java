@@ -31,7 +31,7 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test DeleteMaskCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( {"javadoc", "nls"} )
 public class DeleteMaskCommandTest extends AbstractCommandTest {
 
     @Test

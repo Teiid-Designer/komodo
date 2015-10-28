@@ -19,7 +19,6 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.shell.AbstractCommandTest;
 import org.komodo.shell.api.CommandResult;
-import org.komodo.shell.util.KomodoObjectUtils;
 
 /**
  * Test Class to test {@link HomeCommand}.
@@ -36,7 +35,7 @@ public class HomeCommandTest extends AbstractCommandTest {
         CommandResult result = execute();
         assertCommandResultOk(result);
 
-        String contextPath = KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext());
+        String contextPath = wsStatus.getCurrentContextDisplayPath();
         assertEquals("/", contextPath);
     }
 

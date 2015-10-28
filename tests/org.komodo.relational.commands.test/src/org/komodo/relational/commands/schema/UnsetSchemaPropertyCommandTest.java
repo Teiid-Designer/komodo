@@ -29,7 +29,7 @@ import org.komodo.utils.StringUtils;
  * Test Class to test UnsetSchemaPropertyCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( {"javadoc", "nls"} )
 public class UnsetSchemaPropertyCommandTest extends AbstractCommandTest {
 
     @Test

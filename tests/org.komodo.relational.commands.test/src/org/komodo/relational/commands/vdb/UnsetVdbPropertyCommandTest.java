@@ -28,7 +28,7 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test UnsetVdbPropertyCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( {"javadoc", "nls"} )
 public class UnsetVdbPropertyCommandTest extends AbstractCommandTest {
 
     @Test

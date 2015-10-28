@@ -31,7 +31,7 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test DeleteForeignKeyCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( {"javadoc", "nls"} )
 public class DeleteForeignKeyCommandTest extends AbstractCommandTest {
 
     @Test

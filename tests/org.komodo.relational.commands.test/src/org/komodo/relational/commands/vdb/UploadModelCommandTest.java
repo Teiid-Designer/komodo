@@ -25,7 +25,7 @@ import org.komodo.shell.api.CommandResult;
 /**
  * Test Class to test {@link UploadModelCommand}.
  */
-@SuppressWarnings( { "javadoc", "nls" } )
+@SuppressWarnings( {"javadoc", "nls"} )
 public class UploadModelCommandTest extends AbstractCommandTest {
 
     private static final String UPLOAD_MODEL = "./resources/PartsOracle.ddl";

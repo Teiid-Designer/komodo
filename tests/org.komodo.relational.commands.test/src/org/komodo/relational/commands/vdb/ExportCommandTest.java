@@ -33,7 +33,7 @@ import org.w3c.dom.Document;
  * Test Class to test VDB ExportCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( {"javadoc", "nls"} )
 public class ExportCommandTest extends AbstractCommandTest {
 
     private static final String TWEET_VDB = "./resources/tweet-example-vdb.xml";  //$NON-NLS-1$

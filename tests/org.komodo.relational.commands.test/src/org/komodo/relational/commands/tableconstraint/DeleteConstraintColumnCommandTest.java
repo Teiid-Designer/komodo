@@ -33,7 +33,7 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test DeleteParameterCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( {"javadoc", "nls"} )
 public class DeleteConstraintColumnCommandTest extends AbstractCommandTest {
 
     @Test

@@ -31,7 +31,7 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test UnsetStoredProcedurePropertyCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( {"javadoc", "nls"} )
 public class UnsetStoredProcedurePropertyCommandTest extends AbstractCommandTest {
 
     @Test

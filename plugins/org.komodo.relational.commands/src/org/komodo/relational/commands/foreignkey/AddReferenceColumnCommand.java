@@ -7,20 +7,19 @@
  */
 package org.komodo.relational.commands.foreignkey;
 
-import static org.komodo.relational.commands.foreignkey.ForeignKeyCommandMessages.AddReferenceColumnCommand.COLUMN_PATH_NOT_FOUND;
 import static org.komodo.relational.commands.foreignkey.ForeignKeyCommandMessages.AddReferenceColumnCommand.COLUMN_REF_ADDED;
 import static org.komodo.relational.commands.foreignkey.ForeignKeyCommandMessages.AddReferenceColumnCommand.INVALID_COLUMN;
-import static org.komodo.relational.commands.foreignkey.ForeignKeyCommandMessages.AddReferenceColumnCommand.INVALID_COLUMN_PATH;
 import static org.komodo.relational.commands.foreignkey.ForeignKeyCommandMessages.AddReferenceColumnCommand.MISSING_COLUMN_PATH;
+import static org.komodo.relational.commands.tableconstraint.TableConstraintCommandMessages.AddConstraintColumnCommand.INVALID_COLUMN_PATH;
 import java.util.List;
 import org.komodo.relational.commands.FindCommand;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.ForeignKey;
 import org.komodo.relational.model.Table;
+import org.komodo.repository.ObjectImpl;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.shell.util.ContextUtils;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
@@ -54,11 +53,28 @@ public final class AddReferenceColumnCommand extends ForeignKeyShellCommand {
             final String columnPath = requiredArgument( 0, getMessage( MISSING_COLUMN_PATH ) );
 
             // get reference of the column at the specified path
-            final KomodoObject column = ContextUtils.getContextForPath( getWorkspaceStatus(), columnPath );
+            Column column = null;
+            { // see if valid column
+                String repoPath = getWorkspaceStatus().getLabelProvider().getPath( columnPath );
 
-            if ( column == null ) {
-                result = new CommandResultImpl( false, getMessage( COLUMN_PATH_NOT_FOUND, columnPath ), null );
-            } else if ( column instanceof Column ) {
+                if ( StringUtils.isBlank( repoPath ) ) {
+                    repoPath = columnPath;
+                }
+
+                final KomodoObject possible = new ObjectImpl( getRepository(), repoPath, 0 );
+
+                try {
+                    if ( Column.RESOLVER.resolvable( getTransaction(), possible ) ) {
+                        column = Column.RESOLVER.resolve( getTransaction(), possible );
+                    } else {
+                        result = new CommandResultImpl( false, getMessage( INVALID_COLUMN_PATH, columnPath ), null );
+                    }
+                } catch ( final Exception e ) {
+                    result = new CommandResultImpl( false, getMessage( INVALID_COLUMN_PATH, columnPath ), null );
+                }
+            }
+            
+            if ( column != null ) {
                 final ForeignKey foreignKey = getForeignKey();
 
                 // must NOT be a column in the parent of the table constraint
@@ -72,11 +88,9 @@ public final class AddReferenceColumnCommand extends ForeignKeyShellCommand {
                                                                 foreignKey.getName( getTransaction() ) ),
                                                     null );
                 } else {
-                    foreignKey.addReferencesColumn( getTransaction(), ( Column )column );
+                    foreignKey.addReferencesColumn( getTransaction(), column );
                     result = new CommandResultImpl( getMessage( COLUMN_REF_ADDED, columnPath, getContext().getAbsolutePath() ) );
                 }
-            } else {
-                result = new CommandResultImpl( false, getMessage( INVALID_COLUMN_PATH, columnPath ), null );
             }
         } catch ( final Exception e ) {
             result = new CommandResultImpl( e );

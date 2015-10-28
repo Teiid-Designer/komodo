@@ -31,7 +31,7 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test DeleteAccessPatternCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( {"javadoc", "nls"} )
 public class DeleteAccessPatternCommandTest extends AbstractCommandTest {
 
     @Test

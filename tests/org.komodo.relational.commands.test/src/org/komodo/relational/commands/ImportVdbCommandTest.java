@@ -18,7 +18,6 @@ package org.komodo.relational.commands;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.shell.api.CommandResult;
-import org.komodo.shell.util.KomodoObjectUtils;
 
 /**
  * Test Class to test ImportVdbCommand
@@ -37,7 +36,7 @@ public class ImportVdbCommandTest extends AbstractCommandTest {
         assertCommandResultOk(result);
 
     	// Check WorkspaceContext
-    	assertEquals("/workspace", KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext()));
+    	assertEquals("/workspace", wsStatus.getCurrentContextDisplayPath()); //$NON-NLS-1$
     }
 
 }

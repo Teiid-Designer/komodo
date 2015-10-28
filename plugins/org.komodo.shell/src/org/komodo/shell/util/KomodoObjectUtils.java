@@ -19,6 +19,7 @@ import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.PropertyDescriptor;
+import org.komodo.spi.repository.PropertyDescriptor.Type;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
 
@@ -91,9 +92,14 @@ public class KomodoObjectUtils implements StringConstants {
         if(resolvedObj==null) resolvedObj = kObj;
         if ( resolvedObj.hasProperty( wsStatus.getTransaction(), propertyName ) ) {
             final Property property = resolvedObj.getProperty( wsStatus.getTransaction(), propertyName );
-            //final Type type = property.getDescriptor( wsStatus.getTransaction() ).getType();
-            //final boolean propIsReference = ( ( Type.REFERENCE == type ) || ( Type.WEAKREFERENCE == type ) );
             final String displayValue = RepositoryTools.getDisplayValue( wsStatus.getTransaction(), property );
+
+            // If value is a path, convert it to a display path
+            final Type type = property.getDescriptor( wsStatus.getTransaction() ).getType();
+            final boolean propIsReference = ( ( Type.REFERENCE == type ) || ( Type.WEAKREFERENCE == type ) );
+            if(propIsReference) {
+                return wsStatus.getLabelProvider().getDisplayPath(displayValue);
+            }
 
             return displayValue;
         }
@@ -168,24 +174,6 @@ public class KomodoObjectUtils implements StringConstants {
      * @param wsStatus
      *        the workspace status (cannot be <code>null</code>)
      * @param kobject
-     *        the object whose full path is being requested (cannot be <code>null</code>)
-     * @return the object's full, qualified path (never empty)
-     */
-    public static String getFullName( final WorkspaceStatus wsStatus,
-                                      final KomodoObject kobject ) {
-        final String path = wsStatus.getLabelProvider().getDisplayPath( kobject );
-
-        if ( StringUtils.isBlank( path ) ) {
-            return kobject.getAbsolutePath();
-        }
-
-        return path;
-    }
-
-    /**
-     * @param wsStatus
-     *        the workspace status (cannot be <code>null</code>)
-     * @param kobject
      *        the object whose short name is being requested (cannot be <code>null</code>)
      * @return the object's full, qualified path (never empty)
      */
@@ -217,7 +205,7 @@ public class KomodoObjectUtils implements StringConstants {
         ArgCheck.isNotNull( kobject, "kobject" ); //$NON-NLS-1$
 
         if ( wsStatus.isShowingFullPathInPrompt() ) {
-            return getFullName( wsStatus, kobject );
+            return wsStatus.getDisplayPath(kobject );
         }
 
         return getShortName( wsStatus, kobject );

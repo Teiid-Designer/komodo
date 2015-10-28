@@ -31,7 +31,7 @@ import org.komodo.test.utils.TestUtilities;
  * Test Class to test ExportCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( {"javadoc", "nls"} )
 public class ExportCommandTest extends AbstractCommandTest {
 
     private final static String ALL_ELEMENTS_MODEL_TWO_DDL = EMPTY_STRING + "CREATE VIEW Test" + NEW_LINE + //$NON-NLS-1$

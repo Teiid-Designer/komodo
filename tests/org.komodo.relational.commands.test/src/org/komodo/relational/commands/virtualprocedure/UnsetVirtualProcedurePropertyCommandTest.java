@@ -31,7 +31,7 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test UnsetVirtualProcedurePropertyCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( {"javadoc", "nls"} )
 public class UnsetVirtualProcedurePropertyCommandTest extends AbstractCommandTest {
 
     @Test

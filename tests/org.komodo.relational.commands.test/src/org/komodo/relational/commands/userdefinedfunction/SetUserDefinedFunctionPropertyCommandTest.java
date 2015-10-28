@@ -31,7 +31,7 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test SetUserDefinedFunctionPropertyCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( {"javadoc", "nls"} )
 public class SetUserDefinedFunctionPropertyCommandTest extends AbstractCommandTest {
 
     @Test

@@ -32,7 +32,7 @@ import org.komodo.test.utils.TestUtilities;
  * Test Class to test Schema ExportCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( {"javadoc", "nls"} )
 public class ExportCommandTest extends AbstractCommandTest {
 
     private final static String TWITTER_VIEW_MODEL_DDL = EMPTY_STRING +

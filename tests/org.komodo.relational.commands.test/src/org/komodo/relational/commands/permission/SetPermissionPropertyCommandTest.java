@@ -30,7 +30,7 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test SetPermissionPropertyCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( {"javadoc", "nls"} )
 public class SetPermissionPropertyCommandTest extends AbstractCommandTest {
 
     @Test

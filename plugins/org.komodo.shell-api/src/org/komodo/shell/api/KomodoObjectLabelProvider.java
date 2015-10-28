@@ -147,5 +147,5 @@ public interface KomodoObjectLabelProvider {
      *        the workspace status (never <code>null</code>)
      */
     void setWorkspaceStatus( final WorkspaceStatus status );
-
+    
 }

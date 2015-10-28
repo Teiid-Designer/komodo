@@ -26,7 +26,7 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test ServerConnectCommand
  *
  */
-@SuppressWarnings({"javadoc", "nls"})
+@SuppressWarnings( {"javadoc", "nls"} )
 public class ServerConnectCommandTest extends AbstractCommandTest {
 
     @Test

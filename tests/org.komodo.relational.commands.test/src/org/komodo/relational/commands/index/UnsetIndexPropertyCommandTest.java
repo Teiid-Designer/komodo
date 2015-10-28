@@ -16,8 +16,6 @@
 package org.komodo.relational.commands.index;
 
 import static org.junit.Assert.assertEquals;
-import java.io.File;
-import java.io.FileWriter;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Index;
@@ -31,29 +29,24 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test UnsetIndexPropertyCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( {"javadoc", "nls"} )
 public class UnsetIndexPropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testUnsetProperty1() throws Exception {
-        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
-        cmdFile.deleteOnExit();
+        final String[] commands = { "workspace",
+            "create-vdb myVdb vdbPath",
+            "cd myVdb",
+            "add-model myModel",
+            "cd myModel",
+            "add-table myTable",
+            "cd myTable",
+            "add-index myIndex",
+            "cd myIndex",
+            "set-property expression myExpression",
+            "unset-property expression" };
 
-        FileWriter writer = new FileWriter(cmdFile);
-        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("create-vdb myVdb vdbPath" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd myVdb" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-model myModel" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd myModel" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-table myTable" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd myTable" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-index myIndex" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd myIndex" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("set-property expression myExpression" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("unset-property expression" + NEW_LINE);  //$NON-NLS-1$
-        writer.close();
-
-        setup( cmdFile.getAbsolutePath() );
+        setup( commands );
 
         CommandResult result = execute();
         assertCommandResultOk(result);

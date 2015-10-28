@@ -7,7 +7,6 @@ import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.Messages;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.shell.util.ContextUtils;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 
@@ -47,7 +46,7 @@ public class RenameCommand extends BuiltInShellCommand {
 
             WorkspaceStatus wsStatus = getWorkspaceStatus();
             // Get the context for current object and target object since they can be supplied with a path
-            KomodoObject objContext = ContextUtils.getContextForPath( wsStatus, objNameArg );
+            KomodoObject objContext = wsStatus.getContextForDisplayPath(objNameArg);
 
             // objContext null - Object could not be located
             if ( objContext == null ) {
@@ -57,9 +56,9 @@ public class RenameCommand extends BuiltInShellCommand {
                                               null );
             }
 
-            String[] pathSegs = ContextUtils.getPathSegments( newName );
-            String targetParentPath = ContextUtils.getPath( pathSegs, pathSegs.length - 1 );
-            KomodoObject targetContext = ContextUtils.getContextForPath( wsStatus, targetParentPath );
+            String[] pathSegs = newName.split(FORWARD_SLASH);
+            String targetParentPath = getPath( pathSegs, pathSegs.length - 1 );
+            KomodoObject targetContext = wsStatus.getContextForDisplayPath(targetParentPath);
             // only allow move to an existing context
             if ( targetContext == null ) {
                 return new CommandResultImpl( false,
@@ -84,6 +83,23 @@ public class RenameCommand extends BuiltInShellCommand {
         }
     }
 
+    /**
+     * Builds a path from the specified segments, starting at the root and including nLevels
+     * @param pathSegments the array of segments
+     * @param nLevels number of levels to include
+     * @return the path
+     */
+    private String getPath(String[] pathSegments, int nLevels) {
+        StringBuilder sb = new StringBuilder();
+        for(int i=0; i<nLevels; i++) {
+            if(i!=0) {
+                sb.append(FORWARD_SLASH);
+            }
+            sb.append(pathSegments[i]);
+        }
+        return sb.toString();
+    }
+    
     /**
      * Validates whether another child of the same name and type already exists
      * @param objToRename the object being renamed

@@ -19,7 +19,6 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.shell.AbstractCommandTest;
 import org.komodo.shell.api.CommandResult;
-import org.komodo.shell.util.KomodoObjectUtils;
 
 /**
  * Test class for {@link CdCommand}.
@@ -36,7 +35,7 @@ public class CdCommandTest extends AbstractCommandTest {
         assertCommandResultOk(result);
 
     	// Check WorkspaceContext
-    	assertEquals("/workspace", KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext()));
+    	assertEquals("/workspace", wsStatus.getDisplayPath(wsStatus.getCurrentContext()));
     }
 
     @Test
@@ -49,7 +48,7 @@ public class CdCommandTest extends AbstractCommandTest {
         assertCommandResultOk(result);
 
     	// Check WorkspaceContext
-        String contextPath = KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext());
+        String contextPath = wsStatus.getCurrentContextDisplayPath();
         assertEquals("/", contextPath);
     }
 
@@ -61,7 +60,7 @@ public class CdCommandTest extends AbstractCommandTest {
         CommandResult result = execute();
         assertCommandResultOk(result);
 
-        String contextPath = KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext());
+        String contextPath = wsStatus.getCurrentContextDisplayPath();
         assertEquals("/workspace", contextPath);
     }
 
@@ -73,7 +72,7 @@ public class CdCommandTest extends AbstractCommandTest {
         CommandResult result = execute();
         assertCommandResultOk(result);
 
-        String contextPath = KomodoObjectUtils.getFullName(wsStatus, wsStatus.getCurrentContext());
+        String contextPath = wsStatus.getCurrentContextDisplayPath();
         assertEquals("/workspace", contextPath);
     }
 

@@ -27,7 +27,6 @@ import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.shell.util.ContextUtils;
 import org.komodo.shell.util.KomodoObjectUtils;
 import org.komodo.shell.util.PrintUtils;
 import org.komodo.spi.repository.KomodoObject;
@@ -85,7 +84,10 @@ public class ShowPropertiesCommand extends BuiltInShellCommand {
                 }
             }
 
-		    KomodoObject theContext = ContextUtils.getContextForPath(wsStatus, pathArg);
+            KomodoObject theContext = getContext();
+            if(pathArg!=null) {
+                theContext = wsStatus.getContextForDisplayPath( pathArg );
+            }
 
 		    // Print properties for the context
 		    PrintUtils.printProperties(wsStatus,getWriter(),wsStatus.isShowingHiddenProperties(),wsStatus.isShowingPropertyNamePrefixes(),theContext);

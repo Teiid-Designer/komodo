@@ -30,7 +30,7 @@ import org.komodo.spi.repository.KomodoObject;
  * Test Class to test ServerSetCommand
  *
  */
-@SuppressWarnings({"javadoc", "nls"})
+@SuppressWarnings( {"javadoc", "nls"} )
 public class ServerSetCommandTest extends AbstractCommandTest {
 
     @Test

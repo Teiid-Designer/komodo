@@ -29,7 +29,6 @@ import org.komodo.shell.Messages;
 import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.shell.util.ContextUtils;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.utils.StringUtils;
 
@@ -70,17 +69,16 @@ public class CdCommand extends BuiltInShellCommand {
     @Override
     protected CommandResult doExecute() {
         try {
-    		String locationArg = requiredArgument(0, Messages.getString(SHELL.InvalidArgMsg_EntryPath));
+    		String displayPath = requiredArgument(0, Messages.getString(SHELL.InvalidArgMsg_EntryPath));
 
-    		// Validate the location Path
-    		String validationMsg = validatePath(locationArg);
+    		// Validate the display Path
+    		String validationMsg = validatePath(displayPath);
     		if(!validationMsg.equals(CompletionConstants.OK)) {
     		    return new CommandResultImpl(false, validationMsg, null);
     		}
 
-    		String locArg = locationArg.trim();
     		WorkspaceStatus wsStatus = getWorkspaceStatus();
-    		KomodoObject newContext = ContextUtils.getContextForPath(wsStatus, locArg);
+    		KomodoObject newContext = wsStatus.getContextForDisplayPath(displayPath.trim());
 
     		if(newContext!=null) {
     			getWorkspaceStatus().setCurrentContext(newContext);

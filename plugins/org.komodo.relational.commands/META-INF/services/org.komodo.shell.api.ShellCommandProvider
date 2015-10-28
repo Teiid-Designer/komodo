@@ -12,6 +12,7 @@ org.komodo.relational.commands.modelsource.ModelSourceCommandProvider
 org.komodo.relational.commands.parameter.ParameterCommandProvider
 org.komodo.relational.commands.permission.PermissionCommandProvider
 org.komodo.relational.commands.pushdownfunction.PushdownFunctionCommandProvider
+org.komodo.relational.commands.resultsetcolumn.ResultSetColumnCommandProvider
 org.komodo.relational.commands.schema.SchemaCommandProvider
 org.komodo.relational.commands.server.ServerCommandProvider
 org.komodo.relational.commands.storedprocedure.StoredProcedureCommandProvider

@@ -33,7 +33,7 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test RemoveResultSetCommand
  *
  */
-@SuppressWarnings("javadoc")
+@SuppressWarnings( {"javadoc", "nls"} )
 public class RemoveResultSetCommandTest extends AbstractCommandTest {
 
     @Test
