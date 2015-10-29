@@ -190,6 +190,10 @@
                             <port>9090</port>
                             <!-- application path always starts with / -->
                             <path>/</path>
+                            <systemProperties>
+                                <!-- adds the var/komodo directory to the project structure -->
+                                <komodo.dataDir>var/komodo</komodo.dataDir>
+                            </systemProperties>
                         </configuration>
                     </plugin>
                 </plugins>
