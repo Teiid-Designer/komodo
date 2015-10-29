@@ -26,7 +26,7 @@ import org.komodo.spi.constants.StringConstants;
 /**
  *
  */
-public class KomodoRestProperty implements StringConstants {
+public class RestProperty implements StringConstants {
 
     /**
      * Label used to describe name
@@ -47,7 +47,7 @@ public class KomodoRestProperty implements StringConstants {
      * @param value the value
      *
      */
-    public KomodoRestProperty(String name, String value) {
+    public RestProperty(String name, String value) {
         this.name = name;
         this.value = value;
     }
@@ -83,7 +83,7 @@ public class KomodoRestProperty implements StringConstants {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        KomodoRestProperty other = (KomodoRestProperty)obj;
+        RestProperty other = (RestProperty)obj;
         if (this.name == null) {
             if (other.name != null)
                 return false;

@@ -8,10 +8,11 @@
 package org.komodo.rest.relational.json;
 
 import org.komodo.rest.KomodoRestEntity;
-import org.komodo.rest.KomodoRestProperty;
+import org.komodo.rest.RestProperty;
 import org.komodo.rest.KomodoStatusObject;
 import org.komodo.rest.RestLink;
 import org.komodo.rest.json.LinkSerializer;
+import org.komodo.rest.json.RestPropertySerializer;
 import org.komodo.rest.relational.RestVdb;
 import org.komodo.rest.relational.RestVdbCondition;
 import org.komodo.rest.relational.RestVdbDataRole;
@@ -43,7 +44,7 @@ public final class KomodoJsonMarshaller {
     static {
         final GsonBuilder temp = new GsonBuilder().registerTypeAdapter( RestLink.class, new LinkSerializer() )
                                                   .registerTypeAdapter(KomodoStatusObject.class, new StatusObjectSerializer())
-                                                  .registerTypeAdapter( KomodoRestProperty.class, new KomodoRestPropertySerializer() )
+                                                  .registerTypeAdapter( RestProperty.class, new RestPropertySerializer() )
                                                   .registerTypeAdapter( RestVdb.class, new VdbSerializer() )
                                                   .registerTypeAdapter( RestVdbModel.class, new VdbModelSerializer() )
                                                   .registerTypeAdapter( RestVdbModelSource.class, new VdbModelSourceSerializer() )

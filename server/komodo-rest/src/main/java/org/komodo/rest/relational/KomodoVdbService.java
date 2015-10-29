@@ -79,11 +79,17 @@ import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.KLog;
 import org.komodo.utils.StringUtils;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 /**
  * A Komodo REST service for obtaining VDB information from the workspace.
  */
 @Path(V1Constants.WORKSPACE_SEGMENT)
+@Api(tags = {"vdb","vdbs"})
 public final class KomodoVdbService extends KomodoService {
 
     /**
@@ -221,6 +227,8 @@ public final class KomodoVdbService extends KomodoService {
      */
     @GET
     @Path(V1Constants.ABOUT)
+    @ApiOperation(value = "Display status of this rest service",
+                            response = String.class)
     public Response about() {
         String msg = "The Rest service is up and running"; //$NON-NLS-1$
         return Response.status(200).entity(msg).build();
@@ -249,6 +257,8 @@ public final class KomodoVdbService extends KomodoService {
     @GET
     @Path(V1Constants.SAMPLE_DATA)
     @Produces( MediaType.APPLICATION_JSON )
+    @ApiOperation(value = "Import sample data into VdbBuilder and display the status of the operation",
+                             response = KomodoStatusObject.class)
     public Response importSampleData() {
 
         KomodoStatusObject status = new KomodoStatusObject("Sample Vdb Import");
@@ -459,6 +469,11 @@ public final class KomodoVdbService extends KomodoService {
     @Path( V1Constants.VDBS_SEGMENT)
     @Produces( MediaType.APPLICATION_JSON )
     @Consumes ( { MediaType.APPLICATION_JSON } )
+    @ApiOperation(value = "Display the collection of vdbs",
+                            response = RestVdb[].class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 204, message = "No vdbs in workspace")
+    })
     public Response getVdbs( final @Context HttpHeaders headers,
                              final @Context UriInfo uriInfo ) throws KomodoRestException {
 
@@ -584,8 +599,15 @@ public final class KomodoVdbService extends KomodoService {
                 V1Constants.VDB_PLACEHOLDER )
     @Produces( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
     @Consumes ( { MediaType.APPLICATION_JSON } )
+    @ApiOperation(value = "Find vdb by name", response = RestVdb.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 204, message = "No vdbs in workspace"),
+        @ApiResponse(code = 404, message = "No vdb could be found with name"),
+        @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation")
+    })
     public Response getVdb( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
+                            @ApiParam(value = "Name of the vdb to be fetched", required = true)
                             final @PathParam( "vdbName" ) String vdbName) throws KomodoRestException {
 
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
@@ -638,8 +660,15 @@ public final class KomodoVdbService extends KomodoService {
                 V1Constants.MODELS_SEGMENT )
     @Produces( MediaType.APPLICATION_JSON )
     @Consumes ( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
+    @ApiOperation(value = "Find all models belonging to the vdb", response = RestVdb.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 404, message = "No vdb could be found with name"),
+        @ApiResponse(code = 404, message = "No models could be found"),
+        @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation")
+    })
     public Response getModels( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
+                            @ApiParam(value = "Name of the vdb to be fetched", required = true)
                             final @PathParam( "vdbName" ) String vdbName) throws KomodoRestException {
 
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
@@ -705,9 +734,17 @@ public final class KomodoVdbService extends KomodoService {
                 V1Constants.MODEL_PLACEHOLDER)
     @Produces( MediaType.APPLICATION_JSON )
     @Consumes ( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
+    @ApiOperation(value = "Find the named model belonging to the vdb", response = RestVdbModel.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 404, message = "No vdb could be found with name"),
+        @ApiResponse(code = 404, message = "No model could be found with name"),
+        @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation")
+    })
     public Response getModel( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
+                            @ApiParam(value = "Name of the vdb to be fetched", required = true)
                             final @PathParam( "vdbName" ) String vdbName,
+                            @ApiParam(value = "Name of the model to be fetched", required = true)
                             final @PathParam( "modelName" ) String modelName) throws KomodoRestException {
 
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
@@ -774,8 +811,15 @@ public final class KomodoVdbService extends KomodoService {
                 V1Constants.TRANSLATORS_SEGMENT )
     @Produces( MediaType.APPLICATION_JSON )
     @Consumes ( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
+    @ApiOperation(value = "Find all translators belonging to the vdb", response = RestVdbTranslator[].class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 404, message = "No vdb could be found with name"),
+        @ApiResponse(code = 404, message = "No translators could be found"),
+        @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation")
+    })
     public Response getTranslators( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
+                            @ApiParam(value = "Name of the vdb to be fetched", required = true)
                             final @PathParam( "vdbName" ) String vdbName) throws KomodoRestException {
 
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
@@ -841,9 +885,17 @@ public final class KomodoVdbService extends KomodoService {
                 V1Constants.TRANSLATOR_PLACEHOLDER)
     @Produces( MediaType.APPLICATION_JSON )
     @Consumes ( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
+    @ApiOperation(value = "Find the named translator belonging to the vdb", response = RestVdbTranslator.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 404, message = "No vdb could be found with name"),
+        @ApiResponse(code = 404, message = "No translator could be found with name"),
+        @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation")
+    })
     public Response getTranslator( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
+                            @ApiParam(value = "Name of the vdb to be fetched", required = true)
                             final @PathParam( "vdbName" ) String vdbName,
+                            @ApiParam(value = "Name of the translator to be fetched", required = true)
                             final @PathParam( "translatorName" ) String translatorName) throws KomodoRestException {
 
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
@@ -925,8 +977,15 @@ public final class KomodoVdbService extends KomodoService {
                 V1Constants.IMPORTS_SEGMENT )
     @Produces( MediaType.APPLICATION_JSON )
     @Consumes ( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
+    @ApiOperation(value = "Find all imports belonging to the vdb", response = RestVdbImport[].class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 404, message = "No vdb could be found with name"),
+        @ApiResponse(code = 404, message = "No imports could be found"),
+        @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation")
+    })
     public Response getImports( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
+                            @ApiParam(value = "Name of the vdb to be fetched", required = true)
                             final @PathParam( "vdbName" ) String vdbName) throws KomodoRestException {
 
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
@@ -992,9 +1051,17 @@ public final class KomodoVdbService extends KomodoService {
                 V1Constants.IMPORT_PLACEHOLDER)
     @Produces( MediaType.APPLICATION_JSON )
     @Consumes ( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
+    @ApiOperation(value = "Find the named vdb import belonging to the vdb", response = RestVdbImport.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 404, message = "No vdb could be found with name"),
+        @ApiResponse(code = 404, message = "No import could be found with name"),
+        @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation")
+    })
     public Response getImport( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
+                            @ApiParam(value = "Name of the vdb to be fetched", required = true)
                             final @PathParam( "vdbName" ) String vdbName,
+                            @ApiParam(value = "Name of the vdb import to be fetched", required = true)
                             final @PathParam( "importName" ) String importName) throws KomodoRestException {
 
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
@@ -1076,8 +1143,15 @@ public final class KomodoVdbService extends KomodoService {
                 V1Constants.DATA_ROLES_SEGMENT )
     @Produces( MediaType.APPLICATION_JSON )
     @Consumes ( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
+    @ApiOperation(value = "Find all data roles belonging to the vdb", response = RestVdbDataRole[].class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 404, message = "No vdb could be found with name"),
+        @ApiResponse(code = 404, message = "No data roles could be found"),
+        @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation")
+    })
     public Response getDataRoles( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
+                            @ApiParam(value = "Name of the vdb to be fetched", required = true)
                             final @PathParam( "vdbName" ) String vdbName) throws KomodoRestException {
 
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
@@ -1143,9 +1217,17 @@ public final class KomodoVdbService extends KomodoService {
                 V1Constants.DATA_ROLE_PLACEHOLDER)
     @Produces( MediaType.APPLICATION_JSON )
     @Consumes ( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
+    @ApiOperation(value = "Find the named data role belonging to the vdb", response = RestVdbDataRole.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 404, message = "No vdb could be found with name"),
+        @ApiResponse(code = 404, message = "No data role could be found with name"),
+        @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation")
+    })
     public Response getDataRole( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
+                            @ApiParam(value = "Name of the vdb to be fetched", required = true)
                             final @PathParam( "vdbName" ) String vdbName,
+                            @ApiParam(value = "Name of the data role to be fetched", required = true)
                             final @PathParam( "dataRoleName" ) String dataRoleName) throws KomodoRestException {
 
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
@@ -1231,9 +1313,17 @@ public final class KomodoVdbService extends KomodoService {
                 V1Constants.SOURCES_SEGMENT)
     @Produces( MediaType.APPLICATION_JSON )
     @Consumes ( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
+    @ApiOperation(value = "Find all sources of the model belonging to the vdb", response = RestVdbModelSource[].class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 404, message = "No vdb could be found with name"),
+        @ApiResponse(code = 404, message = "No sources could be found"),
+        @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation")
+    })
     public Response getSources( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
+                            @ApiParam(value = "Name of the vdb to be fetched", required = true)
                             final @PathParam( "vdbName" ) String vdbName,
+                            @ApiParam(value = "Name of the model to be fetched", required = true)
                             final @PathParam( "modelName" ) String modelName) throws KomodoRestException {
 
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
@@ -1322,10 +1412,20 @@ public final class KomodoVdbService extends KomodoService {
                 V1Constants.SOURCE_PLACEHOLDER)
     @Produces( MediaType.APPLICATION_JSON )
     @Consumes ( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
+    @ApiOperation(value = "Find the named source belonging to the model of the vdb", response = RestVdbModelSource.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 404, message = "No vdb could be found with name"),
+        @ApiResponse(code = 404, message = "No model could be found with name"),
+        @ApiResponse(code = 404, message = "No source could be found with name"),
+        @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation")
+    })
     public Response getSource( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
+                            @ApiParam(value = "Name of the vdb to be fetched", required = true)
                             final @PathParam( "vdbName" ) String vdbName,
+                            @ApiParam(value = "Name of the model to be fetched", required = true)
                             final @PathParam( "modelName" ) String modelName,
+                            @ApiParam(value = "Name of the model source to be fetched", required = true)
                             final @PathParam( "sourceName" ) String sourceName) throws KomodoRestException {
 
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();

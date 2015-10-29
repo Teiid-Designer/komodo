@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
-import org.komodo.rest.KomodoRestProperty;
+import org.komodo.rest.RestProperty;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class RestVdbTranslatorTest {
@@ -24,11 +24,11 @@ public final class RestVdbTranslatorTest {
     private static final String NAME = "MyTranslator";
     private static final String TYPE = "oracle";
 
-    private static final List<KomodoRestProperty> PROPS = new ArrayList<>();
+    private static final List<RestProperty> PROPS = new ArrayList<>();
     static {
-        PROPS.add(new KomodoRestProperty("larry", "bird"));
-        PROPS.add(new KomodoRestProperty("magic", "johnson"));
-        PROPS.add(new KomodoRestProperty("michael", "jordan"));
+        PROPS.add(new RestProperty("larry", "bird"));
+        PROPS.add(new RestProperty("magic", "johnson"));
+        PROPS.add(new RestProperty("michael", "jordan"));
     }
 
     private RestVdbTranslator translator;
@@ -104,9 +104,9 @@ public final class RestVdbTranslatorTest {
         thatTranslator.setDescription( this.translator.getDescription() );
         thatTranslator.setLinks( this.translator.getLinks() );
 
-        List<KomodoRestProperty> props = new ArrayList<>();
+        List<RestProperty> props = new ArrayList<>();
         props.addAll(this.translator.getProperties() );
-        props.add(new KomodoRestProperty("blah", "blah" ));
+        props.add(new RestProperty("blah", "blah" ));
         thatTranslator.setProperties( props );
 
         assertThat( this.translator, is( not( thatTranslator ) ) );
@@ -141,8 +141,8 @@ public final class RestVdbTranslatorTest {
 
     @Test
     public void shouldSetProperties() {
-        List<KomodoRestProperty> newProperties = new ArrayList<>();
-        newProperties.add(new KomodoRestProperty("blah", "blah" ));
+        List<RestProperty> newProperties = new ArrayList<>();
+        newProperties.add(new RestProperty("blah", "blah" ));
         this.translator.setProperties( newProperties );
         assertThat( this.translator.getProperties().size(), is( newProperties.size() ) );
     }

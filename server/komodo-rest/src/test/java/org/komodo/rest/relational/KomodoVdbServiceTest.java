@@ -40,12 +40,12 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 import org.komodo.relational.model.Model.Type;
-import org.komodo.rest.KomodoRestProperty;
 import org.komodo.rest.KomodoRestV1Application;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.KomodoStatusObject;
 import org.komodo.rest.RestLink;
 import org.komodo.rest.RestLink.LinkType;
+import org.komodo.rest.RestProperty;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.constants.SystemConstants;
@@ -159,9 +159,9 @@ public final class KomodoVdbServiceTest implements StringConstants {
         assertEquals("BY_VERSION", vdb.getConnectionType());
         assertEquals(1, vdb.getVersion());
 
-        List<KomodoRestProperty> properties = vdb.getProperties();
+        List<RestProperty> properties = vdb.getProperties();
         assertEquals(1, properties.size());
-        KomodoRestProperty property = properties.iterator().next();
+        RestProperty property = properties.iterator().next();
         assertEquals("UseConnectorMetadata", property.getName());
         assertEquals("true", property.getValue());
 
@@ -217,6 +217,26 @@ public final class KomodoVdbServiceTest implements StringConstants {
         final String entity = response.readEntity(String.class);
         System.out.println("Response from uri " + uri + ":\n" + entity);
         assertEquals("The Rest service is up and running", entity);
+    }
+
+    @Test
+    public void shouldReturnSwaggerSpec() throws Exception {
+
+        // get
+        URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
+                                                    .path("swagger.json").build();
+        this.response = request(uri).get();
+        assertTrue(response.hasEntity());
+
+        final String entity = response.readEntity(String.class);
+        System.out.println("Response from uri " + uri + ":\n" + entity);
+
+        assertTrue(entity.contains("\"swagger\" : \"2.0\""));
+        assertTrue(entity.contains("\"/workspace/about\""));
+        assertTrue(entity.contains("\"/workspace/vdbs\""));
+        assertTrue(entity.contains("\"/workspace/vdbs/{vdbName}\""));
+        assertTrue(entity.contains("\"keng__id\""));
+        assertTrue(entity.contains("\"keng__kType\""));
     }
 
     @Test

@@ -13,7 +13,7 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Map;
 import org.komodo.rest.KomodoRestEntity;
-import org.komodo.rest.KomodoRestProperty;
+import org.komodo.rest.RestProperty;
 import org.komodo.rest.KomodoService;
 import org.komodo.rest.Messages;
 import org.komodo.rest.RestLink;
@@ -95,7 +95,7 @@ public abstract class KomodoRestEntitySerializer< T extends KomodoRestEntity > e
     }
 
     protected void readProperties( final JsonReader in, final T value ) {
-        final KomodoRestProperty[] props = BUILDER.fromJson( in, KomodoRestProperty[].class );
+        final RestProperty[] props = BUILDER.fromJson( in, RestProperty[].class );
         if (props == null)
             value.setProperties(null);
         else
@@ -140,7 +140,7 @@ public abstract class KomodoRestEntitySerializer< T extends KomodoRestEntity > e
             return;
 
         out.name( JsonConstants.PROPERTIES );
-        BUILDER.toJson( value.getProperties().toArray(new KomodoRestProperty[0]), KomodoRestProperty[].class, out );
+        BUILDER.toJson( value.getProperties().toArray(new RestProperty[0]), RestProperty[].class, out );
     }
 
     protected void writeLinks( final JsonWriter out,

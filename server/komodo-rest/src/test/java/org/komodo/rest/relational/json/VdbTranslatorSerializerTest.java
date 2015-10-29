@@ -17,7 +17,7 @@ import java.util.List;
 import javax.ws.rs.core.UriBuilder;
 import org.junit.Before;
 import org.junit.Test;
-import org.komodo.rest.KomodoRestProperty;
+import org.komodo.rest.RestProperty;
 import org.komodo.rest.json.JsonConstants;
 import org.komodo.rest.relational.RestVdbTranslator;
 import org.komodo.spi.repository.KomodoType;
@@ -32,11 +32,11 @@ public final class VdbTranslatorSerializerTest implements JsonConstants {
     private static final String NAME = "MyTranslator";
     private static final int NUM_PROPS = 3;
     private static final String TYPE = "oracle";
-    private static final List<KomodoRestProperty> PROPS = new ArrayList<>();
+    private static final List<RestProperty> PROPS = new ArrayList<>();
     static {
-        PROPS.add(new KomodoRestProperty("larry", "bird"));
-        PROPS.add(new KomodoRestProperty("magic", "johnson"));
-        PROPS.add(new KomodoRestProperty("michael", "jordan"));
+        PROPS.add(new RestProperty("larry", "bird"));
+        PROPS.add(new RestProperty("magic", "johnson"));
+        PROPS.add(new RestProperty("michael", "jordan"));
     }
 
     private static final String JSON = EMPTY_STRING +
@@ -99,7 +99,7 @@ public final class VdbTranslatorSerializerTest implements JsonConstants {
         assertThat( translator.getLinks().size(), is( 2 ) );
         assertEquals( translator.getProperties().size(), NUM_PROPS);
 
-        for (KomodoRestProperty property : translator.getProperties()) {
+        for (RestProperty property : translator.getProperties()) {
             assertTrue(PROPS.contains(property));
         }
     }

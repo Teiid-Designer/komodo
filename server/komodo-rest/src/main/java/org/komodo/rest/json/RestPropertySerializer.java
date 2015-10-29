@@ -19,12 +19,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  */
-package org.komodo.rest.relational.json;
+package org.komodo.rest.json;
 
 import java.io.IOException;
-import org.komodo.rest.KomodoRestProperty;
+import org.komodo.rest.RestProperty;
 import org.komodo.rest.Messages;
-import org.komodo.rest.json.JsonConstants;
 import org.komodo.utils.StringUtils;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
@@ -33,14 +32,14 @@ import com.google.gson.stream.JsonWriter;
 /**
  *
  */
-public class KomodoRestPropertySerializer extends TypeAdapter<KomodoRestProperty> implements JsonConstants {
+public class RestPropertySerializer extends TypeAdapter<RestProperty> implements JsonConstants {
 
-    protected boolean isComplete(final KomodoRestProperty property) {
+    protected boolean isComplete(final RestProperty property) {
         return !StringUtils.isBlank(property.getName());
     }
 
     @Override
-    public KomodoRestProperty read(JsonReader in) throws IOException {
+    public RestProperty read(JsonReader in) throws IOException {
 
         String propName = null;
         String propValue = null;
@@ -49,29 +48,29 @@ public class KomodoRestPropertySerializer extends TypeAdapter<KomodoRestProperty
 
         while (in.hasNext()) {
             String name = in.nextName();
-            if (KomodoRestProperty.NAME_LABEL.equals(name))
+            if (RestProperty.NAME_LABEL.equals(name))
                 propName = in.nextString();
-            else if (KomodoRestProperty.VALUE_LABEL.equals(name))
+            else if (RestProperty.VALUE_LABEL.equals(name))
                 propValue = in.nextString();
         }
 
         in.endObject();
 
-        KomodoRestProperty property = new KomodoRestProperty(propName, propValue);
+        RestProperty property = new RestProperty(propName, propValue);
         if (!isComplete(property))
-            throw new IOException(Messages.getString(Messages.Error.INCOMPLETE_JSON, KomodoRestProperty.class.getSimpleName()));
+            throw new IOException(Messages.getString(Messages.Error.INCOMPLETE_JSON, RestProperty.class.getSimpleName()));
 
         return property;
     }
 
     @Override
-    public void write(JsonWriter out, KomodoRestProperty value) throws IOException {
+    public void write(JsonWriter out, RestProperty value) throws IOException {
         out.beginObject();
 
-        out.name(KomodoRestProperty.NAME_LABEL);
+        out.name(RestProperty.NAME_LABEL);
         out.value(value.getName());
 
-        out.name(KomodoRestProperty.VALUE_LABEL);
+        out.name(RestProperty.VALUE_LABEL);
         out.value(value.getValue());
 
         out.endObject();

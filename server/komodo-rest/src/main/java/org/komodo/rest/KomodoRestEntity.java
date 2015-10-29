@@ -84,7 +84,7 @@ public abstract class KomodoRestEntity implements JsonConstants {
 
     protected boolean hasChildren;
 
-    protected final List<KomodoRestProperty> properties = new ArrayList<>();
+    protected final List<RestProperty> properties = new ArrayList<>();
 
     protected List<RestLink> links = RestLink.NO_LINKS;
 
@@ -238,7 +238,7 @@ public abstract class KomodoRestEntity implements JsonConstants {
     /**
      * @return the properties (never <code>null</code> but can be empty)
      */
-    public final List<KomodoRestProperty> getProperties() {
+    public final List<RestProperty> getProperties() {
         return this.properties;
     }
 
@@ -285,18 +285,18 @@ public abstract class KomodoRestEntity implements JsonConstants {
      * @param value the property value
      */
     public final void addProperty(String name, String value) {
-        this.properties.add(new KomodoRestProperty(name, value));
+        this.properties.add(new RestProperty(name, value));
     }
 
     /**
      * @param newProperties
      *        the new properties (can be <code>null</code>)
      */
-    public final void setProperties(final List<KomodoRestProperty> newProperties) {
+    public final void setProperties(final List<RestProperty> newProperties) {
         this.properties.clear();
 
         if ((newProperties != null) && !newProperties.isEmpty()) {
-            for (KomodoRestProperty property : newProperties) {
+            for (RestProperty property : newProperties) {
                 ArgCheck.isNotNull(property);
                 this.properties.add(property);
             }

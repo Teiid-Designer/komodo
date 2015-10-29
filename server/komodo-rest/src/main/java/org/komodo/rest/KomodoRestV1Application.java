@@ -36,6 +36,16 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.SynchronousCallback;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.relational.KomodoVdbService;
+import org.komodo.rest.swagger.RestPropertyConverter;
+import org.komodo.rest.swagger.RestVdbConditionConverter;
+import org.komodo.rest.swagger.RestVdbConverter;
+import org.komodo.rest.swagger.RestVdbDataRoleConverter;
+import org.komodo.rest.swagger.RestVdbImportConverter;
+import org.komodo.rest.swagger.RestVdbMaskConverter;
+import org.komodo.rest.swagger.RestVdbModelConverter;
+import org.komodo.rest.swagger.RestVdbModelSourceConverter;
+import org.komodo.rest.swagger.RestVdbPermissionConverter;
+import org.komodo.rest.swagger.RestVdbTranslatorConverter;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
@@ -43,12 +53,14 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.RepositoryClientEvent;
 import org.komodo.spi.repository.RepositoryObserver;
 import org.komodo.utils.KLog;
+import io.swagger.converter.ModelConverters;
+import io.swagger.jaxrs.config.BeanConfig;
 
 /**
  * The JAX-RS {@link Application} that provides the Komodo REST API.
  */
 @ApplicationPath( V1Constants.APP_PATH )
-public final class KomodoRestV1Application extends Application implements RepositoryObserver {
+public final class KomodoRestV1Application extends Application implements RepositoryObserver, StringConstants {
 
     /**
      * Constants associated with version 1 of the Komodo REST application.
@@ -170,6 +182,40 @@ public final class KomodoRestV1Application extends Application implements Reposi
         objs.add( new KomodoExceptionMapper() );
         objs.add( new KomodoVdbService( this.kengine ) );
         this.singletons = Collections.unmodifiableSet( objs );
+
+        initSwaggerConfiguration();
+    }
+
+    private void initSwaggerConfiguration() {
+        //
+        // Add converters for display of definitions
+        //
+        ModelConverters converters = ModelConverters.getInstance();
+        converters.addConverter(new RestPropertyConverter());
+        converters.addConverter(new RestVdbConditionConverter());
+        converters.addConverter(new RestVdbConverter());
+        converters.addConverter(new RestVdbDataRoleConverter());
+        converters.addConverter(new RestVdbImportConverter());
+        converters.addConverter(new RestVdbMaskConverter());
+        converters.addConverter(new RestVdbModelConverter());
+        converters.addConverter(new RestVdbModelSourceConverter());
+        converters.addConverter(new RestVdbPermissionConverter());
+        converters.addConverter(new RestVdbTranslatorConverter());
+
+        BeanConfig beanConfig = new BeanConfig();
+        beanConfig.setTitle("Vdb Builder");
+        beanConfig.setDescription("A tool that allows creating, editing and managing dynamic VDBs and their contents");
+        beanConfig.setVersion("0.0.2");
+        beanConfig.setSchemes(new String[]{"http"});
+
+        // No need to setHost as it will pick up the one its running on
+
+        beanConfig.setBasePath(V1Constants.APP_PATH);
+        beanConfig.setResourcePackage(
+                                      RestProperty.class.getPackage().getName() + COMMA +
+                                      KomodoVdbService.class.getPackage().getName());
+        beanConfig.setPrettyPrint(true);
+        beanConfig.setScan(true);
     }
 
     /**
@@ -217,6 +263,17 @@ public final class KomodoRestV1Application extends Application implements Reposi
     @Override
     public Set< Object > getSingletons() {
         return this.singletons;
+    }
+
+    @Override
+    public Set<Class<?>> getClasses() {
+        Set<Class<?>> resources = new HashSet();
+
+        // Enable swagger support
+        resources.add(io.swagger.jaxrs.listing.ApiListingResource.class);
+        resources.add(io.swagger.jaxrs.listing.SwaggerSerializers.class);
+
+        return resources;
     }
 
     private KEngine start() throws ServerErrorException {

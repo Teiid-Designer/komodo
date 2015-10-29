@@ -119,56 +119,56 @@ public abstract class KomodoService implements JsonConstants {
         final SynchronousCallback callback = ( SynchronousCallback )transaction.getCallback();
         transaction.commit();
 
-        if ( callback.await( timeout, unit ) ) {
-            Throwable error = callback.error();
-
-            if ( error == null ) {
-                LOGGER.debug( "commit: successfully committed '{0}', rollbackOnly = '{1}'", //$NON-NLS-1$
-                              transaction.getName(),
-                              transaction.isRollbackOnly() );
-                ResponseBuilder builder = null;
-
-                if ( entity == KomodoRestEntity.NO_CONTENT ) {
-                    builder = Response.noContent();
-                } else if ( entity instanceof ResourceNotFound ) {
-                    final ResourceNotFound resourceNotFound = ( ResourceNotFound )entity;
-
-                    String notFoundMsg = Messages.getString( RESOURCE_NOT_FOUND,
-                                                             resourceNotFound.getResourceName(),
-                                                             resourceNotFound.getOperationName() );
-                    Object responseEntity = createErrorResponse(acceptableMediaTypes, notFoundMsg);
-                    builder = Response.status( Status.NOT_FOUND ).entity(responseEntity);
-
-                } else {
-
-                    //
-                    // Json will always be preferred over XML if both or the wildcard are present in the header
-                    //
-                    if (isAcceptable(acceptableMediaTypes, MediaType.APPLICATION_JSON_TYPE))
-                        builder = Response.ok( KomodoJsonMarshaller.marshall( entity ), MediaType.APPLICATION_JSON );
-                    else if (isAcceptable(acceptableMediaTypes, MediaType.APPLICATION_XML_TYPE))
-                        builder = Response.ok( entity.getXml(), MediaType.APPLICATION_XML );
-                    else {
-                        builder = notAcceptableMediaTypesBuilder();
-                    }
-                }
-
-                return builder.build();
-            }
-
-            // callback was called because of an error condition
-            Object responseEntity = createErrorResponse(acceptableMediaTypes, error.getLocalizedMessage());
-            return Response.status( Status.INTERNAL_SERVER_ERROR )
+        if ( !callback.await( timeout, unit ) ) {
+            // callback timeout occurred
+            String errorMessage = Messages.getString( COMMIT_TIMEOUT, transaction.getName(), timeout, unit );
+            Object responseEntity = createErrorResponse(acceptableMediaTypes, errorMessage);
+            return Response.status( Status.GATEWAY_TIMEOUT )
                            .entity(responseEntity)
                            .build();
         }
 
-        // callback timeout occurred
-        String errorMessage = Messages.getString( COMMIT_TIMEOUT, transaction.getName(), timeout, unit );
-        Object responseEntity = createErrorResponse(acceptableMediaTypes, errorMessage);
-        return Response.status( Status.GATEWAY_TIMEOUT )
-                       .entity(responseEntity)
-                       .build();
+        Throwable error = callback.error();
+
+        if ( error != null ) {
+            // callback was called because of an error condition
+            Object responseEntity = createErrorResponse(acceptableMediaTypes, error.getLocalizedMessage());
+            return Response.status( Status.INTERNAL_SERVER_ERROR )
+                .entity(responseEntity)
+                .build();
+        }
+
+        LOGGER.debug( "commit: successfully committed '{0}', rollbackOnly = '{1}'", //$NON-NLS-1$
+                      transaction.getName(),
+                      transaction.isRollbackOnly() );
+        ResponseBuilder builder = null;
+
+        if ( entity == KomodoRestEntity.NO_CONTENT ) {
+            builder = Response.noContent();
+        } else if ( entity instanceof ResourceNotFound ) {
+            final ResourceNotFound resourceNotFound = ( ResourceNotFound )entity;
+
+            String notFoundMsg = Messages.getString( RESOURCE_NOT_FOUND,
+                                                     resourceNotFound.getResourceName(),
+                                                     resourceNotFound.getOperationName() );
+            Object responseEntity = createErrorResponse(acceptableMediaTypes, notFoundMsg);
+            builder = Response.status( Status.NOT_FOUND ).entity(responseEntity);
+
+        } else {
+
+            //
+            // Json will always be preferred over XML if both or the wildcard are present in the header
+            //
+            if (isAcceptable(acceptableMediaTypes, MediaType.APPLICATION_JSON_TYPE))
+                builder = Response.ok( KomodoJsonMarshaller.marshall( entity ), MediaType.APPLICATION_JSON );
+            else if (isAcceptable(acceptableMediaTypes, MediaType.APPLICATION_XML_TYPE))
+                builder = Response.ok( entity.getXml(), MediaType.APPLICATION_XML );
+            else {
+                builder = notAcceptableMediaTypesBuilder();
+            }
+        }
+
+        return builder.build();
     }
 
     protected Response commit( final UnitOfWork transaction, List<MediaType> acceptableMediaTypes,
@@ -180,54 +180,54 @@ public abstract class KomodoService implements JsonConstants {
         final SynchronousCallback callback = ( SynchronousCallback )transaction.getCallback();
         transaction.commit();
 
-        if ( callback.await( timeout, unit ) ) {
-            final Throwable error = callback.error();
+        if ( ! callback.await( timeout, unit ) ) {
+            // callback timeout occurred
+            String errorMessage = Messages.getString( COMMIT_TIMEOUT, transaction.getName(), timeout, unit );
+            Object responseEntity = createErrorResponse(acceptableMediaTypes, errorMessage);
+            return Response.status( Status.GATEWAY_TIMEOUT )
+                           .type( MediaType.TEXT_PLAIN )
+                           .entity(responseEntity)
+                           .build();
+        }
 
-            if ( error == null ) {
-                LOGGER.debug( "commit: successfully committed '{0}', rollbackOnly = '{1}'", //$NON-NLS-1$
-                              transaction.getName(),
-                              transaction.isRollbackOnly() );
-                ResponseBuilder builder = null;
+        final Throwable error = callback.error();
 
-                KomodoRestEntity entity;
-                if ( entities == null || entities.isEmpty()) {
-                    builder = Response.noContent();
-                } else if ( (entity = entities.iterator().next()) instanceof ResourceNotFound ) {
-                    final ResourceNotFound resourceNotFound = ( ResourceNotFound )entity;
-
-                    String notFoundMessage = Messages.getString( RESOURCE_NOT_FOUND,
-                                                                 resourceNotFound.getResourceName(),
-                                                                 resourceNotFound.getOperationName() );
-                    Object responseEntity = createErrorResponse(acceptableMediaTypes, notFoundMessage);
-                    builder = Response.status( Status.NOT_FOUND ).entity(responseEntity);
-                } else {
-
-                    if (isAcceptable(acceptableMediaTypes, MediaType.APPLICATION_JSON_TYPE))
-                        builder = Response.ok( KomodoJsonMarshaller.marshall( entity ), MediaType.APPLICATION_JSON );
-                    else {
-                        builder = notAcceptableMediaTypesBuilder();
-                    }
-
-                    builder = Response.ok( KomodoJsonMarshaller.marshallArray(entities.toArray(new KomodoRestEntity[0]), true), MediaType.APPLICATION_JSON );
-                }
-
-                return builder.build();
-            }
-
-            // callback was called because of an error condition
+        if ( error != null ) {
+         // callback was called because of an error condition
             Object responseEntity = createErrorResponse(acceptableMediaTypes, error.getLocalizedMessage());
             return Response.status( Status.INTERNAL_SERVER_ERROR )
                            .entity(responseEntity)
                            .build();
         }
 
-        // callback timeout occurred
-        String errorMessage = Messages.getString( COMMIT_TIMEOUT, transaction.getName(), timeout, unit );
-        Object responseEntity = createErrorResponse(acceptableMediaTypes, errorMessage);
-        return Response.status( Status.GATEWAY_TIMEOUT )
-                       .type( MediaType.TEXT_PLAIN )
-                       .entity(responseEntity)
-                       .build();
+        LOGGER.debug( "commit: successfully committed '{0}', rollbackOnly = '{1}'", //$NON-NLS-1$
+                      transaction.getName(),
+                      transaction.isRollbackOnly() );
+        ResponseBuilder builder = null;
+
+        KomodoRestEntity entity;
+        if ( entities == null || entities.isEmpty()) {
+            builder = Response.noContent();
+        } else if ( (entity = entities.iterator().next()) instanceof ResourceNotFound ) {
+            final ResourceNotFound resourceNotFound = ( ResourceNotFound )entity;
+
+            String notFoundMessage = Messages.getString( RESOURCE_NOT_FOUND,
+                                                         resourceNotFound.getResourceName(),
+                                                         resourceNotFound.getOperationName() );
+            Object responseEntity = createErrorResponse(acceptableMediaTypes, notFoundMessage);
+            builder = Response.status( Status.NOT_FOUND ).entity(responseEntity);
+        } else {
+
+            if (isAcceptable(acceptableMediaTypes, MediaType.APPLICATION_JSON_TYPE))
+                builder = Response.ok( KomodoJsonMarshaller.marshall( entity ), MediaType.APPLICATION_JSON );
+            else {
+                builder = notAcceptableMediaTypesBuilder();
+            }
+
+            builder = Response.ok( KomodoJsonMarshaller.marshallArray(entities.toArray(new KomodoRestEntity[0]), true), MediaType.APPLICATION_JSON );
+        }
+
+        return builder.build();
     }
 
     /**
