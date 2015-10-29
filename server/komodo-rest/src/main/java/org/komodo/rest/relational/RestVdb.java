@@ -7,114 +7,103 @@
 */
 package org.komodo.rest.relational;
 
-import java.util.Arrays;
-import java.util.Objects;
+import java.net.URI;
+import java.util.Properties;
+import org.komodo.relational.vdb.Vdb;
 import org.komodo.rest.KomodoRestEntity;
-import org.komodo.utils.ArgCheck;
-import org.komodo.utils.StringUtils;
+import org.komodo.rest.KomodoService;
+import org.komodo.rest.RestLink;
+import org.komodo.rest.RestLink.LinkType;
+import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 /**
  * A VDB that can be used by GSON to build a JSON document representation.
  */
 public final class RestVdb extends KomodoRestEntity {
 
-    private String name;
-    private String description;
-    private String originalFilePath;
-    private RestVdbDataRole[] dataRoles = RestVdbDataRole.NO_DATA_ROLES;
-    private RestVdbEntry[] entries = RestVdbEntry.NO_ENTRIES;
-    private RestVdbImport[] imports = RestVdbImport.NO_IMPORTS;
-    private RestVdbTranslator[] translators = RestVdbTranslator.NO_TRANSLATORS;
-
-    // models
+    /**
+     * Label used to describe name
+     */
+    public static final String NAME_LABEL = KomodoService.encode(VdbLexicon.Vdb.NAME);
 
     /**
-     * Constructor for use <strong>only</strong> when deserializing.
+     * Label used to describe description
+     */
+    public static final String DESCRIPTION_LABEL = KomodoService.encode(VdbLexicon.Vdb.DESCRIPTION);
+
+    /**
+     * Label used to describe original file path
+     */
+    public static final String FILE_PATH_LABEL = KomodoService.encode(VdbLexicon.Vdb.ORIGINAL_FILE);
+
+    /**
+     * Label used to describe original file path
+     */
+    public static final String PREVIEW_LABEL = KomodoService.encode(VdbLexicon.Vdb.PREVIEW);
+
+    /**
+     * Label used to describe original file path
+     */
+    public static final String CONNECTION_TYPE_LABEL = KomodoService.encode(VdbLexicon.Vdb.CONNECTION_TYPE);
+
+    /**
+     * Label used to describe original file path
+     */
+    public static final String VERSION_LABEL = KomodoService.encode(VdbLexicon.Vdb.VERSION);
+
+    private String name;
+
+    private String description;
+
+    private String originalFilePath;
+
+    private boolean preview;
+
+    private String connectionType;
+
+    private int version;
+
+    /**
+     * Constructor for use when deserializing
      */
     public RestVdb() {
-        // nothing to do
+        super();
     }
 
     /**
-     * @param vdbName
-     *        the name of the VDB (cannot be empty)
+     * Constructor for use when serializing.
+     * @param baseUri the base uri of the vdb
+     * @param id the id of this vdb
+     * @param dataPath the data path of this vdb
+     * @param kType the type of this vdb
+     * @param hasChildren true if vdb has children
      */
-    public RestVdb( final String vdbName ) {
-        ArgCheck.isNotEmpty( vdbName, "vdbName" ); //$NON-NLS-1$
-        this.name = vdbName;
+    public RestVdb(URI baseUri, String id, String dataPath, KomodoType kType, boolean hasChildren) {
+        super(baseUri, id, dataPath, kType, hasChildren);
+
+        addLink(new RestLink(LinkType.SELF, getUriBuilder().buildVdbUri(LinkType.SELF, id)));
+        addLink(new RestLink(LinkType.PARENT, getUriBuilder().buildVdbUri(LinkType.PARENT, id)));
+        addLink(new RestLink(LinkType.IMPORTS, getUriBuilder().buildVdbUri(LinkType.IMPORTS, id)));
+        addLink(new RestLink(LinkType.MODELS, getUriBuilder().buildVdbUri(LinkType.MODELS, id)));
+        addLink(new RestLink(LinkType.TRANSLATORS, getUriBuilder().buildVdbUri(LinkType.TRANSLATORS, id)));
+        addLink(new RestLink(LinkType.DATA_ROLES, getUriBuilder().buildVdbUri(LinkType.DATA_ROLES, id)));
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * @see java.lang.Object#equals(java.lang.Object)
+     * @return the name
      */
-    @Override
-    public boolean equals( final Object other ) {
-        if ( !super.equals( other ) ) {
-            return false;
-        }
-
-        assert( other != null );
-        assert( getClass().equals( other.getClass() ) );
-
-        final RestVdb that = ( RestVdb )other;
-
-        // check name
-        if ( this.name == null ) {
-            if ( that.name != null ) {
-                return false;
-            }
-        } else if ( !this.name.equals( that.name ) ) {
-            return false;
-        }
-
-        // check description
-        if ( this.description == null ) {
-            if ( that.description != null ) {
-                return false;
-            }
-        } else if ( !this.description.equals( that.description ) ) {
-            return false;
-        }
-
-        // check file path
-        if ( this.originalFilePath == null ) {
-            if ( that.originalFilePath != null ) {
-                return false;
-            }
-        } else if ( !this.originalFilePath.equals( that.originalFilePath ) ) {
-            return false;
-        }
-
-        // data roles
-        if ( !Arrays.deepEquals( getDataRoles(), that.getDataRoles() ) ) {
-            return false;
-        }
-
-        // entries
-        if ( !Arrays.deepEquals( getEntries(), that.getEntries() ) ) {
-            return false;
-        }
-
-        // imports
-        if ( !Arrays.deepEquals( getImports(), that.getImports() ) ) {
-            return false;
-        }
-
-        // translators
-        if ( !Arrays.deepEquals( getTranslators(), that.getTranslators() ) ) {
-            return false;
-        }
-
-        return true;
+    public String getName() {
+        return this.name;
     }
 
     /**
-     * @return the data roles (never <code>null</code> but can be empty)
+     * @param name the name to set
      */
-    public RestVdbDataRole[] getDataRoles() {
-        return this.dataRoles;
+    public void setName(String name) {
+        this.name = name;
     }
 
     /**
@@ -125,213 +114,154 @@ public final class RestVdb extends KomodoRestEntity {
     }
 
     /**
-     * @return the entries (never <code>null</code> but can be empty)
+     * @param description the description to set
      */
-    public RestVdbEntry[] getEntries() {
-        return this.entries;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     /**
-     * @return the VDB imports (never <code>null</code> but can be empty)
-     */
-    public RestVdbImport[] getImports() {
-        return this.imports;
-    }
-
-    /**
-     * @return the VDB name (can be empty)
-     */
-    public String getName() {
-        return this.name;
-    }
-
-    /**
-     * @return the external file path of the VDB (can be empty)
+     * @return the originalFilePath
      */
     public String getOriginalFilePath() {
         return this.originalFilePath;
     }
 
     /**
-     * @return the translators (never <code>null</code> but can be empty)
+     * @param originalFilePath the originalFilePath to set
      */
-    public RestVdbTranslator[] getTranslators() {
-        return this.translators;
+    public void setOriginalFilePath(String originalFilePath) {
+        this.originalFilePath = originalFilePath;
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * @see java.lang.Object#hashCode()
+     * @return the preview
      */
+    public boolean isPreview() {
+        return this.preview;
+    }
+
+    /**
+     * @param preview the preview to set
+     */
+    public void setPreview(boolean preview) {
+        this.preview = preview;
+    }
+
+    /**
+     * @return the connectionType
+     */
+    public String getConnectionType() {
+        return this.connectionType;
+    }
+
+    /**
+     * @param connectionType the connectionType to set
+     */
+    public void setConnectionType(String connectionType) {
+        this.connectionType = connectionType;
+    }
+
+    /**
+     * @return the version
+     */
+    public int getVersion() {
+        return this.version;
+    }
+
+    /**
+     * @param version the version to set
+     */
+    public void setVersion(int version) {
+        this.version = version;
+    }
+
+    /**
+     * @param vdb the source vdb
+     * @param exportAsXml whether to export the xml
+     * @param baseUri the base uri
+     * @param uow the transaction
+     * @return a new {@link RestVdb} from the given source {@link Vdb}
+     * @throws KException if error occurs
+     */
+    public static RestVdb build(final Vdb vdb, final boolean exportAsXml, final URI baseUri, final UnitOfWork uow) throws KException {
+        final String vdbName = vdb.getName(uow);
+        final RestVdb restVdb = new RestVdb(baseUri, vdbName, vdb.getAbsolutePath(), vdb.getTypeIdentifier(uow), vdb.hasChildren(uow));
+
+        restVdb.setName(vdb.getName(uow));
+        restVdb.setDescription(vdb.getDescription(uow));
+        restVdb.setOriginalFilePath(vdb.getOriginalFilePath(uow));
+
+        restVdb.setPreview(vdb.isPreview(uow));
+        restVdb.setConnectionType(vdb.getConnectionType(uow));
+        restVdb.setVersion(vdb.getVersion(uow));
+
+        restVdb.addExecutionProperties(uow, vdb);
+
+        if (exportAsXml) {
+            String xml = vdb.export(uow, new Properties());
+            restVdb.setXml(xml);
+        }
+
+        return restVdb;
+    }
+
     @Override
     public int hashCode() {
-        return Objects.hash( this.name,
-                             this.description,
-                             this.originalFilePath,
-                             Arrays.deepHashCode( this.dataRoles ),
-                             Arrays.deepHashCode( this.entries ),
-                             Arrays.deepHashCode( this.imports ),
-                             Arrays.deepHashCode( this.translators ),
-                             super.hashCode() );
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((this.connectionType == null) ? 0 : this.connectionType.hashCode());
+        result = prime * result + ((this.description == null) ? 0 : this.description.hashCode());
+        result = prime * result + ((this.name == null) ? 0 : this.name.hashCode());
+        result = prime * result + ((this.originalFilePath == null) ? 0 : this.originalFilePath.hashCode());
+        result = prime * result + (this.preview ? 1231 : 1237);
+        result = prime * result + this.version;
+        return result;
     }
 
-    /**
-     * @param newDataRoles
-     *        the new data roles (can be <code>null</code>)
-     */
-    public void setDataRoles( final RestVdbDataRole[] newDataRoles ) {
-        this.dataRoles = ( ( newDataRoles == null ) ? RestVdbDataRole.NO_DATA_ROLES : newDataRoles );
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        RestVdb other = (RestVdb)obj;
+        if (this.connectionType == null) {
+            if (other.connectionType != null)
+                return false;
+        } else
+            if (!this.connectionType.equals(other.connectionType))
+                return false;
+        if (this.description == null) {
+            if (other.description != null)
+                return false;
+        } else
+            if (!this.description.equals(other.description))
+                return false;
+        if (this.name == null) {
+            if (other.name != null)
+                return false;
+        } else
+            if (!this.name.equals(other.name))
+                return false;
+        if (this.originalFilePath == null) {
+            if (other.originalFilePath != null)
+                return false;
+        } else
+            if (!this.originalFilePath.equals(other.originalFilePath))
+                return false;
+        if (this.preview != other.preview)
+            return false;
+        if (this.version != other.version)
+            return false;
+        return true;
     }
 
-    /**
-     * @param newDescription
-     *        the new description (can be empty)
-     */
-    public void setDescription( final String newDescription ) {
-        this.description = newDescription;
-    }
-
-    /**
-     * @param newEntries
-     *        the new entries (can be <code>null</code>)
-     */
-    public void setEntries( final RestVdbEntry[] newEntries ) {
-        this.entries = ( ( newEntries == null ) ? RestVdbEntry.NO_ENTRIES : newEntries );
-    }
-
-    /**
-     * @param newImports
-     *        the new VDB imports (can be <code>null</code>)
-     */
-    public void setImports( final RestVdbImport[] newImports ) {
-        this.imports = ( ( newImports == null ) ? RestVdbImport.NO_IMPORTS : newImports );
-    }
-
-    /**
-     * @param newName
-     *        the new VDB name (can be empty)
-     */
-    public void setName( final String newName ) {
-        this.name = newName;
-    }
-
-    /**
-     * @param newOriginalFilePath
-     *        the new VDB external file path (can be empty)
-     */
-    public void setOriginalFilePath( final String newOriginalFilePath ) {
-        this.originalFilePath = newOriginalFilePath;
-    }
-
-    /**
-     * @param newTranslators
-     *        the new translators (can be <code>null</code>)
-     */
-    public void setTranslators( final RestVdbTranslator[] newTranslators ) {
-        this.translators = ( ( newTranslators == null ) ? RestVdbTranslator.NO_TRANSLATORS : newTranslators );
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see java.lang.Object#toString()
-     */
+    @SuppressWarnings( "nls" )
     @Override
     public String toString() {
-        final StringBuilder builder = new StringBuilder();
-        builder.append( "VDB name = " ).append( this.name ); //$NON-NLS-1$
-        builder.append( ", " ); //$NON-NLS-1$
-
-        { // data roles
-            final RestVdbDataRole[] dataRoles = getDataRoles();
-            builder.append( "data roles = [" ); //$NON-NLS-1$
-
-            if ( dataRoles.length != 0 ) {
-                boolean firstTime = true;
-
-                for ( final RestVdbDataRole dataRole : dataRoles ) {
-                    if ( firstTime ) {
-                        firstTime = false;
-                    } else {
-                        builder.append( ", " ); //$NON-NLS-1$
-                    }
-
-                    final String name = dataRole.getName();
-                    builder.append( StringUtils.isBlank( name ) ? "<no name>" : name ); //$NON-NLS-1$
-                }
-            }
-
-            builder.append( "]" ); //$NON-NLS-1$
-        }
-
-        { // entries
-            final RestVdbEntry[] entries = getEntries();
-            builder.append( "entries = [" ); //$NON-NLS-1$
-
-            if ( entries.length != 0 ) {
-                boolean firstTime = true;
-
-                for ( final RestVdbEntry entry : entries ) {
-                    if ( firstTime ) {
-                        firstTime = false;
-                    } else {
-                        builder.append( ", " ); //$NON-NLS-1$
-                    }
-
-                    final String name = entry.getName();
-                    builder.append( StringUtils.isBlank( name ) ? "<no name>" : name ); //$NON-NLS-1$
-                }
-            }
-
-            builder.append( "]" ); //$NON-NLS-1$
-        }
-
-        { // VDB imports
-            final RestVdbImport[] vdbImports = getImports();
-            builder.append( "imports = [" ); //$NON-NLS-1$
-
-            if ( this.imports.length != 0 ) {
-                boolean firstTime = true;
-
-                for ( final RestVdbImport vdbImport : vdbImports ) {
-                    if ( firstTime ) {
-                        firstTime = false;
-                    } else {
-                        builder.append( ", " ); //$NON-NLS-1$
-                    }
-
-                    final String name = vdbImport.getName();
-                    builder.append( StringUtils.isBlank( name ) ? "<no name>" : name ); //$NON-NLS-1$
-                }
-            }
-
-            builder.append( "]" ); //$NON-NLS-1$
-        }
-
-        { // translators
-            final RestVdbTranslator[] translators = getTranslators();
-            builder.append( "translators = [" ); //$NON-NLS-1$
-
-            if ( translators.length != 0 ) {
-                boolean firstTime = true;
-
-                for ( final RestVdbTranslator translator : translators ) {
-                    if ( firstTime ) {
-                        firstTime = false;
-                    } else {
-                        builder.append( ", " ); //$NON-NLS-1$
-                    }
-
-                    final String name = translator.getName();
-                    builder.append( StringUtils.isBlank( name ) ? "<no name>" : name ); //$NON-NLS-1$
-                }
-            }
-
-            builder.append( "]" ); //$NON-NLS-1$
-        }
-
-        return builder.toString();
+        return "RestVdb [name=" + this.name + ", description=" + this.description + ", originalFilePath=" + this.originalFilePath + ", preview=" + this.preview + ", connectionType=" + this.connectionType + ", version=" + this.version + ", id=" + this.id + ", dataPath=" + this.dataPath + ", kType=" + this.kType + ", hasChildren=" + this.hasChildren + ", properties=" + this.properties + ", links=" + this.links + "]";
     }
-
 }

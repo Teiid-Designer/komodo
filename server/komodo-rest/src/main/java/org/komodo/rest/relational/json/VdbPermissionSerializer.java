@@ -11,9 +11,10 @@ import static org.komodo.rest.Messages.Error.INCOMPLETE_JSON;
 import static org.komodo.rest.Messages.Error.UNEXPECTED_JSON_TOKEN;
 import static org.komodo.rest.relational.json.KomodoJsonMarshaller.BUILDER;
 import java.io.IOException;
-import java.util.Map;
 import org.komodo.rest.Messages;
 import org.komodo.rest.json.JsonConstants;
+import org.komodo.rest.relational.RestVdbCondition;
+import org.komodo.rest.relational.RestVdbMask;
 import org.komodo.rest.relational.RestVdbPermission;
 import org.komodo.utils.StringUtils;
 import com.google.gson.stream.JsonReader;
@@ -39,71 +40,56 @@ public final class VdbPermissionSerializer extends KomodoRestEntitySerializer< R
 
         beginRead( in );
 
+        readBasicProperties(in, permission);
+
         while ( in.hasNext() ) {
             final String name = in.nextName();
 
-            switch ( name ) {
-                case RelationalJsonConstants.ALLOW_ALTER: {
-                    final boolean allow = in.nextBoolean();
-                    permission.setAllowAlter( allow );
-                    break;
-                }
-                case RelationalJsonConstants.ALLOW_CREATE: {
-                    final boolean allow = in.nextBoolean();
-                    permission.setAllowCreate( allow );
-                    break;
-                }
-                case RelationalJsonConstants.ALLOW_DELETE: {
-                    final boolean allow = in.nextBoolean();
-                    permission.setAllowDelete( allow );
-                    break;
-                }
-                case RelationalJsonConstants.ALLOW_EXECUTE: {
-                    final boolean allow = in.nextBoolean();
-                    permission.setAllowExecute( allow );
-                    break;
-                }
-                case RelationalJsonConstants.ALLOW_LANGUAGE: {
-                    final boolean allow = in.nextBoolean();
-                    permission.setAllowLanguage( allow );
-                    break;
-                }
-                case RelationalJsonConstants.ALLOW_READ: {
-                    final boolean allow = in.nextBoolean();
-                    permission.setAllowRead( allow );
-                    break;
-                }
-                case RelationalJsonConstants.ALLOW_UPDATE: {
-                    final boolean allow = in.nextBoolean();
-                    permission.setAllowUpdate( allow );
-                    break;
-                }
-                case RelationalJsonConstants.CONDITIONS: {
-                    final Map< String, Boolean > conditions = BUILDER.fromJson( in, Map.class );
-                    permission.setConditions( conditions );
-                    break;
-                }
-                case JsonConstants.ID: {
-                    final String permissionName = in.nextString();
-                    permission.setName( permissionName );
-                    break;
-                }
-                case RelationalJsonConstants.MASKS: {
-                    final Map< String, String > masks = BUILDER.fromJson( in, Map.class );
-                    permission.setMasks( masks );
-                    break;
-                }
-                case JsonConstants.LINKS: {
-                    readLinks( in, permission );
-                    break;
-                }
-                case JsonConstants.PROPERTIES: {
-                    readProperties( in, permission );
-                    break;
-                }
-                default:
-                    throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
+            if (RestVdbPermission.ALLOW_ALTER_LABEL.equals(name)) {
+                final boolean allow = in.nextBoolean();
+                permission.setAllowAlter( allow );
             }
+            else if (RestVdbPermission.ALLOW_CREATE_LABEL.equals(name)) {
+                final boolean allow = in.nextBoolean();
+                permission.setAllowCreate( allow );
+            }
+            else if (RestVdbPermission.ALLOW_DELETE_LABEL.equals(name)) {
+                final boolean allow = in.nextBoolean();
+                permission.setAllowDelete( allow );
+            }
+            else if (RestVdbPermission.ALLOW_EXECUTE_LABEL.equals(name)) {
+                final boolean allow = in.nextBoolean();
+                permission.setAllowExecute( allow );
+            }
+            else if (RestVdbPermission.ALLOW_LANGUAGE_LABEL.equals(name)) {
+                final boolean allow = in.nextBoolean();
+                permission.setAllowLanguage( allow );
+            }
+            else if (RestVdbPermission.ALLOW_READ_LABEL.equals(name)) {
+                final boolean allow = in.nextBoolean();
+                permission.setAllowRead( allow );
+            }
+            else if (RestVdbPermission.ALLOW_UPDATE_LABEL.equals(name)) {
+                final boolean allow = in.nextBoolean();
+                permission.setAllowUpdate( allow );
+            }
+            else if (RestVdbPermission.CONDITIONS_LABEL.equals(name)) {
+                final RestVdbCondition[] conditions = BUILDER.fromJson( in, RestVdbCondition[].class );
+                permission.setConditions(conditions);
+            }
+            else if (RestVdbPermission.NAME_LABEL.equals(name)) {
+                final String permissionName = in.nextString();
+                permission.setName( permissionName );
+            }
+            else if (RestVdbPermission.MASKS_LABEL.equals(name)) {
+                final RestVdbMask[] masks = BUILDER.fromJson( in, RestVdbMask[].class );
+                permission.setMasks(masks);
+            }
+            else if (JsonConstants.LINKS.equals(name)) {
+                readLinks( in, permission );
+            }
+            else
+                throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
         }
 
         if ( !isComplete( permission ) ) {
@@ -129,47 +115,48 @@ public final class VdbPermissionSerializer extends KomodoRestEntitySerializer< R
 
         beginWrite( out );
 
-        // id
-        out.name( JsonConstants.ID );
-        out.value( value.getName() );
+        writeBasicProperties(out, value);
+
+        // name
+        out.name(RestVdbPermission.NAME_LABEL);
+        out.value(value.getName());
 
         // allow alter
-        out.name( RelationalJsonConstants.ALLOW_ALTER );
-        out.value( value.isAllowAlter() );
+        out.name(RestVdbPermission.ALLOW_ALTER_LABEL);
+        out.value(value.isAllowAlter());
 
         // allow create
-        out.name( RelationalJsonConstants.ALLOW_CREATE );
-        out.value( value.isAllowCreate() );
+        out.name(RestVdbPermission.ALLOW_CREATE_LABEL);
+        out.value(value.isAllowCreate());
 
         // allow delete
-        out.name( RelationalJsonConstants.ALLOW_DELETE );
-        out.value( value.isAllowDelete() );
+        out.name(RestVdbPermission.ALLOW_DELETE_LABEL);
+        out.value(value.isAllowDelete());
 
         // allow execute
-        out.name( RelationalJsonConstants.ALLOW_EXECUTE );
-        out.value( value.isAllowExecute() );
+        out.name(RestVdbPermission.ALLOW_EXECUTE_LABEL);
+        out.value(value.isAllowExecute());
 
         // allow language
-        out.name( RelationalJsonConstants.ALLOW_LANGUAGE );
-        out.value( value.isAllowLanguage() );
+        out.name(RestVdbPermission.ALLOW_LANGUAGE_LABEL);
+        out.value(value.isAllowLanguage());
 
         // allow read
-        out.name( RelationalJsonConstants.ALLOW_READ );
-        out.value( value.isAllowRead() );
+        out.name(RestVdbPermission.ALLOW_READ_LABEL);
+        out.value(value.isAllowRead());
 
         // allow update
-        out.name( RelationalJsonConstants.ALLOW_UPDATE );
-        out.value( value.isAllowUpdate() );
+        out.name(RestVdbPermission.ALLOW_UPDATE_LABEL);
+        out.value(value.isAllowUpdate());
 
         // conditions
-        out.name( RelationalJsonConstants.CONDITIONS );
-        BUILDER.toJson( value.getConditions(), BOOLEAN_MAP_TYPE, out );
+        out.name(RestVdbPermission.CONDITIONS_LABEL);
+        BUILDER.toJson(value.getConditions(), RestVdbCondition[].class, out);
 
         // masks
-        out.name( RelationalJsonConstants.MASKS );
-        BUILDER.toJson( value.getMasks(), STRING_MAP_TYPE, out );
+        out.name(RestVdbPermission.MASKS_LABEL);
+        BUILDER.toJson(value.getMasks(), RestVdbMask[].class, out);
 
-        writeProperties( out, value );
         writeLinks( out, value );
         endWrite( out );
     }

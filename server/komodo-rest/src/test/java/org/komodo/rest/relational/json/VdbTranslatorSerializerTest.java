@@ -8,67 +8,99 @@
 package org.komodo.rest.relational.json;
 
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import static org.junit.Assert.assertTrue;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import javax.ws.rs.core.UriBuilder;
 import org.junit.Before;
 import org.junit.Test;
+import org.komodo.rest.KomodoRestProperty;
+import org.komodo.rest.json.JsonConstants;
 import org.komodo.rest.relational.RestVdbTranslator;
-import org.komodo.rest.relational.json.KomodoJsonMarshaller;
+import org.komodo.spi.repository.KomodoType;
 
 @SuppressWarnings( { "javadoc", "nls" } )
-public final class VdbTranslatorSerializerTest {
+public final class VdbTranslatorSerializerTest implements JsonConstants {
 
+    private static final URI BASE_URI = UriBuilder.fromUri("http://localhost:8081/v1/workspace/").build();
+    private static final String TR_DATA_PATH = "/workspace/MyVdb/vdbTranslators/MyTranslator";
+    private static final String VDB_NAME = "MyVdb";
     private static final String DESCRIPTION = "my description";
-    private static final String JSON = "{\"id\":\"MyTranslator\",\"type\":\"oracle\",\"description\":\"my description\",\"properties\":{\"magic\":\"johnson\",\"michael\":\"jordan\",\"larry\":\"bird\"}}";
     private static final String NAME = "MyTranslator";
     private static final int NUM_PROPS = 3;
-    private static final String[] PROP_NAMES = { "magic", "michael", "larry" };
-    private static final String[] PROP_VALUES = { "johnson", "jordan", "bird" };
     private static final String TYPE = "oracle";
-    private static final Map< String, String > PROPS = Collections.unmodifiableMap( new HashMap< String, String >() {
+    private static final List<KomodoRestProperty> PROPS = new ArrayList<>();
+    static {
+        PROPS.add(new KomodoRestProperty("larry", "bird"));
+        PROPS.add(new KomodoRestProperty("magic", "johnson"));
+        PROPS.add(new KomodoRestProperty("michael", "jordan"));
+    }
 
-        private static final long serialVersionUID = 1L;
-
-        {
-            put( "larry", "bird" );
-            put( "magic", "johnson" );
-            put( "michael", "jordan" );
-        }
-    } );
+    private static final String JSON = EMPTY_STRING +
+    OPEN_BRACE + NEW_LINE +
+    "  \"" + ID + "\": \"" + NAME + "\"," + NEW_LINE +
+    "  \"" + DATA_PATH + "\": \"" + TR_DATA_PATH + "\"," + NEW_LINE +
+    "  \"" + KTYPE + "\": \"" + KomodoType.VDB_TRANSLATOR.getType() + "\"," + NEW_LINE +
+    "  \"" + HAS_CHILDREN + "\": false," + NEW_LINE +
+    "  \"vdb__type\": \"oracle\"" + COMMA + NEW_LINE +
+    "  \"vdb__description\": \"my description\"" + COMMA + NEW_LINE +
+    "  \"keng__properties\": " + OPEN_SQUARE_BRACKET + NEW_LINE +
+        "    " + OPEN_BRACE + NEW_LINE +
+        "      \"name\": \"larry\"" + COMMA + NEW_LINE +
+        "      \"value\": \"bird\"" + NEW_LINE +
+        "    " + CLOSE_BRACE + COMMA + NEW_LINE +
+       "    " +  OPEN_BRACE + NEW_LINE +
+        "      \"name\": \"magic\"" + COMMA + NEW_LINE +
+        "      \"value\": \"johnson\"" + NEW_LINE +
+        "    " + CLOSE_BRACE + COMMA + NEW_LINE +
+        "    " + OPEN_BRACE + NEW_LINE +
+        "      \"name\": \"michael\"" + COMMA + NEW_LINE +
+        "      \"value\": \"jordan\"" + NEW_LINE +
+        "    " + CLOSE_BRACE + NEW_LINE +
+        "  " + CLOSE_SQUARE_BRACKET + COMMA + NEW_LINE +
+        "  \"" + LINKS + "\": " + OPEN_SQUARE_BRACKET + NEW_LINE +
+        "    " + OPEN_BRACE + NEW_LINE +
+        "      \"rel\": \"self\"," + NEW_LINE +
+        "      \"href\": \"http://localhost:8081/v1/workspace/workspace/vdbs/MyVdb/VdbTranslators/MyTranslator\"" + NEW_LINE +
+        "    " + CLOSE_BRACE + COMMA + NEW_LINE +
+        "    " + OPEN_BRACE + NEW_LINE +
+        "      \"rel\": \"parent\"," + NEW_LINE +
+        "      \"href\": \"http://localhost:8081/v1/workspace/workspace/vdbs/MyVdb\"" + NEW_LINE +
+        "    " + CLOSE_BRACE + NEW_LINE +
+        "  " + CLOSE_SQUARE_BRACKET + NEW_LINE +
+    CLOSE_BRACE;
 
     private RestVdbTranslator translator;
 
     @Before
     public void init() {
-        this.translator = new RestVdbTranslator( NAME, TYPE );
+        this.translator = new RestVdbTranslator(BASE_URI, NAME, TR_DATA_PATH,
+                                                                         KomodoType.VDB_TRANSLATOR, false, VDB_NAME);
+        this.translator.setType(TYPE);
         this.translator.setDescription( DESCRIPTION );
         this.translator.setProperties( PROPS );
     }
 
     @Test
     public void shouldExportJson() {
-        assertThat( KomodoJsonMarshaller.marshall( this.translator ), is( JSON ) );
+        String json = KomodoJsonMarshaller.marshall( this.translator );
+        assertEquals(JSON, json);
     }
 
     @Test
     public void shouldImportJson() {
         final RestVdbTranslator translator = KomodoJsonMarshaller.unmarshall( JSON, RestVdbTranslator.class );
         assertThat( translator.getDescription(), is( DESCRIPTION ) );
-        assertThat( translator.getName(), is( NAME ) );
+        assertThat( translator.getId(), is( NAME ) );
         assertThat( translator.getType(), is( TYPE ) );
-        assertThat( translator.getLinks().length, is( 0 ) );
-        assertThat( translator.getProperties().size(), is( NUM_PROPS ) );
+        assertThat( translator.getLinks().size(), is( 2 ) );
+        assertEquals( translator.getProperties().size(), NUM_PROPS);
 
-        // check keys
-        for ( final String key : PROP_NAMES ) {
-            assertThat( translator.getProperties().containsKey( key ), is( true ) );
-        }
-
-        // check values
-        for ( final String value : PROP_VALUES ) {
-            assertThat( translator.getProperties().containsValue( value ), is( true ) );
+        for (KomodoRestProperty property : translator.getProperties()) {
+            assertTrue(PROPS.contains(property));
         }
     }
 
@@ -82,7 +114,7 @@ public final class VdbTranslatorSerializerTest {
     @Test( expected = Exception.class )
     public void shouldNotExportWhenTypeIsMissing() {
         final RestVdbTranslator incomplete = new RestVdbTranslator();
-        translator.setName( NAME );
+        translator.setId( NAME );
         KomodoJsonMarshaller.marshall( incomplete );
     }
 

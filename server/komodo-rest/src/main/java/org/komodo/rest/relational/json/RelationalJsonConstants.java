@@ -7,114 +7,126 @@
 */
 package org.komodo.rest.relational.json;
 
+import org.komodo.rest.json.JsonConstants;
+
 /**
  * Identifiers used in Komodo REST relational object JSON representations.
  */
-public interface RelationalJsonConstants {
+public interface RelationalJsonConstants extends JsonConstants {
+
+    /**
+     * Relational prefix
+     */
+    String RELATIONAL_PREFIX = "vdb" + PREFIX_SEPARATOR; //$NON-NLS-1$
 
     /**
      * Value is {@value}.
      */
-    String ALLOW_CREATE_TEMP_TABLES = "allowCreateTempTables"; //$NON-NLS-1$
+    String ALLOW_CREATE_TEMP_TABLES = RELATIONAL_PREFIX + "allowCreateTempTables"; //$NON-NLS-1$
 
     /**
      * Value is {@value}.
      */
-    String ALLOW_ALTER = "allowAlter"; //$NON-NLS-1$
+    String ALLOW_ALTER = RELATIONAL_PREFIX + "allowAlter"; //$NON-NLS-1$
 
     /**
      * Value is {@value}.
      */
-    String ALLOW_CREATE = "allowCreate"; //$NON-NLS-1$
+    String ALLOW_CREATE = RELATIONAL_PREFIX + "allowCreate"; //$NON-NLS-1$
 
     /**
      * Value is {@value}.
      */
-    String ALLOW_DELETE = "allowDelete"; //$NON-NLS-1$
+    String ALLOW_DELETE = RELATIONAL_PREFIX + "allowDelete"; //$NON-NLS-1$
 
     /**
      * Value is {@value}.
      */
-    String ALLOW_EXECUTE = "allowExecute"; //$NON-NLS-1$
+    String ALLOW_EXECUTE = RELATIONAL_PREFIX + "allowExecute"; //$NON-NLS-1$
 
     /**
      * Value is {@value}.
      */
-    String ALLOW_LANGUAGE = "allowLanguage"; //$NON-NLS-1$
+    String ALLOW_LANGUAGE = RELATIONAL_PREFIX + "allowLanguage"; //$NON-NLS-1$
 
     /**
      * Value is {@value}.
      */
-    String ALLOW_READ = "allowRead"; //$NON-NLS-1$
+    String ALLOW_READ = RELATIONAL_PREFIX + "allowRead"; //$NON-NLS-1$
 
     /**
      * Value is {@value}.
      */
-    String ALLOW_UPDATE = "allowUpdate"; //$NON-NLS-1$
+    String ALLOW_UPDATE = RELATIONAL_PREFIX + "allowUpdate"; //$NON-NLS-1$
 
     /**
      * Value is {@value}.
      */
-    String ANY_AUTHENTICATED = "anyAuthenticated"; //$NON-NLS-1$
+    String ANY_AUTHENTICATED = RELATIONAL_PREFIX + "anyAuthenticated"; //$NON-NLS-1$
 
     /**
      * Value is {@value}.
      */
-    String CONDITIONS = "conditions"; //$NON-NLS-1$
+    String CONDITIONS = RELATIONAL_PREFIX + "conditions"; //$NON-NLS-1$
 
     /**
      * Value is {@value}.
      */
-    String DESCRIPTION = "description"; //$NON-NLS-1$
+    String NAME = RELATIONAL_PREFIX + "name"; //$NON-NLS-1$
 
     /**
      * Value is {@value}.
      */
-    String GRANT_ALL = "grantAll"; //$NON-NLS-1$
+    String DESCRIPTION = RELATIONAL_PREFIX + "description"; //$NON-NLS-1$
 
     /**
      * Value is {@value}.
      */
-    String IMPORT_DATA_POLICIES = "importDataPolicies"; //$NON-NLS-1$
+    String GRANT_ALL = RELATIONAL_PREFIX + "grantAll"; //$NON-NLS-1$
 
     /**
      * Value is {@value}.
      */
-    String MAPPED_ROLES = "mappedRoles"; //$NON-NLS-1$
+    String IMPORT_DATA_POLICIES = RELATIONAL_PREFIX + "importDataPolicies"; //$NON-NLS-1$
 
     /**
      * Value is {@value}.
      */
-    String MASKS = "masks"; //$NON-NLS-1$
+    String MAPPED_ROLES = RELATIONAL_PREFIX + "mappedRoles"; //$NON-NLS-1$
 
     /**
      * Value is {@value}.
      */
-    String ORIGINAL_FILE = "originalFile"; //$NON-NLS-1$
+    String MASKS = RELATIONAL_PREFIX + "masks"; //$NON-NLS-1$
 
     /**
      * Value is {@value}.
      */
-    String PATH = "path"; //$NON-NLS-1$
+    String ORIGINAL_FILE = RELATIONAL_PREFIX + "originalFile"; //$NON-NLS-1$
 
     /**
      * Value is {@value}.
      */
-    String PERMISSIONS = "permissions"; //$NON-NLS-1$
+    String PATH = RELATIONAL_PREFIX + "path"; //$NON-NLS-1$
 
     /**
      * Value is {@value}.
      */
-    String TYPE = "type"; //$NON-NLS-1$
+    String PERMISSIONS = RELATIONAL_PREFIX + "permissions"; //$NON-NLS-1$
 
     /**
      * Value is {@value}.
      */
-    String VDBS = "vdbs"; //$NON-NLS-1$
+    String TYPE = RELATIONAL_PREFIX + "type"; //$NON-NLS-1$
 
     /**
      * Value is {@value}.
      */
-    String VERSION = "version"; //$NON-NLS-1$
+    String VDBS = RELATIONAL_PREFIX + "vdbs"; //$NON-NLS-1$
+
+    /**
+     * Value is {@value}.
+     */
+    String VERSION = RELATIONAL_PREFIX + "version"; //$NON-NLS-1$
 
 }

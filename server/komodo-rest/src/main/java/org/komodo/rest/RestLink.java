@@ -8,8 +8,11 @@
 package org.komodo.rest;
 
 import java.net.URI;
-import java.util.Objects;
+import java.util.Collections;
+import java.util.List;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.utils.ArgCheck;
+import org.komodo.utils.StringUtils;
 
 /**
  * Represents a navigable web link.
@@ -22,14 +25,9 @@ public final class RestLink {
     public enum LinkType {
 
         /**
-         * A delete resource link.
+         * A link to its own resource.
          */
-        DELETE,
-
-        /**
-         * A resource content link to the VDB XML manifest.
-         */
-        MANIFEST,
+        SELF,
 
         /**
          * A link to the parent resource.
@@ -37,9 +35,39 @@ public final class RestLink {
         PARENT,
 
         /**
-         * A link to its own resource.
+         * A link to a vdb imports resource
          */
-        SELF;
+        IMPORTS(KomodoType.VDB_IMPORT),
+
+        /**
+         * A Link to a vdb models resource
+         */
+        MODELS(KomodoType.MODEL),
+
+        /**
+         * A link to a vdb translators resource
+         */
+        TRANSLATORS(KomodoType.VDB_TRANSLATOR),
+
+        /**
+         * A link to a vdb data roles resource
+         */
+        DATA_ROLES(KomodoType.VDB_DATA_ROLE),
+
+        /**
+         * A link to a model source resource
+         */
+        SOURCES(KomodoType.VDB_MODEL_SOURCE);
+
+        private KomodoType kType;
+
+        private LinkType() {
+            this.kType = null;
+        }
+
+        private LinkType(KomodoType kType) {
+            this.kType = kType;
+        }
 
         /**
          * An empty array of link types.
@@ -64,73 +92,36 @@ public final class RestLink {
         }
 
         /**
+         * @return the name used for the uri target of the link type.
+         *                 Prefers the {@link KomodoType} is one is present
+         */
+        public String uriName() {
+            String name = StringUtils.toLowerCamelCase(name());
+            if (kType == null)
+                return name;
+
+            return kType.getType() + "s"; //$NON-NLS-1$
+        }
+
+        /**
          * {@inheritDoc}
          *
          * @see java.lang.Enum#toString()
          */
         @Override
         public String toString() {
-            return name().toLowerCase();
+            return StringUtils.toLowerCamelCase(name());
         }
 
-    }
-
-    /**
-     * The HTTP methods associated with the link.
-     */
-    public enum MethodType {
-
-        /**
-         * Delete a resource.
-         */
-        DELETE,
-
-        /**
-         * Retrieve a resource.
-         */
-        GET,
-
-        /**
-         * Patch a resource.
-         */
-        PATCH,
-
-        /**
-         * Add or update a resource.
-         */
-        POST,
-
-        /**
-         * Create a resource.
-         */
-        PUT;
-
-        /**
-         * @param text
-         *        the text whose enum is being requested (can be empty)
-         * @return the link type (never <code>null</code>)
-         * @throws RuntimeException
-         *         if text is empty or does not represent a link type
-         */
-        public static MethodType fromString( final String text ) {
-            for ( final MethodType type : values() ) {
-                if ( type.toString().equals( text ) ) {
-                    return type;
-                }
-            }
-
-            throw new RuntimeException( "Unexpected method type of '" + text + '\'' ); //$NON-NLS-1$
-        }
     }
 
     /**
      * An empty array of links.
      */
-    public static final RestLink[] NO_LINKS = new RestLink[ 0 ];
+    public static final List<RestLink> NO_LINKS = Collections.emptyList();
 
     private LinkType rel;
     private URI href;
-    private MethodType method;
 
     /**
      * Constructor for use <strong>only</strong> when deserializing.
@@ -152,81 +143,34 @@ public final class RestLink {
 
         this.rel = rel;
         this.href = href;
-
-        MethodType type = null;
-
-        switch ( rel ) {
-            case DELETE:
-                type = MethodType.DELETE;
-                break;
-            case MANIFEST:
-                type = MethodType.GET;
-                break;
-            case PARENT:
-                type = MethodType.GET;
-                break;
-            case SELF:
-                type = MethodType.GET;
-                break;
-            default:
-                throw new RuntimeException( "Unexpected link type of '" + rel + '\'' ); //$NON-NLS-1$
-        }
-
-        this.method = type;
     }
 
-    /**
-     * @param rel
-     *        the link type (cannot be <code>null</code>)
-     * @param href
-     *        the link HREF (cannot be <code>null</code>)
-     * @param method
-     *        the method type (cannot be <code>null</code>)
-     */
-    public RestLink( final LinkType rel,
-                     final URI href,
-                     final MethodType method ) {
-        ArgCheck.isNotNull( rel, "rel" ); //$NON-NLS-1$
-        ArgCheck.isNotNull( href, "href" ); //$NON-NLS-1$
-        ArgCheck.isNotNull( method, "method" ); //$NON-NLS-1$
-
-        this.rel = rel;
-        this.href = href;
-        this.method = method;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
-    public boolean equals( final Object other ) {
-        if ( ( other == null ) || !getClass().equals( other.getClass() ) ) {
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((this.href == null) ? 0 : this.href.hashCode());
+        result = prime * result + ((this.rel == null) ? 0 : this.rel.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
             return false;
-        }
-
-        final RestLink that = ( RestLink )other;
-
-        // rel
-        if ( this.rel != that.rel ) {
+        if (getClass() != obj.getClass())
             return false;
-        }
-
-        // href
-        if ( this.href == null ) {
-            if ( that.href != null ) {
+        RestLink other = (RestLink)obj;
+        if (this.href == null) {
+            if (other.href != null)
                 return false;
-            }
-        } else if ( !this.href.equals( that.href ) ) {
+        } else
+            if (!this.href.equals(other.href))
+                return false;
+        if (this.rel != other.rel)
             return false;
-        }
-
-        // method type
-        if ( this.method != that.method ) {
-            return false;
-        }
-
         return true;
     }
 
@@ -238,27 +182,10 @@ public final class RestLink {
     }
 
     /**
-     * @return the method type (can be <code>null</code>)
-     */
-    public MethodType getMethod() {
-        return this.method;
-    }
-
-    /**
      * @return the rel link type (can be <code>null</code>)
      */
     public LinkType getRel() {
         return this.rel;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see java.lang.Object#hashCode()
-     */
-    @Override
-    public int hashCode() {
-        return Objects.hash( this.rel, this.href, this.method );
     }
 
     /**
@@ -267,14 +194,6 @@ public final class RestLink {
      */
     public void setHref( final URI newHref ) {
         this.href = newHref;
-    }
-
-    /**
-     * @param newMethodType
-     *        the new method type (can be <code>null</code>)
-     */
-    public void setMethod( final MethodType newMethodType ) {
-        this.method = newMethodType;
     }
 
     /**

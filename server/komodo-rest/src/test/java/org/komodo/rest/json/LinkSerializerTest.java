@@ -8,28 +8,27 @@
 package org.komodo.rest.json;
 
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import java.net.URI;
 import javax.ws.rs.core.UriBuilder;
 import org.junit.Test;
 import org.komodo.rest.RestLink;
 import org.komodo.rest.RestLink.LinkType;
-import org.komodo.rest.RestLink.MethodType;
-import org.komodo.rest.json.LinkSerializer;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class LinkSerializerTest {
 
-    private static final String JSON = "{\"rel\":\"self\",\"href\":\"http://localhost:8080\",\"method\":\"GET\"}";
+    private static final String JSON = "{\"rel\":\"self\",\"href\":\"http://localhost:8080\"}";
     private static final LinkType LINK_TYPE = LinkType.SELF;
-    private static final MethodType METHOD_TYPE = MethodType.GET;
     private static final URI URI = UriBuilder.fromUri( "http://localhost:8080" ).build();
     private static final LinkSerializer BUILDER = new LinkSerializer();
 
     @Test
     public void shouldExportJson() throws Exception {
-        final RestLink link = new RestLink( LINK_TYPE, URI, METHOD_TYPE );
-        assertThat( BUILDER.toJson( link ), is( JSON ) );
+        final RestLink link = new RestLink( LINK_TYPE, URI);
+        String json = BUILDER.toJson( link );
+        assertEquals(JSON, json);
     }
 
     @Test
@@ -37,7 +36,6 @@ public final class LinkSerializerTest {
         final RestLink link = BUILDER.fromJson( JSON );
         assertThat( link.getRel(), is( LINK_TYPE ) );
         assertThat( link.getHref(), is( URI ) );
-        assertThat( link.getMethod(), is( METHOD_TYPE ) );
     }
 
 }

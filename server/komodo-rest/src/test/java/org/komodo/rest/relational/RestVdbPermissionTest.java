@@ -11,12 +11,10 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
-import org.komodo.rest.relational.RestVdbPermission;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class RestVdbPermissionTest {
@@ -30,32 +28,49 @@ public final class RestVdbPermissionTest {
     private static final boolean ALLOW_READ = true;
     private static final boolean ALLOW_UPDATE = true;
 
-    private static final Map< String, Boolean > CONDITIONS = Collections.unmodifiableMap( new HashMap< String, Boolean >() {
+    private static final List<RestVdbCondition> CONDITIONS = new ArrayList<>();
 
-        private static final long serialVersionUID = 1L;
+    private static final List<RestVdbMask> MASKS = new ArrayList<>();
 
-        {
-            put( "over", true );
-            put( "the", false );
-            put( "rainbow", true );
-        }
-    } );
+    static {
+        RestVdbCondition condition1 = new RestVdbCondition();
+        condition1.setName("over");
+        condition1.setConstraint(true);
 
-    private static final Map< String, String > MASKS = Collections.unmodifiableMap( new HashMap< String, String >() {
+        RestVdbCondition condition2 = new RestVdbCondition();
+        condition1.setName("the");
+        condition1.setConstraint(false);
 
-        private static final long serialVersionUID = 1L;
+        RestVdbCondition condition3 = new RestVdbCondition();
+        condition1.setName("rainbow");
+        condition1.setConstraint(true);
 
-        {
-            put( "this", "that" );
-            put( "either", "or" );
-            put( "sixofone", "halfdozenofanother" );
-        }
-    } );
+        CONDITIONS.add(condition1);
+        CONDITIONS.add(condition2);
+        CONDITIONS.add(condition3);
+
+        RestVdbMask mask1 = new RestVdbMask();
+        mask1.setName("this");
+        mask1.setOrder("that");
+
+        RestVdbMask mask2 = new RestVdbMask();
+        mask1.setName("either");
+        mask1.setOrder("or");
+
+        RestVdbMask mask3 = new RestVdbMask();
+        mask1.setName("sixofone");
+        mask1.setOrder("halfdozenofanother");
+
+        MASKS.add(mask1);
+        MASKS.add(mask2);
+        MASKS.add(mask3);
+    }
 
     private RestVdbPermission permission;
 
     private RestVdbPermission copy() {
-        final RestVdbPermission copy = new RestVdbPermission( this.permission.getName() );
+        final RestVdbPermission copy = new RestVdbPermission();
+        copy.setName(this.permission.getName() );
         copy.setAllowAlter( this.permission.isAllowAlter() );
         copy.setAllowCreate( this.permission.isAllowCreate() );
         copy.setAllowDelete( this.permission.isAllowDelete() );
@@ -73,7 +88,8 @@ public final class RestVdbPermissionTest {
 
     @Before
     public void init() {
-        this.permission = new RestVdbPermission( NAME );
+        this.permission = new RestVdbPermission();
+        this.permission.setName(NAME );
         this.permission.setAllowAlter( ALLOW_ALTER );
         this.permission.setAllowCreate( ALLOW_CREATE );
         this.permission.setAllowDelete( ALLOW_DELETE );
@@ -81,8 +97,8 @@ public final class RestVdbPermissionTest {
         this.permission.setAllowLanguage( ALLOW_LANGUAGE );
         this.permission.setAllowRead( ALLOW_READ );
         this.permission.setAllowUpdate( ALLOW_UPDATE );
-        this.permission.setConditions( CONDITIONS );
-        this.permission.setMasks( MASKS );
+        this.permission.setConditions( CONDITIONS.toArray(new RestVdbCondition[0]) );
+        this.permission.setMasks( MASKS.toArray(new RestVdbMask[0]) );
     }
 
     @Test
@@ -102,10 +118,10 @@ public final class RestVdbPermissionTest {
     public void shouldConstructEmptyPermission() {
         final RestVdbPermission empty = new RestVdbPermission();
         assertThat( empty.getName(), is( nullValue() ) );
-        assertThat( empty.getConditions().isEmpty(), is( true ) );
-        assertThat( empty.getMasks().isEmpty(), is( true ) );
+        assertThat( empty.getConditions().length, is( 0 ) );
+        assertThat( empty.getMasks().length, is( 0 ) );
         assertThat( empty.getProperties().isEmpty(), is( true ) );
-        assertThat( empty.getLinks().length, is( 0 ) );
+        assertThat( empty.getLinks().size(), is( 0 ) );
     }
 
     @Test
@@ -166,14 +182,24 @@ public final class RestVdbPermissionTest {
     @Test
     public void shouldNotBeEqualWhenConditionsAreDifferent() {
         final RestVdbPermission thatPermission = copy();
-        thatPermission.setConditions( Collections.singletonMap( "blah", false ) );
+
+        RestVdbCondition condition = new RestVdbCondition();
+        condition.setName("blah");
+        condition.setConstraint(false);
+
+        thatPermission.setConditions(new RestVdbCondition[] { condition });
         assertThat( this.permission, is( not( thatPermission ) ) );
     }
 
     @Test
     public void shouldNotBeEqualWhenMasksAreDifferent() {
         final RestVdbPermission thatPermission = copy();
-        thatPermission.setMasks( Collections.singletonMap( "blah", "blah" ) );
+
+        RestVdbMask mask = new RestVdbMask();
+        mask.setName("blah");
+        mask.setOrder("blah");
+
+        thatPermission.setMasks(new RestVdbMask[] { mask });
         assertThat( this.permission, is( not( thatPermission ) ) );
     }
 
@@ -235,15 +261,24 @@ public final class RestVdbPermissionTest {
 
     @Test
     public void shouldSetConditions() {
-        final Map< String, Boolean > newConditions = Collections.singletonMap( "blah", true );
+        RestVdbCondition condition = new RestVdbCondition();
+        condition.setName("blah");
+        condition.setConstraint(false);
+
+        RestVdbCondition[] newConditions = new RestVdbCondition[] { condition };
         this.permission.setConditions( newConditions );
         assertThat( this.permission.getConditions(), is( newConditions ) );
     }
 
     @Test
     public void shouldSetMasks() {
-        final Map< String, String > newMasks = Collections.singletonMap( "blah", "blah" );
-        this.permission.setMasks( newMasks );
+        RestVdbMask mask = new RestVdbMask();
+        mask.setName("blah");
+        mask.setOrder("blah");
+
+        RestVdbMask[] newMasks = new RestVdbMask[] { mask };
+        this.permission.setMasks(newMasks);
+
         assertThat( this.permission.getMasks(), is( newMasks ) );
     }
 

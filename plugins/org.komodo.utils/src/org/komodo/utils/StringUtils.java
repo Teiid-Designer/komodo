@@ -1346,6 +1346,21 @@ public final class StringUtils implements StringConstants {
     }
 
     /**
+     * @param value the value being lower camel-cased
+     * @return CamelCase version of the given string (see {@link #toCamelCase(String)})
+     *                 but also lowers the first letter.
+     */
+    public static String toLowerCamelCase(final String value) {
+        if (value == null)
+            return null;
+
+        String newValue = toCamelCase(value);
+        char c[] = newValue.toCharArray();
+        c[0] = Character.toLowerCase(c[0]);
+        return new String(c);
+    }
+
+    /**
      * @param value the string whose leading spaces are being removed (can be empty)
      * @return the input with leading spaces removed (can be <code>null</code> if input is <code>null</code>)
      */
@@ -1355,6 +1370,26 @@ public final class StringUtils implements StringConstants {
         }
 
         return value.replaceAll("^\\s+", ""); //$NON-NLS-1$ //$NON-NLS-2$
+    }
+
+    /**
+     * @param values array of values
+     * @return a single comma separated string of the given array of values
+     */
+    public static String toCommaSeparatedList(Object[] values) {
+        if (values == null)
+            return EMPTY_STRING;
+
+        StringBuffer buffer = new StringBuffer();
+        for (int i = 0; i < values.length; ++i) {
+            Object value = values[i];
+            buffer.append(value.toString());
+            if (i < (values.length - 1)) {
+                buffer.append(COMMA).append(SPACE);
+            }
+        }
+
+        return buffer.toString();
     }
 
     /**

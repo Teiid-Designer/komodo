@@ -8,7 +8,6 @@
 package org.komodo.rest.relational.json;
 
 import static org.komodo.rest.Messages.Error.INCOMPLETE_JSON;
-import static org.komodo.rest.Messages.Error.UNEXPECTED_JSON_TOKEN;
 import java.io.IOException;
 import org.komodo.rest.Messages;
 import org.komodo.rest.json.JsonConstants;
@@ -37,35 +36,25 @@ public final class VdbImportSerializer extends KomodoRestEntitySerializer< RestV
 
         beginRead( in );
 
-        while ( in.hasNext() ) {
+        readBasicProperties(in, vdbImport);
+
+        while (in.hasNext()) {
             final String name = in.nextName();
 
-            switch ( name ) {
-                case JsonConstants.ID:
-                    final String vdbName = in.nextString();
-                    vdbImport.setName( vdbName );
-                    break;
-                case RelationalJsonConstants.IMPORT_DATA_POLICIES:
-                    final boolean importDataPolicies = in.nextBoolean();
-                    vdbImport.setImportDataPolicies( importDataPolicies );
-                    break;
-                case JsonConstants.LINKS:
-                    readLinks( in, vdbImport );
-                    break;
-                case JsonConstants.PROPERTIES:
-                    readProperties( in, vdbImport );
-                    break;
-                case RelationalJsonConstants.VERSION:
-                    final int version = in.nextInt();
-                    vdbImport.setVersion( version );
-                    break;
-                default:
-                    throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
-            }
+            if (RestVdbImport.NAME_LABEL.equals(name))
+                vdbImport.setName(in.nextString());
+            else if (RestVdbImport.IMPORT_POLICIES_LABEL.equals(name))
+                vdbImport.setImportDataPolicies(in.nextBoolean());
+            else if (RestVdbImport.VERSION_LABEL.equals(name))
+                vdbImport.setVersion(in.nextInt());
+            else if (JsonConstants.LINKS.equals(name))
+                readLinks(in, vdbImport);
+            else
+                throw new IOException(Messages.getString(Messages.Error.UNEXPECTED_JSON_TOKEN, name));
         }
 
-        if ( !isComplete( vdbImport ) ) {
-            throw new IOException( Messages.getString( INCOMPLETE_JSON, RestVdbImport.class.getSimpleName() ) );
+        if (!isComplete(vdbImport)) {
+            throw new IOException(Messages.getString(INCOMPLETE_JSON, RestVdbImport.class.getSimpleName()));
         }
 
         endRead( in );
@@ -80,27 +69,28 @@ public final class VdbImportSerializer extends KomodoRestEntitySerializer< RestV
      */
     @Override
     public void write( final JsonWriter out,
-                       final RestVdbImport value ) throws IOException {
-        if ( !isComplete( value ) ) {
+                       final RestVdbImport vdbImport ) throws IOException {
+        if ( !isComplete( vdbImport ) ) {
             throw new IOException( Messages.getString( INCOMPLETE_JSON, RestVdbImport.class.getSimpleName() ) );
         }
 
         beginWrite( out );
 
-        // id
-        out.name( JsonConstants.ID );
-        out.value( value.getName() );
+        writeBasicProperties(out, vdbImport);
+
+        // name
+        out.name(RestVdbImport.NAME_LABEL);
+        out.value(vdbImport.getName());
 
         // version
-        out.name( RelationalJsonConstants.VERSION );
-        out.value( value.getVersion() );
+        out.name(RestVdbImport.VERSION_LABEL);
+        out.value(vdbImport.getVersion());
 
         // importDataPolicies
-        out.name( RelationalJsonConstants.IMPORT_DATA_POLICIES );
-        out.value( value.isImportDataPolicies() );
+        out.name(RestVdbImport.IMPORT_POLICIES_LABEL);
+        out.value(vdbImport.isImportDataPolicies());
 
-        writeProperties( out, value );
-        writeLinks( out, value );
+        writeLinks( out, vdbImport );
         endWrite( out );
     }
 

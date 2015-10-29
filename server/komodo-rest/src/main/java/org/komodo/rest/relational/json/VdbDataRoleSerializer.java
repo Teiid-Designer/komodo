@@ -39,47 +39,36 @@ public final class VdbDataRoleSerializer extends KomodoRestEntitySerializer< Res
 
         beginRead( in );
 
+        readBasicProperties(in, dataRole);
+
         while ( in.hasNext() ) {
             final String name = in.nextName();
 
-            switch ( name ) {
-                case RelationalJsonConstants.ALLOW_CREATE_TEMP_TABLES:
-                    final boolean allowCreateTempTables = in.nextBoolean();
-                    dataRole.setAllowCreateTempTables( allowCreateTempTables );
-                    break;
-                case RelationalJsonConstants.ANY_AUTHENTICATED:
-                    final boolean anyAuthenticated = in.nextBoolean();
-                    dataRole.setAnyAuthenticated( anyAuthenticated );
-                    break;
-                case RelationalJsonConstants.DESCRIPTION:
-                    final String description = in.nextString();
-                    dataRole.setDescription( description );
-                    break;
-                case JsonConstants.ID:
-                    final String dataRoleName = in.nextString();
-                    dataRole.setName( dataRoleName );
-                    break;
-                case RelationalJsonConstants.GRANT_ALL:
-                    final boolean grantAll = in.nextBoolean();
-                    dataRole.setGrantAll( grantAll );
-                    break;
-                case JsonConstants.LINKS:
-                    readLinks( in, dataRole );
-                    break;
-                case RelationalJsonConstants.MAPPED_ROLES:
-                    final String[] mappedRoles = BUILDER.fromJson( in, String[].class );
-                    dataRole.setMappedRoles( mappedRoles );
-                    break;
-                case RelationalJsonConstants.PERMISSIONS:
-                    final RestVdbPermission[] permissions = BUILDER.fromJson( in, RestVdbPermission[].class );
-                    dataRole.setPermissions( permissions );
-                    break;
-                case JsonConstants.PROPERTIES:
-                    readProperties( in, dataRole );
-                    break;
-                default:
-                    throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
+            if (RestVdbDataRole.NAME_LABEL.equals(name)) {
+               dataRole.setName(in.nextString());
+            } else if (RestVdbDataRole.ALLOW_CREATE_TEMP_TABLES_LABEL.equals(name)) {
+                final boolean allowCreateTempTables = in.nextBoolean();
+                dataRole.setAllowCreateTempTables( allowCreateTempTables );
+            } else if (RestVdbDataRole.ANY_AUTHENTICATED_LABEL.equals(name)) {
+                final boolean anyAuthenticated = in.nextBoolean();
+                dataRole.setAnyAuthenticated( anyAuthenticated );
+            } else if (RestVdbDataRole.DESCRIPTION_LABEL.equals(name)) {
+                final String description = in.nextString();
+                dataRole.setDescription( description );
+            } else if (RestVdbDataRole.GRANT_ALL_LABEL.equals(name)) {
+                final boolean grantAll = in.nextBoolean();
+                dataRole.setGrantAll( grantAll );
+            } else if (JsonConstants.LINKS.equals(name)) {
+                readLinks( in, dataRole );
+            } else if (RestVdbDataRole.MAPPED_ROLES_LABEL.equals(name)) {
+                final String[] mappedRoles = BUILDER.fromJson( in, String[].class );
+                dataRole.setMappedRoles( mappedRoles );
+            } else if (RestVdbDataRole.PERMISSIONS_LABEL.equals(name)) {
+                final RestVdbPermission[] permissions = BUILDER.fromJson( in, RestVdbPermission[].class );
+                dataRole.setPermissions( permissions );
             }
+            else
+                throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
         }
 
         if ( !isComplete( dataRole ) ) {
@@ -97,58 +86,52 @@ public final class VdbDataRoleSerializer extends KomodoRestEntitySerializer< Res
      *      org.komodo.rest.KomodoRestEntity)
      */
     @Override
-    public void write( final JsonWriter out,
-                       final RestVdbDataRole value ) throws IOException {
-        if ( !isComplete( value ) ) {
-            throw new IOException( Messages.getString( INCOMPLETE_JSON, RestVdbDataRole.class.getSimpleName() ) );
+    public void write( final JsonWriter out, final RestVdbDataRole dataRole) throws IOException {
+        if (!isComplete(dataRole)) {
+            throw new IOException(Messages.getString(INCOMPLETE_JSON, RestVdbDataRole.class.getSimpleName()));
         }
 
-        beginWrite( out );
+        beginWrite(out);
 
-        // id
-        out.name( JsonConstants.ID );
-        out.value( value.getName() );
+        writeBasicProperties(out, dataRole);
+
+        // name
+        out.name(RestVdbDataRole.NAME_LABEL);
+        out.value(dataRole.getName());
 
         // description
-        if ( !StringUtils.isBlank( value.getDescription() ) ) {
-            out.name( RelationalJsonConstants.DESCRIPTION );
-            out.value( value.getDescription() );
+        if (!StringUtils.isBlank(dataRole.getDescription())) {
+            out.name(RelationalJsonConstants.DESCRIPTION);
+            out.value(dataRole.getDescription());
         }
 
         // create temp tables
-        out.name( RelationalJsonConstants.ALLOW_CREATE_TEMP_TABLES );
-        out.value( value.isAllowCreateTempTables() );
+        out.name(RestVdbDataRole.ALLOW_CREATE_TEMP_TABLES_LABEL);
+        out.value(dataRole.isAllowCreateTempTables());
 
         // any authenticated
-        out.name( RelationalJsonConstants.ANY_AUTHENTICATED );
-        out.value( value.isAnyAuthenticated() );
+        out.name(RestVdbDataRole.ANY_AUTHENTICATED_LABEL);
+        out.value(dataRole.isAnyAuthenticated());
 
         // grant all
-        out.name( RelationalJsonConstants.GRANT_ALL );
-        out.value( value.isGrantAll() );
+        out.name(RestVdbDataRole.GRANT_ALL_LABEL);
+        out.value(dataRole.isGrantAll());
 
         // mapped roles
-        out.name( RelationalJsonConstants.MAPPED_ROLES );
+        out.name(RestVdbDataRole.MAPPED_ROLES_LABEL);
 
         out.beginArray();
-        for ( final String roleName : value.getMappedRoles() ) {
-            out.value( roleName );
+        for (final String roleName : dataRole.getMappedRoles()) {
+            out.value(roleName);
         }
         out.endArray();
 
         // permissions
-        out.name( RelationalJsonConstants.PERMISSIONS );
-        BUILDER.toJson( value.getPermissions(), RestVdbPermission[].class, out );
-        //
-        //        out.beginArray();
-        //        for ( final RestVdbPermission permission : value.getPermissions() ) {
-        //            BUILDER.getAdapter( RestVdbPermission.class ).write( out, permission );
-        //        }
-        //        out.endArray();
+        out.name(RestVdbDataRole.PERMISSIONS_LABEL);
+        BUILDER.toJson(dataRole.getPermissions(), RestVdbPermission[].class, out);
 
-        writeProperties( out, value );
-        writeLinks( out, value );
-        endWrite( out );
+        writeLinks(out, dataRole);
+        endWrite(out);
     }
 
 }

@@ -14,7 +14,6 @@ import static org.junit.Assert.assertThat;
 import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
-import org.komodo.rest.relational.RestVdbDataRole;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class RestVdbDataRoleTest {
@@ -26,13 +25,15 @@ public final class RestVdbDataRoleTest {
 
     @Before
     public void init() {
-        this.dataRole = new RestVdbDataRole( NAME );
+        this.dataRole = new RestVdbDataRole();
+        this.dataRole.setName(NAME);
         this.dataRole.setMappedRoles( MAPPED_ROLES );
     }
 
     @Test
     public void shouldBeEqual() {
-        final RestVdbDataRole thatDataRole = new RestVdbDataRole( this.dataRole.getName() );
+        final RestVdbDataRole thatDataRole = new RestVdbDataRole();
+         thatDataRole.setName(this.dataRole.getName() );
         thatDataRole.setAllowCreateTempTables( this.dataRole.isAllowCreateTempTables() );
         thatDataRole.setAnyAuthenticated( this.dataRole.isAnyAuthenticated() );
         thatDataRole.setGrantAll( this.dataRole.isGrantAll() );
@@ -56,12 +57,13 @@ public final class RestVdbDataRoleTest {
         assertThat( empty.getName(), is( nullValue() ) );
         assertThat( empty.getMappedRoles().length, is( 0 ) );
         assertThat( empty.getProperties().isEmpty(), is( true ) );
-        assertThat( empty.getLinks().length, is( 0 ) );
+        assertThat( empty.getLinks().size(), is( 0 ) );
     }
 
     @Test
     public void shouldHaveSameHashCode() {
-        final RestVdbDataRole thatDataRole = new RestVdbDataRole( this.dataRole.getName() );
+        final RestVdbDataRole thatDataRole = new RestVdbDataRole();
+         thatDataRole.setName(this.dataRole.getName() );
         thatDataRole.setAllowCreateTempTables( this.dataRole.isAllowCreateTempTables() );
         thatDataRole.setAnyAuthenticated( this.dataRole.isAnyAuthenticated() );
         thatDataRole.setGrantAll( this.dataRole.isGrantAll() );
@@ -74,7 +76,8 @@ public final class RestVdbDataRoleTest {
 
     @Test
     public void shouldNotBeEqualWhenAllowCreateTempTablesIsDifferent() {
-        final RestVdbDataRole thatDataRole = new RestVdbDataRole( this.dataRole.getName() );
+        final RestVdbDataRole thatDataRole = new RestVdbDataRole();
+         thatDataRole.setName(this.dataRole.getName() );
         thatDataRole.setAllowCreateTempTables( !this.dataRole.isAllowCreateTempTables() );
         thatDataRole.setAnyAuthenticated( this.dataRole.isAnyAuthenticated() );
         thatDataRole.setGrantAll( this.dataRole.isGrantAll() );
@@ -88,7 +91,8 @@ public final class RestVdbDataRoleTest {
 
     @Test
     public void shouldNotBeEqualWhenAnyAuthenticatedIsDifferent() {
-        final RestVdbDataRole thatDataRole = new RestVdbDataRole( this.dataRole.getName() );
+        final RestVdbDataRole thatDataRole = new RestVdbDataRole();
+         thatDataRole.setName(this.dataRole.getName() );
         thatDataRole.setAllowCreateTempTables( this.dataRole.isAllowCreateTempTables() );
         thatDataRole.setAnyAuthenticated( !this.dataRole.isAnyAuthenticated() );
         thatDataRole.setGrantAll( this.dataRole.isGrantAll() );
@@ -102,7 +106,8 @@ public final class RestVdbDataRoleTest {
 
     @Test
     public void shouldNotBeEqualWhenGrantAllIsDifferent() {
-        final RestVdbDataRole thatDataRole = new RestVdbDataRole( this.dataRole.getName() );
+        final RestVdbDataRole thatDataRole = new RestVdbDataRole();
+         thatDataRole.setName(this.dataRole.getName() );
         thatDataRole.setAllowCreateTempTables( this.dataRole.isAllowCreateTempTables() );
         thatDataRole.setAnyAuthenticated( this.dataRole.isAnyAuthenticated() );
         thatDataRole.setGrantAll( !this.dataRole.isGrantAll() );
@@ -116,7 +121,8 @@ public final class RestVdbDataRoleTest {
 
     @Test
     public void shouldNotBeEqualWhenMappedRolesAreDifferent() {
-        final RestVdbDataRole thatDataRole = new RestVdbDataRole( this.dataRole.getName() );
+        final RestVdbDataRole thatDataRole = new RestVdbDataRole();
+         thatDataRole.setName(this.dataRole.getName() );
         thatDataRole.setAllowCreateTempTables( this.dataRole.isAllowCreateTempTables() );
         thatDataRole.setAnyAuthenticated( this.dataRole.isAnyAuthenticated() );
         thatDataRole.setGrantAll( this.dataRole.isGrantAll() );
@@ -130,7 +136,8 @@ public final class RestVdbDataRoleTest {
 
     @Test
     public void shouldNotBeEqualWhenNameIsDifferent() {
-        final RestVdbDataRole thatDataRole = new RestVdbDataRole( this.dataRole.getName() + "blah" );
+        final RestVdbDataRole thatDataRole = new RestVdbDataRole();
+        thatDataRole.setName(this.dataRole.getName() + "blah" );
         thatDataRole.setAllowCreateTempTables( this.dataRole.isAllowCreateTempTables() );
         thatDataRole.setAnyAuthenticated( this.dataRole.isAnyAuthenticated() );
         thatDataRole.setGrantAll( this.dataRole.isGrantAll() );

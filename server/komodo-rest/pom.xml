@@ -85,6 +85,32 @@
             <version>${komodo.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.jboss.tools.komodo.plugins</groupId>
+            <artifactId>org.komodo.teiid.client</artifactId>
+            <version>${komodo.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.tools.komodo.plugins</groupId>
+            <artifactId>org.komodo.teiid.client.schema</artifactId>
+            <version>${komodo.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.tools.komodo.plugins</groupId>
+            <artifactId>org.komodo.importer</artifactId>
+            <version>${komodo.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.tools.komodo.plugins</groupId>
+            <artifactId>org.komodo.modeshape.vdb</artifactId>
+            <version>${komodo.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.tools</groupId>
+            <artifactId>org.komodo.test.utils</artifactId>
+            <version>${komodo.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
         </dependency>

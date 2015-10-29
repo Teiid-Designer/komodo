@@ -7,9 +7,17 @@
 */
 package org.komodo.rest.relational;
 
-import java.util.Objects;
+import java.net.URI;
+import org.komodo.relational.vdb.Translator;
+import org.komodo.relational.vdb.Vdb;
 import org.komodo.rest.KomodoRestEntity;
-import org.komodo.utils.ArgCheck;
+import org.komodo.rest.KomodoService;
+import org.komodo.rest.RestLink;
+import org.komodo.rest.RestLink.LinkType;
+import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 /**
  * A translator that can be used by GSON to build a JSON document representation.
@@ -32,11 +40,20 @@ import org.komodo.utils.ArgCheck;
 public final class RestVdbTranslator extends KomodoRestEntity {
 
     /**
+     * Label used to describe description
+     */
+    public static final String DESCRIPTION_LABEL = KomodoService.encode(VdbLexicon.Translator.DESCRIPTION);
+
+    /**
+     * Label used to describe type
+     */
+    public static final String TYPE_LABEL = KomodoService.encode(VdbLexicon.Translator.TYPE);
+
+    /**
      * An empty array of translators.
      */
     public static final RestVdbTranslator[] NO_TRANSLATORS = new RestVdbTranslator[ 0 ];
 
-    private String name;
     private String description;
     private String type;
 
@@ -48,63 +65,19 @@ public final class RestVdbTranslator extends KomodoRestEntity {
     }
 
     /**
-     * @param name
-     *        the name of the translator (cannot be empty)
-     * @param type
-     *        the translator type (cannot be empty)
+     * Constructor for use when serializing.
+     * @param baseUri the base uri of the vdb
+     * @param id the id of this vdb
+     * @param dataPath the data path of this vdb
+     * @param kType the type of this vdb
+     * @param hasChildren true if vdb has children
+     * @param parentVdb the name of the parent vdb
      */
-    public RestVdbTranslator( final String name,
-                              final String type ) {
-        ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( type, "type" ); //$NON-NLS-1$
-        this.name = name;
-        this.type = type;
-    }
+    public RestVdbTranslator(URI baseUri, String id, String dataPath, KomodoType kType, boolean hasChildren, String parentVdb) {
+        super(baseUri, id, dataPath, kType, hasChildren);
 
-    /**
-     * {@inheritDoc}
-     *
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
-    @Override
-    public boolean equals( final Object other ) {
-        if ( !super.equals( other ) ) {
-            return false;
-        }
-
-        assert( other != null );
-        assert( getClass().equals( other.getClass() ) );
-
-        final RestVdbTranslator that = ( RestVdbTranslator )other;
-
-        // check name
-        if ( this.name == null ) {
-            if ( that.name != null ) {
-                return false;
-            }
-        } else if ( !this.name.equals( that.name ) ) {
-            return false;
-        }
-
-        // check description
-        if ( this.description == null ) {
-            if ( that.description != null ) {
-                return false;
-            }
-        } else if ( !this.description.equals( that.description ) ) {
-            return false;
-        }
-
-        // check type
-        if ( this.type == null ) {
-            if ( that.type != null ) {
-                return false;
-            }
-        } else if ( !this.type.equals( that.type ) ) {
-            return false;
-        }
-
-        return true;
+        addLink(new RestLink(LinkType.SELF, getUriBuilder().buildVdbTranslatorUri(LinkType.SELF, parentVdb, id)));
+        addLink(new RestLink(LinkType.PARENT, getUriBuilder().buildVdbTranslatorUri(LinkType.PARENT, parentVdb, id)));
     }
 
     /**
@@ -112,30 +85,6 @@ public final class RestVdbTranslator extends KomodoRestEntity {
      */
     public String getDescription() {
         return this.description;
-    }
-
-    /**
-     * @return the name (can be empty)
-     */
-    public String getName() {
-        return this.name;
-    }
-
-    /**
-     * @return the translator type (can be empty)
-     */
-    public String getType() {
-        return this.type;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see java.lang.Object#hashCode()
-     */
-    @Override
-    public int hashCode() {
-        return Objects.hash( this.name, this.description, this.type, super.hashCode() );
     }
 
     /**
@@ -147,11 +96,10 @@ public final class RestVdbTranslator extends KomodoRestEntity {
     }
 
     /**
-     * @param newName
-     *        the new translator name (can be empty)
+     * @return the translator type (can be empty)
      */
-    public void setName( final String newName ) {
-        this.name = newName;
+    public String getType() {
+        return this.type;
     }
 
     /**
@@ -163,18 +111,66 @@ public final class RestVdbTranslator extends KomodoRestEntity {
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * @see java.lang.Object#toString()
+     * @param translator source translator
+     * @param parentVdb parent Vdb
+     * @param baseUri base uri
+     * @param uow the transaction
+     * @return a new {@link RestVdbTranslator} based on the source {@link Translator}
+     * @throws KException if error occurs
      */
+    public static RestVdbTranslator build(final Translator translator, final Vdb parentVdb, final URI baseUri, final UnitOfWork uow) throws KException {
+
+        final String vdbName = parentVdb.getName(uow);
+        final RestVdbTranslator entity = new RestVdbTranslator(baseUri,
+                                                               translator.getName(uow), translator.getAbsolutePath(),
+                                                               translator.getTypeIdentifier(uow), translator.hasChildren(uow), vdbName);
+
+        entity.setDescription(translator.getDescription(uow));
+        entity.setType(translator.getType(uow));
+
+        entity.addExecutionProperties(uow, translator);
+
+        return entity;
+    }
+
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((this.description == null) ? 0 : this.description.hashCode());
+        result = prime * result + ((this.type == null) ? 0 : this.type.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        RestVdbTranslator other = (RestVdbTranslator)obj;
+        if (this.description == null) {
+            if (other.description != null)
+                return false;
+        } else
+            if (!this.description.equals(other.description))
+                return false;
+        if (this.type == null) {
+            if (other.type != null)
+                return false;
+        } else
+            if (!this.type.equals(other.type))
+                return false;
+        return true;
+    }
+
+    @SuppressWarnings( "nls" )
     @Override
     public String toString() {
-        final StringBuilder builder = new StringBuilder();
-        builder.append( "translator name = " ).append( this.name ); //$NON-NLS-1$
-        builder.append( ", " ); //$NON-NLS-1$
-        builder.append( "type = " ).append( this.type ); //$NON-NLS-1$
-
-        return builder.toString();
+        return "RestVdbTranslator [description=" + this.description + ", type=" + this.type + ", id=" + this.id + ", dataPath=" + this.dataPath + ", kType=" + this.kType + ", hasChildren=" + this.hasChildren + ", properties=" + this.properties + ", links=" + this.links + "]";
     }
 
 }

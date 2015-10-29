@@ -14,8 +14,6 @@ import javax.ws.rs.core.UriBuilder;
 import org.komodo.rest.Messages;
 import org.komodo.rest.RestLink;
 import org.komodo.rest.RestLink.LinkType;
-import org.komodo.rest.RestLink.MethodType;
-import org.komodo.rest.relational.RestVdbEntry;
 import org.komodo.rest.relational.RestVdbImport;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
@@ -27,7 +25,7 @@ import com.google.gson.stream.JsonWriter;
 public final class LinkSerializer extends TypeAdapter< RestLink > {
 
     private boolean isComplete( final RestLink link ) {
-        return ( ( link.getRel() != null ) && ( link.getHref() != null ) && ( link.getMethod() != null ) );
+        return ( ( link.getRel() != null ) && ( link.getHref() != null ) );
     }
 
     /**
@@ -47,10 +45,6 @@ public final class LinkSerializer extends TypeAdapter< RestLink > {
                 case JsonConstants.HREF:
                     final String uri = in.nextString();
                     link.setHref( UriBuilder.fromUri( uri ).build() );
-                    break;
-                case JsonConstants.METHOD:
-                    final String method = in.nextString();
-                    link.setMethod( MethodType.fromString( method ) );
                     break;
                 case JsonConstants.REL:
                     final String rel = in.nextString();
@@ -79,22 +73,18 @@ public final class LinkSerializer extends TypeAdapter< RestLink > {
     public void write( final JsonWriter out,
                        final RestLink value ) throws IOException {
         if ( !isComplete( value ) ) {
-            throw new IOException( Messages.getString( INCOMPLETE_JSON, RestVdbEntry.class.getSimpleName() ) );
+            throw new IOException( Messages.getString( INCOMPLETE_JSON, RestLink.class.getSimpleName() ) );
         }
 
         out.beginObject();
 
         // rel
         out.name( JsonConstants.REL );
-        out.value( value.getRel().toString().toLowerCase() );
+        out.value( value.getRel().toString() );
 
         // href
         out.name( JsonConstants.HREF );
         out.value( value.getHref().toString() );
-
-        // method
-        out.name( JsonConstants.METHOD );
-        out.value( value.getMethod().name() );
 
         out.endObject();
     }

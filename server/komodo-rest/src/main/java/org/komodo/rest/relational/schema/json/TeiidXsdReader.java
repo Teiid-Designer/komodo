@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  */
-package org.komodo.teiid.client.schema.json;
+package org.komodo.rest.relational.schema.json;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -32,7 +32,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import javax.xml.parsers.SAXParserFactory;
-import org.komodo.spi.json.JsonConstants;
+import org.komodo.rest.json.JsonConstants;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.utils.KeyInValueHashMap;
 import org.komodo.spi.utils.KeyInValueHashMap.KeyFromValueAdapter;

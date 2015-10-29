@@ -28,7 +28,7 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 /**
- * Localized messages for the {@code komodo-rest} project.
+ * Localized messages for the {@code server rest} project.
  */
 public final class Messages {
 

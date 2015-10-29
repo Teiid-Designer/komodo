@@ -11,12 +11,11 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
-import org.komodo.rest.relational.RestVdbTranslator;
+import org.komodo.rest.KomodoRestProperty;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class RestVdbTranslatorTest {
@@ -24,29 +23,30 @@ public final class RestVdbTranslatorTest {
     private static final String DESCRIPTION = "my description";
     private static final String NAME = "MyTranslator";
     private static final String TYPE = "oracle";
-    private static final Map< String, String > PROPS = Collections.unmodifiableMap( new HashMap< String, String >() {
 
-        private static final long serialVersionUID = 1L;
-
-        {
-            put( "larry", "bird" );
-            put( "magic", "johnson" );
-            put( "michael", "jordan" );
-        }
-    } );
+    private static final List<KomodoRestProperty> PROPS = new ArrayList<>();
+    static {
+        PROPS.add(new KomodoRestProperty("larry", "bird"));
+        PROPS.add(new KomodoRestProperty("magic", "johnson"));
+        PROPS.add(new KomodoRestProperty("michael", "jordan"));
+    }
 
     private RestVdbTranslator translator;
 
     @Before
     public void init() {
-        this.translator = new RestVdbTranslator( NAME, TYPE );
+        this.translator = new RestVdbTranslator();
+        this.translator.setId(NAME);
+        this.translator.setType(TYPE);
         this.translator.setDescription( DESCRIPTION );
         this.translator.setProperties( PROPS );
     }
 
     @Test
     public void shouldBeEqual() {
-        final RestVdbTranslator thatTranslator = new RestVdbTranslator( this.translator.getName(), this.translator.getType() );
+        final RestVdbTranslator thatTranslator = new RestVdbTranslator();
+        thatTranslator.setId(this.translator.getId());
+        thatTranslator.setType(this.translator.getType());
         thatTranslator.setDescription( this.translator.getDescription() );
         thatTranslator.setProperties( this.translator.getProperties() );
         thatTranslator.setLinks( this.translator.getLinks() );
@@ -65,15 +65,17 @@ public final class RestVdbTranslatorTest {
     public void shouldConstructEmptyTranslator() {
         final RestVdbTranslator empty = new RestVdbTranslator();
         assertThat( empty.getDescription(), is( nullValue() ) );
-        assertThat( empty.getName(), is( nullValue() ) );
+        assertThat( empty.getId(), is( nullValue() ) );
         assertThat( empty.getType(), is( nullValue() ) );
         assertThat( empty.getProperties().isEmpty(), is( true ) );
-        assertThat( empty.getLinks().length, is( 0 ) );
+        assertThat( empty.getLinks().size(), is( 0 ) );
     }
 
     @Test
     public void shouldHaveSameHashCode() {
-        final RestVdbTranslator thatTranslator = new RestVdbTranslator( this.translator.getName(), this.translator.getType() );
+        final RestVdbTranslator thatTranslator = new RestVdbTranslator();
+        thatTranslator.setId(this.translator.getId());
+        thatTranslator.setType(this.translator.getType());
         thatTranslator.setDescription( this.translator.getDescription() );
         thatTranslator.setProperties( this.translator.getProperties() );
         thatTranslator.setLinks( this.translator.getLinks() );
@@ -83,24 +85,28 @@ public final class RestVdbTranslatorTest {
 
     @Test
     public void shouldNotBeEqualWhenNameIsDifferent() {
-        final RestVdbTranslator thatTranslator = new RestVdbTranslator( this.translator.getName() + "blah",
-                                                                        this.translator.getType() );
+        final RestVdbTranslator thatTranslator = new RestVdbTranslator();
+        thatTranslator.setId(this.translator.getId() + "blah");
+        thatTranslator.setType(this.translator.getType());
         thatTranslator.setDescription( this.translator.getDescription() );
         thatTranslator.setProperties( this.translator.getProperties() );
         thatTranslator.setLinks( this.translator.getLinks() );
 
-        assertThat( this.translator.getName(), is( not( thatTranslator.getName() ) ) );
+        assertThat( this.translator.getId(), is( not( thatTranslator.getId() ) ) );
         assertThat( this.translator, is( not( thatTranslator ) ) );
     }
 
     @Test
     public void shouldNotBeEqualWhenPropertiesAreDifferent() {
-        final RestVdbTranslator thatTranslator = new RestVdbTranslator( this.translator.getName(), this.translator.getType() );
+        final RestVdbTranslator thatTranslator = new RestVdbTranslator();
+        thatTranslator.setId(this.translator.getId());
+        thatTranslator.setType(this.translator.getType());
         thatTranslator.setDescription( this.translator.getDescription() );
         thatTranslator.setLinks( this.translator.getLinks() );
 
-        final Map< String, String > props = new HashMap< >( this.translator.getProperties() );
-        props.put( "blah", "blah" );
+        List<KomodoRestProperty> props = new ArrayList<>();
+        props.addAll(this.translator.getProperties() );
+        props.add(new KomodoRestProperty("blah", "blah" ));
         thatTranslator.setProperties( props );
 
         assertThat( this.translator, is( not( thatTranslator ) ) );
@@ -108,8 +114,9 @@ public final class RestVdbTranslatorTest {
 
     @Test
     public void shouldNotBeEqualWhenTypeIsDifferent() {
-        final RestVdbTranslator thatTranslator = new RestVdbTranslator( this.translator.getName(),
-                                                                        this.translator.getType() + "blah" );
+        final RestVdbTranslator thatTranslator = new RestVdbTranslator();
+        thatTranslator.setId(this.translator.getId());
+        thatTranslator.setType(this.translator.getType() + "blah");
         thatTranslator.setDescription( this.translator.getDescription() );
         thatTranslator.setProperties( this.translator.getProperties() );
         thatTranslator.setLinks( this.translator.getLinks() );
@@ -128,17 +135,16 @@ public final class RestVdbTranslatorTest {
     @Test
     public void shouldSetName() {
         final String newName = "blah";
-        this.translator.setName( newName );
-        assertThat( this.translator.getName(), is( newName ) );
+        this.translator.setId( newName );
+        assertThat( this.translator.getId(), is( newName ) );
     }
 
     @Test
     public void shouldSetProperties() {
-        final Map< String, String > newProperties = new HashMap< >();
-        newProperties.put( "blah", "blah" );
+        List<KomodoRestProperty> newProperties = new ArrayList<>();
+        newProperties.add(new KomodoRestProperty("blah", "blah" ));
         this.translator.setProperties( newProperties );
         assertThat( this.translator.getProperties().size(), is( newProperties.size() ) );
-        assertThat( this.translator.getProperties().keySet(), is( newProperties.keySet() ) );
     }
 
     @Test

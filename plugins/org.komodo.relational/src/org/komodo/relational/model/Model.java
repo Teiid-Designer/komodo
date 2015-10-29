@@ -64,6 +64,14 @@ public interface Model extends Exportable, RelationalObject {
          */
         public static final Type DEFAULT_VALUE = PHYSICAL;
 
+        public static Type findType(String typeId) {
+            for (Type type : Type.values()) {
+                if (type.name().equalsIgnoreCase(typeId))
+                    return type;
+            }
+
+            return null;
+        }
     }
 
     /**

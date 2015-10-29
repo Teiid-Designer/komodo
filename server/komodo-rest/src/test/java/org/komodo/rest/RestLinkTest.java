@@ -13,23 +13,21 @@ import static org.junit.Assert.assertThat;
 import java.net.URI;
 import javax.ws.rs.core.UriBuilder;
 import org.junit.Test;
-import org.komodo.rest.RestLink;
 import org.komodo.rest.RestLink.LinkType;
-import org.komodo.rest.RestLink.MethodType;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class RestLinkTest {
 
     private static final LinkType LINK_TYPE = LinkType.SELF;
-    private static final LinkType LINK_TYPE_2 = LinkType.DELETE;
-    private static final MethodType METHOD_TYPE = MethodType.GET;
-    private static final MethodType METHOD_TYPE_2 = MethodType.DELETE;
+
+    private static final LinkType LINK_TYPE_2 = LinkType.PARENT;
+
     private static final URI URI = UriBuilder.fromUri( "http://localhost:8080" ).build();
 
     @Test
     public void shouldBeEqual() {
         final RestLink thisLink = new RestLink( LINK_TYPE, URI );
-        final RestLink thatLink = new RestLink( thisLink.getRel(), thisLink.getHref(), thisLink.getMethod() );
+        final RestLink thatLink = new RestLink( thisLink.getRel(), thisLink.getHref());
         assertThat( thisLink, is( thatLink ) );
     }
 
@@ -40,43 +38,29 @@ public final class RestLinkTest {
 
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailWhenLinkTypeIsNull2() {
-        new RestLink( null, URI, METHOD_TYPE );
-    }
-
-    @Test( expected = IllegalArgumentException.class )
-    public void shouldFailWhenMethodTypeIsNull() {
-        new RestLink( LINK_TYPE, URI, null );
+        new RestLink( null, URI);
     }
 
     @Test
     public void shouldHaveSameHashCode() {
-        final RestLink thisLink = new RestLink( LINK_TYPE, URI, METHOD_TYPE );
-        final RestLink thatLink = new RestLink( thisLink.getRel(), thisLink.getHref(), thisLink.getMethod() );
+        final RestLink thisLink = new RestLink( LINK_TYPE, URI);
+        final RestLink thatLink = new RestLink( thisLink.getRel(), thisLink.getHref());
         assertThat( thisLink.hashCode(), is( thatLink.hashCode() ) );
     }
 
     @Test
     public void shouldNotBeEqualWhenHrefDifferent() {
-        final RestLink thisLink = new RestLink( LINK_TYPE, URI, METHOD_TYPE );
+        final RestLink thisLink = new RestLink( LINK_TYPE, URI);
         final RestLink thatLink = new RestLink( thisLink.getRel(),
-                                                UriBuilder.fromUri( "http://org.komodo:1234" ).build(),
-                                                thisLink.getMethod() );
+                                                UriBuilder.fromUri( "http://org.komodo:1234" ).build());
         assertThat( thisLink.getHref(), is( not( thatLink.getHref() ) ) );
         assertThat( thisLink, is( not( thatLink ) ) );
     }
 
     @Test
-    public void shouldNotBeEqualWhenMethodDifferent() {
-        final RestLink thisLink = new RestLink( LINK_TYPE, URI, METHOD_TYPE );
-        final RestLink thatLink = new RestLink( thisLink.getRel(), thisLink.getHref(), METHOD_TYPE_2 );
-        assertThat( thisLink.getMethod(), is( not( thatLink.getMethod() ) ) );
-        assertThat( thisLink, is( not( thatLink ) ) );
-    }
-
-    @Test
     public void shouldNotBeEqualWhenRelDifferent() {
-        final RestLink thisLink = new RestLink( LINK_TYPE, URI, METHOD_TYPE );
-        final RestLink thatLink = new RestLink( LINK_TYPE_2, thisLink.getHref(), thisLink.getMethod() );
+        final RestLink thisLink = new RestLink( LINK_TYPE, URI);
+        final RestLink thatLink = new RestLink( LINK_TYPE_2, thisLink.getHref());
         assertThat( thisLink.getRel(), is( not( thatLink.getRel() ) ) );
         assertThat( thisLink, is( not( thatLink ) ) );
     }

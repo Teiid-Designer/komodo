@@ -28,7 +28,7 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 /**
- * Localized messages for the {@code komodo-rest} project.
+ * Localized messages for the {@code server rest} project.
  */
 public final class RelationalMessages {
 
@@ -48,14 +48,64 @@ public final class RelationalMessages {
         VDB_SERVICE_CREATE_VDB_ERROR,
 
         /**
+         * An error indicating a JSON document representing the VDBs in the workspace could not be retrieved.
+         */
+        VDB_SERVICE_GET_VDBS_ERROR,
+
+        /**
          * An error indicating an error occurred trying to obtain the specified VDB.
          */
         VDB_SERVICE_GET_VDB_ERROR,
 
         /**
-         * An error indicating a JSON document representing the VDBs in the workspace could not be retrieved.
+         * An error indicating an error occurred trying to obain a VDB's models.
          */
-        VDB_SERVICE_GET_VDBS_ERROR,
+        VDB_SERVICE_GET_MODELS_ERROR,
+
+        /**
+         * An error indicating an error occurred trying to obain a specific model from a VDB
+         */
+        VDB_SERVICE_GET_MODEL_ERROR,
+
+        /**
+         * An error indicating an error occurred trying to obain a VDB Model's sources
+         */
+        VDB_SERVICE_GET_SOURCES_ERROR,
+
+        /**
+         * An error indicating an error occurred trying to obain a VDB Model's source
+         */
+        VDB_SERVICE_GET_SOURCE_ERROR,
+
+        /**
+         * An error indicating an error occurred trying to obain a VDB's translators
+         */
+        VDB_SERVICE_GET_TRANSLATORS_ERROR,
+
+        /**
+         * An error indicating an error occurred trying to obain a VDB's translator
+         */
+        VDB_SERVICE_GET_TRANSLATOR_ERROR,
+
+        /**
+         * An error indicating an error occurred trying to obain a VDB's imports
+         */
+        VDB_SERVICE_GET_IMPORTS_ERROR,
+
+        /**
+         * An error indicating an error occurred trying to obain a VDB's import
+         */
+        VDB_SERVICE_GET_IMPORT_ERROR,
+
+        /**
+         * An error indicating an error occurred trying to obain a VDB's data roles
+         */
+        VDB_SERVICE_GET_DATA_ROLES_ERROR,
+
+        /**
+         * An error indicating an error occurred trying to obain a VDB's data role
+         */
+        VDB_SERVICE_GET_DATA_ROLE_ERROR,
 
         /**
          * An error when creating a VDB indicating the input VDB JSON document was missing.
