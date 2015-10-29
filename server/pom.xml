@@ -65,35 +65,6 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-			    <groupId>com.google.code.gson</groupId>
-			    <artifactId>gson</artifactId>
-			    <version>${gson.version}</version>
-		    </dependency>
-            <dependency>
-                <groupId>org.infinispan</groupId>
-                <artifactId>infinispan-core</artifactId>
-                <version>${infinispan.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>${junit.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>log4j</groupId>
-                <artifactId>log4j</artifactId>
-                <version>${log4j.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.resteasy</groupId>
-                <artifactId>resteasy-bom</artifactId>
-                <version>${resteasy.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
                 <groupId>org.jboss.tools.komodo.plugins</groupId>
                 <artifactId>org.komodo.core</artifactId>
                 <version>${komodo.version}</version>
@@ -115,9 +86,21 @@
                 <scope>import</scope>
             </dependency>
             <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${junit.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-all</artifactId>
                 <version>${mockito.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>log4j</groupId>
+                <artifactId>log4j</artifactId>
+                <version>${log4j.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -135,14 +118,6 @@
     </dependencyManagement>
 
     <dependencies>
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.jboss.tools.komodo.plugins</groupId>
             <artifactId>org.komodo.core</artifactId>
@@ -162,6 +137,50 @@
             <groupId>org.jboss.tools.komodo.plugins.libs</groupId>
             <artifactId>org.komodo.modeshape.lib</artifactId>
             <version>${komodo.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.tools.komodo.plugins</groupId>
+            <artifactId>org.komodo.modeshape.teiid.sql.sequencer</artifactId>
+            <version>${komodo.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.tools.komodo.plugins</groupId>
+            <artifactId>org.komodo.relational</artifactId>
+            <version>${komodo.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.tools.komodo.plugins</groupId>
+            <artifactId>org.komodo.teiid.client</artifactId>
+            <version>${komodo.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.tools.komodo.plugins</groupId>
+            <artifactId>org.komodo.teiid.client.schema</artifactId>
+            <version>${komodo.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.tools.komodo.plugins</groupId>
+            <artifactId>org.komodo.importer</artifactId>
+            <version>${komodo.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.tools.komodo.plugins</groupId>
+            <artifactId>org.komodo.modeshape.vdb</artifactId>
+            <version>${komodo.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.tools</groupId>
+            <artifactId>org.komodo.test.utils</artifactId>
+            <version>${komodo.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

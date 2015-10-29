@@ -43,11 +43,52 @@
     <name>Komodo REST</name>
     <description>Provides RESTful access to the Komodo engine</description>
 
+    <!-- ================================================================== -->
+    <!-- Properties -->
+    <!-- ================================================================== -->
+    <properties>
+        <gson.version>2.2.4</gson.version>
+        <infinispan.version>7.2.0.Final</infinispan.version> <!-- need to override so that resteasy uses same as MS -->
+        <resteasy.version>3.0.11.Final</resteasy.version>
+        <swagger.version>1.5.0</swagger.version>
+        <jaxrs.version>2.13</jaxrs.version>
+        <webapp-dir>${project.artifactId}-${project.version}</webapp-dir>
+        <webapp-outdir>${basedir}/target/${webapp-dir}</webapp-outdir>
+
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>${gson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.infinispan</groupId>
+                <artifactId>infinispan-core</artifactId>
+                <version>${infinispan.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.resteasy</groupId>
+                <artifactId>resteasy-bom</artifactId>
+                <version>${resteasy.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-jaxrs</artifactId>
+                <version>${swagger.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
-		    <groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
-		</dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.infinispan</groupId>
             <artifactId>infinispan-core</artifactId>
@@ -75,44 +116,13 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.jboss.tools.komodo.plugins</groupId>
-            <artifactId>org.komodo.modeshape.teiid.sql.sequencer</artifactId>
-            <version>${komodo.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.tools.komodo.plugins</groupId>
-            <artifactId>org.komodo.relational</artifactId>
-            <version>${komodo.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.tools.komodo.plugins</groupId>
-            <artifactId>org.komodo.teiid.client</artifactId>
-            <version>${komodo.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.tools.komodo.plugins</groupId>
-            <artifactId>org.komodo.teiid.client.schema</artifactId>
-            <version>${komodo.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.tools.komodo.plugins</groupId>
-            <artifactId>org.komodo.importer</artifactId>
-            <version>${komodo.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.tools.komodo.plugins</groupId>
-            <artifactId>org.komodo.modeshape.vdb</artifactId>
-            <version>${komodo.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.tools</groupId>
-            <artifactId>org.komodo.test.utils</artifactId>
-            <version>${komodo.version}</version>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-jaxrs</artifactId>
         </dependency>
     </dependencies>
 
@@ -127,11 +137,73 @@
             <plugin>
                 <artifactId>maven-war-plugin</artifactId>
                 <configuration>
-                    <!-- Java EE 7 doesn't require web.xml, Maven needs to catch up! -->
+                    <warName>komodo-rest</warName>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
+                    <!--
+                        Ensure this never gets added to war and deployed
+                        since only required for local testing using tomcat.
+                        This works since the tomcat7:run-war uses the exploded
+                        version of the war and not the war archive itself. 
+                     -->
+                    <packagingExcludes>
+                        WEB-INF/lib/jaxrs-ri-*.jar
+                     </packagingExcludes>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.tomcat.maven</groupId>
+                <artifactId>tomcat7-maven-plugin</artifactId>
+                <version>2.3-SNAPSHOT</version>
+                <configuration>
+                    <!-- http port -->
+                    <port>9090</port>
+                    <!-- application path always starts with / -->
+                    <path>/</path>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
 
+    <profiles>
+
+        <!--
+            Profile that adds in the glassfish jaxrs implementation to
+            execute rest applications in tomcat. Note: this is NOT
+            required when deploying the war to jboss / wildfly.
+
+            To use do
+            mvn clean -P tomcat-test-server tomcat7:run-war
+        -->
+        <profile>
+            <id>tomcat-test-server</id>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.tomcat.maven</groupId>
+                        <artifactId>tomcat7-maven-plugin</artifactId>
+                        <version>2.3-SNAPSHOT</version>
+                        <configuration>
+                            <!-- http port -->
+                            <port>9090</port>
+                            <!-- application path always starts with / -->
+                            <path>/</path>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+
+            <dependencies>
+                <!-- Used with tomcat test server as jaxrs implementation -->
+                <dependency>
+                    <groupId>org.glassfish.jersey.bundles</groupId>
+                    <artifactId>jaxrs-ri</artifactId>
+                    <version>${jaxrs.version}</version>
+                </dependency>
+            </dependencies>
+
+        </profile>
+    </profiles>
 </project>

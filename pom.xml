@@ -36,6 +36,7 @@
 -->
 		<module>site</module>
 		<module>build</module>
+		<module>server</module>
 	</modules>
 
 	<build>
