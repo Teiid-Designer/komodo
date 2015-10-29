@@ -20,6 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileAttribute;
 import java.util.List;
+import java.util.Map;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation;
@@ -42,6 +43,7 @@ import org.komodo.relational.model.Model.Type;
 import org.komodo.rest.KomodoRestProperty;
 import org.komodo.rest.KomodoRestV1Application;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
+import org.komodo.rest.KomodoStatusObject;
 import org.komodo.rest.RestLink;
 import org.komodo.rest.RestLink.LinkType;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
@@ -215,6 +217,34 @@ public final class KomodoVdbServiceTest implements StringConstants {
         final String entity = response.readEntity(String.class);
         System.out.println("Response from uri " + uri + ":\n" + entity);
         assertEquals("The Rest service is up and running", entity);
+    }
+
+    @Test
+    public void shouldLoadSampleData() throws Exception {
+
+        // get
+        URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
+                                                    .path(V1Constants.WORKSPACE_SEGMENT)
+                                                    .path(V1Constants.SAMPLE_DATA).build();
+        this.response = request(uri).get();
+        assertTrue(response.hasEntity());
+
+        final String entity = response.readEntity(String.class);
+        System.out.println("Response from uri " + uri + ":\n" + entity);
+
+        KomodoStatusObject status = KomodoJsonMarshaller.unmarshallKSO(entity);
+        assertNotNull(status);
+
+        assertEquals("Sample Vdb Import", status.getTitle());
+        Map<String, String> attributes = status.getAttributes();
+
+        for (String sample : KomodoVdbService.SAMPLES) {
+            String message = attributes.get(sample);
+            assertNotNull(message);
+            assertEquals(
+                         RelationalMessages.getString(RelationalMessages.Error.VDB_SAMPLE_IMPORT_SUCCESS, sample),
+                         message);
+        }
     }
 
     @Test

@@ -135,6 +135,11 @@ public final class KomodoRestV1Application extends Application implements Reposi
          * Placeholder added to an URI to allow a specific data role id
          */
         String DATA_ROLE_PLACEHOLDER = "{dataRoleName}"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for loading of the sample vdb data
+         */
+        String SAMPLE_DATA = "samples"; //$NON-NLS-1$
     }
 
     private static final int TIMEOUT = 1;

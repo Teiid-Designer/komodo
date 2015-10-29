@@ -9,6 +9,7 @@ package org.komodo.rest.relational.json;
 
 import org.komodo.rest.KomodoRestEntity;
 import org.komodo.rest.KomodoRestProperty;
+import org.komodo.rest.KomodoStatusObject;
 import org.komodo.rest.RestLink;
 import org.komodo.rest.json.LinkSerializer;
 import org.komodo.rest.relational.RestVdb;
@@ -41,6 +42,7 @@ public final class KomodoJsonMarshaller {
 
     static {
         final GsonBuilder temp = new GsonBuilder().registerTypeAdapter( RestLink.class, new LinkSerializer() )
+                                                  .registerTypeAdapter(KomodoStatusObject.class, new StatusObjectSerializer())
                                                   .registerTypeAdapter( KomodoRestProperty.class, new KomodoRestPropertySerializer() )
                                                   .registerTypeAdapter( RestVdb.class, new VdbSerializer() )
                                                   .registerTypeAdapter( RestVdbModel.class, new VdbModelSerializer() )
@@ -113,6 +115,29 @@ public final class KomodoJsonMarshaller {
     }
 
     /**
+     * @param status
+     *        the status object whose JSON representation is being requested (cannot be <code>null</code>)
+     * @param prettyPrint
+     *        <code>true</code> if JSON output should be pretty printed
+     * @return the JSON representation (never empty)
+     */
+    public static String marshall(KomodoStatusObject status, boolean prettyPrint) {
+        ArgCheck.isNotNull( status, "status" ); //$NON-NLS-1$
+
+        String json = null;
+
+        if ( prettyPrint ) {
+            json = PRETTY_BUILDER.toJson(status);
+        } else {
+            json = BUILDER.toJson(status);
+        }
+
+        LOGGER.debug( "marshall: {0}", json ); //$NON-NLS-1$
+        return json;
+
+    }
+
+    /**
      * @param <T>
      *        the {@link KomodoRestEntity} type of the output
      * @param json
@@ -141,6 +166,17 @@ public final class KomodoJsonMarshaller {
                                                                final Class< T[] > entityClass ) {
         final T[] entity = BUILDER.fromJson( json, entityClass );
         LOGGER.debug( "unmarshall: class = {0}, entity = {1}", entityClass, entity ); //$NON-NLS-1$
+        return entity;
+    }
+
+    /**
+     * @param json
+     *        the JSON representation of a {@link KomodoStatusObject} (cannot be empty)
+     * @return the {@link KomodoStatusObject} (never <code>null</code>)
+     */
+    public static KomodoStatusObject unmarshallKSO( final String json) {
+        final KomodoStatusObject entity = BUILDER.fromJson( json, KomodoStatusObject.class);
+        LOGGER.debug( "unmarshall: class = {0}, entity = {1}", KomodoStatusObject.class, entity ); //$NON-NLS-1$
         return entity;
     }
 

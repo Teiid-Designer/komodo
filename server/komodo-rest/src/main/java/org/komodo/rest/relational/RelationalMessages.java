@@ -125,7 +125,32 @@ public final class RelationalMessages {
         /**
          * An error indicating the parameter and JSON VDB name does not match for a VDB being created.
          */
-        VDB_SERVICE_VDB_NAME_ERROR;
+        VDB_SERVICE_VDB_NAME_ERROR,
+
+        /**
+         * An error indicating an exception occurred while importing a sample vdb
+         */
+        VDB_SERVICE_LOAD_SAMPLE_ERROR,
+
+        /**
+         * An error indicating the content of a sample vdb could not be loaded into a stream
+         */
+        VDB_SAMPLE_CONTENT_FAILURE,
+
+        /**
+         * Success indicator that the content of a sample vdb was loaded into a stream
+         */
+        VDB_SAMPLE_CONTENT_SUCCESS,
+
+        /**
+         * An error indicating the transaction timeout while awaiting the import of a sample vdb
+         */
+        VDB_SAMPLE_IMPORT_TIMEOUT,
+
+        /**
+         * Success indicator that the import of a sample vdb was successful
+         */
+        VDB_SAMPLE_IMPORT_SUCCESS;
 
         /**
          * {@inheritDoc}
