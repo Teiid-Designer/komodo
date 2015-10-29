@@ -66,10 +66,9 @@ import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
+import org.komodo.utils.KLog;
 import org.komodo.utils.StringUtils;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * A Komodo REST service for obtaining VDB information from the workspace.
@@ -100,7 +99,7 @@ public final class KomodoVdbService extends KomodoService {
     }
 
     private static final int ALL_AVAILABLE = -1;
-    private static final Logger LOGGER = LoggerFactory.getLogger( KomodoVdbService.class );
+    private static final KLog LOGGER = KLog.getLogger( );
 
     private final WorkspaceManager wsMgr;
 

@@ -21,8 +21,7 @@ import org.komodo.rest.relational.RestVdbModelSource;
 import org.komodo.rest.relational.RestVdbPermission;
 import org.komodo.rest.relational.RestVdbTranslator;
 import org.komodo.utils.ArgCheck;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.komodo.utils.KLog;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -31,7 +30,7 @@ import com.google.gson.GsonBuilder;
  */
 public final class KomodoJsonMarshaller {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger( KomodoJsonMarshaller.class );
+    private static final KLog LOGGER = KLog.getLogger();
 
     /**
      * The shared JSON serialier/deserializer for {@link KomodoRestEntity} objects.

@@ -25,15 +25,14 @@ import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.komodo.utils.KLog;
 
 /**
  * A Komodo service implementation.
  */
 public abstract class KomodoService implements JsonConstants {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger( KomodoService.class );
+    private static final KLog LOGGER = KLog.getLogger();
 
     private static final int TIMEOUT = 30;
     private static final TimeUnit UNIT = TimeUnit.SECONDS;
