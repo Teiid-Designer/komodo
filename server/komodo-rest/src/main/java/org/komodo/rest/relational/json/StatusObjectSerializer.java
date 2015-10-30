@@ -43,7 +43,7 @@ public final class StatusObjectSerializer extends TypeAdapter< KomodoStatusObjec
                 case KomodoStatusObject.TITLE_LABEL:
                     status.setTitle(in.nextString());
                     break;
-                case KomodoStatusObject.MESSAGES_LABEL:
+                case KomodoStatusObject.INFO_LABEL:
                     Map<String, String> attributes = BUILDER.fromJson(in, Map.class);
                     status.setAttributes(attributes);
                     break;
@@ -72,7 +72,7 @@ public final class StatusObjectSerializer extends TypeAdapter< KomodoStatusObjec
         out.name(KomodoStatusObject.TITLE_LABEL);
         out.value(value.getTitle());
 
-        out.name(KomodoStatusObject.MESSAGES_LABEL);
+        out.name(KomodoStatusObject.INFO_LABEL);
         BUILDER.toJson(value.getAttributes(), STRING_MAP_TYPE, out);
 
         out.endObject();

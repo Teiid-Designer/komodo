@@ -33,4 +33,11 @@ public class KomodoRestException extends Exception {
         super( message, cause );
     }
 
+    /**
+     * @param cause
+     *          the cause (can be <code>null</code>)
+     */
+    public KomodoRestException(final Throwable cause) {
+        super(cause);
+    }
 }

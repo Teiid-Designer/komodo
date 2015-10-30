@@ -79,6 +79,16 @@ public final class KomodoRestV1Application extends Application implements Reposi
         String WORKSPACE_SEGMENT = "workspace"; //$NON-NLS-1$
 
         /**
+         * The name of the URI path segment for the utility service.
+         */
+        String SERVICE_SEGMENT = "service"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for the Komodo schema.
+         */
+        String SCHEMA_SEGMENT = "schema"; //$NON-NLS-1$
+
+        /**
          * The name of the URI path segment for the VDB manifest XML resource.
          */
         String VDB_MANIFEST_SEGMENT = "manifest"; //$NON-NLS-1$
@@ -180,12 +190,14 @@ public final class KomodoRestV1Application extends Application implements Reposi
 
         final Set< Object > objs = new HashSet< >();
         objs.add( new KomodoExceptionMapper() );
+        objs.add( new KomodoUtilService( this.kengine ) );
         objs.add( new KomodoVdbService( this.kengine ) );
         this.singletons = Collections.unmodifiableSet( objs );
 
         initSwaggerConfiguration();
     }
 
+    @SuppressWarnings( "nls" )
     private void initSwaggerConfiguration() {
         //
         // Add converters for display of definitions

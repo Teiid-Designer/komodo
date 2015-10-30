@@ -150,7 +150,12 @@ public final class RelationalMessages {
         /**
          * Success indicator that the import of a sample vdb was successful
          */
-        VDB_SAMPLE_IMPORT_SUCCESS;
+        VDB_SAMPLE_IMPORT_SUCCESS,
+
+        /**
+         * An error occurred while trying to obtain the teiid schema
+         */
+        SCHEMA_SERVICE_GET_SCHEMA_ERROR;
 
         /**
          * {@inheritDoc}

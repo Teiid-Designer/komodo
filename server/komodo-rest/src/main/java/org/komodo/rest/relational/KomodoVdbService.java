@@ -28,12 +28,9 @@ import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_MI
 import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_MISSING_VDB_NAME;
 import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_VDB_EXISTS;
 import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_VDB_NAME_ERROR;
-import java.io.File;
-import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -47,14 +44,9 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 import org.komodo.core.KEngine;
-import org.komodo.importer.ImportMessages;
-import org.komodo.importer.ImportOptions;
-import org.komodo.importer.ImportOptions.OptionKeys;
-import org.komodo.importer.vdb.VdbImporter;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.ModelSource;
@@ -63,20 +55,17 @@ import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.VdbImport;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.ObjectImpl;
-import org.komodo.repository.SynchronousCallback;
 import org.komodo.rest.KomodoRestEntity;
 import org.komodo.rest.KomodoRestEntity.ResourceNotFound;
 import org.komodo.rest.KomodoRestException;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.KomodoService;
-import org.komodo.rest.KomodoStatusObject;
 import org.komodo.rest.Messages;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
-import org.komodo.utils.KLog;
 import org.komodo.utils.StringUtils;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 import io.swagger.annotations.Api;
@@ -88,8 +77,9 @@ import io.swagger.annotations.ApiResponses;
 /**
  * A Komodo REST service for obtaining VDB information from the workspace.
  */
-@Path(V1Constants.WORKSPACE_SEGMENT)
-@Api(tags = {"vdb","vdbs"})
+@Path(V1Constants.WORKSPACE_SEGMENT + StringConstants.FORWARD_SLASH +
+           V1Constants.VDBS_SEGMENT)
+@Api(tags = {V1Constants.VDBS_SEGMENT})
 public final class KomodoVdbService extends KomodoService {
 
     /**
@@ -115,16 +105,6 @@ public final class KomodoVdbService extends KomodoService {
     }
 
     private static final int ALL_AVAILABLE = -1;
-    private static final KLog LOGGER = KLog.getLogger( );
-
-    /**
-     * The sample vdbs provided by this service
-     */
-    @SuppressWarnings( "nls" )
-    public static final String[] SAMPLES = {
-        "parts_dynamic-vdb.xml", "portfolio-vdb.xml",
-        "teiid-vdb-all-elements.xml", "tweet-example-vdb.xml"
-      };
 
     private final WorkspaceManager wsMgr;
 
@@ -220,91 +200,6 @@ public final class KomodoVdbService extends KomodoService {
 
             throw new KomodoRestException( RelationalMessages.getString( VDB_SERVICE_CREATE_VDB_ERROR ), e );
         }
-    }
-
-    /**
-     * @return about information of this service
-     */
-    @GET
-    @Path(V1Constants.ABOUT)
-    @ApiOperation(value = "Display status of this rest service",
-                            response = String.class)
-    public Response about() {
-        String msg = "The Rest service is up and running"; //$NON-NLS-1$
-        return Response.status(200).entity(msg).build();
-    }
-
-    private InputStream getVdbSample(String fileName) {
-        String sampleFilePath = "sample" + File.separator + fileName; //$NON-NLS-1$
-        InputStream fileStream = getClass().getResourceAsStream(sampleFilePath);
-        if (fileStream == null)
-            LOGGER.error(RelationalMessages.getString(
-                                                      RelationalMessages.Error.VDB_SAMPLE_CONTENT_FAILURE, fileName));
-
-        else
-            LOGGER.info(RelationalMessages.getString(
-                                                     RelationalMessages.Error.VDB_SAMPLE_CONTENT_SUCCESS, fileName));
-
-        return fileStream;
-    }
-
-    /**
-     * Attempt to import the sample data into the engine
-     *
-     * @return the response indicating the sample data load has been attempted
-     */
-    @SuppressWarnings( "nls" )
-    @GET
-    @Path(V1Constants.SAMPLE_DATA)
-    @Produces( MediaType.APPLICATION_JSON )
-    @ApiOperation(value = "Import sample data into VdbBuilder and display the status of the operation",
-                             response = KomodoStatusObject.class)
-    public Response importSampleData() {
-
-        KomodoStatusObject status = new KomodoStatusObject("Sample Vdb Import");
-
-        for (String sampleName : SAMPLES) {
-            InputStream sampleStream = getVdbSample(sampleName);
-            if (sampleStream == null) {
-                status.addAttribute(sampleName, RelationalMessages.getString(
-                                                          RelationalMessages.Error.VDB_SAMPLE_CONTENT_FAILURE, sampleName));
-                continue;
-            }
-
-            UnitOfWork uow = null;
-            try {
-                SynchronousCallback callback = new SynchronousCallback();
-                uow = repo.createTransaction("Import vdb " + sampleName, false, callback); //$NON-NLS-1$
-
-                ImportOptions importOptions = new ImportOptions();
-                importOptions.setOption(OptionKeys.NAME, sampleName);
-                ImportMessages importMessages = new ImportMessages();
-
-                KomodoObject workspace = repo.komodoWorkspace(uow);
-                VdbImporter importer = new VdbImporter(repo);
-                importer.importVdb(uow, sampleStream, workspace, importOptions, importMessages);
-
-                uow.commit();
-                if (callback.await(3, TimeUnit.MINUTES))
-                    status.addAttribute(sampleName, RelationalMessages.getString(
-                                                                                 RelationalMessages.Error.VDB_SAMPLE_IMPORT_SUCCESS, sampleName));
-                else
-                    status.addAttribute(sampleName, RelationalMessages.getString(
-                                                                                 RelationalMessages.Error.VDB_SAMPLE_IMPORT_TIMEOUT, sampleName));
-
-            } catch ( final Exception e ) {
-                if ( ( uow != null ) && ( uow.getState() != State.COMMITTED ) ) {
-                    uow.rollback();
-                }
-
-                status.addAttribute(sampleName, RelationalMessages.getString(
-                                                                             RelationalMessages.Error.VDB_SERVICE_LOAD_SAMPLE_ERROR, sampleName, e));
-            }
-        }
-
-        ResponseBuilder builder = Response.ok( KomodoJsonMarshaller.marshall(status, true), MediaType.APPLICATION_JSON );
-        builder.status(200);
-        return builder.build();
     }
 
     /**
@@ -466,7 +361,7 @@ public final class KomodoVdbService extends KomodoService {
      *         if there is a problem constructing the VDBs JSON document
      */
     @GET
-    @Path( V1Constants.VDBS_SEGMENT)
+    @Path(FORWARD_SLASH)
     @Produces( MediaType.APPLICATION_JSON )
     @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Display the collection of vdbs",
@@ -595,8 +490,7 @@ public final class KomodoVdbService extends KomodoService {
      *         if there is a problem finding the specified workspace VDB or constructing the JSON representation
      */
     @GET
-    @Path( V1Constants.VDBS_SEGMENT + StringConstants.FORWARD_SLASH +
-                V1Constants.VDB_PLACEHOLDER )
+    @Path( V1Constants.VDB_PLACEHOLDER )
     @Produces( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
     @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Find vdb by name", response = RestVdb.class)
@@ -655,8 +549,7 @@ public final class KomodoVdbService extends KomodoService {
      *         if there is a problem finding the specified workspace VDB or constructing the JSON representation
      */
     @GET
-    @Path( V1Constants.VDBS_SEGMENT + StringConstants.FORWARD_SLASH +
-                V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+    @Path( V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
                 V1Constants.MODELS_SEGMENT )
     @Produces( MediaType.APPLICATION_JSON )
     @Consumes ( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
@@ -728,8 +621,7 @@ public final class KomodoVdbService extends KomodoService {
      *         if there is a problem finding the specified workspace VDB or constructing the JSON representation
      */
     @GET
-    @Path( V1Constants.VDBS_SEGMENT + StringConstants.FORWARD_SLASH +
-                V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+    @Path( V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
                 V1Constants.MODELS_SEGMENT + StringConstants.FORWARD_SLASH +
                 V1Constants.MODEL_PLACEHOLDER)
     @Produces( MediaType.APPLICATION_JSON )
@@ -806,8 +698,7 @@ public final class KomodoVdbService extends KomodoService {
      *         if there is a problem finding the specified workspace VDB or constructing the JSON representation
      */
     @GET
-    @Path( V1Constants.VDBS_SEGMENT + StringConstants.FORWARD_SLASH +
-                V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+    @Path( V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
                 V1Constants.TRANSLATORS_SEGMENT )
     @Produces( MediaType.APPLICATION_JSON )
     @Consumes ( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
@@ -879,8 +770,7 @@ public final class KomodoVdbService extends KomodoService {
      *         if there is a problem finding the specified workspace VDB or constructing the JSON representation
      */
     @GET
-    @Path( V1Constants.VDBS_SEGMENT + StringConstants.FORWARD_SLASH +
-                V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+    @Path( V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
                 V1Constants.TRANSLATORS_SEGMENT + StringConstants.FORWARD_SLASH +
                 V1Constants.TRANSLATOR_PLACEHOLDER)
     @Produces( MediaType.APPLICATION_JSON )
@@ -972,8 +862,7 @@ public final class KomodoVdbService extends KomodoService {
      *         if there is a problem finding the specified workspace VDB or constructing the JSON representation
      */
     @GET
-    @Path( V1Constants.VDBS_SEGMENT + StringConstants.FORWARD_SLASH +
-                V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+    @Path( V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
                 V1Constants.IMPORTS_SEGMENT )
     @Produces( MediaType.APPLICATION_JSON )
     @Consumes ( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
@@ -1045,8 +934,7 @@ public final class KomodoVdbService extends KomodoService {
      *         if there is a problem finding the specified workspace VDB or constructing the JSON representation
      */
     @GET
-    @Path( V1Constants.VDBS_SEGMENT + StringConstants.FORWARD_SLASH +
-                V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+    @Path( V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
                 V1Constants.IMPORTS_SEGMENT + StringConstants.FORWARD_SLASH +
                 V1Constants.IMPORT_PLACEHOLDER)
     @Produces( MediaType.APPLICATION_JSON )
@@ -1138,8 +1026,7 @@ public final class KomodoVdbService extends KomodoService {
      *         if there is a problem finding the specified workspace VDB or constructing the JSON representation
      */
     @GET
-    @Path( V1Constants.VDBS_SEGMENT + StringConstants.FORWARD_SLASH +
-                V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+    @Path( V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
                 V1Constants.DATA_ROLES_SEGMENT )
     @Produces( MediaType.APPLICATION_JSON )
     @Consumes ( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
@@ -1211,8 +1098,7 @@ public final class KomodoVdbService extends KomodoService {
      *         if there is a problem finding the specified workspace VDB or constructing the JSON representation
      */
     @GET
-    @Path( V1Constants.VDBS_SEGMENT + StringConstants.FORWARD_SLASH +
-                V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+    @Path( V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
                 V1Constants.DATA_ROLES_SEGMENT + StringConstants.FORWARD_SLASH +
                 V1Constants.DATA_ROLE_PLACEHOLDER)
     @Produces( MediaType.APPLICATION_JSON )
@@ -1306,8 +1192,7 @@ public final class KomodoVdbService extends KomodoService {
      *         if there is a problem finding the specified workspace VDB or constructing the JSON representation
      */
     @GET
-    @Path( V1Constants.VDBS_SEGMENT + StringConstants.FORWARD_SLASH +
-                V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+    @Path( V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
                 V1Constants.MODELS_SEGMENT + StringConstants.FORWARD_SLASH +
                 V1Constants.MODEL_PLACEHOLDER + StringConstants.FORWARD_SLASH +
                 V1Constants.SOURCES_SEGMENT)
@@ -1404,8 +1289,7 @@ public final class KomodoVdbService extends KomodoService {
      *         if there is a problem finding the specified workspace VDB or constructing the JSON representation
      */
     @GET
-    @Path( V1Constants.VDBS_SEGMENT + StringConstants.FORWARD_SLASH +
-                V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+    @Path( V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
                 V1Constants.MODELS_SEGMENT + StringConstants.FORWARD_SLASH +
                 V1Constants.MODEL_PLACEHOLDER + StringConstants.FORWARD_SLASH +
                 V1Constants.SOURCES_SEGMENT + StringConstants.FORWARD_SLASH +

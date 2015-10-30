@@ -37,9 +37,9 @@ public class KomodoStatusObject {
     public static final String TITLE_LABEL = "Title"; //$NON-NLS-1$
 
     /**
-     * Label for the messages
+     * Label for the information
      */
-    public static final String MESSAGES_LABEL = "Messages"; //$NON-NLS-1$
+    public static final String INFO_LABEL = "Information"; //$NON-NLS-1$
 
     private String title;
 

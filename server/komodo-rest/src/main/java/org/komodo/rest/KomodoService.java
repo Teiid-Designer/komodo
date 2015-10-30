@@ -32,7 +32,7 @@ import org.komodo.utils.KLog;
  */
 public abstract class KomodoService implements JsonConstants {
 
-    private static final KLog LOGGER = KLog.getLogger();
+    protected static final KLog LOGGER = KLog.getLogger();
 
     private static final int TIMEOUT = 30;
     private static final TimeUnit UNIT = TimeUnit.SECONDS;
@@ -86,7 +86,7 @@ public abstract class KomodoService implements JsonConstants {
         return responseEntity;
     }
 
-    private ResponseBuilder notAcceptableMediaTypesBuilder() {
+    protected ResponseBuilder notAcceptableMediaTypesBuilder() {
         List<Variant> variants = VariantListBuilder.newInstance()
                                                                    .mediaTypes(MediaType.APPLICATION_XML_TYPE,
                                                                                        MediaType.APPLICATION_JSON_TYPE)
@@ -95,7 +95,7 @@ public abstract class KomodoService implements JsonConstants {
         return Response.notAcceptable(variants);
     }
 
-    private boolean isAcceptable(List<MediaType> acceptableTypes, MediaType candidate) {
+    protected boolean isAcceptable(List<MediaType> acceptableTypes, MediaType candidate) {
         if (acceptableTypes == null || acceptableTypes.isEmpty())
             return false;
 
@@ -226,6 +226,50 @@ public abstract class KomodoService implements JsonConstants {
 
             builder = Response.ok( KomodoJsonMarshaller.marshallArray(entities.toArray(new KomodoRestEntity[0]), true), MediaType.APPLICATION_JSON );
         }
+
+        return builder.build();
+    }
+
+    protected Response commit( final UnitOfWork transaction, List<MediaType> acceptableMediaTypes,
+                               final KomodoStatusObject entity ) throws Exception {
+        assert( transaction.getCallback() instanceof SynchronousCallback );
+        final int timeout = TIMEOUT;
+        final TimeUnit unit = UNIT;
+
+        final SynchronousCallback callback = ( SynchronousCallback )transaction.getCallback();
+        transaction.commit();
+
+        if ( !callback.await( timeout, unit ) ) {
+            // callback timeout occurred
+            String errorMessage = Messages.getString( COMMIT_TIMEOUT, transaction.getName(), timeout, unit );
+            Object responseEntity = createErrorResponse(acceptableMediaTypes, errorMessage);
+            return Response.status( Status.GATEWAY_TIMEOUT )
+                           .entity(responseEntity)
+                           .build();
+        }
+
+        Throwable error = callback.error();
+
+        if ( error != null ) {
+            // callback was called because of an error condition
+            Object responseEntity = createErrorResponse(acceptableMediaTypes, error.getLocalizedMessage());
+            return Response.status( Status.INTERNAL_SERVER_ERROR )
+                .entity(responseEntity)
+                .build();
+        }
+
+        LOGGER.debug( "commit: successfully committed '{0}', rollbackOnly = '{1}'", //$NON-NLS-1$
+                      transaction.getName(),
+                      transaction.isRollbackOnly() );
+        ResponseBuilder builder = null;
+
+        //
+        // Json will always be preferred over XML if both or the wildcard are present in the header
+        //
+        if (isAcceptable(acceptableMediaTypes, MediaType.APPLICATION_JSON_TYPE))
+            builder = Response.ok( KomodoJsonMarshaller.marshall( entity, true), MediaType.APPLICATION_JSON );
+        else
+            builder = notAcceptableMediaTypesBuilder();
 
         return builder.build();
     }

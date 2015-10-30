@@ -24,7 +24,9 @@ package org.komodo.test.utils;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -248,7 +250,7 @@ public class TestUtilities implements StringConstants {
         twitterSource.setProperty(VdbLexicon.Source.TRANSLATOR, REST_TRANSLATOR);
         twitterSource.setProperty(VdbLexicon.Source.JNDI_NAME, "java:/twitterDS");
 
-        /*      
+        /*
          *      twitterview
          *          @jcr:primaryType=vdb:declarativeModel
          *          @jcr:uuid={uuid-to-be-created}
@@ -266,7 +268,7 @@ public class TestUtilities implements StringConstants {
 
         return tweetExample;
     }
-    
+
     /**
      * Creates the structure of the tweet example vdb
      *
@@ -356,7 +358,7 @@ public class TestUtilities implements StringConstants {
         twitterSource.setProperty(VdbLexicon.Source.TRANSLATOR, REST_TRANSLATOR);
         twitterSource.setProperty(VdbLexicon.Source.JNDI_NAME, "java:/twitterDS");
 
-        /*      
+        /*
          *      twitterview
          *          @jcr:primaryType=vdb:declarativeModel
          *          @jcr:uuid={uuid-to-be-created}
@@ -446,7 +448,7 @@ public class TestUtilities implements StringConstants {
          *          @vdb:visible=true
          *          @vdb:sourceJndiName=java:/twitterDS
          */
-        KomodoObject twitter = tweetExample.addChild(uow, 
+        KomodoObject twitter = tweetExample.addChild(uow,
                                                                                     TWITTER_MODEL,
                                                                                     VdbLexicon.Vdb.DECLARATIVE_MODEL);
         twitter.setProperty(uow, CoreLexicon.JcrId.MODEL_TYPE, CoreLexicon.ModelType.PHYSICAL);
@@ -473,7 +475,7 @@ public class TestUtilities implements StringConstants {
         twitterSource.setProperty(uow, VdbLexicon.Source.TRANSLATOR, REST_TRANSLATOR);
         twitterSource.setProperty(uow, VdbLexicon.Source.JNDI_NAME, "java:/twitterDS");
 
-        /*      
+        /*
          *      twitterview
          *          @jcr:primaryType=vdb:declarativeModel
          *          @jcr:uuid={uuid-to-be-created}
@@ -618,7 +620,7 @@ public class TestUtilities implements StringConstants {
 
         String modelDefinition = "CREATE VIEW Test AS select * FROM Test.getTest;";
         modelTwo.setProperty(VdbLexicon.Model.MODEL_DEFINITION, modelDefinition);
-        
+
         /*
          *          vdb:sources
          *              @jcr:primaryType=vdb:sources
@@ -644,7 +646,7 @@ public class TestUtilities implements StringConstants {
         Node model2Src2 = model2Sources.addNode("s2", VdbLexicon.Source.SOURCE);
         model2Src2.setProperty(VdbLexicon.Source.TRANSLATOR, "translator");
         model2Src2.setProperty(VdbLexicon.Source.JNDI_NAME, "java:binding-two");
-        
+
         /*
          *      vdb:translators
          *          @jcr:primaryType=vdb:translators
@@ -865,7 +867,7 @@ public class TestUtilities implements StringConstants {
 
         String modelDefinition = "CREATE VIEW Test AS select * FROM Test.getTest;";
         modelTwo.setProperty(uow, VdbLexicon.Model.MODEL_DEFINITION, modelDefinition);
-        
+
         /*
          *          vdb:sources
          *              @jcr:primaryType=vdb:sources
@@ -891,7 +893,7 @@ public class TestUtilities implements StringConstants {
         KomodoObject model2Src2 = model2Sources.addChild(uow, "s2", VdbLexicon.Source.SOURCE);
         model2Src2.setProperty(uow, VdbLexicon.Source.TRANSLATOR, "translator");
         model2Src2.setProperty(uow, VdbLexicon.Source.JNDI_NAME, "java:binding-two");
-        
+
         /*
          *      vdb:translators
          *          @jcr:primaryType=vdb:translators
@@ -1142,8 +1144,8 @@ public class TestUtilities implements StringConstants {
         NamedNodeMap expectedAttrs = expectedElement.getAttributes();
         NamedNodeMap actualAttrs = actualElement.getAttributes();
         if (expectedAttrs.getLength() != actualAttrs.getLength()) {
-            errorMessages.append(OPEN_ANGLE_BRACKET + expectedElement.getNodeName() + CLOSE_ANGLE_BRACKET + 
-                                 " has different number of attributes (" + expectedAttrs.getLength() + ") to " + 
+            errorMessages.append(OPEN_ANGLE_BRACKET + expectedElement.getNodeName() + CLOSE_ANGLE_BRACKET +
+                                 " has different number of attributes (" + expectedAttrs.getLength() + ") to " +
                                  OPEN_ANGLE_BRACKET + actualElement.getNodeName() + CLOSE_ANGLE_BRACKET +
                                  " (" + actualAttrs.getLength() + ")" + NEW_LINE);
             errorMessages.append(TAB + "Expected Attributes:" + NEW_LINE);
@@ -1285,5 +1287,23 @@ public class TestUtilities implements StringConstants {
         StringBuilder errorMessages = new StringBuilder();
         if (! compareNodes(document1.getDocumentElement(), document2.getDocumentElement(), errorMessages))
             fail(errorMessages.toString());
+    }
+
+    /**
+     * @param inputStream the input stream
+     * @return convert the given input stream to a string
+     * @throws Exception if error occurs
+     */
+    public static String toString(InputStream inputStream) throws Exception {
+        BufferedInputStream bis = new BufferedInputStream(inputStream);
+        ByteArrayOutputStream buf = new ByteArrayOutputStream();
+        int result = bis.read();
+        while (result != -1) {
+            byte b = (byte)result;
+            buf.write(b);
+            result = bis.read();
+        }
+
+        return buf.toString();
     }
 }

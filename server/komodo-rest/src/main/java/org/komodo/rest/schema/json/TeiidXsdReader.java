@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  */
-package org.komodo.rest.relational.schema.json;
+package org.komodo.rest.schema.json;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -74,7 +74,7 @@ public class TeiidXsdReader implements XSVisitor, JsonConstants {
 
     private static final String SCHEMA = "schema-"; //$NON-NLS-1$
 
-    private static final String TEIID_VDB_XSD = "/org/komodo/teiid/client/schema/teiid-vdb.xsd"; //$NON-NLS-1$
+    private static final String TEIID_VDB_XSD = "teiid-vdb.xsd"; //$NON-NLS-1$
 
     private static final String SUGGESTED = "suggested"; //$NON-NLS-1$
 
