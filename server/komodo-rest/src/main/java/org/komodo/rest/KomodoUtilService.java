@@ -201,7 +201,6 @@ public final class KomodoUtilService extends KomodoService {
         }
 
         ResponseBuilder builder = Response.ok( KomodoJsonMarshaller.marshall(status, true), MediaType.APPLICATION_JSON );
-        builder.status(200);
         return builder.build();
     }
 

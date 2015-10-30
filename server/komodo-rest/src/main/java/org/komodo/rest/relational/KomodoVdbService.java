@@ -361,7 +361,6 @@ public final class KomodoVdbService extends KomodoService {
      *         if there is a problem constructing the VDBs JSON document
      */
     @GET
-    @Path(FORWARD_SLASH)
     @Produces( MediaType.APPLICATION_JSON )
     @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Display the collection of vdbs",

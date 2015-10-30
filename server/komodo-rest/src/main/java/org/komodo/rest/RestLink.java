@@ -13,6 +13,7 @@ import java.util.List;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Represents a navigable web link.
@@ -177,6 +178,7 @@ public final class RestLink {
     /**
      * @return the href the HREF (can be <code>null</code>)
      */
+    @ApiModelProperty(required=true)
     public URI getHref() {
         return this.href;
     }
@@ -184,6 +186,7 @@ public final class RestLink {
     /**
      * @return the rel link type (can be <code>null</code>)
      */
+    @ApiModelProperty(required=true)
     public LinkType getRel() {
         return this.rel;
     }

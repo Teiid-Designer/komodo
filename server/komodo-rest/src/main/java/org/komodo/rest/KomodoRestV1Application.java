@@ -285,6 +285,9 @@ public final class KomodoRestV1Application extends Application implements Reposi
         resources.add(io.swagger.jaxrs.listing.ApiListingResource.class);
         resources.add(io.swagger.jaxrs.listing.SwaggerSerializers.class);
 
+        // Enable cross origin support
+        resources.add(CORSFilter.class);
+
         return resources;
     }
 
