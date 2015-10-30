@@ -7,7 +7,7 @@ import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.Messages;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.spi.KException;
+import org.komodo.shell.util.KomodoObjectUtils;
 import org.komodo.spi.repository.KomodoObject;
 
 /**
@@ -177,18 +177,7 @@ public class RenameCommand extends BuiltInShellCommand {
      */
     @Override
     public boolean isValidForCurrentContext() {
-        // make invalid at root context - cannot rename workpace, library, environment
-        KomodoObject context = getContext();
-        KomodoObject parent = null;
-        try {
-            parent = context.getParent( getTransaction() );
-        } catch (KException ex) {
-            // Exception, parent false
-        }
-        if(parent!=null) {
-            return true;
-        }
-        return false;
+        return !KomodoObjectUtils.isRoot( getContext() );
     }
 
     /* (non-Javadoc)

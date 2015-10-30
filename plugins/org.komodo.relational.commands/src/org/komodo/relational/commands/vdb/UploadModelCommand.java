@@ -7,7 +7,7 @@
 */
 package org.komodo.relational.commands.vdb;
 
-import static org.komodo.relational.commands.WorkspaceCommandMessages.General.INPUT_FILE_ERROR;
+import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.INPUT_FILE_ERROR;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.UploadModelCommand.MISSING_INPUT_MODEL_FILE_PATH;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.UploadModelCommand.MISSING_MODEL_NAME;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.UploadModelCommand.MODEL_INPUT_FILE_IS_EMPTY;

@@ -26,8 +26,15 @@ import org.komodo.shell.api.CommandResult;
 @SuppressWarnings({"javadoc", "nls"})
 public class ShowChildrenCommandTest extends AbstractCommandTest {
 
+    @Test( expected = AssertionError.class )
+    public void shouldFailTooManyArgs( ) throws Exception {
+        final String[] commands = { "show-children extraArg" };
+        setup( commands );
+        execute();
+    }
+    
     @Test
-    public void testShowChildren1() throws Exception {
+    public void shouldShowChildrenNoChildren() throws Exception {
         final String[] commands = { "workspace",
                                     "show-children" };
         setup( commands );
@@ -37,6 +44,25 @@ public class ShowChildrenCommandTest extends AbstractCommandTest {
 
         String writerOutput = getCommandOutput();
         assertTrue(writerOutput.contains("There are no children"));
+    }
+    
+    @Test
+    public void shouldShowTwoChildren() throws Exception {
+        final String child1Name = "blah1";
+        final String child2Name = "blah2";
+        final String[] commands = { 
+            "workspace", 
+            "add-child " + child1Name,
+            "add-child " + child2Name,
+            "show-children" };
+        setup( commands );
+
+        CommandResult result = execute();
+        assertCommandResultOk(result);
+
+        String writerOutput = getCommandOutput();
+        assertTrue(writerOutput.contains(child1Name));
+        assertTrue(writerOutput.contains(child2Name));
     }
 
 }

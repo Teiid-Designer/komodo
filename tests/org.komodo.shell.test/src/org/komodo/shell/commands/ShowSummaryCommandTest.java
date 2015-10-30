@@ -29,6 +29,13 @@ import org.komodo.spi.repository.KomodoObject;
 @SuppressWarnings({"javadoc", "nls"})
 public class ShowSummaryCommandTest extends AbstractCommandTest {
 
+    @Test( expected = AssertionError.class )
+    public void shouldFailTooManyArgs( ) throws Exception {
+        final String[] commands = { "show-summary extraArg" };
+        setup( commands );
+        execute();
+    }
+    
     @Test
     public void shouldBeAvailableAtLibrary() throws Exception {
         final String[] commands = { "library",

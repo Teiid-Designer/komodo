@@ -17,8 +17,6 @@ package org.komodo.relational.commands.resultsetcolumn;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import java.io.File;
-import java.io.FileWriter;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Function;
@@ -40,26 +38,22 @@ public class UnsetResultSetColumnPropertyCommandTest extends AbstractCommandTest
 
     @Test
     public void testUnsetProperty1() throws Exception {
-        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
-        cmdFile.deleteOnExit();
+        final String[] commands = { 
+            "workspace",
+            "create-vdb myVdb vdbPath",
+            "cd myVdb",
+            "add-model myModel",
+            "cd myModel",
+            "add-pushdown-function myPushdownFunction",
+            "cd myPushdownFunction",
+            "set-result-set TabularResultSet",
+            "cd resultSet",
+            "add-column myColumn",
+            "cd myColumn",
+            "set-property NAMEINSOURCE myNameInSource",
+            "unset-property NAMEINSOURCE" };
 
-        FileWriter writer = new FileWriter(cmdFile);
-        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("create-vdb myVdb vdbPath" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd myVdb" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-model myModel " + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd myModel" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-pushdown-function myPushdownFunction" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd myPushdownFunction" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("set-result-set TabularResultSet" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd resultSet" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-column myColumn" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd myColumn" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("set-property NAMEINSOURCE myNameInSource" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("unset-property NAMEINSOURCE" + NEW_LINE);  //$NON-NLS-1$
-        writer.close();
-
-        setup( cmdFile.getAbsolutePath() );
+        setup( commands );
 
         CommandResult result = execute();
         assertCommandResultOk(result);

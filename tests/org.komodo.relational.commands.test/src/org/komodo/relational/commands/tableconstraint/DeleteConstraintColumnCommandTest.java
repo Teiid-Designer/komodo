@@ -16,8 +16,6 @@
 package org.komodo.relational.commands.tableconstraint;
 
 import static org.junit.Assert.assertEquals;
-import java.io.File;
-import java.io.FileWriter;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Column;
@@ -38,37 +36,34 @@ public class DeleteConstraintColumnCommandTest extends AbstractCommandTest {
 
     @Test
     public void testDelete1() throws Exception {
-        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
-        cmdFile.deleteOnExit();
+        final String[] commands = { 
+            "set-auto-commit false",
+            "workspace",
+            "create-vdb myVdb vdbPath",
+            "cd myVdb",
+            "add-model refModel",
+            "cd refModel",
+            "add-table refTable",
+            "cd refTable",
+            "add-column refCol1",
+            "add-column refCol2",
+            "cd ../..",
+            "add-model myModel",
+            "cd myModel",
+            "add-table myTable",
+            "cd myTable",
+            "add-column myCol1",
+            "add-column myCol2",
+            "add-foreign-key myForeignKey /workspace/myVdb/refModel/refTable",
+            "cd myForeignKey",
+            "add-column /workspace/myVdb/myModel/myTable/myCol1",
+            "add-column /workspace/myVdb/myModel/myTable/myCol2",
+            "commit",
+            "delete-column /workspace/myVdb/myModel/myTable/myCol1",
+            "commit"
+            };
 
-        FileWriter writer = new FileWriter(cmdFile);
-        writer.write("set-auto-commit false" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("create-vdb myVdb vdbPath" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd myVdb" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-model refModel" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd refModel" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-table refTable" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd refTable" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-column refCol1" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-column refCol2" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd ../.." + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-model myModel" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd myModel" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-table myTable" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd myTable" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-column myCol1" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-column myCol2" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-foreign-key myForeignKey /workspace/myVdb/refModel/refTable" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd myForeignKey" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-column /workspace/myVdb/myModel/myTable/myCol1" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-column /workspace/myVdb/myModel/myTable/myCol2" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("commit" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("delete-column /workspace/myVdb/myModel/myTable/myCol1" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("commit" + NEW_LINE);  //$NON-NLS-1$
-        writer.close();
-
-        setup( cmdFile.getAbsolutePath() );
+        setup(commands);
 
         CommandResult result = execute();
         assertCommandResultOk(result);

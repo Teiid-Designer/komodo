@@ -15,10 +15,8 @@
  */
 package org.komodo.shell.commands;
 
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.shell.AbstractCommandTest;
-import org.komodo.shell.api.CommandResult;
 
 /**
  * Test Class to test {@link SetPropertyCommand}.
@@ -26,16 +24,32 @@ import org.komodo.shell.api.CommandResult;
 @SuppressWarnings( { "javadoc", "nls" } )
 public class SetPropertyCommandTest extends AbstractCommandTest {
 
-    @Test
-    public void test1() throws Exception {
-        final String[] commands = { "workspace" };
-    	setup( commands );
-
-        CommandResult result = execute();
-        assertCommandResultOk(result);
-
-    	// Check WorkspaceContext
-    	assertEquals("/workspace", wsStatus.getCurrentContextDisplayPath());
+    @Test( expected = AssertionError.class )
+    public void shouldFailTooManyArgs( ) throws Exception {
+        final String[] commands = { "set-property anArg extraArg" };
+        setup( commands );
+        execute();
     }
+    
+//    @Test
+//    public void shouldSetProperty() throws Exception {
+//        final String childName = "blah";
+//        final String propName = "primaryType";
+//        final String propValue = "nt:unstructured";
+//        final String[] commands = { 
+//            "workspace", 
+//            "add-child " + childName,
+//            "cd " + childName,
+//            "set-property " + propName + " " + propValue };
+//        setup( commands );
+//
+//        final CommandResult result = execute();
+//        assertThat( result.isOk(), is( true ) );
+//
+//        final KomodoObject workspace = _repo.komodoWorkspace( getTransaction() );
+//        assertThat( workspace.getChildren( getTransaction() ).length, is( 1 ) );
+//        assertThat( workspace.getChildren( getTransaction() )[ 0 ].getName( getTransaction() ), is( childName ) );
+//        assertThat( workspace.getChildren( getTransaction() )[ 0 ].getProperty( getTransaction(), propName ).getStringValue(getTransaction()), is( propValue ) );
+//    }
 
 }

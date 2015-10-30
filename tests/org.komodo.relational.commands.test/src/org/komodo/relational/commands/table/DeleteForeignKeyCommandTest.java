@@ -16,8 +16,6 @@
 package org.komodo.relational.commands.table;
 
 import static org.junit.Assert.assertEquals;
-import java.io.File;
-import java.io.FileWriter;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.ForeignKey;
@@ -36,27 +34,23 @@ public class DeleteForeignKeyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testDelete1() throws Exception {
-        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
-        cmdFile.deleteOnExit();
+        final String[] commands = { 
+            "workspace",
+            "create-vdb myVdb vdbPath",
+            "cd myVdb",
+            "add-model refModel",
+            "cd refModel",
+            "add-table refTable",
+            "cd ..",
+            "add-model myModel",
+            "cd myModel",
+            "add-table myTable",
+            "cd myTable",
+            "add-foreign-key myForeignKey1 /workspace/myVdb/refModel/refTable",
+            "add-foreign-key myForeignKey2 /workspace/myVdb/refModel/refTable",
+            "delete-foreign-key myForeignKey1" };
 
-        FileWriter writer = new FileWriter(cmdFile);
-        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("create-vdb myVdb vdbPath" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd myVdb" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-model refModel" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd refModel" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-table refTable" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd .." + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-model myModel" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd myModel" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-table myTable" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd myTable" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-foreign-key myForeignKey1 /workspace/myVdb/refModel/refTable" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-foreign-key myForeignKey2 /workspace/myVdb/refModel/refTable" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("delete-foreign-key myForeignKey1" + NEW_LINE);  //$NON-NLS-1$
-        writer.close();
-
-        setup( cmdFile.getAbsolutePath() );
+        setup(commands);
 
         CommandResult result = execute();
         assertCommandResultOk(result);

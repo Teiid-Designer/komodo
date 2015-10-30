@@ -289,13 +289,12 @@ public class PrintUtils implements StringConstants {
     /**
      * Shows the komodo object property with the specified name
      * @param wsStatus the WorkspaceStatus
+     * @param writer the Writer
      * @param context the workspace context
      * @param name the property name
      * @throws Exception the exception
      */
-    public static void printProperty( final WorkspaceStatus wsStatus, KomodoObject context, String name ) throws Exception {
-        Writer commandOutput = wsStatus.getShell().getOutputWriter();
-
+    public static void printProperty( final WorkspaceStatus wsStatus, final Writer writer, KomodoObject context, String name ) throws Exception {
         String propertyName = KomodoObjectUtils.attachPrefix( wsStatus, context, name );
 
         // Get the value for the supplied property
@@ -322,19 +321,19 @@ public class PrintUtils implements StringConstants {
         // Print properties header
         final String path = wsStatus.getDisplayPath(context);
         String propListHeader = Messages.getString( SHELL.PropertyHeader, wsStatus.getTypeDisplay(context), path );
-        print( commandOutput, MESSAGE_INDENT, propListHeader );
-        print( commandOutput, MESSAGE_INDENT,
+        print( writer, MESSAGE_INDENT, propListHeader );
+        print( writer, MESSAGE_INDENT,
                String.format( format,
                               Messages.getString( SHELL.PROPERTY_NAME_HEADER ),
                               Messages.getString( SHELL.PROPERTY_VALUE_HEADER ) ) );
-        print( commandOutput, MESSAGE_INDENT, String.format( format, PrintUtils.getHeaderDelimiter( maxNameWidth ), PrintUtils.getHeaderDelimiter( maxValueWidth ) ) );
+        print( writer, MESSAGE_INDENT, String.format( format, PrintUtils.getHeaderDelimiter( maxNameWidth ), PrintUtils.getHeaderDelimiter( maxValueWidth ) ) );
 
         // propValue less than maximum width
         if(propValue.length() <= maxValueWidth) {
-            print( commandOutput, MESSAGE_INDENT, String.format( format, propertyName, propValue ) );
+            print( writer, MESSAGE_INDENT, String.format( format, propertyName, propValue ) );
         // propValue exceeds maximum width - splits it up onto separate lines
         } else {
-            printPropWithLongValue(commandOutput,format,propertyName,propValue,maxValueWidth);
+            printPropWithLongValue(writer,format,propertyName,propValue,maxValueWidth);
         }
 
     }

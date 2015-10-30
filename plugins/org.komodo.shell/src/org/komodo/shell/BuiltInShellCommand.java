@@ -24,6 +24,7 @@ import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.InvalidCommandArgumentException;
+import org.komodo.shell.api.KomodoObjectLabelProvider;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.KomodoObjectUtils;
@@ -400,13 +401,29 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
 		// If supplied path doesnt start with FORWARD_SLASH, it should be relative to current context
 		String entireDisplayPath = displayPath;
 		if(!displayPath.startsWith(FORWARD_SLASH)) {
-            entireDisplayPath = getWorkspaceStatus().getCurrentContextDisplayPath()+FORWARD_SLASH+displayPath;
+		    if(KomodoObjectUtils.isRoot(getContext())) {
+		        entireDisplayPath = FORWARD_SLASH + displayPath;
+		    } else {
+		        entireDisplayPath = getWorkspaceStatus().getCurrentContextDisplayPath()+FORWARD_SLASH+displayPath;
+		    }
 		}
 		
 		// Try to locate the object at the specified path
         KomodoObject newContext = null;
         String repoPath = getWorkspaceStatus().getLabelProvider().getPath(entireDisplayPath);
         if(!StringUtils.isBlank(repoPath)) {
+            // TODO: probably need to add getFromLibrary method similar to getFromWorkspace instead of the below...
+            // /tko:komodo/library
+            if ( KomodoObjectLabelProvider.LIB_PATH.equals( repoPath ) || KomodoObjectLabelProvider.LIB_SLASH_PATH.equals( repoPath ) ) {
+                return CompletionConstants.OK;
+            }
+
+            // /tko:komodo/environment
+            if ( KomodoObjectLabelProvider.ENV_PATH.equals( repoPath ) || KomodoObjectLabelProvider.ENV_SLASH_PATH.equals( repoPath ) ) {
+                return CompletionConstants.OK;
+            }
+            
+            //
             try {
                 newContext = wsStatus.getRootContext().getRepository().getFromWorkspace(getTransaction(), repoPath);
             } catch (KException ex) {

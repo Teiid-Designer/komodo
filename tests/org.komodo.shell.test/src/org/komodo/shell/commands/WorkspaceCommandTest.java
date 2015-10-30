@@ -26,16 +26,25 @@ import org.komodo.shell.api.CommandResult;
 @SuppressWarnings( { "javadoc", "nls" } )
 public class WorkspaceCommandTest extends AbstractCommandTest {
 
+    @Test( expected = AssertionError.class )
+    public void shouldFailTooManyArgs( ) throws Exception {
+        final String[] commands = { "workspace extraArg" };
+        setup( commands );
+        execute();
+    }
+    
     @Test
-    public void test1() throws Exception {
-        final String[] commands = { "workspace" };
+    public void shouldSetWorkspace() throws Exception {
+        final String[] commands = { 
+            "library",
+            "workspace" };
     	setup( commands );
 
         CommandResult result = execute();
         assertCommandResultOk(result);
 
         String contextPath = wsStatus.getCurrentContextDisplayPath();
-        assertEquals("/workspace", contextPath); //$NON-NLS-1$
+        assertEquals("/workspace", contextPath); 
     }
 
 }

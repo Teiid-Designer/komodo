@@ -3,6 +3,7 @@ package org.komodo.shell;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.komodo.shell.commands.AddChildCommandTest;
+import org.komodo.shell.commands.AddDescriptorCommandTest;
 import org.komodo.shell.commands.CdCommandTest;
 import org.komodo.shell.commands.CommitCommandTest;
 import org.komodo.shell.commands.DeleteChildCommandTest;
@@ -12,14 +13,18 @@ import org.komodo.shell.commands.HomeCommandTest;
 import org.komodo.shell.commands.LibraryCommandTest;
 import org.komodo.shell.commands.ListCommandTest;
 import org.komodo.shell.commands.PlayCommandTest;
+import org.komodo.shell.commands.RemoveDescriptorCommandTest;
 import org.komodo.shell.commands.RenameCommandTest;
 import org.komodo.shell.commands.RollbackCommandTest;
 import org.komodo.shell.commands.SetAutoCommitCommandTest;
 import org.komodo.shell.commands.SetGlobalPropertyCommandTest;
+import org.komodo.shell.commands.SetPrimaryTypeCommandTest;
 import org.komodo.shell.commands.SetPropertyCommandTest;
 import org.komodo.shell.commands.SetRecordCommandTest;
 import org.komodo.shell.commands.ShowChildrenCommandTest;
+import org.komodo.shell.commands.ShowDescriptorsCommandTest;
 import org.komodo.shell.commands.ShowGlobalCommandTest;
+import org.komodo.shell.commands.ShowPrimaryTypeCommandTest;
 import org.komodo.shell.commands.ShowPropertiesCommandTest;
 import org.komodo.shell.commands.ShowPropertyCommandTest;
 import org.komodo.shell.commands.ShowStatusCommandTest;
@@ -32,6 +37,7 @@ import org.komodo.shell.commands.WorkspaceCommandTest;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses( { AddChildCommandTest.class,
+                       AddDescriptorCommandTest.class,
                        CdCommandTest.class, 
                        CommitCommandTest.class,
                        DeleteChildCommandTest.class,
@@ -41,14 +47,18 @@ import org.komodo.shell.commands.WorkspaceCommandTest;
                        LibraryCommandTest.class, 
                        ListCommandTest.class, 
                        PlayCommandTest.class,
+                       RemoveDescriptorCommandTest.class,
                        RenameCommandTest.class, 
                        RollbackCommandTest.class, 
                        SetAutoCommitCommandTest.class,
                        SetGlobalPropertyCommandTest.class, 
+                       SetPrimaryTypeCommandTest.class,
                        SetPropertyCommandTest.class, 
                        SetRecordCommandTest.class,
                        ShowChildrenCommandTest.class, 
+                       ShowDescriptorsCommandTest.class, 
                        ShowGlobalCommandTest.class, 
+                       ShowPrimaryTypeCommandTest.class,
                        ShowPropertiesCommandTest.class,
                        ShowPropertyCommandTest.class, 
                        ShowStatusCommandTest.class, 

@@ -15,8 +15,12 @@
  */
 package org.komodo.shell.commands;
 
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.komodo.shell.AbstractCommandTest;
+import org.komodo.shell.api.CommandResult;
 
 /**
  * Test Class to test {@link ShowPropertyCommand}.
@@ -24,6 +28,13 @@ import org.komodo.shell.AbstractCommandTest;
 @SuppressWarnings({"javadoc", "nls"})
 public class ShowPropertyCommandTest extends AbstractCommandTest {
 
+    @Test( expected = AssertionError.class )
+    public void shouldFailTooManyArgs( ) throws Exception {
+        final String[] commands = { "show-property aProp extraArg" };
+        setup( commands );
+        execute();
+    }
+    
     @Test( expected = AssertionError.class )
     public void shouldNotBeAvailableAtLibrary() throws Exception {
         final String[] commands = { "library",
@@ -45,6 +56,24 @@ public class ShowPropertyCommandTest extends AbstractCommandTest {
                                     "show-property test" };
         setup( commands );
         execute();
+    }
+    
+    @Test
+    public void shouldShowProperties() throws Exception {
+        final String childName = "blah";
+        final String[] commands = { 
+            "workspace", 
+            "add-child " + childName,
+            "cd " + childName,
+            "show-property primaryType" };
+        setup( commands );
+
+        final CommandResult result = execute();
+        assertThat( result.isOk(), is( true ) );
+
+        String writerOutput = getCommandOutput();
+        assertTrue(writerOutput.contains("primaryType"));
+        assertTrue(writerOutput.contains("nt:unstructured"));
     }
 
 }

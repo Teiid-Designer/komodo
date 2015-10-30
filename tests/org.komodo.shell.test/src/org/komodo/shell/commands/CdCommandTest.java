@@ -26,6 +26,13 @@ import org.komodo.shell.api.CommandResult;
 @SuppressWarnings( { "javadoc", "nls" } )
 public class CdCommandTest extends AbstractCommandTest {
 
+    @Test( expected = AssertionError.class )
+    public void shouldFailTooManyArgs( ) throws Exception {
+        final String[] commands = { "cd somewhere extraArg" };
+        setup( commands );
+        execute();
+    }
+    
     @Test
     public void shouldCdAbsolute() throws Exception {
         final String[] commands = { "cd /workspace" };

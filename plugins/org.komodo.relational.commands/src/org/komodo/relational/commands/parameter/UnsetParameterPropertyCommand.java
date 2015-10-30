@@ -7,9 +7,9 @@
  */
 package org.komodo.relational.commands.parameter;
 
-import static org.komodo.relational.commands.WorkspaceCommandMessages.General.INVALID_PROPERTY_NAME;
-import static org.komodo.relational.commands.WorkspaceCommandMessages.General.UNSET_MISSING_PROPERTY_NAME;
-import static org.komodo.relational.commands.WorkspaceCommandMessages.General.UNSET_PROPERTY_SUCCESS;
+import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.INVALID_PROPERTY_NAME;
+import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.UNSET_MISSING_PROPERTY_NAME;
+import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.UNSET_PROPERTY_SUCCESS;
 import java.util.List;
 import org.komodo.relational.RelationalConstants;
 import org.komodo.relational.model.Parameter;

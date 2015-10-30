@@ -26,6 +26,13 @@ import org.komodo.shell.api.CommandResult;
 @SuppressWarnings( { "javadoc", "nls" } )
 public class HelpCommandTest extends AbstractCommandTest {
 
+    @Test( expected = AssertionError.class )
+    public void shouldFailTooManyArgs( ) throws Exception {
+        final String[] commands = { "help cd extraArg" };
+        setup( commands );
+        execute();
+    }
+    
     @Test
     public void shouldShowHelpAtContext() throws Exception {
         final String[] commands = { "workspace",
