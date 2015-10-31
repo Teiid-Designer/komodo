@@ -37,6 +37,32 @@ public abstract class KomodoService implements JsonConstants {
     private static final int TIMEOUT = 30;
     private static final TimeUnit UNIT = TimeUnit.SECONDS;
 
+    /**
+     * Query parameter keys used by the service methods.
+     */
+    public interface QueryParamKeys {
+
+        /**
+         * A regex expression used when searching. If not present, all objects are returned.
+         */
+        String PATTERN = "pattern"; //$NON-NLS-1$
+
+        /**
+         * The number of objects to return. If not present, all objects are returned.
+         */
+        String SIZE = "size"; //$NON-NLS-1$
+
+        /**
+         * The index of the first object to return. Defaults to zero.
+         */
+        String START = "start"; //$NON-NLS-1$
+
+        /**
+         * The Komodo Type required.
+         */
+        String KTYPE = "ktype"; //$NON-NLS-1$
+    }
+
     protected final Repository repo;
 
     /**

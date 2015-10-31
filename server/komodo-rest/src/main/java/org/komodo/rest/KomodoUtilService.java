@@ -15,6 +15,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
@@ -36,11 +37,15 @@ import org.komodo.rest.relational.RelationalMessages;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.rest.schema.json.TeiidXsdReader;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.Id;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 /**
  * A Komodo REST service for obtaining VDB information from the workspace.
@@ -209,7 +214,11 @@ public final class KomodoUtilService extends KomodoService {
      *        the request headers (never <code>null</code>)
      * @param uriInfo
      *        the request URI information (never <code>null</code>)
-     * @return a JSON document representing the schema of the teiid VDB (never <code>null</code>)
+     * @param ktype
+     *        the komodo type parameter
+     * @return a JSON document representing the schema of the teiid VDB (never <code>null</code>).
+     *                If a ktype parameter is specified conforming to a KomodoType then only the associated
+     *                element of the teiid schema is returned.
      * @throws KomodoRestException
      *         if there is a problem constructing the VDBs JSON document
      */
@@ -219,22 +228,53 @@ public final class KomodoUtilService extends KomodoService {
     @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Display the schema structure of the teiid vdb",
                             response = String.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 404, message = "If ktype is not a recognised type"),
+        @ApiResponse(code = 404, message = "If ktype is recognised but not associated with a teiid schema element"),
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation")
+    })
     public Response getSchema( final @Context HttpHeaders headers,
-                             final @Context UriInfo uriInfo ) throws KomodoRestException {
+                             final @Context UriInfo uriInfo,
+                             @ApiParam(value = "Type of schema element to be returned",
+                                                allowableValues = "Vdb, VdbImport, " +
+                                                                             "VdbTranslator, Model, " +
+                                                                             "VdbModelSource, VdbDataRole, " +
+                                                                             "VdbPermission, VdbCondition, VdbMask",
+                                                required = false,
+                                                allowMultiple = false)
+                             @QueryParam(value = "ktype") String ktype) throws KomodoRestException {
 
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
+            return notAcceptableMediaTypesBuilder().build();
 
         try {
             TeiidXsdReader reader = new TeiidXsdReader();
-            String schema = reader.read();
+            String schema = null;
 
-            ResponseBuilder builder = null;
-            if (isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
-                builder = Response.ok().entity(schema);
-            else
-                builder = notAcceptableMediaTypesBuilder();
+            if (ktype == null) {
+                //
+                // Request to return whole of schema
+                //
+                schema = reader.read();
+                return Response.ok().entity(schema).build();
+            }
 
-            return builder.build();
+            KomodoType komodoType = KomodoType.getKomodoType(ktype);
+            if (komodoType == null) {
+                String msg = RelationalMessages.getString(
+                                                          RelationalMessages.Error.SCHEMA_SERVICE_GET_SCHEMA_UNKNOWN_KTYPE, ktype );
+                return Response.status(Status.NOT_FOUND).entity(msg).build();
+            }
+
+            schema = reader.schemaByKType(komodoType);
+            if (EMPTY_STRING.equals(schema)) {
+                String msg = RelationalMessages.getString(
+                                                          RelationalMessages.Error.SCHEMA_SERVICE_GET_SCHEMA_NOT_FOUND, ktype );
+                return Response.status(Status.NOT_FOUND).entity(msg).build();
+            }
+
+            return Response.ok().entity(schema).build();
 
         } catch ( final Exception e ) {
             if ( e instanceof KomodoRestException ) {

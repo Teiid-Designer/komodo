@@ -8,6 +8,7 @@
 package org.komodo.rest;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.io.InputStream;
@@ -37,6 +38,7 @@ import org.komodo.rest.relational.RelationalMessages;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.constants.SystemConstants;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.test.utils.TestUtilities;
 
 @SuppressWarnings( {"javadoc", "nls"} )
@@ -197,5 +199,86 @@ public final class KomodoUtilServiceTest implements StringConstants {
         String expected = TestUtilities.toString(schemaStream);
 
         assertEquals(expected, entity);
+    }
+
+    @Test
+    public void shouldReturnTeiidSchemaForKType() throws Exception {
+
+        // get
+        UriBuilder baseBuilder = UriBuilder.fromUri(_uriBuilder.baseUri())
+                                                    .path(V1Constants.SERVICE_SEGMENT)
+                                                    .path(V1Constants.SCHEMA_SEGMENT);
+
+        // Get model
+        URI uri = baseBuilder.clone()
+                                         .queryParam(KomodoService.QueryParamKeys.KTYPE, KomodoType.MODEL)
+                                         .build();
+        this.response = request(uri).get();
+        assertTrue(response.hasEntity());
+
+        String entity = response.readEntity(String.class);
+        System.out.println("Response from uri " + uri + ":\n" + entity);
+
+        assertFalse(entity.contains("\"schema-1\" : {"));
+        assertFalse(entity.contains("\"keng__id\" : \"vdb\""));
+        assertFalse(entity.contains("\"keng__id\" : \"importVdb\""));
+        assertTrue(entity.contains("\"keng__id\" : \"model\""));
+        assertFalse(entity.contains("\"keng__id\" : \"source\""));
+        assertFalse(entity.contains("\"keng__id\" : \"metadata\""));
+        assertFalse(entity.contains("\"keng__id\" : \"validationError\""));
+        assertFalse(entity.contains("\"keng__id\" : \"translator\""));
+        assertFalse(entity.contains("\"keng__id\" : \"dataRole\""));
+        assertFalse(entity.contains("\"keng__id\" : \"permission\""));
+        assertFalse(entity.contains("\"keng__id\" : \"condition\""));
+        assertFalse(entity.contains("\"keng__id\" : \"mask\""));
+        assertFalse(entity.contains("\"keng__id\" : \"entry\""));
+
+        // Get data role
+        uri = baseBuilder.clone()
+                                  .queryParam(KomodoService.QueryParamKeys.KTYPE, KomodoType.VDB_DATA_ROLE)
+                                  .build();
+        this.response = request(uri).get();
+        assertTrue(response.hasEntity());
+
+        entity = response.readEntity(String.class);
+        System.out.println("Response from uri " + uri + ":\n" + entity);
+
+        assertFalse(entity.contains("\"schema-1\" : {"));
+        assertFalse(entity.contains("\"keng__id\" : \"vdb\""));
+        assertFalse(entity.contains("\"keng__id\" : \"importVdb\""));
+        assertFalse(entity.contains("\"keng__id\" : \"model\""));
+        assertFalse(entity.contains("\"keng__id\" : \"source\""));
+        assertFalse(entity.contains("\"keng__id\" : \"metadata\""));
+        assertFalse(entity.contains("\"keng__id\" : \"validationError\""));
+        assertFalse(entity.contains("\"keng__id\" : \"translator\""));
+        assertTrue(entity.contains("\"keng__id\" : \"dataRole\""));
+        assertFalse(entity.contains("\"keng__id\" : \"permission\""));
+        assertFalse(entity.contains("\"keng__id\" : \"condition\""));
+        assertFalse(entity.contains("\"keng__id\" : \"mask\""));
+        assertFalse(entity.contains("\"keng__id\" : \"entry\""));
+
+        // Get mask
+        uri = baseBuilder.clone().
+                                   queryParam(KomodoService.QueryParamKeys.KTYPE, KomodoType.VDB_MASK)
+                                   .build();
+        this.response = request(uri).get();
+        assertTrue(response.hasEntity());
+
+        entity = response.readEntity(String.class);
+        System.out.println("Response from uri " + uri + ":\n" + entity);
+
+        assertFalse(entity.contains("\"schema-1\" : {"));
+        assertFalse(entity.contains("\"keng__id\" : \"vdb\""));
+        assertFalse(entity.contains("\"keng__id\" : \"importVdb\""));
+        assertFalse(entity.contains("\"keng__id\" : \"model\""));
+        assertFalse(entity.contains("\"keng__id\" : \"source\""));
+        assertFalse(entity.contains("\"keng__id\" : \"metadata\""));
+        assertFalse(entity.contains("\"keng__id\" : \"validationError\""));
+        assertFalse(entity.contains("\"keng__id\" : \"translator\""));
+        assertFalse(entity.contains("\"keng__id\" : \"dataRole\""));
+        assertFalse(entity.contains("\"keng__id\" : \"permission\""));
+        assertFalse(entity.contains("\"keng__id\" : \"condition\""));
+        assertTrue(entity.contains("\"keng__id\" : \"mask\""));
+        assertFalse(entity.contains("\"keng__id\" : \"entry\""));
     }
 }

@@ -31,11 +31,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import javax.resource.spi.IllegalStateException;
 import javax.xml.parsers.SAXParserFactory;
 import org.komodo.rest.json.JsonConstants;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.utils.KeyInValueHashMap;
 import org.komodo.spi.utils.KeyInValueHashMap.KeyFromValueAdapter;
+import org.komodo.utils.StringUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -476,15 +479,25 @@ public class TeiidXsdReader implements XSVisitor, JsonConstants {
         parentCtx = schemaCtx;
     }
 
+    private String writeNode(JsonNode node) throws JsonProcessingException {
+        return getMapper().writerWithDefaultPrettyPrinter().writeValueAsString(node);
+    }
+
+    private ObjectMapper getMapper() {
+        if (mapper == null) {
+            mapper = new ObjectMapper();
+            mapper.enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY);
+            mapper.enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS);
+        }
+
+        return mapper;
+    }
+
     /**
      * @return String representation of teiid xsd
      * @throws Exception if error occurs
      */
     public String read() throws Exception {
-        mapper = new ObjectMapper();
-        mapper.enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY);
-        mapper.enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS);
-
         XSOMParser parser = new XSOMParser(SAXParserFactory.newInstance());
         parser.setAnnotationParser(new XsdAnnotationFactory());
         InputStream stream = this.getClass().getResourceAsStream(TEIID_VDB_XSD);
@@ -496,7 +509,7 @@ public class TeiidXsdReader implements XSVisitor, JsonConstants {
 
             XSSchemaSet schemaSet = parser.getResult();
             Collection<XSSchema> schemas = schemaSet.getSchemas();
-            rootNode = mapper.createObjectNode();
+            rootNode = getMapper().createObjectNode();
 
             Iterator<XSSchema> iterator = schemas.iterator();
             for (int i = 0; iterator.hasNext(); ++i) {
@@ -509,10 +522,45 @@ public class TeiidXsdReader implements XSVisitor, JsonConstants {
                     rootNode.set(SCHEMA + i, parentCtx);
             }
 
-            return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(rootNode);
+            return writeNode(rootNode);
         } finally {
             stream.close();
         }
+    }
+
+    private String schemaByKType(JsonNode node, KomodoType kType) throws Exception {
+        if (node == null)
+            throw new IllegalStateException("Programming error. read() should be called prior to this method");
+
+        JsonNode jsonNode = node.get(KTYPE);
+        if (jsonNode != null) {
+            String kValue = jsonNode.asText();
+            KomodoType nodeKType = KomodoType.getKomodoType(kValue);
+            if (kType.equals(nodeKType))
+                return writeNode(node);
+        }
+
+        Iterator<JsonNode> elements = node.elements();
+        while (elements.hasNext()) {
+            JsonNode element = elements.next();
+            String schema = schemaByKType(element, kType);
+            if (! EMPTY_STRING.equals(schema))
+                return schema;
+        }
+
+        return EMPTY_STRING;
+    }
+
+    /**
+     * @param kType the {@link KomodoType}
+     * @return the schema representation for the given {@link KomodoType}
+     * @throws Exception if error occurs
+     */
+    public String schemaByKType(KomodoType kType) throws Exception {
+        if (rootNode == null)
+            read();
+
+        return schemaByKType(rootNode, kType);
     }
 
     /**
@@ -522,5 +570,24 @@ public class TeiidXsdReader implements XSVisitor, JsonConstants {
     public static void main(String[] args) throws Exception {
         TeiidXsdReader reader = new TeiidXsdReader();
         System.out.println(reader.read());
+        System.out.println();
+        System.out.println();
+        System.out.println(reader.schemaByKType(KomodoType.MODEL));
+        System.out.println();
+        System.out.println();
+        System.out.println(reader.schemaByKType(KomodoType.VDB_DATA_ROLE));
+
+        String[] values = {
+           KomodoType.VDB.getType(),
+           KomodoType.VDB_IMPORT.getType(),
+           KomodoType.VDB_TRANSLATOR.getType(),
+           KomodoType.MODEL.getType(),
+           KomodoType.VDB_MODEL_SOURCE.getType(),
+           KomodoType.VDB_DATA_ROLE.getType(),
+           KomodoType.VDB_PERMISSION.getType(),
+           KomodoType.VDB_CONDITION.getType(),
+           KomodoType.VDB_MASK.getType(),
+        };
+        System.out.println(StringUtils.toCommaSeparatedList(values));
     }
 }

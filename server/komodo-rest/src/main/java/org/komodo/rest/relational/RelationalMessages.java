@@ -26,6 +26,7 @@ import static org.komodo.spi.constants.StringConstants.DOT;
 import static org.komodo.spi.constants.StringConstants.OPEN_ANGLE_BRACKET;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import org.komodo.spi.repository.KomodoType;
 
 /**
  * Localized messages for the {@code server rest} project.
@@ -155,7 +156,17 @@ public final class RelationalMessages {
         /**
          * An error occurred while trying to obtain the teiid schema
          */
-        SCHEMA_SERVICE_GET_SCHEMA_ERROR;
+        SCHEMA_SERVICE_GET_SCHEMA_ERROR,
+
+        /**
+         * An unknown {@link KomodoType} was provided to the get schema operation
+         */
+        SCHEMA_SERVICE_GET_SCHEMA_UNKNOWN_KTYPE,
+
+        /**
+         * The schema was not found
+         */
+        SCHEMA_SERVICE_GET_SCHEMA_NOT_FOUND;
 
         /**
          * {@inheritDoc}

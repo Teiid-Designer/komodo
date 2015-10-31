@@ -305,7 +305,7 @@ public final class KomodoVdbServiceTest implements StringConstants {
         final String pattern = STAR + "P" + STAR;
         this.response = request(
                                 UriBuilder.fromUri(_uriBuilder.generateVdbsUri())
-                                .queryParam(KomodoVdbService.QueryParam.PATTERN, pattern).build()).get();
+                                .queryParam(KomodoVdbService.QueryParamKeys.PATTERN, pattern).build()).get();
 
         final String entities = response.readEntity(String.class);
         assertThat(entities, is(notNullValue()));
@@ -333,7 +333,7 @@ public final class KomodoVdbServiceTest implements StringConstants {
             final int resultSize = 3;
 
             this.response = request( UriBuilder.fromUri( _uriBuilder.generateVdbsUri() )
-                                               .queryParam( KomodoVdbService.QueryParam.SIZE, resultSize )
+                                               .queryParam( KomodoVdbService.QueryParamKeys.SIZE, resultSize )
                                                .build() ).get();
             final String entities = response.readEntity(String.class);
             assertThat(entities, is(notNullValue()));
@@ -351,7 +351,7 @@ public final class KomodoVdbServiceTest implements StringConstants {
             final int start = 3;
 
             this.response = request( UriBuilder.fromUri( _uriBuilder.generateVdbsUri() )
-                                               .queryParam( KomodoVdbService.QueryParam.START, start )
+                                               .queryParam( KomodoVdbService.QueryParamKeys.START, start )
                                                .build() ).get();
             final String entities = response.readEntity(String.class);
             assertThat(entities, is(notNullValue()));
@@ -430,7 +430,7 @@ public final class KomodoVdbServiceTest implements StringConstants {
         loadVdbs();
 
         // get
-        URI uri = _uriBuilder.buildVdbModelUri(LinkType.SELF, TestUtilities.PORTFOLIO_VDB_NAME, "PersonalValuations");
+        URI uri = _uriBuilder.buildVdbModelUri(LinkType.SELF, TestUtilities.PORTFOLIO_VDB_NAME, "StocksMatModel");
         this.response = request(uri).get();
         final String entity = this.response.readEntity(String.class);
         assertThat(entity, is(notNullValue()));

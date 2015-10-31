@@ -81,28 +81,6 @@ import io.swagger.annotations.ApiResponses;
 @Api(tags = {V1Constants.VDBS_SEGMENT})
 public final class KomodoVdbService extends KomodoService {
 
-    /**
-     * Query parameters used by the service methods.
-     */
-    public interface QueryParam {
-
-        /**
-         * A regex expression used when searching. If not present, all objects are returned.
-         */
-        String PATTERN = "pattern"; //$NON-NLS-1$
-
-        /**
-         * The number of objects to return. If not present, all objects are returned.
-         */
-        String SIZE = "size"; //$NON-NLS-1$
-
-        /**
-         * The index of the first object to return. Defaults to zero.
-         */
-        String START = "start"; //$NON-NLS-1$
-
-    }
-
     private static final int ALL_AVAILABLE = -1;
 
     private final WorkspaceManager wsMgr;
@@ -371,7 +349,7 @@ public final class KomodoVdbService extends KomodoService {
         UnitOfWork uow = null;
 
         try {
-            final String searchPattern = uriInfo.getQueryParameters().getFirst( QueryParam.PATTERN );
+            final String searchPattern = uriInfo.getQueryParameters().getFirst( QueryParamKeys.PATTERN );
 
             // find VDBs
             uow = createTransaction( "getVdbs", true ); //$NON-NLS-1$
@@ -400,7 +378,7 @@ public final class KomodoVdbService extends KomodoService {
             int start = 0;
 
             { // start query parameter
-                final String qparam = uriInfo.getQueryParameters().getFirst( QueryParam.START );
+                final String qparam = uriInfo.getQueryParameters().getFirst( QueryParamKeys.START );
 
                 if ( qparam != null ) {
 
@@ -419,7 +397,7 @@ public final class KomodoVdbService extends KomodoService {
             int size = ALL_AVAILABLE;
 
             { // size query parameter
-                final String qparam = uriInfo.getQueryParameters().getFirst( QueryParam.SIZE );
+                final String qparam = uriInfo.getQueryParameters().getFirst( QueryParamKeys.SIZE );
 
                 if ( qparam != null ) {
 
