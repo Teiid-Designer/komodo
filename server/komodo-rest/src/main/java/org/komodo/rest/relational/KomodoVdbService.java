@@ -7,7 +7,6 @@
 */
 package org.komodo.rest.relational;
 
-import static org.komodo.rest.KomodoRestEntity.NO_CONTENT;
 import static org.komodo.rest.Messages.Error.KOMODO_ENGINE_WORKSPACE_MGR_ERROR;
 import static org.komodo.rest.Messages.General.DELETE_OPERATION_NAME;
 import static org.komodo.rest.Messages.General.GET_OPERATION_NAME;
@@ -365,9 +364,6 @@ public final class KomodoVdbService extends KomodoService {
     @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Display the collection of vdbs",
                             response = RestVdb[].class)
-    @ApiResponses(value = {
-        @ApiResponse(code = 204, message = "No vdbs in workspace")
-    })
     public Response getVdbs( final @Context HttpHeaders headers,
                              final @Context UriInfo uriInfo ) throws KomodoRestException {
 
@@ -399,11 +395,6 @@ public final class KomodoVdbService extends KomodoService {
 
                     LOGGER.debug( "getVdbs:found '{0}' VDBs using pattern '{1}'", vdbs.length, searchPattern ); //$NON-NLS-1$
                 }
-            }
-
-            if ( vdbs.length == 0 ) {
-                final Response response = commit( uow, mediaTypes, NO_CONTENT );
-                return response;
             }
 
             int start = 0;
@@ -494,7 +485,6 @@ public final class KomodoVdbService extends KomodoService {
     @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Find vdb by name", response = RestVdb.class)
     @ApiResponses(value = {
-        @ApiResponse(code = 204, message = "No vdbs in workspace"),
         @ApiResponse(code = 404, message = "No vdb could be found with name"),
         @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation")
     })
@@ -555,7 +545,7 @@ public final class KomodoVdbService extends KomodoService {
     @ApiOperation(value = "Find all models belonging to the vdb", response = RestVdb.class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No vdb could be found with name"),
-        @ApiResponse(code = 404, message = "No models could be found"),
+        @ApiResponse(code = 200, message = "No models could be found but an empty list is returned"),
         @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation")
     })
     public Response getModels( final @Context HttpHeaders headers,
@@ -578,11 +568,8 @@ public final class KomodoVdbService extends KomodoService {
             final Vdb vdb = this.wsMgr.resolve( uow, kobject, Vdb.class );
 
             Model[] models = vdb.getModels(uow);
-            if (models == null || models.length == 0) {
-                LOGGER.debug("getModels:No models found for vdb '{0}'", vdbName); //$NON-NLS-1$
-                String resourceName = vdbName + FORWARD_SLASH + V1Constants.MODELS_SEGMENT;
-                return commit(uow, mediaTypes, new ResourceNotFound(resourceName, Messages.getString(GET_OPERATION_NAME)));
-            }
+            if (models == null)
+                models = new Model[0];
 
             List<RestVdbModel> restModels = new ArrayList<>(models.length);
             for (Model model : models) {
@@ -704,7 +691,7 @@ public final class KomodoVdbService extends KomodoService {
     @ApiOperation(value = "Find all translators belonging to the vdb", response = RestVdbTranslator[].class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No vdb could be found with name"),
-        @ApiResponse(code = 404, message = "No translators could be found"),
+        @ApiResponse(code = 200, message = "No translators could be found but an empty list is returned"),
         @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation")
     })
     public Response getTranslators( final @Context HttpHeaders headers,
@@ -727,11 +714,8 @@ public final class KomodoVdbService extends KomodoService {
             final Vdb vdb = this.wsMgr.resolve( uow, kobject, Vdb.class );
 
             Translator[] translators = vdb.getTranslators(uow);
-            if (translators == null || translators.length == 0) {
-                LOGGER.debug("getTranslators:No translators found for vdb '{0}'", vdbName); //$NON-NLS-1$
-                String resourceName = vdbName + FORWARD_SLASH + V1Constants.TRANSLATORS_SEGMENT;
-                return commit(uow, mediaTypes, new ResourceNotFound(resourceName, Messages.getString(GET_OPERATION_NAME)));
-            }
+            if (translators == null)
+                translators = new Translator[0];
 
             List<RestVdbTranslator> restTranslators = new ArrayList<>(translators.length);
             for (Translator translator : translators) {
@@ -868,7 +852,7 @@ public final class KomodoVdbService extends KomodoService {
     @ApiOperation(value = "Find all imports belonging to the vdb", response = RestVdbImport[].class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No vdb could be found with name"),
-        @ApiResponse(code = 404, message = "No imports could be found"),
+        @ApiResponse(code = 200, message = "No imports could be found but an empty list is returned"),
         @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation")
     })
     public Response getImports( final @Context HttpHeaders headers,
@@ -891,11 +875,8 @@ public final class KomodoVdbService extends KomodoService {
             final Vdb vdb = this.wsMgr.resolve( uow, kobject, Vdb.class );
 
             VdbImport[] imports = vdb.getImports(uow);
-            if (imports == null || imports.length == 0) {
-                LOGGER.debug("getImports:No imports found for vdb '{0}'", vdbName); //$NON-NLS-1$
-                String resourceName = vdbName + FORWARD_SLASH + V1Constants.IMPORTS_SEGMENT;
-                return commit(uow, mediaTypes, new ResourceNotFound(resourceName, Messages.getString(GET_OPERATION_NAME)));
-            }
+            if (imports == null)
+                imports = new VdbImport[0];
 
             List<RestVdbImport> restImports = new ArrayList<>(imports.length);
             for (VdbImport vdbImport : imports) {
@@ -1032,7 +1013,7 @@ public final class KomodoVdbService extends KomodoService {
     @ApiOperation(value = "Find all data roles belonging to the vdb", response = RestVdbDataRole[].class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No vdb could be found with name"),
-        @ApiResponse(code = 404, message = "No data roles could be found"),
+        @ApiResponse(code = 200, message = "No data roles could be found but an empty list is returned"),
         @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation")
     })
     public Response getDataRoles( final @Context HttpHeaders headers,
@@ -1055,11 +1036,8 @@ public final class KomodoVdbService extends KomodoService {
             final Vdb vdb = this.wsMgr.resolve( uow, kobject, Vdb.class );
 
             DataRole[] dataRoles = vdb.getDataRoles(uow);
-            if (dataRoles == null || dataRoles.length == 0) {
-                LOGGER.debug("getDataRoles:No data roles found for vdb '{0}'", vdbName); //$NON-NLS-1$
-                String resourceName = vdbName + FORWARD_SLASH + V1Constants.DATA_ROLES_SEGMENT;
-                return commit(uow, mediaTypes, new ResourceNotFound(resourceName, Messages.getString(GET_OPERATION_NAME)));
-            }
+            if (dataRoles == null)
+                dataRoles = new DataRole[0];
 
             List<RestVdbDataRole> restImports = new ArrayList<>(dataRoles.length);
             for (DataRole dataRole : dataRoles) {
@@ -1200,7 +1178,7 @@ public final class KomodoVdbService extends KomodoService {
     @ApiOperation(value = "Find all sources of the model belonging to the vdb", response = RestVdbModelSource[].class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No vdb could be found with name"),
-        @ApiResponse(code = 404, message = "No sources could be found"),
+        @ApiResponse(code = 200, message = "No sources could be found but an empty list is returned"),
         @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation")
     })
     public Response getSources( final @Context HttpHeaders headers,
@@ -1241,14 +1219,8 @@ public final class KomodoVdbService extends KomodoService {
             Model model = this.wsMgr.resolve( uow, kModel, Model.class );
 
             ModelSource[] sources = model.getSources(uow);
-            if (sources == null || sources.length == 0) {
-                LOGGER.debug("getSources:No sources found for model '{0}' in vdb '{1}'", modelName, vdbName); //$NON-NLS-1$
-                String resourceName = vdbName + FORWARD_SLASH +
-                                                     V1Constants.MODELS_SEGMENT + FORWARD_SLASH +
-                                                     modelName + FORWARD_SLASH +
-                                                     V1Constants.SOURCES_SEGMENT;
-                return commit(uow, mediaTypes, new ResourceNotFound(resourceName, Messages.getString(GET_OPERATION_NAME)));
-            }
+            if (sources == null)
+                sources = new ModelSource[0];
 
             List<RestVdbModelSource> restSources = new ArrayList<>(sources.length);
             for (ModelSource source : sources) {

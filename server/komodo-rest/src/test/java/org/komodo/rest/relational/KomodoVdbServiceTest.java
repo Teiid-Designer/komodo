@@ -376,9 +376,16 @@ public final class KomodoVdbServiceTest implements StringConstants {
     }
 
     @Test
-    public void shouldReturnEmptyResponseWhenNoVdbsInWorkspace() {
+    public void shouldReturnEmptyListWhenNoVdbsInWorkspace() {
         this.response = request(_uriBuilder.generateVdbsUri()).get();
-        assertThat(this.response.getStatus(), is(Status.NO_CONTENT.getStatusCode()));
+        final String entity = this.response.readEntity(String.class);
+        assertThat(entity, is(notNullValue()));
+
+        System.out.println("Response:\n" + entity);
+
+        RestVdb[] vdbs = KomodoJsonMarshaller.unmarshallArray(entity, RestVdb[].class);
+        assertNotNull(vdbs);
+        assertEquals(0, vdbs.length);
     }
 
     @Test
@@ -521,6 +528,23 @@ public final class KomodoVdbServiceTest implements StringConstants {
     }
 
     @Test
+    public void shouldGetVdbTranslatorsEmptyList() throws Exception {
+        loadVdbs();
+
+        // get
+        URI uri = _uriBuilder.generateVdbChildGroupUri(TestUtilities.PORTFOLIO_VDB_NAME, LinkType.TRANSLATORS);
+        this.response = request(uri).get();
+        final String entity = this.response.readEntity(String.class);
+        assertThat(entity, is(notNullValue()));
+
+        System.out.println("Response:\n" + entity);
+
+        RestVdbTranslator[] translators = KomodoJsonMarshaller.unmarshallArray(entity, RestVdbTranslator[].class);
+        assertNotNull(translators);
+        assertEquals(0, translators.length);
+    }
+
+    @Test
     public void shouldGetVdbTranslator() throws Exception {
         loadVdbs();
 
@@ -568,6 +592,23 @@ public final class KomodoVdbServiceTest implements StringConstants {
 
         List<RestLink> links = vdbImport.getLinks();
         assertEquals(2, links.size());
+    }
+
+    @Test
+    public void shouldGetVdbImportsEmptyList() throws Exception {
+        loadVdbs();
+
+        // get
+        URI uri = _uriBuilder.generateVdbChildGroupUri(TestUtilities.PORTFOLIO_VDB_NAME, LinkType.IMPORTS);
+        this.response = request(uri).get();
+        final String entity = this.response.readEntity(String.class);
+        assertThat(entity, is(notNullValue()));
+
+        System.out.println("Response:\n" + entity);
+
+        RestVdbImport[] imports = KomodoJsonMarshaller.unmarshallArray(entity, RestVdbImport[].class);
+        assertNotNull(imports);
+        assertEquals(0, imports.length);
     }
 
     @Test
@@ -692,6 +733,23 @@ public final class KomodoVdbServiceTest implements StringConstants {
 
         List<RestLink> links = dataRole.getLinks();
         assertEquals(2, links.size());
+    }
+
+    @Test
+    public void shouldGetVdbDataRolesEmptyList() throws Exception {
+        loadVdbs();
+
+        // get
+        URI uri = _uriBuilder.generateVdbChildGroupUri(TestUtilities.PORTFOLIO_VDB_NAME, LinkType.DATA_ROLES);
+        this.response = request(uri).get();
+        final String entity = this.response.readEntity(String.class);
+        assertThat(entity, is(notNullValue()));
+
+        System.out.println("Response:\n" + entity);
+
+        RestVdbDataRole[] dataRoles = KomodoJsonMarshaller.unmarshallArray(entity, RestVdbDataRole[].class);
+        assertNotNull(dataRoles);
+        assertEquals(0, dataRoles.length);
     }
 
     @Test

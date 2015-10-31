@@ -206,9 +206,7 @@ public abstract class KomodoService implements JsonConstants {
         ResponseBuilder builder = null;
 
         KomodoRestEntity entity;
-        if ( entities == null || entities.isEmpty()) {
-            builder = Response.noContent();
-        } else if ( (entity = entities.iterator().next()) instanceof ResourceNotFound ) {
+        if ( entities.size() == 1 && (entity = entities.iterator().next()) instanceof ResourceNotFound ) {
             final ResourceNotFound resourceNotFound = ( ResourceNotFound )entity;
 
             String notFoundMessage = Messages.getString( RESOURCE_NOT_FOUND,
@@ -219,12 +217,10 @@ public abstract class KomodoService implements JsonConstants {
         } else {
 
             if (isAcceptable(acceptableMediaTypes, MediaType.APPLICATION_JSON_TYPE))
-                builder = Response.ok( KomodoJsonMarshaller.marshall( entity ), MediaType.APPLICATION_JSON );
+                builder = Response.ok( KomodoJsonMarshaller.marshallArray(entities.toArray(new KomodoRestEntity[0]), true), MediaType.APPLICATION_JSON );
             else {
                 builder = notAcceptableMediaTypesBuilder();
             }
-
-            builder = Response.ok( KomodoJsonMarshaller.marshallArray(entities.toArray(new KomodoRestEntity[0]), true), MediaType.APPLICATION_JSON );
         }
 
         return builder.build();
