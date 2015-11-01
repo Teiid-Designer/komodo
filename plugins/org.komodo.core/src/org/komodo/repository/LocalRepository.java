@@ -483,6 +483,12 @@ public class LocalRepository extends RepositoryImpl {
                     LocalRepository.this.state = State.NOT_REACHABLE;
                     notifyObservers();
                 }
+
+                //
+                // If this repository is restarted then createEngineThread() is going to be called
+                // hence this defunct engineThread must be discarded to ensure a clean restart
+                //
+                engineThread = null;
             }
         };
 
