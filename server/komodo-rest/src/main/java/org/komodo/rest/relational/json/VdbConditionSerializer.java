@@ -11,6 +11,7 @@ import static org.komodo.rest.Messages.Error.INCOMPLETE_JSON;
 import static org.komodo.rest.Messages.Error.UNEXPECTED_JSON_TOKEN;
 import java.io.IOException;
 import org.komodo.rest.Messages;
+import org.komodo.rest.json.JsonConstants;
 import org.komodo.rest.relational.RestVdbCondition;
 import org.komodo.utils.StringUtils;
 import com.google.gson.stream.JsonReader;
@@ -47,8 +48,9 @@ public final class VdbConditionSerializer extends KomodoRestEntitySerializer< Re
             else if (RestVdbCondition.CONSTRAINT_LABEL.equals(name)) {
                 final boolean constraint = in.nextBoolean();
                 condition.setConstraint(constraint);
-            }
-            else
+            } else if (JsonConstants.LINKS.equals(name)) {
+                readLinks( in, condition );
+            } else
                 throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
         }
 
@@ -84,6 +86,8 @@ public final class VdbConditionSerializer extends KomodoRestEntitySerializer< Re
         // allow alter
         out.name(RestVdbCondition.CONSTRAINT_LABEL);
         out.value(value.isConstraint());
+
+        writeLinks(out, value);
 
         endWrite( out );
     }

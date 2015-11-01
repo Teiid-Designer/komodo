@@ -58,7 +58,22 @@ public final class RestLink {
         /**
          * A link to a model source resource
          */
-        SOURCES(KomodoType.VDB_MODEL_SOURCE);
+        SOURCES(KomodoType.VDB_MODEL_SOURCE),
+
+        /**
+         * A link to a permission resource
+         */
+        PERMISSIONS(KomodoType.VDB_PERMISSION),
+
+        /**
+         * A link to a condition resource
+         */
+        CONDITIONS(KomodoType.VDB_CONDITION),
+
+        /**
+         * A link to a mask resource
+         */
+        MASKS(KomodoType.VDB_MASK);
 
         private KomodoType kType;
 

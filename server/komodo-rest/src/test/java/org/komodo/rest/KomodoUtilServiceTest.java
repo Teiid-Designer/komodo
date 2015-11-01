@@ -12,6 +12,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -32,6 +33,7 @@ import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
+import org.komodo.core.KEngine;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.relational.KomodoRestUriBuilder;
 import org.komodo.rest.relational.RelationalMessages;
@@ -51,8 +53,20 @@ public final class KomodoUtilServiceTest implements StringConstants {
 
     @AfterClass
     public static void afterAll() throws Exception {
-        _server.stop();
-        _restApp.stop();
+        if (_server != null)
+            _server.stop();
+
+        if (_restApp != null)
+            _restApp.stop();
+
+        //
+        // Allow other instances of the KomodoRestV1Application to be deployed
+        // with a clean komodo engine by destroying the current static instance
+        // loaded from these tests
+        //
+        Field instanceField = KEngine.class.getDeclaredField("_instance");
+        instanceField.setAccessible(true);
+        instanceField.set(KEngine.class, null);
     }
 
     @BeforeClass
@@ -125,7 +139,7 @@ public final class KomodoUtilServiceTest implements StringConstants {
         assertTrue(response.hasEntity());
 
         final String entity = response.readEntity(String.class);
-        System.out.println("Response from uri " + uri + ":\n" + entity);
+        //System.out.println("Response from uri " + uri + ":\n" + entity);
         for (String expected : EXPECTED) {
             assertTrue(entity.contains(expected));
         }
@@ -141,7 +155,7 @@ public final class KomodoUtilServiceTest implements StringConstants {
         assertTrue(response.hasEntity());
 
         final String entity = response.readEntity(String.class);
-        System.out.println("Response from uri " + uri + ":\n" + entity);
+        //System.out.println("Response from uri " + uri + ":\n" + entity);
 
         assertTrue(entity.contains("\"swagger\" : \"2.0\""));
         assertTrue(entity.contains("\"/service/about\""));
@@ -164,7 +178,7 @@ public final class KomodoUtilServiceTest implements StringConstants {
         assertTrue(response.hasEntity());
 
         final String entity = response.readEntity(String.class);
-        System.out.println("Response from uri " + uri + ":\n" + entity);
+        //System.out.println("Response from uri " + uri + ":\n" + entity);
 
         KomodoStatusObject status = KomodoJsonMarshaller.unmarshallKSO(entity);
         assertNotNull(status);
@@ -193,7 +207,7 @@ public final class KomodoUtilServiceTest implements StringConstants {
         assertTrue(response.hasEntity());
 
         final String entity = response.readEntity(String.class);
-        System.out.println("Response from uri " + uri + ":\n" + entity);
+        //System.out.println("Response from uri " + uri + ":\n" + entity);
 
         InputStream schemaStream = getClass().getResourceAsStream("teiid-schema.json");
         String expected = TestUtilities.toString(schemaStream);
@@ -217,7 +231,7 @@ public final class KomodoUtilServiceTest implements StringConstants {
         assertTrue(response.hasEntity());
 
         String entity = response.readEntity(String.class);
-        System.out.println("Response from uri " + uri + ":\n" + entity);
+        //System.out.println("Response from uri " + uri + ":\n" + entity);
 
         assertFalse(entity.contains("\"schema-1\" : {"));
         assertFalse(entity.contains("\"keng__id\" : \"vdb\""));
@@ -241,7 +255,7 @@ public final class KomodoUtilServiceTest implements StringConstants {
         assertTrue(response.hasEntity());
 
         entity = response.readEntity(String.class);
-        System.out.println("Response from uri " + uri + ":\n" + entity);
+        //System.out.println("Response from uri " + uri + ":\n" + entity);
 
         assertFalse(entity.contains("\"schema-1\" : {"));
         assertFalse(entity.contains("\"keng__id\" : \"vdb\""));
@@ -265,7 +279,7 @@ public final class KomodoUtilServiceTest implements StringConstants {
         assertTrue(response.hasEntity());
 
         entity = response.readEntity(String.class);
-        System.out.println("Response from uri " + uri + ":\n" + entity);
+        //System.out.println("Response from uri " + uri + ":\n" + entity);
 
         assertFalse(entity.contains("\"schema-1\" : {"));
         assertFalse(entity.contains("\"keng__id\" : \"vdb\""));

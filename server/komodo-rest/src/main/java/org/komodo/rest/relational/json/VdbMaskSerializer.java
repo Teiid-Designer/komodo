@@ -11,6 +11,7 @@ import static org.komodo.rest.Messages.Error.INCOMPLETE_JSON;
 import static org.komodo.rest.Messages.Error.UNEXPECTED_JSON_TOKEN;
 import java.io.IOException;
 import org.komodo.rest.Messages;
+import org.komodo.rest.json.JsonConstants;
 import org.komodo.rest.relational.RestVdbMask;
 import org.komodo.utils.StringUtils;
 import com.google.gson.stream.JsonReader;
@@ -47,6 +48,8 @@ public final class VdbMaskSerializer extends KomodoRestEntitySerializer< RestVdb
             else if (RestVdbMask.ORDER_LABEL.equals(name)) {
                 final String order = in.nextString();
                 mask.setOrder(order);
+            } else if (JsonConstants.LINKS.equals(name)) {
+                readLinks( in, mask );
             }
             else
                 throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
@@ -84,6 +87,8 @@ public final class VdbMaskSerializer extends KomodoRestEntitySerializer< RestVdb
         // allow alter
         out.name(RestVdbMask.ORDER_LABEL);
         out.value(value.getOrder());
+
+        writeLinks(out, value);
 
         endWrite( out );
     }

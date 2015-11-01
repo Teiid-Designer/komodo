@@ -14,7 +14,6 @@ import java.io.IOException;
 import org.komodo.rest.Messages;
 import org.komodo.rest.json.JsonConstants;
 import org.komodo.rest.relational.RestVdbDataRole;
-import org.komodo.rest.relational.RestVdbPermission;
 import org.komodo.utils.StringUtils;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
@@ -63,9 +62,6 @@ public final class VdbDataRoleSerializer extends KomodoRestEntitySerializer< Res
             } else if (RestVdbDataRole.MAPPED_ROLES_LABEL.equals(name)) {
                 final String[] mappedRoles = BUILDER.fromJson( in, String[].class );
                 dataRole.setMappedRoles( mappedRoles );
-            } else if (RestVdbDataRole.PERMISSIONS_LABEL.equals(name)) {
-                final RestVdbPermission[] permissions = BUILDER.fromJson( in, RestVdbPermission[].class );
-                dataRole.setPermissions( permissions );
             }
             else
                 throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
@@ -125,10 +121,6 @@ public final class VdbDataRoleSerializer extends KomodoRestEntitySerializer< Res
             out.value(roleName);
         }
         out.endArray();
-
-        // permissions
-        out.name(RestVdbDataRole.PERMISSIONS_LABEL);
-        BUILDER.toJson(dataRole.getPermissions(), RestVdbPermission[].class, out);
 
         writeLinks(out, dataRole);
         endWrite(out);

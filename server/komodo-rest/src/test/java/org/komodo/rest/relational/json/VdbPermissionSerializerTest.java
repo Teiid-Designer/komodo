@@ -8,7 +8,6 @@
 package org.komodo.rest.relational.json;
 
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import java.net.URI;
@@ -115,56 +114,22 @@ public final class VdbPermissionSerializerTest implements JsonConstants {
     "  \"vdb__allowLanguage\": true," + NEW_LINE +
     "  \"vdb__allowRead\": false," + NEW_LINE +
     "  \"vdb__allowUpdate\": true," + NEW_LINE +
-    "  \"vdb__conditions\": [" + NEW_LINE +
+    "  \"" + LINKS + "\": " + OPEN_SQUARE_BRACKET + NEW_LINE +
     "    " + OPEN_BRACE + NEW_LINE +
-    "      \"" + ID + "\": \"" + CONDITION1 + "\"," + NEW_LINE +
-    "      \"" + DATA_PATH + "\": \"" + CONDITION1_DATA_PATH + "\"," + NEW_LINE +
-    "      \"" + KTYPE + "\": \"" + KomodoType.VDB_CONDITION.getType() + "\"," + NEW_LINE +
-    "      \"" + HAS_CHILDREN + "\": false," + NEW_LINE +
-    "      \"vdb__condition\": \"" + CONDITION1 + "\"," + NEW_LINE +
-    "      \"vdb__constraint\": true" + NEW_LINE +
+    "      \"rel\": \"self\"," + NEW_LINE +
+    "      \"href\": \"http://localhost:8081/v1/workspace/workspace/vdbs/vdb1/VdbDataRoles/MyDataRole/VdbPermissions/MyPermission\"" + NEW_LINE +
     "    " + CLOSE_BRACE + COMMA + NEW_LINE +
     "    " + OPEN_BRACE + NEW_LINE +
-    "      \"" + ID + "\": \"" + CONDITION2 + "\"," + NEW_LINE +
-    "      \"" + DATA_PATH + "\": \"" + CONDITION2_DATA_PATH + "\"," + NEW_LINE +
-    "      \"" + KTYPE + "\": \"" + KomodoType.VDB_CONDITION.getType() + "\"," + NEW_LINE +
-    "      \"" + HAS_CHILDREN + "\": false," + NEW_LINE +
-    "      \"vdb__condition\": \"" + CONDITION2 + "\"," + NEW_LINE +
-    "      \"vdb__constraint\": false" + NEW_LINE +
+    "      \"rel\": \"parent\"," + NEW_LINE +
+    "      \"href\": \"http://localhost:8081/v1/workspace/workspace/vdbs/vdb1/VdbDataRoles/MyDataRole\"" + NEW_LINE +
     "    " + CLOSE_BRACE + COMMA + NEW_LINE +
     "    " + OPEN_BRACE + NEW_LINE +
-    "      \"" + ID + "\": \"" + CONDITION3 + "\"," + NEW_LINE +
-    "      \"" + DATA_PATH + "\": \"" + CONDITION3_DATA_PATH + "\"," + NEW_LINE +
-    "      \"" + KTYPE + "\": \"" + KomodoType.VDB_CONDITION.getType() + "\"," + NEW_LINE +
-    "      \"" + HAS_CHILDREN + "\": false," + NEW_LINE +
-    "      \"vdb__condition\": \"" + CONDITION3 + "\"," + NEW_LINE +
-    "      \"vdb__constraint\": true" + NEW_LINE +
-    "    " + CLOSE_BRACE + NEW_LINE +
-    "  " + CLOSE_SQUARE_BRACKET + COMMA + NEW_LINE +
-    "  \"vdb__masks\": [" + NEW_LINE +
-    "    " + OPEN_BRACE + NEW_LINE +
-    "      \"" + ID + "\": \"" + MASK1 + "\"," + NEW_LINE +
-    "      \"" + DATA_PATH + "\": \"" + MASK1_DATA_PATH + "\"," + NEW_LINE +
-    "      \"" + KTYPE + "\": \"" + KomodoType.VDB_MASK.getType() + "\"," + NEW_LINE +
-    "      \"" + HAS_CHILDREN + "\": false," + NEW_LINE +
-    "      \"vdb__mask\": \"" + MASK1 + "\"," + NEW_LINE +
-    "      \"vdb__order\": \"that\"" + NEW_LINE +
+    "      \"rel\": \"conditions\"," + NEW_LINE +
+    "      \"href\": \"http://localhost:8081/v1/workspace/workspace/vdbs/vdb1/VdbDataRoles/MyDataRole/VdbPermissions/MyPermission/VdbConditions\"" + NEW_LINE +
     "    " + CLOSE_BRACE + COMMA + NEW_LINE +
     "    " + OPEN_BRACE + NEW_LINE +
-    "      \"" + ID + "\": \"" + MASK2 + "\"," + NEW_LINE +
-    "      \"" + DATA_PATH + "\": \"" + MASK2_DATA_PATH + "\"," + NEW_LINE +
-    "      \"" + KTYPE + "\": \"" + KomodoType.VDB_MASK.getType() + "\"," + NEW_LINE +
-    "      \"" + HAS_CHILDREN + "\": false," + NEW_LINE +
-    "      \"vdb__mask\": \"" + MASK2 + "\"," + NEW_LINE +
-    "      \"vdb__order\": \"or\"" + NEW_LINE +
-    "    " + CLOSE_BRACE + COMMA + NEW_LINE +
-    "    " + OPEN_BRACE + NEW_LINE +
-    "      \"" + ID + "\": \"" + MASK3 + "\"," + NEW_LINE +
-    "      \"" + DATA_PATH + "\": \"" + MASK3_DATA_PATH + "\"," + NEW_LINE +
-    "      \"" + KTYPE + "\": \"" + KomodoType.VDB_MASK.getType() + "\"," + NEW_LINE +
-    "      \"" + HAS_CHILDREN + "\": false," + NEW_LINE +
-    "      \"vdb__mask\": \"" + MASK3 + "\"," + NEW_LINE +
-    "      \"vdb__order\": \"halfdozenofanother\"" + NEW_LINE +
+    "      \"rel\": \"masks\"," + NEW_LINE +
+    "      \"href\": \"http://localhost:8081/v1/workspace/workspace/vdbs/vdb1/VdbDataRoles/MyDataRole/VdbPermissions/MyPermission/VdbMasks\"" + NEW_LINE +
     "    " + CLOSE_BRACE + NEW_LINE +
     "  " + CLOSE_SQUARE_BRACKET + NEW_LINE +
     CLOSE_BRACE;
@@ -184,8 +149,6 @@ public final class VdbPermissionSerializerTest implements JsonConstants {
         this.permission.setAllowLanguage( ALLOW_LANGUAGE );
         this.permission.setAllowRead( ALLOW_READ );
         this.permission.setAllowUpdate( ALLOW_UPDATE );
-        this.permission.setConditions( CONDITIONS.toArray(new RestVdbCondition[0]) );
-        this.permission.setMasks( MASKS.toArray(new RestVdbMask[0]) );
     }
 
     @Test
@@ -205,11 +168,8 @@ public final class VdbPermissionSerializerTest implements JsonConstants {
         assertThat( permission.isAllowLanguage(), is( ALLOW_LANGUAGE ) );
         assertThat( permission.isAllowRead(), is( ALLOW_READ ) );
         assertThat( permission.isAllowUpdate(), is( ALLOW_UPDATE ) );
-        assertThat( permission.getLinks().size(), is( 0 ) );
+        assertThat( permission.getLinks().size(), is( 4 ) );
         assertThat( permission.getProperties().isEmpty(), is( true ) );
-
-        assertArrayEquals(CONDITIONS.toArray(new RestVdbCondition[0]), permission.getConditions());
-        assertArrayEquals(MASKS.toArray(new RestVdbMask[0]), permission.getMasks());
     }
 
     @Test( expected = Exception.class )

@@ -22,7 +22,6 @@
 package org.komodo.rest.swagger;
 
 import org.komodo.rest.relational.RestVdbDataRole;
-import org.komodo.rest.relational.RestVdbPermission;
 import org.komodo.spi.repository.KomodoType;
 import io.swagger.converter.ModelConverterContext;
 import io.swagger.models.ModelImpl;
@@ -52,7 +51,5 @@ public class RestVdbDataRoleConverter extends RestEntityConverter<RestVdbDataRol
         model.property(RestVdbDataRole.ANY_AUTHENTICATED_LABEL, property(Boolean.class));
         model.property(RestVdbDataRole.GRANT_ALL_LABEL, property(Boolean.class));
         model.property(RestVdbDataRole.MAPPED_ROLES_LABEL, new ArrayProperty(new StringProperty()));
-
-        model.property(RestVdbDataRole.PERMISSIONS_LABEL, context.resolveProperty(RestVdbPermission.class, null));
     }
 }

@@ -8,11 +8,8 @@
 package org.komodo.rest.relational;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import org.komodo.relational.vdb.DataRole;
-import org.komodo.relational.vdb.Permission;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.rest.KomodoRestEntity;
 import org.komodo.rest.KomodoService;
@@ -116,11 +113,6 @@ public final class RestVdbDataRole extends KomodoRestEntity {
     public static final String MAPPED_ROLES_LABEL = KomodoService.encode(VdbLexicon.DataRole.MAPPED_ROLE_NAMES);
 
     /**
-     * Label used to describe permissions
-     */
-    public static final String PERMISSIONS_LABEL = KomodoService.encode(VdbLexicon.DataRole.PERMISSIONS);
-
-    /**
      * An empty array of data roles.
      */
     public static final RestVdbDataRole[] NO_DATA_ROLES = new RestVdbDataRole[ 0 ];
@@ -131,7 +123,6 @@ public final class RestVdbDataRole extends KomodoRestEntity {
     private boolean anyAuthenticated = DataRole.DEFAULT_ANY_AUTHENTICATED;
     private boolean grantAll = DataRole.DEFAULT_GRANT_ALL;
     private String[] mappedRoles = StringConstants.EMPTY_ARRAY;
-    private RestVdbPermission[] permissions = RestVdbPermission.NO_PERMISSIONS;
 
     /**
      * Constructor for use <strong>only</strong> when deserializing.
@@ -154,6 +145,7 @@ public final class RestVdbDataRole extends KomodoRestEntity {
 
         addLink(new RestLink(LinkType.SELF, getUriBuilder().buildVdbDataRoleUri(LinkType.SELF, parentVdb, id)));
         addLink(new RestLink(LinkType.PARENT, getUriBuilder().buildVdbDataRoleUri(LinkType.PARENT, parentVdb, id)));
+        addLink(new RestLink(LinkType.PERMISSIONS, getUriBuilder().buildVdbDataRoleUri(LinkType.PERMISSIONS, parentVdb, id)));
     }
 
     /**
@@ -175,13 +167,6 @@ public final class RestVdbDataRole extends KomodoRestEntity {
      */
     public String getName() {
         return this.name;
-    }
-
-    /**
-     * @return the permission (never <code>null</code> but can be empty)
-     */
-    public RestVdbPermission[] getPermissions() {
-        return this.permissions;
     }
 
     /**
@@ -254,14 +239,6 @@ public final class RestVdbDataRole extends KomodoRestEntity {
     }
 
     /**
-     * @param newPermissions
-     *        the new permissions (can be <code>null</code>)
-     */
-    public void setPermissions( final RestVdbPermission[] newPermissions ) {
-        this.permissions = ( ( newPermissions == null ) ? RestVdbPermission.NO_PERMISSIONS : newPermissions );
-    }
-
-    /**
      * @param dataRole source data role
      * @param parentVdb vdb parent
      * @param baseUri base uri
@@ -288,17 +265,6 @@ public final class RestVdbDataRole extends KomodoRestEntity {
             entity.setMappedRoles(mappedRoles);
         }
 
-        Permission[] permissions = dataRole.getPermissions(uow);
-        if (permissions != null) {
-            List<RestVdbPermission> restPermissions = new ArrayList<>();
-            for (Permission permission : permissions) {
-                RestVdbPermission restPermission = RestVdbPermission.build(permission, dataRole, parentVdb, baseUri, uow);
-                restPermissions.add(restPermission);
-            }
-
-            entity.setPermissions(restPermissions.toArray(new RestVdbPermission[0]));
-        }
-
         return entity;
     }
 
@@ -312,7 +278,6 @@ public final class RestVdbDataRole extends KomodoRestEntity {
         result = prime * result + (this.grantAll ? 1231 : 1237);
         result = prime * result + Arrays.hashCode(this.mappedRoles);
         result = prime * result + ((this.name == null) ? 0 : this.name.hashCode());
-        result = prime * result + Arrays.hashCode(this.permissions);
         return result;
     }
 
@@ -345,15 +310,13 @@ public final class RestVdbDataRole extends KomodoRestEntity {
         } else
             if (!this.name.equals(other.name))
                 return false;
-        if (!Arrays.equals(this.permissions, other.permissions))
-            return false;
         return true;
     }
 
     @SuppressWarnings( "nls" )
     @Override
     public String toString() {
-        return "RestVdbDataRole [name=" + this.name + ", description=" + this.description + ", allowCreateTempTables=" + this.allowCreateTempTables + ", anyAuthenticated=" + this.anyAuthenticated + ", grantAll=" + this.grantAll + ", mappedRoles=" + Arrays.toString(this.mappedRoles) + ", permissions=" + Arrays.toString(this.permissions) + ", id=" + this.id + ", dataPath=" + this.dataPath + ", kType=" + this.kType + ", hasChildren=" + this.hasChildren + ", properties=" + this.properties + ", links=" + this.links + "]";
+        return "RestVdbDataRole [name=" + this.name + ", description=" + this.description + ", allowCreateTempTables=" + this.allowCreateTempTables + ", anyAuthenticated=" + this.anyAuthenticated + ", grantAll=" + this.grantAll + ", mappedRoles=" + Arrays.toString(this.mappedRoles) + ", id=" + this.id + ", dataPath=" + this.dataPath + ", kType=" + this.kType + ", hasChildren=" + this.hasChildren + ", properties=" + this.properties + ", links=" + this.links + "]";
     }
 
 }

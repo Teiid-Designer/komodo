@@ -21,8 +21,6 @@
  */
 package org.komodo.rest.swagger;
 
-import org.komodo.rest.relational.RestVdbCondition;
-import org.komodo.rest.relational.RestVdbMask;
 import org.komodo.rest.relational.RestVdbPermission;
 import org.komodo.spi.repository.KomodoType;
 import io.swagger.converter.ModelConverterContext;
@@ -53,8 +51,5 @@ public class RestVdbPermissionConverter extends RestEntityConverter<RestVdbPermi
         model.property(RestVdbPermission.ALLOW_LANGUAGE_LABEL, requiredProperty(Boolean.class));
         model.property(RestVdbPermission.ALLOW_READ_LABEL, requiredProperty(Boolean.class));
         model.property(RestVdbPermission.ALLOW_UPDATE_LABEL, requiredProperty(Boolean.class));
-
-        model.property(RestVdbPermission.CONDITIONS_LABEL, context.resolveProperty(RestVdbCondition.class, null));
-        model.property(RestVdbPermission.MASKS_LABEL, context.resolveProperty(RestVdbMask.class, null));
     }
 }

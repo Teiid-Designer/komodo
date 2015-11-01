@@ -9,12 +9,9 @@ package org.komodo.rest.relational.json;
 
 import static org.komodo.rest.Messages.Error.INCOMPLETE_JSON;
 import static org.komodo.rest.Messages.Error.UNEXPECTED_JSON_TOKEN;
-import static org.komodo.rest.relational.json.KomodoJsonMarshaller.BUILDER;
 import java.io.IOException;
 import org.komodo.rest.Messages;
 import org.komodo.rest.json.JsonConstants;
-import org.komodo.rest.relational.RestVdbCondition;
-import org.komodo.rest.relational.RestVdbMask;
 import org.komodo.rest.relational.RestVdbPermission;
 import org.komodo.utils.StringUtils;
 import com.google.gson.stream.JsonReader;
@@ -73,17 +70,9 @@ public final class VdbPermissionSerializer extends KomodoRestEntitySerializer< R
                 final boolean allow = in.nextBoolean();
                 permission.setAllowUpdate( allow );
             }
-            else if (RestVdbPermission.CONDITIONS_LABEL.equals(name)) {
-                final RestVdbCondition[] conditions = BUILDER.fromJson( in, RestVdbCondition[].class );
-                permission.setConditions(conditions);
-            }
             else if (RestVdbPermission.NAME_LABEL.equals(name)) {
                 final String permissionName = in.nextString();
                 permission.setName( permissionName );
-            }
-            else if (RestVdbPermission.MASKS_LABEL.equals(name)) {
-                final RestVdbMask[] masks = BUILDER.fromJson( in, RestVdbMask[].class );
-                permission.setMasks(masks);
             }
             else if (JsonConstants.LINKS.equals(name)) {
                 readLinks( in, permission );
@@ -148,14 +137,6 @@ public final class VdbPermissionSerializer extends KomodoRestEntitySerializer< R
         // allow update
         out.name(RestVdbPermission.ALLOW_UPDATE_LABEL);
         out.value(value.isAllowUpdate());
-
-        // conditions
-        out.name(RestVdbPermission.CONDITIONS_LABEL);
-        BUILDER.toJson(value.getConditions(), RestVdbCondition[].class, out);
-
-        // masks
-        out.name(RestVdbPermission.MASKS_LABEL);
-        BUILDER.toJson(value.getMasks(), RestVdbMask[].class, out);
 
         writeLinks( out, value );
         endWrite( out );

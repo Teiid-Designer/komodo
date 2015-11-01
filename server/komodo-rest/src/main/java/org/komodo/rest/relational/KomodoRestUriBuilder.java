@@ -11,13 +11,12 @@ import java.net.URI;
 import javax.ws.rs.core.UriBuilder;
 import org.komodo.rest.KomodoRestV1Application;
 import org.komodo.rest.RestLink.LinkType;
-import org.komodo.spi.constants.StringConstants;
 import org.komodo.utils.ArgCheck;
 
 /**
  * Komodo REST URI builder.
  */
-public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Constants, StringConstants {
+public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Constants {
 
     private final URI baseUri;
 
@@ -213,18 +212,18 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
      *        the type of URI being created (cannot be <code>null</code>)
      * @param parentVdb
      *        the parent VDB name (cannot be empty)
-     * @param dataRoleName
+     * @param dataRoleId
      *        the Vdb data role name
      * @return the VDB data role URI for the specified VDB (never <code>null</code>)
      */
-    public URI buildVdbDataRoleUri(LinkType linkType, String parentVdb, String dataRoleName) {
+    public URI buildVdbDataRoleUri(LinkType linkType, String parentVdb, String dataRoleId) {
         ArgCheck.isNotNull(linkType, "linkType"); //$NON-NLS-1$
         ArgCheck.isNotEmpty(parentVdb, "parentVdb"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(dataRoleName, "dataRoleName"); //$NON-NLS-1$
+        ArgCheck.isNotEmpty(dataRoleId, "dataRoleId"); //$NON-NLS-1$
 
         URI result = null;
         URI vdbUri = generateVdbUri(parentVdb);
-        URI myDataRoleUri = generateVdbChildUri(parentVdb, LinkType.DATA_ROLES, dataRoleName);
+        URI myDataRoleUri = generateVdbChildUri(parentVdb, LinkType.DATA_ROLES, dataRoleId);
 
         switch (linkType) {
             case SELF:
@@ -233,8 +232,100 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
             case PARENT:
                 result = vdbUri;
                 break;
-            case SOURCES:
+            case PERMISSIONS:
                 result = UriBuilder.fromUri(myDataRoleUri).path(linkType.uriName()).build();
+                break;
+            default:
+                throw new RuntimeException("LinkType " + linkType + " not handled"); //$NON-NLS-1$ //$NON-NLS-2$
+        }
+
+        assert(result != null);
+        return result;
+    }
+
+    /**
+     * @param linkType
+     *        the type of URI being created (cannot be <code>null</code>)
+     * @param parentVdb
+     *        the parent VDB name (cannot be empty)
+     * @param dataRoleId
+     *        the Vdb data role id
+     * @param permissionId
+     *        the Vdb permission id
+     * @return the VDB permission URI for the specified VDB (never <code>null</code>)
+     */
+    public URI buildVdbPermissionUri(LinkType linkType, String parentVdb, String dataRoleId, String permissionId) {
+        ArgCheck.isNotNull(linkType, "linkType"); //$NON-NLS-1$
+        ArgCheck.isNotEmpty(parentVdb, "parentVdb"); //$NON-NLS-1$
+        ArgCheck.isNotEmpty(dataRoleId, "dataRoleId"); //$NON-NLS-1$
+        ArgCheck.isNotEmpty(permissionId, "permissionId"); //$NON-NLS-1$
+
+        URI result = null;
+        URI myDataRoleUri = generateVdbChildUri(parentVdb, LinkType.DATA_ROLES, dataRoleId);
+        URI myPermUri = UriBuilder.fromUri(myDataRoleUri)
+                                                   .path(LinkType.PERMISSIONS.uriName())
+                                                   .path(permissionId)
+                                                   .build();
+
+        switch (linkType) {
+            case SELF:
+                result = myPermUri;
+                break;
+            case PARENT:
+                result = myDataRoleUri;
+                break;
+            case CONDITIONS:
+            case MASKS:
+                result = UriBuilder.fromUri(myPermUri).path(linkType.uriName()).build();
+                break;
+            default:
+                throw new RuntimeException("LinkType " + linkType + " not handled"); //$NON-NLS-1$ //$NON-NLS-2$
+        }
+
+        assert(result != null);
+        return result;
+    }
+
+    /**
+     * @param linkType
+     *        the type of URI being created (cannot be <code>null</code>)
+     * @param parentVdb
+     *        the parent VDB name (cannot be empty)
+     * @param dataRoleId
+     *        the Vdb data role id
+     * @param permissionId
+     *        the Vdb permission id
+     * @param childType
+     *        the type of the child
+     * @param childId
+     *        the child id of the permission
+     * @return the permission child URI for the specified VDB (never <code>null</code>)
+     */
+    public URI buildVdbPermissionChildUri(LinkType linkType, String parentVdb,
+                                                                  String dataRoleId, String permissionId, LinkType childType, String childId) {
+        ArgCheck.isNotNull(linkType, "linkType"); //$NON-NLS-1$
+        ArgCheck.isNotEmpty(parentVdb, "parentVdb"); //$NON-NLS-1$
+        ArgCheck.isNotEmpty(dataRoleId, "dataRoleId"); //$NON-NLS-1$
+        ArgCheck.isNotEmpty(permissionId, "permissionId"); //$NON-NLS-1$
+        ArgCheck.isNotNull(childType, "childType"); //$NON-NLS-1$
+        ArgCheck.isNotEmpty(childId, "childId"); //$NON-NLS-1$
+
+        URI result = null;
+        URI myDataRoleUri = generateVdbChildUri(parentVdb, LinkType.DATA_ROLES, dataRoleId);
+        URI myPermUri = UriBuilder.fromUri(myDataRoleUri)
+                                                   .path(LinkType.PERMISSIONS.uriName())
+                                                   .path(permissionId)
+                                                   .build();
+
+        switch (linkType) {
+            case SELF:
+                result = UriBuilder.fromUri(myPermUri)
+                                            .path(childType.uriName())
+                                            .path(childId)
+                                            .build();
+                break;
+            case PARENT:
+                result = myPermUri;
                 break;
             default:
                 throw new RuntimeException("LinkType " + linkType + " not handled"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -282,4 +373,5 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
         URI groupUri = generateVdbChildGroupUri(parentVdb, groupLink);
         return UriBuilder.fromUri(groupUri).path(childName).build();
     }
+
 }

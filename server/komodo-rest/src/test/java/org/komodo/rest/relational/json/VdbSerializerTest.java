@@ -84,7 +84,6 @@ public final class VdbSerializerTest implements StringConstants {
     @Test
     public void shouldExportJson() {
         String json = KomodoJsonMarshaller.marshall( this.vdb );
-        System.out.println(json);
         assertEquals(json, JSON);
     }
 

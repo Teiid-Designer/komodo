@@ -156,7 +156,37 @@ public final class KomodoRestV1Application extends Application implements Reposi
         /**
          * Placeholder added to an URI to allow a specific data role id
          */
-        String DATA_ROLE_PLACEHOLDER = "{dataRoleName}"; //$NON-NLS-1$
+        String DATA_ROLE_PLACEHOLDER = "{dataRoleId}"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for the collection of data role permissions
+         */
+        String PERMISSIONS_SEGMENT = "VdbPermissions"; //$NON-NLS-1$
+
+        /**
+         * Placeholder added to an URI to allow a specific permission id
+         */
+        String PERMISSION_PLACEHOLDER = "{permissionId}"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for the collection of permission's conditions
+         */
+        String CONDITIONS_SEGMENT = "VdbConditions"; //$NON-NLS-1$
+
+        /**
+         * Placeholder added to an URI to allow a specific condition id
+         */
+        String CONDITION_PLACEHOLDER = "{conditionId}"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for the collection of permission's masks
+         */
+        String MASKS_SEGMENT = "VdbMasks"; //$NON-NLS-1$
+
+        /**
+         * Placeholder added to an URI to allow a specific mask id
+         */
+        String MASK_PLACEHOLDER = "{maskId}"; //$NON-NLS-1$
 
         /**
          * The name of the URI path segment for loading of the sample vdb data
@@ -167,7 +197,7 @@ public final class KomodoRestV1Application extends Application implements Reposi
     private static final int TIMEOUT = 1;
     private static final TimeUnit UNIT = TimeUnit.MINUTES;
 
-    private final KEngine kengine;
+    private KEngine kengine;
     private CountDownLatch latch;
     private final Set< Object > singletons;
 
@@ -303,7 +333,8 @@ public final class KomodoRestV1Application extends Application implements Reposi
             kengine.start();
             started = this.latch.await( TIMEOUT, UNIT );
         } catch ( final Exception e ) {
-            throw new ServerErrorException( Messages.getString( KOMODO_ENGINE_STARTUP_ERROR ), Status.INTERNAL_SERVER_ERROR );
+            e.printStackTrace();
+            throw new ServerErrorException( Messages.getString( KOMODO_ENGINE_STARTUP_ERROR, e ), Status.INTERNAL_SERVER_ERROR );
         }
 
         if ( !started ) {
@@ -334,6 +365,8 @@ public final class KomodoRestV1Application extends Application implements Reposi
             } catch ( final Exception e ) {
                 throw new ServerErrorException( Messages.getString( KOMODO_ENGINE_SHUTDOWN_ERROR ),
                                                 Status.INTERNAL_SERVER_ERROR );
+            } finally {
+                this.kengine = null;
             }
 
             if ( !shutdown ) {

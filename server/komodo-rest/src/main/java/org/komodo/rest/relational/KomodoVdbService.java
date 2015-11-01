@@ -12,11 +12,18 @@ import static org.komodo.rest.Messages.General.DELETE_OPERATION_NAME;
 import static org.komodo.rest.Messages.General.GET_OPERATION_NAME;
 import static org.komodo.rest.Messages.General.NO_VALUE;
 import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_CREATE_VDB_ERROR;
+import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_CONDITIONS_ERROR;
+import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_CONDITION_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_DATA_ROLES_ERROR;
+import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_DATA_ROLE_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_IMPORTS_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_IMPORT_ERROR;
+import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_MASKS_ERROR;
+import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_MASK_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_MODELS_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_MODEL_ERROR;
+import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_PERMISSIONS_ERROR;
+import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_PERMISSION_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_SOURCES_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_SOURCE_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_TRANSLATORS_ERROR;
@@ -47,8 +54,11 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 import org.komodo.core.KEngine;
 import org.komodo.relational.model.Model;
+import org.komodo.relational.vdb.Condition;
 import org.komodo.relational.vdb.DataRole;
+import org.komodo.relational.vdb.Mask;
 import org.komodo.relational.vdb.ModelSource;
+import org.komodo.relational.vdb.Permission;
 import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.VdbImport;
@@ -61,6 +71,7 @@ import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.KomodoService;
 import org.komodo.rest.Messages;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
+import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -230,18 +241,114 @@ public final class KomodoVdbService extends KomodoService {
         }
     }
 
+    private String uri(String... segments) {
+        StringBuffer buffer = new StringBuffer();
+        for (int i = 0; i < segments.length; ++i) {
+            buffer.append(segments[i]);
+            if (i < (segments.length - 1))
+                buffer.append(FORWARD_SLASH);
+        }
+
+        return buffer.toString();
+    }
+
     private Response commitNoVdbFound(UnitOfWork uow, List<MediaType> mediaTypes, String vdbName) throws Exception {
-        LOGGER.debug( "getVdb:VDB '{0}' was not found", vdbName ); //$NON-NLS-1$
+        LOGGER.debug( "VDB '{0}' was not found", vdbName ); //$NON-NLS-1$
         return commit( uow, mediaTypes, new ResourceNotFound( vdbName, Messages.getString( GET_OPERATION_NAME ) ) );
     }
 
+    private Response commitNoModelFound(UnitOfWork uow, List<MediaType> mediaTypes, String modelName, String vdbName) throws Exception {
+        return commit(uow, mediaTypes,
+                      new ResourceNotFound(uri(vdbName, MODELS_SEGMENT, modelName),
+                                           Messages.getString( GET_OPERATION_NAME)));
+    }
+
+    private Response commitNoDataRoleFound(UnitOfWork uow, List<MediaType> mediaTypes,
+                                                                           String dataRoleId, String vdbName) throws Exception {
+        LOGGER.debug("No data role '{0}' found for vdb '{1}'", dataRoleId, vdbName); //$NON-NLS-1$
+        return commit(uow, mediaTypes, new ResourceNotFound(
+                                                     uri(vdbName, DATA_ROLES_SEGMENT, dataRoleId),
+                                                     Messages.getString( GET_OPERATION_NAME)));
+    }
+
+    private Response commitNoPermissionFound(UnitOfWork uow, List<MediaType> mediaTypes,
+                                                                             String permissionId, String dataRoleId,
+                                                                             String vdbName) throws Exception {
+        LOGGER.debug("No permission '{0}' for data role '{1}' found for vdb '{2}'", //$NON-NLS-1$
+                                                                     permissionId, dataRoleId, vdbName);
+        return commit(uow, mediaTypes, new ResourceNotFound(
+                                                     uri(vdbName, DATA_ROLES_SEGMENT,
+                                                          dataRoleId, PERMISSIONS_SEGMENT,
+                                                          permissionId),
+                                                     Messages.getString( GET_OPERATION_NAME)));
+    }
+
+    private Vdb findVdb(UnitOfWork uow, List<MediaType> mediaTypes, String vdbName) throws KException {
+        if (! this.wsMgr.hasChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE ) ) {
+            return null;
+        }
+
+        final KomodoObject kobject = this.wsMgr.getChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
+        final Vdb vdb = this.wsMgr.resolve( uow, kobject, Vdb.class );
+
+        LOGGER.debug( "VDB '{0}' was found", vdbName ); //$NON-NLS-1$
+        return vdb;
+    }
+
+    private Model findModel(UnitOfWork uow, List<MediaType> mediaTypes,
+                                                String modelName, Vdb vdb) throws KException {
+        if (! vdb.hasChild(uow, modelName, VdbLexicon.Vdb.DECLARATIVE_MODEL)) {
+            return null;
+        }
+
+        KomodoObject kModel = vdb.getChild(uow, modelName, VdbLexicon.Vdb.DECLARATIVE_MODEL);
+        Model model = this.wsMgr.resolve( uow, kModel, Model.class );
+        LOGGER.debug( "Model '{0}' was found", modelName ); //$NON-NLS-1$
+        return model;
+    }
+
+    private DataRole findDataRole(UnitOfWork uow, List<MediaType> mediaTypes,
+                                                      String dataRoleId, Vdb vdb) throws KException {
+        DataRole[] dataRoles = vdb.getDataRoles(uow);
+        if (dataRoles == null || dataRoles.length == 0) {
+            return null;
+        }
+
+        DataRole dataRole = null;
+        for (DataRole drole : dataRoles) {
+            if (dataRoleId.equals(drole.getName(uow))) {
+                dataRole = drole;
+                break;
+            }
+        }
+
+        return dataRole;
+    }
+
+    private Permission findPermission(UnitOfWork uow, List<MediaType> mediaTypes,
+                                                              String permissionId, DataRole dataRole, Vdb vdb) throws KException {
+        Permission[] permissions = dataRole.getPermissions(uow);
+        if (permissions == null || permissions.length == 0) {
+            return null;
+        }
+
+        Permission permission = null;
+        for (Permission perm : permissions) {
+            if (permissionId.equals(perm.getName(uow))) {
+                permission = perm;
+                break;
+            }
+        }
+
+        return permission;
+    }
     /**
      * @param headers
      *        the request headers (never <code>null</code>)
      * @param uriInfo
      *        the request URI information (never <code>null</code>)
      * @param vdbName
-     *        the name of the VDB being deleted (cannot be empty)
+     *        the id of the VDB being deleted (cannot be empty)
      * @return the JSON representation of the VDB that was deleted (never <code>null</code>)
      * @throws KomodoRestException
      *         if there is a problem deleting the specified workspace VDB or constructing the JSON representation
@@ -452,7 +559,7 @@ public final class KomodoVdbService extends KomodoService {
      * @param uriInfo
      *        the request URI information (never <code>null</code>)
      * @param vdbName
-     *        the name of the VDB being retrieved (cannot be empty)
+     *        the id of the VDB being retrieved (cannot be empty)
      * @return the JSON representation of the VDB (never <code>null</code>)
      * @throws KomodoRestException
      *         if there is a problem finding the specified workspace VDB or constructing the JSON representation
@@ -468,7 +575,7 @@ public final class KomodoVdbService extends KomodoService {
     })
     public Response getVdb( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
-                            @ApiParam(value = "Name of the vdb to be fetched", required = true)
+                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
                             final @PathParam( "vdbName" ) String vdbName) throws KomodoRestException {
 
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
@@ -477,17 +584,12 @@ public final class KomodoVdbService extends KomodoService {
         try {
             uow = createTransaction( "getVdb", true ); //$NON-NLS-1$
 
-            // make sure VDB exists
-            if (! this.wsMgr.hasChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE ) ) {
+            Vdb vdb = findVdb(uow, mediaTypes, vdbName);
+            if (vdb == null)
                 return commitNoVdbFound(uow, mediaTypes, vdbName);
-            }
 
-            final KomodoObject kobject = this.wsMgr.getChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
-            final Vdb vdb = this.wsMgr.resolve( uow, kobject, Vdb.class );
             final RestVdb restVdb = RestVdb.build(vdb, mediaTypes.contains(MediaType.APPLICATION_XML_TYPE), uriInfo.getBaseUri(), uow);
             LOGGER.debug("getVdb:VDB '{0}' entity was constructed", vdb.getName(uow)); //$NON-NLS-1$
-
-            LOGGER.debug( "getVdb:VDB '{0}' was found", vdbName ); //$NON-NLS-1$
             return commit( uow, mediaTypes, restVdb );
 
         } catch ( final Exception e ) {
@@ -510,7 +612,7 @@ public final class KomodoVdbService extends KomodoService {
      * @param uriInfo
      *        the request URI information (never <code>null</code>)
      * @param vdbName
-     *        the name of the VDB being retrieved (cannot be empty)
+     *        the id of the VDB being retrieved (cannot be empty)
      * @return the JSON representation of the VDB (never <code>null</code>)
      * @throws KomodoRestException
      *         if there is a problem finding the specified workspace VDB or constructing the JSON representation
@@ -519,16 +621,16 @@ public final class KomodoVdbService extends KomodoService {
     @Path( V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
                 V1Constants.MODELS_SEGMENT )
     @Produces( MediaType.APPLICATION_JSON )
-    @Consumes ( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
+    @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Find all models belonging to the vdb", response = RestVdb.class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No vdb could be found with name"),
         @ApiResponse(code = 200, message = "No models could be found but an empty list is returned"),
-        @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation")
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation")
     })
     public Response getModels( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
-                            @ApiParam(value = "Name of the vdb to be fetched", required = true)
+                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
                             final @PathParam( "vdbName" ) String vdbName) throws KomodoRestException {
 
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
@@ -537,13 +639,9 @@ public final class KomodoVdbService extends KomodoService {
         try {
             uow = createTransaction( "getModels", true ); //$NON-NLS-1$
 
-            // make sure VDB exists
-            if (! this.wsMgr.hasChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE ) ) {
+            Vdb vdb = findVdb(uow, mediaTypes, vdbName);
+            if (vdb == null)
                 return commitNoVdbFound(uow, mediaTypes, vdbName);
-            }
-
-            final KomodoObject kobject = this.wsMgr.getChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
-            final Vdb vdb = this.wsMgr.resolve( uow, kobject, Vdb.class );
 
             Model[] models = vdb.getModels(uow);
             if (models == null)
@@ -577,9 +675,9 @@ public final class KomodoVdbService extends KomodoService {
      * @param uriInfo
      *        the request URI information (never <code>null</code>)
      * @param vdbName
-     *        the name of the VDB being retrieved (cannot be empty)
+     *        the id of the VDB being retrieved (cannot be empty)
      * @param modelName
-     *        the name of the model being retrieved (cannot be empty)
+     *        the id of the model being retrieved (cannot be empty)
      * @return the JSON representation of the VDB model (never <code>null</code>)
      * @throws KomodoRestException
      *         if there is a problem finding the specified workspace VDB or constructing the JSON representation
@@ -589,18 +687,18 @@ public final class KomodoVdbService extends KomodoService {
                 V1Constants.MODELS_SEGMENT + StringConstants.FORWARD_SLASH +
                 V1Constants.MODEL_PLACEHOLDER)
     @Produces( MediaType.APPLICATION_JSON )
-    @Consumes ( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
+    @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Find the named model belonging to the vdb", response = RestVdbModel.class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No vdb could be found with name"),
         @ApiResponse(code = 404, message = "No model could be found with name"),
-        @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation")
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation")
     })
     public Response getModel( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
-                            @ApiParam(value = "Name of the vdb to be fetched", required = true)
+                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
                             final @PathParam( "vdbName" ) String vdbName,
-                            @ApiParam(value = "Name of the model to be fetched", required = true)
+                            @ApiParam(value = "Id of the model to be fetched", required = true)
                             final @PathParam( "modelName" ) String modelName) throws KomodoRestException {
 
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
@@ -609,27 +707,14 @@ public final class KomodoVdbService extends KomodoService {
         try {
             uow = createTransaction( "getModel", true ); //$NON-NLS-1$
 
-            // make sure VDB exists
-            if (! this.wsMgr.hasChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE ) ) {
+            Vdb vdb = findVdb(uow, mediaTypes, vdbName);
+            if (vdb == null)
                 return commitNoVdbFound(uow, mediaTypes, vdbName);
+
+            Model model = findModel(uow, mediaTypes, modelName, vdb);
+            if (model == null) {
+                return commitNoModelFound(uow, mediaTypes, modelName, vdbName);
             }
-
-            final KomodoObject kobject = this.wsMgr.getChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
-            final Vdb vdb = this.wsMgr.resolve( uow, kobject, Vdb.class );
-
-            LOGGER.debug( "getModel:VDB '{0}' was found", vdbName ); //$NON-NLS-1$
-
-            if (! vdb.hasChild(uow, modelName, VdbLexicon.Vdb.DECLARATIVE_MODEL)) {
-                return commit(uow, mediaTypes,
-                              new ResourceNotFound(
-                                                   vdbName + FORWARD_SLASH +
-                                                   V1Constants.MODELS_SEGMENT + FORWARD_SLASH +
-                                                   modelName,
-                                                   Messages.getString( GET_OPERATION_NAME)));
-            }
-
-            KomodoObject kModel = vdb.getChild(uow, modelName, VdbLexicon.Vdb.DECLARATIVE_MODEL);
-            Model model = this.wsMgr.resolve( uow, kModel, Model.class );
 
             RestVdbModel restModel = RestVdbModel.build(model, vdb, uriInfo.getBaseUri(), uow);
             LOGGER.debug("getModel:Model '{0}' from VDB '{1}' entity was constructed", modelName, vdbName); //$NON-NLS-1$
@@ -656,7 +741,7 @@ public final class KomodoVdbService extends KomodoService {
      * @param uriInfo
      *        the request URI information (never <code>null</code>)
      * @param vdbName
-     *        the name of the VDB being retrieved (cannot be empty)
+     *        the id of the VDB being retrieved (cannot be empty)
      * @return the JSON representation of the VDB translators (never <code>null</code>)
      * @throws KomodoRestException
      *         if there is a problem finding the specified workspace VDB or constructing the JSON representation
@@ -665,16 +750,16 @@ public final class KomodoVdbService extends KomodoService {
     @Path( V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
                 V1Constants.TRANSLATORS_SEGMENT )
     @Produces( MediaType.APPLICATION_JSON )
-    @Consumes ( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
+    @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Find all translators belonging to the vdb", response = RestVdbTranslator[].class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No vdb could be found with name"),
         @ApiResponse(code = 200, message = "No translators could be found but an empty list is returned"),
-        @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation")
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation")
     })
     public Response getTranslators( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
-                            @ApiParam(value = "Name of the vdb to be fetched", required = true)
+                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
                             final @PathParam( "vdbName" ) String vdbName) throws KomodoRestException {
 
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
@@ -683,13 +768,9 @@ public final class KomodoVdbService extends KomodoService {
         try {
             uow = createTransaction( "getTranslators", true ); //$NON-NLS-1$
 
-            // make sure VDB exists
-            if (! this.wsMgr.hasChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE ) ) {
+            Vdb vdb = findVdb(uow, mediaTypes, vdbName);
+            if (vdb == null)
                 return commitNoVdbFound(uow, mediaTypes, vdbName);
-            }
-
-            final KomodoObject kobject = this.wsMgr.getChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
-            final Vdb vdb = this.wsMgr.resolve( uow, kobject, Vdb.class );
 
             Translator[] translators = vdb.getTranslators(uow);
             if (translators == null)
@@ -723,9 +804,9 @@ public final class KomodoVdbService extends KomodoService {
      * @param uriInfo
      *        the request URI information (never <code>null</code>)
      * @param vdbName
-     *        the name of the VDB being retrieved (cannot be empty)
+     *        the id of the VDB being retrieved (cannot be empty)
      * @param translatorName
-     *        the name of the translator being retrieved (cannot be empty)
+     *        the id of the translator being retrieved (cannot be empty)
      * @return the JSON representation of the VDB translator (never <code>null</code>)
      * @throws KomodoRestException
      *         if there is a problem finding the specified workspace VDB or constructing the JSON representation
@@ -735,18 +816,18 @@ public final class KomodoVdbService extends KomodoService {
                 V1Constants.TRANSLATORS_SEGMENT + StringConstants.FORWARD_SLASH +
                 V1Constants.TRANSLATOR_PLACEHOLDER)
     @Produces( MediaType.APPLICATION_JSON )
-    @Consumes ( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
+    @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Find the named translator belonging to the vdb", response = RestVdbTranslator.class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No vdb could be found with name"),
         @ApiResponse(code = 404, message = "No translator could be found with name"),
-        @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation")
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation")
     })
     public Response getTranslator( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
-                            @ApiParam(value = "Name of the vdb to be fetched", required = true)
+                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
                             final @PathParam( "vdbName" ) String vdbName,
-                            @ApiParam(value = "Name of the translator to be fetched", required = true)
+                            @ApiParam(value = "Id of the translator to be fetched", required = true)
                             final @PathParam( "translatorName" ) String translatorName) throws KomodoRestException {
 
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
@@ -755,22 +836,14 @@ public final class KomodoVdbService extends KomodoService {
         try {
             uow = createTransaction( "getTranslator", true ); //$NON-NLS-1$
 
-            // make sure VDB exists
-            if (! this.wsMgr.hasChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE ) ) {
+            Vdb vdb = findVdb(uow, mediaTypes, vdbName);
+            if (vdb == null)
                 return commitNoVdbFound(uow, mediaTypes, vdbName);
-            }
-
-            final KomodoObject kobject = this.wsMgr.getChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
-            final Vdb vdb = this.wsMgr.resolve( uow, kobject, Vdb.class );
-
-            LOGGER.debug( "getTranslator:VDB '{0}' was found", vdbName ); //$NON-NLS-1$
 
             Translator[] translators = vdb.getTranslators(uow);
             if (translators == null || translators.length == 0) {
                 LOGGER.debug("getTranslators:No translators found for vdb '{0}'", vdbName); //$NON-NLS-1$
-                String resourceName = vdbName + FORWARD_SLASH +
-                                                     V1Constants.TRANSLATORS_SEGMENT + FORWARD_SLASH +
-                                                     translatorName;
+                String resourceName = uri(vdbName, TRANSLATORS_SEGMENT, translatorName);
                 return commit(uow, mediaTypes, new ResourceNotFound(resourceName, Messages.getString(GET_OPERATION_NAME)));
             }
 
@@ -785,10 +858,7 @@ public final class KomodoVdbService extends KomodoService {
             // make sure source exists
             if (translator == null) {
                 return commit(uow, mediaTypes,
-                              new ResourceNotFound(
-                                                   vdbName + FORWARD_SLASH +
-                                                    V1Constants.TRANSLATORS_SEGMENT + FORWARD_SLASH +
-                                                   translatorName,
+                              new ResourceNotFound(uri(vdbName, V1Constants.TRANSLATORS_SEGMENT, translatorName),
                                                    Messages.getString( GET_OPERATION_NAME)));
             }
 
@@ -817,7 +887,7 @@ public final class KomodoVdbService extends KomodoService {
      * @param uriInfo
      *        the request URI information (never <code>null</code>)
      * @param vdbName
-     *        the name of the VDB being retrieved (cannot be empty)
+     *        the id of the VDB being retrieved (cannot be empty)
      * @return the JSON representation of the VDB import (never <code>null</code>)
      * @throws KomodoRestException
      *         if there is a problem finding the specified workspace VDB or constructing the JSON representation
@@ -826,16 +896,16 @@ public final class KomodoVdbService extends KomodoService {
     @Path( V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
                 V1Constants.IMPORTS_SEGMENT )
     @Produces( MediaType.APPLICATION_JSON )
-    @Consumes ( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
+    @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Find all imports belonging to the vdb", response = RestVdbImport[].class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No vdb could be found with name"),
         @ApiResponse(code = 200, message = "No imports could be found but an empty list is returned"),
-        @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation")
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation")
     })
     public Response getImports( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
-                            @ApiParam(value = "Name of the vdb to be fetched", required = true)
+                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
                             final @PathParam( "vdbName" ) String vdbName) throws KomodoRestException {
 
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
@@ -844,13 +914,9 @@ public final class KomodoVdbService extends KomodoService {
         try {
             uow = createTransaction( "getImports", true ); //$NON-NLS-1$
 
-            // make sure VDB exists
-            if (! this.wsMgr.hasChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE ) ) {
+            Vdb vdb = findVdb(uow, mediaTypes, vdbName);
+            if (vdb == null)
                 return commitNoVdbFound(uow, mediaTypes, vdbName);
-            }
-
-            final KomodoObject kobject = this.wsMgr.getChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
-            final Vdb vdb = this.wsMgr.resolve( uow, kobject, Vdb.class );
 
             VdbImport[] imports = vdb.getImports(uow);
             if (imports == null)
@@ -884,9 +950,9 @@ public final class KomodoVdbService extends KomodoService {
      * @param uriInfo
      *        the request URI information (never <code>null</code>)
      * @param vdbName
-     *        the name of the VDB being retrieved (cannot be empty)
+     *        the id of the VDB being retrieved (cannot be empty)
      * @param importName
-     *        the name of the import being retrieved (cannot be empty)
+     *        the id of the import being retrieved (cannot be empty)
      * @return the JSON representation of the VDB import (never <code>null</code>)
      * @throws KomodoRestException
      *         if there is a problem finding the specified workspace VDB or constructing the JSON representation
@@ -896,18 +962,18 @@ public final class KomodoVdbService extends KomodoService {
                 V1Constants.IMPORTS_SEGMENT + StringConstants.FORWARD_SLASH +
                 V1Constants.IMPORT_PLACEHOLDER)
     @Produces( MediaType.APPLICATION_JSON )
-    @Consumes ( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
+    @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Find the named vdb import belonging to the vdb", response = RestVdbImport.class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No vdb could be found with name"),
         @ApiResponse(code = 404, message = "No import could be found with name"),
-        @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation")
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation")
     })
     public Response getImport( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
-                            @ApiParam(value = "Name of the vdb to be fetched", required = true)
+                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
                             final @PathParam( "vdbName" ) String vdbName,
-                            @ApiParam(value = "Name of the vdb import to be fetched", required = true)
+                            @ApiParam(value = "Id of the vdb import to be fetched", required = true)
                             final @PathParam( "importName" ) String importName) throws KomodoRestException {
 
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
@@ -916,22 +982,14 @@ public final class KomodoVdbService extends KomodoService {
         try {
             uow = createTransaction( "getImport", true ); //$NON-NLS-1$
 
-            // make sure VDB exists
-            if (! this.wsMgr.hasChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE ) ) {
+            Vdb vdb = findVdb(uow, mediaTypes, vdbName);
+            if (vdb == null)
                 return commitNoVdbFound(uow, mediaTypes, vdbName);
-            }
-
-            final KomodoObject kobject = this.wsMgr.getChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
-            final Vdb vdb = this.wsMgr.resolve( uow, kobject, Vdb.class );
-
-            LOGGER.debug( "getImport:VDB '{0}' was found", vdbName ); //$NON-NLS-1$
 
             VdbImport[] imports = vdb.getImports(uow);
             if (imports == null || imports.length == 0) {
                 LOGGER.debug("getImport:No import found for vdb '{0}'", vdbName); //$NON-NLS-1$
-                String resourceName = vdbName + FORWARD_SLASH +
-                                                     V1Constants.TRANSLATORS_SEGMENT + FORWARD_SLASH +
-                                                     importName;
+                String resourceName = uri(vdbName, TRANSLATORS_SEGMENT, importName);
                 return commit(uow, mediaTypes, new ResourceNotFound(resourceName, Messages.getString(GET_OPERATION_NAME)));
             }
 
@@ -946,10 +1004,7 @@ public final class KomodoVdbService extends KomodoService {
             // make sure source exists
             if (vdbImport == null) {
                 return commit(uow, mediaTypes,
-                              new ResourceNotFound(
-                                                   vdbName + FORWARD_SLASH +
-                                                    V1Constants.IMPORTS_SEGMENT + FORWARD_SLASH +
-                                                   importName,
+                              new ResourceNotFound(uri(vdbName, IMPORTS_SEGMENT, importName),
                                                    Messages.getString( GET_OPERATION_NAME)));
             }
 
@@ -978,7 +1033,7 @@ public final class KomodoVdbService extends KomodoService {
      * @param uriInfo
      *        the request URI information (never <code>null</code>)
      * @param vdbName
-     *        the name of the VDB being retrieved (cannot be empty)
+     *        the id of the VDB being retrieved (cannot be empty)
      * @return the JSON representation of the VDB data role (never <code>null</code>)
      * @throws KomodoRestException
      *         if there is a problem finding the specified workspace VDB or constructing the JSON representation
@@ -987,16 +1042,16 @@ public final class KomodoVdbService extends KomodoService {
     @Path( V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
                 V1Constants.DATA_ROLES_SEGMENT )
     @Produces( MediaType.APPLICATION_JSON )
-    @Consumes ( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
+    @Consumes ( { MediaType.APPLICATION_JSON} )
     @ApiOperation(value = "Find all data roles belonging to the vdb", response = RestVdbDataRole[].class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No vdb could be found with name"),
         @ApiResponse(code = 200, message = "No data roles could be found but an empty list is returned"),
-        @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation")
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation")
     })
     public Response getDataRoles( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
-                            @ApiParam(value = "Name of the vdb to be fetched", required = true)
+                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
                             final @PathParam( "vdbName" ) String vdbName) throws KomodoRestException {
 
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
@@ -1005,25 +1060,21 @@ public final class KomodoVdbService extends KomodoService {
         try {
             uow = createTransaction( "getDataRoles", true ); //$NON-NLS-1$
 
-            // make sure VDB exists
-            if (! this.wsMgr.hasChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE ) ) {
+            Vdb vdb = findVdb(uow, mediaTypes, vdbName);
+            if (vdb == null)
                 return commitNoVdbFound(uow, mediaTypes, vdbName);
-            }
-
-            final KomodoObject kobject = this.wsMgr.getChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
-            final Vdb vdb = this.wsMgr.resolve( uow, kobject, Vdb.class );
 
             DataRole[] dataRoles = vdb.getDataRoles(uow);
             if (dataRoles == null)
                 dataRoles = new DataRole[0];
 
-            List<RestVdbDataRole> restImports = new ArrayList<>(dataRoles.length);
+            List<RestVdbDataRole> restDataRoles = new ArrayList<>(dataRoles.length);
             for (DataRole dataRole : dataRoles) {
-                restImports.add(RestVdbDataRole.build(dataRole, vdb, uriInfo.getBaseUri(), uow));
+                restDataRoles.add(RestVdbDataRole.build(dataRole, vdb, uriInfo.getBaseUri(), uow));
                 LOGGER.debug("getDataRoles:Data role from VDB '{0}' entity was constructed", vdbName); //$NON-NLS-1$
             }
 
-            return commit( uow, mediaTypes, restImports);
+            return commit( uow, mediaTypes, restDataRoles);
 
         } catch ( final Exception e ) {
             if ( ( uow != null ) && ( uow.getState() != State.ROLLED_BACK ) ) {
@@ -1045,9 +1096,9 @@ public final class KomodoVdbService extends KomodoService {
      * @param uriInfo
      *        the request URI information (never <code>null</code>)
      * @param vdbName
-     *        the name of the VDB being retrieved (cannot be empty)
-     * @param dataRoleName
-     *        the name of the import being retrieved (cannot be empty)
+     *        the id of the VDB being retrieved (cannot be empty)
+     * @param dataRoleId
+     *        the id of the data role being retrieved (cannot be empty)
      * @return the JSON representation of the VDB data role (never <code>null</code>)
      * @throws KomodoRestException
      *         if there is a problem finding the specified workspace VDB or constructing the JSON representation
@@ -1057,19 +1108,19 @@ public final class KomodoVdbService extends KomodoService {
                 V1Constants.DATA_ROLES_SEGMENT + StringConstants.FORWARD_SLASH +
                 V1Constants.DATA_ROLE_PLACEHOLDER)
     @Produces( MediaType.APPLICATION_JSON )
-    @Consumes ( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
+    @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Find the named data role belonging to the vdb", response = RestVdbDataRole.class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No vdb could be found with name"),
         @ApiResponse(code = 404, message = "No data role could be found with name"),
-        @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation")
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation")
     })
     public Response getDataRole( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
-                            @ApiParam(value = "Name of the vdb to be fetched", required = true)
+                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
                             final @PathParam( "vdbName" ) String vdbName,
-                            @ApiParam(value = "Name of the data role to be fetched", required = true)
-                            final @PathParam( "dataRoleName" ) String dataRoleName) throws KomodoRestException {
+                            @ApiParam(value = "Id of the data role to be fetched", required = true)
+                            final @PathParam( "dataRoleId" ) String dataRoleId) throws KomodoRestException {
 
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         UnitOfWork uow = null;
@@ -1077,45 +1128,17 @@ public final class KomodoVdbService extends KomodoService {
         try {
             uow = createTransaction( "getDataRole", true ); //$NON-NLS-1$
 
-            // make sure VDB exists
-            if (! this.wsMgr.hasChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE ) ) {
+            Vdb vdb = findVdb(uow, mediaTypes, vdbName);
+            if (vdb == null)
                 return commitNoVdbFound(uow, mediaTypes, vdbName);
-            }
 
-            final KomodoObject kobject = this.wsMgr.getChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
-            final Vdb vdb = this.wsMgr.resolve( uow, kobject, Vdb.class );
-
-            LOGGER.debug( "getDataRole:VDB '{0}' was found", vdbName ); //$NON-NLS-1$
-
-            DataRole[] dataRoles = vdb.getDataRoles(uow);
-            if (dataRoles == null || dataRoles.length == 0) {
-                LOGGER.debug("getDataRole:No data role found for vdb '{0}'", vdbName); //$NON-NLS-1$
-                String resourceName = vdbName + FORWARD_SLASH +
-                                                     V1Constants.TRANSLATORS_SEGMENT + FORWARD_SLASH +
-                                                     dataRoleName;
-                return commit(uow, mediaTypes, new ResourceNotFound(resourceName, Messages.getString(GET_OPERATION_NAME)));
-            }
-
-            DataRole dataRole = null;
-            for (DataRole drole : dataRoles) {
-                if (dataRoleName.equals(drole.getName(uow))) {
-                    dataRole = drole;
-                    break;
-                }
-            }
-
-            // make sure source exists
+            DataRole dataRole = findDataRole(uow, mediaTypes, dataRoleId, vdb);
             if (dataRole == null) {
-                return commit(uow, mediaTypes,
-                              new ResourceNotFound(
-                                                   vdbName + FORWARD_SLASH +
-                                                    V1Constants.IMPORTS_SEGMENT + FORWARD_SLASH +
-                                                   dataRoleName,
-                                                   Messages.getString( GET_OPERATION_NAME)));
+                return commitNoDataRoleFound(uow, mediaTypes, dataRoleId, vdbName);
             }
 
             RestVdbDataRole restDataRole = RestVdbDataRole.build(dataRole, vdb, uriInfo.getBaseUri(), uow);
-            LOGGER.debug("getDataRole:data role '{0}' from VDB '{1}' entity was constructed", dataRoleName, vdbName); //$NON-NLS-1$
+            LOGGER.debug("getDataRole:data role '{0}' from VDB '{1}' entity was constructed", dataRoleId, vdbName); //$NON-NLS-1$
 
             return commit( uow, mediaTypes, restDataRole);
 
@@ -1129,7 +1152,7 @@ public final class KomodoVdbService extends KomodoService {
             }
 
             String errorMsg = e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.getClass().getSimpleName();
-            throw new KomodoRestException( RelationalMessages.getString( VDB_SERVICE_GET_IMPORT_ERROR, dataRoleName, vdbName, errorMsg ), e );
+            throw new KomodoRestException( RelationalMessages.getString( VDB_SERVICE_GET_DATA_ROLE_ERROR, dataRoleId, vdbName, errorMsg ), e );
         }
     }
 
@@ -1139,9 +1162,9 @@ public final class KomodoVdbService extends KomodoService {
      * @param uriInfo
      *        the request URI information (never <code>null</code>)
      * @param vdbName
-     *        the name of the VDB being retrieved (cannot be empty)
+     *        the id of the VDB being retrieved (cannot be empty)
      * @param modelName
-     *        the name of the model being retrieved (cannot be empty)
+     *        the id of the model being retrieved (cannot be empty)
      * @return the JSON representation of the VDB (never <code>null</code>)
      * @throws KomodoRestException
      *         if there is a problem finding the specified workspace VDB or constructing the JSON representation
@@ -1152,18 +1175,18 @@ public final class KomodoVdbService extends KomodoService {
                 V1Constants.MODEL_PLACEHOLDER + StringConstants.FORWARD_SLASH +
                 V1Constants.SOURCES_SEGMENT)
     @Produces( MediaType.APPLICATION_JSON )
-    @Consumes ( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
+    @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Find all sources of the model belonging to the vdb", response = RestVdbModelSource[].class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No vdb could be found with name"),
         @ApiResponse(code = 200, message = "No sources could be found but an empty list is returned"),
-        @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation")
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation")
     })
     public Response getSources( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
-                            @ApiParam(value = "Name of the vdb to be fetched", required = true)
+                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
                             final @PathParam( "vdbName" ) String vdbName,
-                            @ApiParam(value = "Name of the model to be fetched", required = true)
+                            @ApiParam(value = "Id of the model to be fetched", required = true)
                             final @PathParam( "modelName" ) String modelName) throws KomodoRestException {
 
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
@@ -1172,29 +1195,14 @@ public final class KomodoVdbService extends KomodoService {
         try {
             uow = createTransaction( "getSources", true ); //$NON-NLS-1$
 
-            // make sure VDB exists
-            if (! this.wsMgr.hasChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE ) ) {
+            Vdb vdb = findVdb(uow, mediaTypes, vdbName);
+            if (vdb == null)
                 return commitNoVdbFound(uow, mediaTypes, vdbName);
+
+            Model model = findModel(uow, mediaTypes, modelName, vdb);
+            if (model == null) {
+                return commitNoModelFound(uow, mediaTypes, modelName, vdbName);
             }
-
-            final KomodoObject kobject = this.wsMgr.getChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
-            final Vdb vdb = this.wsMgr.resolve( uow, kobject, Vdb.class );
-
-            LOGGER.debug( "getSources:VDB '{0}' was found", vdbName ); //$NON-NLS-1$
-
-            // make sure model exists
-            if (! vdb.hasChild(uow, modelName, VdbLexicon.Vdb.DECLARATIVE_MODEL)) {
-                return commit(uow, mediaTypes,
-                              new ResourceNotFound(
-                                                   vdbName + FORWARD_SLASH +
-                                                    V1Constants.MODELS_SEGMENT + FORWARD_SLASH +
-                                                   modelName + FORWARD_SLASH +
-                                                   V1Constants.SOURCES_SEGMENT,
-                                                   Messages.getString( GET_OPERATION_NAME)));
-            }
-
-            KomodoObject kModel = vdb.getChild(uow, modelName, VdbLexicon.Vdb.DECLARATIVE_MODEL);
-            Model model = this.wsMgr.resolve( uow, kModel, Model.class );
 
             ModelSource[] sources = model.getSources(uow);
             if (sources == null)
@@ -1228,11 +1236,11 @@ public final class KomodoVdbService extends KomodoService {
      * @param uriInfo
      *        the request URI information (never <code>null</code>)
      * @param vdbName
-     *        the name of the VDB being retrieved (cannot be empty)
+     *        the id of the VDB being retrieved (cannot be empty)
      * @param modelName
-     *        the name of the model being retrieved (cannot be empty)
+     *        the id of the model being retrieved (cannot be empty)
      * @param sourceName
-     *        the name of the source being retrieved (cannot be empty)
+     *        the id of the source being retrieved (cannot be empty)
      * @return the JSON representation of the VDB (never <code>null</code>)
      * @throws KomodoRestException
      *         if there is a problem finding the specified workspace VDB or constructing the JSON representation
@@ -1244,21 +1252,21 @@ public final class KomodoVdbService extends KomodoService {
                 V1Constants.SOURCES_SEGMENT + StringConstants.FORWARD_SLASH +
                 V1Constants.SOURCE_PLACEHOLDER)
     @Produces( MediaType.APPLICATION_JSON )
-    @Consumes ( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
+    @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Find the named source belonging to the model of the vdb", response = RestVdbModelSource.class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No vdb could be found with name"),
         @ApiResponse(code = 404, message = "No model could be found with name"),
         @ApiResponse(code = 404, message = "No source could be found with name"),
-        @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation")
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation")
     })
     public Response getSource( final @Context HttpHeaders headers,
                             final @Context UriInfo uriInfo,
-                            @ApiParam(value = "Name of the vdb to be fetched", required = true)
+                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
                             final @PathParam( "vdbName" ) String vdbName,
-                            @ApiParam(value = "Name of the model to be fetched", required = true)
+                            @ApiParam(value = "Id of the model to be fetched", required = true)
                             final @PathParam( "modelName" ) String modelName,
-                            @ApiParam(value = "Name of the model source to be fetched", required = true)
+                            @ApiParam(value = "Id of the model source to be fetched", required = true)
                             final @PathParam( "sourceName" ) String sourceName) throws KomodoRestException {
 
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
@@ -1267,36 +1275,19 @@ public final class KomodoVdbService extends KomodoService {
         try {
             uow = createTransaction( "getSource", true ); //$NON-NLS-1$
 
-            // make sure VDB exists
-            if (! this.wsMgr.hasChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE ) ) {
+            Vdb vdb = findVdb(uow, mediaTypes, vdbName);
+            if (vdb == null)
                 return commitNoVdbFound(uow, mediaTypes, vdbName);
+
+            Model model = findModel(uow, mediaTypes, modelName, vdb);
+            if (model == null) {
+                return commitNoModelFound(uow, mediaTypes, modelName, vdbName);
             }
-
-            final KomodoObject kobject = this.wsMgr.getChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
-            final Vdb vdb = this.wsMgr.resolve( uow, kobject, Vdb.class );
-
-            LOGGER.debug( "getSource:VDB '{0}' was found", vdbName ); //$NON-NLS-1$
-
-            // make sure model exists
-            if (! vdb.hasChild(uow, modelName, VdbLexicon.Vdb.DECLARATIVE_MODEL)) {
-                return commit(uow, mediaTypes,
-                              new ResourceNotFound(
-                                                   vdbName + FORWARD_SLASH +
-                                                    V1Constants.MODELS_SEGMENT + FORWARD_SLASH +
-                                                   modelName,
-                                                   Messages.getString( GET_OPERATION_NAME)));
-            }
-
-            KomodoObject kModel = vdb.getChild(uow, modelName, VdbLexicon.Vdb.DECLARATIVE_MODEL);
-            Model model = this.wsMgr.resolve( uow, kModel, Model.class );
 
             ModelSource[] sources = model.getSources(uow);
             if (sources == null || sources.length == 0) {
                 LOGGER.debug("getSource:No sources found for model '{0}' in vdb '{1}'", modelName, vdbName); //$NON-NLS-1$
-                String resourceName = vdbName + FORWARD_SLASH +
-                                                     V1Constants.MODELS_SEGMENT + FORWARD_SLASH +
-                                                     modelName + FORWARD_SLASH +
-                                                     V1Constants.SOURCES_SEGMENT;
+                String resourceName = uri(vdbName, MODELS_SEGMENT, modelName, SOURCES_SEGMENT);
                 return commit(uow, mediaTypes, new ResourceNotFound(resourceName, Messages.getString(GET_OPERATION_NAME)));
             }
 
@@ -1315,12 +1306,9 @@ public final class KomodoVdbService extends KomodoService {
             // make sure source exists
             if (source == null) {
                 return commit(uow, mediaTypes,
-                              new ResourceNotFound(
-                                                   vdbName + FORWARD_SLASH +
-                                                    V1Constants.MODELS_SEGMENT + FORWARD_SLASH +
-                                                   modelName + FORWARD_SLASH +
-                                                   V1Constants.SOURCES_SEGMENT + FORWARD_SLASH +
-                                                   sourceName,
+                              new ResourceNotFound(uri(vdbName, MODELS_SEGMENT,
+                                                                           modelName, SOURCES_SEGMENT,
+                                                                           sourceName),
                                                    Messages.getString( GET_OPERATION_NAME)));
             }
 
@@ -1341,6 +1329,532 @@ public final class KomodoVdbService extends KomodoService {
 
             String errorMsg = e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.getClass().getSimpleName();
             throw new KomodoRestException( RelationalMessages.getString( VDB_SERVICE_GET_SOURCE_ERROR, sourceName, modelName, vdbName, errorMsg ), e );
+        }
+    }
+
+    /**
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @param vdbName
+     *        the id of the VDB being retrieved (cannot be empty)
+     * @param dataRoleId
+     *        the id of the data role being retrieved (cannot be empty)
+     * @return the JSON representation of the VDB data role permissions (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is a problem finding the specified workspace VDB or constructing the JSON representation
+     */
+    @GET
+    @Path( V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+                V1Constants.DATA_ROLES_SEGMENT + StringConstants.FORWARD_SLASH +
+                V1Constants.DATA_ROLE_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+                V1Constants.PERMISSIONS_SEGMENT)
+    @Produces( MediaType.APPLICATION_JSON )
+    @Consumes ( { MediaType.APPLICATION_JSON} )
+    @ApiOperation(value = "Find all permissions belonging to the vdb data role", response = RestVdbPermission[].class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 404, message = "No vdb or data role could be found with given names"),
+        @ApiResponse(code = 200, message = "No permissions could be found but an empty list is returned"),
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation")
+    })
+    public Response getPermissions( final @Context HttpHeaders headers,
+                            final @Context UriInfo uriInfo,
+                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
+                            final @PathParam( "vdbName" ) String vdbName,
+                            @ApiParam(value = "Id of the data role to be fetched", required = true)
+                            final @PathParam( "dataRoleId" ) String dataRoleId) throws KomodoRestException {
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        UnitOfWork uow = null;
+
+        try {
+            uow = createTransaction( "getPermissions", true ); //$NON-NLS-1$
+
+            Vdb vdb = findVdb(uow, mediaTypes, vdbName);
+            if (vdb == null)
+                return commitNoVdbFound(uow, mediaTypes, vdbName);
+
+            DataRole dataRole = findDataRole(uow, mediaTypes, dataRoleId, vdb);
+            if (dataRole == null) {
+                return commitNoDataRoleFound(uow, mediaTypes, dataRoleId, vdbName);
+            }
+
+            Permission[] permissions = dataRole.getPermissions(uow);
+            if (permissions == null)
+                permissions = new Permission[0];
+
+            List<RestVdbPermission> restPermissions = new ArrayList<>(permissions.length);
+            for (Permission permission : permissions) {
+                restPermissions.add(RestVdbPermission.build(permission, dataRole, vdb, uriInfo.getBaseUri(), uow));
+                LOGGER.debug("getPermissions:Permission from Data role '{0}' from VDB '{1}' entity was constructed", dataRoleId, vdbName); //$NON-NLS-1$
+            }
+
+            return commit( uow, mediaTypes, restPermissions);
+
+        } catch ( final Exception e ) {
+            if ( ( uow != null ) && ( uow.getState() != State.ROLLED_BACK ) ) {
+                uow.rollback();
+            }
+
+            if ( e instanceof KomodoRestException ) {
+                throw ( KomodoRestException )e;
+            }
+
+            String errorMsg = e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.getClass().getSimpleName();
+            throw new KomodoRestException( RelationalMessages.getString( VDB_SERVICE_GET_PERMISSIONS_ERROR, vdbName, errorMsg ), e );
+        }
+    }
+
+    /**
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @param vdbName
+     *        the id of the VDB being retrieved (cannot be empty)
+     * @param dataRoleId
+     *        the id of the data role being retrieved (cannot be empty)
+     * @param permissionId
+     *        the id of the permission being retrieved (cannot be empty)
+     * @return the JSON representation of the VDB data role permission (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is a problem finding the specified workspace VDB or constructing the JSON representation
+     */
+    @GET
+    @Path( V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+                V1Constants.DATA_ROLES_SEGMENT + StringConstants.FORWARD_SLASH +
+                V1Constants.DATA_ROLE_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+                V1Constants.PERMISSIONS_SEGMENT + StringConstants.FORWARD_SLASH +
+                V1Constants.PERMISSION_PLACEHOLDER)
+    @Produces( MediaType.APPLICATION_JSON )
+    @Consumes ( { MediaType.APPLICATION_JSON } )
+    @ApiOperation(value = "Find the named permission belonging to the data role of the vdb", response = RestVdbPermission.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 404, message = "No vdb, data role or permission could be found with name"),
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation")
+    })
+    public Response getPermission( final @Context HttpHeaders headers,
+                            final @Context UriInfo uriInfo,
+                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
+                            final @PathParam( "vdbName" ) String vdbName,
+                            @ApiParam(value = "Id of the data role to be fetched", required = true)
+                            final @PathParam( "dataRoleId" ) String dataRoleId,
+                            @ApiParam(value = "Id of the permission to be fetched", required = true)
+                            final @PathParam( "permissionId" ) String permissionId) throws KomodoRestException {
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        UnitOfWork uow = null;
+
+        try {
+            uow = createTransaction( "getPermission", true ); //$NON-NLS-1$
+
+            Vdb vdb = findVdb(uow, mediaTypes, vdbName);
+            if (vdb == null)
+                return commitNoVdbFound(uow, mediaTypes, vdbName);
+
+            DataRole dataRole = findDataRole(uow, mediaTypes, dataRoleId, vdb);
+            if (dataRole == null)
+                return commitNoDataRoleFound(uow, mediaTypes, dataRoleId, vdbName);
+
+            Permission permission = findPermission(uow, mediaTypes, permissionId, dataRole, vdb);
+            if (permission == null)
+                return commitNoPermissionFound(uow, mediaTypes, permissionId, dataRoleId, vdbName);
+
+            RestVdbPermission restPermission = RestVdbPermission.build(permission, dataRole, vdb, uriInfo.getBaseUri(), uow);
+            LOGGER.debug("getPermission:permission '{0}' from data role '{1}' from VDB '{2}' entity was constructed", permissionId, dataRoleId, vdbName); //$NON-NLS-1$
+
+            return commit( uow, mediaTypes, restPermission);
+
+        } catch ( final Exception e ) {
+            if ( ( uow != null ) && ( uow.getState() != State.ROLLED_BACK ) ) {
+                uow.rollback();
+            }
+
+            if ( e instanceof KomodoRestException ) {
+                throw ( KomodoRestException )e;
+            }
+
+            String errorMsg = e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.getClass().getSimpleName();
+            throw new KomodoRestException( RelationalMessages.getString( VDB_SERVICE_GET_PERMISSION_ERROR, permissionId, dataRoleId, vdbName, errorMsg ), e );
+        }
+    }
+
+    /**
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @param vdbName
+     *        the id of the VDB being retrieved (cannot be empty)
+     * @param dataRoleId
+     *        the id of the data role being retrieved (cannot be empty)
+     * @param permissionId
+     *        the id of the permission being retrieved (cannot be empty)
+     * @return the JSON representation of the VDB data role permission's conditions (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is a problem finding the specified workspace VDB or constructing the JSON representation
+     */
+    @GET
+    @Path( V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+                V1Constants.DATA_ROLES_SEGMENT + StringConstants.FORWARD_SLASH +
+                V1Constants.DATA_ROLE_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+                V1Constants.PERMISSIONS_SEGMENT + StringConstants.FORWARD_SLASH +
+                V1Constants.PERMISSION_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+                V1Constants.CONDITIONS_SEGMENT)
+    @Produces( MediaType.APPLICATION_JSON )
+    @Consumes ( { MediaType.APPLICATION_JSON } )
+    @ApiOperation(value = "Find the conditions belonging to the permission of the data role of the vdb", response = RestVdbPermission.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 404, message = "No vdb, data role or permission could be found with given names"),
+        @ApiResponse(code = 200, message = "No conditions could be found but an empty list is returned"),
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation")
+    })
+    public Response getConditions( final @Context HttpHeaders headers,
+                            final @Context UriInfo uriInfo,
+                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
+                            final @PathParam( "vdbName" ) String vdbName,
+                            @ApiParam(value = "Id of the data role to be fetched", required = true)
+                            final @PathParam( "dataRoleId" ) String dataRoleId,
+                            @ApiParam(value = "Id of the permission to be fetched", required = true)
+                            final @PathParam( "permissionId" ) String permissionId) throws KomodoRestException {
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        UnitOfWork uow = null;
+
+        try {
+            uow = createTransaction( "getConditions", true ); //$NON-NLS-1$
+
+            Vdb vdb = findVdb(uow, mediaTypes, vdbName);
+            if (vdb == null)
+                return commitNoVdbFound(uow, mediaTypes, vdbName);
+
+            DataRole dataRole = findDataRole(uow, mediaTypes, dataRoleId, vdb);
+            if (dataRole == null)
+                return commitNoDataRoleFound(uow, mediaTypes, dataRoleId, vdbName);
+
+            Permission permission = findPermission(uow, mediaTypes, permissionId, dataRole, vdb);
+            if (permission == null)
+                return commitNoPermissionFound(uow, mediaTypes, permissionId, dataRoleId, vdbName);
+
+            Condition[] conditions = permission.getConditions(uow);
+            List<RestVdbCondition> restConditions = new ArrayList<>(conditions.length);
+            for (Condition condition : conditions) {
+                restConditions.add(RestVdbCondition.build(condition, permission, dataRole, vdb, uriInfo.getBaseUri(), uow));
+                LOGGER.debug("getConditions:Condition from Permission from Data Role '{0}' from VDB '{1}' entity was constructed", dataRoleId, vdbName); //$NON-NLS-1$
+            }
+
+            return commit( uow, mediaTypes, restConditions);
+
+        } catch ( final Exception e ) {
+            if ( ( uow != null ) && ( uow.getState() != State.ROLLED_BACK ) ) {
+                uow.rollback();
+            }
+
+            if ( e instanceof KomodoRestException ) {
+                throw ( KomodoRestException )e;
+            }
+
+            String errorMsg = e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.getClass().getSimpleName();
+            throw new KomodoRestException( RelationalMessages.getString( VDB_SERVICE_GET_CONDITIONS_ERROR, permissionId, dataRoleId, vdbName, errorMsg ), e );
+        }
+    }
+
+    /**
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @param vdbName
+     *        the id of the VDB being retrieved (cannot be empty)
+     * @param dataRoleId
+     *        the id of the data role being retrieved (cannot be empty)
+     * @param permissionId
+     *        the id of the permission being retrieved (cannot be empty)
+     * @param conditionId
+     *        the id of the condition being retrieved (cannot be empty)
+     * @return the JSON representation of the VDB data role permission condition (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is a problem finding the specified workspace VDB or constructing the JSON representation
+     */
+    @GET
+    @Path( V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+                V1Constants.DATA_ROLES_SEGMENT + StringConstants.FORWARD_SLASH +
+                V1Constants.DATA_ROLE_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+                V1Constants.PERMISSIONS_SEGMENT + StringConstants.FORWARD_SLASH +
+                V1Constants.PERMISSION_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+                V1Constants.CONDITIONS_SEGMENT + StringConstants.FORWARD_SLASH +
+                V1Constants.CONDITION_PLACEHOLDER)
+    @Produces( MediaType.APPLICATION_JSON )
+    @Consumes ( { MediaType.APPLICATION_JSON } )
+    @ApiOperation(value = "Find the condition belonging to the permission of the data role of the vdb", response = RestVdbPermission.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 404, message = "No vdb, data role, permission or condition could be found with name"),
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation")
+    })
+    public Response getCondition( final @Context HttpHeaders headers,
+                            final @Context UriInfo uriInfo,
+                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
+                            final @PathParam( "vdbName" ) String vdbName,
+                            @ApiParam(value = "Id of the data role to be fetched", required = true)
+                            final @PathParam( "dataRoleId" ) String dataRoleId,
+                            @ApiParam(value = "Id of the permission to be fetched", required = true)
+                            final @PathParam( "permissionId" ) String permissionId,
+                            @ApiParam(value = "Id of the condition to be fetched", required = true)
+                            final @PathParam( "conditionId" ) String conditionId) throws KomodoRestException {
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        UnitOfWork uow = null;
+
+        try {
+            uow = createTransaction( "getCondition", true ); //$NON-NLS-1$
+
+            Vdb vdb = findVdb(uow, mediaTypes, vdbName);
+            if (vdb == null)
+                return commitNoVdbFound(uow, mediaTypes, vdbName);
+
+            DataRole dataRole = findDataRole(uow, mediaTypes, dataRoleId, vdb);
+            if (dataRole == null)
+                return commitNoDataRoleFound(uow, mediaTypes, dataRoleId, vdbName);
+
+            Permission permission = findPermission(uow, mediaTypes, permissionId, dataRole, vdb);
+            if (permission == null)
+                return commitNoPermissionFound(uow, mediaTypes, permissionId, dataRoleId, vdbName);
+
+            Condition[] conditions = permission.getConditions(uow);
+            if (conditions == null || conditions.length == 0) {
+                LOGGER.debug("getConition:No conditions found for vdb '{0}'", vdbName); //$NON-NLS-1$
+                String resourceName = uri(vdbName, DATA_ROLES_SEGMENT,
+                                                          dataRoleId, PERMISSIONS_SEGMENT,
+                                                          permissionId, CONDITIONS_SEGMENT,
+                                                          conditionId);
+                return commit(uow, mediaTypes, new ResourceNotFound(resourceName, Messages.getString(GET_OPERATION_NAME)));
+            }
+
+            Condition condition = null;
+            for (Condition con : conditions) {
+                if (conditionId.equals(con.getName(uow))) {
+                    condition = con;
+                    break;
+                }
+            }
+
+            if (condition == null) {
+                LOGGER.debug("No condition '{0}' for permission '{1}' for data role '{2}' found for vdb '{3}'", //$NON-NLS-1$
+                             conditionId, permissionId, dataRoleId, vdbName);
+                return commit(uow, mediaTypes, new ResourceNotFound(
+                                                                    uri(vdbName, DATA_ROLES_SEGMENT,
+                                                                        dataRoleId, PERMISSIONS_SEGMENT,
+                                                                        permissionId, CONDITIONS_SEGMENT,
+                                                                        conditionId),
+                                                                    Messages.getString( GET_OPERATION_NAME)));
+            }
+
+            RestVdbCondition restCondition = RestVdbCondition.build(condition, permission, dataRole, vdb, uriInfo.getBaseUri(), uow);
+            LOGGER.debug("getCondition:condition '{0}' from permission '{1}' from data role '{2}' from VDB '{3}' entity was constructed", permissionId, dataRoleId, vdbName); //$NON-NLS-1$
+
+            return commit( uow, mediaTypes, restCondition);
+
+        } catch ( final Exception e ) {
+            if ( ( uow != null ) && ( uow.getState() != State.ROLLED_BACK ) ) {
+                uow.rollback();
+            }
+
+            if ( e instanceof KomodoRestException ) {
+                throw ( KomodoRestException )e;
+            }
+
+            String errorMsg = e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.getClass().getSimpleName();
+            throw new KomodoRestException( RelationalMessages.getString( VDB_SERVICE_GET_CONDITION_ERROR, permissionId, dataRoleId, vdbName, errorMsg ), e );
+        }
+    }
+
+    /**
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @param vdbName
+     *        the id of the VDB being retrieved (cannot be empty)
+     * @param dataRoleId
+     *        the id of the data role being retrieved (cannot be empty)
+     * @param permissionId
+     *        the id of the permission being retrieved (cannot be empty)
+     * @return the JSON representation of the VDB data role permission's masks (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is a problem finding the specified workspace VDB or constructing the JSON representation
+     */
+    @GET
+    @Path( V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+                V1Constants.DATA_ROLES_SEGMENT + StringConstants.FORWARD_SLASH +
+                V1Constants.DATA_ROLE_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+                V1Constants.PERMISSIONS_SEGMENT + StringConstants.FORWARD_SLASH +
+                V1Constants.PERMISSION_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+                V1Constants.MASKS_SEGMENT)
+    @Produces( MediaType.APPLICATION_JSON )
+    @Consumes ( { MediaType.APPLICATION_JSON } )
+    @ApiOperation(value = "Find the masks belonging to the permission of the data role of the vdb", response = RestVdbPermission.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 404, message = "No vdb, data role or permission could be found with given names"),
+        @ApiResponse(code = 200, message = "No masks could be found but an empty list is returned"),
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation")
+    })
+    public Response getMasks( final @Context HttpHeaders headers,
+                            final @Context UriInfo uriInfo,
+                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
+                            final @PathParam( "vdbName" ) String vdbName,
+                            @ApiParam(value = "Id of the data role to be fetched", required = true)
+                            final @PathParam( "dataRoleId" ) String dataRoleId,
+                            @ApiParam(value = "Id of the permission to be fetched", required = true)
+                            final @PathParam( "permissionId" ) String permissionId) throws KomodoRestException {
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        UnitOfWork uow = null;
+
+        try {
+            uow = createTransaction( "getMasks", true ); //$NON-NLS-1$
+
+            Vdb vdb = findVdb(uow, mediaTypes, vdbName);
+            if (vdb == null)
+                return commitNoVdbFound(uow, mediaTypes, vdbName);
+
+            DataRole dataRole = findDataRole(uow, mediaTypes, dataRoleId, vdb);
+            if (dataRole == null)
+                return commitNoDataRoleFound(uow, mediaTypes, dataRoleId, vdbName);
+
+            Permission permission = findPermission(uow, mediaTypes, permissionId, dataRole, vdb);
+            if (permission == null)
+                return commitNoPermissionFound(uow, mediaTypes, permissionId, dataRoleId, vdbName);
+
+            Mask[] masks = permission.getMasks(uow);
+            List<RestVdbMask> restMasks = new ArrayList<>(masks.length);
+            for (Mask mask : masks) {
+                restMasks.add(RestVdbMask.build(mask, permission, dataRole, vdb, uriInfo.getBaseUri(), uow));
+                LOGGER.debug("getMasks:Mask from Permission from Data Role '{0}' from VDB '{1}' entity was constructed", dataRoleId, vdbName); //$NON-NLS-1$
+            }
+
+            return commit( uow, mediaTypes, restMasks);
+
+        } catch ( final Exception e ) {
+            if ( ( uow != null ) && ( uow.getState() != State.ROLLED_BACK ) ) {
+                uow.rollback();
+            }
+
+            if ( e instanceof KomodoRestException ) {
+                throw ( KomodoRestException )e;
+            }
+
+            String errorMsg = e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.getClass().getSimpleName();
+            throw new KomodoRestException( RelationalMessages.getString( VDB_SERVICE_GET_MASKS_ERROR, permissionId, dataRoleId, vdbName, errorMsg ), e );
+        }
+    }
+
+    /**
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @param vdbName
+     *        the id of the VDB being retrieved (cannot be empty)
+     * @param dataRoleId
+     *        the id of the data role being retrieved (cannot be empty)
+     * @param permissionId
+     *        the id of the permission being retrieved (cannot be empty)
+     * @param maskId
+     *        the id of the mask being retrieved (cannot be empty)
+     * @return the JSON representation of the VDB data role permission mask (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is a problem finding the specified workspace VDB or constructing the JSON representation
+     */
+    @GET
+    @Path( V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+                V1Constants.DATA_ROLES_SEGMENT + StringConstants.FORWARD_SLASH +
+                V1Constants.DATA_ROLE_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+                V1Constants.PERMISSIONS_SEGMENT + StringConstants.FORWARD_SLASH +
+                V1Constants.PERMISSION_PLACEHOLDER + StringConstants.FORWARD_SLASH +
+                V1Constants.MASKS_SEGMENT + StringConstants.FORWARD_SLASH +
+                V1Constants.MASK_PLACEHOLDER)
+    @Produces( MediaType.APPLICATION_JSON )
+    @Consumes ( { MediaType.APPLICATION_JSON } )
+    @ApiOperation(value = "Find the mask belonging to the permission of the data role of the vdb", response = RestVdbPermission.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 404, message = "No vdb, data role, permission or mask could be found with name"),
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation")
+    })
+    public Response getMask( final @Context HttpHeaders headers,
+                            final @Context UriInfo uriInfo,
+                            @ApiParam(value = "Id of the vdb to be fetched", required = true)
+                            final @PathParam( "vdbName" ) String vdbName,
+                            @ApiParam(value = "Id of the data role to be fetched", required = true)
+                            final @PathParam( "dataRoleId" ) String dataRoleId,
+                            @ApiParam(value = "Id of the permission to be fetched", required = true)
+                            final @PathParam( "permissionId" ) String permissionId,
+                            @ApiParam(value = "Id of the mask to be fetched", required = true)
+                            final @PathParam( "maskId" ) String maskId) throws KomodoRestException {
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        UnitOfWork uow = null;
+
+        try {
+            uow = createTransaction( "getMask", true ); //$NON-NLS-1$
+
+            Vdb vdb = findVdb(uow, mediaTypes, vdbName);
+            if (vdb == null)
+                return commitNoVdbFound(uow, mediaTypes, vdbName);
+
+            DataRole dataRole = findDataRole(uow, mediaTypes, dataRoleId, vdb);
+            if (dataRole == null)
+                return commitNoDataRoleFound(uow, mediaTypes, dataRoleId, vdbName);
+
+            Permission permission = findPermission(uow, mediaTypes, permissionId, dataRole, vdb);
+            if (permission == null)
+                return commitNoPermissionFound(uow, mediaTypes, permissionId, dataRoleId, vdbName);
+
+            Mask[] masks = permission.getMasks(uow);
+            if (masks == null || masks.length == 0) {
+                LOGGER.debug("getConition:No masks found for vdb '{0}'", vdbName); //$NON-NLS-1$
+                String resourceName = uri(vdbName, DATA_ROLES_SEGMENT,
+                                                          dataRoleId, PERMISSIONS_SEGMENT,
+                                                          permissionId, MASKS_SEGMENT,
+                                                          maskId);
+                return commit(uow, mediaTypes, new ResourceNotFound(resourceName, Messages.getString(GET_OPERATION_NAME)));
+            }
+
+            Mask mask = null;
+            for (Mask con : masks) {
+                if (maskId.equals(con.getName(uow))) {
+                    mask = con;
+                    break;
+                }
+            }
+
+            if (mask == null) {
+                LOGGER.debug("No mask '{0}' for permission '{1}' for data role '{2}' found for vdb '{3}'", //$NON-NLS-1$
+                             maskId, permissionId, dataRoleId, vdbName);
+                return commit(uow, mediaTypes, new ResourceNotFound(
+                                                                    uri(vdbName, DATA_ROLES_SEGMENT,
+                                                                        dataRoleId, PERMISSIONS_SEGMENT,
+                                                                        permissionId, MASKS_SEGMENT,
+                                                                        maskId),
+                                                                    Messages.getString( GET_OPERATION_NAME)));
+            }
+
+            RestVdbMask restMask = RestVdbMask.build(mask, permission, dataRole, vdb, uriInfo.getBaseUri(), uow);
+            LOGGER.debug("getMask:mask '{0}' from permission '{1}' from data role '{2}' from VDB '{3}' entity was constructed", permissionId, dataRoleId, vdbName); //$NON-NLS-1$
+
+            return commit( uow, mediaTypes, restMask);
+
+        } catch ( final Exception e ) {
+            if ( ( uow != null ) && ( uow.getState() != State.ROLLED_BACK ) ) {
+                uow.rollback();
+            }
+
+            if ( e instanceof KomodoRestException ) {
+                throw ( KomodoRestException )e;
+            }
+
+            String errorMsg = e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.getClass().getSimpleName();
+            throw new KomodoRestException( RelationalMessages.getString( VDB_SERVICE_GET_MASK_ERROR, permissionId, dataRoleId, vdbName, errorMsg ), e );
         }
     }
 }

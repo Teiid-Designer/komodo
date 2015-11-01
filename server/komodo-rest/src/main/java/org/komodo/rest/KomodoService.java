@@ -20,6 +20,7 @@ import javax.ws.rs.core.Variant.VariantListBuilder;
 import org.komodo.core.KEngine;
 import org.komodo.repository.SynchronousCallback;
 import org.komodo.rest.KomodoRestEntity.ResourceNotFound;
+import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.json.JsonConstants;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.spi.KException;
@@ -30,7 +31,7 @@ import org.komodo.utils.KLog;
 /**
  * A Komodo service implementation.
  */
-public abstract class KomodoService implements JsonConstants {
+public abstract class KomodoService implements JsonConstants, V1Constants {
 
     protected static final KLog LOGGER = KLog.getLogger();
 

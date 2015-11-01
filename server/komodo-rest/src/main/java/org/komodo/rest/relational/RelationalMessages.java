@@ -109,6 +109,36 @@ public final class RelationalMessages {
         VDB_SERVICE_GET_DATA_ROLE_ERROR,
 
         /**
+         * An error indicating an error occurred trying to obain a VDB's data role permissions
+         */
+        VDB_SERVICE_GET_PERMISSIONS_ERROR,
+
+        /**
+         * An error indicating an error occurred trying to obain a data role's permission
+         */
+        VDB_SERVICE_GET_PERMISSION_ERROR,
+
+        /**
+         * An error indicating an error occurred trying to obain a permission's conditions
+         */
+        VDB_SERVICE_GET_CONDITIONS_ERROR,
+
+        /**
+         * An error indicating an error occurred trying to obain a permission's condition
+         */
+        VDB_SERVICE_GET_CONDITION_ERROR,
+
+        /**
+         * An error indicating an error occurred trying to obain a permission's masks
+         */
+        VDB_SERVICE_GET_MASKS_ERROR,
+
+        /**
+         * An error indicating an error occurred trying to obain a permission's mask
+         */
+        VDB_SERVICE_GET_MASK_ERROR,
+
+        /**
          * An error when creating a VDB indicating the input VDB JSON document was missing.
          */
         VDB_SERVICE_MISSING_VDB,

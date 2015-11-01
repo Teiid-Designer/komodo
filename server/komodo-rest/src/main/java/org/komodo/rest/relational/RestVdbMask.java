@@ -14,6 +14,8 @@ import org.komodo.relational.vdb.Permission;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.rest.KomodoRestEntity;
 import org.komodo.rest.KomodoService;
+import org.komodo.rest.RestLink;
+import org.komodo.rest.RestLink.LinkType;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -64,6 +66,11 @@ public final class RestVdbMask extends KomodoRestEntity {
     public RestVdbMask(URI baseUri, String id, String dataPath, KomodoType kType, boolean hasChildren,
                                             String permission, String dataRole, String parentVdb) {
         super(baseUri, id, dataPath, kType, hasChildren);
+
+        addLink(new RestLink(LinkType.SELF, getUriBuilder()
+                             .buildVdbPermissionChildUri(LinkType.SELF, parentVdb, dataRole, permission, LinkType.MASKS, id)));
+        addLink(new RestLink(LinkType.PARENT, getUriBuilder()
+                             .buildVdbPermissionChildUri(LinkType.PARENT, parentVdb, dataRole, permission, LinkType.MASKS, id)));
     }
 
     /**

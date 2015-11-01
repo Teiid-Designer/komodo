@@ -15,6 +15,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import java.lang.reflect.Field;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -38,6 +39,7 @@ import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
+import org.komodo.core.KEngine;
 import org.komodo.relational.model.Model.Type;
 import org.komodo.rest.KomodoRestV1Application;
 import org.komodo.rest.RestLink;
@@ -59,8 +61,20 @@ public final class KomodoVdbServiceTest implements StringConstants {
 
     @AfterClass
     public static void afterAll() throws Exception {
-        _server.stop();
-        _restApp.stop();
+        if (_server != null)
+            _server.stop();
+
+        if (_restApp != null)
+            _restApp.stop();
+
+        //
+        // Allow other instances of the KomodoRestV1Application to be deployed
+        // with a clean komodo engine by destroying the current static instance
+        // loaded from these tests
+        //
+        Field instanceField = KEngine.class.getDeclaredField("_instance");
+        instanceField.setAccessible(true);
+        instanceField.set(KEngine.class, null);
     }
 
     @BeforeClass
@@ -213,7 +227,7 @@ public final class KomodoVdbServiceTest implements StringConstants {
         final String entities = response.readEntity(String.class);
         assertThat(entities, is(notNullValue()));
 
-        System.out.println("Response:\n" + entities);
+        //System.out.println("Response:\n" + entities);
         // make sure the VDB JSON document is returned for each vdb
         RestVdb[] vdbs = KomodoJsonMarshaller.unmarshallArray(entities, RestVdb[].class);
         assertEquals(4, vdbs.length);
@@ -268,13 +282,11 @@ public final class KomodoVdbServiceTest implements StringConstants {
         loadVdbs();
 
         // get
-        this.response = request(
-                                _uriBuilder.buildVdbUri(LinkType.SELF,
-                                                        TestUtilities.PORTFOLIO_VDB_NAME)).get();
+        this.response = request(_uriBuilder.buildVdbUri(LinkType.SELF, TestUtilities.PORTFOLIO_VDB_NAME)).get();
         final String entity = this.response.readEntity(String.class);
         assertThat(entity, is(notNullValue()));
 
-        System.out.println("Response:\n" + entity);
+        //System.out.println("Response:\n" + entity);
 
         RestVdb vdb = KomodoJsonMarshaller.unmarshall(entity, RestVdb.class);
         assertNotNull(vdb);
@@ -292,7 +304,7 @@ public final class KomodoVdbServiceTest implements StringConstants {
         final String entity = this.response.readEntity(String.class);
         assertThat(entity, is(notNullValue()));
 
-        System.out.println("Response:\n" + entity);
+        //System.out.println("Response:\n" + entity);
         assertTrue(entity.contains("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"));
         assertTrue(entity.contains("<vdb name=\"Portfolio\" version=\"1\">"));
         assertTrue(entity.contains("</vdb>"));
@@ -303,14 +315,12 @@ public final class KomodoVdbServiceTest implements StringConstants {
         loadVdbs();
 
         final String pattern = STAR + "P" + STAR;
-        this.response = request(
-                                UriBuilder.fromUri(_uriBuilder.generateVdbsUri())
-                                .queryParam(KomodoVdbService.QueryParamKeys.PATTERN, pattern).build()).get();
+        this.response = request(UriBuilder.fromUri(_uriBuilder.generateVdbsUri()).queryParam(KomodoVdbService.QueryParamKeys.PATTERN, pattern).build()).get();
 
         final String entities = response.readEntity(String.class);
         assertThat(entities, is(notNullValue()));
 
-        System.out.println("Response:\n" + entities);
+        //System.out.println("Response:\n" + entities);
         // make sure the VDB JSON document is returned for each vdb
         RestVdb[] vdbs = KomodoJsonMarshaller.unmarshallArray(entities, RestVdb[].class);
         assertEquals(2, vdbs.length);
@@ -319,48 +329,45 @@ public final class KomodoVdbServiceTest implements StringConstants {
         for (RestVdb vdb : vdbs) {
             if (TestUtilities.PARTS_VDB_NAME.equals(vdb.getName())) {
                 // Not checking this one
-            } else if (TestUtilities.PORTFOLIO_VDB_NAME.equals(vdb.getName()))
-                assertPortfolio(vdb);
+            } else
+                if (TestUtilities.PORTFOLIO_VDB_NAME.equals(vdb.getName()))
+                    assertPortfolio(vdb);
             else
                 fail("Invalid VDB returned from search pattern " + pattern);
         }
     }
 
-        @Test
-        public void shouldLimitNumberOfVdbsReturnedWhenUsingSizeQueryParameter() throws Exception {
-            loadVdbs();
+    @Test
+    public void shouldLimitNumberOfVdbsReturnedWhenUsingSizeQueryParameter() throws Exception {
+        loadVdbs();
 
-            final int resultSize = 3;
+        final int resultSize = 3;
 
-            this.response = request( UriBuilder.fromUri( _uriBuilder.generateVdbsUri() )
-                                               .queryParam( KomodoVdbService.QueryParamKeys.SIZE, resultSize )
-                                               .build() ).get();
-            final String entities = response.readEntity(String.class);
-            assertThat(entities, is(notNullValue()));
+        this.response = request(UriBuilder.fromUri(_uriBuilder.generateVdbsUri()).queryParam(KomodoVdbService.QueryParamKeys.SIZE, resultSize).build()).get();
+        final String entities = response.readEntity(String.class);
+        assertThat(entities, is(notNullValue()));
 
-            System.out.println("Response:\n" + entities);
-            // make sure the VDB JSON document is returned for each vdb
-            RestVdb[] vdbs = KomodoJsonMarshaller.unmarshallArray(entities, RestVdb[].class);
-            assertEquals(resultSize, vdbs.length);
-        }
+        //System.out.println("Response:\n" + entities);
+        // make sure the VDB JSON document is returned for each vdb
+        RestVdb[] vdbs = KomodoJsonMarshaller.unmarshallArray(entities, RestVdb[].class);
+        assertEquals(resultSize, vdbs.length);
+    }
 
-        @Test
-        public void shouldLimitNumberOfVdbsReturnedWhenUsingStartQueryParameter() throws Exception {
-            loadVdbs();
+    @Test
+    public void shouldLimitNumberOfVdbsReturnedWhenUsingStartQueryParameter() throws Exception {
+        loadVdbs();
 
-            final int start = 3;
+        final int start = 3;
 
-            this.response = request( UriBuilder.fromUri( _uriBuilder.generateVdbsUri() )
-                                               .queryParam( KomodoVdbService.QueryParamKeys.START, start )
-                                               .build() ).get();
-            final String entities = response.readEntity(String.class);
-            assertThat(entities, is(notNullValue()));
+        this.response = request(UriBuilder.fromUri(_uriBuilder.generateVdbsUri()).queryParam(KomodoVdbService.QueryParamKeys.START, start).build()).get();
+        final String entities = response.readEntity(String.class);
+        assertThat(entities, is(notNullValue()));
 
-            System.out.println("Response:\n" + entities);
-            // make sure the VDB JSON document is returned for each vdb
-            RestVdb[] vdbs = KomodoJsonMarshaller.unmarshallArray(entities, RestVdb[].class);
-            assertEquals(1, vdbs.length);
-        }
+        //System.out.println("Response:\n" + entities);
+        // make sure the VDB JSON document is returned for each vdb
+        RestVdb[] vdbs = KomodoJsonMarshaller.unmarshallArray(entities, RestVdb[].class);
+        assertEquals(1, vdbs.length);
+    }
 
     //
     //    @Test
@@ -381,7 +388,7 @@ public final class KomodoVdbServiceTest implements StringConstants {
         final String entity = this.response.readEntity(String.class);
         assertThat(entity, is(notNullValue()));
 
-        System.out.println("Response:\n" + entity);
+        //System.out.println("Response:\n" + entity);
 
         RestVdb[] vdbs = KomodoJsonMarshaller.unmarshallArray(entity, RestVdb[].class);
         assertNotNull(vdbs);
@@ -398,7 +405,7 @@ public final class KomodoVdbServiceTest implements StringConstants {
         final String entity = this.response.readEntity(String.class);
         assertThat(entity, is(notNullValue()));
 
-        System.out.println("Response:\n" + entity);
+        //System.out.println("Response:\n" + entity);
 
         RestVdbModel[] models = KomodoJsonMarshaller.unmarshallArray(entity, RestVdbModel[].class);
         assertNotNull(models);
@@ -409,13 +416,17 @@ public final class KomodoVdbServiceTest implements StringConstants {
 
             if ("MarketData".equals(model.getId())) {
                 assertEquals(Type.PHYSICAL, model.getModelType());
-            } else if ("Accounts".equals(model.getId())) {
+            } else
+                if ("Accounts".equals(model.getId())) {
                 assertEquals(Type.PHYSICAL, model.getModelType());
-            } else if ("PersonalValuations".equals(model.getId())) {
+            } else
+                    if ("PersonalValuations".equals(model.getId())) {
                 assertEquals(Type.PHYSICAL, model.getModelType());
-            } else if ("Stocks".equals(model.getId())) {
+            } else
+                        if ("Stocks".equals(model.getId())) {
                 assertEquals(Type.VIRTUAL, model.getModelType());
-            } else if ("StocksMatModel".equals(model.getId())) {
+            } else
+                            if ("StocksMatModel".equals(model.getId())) {
                 assertEquals(Type.VIRTUAL, model.getModelType());
             } else
                 fail("Model has invalid id");
@@ -430,12 +441,12 @@ public final class KomodoVdbServiceTest implements StringConstants {
         loadVdbs();
 
         // get
-        URI uri = _uriBuilder.buildVdbModelUri(LinkType.SELF, TestUtilities.PORTFOLIO_VDB_NAME, "StocksMatModel");
+        URI uri = _uriBuilder.buildVdbModelUri(LinkType.SELF, TestUtilities.PORTFOLIO_VDB_NAME, "PersonalValuations");
         this.response = request(uri).get();
         final String entity = this.response.readEntity(String.class);
         assertThat(entity, is(notNullValue()));
 
-        System.out.println("Response from uri " + uri + ":\n" + entity);
+        //System.out.println("Response from uri " + uri + ":\n" + entity);
 
         RestVdbModel model = KomodoJsonMarshaller.unmarshall(entity, RestVdbModel.class);
         assertNotNull(model);
@@ -454,13 +465,12 @@ public final class KomodoVdbServiceTest implements StringConstants {
         loadVdbs();
 
         // get
-        URI uri = _uriBuilder.buildVdbModelUri(LinkType.SOURCES,
-                                                                     TestUtilities.PORTFOLIO_VDB_NAME, "PersonalValuations");
+        URI uri = _uriBuilder.buildVdbModelUri(LinkType.SOURCES, TestUtilities.PORTFOLIO_VDB_NAME, "PersonalValuations");
         this.response = request(uri).get();
         final String entities = this.response.readEntity(String.class);
         assertThat(entities, is(notNullValue()));
 
-        System.out.println("Response from uri " + uri + ":\n" + entities);
+        //System.out.println("Response from uri " + uri + ":\n" + entities);
 
         RestVdbModelSource[] sources = KomodoJsonMarshaller.unmarshallArray(entities, RestVdbModelSource[].class);
         assertEquals(1, sources.length);
@@ -481,13 +491,12 @@ public final class KomodoVdbServiceTest implements StringConstants {
         loadVdbs();
 
         // get
-        URI uri = _uriBuilder.buildVdbModelSourceUri(LinkType.SELF, TestUtilities.PORTFOLIO_VDB_NAME,
-                                                                                 "PersonalValuations", "excelconnector");
+        URI uri = _uriBuilder.buildVdbModelSourceUri(LinkType.SELF, TestUtilities.PORTFOLIO_VDB_NAME, "PersonalValuations", "excelconnector");
         this.response = request(uri).get();
         final String entity = this.response.readEntity(String.class);
         assertThat(entity, is(notNullValue()));
 
-        System.out.println("Response from uri " + uri + ":\n" + entity);
+        //System.out.println("Response from uri " + uri + ":\n" + entity);
 
         RestVdbModelSource source = KomodoJsonMarshaller.unmarshall(entity, RestVdbModelSource.class);
         assertNotNull(source);
@@ -511,7 +520,7 @@ public final class KomodoVdbServiceTest implements StringConstants {
         final String entity = this.response.readEntity(String.class);
         assertThat(entity, is(notNullValue()));
 
-        System.out.println("Response:\n" + entity);
+        //System.out.println("Response:\n" + entity);
 
         RestVdbTranslator[] translators = KomodoJsonMarshaller.unmarshallArray(entity, RestVdbTranslator[].class);
         assertNotNull(translators);
@@ -537,7 +546,7 @@ public final class KomodoVdbServiceTest implements StringConstants {
         final String entity = this.response.readEntity(String.class);
         assertThat(entity, is(notNullValue()));
 
-        System.out.println("Response:\n" + entity);
+        //System.out.println("Response:\n" + entity);
 
         RestVdbTranslator[] translators = KomodoJsonMarshaller.unmarshallArray(entity, RestVdbTranslator[].class);
         assertNotNull(translators);
@@ -554,7 +563,7 @@ public final class KomodoVdbServiceTest implements StringConstants {
         final String entity = this.response.readEntity(String.class);
         assertThat(entity, is(notNullValue()));
 
-        System.out.println("Response from uri " + uri + ":\n" + entity);
+        //System.out.println("Response from uri " + uri + ":\n" + entity);
 
         RestVdbTranslator translator = KomodoJsonMarshaller.unmarshall(entity, RestVdbTranslator.class);
         assertNotNull(translator);
@@ -577,7 +586,7 @@ public final class KomodoVdbServiceTest implements StringConstants {
         final String entity = this.response.readEntity(String.class);
         assertThat(entity, is(notNullValue()));
 
-        System.out.println("Response:\n" + entity);
+        //System.out.println("Response:\n" + entity);
 
         RestVdbImport[] imports = KomodoJsonMarshaller.unmarshallArray(entity, RestVdbImport[].class);
         assertNotNull(imports);
@@ -604,7 +613,7 @@ public final class KomodoVdbServiceTest implements StringConstants {
         final String entity = this.response.readEntity(String.class);
         assertThat(entity, is(notNullValue()));
 
-        System.out.println("Response:\n" + entity);
+        //System.out.println("Response:\n" + entity);
 
         RestVdbImport[] imports = KomodoJsonMarshaller.unmarshallArray(entity, RestVdbImport[].class);
         assertNotNull(imports);
@@ -621,7 +630,7 @@ public final class KomodoVdbServiceTest implements StringConstants {
         final String entity = this.response.readEntity(String.class);
         assertThat(entity, is(notNullValue()));
 
-        System.out.println("Response from uri " + uri + ":\n" + entity);
+        //System.out.println("Response from uri " + uri + ":\n" + entity);
 
         RestVdbImport vdbImport = KomodoJsonMarshaller.unmarshall(entity, RestVdbImport.class);
         assertNotNull(vdbImport);
@@ -645,7 +654,7 @@ public final class KomodoVdbServiceTest implements StringConstants {
         final String entity = this.response.readEntity(String.class);
         assertThat(entity, is(notNullValue()));
 
-        System.out.println("Response:\n" + entity);
+        //System.out.println("Response:\n" + entity);
 
         RestVdbDataRole[] dataRoles = KomodoJsonMarshaller.unmarshallArray(entity, RestVdbDataRole[].class);
         assertNotNull(dataRoles);
@@ -663,76 +672,8 @@ public final class KomodoVdbServiceTest implements StringConstants {
         assertTrue(dataRole.getMappedRoles()[0].equals("ROLE1") || dataRole.getMappedRoles()[0].equals("ROLE2"));
         assertTrue(dataRole.getMappedRoles()[1].equals("ROLE1") || dataRole.getMappedRoles()[1].equals("ROLE2"));
 
-        RestVdbPermission[] permissions = dataRole.getPermissions();
-        assertEquals(4, permissions.length);
-
-        for (RestVdbPermission permission : permissions) {
-            assertEquals(KomodoType.VDB_PERMISSION, permission.getkType());
-
-            if (permission.getId().equals("myTable.T1")) {
-                assertFalse(permission.hasChildren());
-                assertFalse(permission.isAllowAlter());
-                assertFalse(permission.isAllowCreate());
-                assertFalse(permission.isAllowDelete());
-                assertFalse(permission.isAllowExecute());
-                assertFalse(permission.isAllowLanguage());
-                assertTrue(permission.isAllowRead());
-                assertFalse(permission.isAllowUpdate());
-
-                assertEquals(0, permission.getConditions().length);
-                assertEquals(0, permission.getMasks().length);
-
-            } else if (permission.getId().equals("myTable.T2")) {
-                assertTrue(permission.hasChildren());
-                assertTrue(permission.isAllowAlter());
-                assertTrue(permission.isAllowCreate());
-                assertTrue(permission.isAllowDelete());
-                assertTrue(permission.isAllowExecute());
-                assertFalse(permission.isAllowLanguage());
-                assertFalse(permission.isAllowRead());
-                assertTrue(permission.isAllowUpdate());
-
-                assertEquals(1, permission.getConditions().length);
-                RestVdbCondition condition = permission.getConditions()[0];
-                assertEquals("col1 = user()", condition.getName());
-                assertFalse(condition.isConstraint());
-
-                assertEquals(0, permission.getMasks().length);
-
-            } else if (permission.getId().equals("myTable.T2.col1")) {
-                assertTrue(permission.hasChildren());
-                assertFalse(permission.isAllowAlter());
-                assertFalse(permission.isAllowCreate());
-                assertFalse(permission.isAllowDelete());
-                assertFalse(permission.isAllowExecute());
-                assertFalse(permission.isAllowLanguage());
-                assertFalse(permission.isAllowRead());
-                assertFalse(permission.isAllowUpdate());
-
-                assertEquals(0, permission.getConditions().length);
-
-                assertEquals(1, permission.getMasks().length);
-                RestVdbMask mask = permission.getMasks()[0];
-                assertEquals("col2", mask.getName());
-                assertEquals("1", mask.getOrder());
-
-            } else if (permission.getId().equals("javascript")) {
-                assertFalse(permission.hasChildren());
-                assertFalse(permission.isAllowAlter());
-                assertFalse(permission.isAllowCreate());
-                assertFalse(permission.isAllowDelete());
-                assertFalse(permission.isAllowExecute());
-                assertTrue(permission.isAllowLanguage());
-                assertFalse(permission.isAllowRead());
-                assertFalse(permission.isAllowUpdate());
-
-                assertEquals(0, permission.getConditions().length);
-                assertEquals(0, permission.getMasks().length);
-            }
-        }
-
         List<RestLink> links = dataRole.getLinks();
-        assertEquals(2, links.size());
+        assertEquals(3, links.size());
     }
 
     @Test
@@ -745,7 +686,7 @@ public final class KomodoVdbServiceTest implements StringConstants {
         final String entity = this.response.readEntity(String.class);
         assertThat(entity, is(notNullValue()));
 
-        System.out.println("Response:\n" + entity);
+        //System.out.println("Response:\n" + entity);
 
         RestVdbDataRole[] dataRoles = KomodoJsonMarshaller.unmarshallArray(entity, RestVdbDataRole[].class);
         assertNotNull(dataRoles);
@@ -762,7 +703,7 @@ public final class KomodoVdbServiceTest implements StringConstants {
         final String entity = this.response.readEntity(String.class);
         assertThat(entity, is(notNullValue()));
 
-        System.out.println("Response from uri " + uri + ":\n" + entity);
+        //System.out.println("Response from uri " + uri + ":\n" + entity);
 
         RestVdbDataRole dataRole = KomodoJsonMarshaller.unmarshall(entity, RestVdbDataRole.class);
         assertNotNull(dataRole);
@@ -777,11 +718,30 @@ public final class KomodoVdbServiceTest implements StringConstants {
         assertTrue(dataRole.getMappedRoles()[0].equals("ROLE1") || dataRole.getMappedRoles()[0].equals("ROLE2"));
         assertTrue(dataRole.getMappedRoles()[1].equals("ROLE1") || dataRole.getMappedRoles()[1].equals("ROLE2"));
 
-        RestVdbPermission[] permissions = dataRole.getPermissions();
+        List<RestLink> links = dataRole.getLinks();
+        assertEquals(3, links.size());
+    }
+
+    @Test
+    public void shouldGetVdbPermissions() throws Exception {
+        loadVdbs();
+
+        // get
+        URI uri = _uriBuilder.buildVdbDataRoleUri(LinkType.PERMISSIONS, TestUtilities.ALL_ELEMENTS_EXAMPLE_NAME, "roleOne");
+        this.response = request(uri).get();
+        final String entity = this.response.readEntity(String.class);
+        assertThat(entity, is(notNullValue()));
+
+        //System.out.println("Response:\n" + entity);
+
+        RestVdbPermission[] permissions = KomodoJsonMarshaller.unmarshallArray(entity, RestVdbPermission[].class);
+        assertNotNull(permissions);
         assertEquals(4, permissions.length);
 
         for (RestVdbPermission permission : permissions) {
             assertEquals(KomodoType.VDB_PERMISSION, permission.getkType());
+            List<RestLink> links = permission.getLinks();
+            assertEquals(4, links.size());
 
             if (permission.getId().equals("myTable.T1")) {
                 assertFalse(permission.hasChildren());
@@ -793,10 +753,8 @@ public final class KomodoVdbServiceTest implements StringConstants {
                 assertTrue(permission.isAllowRead());
                 assertFalse(permission.isAllowUpdate());
 
-                assertEquals(0, permission.getConditions().length);
-                assertEquals(0, permission.getMasks().length);
-
-            } else if (permission.getId().equals("myTable.T2")) {
+            } else
+                if (permission.getId().equals("myTable.T2")) {
                 assertTrue(permission.hasChildren());
                 assertTrue(permission.isAllowAlter());
                 assertTrue(permission.isAllowCreate());
@@ -806,14 +764,8 @@ public final class KomodoVdbServiceTest implements StringConstants {
                 assertFalse(permission.isAllowRead());
                 assertTrue(permission.isAllowUpdate());
 
-                assertEquals(1, permission.getConditions().length);
-                RestVdbCondition condition = permission.getConditions()[0];
-                assertEquals("col1 = user()", condition.getName());
-                assertFalse(condition.isConstraint());
-
-                assertEquals(0, permission.getMasks().length);
-
-            } else if (permission.getId().equals("myTable.T2.col1")) {
+            } else
+                    if (permission.getId().equals("myTable.T2.col1")) {
                 assertTrue(permission.hasChildren());
                 assertFalse(permission.isAllowAlter());
                 assertFalse(permission.isAllowCreate());
@@ -823,14 +775,8 @@ public final class KomodoVdbServiceTest implements StringConstants {
                 assertFalse(permission.isAllowRead());
                 assertFalse(permission.isAllowUpdate());
 
-                assertEquals(0, permission.getConditions().length);
-
-                assertEquals(1, permission.getMasks().length);
-                RestVdbMask mask = permission.getMasks()[0];
-                assertEquals("col2", mask.getName());
-                assertEquals("1", mask.getOrder());
-
-            } else if (permission.getId().equals("javascript")) {
+            } else
+                        if (permission.getId().equals("javascript")) {
                 assertFalse(permission.hasChildren());
                 assertFalse(permission.isAllowAlter());
                 assertFalse(permission.isAllowCreate());
@@ -839,13 +785,139 @@ public final class KomodoVdbServiceTest implements StringConstants {
                 assertTrue(permission.isAllowLanguage());
                 assertFalse(permission.isAllowRead());
                 assertFalse(permission.isAllowUpdate());
-
-                assertEquals(0, permission.getConditions().length);
-                assertEquals(0, permission.getMasks().length);
             }
         }
+    }
 
-        List<RestLink> links = dataRole.getLinks();
+    @Test
+    public void shouldGetVdbPermission() throws Exception {
+        loadVdbs();
+
+        // get
+        URI uri = _uriBuilder.buildVdbPermissionUri(LinkType.SELF,
+                                                    TestUtilities.ALL_ELEMENTS_EXAMPLE_NAME,
+                                                    "roleOne", "myTable.T1");
+        this.response = request(uri).get();
+        final String entity = this.response.readEntity(String.class);
+        assertThat(entity, is(notNullValue()));
+
+        //System.out.println("Response from uri " + uri + ":\n" + entity);
+
+        RestVdbPermission permission = KomodoJsonMarshaller.unmarshall(entity, RestVdbPermission.class);
+        assertNotNull(permission);
+
+        assertEquals(KomodoType.VDB_PERMISSION, permission.getkType());
+        assertEquals("myTable.T1", permission.getId());
+        assertFalse(permission.hasChildren());
+        assertFalse(permission.isAllowAlter());
+        assertFalse(permission.isAllowCreate());
+        assertFalse(permission.isAllowDelete());
+        assertFalse(permission.isAllowExecute());
+        assertFalse(permission.isAllowLanguage());
+        assertTrue(permission.isAllowRead());
+        assertFalse(permission.isAllowUpdate());
+
+        List<RestLink> links = permission.getLinks();
+        assertEquals(4, links.size());
+    }
+
+    @Test
+    public void shouldGetVdbConditions() throws Exception {
+        loadVdbs();
+
+        // get
+        URI uri = _uriBuilder.buildVdbPermissionUri(LinkType.CONDITIONS,
+                                                  TestUtilities.ALL_ELEMENTS_EXAMPLE_NAME,
+                                                  "roleOne", "myTable.T2");
+        this.response = request(uri).get();
+        final String entity = this.response.readEntity(String.class);
+        assertThat(entity, is(notNullValue()));
+
+        //System.out.println("Response:\n" + entity);
+
+        RestVdbCondition[] conditions = KomodoJsonMarshaller.unmarshallArray(entity, RestVdbCondition[].class);
+        assertNotNull(conditions);
+        assertEquals(1, conditions.length);
+
+        RestVdbCondition condition = conditions[0];
+        assertEquals("col1 = user()", condition.getName());
+        assertFalse(condition.isConstraint());
+
+        List<RestLink> links = condition.getLinks();
+        assertEquals(2, links.size());
+    }
+
+    @Test
+    public void shouldGetVdbCondition() throws Exception {
+        loadVdbs();
+
+        // get
+        URI uri = _uriBuilder.buildVdbPermissionChildUri(LinkType.SELF,
+                                                  TestUtilities.ALL_ELEMENTS_EXAMPLE_NAME,
+                                                  "roleOne", "myTable.T2", LinkType.CONDITIONS, "col1 = user()");
+        this.response = request(uri).get();
+        final String entity = this.response.readEntity(String.class);
+        assertThat(entity, is(notNullValue()));
+
+        //System.out.println("Response:\n" + entity);
+
+        RestVdbCondition condition = KomodoJsonMarshaller.unmarshall(entity, RestVdbCondition.class);
+        assertNotNull(condition);
+
+        assertEquals("col1 = user()", condition.getName());
+        assertFalse(condition.isConstraint());
+
+        List<RestLink> links = condition.getLinks();
+        assertEquals(2, links.size());
+    }
+
+    @Test
+    public void shouldGetVdbMasks() throws Exception {
+        loadVdbs();
+
+        // get
+        URI uri = _uriBuilder.buildVdbPermissionUri(LinkType.MASKS,
+                                                  TestUtilities.ALL_ELEMENTS_EXAMPLE_NAME,
+                                                  "roleOne", "myTable.T2.col1");
+        this.response = request(uri).get();
+        final String entity = this.response.readEntity(String.class);
+        assertThat(entity, is(notNullValue()));
+
+        //System.out.println("Response:\n" + entity);
+
+        RestVdbMask[] masks = KomodoJsonMarshaller.unmarshallArray(entity, RestVdbMask[].class);
+        assertNotNull(masks);
+        assertEquals(1, masks.length);
+
+        RestVdbMask mask = masks[0];
+        assertEquals("col2", mask.getName());
+        assertEquals("1", mask.getOrder());
+
+        List<RestLink> links = mask.getLinks();
+        assertEquals(2, links.size());
+    }
+
+    @Test
+    public void shouldGetVdbMask() throws Exception {
+        loadVdbs();
+
+        // get
+        URI uri = _uriBuilder.buildVdbPermissionChildUri(LinkType.SELF,
+                                                  TestUtilities.ALL_ELEMENTS_EXAMPLE_NAME,
+                                                  "roleOne", "myTable.T2.col1", LinkType.MASKS, "col2");
+        this.response = request(uri).get();
+        final String entity = this.response.readEntity(String.class);
+        assertThat(entity, is(notNullValue()));
+
+        //System.out.println("Response:\n" + entity);
+
+        RestVdbMask mask = KomodoJsonMarshaller.unmarshall(entity, RestVdbMask.class);
+        assertNotNull(mask);
+
+        assertEquals("col2", mask.getName());
+        assertEquals("1", mask.getOrder());
+
+        List<RestLink> links = mask.getLinks();
         assertEquals(2, links.size());
     }
 }

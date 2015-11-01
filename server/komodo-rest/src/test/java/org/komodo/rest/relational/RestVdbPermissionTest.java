@@ -78,8 +78,6 @@ public final class RestVdbPermissionTest {
         copy.setAllowLanguage( this.permission.isAllowLanguage() );
         copy.setAllowRead( this.permission.isAllowRead() );
         copy.setAllowUpdate( this.permission.isAllowUpdate() );
-        copy.setConditions( this.permission.getConditions() );
-        copy.setMasks( this.permission.getMasks() );
         copy.setLinks( this.permission.getLinks() );
         copy.setProperties( this.permission.getProperties() );
 
@@ -97,8 +95,6 @@ public final class RestVdbPermissionTest {
         this.permission.setAllowLanguage( ALLOW_LANGUAGE );
         this.permission.setAllowRead( ALLOW_READ );
         this.permission.setAllowUpdate( ALLOW_UPDATE );
-        this.permission.setConditions( CONDITIONS.toArray(new RestVdbCondition[0]) );
-        this.permission.setMasks( MASKS.toArray(new RestVdbMask[0]) );
     }
 
     @Test
@@ -118,8 +114,6 @@ public final class RestVdbPermissionTest {
     public void shouldConstructEmptyPermission() {
         final RestVdbPermission empty = new RestVdbPermission();
         assertThat( empty.getName(), is( nullValue() ) );
-        assertThat( empty.getConditions().length, is( 0 ) );
-        assertThat( empty.getMasks().length, is( 0 ) );
         assertThat( empty.getProperties().isEmpty(), is( true ) );
         assertThat( empty.getLinks().size(), is( 0 ) );
     }
@@ -180,30 +174,6 @@ public final class RestVdbPermissionTest {
     }
 
     @Test
-    public void shouldNotBeEqualWhenConditionsAreDifferent() {
-        final RestVdbPermission thatPermission = copy();
-
-        RestVdbCondition condition = new RestVdbCondition();
-        condition.setName("blah");
-        condition.setConstraint(false);
-
-        thatPermission.setConditions(new RestVdbCondition[] { condition });
-        assertThat( this.permission, is( not( thatPermission ) ) );
-    }
-
-    @Test
-    public void shouldNotBeEqualWhenMasksAreDifferent() {
-        final RestVdbPermission thatPermission = copy();
-
-        RestVdbMask mask = new RestVdbMask();
-        mask.setName("blah");
-        mask.setOrder("blah");
-
-        thatPermission.setMasks(new RestVdbMask[] { mask });
-        assertThat( this.permission, is( not( thatPermission ) ) );
-    }
-
-    @Test
     public void shouldNotBeEqualWhenNameIsDifferent() {
         final RestVdbPermission thatPermission = copy();
         thatPermission.setName( this.permission.getName() + "blah" );
@@ -257,29 +227,6 @@ public final class RestVdbPermissionTest {
         final boolean newValue = !this.permission.isAllowUpdate();
         this.permission.setAllowUpdate( newValue );
         assertThat( this.permission.isAllowUpdate(), is( newValue ) );
-    }
-
-    @Test
-    public void shouldSetConditions() {
-        RestVdbCondition condition = new RestVdbCondition();
-        condition.setName("blah");
-        condition.setConstraint(false);
-
-        RestVdbCondition[] newConditions = new RestVdbCondition[] { condition };
-        this.permission.setConditions( newConditions );
-        assertThat( this.permission.getConditions(), is( newConditions ) );
-    }
-
-    @Test
-    public void shouldSetMasks() {
-        RestVdbMask mask = new RestVdbMask();
-        mask.setName("blah");
-        mask.setOrder("blah");
-
-        RestVdbMask[] newMasks = new RestVdbMask[] { mask };
-        this.permission.setMasks(newMasks);
-
-        assertThat( this.permission.getMasks(), is( newMasks ) );
     }
 
     @Test

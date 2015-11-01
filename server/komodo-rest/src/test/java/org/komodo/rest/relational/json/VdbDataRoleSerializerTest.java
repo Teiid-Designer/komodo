@@ -18,7 +18,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.komodo.rest.json.JsonConstants;
 import org.komodo.rest.relational.RestVdbDataRole;
-import org.komodo.rest.relational.RestVdbPermission;
 import org.komodo.spi.repository.KomodoType;
 
 @SuppressWarnings( {"javadoc", "nls"} )
@@ -51,40 +50,6 @@ public final class VdbDataRoleSerializerTest implements JsonConstants {
         "    \"curly\"," + NEW_LINE +
         "    \"moe\"" + NEW_LINE +
         "  ]," + NEW_LINE +
-        "  \"vdb__permissions\": [" + NEW_LINE +
-        "    " + OPEN_BRACE + NEW_LINE +
-        "      \"" + ID + "\": \"firstPermission\"," + NEW_LINE +
-        "      \"" + DATA_PATH + "\": \"" + PERMISSIONS_DATA_PATH + "/firstPermission\"," + NEW_LINE +
-        "      \"" + KTYPE + "\": \"" + KomodoType.VDB_PERMISSION.getType() + "\"," + NEW_LINE +
-        "      \"" + HAS_CHILDREN + "\": false," + NEW_LINE +
-        "      \"vdb__permission\": \"firstPermission\"," + NEW_LINE +
-        "      \"vdb__allowAlter\": false," + NEW_LINE +
-        "      \"vdb__allowCreate\": false," + NEW_LINE +
-        "      \"vdb__allowDelete\": false," + NEW_LINE +
-        "      \"vdb__allowExecute\": false," + NEW_LINE +
-        "      \"vdb__allowLanguage\": false," + NEW_LINE +
-        "      \"vdb__allowRead\": false," + NEW_LINE +
-        "      \"vdb__allowUpdate\": false," + NEW_LINE +
-        "      \"vdb__conditions\": []," + NEW_LINE +
-        "      \"vdb__masks\": []" + NEW_LINE +
-        "    " + CLOSE_BRACE + COMMA + NEW_LINE +
-        "    " + OPEN_BRACE + NEW_LINE +
-        "      \"" + ID + "\": \"secondPermission\"," + NEW_LINE +
-        "      \"" + DATA_PATH + "\": \"" + PERMISSIONS_DATA_PATH + "/secondPermission\"," + NEW_LINE +
-        "      \"" + KTYPE + "\": \"" + KomodoType.VDB_PERMISSION.getType() + "\"," + NEW_LINE +
-        "      \"" + HAS_CHILDREN + "\": false," + NEW_LINE +
-        "      \"vdb__permission\": \"secondPermission\"," + NEW_LINE +
-        "      \"vdb__allowAlter\": false," + NEW_LINE +
-        "      \"vdb__allowCreate\": false," + NEW_LINE +
-        "      \"vdb__allowDelete\": false," + NEW_LINE +
-        "      \"vdb__allowExecute\": false," + NEW_LINE +
-        "      \"vdb__allowLanguage\": false," + NEW_LINE +
-        "      \"vdb__allowRead\": false," + NEW_LINE +
-        "      \"vdb__allowUpdate\": false," + NEW_LINE +
-        "      \"vdb__conditions\": []," + NEW_LINE +
-        "      \"vdb__masks\": []" + NEW_LINE +
-        "    " + CLOSE_BRACE + NEW_LINE +
-        "  " + CLOSE_SQUARE_BRACKET + COMMA + NEW_LINE +
         "  \"" + LINKS + "\": " + OPEN_SQUARE_BRACKET + NEW_LINE +
         "    " + OPEN_BRACE + NEW_LINE +
         "      \"rel\": \"self\"," + NEW_LINE +
@@ -93,12 +58,15 @@ public final class VdbDataRoleSerializerTest implements JsonConstants {
         "    " + OPEN_BRACE + NEW_LINE +
         "      \"rel\": \"parent\"," + NEW_LINE +
         "      \"href\": \"http://localhost:8081/v1/workspace/workspace/vdbs/vdb1\"" + NEW_LINE +
+        "    " + CLOSE_BRACE + COMMA + NEW_LINE +
+        "    " + OPEN_BRACE + NEW_LINE +
+        "      \"rel\": \"permissions\"," + NEW_LINE +
+        "      \"href\": \"http://localhost:8081/v1/workspace/workspace/vdbs/vdb1/VdbDataRoles/MyDataRole/VdbPermissions\"" + NEW_LINE +
         "    " + CLOSE_BRACE + NEW_LINE +
         "  " + CLOSE_SQUARE_BRACKET + NEW_LINE +
         CLOSE_BRACE;
 
     private RestVdbDataRole dataRole;
-    private RestVdbPermission[] permissions = new RestVdbPermission[2];
 
     @Before
     public void init() {
@@ -110,18 +78,6 @@ public final class VdbDataRoleSerializerTest implements JsonConstants {
         this.dataRole.setAnyAuthenticated(ANY_AUTHENTICATED);
         this.dataRole.setGrantAll(GRANT_ALL);
         this.dataRole.setMappedRoles(MAPPED_ROLES.toArray(new String[MAPPED_ROLES.size()]));
-
-        this.permissions[0] = new RestVdbPermission(BASE_URI, "firstPermission",
-                                                    PERMISSIONS_DATA_PATH + "/firstPermission",
-                                                    KomodoType.VDB_PERMISSION, false, NAME, PARENT_VDB);
-        this.permissions[0].setName("firstPermission");
-
-        this.permissions[1] = new RestVdbPermission(BASE_URI, "secondPermission",
-                                                    PERMISSIONS_DATA_PATH + "/secondPermission",
-                                                    KomodoType.VDB_PERMISSION, false, NAME, PARENT_VDB);
-        this.permissions[1].setName("secondPermission");
-
-        this.dataRole.setPermissions(this.permissions);
     }
 
     @Test
@@ -138,7 +94,7 @@ public final class VdbDataRoleSerializerTest implements JsonConstants {
         assertThat(dataRole.isAllowCreateTempTables(), is(ALLOW_CREATE_TEMP_TABLES));
         assertThat(dataRole.isAnyAuthenticated(), is(ANY_AUTHENTICATED));
         assertThat(dataRole.isGrantAll(), is(GRANT_ALL));
-        assertThat(dataRole.getLinks().size(), is(2));
+        assertThat(dataRole.getLinks().size(), is(3));
         assertThat(dataRole.getProperties().isEmpty(), is(true));
         assertThat(dataRole.getMappedRoles().length, is(MAPPED_ROLES.size()));
     }
