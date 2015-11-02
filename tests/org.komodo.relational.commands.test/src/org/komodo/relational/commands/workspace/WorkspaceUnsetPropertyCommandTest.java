@@ -20,7 +20,7 @@ import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.commands.workspace.WorkspaceUnsetPropertyCommand;
 
 /**
- * Test Class to test {@link WorkspaceUnsetPropertyCommand}.
+ * Test Class to test {@link TabularResultSetUnsetPropertyCommand}.
  */
 @SuppressWarnings( { "javadoc", "nls" } )
 public class WorkspaceUnsetPropertyCommandTest extends AbstractCommandTest {

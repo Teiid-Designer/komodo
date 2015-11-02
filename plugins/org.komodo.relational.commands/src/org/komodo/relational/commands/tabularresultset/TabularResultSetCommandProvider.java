@@ -40,6 +40,8 @@ public class TabularResultSetCommandProvider implements ShellCommandProvider {
 
         result.add( AddColumnCommand.class );
         result.add( DeleteColumnCommand.class );
+        result.add( TabularResultSetSetPropertyCommand.class );
+        result.add( TabularResultSetUnsetPropertyCommand.class );
 
         return result;
     }

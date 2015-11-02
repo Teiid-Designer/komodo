@@ -11,5 +11,6 @@ Require-Bundle: org.junit;bundle-version="4.11.0",
  org.jboss.tools.locus.mockito;bundle-version="1.9.5",
  org.komodo.test.utils;bundle-version="0.0.1",
  org.komodo.importer;bundle-version="0.0.2",
- org.komodo.shell.lib;bundle-version="0.0.2"
+ org.komodo.shell.lib;bundle-version="0.0.2",
+ org.komodo.modeshape.teiid.sql.sequencer;bundle-version="0.0.2"
 Import-Package: org.komodo.shell

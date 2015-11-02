@@ -154,7 +154,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         this.defaultLabelProvider = new DefaultLabelProvider();
         this.defaultLabelProvider.setRepository( repo );
         this.defaultLabelProvider.setWorkspaceStatus( this );
-        
+
         // Discover any other label providers
         discoverLabelProviders();
         setLabelProvider(this.currentContext);
@@ -382,7 +382,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     public String getDisplayPath(KomodoObject context) {
         return getLabelProvider().getDisplayPath(context);
     }
-    
+
     @Override
     public KomodoObject getRootContext() {
         return this.rootContext;
@@ -810,7 +810,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         assert ( this.wsProperties.containsKey( AUTO_COMMIT ) );
         return Boolean.parseBoolean( this.wsProperties.getProperty( AUTO_COMMIT ) );
     }
-    
+
     private void discoverLabelProviders( ) {
         final List< ClassLoader > commandClassloaders = new ArrayList< >();
         commandClassloaders.add( Thread.currentThread().getContextClassLoader() );
@@ -859,7 +859,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
                 }
             }
         }
-        
+
         LOGGER.debug( "WorkspaceStatusImpl: found \"{0}\" LabelProviders", alternateLabelProviders.size() ); //$NON-NLS-1$
     }
 
@@ -1006,16 +1006,16 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
                 entireDisplayPath = getCurrentContextDisplayPath()+FORWARD_SLASH+displayPath;
             }
         }
-        
+
         entireDisplayPath = removePathDots(entireDisplayPath);
         // check path for cd into root options
         if ( entireDisplayPath.equals( FORWARD_SLASH ) ) {
             return getRootContext();
         }
-        
+
         String repoPath = getLabelProvider().getPath(entireDisplayPath);
         if(repoPath==null) return null;
-        
+
         KomodoObject resultObject = null;
         try {
             resultObject = getRootContext().getRepository().getFromWorkspace(getTransaction(), repoPath);
@@ -1036,14 +1036,14 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         }
         return resultObject;
     }
-    
+
     /*
      * Remove '..' and '.' segments from a display path
      */
     private String removePathDots(String absoluteDisplayPath) {
         ArgCheck.isNotNull(absoluteDisplayPath);
         String[] segments = absoluteDisplayPath.split(FORWARD_SLASH);
-        
+
         List<String> newSegments = new ArrayList<String>();
         for(String segment : segments) {
             // Dot stays in same place
@@ -1058,7 +1058,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
                 newSegments.add(segment);
             }
         }
-        
+
         // Construct the new path without dots
         StringBuilder sb = new StringBuilder(FORWARD_SLASH);
         for(int i=0; i<newSegments.size(); i++) {
@@ -1067,7 +1067,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
                 sb.append(FORWARD_SLASH);
             }
         }
-        
+
         return sb.toString();
     }
 

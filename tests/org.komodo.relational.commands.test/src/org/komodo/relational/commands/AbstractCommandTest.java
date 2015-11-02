@@ -11,6 +11,8 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;
@@ -151,6 +153,16 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
 
         this.wsStatus = new WorkspaceStatusImpl( super.getTransaction(), komodoShell );
         this.commandWriter = new StringWriter();
+    }
+
+    protected void assertCommandsNotAvailable( final String... cmdNames ) throws Exception {
+        final Collection< String > available = Arrays.asList( this.wsStatus.getAvailableCommands() );
+
+        for ( final String name : cmdNames ) {
+            if ( available.contains( name ) ) {
+                Assert.fail( "Command " + name + " should not be available" );
+            }
+        }
     }
 
     /**

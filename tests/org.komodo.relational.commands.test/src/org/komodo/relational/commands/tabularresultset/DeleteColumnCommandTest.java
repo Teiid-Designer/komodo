@@ -15,70 +15,34 @@
  */
 package org.komodo.relational.commands.tabularresultset;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
 import org.junit.Test;
-import org.komodo.relational.commands.AbstractCommandTest;
-import org.komodo.relational.model.Function;
-import org.komodo.relational.model.Model;
-import org.komodo.relational.model.ProcedureResultSet;
-import org.komodo.relational.model.PushdownFunction;
 import org.komodo.relational.model.ResultSetColumn;
-import org.komodo.relational.model.TabularResultSet;
-import org.komodo.relational.vdb.Vdb;
-import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test DeleteColumnCommand
- *
+ * Test Class to test {@link DeleteColumnCommand}.
  */
-@SuppressWarnings( {"javadoc", "nls"} )
-public class DeleteColumnCommandTest extends AbstractCommandTest {
+@SuppressWarnings( { "javadoc",
+                     "nls" } )
+public final class DeleteColumnCommandTest extends TabularResultSetCommandTest {
 
     @Test
-    public void testDelete1() throws Exception {
-        final String[] commands = { 
-            "workspace",
-            "create-vdb myVdb vdbPath",
-            "cd myVdb",
-            "add-model myModel ",
-            "cd myModel",
-            "add-pushdown-function myPushdownFunction",
-            "cd myPushdownFunction",
-            "set-result-set TabularResultSet",
-            "cd resultSet",
-            "add-column myColumn1",
-            "add-column myColumn2",
-            "delete-column myColumn1" };
-        
+    public void shouldDeleteColumn() throws Exception {
+        final String deletedColumn = "myColumn1";
+        final String remainingColumn = "myColumn2";
+        final String[] commands = { "add-column " + deletedColumn,
+                                    "add-column " + remainingColumn,
+                                    "delete-column " + deletedColumn };
         setup( commands );
 
-        CommandResult result = execute();
-        assertCommandResultOk(result);
+        final CommandResult result = execute();
+        assertCommandResultOk( result );
 
-        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
-        Vdb[] vdbs = wkspMgr.findVdbs(getTransaction());
-
-        assertEquals(1, vdbs.length);
-
-        Model[] models = vdbs[0].getModels(getTransaction());
-        assertEquals(1, models.length);
-        assertEquals("myModel", models[0].getName(getTransaction())); //$NON-NLS-1$
-
-        Function[] functions = models[0].getFunctions(getTransaction());
-        assertEquals(1, functions.length);
-        assertEquals(true, functions[0] instanceof PushdownFunction);
-        assertEquals("myPushdownFunction", functions[0].getName(getTransaction())); //$NON-NLS-1$
-
-        ProcedureResultSet rSet = ((PushdownFunction)functions[0]).getResultSet(getTransaction());
-        TabularResultSet tabularResultSet = null;
-        if(rSet instanceof TabularResultSet) {
-            tabularResultSet = (TabularResultSet)rSet;
-        }
-
-        ResultSetColumn[] cols = tabularResultSet.getColumns(getTransaction());
-        assertEquals(1,cols.length);
-        assertEquals("myColumn2", cols[0].getName(getTransaction())); //$NON-NLS-1$
+        final ResultSetColumn[] cols = get().getColumns( getTransaction() );
+        assertThat( cols.length, is( 1 ) );
+        assertThat( cols[ 0 ].getName( getTransaction() ), is( remainingColumn ) );
     }
 
 }

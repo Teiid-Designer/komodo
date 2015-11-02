@@ -74,7 +74,7 @@ public class TestJsonVisitor extends AbstractLocalRepositoryTest {
 
     @Test(timeout=3000000)
     public void testJsonVisitor1() throws Exception {
-        createInitialTransaction();
+//        createInitialTransaction();
         KomodoObject kWorkspace = _repo.komodoWorkspace(getTransaction());
         KomodoObject twitterExampleNode = TestUtilities.createTweetExampleNode(getTransaction(), kWorkspace);
         commit();
@@ -95,7 +95,7 @@ public class TestJsonVisitor extends AbstractLocalRepositoryTest {
     @Test(timeout=3000000)
     public void testJsonVisitor2() throws Exception {
         VdbImporter importer = new VdbImporter(_repo);
-        createInitialTransaction();
+//        createInitialTransaction();
         KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
 
         ImportOptions importOptions = new ImportOptions();
@@ -125,7 +125,7 @@ public class TestJsonVisitor extends AbstractLocalRepositoryTest {
     @Test(timeout=3000000)
     public void testJsonVisitor3() throws Exception {
         VdbImporter importer = new VdbImporter(_repo);
-        createInitialTransaction();
+//        createInitialTransaction();
         KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
 
         ImportOptions importOptions = new ImportOptions();

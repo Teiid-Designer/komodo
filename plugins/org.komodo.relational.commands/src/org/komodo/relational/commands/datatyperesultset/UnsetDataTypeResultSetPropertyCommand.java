@@ -22,7 +22,7 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.StringUtils;
 
 /**
- * A shell command to set DataTypeResultSet properties
+ * A shell command to unset {@link DataTypeResultSet} properties.
  */
 public final class UnsetDataTypeResultSetPropertyCommand extends DataTypeResultSetShellCommand {
 
@@ -53,14 +53,29 @@ public final class UnsetDataTypeResultSetPropertyCommand extends DataTypeResultS
             String errorMsg = null;
 
             switch ( name ) {
-                case ARRAY:
-                    rs.setArray( transaction, true );
+                case DATATYPE_NAME:
+                    rs.setType( transaction, null );
+                    break;
+                case DESCRIPTION:
+                    rs.setDescription( transaction, null );
                     break;
                 case LENGTH:
                     rs.setLength( transaction, RelationalConstants.DEFAULT_LENGTH );
                     break;
-                case TYPE:
-                    rs.setType( transaction, null );
+                case NAME_IN_SOURCE:
+                    rs.setNameInSource( transaction, null );
+                    break;
+                case NULLABLE:
+                    rs.setNullable( transaction, null );
+                    break;
+                case PRECISION:
+                    rs.setPrecision( transaction, RelationalConstants.DEFAULT_PRECISION );
+                    break;
+                case SCALE:
+                    rs.setScale( transaction, RelationalConstants.DEFAULT_SCALE );
+                    break;
+                case UUID:
+                    rs.setUuid( transaction, null );
                     break;
                 default:
                     errorMsg = getWorkspaceMessage( INVALID_PROPERTY_NAME, name, DataTypeResultSet.class.getSimpleName() );
@@ -77,6 +92,7 @@ public final class UnsetDataTypeResultSetPropertyCommand extends DataTypeResultS
         }
 
         return result;
+
     }
 
     /**

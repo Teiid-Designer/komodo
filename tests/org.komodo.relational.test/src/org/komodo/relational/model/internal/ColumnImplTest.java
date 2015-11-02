@@ -46,7 +46,7 @@ public final class ColumnImplTest extends RelationalModelTest {
     public void init() throws Exception {
         this.table = createTable();
         this.column = this.table.addColumn( getTransaction(), NAME );
-        commit();
+//        commit();
     }
 
     @Test

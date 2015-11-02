@@ -10,11 +10,13 @@ package org.komodo.relational.model.internal;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNull.notNullValue;
+import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalConstants;
+import org.komodo.relational.RelationalConstants.Nullable;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalObject.Filter;
 import org.komodo.relational.internal.RelationalObjectImpl;
@@ -23,6 +25,7 @@ import org.komodo.relational.model.DataTypeResultSet.Type;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.StoredProcedure;
 import org.komodo.spi.KException;
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
@@ -101,6 +104,15 @@ public final class DataTypeResultSetImplTest extends RelationalModelTest {
         assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
     }
 
+    @Test
+    public void shouldHaveNullablePropertyAfterConstruction() throws Exception {
+        assertThat( this.resultSet.hasProperty( getTransaction(), StandardDdlLexicon.NULLABLE ), is( true ) );
+        assertThat( this.resultSet.getNullable( getTransaction() ), is( RelationalConstants.Nullable.DEFAULT_VALUE ) );
+        assertThat( this.resultSet.getProperty( getTransaction(), StandardDdlLexicon.NULLABLE )
+                                  .getStringValue( getTransaction() ),
+                    is( RelationalConstants.Nullable.DEFAULT_VALUE.toValue() ) );
+    }
+
     @Test( expected = UnsupportedOperationException.class )
     public void shouldNotAllowChildren() throws Exception {
         this.resultSet.addChild( getTransaction(), "blah", null );
@@ -144,6 +156,30 @@ public final class DataTypeResultSetImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldSetDescription() throws Exception {
+        final String expected = "new description";
+        this.resultSet.setDescription( getTransaction(), expected );
+        assertThat( this.resultSet.getDescription( getTransaction() ), is( expected ) );
+    }
+
+    @Test
+    public void shouldSetNameInSource() throws Exception {
+        final String expected = "newNameInSource";
+        this.resultSet.setNameInSource( getTransaction(), expected );
+        assertThat( this.resultSet.getNameInSource( getTransaction() ), is( expected ) );
+    }
+
+    @Test
+    public void shouldSetNullableProperty() throws Exception {
+        final Nullable expected = Nullable.NO_NULLS;
+        this.resultSet.setNullable( getTransaction(), expected );
+        assertThat( this.resultSet.getNullable( getTransaction() ), is( expected ) );
+        assertThat( this.resultSet.getProperty( getTransaction(), StandardDdlLexicon.NULLABLE )
+                                  .getStringValue( getTransaction() ),
+                    is( expected.toValue() ) );
+    }
+
+    @Test
     public void shouldSetType() throws Exception {
         final Type value = Type.BIGDECIMAL;
         this.resultSet.setType( getTransaction(), value );
@@ -155,6 +191,54 @@ public final class DataTypeResultSetImplTest extends RelationalModelTest {
         this.resultSet.setType( getTransaction(), Type.BIGDECIMAL );
         this.resultSet.setType( getTransaction(), null );
         assertThat( this.resultSet.getType( getTransaction() ), is( Type.DEFAULT_VALUE ) );
+    }
+
+    @Test
+    public void shouldUnsetNameInSourceWhenNullValue() throws Exception {
+        this.resultSet.setNameInSource( getTransaction(), "newNameInSource" );
+        this.resultSet.setNameInSource( getTransaction(), null );
+        assertThat( this.resultSet.getNameInSource( getTransaction() ), is( nullValue() ) );
+    }
+
+    @Test
+    public void shouldSetDatatypePrecisionProperty() throws Exception {
+        final long expected = 10;
+        this.resultSet.setPrecision( getTransaction(), expected );
+        assertThat( this.resultSet.getPrecision( getTransaction() ), is( expected ) );
+        assertThat( this.resultSet.getProperty( getTransaction(), StandardDdlLexicon.DATATYPE_PRECISION )
+                                  .getLongValue( getTransaction() ),
+                    is( expected ) );
+    }
+
+    @Test
+    public void shouldSetDatatypeScaleProperty() throws Exception {
+        final long expected = 10;
+        this.resultSet.setScale( getTransaction(), expected );
+        assertThat( this.resultSet.getScale( getTransaction() ), is( expected ) );
+        assertThat( this.resultSet.getProperty( getTransaction(), StandardDdlLexicon.DATATYPE_SCALE )
+                                  .getLongValue( getTransaction() ),
+                    is( expected ) );
+    }
+
+    @Test
+    public void shouldUnsetDescriptionWhenNullValue() throws Exception {
+        this.resultSet.setDescription( getTransaction(), "new description" );
+        this.resultSet.setDescription( getTransaction(), null );
+        assertThat( this.resultSet.getDescription( getTransaction() ), is( nullValue() ) );
+    }
+
+    @Test
+    public void shouldUnsetDescriptionWhenEmptyValue() throws Exception {
+        this.resultSet.setDescription( getTransaction(), "new description" );
+        this.resultSet.setDescription( getTransaction(), StringConstants.EMPTY_STRING );
+        assertThat( this.resultSet.getDescription( getTransaction() ), is( nullValue() ) );
+    }
+
+    @Test
+    public void shouldUnsetNameInSourceWhenEmptyValue() throws Exception {
+        this.resultSet.setNameInSource( getTransaction(), "newNameInSource" );
+        this.resultSet.setNameInSource( getTransaction(), StringConstants.EMPTY_STRING );
+        assertThat( this.resultSet.getNameInSource( getTransaction() ), is( nullValue() ) );
     }
 
     /*

@@ -27,7 +27,7 @@ import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 /**
  * An implementation of a relational model tabular result set column.
  */
-public final class ResultSetColumnImpl extends RelationalChildRestrictedObject implements ResultSetColumn {
+public class ResultSetColumnImpl extends RelationalChildRestrictedObject implements ResultSetColumn {
 
     private enum StandardOption {
 

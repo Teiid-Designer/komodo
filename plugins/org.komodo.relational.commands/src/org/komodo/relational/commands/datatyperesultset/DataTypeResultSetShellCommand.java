@@ -19,17 +19,23 @@ import org.komodo.shell.api.WorkspaceStatus;
  */
 abstract class DataTypeResultSetShellCommand extends RelationalShellCommand {
 
-    protected static final String ARRAY = "array"; //$NON-NLS-1$
-    protected static final String LENGTH = "length"; //$NON-NLS-1$
-    protected static final String TYPE = "type"; //$NON-NLS-1$
+    protected static final String DATATYPE_NAME = "datatypeName"; //$NON-NLS-1$
+    protected static final String DESCRIPTION = "ANNOTATION"; //$NON-NLS-1$
+    protected static final String LENGTH = "datatypeLength"; //$NON-NLS-1$
+    protected static final String NAME_IN_SOURCE = "NAMEINSOURCE"; //$NON-NLS-1$
+    protected static final String NULLABLE = "nullable"; //$NON-NLS-1$
+    protected static final String PRECISION = "datatypePrecision"; //$NON-NLS-1$
+    protected static final String SCALE = "datatypeScale"; //$NON-NLS-1$
+    protected static final String UUID = "UUID"; //$NON-NLS-1$
 
-//    protected static final String DATATYPE_LENGTH = "datatypeLength"; //$NON-NLS-1$     
-//    protected static final String DATATYPE_NAME = "datatypeName"; //$NON-NLS-1$             
-//    protected static final String DATATYPE_PRECISION = "datatypePrecision"; //$NON-NLS-1$            
-//    protected static final String DATATYPE_SCALE = "datatypeScale"; //$NON-NLS-1$             
-//    protected static final String NULLABLE = "nullable";  //$NON-NLS-1$                      
-
-    protected static final List< String > ALL_PROPS = Arrays.asList( new String[] { ARRAY, LENGTH, TYPE } );
+    protected static final List< String > ALL_PROPS = Arrays.asList( new String[] { DATATYPE_NAME,
+                                                                                    DESCRIPTION,
+                                                                                    LENGTH,
+                                                                                    NAME_IN_SOURCE,
+                                                                                    NULLABLE,
+                                                                                    PRECISION,
+                                                                                    SCALE,
+                                                                                    UUID } );
 
     protected DataTypeResultSetShellCommand( final String name,
                                            final WorkspaceStatus status ) {

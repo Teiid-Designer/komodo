@@ -10,10 +10,10 @@ package org.komodo.relational.model;
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalConstants;
-import org.komodo.relational.RelationalObject;
-import org.komodo.relational.TypeResolver;
 import org.komodo.relational.RelationalConstants.Nullable;
+import org.komodo.relational.RelationalObject;
 import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.TypeResolver;
 import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.model.internal.ResultSetColumnImpl;
 import org.komodo.repository.ObjectImpl;
@@ -49,7 +49,7 @@ public interface ResultSetColumn extends OptionContainer, RelationalObject {
      * The resolver of a {@link ResultSetColumn}.
      */
     public static final TypeResolver< ResultSetColumn > RESOLVER = new TypeResolver< ResultSetColumn >() {
-    
+
         /**
          * {@inheritDoc}
          *
@@ -65,16 +65,16 @@ public interface ResultSetColumn extends OptionContainer, RelationalObject {
                                        final RelationalProperties properties ) throws KException {
             final AdapterFactory adapter = new AdapterFactory( );
             final TabularResultSet parentResultSet = adapter.adapt( transaction, parent, TabularResultSet.class );
-    
+
             if ( parentResultSet == null ) {
                 throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
                                                           parent.getAbsolutePath(),
                                                           ResultSetColumn.class.getSimpleName() ) );
             }
-    
+
             return parentResultSet.addColumn( transaction, id );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -84,7 +84,7 @@ public interface ResultSetColumn extends OptionContainer, RelationalObject {
         public KomodoType identifier() {
             return IDENTIFIER;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -94,7 +94,7 @@ public interface ResultSetColumn extends OptionContainer, RelationalObject {
         public Class< ResultSetColumnImpl > owningClass() {
             return ResultSetColumnImpl.class;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -106,7 +106,7 @@ public interface ResultSetColumn extends OptionContainer, RelationalObject {
                                    final KomodoObject kobject ) throws KException {
             return ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, CreateProcedure.RESULT_COLUMN );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -118,13 +118,13 @@ public interface ResultSetColumn extends OptionContainer, RelationalObject {
                                         final KomodoObject kobject ) throws KException {
             return new ResultSetColumnImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
-    
+
     };
 
     /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @return the value of the <code>datatype name</code> property (can be empty)
+     * @return the value of the <code>datatype name</code> property (never empty)
      * @throws KException
      *         if an error occurs
      * @see RelationalConstants#DEFAULT_DATATYPE_NAME
@@ -211,7 +211,7 @@ public interface ResultSetColumn extends OptionContainer, RelationalObject {
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param newTypeName
-     *        the new value of the <code>datatype name</code> property
+     *        the new value of the <code>datatype name</code> property (can be empty)
      * @throws KException
      *         if an error occurs
      * @see RelationalConstants#DEFAULT_DATATYPE_NAME

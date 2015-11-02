@@ -28,6 +28,7 @@ public class WorkspaceCommandMessages implements StringConstants {
         ERROR_WRITING_FILE,
         INVALID_BOOLEAN_PROPERTY_VALUE,
         INVALID_INTEGER_PROPERTY_VALUE,
+        INVALID_NULLABLE_PROPERTY_VALUE,
         INVALID_OBJECT_TYPE,
         INVALID_PROPERTY_NAME,
         MISSING_OUTPUT_FILE_NAME,
