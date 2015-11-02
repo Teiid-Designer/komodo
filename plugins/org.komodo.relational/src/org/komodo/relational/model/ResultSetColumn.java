@@ -124,7 +124,7 @@ public interface ResultSetColumn extends OptionContainer, RelationalObject {
     /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @return the value of the <code>datatype name</code> property (never empty)
+     * @return the value of the <code>datatype name</code> property (can be empty)
      * @throws KException
      *         if an error occurs
      * @see RelationalConstants#DEFAULT_DATATYPE_NAME
