@@ -7,12 +7,14 @@
 */
 package org.komodo.relational.commands.vdb;
 
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.INPUT_FILE_ERROR;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.UploadModelCommand.MISSING_INPUT_MODEL_FILE_PATH;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.UploadModelCommand.MISSING_MODEL_NAME;
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.UploadModelCommand.MISSING_MODEL_TYPE;
+import static org.komodo.relational.commands.vdb.VdbCommandMessages.UploadModelCommand.MODEL_TYPE_ERROR;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.UploadModelCommand.MODEL_INPUT_FILE_IS_EMPTY;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.UploadModelCommand.MODEL_OVERWRITE_DISABLED;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.UploadModelCommand.MODEL_UPLOADED;
+import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.INPUT_FILE_ERROR;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -21,12 +23,13 @@ import org.komodo.relational.model.Model;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.CompletionConstants;
+import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.utils.StringUtils;
-import org.modeshape.jcr.JcrLexicon;
+import org.modeshape.sequencer.ddl.StandardDdlLexicon;
+import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlParser;
 
 /**
  * Loads a {@link Model MODEL} from a local file.
@@ -54,10 +57,16 @@ public final class UploadModelCommand extends VdbShellCommand {
     protected CommandResult doExecute() {
         try {
             final String modelName = requiredArgument( 0, getMessage( MISSING_MODEL_NAME ) );
-            final String fileName = requiredArgument( 1, getMessage( MISSING_INPUT_MODEL_FILE_PATH ) );
-            final String overwriteArg = optionalArgument( 2, null );
+            final String modelType = requiredArgument( 1, getMessage( MISSING_MODEL_TYPE ) );
+            final String fileName = requiredArgument( 2, getMessage( MISSING_INPUT_MODEL_FILE_PATH ) );
+            final String overwriteArg = optionalArgument( 3, null );
             final boolean overwrite = !StringUtils.isBlank( overwriteArg );
 
+            // make sure ModelType arg is valid
+            if(!modelType.equals(Model.Type.PHYSICAL.name()) && !modelType.equals(Model.Type.VIRTUAL.name())) {
+                return new CommandResultImpl( false, getMessage( MODEL_TYPE_ERROR, modelType ), null );
+            }
+            
             // make sure overwrite arg is valid
             if ( overwrite && !VALID_ARGS.contains( overwriteArg ) ) {
                 return new CommandResultImpl( false, getMessage( INPUT_FILE_ERROR, overwriteArg ), null );
@@ -96,8 +105,10 @@ public final class UploadModelCommand extends VdbShellCommand {
 
             // create Model
             final Model model = vdbContext.addModel( uow, modelName );
-            final KomodoObject fileNode = model.addChild( uow, JcrLexicon.CONTENT.getString(), null );
-            fileNode.setProperty( uow, JcrLexicon.DATA.getString(), content );
+            
+            model.setModelType(uow, Model.Type.valueOf(modelType));
+            model.setModelDefinition(uow, content);
+            model.setProperty(uow, StandardDdlLexicon.PARSER_ID, TeiidDdlParser.ID);
 
             return new CommandResultImpl( getMessage( MODEL_UPLOADED, modelName ) );
         } catch ( final Exception e ) {
@@ -112,7 +123,36 @@ public final class UploadModelCommand extends VdbShellCommand {
      */
     @Override
     protected int getMaxArgCount() {
-        return 3;
+        return 4;
+    }
+    
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
+     */
+    @Override
+    public int tabCompletion( final String lastArgument,
+                              final List< CharSequence > candidates ) throws Exception {
+        final Arguments args = getArguments();
+
+        if ( ( args.size() == 1 ) ) {
+            if(lastArgument ==null) {
+                candidates.add( Model.Type.PHYSICAL.name() );
+                candidates.add( Model.Type.VIRTUAL.name() );
+            } else {
+                if( Model.Type.PHYSICAL.name().toUpperCase().startsWith(lastArgument.toUpperCase()) ) {
+                    candidates.add(Model.Type.PHYSICAL.name());
+                } else if ( Model.Type.VIRTUAL.name().toUpperCase().startsWith(lastArgument.toUpperCase()) ) {
+                    candidates.add(Model.Type.VIRTUAL.name());
+                }
+            }
+
+            return ( candidates.isEmpty() ? -1 : ( StringUtils.isBlank( lastArgument ) ? 0 : ( toString().length() + 1 ) ) );
+        }
+
+        // no tab completion
+        return -1;
     }
 
 }
