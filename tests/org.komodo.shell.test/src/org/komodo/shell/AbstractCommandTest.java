@@ -8,6 +8,8 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -113,6 +115,16 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
 
         final String commandFilePath = cmdFile.getAbsolutePath();
         setup( commandFilePath );
+    }
+
+    protected void assertCommandsNotAvailable( final String... cmdNames ) throws Exception {
+        final Collection< String > available = Arrays.asList( this.wsStatus.getAvailableCommands() );
+
+        for ( final String name : cmdNames ) {
+            if ( available.contains( name ) ) {
+                Assert.fail( "Command " + name + " should not be available" );
+            }
+        }
     }
 
     protected void setup( final String commandFilePath ) throws Exception {

@@ -29,24 +29,33 @@ import org.komodo.spi.repository.KomodoObject;
 public class SetPrimaryTypeCommandTest extends AbstractCommandTest {
 
     @Test( expected = AssertionError.class )
-    public void shouldNotSetPrimaryTypeAtRoot() throws Exception {
-        final String[] commands = { "set-primary-type blah" }; // set-primary-type is not available at root
+    public void shouldFailWhenTooManyArgs() throws Exception {
+        final String[] commands = { "workspace",
+                                    "add-child myChild",
+                                    "cd myChild",
+                                    "set-primary-type nt:folder extraArg" };
         setup( commands );
         execute();
     }
 
-    @Test( expected = AssertionError.class )
-    public void shouldNotSetPrimaryTypeAtWorkspace() throws Exception {
-        final String[] commands = { 
-            "workspace",
-            "set-primary-type blah" }; 
+    @Test
+    public void shouldNotHaveSetPrimaryTypeAvailableAtRoot() throws Exception {
+        assertCommandsNotAvailable( SetPrimaryTypeCommand.NAME );
+    }
+
+    @Test
+    public void shouldNotHaveSetPrimaryTypeAvailableAtWorkspace() throws Exception {
+        final String[] commands = { "workspace" };
         setup( commands );
-        execute();
+        final CommandResult result = execute();
+
+        assertCommandResultOk( result );
+        assertCommandsNotAvailable( SetPrimaryTypeCommand.NAME );
     }
 
     @Test( expected = AssertionError.class )
     public void shouldNotSetInvalidType() throws Exception {
-        final String[] commands = { 
+        final String[] commands = {
             "workspace",
             "add-child myChild",
             "cd myChild",
@@ -55,10 +64,10 @@ public class SetPrimaryTypeCommandTest extends AbstractCommandTest {
         setup( commands );
         execute();
     }
-    
+
     @Test
     public void shouldSetPrimaryType() throws Exception {
-        final String[] commands = { 
+        final String[] commands = {
             "workspace",
             "add-child myChild",
             "cd myChild",
@@ -67,7 +76,7 @@ public class SetPrimaryTypeCommandTest extends AbstractCommandTest {
     	setup( commands );
 
         final CommandResult result = execute();
-        assertThat( result.isOk(), is( true ) );
+        assertCommandResultOk( result );
 
         final KomodoObject workspace = _repo.komodoWorkspace( getTransaction() );
         assertThat( workspace.getChildren( getTransaction() ).length, is( 1 ) );
