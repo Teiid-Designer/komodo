@@ -26,6 +26,13 @@ import org.komodo.shell.api.CommandResult;
 @SuppressWarnings( { "javadoc", "nls" } )
 public class UnsetPropertyCommandTest extends AbstractCommandTest {
 
+    @Test( expected = AssertionError.class )
+    public void shouldFailTooManyArgs( ) throws Exception {
+        final String[] commands = { "unset-property aProp extraArg" };
+        setup( commands );
+        execute();
+    }
+    
     @Test
     public void testShowStatus1() throws Exception {
         final String[] commands = { "workspace" };

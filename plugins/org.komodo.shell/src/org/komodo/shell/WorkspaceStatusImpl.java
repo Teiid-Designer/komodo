@@ -54,6 +54,7 @@ import org.komodo.shell.api.ShellCommandFactory;
 import org.komodo.shell.api.ShellCommandProvider;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.api.WorkspaceStatusEventHandler;
+import org.komodo.shell.util.KomodoObjectUtils;
 import org.komodo.shell.util.PrintUtils;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
@@ -101,6 +102,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
 
     private Map<String,KomodoObject> stateObjects = new HashMap<String,KomodoObject>();
 
+    private KomodoObjectLabelProvider currentContextLabelProvider;
     private KomodoObjectLabelProvider defaultLabelProvider;
     private Collection<KomodoObjectLabelProvider> alternateLabelProviders = new ArrayList<>();
 
@@ -155,6 +157,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
 
         // Discover any other label providers
         discoverLabelProviders();
+        setLabelProvider(this.currentContext);
     }
 
     private void initGlobalProperties() throws KException {
@@ -352,6 +355,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     public void setCurrentContext(KomodoObject context) throws Exception {
         this.currentContext = context;
         this.wsProperties.setProperty( SAVED_CONTEXT_PATH, this.currentContext.getAbsolutePath() );
+        setLabelProvider(this.currentContext);  // Resets the current LabelProvider for the context
 
         { // try and resolve
             final KomodoObject resolved = resolve( this.currentContext );
@@ -694,20 +698,25 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
      */
     @Override
     public KomodoObjectLabelProvider getLabelProvider() {
+        return this.currentContextLabelProvider;
+    }
+
+    /*
+     * Set the Label provider for the supplied context
+     * @param context the context
+     */
+    private void setLabelProvider(KomodoObject context) {
         // If an alternate provider yields a path for this KomodoObject, it is used.  Otherwise, the defaultProvider is used.
         KomodoObjectLabelProvider resultLabelProvider = null;
         if(!this.alternateLabelProviders.isEmpty()) {
             for(KomodoObjectLabelProvider altProvider : this.alternateLabelProviders) {
-                if( !StringUtils.isEmpty(altProvider.getDisplayPath(getCurrentContext())) ) {
+                if( !StringUtils.isEmpty(altProvider.getDisplayPath(context)) ) {
                     resultLabelProvider = altProvider;
                     break;
                 }
             }
         }
-        if(resultLabelProvider!=null) {
-            return resultLabelProvider;
-        }
-        return defaultLabelProvider;
+        this.currentContextLabelProvider = (resultLabelProvider!=null) ? resultLabelProvider : defaultLabelProvider;
     }
 
     @Override
@@ -991,7 +1000,11 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         // If supplied path doesnt start with FORWARD_SLASH, it should be relative to current context
         String entireDisplayPath = displayPath;
         if(!displayPath.startsWith(FORWARD_SLASH)) {
-            entireDisplayPath = getCurrentContextDisplayPath()+FORWARD_SLASH+displayPath;
+            if(KomodoObjectUtils.isRoot(getCurrentContext())) {
+                entireDisplayPath = FORWARD_SLASH+displayPath;
+            } else {
+                entireDisplayPath = getCurrentContextDisplayPath()+FORWARD_SLASH+displayPath;
+            }
         }
 
         entireDisplayPath = removePathDots(entireDisplayPath);

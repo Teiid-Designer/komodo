@@ -19,6 +19,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.shell.AbstractCommandTest;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.WorkspaceStatus;
 
 /**
  * Test Class to test {@link SetGlobalPropertyCommand}.
@@ -26,16 +27,44 @@ import org.komodo.shell.api.CommandResult;
 @SuppressWarnings( { "javadoc", "nls" } )
 public class SetGlobalPropertyCommandTest extends AbstractCommandTest {
 
+    @Test( expected = AssertionError.class )
+    public void shouldFailTooManyArgs( ) throws Exception {
+        final String[] commands = { "set-global anArg extraArg" };
+        setup( commands );
+        execute();
+    }
+    
+    @Test( expected = AssertionError.class )
+    public void shouldFailBadGlobalProperty( ) throws Exception {
+        final String[] commands = { "set-global anArg" };
+        setup( commands );
+        execute();
+    }
+    
     @Test
-    public void test1() throws Exception {
-        final String[] commands = { "workspace" };
-    	setup( commands );
+    public void shouldSetShowTypeInPrompt() throws Exception {
+        final String[] commands = { "set-global " + WorkspaceStatus.SHOW_TYPE_IN_PROMPT_KEY + " true" };
+        setup( commands );
 
         CommandResult result = execute();
         assertCommandResultOk(result);
 
-    	// Check WorkspaceContext
-    	assertEquals("/workspace", wsStatus.getCurrentContextDisplayPath());
+        // Check Context and property value
+        assertEquals("/", wsStatus.getCurrentContextDisplayPath());
+        assertEquals("true", wsStatus.getProperties().getProperty(WorkspaceStatus.SHOW_TYPE_IN_PROMPT_KEY));
+    }
+
+    @Test
+    public void shouldSetRecordingOutputFile() throws Exception {
+        final String[] commands = { "set-global " + WorkspaceStatus.RECORDING_FILE_KEY + " /aRecordingFile.txt" };
+        setup( commands );
+
+        CommandResult result = execute();
+        assertCommandResultOk(result);
+
+        // Check Context and property value
+        assertEquals("/", wsStatus.getCurrentContextDisplayPath());
+        assertEquals("/aRecordingFile.txt", wsStatus.getProperties().getProperty(WorkspaceStatus.RECORDING_FILE_KEY));
     }
 
 }

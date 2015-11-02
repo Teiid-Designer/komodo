@@ -27,6 +27,13 @@ import org.komodo.shell.api.WorkspaceStatus;
 @SuppressWarnings({"javadoc", "nls"})
 public class ShowGlobalCommandTest extends AbstractCommandTest {
 
+    @Test( expected = AssertionError.class )
+    public void shouldFailTooManyArgs( ) throws Exception {
+        final String[] commands = { "show-global extraArg" };
+        setup( commands );
+        execute();
+    }
+    
     @Test
     public void testShowGlobal1() throws Exception {
         final String[] commands = { "show-global" };

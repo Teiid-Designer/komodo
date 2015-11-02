@@ -33,14 +33,16 @@ public class AddAccessPatternCommandTest extends AbstractCommandTest {
 
     @Test
     public void testAdd1() throws Exception {
-        final String[] commands = { "workspace",
-                                    "create-vdb myVdb vdbPath",
-                                    "cd myVdb",
-                                    "add-model myModel",
-                                    "cd myModel",
-                                    "add-table myTable",
-                                    "cd myTable",
-                                    "add-access-pattern myAccessPattern" };
+        final String[] commands = { 
+            "workspace",
+            "create-vdb myVdb vdbPath",
+            "cd myVdb",
+            "add-model myModel",
+            "cd myModel",
+            "add-table myTable",
+            "cd myTable",
+            "add-access-pattern myAccessPattern" };
+        
         setup(commands);
 
         CommandResult result = execute();

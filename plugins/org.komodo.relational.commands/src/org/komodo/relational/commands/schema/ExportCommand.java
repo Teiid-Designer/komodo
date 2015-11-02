@@ -7,10 +7,10 @@
  */
 package org.komodo.relational.commands.schema;
 
-import static org.komodo.relational.commands.WorkspaceCommandMessages.General.ERROR_DDL_EMPTY;
-import static org.komodo.relational.commands.WorkspaceCommandMessages.General.ERROR_WRITING_FILE;
-import static org.komodo.relational.commands.WorkspaceCommandMessages.General.MISSING_OUTPUT_FILE_NAME;
-import static org.komodo.relational.commands.WorkspaceCommandMessages.General.OUTPUT_FILE_ERROR;
+import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.ERROR_DDL_EMPTY;
+import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.ERROR_WRITING_FILE;
+import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.MISSING_OUTPUT_FILE_NAME;
+import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.OUTPUT_FILE_ERROR;
 import static org.komodo.relational.commands.schema.SchemaCommandMessages.ExportCommand.DDL_EXPORTED;
 import java.io.File;
 import java.io.FileWriter;

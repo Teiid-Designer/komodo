@@ -16,8 +16,6 @@
 package org.komodo.relational.commands.teiid;
 
 import static org.junit.Assert.assertEquals;
-import java.io.File;
-import java.io.FileWriter;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.teiid.Teiid;
@@ -33,17 +31,13 @@ public class SetTeiidPropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testSetProperty1() throws Exception {
-        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
-        cmdFile.deleteOnExit();
+        final String[] commands = { 
+            "workspace",
+            "create-teiid testTeiid",
+            "cd testTeiid",
+            "set-property adminPort 88" };
 
-        FileWriter writer = new FileWriter(cmdFile);
-        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("create-teiid testTeiid" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd testTeiid" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("set-property adminPort 88" + NEW_LINE);  //$NON-NLS-1$
-        writer.close();
-
-        setup( cmdFile.getAbsolutePath() );
+        setup( commands  );
 
         CommandResult result = execute();
         assertCommandResultOk(result);

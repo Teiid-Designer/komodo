@@ -26,6 +26,13 @@ import org.komodo.shell.api.CommandResult;
 @SuppressWarnings( { "javadoc", "nls" } )
 public class SetRecordCommandTest extends AbstractCommandTest {
 
+    @Test( expected = AssertionError.class )
+    public void shouldFailTooManyArgs( ) throws Exception {
+        final String[] commands = { "set-record on extraArg" };
+        setup( commands );
+        execute();
+    }
+    
     @Test
     public void shouldSetRecordOn() throws Exception {
         final String[] commands = { "workspace",

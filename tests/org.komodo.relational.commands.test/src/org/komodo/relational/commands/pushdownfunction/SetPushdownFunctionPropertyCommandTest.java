@@ -16,8 +16,6 @@
 package org.komodo.relational.commands.pushdownfunction;
 
 import static org.junit.Assert.assertEquals;
-import java.io.File;
-import java.io.FileWriter;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Function;
@@ -36,21 +34,17 @@ public class SetPushdownFunctionPropertyCommandTest extends AbstractCommandTest 
 
     @Test
     public void testSetProperty1() throws Exception {
-        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
-        cmdFile.deleteOnExit();
+        final String[] commands = { 
+            "workspace",
+            "create-vdb myVdb vdbPath",
+            "cd myVdb",
+            "add-model myModel",
+            "cd myModel",
+            "add-pushdown-function myPushdownFunction",
+            "cd myPushdownFunction",
+            "set-property NAMEINSOURCE myNameInSource" };
 
-        FileWriter writer = new FileWriter(cmdFile);
-        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("create-vdb myVdb vdbPath" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd myVdb" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-model myModel " + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd myModel" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-pushdown-function myPushdownFunction" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd myPushdownFunction" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("set-property NAMEINSOURCE myNameInSource" + NEW_LINE);  //$NON-NLS-1$
-        writer.close();
-
-        setup( cmdFile.getAbsolutePath() );
+        setup( commands );
 
         CommandResult result = execute();
         assertCommandResultOk(result);

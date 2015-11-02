@@ -16,8 +16,6 @@
 package org.komodo.relational.commands.server;
 
 import static org.junit.Assert.assertTrue;
-import java.io.File;
-import java.io.FileWriter;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.shell.api.CommandResult;
@@ -31,19 +29,15 @@ public class ServerConnectCommandTest extends AbstractCommandTest {
 
     @Test
     public void shouldFailNoLocalhostFound() throws Exception {
-        File cmdFile = File.createTempFile("TestCommand", ".txt");
-        cmdFile.deleteOnExit();
+        final String[] commands = { 
+            "set-auto-commit false",
+            "workspace",
+            "create-teiid myTeiid",
+            "commit",
+            "set-server myTeiid",
+            "server-connect" };
 
-        FileWriter writer = new FileWriter(cmdFile);
-        writer.write("set-auto-commit false" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("workspace" + NEW_LINE);
-        writer.write("create-teiid myTeiid" + NEW_LINE);
-        writer.write("commit" + NEW_LINE);
-        writer.write("set-server myTeiid" + NEW_LINE);
-        writer.write("server-connect" + NEW_LINE);  //$NON-NLS-1$
-        writer.close();
-
-        setup( cmdFile.getAbsolutePath() );
+        setup( commands );
 
         CommandResult result = execute();
         String msg = result.getMessage();

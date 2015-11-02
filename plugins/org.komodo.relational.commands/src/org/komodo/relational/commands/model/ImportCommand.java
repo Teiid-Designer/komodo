@@ -7,8 +7,8 @@
  */
 package org.komodo.relational.commands.model;
 
-import static org.komodo.relational.commands.WorkspaceCommandMessages.General.INPUT_FILE_ERROR;
-import static org.komodo.relational.commands.WorkspaceCommandMessages.General.MISSING_INPUT_FILE_NAME;
+import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.INPUT_FILE_ERROR;
+import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.MISSING_INPUT_FILE_NAME;
 import static org.komodo.relational.commands.model.ModelCommandMessages.ImportCommand.DdlImportInProgressMsg;
 import static org.komodo.relational.commands.model.ModelCommandMessages.ImportCommand.DdlImportSuccessMsg;
 import static org.komodo.relational.commands.model.ModelCommandMessages.ImportCommand.DeleteTempContextFailedMsg;
@@ -19,8 +19,8 @@ import java.util.concurrent.TimeUnit;
 import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
 import org.komodo.relational.Messages;
-import org.komodo.relational.commands.CreateSchemaCommand;
-import org.komodo.relational.commands.DeleteSchemaCommand;
+import org.komodo.relational.commands.workspace.CreateSchemaCommand;
+import org.komodo.relational.commands.workspace.DeleteSchemaCommand;
 import org.komodo.relational.importer.ddl.DdlImporter;
 import org.komodo.repository.SynchronousCallback;
 import org.komodo.shell.CommandResultImpl;

@@ -7,9 +7,10 @@
  */
 package org.komodo.relational.commands;
 
-import static org.komodo.relational.commands.WorkspaceCommandMessages.General.INVALID_OBJECT_TYPE;
+import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.INVALID_OBJECT_TYPE;
 import org.komodo.relational.Messages;
 import org.komodo.relational.RelationalObject;
+import org.komodo.relational.commands.workspace.WorkspaceCommandMessages;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.api.ShellCommand;

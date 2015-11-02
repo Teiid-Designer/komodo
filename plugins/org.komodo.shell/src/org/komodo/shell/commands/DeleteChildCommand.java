@@ -9,6 +9,9 @@ package org.komodo.shell.commands;
 
 import static org.komodo.shell.Messages.DeleteChildCommand.CHILD_DELETED;
 import static org.komodo.shell.Messages.DeleteChildCommand.MISSING_CHILD_NAME;
+import static org.komodo.shell.Messages.DeleteChildCommand.NO_CHILD_WITH_NAME_AND_TYPE;
+import static org.komodo.shell.Messages.DeleteChildCommand.NO_CHILD_WITH_NAME;
+import static org.komodo.shell.Messages.DeleteChildCommand.ERROR_GETTING_CHILD;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.Messages;
@@ -16,6 +19,7 @@ import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.KomodoObjectUtils;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.utils.StringUtils;
 
 /**
  * Deletes a child from a {@link KomodoObject}.
@@ -50,10 +54,24 @@ public class DeleteChildCommand extends BuiltInShellCommand {
     protected CommandResult doExecute() {
         try {
             final String childNameArg = requiredArgument( 0, Messages.getString( MISSING_CHILD_NAME ) );
-            //final String childTypeArg = optionalArgument( 1 );
+            final String childTypeArg = optionalArgument( 1 );
 
             final KomodoObject kobject = getContext();
-            kobject.removeChild(getTransaction(), childNameArg);
+            KomodoObject childObject = null;
+            // Determine if child exists before attempting delete.
+            if(!StringUtils.isBlank(childTypeArg)) {
+                if(!kobject.hasChild(getTransaction(), childNameArg, childTypeArg)) {
+                    return new CommandResultImpl( false, Messages.getString(NO_CHILD_WITH_NAME_AND_TYPE, childNameArg, childTypeArg), null);
+                }
+                childObject = kobject.getChild(getTransaction(), childNameArg, childTypeArg);
+            } else {
+                if(!kobject.hasChild(getTransaction(), childNameArg)) return new CommandResultImpl( false, Messages.getString(NO_CHILD_WITH_NAME, childNameArg), null);
+                childObject = kobject.getChild(getTransaction(), childNameArg);
+            }
+            
+            if(childObject==null) return new CommandResultImpl(false, Messages.getString(ERROR_GETTING_CHILD, childNameArg), null);
+
+            childObject.remove(getTransaction());
             return new CommandResultImpl( Messages.getString( CHILD_DELETED, childNameArg ) );
         } catch ( final Exception e ) {
             return new CommandResultImpl( e );

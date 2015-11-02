@@ -158,9 +158,42 @@ public class Messages implements StringConstants {
     }
 
     public enum DeleteChildCommand {
-
         CHILD_DELETED,
-        MISSING_CHILD_NAME;
+        MISSING_CHILD_NAME,
+        NO_CHILD_WITH_NAME_AND_TYPE,
+        NO_CHILD_WITH_NAME,
+        ERROR_GETTING_CHILD;
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see java.lang.Enum#toString()
+         */
+        @Override
+        public String toString() {
+            return getEnumName( this ) + DOT + name();
+        }
+    }
+
+    public enum AddDescriptorCommand {
+        DESCRIPTOR_ADDED,
+        MISSING_DESCRIPTOR_NAME;
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see java.lang.Enum#toString()
+         */
+        @Override
+        public String toString() {
+            return getEnumName( this ) + DOT + name();
+        }
+    }
+
+    public enum RemoveDescriptorCommand {
+
+        DESCRIPTOR_REMOVED,
+        MISSING_DESCRIPTOR_NAME;
 
         /**
          * {@inheritDoc}
@@ -232,6 +265,16 @@ public class Messages implements StringConstants {
           return getEnumName(this) + DOT + name();
       }
     }
+    
+    public enum SetPrimaryTypeCommand {
+        MISSING_TYPE_NAME,
+        PRIMARY_TYPE_SET;
+
+      @Override
+      public String toString() {
+          return getEnumName(this) + DOT + name();
+      }
+    }
 
     public enum SetPropertyCommand {
         InvalidPropName,
@@ -275,9 +318,27 @@ public class Messages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
+    
+    public enum ShowDescriptorsCommand {
+        ListHeader,
+        NoDescriptors;
+
+      @Override
+      public String toString() {
+          return getEnumName(this) + DOT + name();
+      }
+    }
+
+    public enum ShowPrimaryTypeCommand {
+        ShowType;
+
+      @Override
+      public String toString() {
+          return getEnumName(this) + DOT + name();
+      }
+    }
 
     public enum SetAutoCommitCommand {
-
         ENABLE_FLAG_MISSING;
 
         /**

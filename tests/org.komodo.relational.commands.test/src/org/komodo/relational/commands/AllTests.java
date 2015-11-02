@@ -96,6 +96,15 @@ import org.komodo.relational.commands.view.SetViewPropertyCommandTest;
 import org.komodo.relational.commands.view.UnsetViewPropertyCommandTest;
 import org.komodo.relational.commands.virtualprocedure.SetVirtualProcedurePropertyCommandTest;
 import org.komodo.relational.commands.virtualprocedure.UnsetVirtualProcedurePropertyCommandTest;
+import org.komodo.relational.commands.workspace.CreateSchemaCommandTest;
+import org.komodo.relational.commands.workspace.CreateTeiidCommandTest;
+import org.komodo.relational.commands.workspace.CreateVdbCommandTest;
+import org.komodo.relational.commands.workspace.DeleteSchemaCommandTest;
+import org.komodo.relational.commands.workspace.DeleteTeiidCommandTest;
+import org.komodo.relational.commands.workspace.DeleteVdbCommandTest;
+import org.komodo.relational.commands.workspace.UploadVdbCommandTest;
+import org.komodo.relational.commands.workspace.WorkspaceSetPropertyCommandTest;
+import org.komodo.relational.commands.workspace.WorkspaceUnsetPropertyCommandTest;
 
 
 /**
@@ -103,6 +112,18 @@ import org.komodo.relational.commands.virtualprocedure.UnsetVirtualProcedureProp
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
+    // Core relational
+    FindCommandTest.class,
+    SetCustomPropertyCommandTest.class,
+    UnsetCustomPropertyCommandTest.class,
+    RelationalAddChildCommandTest.class,
+    RelationalDeleteChildCommandTest.class,
+    RelationalAddDescriptorCommandTest.class,
+    RelationalRemoveDescriptorCommandTest.class,
+    RelationalSetPrimaryTypeCommandTest.class,
+    RelationalShowPrimaryTypeCommandTest.class,
+    RelationalShowDescriptorsCommandTest.class,
+    
     // Workspace
     CreateSchemaCommandTest.class,
     CreateTeiidCommandTest.class,
@@ -110,12 +131,8 @@ import org.komodo.relational.commands.virtualprocedure.UnsetVirtualProcedureProp
     DeleteSchemaCommandTest.class,
     DeleteTeiidCommandTest.class,
     DeleteVdbCommandTest.class,
-    FindCommandTest.class,
 //    ImportVdbCommandTest.class,
-    SetCustomPropertyCommandTest.class,
-    UnsetCustomPropertyCommandTest.class,
     UploadVdbCommandTest.class,
-    WorkspaceAddChildCommandTest.class,
     WorkspaceSetPropertyCommandTest.class,
     WorkspaceUnsetPropertyCommandTest.class,
 

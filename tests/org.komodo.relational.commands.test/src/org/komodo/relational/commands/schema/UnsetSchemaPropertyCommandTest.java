@@ -16,8 +16,6 @@
 package org.komodo.relational.commands.schema;
 
 import static org.junit.Assert.assertEquals;
-import java.io.File;
-import java.io.FileWriter;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Schema;
@@ -34,18 +32,14 @@ public class UnsetSchemaPropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testUnsetProperty1() throws Exception {
-        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
-        cmdFile.deleteOnExit();
+        final String[] commands = { 
+            "workspace",
+            "create-schema testSchema",
+            "cd testSchema",
+            "set-property rendition \"CREATE FOREIGN TABLE G1 (e1 integer) OPTIONS (ANNOTATION 'test', CARDINALITY '12');\"",
+            "unset-property rendition" };
 
-        FileWriter writer = new FileWriter(cmdFile);
-        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("create-schema testSchema" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd testSchema" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("set-property rendition \"CREATE FOREIGN TABLE G1 (e1 integer) OPTIONS (ANNOTATION 'test', CARDINALITY '12');\"" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("unset-property rendition" + NEW_LINE);  //$NON-NLS-1$
-        writer.close();
-
-        setup( cmdFile.getAbsolutePath() );
+        setup( commands );
 
         CommandResult result = execute();
         assertCommandResultOk(result);

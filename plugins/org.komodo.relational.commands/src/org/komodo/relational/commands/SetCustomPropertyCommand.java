@@ -7,9 +7,9 @@
  */
 package org.komodo.relational.commands;
 
-import static org.komodo.relational.commands.WorkspaceCommandMessages.RESOURCE_BUNDLE;
-import static org.komodo.relational.commands.WorkspaceCommandMessages.General.MISSING_PROPERTY_NAME_VALUE;
-import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_SUCCESS;
+import static org.komodo.relational.commands.RelationalCommandMessages.RESOURCE_BUNDLE;
+import static org.komodo.relational.commands.RelationalCommandMessages.General.MISSING_PROPERTY_NAME_VALUE;
+import static org.komodo.relational.commands.RelationalCommandMessages.General.SET_PROPERTY_SUCCESS;
 import org.komodo.relational.Messages;
 import org.komodo.relational.RelationalObject;
 import org.komodo.shell.CommandResultImpl;

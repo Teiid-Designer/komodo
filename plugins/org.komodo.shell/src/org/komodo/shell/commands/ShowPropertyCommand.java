@@ -84,7 +84,7 @@ public class ShowPropertyCommand extends BuiltInShellCommand {
                                               null );
             }
 
-            PrintUtils.printProperty( getWorkspaceStatus(), context, propName );
+            PrintUtils.printProperty( getWorkspaceStatus(), getWriter(), context, propName );
             return CommandResult.SUCCESS;
         } catch ( Exception e ) {
             return new CommandResultImpl( e );

@@ -26,6 +26,13 @@ import org.komodo.shell.api.CommandResult;
 @SuppressWarnings( { "javadoc", "nls" } )
 public class ListCommandTest extends AbstractCommandTest {
 
+    @Test( expected = AssertionError.class )
+    public void shouldFailTooManyArgs( ) throws Exception {
+        final String[] commands = { "list extraArg" };
+        setup( commands );
+        execute();
+    }
+    
     @Test
     public void testList1() throws Exception {
         final String[] commands =  { "workspace",

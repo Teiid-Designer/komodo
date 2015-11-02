@@ -21,6 +21,13 @@ import org.komodo.spi.repository.KomodoObject;
 public final class AddChildCommandTest extends AbstractCommandTest {
 
     @Test( expected = AssertionError.class )
+    public void shouldFailTooManyArgs( ) throws Exception {
+        final String[] commands = { "workspace", "add-child childName extraArg" };
+        setup( commands );
+        execute();
+    }
+    
+    @Test( expected = AssertionError.class )
     public void shouldNotAddChildAtRoot() throws Exception {
         final String[] commands = { "add-child blah" }; // add-child is not available at root
         setup( commands );

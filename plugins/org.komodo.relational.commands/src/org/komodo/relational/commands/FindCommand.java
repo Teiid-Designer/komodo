@@ -7,11 +7,11 @@
  */
 package org.komodo.relational.commands;
 
-import static org.komodo.relational.commands.WorkspaceCommandMessages.RESOURCE_BUNDLE;
-import static org.komodo.relational.commands.WorkspaceCommandMessages.FindCommand.INVALID_TYPE;
-import static org.komodo.relational.commands.WorkspaceCommandMessages.FindCommand.MISSING_TYPE_NAME;
-import static org.komodo.relational.commands.WorkspaceCommandMessages.FindCommand.NO_OBJECTS_FOUND;
-import static org.komodo.relational.commands.WorkspaceCommandMessages.FindCommand.TYPE_HEADER;
+import static org.komodo.relational.commands.RelationalCommandMessages.RESOURCE_BUNDLE;
+import static org.komodo.relational.commands.RelationalCommandMessages.FindCommand.INVALID_TYPE;
+import static org.komodo.relational.commands.RelationalCommandMessages.FindCommand.MISSING_TYPE_NAME;
+import static org.komodo.relational.commands.RelationalCommandMessages.FindCommand.NO_OBJECTS_FOUND;
+import static org.komodo.relational.commands.RelationalCommandMessages.FindCommand.TYPE_HEADER;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.Arrays;
 import java.util.Collections;

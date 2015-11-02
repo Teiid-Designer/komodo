@@ -26,6 +26,13 @@ import org.komodo.shell.api.CommandResult;
 @SuppressWarnings( { "javadoc", "nls" } )
 public class LibraryCommandTest extends AbstractCommandTest {
 
+    @Test( expected = AssertionError.class )
+    public void shouldFailTooManyArgs( ) throws Exception {
+        final String[] commands = { "library extraArg" };
+        setup( commands );
+        execute();
+    }
+    
     @Test
     public void test1() throws Exception {
         final String[] commands = { "library" };

@@ -34,14 +34,16 @@ public class AddColumnCommandTest extends AbstractCommandTest {
 
     @Test
     public void testAdd1() throws Exception {
-        final String[] commands = { "workspace",
-                                    "create-vdb myVdb vdbPath",
-                                    "cd myVdb",
-                                    "add-model myModel",
-                                    "cd myModel",
-                                    "add-table myTable",
-                                    "cd myTable",
-                                    "add-column myColumn" };
+        final String[] commands = { 
+            "workspace",
+            "create-vdb myVdb vdbPath",
+            "cd myVdb",
+            "add-model myModel",
+            "cd myModel",
+            "add-table myTable",
+            "cd myTable",
+            "add-column myColumn" };
+        
         setup( commands );
 
         CommandResult result = execute();

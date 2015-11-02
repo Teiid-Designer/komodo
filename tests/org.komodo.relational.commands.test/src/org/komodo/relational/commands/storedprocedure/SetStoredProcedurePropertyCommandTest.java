@@ -16,8 +16,6 @@
 package org.komodo.relational.commands.storedprocedure;
 
 import static org.junit.Assert.assertEquals;
-import java.io.File;
-import java.io.FileWriter;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Model;
@@ -36,21 +34,17 @@ public class SetStoredProcedurePropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testSetProperty1() throws Exception {
-        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
-        cmdFile.deleteOnExit();
+        final String[] commands = { 
+            "workspace",
+            "create-vdb myVdb vdbPath",
+            "cd myVdb",
+            "add-model myModel",
+            "cd myModel",
+            "add-stored-procedure myStoredProcedure",
+            "cd myStoredProcedure",
+            "set-property NAMEINSOURCE myNameInSource" };
 
-        FileWriter writer = new FileWriter(cmdFile);
-        writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("create-vdb myVdb vdbPath" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd myVdb" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-model myModel " + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd myModel" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("add-stored-procedure myStoredProcedure" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("cd myStoredProcedure" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("set-property NAMEINSOURCE myNameInSource" + NEW_LINE);  //$NON-NLS-1$
-        writer.close();
-
-        setup( cmdFile.getAbsolutePath() );
+        setup( commands );
 
         CommandResult result = execute();
         assertCommandResultOk(result);

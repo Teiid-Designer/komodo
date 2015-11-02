@@ -17,8 +17,6 @@ package org.komodo.relational.commands.server;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import java.io.File;
-import java.io.FileWriter;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.teiid.Teiid;
@@ -35,20 +33,16 @@ public class ServerSetCommandTest extends AbstractCommandTest {
 
     @Test
     public void testSet() throws Exception {
-        File cmdFile = File.createTempFile("TestCommand", ".txt");
-        cmdFile.deleteOnExit();
+        final String[] commands = { 
+            "set-auto-commit false",
+            "workspace",
+            "create-teiid myTeiid",
+            "commit",
+            "set-server myTeiid",
+            "commit",
+            "show-global" };
 
-        FileWriter writer = new FileWriter(cmdFile);
-        writer.write("set-auto-commit false" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("workspace" + NEW_LINE);
-        writer.write("create-teiid myTeiid" + NEW_LINE);
-        writer.write("commit" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("set-server myTeiid" + NEW_LINE);
-        writer.write("commit" + NEW_LINE);  //$NON-NLS-1$
-        writer.write("show-global" + NEW_LINE);
-        writer.close();
-
-        setup( cmdFile.getAbsolutePath() );
+        setup( commands );
 
         CommandResult result = execute();
         assertCommandResultOk(result);
