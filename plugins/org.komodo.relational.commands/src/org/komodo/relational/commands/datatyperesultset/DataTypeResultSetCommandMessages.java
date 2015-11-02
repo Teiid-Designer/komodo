@@ -14,51 +14,34 @@ import org.komodo.spi.constants.StringConstants;
 /**
  * Localized messages for {@link DataTypeResultSet}-related shell commands.
  */
-public class DataTypeResultSetCommandMessages implements StringConstants {
+@SuppressWarnings( "javadoc" )
+public final class DataTypeResultSetCommandMessages implements StringConstants {
 
-    private static final String BUNDLE_NAME = ( DataTypeResultSetCommandMessages.class.getPackage().getName() + DOT + DataTypeResultSetCommandMessages.class.getSimpleName().toLowerCase() );
+    public enum SetDataTypeResultSetPropertyCommand {
+
+        INVALID_DATA_TYPE_ARRAY_INDICATOR,
+        INVALID_DATATYPE_NAME;
+
+        @Override
+        public String toString() {
+            return getEnumName( this ) + DOT + name();
+        }
+
+    }
+
+    private static final String BUNDLE_NAME = ( DataTypeResultSetCommandMessages.class.getPackage().getName()
+                                                + DOT
+                                                + DataTypeResultSetCommandMessages.class.getSimpleName().toLowerCase() );
 
     /**
      * The resource bundle for localized messages.
      */
     public static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle( BUNDLE_NAME );
 
-    @SuppressWarnings( "javadoc" )
-    public enum General {
-        MISSING_PARAMETER_NAME,
-        PARAMETER_NAME,
-        INVALID_SCHEMA_ELEMENT_TYPE_PROPERTY_VALUE;
-
-        @Override
-        public String toString() {
-            return getEnumName(this) + DOT + name();
-        }
-    }
-
-    @SuppressWarnings( "javadoc" )
-    public enum AddParameterCommand {
-        PARAMETER_ADDED;
-
-        @Override
-        public String toString() {
-            return getEnumName(this) + DOT + name();
-        }
-    }
-
-    @SuppressWarnings( "javadoc" )
-    public enum DeleteParameterCommand {
-        PARAMETER_DELETED;
-
-        @Override
-        public String toString() {
-            return getEnumName(this) + DOT + name();
-        }
-    }
-
-    private static String getEnumName(Enum<?> enumValue) {
-        String className = enumValue.getClass().getName();
-        String[] components = className.split("\\$"); //$NON-NLS-1$
-        return components[components.length - 1];
+    private static String getEnumName( final Enum< ? > enumValue ) {
+        final String className = enumValue.getClass().getName();
+        final String[] components = className.split( "\\$" ); //$NON-NLS-1$
+        return components[ components.length - 1 ];
     }
 
 }

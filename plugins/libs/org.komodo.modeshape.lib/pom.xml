@@ -16,12 +16,12 @@
         <modeshape.version>4.4.0.Final</modeshape.version>
         <!-- Should be the same as specified in the modeshape bom. Cannot pick it up directly -->
         <logback.version>1.0.9</logback.version>
-        <infinispan.version>6.0.2.Final</infinispan.version>
+        <infinispan.version>7.2.3.Final</infinispan.version>
         <javax.servlet.version>3.1.0</javax.servlet.version>
         <javax.jacc.version>1.0.0.Final</javax.jacc.version>
         <joda.time.version>2.7</joda.time.version>
         <mapdb.version>1.0.6</mapdb.version>
-        <tika.version>1.6</tika.version>
+        <tika.version>1.8</tika.version>
     </properties>
 
     <profiles>

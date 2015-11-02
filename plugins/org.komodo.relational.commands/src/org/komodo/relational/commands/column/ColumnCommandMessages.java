@@ -25,8 +25,7 @@ public class ColumnCommandMessages implements StringConstants {
 
     @SuppressWarnings( "javadoc" )
     public enum General {
-        INVALID_SEARCHABLE_PROPERTY_VALUE,
-        INVALID_NULLABLE_PROPERTY_VALUE;
+        INVALID_SEARCHABLE_PROPERTY_VALUE;
 
         @Override
         public String toString() {

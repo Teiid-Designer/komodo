@@ -15,64 +15,27 @@
  */
 package org.komodo.relational.commands.datatyperesultset;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
 import org.junit.Test;
-import org.komodo.relational.commands.AbstractCommandTest;
-import org.komodo.relational.model.DataTypeResultSet;
-import org.komodo.relational.model.Function;
-import org.komodo.relational.model.Model;
-import org.komodo.relational.model.ProcedureResultSet;
-import org.komodo.relational.model.PushdownFunction;
-import org.komodo.relational.vdb.Vdb;
-import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test SetDataTypeResultSetPropertyCommand
- *
+ * Test Class to test {@link SetDataTypeResultSetPropertyCommand}.
  */
-@SuppressWarnings( {"javadoc", "nls"} )
-public class SetDataTypeResultSetPropertyCommandTest extends AbstractCommandTest {
+@SuppressWarnings( { "javadoc",
+                     "nls" } )
+public final class SetDataTypeResultSetPropertyCommandTest extends DataTypeResultSetCommandTest {
 
     @Test
-    public void testSetProperty1() throws Exception {
-        final String[] commands = { "workspace",
-            "create-vdb myVdb vdbPath",
-            "cd myVdb",
-            "add-model myModel",
-            "cd myModel",
-            "add-pushdown-function myPushdownFunction",
-            "cd myPushdownFunction",
-            "set-result-set DataTypeResultSet",
-            "cd resultSet",
-            "set-property length 99"};
-
+    public void shouldSetProperty() throws Exception {
+        final long expected = 99;
+        final String[] commands = { "set-property datatypeLength " + expected };
         setup( commands );
 
-        CommandResult result = execute();
-        assertCommandResultOk(result);
-
-        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
-        Vdb[] vdbs = wkspMgr.findVdbs(getTransaction());
-
-        assertEquals(1, vdbs.length);
-
-        Model[] models = vdbs[0].getModels(getTransaction());
-        assertEquals(1, models.length);
-        assertEquals("myModel", models[0].getName(getTransaction())); //$NON-NLS-1$
-
-        Function[] functions = models[0].getFunctions(getTransaction());
-        assertEquals(1, functions.length);
-        assertEquals(true, functions[0] instanceof PushdownFunction);
-        assertEquals("myPushdownFunction", functions[0].getName(getTransaction())); //$NON-NLS-1$
-
-        ProcedureResultSet rSet = ((PushdownFunction)functions[0]).getResultSet(getTransaction());
-        DataTypeResultSet dtResultSet = null;
-        if(rSet instanceof DataTypeResultSet) {
-            dtResultSet = (DataTypeResultSet)rSet;
-        }
-
-        assertEquals(99,dtResultSet.getLength(getTransaction()));
+        final CommandResult result = execute();
+        assertCommandResultOk( result );
+        assertThat( get().getLength( getTransaction() ), is( expected ) );
     }
 
 }

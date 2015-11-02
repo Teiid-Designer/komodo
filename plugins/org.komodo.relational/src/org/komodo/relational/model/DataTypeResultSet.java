@@ -26,7 +26,7 @@ import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure
 /**
  * Represents a data type result set.
  */
-public interface DataTypeResultSet extends ProcedureResultSet {
+public interface DataTypeResultSet extends ProcedureResultSet, ResultSetColumn {
 
     /**
      * The valid data types.
@@ -79,7 +79,7 @@ public interface DataTypeResultSet extends ProcedureResultSet {
      * The resolver of a {@link DataTypeResultSet}.
      */
     public static final TypeResolver< DataTypeResultSet > RESOLVER = new TypeResolver< DataTypeResultSet >() {
-    
+
         /**
          * {@inheritDoc}
          *
@@ -96,24 +96,24 @@ public interface DataTypeResultSet extends ProcedureResultSet {
             final Class< ? extends AbstractProcedure > clazz = AbstractProcedure.Utils.getProcedureType( transaction, parent );
             final AdapterFactory adapter = new AdapterFactory( );
             final AbstractProcedure parentProc = adapter.adapt( transaction, parent, clazz );
-    
+
             if ( parentProc == null ) {
                 throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
                                                           parent.getAbsolutePath(),
                                                           DataTypeResultSet.class.getSimpleName() ) );
             }
-    
+
             if ( parentProc instanceof StoredProcedure ) {
                 return ( ( StoredProcedure )parentProc ).setResultSet( transaction, DataTypeResultSet.class );
             }
-    
+
             if ( parentProc instanceof PushdownFunction ) {
                 return ( ( PushdownFunction )parentProc ).setResultSet( transaction, DataTypeResultSet.class );
             }
-    
+
             throw new KException( Messages.getString( Relational.UNEXPECTED_RESULT_SET_TYPE, clazz.getName() ) );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -123,7 +123,7 @@ public interface DataTypeResultSet extends ProcedureResultSet {
         public KomodoType identifier() {
             return IDENTIFIER;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -133,7 +133,7 @@ public interface DataTypeResultSet extends ProcedureResultSet {
         public Class< DataTypeResultSetImpl > owningClass() {
             return DataTypeResultSetImpl.class;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -147,10 +147,10 @@ public interface DataTypeResultSet extends ProcedureResultSet {
             if ( CreateProcedure.RESULT_SET.equals( kobject.getName( transaction ) ) ) {
                 return ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, CreateProcedure.RESULT_DATA_TYPE );
             }
-    
+
             return false;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -162,7 +162,7 @@ public interface DataTypeResultSet extends ProcedureResultSet {
                                           final KomodoObject kobject ) throws KException {
             return new DataTypeResultSetImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
-    
+
     };
 
     /**
@@ -174,16 +174,6 @@ public interface DataTypeResultSet extends ProcedureResultSet {
      * @see RelationalConstants#DEFAULT_LENGTH
      */
     String getDisplayString( final UnitOfWork transaction ) throws KException;
-
-    /**
-     * @param transaction
-     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @return the value of the <code>data type length</code> property
-     * @throws KException
-     *         if an error occurs
-     * @see RelationalConstants#DEFAULT_LENGTH
-     */
-    long getLength( final UnitOfWork transaction ) throws KException;
 
     /**
      * @param transaction
@@ -225,18 +215,6 @@ public interface DataTypeResultSet extends ProcedureResultSet {
      */
     void setArray( final UnitOfWork transaction,
                    final boolean newArray ) throws KException;
-
-    /**
-     * @param transaction
-     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @param newLength
-     *        the new value of the <code>data type length</code> property
-     * @throws KException
-     *         if an error occurs
-     * @see RelationalConstants#DEFAULT_LENGTH
-     */
-    void setLength( final UnitOfWork transaction,
-                    final long newLength ) throws KException;
 
     /**
      * @param transaction

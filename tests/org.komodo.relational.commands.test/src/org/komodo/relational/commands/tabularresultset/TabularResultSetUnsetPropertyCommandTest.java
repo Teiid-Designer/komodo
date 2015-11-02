@@ -13,22 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.komodo.relational.commands;
+package org.komodo.relational.commands.tabularresultset;
 
 import org.junit.Test;
+import org.komodo.shell.commands.UnsetPropertyCommand;
 
 /**
- * Test Class to test {@link TabularResultSetUnsetPropertyCommand}.
+ * Test class for {@link TabularResultSetSetPropertyCommand}.
  */
-@SuppressWarnings( { "javadoc", "nls" } )
-public class WorkspaceUnsetPropertyCommandTest extends AbstractCommandTest {
+@SuppressWarnings( { "javadoc" } )
+public final class TabularResultSetUnsetPropertyCommandTest extends TabularResultSetCommandTest {
 
-    @Test( expected = AssertionError.class )
-    public void shouldNotBeAvailableAtWorkspace() throws Exception {
-        final String[] commands = { "workspace",
-                                    "unset-property blah" };
-        setup( commands );
-        execute();
+    @Test
+    public void setPropertyCommandShouldNotBeAvailable() throws Exception {
+        assertCommandsNotAvailable( UnsetPropertyCommand.NAME );
     }
 
 }

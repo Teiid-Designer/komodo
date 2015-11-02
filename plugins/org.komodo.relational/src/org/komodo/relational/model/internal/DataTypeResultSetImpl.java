@@ -9,8 +9,6 @@ package org.komodo.relational.model.internal;
 
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
-import org.komodo.relational.RelationalConstants;
-import org.komodo.relational.internal.RelationalChildRestrictedObject;
 import org.komodo.relational.model.DataTypeResultSet;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoType;
@@ -25,7 +23,7 @@ import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 /**
  * An implementation of a relational model procedure data type result set.
  */
-public final class DataTypeResultSetImpl extends RelationalChildRestrictedObject implements DataTypeResultSet {
+public final class DataTypeResultSetImpl extends ResultSetColumnImpl implements DataTypeResultSet {
 
     private static final String ARRAY_SUFFIX = "[]"; //$NON-NLS-1$
 
@@ -67,23 +65,6 @@ public final class DataTypeResultSetImpl extends RelationalChildRestrictedObject
         }
 
         return result.toString();
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.model.DataTypeResultSet#getLength(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    public long getLength( final UnitOfWork uow ) throws KException {
-        final Long value = getObjectProperty( uow, PropertyValueType.LONG, "getLength", //$NON-NLS-1$
-                                              StandardDdlLexicon.DATATYPE_LENGTH );
-
-        if (value == null) {
-            return RelationalConstants.DEFAULT_LENGTH;
-        }
-
-        return value;
     }
 
     /**
@@ -180,12 +161,23 @@ public final class DataTypeResultSetImpl extends RelationalChildRestrictedObject
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.DataTypeResultSet#setLength(org.komodo.spi.repository.Repository.UnitOfWork, long)
+     * @see org.komodo.relational.model.internal.ResultSetColumnImpl#setDatatypeName(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String)
      */
     @Override
-    public void setLength( final UnitOfWork uow,
-                           final long newLength ) throws KException {
-        setObjectProperty( uow, "setLength", StandardDdlLexicon.DATATYPE_LENGTH, newLength ); //$NON-NLS-1$
+    public void setDatatypeName( final UnitOfWork uow,
+                                 final String newTypeName ) throws KException {
+        Type newType = null;
+
+        if ( !StringUtils.isBlank( newTypeName ) ) {
+            try {
+                newType = Type.valueOf( newTypeName );
+            } catch ( final Exception e ) {
+                // not a valid type name so ignore
+            }
+        }
+
+        setType( uow, newType );
     }
 
     /**
@@ -209,7 +201,7 @@ public final class DataTypeResultSetImpl extends RelationalChildRestrictedObject
             newValue += ARRAY_SUFFIX;
         }
 
-        setObjectProperty( uow, "setArray", StandardDdlLexicon.DATATYPE_NAME, newValue ); //$NON-NLS-1$
+        setObjectProperty( uow, "setType", StandardDdlLexicon.DATATYPE_NAME, newValue ); //$NON-NLS-1$
     }
 
 }

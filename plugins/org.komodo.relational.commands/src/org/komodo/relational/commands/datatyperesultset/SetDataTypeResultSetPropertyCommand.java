@@ -7,13 +7,15 @@
  */
 package org.komodo.relational.commands.datatyperesultset;
 
-import static org.komodo.relational.commands.WorkspaceCommandMessages.General.INVALID_BOOLEAN_PROPERTY_VALUE;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.INVALID_INTEGER_PROPERTY_VALUE;
+import static org.komodo.relational.commands.WorkspaceCommandMessages.General.INVALID_NULLABLE_PROPERTY_VALUE;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.INVALID_PROPERTY_NAME;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.MISSING_PROPERTY_NAME_VALUE;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_SUCCESS;
-import static org.komodo.relational.commands.model.ModelCommandMessages.General.INVALID_MODEL_TYPE_PROPERTY_VALUE;
+import static org.komodo.relational.commands.datatyperesultset.DataTypeResultSetCommandMessages.SetDataTypeResultSetPropertyCommand.INVALID_DATATYPE_NAME;
+import static org.komodo.relational.commands.datatyperesultset.DataTypeResultSetCommandMessages.SetDataTypeResultSetPropertyCommand.INVALID_DATA_TYPE_ARRAY_INDICATOR;
 import java.util.List;
+import org.komodo.relational.RelationalConstants.Nullable;
 import org.komodo.relational.model.DataTypeResultSet;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
@@ -24,7 +26,7 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.StringUtils;
 
 /**
- * A shell command to set DataTypeResultSet properties
+ * A shell command to set {@link DataTypeResultSet} properties.
  */
 public final class SetDataTypeResultSetPropertyCommand extends DataTypeResultSetShellCommand {
 
@@ -52,27 +54,11 @@ public final class SetDataTypeResultSetPropertyCommand extends DataTypeResultSet
             final String value = requiredArgument( 1, getWorkspaceMessage( MISSING_PROPERTY_NAME_VALUE ) );
 
             final DataTypeResultSet rs = getDataTypeResultSet();
-
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
             switch ( name ) {
-                case ARRAY:
-                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                        rs.setArray( transaction, Boolean.parseBoolean( value ) );
-                    } else {
-                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, ARRAY );
-                    }
-                    break;
-                case LENGTH:
-                    try {
-                        final long length = Long.parseLong( value );
-                        rs.setLength( transaction, length );
-                    } catch ( final NumberFormatException e ) {
-                        errorMsg = getWorkspaceMessage( INVALID_INTEGER_PROPERTY_VALUE, LENGTH );
-                    }
-                    break;
-                case TYPE:
+                case DATATYPE_NAME: {
                     if ( DataTypeResultSet.Type.BIGDECIMAL.name().equals( value ) ) {
                         rs.setType( transaction, DataTypeResultSet.Type.BIGDECIMAL );
                     } else if ( DataTypeResultSet.Type.BIGINT.name().equals( value ) ) {
@@ -126,8 +112,69 @@ public final class SetDataTypeResultSetPropertyCommand extends DataTypeResultSet
                     } else if ( DataTypeResultSet.Type.XML.name().equals( value ) ) {
                         rs.setType( transaction, DataTypeResultSet.Type.XML );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_MODEL_TYPE_PROPERTY_VALUE, TYPE );
+                        errorMsg = getMessage( INVALID_DATATYPE_NAME, DATATYPE_NAME );
                     }
+
+                    // check to see if needs to be an array type
+                    if ( StringUtils.isBlank( errorMsg ) ) {
+                        final String arrayArg = optionalArgument( 2, Boolean.FALSE.toString() );
+
+                        if ( trueString.equals( arrayArg ) || falseString.equals( arrayArg ) ) {
+                            rs.setArray( transaction, Boolean.parseBoolean( arrayArg ) );
+                        } else {
+                            errorMsg = getMessage( INVALID_DATA_TYPE_ARRAY_INDICATOR );
+                        }
+                    }
+
+                    break;
+                }
+                case DESCRIPTION:
+                    rs.setDescription( transaction, value );
+                    break;
+                case LENGTH:
+                    try {
+                        final long length = Long.parseLong( value );
+                        rs.setLength( transaction, length );
+                    } catch ( final NumberFormatException e ) {
+                        errorMsg = getWorkspaceMessage( INVALID_INTEGER_PROPERTY_VALUE, LENGTH );
+                    }
+
+                    break;
+                case NAME_IN_SOURCE:
+                    rs.setNameInSource( transaction, value );
+                    break;
+                case NULLABLE:
+                    if ( Nullable.NO_NULLS.name().equals( value ) ) {
+                        rs.setNullable( transaction, Nullable.NO_NULLS );
+                    } else if ( Nullable.NULLABLE.name().equals( value ) ) {
+                        rs.setNullable( transaction, Nullable.NULLABLE );
+                    } else if ( Nullable.NULLABLE_UNKNOWN.name().equals( value ) ) {
+                        rs.setNullable( transaction, Nullable.NULLABLE_UNKNOWN );
+                    } else {
+                        errorMsg = getWorkspaceMessage( INVALID_NULLABLE_PROPERTY_VALUE, NULLABLE );
+                    }
+
+                    break;
+                case PRECISION:
+                    try {
+                        final long precision = Long.parseLong( value );
+                        rs.setPrecision( transaction, precision );
+                    } catch ( final NumberFormatException e ) {
+                        errorMsg = getWorkspaceMessage( INVALID_INTEGER_PROPERTY_VALUE, PRECISION );
+                    }
+
+                    break;
+                case SCALE:
+                    try {
+                        final long scale = Long.parseLong( value );
+                        rs.setScale( transaction, scale );
+                    } catch ( final NumberFormatException e ) {
+                        errorMsg = getWorkspaceMessage( INVALID_INTEGER_PROPERTY_VALUE, SCALE );
+                    }
+
+                    break;
+                case UUID:
+                    rs.setUuid( transaction, value );
                     break;
                 default:
                     errorMsg = getWorkspaceMessage( INVALID_PROPERTY_NAME, name, DataTypeResultSet.class.getSimpleName() );
@@ -153,7 +200,7 @@ public final class SetDataTypeResultSetPropertyCommand extends DataTypeResultSet
      */
     @Override
     protected int getMaxArgCount() {
-        return 2;
+        return 3;
     }
 
     /**
@@ -180,37 +227,15 @@ public final class SetDataTypeResultSetPropertyCommand extends DataTypeResultSet
             return 0;
         }
 
-        if ( ( args.size() == 1 ) ) {
-            String theArg = getArguments().get(0);
-            if( ARRAY.equals(theArg) ) {
+        if ( ( args.size() >= 1 ) && DATATYPE_NAME.equals( args.get( 0 ) ) ) {
+            if ( args.size() == 1 ) {
+                for ( final DataTypeResultSet.Type type : DataTypeResultSet.Type.values() ) {
+                    if ( StringUtils.isBlank( lastArgument ) || type.name().startsWith( lastArgument ) ) {
+                        candidates.add( type.name() );
+                    }
+                }
+            } else if ( args.size() == 2 ) {
                 updateCandidatesForBooleanProperty( lastArgument, candidates );
-            } else if( TYPE.equals(theArg) ) {
-                candidates.add( DataTypeResultSet.Type.BIGDECIMAL.name() );
-                candidates.add( DataTypeResultSet.Type.BIGINT.name() );
-                candidates.add( DataTypeResultSet.Type.BIGINTEGER.name() );
-                candidates.add( DataTypeResultSet.Type.BLOB.name() );
-                candidates.add( DataTypeResultSet.Type.BOOLEAN.name() );
-                candidates.add( DataTypeResultSet.Type.BYTE.name() );
-                candidates.add( DataTypeResultSet.Type.CHAR.name() );
-                candidates.add( DataTypeResultSet.Type.CLOB.name() );
-                candidates.add( DataTypeResultSet.Type.DATE.name() );
-                candidates.add( DataTypeResultSet.Type.DECIMAL.name() );
-                candidates.add( DataTypeResultSet.Type.DEFAULT_VALUE.name() );
-                candidates.add( DataTypeResultSet.Type.DOUBLE.name() );
-                candidates.add( DataTypeResultSet.Type.FLOAT.name() );
-                candidates.add( DataTypeResultSet.Type.INTEGER.name() );
-                candidates.add( DataTypeResultSet.Type.LONG.name() );
-                candidates.add( DataTypeResultSet.Type.OBJECT.name() );
-                candidates.add( DataTypeResultSet.Type.REAL.name() );
-                candidates.add( DataTypeResultSet.Type.SHORT.name() );
-                candidates.add( DataTypeResultSet.Type.SMALLINT.name() );
-                candidates.add( DataTypeResultSet.Type.STRING.name() );
-                candidates.add( DataTypeResultSet.Type.TIME.name() );
-                candidates.add( DataTypeResultSet.Type.TIMESTAMP.name() );
-                candidates.add( DataTypeResultSet.Type.TINYINT.name() );
-                candidates.add( DataTypeResultSet.Type.VARBINARY.name() );
-                candidates.add( DataTypeResultSet.Type.VARCHAR.name() );
-                candidates.add( DataTypeResultSet.Type.XML.name() );
             }
 
             return ( candidates.isEmpty() ? -1 : ( StringUtils.isBlank( lastArgument ) ? 0 : ( toString().length() + 1 ) ) );

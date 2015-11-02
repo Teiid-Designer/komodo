@@ -11,6 +11,30 @@
 	<artifactId>org.komodo.modeshape.vdb</artifactId>
 	<version>0.0.2-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
+ 	
+	<dependencies>
+	    <dependency>
+            <groupId>org.jboss.tools.komodo.plugins.libs</groupId>
+            <artifactId>org.komodo.modeshape.lib</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+	    <dependency>
+            <groupId>org.jboss.tools.komodo.plugins</groupId>
+            <artifactId>org.komodo.modeshape.teiid.sql.sequencer</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+	    <dependency>
+            <groupId>org.jboss.tools.komodo.plugins</groupId>
+            <artifactId>org.komodo.spi</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+	    <dependency>
+            <groupId>org.jboss.tools.komodo.plugins</groupId>
+            <artifactId>org.komodo.utils</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+	</dependencies>
+
 	<build>
 		<plugins>
 			<plugin>

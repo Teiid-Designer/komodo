@@ -69,6 +69,8 @@ import org.komodo.relational.commands.table.SetTablePropertyCommandTest;
 import org.komodo.relational.commands.table.UnsetTablePropertyCommandTest;
 import org.komodo.relational.commands.tableconstraint.AddConstraintColumnCommandTest;
 import org.komodo.relational.commands.tableconstraint.DeleteConstraintColumnCommandTest;
+import org.komodo.relational.commands.tabularresultset.TabularResultSetSetPropertyCommandTest;
+import org.komodo.relational.commands.tabularresultset.TabularResultSetUnsetPropertyCommandTest;
 import org.komodo.relational.commands.teiid.SetTeiidPropertyCommandTest;
 import org.komodo.relational.commands.teiid.UnsetTeiidPropertyCommandTest;
 import org.komodo.relational.commands.translator.SetTranslatorPropertyCommandTest;
@@ -238,6 +240,8 @@ import org.komodo.relational.commands.virtualprocedure.UnsetVirtualProcedureProp
     // TabularResultSet
     org.komodo.relational.commands.tabularresultset.AddColumnCommandTest.class,
     org.komodo.relational.commands.tabularresultset.DeleteColumnCommandTest.class,
+    TabularResultSetSetPropertyCommandTest.class,
+    TabularResultSetUnsetPropertyCommandTest.class,
 
     // Teiid
     SetTeiidPropertyCommandTest.class,

@@ -8,10 +8,10 @@
 package org.komodo.relational.commands.resultsetcolumn;
 
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.INVALID_INTEGER_PROPERTY_VALUE;
+import static org.komodo.relational.commands.WorkspaceCommandMessages.General.INVALID_NULLABLE_PROPERTY_VALUE;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.INVALID_PROPERTY_NAME;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.MISSING_PROPERTY_NAME_VALUE;
 import static org.komodo.relational.commands.WorkspaceCommandMessages.General.SET_PROPERTY_SUCCESS;
-import static org.komodo.relational.commands.column.ColumnCommandMessages.General.INVALID_NULLABLE_PROPERTY_VALUE;
 import java.util.List;
 import org.komodo.relational.RelationalConstants.Nullable;
 import org.komodo.relational.model.Column;
@@ -168,7 +168,7 @@ public final class SetResultSetColumnPropertyCommand extends ResultSetColumnShel
                 candidates.add( Nullable.NO_NULLS.name() );
                 candidates.add( Nullable.NULLABLE.name() );
                 candidates.add( Nullable.NULLABLE_UNKNOWN.name() );
-            } 
+            }
 
             return ( candidates.isEmpty() ? -1 : ( StringUtils.isBlank( lastArgument ) ? 0 : ( toString().length() + 1 ) ) );
         }

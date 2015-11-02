@@ -221,8 +221,8 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest im
     }
 
     protected void commit( final UnitOfWork.State expectedState ) throws Exception {
-        this.callback = new TestTransactionListener();
-        commit( expectedState, this.callback );
+        final SynchronousCallback nextCallback = new TestTransactionListener();
+        commit( expectedState, nextCallback );
     }
 
     protected void commit() throws Exception {
