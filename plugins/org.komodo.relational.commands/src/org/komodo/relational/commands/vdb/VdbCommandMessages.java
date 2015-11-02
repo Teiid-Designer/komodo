@@ -235,6 +235,8 @@ public class VdbCommandMessages implements StringConstants {
         INVALID_OVERWRITE_ARG,
         MISSING_INPUT_MODEL_FILE_PATH,
         MISSING_MODEL_NAME,
+        MISSING_MODEL_TYPE,
+        MODEL_TYPE_ERROR,
         MODEL_INPUT_FILE_IS_EMPTY,
         MODEL_OVERWRITE_DISABLED,
         MODEL_UPLOADED;

@@ -31,11 +31,11 @@ public class UploadModelCommandTest extends AbstractCommandTest {
     private static final String UPLOAD_MODEL = "./resources/PartsOracle.ddl";
 
     @Test
-    public void testUploadModel1() throws Exception {
+    public void shouldUploadPartsOraclePhysical() throws Exception {
         final String[] commands = { "workspace",
                                     "create-vdb testVdb vdbPath",
                                     "cd testVdb",
-                                    "upload-model myModel " + UPLOAD_MODEL };
+                                    "upload-model myModel PHYSICAL " + UPLOAD_MODEL };
         setup( commands );
 
         CommandResult result = execute();
@@ -47,8 +47,12 @@ public class UploadModelCommandTest extends AbstractCommandTest {
         assertEquals(1, vdbs.length);
         assertEquals("testVdb", vdbs[0].getName( getTransaction() ));
 
+        // Make sure model was created
         assertEquals(1, vdbs[0].getModels( getTransaction() ).length);
         assertEquals("myModel", vdbs[0].getModels( getTransaction() )[0].getName( getTransaction() ));
+        
+        // Should be 5 tables in the model
+        assertEquals(5, vdbs[0].getModels(getTransaction())[0].getTables(getTransaction()).length);
     }
 
 }

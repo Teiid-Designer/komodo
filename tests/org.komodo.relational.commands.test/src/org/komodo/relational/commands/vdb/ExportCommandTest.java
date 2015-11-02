@@ -19,7 +19,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.InputStream;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
@@ -40,174 +39,118 @@ public class ExportCommandTest extends AbstractCommandTest {
     private static final String ALL_ELEMENTS_VDB = "./resources/teiid-vdb-all-elements.xml";  //$NON-NLS-1$
 
     private KomodoObject addTweetVdbExample() throws KException, Exception {
-        KomodoObject tweet = null;
-
-        try {
-            createInitialTransaction();
-            KomodoObject kWorkspace = _repo.komodoWorkspace(getTransaction());
-            tweet = TestUtilities.createTweetExampleNode(getTransaction(), kWorkspace);
-        } finally {
-            commit();
-        }
+        KomodoObject kWorkspace = _repo.komodoWorkspace(getTransaction());
+        KomodoObject tweet = TestUtilities.createTweetExampleNode(getTransaction(), kWorkspace);
 
         assertNotNull(tweet);
 
-        try {
-            createInitialTransaction();
-            traverse(getTransaction(), tweet.getAbsolutePath());
-        } finally {
-            commit();
-        }
+        traverse(getTransaction(), tweet.getAbsolutePath());
 
         return tweet;
     }
 
     private KomodoObject addAllElementsVdbExample() throws Exception {
-        KomodoObject tweet = null;
-
-        try {
-            createInitialTransaction();
-            KomodoObject kWorkspace = _repo.komodoWorkspace(getTransaction());
-            tweet = TestUtilities.createAllElementsExampleNode(getTransaction(), kWorkspace);
-        } finally {
-            commit();
-        }
+        KomodoObject kWorkspace = _repo.komodoWorkspace(getTransaction());
+        KomodoObject tweet = TestUtilities.createAllElementsExampleNode(getTransaction(), kWorkspace);
 
         assertNotNull(tweet);
 
-        try {
-            createInitialTransaction();
-            traverse(getTransaction(), tweet.getAbsolutePath());
-        } finally {
-            commit();
-        }
+        traverse(getTransaction(), tweet.getAbsolutePath());
 
         return tweet;
     }
 
     @Test
     public void testExportCommandTweetVdb() throws Exception {
-        FileWriter writer = null;
-
         //
         // Create the vdb in the repository
         //
         KomodoObject tweetVdb = addTweetVdbExample();
 
-        try {
-            //
-            // Create the export command instructions file
-            //
-            File exportCmdFile = File.createTempFile("TestExportCommand", ".txt"); //$NON-NLS-1$  //$NON-NLS-2$
-            exportCmdFile.deleteOnExit();
+        //
+        // Create the export command instructions file
+        //
+        File exportCmdFile = File.createTempFile("TestExportCommand", ".txt"); //$NON-NLS-1$  //$NON-NLS-2$
+        exportCmdFile.deleteOnExit();
 
-            //
-            // Create the export destination file, ensuring it does not already exist
-            //
-            File exportDest = new File(System.getProperty("java.io.tmpdir") + File.separator + "TestExportDestination.txt"); //$NON-NLS-1$  //$NON-NLS-2$
-            exportDest.deleteOnExit();
-            if (exportDest.exists())
-                exportDest.delete();
+        //
+        // Create the export destination file, ensuring it does not already exist
+        //
+        File exportDest = new File(System.getProperty("java.io.tmpdir") + File.separator + "TestExportDestination.txt"); //$NON-NLS-1$  //$NON-NLS-2$
+        exportDest.deleteOnExit();
+        if (exportDest.exists())
+            exportDest.delete();
 
-            //
-            // Write the instructions to the file
-            //
-            createInitialTransaction();
-            writer = new FileWriter(exportCmdFile);
-            writer.write("workspace " + NEW_LINE); //$NON-NLS-1$
-            writer.write("cd " + tweetVdb.getName(getTransaction()) + NEW_LINE);  //$NON-NLS-1$
-            writer.write("export-vdb " + exportDest.getAbsolutePath() + NEW_LINE); //$NON-NLS-1$
-            writer.close();
+        // The test commands
+        final String[] commands = { 
+            "commit",
+            "workspace",
+            "cd " + tweetVdb.getName(getTransaction()),
+            "export-vdb " + exportDest.getAbsolutePath() };
 
-            //
-            // Setup the export instructions
-            //
-            setup( exportCmdFile.getAbsolutePath() );
+        setup( commands );
 
-            //
-            // Execute the commands
-            //
-            execute();
+        //
+        // Execute the commands
+        //
+        execute();
 
-            assertTrue(exportDest.exists());
+        assertTrue(exportDest.exists());
 
-            Document vdbDocument = TestUtilities.createDocument(new FileInputStream(exportDest));
-            assertNotNull(vdbDocument);
+        Document vdbDocument = TestUtilities.createDocument(new FileInputStream(exportDest));
+        assertNotNull(vdbDocument);
 
-            InputStream tweetExample = new FileInputStream(new File(TWEET_VDB));
-            Document tweetDocument = TestUtilities.createDocument(tweetExample);
+        InputStream tweetExample = new FileInputStream(new File(TWEET_VDB));
+        Document tweetDocument = TestUtilities.createDocument(tweetExample);
 
-            TestUtilities.compareDocuments(tweetDocument, vdbDocument);
-
-        } finally {
-            commit();
-
-            if (writer != null)
-                writer.close();
-        }
+        TestUtilities.compareDocuments(tweetDocument, vdbDocument);
     }
 
     @Test
     public void testExportCommandAllElementsVdb() throws Exception {
-        FileWriter writer = null;
-
         //
         // Create the vdb in the repository
         //
         KomodoObject allElementsVdb = addAllElementsVdbExample();
 
-        try {
-            //
-            // Create the export command instructions file
-            //
-            File exportCmdFile = File.createTempFile("TestExportCommand", ".txt"); //$NON-NLS-1$  //$NON-NLS-2$
-            exportCmdFile.deleteOnExit();
+        //
+        // Create the export command instructions file
+        //
+        File exportCmdFile = File.createTempFile("TestExportCommand", ".txt"); //$NON-NLS-1$  //$NON-NLS-2$
+        exportCmdFile.deleteOnExit();
 
-            //
-            // Create the export destination file, ensuring it does not already exist
-            //
-            File exportDest = new File(System.getProperty("java.io.tmpdir") + File.separator + "TestExportDestination.txt"); //$NON-NLS-1$  //$NON-NLS-2$
-            exportDest.deleteOnExit();
-            if (exportDest.exists())
-                exportDest.delete();
+        //
+        // Create the export destination file, ensuring it does not already exist
+        //
+        File exportDest = new File(System.getProperty("java.io.tmpdir") + File.separator + "TestExportDestination.txt"); //$NON-NLS-1$  //$NON-NLS-2$
+        exportDest.deleteOnExit();
+        if (exportDest.exists())
+            exportDest.delete();
 
-            //
-            // Write the instructions to the file
-            //
-            createInitialTransaction();
-            writer = new FileWriter(exportCmdFile);
-            writer.write("workspace " + NEW_LINE); //$NON-NLS-1$
-            writer.write("cd " + allElementsVdb.getName(getTransaction()) + NEW_LINE);  //$NON-NLS-1$
-            writer.write("export-vdb " + exportDest.getAbsolutePath() + NEW_LINE); //$NON-NLS-1$
-            writer.close();
+        // The test commands
+        final String[] commands = { 
+            "commit",
+            "workspace",
+            "cd " + allElementsVdb.getName(getTransaction()),
+            "export-vdb " + exportDest.getAbsolutePath() };
 
-            //
-            // Setup the export instructions
-            //
-            setup( exportCmdFile.getAbsolutePath() );
+        setup( commands );
 
-            //
-            // Execute the commands
-            //
-            CommandResult result = execute();
-            assertCommandResultOk(result);
+        //
+        // Execute the commands
+        //
+        CommandResult result = execute();
+        assertCommandResultOk(result);
 
-            assertTrue(exportDest.exists());
+        assertTrue(exportDest.exists());
 
-            Document vdbDocument = TestUtilities.createDocument(new FileInputStream(exportDest));
-            assertNotNull(vdbDocument);
+        Document vdbDocument = TestUtilities.createDocument(new FileInputStream(exportDest));
+        assertNotNull(vdbDocument);
 
-            InputStream allElementsExample = new FileInputStream(new File(ALL_ELEMENTS_VDB));
-            Document allElementsDocument = TestUtilities.createDocument(allElementsExample);
+        InputStream allElementsExample = new FileInputStream(new File(ALL_ELEMENTS_VDB));
+        Document allElementsDocument = TestUtilities.createDocument(allElementsExample);
 
-            TestUtilities.compareDocuments(allElementsDocument, vdbDocument);
-
-        } finally {
-            commit();
-
-            if (writer != null)
-                writer.close();
-        }
+        TestUtilities.compareDocuments(allElementsDocument, vdbDocument);
     }
 
 }

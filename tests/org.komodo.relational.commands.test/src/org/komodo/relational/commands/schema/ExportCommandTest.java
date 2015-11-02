@@ -19,7 +19,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.io.File;
-import java.io.FileWriter;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Schema;
@@ -44,26 +43,14 @@ public class ExportCommandTest extends AbstractCommandTest {
                                                          NEW_LINE + "CREATE VIEW Tweet" + NEW_LINE + "AS" + NEW_LINE + "SELECT * FROM twitterview.getTweets;"; //$NON-NLS-1$  //$NON-NLS-2$ //$NON-NLS-3$
 
     private KomodoObject addSchemaExample() throws Exception {
-        Schema schema = null;
-
-        try {
-            createInitialTransaction();
-            KomodoObject kWorkspace = _repo.komodoWorkspace(getTransaction());
-            WorkspaceManager manager = WorkspaceManager.getInstance(_repo);
-            schema = manager.createSchema(getTransaction(), kWorkspace, "TestTweetSchema");  //$NON-NLS-1$
-            schema.setRendition(getTransaction(), TWITTER_VIEW_MODEL_DDL);
-        } finally {
-            commit();
-        }
+        KomodoObject kWorkspace = _repo.komodoWorkspace(getTransaction());
+        WorkspaceManager manager = WorkspaceManager.getInstance(_repo);
+        Schema schema = manager.createSchema(getTransaction(), kWorkspace, "TestTweetSchema");  //$NON-NLS-1$
+        schema.setRendition(getTransaction(), TWITTER_VIEW_MODEL_DDL);
 
         assertNotNull(schema);
 
-        try {
-            createInitialTransaction();
-            traverse(getTransaction(), schema.getAbsolutePath());
-        } finally {
-            commit();
-        }
+        traverse(getTransaction(), schema.getAbsolutePath());
 
         return schema;
     }
@@ -75,60 +62,44 @@ public class ExportCommandTest extends AbstractCommandTest {
      */
     @Test
     public void testExportCommandSchemaRendition() throws Exception {
-        FileWriter writer = null;
-
         //
         // Create the vdb in the repository
         //
         addSchemaExample();
 
-        try {
-            //
-            // Create the export command instructions file
-            //
-            File exportCmdFile = File.createTempFile("TestExportCommand", ".txt");  //$NON-NLS-1$ //$NON-NLS-2$
-            exportCmdFile.deleteOnExit();
+        //
+        // Create the export command instructions file
+        //
+        File exportCmdFile = File.createTempFile("TestExportCommand", ".txt");  //$NON-NLS-1$ //$NON-NLS-2$
+        exportCmdFile.deleteOnExit();
 
-            //
-            // Create the export destination file, ensuring it does not already exist
-            //
-            File exportDest = new File(System.getProperty("java.io.tmpdir") + File.separator + "TestExportDestination.txt");  //$NON-NLS-1$ //$NON-NLS-2$
-            exportDest.deleteOnExit();
-            if (exportDest.exists())
-                exportDest.delete();
+        //
+        // Create the export destination file, ensuring it does not already exist
+        //
+        File exportDest = new File(System.getProperty("java.io.tmpdir") + File.separator + "TestExportDestination.txt");  //$NON-NLS-1$ //$NON-NLS-2$
+        exportDest.deleteOnExit();
+        if (exportDest.exists())
+            exportDest.delete();
 
-            //
-            // Write the instructions to the file
-            //
-            createInitialTransaction();
-            writer = new FileWriter(exportCmdFile);
-            writer.write("workspace" + NEW_LINE);  //$NON-NLS-1$
-            writer.write("cd TestTweetSchema" + NEW_LINE);  //$NON-NLS-1$
-            writer.write("export-ddl " + exportDest.getAbsolutePath() + NEW_LINE);  //$NON-NLS-1$
-            writer.close();
+        // The test commands
+        final String[] commands = { 
+            "commit",
+            "workspace",
+            "cd TestTweetSchema",
+            "export-ddl " + exportDest.getAbsolutePath() };
 
-            //
-            // Setup the export instructions
-            //
-            setup( exportCmdFile.getAbsolutePath() );
+        setup( commands );
 
-            //
-            // Execute the commands
-            //
-            CommandResult result = execute();
-            assertCommandResultOk(result);
+        //
+        // Execute the commands
+        //
+        CommandResult result = execute();
+        assertCommandResultOk(result);
 
-            assertTrue(exportDest.exists());
+        assertTrue(exportDest.exists());
 
-            String exportContents = TestUtilities.fileToString(exportDest);
-            assertEquals(TWITTER_VIEW_MODEL_DDL + NEW_LINE, exportContents);
-
-        } finally {
-            commit();
-
-            if (writer != null)
-                writer.close();
-        }
+        String exportContents = TestUtilities.fileToString(exportDest);
+        assertEquals(TWITTER_VIEW_MODEL_DDL + NEW_LINE, exportContents);
     }
 
 }
