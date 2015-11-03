@@ -54,7 +54,6 @@ public class WorkspaceCommandMessages implements StringConstants {
     }
 
     public enum CreateVdbCommand {
-        MISSING_VDB_EXTERNAL_PATH,
         VDB_CREATED;
 
         @Override

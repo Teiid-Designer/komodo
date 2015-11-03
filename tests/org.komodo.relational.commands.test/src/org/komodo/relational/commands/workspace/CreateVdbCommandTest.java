@@ -30,7 +30,23 @@ import org.komodo.shell.api.CommandResult;
 public class CreateVdbCommandTest extends AbstractCommandTest {
 
     @Test
-    public void testCreateVdb1() throws Exception {
+    public void shouldCreateVdbWithoutOptionalPath() throws Exception {
+        final String[] commands = { "workspace",
+                                    "create-vdb testVdb" };
+        setup( commands  );
+
+        CommandResult result = execute();
+        assertCommandResultOk(result);
+
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        Vdb[] vdbs = wkspMgr.findVdbs(getTransaction());
+
+        assertEquals(1, vdbs.length);
+        assertEquals("testVdb", vdbs[0].getName(getTransaction()));
+    }
+    
+    @Test
+    public void shouldCreateVdbWithOptionalPath() throws Exception {
         final String[] commands = { "workspace",
                                     "create-vdb testVdb vdbPath" };
         setup( commands  );
