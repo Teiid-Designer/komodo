@@ -174,8 +174,7 @@ public final class KomodoUtilServiceTest implements StringConstants {
         URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
                                                     .path(V1Constants.SERVICE_SEGMENT)
                                                     .path(V1Constants.SAMPLE_DATA).build();
-        this.response = request(uri).get();
-        assertTrue(response.hasEntity());
+        this.response = request(uri).post(null);
 
         final String entity = response.readEntity(String.class);
         //System.out.println("Response from uri " + uri + ":\n" + entity);

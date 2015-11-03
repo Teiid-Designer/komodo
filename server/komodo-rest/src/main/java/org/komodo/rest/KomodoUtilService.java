@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -157,7 +158,7 @@ public final class KomodoUtilService extends KomodoService {
      * @return the response indicating the sample data load has been attempted
      */
     @SuppressWarnings( "nls" )
-    @GET
+    @POST
     @Path(V1Constants.SAMPLE_DATA)
     @Produces( MediaType.APPLICATION_JSON )
     @ApiOperation(value = "Import sample data into VdbBuilder and display the status of the operation",
