@@ -22,14 +22,13 @@
 package org.komodo.shell.api;
 
 import java.io.InputStream;
-import java.io.PrintStream;
 import java.io.Writer;
 import org.komodo.core.KEngine;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.constants.SystemConstants;
 
 /**
- *
+ * The KomodoShell interface
  */
 public interface KomodoShell extends StringConstants {
 
@@ -44,9 +43,9 @@ public interface KomodoShell extends StringConstants {
     InputStream getInputStream();
 
     /**
-     * @return the shell's output stream
+     * @return the shell's output writer
      */
-    PrintStream getOutputStream();
+    Writer getOutputWriter();
 
     /**
      * The directory where the shell saves user settings, preferences, or any other data needed to restore a user session.
@@ -55,6 +54,12 @@ public interface KomodoShell extends StringConstants {
      * @see SystemConstants#VDB_BUILDER_DATA_DIR
      */
     String getShellDataLocation();
+    
+    /**
+     * Get the global shell properties file
+     * @return the global shell properties file
+     */
+    String getShellPropertiesFile();
 
     /**
      * Must be called before the shell is running.
@@ -64,12 +69,6 @@ public interface KomodoShell extends StringConstants {
      *        be used)
      */
     void setShellDataLocation( final String dataDirectory );
-
-    /**
-     *
-     * @return the command output writer
-     */
-    Writer getCommandOutput();
 
     /**
      * Exit the shell

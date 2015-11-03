@@ -245,7 +245,11 @@ public class Messages implements StringConstants {
 
     }
 
-    private static String getEnumName( Enum< ? > enumValue ) {
+    /**
+     * @param enumValue the value
+     * @return the name
+     */
+    public static String getEnumName( Enum< ? > enumValue ) {
         String className = enumValue.getClass().getName();
         String[] components = className.split("\\$"); //$NON-NLS-1$
         return components[components.length - 1];
@@ -301,4 +305,54 @@ public class Messages implements StringConstants {
 
         return MessageFormat.format(text, parameters);
     }
+    
+    /**
+     * @param key
+     *        the key of the localized message being requested (cannot be empty)
+     * @return the message (never empty)
+     */
+    public static String getString( final String key ) {
+        return getString( RESOURCE_BUNDLE, key );
+    }
+
+    /**
+     * Look up a message in the i18n resource message bundle by key, then format the message with the given params and return the
+     * result.
+     *
+     * @param bundle
+     *        the resource bundle (cannot be <code>null</code>)
+     * @param key
+     *        the message key
+     * @param parameters
+     *        the parameters
+     * @return the message
+     */
+    public static String getString(final ResourceBundle bundle,
+                                   final String key,
+                                   final Object ... parameters) {
+        String text = null;
+
+        try {
+            text = bundle.getString(key);
+        } catch (final Exception err) {
+            if (err instanceof NullPointerException) {
+                text = "<No message available>"; //$NON-NLS-1$
+            } else if (err instanceof MissingResourceException) {
+                text = OPEN_ANGLE_BRACKET + "Missing message for key \"" + key + "\" in: " + BUNDLE_NAME + CLOSE_ANGLE_BRACKET; //$NON-NLS-1$ //$NON-NLS-2$
+            } else {
+                text = err.getLocalizedMessage();
+            }
+        }
+
+        // Check the trivial cases ...
+        if (text == null) {
+            return OPEN_ANGLE_BRACKET + key + CLOSE_ANGLE_BRACKET;
+        }
+        if (parameters == null || parameters.length == 0) {
+            return text;
+        }
+
+        return MessageFormat.format(text, parameters);
+    }
+    
 }

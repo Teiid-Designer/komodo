@@ -1,0 +1,11 @@
+#go to workspace, create a VDB with a DataRole
+workspace
+create-vdb myVdb vdbPath
+# 
+# Add DataRole
+cd myVdb
+add-data-role myDataRole
+#
+# Set property on the DataRole
+cd myDataRole
+set-property description myDescription

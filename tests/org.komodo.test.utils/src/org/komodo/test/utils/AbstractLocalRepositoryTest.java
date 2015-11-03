@@ -48,6 +48,7 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository.State;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWorkListener;
 import org.komodo.spi.repository.RepositoryClient;
 import org.komodo.spi.repository.RepositoryClientEvent;
 import org.komodo.utils.KLog;
@@ -151,14 +152,14 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest im
 
     @Rule
     public TestName name = new TestName();
-    protected boolean rollbackOnly = false;
-    protected int txCount;
-    protected UnitOfWork uow;
+    private boolean rollbackOnly = false;
+    private int txCount;
+    private UnitOfWork uow;
     protected SynchronousCallback callback;
 
     @Before
     public void createInitialTransaction() throws Exception {
-        this.callback = new SynchronousCallback();
+        this.callback = new TestTransactionListener();
         this.uow = createTransaction(callback);
         KLog.getLogger().debug( "\n\n ----- Test {0}: createInitialTransaction() finished", this.name.getMethodName() );
     }
@@ -202,45 +203,73 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest im
         }
     }
 
-    protected void commit(UnitOfWork.State expectedState) throws Exception {
+    private void commit( final UnitOfWork.State expectedState,
+                         final SynchronousCallback nextCallback ) throws Exception {
         this.uow.commit();
+
         assertThat( this.callback.await( TIME_TO_WAIT, TimeUnit.MINUTES ), is( true ) );
         assertThat( this.uow.getError(), is( nullValue() ) );
         assertThat( this.uow.getState(), is( expectedState ) );
 
-        // create new transaction
-        this.callback = new SynchronousCallback();
-        this.uow = createTransaction(callback);
+        if ( this.callback instanceof TestTransactionListener ) {
+            assertThat( ( ( TestTransactionListener )this.callback ).respondCallbackReceived(), is( true ) );
+            assertThat( ( ( TestTransactionListener )this.callback ).errorCallbackReceived(), is( false ) );
+        }
+
+        this.callback = nextCallback;
+        this.uow = _repo.createTransaction( this.name.getMethodName(), this.rollbackOnly, this.callback );
+    }
+
+    protected void commit( final UnitOfWork.State expectedState ) throws Exception {
+        final SynchronousCallback nextCallback = new TestTransactionListener();
+        commit( expectedState, nextCallback );
     }
 
     protected void commit() throws Exception {
         commit(UnitOfWork.State.COMMITTED);
     }
 
-    protected UnitOfWork createTransaction(String name, SynchronousCallback callback) throws Exception {
-        return _repo.createTransaction( name,
-                                        this.rollbackOnly,
-                                        callback );
+    protected void useCustomCallback( final SynchronousCallback callback,
+                                      final boolean commitCurrentTransaction ) throws Exception {
+        if ( commitCurrentTransaction ) {
+            commit( UnitOfWork.State.COMMITTED, callback );
+        } else {
+            rollback( callback );
+        }
     }
 
-    protected UnitOfWork createTransaction( final String name ) throws Exception {
-        this.callback = new SynchronousCallback();
-        return createTransaction( name, this.callback );
+    private UnitOfWork createTransaction( final UnitOfWorkListener callback ) throws Exception {
+        return _repo.createTransaction( ( this.name.getMethodName() + '-' + this.txCount++ ), this.rollbackOnly, callback );
     }
 
-    protected UnitOfWork createTransaction(SynchronousCallback callback) throws Exception {
-        return this.createTransaction( this.name.getMethodName() + '-' + this.txCount++, callback );
+    /**
+     * The transaction object should <strong>NOT</strong> be cached.
+     *
+     * @return the current transaction (never <code>null</code>)
+     */
+    protected UnitOfWork getTransaction() {
+        return this.uow;
     }
 
-    protected void rollback() throws Exception {
+    private void rollback( final SynchronousCallback nextCallback ) throws Exception {
         this.uow.rollback();
+
         assertThat( this.callback.await( TIME_TO_WAIT, TimeUnit.MINUTES ), is( true ) );
         assertThat( this.uow.getError(), is( nullValue() ) );
         assertThat( this.uow.getState(), is( UnitOfWork.State.ROLLED_BACK ) );
 
+        if ( this.callback instanceof TestTransactionListener ) {
+            assertThat( ( ( TestTransactionListener )this.callback ).respondCallbackReceived(), is( true ) );
+            assertThat( ( ( TestTransactionListener )this.callback ).errorCallbackReceived(), is( false ) );
+        }
+
         // create new transaction
-        this.callback = new SynchronousCallback();
-        this.uow = createTransaction(callback);
+        this.callback = nextCallback;
+        this.uow = createTransaction( this.callback );
+    }
+
+    protected void rollback() throws Exception {
+        rollback( new TestTransactionListener() );
     }
 
     protected Session session(UnitOfWork uow) throws Exception {
@@ -312,6 +341,43 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest im
         }
 
         return sb.toString();
+    }
+
+    protected class TestTransactionListener extends SynchronousCallback {
+
+        private boolean errorCallback = false;
+        private boolean successCallback = false;
+
+        protected boolean errorCallbackReceived() {
+            return this.errorCallback;
+        }
+
+        protected boolean respondCallbackReceived() {
+            return this.successCallback;
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.repository.SynchronousCallback#errorOccurred(java.lang.Throwable)
+         */
+        @Override
+        public void errorOccurred( final Throwable error ) {
+            this.errorCallback = true;
+            super.errorOccurred( error );
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.repository.SynchronousCallback#respond(java.lang.Object)
+         */
+        @Override
+        public void respond( final Object results ) {
+            this.successCallback = true;
+            super.respond( results );
+        }
+
     }
 
 }

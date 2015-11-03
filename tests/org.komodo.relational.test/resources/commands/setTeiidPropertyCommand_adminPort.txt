@@ -1,0 +1,7 @@
+#go to workspace, then create a teiid object 
+workspace
+create-teiid testTeiid
+#
+# Set a property
+cd testTeiid
+set-property adminPort 88

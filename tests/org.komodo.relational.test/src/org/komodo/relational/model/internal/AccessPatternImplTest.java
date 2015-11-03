@@ -36,7 +36,7 @@ public final class AccessPatternImplTest extends RelationalModelTest {
     @Before
     public void init() throws Exception {
         this.table = createTable();
-        this.accessPattern = this.table.addAccessPattern( this.uow, NAME );
+        this.accessPattern = this.table.addAccessPattern( getTransaction(), NAME );
         commit();
     }
 
@@ -49,7 +49,7 @@ public final class AccessPatternImplTest extends RelationalModelTest {
     public void shouldFailConstructionIfNotAccessPattern() {
         if ( RelationalObjectImpl.VALIDATE_INITIAL_STATE ) {
             try {
-                new AccessPatternImpl( this.uow, _repo, this.table.getAbsolutePath() );
+                new AccessPatternImpl( getTransaction(), _repo, this.table.getAbsolutePath() );
                 fail();
             } catch ( final KException e ) {
                 // expected
@@ -60,50 +60,50 @@ public final class AccessPatternImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveCorrectConstraintType() throws Exception {
         assertThat( this.accessPattern.getConstraintType(), is( TableConstraint.ConstraintType.ACCESS_PATTERN ) );
-        assertThat( this.accessPattern.getRawProperty( this.uow, TeiidDdlLexicon.Constraint.TYPE ).getStringValue( this.uow ),
+        assertThat( this.accessPattern.getRawProperty( getTransaction(), TeiidDdlLexicon.Constraint.TYPE ).getStringValue( getTransaction() ),
                     is( TableConstraint.ConstraintType.ACCESS_PATTERN.toValue() ) );
     }
 
     @Test
     public void shouldHaveCorrectDescriptor() throws Exception {
-        assertThat( this.accessPattern.hasDescriptor( this.uow, TeiidDdlLexicon.Constraint.TABLE_ELEMENT ), is( true ) );
+        assertThat( this.accessPattern.hasDescriptor( getTransaction(), TeiidDdlLexicon.Constraint.TABLE_ELEMENT ), is( true ) );
     }
 
     @Test
     public void shouldHaveCorrectTypeIdentifier() throws Exception {
-        assertThat(this.accessPattern.getTypeIdentifier( this.uow ), is(KomodoType.ACCESS_PATTERN));
+        assertThat(this.accessPattern.getTypeIdentifier( getTransaction() ), is(KomodoType.ACCESS_PATTERN));
     }
 
     @Test
     public void shouldHaveCorrectName() throws Exception {
-        assertThat( this.accessPattern.getName( this.uow ), is( NAME ) );
+        assertThat( this.accessPattern.getName( getTransaction() ), is( NAME ) );
     }
 
     @Test
     public void shouldHaveMoreRawProperties() throws Exception {
-        final String[] filteredProps = this.accessPattern.getPropertyNames( this.uow );
-        final String[] rawProps = this.accessPattern.getRawPropertyNames( this.uow );
+        final String[] filteredProps = this.accessPattern.getPropertyNames( getTransaction() );
+        final String[] rawProps = this.accessPattern.getRawPropertyNames( getTransaction() );
         assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
     }
 
     @Test
     public void shouldHaveParentTable() throws Exception {
-        assertThat( this.accessPattern.getParent( this.uow ), is( instanceOf( Table.class ) ) );
+        assertThat( this.accessPattern.getParent( getTransaction() ), is( instanceOf( Table.class ) ) );
     }
 
     @Test
     public void shouldHaveParentTableAfterConstruction() throws Exception {
-        assertThat( this.accessPattern.getTable( this.uow ), is( this.table ) );
+        assertThat( this.accessPattern.getTable( getTransaction() ), is( this.table ) );
     }
 
     @Test( expected = UnsupportedOperationException.class )
     public void shouldNotAllowChildren() throws Exception {
-        this.accessPattern.addChild( this.uow, "blah", null );
+        this.accessPattern.addChild( getTransaction(), "blah", null );
     }
 
     @Test
     public void shouldNotContainFilteredProperties() throws Exception {
-        final String[] filteredProps = this.accessPattern.getPropertyNames( this.uow );
+        final String[] filteredProps = this.accessPattern.getPropertyNames( getTransaction() );
         final Filter[] filters = this.accessPattern.getFilters();
 
         for ( final String name : filteredProps ) {
@@ -122,16 +122,16 @@ public final class AccessPatternImplTest extends RelationalModelTest {
     @Test
     public void shouldCreateUsingResolver() throws Exception {
         final String name = "blah";
-        final KomodoObject kobject = AccessPatternImpl.RESOLVER.create( this.uow, _repo, this.table, name, null );
+        final KomodoObject kobject = AccessPattern.RESOLVER.create( getTransaction(), _repo, this.table, name, null );
         assertThat( kobject, is( notNullValue() ) );
         assertThat( kobject, is( instanceOf( AccessPattern.class ) ) );
-        assertThat( kobject.getName( this.uow ), is( name ) );
+        assertThat( kobject.getName( getTransaction() ), is( name ) );
     }
 
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
-        final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        AccessPatternImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
+        final KomodoObject bogusParent = _repo.add( getTransaction(), null, "bogus", null );
+        AccessPattern.RESOLVER.create( getTransaction(), _repo, bogusParent, "blah", null );
     }
 
 }

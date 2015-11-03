@@ -1,2 +1,0 @@
-# Tests the Set Global command
-set global RECORDING_FILE BogusFile.txt

@@ -26,9 +26,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.InputStream;
-
 import org.komodo.importer.Messages.IMPORTER;
-import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
@@ -62,10 +60,6 @@ public abstract class AbstractImporter implements StringConstants {
         ArgCheck.isNotNull(transaction);
 
         return getRepository().komodoWorkspace(transaction);
-    }
-
-    protected WorkspaceManager getWorkspaceManager() throws KException {
-        return WorkspaceManager.getInstance(getRepository());
     }
 
     /**

@@ -15,18 +15,15 @@
  */
 package org.komodo.shell.commands;
 
-import java.util.Collection;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeSet;
 import org.komodo.shell.BuiltInShellCommand;
+import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.Messages;
 import org.komodo.shell.Messages.SHELL;
+import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.ShellCommand;
-import org.komodo.shell.api.WorkspaceContext;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.constants.StringConstants;
 
@@ -46,9 +43,8 @@ public class HelpCommand extends BuiltInShellCommand {
      */
     public static final String NAME = "help"; //$NON-NLS-1$
 
-	private static final int CMDS_PER_LINE = 4;
-
-	private Map<String, ShellCommand> commands = Collections.< String, ShellCommand >emptyMap();
+    private static final int CMDS_PER_LINE = 4;
+    private static final int DEFAULT_COLUMN_WIDTH = 10;
 
     /**
      * @param wsStatus
@@ -59,30 +55,45 @@ public class HelpCommand extends BuiltInShellCommand {
     }
 
     /**
-     * @param commands
-     *        the commands the commands applicable for the current context (can be <code>null</code> or empty)
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#doExecute()
      */
-    public void setCommands(final Map< String, ShellCommand > commands) {
-        this.commands = ( ( commands == null ) ? Collections.< String, ShellCommand >emptyMap() : commands );
+    @Override
+    protected CommandResult doExecute() {
+        try {
+    		String commandName = optionalArgument(0);
+    		if (commandName == null) {
+    			printHelpAll();
+    		} else {
+    			printHelpForCommand(commandName);
+    		}
+
+    		return CommandResult.SUCCESS;
+        } catch ( final Exception e ) {
+            return new CommandResultImpl( e );
+        }
+	}
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 1;
     }
 
     /**
-	 * Execute.
-	 *
-	 * @return true, if successful
-	 * @throws Exception the exception
-	 * @see org.komodo.shell.api.ShellCommand#execute()
-	 */
-	@Override
-	public boolean execute() throws Exception {
-		String commandName = optionalArgument(0);
-		if (commandName == null) {
-			printHelpAll();
-		} else {
-			printHelpForCommand(commandName);
-		}
-		return true;
-	}
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
+     */
+    @Override
+    public boolean isValidForCurrentContext() {
+        return true;
+    }
 
 	/**
 	 * Prints the generic help - all commands for this workspace context
@@ -90,31 +101,34 @@ public class HelpCommand extends BuiltInShellCommand {
 	private void printHelpAll() throws Exception {
 		print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.Help_COMMAND_LIST_MSG));
 
-		// Determine the current Workspace Context type
-		WorkspaceStatus wsStatus = getWorkspaceStatus();
-		WorkspaceContext currentContext = wsStatus.getCurrentContext();
-		String currentContextType = currentContext.getType();
-
 		StringBuffer indentBuffer = new StringBuffer();
 		for(int i=0; i<CompletionConstants.MESSAGE_INDENT; i++) {
 			indentBuffer.append(StringConstants.SPACE);
 		}
 
+		// Assemble the valid command names and find the max command character length
+		int maxCommandLength = DEFAULT_COLUMN_WIDTH;
+        List<String> validCmdNames = new ArrayList<String>();
+        for (final String cmdName : getWorkspaceStatus().getAvailableCommands()) {
+            if(cmdName.length()>maxCommandLength) {
+                maxCommandLength = cmdName.length();
+            }
+            validCmdNames.add(cmdName);
+        }
+
+        // Print appropriate commands per line
 		int colCount = 0;
 		StringBuilder builder = new StringBuilder();
-		for (Entry<String,ShellCommand> entry : this.commands.entrySet()) {
-			String cmdName = entry.getKey();
-			ShellCommand command = entry.getValue();
-			if(command.isValidForWsContext(currentContextType)) {
-				builder.append(String.format("%-18s", cmdName)); //$NON-NLS-1$
-				colCount++;
+		for (String cmdName : validCmdNames) {
+            builder.append(String.format("%-"+(maxCommandLength+5)+"s", cmdName)); //$NON-NLS-1$ //$NON-NLS-2$
+            colCount++;
 
-				if (colCount == CMDS_PER_LINE) {
-					builder.append("\n"+indentBuffer.toString()); //$NON-NLS-1$
-					colCount = 0;
-				}
-			}
+            if (colCount == CMDS_PER_LINE) {
+                builder.append("\n"+indentBuffer.toString()); //$NON-NLS-1$
+                colCount = 0;
+            }
 		}
+
 		print(CompletionConstants.MESSAGE_INDENT,builder.toString());
 		if(colCount!=0) print(CompletionConstants.MESSAGE_INDENT,"\n"); //$NON-NLS-1$
 		print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.Help_GET_HELP_1));
@@ -123,28 +137,12 @@ public class HelpCommand extends BuiltInShellCommand {
 	}
 
     private void printHelpForCommand( final String cmdName ) throws Exception {
-        ShellCommand command = this.commands.get( cmdName );
-
-        if ( command == null ) {
-            // see if an alias
-            for ( final ShellCommand cmd : this.commands.values() ) {
-                final String[] aliases = cmd.getAliases();
-
-                if ( aliases.length != 0 ) {
-                    for ( final String alias : aliases ) {
-                        if ( alias.equals( cmdName ) ) {
-                            command = cmd;
-                            break;
-                        }
-                    }
-                }
-            }
-        }
+        final ShellCommand command = getWorkspaceStatus().getCommand( cmdName );
 
         if (command == null) {
             print( CompletionConstants.MESSAGE_INDENT, Messages.getString( SHELL.Help_INVALID_COMMAND, cmdName ) );
         } else {
-            command.setOutput( getWorkspaceStatus().getShell().getCommandOutput() );
+            command.setWriter( getWriter() );
             command.printHelp( CompletionConstants.MESSAGE_INDENT );
         }
     }
@@ -155,36 +153,27 @@ public class HelpCommand extends BuiltInShellCommand {
 	 * @param lastArgument the last argument
 	 * @param candidates the candidates
 	 * @return the int
-	 * @see org.komodo.shell.api.AbstractShellCommand#tabCompletion(java.lang.String,
+	 * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String,
 	 *      java.util.List)
 	 */
 	@Override
-	public int tabCompletion(String lastArgument, List<CharSequence> candidates) {
-		if (getArguments().isEmpty()) {
-			for (String candidate : generateHelpCandidates()) {
-				if (lastArgument == null || candidate.startsWith(lastArgument)) {
-					candidates.add(candidate);
-				}
-			}
+    public int tabCompletion( String lastArgument,
+                              List< CharSequence > candidates ) {
+        if ( getArguments().isEmpty() ) {
+            try {
+                for ( String candidate : getWorkspaceStatus().getAvailableCommands() ) {
+                    if ( lastArgument == null || candidate.startsWith( lastArgument ) ) {
+                        candidates.add( candidate );
+                    }
+                }
+            } catch ( final Exception e ) {
+                throw new RuntimeException( e );
+            }
 
-			return 0;
-		} else {
-			return -1;
-		}
-	}
+            return 0;
+        }
 
-	/**
-	 * Generate help candidates.
-	 *
-	 * @return a collection of all possible command names
-	 */
-	private Collection<String> generateHelpCandidates() {
-		TreeSet<String> candidates = new TreeSet<String>();
-		for (String key : this.commands.keySet()) {
-			String candidate = key;
-			candidates.add(candidate);
-		}
-		return candidates;
-	}
+        return -1;
+    }
 
 }

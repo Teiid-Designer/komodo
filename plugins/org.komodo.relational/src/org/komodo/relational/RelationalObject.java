@@ -48,6 +48,8 @@ public interface RelationalObject extends KomodoObject {
      */
     Filter DDL_QNAMES_FILTER = new ExcludeQNamesFilter( StandardDdlLexicon.DDL_EXPRESSION,
                                                         StandardDdlLexicon.DDL_LENGTH,
+                                                        StandardDdlLexicon.DEFAULT_PRECISION,
+                                                        StandardDdlLexicon.DEFAULT_OPTION,
                                                         StandardDdlLexicon.DDL_ORIGINAL_EXPRESSION,
                                                         StandardDdlLexicon.DDL_START_CHAR_INDEX,
                                                         StandardDdlLexicon.DDL_START_COLUMN_NUMBER,
@@ -126,5 +128,10 @@ public interface RelationalObject extends KomodoObject {
      *        descriptors} are valid for this object (can be <code>null</code>)
      */
     void setFilters( final Filter[] newFilters );
+
+    /**
+     * @return the short name of the object type used for display purposes (never empty)
+     */
+    String getTypeDisplayName();
 
 }

@@ -10,6 +10,45 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 	<artifactId>org.komodo.relational</artifactId> 
 	<version>0.0.2-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
+ 	
+	<dependencies>
+	    <dependency>
+            <groupId>org.jboss.tools.komodo.plugins</groupId>
+            <artifactId>org.komodo.core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+	    <dependency>
+            <groupId>org.jboss.tools.komodo.plugins</groupId>
+            <artifactId>org.komodo.importer</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+	    <dependency>
+            <groupId>org.jboss.tools.komodo.plugins.libs</groupId>
+            <artifactId>org.komodo.modeshape.lib</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+	    <dependency>
+            <groupId>org.jboss.tools.komodo.plugins</groupId>
+            <artifactId>org.komodo.modeshape.vdb</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+	    <dependency>
+            <groupId>org.jboss.tools.komodo.plugins</groupId>
+            <artifactId>org.komodo.spi</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+	    <dependency>
+            <groupId>org.jboss.tools.komodo.plugins</groupId>
+            <artifactId>org.komodo.teiid.client</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+	    <dependency>
+            <groupId>org.jboss.tools.komodo.plugins</groupId>
+            <artifactId>org.komodo.utils</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+	</dependencies>
+ 
     <build>
         <plugins>
             <plugin>

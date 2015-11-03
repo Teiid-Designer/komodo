@@ -1,5 +1,0 @@
-#List at the root
-cd /workspace
-list
-
-

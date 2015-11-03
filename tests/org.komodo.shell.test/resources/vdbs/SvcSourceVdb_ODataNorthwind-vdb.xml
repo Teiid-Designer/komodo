@@ -1,8 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-  <vdb name="SvcSourceVdb_ODataNorthwind" version="1">
-  <description>VDB for: SvcSourceVdb_ODataNorthwind, Version: 1</description>
-  <connection-type>BY_VERSION</connection-type>
-  <model name="ODataNorthwind" type="PHYSICAL" visible="true">
-    <source name="ODataNorthwind" translator-name="odata" connection-jndi-name="java:/ODataNorthwind"/>
-  </model>
-</vdb>

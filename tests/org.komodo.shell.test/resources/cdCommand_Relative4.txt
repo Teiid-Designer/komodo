@@ -1,9 +1,0 @@
-#Uses multiple double dot notations together
-cd /workspace
-create vdb MyVdb
-cd MyVdb
-create model MyModel
-cd MyModel
-create table MyTable
-cd MyTable
-cd ../..

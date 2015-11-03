@@ -6,12 +6,11 @@ Bundle-Version: 0.0.2.qualifier
 Bundle-Vendor: %pluginProvider
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Localization: plugin
-Export-Package: org.komodo.importer,
- org.komodo.importer.ddl,
- org.komodo.importer.vdb
+Export-Package: org.komodo.importer
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.komodo.utils;bundle-version="[0.0.1,2.0.0)",
- org.komodo.relational;bundle-version="[0.0.1,2.0.0)",
  org.komodo.spi;bundle-version="[0.0.1,2.0.0)",
  org.komodo.modeshape.lib;bundle-version="[0.0.1,2.0.0)",
- org.komodo.core;bundle-version="[0.0.1,2.0.0)"
+ org.komodo.core;bundle-version="[0.0.1,2.0.0)",
+ org.komodo.shell;bundle-version="0.0.1",
+ org.komodo.shell-api;bundle-version="0.0.1"

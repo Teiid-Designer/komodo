@@ -15,24 +15,57 @@
  */
 package org.komodo.shell.api;
 
-import java.util.Map;
+import java.util.Set;
+import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.Repository;
 
 
 /**
- * Provides comands - used by the shell command factory when creating the map of
- * available shell commands.
- * 
- * This class adapted from classes at https://github.com/Governance/s-ramp/blob/master/s-ramp-shell-api
- * - altered map
- * 
- * @author eric.wittmann@redhat.com
+ * The ShellCommandProvider interface
  */
 public interface ShellCommandProvider {
 
-	/**
-	 * Called to get the collection of commands contributed by the provider.
-	 * @return the map of commands
-	 */
-	public Map<String, Class<? extends ShellCommand>> provideCommands();
+    /**
+     * Called to get the collection of commands contributed by the provider.
+     *
+     * @return the provided commands (can be <code>null</code> or empty)
+     */
+    public Set< Class< ? extends ShellCommand > > provideCommands();
+
+    /**
+     * Resolve the supplied KomodoObject
+     * @param <T> the specific {@link KomodoObject} type being resolved
+     * @param uow the transaction
+     * @param kObj the KomodoObject
+     * @return resolved object
+     * @throws KException the exception
+     */
+    public < T extends KomodoObject > T resolve ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException;
+
+    /**
+     * Get the type display string for a KomodoObject
+     * @param uow the transaction
+     * @param kObj the KomodoObject
+     * @return the type display string
+     * @throws KException the exception
+     */
+    public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException;
+
+    /**
+     * Initialize workspace state for recognized properties
+     * @param wsStatus the workspace status
+     * @throws KException the exception
+     */
+    public void initWorkspaceState ( final WorkspaceStatus wsStatus ) throws KException;
+
+    /**
+     * Get status message for the provided KomodoObject
+     * @param uow the transaction
+     * @param kObj the KomodoObject
+     * @return the status message
+     * @throws KException the exception
+     */
+    public String getStatusMessage ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException;
 
 }

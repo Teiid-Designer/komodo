@@ -7,22 +7,12 @@
  */
 package org.komodo.relational.model.internal;
 
-import org.komodo.relational.Messages;
-import org.komodo.relational.Messages.Relational;
-import org.komodo.relational.RelationalProperties;
-import org.komodo.relational.internal.AdapterFactory;
-import org.komodo.relational.internal.TypeResolver;
-import org.komodo.relational.model.Model;
 import org.komodo.relational.model.UserDefinedFunction;
-import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
-import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.SchemaElement;
 
 /**
  * An implementation of a UDF.
@@ -66,87 +56,6 @@ public final class UserDefinedFunctionImpl extends FunctionImpl implements UserD
         }
 
     }
-
-    /**
-     * The resolver of a {@link UserDefinedFunction}.
-     */
-    public static final TypeResolver< UserDefinedFunction > RESOLVER = new TypeResolver< UserDefinedFunction >() {
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.relational.internal.TypeResolver#create(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject, java.lang.String,
-         *      org.komodo.relational.RelationalProperties)
-         */
-        @Override
-        public UserDefinedFunction create( final UnitOfWork transaction,
-                                           final Repository repository,
-                                           final KomodoObject parent,
-                                           final String id,
-                                           final RelationalProperties properties ) throws KException {
-            final AdapterFactory adapter = new AdapterFactory( repository );
-            final Model parentModel = adapter.adapt( transaction, parent, Model.class );
-
-            if ( parentModel == null ) {
-                throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
-                                                          parent.getAbsolutePath(),
-                                                          UserDefinedFunction.class.getSimpleName() ) );
-            }
-
-            return parentModel.addUserDefinedFunction( transaction, id );
-        }
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.relational.internal.TypeResolver#identifier()
-         */
-        @Override
-        public KomodoType identifier() {
-            return IDENTIFIER;
-        }
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.relational.internal.TypeResolver#owningClass()
-         */
-        @Override
-        public Class< UserDefinedFunctionImpl > owningClass() {
-            return UserDefinedFunctionImpl.class;
-        }
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.relational.internal.TypeResolver#resolvable(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.KomodoObject)
-         */
-        @Override
-        public boolean resolvable( final UnitOfWork transaction,
-                                   final KomodoObject kobject ) throws KException {
-            return ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, CreateProcedure.FUNCTION_STATEMENT )
-                   && ObjectImpl.validatePropertyValue( transaction,
-                                                        kobject.getRepository(),
-                                                        kobject,
-                                                        SchemaElement.TYPE,
-                                                        SchemaElementType.VIRTUAL.name() );
-        }
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.relational.internal.TypeResolver#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
-         *      org.komodo.spi.repository.KomodoObject)
-         */
-        @Override
-        public UserDefinedFunction resolve( final UnitOfWork transaction,
-                                            final KomodoObject kobject ) throws KException {
-            return new UserDefinedFunctionImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
-        }
-
-    };
 
     /**
      * @param uow
@@ -229,7 +138,7 @@ public final class UserDefinedFunctionImpl extends FunctionImpl implements UserD
      */
     @Override
     public KomodoType getTypeIdentifier( final UnitOfWork uow ) {
-        return RESOLVER.identifier();
+        return UserDefinedFunction.RESOLVER.identifier();
     }
 
     /**

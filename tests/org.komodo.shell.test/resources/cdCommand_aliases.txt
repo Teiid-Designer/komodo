@@ -1,7 +1,0 @@
-#create a vdb and a model, then cd into MyVdb with absolute path
-edit /workspace
-create vdb MyVdb
-goto MyVdb
-create model MyModel
-edit MyModel
-goto /workspace/MyVdb

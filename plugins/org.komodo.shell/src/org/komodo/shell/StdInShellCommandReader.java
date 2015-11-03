@@ -19,7 +19,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Map;
+import org.komodo.shell.api.ShellCommandFactory;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.shell.util.PrintUtils;
 
 /**
  * An implementation of the {@link ShellCommandReader} that uses standard input
@@ -73,7 +75,7 @@ public class StdInShellCommandReader extends AbstractShellCommandReader {
 	@Override
 	protected String readLine() throws Exception {
 		if (!stdinReader.ready()) {
-			getOutputStream().print(getPrompt() + " > "); //$NON-NLS-1$
+		    PrintUtils.print(getOutputWriter(), 0, getPrompt() + " > "); //$NON-NLS-1$
 		}
 		return stdinReader.readLine();
 	}
@@ -100,7 +102,7 @@ public class StdInShellCommandReader extends AbstractShellCommandReader {
 	public String promptForInput(String prompt) {
 		try {
 			if (!stdinReader.ready()) {
-				getOutputStream().print(prompt);
+	            PrintUtils.print(getOutputWriter(), 0, prompt);
 			}
 			return stdinReader.readLine();
 		} catch (IOException e) {

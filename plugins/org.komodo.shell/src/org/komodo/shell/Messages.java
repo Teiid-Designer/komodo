@@ -39,6 +39,9 @@ public class Messages implements StringConstants {
     private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME);
 
     public enum SHELL {
+        CommitSuccess,
+        RollbackSuccess,
+        FileNotAccessible,
         ERROR_LOADING_PROPERTIES,
         INVALID_GLOBAL_PROPERTY_NAME,
         INVALID_BOOLEAN_GLOBAL_PROPERTY_VALUE,
@@ -59,7 +62,6 @@ public class Messages implements StringConstants {
         LOCAL_REPOSITORY_STARTING,
         LOCAL_REPOSITORY_TIMEOUT_ERROR,
     	COMMAND_NOT_FOUND,
-    	GOOD_BYE,
     	Help_COMMAND_LIST_MSG,
     	Help_INVALID_COMMAND,
     	Help_USAGE,
@@ -74,7 +76,6 @@ public class Messages implements StringConstants {
     	ENTRY_PATH,
     	ENTRY_LIST_SUMMARY,
     	ENTRY,
-    	InvalidArgMsg_ArtifactId,
     	Property_InvalidArgMsg_SubCommand,
     	Property_InvalidArgMsg_PropertyName,
     	Property_InvalidArgMsg_PropertyValue,
@@ -82,18 +83,39 @@ public class Messages implements StringConstants {
     	Property_PropertyUnset,
     	Property_InvalidSubCommand,
     	Property_Failure,
+    	NoPropertiesMsg,
+    	PropertiesHeader,
+    	noChildrenMsg,
+    	ChildrenHeader,
+    	PropertyHeader,
+    	CommandFailure,
     	InvalidArgMsg_propertiesFile_not_exist,
     	InvalidArgMsg_property_not_correct_format,
     	InvalidArgMsg_propertiesFile_error_reading,
     	InvalidArgMsg_propertiesFile_error_reading_line,
-        FileShellCommandReader_NoConsole,
+    	InvalidArgMsg_PropertyName,
+    	InvalidArgMsg_PropertyValue,
+    	TOO_MANY_ARGS,
+    	InvalidCommandForContext,
+    	FileShellCommandReader_NoConsole,
         HelpNoAliases,
         HelpAliasesHeading,
         HelpUsageHeading,
         HelpDescription,
         HelpDescriptionHeading,
         HelpExamplesHeading,
-        WelcomeMessage;
+        WelcomeMessage,
+        locationArg_noContextWithThisName,
+        propertyArg_noPropertyWithThisName,
+        locationArg_empty,
+        typeArg_childTypeNotAllowed,
+        objectNameNotValid,
+        FileNotFound,
+        FileArgNotAFile,
+        FileCannotRead,
+        RecordingFileOutputError,
+        RecordingFileCannotWrite,
+        RecordingFileNotDefined;
 
     	@Override
     	public String toString() {
@@ -101,43 +123,86 @@ public class Messages implements StringConstants {
     	}
     }
 
-    public enum CreateCommand {
-        DEFAULT_VDB_FILE_PATH,
-        FAILURE,
-        MISSING_ENTRY_PATH,
-        MISSING_FOREIGN_KEY_TABLE_REF,
-        MISSING_OBJ_NAME,
-        MISSING_OBJ_TYPE,
-        MISSING_OPTION_VALUE,
-        MISSING_PROPERTY_NAME,
-        MISSING_PROPERTY_VALUE,
-        PROPERTY_ALREADY_EXISTS,
-        MISSING_TRANSLATOR_TYPE,
-        NO_DUPLICATES_ALLOWED,
-        OBJECT_CREATED,
-        PROPERTY_CREATED,
-        PATH_NOT_FOUND,
-        TOO_MANY_ARGS,
-        TYPE_NOT_VALID;
+    public enum ExitCommand {
 
+        EXIT_CANCELED,
+        GOOD_BYE,
+        INVALID_EXIT_ARG;
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see java.lang.Enum#toString()
+         */
         @Override
         public String toString() {
-            return getEnumName(this) + DOT + name();
+            return getEnumName( this ) + DOT + name();
+        }
+
+    }
+
+    public enum AddChildCommand {
+
+        CHILD_ADDED,
+        MISSING_CHILD_NAME;
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see java.lang.Enum#toString()
+         */
+        @Override
+        public String toString() {
+            return getEnumName( this ) + DOT + name();
         }
     }
-    
-    public enum DeleteCommand {
-        InvalidArgMsg_ObjectPath,
-        ObjectDeleted,
-        Failure,
-        cannotDelete_objectDoesNotExist,
-        contextMustBeBelowCurrent, 
-        cantDeleteReserved,
-        cannotRename_objectDoesNotExist;
 
+    public enum DeleteChildCommand {
+        CHILD_DELETED,
+        MISSING_CHILD_NAME,
+        NO_CHILD_WITH_NAME_AND_TYPE,
+        NO_CHILD_WITH_NAME,
+        ERROR_GETTING_CHILD;
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see java.lang.Enum#toString()
+         */
         @Override
         public String toString() {
-            return getEnumName(this) + DOT + name();
+            return getEnumName( this ) + DOT + name();
+        }
+    }
+
+    public enum AddDescriptorCommand {
+        DESCRIPTOR_ADDED,
+        MISSING_DESCRIPTOR_NAME;
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see java.lang.Enum#toString()
+         */
+        @Override
+        public String toString() {
+            return getEnumName( this ) + DOT + name();
+        }
+    }
+
+    public enum RemoveDescriptorCommand {
+
+        DESCRIPTOR_REMOVED,
+        MISSING_DESCRIPTOR_NAME;
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see java.lang.Enum#toString()
+         */
+        @Override
+        public String toString() {
+            return getEnumName( this ) + DOT + name();
         }
     }
 
@@ -153,10 +218,11 @@ public class Messages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     public enum PlayCommand {
         InvalidArgMsg_FileName,
         fileExecuted,
+        FileNotAccessible,
         Failure,
         CommandFailure;
 
@@ -166,75 +232,136 @@ public class Messages implements StringConstants {
         }
     }
 
-    public enum SetCommand {
+    public enum ListCommand {
+        noChildrenMsg;
 
-        ADD_TABLE_CONSTRAINT_COLUMN_FAILED,
-        COLUMN_PATH_NOT_FOUND,
-        INVALID_TABLE_REF_COLUMN_PATH,
-        TABLE_COLUMNS_CANNOT_BE_SET,
-        TABLE_COLUMNS_SET,
-        TABLE_PATH_NOT_FOUND,
-        TABLE_REF_CANNOT_BE_SET,
-        TABLE_REF_COLUMNS_SET,
-        TABLE_REF_REFS_CANNOT_BE_SET,
-        TABLE_REF_SET,
-        TOO_MANY_ARGS,
-        UNSET_TABLE_CONSTRAINT_COLUMN_FAILED,
-        UNSET_TABLE_REF_COLUMN_FAILED,
-        InvalidArgMsg_SubCommand,
-        InvalidArgMsg_PropertyName,
-        InvalidArgMsg_PropertyValue,
-        InvalidArgMsg_GlobalPropertyName,
-        InvalidGlobalProperty,
-        PropertySet,
-        GlobalPropertySet,
-        resetGlobalProperties,
-        InvalidSubCommand,
-        Failure,
-        onOffArg_empty,
-        onOffArg_invalid,
-        setRecordingStateMsg,
-        recordingFileNotSet,
-        recordingFileNotWriteable,
-        invalidTeiidName;
         @Override
         public String toString() {
             return getEnumName(this) + DOT + name();
         }
     }
 
-    public enum ShowCommand {
-        InvalidArgMsg_SubCommand,
-        InvalidArgMsg_PropertyName,
-        InvalidArgMsg_ServerObjName,
-        InvalidSubCommand,
-        Failure,
-        NoPropertiesMsg,
-        PropertiesHeader,
-        PropertyHeader,
-        ChildrenHeader,
+    public enum SetRecordCommand {
+        onOffArg_empty,
+        onOffArg_invalid,
+        setRecordingStateMsg,
+        recordingFileNotSet,
+        recordingFileProblem;
+
+      @Override
+      public String toString() {
+          return getEnumName(this) + DOT + name();
+      }
+    }
+
+    public enum SetGlobalPropertyCommand {
+        InvalidArgMsg_GlobalPropertyName,
+        InvalidGlobalProperty,
+        InvalidArgMsg_PropertyValue,
+        GlobalPropertySet;
+
+      @Override
+      public String toString() {
+          return getEnumName(this) + DOT + name();
+      }
+    }
+    
+    public enum SetPrimaryTypeCommand {
+        MISSING_TYPE_NAME,
+        PRIMARY_TYPE_SET;
+
+      @Override
+      public String toString() {
+          return getEnumName(this) + DOT + name();
+      }
+    }
+
+    public enum SetPropertyCommand {
+        InvalidPropName,
+        InvalidPropValue,
+        PropertySet;
+
+      @Override
+      public String toString() {
+          return getEnumName(this) + DOT + name();
+      }
+    }
+
+    public enum UnsetPropertyCommand {
+        InvalidArgMsg_GlobalPropertyName,
+        InvalidGlobalProperty,
+        InvalidArgMsg_PropertyValue,
+        GlobalPropertySet;
+
+      @Override
+      public String toString() {
+          return getEnumName(this) + DOT + name();
+      }
+    }
+
+    public enum ShowStatusCommand {
         CurrentRepoUrl,
         CurrentRepoName,
-        NoCurrentTeiid,
-        CurrentTeiid,
-        CurrentTeiidJdbc,
-        CurrentContext,
-        GlobalPropertiesHeader,
-        noChildrenMsg,
-        serverStatusText,
-        ServerNotConnected,
-        ServerTypeHeader,
-        Connected,
-        NotConnected,
-        PingOk,
-        PingFail;
-        
+        CurrentContext;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    public enum ShowGlobalCommand {
+        GlobalPropertiesHeader;
+
         @Override
         public String toString() {
             return getEnumName(this) + DOT + name();
         }
     }
     
+    public enum ShowDescriptorsCommand {
+        ListHeader,
+        NoDescriptors;
+
+      @Override
+      public String toString() {
+          return getEnumName(this) + DOT + name();
+      }
+    }
+
+    public enum ShowPrimaryTypeCommand {
+        ShowType;
+
+      @Override
+      public String toString() {
+          return getEnumName(this) + DOT + name();
+      }
+    }
+
+    public enum SetAutoCommitCommand {
+        ENABLE_FLAG_MISSING;
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see java.lang.Enum#toString()
+         */
+        @Override
+        public String toString() {
+            return getEnumName( this ) + DOT + name();
+        }
+
+    }
+
+    public enum ShowPropertyCommand {
+        InvalidArgMsg_PropertyName;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
     public enum ServerCommand {
         InvalidArgMsg_SubCommand,
         InvalidArgMsg_ServerObjType,
@@ -277,111 +404,7 @@ public class Messages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
-    public enum ImportCommand {
-    	InvalidArgMsg_SubCommand,
-    	InvalidArgMsg_FileName,
-    	InvalidArgMsg_ModelName,
-    	InvalidTargetPath,
-    	DdlImportInProgressMsg,
-    	VdbImportInProgressMsg,
-    	DdlImportSuccessMsg,
-    	VdbImportSuccessMsg,
-    	InvalidSubCommand,
-    	ImportFailedMsg,
-    	childTypeNotAllowed,
-    	InvalidDDLParentType,
-    	ErrorCreatingTempNode,
-    	DeleteTempContextFailedMsg,
-    	cannotImport_wouldCreateDuplicate;
 
-    	@Override
-    	public String toString() {
-    		return getEnumName(this) + DOT + name();
-    	}
-    }
-
-    public enum ExportCommand {
-    	InvalidArgMsgSubCommand,
-    	InvalidArgMsgObjectName,
-        InvalidArgMsgOutputFileName,
-        Failure,
-        ObjectExported,
-        NoContentExported,
-        ObjectNotAVdb,
-        CannotExportObjectDoesNotExist,
-        CannotExportObjectNotExportable,
-        CannotExportFileAlreadyExists,
-        CannotExportProblemWithVdb,
-        CannotExportProblemWithModel,
-        CannotExportProblemWithSchema,
-        ExportOfTypeNotSupported;
-
-        @Override
-        public String toString() {
-            return getEnumName(this) + DOT + name();
-        }
-    }
-    
-    public enum FindCommand {
-        helpTypesHeading,
-        Failure,
-        MissingTypeArg,
-        InvalidType,
-        NoObjectsFound,
-        TypeHeader;
-
-        @Override
-        public String toString() {
-            return getEnumName(this) + DOT + name();
-        }
-    }
-    
-    /**
-     * Localized messages of the {@link AddConstraintColumnCommand}.
-     */
-    public enum AddConstraintColumnCommand {
-
-        columnRefAdded,
-        columnPathNotFound,
-        error,
-        invalidColumnPath,
-        invalidColumn,
-        missingColumnPathArg;
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see java.lang.Enum#toString()
-         */
-        @Override
-        public String toString() {
-            return getEnumName( this ) + DOT + name();
-        }
-    }
-    
-    /**
-     * Localized messages of the {@link RemoveConstraintColumnCommand}.
-     */
-    public enum RemoveConstraintColumnCommand {
-
-        COLUMN_REF_REMOVED,
-        COLUMN_PATH_NOT_FOUND,
-        ERROR,
-        INVALID_COLUMN_PATH,
-        MISSING_COLUMN_PATH_ARG;
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see java.lang.Enum#toString()
-         */
-        @Override
-        public String toString() {
-            return getEnumName( this ) + DOT + name();
-        }
-    }
-    
     /**
      * Localized messages of the {@link RenameCommand}.
      */

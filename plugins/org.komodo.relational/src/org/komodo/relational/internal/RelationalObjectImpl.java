@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalObject;
+import org.komodo.relational.TypeResolver;
 import org.komodo.repository.Messages;
 import org.komodo.repository.Messages.Komodo;
 import org.komodo.repository.ObjectImpl;
@@ -376,6 +377,16 @@ public abstract class RelationalObjectImpl extends ObjectImpl implements Relatio
             _resolverRegistry = TypeResolverRegistry.getInstance();
 
         return _resolverRegistry;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.RelationalObject#getTypeDisplayName()
+     */
+    @Override
+    public String getTypeDisplayName() {
+        return org.komodo.relational.Messages.getString( getClass().getSimpleName() + ".typeName" ); //$NON-NLS-1$
     }
 
     /**

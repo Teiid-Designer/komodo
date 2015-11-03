@@ -34,9 +34,9 @@ public final class ConditionImplTest extends RelationalModelTest {
     @Before
     public void init() throws Exception {
         final Vdb vdb = createVdb();
-        final DataRole dataRole = vdb.addDataRole( this.uow, "dataRole" );
-        final Permission permission = dataRole.addPermission( this.uow, "permission" );
-        this.condition = permission.addCondition( this.uow, "condition" );
+        final DataRole dataRole = vdb.addDataRole( getTransaction(), "dataRole" );
+        final Permission permission = dataRole.addPermission( getTransaction(), "permission" );
+        this.condition = permission.addCondition( getTransaction(), "condition" );
         commit();
     }
 
@@ -49,7 +49,7 @@ public final class ConditionImplTest extends RelationalModelTest {
     public void shouldFailConstructionIfNotCondition() {
         if ( RelationalObjectImpl.VALIDATE_INITIAL_STATE ) {
             try {
-                new ConditionImpl( this.uow, _repo, this.condition.getParent( this.uow ).getAbsolutePath() );
+                new ConditionImpl( getTransaction(), _repo, this.condition.getParent( getTransaction() ).getAbsolutePath() );
                 fail();
             } catch ( final KException e ) {
                 // expected
@@ -59,39 +59,39 @@ public final class ConditionImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveConstraintDefaultValueAfterConstruction() throws Exception {
-        assertThat( this.condition.isConstraint( this.uow ), is( Condition.DEFAULT_CONSTRAINT ) );
+        assertThat( this.condition.isConstraint( getTransaction() ), is( Condition.DEFAULT_CONSTRAINT ) );
     }
 
     @Test
     public void shouldHaveCorrectPrimaryType() throws Exception {
-        assertThat( this.condition.getPrimaryType( this.uow ).getName(), is( VdbLexicon.DataRole.Permission.Condition.CONDITION ) );
+        assertThat( this.condition.getPrimaryType( getTransaction() ).getName(), is( VdbLexicon.DataRole.Permission.Condition.CONDITION ) );
     }
 
     @Test
     public void shouldHaveCorrectTypeIdentifier() throws Exception {
-        assertThat(this.condition.getTypeIdentifier( this.uow ), is(KomodoType.VDB_CONDITION));
+        assertThat(this.condition.getTypeIdentifier( getTransaction() ), is(KomodoType.VDB_CONDITION));
     }
 
     @Test
     public void shouldHaveMoreRawProperties() throws Exception {
-        final String[] filteredProps = this.condition.getPropertyNames( this.uow );
-        final String[] rawProps = this.condition.getRawPropertyNames( this.uow );
+        final String[] filteredProps = this.condition.getPropertyNames( getTransaction() );
+        final String[] rawProps = this.condition.getRawPropertyNames( getTransaction() );
         assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
     }
 
     @Test
     public void shouldHaveParentPermission() throws Exception {
-        assertThat( this.condition.getParent( this.uow ), is( instanceOf( Permission.class ) ) );
+        assertThat( this.condition.getParent( getTransaction() ), is( instanceOf( Permission.class ) ) );
     }
 
     @Test( expected = UnsupportedOperationException.class )
     public void shouldNotAllowChildren() throws Exception {
-        this.condition.addChild( this.uow, "blah", null );
+        this.condition.addChild( getTransaction(), "blah", null );
     }
 
     @Test
     public void shouldNotContainFilteredProperties() throws Exception {
-        final String[] filteredProps = this.condition.getPropertyNames( this.uow );
+        final String[] filteredProps = this.condition.getPropertyNames( getTransaction() );
         final Filter[] filters = this.condition.getFilters();
 
         for ( final String name : filteredProps ) {
@@ -104,8 +104,8 @@ public final class ConditionImplTest extends RelationalModelTest {
     @Test
     public void shouldSetConstraintValue() throws Exception {
         final boolean newValue = !Condition.DEFAULT_CONSTRAINT;
-        this.condition.setConstraint( this.uow, newValue );
-        assertThat( this.condition.isConstraint( this.uow ), is( newValue ) );
+        this.condition.setConstraint( getTransaction(), newValue );
+        assertThat( this.condition.isConstraint( getTransaction() ), is( newValue ) );
     }
 
     /*
@@ -117,20 +117,20 @@ public final class ConditionImplTest extends RelationalModelTest {
     @Test
     public void shouldCreateUsingResolver() throws Exception {
         final String name = "blah";
-        final KomodoObject kobject = ConditionImpl.RESOLVER.create( this.uow,
+        final KomodoObject kobject = Condition.RESOLVER.create( getTransaction(),
                                                                     _repo,
-                                                                    this.condition.getParent( this.uow ),
+                                                                    this.condition.getParent( getTransaction() ),
                                                                     name,
                                                                     null );
         assertThat( kobject, is( notNullValue() ) );
         assertThat( kobject, is( instanceOf( Condition.class ) ) );
-        assertThat( kobject.getName( this.uow ), is( name ) );
+        assertThat( kobject.getName( getTransaction() ), is( name ) );
     }
 
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
-        final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        ConditionImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
+        final KomodoObject bogusParent = _repo.add( getTransaction(), null, "bogus", null );
+        Condition.RESOLVER.create( getTransaction(), _repo, bogusParent, "blah", null );
     }
 
 }

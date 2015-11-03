@@ -37,29 +37,29 @@ public final class VirtualProcedureImplTest extends RelationalModelTest {
     @Before
     public void init() throws Exception {
         final Model model = createModel();
-        this.procedure = model.addVirtualProcedure( this.uow, "myProcedure" );
+        this.procedure = model.addVirtualProcedure( getTransaction(), "myProcedure" );
         commit();
     }
 
     @Test
     public void shouldClearAsClauseWithEmptyString() throws Exception {
-        this.procedure.setAsClauseStatement( this.uow, AS_ClAUSE );
-        this.procedure.setAsClauseStatement( this.uow, StringConstants.EMPTY_STRING );
-        assertThat( this.procedure.getAsClauseStatement( this.uow ), is( nullValue() ) );
+        this.procedure.setAsClauseStatement( getTransaction(), AS_ClAUSE );
+        this.procedure.setAsClauseStatement( getTransaction(), StringConstants.EMPTY_STRING );
+        assertThat( this.procedure.getAsClauseStatement( getTransaction() ), is( nullValue() ) );
     }
 
     @Test
     public void shouldClearAsClauseWithNullString() throws Exception {
-        this.procedure.setAsClauseStatement( this.uow, AS_ClAUSE );
-        this.procedure.setAsClauseStatement( this.uow, null );
-        assertThat( this.procedure.getAsClauseStatement( this.uow ), is( nullValue() ) );
+        this.procedure.setAsClauseStatement( getTransaction(), AS_ClAUSE );
+        this.procedure.setAsClauseStatement( getTransaction(), null );
+        assertThat( this.procedure.getAsClauseStatement( getTransaction() ), is( nullValue() ) );
     }
 
     @Test
     public void shouldFailConstructionIfNotVirtualProcedure() {
         if ( RelationalObjectImpl.VALIDATE_INITIAL_STATE ) {
             try {
-                new VirtualProcedureImpl( this.uow, _repo, _repo.komodoLibrary( this.uow ).getAbsolutePath() );
+                new VirtualProcedureImpl( getTransaction(), _repo, _repo.komodoLibrary( getTransaction() ).getAbsolutePath() );
                 fail();
             } catch ( final KException e ) {
                 // expected
@@ -69,24 +69,24 @@ public final class VirtualProcedureImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveCorrectSchemaElementType() throws Exception {
-        assertThat( this.procedure.getSchemaElementType( this.uow ), is( SchemaElementType.VIRTUAL ) );
+        assertThat( this.procedure.getSchemaElementType( getTransaction() ), is( SchemaElementType.VIRTUAL ) );
     }
 
     @Test
     public void shouldHaveCorrectTypeIdentifier() throws Exception {
-        assertThat(this.procedure.getTypeIdentifier( this.uow ), is(KomodoType.VIRTUAL_PROCEDURE));
+        assertThat(this.procedure.getTypeIdentifier( getTransaction() ), is(KomodoType.VIRTUAL_PROCEDURE));
     }
 
     @Test
     public void shouldHaveMoreRawProperties() throws Exception {
-        final String[] filteredProps = this.procedure.getPropertyNames( this.uow );
-        final String[] rawProps = this.procedure.getRawPropertyNames( this.uow );
+        final String[] filteredProps = this.procedure.getPropertyNames( getTransaction() );
+        final String[] rawProps = this.procedure.getRawPropertyNames( getTransaction() );
         assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
     }
 
     @Test
     public void shouldNotContainFilteredProperties() throws Exception {
-        final String[] filteredProps = this.procedure.getPropertyNames( this.uow );
+        final String[] filteredProps = this.procedure.getPropertyNames( getTransaction() );
         final Filter[] filters = this.procedure.getFilters();
 
         for ( final String name : filteredProps ) {
@@ -98,22 +98,22 @@ public final class VirtualProcedureImplTest extends RelationalModelTest {
 
     @Test
     public void shouldNotCountStatementOptionsAsChildren() throws Exception {
-        this.procedure.setStatementOption( this.uow, "sledge", "hammer" );
-        assertThat( this.procedure.getChildren( this.uow ).length, is( 0 ) );
+        this.procedure.setStatementOption( getTransaction(), "sledge", "hammer" );
+        assertThat( this.procedure.getChildren( getTransaction() ).length, is( 0 ) );
     }
 
     @Test
     public void shouldNotHaveAsClauseStatementPropertyAfterConstruction() throws Exception {
-        assertThat( this.procedure.getAsClauseStatement( this.uow ), is( nullValue() ) );
-        assertThat( this.procedure.hasProperty( this.uow, TeiidDdlLexicon.CreateProcedure.STATEMENT ), is( false ) );
+        assertThat( this.procedure.getAsClauseStatement( getTransaction() ), is( nullValue() ) );
+        assertThat( this.procedure.hasProperty( getTransaction(), TeiidDdlLexicon.CreateProcedure.STATEMENT ), is( false ) );
     }
 
     @Test
     public void shouldSetAsClauseProperty() throws Exception {
         final String value = AS_ClAUSE;
-        this.procedure.setAsClauseStatement( this.uow, value );
-        assertThat( this.procedure.getAsClauseStatement( this.uow ), is( value ) );
-        assertThat( this.procedure.getProperty( this.uow, TeiidDdlLexicon.CreateProcedure.STATEMENT ).getStringValue( this.uow ),
+        this.procedure.setAsClauseStatement( getTransaction(), value );
+        assertThat( this.procedure.getAsClauseStatement( getTransaction() ), is( value ) );
+        assertThat( this.procedure.getProperty( getTransaction(), TeiidDdlLexicon.CreateProcedure.STATEMENT ).getStringValue( getTransaction() ),
                     is( value ) );
     }
 
@@ -126,20 +126,20 @@ public final class VirtualProcedureImplTest extends RelationalModelTest {
     @Test
     public void shouldCreateUsingResolver() throws Exception {
         final String name = "blah";
-        final KomodoObject kobject = VirtualProcedureImpl.RESOLVER.create( this.uow,
+        final KomodoObject kobject = VirtualProcedure.RESOLVER.create( getTransaction(),
                                                                            _repo,
-                                                                           this.procedure.getParent( this.uow ),
+                                                                           this.procedure.getParent( getTransaction() ),
                                                                            name,
                                                                            null );
         assertThat( kobject, is( notNullValue() ) );
         assertThat( kobject, is( instanceOf( VirtualProcedure.class ) ) );
-        assertThat( kobject.getName( this.uow ), is( name ) );
+        assertThat( kobject.getName( getTransaction() ), is( name ) );
     }
 
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
-        final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        VirtualProcedureImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
+        final KomodoObject bogusParent = _repo.add( getTransaction(), null, "bogus", null );
+        VirtualProcedure.RESOLVER.create( getTransaction(), _repo, bogusParent, "blah", null );
     }
 
 }

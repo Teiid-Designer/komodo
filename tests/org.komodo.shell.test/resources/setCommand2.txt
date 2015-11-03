@@ -1,6 +1,0 @@
-# Tests the Set Property command using a relative context path
-create Vdb MyVdb
-create Model MyModel ./MyVdb
-create Table MyTable ./MyVdb/MyModel
-#
-set Property ANNOTATION mydescription ./MyVdb/MyModel/MyTable

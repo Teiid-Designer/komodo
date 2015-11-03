@@ -1,4 +1,0 @@
-#show status at root context
-show status
-
-

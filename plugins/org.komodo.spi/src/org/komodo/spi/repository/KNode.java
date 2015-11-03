@@ -22,7 +22,8 @@ public interface KNode {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
+     *        the transaction (cannot be <code>null</code> and must have a state of
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED}
      * @return the last segment of the absolute path (never empty)
      * @throws KException
      *         if an error occurs
@@ -32,8 +33,9 @@ public interface KNode {
 
     /**
      * @param transaction
-     *        the transaction (can be <code>null</code> if query should be automatically committed)
-     * @return the parent {@link KomodoObject Komodo object} (never <code>null</code>)
+     *        the transaction (cannot be <code>null</code> and must have a state of
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED}
+     * @return the parent {@link KomodoObject Komodo object} (can be <code>null</code> if at the Komodo root)
      * @throws KException
      *         if an error occurs
      */

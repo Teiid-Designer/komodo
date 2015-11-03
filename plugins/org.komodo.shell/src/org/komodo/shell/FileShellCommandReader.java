@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Map;
 import org.komodo.shell.Messages.SHELL;
+import org.komodo.shell.api.ShellCommandFactory;
 import org.komodo.shell.api.WorkspaceStatus;
 
 /**

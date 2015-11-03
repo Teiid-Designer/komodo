@@ -21,10 +21,18 @@
  */
 package org.komodo.relational.model;
 
+import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.RelationalObject;
+import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.TypeResolver;
+import org.komodo.relational.model.internal.SchemaImpl;
+import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Exportable;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 
@@ -47,6 +55,74 @@ public interface Schema extends RelationalObject, Exportable {
      * An empty array of schemas.
      */
     Schema[] NO_SCHEMAS = new Schema[0];
+
+    /**
+     * The resolver of a {@link Schema}.
+     */
+    public static final TypeResolver< Schema > RESOLVER = new TypeResolver< Schema >() {
+    
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.TypeResolver#create(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.Repository, org.komodo.spi.repository.KomodoObject, java.lang.String,
+         *      org.komodo.relational.RelationalProperties)
+         */
+        @Override
+        public Schema create( final UnitOfWork transaction,
+                              final Repository repository,
+                              final KomodoObject parent,
+                              final String id,
+                              final RelationalProperties properties ) throws KException {
+            final WorkspaceManager mgr = WorkspaceManager.getInstance( repository );
+            return mgr.createSchema( transaction, parent, id );
+        }
+    
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.TypeResolver#identifier()
+         */
+        @Override
+        public KomodoType identifier() {
+            return IDENTIFIER;
+        }
+    
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.TypeResolver#owningClass()
+         */
+        @Override
+        public Class< SchemaImpl > owningClass() {
+            return SchemaImpl.class;
+        }
+    
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.TypeResolver#resolvable(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.KomodoObject)
+         */
+        @Override
+        public boolean resolvable( final UnitOfWork transaction,
+                                   final KomodoObject kobject ) throws KException {
+            return ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, KomodoLexicon.Schema.NODE_TYPE );
+        }
+    
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.relational.TypeResolver#resolve(org.komodo.spi.repository.Repository.UnitOfWork,
+         *      org.komodo.spi.repository.KomodoObject)
+         */
+        @Override
+        public Schema resolve( final UnitOfWork transaction,
+                               final KomodoObject kobject ) throws KException {
+            return new SchemaImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
+        }
+    
+    };
 
     /**
      * @param transaction

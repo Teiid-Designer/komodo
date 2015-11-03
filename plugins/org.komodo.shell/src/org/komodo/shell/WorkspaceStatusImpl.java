@@ -22,35 +22,48 @@
 package org.komodo.shell;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintStream;
+import java.io.Writer;
+import java.lang.reflect.Modifier;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.komodo.core.KEngine;
-import org.komodo.importer.ImportMessages;
-import org.komodo.relational.teiid.Teiid;
-import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.repository.ObjectImpl;
+import org.komodo.repository.RepositoryImpl;
 import org.komodo.repository.SynchronousCallback;
 import org.komodo.shell.Messages.SHELL;
+import org.komodo.shell.api.KomodoObjectLabelProvider;
 import org.komodo.shell.api.KomodoShell;
-import org.komodo.shell.api.WorkspaceContext;
+import org.komodo.shell.api.ShellCommand;
+import org.komodo.shell.api.ShellCommandFactory;
+import org.komodo.shell.api.ShellCommandProvider;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.api.WorkspaceStatusEventHandler;
-import org.komodo.shell.util.ContextUtils;
+import org.komodo.shell.util.KomodoObjectUtils;
+import org.komodo.shell.util.PrintUtils;
 import org.komodo.spi.KException;
-import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
+import org.komodo.spi.repository.Repository.UnitOfWorkListener;
 import org.komodo.utils.ArgCheck;
+import org.komodo.utils.FileUtils;
 import org.komodo.utils.KLog;
 import org.komodo.utils.StringUtils;
 
@@ -59,31 +72,39 @@ import org.komodo.utils.StringUtils;
  */
 public class WorkspaceStatusImpl implements WorkspaceStatus {
 
-    private static final String SERVER_DEFAULT_KEY = "SERVER_DEFAULT"; //$NON-NLS-1$
+    private static final KLog LOGGER = KLog.getLogger();
+    /**
+     * A transaction commit/rollback source for when the transaction was called directly not going through the WorkspaceStatus.
+     */
+    static final String UNKNOWN_SOURCE = WorkspaceStatusTransaction.class.getSimpleName();
+
     private static final String SAVED_CONTEXT_PATH = "SAVED_CONTEXT_PATH"; //$NON-NLS-1$
-    private static final List< String > HIDDEN_PROPS = Arrays.asList( new String[] { SAVED_CONTEXT_PATH, SERVER_DEFAULT_KEY } );
+    private static final List< String > HIDDEN_PROPS = Arrays.asList( new String[] { SAVED_CONTEXT_PATH } );
 
     private final KomodoShell shell;
 
-    /* Workspace Context */
-    private WorkspaceContextImpl wsContext;
+    /* Root Context */
+    private KomodoObject rootContext;
 
-    /* Cache of context to avoid creating needless duplicate contexts */
-    private Map<String, WorkspaceContext> contextCache = new HashMap<String, WorkspaceContext>();
-
-    private UnitOfWork uow; // the current transaction
+    private WorkspaceStatusTransaction uow; // the current transaction
     private SynchronousCallback callback;
 
     private int count = 0; // commit count
 
-    private WorkspaceContext currentContext;
+    private KomodoObject currentContext;
     private Set<WorkspaceStatusEventHandler> eventHandlers = new HashSet<WorkspaceStatusEventHandler>();
 
-    private Properties wsProperties;
+    private Properties wsProperties = new Properties();
 
     private boolean recordingStatus = false;
+    private Writer recordingFileWriter = null;
+    private ShellCommandFactory commandFactory;
 
-    private Teiid teiid;
+    private Map<String,KomodoObject> stateObjects = new HashMap<String,KomodoObject>();
+
+    private KomodoObjectLabelProvider currentContextLabelProvider;
+    private KomodoObjectLabelProvider defaultLabelProvider;
+    private Collection<KomodoObjectLabelProvider> alternateLabelProviders = new ArrayList<>();
 
     /**
      * Constructor
@@ -103,39 +124,77 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
      *         error on initialisation failure
      */
     public WorkspaceStatusImpl( final UnitOfWork transaction,
-                                final KomodoShell shell ) throws Exception {
+                                final KomodoShell shell) throws Exception {
         this.shell = shell;
         init(transaction);
     }
 
     private void init( final UnitOfWork transaction ) throws Exception {
+        this.commandFactory = new ShellCommandFactoryImpl(this);
+
         if ( transaction == null ) {
-        	createTransaction("init"); //$NON-NLS-1$
+            createTransaction("init"); //$NON-NLS-1$
         } else {
-            this.uow = transaction;
+            this.uow = ( ( transaction instanceof WorkspaceStatusTransaction ) ? ( WorkspaceStatusTransaction )transaction
+                                                                               : new WorkspaceStatusTransaction( transaction ) );
             Repository.UnitOfWorkListener uowListener = transaction.getCallback();
             if(uowListener!=null && uowListener instanceof SynchronousCallback) {
                 this.callback = (SynchronousCallback)uowListener;
             }
         }
 
+        // The default root context is komodoRoot.  The providers may specify a higher root (as in WorkspaceManager)
         final Repository repo = getEngine().getDefaultRepository();
-        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(repo);
+        this.rootContext = new ObjectImpl( repo, RepositoryImpl.KOMODO_ROOT, 0 );
+        this.currentContext = this.rootContext;
 
-        wsContext = new WorkspaceContextImpl(this,null,wkspMgr);
-        contextCache.put( wkspMgr.getAbsolutePath(), wsContext );
+        // initialize the global properties
+        initGlobalProperties();
 
-        currentContext = wsContext;
+        this.defaultLabelProvider = new DefaultLabelProvider();
+        this.defaultLabelProvider.setRepository( repo );
+        this.defaultLabelProvider.setWorkspaceStatus( this );
 
-        // load saved state
-        this.wsProperties = new Properties();
+        // Discover any other label providers
+        discoverLabelProviders();
+        setLabelProvider(this.currentContext);
+    }
+
+    private void initGlobalProperties() throws KException {
         resetProperties();
+
+        // load shell properties if they exist
+        final String dataDir = this.shell.getShellDataLocation();
+        final File startupPropertiesFile = new File( dataDir, this.shell.getShellPropertiesFile() );
+
+        if ( startupPropertiesFile.exists() && startupPropertiesFile.isFile() && startupPropertiesFile.canRead() ) {
+            try ( final FileInputStream fis = new FileInputStream( startupPropertiesFile ) ) {
+                this.wsProperties.load( fis );
+            } catch ( final Exception e ) {
+                String msg = Messages.getString( SHELL.ERROR_LOADING_PROPERTIES,
+                                                 startupPropertiesFile.getAbsolutePath(),
+                                                 e.getMessage() );
+                PrintUtils.print(getOutputWriter(), CompletionConstants.MESSAGE_INDENT, msg);
+            }
+        }
+
+        // Init the recording output file if it is defined
+        String recordingFile = this.wsProperties.getProperty(RECORDING_FILE_KEY);
+        if(!StringUtils.isBlank(recordingFile)) {
+            setRecordingWriter(recordingFile);
+        }
+
+        // Let the providers init any provided states
+        initProvidedStates(this.wsProperties);
     }
 
     private void createTransaction(final String source ) throws Exception {
         final Repository repo = getEngine().getDefaultRepository();
         this.callback = new SynchronousCallback();
-        this.uow = repo.createTransaction( ( getClass().getSimpleName() + ':' + source + '-' + this.count++ ), false, callback );
+        final UnitOfWork transaction = repo.createTransaction( ( getClass().getSimpleName() + ':' + source + '-' + this.count++ ),
+                                                               false,
+                                                               this.callback );
+        this.uow = new WorkspaceStatusTransaction( transaction );
         KLog.getLogger().debug( "WorkspaceStatusImpl.createTransaction: " + this.uow.getName() ); //$NON-NLS-1$
     }
 
@@ -155,8 +214,13 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     }
 
     @Override
-    public PrintStream getOutputStream() {
-        return shell.getOutputStream();
+    public Writer getOutputWriter() {
+        return shell.getOutputWriter();
+    }
+
+    @Override
+    public ShellCommandFactory getCommandFactory() {
+        return commandFactory;
     }
 
     /**
@@ -178,55 +242,58 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     public void setTransaction( final UnitOfWork transaction ) {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        this.uow = transaction;
+        this.uow = ( ( transaction instanceof WorkspaceStatusTransaction ) ? ( WorkspaceStatusTransaction )transaction
+                                                                           : new WorkspaceStatusTransaction( transaction ) );
     }
 
     @Override
-	public void commit( final String source ) throws Exception {
+    public void commit( final String source ) throws Exception {
+        String newTxName = source;
         final String txName = this.uow.getName();
-        this.uow.commit();
+        this.uow.getDelegate().commit();
 
-        final boolean success = this.callback.await( 3, TimeUnit.MINUTES );
-        if ( success ) {
-            final KException error = uow.getError();
-            final State txState = this.uow.getState();
+        try {
+            final boolean success = this.callback.await( 3, TimeUnit.MINUTES );
 
-            if ( ( error != null ) || !State.COMMITTED.equals( txState ) ) {
-                throw new KException( Messages.getString( SHELL.TRANSACTION_COMMIT_ERROR, txName ), error );
+            if ( success ) {
+                final KException error = this.uow.getError();
+
+                if ( error != null ) {
+                    newTxName += "__commitSuccessWithError"; //$NON-NLS-1$
+                    throw new KException( Messages.getString( SHELL.TRANSACTION_COMMIT_ERROR, txName ), error );
+                }
+
+                final Throwable callbackError = this.callback.error();
+
+                if ( callbackError != null ) {
+                    newTxName += "__commitSuccessWithCallbackError"; //$NON-NLS-1$
+                    throw new KException( Messages.getString( SHELL.TRANSACTION_COMMIT_ERROR, txName ), callbackError );
+                }
+
+                final State txState = this.uow.getState();
+
+                if ( !State.COMMITTED.equals( txState ) ) {
+                    newTxName += ( "__commitSuccessWrongState:" + txState ); //$NON-NLS-1$
+                    throw new KException( Messages.getString( SHELL.TRANSACTION_COMMIT_ERROR, txName ) );
+                }
+            } else {
+                newTxName += "__commitFail"; //$NON-NLS-1$
+                throw new KException( Messages.getString( SHELL.TRANSACTION_TIMEOUT, txName ) );
             }
-        } else {
-            throw new KException( Messages.getString( SHELL.TRANSACTION_TIMEOUT, txName ) );
-        }
-
-        // create new transaction
-        createTransaction(source);
-    }
-    
-    @Override
-	public void commitImport( final String source, ImportMessages importMessages ) throws Exception {
-        final String txName = this.uow.getName();
-        this.uow.commit();
-
-        final boolean success = this.callback.await( 3, TimeUnit.MINUTES );
-        if ( success ) {
-        	// For imports, if has callback error - add to import errors and return.
-        	if(this.callback.hasError()) {
-            	importMessages.addErrorMessage(callback.error());
-            	createTransaction(source);
-            	return;
-        	}
-            final KException error = uow.getError();
-            final State txState = this.uow.getState();
-
-            if ( ( error != null ) || !State.COMMITTED.equals( txState ) ) {
-                throw new KException( Messages.getString( SHELL.TRANSACTION_COMMIT_ERROR, txName ), error );
+        } catch ( final Exception e ) {
+            if ( newTxName.equals( source ) ) {
+                newTxName += "__commitException"; //$NON-NLS-1$
             }
-        } else {
-            throw new KException( Messages.getString( SHELL.TRANSACTION_TIMEOUT, txName ) );
-        }
 
-        // create new transaction
-        createTransaction(source);
+            if ( UNKNOWN_SOURCE.equals( source ) ) {
+                this.uow.getCallback().errorOccurred( e );
+                KLog.getLogger().debug( "{0}.commit error: ", e, UNKNOWN_SOURCE ); //$NON-NLS-1$
+            } else {
+                throw e;
+            }
+        } finally {
+            createTransaction( newTxName );
+        }
     }
 
     /**
@@ -236,116 +303,89 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
      */
     @Override
     public void rollback( final String source ) throws Exception {
+        String newTxName = source;
         final String txName = this.uow.getName();
-        this.uow.rollback();
+        this.uow.getDelegate().rollback();
 
-        final boolean success = this.callback.await( 3, TimeUnit.MINUTES );
+        try {
+            final boolean success = this.callback.await( 3, TimeUnit.MINUTES );
 
-        if ( success ) {
-            final KException error = uow.getError();
-            final State txState = this.uow.getState();
+            if ( success ) {
+                final KException error = uow.getError();
 
-            if ( ( error != null ) || !State.ROLLED_BACK.equals( txState ) ) {
-                throw new KException( Messages.getString( SHELL.TRANSACTION_ROLLBACK_ERROR, txName ), error );
+                if ( error != null ) {
+                    newTxName += "__rollbackSuccessWithError"; //$NON-NLS-1$
+                    throw new KException( Messages.getString( SHELL.TRANSACTION_ROLLBACK_ERROR, txName ), error );
+                }
+
+                final Throwable callbackError = this.callback.error();
+
+                if ( callbackError != null ) {
+                    newTxName += "__rollbackSuccessWithCallbackError"; //$NON-NLS-1$
+                    throw new KException( Messages.getString( SHELL.TRANSACTION_ROLLBACK_ERROR, txName ), callbackError );
+                }
+
+                final State txState = this.uow.getState();
+
+                if ( !State.ROLLED_BACK.equals( txState ) ) {
+                    newTxName += ( "__rollbackSuccessWrongState:" + txState ); //$NON-NLS-1$
+                    throw new KException( Messages.getString( SHELL.TRANSACTION_ROLLBACK_ERROR, txName ) );
+                }
+            } else {
+                newTxName += "__rollbackFail"; //$NON-NLS-1$
+                throw new KException( Messages.getString( SHELL.TRANSACTION_TIMEOUT, txName ) );
             }
-        } else {
-            throw new KException( Messages.getString( SHELL.TRANSACTION_TIMEOUT, txName ) );
-        }
-
-        // create new transaction
-        createTransaction(source);
-    }
-
-    @Override
-    public WorkspaceContext getWorkspaceContext(String contextPath) {
-        if (contextPath == null)
-            return null;
-
-        WorkspaceContext context = contextCache.get(contextPath);
-        if (context != null)
-            return context;
-
-        if (FORWARD_SLASH.equals(contextPath))
-            return getWorkspaceContext();
-
-        //
-        // Need to hunt for the path
-        // contextPath should be of the form /tko:komodo/tko:workspace/vdb/.../...
-        //
-        String[] contexts = contextPath.split("\\/"); //$NON-NLS-1$
-        context = getWorkspaceContext();
-        for (int i = 0; i < contexts.length; ++i) {
-            try {
-                context = context.getChild(contexts[i]);
-            } catch (Exception ex) {
-                return null;
+        } catch ( final Exception e ) {
+            if ( newTxName.equals( source ) ) {
+                newTxName += "__rollbackException"; //$NON-NLS-1$
             }
+
+            if ( UNKNOWN_SOURCE.equals( source ) ) {
+                this.uow.getCallback().errorOccurred( e );
+                KLog.getLogger().debug( "{0}.rollback error: ", e, UNKNOWN_SOURCE ); //$NON-NLS-1$
+            } else {
+                throw e;
+            }
+        } finally {
+            createTransaction( newTxName );
         }
-
-        return context;
     }
 
     @Override
-    public void addWorkspaceContext(String contextId, WorkspaceContext context) {
-        contextCache.put(contextId, context);
-    }
+    public void setCurrentContext(KomodoObject context) throws Exception {
+        this.currentContext = context;
+        this.wsProperties.setProperty( SAVED_CONTEXT_PATH, this.currentContext.getAbsolutePath() );
+        setLabelProvider(this.currentContext);  // Resets the current LabelProvider for the context
 
-    @Override
-    public Teiid getTeiid() {
-        // If teiid is not set, look at global default.  use it if found.
-        if( teiid == null ) {
-            String globalDefaultServer = getProperties().getProperty(SERVER_DEFAULT_KEY);
-            if(!StringUtils.isEmpty(globalDefaultServer)) {
-                setDefaultServer(globalDefaultServer);
+        { // try and resolve
+            final KomodoObject resolved = resolve( this.currentContext );
+
+            if ( resolved != null ) {
+                this.currentContext = resolved;
             }
         }
-        return teiid;
-    }
 
-    @Override
-    public boolean hasConnectedTeiid() {
-        Teiid teiid = getTeiid();
-
-        if(teiid!=null && teiid.getTeiidInstance(getTransaction()).isConnected()) {
-            return true;
-        }
-
-        return false;
-    }
-
-    @Override
-    public void setTeiid(Teiid teiid) throws Exception {
-        this.teiid = teiid;
-        // Set the hidden property SERVER_DEFAULT_KEY
-        String teiidName = teiid==null ? StringConstants.EMPTY_STRING : this.teiid.getName(getTransaction());
-        this.wsProperties.setProperty( SERVER_DEFAULT_KEY, teiidName);
-    }
-
-    @Override
-    public void setCurrentContext(WorkspaceContext context) throws Exception {
-        currentContext = context;
-        this.wsProperties.setProperty( SAVED_CONTEXT_PATH, this.currentContext.getFullName() );
         fireContextChangeEvent();
     }
 
     @Override
-    public WorkspaceContext getCurrentContext() {
-        return currentContext;
+    public KomodoObject getCurrentContext() {
+        return this.currentContext;
     }
 
-    /**
-     * @return the contextCache
-     */
-    public Map<String, WorkspaceContext> getContextCache() {
-        return this.contextCache;
-    }
-
-    /* (non-Javadoc)
-     * @see org.komodo.shell.api.WorkspaceStatus#getWorkspaceContext()
-     */
     @Override
-    public WorkspaceContext getWorkspaceContext() {
-        return wsContext;
+    public String getCurrentContextDisplayPath() {
+        return getLabelProvider().getDisplayPath(this.currentContext);
+    }
+
+    @Override
+    public String getDisplayPath(KomodoObject context) {
+        return getLabelProvider().getDisplayPath(context);
+    }
+
+    @Override
+    public KomodoObject getRootContext() {
+        return this.rootContext;
     }
 
     /**
@@ -391,15 +431,11 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     }
 
     /* (non-Javadoc)
-     * @see org.komodo.shell.api.WorkspaceStatus#getRecordingOutputFile()
+     * @see org.komodo.shell.api.WorkspaceStatus#getRecordingWriter()
      */
     @Override
-    public File getRecordingOutputFile() {
-    	String filePath = this.wsProperties.getProperty(WorkspaceStatus.RECORDING_FILE_KEY);
-    	if(StringUtils.isEmpty(filePath)) {
-    		return null;
-    	}
-        return new File(filePath);
+    public Writer getRecordingWriter() {
+        return this.recordingFileWriter;
     }
 
     /**
@@ -412,7 +448,8 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
         final String propertyName = name.toUpperCase();
         return propertyName.equals( SHOW_FULL_PATH_IN_PROMPT_KEY ) || propertyName.equals( SHOW_HIDDEN_PROPERTIES_KEY )
-               || propertyName.equals( SHOW_PROP_NAME_PREFIX_KEY ) || propertyName.equals( SHOW_TYPE_IN_PROMPT_KEY );
+               || propertyName.equals( SHOW_PROP_NAME_PREFIX_KEY ) || propertyName.equals( SHOW_TYPE_IN_PROMPT_KEY )
+               || propertyName.equals( AUTO_COMMIT );
     }
 
     /**
@@ -489,13 +526,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         return null; // name and value are valid
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.WorkspaceStatus#resetProperties()
-     */
-    @Override
-    public void resetProperties() {
+    private void resetProperties() {
         for ( final Entry< String, String > entry : GLOBAL_PROPS.entrySet() ) {
             setProperty( entry.getKey(), entry.getValue() );
         }
@@ -524,6 +555,9 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
                     setProperty( name, null );
                 }
             }
+            if(name.toUpperCase().equals(WorkspaceStatus.RECORDING_FILE_KEY)) {
+                setRecordingWriter(value);
+            }
         }
     }
 
@@ -542,41 +576,67 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
             }
 
             // set current context to saved context if necessary
-            final String savedPath = props.getProperty( SAVED_CONTEXT_PATH );
+            String savedPath = props.getProperty( SAVED_CONTEXT_PATH );
 
-            if ( !StringUtils.isBlank( savedPath ) ) {
-                WorkspaceContext context = ContextUtils.getContextForPath( this, savedPath );
-
-                // saved path no longer exists so set context to workspace root
-                if ( context == null ) {
-                    context = getWorkspaceContext();
-                }
-
-                setCurrentContext( context );
+            if ( StringUtils.isBlank( savedPath ) ) {
+                savedPath = KomodoObjectLabelProvider.WORKSPACE_PATH;
             }
-            
-            // set default teiid if necessary
-            final String defaultServer = props.getProperty( SERVER_DEFAULT_KEY );
 
-            if ( !StringUtils.isBlank( defaultServer ) ) {
-                setDefaultServer(defaultServer);
+            final Repository repo = getEngine().getDefaultRepository();
+            KomodoObject context = new ObjectImpl( repo, savedPath, 0 );
+
+            // make sure object still exists
+            try {
+                context.getName( getTransaction() );
+            } catch ( final Exception e ) {
+                context = null;
             }
+
+            // saved path no longer exists so set context to workspace root
+            if ( context == null ) {
+                context = getRootContext();
+            }
+
+            setCurrentContext( context );
         }
     }
-    
-    private void setDefaultServer(String defaultServer) {
+
+    // Attempt to init the writer using the supplied file path
+    private void setRecordingWriter(String recordingFilePath) {
+        // commandWriter for output of error messages
+        Writer commandWriter = getOutputWriter();
+
+        if(recordingFilePath==null) {
+            recordingFileWriter = null;
+            return;
+        }
+
+        // Checks to ensure the specified file is valid and writable
+        File outputFile = new File(recordingFilePath);
+
+        recordingFileWriter = null;
         try {
-            // Attempt to get default context from workspace
-            WorkspaceContext teiidContext = getWorkspaceContext().getChild(defaultServer, KomodoType.TEIID.getType());
-            // If context found, set the default teiid
-            if(teiidContext!=null) {
-                Teiid theTeiid = getWorkspaceContext().getWorkspaceManager().resolve(getTransaction(), teiidContext.getKomodoObj(), Teiid.class);
-                if( theTeiid != null ) {
-                    teiid = theTeiid;
-                }
+            // Creates file only if it doesnt exist
+            outputFile.createNewFile();
+            // Make sure we can write to the file
+            if(!outputFile.canWrite()) {
+                PrintUtils.print(commandWriter,CompletionConstants.MESSAGE_INDENT, Messages.getString(SHELL.RecordingFileCannotWrite, recordingFilePath));
+                return;
             }
-        } catch (Exception e) {
-            // On exception, the server is not set
+            recordingFileWriter = new FileWriter(outputFile,true);
+        } catch (IOException ex) {
+            PrintUtils.print(commandWriter, 0, Messages.getString(SHELL.RecordingFileOutputError,outputFile));
+        }
+    }
+
+    @Override
+    public void closeRecordingWriter() {
+        if(this.recordingFileWriter!=null) {
+            try {
+                this.recordingFileWriter.close();
+            } catch (IOException ex) {
+                // nothing to do
+            }
         }
     }
 
@@ -594,6 +654,421 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         }
 
         return copy;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.WorkspaceStatus#getCommand(java.lang.String)
+     */
+    @Override
+    public ShellCommand getCommand( final String commandName ) throws Exception {
+        return this.commandFactory.getCommand( commandName );
+    }
+
+    /* (non-Javadoc)
+     * @see org.komodo.shell.api.WorkspaceStatus#getStateObjects()
+     */
+    @Override
+    public Map<String, KomodoObject> getStateObjects() {
+        return this.stateObjects;
+    }
+
+    /* (non-Javadoc)
+     * @see org.komodo.shell.api.WorkspaceStatus#setStateObject(java.lang.String, org.komodo.spi.repository.KomodoObject)
+     */
+    @Override
+    public void setStateObject(String key,
+                               KomodoObject stateObj) {
+        this.stateObjects.put(key, stateObj);
+    }
+
+    /* (non-Javadoc)
+     * @see org.komodo.shell.api.WorkspaceStatus#removeStateObject(java.lang.String)
+     */
+    @Override
+    public void removeStateObject(String key) {
+        this.stateObjects.remove(key);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.WorkspaceStatus#getLabelProvider()
+     */
+    @Override
+    public KomodoObjectLabelProvider getLabelProvider() {
+        return this.currentContextLabelProvider;
+    }
+
+    /*
+     * Set the Label provider for the supplied context
+     * @param context the context
+     */
+    private void setLabelProvider(KomodoObject context) {
+        // If an alternate provider yields a path for this KomodoObject, it is used.  Otherwise, the defaultProvider is used.
+        KomodoObjectLabelProvider resultLabelProvider = null;
+        if(!this.alternateLabelProviders.isEmpty()) {
+            for(KomodoObjectLabelProvider altProvider : this.alternateLabelProviders) {
+                if( !StringUtils.isEmpty(altProvider.getDisplayPath(context)) ) {
+                    resultLabelProvider = altProvider;
+                    break;
+                }
+            }
+        }
+        this.currentContextLabelProvider = (resultLabelProvider!=null) ? resultLabelProvider : defaultLabelProvider;
+    }
+
+    @Override
+    public String getTypeDisplay ( final KomodoObject kObj ) {
+        if ( !this.commandFactory.getCommandProviders().isEmpty() ) {
+            ShellCommandProvider defaultProvider = null;
+
+            try {
+                for ( ShellCommandProvider provider : this.commandFactory.getCommandProviders() ) {
+                    try {
+                        if ( provider instanceof BuiltInShellCommandProvider ) {
+                            defaultProvider = provider;
+                            continue;
+                        }
+
+                        String typeString = provider.getTypeDisplay( getTransaction(), kObj );
+                        if ( typeString != null ) return typeString;
+                    } catch ( final Exception e ) {
+                        KLog.getLogger().error( "WorkspaceStatusImpl.getTypeDisplay error in provider \"{0}\"", e, provider ); //$NON-NLS-1$
+                        // continue on to next provider
+                    }
+                }
+
+                return defaultProvider.getTypeDisplay( getTransaction(), kObj );
+            } catch ( KException ex ) {
+                KLog.getLogger().error( "WorkspaceStatusImpl.getTypeDisplay error in built-in provider", ex ); //$NON-NLS-1$
+            }
+        }
+
+        assert false;
+        KLog.getLogger().error( "WorkspaceStatusImpl.getTypeDisplay: no type display found for \"{0}\"", kObj.getAbsolutePath() ); //$NON-NLS-1$
+        return kObj.getClass().getSimpleName();
+    }
+
+    @Override
+    public List<String> getProvidedStatusMessages( final KomodoObject kObj ) {
+        List<String> allMessages = new ArrayList<String>();
+        if(!this.commandFactory.getCommandProviders().isEmpty()) {
+            for(ShellCommandProvider provider : this.commandFactory.getCommandProviders()) {
+                String statusMessage = null;
+                try {
+                    statusMessage = provider.getStatusMessage(getTransaction(), kObj);
+                } catch (KException ex) {
+                    // just set message null
+                }
+                if(!StringUtils.isBlank(statusMessage)) {
+                    allMessages.add(statusMessage);
+                }
+            }
+        }
+        return allMessages;
+    }
+
+    @Override
+    public void initProvidedStates( final Properties globalProps ) throws KException {
+        if(!this.commandFactory.getCommandProviders().isEmpty()) {
+            for(ShellCommandProvider provider : this.commandFactory.getCommandProviders()) {
+                provider.initWorkspaceState(this);
+            }
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.WorkspaceStatus#getAvailableCommands()
+     */
+    @Override
+    public String[] getAvailableCommands() throws Exception {
+        return this.commandFactory.getCommandNamesForCurrentContext().toArray( new String[ 0 ] );
+    }
+
+    @Override
+    public < T extends KomodoObject > T resolve ( final KomodoObject kObj ) throws KException {
+        if(!this.commandFactory.getCommandProviders().isEmpty()) {
+            for(ShellCommandProvider provider : this.commandFactory.getCommandProviders()) {
+                T resolvedObj = provider.resolve(getTransaction(), kObj);
+                if(resolvedObj!=null) return resolvedObj;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.WorkspaceStatus#isAutoCommit()
+     */
+    @Override
+    public boolean isAutoCommit() {
+        assert ( this.wsProperties.containsKey( AUTO_COMMIT ) );
+        return Boolean.parseBoolean( this.wsProperties.getProperty( AUTO_COMMIT ) );
+    }
+
+    private void discoverLabelProviders( ) {
+        final List< ClassLoader > commandClassloaders = new ArrayList< >();
+        commandClassloaders.add( Thread.currentThread().getContextClassLoader() );
+
+        // Find providers in the user's commands directory
+        final String userHome = System.getProperty( "user.home", "/" ); //$NON-NLS-1$ //$NON-NLS-2$
+        final String commandsDirName = System.getProperty( "komodo.shell.commandsDir", userHome + "/.komodo/commands" ); //$NON-NLS-1$ //$NON-NLS-2$
+        LOGGER.debug( "WorkspaceStatusImpl: commands directory is \"{0}\"", commandsDirName ); //$NON-NLS-1$
+        final File commandsDir = new File( commandsDirName );
+
+        if ( !commandsDir.exists() ) {
+            commandsDir.mkdirs();
+        }
+
+        if ( commandsDir.isDirectory() ) {
+            try {
+                final Collection< File > jarFiles = FileUtils.getFilesForPattern( commandsDir.getCanonicalPath(), "", ".jar" ); //$NON-NLS-1$ //$NON-NLS-2$
+
+                if ( !jarFiles.isEmpty() ) {
+                    final List< URL > jarURLs = new ArrayList< >( jarFiles.size() );
+
+                    for ( final File jarFile : jarFiles ) {
+                        final URL jarUrl = jarFile.toURI().toURL();
+                        jarURLs.add( jarUrl );
+                        LOGGER.debug( "WorkspaceStatusImpl: adding discovered jar \"{0}\"", jarUrl ); //$NON-NLS-1$
+                    }
+
+                    final URL[] urls = jarURLs.toArray( new URL[ jarURLs.size() ] );
+                    final ClassLoader extraCommandsCL = new URLClassLoader( urls,
+                                                                            Thread.currentThread().getContextClassLoader() );
+                    commandClassloaders.add( extraCommandsCL );
+                }
+            } catch ( final IOException e ) {
+                KEngine.getInstance().getErrorHandler().error( e );
+            }
+        }
+
+        // iterate through the ClassLoaders and use the Java ServiceLoader mechanism to load the providers
+        for ( final ClassLoader classLoader : commandClassloaders ) {
+            for ( final KomodoObjectLabelProvider provider : ServiceLoader.load( KomodoObjectLabelProvider.class, classLoader ) ) {
+                if ( !Modifier.isAbstract( provider.getClass().getModifiers() ) ) {
+                    provider.setRepository(getEngine().getDefaultRepository());
+                    provider.setWorkspaceStatus(this);
+                    LOGGER.debug( "WorkspaceStatusImpl: adding LabelProvider \"{0}\"", provider.getClass().getName() ); //$NON-NLS-1$
+                    this.alternateLabelProviders.add( provider );
+                }
+            }
+        }
+
+        LOGGER.debug( "WorkspaceStatusImpl: found \"{0}\" LabelProviders", alternateLabelProviders.size() ); //$NON-NLS-1$
+    }
+
+    /**
+     * A class to make sure commit and rollback is not called directly on the UnitOfWork. We want associated WorkspaceStatus
+     * methods to be called instead.
+     */
+    class WorkspaceStatusTransaction extends RepositoryImpl.UnitOfWorkImpl {
+
+        private final UnitOfWork delegate;
+
+        WorkspaceStatusTransaction( final UnitOfWork delegate ) {
+            super( delegate.getName(),
+                   ( ( RepositoryImpl.UnitOfWorkImpl )delegate ).getSession(),
+                   delegate.isRollbackOnly(),
+                   delegate.getCallback() );
+            this.delegate = delegate;
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.spi.repository.Repository.UnitOfWork#commit()
+         */
+        @Override
+        public void commit() {
+            try {
+                WorkspaceStatusImpl.this.commit( UNKNOWN_SOURCE );
+            } catch ( final Exception e ) {
+                assert false;
+                // should be handled in main class rollback
+            }
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.spi.repository.Repository.UnitOfWork#decode(java.lang.String)
+         */
+        @Override
+        public String decode( final String encoded ) {
+            return this.delegate.decode( encoded );
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.spi.repository.Repository.UnitOfWork#getCallback()
+         */
+        @Override
+        public UnitOfWorkListener getCallback() {
+            return this.delegate.getCallback();
+        }
+
+        UnitOfWork getDelegate() {
+            return this.delegate;
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.spi.repository.Repository.UnitOfWork#getError()
+         */
+        @Override
+        public KException getError() {
+            return this.delegate.getError();
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.spi.repository.Repository.UnitOfWork#getName()
+         */
+        @Override
+        public String getName() {
+            return this.delegate.getName();
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.spi.repository.Repository.UnitOfWork#getState()
+         */
+        @Override
+        public State getState() {
+            return this.delegate.getState();
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.spi.repository.Repository.UnitOfWork#hasChanges()
+         */
+        @Override
+        public boolean hasChanges() throws KException {
+            return this.delegate.hasChanges();
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.spi.repository.Repository.UnitOfWork#isRollbackOnly()
+         */
+        @Override
+        public boolean isRollbackOnly() {
+            return this.delegate.isRollbackOnly();
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.spi.repository.Repository.UnitOfWork#rollback()
+         */
+        @Override
+        public void rollback() {
+            try {
+                WorkspaceStatusImpl.this.rollback( UNKNOWN_SOURCE );
+            } catch ( final Exception e ) {
+                assert false;
+                // should be handled in main class rollback
+            }
+        }
+
+    }
+
+    /* (non-Javadoc)
+     * @see org.komodo.shell.api.WorkspaceStatus#getContextForDisplayPath(java.lang.String)
+     */
+    @Override
+    public KomodoObject getContextForDisplayPath(String displayPath) {
+        if(StringUtils.isBlank(displayPath)) return getCurrentContext();
+
+        // check path for cd into root options
+        if ( displayPath.equals( FORWARD_SLASH ) ) {
+            return getRootContext();
+        }
+
+        // If supplied path doesnt start with FORWARD_SLASH, it should be relative to current context
+        String entireDisplayPath = displayPath;
+        if(!displayPath.startsWith(FORWARD_SLASH)) {
+            if(KomodoObjectUtils.isRoot(getCurrentContext())) {
+                entireDisplayPath = FORWARD_SLASH+displayPath;
+            } else {
+                entireDisplayPath = getCurrentContextDisplayPath()+FORWARD_SLASH+displayPath;
+            }
+        }
+
+        entireDisplayPath = removePathDots(entireDisplayPath);
+        // check path for cd into root options
+        if ( entireDisplayPath.equals( FORWARD_SLASH ) ) {
+            return getRootContext();
+        }
+
+        String repoPath = getLabelProvider().getPath(entireDisplayPath);
+        if(repoPath==null) return null;
+
+        KomodoObject resultObject = null;
+        try {
+            resultObject = getRootContext().getRepository().getFromWorkspace(getTransaction(), repoPath);
+        } catch (KException ex) {
+            // Failed to locate the object
+        }
+
+        if(resultObject!=null) {
+            try {
+                final KomodoObject resolved = resolve( resultObject );
+
+                if ( resolved != null ) {
+                    return resolved;
+                }
+            } catch (KException ex) {
+                LOGGER.debug( "WorkspaceStatusImpl: problem resolving object" ); //$NON-NLS-1$
+            }
+        }
+        return resultObject;
+    }
+
+    /*
+     * Remove '..' and '.' segments from a display path
+     */
+    private String removePathDots(String absoluteDisplayPath) {
+        ArgCheck.isNotNull(absoluteDisplayPath);
+        String[] segments = absoluteDisplayPath.split(FORWARD_SLASH);
+
+        List<String> newSegments = new ArrayList<String>();
+        for(String segment : segments) {
+            // Dot stays in same place
+            if(segment.equals(DOT) || StringUtils.isBlank(segment)) {
+                continue;
+            // Dot dot go up
+            } else if(segment.equals(DOT_DOT)) {
+                if(newSegments.size()>0) {
+                    newSegments.remove(newSegments.size()-1);
+                }
+            } else {
+                newSegments.add(segment);
+            }
+        }
+
+        // Construct the new path without dots
+        StringBuilder sb = new StringBuilder(FORWARD_SLASH);
+        for(int i=0; i<newSegments.size(); i++) {
+            sb.append(newSegments.get(i));
+            if(i != newSegments.size()-1) {
+                sb.append(FORWARD_SLASH);
+            }
+        }
+
+        return sb.toString();
     }
 
 }

@@ -1,0 +1,255 @@
+/*
+ * JBoss, Home of Professional Open Source.
+ *
+ * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
+ *
+ * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
+ */
+package org.komodo.relational.commands.userdefinedfunction;
+
+import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.INVALID_BOOLEAN_PROPERTY_VALUE;
+import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.INVALID_INTEGER_PROPERTY_VALUE;
+import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.INVALID_PROPERTY_NAME;
+import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.MISSING_PROPERTY_NAME_VALUE;
+import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.SET_PROPERTY_SUCCESS;
+import static org.komodo.relational.commands.userdefinedfunction.UserDefinedFunctionCommandMessages.General.INVALID_DETERMINISTIC_PROPERTY_VALUE;
+import static org.komodo.relational.commands.userdefinedfunction.UserDefinedFunctionCommandMessages.General.INVALID_SCHEMA_ELEMENT_TYPE_PROPERTY_VALUE;
+import java.util.List;
+import org.komodo.relational.model.Function;
+import org.komodo.relational.model.SchemaElement;
+import org.komodo.relational.model.UserDefinedFunction;
+import org.komodo.shell.CommandResultImpl;
+import org.komodo.shell.api.Arguments;
+import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.shell.commands.SetPropertyCommand;
+import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.utils.StringUtils;
+
+/**
+ * A shell command to set UserDefinedFunction properties
+ */
+public final class SetUserDefinedFunctionPropertyCommand extends UserDefinedFunctionShellCommand {
+
+    static final String NAME = SetPropertyCommand.NAME;
+
+    /**
+     * @param status
+     *        the shell's workspace status (cannot be <code>null</code>)
+     */
+    public SetUserDefinedFunctionPropertyCommand( final WorkspaceStatus status ) {
+        super( NAME, status );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#doExecute()
+     */
+    @Override
+    protected CommandResult doExecute() {
+        CommandResult result = null;
+
+        try {
+            final String name = requiredArgument( 0, getWorkspaceMessage( MISSING_PROPERTY_NAME_VALUE ) );
+            final String value = requiredArgument( 1, getWorkspaceMessage( MISSING_PROPERTY_NAME_VALUE ) );
+
+            final UserDefinedFunction func = getUserDefinedFunction();
+            final UnitOfWork transaction = getTransaction();
+            String errorMsg = null;
+
+            switch ( name ) {
+                case AGGREGATE:
+                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                        func.setAggregate( transaction, Boolean.parseBoolean( value ) );
+                    } else {
+                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, AGGREGATE );
+                    }
+
+                    break;
+                case ALLOWS_DISTINCT:
+                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                        func.setAllowsDistinct( transaction, Boolean.parseBoolean( value ) );
+                    } else {
+                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, ALLOWS_DISTINCT );
+                    }
+
+                    break;
+                case ALLOWS_ORDERBY:
+                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                        func.setAllowsOrderBy( transaction, Boolean.parseBoolean( value ) );
+                    } else {
+                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, ALLOWS_ORDERBY );
+                    }
+
+                    break;
+                case ANALYTIC:
+                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                        func.setAnalytic( transaction, Boolean.parseBoolean( value ) );
+                    } else {
+                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, ANALYTIC );
+                    }
+
+                    break;
+                case CATEGORY:
+                    func.setCategory( getTransaction(), value );
+                    break;
+                case DECOMPOSABLE:
+                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                        func.setDecomposable( transaction, Boolean.parseBoolean( value ) );
+                    } else {
+                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, DECOMPOSABLE );
+                    }
+
+                    break;
+                case DESCRIPTION:
+                    func.setDescription( getTransaction(), value );
+                    break;
+                case DETERMINISM:
+                    if ( Function.Determinism.COMMAND_DETERMINISTIC.name().equals( value ) ) {
+                        func.setDeterminism( transaction, Function.Determinism.COMMAND_DETERMINISTIC );
+                    } else if ( Function.Determinism.DETERMINISTIC.name().equals( value ) ) {
+                        func.setDeterminism( transaction, Function.Determinism.DETERMINISTIC );
+                    } else if ( Function.Determinism.NONDETERMINISTIC.name().equals( value ) ) {
+                        func.setDeterminism( transaction, Function.Determinism.NONDETERMINISTIC );
+                    } else if ( Function.Determinism.SESSION_DETERMINISTIC.name().equals( value ) ) {
+                        func.setDeterminism( transaction, Function.Determinism.SESSION_DETERMINISTIC );
+                    } else if ( Function.Determinism.USER_DETERMINISTIC.name().equals( value ) ) {
+                        func.setDeterminism( transaction, Function.Determinism.USER_DETERMINISTIC );
+                    } else if ( Function.Determinism.VDB_DETERMINISTIC.name().equals( value ) ) {
+                        func.setDeterminism( transaction, Function.Determinism.VDB_DETERMINISTIC );
+                    } else {
+                        errorMsg = getWorkspaceMessage( INVALID_DETERMINISTIC_PROPERTY_VALUE, DETERMINISM );
+                    }
+
+                    break;
+                case JAVA_CLASS:
+                    func.setJavaClass( getTransaction(), value );
+                    break;
+                case JAVA_METHOD:
+                    func.setJavaMethod( getTransaction(), value );
+                    break;
+                case NAME_IN_SOURCE:
+                    func.setNameInSource( getTransaction(), value );
+                    break;
+                case NULL_ON_NULL:
+                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                        func.setNullOnNull( transaction, Boolean.parseBoolean( value ) );
+                    } else {
+                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, NULL_ON_NULL );
+                    }
+
+                    break;
+                case SCHEMA_ELEMENT_TYPE:
+                    if ( SchemaElement.SchemaElementType.FOREIGN.name().equals( value ) ) {
+                        func.setSchemaElementType( transaction, SchemaElement.SchemaElementType.FOREIGN );
+                    } else if ( SchemaElement.SchemaElementType.VIRTUAL.name().equals( value ) ) {
+                        func.setSchemaElementType( transaction, SchemaElement.SchemaElementType.VIRTUAL );
+                    } else {
+                        errorMsg = getWorkspaceMessage( INVALID_SCHEMA_ELEMENT_TYPE_PROPERTY_VALUE, SCHEMA_ELEMENT_TYPE );
+                    }
+
+                    break;
+                case UPDATE_COUNT:
+                    try {
+                        final long count = Long.parseLong( value );
+                        func.setUpdateCount( transaction, count );
+                    } catch ( final NumberFormatException e ) {
+                        errorMsg = getWorkspaceMessage( INVALID_INTEGER_PROPERTY_VALUE, UPDATE_COUNT );
+                    }
+
+                    break;
+                case USES_DISTINCT_ROWS:
+                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                        func.setUsesDistinctRows( transaction, Boolean.parseBoolean( value ) );
+                    } else {
+                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, USES_DISTINCT_ROWS );
+                    }
+
+                    break;
+                case UUID:
+                    func.setUuid( getTransaction(), value );
+                    break;
+                case VAR_ARGS:
+                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                        func.setVarArgs( transaction, Boolean.parseBoolean( value ) );
+                    } else {
+                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, VAR_ARGS );
+                    }
+
+                    break;
+                default:
+                    errorMsg = getWorkspaceMessage( INVALID_PROPERTY_NAME, name, UserDefinedFunction.class.getSimpleName() );
+                    break;
+            }
+
+            if ( StringUtils.isBlank( errorMsg ) ) {
+                result = new CommandResultImpl( getWorkspaceMessage( SET_PROPERTY_SUCCESS, name ) );
+            } else {
+                result = new CommandResultImpl( false, errorMsg, null );
+            }
+        } catch ( final Exception e ) {
+            result = new CommandResultImpl( e );
+        }
+
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
+     */
+    @Override
+    protected int getMaxArgCount() {
+        return 2;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
+     */
+    @Override
+    public int tabCompletion( final String lastArgument,
+                              final List< CharSequence > candidates ) throws Exception {
+        final Arguments args = getArguments();
+
+        if ( args.isEmpty() ) {
+            if ( lastArgument == null ) {
+                candidates.addAll( ALL_PROPS );
+            } else {
+                for ( final String item : ALL_PROPS ) {
+                    if ( item.toUpperCase().startsWith( lastArgument.toUpperCase() ) ) {
+                        candidates.add( item );
+                    }
+                }
+            }
+
+            return 0;
+        }
+
+        if ( ( args.size() == 1 ) ) {
+            String theArg = getArguments().get(0);
+            if( AGGREGATE.equals(theArg) || ALLOWS_DISTINCT.equals(theArg) || ALLOWS_ORDERBY.equals(theArg) || ANALYTIC.equals(theArg)
+                || DECOMPOSABLE.equals(theArg) || NULL_ON_NULL.equals(theArg) || USES_DISTINCT_ROWS.equals(theArg) || VAR_ARGS.equals(theArg)) {
+                updateCandidatesForBooleanProperty( lastArgument, candidates );
+            } else if( DETERMINISM.equals(theArg) ) {
+                candidates.add( Function.Determinism.COMMAND_DETERMINISTIC.name() );
+                candidates.add( Function.Determinism.DETERMINISTIC.name() );
+                candidates.add( Function.Determinism.NONDETERMINISTIC.name() );
+                candidates.add( Function.Determinism.SESSION_DETERMINISTIC.name() );
+                candidates.add( Function.Determinism.USER_DETERMINISTIC.name() );
+                candidates.add( Function.Determinism.VDB_DETERMINISTIC.name() );
+            } else if( SCHEMA_ELEMENT_TYPE.equals(theArg)) {
+                candidates.add( SchemaElement.SchemaElementType.FOREIGN.name() );
+                candidates.add( SchemaElement.SchemaElementType.VIRTUAL.name() );
+            }
+
+            return ( candidates.isEmpty() ? -1 : ( StringUtils.isBlank( lastArgument ) ? 0 : ( toString().length() + 1 ) ) );
+        }
+
+        // no tab completion
+        return -1;
+    }
+}

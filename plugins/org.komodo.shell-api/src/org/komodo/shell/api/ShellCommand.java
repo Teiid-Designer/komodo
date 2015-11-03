@@ -30,36 +30,31 @@ import java.util.List;
 public interface ShellCommand {
 
     /**
-     * @return <code>true</code> if the command should commit the transaction after execution
-     */
-    boolean isAutoCommit();
-
-    /**
      * @return the command name (never empty)
      */
-    public String getName();
+    String getName();
 
 	/**
 	 * @return the command name aliases (never <code>null</code> but can be empty)
 	 */
-	public String[] getAliases();
+	String[] getAliases();
 
     /**
      * @return the command arguments (can be <code>null</code>)
      */
-    public Arguments getArguments();
+    Arguments getArguments();
 
     /**
      * Sets the arguments that can be used by this command.
      * @param arguments the args
      */
-    public void setArguments(Arguments arguments);
+    void setArguments(Arguments arguments);
 
 	/**
 	 * Configure the command's output.
 	 * @param output the writer
 	 */
-	public void setOutput(Writer output);
+	void setWriter(Writer output);
 
 	/**
 	 * @return the stream writer (can be <code>null</code> if not set)
@@ -67,54 +62,44 @@ public interface ShellCommand {
 	Writer getWriter();
 
 	/**
-	 * Init Valid workspace context types for this command
+	 * Get the WorkspaceStatus
+	 * @return the workspace status
 	 */
-	public void initValidWsContextTypes();
+	WorkspaceStatus getWorkspaceStatus();
 
-	/**
-	 * Is the command valid for the supplied Ws Context
-	 * @param contextType the context type
-	 * @return 'true' if valid, 'false' if not.
-	 */
-	public boolean isValidForWsContext(String contextType);
+    /**
+     * @return <code>true</code> if command is valid for the current context
+     */
+    boolean isValidForCurrentContext();
 
-	/**
-	 * Called to execute the command.
-	 * @return execution status
-	 * @throws Exception the exception
-	 */
-	public boolean execute() throws Exception;
+    /**
+     * @return <code>true</code> if the command can be overridden
+     */
+    boolean isOverridable();
+
+    /**
+     * @return <code>true</code> if the command is enabled
+     */
+    boolean isEnabled();
+
+    /**
+     * Called to execute the command.
+     *
+     * @return the result (never <code>null</code>)
+     */
+    CommandResult execute();
 
 	/**
 	 * Prints the usage help for this command.
 	 * @param indent number of spaces to indent
 	 */
-	public void printUsage(int indent);
+	void printUsage(int indent);
 
 	/**
 	 * Prints the help text for this command.
 	 * @param indent number of spaces to indent
 	 */
-	public void printHelp(int indent);
-
-    /**
-     * Records the command to the recording output destination.
-     */
-    public void record();
-
-	/**
-	 * Record the comment to the current record output
-	 * @param comment the comment
-	 */
-	public void recordComment(String comment);
-
-	/**
-	 * Prints the given message to the output stream.
-	 * @param indent the number of chars to indent the message
-	 * @param formattedMessage the message
-	 * @param params the params
-	 */
-	public void print(int indent,String formattedMessage, Object ... params);
+	void printHelp(int indent);
 
 	/**
 	 * Handle tab completion for the command.  This is optional, but provides a mechanism by
@@ -140,6 +125,6 @@ public interface ShellCommand {
 	 * @return the cursor position
 	 * @throws Exception if errors occur
 	 */
-	public int tabCompletion(String lastArgument, List<CharSequence> candidates) throws Exception;
+	int tabCompletion(String lastArgument, List<CharSequence> candidates) throws Exception;
 
 }

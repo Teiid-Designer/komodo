@@ -39,21 +39,21 @@ public final class PrimaryKeyImplTest extends RelationalModelTest {
     @Before
     public void init() throws Exception {
         this.table = createTable();
-        this.primaryKey = this.table.setPrimaryKey( this.uow, NAME );
+        this.primaryKey = this.table.setPrimaryKey( getTransaction(), NAME );
         commit();
     }
 
     @Test
     public void shouldAddColumnReference() throws Exception {
-        final Column column = this.table.addColumn( this.uow, "MyColumn" );
-        this.primaryKey.addColumn( this.uow, column );
+        final Column column = this.table.addColumn( getTransaction(), "MyColumn" );
+        this.primaryKey.addColumn( getTransaction(), column );
         commit();
 
-        assertThat( this.primaryKey.getColumns( this.uow ).length, is( 1 ) );
-        assertThat( this.primaryKey.getColumns( this.uow )[0], is( column ) );
-        assertThat( this.primaryKey.getProperty( this.uow, Constraint.REFERENCES ).getValues( this.uow ).length, is( 1 ) );
-        assertThat( this.primaryKey.getProperty( this.uow, Constraint.REFERENCES ).getValues( this.uow )[0].toString(),
-                    is( column.getRawProperty( this.uow, JcrLexicon.UUID.getString() ).getStringValue( this.uow ) ) );
+        assertThat( this.primaryKey.getColumns( getTransaction() ).length, is( 1 ) );
+        assertThat( this.primaryKey.getColumns( getTransaction() )[0], is( column ) );
+        assertThat( this.primaryKey.getProperty( getTransaction(), Constraint.REFERENCES ).getValues( getTransaction() ).length, is( 1 ) );
+        assertThat( this.primaryKey.getProperty( getTransaction(), Constraint.REFERENCES ).getValues( getTransaction() )[0].toString(),
+                    is( column.getRawProperty( getTransaction(), JcrLexicon.UUID.getString() ).getStringValue( getTransaction() ) ) );
     }
 
     @Test
@@ -65,7 +65,7 @@ public final class PrimaryKeyImplTest extends RelationalModelTest {
     public void shouldFailConstructionIfNotPrimaryKey() {
         if ( RelationalObjectImpl.VALIDATE_INITIAL_STATE ) {
             try {
-                new PrimaryKeyImpl( this.uow, _repo, this.table.getAbsolutePath() );
+                new PrimaryKeyImpl( getTransaction(), _repo, this.table.getAbsolutePath() );
                 fail();
             } catch ( final KException e ) {
                 // expected
@@ -76,46 +76,46 @@ public final class PrimaryKeyImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveCorrectConstraintType() throws Exception {
         assertThat( this.primaryKey.getConstraintType(), is( TableConstraint.ConstraintType.PRIMARY_KEY ) );
-        assertThat( this.primaryKey.getRawProperty( this.uow, TeiidDdlLexicon.Constraint.TYPE ).getStringValue( this.uow ),
+        assertThat( this.primaryKey.getRawProperty( getTransaction(), TeiidDdlLexicon.Constraint.TYPE ).getStringValue( getTransaction() ),
                     is( TableConstraint.ConstraintType.PRIMARY_KEY.toValue() ) );
     }
 
     @Test
     public void shouldHaveCorrectDescriptor() throws Exception {
-        assertThat( this.primaryKey.hasDescriptor( this.uow, TeiidDdlLexicon.Constraint.TABLE_ELEMENT ), is( true ) );
+        assertThat( this.primaryKey.hasDescriptor( getTransaction(), TeiidDdlLexicon.Constraint.TABLE_ELEMENT ), is( true ) );
     }
 
     @Test
     public void shouldHaveCorrectName() throws Exception {
-        assertThat( this.primaryKey.getName( this.uow ), is( NAME ) );
+        assertThat( this.primaryKey.getName( getTransaction() ), is( NAME ) );
     }
 
     @Test
     public void shouldHaveCorrectTypeIdentifier() throws Exception {
-        assertThat(this.primaryKey.getTypeIdentifier( this.uow ), is(KomodoType.PRIMARY_KEY));
+        assertThat(this.primaryKey.getTypeIdentifier( getTransaction() ), is(KomodoType.PRIMARY_KEY));
     }
 
     @Test
     public void shouldHaveMoreRawProperties() throws Exception {
-        final String[] filteredProps = this.primaryKey.getPropertyNames( this.uow );
-        final String[] rawProps = this.primaryKey.getRawPropertyNames( this.uow );
+        final String[] filteredProps = this.primaryKey.getPropertyNames( getTransaction() );
+        final String[] rawProps = this.primaryKey.getRawPropertyNames( getTransaction() );
         assertThat( ( rawProps.length > filteredProps.length ), is( true ) );
     }
 
     @Test
     public void shouldHaveParentTableAfterConstruction() throws Exception {
-        assertThat( this.primaryKey.getParent( this.uow ), is( instanceOf( Table.class ) ) );
-        assertThat( this.primaryKey.getTable( this.uow ), is( this.table ) );
+        assertThat( this.primaryKey.getParent( getTransaction() ), is( instanceOf( Table.class ) ) );
+        assertThat( this.primaryKey.getTable( getTransaction() ), is( this.table ) );
     }
 
     @Test( expected = UnsupportedOperationException.class )
     public void shouldNotAllowChildren() throws Exception {
-        this.primaryKey.addChild( this.uow, "blah", null );
+        this.primaryKey.addChild( getTransaction(), "blah", null );
     }
 
     @Test
     public void shouldNotContainFilteredProperties() throws Exception {
-        final String[] filteredProps = this.primaryKey.getPropertyNames( this.uow );
+        final String[] filteredProps = this.primaryKey.getPropertyNames( getTransaction() );
         final Filter[] filters = this.primaryKey.getFilters();
 
         for ( final String name : filteredProps ) {
@@ -134,16 +134,16 @@ public final class PrimaryKeyImplTest extends RelationalModelTest {
     @Test
     public void shouldCreateUsingResolver() throws Exception {
         final String name = "blah";
-        final KomodoObject kobject = PrimaryKeyImpl.RESOLVER.create( this.uow, _repo, this.table, name, null );
+        final KomodoObject kobject = PrimaryKey.RESOLVER.create( getTransaction(), _repo, this.table, name, null );
         assertThat( kobject, is( notNullValue() ) );
         assertThat( kobject, is( instanceOf( PrimaryKey.class ) ) );
-        assertThat( kobject.getName( this.uow ), is( name ) );
+        assertThat( kobject.getName( getTransaction() ), is( name ) );
     }
 
     @Test( expected = KException.class )
     public void shouldFailCreateUsingResolverWithInvalidParent() throws Exception {
-        final KomodoObject bogusParent = _repo.add( this.uow, null, "bogus", null );
-        PrimaryKeyImpl.RESOLVER.create( this.uow, _repo, bogusParent, "blah", null );
+        final KomodoObject bogusParent = _repo.add( getTransaction(), null, "bogus", null );
+        PrimaryKey.RESOLVER.create( getTransaction(), _repo, bogusParent, "blah", null );
     }
 
 }
