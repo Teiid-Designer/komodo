@@ -65,6 +65,11 @@ public class TestUtilities implements StringConstants {
     public static final String TWEET_EXAMPLE_NAME = "tweet-example-vdb";
 
     /**
+     * Tweet example vdb name
+     */
+    public static final String TWEET_EXAMPLE_VDB_NAME = "twitter";
+
+    /**
      * Tweet example file, translator has no description defined
      */
     public static final String NO_TRANSLATOR_DESCRIP_NAME = "notranslator-descrip-vdb";
@@ -78,6 +83,11 @@ public class TestUtilities implements StringConstants {
      * All elements example file name
      */
     public static final String ALL_ELEMENTS_EXAMPLE_NAME = "teiid-vdb-all-elements";
+
+    /**
+     * All elements example vdb name
+     */
+    public static final String ALL_ELEMENTS_EXAMPLE_VDB_NAME = "myVDB";
 
     /**
      * All elements example file suffix

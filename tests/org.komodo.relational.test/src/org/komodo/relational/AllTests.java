@@ -2,6 +2,7 @@ package org.komodo.relational;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import org.komodo.relational.importer.vdb.TestTeiidVdbImporter;
 import org.komodo.relational.model.internal.AbstractProcedureImplTest;
 import org.komodo.relational.model.internal.AccessPatternImplTest;
 import org.komodo.relational.model.internal.ColumnImplTest;
@@ -82,12 +83,16 @@ import org.komodo.relational.workspace.WorkspaceManagerTest;
 
     // Teiid
     TeiidImplTest.class,
-    
+
     // DDL
     SchemaImplTest.class,
 
     // Workspace
     WorkspaceManagerTest.class,
+
+    // Import
+    TestTeiidVdbImporter.class
+
     })
 public class AllTests {
     // nothing to do
