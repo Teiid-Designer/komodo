@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.workspace;
 
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.CreateVdbCommand.MISSING_VDB_EXTERNAL_PATH;
 import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.CreateVdbCommand.VDB_CREATED;
 import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.MISSING_VDB_NAME;
 import org.komodo.relational.workspace.WorkspaceManager;
@@ -21,7 +20,8 @@ import org.komodo.shell.api.WorkspaceStatus;
 public final class CreateVdbCommand extends WorkspaceShellCommand {
 
     static final String NAME = "create-vdb"; //$NON-NLS-1$
-
+    static final String DEFAULT_PATH = "defaultPath"; //$NON-NLS-1$
+    
     /**
      * @param status
      *        the shell's workspace status (cannot be <code>null</code>)
@@ -41,7 +41,7 @@ public final class CreateVdbCommand extends WorkspaceShellCommand {
 
         try {
             final String vdbName = requiredArgument( 0, getMessage( MISSING_VDB_NAME ) );
-            final String extPath = requiredArgument( 1, getMessage( MISSING_VDB_EXTERNAL_PATH ) );
+            final String extPath = optionalArgument( 1, DEFAULT_PATH );
 
             final WorkspaceManager mgr = getWorkspaceManager();
             mgr.createVdb( getTransaction(), null, vdbName, extPath );

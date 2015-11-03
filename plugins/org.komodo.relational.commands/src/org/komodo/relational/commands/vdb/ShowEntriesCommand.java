@@ -65,6 +65,11 @@ public final class ShowEntriesCommand extends VdbShellCommand {
         return result;
     }
 
+    @Override
+    public boolean isEnabled() {
+        return false;
+    }
+    
     /**
      * {@inheritDoc}
      *
