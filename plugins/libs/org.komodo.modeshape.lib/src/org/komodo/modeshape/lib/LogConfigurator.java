@@ -93,6 +93,9 @@ public class LogConfigurator {
         // get default log file path if necessary
         if ( ( this.logPath == null ) || this.logPath.isEmpty() ) {
             String tempPath = System.getProperty( "komodo.dataDir" ); //$NON-NLS-1$
+            if (tempPath == null) {
+                tempPath = System.getProperty("java.io.tmpdir"); //$NON-NLS-1$
+            }
             tempPath += File.separator + "komodo.log"; //$NON-NLS-1$
             this.logPath = tempPath;
         }
