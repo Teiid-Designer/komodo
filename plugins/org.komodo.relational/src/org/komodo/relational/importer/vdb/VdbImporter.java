@@ -21,8 +21,12 @@
  */
 package org.komodo.relational.importer.vdb;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import org.komodo.importer.AbstractImporter;
 import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
@@ -34,10 +38,13 @@ import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.ArgCheck;
 import org.modeshape.jcr.JcrLexicon;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  *
@@ -68,7 +75,7 @@ public class VdbImporter extends AbstractImporter {
         KomodoObject fileNode = vdb.addChild(transaction, JcrLexicon.CONTENT.getString(), null);
         fileNode.setProperty(transaction, JcrLexicon.DATA.getString(), content);
     }
-    
+
     protected WorkspaceManager getWorkspaceManager() throws KException {
         return WorkspaceManager.getInstance( getRepository() );
     }
@@ -77,7 +84,7 @@ public class VdbImporter extends AbstractImporter {
     protected boolean handleExistingNode(UnitOfWork transaction,
     		ImportOptions importOptions,
     		ImportMessages importMessages) throws KException {
-    	
+
     	// VDB name to create
     	String vdbName = importOptions.getOption(OptionKeys.NAME).toString();
 
@@ -107,7 +114,52 @@ public class VdbImporter extends AbstractImporter {
 
     	return true;
     }
-    
+
+    /**
+     * @param vdbStream the vdb input stream
+     * @return the name of the vdb specified in the xml
+     */
+    public static String extractVdbName(InputStream vdbStream) {
+        if (vdbStream == null)
+            return null;
+
+        try {
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            Document doc = db.parse(vdbStream);
+
+            Element docElement = doc.getDocumentElement();
+            String docNodeName = docElement.getNodeName();
+            String vdbTag = KomodoType.VDB.getAliases().iterator().next();
+
+            if (! vdbTag.equals(docNodeName)) {
+                return null;
+            }
+
+            return docElement.getAttribute("name"); //$NON-NLS-1$
+        } catch (Exception ex) {
+            // Don't need to worry about the exception
+            return null;
+        }
+    }
+
+    /**
+     * Extracts the name attribute from the vdb xml file and sets it into
+     * the import options to synchronise the imported node name with
+     * the vdb:name property.
+     *
+     * @param vdbStream
+     * @param importOptions
+     * @throws Exception
+     */
+    private void overrideName(InputStream vdbStream, ImportOptions importOptions) throws Exception {
+        String vdbName = extractVdbName(vdbStream);
+        if (vdbName == null)
+            return;
+
+        importOptions.setOption(OptionKeys.NAME, vdbName);
+    }
+
     /**
      * Perform the vdb import using the specified xml Stream.
      *
@@ -121,7 +173,11 @@ public class VdbImporter extends AbstractImporter {
         ArgCheck.isNotNull(vdbStream);
 
         try {
-            doImport(uow, toString(vdbStream), parentObject, importOptions, importMessages);
+            String vdbXml = toString(vdbStream);
+            ByteArrayInputStream vdbNameStream = new ByteArrayInputStream(vdbXml.getBytes("UTF-8")); //$NON-NLS-1$
+            overrideName(vdbNameStream, importOptions);
+
+            doImport(uow, vdbXml, parentObject, importOptions, importMessages);
         } catch (Exception ex) {
             importMessages.addErrorMessage(ex.getLocalizedMessage());
         }
@@ -140,6 +196,8 @@ public class VdbImporter extends AbstractImporter {
         if (!validFile(vdbXmlFile, importMessages)) return;
 
         try {
+            overrideName(new FileInputStream(vdbXmlFile), importOptions);
+
             doImport(uow, toString(vdbXmlFile), parentObject, importOptions, importMessages);
         } catch (Exception ex) {
             importMessages.addErrorMessage(ex.getLocalizedMessage());
