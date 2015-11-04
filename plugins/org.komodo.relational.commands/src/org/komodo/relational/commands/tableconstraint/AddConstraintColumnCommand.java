@@ -81,12 +81,11 @@ public final class AddConstraintColumnCommand extends TableConstraintShellComman
 
                 if ( parentTable.equals( column.getParent( getTransaction() ) ) ) {
                     constraint.addColumn( getTransaction(), column );
-                    result = new CommandResultImpl( getMessage( COLUMN_REF_ADDED, columnPath, getContext().getAbsolutePath() ) );
+                    result = new CommandResultImpl( getMessage( COLUMN_REF_ADDED, columnPath, getWorkspaceStatus().getCurrentContextDisplayPath() ) );
                 } else {
                     result = new CommandResultImpl( false,
                                                     getMessage( INVALID_COLUMN,
-                                                                getWorkspaceStatus().getLabelProvider()
-                                                                                    .getDisplayPath( column.getAbsolutePath() ),
+                                                                getWorkspaceStatus().getDisplayPath( column ),
                                                                 constraint.getName( getTransaction() ) ),
                                                     null );
                 }
