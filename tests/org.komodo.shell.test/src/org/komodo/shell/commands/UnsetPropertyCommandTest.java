@@ -15,16 +15,20 @@
  */
 package org.komodo.shell.commands;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNull.notNullValue;
+import static org.hamcrest.core.IsNull.nullValue;
+import static org.junit.Assert.assertThat;
 import org.junit.Test;
 import org.komodo.shell.AbstractCommandTest;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.spi.repository.KomodoObject;
 
 /**
  * Test Class to test {@link UnsetPropertyCommand}.
  */
 @SuppressWarnings( { "javadoc", "nls" } )
-public class UnsetPropertyCommandTest extends AbstractCommandTest {
+public final class UnsetPropertyCommandTest extends AbstractCommandTest {
 
     @Test( expected = AssertionError.class )
     public void shouldFailTooManyArgs( ) throws Exception {
@@ -32,17 +36,52 @@ public class UnsetPropertyCommandTest extends AbstractCommandTest {
         setup( commands );
         execute();
     }
-    
+
     @Test
-    public void testShowStatus1() throws Exception {
+    public void shouldNotBeAvailableAtLibrary() throws Exception {
+        final String[] commands = { "library" };
+        setup( commands );
+
+        final CommandResult result = execute();
+        assertCommandResultOk( result );
+        assertCommandsNotAvailable( UnsetPropertyCommand.NAME );
+    }
+
+    @Test
+    public void shouldNotBeAvailableAtRoot() throws Exception {
+        assertCommandsNotAvailable( UnsetPropertyCommand.NAME );
+    }
+
+    @Test
+    public void shouldNotBeAvailableAtWorkspace() throws Exception {
         final String[] commands = { "workspace" };
         setup( commands );
 
-        CommandResult result = execute();
-        assertCommandResultOk(result);
+        final CommandResult result = execute();
+        assertCommandResultOk( result );
+        assertCommandsNotAvailable( UnsetPropertyCommand.NAME );
+    }
 
-        // Check WorkspaceContext
-        assertEquals("/workspace", wsStatus.getCurrentContextDisplayPath());
+    @Test
+    public void shouldUnsetProperty() throws Exception {
+        final String child = "blah";
+        final String prop = "foo";
+        final String originalValue = "bar";
+        final String[] commands = { "workspace",
+                                    "add-child " + child,
+                                    "cd " + child,
+                                    "set-property " + prop + ' ' + originalValue,
+                                    "commit",
+                                    "set-property " + prop + " bar",
+                                    "unset-property " + prop };
+        setup( commands );
+
+        final CommandResult result = execute();
+        assertCommandResultOk( result );
+
+        final KomodoObject kobject = _repo.getFromWorkspace( getTransaction(), child );
+        assertThat( kobject, is( notNullValue() ) );
+        assertThat( kobject.getProperty( getTransaction(), prop ), is( nullValue() ) );
     }
 
 }

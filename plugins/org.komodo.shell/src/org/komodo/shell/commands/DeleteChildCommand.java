@@ -8,16 +8,15 @@
 package org.komodo.shell.commands;
 
 import static org.komodo.shell.Messages.DeleteChildCommand.CHILD_DELETED;
-import static org.komodo.shell.Messages.DeleteChildCommand.MISSING_CHILD_NAME;
-import static org.komodo.shell.Messages.DeleteChildCommand.NO_CHILD_WITH_NAME_AND_TYPE;
-import static org.komodo.shell.Messages.DeleteChildCommand.NO_CHILD_WITH_NAME;
 import static org.komodo.shell.Messages.DeleteChildCommand.ERROR_GETTING_CHILD;
+import static org.komodo.shell.Messages.DeleteChildCommand.MISSING_CHILD_NAME;
+import static org.komodo.shell.Messages.DeleteChildCommand.NO_CHILD_WITH_NAME;
+import static org.komodo.shell.Messages.DeleteChildCommand.NO_CHILD_WITH_NAME_AND_TYPE;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.Messages;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.shell.util.KomodoObjectUtils;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.utils.StringUtils;
 
@@ -68,7 +67,7 @@ public class DeleteChildCommand extends BuiltInShellCommand {
                 if(!kobject.hasChild(getTransaction(), childNameArg)) return new CommandResultImpl( false, Messages.getString(NO_CHILD_WITH_NAME, childNameArg), null);
                 childObject = kobject.getChild(getTransaction(), childNameArg);
             }
-            
+
             if(childObject==null) return new CommandResultImpl(false, Messages.getString(ERROR_GETTING_CHILD, childNameArg), null);
 
             childObject.remove(getTransaction());
@@ -95,7 +94,7 @@ public class DeleteChildCommand extends BuiltInShellCommand {
      */
     @Override
     public boolean isValidForCurrentContext() {
-        return !KomodoObjectUtils.isRoot( getContext() );
+        return true;
     }
 
 }

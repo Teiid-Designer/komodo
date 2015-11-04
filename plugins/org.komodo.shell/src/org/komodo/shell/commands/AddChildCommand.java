@@ -14,7 +14,6 @@ import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.Messages;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.shell.util.KomodoObjectUtils;
 import org.komodo.spi.repository.KomodoObject;
 
 /**
@@ -77,7 +76,7 @@ public class AddChildCommand extends BuiltInShellCommand {
      */
     @Override
     public boolean isValidForCurrentContext() {
-        return !KomodoObjectUtils.isRoot( getContext() );
+        return true;
     }
 
 }

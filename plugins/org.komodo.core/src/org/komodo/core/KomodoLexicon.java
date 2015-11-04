@@ -56,6 +56,11 @@ public interface KomodoLexicon extends StringConstants {
         String NODE_TYPE = Komodo.ENVIRONMENT;
 
         /**
+         * The unqualified name of the environment area. Value is {@value}.
+         */
+        String UNQUALIFIED_NAME = NODE_TYPE.substring( NODE_TYPE.indexOf( ':' ) + 1 );
+
+        /**
          * The name of the Komodo environment validation child node. Value is {@value} .
          */
         String VALIDATION = Namespace.PREFIX + COLON + "validation"; //$NON-NLS-1$
@@ -108,6 +113,11 @@ public interface KomodoLexicon extends StringConstants {
          * The name and node type name of the Komodo library's schema grouping node. Value is {@value} .
          */
         String SCHEMAS = Schema.GROUP_NODE;
+
+        /**
+         * The unqualified name of the library area. Value is {@value}.
+         */
+        String UNQUALIFIED_NAME = NODE_TYPE.substring( NODE_TYPE.indexOf( ':' ) + 1 );
 
         /**
          * The name and node type name of the Komodo library's file entry grouping node. Value is {@value} .
@@ -600,6 +610,11 @@ public interface KomodoLexicon extends StringConstants {
          * The name and node type name of the Komodo workspace node. Value is {@value} .
          */
         String NODE_TYPE = Komodo.WORKSPACE;
+
+        /**
+         * The unqualified name of the workspace area. Value is {@value}.
+         */
+        String UNQUALIFIED_NAME = NODE_TYPE.substring( NODE_TYPE.indexOf( ':' ) + 1 );
 
     }
 

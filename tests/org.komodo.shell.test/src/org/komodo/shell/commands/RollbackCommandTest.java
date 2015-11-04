@@ -15,7 +15,8 @@
  */
 package org.komodo.shell.commands;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
 import org.junit.Test;
 import org.komodo.shell.AbstractCommandTest;
 import org.komodo.shell.api.CommandResult;
@@ -32,17 +33,18 @@ public class RollbackCommandTest extends AbstractCommandTest {
         setup( commands );
         execute();
     }
-    
+
     @Test
-    public void test1() throws Exception {
-        final String[] commands = { "workspace" };
-    	setup( commands );
+    public void shouldRollback() throws Exception {
+        final String childName = "blah";
+        final String[] commands = { "workspace",
+                                    "add-child " + childName,
+                                    RollbackCommand.NAME };
+        setup( commands );
 
-        CommandResult result = execute();
-        assertCommandResultOk(result);
-
-    	// Check WorkspaceContext
-    	assertEquals("/workspace", wsStatus.getCurrentContextDisplayPath());
+        final CommandResult result = execute(); // this does a commit
+        assertCommandResultOk( result );
+        assertThat( _repo.komodoWorkspace( getTransaction() ).hasChild( getTransaction(), childName ), is( false ) );
     }
 
 }
