@@ -31,7 +31,6 @@ The following command files provide more examples of scripting VDB creation.
 
 - [PartsVDBScript.txt](files/PartsVDBScript.txt) - re-creates __PartsVDB-vdb.xml__ dynamic VDB above
 - [commandExample1.txt](files/commandExample1.txt)
-- [commandExample2.txt](files/commandExample2.txt)
 
 
 
