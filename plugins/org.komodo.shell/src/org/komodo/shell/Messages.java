@@ -115,7 +115,8 @@ public class Messages implements StringConstants {
         FileCannotRead,
         RecordingFileOutputError,
         RecordingFileCannotWrite,
-        RecordingFileNotDefined;
+        RecordingFileNotDefined,
+        NotMultiValuedProperty;
 
     	@Override
     	public String toString() {
@@ -265,7 +266,7 @@ public class Messages implements StringConstants {
           return getEnumName(this) + DOT + name();
       }
     }
-    
+
     public enum SetPrimaryTypeCommand {
         MISSING_TYPE_NAME,
         PRIMARY_TYPE_SET;
@@ -318,7 +319,7 @@ public class Messages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     public enum ShowDescriptorsCommand {
         ListHeader,
         NoDescriptors;

@@ -59,7 +59,7 @@ public class UnsetPropertyCommand extends BuiltInShellCommand {
         try {
             final String propNameArg = requiredArgument( 0, Messages.getString( Messages.SHELL.InvalidArgMsg_PropertyName ) );
 
-            if ( !validateProperty( propNameArg, getContext() ) ) {
+            if ( !KomodoObjectUtils.isValidProperty( getWorkspaceStatus(), propNameArg, getContext() ) ) {
                 return new CommandResultImpl( false,
                                               Messages.getString( Messages.SetPropertyCommand.InvalidPropName, propNameArg ),
                                               null );
@@ -68,7 +68,10 @@ public class UnsetPropertyCommand extends BuiltInShellCommand {
             final KomodoObject context = getContext();
 
             // remove the property by setting its value to null
-            final String propertyName = ( !isShowingPropertyNamePrefixes() ? KomodoObjectUtils.attachPrefix( getWorkspaceStatus(),context, propNameArg ) : propNameArg );
+            final String propertyName = ( !isShowingPropertyNamePrefixes() ? KomodoObjectUtils.attachPrefix( getWorkspaceStatus(),
+                                                                                                             context,
+                                                                                                             propNameArg )
+                                                                           : propNameArg );
             context.setProperty( getTransaction(),propertyName, (Object[])null );
 
             return new CommandResultImpl( getString( "propertyUnset", propNameArg ) ); //$NON-NLS-1$

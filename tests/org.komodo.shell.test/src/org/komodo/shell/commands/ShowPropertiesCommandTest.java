@@ -34,35 +34,37 @@ public class ShowPropertiesCommandTest extends AbstractCommandTest {
         setup( commands );
         execute();
     }
-    
-    @Test( expected = AssertionError.class )
+
+    @Test
     public void shouldNotBeAvailableAtLibrary() throws Exception {
-        final String[] commands = { "library",
-                                    "show-properties" };
+        final String[] commands = { "library" };
         setup( commands );
-        execute();
+
+        final CommandResult result = execute();
+        assertCommandResultOk( result );
+        assertCommandsNotAvailable( ShowPropertiesCommand.NAME );
     }
 
-    @Test( expected = AssertionError.class )
+    @Test
     public void shouldNotBeAvailableAtRoot() throws Exception {
-        final String[] commands = { "show-properties" };
-        setup( commands );
-        execute();
+        assertCommandsNotAvailable( ShowPropertiesCommand.NAME );
     }
 
-    @Test( expected = AssertionError.class )
+    @Test
     public void shouldNotBeAvailableAtWorkspace() throws Exception {
-        final String[] commands = { "workspace",
-                                    "show-properties" };
+        final String[] commands = { "workspace" };
         setup( commands );
-        execute();
+
+        final CommandResult result = execute();
+        assertCommandResultOk( result );
+        assertCommandsNotAvailable( ShowPropertiesCommand.NAME );
     }
-    
+
     @Test
     public void shouldShowProperties() throws Exception {
         final String childName = "blah";
-        final String[] commands = { 
-            "workspace", 
+        final String[] commands = {
+            "workspace",
             "add-child " + childName,
             "cd " + childName,
             "show-properties " };

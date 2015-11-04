@@ -15,41 +15,46 @@
  */
 package org.komodo.shell.commands;
 
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
 import org.junit.Test;
 import org.komodo.shell.AbstractCommandTest;
+import org.komodo.shell.api.CommandResult;
+import org.komodo.spi.repository.KomodoObject;
 
 /**
  * Test Class to test {@link SetPropertyCommand}.
  */
 @SuppressWarnings( { "javadoc", "nls" } )
-public class SetPropertyCommandTest extends AbstractCommandTest {
+public final class SetPropertyCommandTest extends AbstractCommandTest {
 
     @Test( expected = AssertionError.class )
     public void shouldFailTooManyArgs( ) throws Exception {
-        final String[] commands = { "set-property anArg extraArg" };
+        final String[] commands = { "set-property prop value extraArg" };
         setup( commands );
         execute();
     }
-    
-//    @Test
-//    public void shouldSetProperty() throws Exception {
-//        final String childName = "blah";
-//        final String propName = "primaryType";
-//        final String propValue = "nt:unstructured";
-//        final String[] commands = { 
-//            "workspace", 
-//            "add-child " + childName,
-//            "cd " + childName,
-//            "set-property " + propName + " " + propValue };
-//        setup( commands );
-//
-//        final CommandResult result = execute();
-//        assertThat( result.isOk(), is( true ) );
-//
-//        final KomodoObject workspace = _repo.komodoWorkspace( getTransaction() );
-//        assertThat( workspace.getChildren( getTransaction() ).length, is( 1 ) );
-//        assertThat( workspace.getChildren( getTransaction() )[ 0 ].getName( getTransaction() ), is( childName ) );
-//        assertThat( workspace.getChildren( getTransaction() )[ 0 ].getProperty( getTransaction(), propName ).getStringValue(getTransaction()), is( propValue ) );
-//    }
+
+    @Test
+    public void shouldSetProperty() throws Exception {
+        final String childName = "blah";
+        final String propName = "foo";
+        final String propValue = "bar";
+        final String[] commands = { "workspace",
+                                    "add-child " + childName,
+                                    "cd " + childName,
+                                    "set-property " + propName + " " + propValue };
+        setup( commands );
+
+        final CommandResult result = execute();
+        assertThat( result.isOk(), is( true ) );
+
+        final KomodoObject workspace = _repo.komodoWorkspace( getTransaction() );
+        assertThat( workspace.getChildren( getTransaction() ).length, is( 1 ) );
+        assertThat( workspace.getChildren( getTransaction() )[ 0 ].getName( getTransaction() ), is( childName ) );
+        assertThat( workspace.getChildren( getTransaction() )[ 0 ].getProperty( getTransaction(), propName )
+                                                                  .getStringValue( getTransaction() ),
+                    is( propValue ) );
+    }
 
 }

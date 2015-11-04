@@ -9,9 +9,6 @@ package org.komodo.relational.commands;
 
 import java.util.HashSet;
 import java.util.Set;
-import org.komodo.relational.commands.FindCommand;
-import org.komodo.relational.commands.SetCustomPropertyCommand;
-import org.komodo.relational.commands.UnsetCustomPropertyCommand;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandProvider;
@@ -45,14 +42,13 @@ public class RelationalCommandProvider implements ShellCommandProvider {
         result.add( FindCommand.class );
         result.add( SetCustomPropertyCommand.class );
         result.add( UnsetCustomPropertyCommand.class );
-        
+
         // These commands disable basic shell commands
         result.add( RelationalAddChildCommand.class );
         result.add( RelationalDeleteChildCommand.class );
         result.add( RelationalAddDescriptorCommand.class );
         result.add( RelationalRemoveDescriptorCommand.class );
         result.add( RelationalSetPrimaryTypeCommand.class );
-        result.add( RelationalShowPrimaryTypeCommand.class );
         result.add( RelationalShowDescriptorsCommand.class );
 
         return result;

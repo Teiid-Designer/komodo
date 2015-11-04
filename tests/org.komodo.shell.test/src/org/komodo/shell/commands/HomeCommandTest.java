@@ -17,6 +17,7 @@ package org.komodo.shell.commands;
 
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
+import org.komodo.repository.RepositoryImpl;
 import org.komodo.shell.AbstractCommandTest;
 import org.komodo.shell.api.CommandResult;
 
@@ -24,7 +25,7 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test {@link HomeCommand}.
  */
 @SuppressWarnings( { "javadoc", "nls" } )
-public class HomeCommandTest extends AbstractCommandTest {
+public final class HomeCommandTest extends AbstractCommandTest {
 
     @Test( expected = AssertionError.class )
     public void shouldFailTooManyArgs( ) throws Exception {
@@ -32,18 +33,16 @@ public class HomeCommandTest extends AbstractCommandTest {
         setup( commands );
         execute();
     }
-    
+
     @Test
-    public void test1() throws Exception {
+    public void shouldGoToKomodoRoot() throws Exception {
         final String[] commands = { "workspace",
                                     "home" };
     	setup( commands );
 
         CommandResult result = execute();
         assertCommandResultOk(result);
-
-        String contextPath = wsStatus.getCurrentContextDisplayPath();
-        assertEquals("/", contextPath);
+        assertEquals( RepositoryImpl.KOMODO_ROOT, this.wsStatus.getCurrentContext().getAbsolutePath() );
     }
 
 }

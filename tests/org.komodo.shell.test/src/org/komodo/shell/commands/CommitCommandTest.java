@@ -15,35 +15,44 @@
  */
 package org.komodo.shell.commands;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNull.notNullValue;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import org.junit.Test;
 import org.komodo.shell.AbstractCommandTest;
-import org.komodo.shell.api.CommandResult;
 
 /**
  * Test class for {@link CommitCommand}.
  */
-@SuppressWarnings( { "javadoc", "nls" } )
-public class CommitCommandTest extends AbstractCommandTest {
+@SuppressWarnings( { "javadoc",
+                     "nls" } )
+public final class CommitCommandTest extends AbstractCommandTest {
+
+    @Test
+    public void shouldCommitEvenIfPlayCommandFails() throws Exception {
+        final String child = "blah";
+        final String[] commands = { "workspace",
+                                    "add-child " + child,
+                                    "commit", // should add child and *not* be rollbacked by the play command
+                                    "home",
+                                    "delete-child workspace" }; // should fail
+        setup( commands );
+
+        try {
+            execute();
+            fail(); // delete-child should throw exception so should not get here
+        } catch ( final Throwable e ) {
+            // make sure the work done before the commit was persisted
+            assertThat( _repo.komodoWorkspace( getTransaction() ).getChild( getTransaction(), child ), is( notNullValue() ) );
+        }
+    }
 
     @Test( expected = AssertionError.class )
-    public void shouldFailTooManyArgs( ) throws Exception {
+    public void shouldFailTooManyArgs() throws Exception {
         final String[] commands = { "commit extraArg" };
         setup( commands );
         execute();
-    }
-    
-    @Test
-    public void test1() throws Exception {
-        final String[] commands = { "workspace",
-                                    "commit" };
-    	setup( commands );
-
-        CommandResult result = execute();
-        assertCommandResultOk(result);
-
-    	// Check WorkspaceContext
-    	assertEquals("/workspace", wsStatus.getCurrentContextDisplayPath()); //$NON-NLS-1$
     }
 
 }

@@ -22,6 +22,7 @@ import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.SetPropertyCommand;
+import org.komodo.shell.util.KomodoObjectUtils;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.StringUtils;
 
@@ -119,7 +120,8 @@ public final class SetDataTypeResultSetPropertyCommand extends DataTypeResultSet
                     if ( StringUtils.isBlank( errorMsg ) ) {
                         final String arrayArg = optionalArgument( 2, Boolean.FALSE.toString() );
 
-                        if ( trueString.equals( arrayArg ) || falseString.equals( arrayArg ) ) {
+                        if ( KomodoObjectUtils.TRUE_STRING.equals( arrayArg )
+                             || KomodoObjectUtils.FALSE_STRING.equals( arrayArg ) ) {
                             rs.setArray( transaction, Boolean.parseBoolean( arrayArg ) );
                         } else {
                             errorMsg = getMessage( INVALID_DATA_TYPE_ARRAY_INDICATOR );

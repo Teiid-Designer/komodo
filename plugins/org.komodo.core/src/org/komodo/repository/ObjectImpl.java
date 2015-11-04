@@ -21,6 +21,7 @@ import javax.jcr.Session;
 import javax.jcr.Value;
 import javax.jcr.ValueFactory;
 import javax.jcr.nodetype.NodeType;
+import org.komodo.core.KomodoLexicon;
 import org.komodo.repository.KomodoTypeRegistry.TypeIdentifier;
 import org.komodo.repository.RepositoryImpl.UnitOfWorkImpl;
 import org.komodo.spi.KException;
@@ -387,7 +388,14 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         }
 
         if ( RepositoryImpl.KOMODO_ROOT.equals( getAbsolutePath() ) ) {
-            throw new KException( Messages.getString( Messages.Komodo.ADD_CHILD_NOT_ALLOWED, getAbsolutePath() ) );
+            if ( KomodoLexicon.Komodo.ENVIRONMENT.equals( name )
+                 || KomodoLexicon.Environment.UNQUALIFIED_NAME.equals( name )
+                 || KomodoLexicon.Komodo.LIBRARY.equals( name )
+                 || KomodoLexicon.Library.UNQUALIFIED_NAME.equals( name )
+                 || KomodoLexicon.Komodo.WORKSPACE.equals( name )
+                 || KomodoLexicon.Workspace.UNQUALIFIED_NAME.equals( name ) ) {
+                throw new KException( Messages.getString( Messages.Komodo.ADD_CHILD_NOT_ALLOWED, name, getAbsolutePath() ) );
+            }
         }
 
         final String type = (StringUtils.isBlank(primaryType) ? JcrNtLexicon.UNSTRUCTURED.getString() : primaryType);

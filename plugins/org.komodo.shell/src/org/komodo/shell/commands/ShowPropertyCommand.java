@@ -78,7 +78,7 @@ public class ShowPropertyCommand extends BuiltInShellCommand {
                                                 Messages.getString( Messages.ShowPropertyCommand.InvalidArgMsg_PropertyName ) );
 
             KomodoObject context = getContext();
-            if ( !validateProperty( propName, context ) ) {
+            if ( !KomodoObjectUtils.isValidProperty( getWorkspaceStatus(), propName, context ) ) {
                 return new CommandResultImpl( false,
                                               Messages.getString( Messages.SetPropertyCommand.InvalidPropName, propName ),
                                               null );

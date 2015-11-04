@@ -123,9 +123,8 @@ import org.komodo.relational.commands.workspace.WorkspaceUnsetPropertyCommandTes
     RelationalAddDescriptorCommandTest.class,
     RelationalRemoveDescriptorCommandTest.class,
     RelationalSetPrimaryTypeCommandTest.class,
-    RelationalShowPrimaryTypeCommandTest.class,
     RelationalShowDescriptorsCommandTest.class,
-    
+
     // Workspace
     CreateSchemaCommandTest.class,
     CreateTeiidCommandTest.class,
