@@ -57,6 +57,11 @@ public final class DeleteEntryCommand extends VdbShellCommand {
         return result;
     }
 
+    @Override
+    public boolean isEnabled() {
+        return false;
+    }
+    
     /**
      * {@inheritDoc}
      *

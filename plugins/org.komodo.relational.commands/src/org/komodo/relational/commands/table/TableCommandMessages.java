@@ -28,6 +28,7 @@ public class TableCommandMessages implements StringConstants {
         MISSING_ACCESS_PATTERN_NAME,
         MISSING_COLUMN_NAME,
         MISSING_FOREIGN_KEY_NAME,
+        MISSING_PRIMARY_KEY_NAME,
         MISSING_INDEX_NAME,
         MISSING_UNIQUE_CONSTRAINT_NAME,
         ACCESS_PATTERN_NAME,
@@ -96,6 +97,17 @@ public class TableCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
+    
+    @SuppressWarnings( "javadoc" )
+    public enum AddPrimaryKeyCommand {
+        PK_EXISTS_CANT_ADD,
+        PRIMARY_KEY_ADDED;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
 
     @SuppressWarnings( "javadoc" )
     public enum DeleteAccessPatternCommand {
@@ -140,6 +152,17 @@ public class TableCommandMessages implements StringConstants {
     @SuppressWarnings( "javadoc" )
     public enum DeleteUniqueConstraintCommand {
         UNIQUE_CONSTRAINT_DELETED;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum DeletePrimaryKeyCommand {
+        NO_PK_TO_REMOVE,
+        PRIMARY_KEY_DELETED;
 
         @Override
         public String toString() {

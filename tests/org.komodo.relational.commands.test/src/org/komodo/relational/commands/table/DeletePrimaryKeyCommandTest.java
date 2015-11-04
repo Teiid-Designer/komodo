@@ -13,34 +13,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.komodo.relational.commands.vdb;
+package org.komodo.relational.commands.table;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertEquals;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
-import org.komodo.relational.vdb.Entry;
+import org.komodo.relational.model.Model;
+import org.komodo.relational.model.PrimaryKey;
+import org.komodo.relational.model.Table;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test AddEntryCommand
- * -- currently ignored - cannot create Entry in vdbbuilder
+ * Test Class to test DeletePrimaryKeyCommand
+ *
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-@Ignore
-public class AddEntryCommandTest extends AbstractCommandTest {
+public class DeletePrimaryKeyCommandTest extends AbstractCommandTest {
 
     @Test
-    public void testAdd1() throws Exception {
+    public void shouldRemovePrimaryKey() throws Exception {
         final String[] commands = { 
             "workspace",
             "create-vdb myVdb vdbPath",
             "cd myVdb",
-            "add-entry myEntry entryPath" };
+            "add-model myModel",
+            "cd myModel",
+            "add-table myTable",
+            "cd myTable",
+            "add-primary-key myPk",
+            "delete-primary-key" };
 
-        setup( commands );
+        setup(commands);
 
         CommandResult result = execute();
         assertCommandResultOk(result);
@@ -50,9 +56,16 @@ public class AddEntryCommandTest extends AbstractCommandTest {
 
         assertEquals(1, vdbs.length);
 
-        Entry[] entries = vdbs[0].getEntries(getTransaction());
-        assertEquals(1, entries.length);
-        assertEquals("myEntry", entries[0].getName(getTransaction())); //$NON-NLS-1$
+        Model[] models = vdbs[0].getModels(getTransaction());
+        assertEquals(1, models.length);
+        assertEquals("myModel", models[0].getName(getTransaction())); //$NON-NLS-1$
+
+        Table[] tables = models[0].getTables(getTransaction());
+        assertEquals(1, tables.length);
+        assertEquals("myTable", tables[0].getName(getTransaction())); //$NON-NLS-1$
+
+        PrimaryKey pk = tables[0].getPrimaryKey(getTransaction());
+        assertNull(pk);
     }
 
 }

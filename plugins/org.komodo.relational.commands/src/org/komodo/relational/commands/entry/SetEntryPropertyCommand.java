@@ -76,6 +76,11 @@ public final class SetEntryPropertyCommand extends EntryShellCommand {
         return result;
     }
 
+    @Override
+    public boolean isEnabled() {
+        return false;
+    }
+    
     /**
      * {@inheritDoc}
      *

@@ -30,6 +30,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
@@ -49,6 +50,7 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.SynchronousCallback;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.test.utils.TestUtilities;
 import org.komodo.utils.KLog;
 import org.modeshape.jcr.api.JcrConstants;
@@ -117,12 +119,19 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
     private static final String PORTFOLIO_VDB = "portfolio-vdb.xml";
     private static final String PORTFOLIO_VDB_NAME = "Portfolio";
 
-    private static final String BOOKS_EXAMPLE_FULL = "books.xml";
-    private static final String BOOKS_EXAMPLE_PROPS_ONLY = "books_props_only.xml";
-    private static final String BOOKS_EXAMPLE_SOURCE_MODEL_ONLY = "books_source_model_only.xml";
-    private static final String BOOKS_EXAMPLE_SOURCE_WITH_ROLES = "books_source_model_with_roles.xml";
-    private static final String BOOKS_EXAMPLE_VIRTUAL_MODEL_ONLY = "books_virtual_model_only.xml";
-    private static final String BOOKS_EXAMPLE_TRANSLATORS_ONLY = "books_translators_only.xml";
+    private static final String BOOKS_EXAMPLE_FILE_FULL = "books.xml";
+    private static final String BOOKS_EXAMPLE_FILE_PROPS_ONLY = "books_props_only.xml";
+    private static final String BOOKS_EXAMPLE_FILE_SOURCE_MODEL_ONLY = "books_source_model_only.xml";
+    private static final String BOOKS_EXAMPLE_FILE_SOURCE_WITH_ROLES = "books_source_model_with_roles.xml";
+    private static final String BOOKS_EXAMPLE_FILE_VIRTUAL_MODEL_ONLY = "books_virtual_model_only.xml";
+    private static final String BOOKS_EXAMPLE_FILE_TRANSLATORS_ONLY = "books_translators_only.xml";
+
+    private static final String BOOKS_EXAMPLE_NAME_FULL = "BooksExample";
+    private static final String BOOKS_EXAMPLE_NAME_PROPS_ONLY = "Books_Props_Only";
+    private static final String BOOKS_EXAMPLE_NAME_SOURCE_MODEL_ONLY = "Books_Source_Model_Only";
+    private static final String BOOKS_EXAMPLE_NAME_SOURCE_WITH_ROLES = "Books_Source_Model_With_Roles";
+    private static final String BOOKS_EXAMPLE_NAME_VIRTUAL_MODEL_ONLY = "BooksVirtualModelOnly";
+    private static final String BOOKS_EXAMPLE_NAME_TRANSLATORS_ONLY = "BooksExampleTranslatorOverride";
 
     private static final String TWEET_EXAMPLE_DDL = EMPTY_STRING +
                                                         "CREATE VIRTUAL PROCEDURE getTweets(IN query varchar) " +
@@ -281,7 +290,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
          *      @vdb:description=Shows how to call Web Services
          *      @UseConnectorMetadata=cached
          */
-        verify(tweetNode.getParent(getTransaction()), TestUtilities.TWEET_EXAMPLE_NAME, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        verify(tweetNode.getParent(getTransaction()), TestUtilities.TWEET_EXAMPLE_VDB_NAME, VdbLexicon.Vdb.VIRTUAL_DATABASE);
         verifyMixinType(tweetNode, "mix:referenceable");
         verifyProperty(tweetNode, VdbLexicon.Vdb.NAME, "twitter");
         verifyProperty(tweetNode, VdbLexicon.Vdb.DESCRIPTION, "Shows how to call Web Services");
@@ -377,7 +386,6 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
         // Options for the import (default)
         ImportOptions importOptions = new ImportOptions();
-        importOptions.setOption(OptionKeys.NAME, TestUtilities.TWEET_EXAMPLE_NAME);
 
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
@@ -389,7 +397,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
     	commitHandleErrors(importMessages);
 
         // Test that a vdb was created
-        KomodoObject vdbNode = workspace.getChild(getTransaction(), TestUtilities.TWEET_EXAMPLE_NAME, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        KomodoObject vdbNode = workspace.getChild(getTransaction(), TestUtilities.TWEET_EXAMPLE_VDB_NAME, VdbLexicon.Vdb.VIRTUAL_DATABASE);
         assertNotNull("Failed - No Vdb Created ", vdbNode);
 
         // Test vdb name
@@ -437,7 +445,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
         // Options for the import (default)
         ImportOptions importOptions = new ImportOptions();
-        importOptions.setOption(OptionKeys.NAME, TestUtilities.TWEET_EXAMPLE_NAME);
+        importOptions.setOption(OptionKeys.NAME, TestUtilities.TWEET_EXAMPLE_VDB_NAME);
 
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
@@ -446,10 +454,20 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         executeImporter(vdbStream, workspace, importOptions, importMessages);
 
     	// Commit the transaction and handle any import exceptions
-    	commitHandleErrors(importMessages);
+
+        SynchronousCallback testCallback = this.callback;
+        this.getTransaction().commit();
+
+        assertTrue(this.callback.await( TIME_TO_WAIT, TimeUnit.MINUTES ));
+        assertEquals(State.ERROR, getTransaction().getState());
+
+        if ( testCallback.hasError() ) {
+            importMessages.addErrorMessage( testCallback.error() );
+        }
 
     	// Retrieve vdb after import
-        KomodoObject vdbNode = workspace.getChild(getTransaction(), TestUtilities.TWEET_EXAMPLE_NAME, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        createInitialTransaction();
+        KomodoObject vdbNode = workspace.getChild(getTransaction(), TestUtilities.TWEET_EXAMPLE_VDB_NAME, VdbLexicon.Vdb.VIRTUAL_DATABASE);
         assertNotNull(vdbNode);
 
         // Error messages - expect parser error
@@ -470,7 +488,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
         KLog.getLogger().debug("\n\n=== Editing tweet example ===");
 
-        KomodoObject vdbNode = _repo.getFromWorkspace(getTransaction(), TestUtilities.TWEET_EXAMPLE_NAME);
+        KomodoObject vdbNode = _repo.getFromWorkspace(getTransaction(), TestUtilities.TWEET_EXAMPLE_VDB_NAME);
         assertNotNull(vdbNode);
         WorkspaceManager wkspManager = WorkspaceManager.getInstance(_repo);
 
@@ -516,7 +534,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
         KLog.getLogger().debug("\n\n=== Editing tweet example ===");
 
-        KomodoObject vdbNode = _repo.getFromWorkspace(getTransaction(), TestUtilities.TWEET_EXAMPLE_NAME);
+        KomodoObject vdbNode = _repo.getFromWorkspace(getTransaction(), TestUtilities.TWEET_EXAMPLE_VDB_NAME);
         assertNotNull(vdbNode);
 
         KomodoObject twitterView = vdbNode.getChild(getTransaction(), TWITTER_VIEW_MODEL);
@@ -556,7 +574,6 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
         // ImportOption - Handle existing node set to OVERWRITE by default
         ImportOptions importOptions = new ImportOptions();
-        importOptions.setOption(OptionKeys.NAME, TestUtilities.TWEET_EXAMPLE_NAME);
 
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
@@ -568,7 +585,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         commitHandleErrors(importMessages);
 
         // Test that a vdb was created
-        KomodoObject vdbNode = workspace.getChild(getTransaction(), TestUtilities.TWEET_EXAMPLE_NAME, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        KomodoObject vdbNode = workspace.getChild(getTransaction(), TestUtilities.TWEET_EXAMPLE_VDB_NAME, VdbLexicon.Vdb.VIRTUAL_DATABASE);
         assertNotNull("Failed - No Vdb Created ",vdbNode);
 
         // Test vdb name
@@ -598,7 +615,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
          *      @vdb-property=vdb-value
          */
         KomodoObject myVdbExample = verify(allElementsNode.getParent(getTransaction()),
-                                                                    TestUtilities.ALL_ELEMENTS_EXAMPLE_NAME + TestUtilities.ALL_ELEMENTS_EXAMPLE_SUFFIX,
+                                                                    TestUtilities.ALL_ELEMENTS_EXAMPLE_VDB_NAME,
                                                                     VdbLexicon.Vdb.VIRTUAL_DATABASE,
                                                                     "mix:referenceable");
         assertEquals(allElementsNode, myVdbExample);
@@ -823,8 +840,6 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
         // Options for the import (default)
         ImportOptions importOptions = new ImportOptions();
-        importOptions.setOption(OptionKeys.NAME,
-                                               TestUtilities.ALL_ELEMENTS_EXAMPLE_NAME + TestUtilities.ALL_ELEMENTS_EXAMPLE_SUFFIX);
 
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
@@ -836,7 +851,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         commitHandleErrors(importMessages);
 
         // Test that a vdb was created
-        KomodoObject vdbNode = workspace.getChild(getTransaction(), TestUtilities.ALL_ELEMENTS_EXAMPLE_NAME + TestUtilities.ALL_ELEMENTS_EXAMPLE_SUFFIX, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        KomodoObject vdbNode = workspace.getChild(getTransaction(), TestUtilities.ALL_ELEMENTS_EXAMPLE_VDB_NAME, VdbLexicon.Vdb.VIRTUAL_DATABASE);
         assertNotNull("Failed - No Vdb Created ", vdbNode);
 
         // Test vdb name
@@ -850,11 +865,10 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
     @Test
     public void testBooksExample_Full_Vdb() throws Exception {
         InputStream vdbStream = TestUtilities.getResourceAsStream(getClass(),
-                                                                  BOOKS_DIRECTORY, BOOKS_EXAMPLE_FULL);
+                                                                  BOOKS_DIRECTORY, BOOKS_EXAMPLE_FILE_FULL);
 
         // Options for the import (default)
         ImportOptions importOptions = new ImportOptions();
-        importOptions.setOption(OptionKeys.NAME, BOOKS_EXAMPLE_FULL);
 
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
@@ -866,7 +880,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         commitHandleErrors(importMessages);
 
         // Test that a vdb was created
-        KomodoObject vdbNode = workspace.getChild(getTransaction(), BOOKS_EXAMPLE_FULL, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        KomodoObject vdbNode = workspace.getChild(getTransaction(), BOOKS_EXAMPLE_NAME_FULL, VdbLexicon.Vdb.VIRTUAL_DATABASE);
         assertNotNull("Failed - No Vdb Created ", vdbNode);
 
         // Test vdb name
@@ -917,11 +931,10 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
     public void testBooksExample_Vdb_Properties_Only() throws Exception {
         //File vdbFile = setupWithFile(BOOKS_EXAMPLE);
         InputStream vdbStream = TestUtilities.getResourceAsStream(getClass(),
-                                                                  BOOKS_DIRECTORY, BOOKS_EXAMPLE_PROPS_ONLY);
+                                                                  BOOKS_DIRECTORY, BOOKS_EXAMPLE_FILE_PROPS_ONLY);
 
         // Options for the import (default)
         ImportOptions importOptions = new ImportOptions();
-        importOptions.setOption(OptionKeys.NAME, BOOKS_EXAMPLE_PROPS_ONLY);
 
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
@@ -933,7 +946,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         commitHandleErrors(importMessages);
 
         // Test that a vdb was created
-        KomodoObject vdbNode = workspace.getChild(getTransaction(), BOOKS_EXAMPLE_PROPS_ONLY, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        KomodoObject vdbNode = workspace.getChild(getTransaction(), BOOKS_EXAMPLE_NAME_PROPS_ONLY, VdbLexicon.Vdb.VIRTUAL_DATABASE);
         assertNotNull("Failed - No Vdb Created ", vdbNode);
 
         // Test vdb name
@@ -975,11 +988,10 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
     @Test
     public void testBooksExample_Source_Model_Only() throws Exception {
         InputStream vdbStream = TestUtilities.getResourceAsStream(getClass(),
-                                                                  BOOKS_DIRECTORY, BOOKS_EXAMPLE_SOURCE_MODEL_ONLY);
+                                                                  BOOKS_DIRECTORY, BOOKS_EXAMPLE_FILE_SOURCE_MODEL_ONLY);
 
         // Options for the import (default)
         ImportOptions importOptions = new ImportOptions();
-        importOptions.setOption(OptionKeys.NAME, BOOKS_EXAMPLE_SOURCE_MODEL_ONLY);
 
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
@@ -991,7 +1003,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         commitHandleErrors(importMessages);
 
         // Test that a vdb was created
-        KomodoObject vdbNode = workspace.getChild(getTransaction(), BOOKS_EXAMPLE_SOURCE_MODEL_ONLY, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        KomodoObject vdbNode = workspace.getChild(getTransaction(), BOOKS_EXAMPLE_NAME_SOURCE_MODEL_ONLY, VdbLexicon.Vdb.VIRTUAL_DATABASE);
         assertNotNull("Failed - No Vdb Created ", vdbNode);
 
         // Test vdb name
@@ -1013,11 +1025,10 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
     @Test
     public void testBooksExample_Source_Model_With_Roles() throws Exception {
         InputStream vdbStream = TestUtilities.getResourceAsStream(getClass(),
-                                                                  BOOKS_DIRECTORY, BOOKS_EXAMPLE_SOURCE_WITH_ROLES);
+                                                                  BOOKS_DIRECTORY, BOOKS_EXAMPLE_FILE_SOURCE_WITH_ROLES);
 
         // Options for the import (default)
         ImportOptions importOptions = new ImportOptions();
-        importOptions.setOption(OptionKeys.NAME, BOOKS_EXAMPLE_SOURCE_WITH_ROLES);
 
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
@@ -1029,7 +1040,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         commitHandleErrors(importMessages);
 
         // Test that a vdb was created
-        KomodoObject vdbNode = workspace.getChild(getTransaction(), BOOKS_EXAMPLE_SOURCE_WITH_ROLES, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        KomodoObject vdbNode = workspace.getChild(getTransaction(), BOOKS_EXAMPLE_NAME_SOURCE_WITH_ROLES, VdbLexicon.Vdb.VIRTUAL_DATABASE);
         assertNotNull("Failed - No Vdb Created ", vdbNode);
 
         // Test vdb name
@@ -1089,11 +1100,10 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
     @Test
     public void testBooksExample_Virtual_Model_Only() throws Exception {
         InputStream vdbStream = TestUtilities.getResourceAsStream(getClass(),
-                                                                  BOOKS_DIRECTORY, BOOKS_EXAMPLE_VIRTUAL_MODEL_ONLY);
+                                                                  BOOKS_DIRECTORY, BOOKS_EXAMPLE_FILE_VIRTUAL_MODEL_ONLY);
 
         // Options for the import (default)
         ImportOptions importOptions = new ImportOptions();
-        importOptions.setOption(OptionKeys.NAME, BOOKS_EXAMPLE_VIRTUAL_MODEL_ONLY);
 
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
@@ -1105,7 +1115,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         commitHandleErrors(importMessages);
 
         // Test that a vdb was created
-        KomodoObject vdbNode = workspace.getChild(getTransaction(), BOOKS_EXAMPLE_VIRTUAL_MODEL_ONLY, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        KomodoObject vdbNode = workspace.getChild(getTransaction(), BOOKS_EXAMPLE_NAME_VIRTUAL_MODEL_ONLY, VdbLexicon.Vdb.VIRTUAL_DATABASE);
         assertNotNull("Failed - No Vdb Created ", vdbNode);
 
         // Test vdb name
@@ -1129,11 +1139,10 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
     @Test
     public void testBooksExample_Translator_Only() throws Exception {
         InputStream vdbStream = TestUtilities.getResourceAsStream(getClass(),
-                                                                  BOOKS_DIRECTORY, BOOKS_EXAMPLE_TRANSLATORS_ONLY);
+                                                                  BOOKS_DIRECTORY, BOOKS_EXAMPLE_FILE_TRANSLATORS_ONLY);
 
         // Options for the import (default)
         ImportOptions importOptions = new ImportOptions();
-        importOptions.setOption(OptionKeys.NAME, BOOKS_EXAMPLE_TRANSLATORS_ONLY);
 
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
@@ -1145,7 +1154,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         commitHandleErrors(importMessages);
 
         // Test that a vdb was created
-        KomodoObject vdbNode = workspace.getChild(getTransaction(), BOOKS_EXAMPLE_TRANSLATORS_ONLY, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        KomodoObject vdbNode = workspace.getChild(getTransaction(), BOOKS_EXAMPLE_NAME_TRANSLATORS_ONLY, VdbLexicon.Vdb.VIRTUAL_DATABASE);
         assertNotNull("Failed - No Vdb Created ", vdbNode);
 
         // Test vdb name
@@ -1190,7 +1199,6 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
         // Options for the import (default)
         ImportOptions importOptions = new ImportOptions();
-        importOptions.setOption(OptionKeys.NAME, DYNAMIC_CUSTOMER_VDB_NAME);
 
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();

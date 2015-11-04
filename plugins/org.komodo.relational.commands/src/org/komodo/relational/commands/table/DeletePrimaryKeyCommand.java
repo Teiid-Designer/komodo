@@ -5,28 +5,27 @@
  *
  * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
  */
-package org.komodo.relational.commands.vdb;
+package org.komodo.relational.commands.table;
 
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.AddEntryCommand.ENTRY_ADDED;
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_ENTRY_NAME;
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_ENTRY_PATH;
-import org.komodo.relational.vdb.Vdb;
+import static org.komodo.relational.commands.table.TableCommandMessages.DeletePrimaryKeyCommand.NO_PK_TO_REMOVE;
+import static org.komodo.relational.commands.table.TableCommandMessages.DeletePrimaryKeyCommand.PRIMARY_KEY_DELETED;
+import org.komodo.relational.model.Table;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 
 /**
- * A shell command to add an entry to a VDB.
+ * A shell command to delete a PrimaryKey from a Table.
  */
-public final class AddEntryCommand extends VdbShellCommand {
+public final class DeletePrimaryKeyCommand extends TableShellCommand {
 
-    static final String NAME = "add-entry"; //$NON-NLS-1$
+    static final String NAME = "delete-primary-key"; //$NON-NLS-1$
 
     /**
      * @param status
      *        the shell's workspace status (cannot be <code>null</code>)
      */
-    public AddEntryCommand( final WorkspaceStatus status ) {
+    public DeletePrimaryKeyCommand( final WorkspaceStatus status ) {
         super( NAME, status );
     }
 
@@ -40,13 +39,13 @@ public final class AddEntryCommand extends VdbShellCommand {
         CommandResult result = null;
 
         try {
-            final String entryName = requiredArgument( 0, getMessage( MISSING_ENTRY_NAME ) );
-            final String entryPath = requiredArgument( 1, getMessage( MISSING_ENTRY_PATH ) );
+            final Table table = getTable();
+            if( table.getPrimaryKey(getTransaction())==null ) {
+                return new CommandResultImpl( getMessage( NO_PK_TO_REMOVE ));
+            }
+            table.removePrimaryKey( getTransaction()  );
 
-            final Vdb vdb = getVdb();
-            vdb.addEntry( getTransaction(), entryName, entryPath );
-
-            result = new CommandResultImpl( getMessage( ENTRY_ADDED, entryName ) );
+            result = new CommandResultImpl( getMessage( PRIMARY_KEY_DELETED ) );
         } catch ( final Exception e ) {
             result = new CommandResultImpl( e );
         }
@@ -54,11 +53,6 @@ public final class AddEntryCommand extends VdbShellCommand {
         return result;
     }
 
-    @Override
-    public boolean isEnabled() {
-        return false;
-    }
-    
     /**
      * {@inheritDoc}
      *
@@ -66,7 +60,7 @@ public final class AddEntryCommand extends VdbShellCommand {
      */
     @Override
     protected int getMaxArgCount() {
-        return 2;
+        return 0;
     }
 
 }

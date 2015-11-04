@@ -61,11 +61,13 @@ import org.komodo.relational.commands.table.AddAccessPatternCommandTest;
 import org.komodo.relational.commands.table.AddColumnCommandTest;
 import org.komodo.relational.commands.table.AddForeignKeyCommandTest;
 import org.komodo.relational.commands.table.AddIndexCommandTest;
+import org.komodo.relational.commands.table.AddPrimaryKeyCommandTest;
 import org.komodo.relational.commands.table.AddUniqueConstraintCommandTest;
 import org.komodo.relational.commands.table.DeleteAccessPatternCommandTest;
 import org.komodo.relational.commands.table.DeleteColumnCommandTest;
 import org.komodo.relational.commands.table.DeleteForeignKeyCommandTest;
 import org.komodo.relational.commands.table.DeleteIndexCommandTest;
+import org.komodo.relational.commands.table.DeletePrimaryKeyCommandTest;
 import org.komodo.relational.commands.table.DeleteUniqueConstraintCommandTest;
 import org.komodo.relational.commands.table.SetTablePropertyCommandTest;
 import org.komodo.relational.commands.table.UnsetTablePropertyCommandTest;
@@ -243,11 +245,13 @@ import org.komodo.relational.commands.workspace.WorkspaceUnsetPropertyCommandTes
     AddForeignKeyCommandTest.class,
     AddIndexCommandTest.class,
     AddUniqueConstraintCommandTest.class,
+    AddPrimaryKeyCommandTest.class,
     DeleteAccessPatternCommandTest.class,
     DeleteColumnCommandTest.class,
     DeleteForeignKeyCommandTest.class,
     DeleteIndexCommandTest.class,
     DeleteUniqueConstraintCommandTest.class,
+    DeletePrimaryKeyCommandTest.class,
     SetTablePropertyCommandTest.class,
     UnsetTablePropertyCommandTest.class,
 
