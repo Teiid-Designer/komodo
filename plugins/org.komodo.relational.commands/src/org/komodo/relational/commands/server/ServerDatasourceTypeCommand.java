@@ -25,7 +25,7 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.runtime.TeiidPropertyDefinition;
 
 /**
- * A shell command to show all vdbs on a server
+ * A shell command to show details for a server data source type.
  */
 public final class ServerDatasourceTypeCommand extends ServerShellCommand {
 

@@ -123,24 +123,21 @@ public final class ServerDeployVdbCommand extends ServerShellCommand {
         return result;
     }
     
-    private boolean serverHasVdb(TeiidInstance teiidInstance, String vdbName, int vdbVersion) {
-        boolean vdbExists = false;
-        
-        try {
-            Collection<TeiidVdb> serverVdbs = teiidInstance.getVdbs();
-            for(TeiidVdb serverVdb : serverVdbs) {
-                String serverVdbName = serverVdb.getName();
-                int serverVdbVersion = serverVdb.getVersion();
-                if(serverVdbName.equals(vdbName) && serverVdbVersion==vdbVersion) {
-                    vdbExists = true;
-                    break;
-                }
-            }
-        } catch (Exception ex) {
-            // TODO log error
+    private boolean serverHasVdb(TeiidInstance teiidInstance, String vdbName, int vdbVersion) throws Exception {
+        // If no VDB with this name, return false;
+        if(!teiidInstance.hasVdb(vdbName)) {
+            return false;
         }
         
-        return vdbExists;
+        // May be multiple versions deployed - see if there is one matching supplied version
+        Collection<TeiidVdb> serverVdbs = teiidInstance.getVdbs();
+        for(TeiidVdb serverVdb : serverVdbs) {
+            if(serverVdb.getName().equals(vdbName) && serverVdb.getVersion()==vdbVersion) {
+                return true;
+            }
+        }
+        
+        return false;
     }
     
     /**

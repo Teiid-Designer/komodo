@@ -23,7 +23,7 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.runtime.TeiidVdb;
 
 /**
- * A shell command to show details of a server vdb
+ * A shell command to show details for a server VDB
  */
 public final class ServerVdbCommand extends ServerShellCommand {
 

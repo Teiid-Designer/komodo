@@ -23,7 +23,7 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.runtime.TeiidTranslator;
 
 /**
- * A shell command to show all translators on a server
+ * A shell command to show details for a server translator.
  */
 public final class ServerTranslatorCommand extends ServerShellCommand {
 
