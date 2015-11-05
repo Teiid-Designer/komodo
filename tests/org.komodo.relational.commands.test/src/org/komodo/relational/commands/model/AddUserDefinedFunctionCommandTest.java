@@ -26,25 +26,20 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test AddUserDefinedFunctionCommand
- *
+ * Test Class to test {@link AddUserDefinedFunctionCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public class AddUserDefinedFunctionCommandTest extends AbstractCommandTest {
+public final class AddUserDefinedFunctionCommandTest extends AbstractCommandTest {
 
     @Test
     public void testAdd1() throws Exception {
-        final String[] commands = { 
-            "workspace",
+        final String[] commands = {
             "create-vdb myVdb vdbPath",
             "cd myVdb",
             "add-model myModel",
             "cd myModel",
             "add-user-defined-function myUserDefinedFunction"};
-
-        setup( commands );
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

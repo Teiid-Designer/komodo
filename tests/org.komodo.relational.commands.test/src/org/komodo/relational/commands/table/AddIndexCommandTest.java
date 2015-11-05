@@ -26,16 +26,14 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test AddIndexCommand
- *
+ * Test Class to test {@link AddIndexCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public class AddIndexCommandTest extends AbstractCommandTest {
+public final class AddIndexCommandTest extends AbstractCommandTest {
 
     @Test
     public void testAdd1() throws Exception {
-        final String[] commands = { 
-            "workspace",
+        final String[] commands = {
             "create-vdb myVdb vdbPath",
             "cd myVdb",
             "add-model myModel",
@@ -43,10 +41,7 @@ public class AddIndexCommandTest extends AbstractCommandTest {
             "add-table myTable",
             "cd myTable",
             "add-index myIndex" };
-
-        setup(commands);
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

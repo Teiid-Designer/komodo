@@ -24,25 +24,20 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test SetTranslatorPropertyCommand
- *
+ * Test Class to test {@link SetTranslatorPropertyCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public class SetTranslatorPropertyCommandTest extends AbstractCommandTest {
+public final class SetTranslatorPropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testSetProperty1() throws Exception {
-        final String[] commands = { 
-            "workspace",
+        final String[] commands = {
             "create-vdb myVdb vdbPath",
             "cd myVdb",
             "add-translator myTranslator tType",
             "cd myTranslator",
             "set-property description myDescription" };
-        
-        setup( commands );
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

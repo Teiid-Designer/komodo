@@ -28,8 +28,7 @@ public class ExitCommandTest extends AbstractCommandTest {
     @Test( expected = AssertionError.class )
     public void shouldFailTooManyArgs() throws Exception {
         final String[] commands = { "exit -s extraArg" };
-        setup( commands );
-        execute();
+        execute( commands );
     }
 
     @Test
@@ -39,8 +38,7 @@ public class ExitCommandTest extends AbstractCommandTest {
                                     "cd blah",
                                     "set-property sledge hammer",
                                     "exit -s" };
-        setup( commands );
-        final CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk( result );
     }
 
@@ -51,8 +49,7 @@ public class ExitCommandTest extends AbstractCommandTest {
                                     "cd blah",
                                     "set-property sledge hammer",
                                     "exit -f" };
-        setup( commands );
-        final CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk( result );
     }
 
@@ -63,8 +60,7 @@ public class ExitCommandTest extends AbstractCommandTest {
                                     "cd blah",
                                     "set-property sledge hammer",
                                     "exit" };
-        setup( commands );
-        execute();
+        execute( commands );
     }
 
 }

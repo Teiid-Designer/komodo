@@ -29,8 +29,7 @@ public abstract class DataTypeResultSetCommandTest extends AbstractCommandTest {
 
     @Before
     public void createContext() throws Exception {
-        final String[] commands = { "workspace",
-                                    "create-vdb myVdb vdbPath",
+        final String[] commands = { "create-vdb myVdb vdbPath",
                                     "cd myVdb",
                                     "add-model myModel ",
                                     "cd myModel",
@@ -38,8 +37,7 @@ public abstract class DataTypeResultSetCommandTest extends AbstractCommandTest {
                                     "cd myPushdownFunction",
                                     "set-result-set DataTypeResultSet",
                                     "cd resultSet" };
-        setup( commands );
-        final CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk( result );
 
         final WorkspaceManager wkspMgr = WorkspaceManager.getInstance( _repo );

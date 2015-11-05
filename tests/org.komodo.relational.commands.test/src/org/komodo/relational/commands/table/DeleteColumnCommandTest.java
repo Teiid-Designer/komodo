@@ -26,16 +26,14 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test DeleteColumnCommand
- *
+ * Test Class to test {@link DeleteColumnCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
 public class DeleteColumnCommandTest extends AbstractCommandTest {
 
     @Test
     public void testDelete1() throws Exception {
-        final String[] commands = { 
-            "workspace",
+        final String[] commands = {
             "create-vdb myVdb vdbPath",
             "cd myVdb",
             "add-model myModel",
@@ -45,10 +43,7 @@ public class DeleteColumnCommandTest extends AbstractCommandTest {
             "add-column myColumn1",
             "add-column myColumn2",
             "delete-column myColumn1" };
-        
-        setup( commands );
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

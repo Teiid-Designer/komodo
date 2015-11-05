@@ -23,24 +23,19 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test UnsetVdbPropertyCommand
- *
+ * Test Class to test {@link UnsetVdbPropertyCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public class UnsetVdbPropertyCommandTest extends AbstractCommandTest {
+public final class UnsetVdbPropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testUnsetProperty1() throws Exception {
-        final String[] commands = { 
-            "workspace",
+        final String[] commands = {
             "create-vdb testVdb vdbPath",
             "cd testVdb",
             "set-property version 3",
             "unset-property version" };
-
-        setup( commands );
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

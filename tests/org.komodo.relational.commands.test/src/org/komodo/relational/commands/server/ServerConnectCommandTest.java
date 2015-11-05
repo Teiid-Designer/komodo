@@ -21,27 +21,23 @@ import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test ServerConnectCommand
- *
+ * Test Class to test {@link ServerConnectCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public class ServerConnectCommandTest extends AbstractCommandTest {
+public final class ServerConnectCommandTest extends AbstractCommandTest {
 
     @Test
     public void shouldFailNoLocalhostFound() throws Exception {
-        final String[] commands = { 
+        final String[] commands = {
             "set-auto-commit false",
-            "workspace",
             "create-teiid myTeiid",
             "commit",
             "set-server myTeiid",
             "server-connect" };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk(result);
 
-        setup( commands );
-
-        CommandResult result = execute();
         String msg = result.getMessage();
-
         assertTrue(msg.contains("localhost is not available"));
     }
 

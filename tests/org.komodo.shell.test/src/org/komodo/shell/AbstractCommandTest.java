@@ -2,6 +2,7 @@ package org.komodo.shell;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.StringWriter;
@@ -29,6 +30,7 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.RepositoryClient;
 import org.komodo.test.utils.AbstractLocalRepositoryTest;
 import org.komodo.utils.FileUtils;
+import org.komodo.utils.KLog;
 import org.mockito.Mockito;
 
 /**
@@ -37,11 +39,10 @@ import org.mockito.Mockito;
 @SuppressWarnings({"javadoc", "nls"})
 public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
 
+    private static final KLog LOGGER = KLog.getLogger();
     private static KEngine kEngine = KEngine.getInstance();
     protected static Path _shellDataDirectory;
 
-    @SuppressWarnings( "unused" )
-    private Writer writer;
     private Writer commandWriter;
     private PlayCommand playCmd;
     protected WorkspaceStatusImpl wsStatus;
@@ -53,6 +54,8 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
     @BeforeClass
     public static void startKEngine() throws Exception {
         assertNotNull(_repo);
+        final long startTime = System.currentTimeMillis();
+        LOGGER.debug( "AbstractCommandTest:startKEngine" );
 
         // create data directory for shell
         _shellDataDirectory = Files.createTempDirectory( "VdbBuilderDataDir" );
@@ -63,6 +66,8 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
 
         assertEquals(RepositoryClient.State.STARTED, kEngine.getState());
         assertEquals(Repository.State.REACHABLE, kEngine.getDefaultRepository().getState());
+        LOGGER.debug( "AbstractCommandTest:startKEngine time to start engine: {0}",
+                      ( System.currentTimeMillis() - startTime ) );
     }
 
     /**
@@ -71,6 +76,8 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
     @AfterClass
     public static void stopKEngine() throws Exception {
         assertNotNull(kEngine);
+        final long startTime = System.currentTimeMillis();
+        LOGGER.debug( "AbstractCommandTest:stopKEngine" );
 
         // delete data directory
         FileUtils.removeDirectoryAndChildren( _shellDataDirectory.toFile() );
@@ -86,6 +93,8 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
         kEngine.setDefaultRepository(null);
         assertEquals(RepositoryClient.State.SHUTDOWN, kEngine.getState());
         assertEquals(Repository.State.NOT_REACHABLE, _repo.getState());
+        LOGGER.debug( "AbstractCommandTest:stopKEngine time to stop engine: {0}",
+                      ( System.currentTimeMillis() - startTime ) );
     }
 
     @Before
@@ -101,6 +110,12 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
         Mockito.when( komodoShell.getShellPropertiesFile() ).thenReturn( "vdbbuilderShell.properties" );
 
         this.wsStatus = new WorkspaceStatusImpl( super.getTransaction(), komodoShell );
+        this.commandWriter = new StringWriter();
+    }
+
+    protected CommandResult execute( final String[] commands ) throws Exception {
+        setup( commands );
+        return execute();
     }
 
     protected void setup( final String[] commands ) throws Exception {
@@ -128,10 +143,6 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
     }
 
     protected void setup( final String commandFilePath ) throws Exception {
-        // create writers to store the output
-        this.writer = new StringWriter();
-        this.commandWriter = new StringWriter();
-
         // setup arguments for play command
         final String filePath = ( new File( commandFilePath ).isAbsolute() ) ? commandFilePath
                                                                              : ( "./resources/" + commandFilePath );
@@ -166,7 +177,6 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
     @After
     public void teardown( ) {
         this.commandWriter = null;
-        this.writer = null;
         this.playCmd = null;
     }
 
@@ -207,12 +217,26 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
         }
     }
 
+    protected void assertContextIs( final String absolutePath ) {
+        if ( !this.wsStatus.getCurrentContext().getAbsolutePath().equals( absolutePath ) ) {
+            fail( "Expected context '"
+                  + absolutePath
+                  + "' but was '"
+                  + this.wsStatus.getCurrentContext().getAbsolutePath()
+                  + '\'' );
+        }
+    }
+
     /**
      * Get command output.  Contains only the output of the command being tested.
      * @return the output
      */
     protected String getCommandOutput() {
         return this.commandWriter.toString();
+    }
+
+    protected Writer getOutputWriter() {
+        return this.commandWriter;
     }
 
     /**

@@ -36,9 +36,7 @@ public class UploadModelCommandTest extends AbstractCommandTest {
                                     "create-vdb testVdb vdbPath",
                                     "cd testVdb",
                                     "upload-model myModel PHYSICAL " + UPLOAD_MODEL };
-        setup( commands );
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
@@ -50,7 +48,7 @@ public class UploadModelCommandTest extends AbstractCommandTest {
         // Make sure model was created
         assertEquals(1, vdbs[0].getModels( getTransaction() ).length);
         assertEquals("myModel", vdbs[0].getModels( getTransaction() )[0].getName( getTransaction() ));
-        
+
         // Should be 5 tables in the model
         assertEquals(5, vdbs[0].getModels(getTransaction())[0].getTables(getTransaction()).length);
     }

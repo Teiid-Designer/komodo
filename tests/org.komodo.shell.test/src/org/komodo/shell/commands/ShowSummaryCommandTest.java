@@ -32,18 +32,15 @@ public class ShowSummaryCommandTest extends AbstractCommandTest {
     @Test( expected = AssertionError.class )
     public void shouldFailTooManyArgs( ) throws Exception {
         final String[] commands = { "show-summary extraArg" };
-        setup( commands );
-        execute();
+        execute( commands );
     }
-    
+
     @Test
     public void shouldBeAvailableAtLibrary() throws Exception {
         final String[] commands = { "library",
                                     "show-summary" };
-        setup( commands );
-
-        CommandResult result = execute();
-        assertCommandResultOk(result);
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
 
         String writerOutput = getCommandOutput();
         assertThat( writerOutput, writerOutput.contains( KomodoObject.class.getSimpleName()
@@ -56,10 +53,8 @@ public class ShowSummaryCommandTest extends AbstractCommandTest {
     @Test
     public void shouldBeAvailableAtRoot() throws Exception {
         final String[] commands = { "show-summary" };
-        setup( commands );
-
-        CommandResult result = execute();
-        assertCommandResultOk(result);
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
 
         String writerOutput = getCommandOutput();
         assertThat( writerOutput, writerOutput.contains( KomodoObject.class.getSimpleName()
@@ -73,10 +68,8 @@ public class ShowSummaryCommandTest extends AbstractCommandTest {
     public void shouldBeAvailableAtWorkspace() throws Exception {
         final String[] commands = { "workspace",
                                     "show-summary" };
-        setup( commands );
-
-        CommandResult result = execute();
-        assertCommandResultOk(result);
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
 
         String writerOutput = getCommandOutput();
         assertThat( writerOutput, writerOutput.contains( KomodoObject.class.getSimpleName()

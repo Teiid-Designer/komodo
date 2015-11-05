@@ -27,8 +27,7 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.test.utils.TestUtilities;
 
 /**
- * Test Class to test ExportCommand
- *
+ * Test Class to test {@link ExportCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
 public class ExportCommandTest extends AbstractCommandTest {
@@ -95,21 +94,15 @@ public class ExportCommandTest extends AbstractCommandTest {
         //
         // The commands
         //
-        final String[] commands = { 
+        final String[] commands = {
             "commit",
             "workspace",
             "cd " + tweetVdb.getName(getTransaction()),
             "cd twitterview",
             "export-ddl " + exportDest.getAbsolutePath() };
-
-        setup( commands );
-
-        //
-        // Execute the commands
-        //
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
+        assertCommandResultOk(result);
         assertTrue(exportDest.exists());
-        assertTrue(result.isOk());
 
         String exportContents = TestUtilities.fileToString(exportDest);
         assertEquals(TWITTER_VIEW_MODEL_DDL + NEW_LINE, exportContents);
@@ -144,19 +137,14 @@ public class ExportCommandTest extends AbstractCommandTest {
         //
         // The commands
         //
-        final String[] commands = { 
+        final String[] commands = {
             "commit",
             "workspace",
             "cd " + allElementsVdb.getName(getTransaction()),
             "cd model-one",
             "export-ddl " + exportDest.getAbsolutePath() };
-
-        setup( commands );
-
-        //
-        // Execute the commands
-        //
-        execute();
+        final CommandResult result = execute( commands );
+        assertCommandResultOk(result);
 //        assertTrue(exportDest.exists());
 //        assertTrue(!result.isOk());
 //
@@ -193,19 +181,13 @@ public class ExportCommandTest extends AbstractCommandTest {
         //
         // The commands
         //
-        final String[] commands = { 
+        final String[] commands = {
             "commit",
             "workspace",
             "cd " + allElementsVdb.getName(getTransaction()),
             "cd model-two",
             "export-ddl " + exportDest.getAbsolutePath() };
-
-        setup( commands );
-
-        //
-        // Execute the commands
-        //
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         assertTrue(exportDest.exists());

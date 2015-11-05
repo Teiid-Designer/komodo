@@ -25,26 +25,22 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test DeleteEntryCommand
+ * Test Class to test {@link DeleteEntryCommand}.
  * -- currently ignored - cannot create Entry in vdbbuilder
  */
 @SuppressWarnings( {"javadoc", "nls"} )
 @Ignore
-public class DeleteEntryCommandTest extends AbstractCommandTest {
+public final class DeleteEntryCommandTest extends AbstractCommandTest {
 
     @Test
     public void testDelete1() throws Exception {
-        final String[] commands = { 
-            "workspace",
+        final String[] commands = {
             "create-vdb myVdb vdbPath",
             "cd myVdb",
             "add-entry myEntry1 entryPath",
             "add-entry myEntry2 entryPath",
             "delete-entry myEntry1" };
-
-        setup( commands );
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

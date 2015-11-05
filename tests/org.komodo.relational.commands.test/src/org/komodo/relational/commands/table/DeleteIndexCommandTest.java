@@ -26,16 +26,14 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test DeleteIndexCommand
- *
+ * Test Class to test {@link DeleteIndexCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
 public class DeleteIndexCommandTest extends AbstractCommandTest {
 
     @Test
     public void testDelete1() throws Exception {
-        final String[] commands = { 
-            "workspace",
+        final String[] commands = {
             "create-vdb myVdb vdbPath",
             "cd myVdb",
             "add-model myModel",
@@ -45,10 +43,7 @@ public class DeleteIndexCommandTest extends AbstractCommandTest {
             "add-index myIndex1",
             "add-index myIndex2",
             "delete-index myIndex1" };
-
-        setup(commands);
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

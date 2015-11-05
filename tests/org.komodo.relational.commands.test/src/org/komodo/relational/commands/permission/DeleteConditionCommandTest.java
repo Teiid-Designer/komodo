@@ -26,16 +26,14 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test DeleteConditionCommand
- *
+ * Test Class to test {@link DeleteConditionCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public class DeleteConditionCommandTest extends AbstractCommandTest {
+public final class DeleteConditionCommandTest extends AbstractCommandTest {
 
     @Test
     public void testDelete1() throws Exception {
-        final String[] commands = { 
-            "workspace",
+        final String[] commands = {
             "create-vdb myVdb vdbPath",
             "cd myVdb",
             "add-data-role myDataRole",
@@ -46,10 +44,7 @@ public class DeleteConditionCommandTest extends AbstractCommandTest {
             "add-condition myCondition2",
             "delete-condition myCondition1",
             };
-
-        setup( commands );
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

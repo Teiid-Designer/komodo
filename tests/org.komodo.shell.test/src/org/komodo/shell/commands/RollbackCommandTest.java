@@ -30,8 +30,7 @@ public class RollbackCommandTest extends AbstractCommandTest {
     @Test( expected = AssertionError.class )
     public void shouldFailTooManyArgs( ) throws Exception {
         final String[] commands = { "rollback extraArg" };
-        setup( commands );
-        execute();
+        execute( commands );
     }
 
     @Test
@@ -40,9 +39,7 @@ public class RollbackCommandTest extends AbstractCommandTest {
         final String[] commands = { "workspace",
                                     "add-child " + childName,
                                     RollbackCommand.NAME };
-        setup( commands );
-
-        final CommandResult result = execute(); // this does a commit
+        final CommandResult result = execute( commands );
         assertCommandResultOk( result );
         assertThat( _repo.komodoWorkspace( getTransaction() ).hasChild( getTransaction(), childName ), is( false ) );
     }

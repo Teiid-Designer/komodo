@@ -18,12 +18,11 @@ package org.komodo.relational.commands.tabularresultset;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import org.junit.Test;
-import org.komodo.relational.commands.pushdownfunction.AddParameterCommand;
 import org.komodo.relational.model.ResultSetColumn;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test class for {@link AddParameterCommand}.
+ * Test class for {@link AddColumnCommand}.
  */
 @SuppressWarnings( { "javadoc",
                      "nls" } )
@@ -33,10 +32,8 @@ public final class AddColumnCommandTest extends TabularResultSetCommandTest {
     public void shouldAddColumn() throws Exception {
         final String addedColumn = "myColumn";
         final String[] commands = { "add-column " + addedColumn };
-        setup( commands );
-
-        final CommandResult result = execute();
-        assertCommandResultOk( result );
+        final CommandResult result = execute( commands );
+        assertCommandResultOk(result);
 
         final ResultSetColumn[] cols = get().getColumns( getTransaction() );
         assertThat( cols.length, is( 1 ) );

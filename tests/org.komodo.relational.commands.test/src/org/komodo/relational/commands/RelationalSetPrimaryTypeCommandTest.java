@@ -16,19 +16,17 @@
 package org.komodo.relational.commands;
 
 import org.junit.Test;
+import org.komodo.shell.commands.SetPrimaryTypeCommand;
 
 /**
  * Test Class to test {@link RelationalSetPrimaryTypeCommand}.
  */
-@SuppressWarnings( { "javadoc", "nls" } )
-public class RelationalSetPrimaryTypeCommandTest extends AbstractCommandTest {
+@SuppressWarnings( { "javadoc" } )
+public final class RelationalSetPrimaryTypeCommandTest extends AbstractCommandTest {
 
-    @Test( expected = AssertionError.class )
+    @Test
     public void shouldNotBeAvailableAtWorkspace() throws Exception {
-        final String[] commands = { "workspace",
-                                    "set-primary-type blah" };
-        setup( commands );
-        execute();
+        assertCommandsNotAvailable( SetPrimaryTypeCommand.NAME );
     }
 
 }

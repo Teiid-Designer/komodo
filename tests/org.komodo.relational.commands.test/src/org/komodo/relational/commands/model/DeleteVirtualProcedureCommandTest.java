@@ -26,16 +26,14 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test DeleteVirtualProcedureCommand
- *
+ * Test Class to test {@link DeleteVirtualProcedureCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public class DeleteVirtualProcedureCommandTest extends AbstractCommandTest {
+public final class DeleteVirtualProcedureCommandTest extends AbstractCommandTest {
 
     @Test
     public void testDelete1() throws Exception {
-        final String[] commands = { 
-            "workspace",
+        final String[] commands = {
             "create-vdb myVdb vdbPath",
             "cd myVdb",
             "add-model myModel",
@@ -43,10 +41,7 @@ public class DeleteVirtualProcedureCommandTest extends AbstractCommandTest {
             "add-virtual-procedure myVirtualProcedure1",
             "add-virtual-procedure myVirtualProcedure2",
             "delete-virtual-procedure myVirtualProcedure1" };
-
-        setup( commands );
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

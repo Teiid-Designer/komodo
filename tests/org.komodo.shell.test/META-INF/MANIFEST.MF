@@ -4,10 +4,14 @@ Bundle-Name: %Bundle-Name.0
 Bundle-SymbolicName: org.komodo.shell.test;singleton:=true
 Bundle-Version: 0.0.2.qualifier
 Bundle-Vendor: %Bundle-Vendor.0
-Fragment-Host: org.komodo.shell
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Require-Bundle: org.junit;bundle-version="4.11.0",
  org.komodo.spi;bundle-version="[0.0.1,2.0.0)",
  org.komodo.test.utils;bundle-version="[0.0.1,2.0.0)",
- org.jboss.tools.locus.mockito
+ org.jboss.tools.locus.mockito,
+ org.komodo.shell;bundle-version="0.0.2",
+ org.komodo.shell-api;bundle-version="0.0.2",
+ org.komodo.utils;bundle-version="0.0.2"
+Export-Package: org.komodo.shell,
+ org.komodo.shell.commands

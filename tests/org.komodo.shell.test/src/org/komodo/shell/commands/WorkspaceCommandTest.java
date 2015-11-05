@@ -15,7 +15,6 @@
  */
 package org.komodo.shell.commands;
 
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.repository.RepositoryImpl;
 import org.komodo.shell.AbstractCommandTest;
@@ -30,20 +29,16 @@ public final class WorkspaceCommandTest extends AbstractCommandTest {
     @Test( expected = AssertionError.class )
     public void shouldFailTooManyArgs( ) throws Exception {
         final String[] commands = { "workspace extraArg" };
-        setup( commands );
-        execute();
+        execute( commands );
     }
 
     @Test
     public void shouldGoToWorkspace() throws Exception {
-        final String[] commands = {
-            "library",
-            "workspace" };
-    	setup( commands );
-
-        CommandResult result = execute();
-        assertCommandResultOk(result);
-        assertEquals( RepositoryImpl.WORKSPACE_ROOT, this.wsStatus.getCurrentContext().getAbsolutePath() );
+        final String[] commands = { LibraryCommand.NAME,
+                                    WorkspaceCommand.NAME };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+        assertContextIs( RepositoryImpl.WORKSPACE_ROOT );
     }
 
 }

@@ -29,19 +29,15 @@ public class SetAutoCommitCommandTest extends AbstractCommandTest {
     @Test( expected = AssertionError.class )
     public void shouldFailTooManyArgs( ) throws Exception {
         final String[] commands = { "set-auto-commit false extraArg" };
-        setup( commands );
-        execute();
+        execute( commands );
     }
-    
+
     @Test
     public void test1() throws Exception {
         final String[] commands = { "workspace",
                                     "set-auto-commit false" };
-    	setup( commands );
-
-        CommandResult result = execute();
-        assertCommandResultOk(result);
-
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
     	assertEquals(false, wsStatus.isAutoCommit());
     }
 

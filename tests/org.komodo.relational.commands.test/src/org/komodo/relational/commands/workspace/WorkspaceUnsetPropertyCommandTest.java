@@ -17,19 +17,17 @@ package org.komodo.relational.commands.workspace;
 
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
+import org.komodo.shell.commands.UnsetPropertyCommand;
 
 /**
  * Test Class to test {@link WorkspaceUnsetPropertyCommand}.
  */
-@SuppressWarnings( { "javadoc", "nls" } )
-public class WorkspaceUnsetPropertyCommandTest extends AbstractCommandTest {
+@SuppressWarnings( { "javadoc" } )
+public final class WorkspaceUnsetPropertyCommandTest extends AbstractCommandTest {
 
-    @Test( expected = AssertionError.class )
+    @Test
     public void shouldNotBeAvailableAtWorkspace() throws Exception {
-        final String[] commands = { "workspace",
-                                    "unset-property blah" };
-        setup( commands );
-        execute();
+        assertCommandsNotAvailable( UnsetPropertyCommand.NAME );
     }
 
 }

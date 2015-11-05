@@ -15,8 +15,6 @@
  */
 package org.komodo.shell.commands;
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.komodo.shell.AbstractCommandTest;
@@ -31,16 +29,13 @@ public class ShowPropertiesCommandTest extends AbstractCommandTest {
     @Test( expected = AssertionError.class )
     public void shouldFailTooManyArgs( ) throws Exception {
         final String[] commands = { "show-properties extraArg" };
-        setup( commands );
-        execute();
+        execute( commands );
     }
 
     @Test
     public void shouldNotBeAvailableAtLibrary() throws Exception {
         final String[] commands = { "library" };
-        setup( commands );
-
-        final CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk( result );
         assertCommandsNotAvailable( ShowPropertiesCommand.NAME );
     }
@@ -53,9 +48,7 @@ public class ShowPropertiesCommandTest extends AbstractCommandTest {
     @Test
     public void shouldNotBeAvailableAtWorkspace() throws Exception {
         final String[] commands = { "workspace" };
-        setup( commands );
-
-        final CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk( result );
         assertCommandsNotAvailable( ShowPropertiesCommand.NAME );
     }
@@ -68,10 +61,8 @@ public class ShowPropertiesCommandTest extends AbstractCommandTest {
             "add-child " + childName,
             "cd " + childName,
             "show-properties " };
-        setup( commands );
-
-        final CommandResult result = execute();
-        assertThat( result.isOk(), is( true ) );
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
 
         String writerOutput = getCommandOutput();
         assertTrue(writerOutput.contains("primaryType"));

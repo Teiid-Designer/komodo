@@ -29,16 +29,13 @@ public final class RemoveDescriptorCommandTest extends AbstractCommandTest {
                                     "cd " + childName,
                                     "add-descriptor " + removed,
                                     "remove-descriptor " + removed + " extraArg" };
-        setup( commands );
-        execute();
+        execute( commands );
     }
 
     @Test
     public void shouldNotHaveRemoveDescriptorAvailableAtLibrary() throws Exception {
         final String[] commands = { "library" };
-        setup( commands );
-        final CommandResult result = execute();
-
+        final CommandResult result = execute( commands );
         assertCommandResultOk( result );
         assertCommandsNotAvailable( RemoveDescriptorCommand.NAME );
     }
@@ -51,9 +48,7 @@ public final class RemoveDescriptorCommandTest extends AbstractCommandTest {
     @Test
     public void shouldNotHaveRemoveDescriptorAvailableAtWorkspace() throws Exception {
         final String[] commands = { "workspace" };
-        setup( commands );
-        final CommandResult result = execute();
-
+        final CommandResult result = execute( commands );
         assertCommandResultOk( result );
         assertCommandsNotAvailable( RemoveDescriptorCommand.NAME );
     }
@@ -65,8 +60,7 @@ public final class RemoveDescriptorCommandTest extends AbstractCommandTest {
                                     "add-child " + childName,
                                     "cd " + childName,
                                     "remove-descriptor mix:referenceable" };
-        setup( commands );
-        execute();
+        execute( commands );
     }
 
     @Test
@@ -78,9 +72,7 @@ public final class RemoveDescriptorCommandTest extends AbstractCommandTest {
                                     "cd " + childName,
                                     "add-descriptor " + removed,
                                     "remove-descriptor " + removed };
-        setup( commands );
-
-        final CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk( result );
 
         final KomodoObject library = _repo.komodoWorkspace( getTransaction() );

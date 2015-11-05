@@ -26,16 +26,14 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test UnsetStoredProcedurePropertyCommand
- *
+ * Test Class to test {@link UnsetStoredProcedurePropertyCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public class UnsetStoredProcedurePropertyCommandTest extends AbstractCommandTest {
+public final class UnsetStoredProcedurePropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testUnsetProperty1() throws Exception {
-        final String[] commands = { 
-            "workspace",
+        final String[] commands = {
             "create-vdb myVdb vdbPath",
             "cd myVdb",
             "add-model myModel",
@@ -44,10 +42,7 @@ public class UnsetStoredProcedurePropertyCommandTest extends AbstractCommandTest
             "cd myStoredProcedure",
             "set-property NAMEINSOURCE myNameInSource",
             "unset-property NAMEINSOURCE" };
-
-        setup( commands );
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

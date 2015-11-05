@@ -24,23 +24,18 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test AddModelCommand
- *
+ * Test Class to test {@link AddModelCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public class AddModelCommandTest extends AbstractCommandTest {
+public final class AddModelCommandTest extends AbstractCommandTest {
 
     @Test
     public void testAdd1() throws Exception {
-        final String[] commands = { 
-            "workspace",
+        final String[] commands = {
             "create-vdb myVdb vdbPath",
             "cd myVdb",
             "add-model myModel" };
-
-        setup( commands );
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

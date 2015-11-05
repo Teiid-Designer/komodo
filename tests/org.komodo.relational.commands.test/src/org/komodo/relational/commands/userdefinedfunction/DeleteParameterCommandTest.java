@@ -16,7 +16,6 @@
 package org.komodo.relational.commands.userdefinedfunction;
 
 import static org.junit.Assert.assertEquals;
-import java.io.File;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Function;
@@ -28,16 +27,14 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test DeleteParameterCommand
- *
+ * Test Class to test {@link DeleteParameterCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public class DeleteParameterCommandTest extends AbstractCommandTest {
+public final class DeleteParameterCommandTest extends AbstractCommandTest {
 
     @Test
     public void testDelete1() throws Exception {
-        final String[] commands = { 
-            "workspace",
+        final String[] commands = {
             "create-vdb myVdb vdbPath",
             "cd myVdb",
             "add-model myModel",
@@ -47,13 +44,7 @@ public class DeleteParameterCommandTest extends AbstractCommandTest {
             "add-parameter myParameter1",
             "add-parameter myParameter2",
             "delete-parameter myParameter1" };
-
-        setup( commands );
-
-        File cmdFile = File.createTempFile("TestCommand", ".txt");  //$NON-NLS-1$  //$NON-NLS-2$
-        cmdFile.deleteOnExit();
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

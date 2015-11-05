@@ -28,16 +28,14 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test RemoveResultSetCommand
- *
+ * Test Class to test {@link RemoveResultSetCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public class RemoveResultSetCommandTest extends AbstractCommandTest {
+public final class RemoveResultSetCommandTest extends AbstractCommandTest {
 
     @Test
     public void testDelete1() throws Exception {
-        final String[] commands = { 
-            "workspace",
+        final String[] commands = {
             "create-vdb myVdb vdbPath",
             "cd myVdb",
             "add-model myModel",
@@ -46,10 +44,7 @@ public class RemoveResultSetCommandTest extends AbstractCommandTest {
             "cd myPushdownFunction",
             "set-result-set DataTypeResultSet",
             "remove-result-set" };
-
-        setup( commands );
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

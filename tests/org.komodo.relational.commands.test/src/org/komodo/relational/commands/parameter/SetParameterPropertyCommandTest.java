@@ -27,16 +27,14 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test SetParameterPropertyCommand
- *
+ * Test Class to test {@link SetParameterPropertyCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public class SetParameterPropertyCommandTest extends AbstractCommandTest {
+public final class SetParameterPropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testSetProperty1() throws Exception {
-        final String[] commands = { 
-            "workspace",
+        final String[] commands = {
             "create-vdb myVdb vdbPath",
             "cd myVdb",
             "add-model myModel",
@@ -46,10 +44,7 @@ public class SetParameterPropertyCommandTest extends AbstractCommandTest {
             "add-parameter myParameter",
             "cd myParameter",
             "set-property datatypeLength 99" };
-
-        setup( commands );
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

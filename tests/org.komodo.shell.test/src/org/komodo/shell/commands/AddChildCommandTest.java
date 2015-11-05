@@ -25,17 +25,14 @@ public final class AddChildCommandTest extends AbstractCommandTest {
     @Test( expected = AssertionError.class )
     public void shouldFailTooManyArgs( ) throws Exception {
         final String[] commands = { "add-child childName extraArg" };
-        setup( commands );
-        execute();
+        execute( commands );
     }
 
     @Test
     public void shouldAllowAtRoot() throws Exception {
         final String child = "blah";
         final String[] commands = { "add-child " + child };
-        setup( commands );
-
-        final CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk( result );
 
         final KomodoObject root = _repo.komodoWorkspace( getTransaction() ).getParent( getTransaction() );
@@ -46,10 +43,8 @@ public final class AddChildCommandTest extends AbstractCommandTest {
     public void shouldAddChildAtLibrary() throws Exception {
         final String childName = "blah";
         final String[] commands = { "library", "add-child " + childName };
-        setup( commands );
-
-        final CommandResult result = execute();
-        assertThat( result.isOk(), is( true ) );
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
 
         final KomodoObject library = _repo.komodoLibrary( getTransaction() );
         assertThat( library.getChildren( getTransaction() ).length, is( 1 ) );
@@ -60,10 +55,8 @@ public final class AddChildCommandTest extends AbstractCommandTest {
     public void shouldAddChildAtWorkspace() throws Exception {
         final String childName = "blah";
         final String[] commands = { "workspace", "add-child " + childName };
-        setup( commands );
-
-        final CommandResult result = execute();
-        assertThat( result.isOk(), is( true ) );
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
 
         final KomodoObject workspace = _repo.komodoWorkspace( getTransaction() );
         assertThat( workspace.getChildren( getTransaction() ).length, is( 1 ) );
@@ -74,24 +67,21 @@ public final class AddChildCommandTest extends AbstractCommandTest {
     public void shouldNotBeAllowedToAddEnvironmentAtRoot() throws Exception {
         final String childName = KomodoLexicon.Komodo.ENVIRONMENT;
         final String[] commands = { "add-child " + childName };
-        setup( commands );
-        execute();
+        execute( commands );
     }
 
     @Test( expected = AssertionError.class )
     public void shouldNotBeAllowedToAddLibraryAtRoot() throws Exception {
         final String childName = KomodoLexicon.Komodo.LIBRARY;
         final String[] commands = { "add-child " + childName };
-        setup( commands );
-        execute();
+        execute( commands );
     }
 
     @Test( expected = AssertionError.class )
     public void shouldNotBeAllowedToAddWorkspaceAtRoot() throws Exception {
         final String childName = KomodoLexicon.Komodo.WORKSPACE;
         final String[] commands = { "add-child " + childName };
-        setup( commands );
-        execute();
+        execute( commands );
     }
 
 }

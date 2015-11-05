@@ -16,19 +16,17 @@
 package org.komodo.relational.commands;
 
 import org.junit.Test;
+import org.komodo.shell.commands.DeleteChildCommand;
 
 /**
  * Test Class to test {@link RelationalDeleteChildCommand}.
  */
-@SuppressWarnings( { "javadoc", "nls" } )
-public class RelationalDeleteChildCommandTest extends AbstractCommandTest {
+@SuppressWarnings( { "javadoc" } )
+public final class RelationalDeleteChildCommandTest extends AbstractCommandTest {
 
-    @Test( expected = AssertionError.class )
+    @Test
     public void shouldNotBeAvailableAtWorkspace() throws Exception {
-        final String[] commands = { "workspace",
-                                    "delete-child blah" };
-        setup( commands );
-        execute();
+        assertCommandsNotAvailable( DeleteChildCommand.NAME );
     }
 
 }

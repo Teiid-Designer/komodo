@@ -24,26 +24,21 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test UnsetTranslatorPropertyCommand
- *
+ * Test Class to test {@link UnsetTranslatorPropertyCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public class UnsetTranslatorPropertyCommandTest extends AbstractCommandTest {
+public final class UnsetTranslatorPropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testUnsetProperty1() throws Exception {
-        final String[] commands = { 
-            "workspace",
+        final String[] commands = {
             "create-vdb myVdb vdbPath",
             "cd myVdb",
             "add-translator myTranslator tType",
             "cd myTranslator",
             "set-property description myDescription",
             "unset-property description" };
-        
-        setup( commands );
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

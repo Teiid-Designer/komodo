@@ -26,16 +26,14 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test AddColumnCommand
- *
+ * Test Class to test {@link AddColumnCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public class AddColumnCommandTest extends AbstractCommandTest {
+public final class AddColumnCommandTest extends AbstractCommandTest {
 
     @Test
     public void testAdd1() throws Exception {
-        final String[] commands = { 
-            "workspace",
+        final String[] commands = {
             "create-vdb myVdb vdbPath",
             "cd myVdb",
             "add-model myModel",
@@ -43,10 +41,7 @@ public class AddColumnCommandTest extends AbstractCommandTest {
             "add-view myView",
             "cd myView",
             "add-column myColumn" };
-
-        setup( commands );
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

@@ -31,36 +31,31 @@ public class RenameCommandTest extends AbstractCommandTest {
     @Test( expected = AssertionError.class )
     public void shouldNotRenameAtRoot() throws Exception {
         final String[] commands = { "rename workspace myWorkspace" }; // rename is not available at root
-        setup( commands );
-        execute();
+        execute( commands );
     }
-    
+
     @Test( expected = AssertionError.class )
     public void shouldFailTooManyArgs( ) throws Exception {
         final String childName = "blah";
         final String newChildName = "blech";
-        final String[] commands = { 
-            "workspace", 
+        final String[] commands = {
+            "workspace",
             "add-child " + childName,
             "rename " + childName + " " + newChildName + " extraArg"};
-        
-        setup( commands );
-        execute();
+        execute( commands );
     }
-    
+
     @Test
     public void shouldRenameChild() throws Exception {
         final String childName = "blah";
         final String newChildName = "blech";
-        final String[] commands = { 
-            "workspace", 
+        final String[] commands = {
+            "workspace",
             "add-child " + childName,
             "rename " + childName + " " + newChildName};
-        
-        setup( commands );
 
-        final CommandResult result = execute();
-        assertThat( result.isOk(), is( true ) );
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
 
         final KomodoObject workspace = _repo.komodoWorkspace( getTransaction() );
         assertThat( workspace.getChildren( getTransaction() ).length, is( 1 ) );

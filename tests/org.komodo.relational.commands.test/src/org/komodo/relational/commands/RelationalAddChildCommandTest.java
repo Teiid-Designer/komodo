@@ -16,19 +16,17 @@
 package org.komodo.relational.commands;
 
 import org.junit.Test;
+import org.komodo.shell.commands.AddChildCommand;
 
 /**
  * Test Class to test {@link RelationalAddChildCommand}.
  */
-@SuppressWarnings( { "javadoc", "nls" } )
-public class RelationalAddChildCommandTest extends AbstractCommandTest {
+@SuppressWarnings( { "javadoc" } )
+public final class RelationalAddChildCommandTest extends AbstractCommandTest {
 
-    @Test( expected = AssertionError.class )
+    @Test
     public void shouldNotBeAvailableAtWorkspace() throws Exception {
-        final String[] commands = { "workspace",
-                                    "add-child blah" };
-        setup( commands );
-        execute();
+        assertCommandsNotAvailable( AddChildCommand.NAME );
     }
 
 }

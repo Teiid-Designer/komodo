@@ -26,25 +26,20 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test AddVirtualProcedureCommand
- *
+ * Test Class to test {@link AddVirtualProcedureCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public class AddVirtualProcedureCommandTest extends AbstractCommandTest {
+public final class AddVirtualProcedureCommandTest extends AbstractCommandTest {
 
     @Test
     public void testAdd1() throws Exception {
-        final String[] commands = { 
-            "workspace",
+        final String[] commands = {
             "create-vdb myVdb vdbPath",
             "cd myVdb",
             "add-model myModel",
             "cd myModel",
             "add-virtual-procedure myVirtualProcedure"};
-
-        setup( commands );
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

@@ -30,21 +30,18 @@ import org.komodo.shell.api.CommandResult;
  */
 @SuppressWarnings( {"javadoc", "nls"} )
 @Ignore
-public class UnsetEntryPropertyCommandTest extends AbstractCommandTest {
+public final class UnsetEntryPropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testUnsetProperty1() throws Exception {
-        final String[] commands = { "workspace",
+        final String[] commands = {
             "create-vdb myVdb vdbPath",
             "cd myVdb",
             "add-entry myEntry entryPath",
             "cd myEntry",
             "set-property description myDescription",
             "unset-property description"};
-
-        setup( commands );
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

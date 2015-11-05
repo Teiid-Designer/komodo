@@ -29,18 +29,15 @@ public class HelpCommandTest extends AbstractCommandTest {
     @Test( expected = AssertionError.class )
     public void shouldFailTooManyArgs( ) throws Exception {
         final String[] commands = { "help cd extraArg" };
-        setup( commands );
-        execute();
+        execute( commands );
     }
-    
+
     @Test
     public void shouldShowHelpAtContext() throws Exception {
         final String[] commands = { "workspace",
                                     "help" };
-    	setup( commands );
-
-        CommandResult result = execute();
-        assertCommandResultOk(result);
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
 
         // check help text
         String writerOutput = getCommandOutput();
@@ -52,9 +49,8 @@ public class HelpCommandTest extends AbstractCommandTest {
     public void shouldShowHelpForCommand() throws Exception {
         final String[] commands = { "workspace",
                                     "help cd" };
-        setup( commands );
-
-        execute();
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
 
         // check help text
         String writerOutput = getCommandOutput();

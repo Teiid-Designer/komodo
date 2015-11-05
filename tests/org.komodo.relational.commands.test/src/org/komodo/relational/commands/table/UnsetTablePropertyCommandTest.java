@@ -25,16 +25,14 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test UnsetTablePropertyCommand
- *
+ * Test Class to test {@link UnsetTablePropertyCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public class UnsetTablePropertyCommandTest extends AbstractCommandTest {
+public final class UnsetTablePropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testUnsetProperty1() throws Exception {
-        final String[] commands = { 
-            "workspace",
+        final String[] commands = {
             "create-vdb myVdb vdbPath",
             "cd myVdb",
             "add-model myModel",
@@ -43,10 +41,7 @@ public class UnsetTablePropertyCommandTest extends AbstractCommandTest {
             "cd myTable",
             "set-property CARDINALITY 999",
             "unset-property CARDINALITY" };
-
-        setup(commands);
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

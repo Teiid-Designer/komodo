@@ -15,7 +15,6 @@
  */
 package org.komodo.shell.commands;
 
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.repository.RepositoryImpl;
 import org.komodo.shell.AbstractCommandTest;
@@ -30,18 +29,15 @@ public final class LibraryCommandTest extends AbstractCommandTest {
     @Test( expected = AssertionError.class )
     public void shouldFailTooManyArgs( ) throws Exception {
         final String[] commands = { "library extraArg" };
-        setup( commands );
-        execute();
+        execute( commands );
     }
 
     @Test
     public void shouldGoToLibrary() throws Exception {
         final String[] commands = { "library" };
-    	setup( commands );
-
-        final CommandResult result = execute();
-        assertCommandResultOk(result);
-        assertEquals( RepositoryImpl.LIBRARY_ROOT, this.wsStatus.getCurrentContext().getAbsolutePath() );
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+        assertContextIs( RepositoryImpl.LIBRARY_ROOT );
     }
 
 }

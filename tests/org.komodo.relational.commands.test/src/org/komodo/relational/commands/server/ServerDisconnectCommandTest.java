@@ -21,27 +21,23 @@ import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test ServerDisconnectCommand
- *
+ * Test Class to test {@link ServerDisconnectCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public class ServerDisconnectCommandTest extends AbstractCommandTest {
+public final class ServerDisconnectCommandTest extends AbstractCommandTest {
 
     @Test
     public void shouldFailNoServerConnected() throws Exception {
-        final String[] commands = { 
+        final String[] commands = {
             "set-auto-commit false",
-            "workspace",
             "create-teiid myTeiid",
             "commit",
             "set-server myTeiid",
             "server-disconnect" };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk(result);
 
-        setup( commands );
-
-        CommandResult result = execute();
         String msg = result.getMessage();
-
         assertEquals("something", msg);
     }
 

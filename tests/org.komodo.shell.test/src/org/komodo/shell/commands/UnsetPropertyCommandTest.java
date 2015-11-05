@@ -33,16 +33,13 @@ public final class UnsetPropertyCommandTest extends AbstractCommandTest {
     @Test( expected = AssertionError.class )
     public void shouldFailTooManyArgs( ) throws Exception {
         final String[] commands = { "unset-property aProp extraArg" };
-        setup( commands );
-        execute();
+        execute( commands );
     }
 
     @Test
     public void shouldNotBeAvailableAtLibrary() throws Exception {
         final String[] commands = { "library" };
-        setup( commands );
-
-        final CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk( result );
         assertCommandsNotAvailable( UnsetPropertyCommand.NAME );
     }
@@ -55,9 +52,7 @@ public final class UnsetPropertyCommandTest extends AbstractCommandTest {
     @Test
     public void shouldNotBeAvailableAtWorkspace() throws Exception {
         final String[] commands = { "workspace" };
-        setup( commands );
-
-        final CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk( result );
         assertCommandsNotAvailable( UnsetPropertyCommand.NAME );
     }
@@ -74,9 +69,7 @@ public final class UnsetPropertyCommandTest extends AbstractCommandTest {
                                     "commit",
                                     "set-property " + prop + " bar",
                                     "unset-property " + prop };
-        setup( commands );
-
-        final CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk( result );
 
         final KomodoObject kobject = _repo.getFromWorkspace( getTransaction(), child );

@@ -25,16 +25,14 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test SetViewPropertyCommand
- *
+ * Test Class to test {@link SetViewPropertyCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public class SetViewPropertyCommandTest extends AbstractCommandTest {
+public final class SetViewPropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testSetProperty1() throws Exception {
-        final String[] commands = { 
-            "workspace",
+        final String[] commands = {
             "create-vdb myVdb vdbPath",
             "cd myVdb",
             "add-model myModel",
@@ -42,10 +40,7 @@ public class SetViewPropertyCommandTest extends AbstractCommandTest {
             "add-view myView",
             "cd myView",
             "set-property ANNOTATION myDescription" };
-
-        setup( commands );
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

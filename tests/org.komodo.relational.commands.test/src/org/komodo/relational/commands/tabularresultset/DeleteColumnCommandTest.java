@@ -35,10 +35,8 @@ public final class DeleteColumnCommandTest extends TabularResultSetCommandTest {
         final String[] commands = { "add-column " + deletedColumn,
                                     "add-column " + remainingColumn,
                                     "delete-column " + deletedColumn };
-        setup( commands );
-
-        final CommandResult result = execute();
-        assertCommandResultOk( result );
+        final CommandResult result = execute( commands );
+        assertCommandResultOk(result);
 
         final ResultSetColumn[] cols = get().getColumns( getTransaction() );
         assertThat( cols.length, is( 1 ) );

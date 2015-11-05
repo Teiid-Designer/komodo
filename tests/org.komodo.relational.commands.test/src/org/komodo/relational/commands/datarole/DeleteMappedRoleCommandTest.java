@@ -28,7 +28,7 @@ import org.komodo.shell.api.CommandResult;
  *
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public class DeleteMappedRoleCommandTest extends AbstractCommandTest {
+public final class DeleteMappedRoleCommandTest extends AbstractCommandTest {
 
     @Test
     public void testSetProperty1() throws Exception {
@@ -40,10 +40,7 @@ public class DeleteMappedRoleCommandTest extends AbstractCommandTest {
             "add-mapped-role myMappedRole1",
             "add-mapped-role myMappedRole2",
             "delete-mapped-role myMappedRole1"};
-
-        setup( commands );
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

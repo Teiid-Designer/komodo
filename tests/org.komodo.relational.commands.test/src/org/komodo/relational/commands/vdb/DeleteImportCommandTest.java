@@ -24,25 +24,20 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test DeleteImportCommand
- *
+ * Test Class to test {@link DeleteImportCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public class DeleteImportCommandTest extends AbstractCommandTest {
+public final class DeleteImportCommandTest extends AbstractCommandTest {
 
     @Test
     public void testDelete1() throws Exception {
-        final String[] commands = { 
-            "workspace",
+        final String[] commands = {
             "create-vdb myVdb vdbPath",
             "cd myVdb",
             "add-import myImport1",
             "add-import myImport2",
             "delete-import myImport1" };
-
-        setup( commands );
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

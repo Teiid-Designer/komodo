@@ -15,8 +15,8 @@
  */
 package org.komodo.relational.commands.table;
 
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Model;
@@ -27,16 +27,14 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test DeletePrimaryKeyCommand
- *
+ * Test Class to test {@link DeletePrimaryKeyCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
 public class DeletePrimaryKeyCommandTest extends AbstractCommandTest {
 
     @Test
     public void shouldRemovePrimaryKey() throws Exception {
-        final String[] commands = { 
-            "workspace",
+        final String[] commands = {
             "create-vdb myVdb vdbPath",
             "cd myVdb",
             "add-model myModel",
@@ -45,10 +43,7 @@ public class DeletePrimaryKeyCommandTest extends AbstractCommandTest {
             "cd myTable",
             "add-primary-key myPk",
             "delete-primary-key" };
-
-        setup(commands);
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

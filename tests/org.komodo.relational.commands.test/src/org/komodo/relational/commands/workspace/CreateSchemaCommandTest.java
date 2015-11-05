@@ -20,7 +20,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
-import org.komodo.relational.commands.workspace.CreateSchemaCommand;
 import org.komodo.relational.model.Schema;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.CompletionConstants;
@@ -31,15 +30,12 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test {@link CreateSchemaCommand}.
  */
 @SuppressWarnings( { "javadoc", "nls" } )
-public class CreateSchemaCommandTest extends AbstractCommandTest {
+public final class CreateSchemaCommandTest extends AbstractCommandTest {
 
     @Test
     public void testCreateSchema1() throws Exception {
-        final String[] commands = { "workspace",
-                                    "create-schema testSchema" };
-        setup( commands  );
-
-        CommandResult result = execute();
+        final String[] commands = { "create-schema testSchema" };
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
     	WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
@@ -52,7 +48,7 @@ public class CreateSchemaCommandTest extends AbstractCommandTest {
     @Test
     public void shouldDisplayHelp( ) throws Exception {
         CreateSchemaCommand command = new CreateSchemaCommand(wsStatus);
-        command.setWriter( this.commandWriter );
+        command.setWriter( getOutputWriter() );
         command.printHelp(CompletionConstants.MESSAGE_INDENT);
 
         String writerOutput = getCommandOutput();

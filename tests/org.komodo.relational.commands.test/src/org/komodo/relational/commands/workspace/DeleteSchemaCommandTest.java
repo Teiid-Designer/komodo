@@ -23,24 +23,20 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test DeleteSchemaCommand
- *
+ * Test Class to test {@link DeleteSchemaCommand}.
  */
 @SuppressWarnings( { "javadoc", "nls" } )
-public class DeleteSchemaCommandTest extends AbstractCommandTest {
+public final class DeleteSchemaCommandTest extends AbstractCommandTest {
 
     @Test
     public void testDeleteSchema1() throws Exception {
         final String[] commands = { "set-auto-commit false",
-                                    "workspace",
                                     "create-schema testSchema1",
                                     "create-schema testSchema2",
                                     "commit",
                                     "delete-schema testSchema1",
                                     "commit" };
-        setup( commands );
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

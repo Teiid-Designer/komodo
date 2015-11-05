@@ -25,28 +25,23 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test UnsetModelSourcePropertyCommand
- *
+ * Test Class to test {@link UnsetModelSourcePropertyCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public class UnsetModelSourcePropertyCommandTest extends AbstractCommandTest {
+public final class UnsetModelSourcePropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testUnsetProperty1() throws Exception {
-        final String[] commands = { 
-            "workspace",
+        final String[] commands = {
             "create-vdb myVdb vdbPath",
             "cd myVdb",
             "add-model myModel",
             "cd myModel",
             "add-source mySource",
             "cd mySource",
-            "set-property sourceJndiName myJndi", 
+            "set-property sourceJndiName myJndi",
             "unset-property sourceJndiName" };
-
-        setup( commands );
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

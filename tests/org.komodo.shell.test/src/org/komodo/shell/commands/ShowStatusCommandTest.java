@@ -29,18 +29,15 @@ public class ShowStatusCommandTest extends AbstractCommandTest {
     @Test( expected = AssertionError.class )
     public void shouldFailTooManyArgs( ) throws Exception {
         final String[] commands = { "show-status extraArg" };
-        setup( commands );
-        execute();
+        execute( commands );
     }
-    
+
     @Test
     public void testShowStatus1() throws Exception {
         final String[] commands = { "workspace",
                                     "show-status" };
-    	setup( commands );
-
-        CommandResult result = execute();
-        assertCommandResultOk(result);
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
 
     	// make sure repository URL and workspace appear, no Teiid is set, and current context path
     	String writerOutput = getCommandOutput();
