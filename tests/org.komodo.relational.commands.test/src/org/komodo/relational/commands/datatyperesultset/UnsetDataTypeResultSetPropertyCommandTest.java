@@ -33,9 +33,8 @@ public final class UnsetDataTypeResultSetPropertyCommandTest extends DataTypeRes
         final String[] commands = { "set-property datatypeLength 99",
                                     "set-property " + property + " blah",
                                     "unset-property " + property };
-        setup( commands );
 
-        final CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk( result );
         assertThat( get().hasProperty( getTransaction(), property ), is( false ) );
     }

@@ -15,8 +15,8 @@
  */
 package org.komodo.relational.commands.table;
 
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Model;
@@ -27,16 +27,14 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test AddForeignKeyCommand
- *
+ * Test Class to test {@link AddPrimaryKeyCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public class AddPrimaryKeyCommandTest extends AbstractCommandTest {
+public final class AddPrimaryKeyCommandTest extends AbstractCommandTest {
 
     @Test
     public void shouldAddPrimaryKey() throws Exception {
-        final String[] commands = { 
-            "workspace",
+        final String[] commands = {
             "create-vdb myVdb vdbPath",
             "cd myVdb",
             "add-model myModel",
@@ -44,10 +42,7 @@ public class AddPrimaryKeyCommandTest extends AbstractCommandTest {
             "add-table myTable",
             "cd myTable",
             "add-primary-key myPk" };
-
-        setup(commands);
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

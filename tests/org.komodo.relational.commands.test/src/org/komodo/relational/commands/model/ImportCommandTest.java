@@ -15,34 +15,27 @@
  */
 package org.komodo.relational.commands.model;
 
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
+import org.komodo.repository.RepositoryImpl;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test ImportCommand
- *
+ * Test Class to test {@link ImportCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public class ImportCommandTest extends AbstractCommandTest {
+public final class ImportCommandTest extends AbstractCommandTest {
 
     @Test
     public void testImportDdl1() throws Exception {
-        final String[] commands = { 
-            "workspace",
+        final String[] commands = {
             "create-vdb myVdb vdbPath",
             "cd myVdb",
             "add-model myModel",
             "cd myModel"};
-
-        setup( commands );
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
-
-    	// Check WorkspaceContext
-    	assertEquals("/workspace", wsStatus.getDisplayPath(wsStatus.getCurrentContext())); //$NON-NLS-1$
+        assertContextIs( RepositoryImpl.WORKSPACE_ROOT );
     }
 
 }

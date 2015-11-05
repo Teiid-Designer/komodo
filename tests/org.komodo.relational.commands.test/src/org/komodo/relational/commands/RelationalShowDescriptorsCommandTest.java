@@ -16,19 +16,17 @@
 package org.komodo.relational.commands;
 
 import org.junit.Test;
+import org.komodo.shell.commands.ShowDescriptorsCommand;
 
 /**
  * Test Class to test {@link RelationalShowDescriptorsCommand}.
  */
-@SuppressWarnings( { "javadoc", "nls" } )
-public class RelationalShowDescriptorsCommandTest extends AbstractCommandTest {
+@SuppressWarnings( { "javadoc" } )
+public final class RelationalShowDescriptorsCommandTest extends AbstractCommandTest {
 
-    @Test( expected = AssertionError.class )
+    @Test
     public void shouldNotBeAvailableAtWorkspace() throws Exception {
-        final String[] commands = { "workspace",
-                                    "show-descriptors" };
-        setup( commands );
-        execute();
+        assertCommandsNotAvailable( ShowDescriptorsCommand.NAME );
     }
 
 }

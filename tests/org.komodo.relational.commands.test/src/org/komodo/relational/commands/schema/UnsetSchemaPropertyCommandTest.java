@@ -24,24 +24,19 @@ import org.komodo.shell.api.CommandResult;
 import org.komodo.utils.StringUtils;
 
 /**
- * Test Class to test UnsetSchemaPropertyCommand
- *
+ * Test Class to test {@link UnsetSchemaPropertyCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public class UnsetSchemaPropertyCommandTest extends AbstractCommandTest {
+public final class UnsetSchemaPropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testUnsetProperty1() throws Exception {
-        final String[] commands = { 
-            "workspace",
+        final String[] commands = {
             "create-schema testSchema",
             "cd testSchema",
             "set-property rendition \"CREATE FOREIGN TABLE G1 (e1 integer) OPTIONS (ANNOTATION 'test', CARDINALITY '12');\"",
             "unset-property rendition" };
-
-        setup( commands );
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

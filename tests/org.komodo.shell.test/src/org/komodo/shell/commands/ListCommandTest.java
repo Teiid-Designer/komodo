@@ -29,18 +29,15 @@ public class ListCommandTest extends AbstractCommandTest {
     @Test( expected = AssertionError.class )
     public void shouldFailTooManyArgs( ) throws Exception {
         final String[] commands = { "list extraArg" };
-        setup( commands );
-        execute();
+        execute( commands );
     }
-    
+
     @Test
     public void testList1() throws Exception {
         final String[] commands =  { "workspace",
                                      "list" };
-    	setup( commands );
-
-        CommandResult result = execute();
-        assertCommandResultOk(result);
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
 
         // workspace is empty
     	String writerOutput = getCommandOutput();
@@ -51,10 +48,8 @@ public class ListCommandTest extends AbstractCommandTest {
     public void testListLsAlias() throws Exception {
         final String[] commands =  { "workspace",
                                      "ls" };
-        setup( commands );
-
-        CommandResult result = execute();
-        assertCommandResultOk(result);
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
 
         // workspace is empty
         String writerOutput = getCommandOutput();
@@ -65,10 +60,8 @@ public class ListCommandTest extends AbstractCommandTest {
     public void testListLlAlias() throws Exception {
         final String[] commands =  { "workspace",
                                      "ll" };
-        setup( commands );
-
-        CommandResult result = execute();
-        assertCommandResultOk(result);
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
 
         // workspace is empty
         String writerOutput = getCommandOutput();

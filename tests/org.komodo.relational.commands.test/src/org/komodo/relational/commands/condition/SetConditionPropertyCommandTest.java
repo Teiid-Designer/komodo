@@ -29,12 +29,11 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test {@link SetConditionPropertyCommand}.
  */
 @SuppressWarnings( { "javadoc", "nls" } )
-public class SetConditionPropertyCommandTest extends AbstractCommandTest {
+public final class SetConditionPropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testSetProperty1() throws Exception {
-        final String[] commands = { "workspace",
-                                    "create-vdb myVdb vdbPath",
+        final String[] commands = { "create-vdb myVdb vdbPath",
                                     "cd myVdb",
                                     "add-data-role myDataRole",
                                     "cd myDataRole",
@@ -43,9 +42,7 @@ public class SetConditionPropertyCommandTest extends AbstractCommandTest {
                                     "add-condition myCondition",
                                     "cd myCondition",
                                     "set-property constraint true" };
-    	setup( commands );
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

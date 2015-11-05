@@ -30,17 +30,14 @@ public class ShowGlobalCommandTest extends AbstractCommandTest {
     @Test( expected = AssertionError.class )
     public void shouldFailTooManyArgs( ) throws Exception {
         final String[] commands = { "show-global extraArg" };
-        setup( commands );
-        execute();
+        execute( commands );
     }
-    
+
     @Test
     public void testShowGlobal1() throws Exception {
         final String[] commands = { "show-global" };
-    	setup( commands );
-
-        CommandResult result = execute();
-        assertCommandResultOk(result);
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
 
     	// make sure repository URL and workspace appear, no Teiid is set, and current context path
     	String writerOutput = getCommandOutput();

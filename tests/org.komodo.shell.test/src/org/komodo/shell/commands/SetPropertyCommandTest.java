@@ -31,8 +31,7 @@ public final class SetPropertyCommandTest extends AbstractCommandTest {
     @Test( expected = AssertionError.class )
     public void shouldFailTooManyArgs( ) throws Exception {
         final String[] commands = { "set-property prop value extraArg" };
-        setup( commands );
-        execute();
+        execute( commands );
     }
 
     @Test
@@ -44,10 +43,8 @@ public final class SetPropertyCommandTest extends AbstractCommandTest {
                                     "add-child " + childName,
                                     "cd " + childName,
                                     "set-property " + propName + " " + propValue };
-        setup( commands );
-
-        final CommandResult result = execute();
-        assertThat( result.isOk(), is( true ) );
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
 
         final KomodoObject workspace = _repo.komodoWorkspace( getTransaction() );
         assertThat( workspace.getChildren( getTransaction() ).length, is( 1 ) );

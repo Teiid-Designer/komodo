@@ -34,7 +34,7 @@ public class UnsetConditionPropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testUnsetProperty1() throws Exception {
-        final String[] commands = { "workspace",
+        final String[] commands = {
             "create-vdb myVdb vdbPath",
             "cd myVdb",
             "add-data-role myDataRole",
@@ -45,9 +45,7 @@ public class UnsetConditionPropertyCommandTest extends AbstractCommandTest {
             "cd myCondition",
             "set-property constraint true",
             "unset-property constraint"};
-        setup( commands );
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

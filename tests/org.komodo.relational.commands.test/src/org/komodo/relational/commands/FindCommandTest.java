@@ -24,19 +24,16 @@ import org.komodo.shell.api.CommandResult;
  *
  */
 @SuppressWarnings( { "javadoc", "nls" } )
-public class FindCommandTest extends AbstractCommandTest {
+public final class FindCommandTest extends AbstractCommandTest {
 
     @Test
     public void testFind1() throws Exception {
         final String[] commands = { "set-auto-commit false",
-                                    "workspace",
                                     "create-vdb testVdb1 vdbPath",
                                     "create-vdb testVdb2 vdbPath",
                                     "commit",
                                     "find Vdb" };
-        setup( commands );
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         // Make sure the two VDBs are found

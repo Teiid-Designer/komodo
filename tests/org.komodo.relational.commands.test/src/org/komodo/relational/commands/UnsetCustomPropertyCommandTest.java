@@ -24,23 +24,19 @@ import org.komodo.shell.api.CommandResult;
 import org.komodo.spi.repository.Property;
 
 /**
- * Test Class to test UnsetCustomPropertyCommand
- *
+ * Test Class to test {@link UnsetCustomPropertyCommand}.
  */
 @SuppressWarnings( { "javadoc", "nls" } )
-public class UnsetCustomPropertyCommandTest extends AbstractCommandTest {
+public final class UnsetCustomPropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testUnsetCustomProperty1() throws Exception {
-        final String[] commands = { "workspace",
-                                    "create-vdb testVdb vdbPath",
+        final String[] commands = { "create-vdb testVdb vdbPath",
                                     "cd testVdb",
                                     "set-custom-property newProperty myProperty",
                                     "unset-custom-property newProperty" };
 
-        setup( commands );
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

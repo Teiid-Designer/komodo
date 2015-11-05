@@ -29,18 +29,15 @@ public class SetRecordCommandTest extends AbstractCommandTest {
     @Test( expected = AssertionError.class )
     public void shouldFailTooManyArgs( ) throws Exception {
         final String[] commands = { "set-record on extraArg" };
-        setup( commands );
-        execute();
+        execute( commands );
     }
-    
+
     @Test
     public void shouldSetRecordOn() throws Exception {
         final String[] commands = { "workspace",
                                     "set-record on" };
-    	setup( commands );
-
-        execute();
-
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
         assertEquals(true, wsStatus.getRecordingStatus());
     }
 
@@ -49,11 +46,8 @@ public class SetRecordCommandTest extends AbstractCommandTest {
         final String[] commands = { "workspace",
                                     "set-record on",
                                     "set-record off" };
-        setup( commands );
-
-        CommandResult result = execute();
-        assertCommandResultOk(result);
-
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
         assertEquals(false, wsStatus.getRecordingStatus());
     }
 

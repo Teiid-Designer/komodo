@@ -17,6 +17,7 @@ package org.komodo.shell.commands;
 
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
+import org.komodo.repository.RepositoryImpl;
 import org.komodo.shell.AbstractCommandTest;
 import org.komodo.shell.api.CommandResult;
 
@@ -29,30 +30,23 @@ public class CdCommandTest extends AbstractCommandTest {
     @Test( expected = AssertionError.class )
     public void shouldFailTooManyArgs( ) throws Exception {
         final String[] commands = { "cd somewhere extraArg" };
-        setup( commands );
-        execute();
+        execute( commands );
     }
-    
+
     @Test
     public void shouldCdAbsolute() throws Exception {
         final String[] commands = { "cd /workspace" };
-    	setup( commands );
-
-        CommandResult result = execute();
-        assertCommandResultOk(result);
-
-    	// Check WorkspaceContext
-    	assertEquals("/workspace", wsStatus.getDisplayPath(wsStatus.getCurrentContext()));
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+        assertContextIs( RepositoryImpl.WORKSPACE_ROOT );
     }
 
     @Test
     public void shouldCdRelative() throws Exception {
         final String[] commands = { "workspace",
                                     "cd .." };
-    	setup( commands );
-
-        CommandResult result = execute();
-        assertCommandResultOk(result);
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
 
     	// Check WorkspaceContext
         String contextPath = wsStatus.getCurrentContextDisplayPath();
@@ -62,10 +56,8 @@ public class CdCommandTest extends AbstractCommandTest {
     @Test
     public void shouldTestGoToAlias() throws Exception {
         final String[] commands = { "goto /workspace" };
-        setup( commands );
-
-        CommandResult result = execute();
-        assertCommandResultOk(result);
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
 
         String contextPath = wsStatus.getCurrentContextDisplayPath();
         assertEquals("/workspace", contextPath);
@@ -74,10 +66,8 @@ public class CdCommandTest extends AbstractCommandTest {
     @Test
     public void shouldTestEditAlias() throws Exception {
         final String[] commands = { "edit /workspace" };
-        setup( commands );
-
-        CommandResult result = execute();
-        assertCommandResultOk(result);
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
 
         String contextPath = wsStatus.getCurrentContextDisplayPath();
         assertEquals("/workspace", contextPath);

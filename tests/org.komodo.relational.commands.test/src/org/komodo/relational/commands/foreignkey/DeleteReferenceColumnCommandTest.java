@@ -27,16 +27,15 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test DeleteReferenceColumnCommand
+ * Test Class to test {@link DeleteReferenceColumnCommand}.
  *
  */
 @SuppressWarnings( { "javadoc", "nls" } )
-public class DeleteReferenceColumnCommandTest extends AbstractCommandTest {
+public final class DeleteReferenceColumnCommandTest extends AbstractCommandTest {
 
     @Test
     public void testDelete1() throws Exception {
-        final String[] commands = { "workspace",
-                                    "create-vdb myVdb vdbPath",
+        final String[] commands = { "create-vdb myVdb vdbPath",
                                     "cd myVdb",
                                     "add-model refModel",
                                     "cd refModel",
@@ -55,9 +54,7 @@ public class DeleteReferenceColumnCommandTest extends AbstractCommandTest {
                                     "add-ref-column /workspace/myVdb/refModel/refTable/refCol2",
                                     "commit", // need to commit since delete-ref-column uses search framework
                                     "delete-ref-column /workspace/myVdb/refModel/refTable/refCol1" };
-        setup( commands );
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

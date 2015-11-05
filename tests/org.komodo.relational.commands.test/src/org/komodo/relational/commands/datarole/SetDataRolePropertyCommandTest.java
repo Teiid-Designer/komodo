@@ -28,20 +28,17 @@ import org.komodo.shell.api.CommandResult;
  *
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public class SetDataRolePropertyCommandTest extends AbstractCommandTest {
+public final class SetDataRolePropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testSetProperty1() throws Exception {
-        final String[] commands = { "workspace",
+        final String[] commands = {
             "create-vdb myVdb vdbPath",
             "cd myVdb",
             "add-data-role myDataRole",
             "cd myDataRole",
             "set-property description myDescription"};
-
-        setup( commands );
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

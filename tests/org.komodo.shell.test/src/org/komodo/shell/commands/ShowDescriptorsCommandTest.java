@@ -15,7 +15,6 @@
  */
 package org.komodo.shell.commands;
 
-import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.komodo.shell.AbstractCommandTest;
 import org.komodo.shell.api.CommandResult;
@@ -29,36 +28,28 @@ public class ShowDescriptorsCommandTest extends AbstractCommandTest {
     @Test( expected = AssertionError.class )
     public void shouldFailTooManyArgs( ) throws Exception {
         final String[] commands = { "show-descriptors extraArg" };
-        setup( commands );
-        execute();
+        execute( commands );
     }
-    
-//    @Test
-//    public void shouldShowRootDescriptors() throws Exception {
-//        final String[] commands = { "show-descriptors" };
-//        setup( commands );
-//
-//        CommandResult result = execute();
-//        assertCommandResultOk(result);
-//
-//        // root primary type
-//        String writerOutput = getCommandOutput();
-//        assertTrue(writerOutput.contains("No Descriptors"));
-//    }
-//
-//    @Test
-//    public void shouldShowWorkspaceDescriptors() throws Exception {
-//        final String[] commands = { 
-//            "workspace",
-//            "show-descriptors"};
-//        setup( commands );
-//
-//        CommandResult result = execute();
-//        assertCommandResultOk(result);
-//
-//        // root primary type
-//        String writerOutput = getCommandOutput();
-//        assertTrue(writerOutput.contains("No Descriptors"));
-//    }
+
+    @Test
+    public void shouldNotHaveAvailableAtLibrary() throws Exception {
+        final String[] commands = { LibraryCommand.NAME };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+        assertCommandsNotAvailable( ShowDescriptorsCommand.NAME );
+    }
+
+    @Test
+    public void shouldNotHaveAvailableAtRoot() throws Exception {
+        assertCommandsNotAvailable( ShowDescriptorsCommand.NAME );
+    }
+
+    @Test
+    public void shouldNotHaveAvailableAtWorkspace() throws Exception {
+        final String[] commands = { WorkspaceCommand.NAME };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+        assertCommandsNotAvailable( ShowDescriptorsCommand.NAME );
+    }
 
 }

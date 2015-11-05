@@ -31,9 +31,8 @@ public final class SetDataTypeResultSetPropertyCommandTest extends DataTypeResul
     public void shouldSetProperty() throws Exception {
         final long expected = 99;
         final String[] commands = { "set-property datatypeLength " + expected };
-        setup( commands );
 
-        final CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk( result );
         assertThat( get().getLength( getTransaction() ), is( expected ) );
     }

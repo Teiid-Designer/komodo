@@ -23,24 +23,20 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test DeleteTeiidCommand
- *
+ * Test Class to test {@link DeleteTeiidCommand}.
  */
 @SuppressWarnings( { "javadoc", "nls" } )
-public class DeleteTeiidCommandTest extends AbstractCommandTest {
+public final class DeleteTeiidCommandTest extends AbstractCommandTest {
 
     @Test
     public void testDeleteTeiid1() throws Exception {
         final String[] commands = { "set-auto-commit false",
-                                    "workspace",
                                     "create-teiid testTeiid1",
                                     "create-teiid testTeiid2",
                                     "commit",
                                     "delete-teiid testTeiid1",
                                     "commit" };
-        setup( commands );
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

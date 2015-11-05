@@ -24,25 +24,20 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test DeleteTranslatorCommand
- *
+ * Test Class to test {@link DeleteTranslatorCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public class DeleteTranslatorCommandTest extends AbstractCommandTest {
+public final class DeleteTranslatorCommandTest extends AbstractCommandTest {
 
     @Test
     public void testDelete1() throws Exception {
-        final String[] commands = { 
-            "workspace",
+        final String[] commands = {
             "create-vdb myVdb vdbPath",
             "cd myVdb",
             "add-translator myTranslator1 tType",
             "add-translator myTranslator2 tType",
             "delete-translator myTranslator1" };
-
-        setup( commands );
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

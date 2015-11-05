@@ -38,9 +38,8 @@ public abstract class TabularResultSetCommandTest extends AbstractCommandTest {
                                     "cd myPushdownFunction",
                                     "set-result-set TabularResultSet",
                                     "cd resultSet" };
-        setup( commands );
-        final CommandResult result = execute();
-        assertCommandResultOk( result );
+        final CommandResult result = execute( commands );
+        assertCommandResultOk(result);
 
         final WorkspaceManager wkspMgr = WorkspaceManager.getInstance( _repo );
         final Vdb[] vdbs = wkspMgr.findVdbs( getTransaction() );

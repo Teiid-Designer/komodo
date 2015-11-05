@@ -30,24 +30,20 @@ public class SetGlobalPropertyCommandTest extends AbstractCommandTest {
     @Test( expected = AssertionError.class )
     public void shouldFailTooManyArgs( ) throws Exception {
         final String[] commands = { "set-global anArg extraArg" };
-        setup( commands );
-        execute();
+        execute( commands );
     }
-    
+
     @Test( expected = AssertionError.class )
     public void shouldFailBadGlobalProperty( ) throws Exception {
         final String[] commands = { "set-global anArg" };
-        setup( commands );
-        execute();
+        execute( commands );
     }
-    
+
     @Test
     public void shouldSetShowTypeInPrompt() throws Exception {
         final String[] commands = { "set-global " + WorkspaceStatus.SHOW_TYPE_IN_PROMPT_KEY + " true" };
-        setup( commands );
-
-        CommandResult result = execute();
-        assertCommandResultOk(result);
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
 
         // Check Context and property value
         assertEquals("/", wsStatus.getCurrentContextDisplayPath());
@@ -57,10 +53,8 @@ public class SetGlobalPropertyCommandTest extends AbstractCommandTest {
     @Test
     public void shouldSetRecordingOutputFile() throws Exception {
         final String[] commands = { "set-global " + WorkspaceStatus.RECORDING_FILE_KEY + " /aRecordingFile.txt" };
-        setup( commands );
-
-        CommandResult result = execute();
-        assertCommandResultOk(result);
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
 
         // Check Context and property value
         assertEquals("/", wsStatus.getCurrentContextDisplayPath());

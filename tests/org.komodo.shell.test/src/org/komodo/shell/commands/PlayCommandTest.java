@@ -15,8 +15,6 @@
  */
 package org.komodo.shell.commands;
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
 import org.junit.Test;
 import org.komodo.shell.AbstractCommandTest;
 import org.komodo.shell.api.CommandResult;
@@ -36,7 +34,7 @@ public final class PlayCommandTest extends AbstractCommandTest {
         final CommandResult result = execute();
 
         assertCommandResultOk( result );
-        assertThat( this.wsStatus.getCurrentContext().getAbsolutePath(), is( "/tko:komodo/tko:workspace/blah/blahblah" ) );
+        assertContextIs( "/tko:komodo/tko:workspace/blah/blahblah" );
     }
 
 }

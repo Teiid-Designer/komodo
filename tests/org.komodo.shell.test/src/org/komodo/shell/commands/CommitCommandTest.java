@@ -37,10 +37,9 @@ public final class CommitCommandTest extends AbstractCommandTest {
                                     "commit", // should add child and *not* be rollbacked by the play command
                                     "home",
                                     "delete-child workspace" }; // should fail
-        setup( commands );
 
         try {
-            execute();
+            execute( commands );
             fail(); // delete-child should throw exception so should not get here
         } catch ( final Throwable e ) {
             // make sure the work done before the commit was persisted
@@ -51,8 +50,7 @@ public final class CommitCommandTest extends AbstractCommandTest {
     @Test( expected = AssertionError.class )
     public void shouldFailTooManyArgs() throws Exception {
         final String[] commands = { "commit extraArg" };
-        setup( commands );
-        execute();
+        execute( commands );
     }
 
 }

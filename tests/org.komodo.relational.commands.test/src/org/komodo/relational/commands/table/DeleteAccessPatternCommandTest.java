@@ -26,16 +26,14 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test DeleteAccessPatternCommand
- *
+ * Test Class to test {@link DeleteAccessPatternCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public class DeleteAccessPatternCommandTest extends AbstractCommandTest {
+public final class DeleteAccessPatternCommandTest extends AbstractCommandTest {
 
     @Test
     public void testDelete1() throws Exception {
-        final String[] commands = { 
-            "workspace",
+        final String[] commands = {
             "create-vdb myVdb vdbPath",
             "cd myVdb",
             "add-model myModel",
@@ -45,10 +43,7 @@ public class DeleteAccessPatternCommandTest extends AbstractCommandTest {
             "add-access-pattern myAccessPattern1",
             "add-access-pattern myAccessPattern2",
             "delete-access-pattern myAccessPattern1" };
-        
-        setup(commands);
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

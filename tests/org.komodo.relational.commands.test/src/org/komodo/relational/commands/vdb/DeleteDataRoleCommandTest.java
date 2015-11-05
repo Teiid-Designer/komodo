@@ -24,25 +24,20 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test DeleteDataRoleCommand
- *
+ * Test Class to test {@link DeleteDataRoleCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public class DeleteDataRoleCommandTest extends AbstractCommandTest {
+public final class DeleteDataRoleCommandTest extends AbstractCommandTest {
 
     @Test
     public void testDelete1() throws Exception {
-        final String[] commands = { 
-            "workspace",
+        final String[] commands = {
             "create-vdb myVdb vdbPath",
             "cd myVdb",
             "add-data-role myDataRole1",
             "add-data-role myDataRole2",
             "delete-data-role myDataRole1" };
-
-        setup( commands );
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

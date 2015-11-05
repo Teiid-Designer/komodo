@@ -28,11 +28,10 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.test.utils.TestUtilities;
 
 /**
- * Test Class to test Schema ExportCommand
- *
+ * Test Class to test Schema {@link ExportCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public class ExportCommandTest extends AbstractCommandTest {
+public final class ExportCommandTest extends AbstractCommandTest {
 
     private final static String TWITTER_VIEW_MODEL_DDL = EMPTY_STRING +
                                                          "CREATE VIRTUAL PROCEDURE getTweets(IN query varchar) RETURNS TABLE " +  //$NON-NLS-1$
@@ -82,20 +81,13 @@ public class ExportCommandTest extends AbstractCommandTest {
             exportDest.delete();
 
         // The test commands
-        final String[] commands = { 
+        final String[] commands = {
             "commit",
             "workspace",
             "cd TestTweetSchema",
             "export-ddl " + exportDest.getAbsolutePath() };
-
-        setup( commands );
-
-        //
-        // Execute the commands
-        //
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
-
         assertTrue(exportDest.exists());
 
         String exportContents = TestUtilities.fileToString(exportDest);

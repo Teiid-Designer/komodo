@@ -28,16 +28,14 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test SetResultSetCommand
- *
+ * Test Class to test {@link SetResultSetCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public class SetResultSetCommandTest extends AbstractCommandTest {
+public final class SetResultSetCommandTest extends AbstractCommandTest {
 
     @Test
     public void testSet() throws Exception {
-        final String[] commands = { 
-            "workspace",
+        final String[] commands = {
             "create-vdb myVdb vdbPath",
             "cd myVdb",
             "add-model myModel",
@@ -45,10 +43,7 @@ public class SetResultSetCommandTest extends AbstractCommandTest {
             "add-stored-procedure myStoredProcedure",
             "cd myStoredProcedure",
             "set-result-set DataTypeResultSet" };
-
-        setup( commands );
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
