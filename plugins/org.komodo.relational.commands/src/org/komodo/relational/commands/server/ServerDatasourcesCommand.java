@@ -21,7 +21,7 @@ import org.komodo.shell.util.PrintUtils;
 import org.komodo.spi.runtime.TeiidDataSource;
 
 /**
- * A shell command to show all vdbs on a server
+ * A shell command to show all data sources on a server
  */
 public final class ServerDatasourcesCommand extends ServerShellCommand {
 

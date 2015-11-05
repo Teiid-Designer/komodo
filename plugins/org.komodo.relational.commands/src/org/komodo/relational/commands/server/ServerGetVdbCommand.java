@@ -13,7 +13,8 @@ import static org.komodo.relational.commands.server.ServerCommandMessages.Server
 import static org.komodo.relational.commands.server.ServerCommandMessages.ServerGetVdbCommand.VdbCopyToRepoFinished;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.io.File;
-import java.io.FileWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -29,7 +30,7 @@ import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.TeiidVdb;
 
 /**
- * A shell command to import a server vdb into the workspace
+ * A shell command to get a server VDB and copy into the workspace
  */
 public final class ServerGetVdbCommand extends ServerShellCommand {
 
@@ -82,7 +83,7 @@ public final class ServerGetVdbCommand extends ServerShellCommand {
             
             // Output the content to a temp file
             File tempFile = File.createTempFile(TEMPFILE_PREFIX, TEMPFILE_SUFFIX);
-            writeToFile(tempFile.getPath(),vdbStr);
+            Files.write(Paths.get(tempFile.getPath()), vdbStr.getBytes());
             
             // Upload the VdbFile
             UploadVdbCommand uploadVdbCommand = new UploadVdbCommand(getWorkspaceStatus());
@@ -173,15 +174,5 @@ public final class ServerGetVdbCommand extends ServerShellCommand {
         }
         return existingVdbNames;
     }
-    
-    private void writeToFile(String fileName, String content) {
-        // write file
-        try ( final FileWriter fileWriter = new FileWriter( fileName, false ) ) {
-            fileWriter.write( content );
-            fileWriter.flush();
-        } catch ( final Exception e ) {
-            // TODO: log error
-        }
-    }
-    
+        
 }

@@ -21,7 +21,7 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.PrintUtils;
 
 /**
- * A shell command to show all vdbs on a server
+ * A shell command to show all data source types on a server
  */
 public final class ServerDatasourceTypesCommand extends ServerShellCommand {
 
