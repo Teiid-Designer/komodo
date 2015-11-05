@@ -2,7 +2,7 @@
 
 On this page we will provide a few more example script files, DDL files and VDB files that you can try.  They go a bit further in complexity than the previous simple examples.  We will continue to add more examples to this page as they are developed.
 
-Remember, you can use __tab completion__ to see the available commands and sub-command options, or use __help__ to see command details.
+You can use __tab completion__ to see the available commands options, or use __help commandName__ to see command details.
 
 
 ### Requirements

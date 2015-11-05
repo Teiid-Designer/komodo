@@ -86,7 +86,7 @@ public class ServerCommandMessages implements StringConstants {
     }
 
     @SuppressWarnings( "javadoc" )
-    public enum ServerShowVdbsCommand {
+    public enum ServerVdbsCommand {
         InfoMessage,
         ListHeader;
 
@@ -97,7 +97,7 @@ public class ServerCommandMessages implements StringConstants {
     }
 
     @SuppressWarnings( "javadoc" )
-    public enum ServerShowTranslatorsCommand {
+    public enum ServerTranslatorsCommand {
         InfoMessage,
         ListHeader;
 
@@ -108,7 +108,7 @@ public class ServerCommandMessages implements StringConstants {
     }
 
     @SuppressWarnings( "javadoc" )
-    public enum ServerShowDatasourcesCommand {
+    public enum ServerDatasourcesCommand {
         InfoMessage,
         ListHeader;
 
@@ -119,7 +119,7 @@ public class ServerCommandMessages implements StringConstants {
     }
 
     @SuppressWarnings( "javadoc" )
-    public enum ServerShowDatasourceTypesCommand {
+    public enum ServerDatasourceTypesCommand {
         InfoMessage,
         ListHeader;
 
@@ -130,7 +130,7 @@ public class ServerCommandMessages implements StringConstants {
     }
 
     @SuppressWarnings( "javadoc" )
-    public enum ServerShowVdbCommand {
+    public enum ServerVdbCommand {
         InfoMessage;
 
         @Override
@@ -140,7 +140,7 @@ public class ServerCommandMessages implements StringConstants {
     }
 
     @SuppressWarnings( "javadoc" )
-    public enum ServerShowTranslatorCommand {
+    public enum ServerTranslatorCommand {
         InfoMessage;
 
         @Override
@@ -150,7 +150,7 @@ public class ServerCommandMessages implements StringConstants {
     }
 
     @SuppressWarnings( "javadoc" )
-    public enum ServerShowDatasourceCommand {
+    public enum ServerDatasourceCommand {
         InfoMessage;
 
         @Override
@@ -160,7 +160,7 @@ public class ServerCommandMessages implements StringConstants {
     }
 
     @SuppressWarnings( "javadoc" )
-    public enum ServerShowDatasourceTypeCommand {
+    public enum ServerDatasourceTypeCommand {
         InfoMessage;
 
         @Override
@@ -172,6 +172,8 @@ public class ServerCommandMessages implements StringConstants {
     @SuppressWarnings( "javadoc" )
     public enum ServerDeployVdbCommand {
         VdbExportFailed,
+        OverwriteArgInvalid,
+        VdbDeploymentOverwriteDisabled,
         VdbDeployFinished;
 
         @Override
@@ -191,7 +193,7 @@ public class ServerCommandMessages implements StringConstants {
     }
 
     @SuppressWarnings( "javadoc" )
-    public enum ServerImportVdbCommand {
+    public enum ServerGetVdbCommand {
         VdbCopyToRepoFinished,
         CanOnlyCopyDynamicVDBs;
 

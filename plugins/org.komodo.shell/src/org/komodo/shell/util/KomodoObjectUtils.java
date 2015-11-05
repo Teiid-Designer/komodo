@@ -109,7 +109,28 @@ public class KomodoObjectUtils implements StringConstants {
             final Type type = property.getDescriptor( wsStatus.getTransaction() ).getType();
             final boolean propIsReference = ( ( Type.REFERENCE == type ) || ( Type.WEAKREFERENCE == type ) );
             if(propIsReference) {
-                return wsStatus.getLabelProvider().getDisplayPath(displayValue);
+                // Multiple references need to be converted from repo paths to display paths
+                if(property.isMultiple(wsStatus.getTransaction())) {
+                    // Remove square brackets
+                    String absPaths = displayValue.replaceAll("\\[|\\]", "");  //$NON-NLS-1$ //$NON-NLS-2$
+                    // Get multiple paths are separated by commas
+                    String[] splitPaths = absPaths.split(","); //$NON-NLS-1$
+                    
+                    // Convert repo paths to display paths, returning the multiple display paths
+                    StringBuilder sb = new StringBuilder("["); //$NON-NLS-1$ 
+                    boolean first = true;
+                    for(String absPath : splitPaths) {
+                        if(!absPath.isEmpty()) {
+                            if(!first) sb.append(","); //$NON-NLS-1$
+                            sb.append(wsStatus.getLabelProvider().getDisplayPath(absPath));
+                            first = false;
+                        }
+                    }
+                    sb.append("]"); //$NON-NLS-1$
+                    return sb.toString();
+                } else {
+                    return wsStatus.getLabelProvider().getDisplayPath(displayValue);
+                }
             }
 
             return displayValue;

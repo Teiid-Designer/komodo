@@ -9,13 +9,11 @@ package org.komodo.relational.commands.server;
 
 import static org.komodo.relational.commands.server.ServerCommandMessages.Common.MissingVdbName;
 import static org.komodo.relational.commands.server.ServerCommandMessages.Common.ServerVdbNotFound;
-import static org.komodo.relational.commands.server.ServerCommandMessages.ServerImportVdbCommand.CanOnlyCopyDynamicVDBs;
-import static org.komodo.relational.commands.server.ServerCommandMessages.ServerImportVdbCommand.VdbCopyToRepoFinished;
+import static org.komodo.relational.commands.server.ServerCommandMessages.ServerGetVdbCommand.CanOnlyCopyDynamicVDBs;
+import static org.komodo.relational.commands.server.ServerCommandMessages.ServerGetVdbCommand.VdbCopyToRepoFinished;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -33,9 +31,9 @@ import org.komodo.spi.runtime.TeiidVdb;
 /**
  * A shell command to import a server vdb into the workspace
  */
-public final class ServerImportVdbCommand extends ServerShellCommand {
+public final class ServerGetVdbCommand extends ServerShellCommand {
 
-    static final String NAME = "server-import-vdb"; //$NON-NLS-1$
+    static final String NAME = "server-get-vdb"; //$NON-NLS-1$
 
     private static final String TEMPFILE_PREFIX = "Vdb-"; //$NON-NLS-1$
     private static final String TEMPFILE_SUFFIX = ".xml"; //$NON-NLS-1$
@@ -44,7 +42,7 @@ public final class ServerImportVdbCommand extends ServerShellCommand {
      * @param status
      *        the shell's workspace status (cannot be <code>null</code>)
      */
-    public ServerImportVdbCommand( final WorkspaceStatus status ) {
+    public ServerGetVdbCommand( final WorkspaceStatus status ) {
         super( NAME, status );
     }
 
@@ -66,20 +64,20 @@ public final class ServerImportVdbCommand extends ServerShellCommand {
                 return validationResult;
             }
 
-            // Undeploy the VDB
+            // Get the teiid instance
             Teiid teiid = getWorkspaceServer();
             TeiidInstance teiidInstance = teiid.getTeiidInstance(getTransaction());
             
             // Get the VDB - make sure its a dynamic VDB
             TeiidVdb vdb = teiidInstance.getVdb(vdbName);
             if(vdb == null) {
-                return new CommandResultImpl( false, getMessage(ServerVdbNotFound), null );
+                return new CommandResultImpl( false, getMessage(ServerVdbNotFound, vdbName), null );
             }
             if(!vdb.isXmlDeployment()) {
-                return new CommandResultImpl( false, getMessage(CanOnlyCopyDynamicVDBs), null );
+                return new CommandResultImpl( false, getMessage(CanOnlyCopyDynamicVDBs, vdbName), null );
             }
             
-            // Export the string content
+            // Export the vdb content into a string
             String vdbStr = vdb.export();
             
             // Output the content to a temp file
@@ -177,26 +175,12 @@ public final class ServerImportVdbCommand extends ServerShellCommand {
     }
     
     private void writeToFile(String fileName, String content) {
-        BufferedWriter writer = null;
-        try
-        {
-            writer = new BufferedWriter(new FileWriter(fileName));
-            writer.write(content);
-
-        }
-        catch ( IOException e)
-        {
-        }
-        finally
-        {
-            try
-            {
-                if ( writer != null)
-                    writer.close( );
-            }
-            catch ( IOException e)
-            {
-            }
+        // write file
+        try ( final FileWriter fileWriter = new FileWriter( fileName, false ) ) {
+            fileWriter.write( content );
+            fileWriter.flush();
+        } catch ( final Exception e ) {
+            // TODO: log error
         }
     }
     

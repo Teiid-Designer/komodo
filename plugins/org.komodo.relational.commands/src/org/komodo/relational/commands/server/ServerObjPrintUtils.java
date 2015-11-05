@@ -55,7 +55,7 @@ public class ServerObjPrintUtils implements StringConstants {
             // ------------
             // VDB Status
             // ------------
-            String status = vdb.isActive() ? "Active" : "Inactive"; //$NON-NLS-1$ //$NON-NLS-2$
+            String status = vdb.isActive() ? "ACTIVE" : "INACTIVE"; //$NON-NLS-1$ //$NON-NLS-2$
             PrintUtils.print(writer, indent, "Status: "+status); //$NON-NLS-1$
             
             // ------------

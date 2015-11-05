@@ -2,7 +2,7 @@
 
 This sample shows how to use the VDB Builder cli to record your session commands for later playback.  You can use the command file to fully script the construction of your VDBs!  Use this sample as a starting point for working with your own VDBS.
 
-Remember, you can use __tab completion__ to see the available commands and sub-command options, or use __help__ to see command details.
+You can use __tab completion__ to see the available commands options, or use __help commandName__ to see command details.
 
 
 ### Requirements

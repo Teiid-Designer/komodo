@@ -10,5 +10,6 @@ The following samples will help you get started using the VDB Builder cli:
 - [Import and Export VDBs and DDL](import-export-vdbs-ddl.md)
 - [Record Session commands to a file](record-cli-session.md)
 - [Execute a Command file](execute-command-script.md)
+- [Connect to a Server](connect_to_server.md)
 - [More cli examples and test files](more-examples.md)
 

@@ -2,7 +2,7 @@
 
 These samples show how to use the VDB Builder cli to import and export VDBs and DDL interactively.  Use this sample as a starting point for working with your own VDBs and DDL.
 
-Remember, you can use __tab completion__ to see the available commands and sub-command options, or use __help__ to see command details.
+You can use __tab completion__ to see the available commands options, or use __help commandName__ to see command details.
 
 
 ### Requirements
