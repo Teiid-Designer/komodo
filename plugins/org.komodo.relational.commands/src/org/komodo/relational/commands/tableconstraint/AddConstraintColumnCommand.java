@@ -16,8 +16,8 @@ import java.util.List;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.TableConstraint;
-import org.komodo.repository.ObjectImpl;
 import org.komodo.shell.CommandResultImpl;
+import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.KomodoObjectLabelProvider;
 import org.komodo.shell.api.WorkspaceStatus;
@@ -52,16 +52,17 @@ public final class AddConstraintColumnCommand extends TableConstraintShellComman
         try {
             final String columnPath = requiredArgument( 0, getMessage( MISSING_COLUMN_PATH ) );
 
+            // Validate the display Path
+            String validationMsg = validatePath(columnPath);
+            if(!validationMsg.equals(CompletionConstants.OK)) {
+                return new CommandResultImpl(false, validationMsg, null);
+            }
+            
+            // Get the Object at the supplied path
+            KomodoObject possible = getWorkspaceStatus().getContextForDisplayPath(columnPath.trim());
+            
             Column column = null;
             { // see if valid column
-                String repoPath = getWorkspaceStatus().getLabelProvider().getPath( columnPath );
-
-                if ( StringUtils.isBlank( repoPath ) ) {
-                    repoPath = columnPath;
-                }
-
-                final KomodoObject possible = new ObjectImpl( getRepository(), repoPath, 0 );
-
                 try {
                     if ( Column.RESOLVER.resolvable( getTransaction(), possible ) ) {
                         column = Column.RESOLVER.resolve( getTransaction(), possible );
@@ -96,7 +97,7 @@ public final class AddConstraintColumnCommand extends TableConstraintShellComman
 
         return result;
     }
-
+    
     /**
      * {@inheritDoc}
      *

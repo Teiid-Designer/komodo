@@ -152,6 +152,7 @@ public class WorkspaceCommandMessages implements StringConstants {
         MISSING_INPUT_VDB_FILE_PATH,
         MISSING_VDB_NAME,
         VDB_INPUT_FILE_IS_EMPTY,
+        OVERWRITE_ARG_INVALID,
         VDB_OVERWRITE_DISABLED,
         VDB_UPLOADED;
 

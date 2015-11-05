@@ -9,7 +9,7 @@ package org.komodo.relational.commands.server;
 
 import static org.komodo.relational.commands.server.ServerCommandMessages.Common.MissingDatasourceName;
 import static org.komodo.relational.commands.server.ServerCommandMessages.Common.ServerDatasourceNotFound;
-import static org.komodo.relational.commands.server.ServerCommandMessages.ServerShowDatasourceCommand.InfoMessage;
+import static org.komodo.relational.commands.server.ServerCommandMessages.ServerDatasourceCommand.InfoMessage;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,15 +25,15 @@ import org.komodo.spi.runtime.TeiidDataSource;
 /**
  * A shell command to show all vdbs on a server
  */
-public final class ServerShowDatasourceCommand extends ServerShellCommand {
+public final class ServerDatasourceCommand extends ServerShellCommand {
 
-    static final String NAME = "server-show-datasource"; //$NON-NLS-1$
+    static final String NAME = "server-datasource"; //$NON-NLS-1$
 
     /**
      * @param status
      *        the shell's workspace status (cannot be <code>null</code>)
      */
-    public ServerShowDatasourceCommand( final WorkspaceStatus status ) {
+    public ServerDatasourceCommand( final WorkspaceStatus status ) {
         super( NAME, status );
     }
 

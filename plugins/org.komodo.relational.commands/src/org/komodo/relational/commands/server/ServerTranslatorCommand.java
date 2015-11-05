@@ -9,7 +9,7 @@ package org.komodo.relational.commands.server;
 
 import static org.komodo.relational.commands.server.ServerCommandMessages.Common.MissingTranslatorName;
 import static org.komodo.relational.commands.server.ServerCommandMessages.Common.ServerTranslatorNotFound;
-import static org.komodo.relational.commands.server.ServerCommandMessages.ServerShowTranslatorCommand.InfoMessage;
+import static org.komodo.relational.commands.server.ServerCommandMessages.ServerTranslatorCommand.InfoMessage;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,15 +25,15 @@ import org.komodo.spi.runtime.TeiidTranslator;
 /**
  * A shell command to show all translators on a server
  */
-public final class ServerShowTranslatorCommand extends ServerShellCommand {
+public final class ServerTranslatorCommand extends ServerShellCommand {
 
-    static final String NAME = "server-show-translator"; //$NON-NLS-1$
+    static final String NAME = "server-translator"; //$NON-NLS-1$
 
     /**
      * @param status
      *        the shell's workspace status (cannot be <code>null</code>)
      */
-    public ServerShowTranslatorCommand( final WorkspaceStatus status ) {
+    public ServerTranslatorCommand( final WorkspaceStatus status ) {
         super( NAME, status );
     }
 

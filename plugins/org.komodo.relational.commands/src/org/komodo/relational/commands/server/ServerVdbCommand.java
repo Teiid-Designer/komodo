@@ -7,35 +7,33 @@
  */
 package org.komodo.relational.commands.server;
 
-import static org.komodo.relational.commands.server.ServerCommandMessages.Common.MissingDatasourceTypeName;
-import static org.komodo.relational.commands.server.ServerCommandMessages.Common.ServerDatasourceTypeNotFound;
-import static org.komodo.relational.commands.server.ServerCommandMessages.ServerShowDatasourceTypeCommand.InfoMessage;
+import static org.komodo.relational.commands.server.ServerCommandMessages.Common.MissingVdbName;
+import static org.komodo.relational.commands.server.ServerCommandMessages.Common.ServerVdbNotFound;
+import static org.komodo.relational.commands.server.ServerCommandMessages.ServerVdbCommand.InfoMessage;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
-import org.komodo.relational.RelationalObject;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.spi.runtime.TeiidPropertyDefinition;
+import org.komodo.spi.runtime.TeiidVdb;
 
 /**
- * A shell command to show all vdbs on a server
+ * A shell command to show details of a server vdb
  */
-public final class ServerShowDatasourceTypeCommand extends ServerShellCommand {
+public final class ServerVdbCommand extends ServerShellCommand {
 
-    static final String NAME = "server-show-datasource-type"; //$NON-NLS-1$
+    static final String NAME = "server-vdb"; //$NON-NLS-1$
 
     /**
      * @param status
      *        the shell's workspace status (cannot be <code>null</code>)
      */
-    public ServerShowDatasourceTypeCommand( final WorkspaceStatus status ) {
+    public ServerVdbCommand( final WorkspaceStatus status ) {
         super( NAME, status );
     }
 
@@ -49,7 +47,7 @@ public final class ServerShowDatasourceTypeCommand extends ServerShellCommand {
         CommandResult result = null;
 
         try {
-            final String sourceTypeName = requiredArgument( 0, getMessage( MissingDatasourceTypeName ) );
+            final String vdbName = requiredArgument( 0, getMessage( MissingVdbName ) );
             
             // Validates that a server is connected
             CommandResult validationResult = validateHasConnectedWorkspaceServer();
@@ -58,18 +56,17 @@ public final class ServerShowDatasourceTypeCommand extends ServerShellCommand {
             }
 
             Teiid teiid = getWorkspaceServer();
-            Collection<TeiidPropertyDefinition> propDefns = teiid.getTeiidInstance( getTransaction() ).getTemplatePropertyDefns(sourceTypeName);
-            if(propDefns==null) {
-                return new CommandResultImpl(false, getMessage( ServerDatasourceTypeNotFound, sourceTypeName ), null);
+            TeiidVdb vdb = teiid.getTeiidInstance( getTransaction() ).getVdb(vdbName);
+            if(vdb==null) {
+                return new CommandResultImpl(false, getMessage( ServerVdbNotFound, vdbName ), null);
             }
             
             // Print title
-            final String title = getMessage( InfoMessage, sourceTypeName, getWorkspaceServerName() );
+            final String title = getMessage( InfoMessage, vdbName, getWorkspaceServerName() );
             print( MESSAGE_INDENT, title );
-            print( MESSAGE_INDENT, "DataSource Template Properties:" ); //$NON-NLS-1$
 
-            // Print DataSource Template Info
-            ServerObjPrintUtils.printDatasourceTemplateProperties(getWriter(), MESSAGE_INDENT, propDefns, "Name", "Default Value"); //$NON-NLS-1$  //$NON-NLS-2$
+            // Print VDB Info
+            ServerObjPrintUtils.printVdbDetails(getWriter(), MESSAGE_INDENT, vdb);
 
             result = CommandResult.SUCCESS;
         } catch ( final Exception e ) {
@@ -77,16 +74,6 @@ public final class ServerShowDatasourceTypeCommand extends ServerShellCommand {
         }
 
         return result;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.commands.RelationalShellCommand#get()
-     */
-    @Override
-    protected RelationalObject get() throws Exception {
-        return super.get();
     }
 
     /**
@@ -120,18 +107,19 @@ public final class ServerShowDatasourceTypeCommand extends ServerShellCommand {
         final Arguments args = getArguments();
 
         Teiid teiid = getWorkspaceServer();
-        List< String > existingTypes = new ArrayList< String >();
-        Set< String > types = teiid.getTeiidInstance( getTransaction() ).getDataSourceTypeNames();
-        for ( String type : types ) {
-            existingTypes.add( type );
+        List< String > existingVdbNames = new ArrayList< String >();
+        Collection< TeiidVdb > vdbs = teiid.getTeiidInstance( getTransaction() ).getVdbs();
+        for ( TeiidVdb vdb : vdbs ) {
+            String name = vdb.getName();
+            existingVdbNames.add( name );
         }
-        Collections.sort(existingTypes);
+        Collections.sort(existingVdbNames);
 
         if ( args.isEmpty() ) {
             if ( lastArgument == null ) {
-                candidates.addAll( existingTypes );
+                candidates.addAll( existingVdbNames );
             } else {
-                for ( final String item : existingTypes ) {
+                for ( final String item : existingVdbNames ) {
                     if ( item.toUpperCase().startsWith( lastArgument.toUpperCase() ) ) {
                         candidates.add( item );
                     }
@@ -144,5 +132,5 @@ public final class ServerShowDatasourceTypeCommand extends ServerShellCommand {
         // no tab completion
         return -1;
     }
-    
+
 }

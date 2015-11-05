@@ -7,7 +7,7 @@
  */
 package org.komodo.relational.commands.server;
 
-import static org.komodo.relational.commands.server.ServerCommandMessages.ServerShowDatasourceTypesCommand.InfoMessage;
+import static org.komodo.relational.commands.server.ServerCommandMessages.ServerDatasourceTypesCommand.InfoMessage;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,15 +23,15 @@ import org.komodo.shell.util.PrintUtils;
 /**
  * A shell command to show all vdbs on a server
  */
-public final class ServerShowDatasourceTypesCommand extends ServerShellCommand {
+public final class ServerDatasourceTypesCommand extends ServerShellCommand {
 
-    static final String NAME = "server-show-datasource-types"; //$NON-NLS-1$
+    static final String NAME = "server-datasource-types"; //$NON-NLS-1$
 
     /**
      * @param status
      *        the shell's workspace status (cannot be <code>null</code>)
      */
-    public ServerShowDatasourceTypesCommand( final WorkspaceStatus status ) {
+    public ServerDatasourceTypesCommand( final WorkspaceStatus status ) {
         super( NAME, status );
     }
 

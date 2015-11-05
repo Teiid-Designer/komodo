@@ -54,17 +54,17 @@ public class ServerCommandProvider implements ShellCommandProvider {
         result.add( ServerConnectCommand.class );
         result.add( ServerDisconnectCommand.class );
         result.add( ServerSetCommand.class );
-        result.add( ServerShowVdbsCommand.class );
-        result.add( ServerShowTranslatorsCommand.class );
-        result.add( ServerShowDatasourcesCommand.class );
-        result.add( ServerShowDatasourceTypesCommand.class );
+        result.add( ServerVdbsCommand.class );
+        result.add( ServerTranslatorsCommand.class );
+        result.add( ServerDatasourcesCommand.class );
+        result.add( ServerDatasourceTypesCommand.class );
         result.add( ServerDeployVdbCommand.class );
         result.add( ServerUndeployVdbCommand.class );
-        result.add( ServerImportVdbCommand.class );
-        result.add( ServerShowVdbCommand.class );
-        result.add( ServerShowTranslatorCommand.class );
-        result.add( ServerShowDatasourceCommand.class );
-        result.add( ServerShowDatasourceTypeCommand.class );
+        result.add( ServerGetVdbCommand.class );
+        result.add( ServerVdbCommand.class );
+        result.add( ServerTranslatorCommand.class );
+        result.add( ServerDatasourceCommand.class );
+        result.add( ServerDatasourceTypeCommand.class );
 
         return result;
     }

@@ -7,7 +7,7 @@
  */
 package org.komodo.relational.commands.server;
 
-import static org.komodo.relational.commands.server.ServerCommandMessages.ServerShowVdbsCommand.InfoMessage;
+import static org.komodo.relational.commands.server.ServerCommandMessages.ServerTranslatorsCommand.InfoMessage;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,20 +18,20 @@ import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.PrintUtils;
-import org.komodo.spi.runtime.TeiidVdb;
+import org.komodo.spi.runtime.TeiidTranslator;
 
 /**
- * A shell command to show all vdbs on a server
+ * A shell command to show all translators on a server
  */
-public final class ServerShowVdbsCommand extends ServerShellCommand {
+public final class ServerTranslatorsCommand extends ServerShellCommand {
 
-    static final String NAME = "server-show-vdbs"; //$NON-NLS-1$
+    static final String NAME = "server-translators"; //$NON-NLS-1$
 
     /**
      * @param status
      *        the shell's workspace status (cannot be <code>null</code>)
      */
-    public ServerShowVdbsCommand( final WorkspaceStatus status ) {
+    public ServerTranslatorsCommand( final WorkspaceStatus status ) {
         super( NAME, status );
     }
 
@@ -57,11 +57,12 @@ public final class ServerShowVdbsCommand extends ServerShellCommand {
 
             Teiid teiid = getWorkspaceServer();
             List< String > objNames = new ArrayList< String >();
-            Collection< TeiidVdb > vdbs = teiid.getTeiidInstance( getTransaction() ).getVdbs();
-            for ( TeiidVdb vdb : vdbs ) {
-                String name = vdb.getName();
+            Collection< TeiidTranslator > translators = teiid.getTeiidInstance( getTransaction() ).getTranslators();
+            for ( TeiidTranslator translator : translators ) {
+                String name = translator.getName();
                 objNames.add( name );
             }
+
             Collections.sort(objNames);
             PrintUtils.printMultiLineItemList( MESSAGE_INDENT, getWriter(), objNames, 4, null );
             result = CommandResult.SUCCESS;
