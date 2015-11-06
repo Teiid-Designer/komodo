@@ -88,8 +88,7 @@ public class ServerCommandMessages implements StringConstants {
 
     @SuppressWarnings( "javadoc" )
     public enum ServerVdbsCommand {
-        InfoMessage,
-        ListHeader;
+        InfoMessage;
 
         @Override
         public String toString() {
@@ -99,8 +98,7 @@ public class ServerCommandMessages implements StringConstants {
 
     @SuppressWarnings( "javadoc" )
     public enum ServerTranslatorsCommand {
-        InfoMessage,
-        ListHeader;
+        InfoMessage;
 
         @Override
         public String toString() {
@@ -110,8 +108,7 @@ public class ServerCommandMessages implements StringConstants {
 
     @SuppressWarnings( "javadoc" )
     public enum ServerDatasourcesCommand {
-        InfoMessage,
-        ListHeader;
+        InfoMessage;
 
         @Override
         public String toString() {
@@ -121,8 +118,7 @@ public class ServerCommandMessages implements StringConstants {
 
     @SuppressWarnings( "javadoc" )
     public enum ServerDatasourceTypesCommand {
-        InfoMessage,
-        ListHeader;
+        InfoMessage;
 
         @Override
         public String toString() {

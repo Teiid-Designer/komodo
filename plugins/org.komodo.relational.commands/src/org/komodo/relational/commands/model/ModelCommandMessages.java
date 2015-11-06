@@ -32,14 +32,7 @@ public class ModelCommandMessages implements StringConstants {
         MISSING_TABLE_NAME,
         MISSING_USER_DEFINED_FUNCTION_NAME,
         MISSING_VIEW_NAME,
-        MISSING_VIRTUAL_PROCEDURE_NAME,
-        PUSHDOWN_FUNCTION_NAME,
-        SOURCE_NAME,
-        STORED_PROCEDURE_NAME,
-        TABLE_NAME,
-        USER_DEFINED_FUNCTION_NAME,
-        VIEW_NAME,
-        VIRTUAL_PROCEDURE_NAME;
+        MISSING_VIRTUAL_PROCEDURE_NAME;
 
         @Override
         public String toString() {

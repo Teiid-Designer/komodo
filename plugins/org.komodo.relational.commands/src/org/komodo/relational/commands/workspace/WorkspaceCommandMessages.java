@@ -37,12 +37,8 @@ public class WorkspaceCommandMessages implements StringConstants {
         MISSING_VDB_NAME,
         MISSING_TEIID_NAME,
         MISSING_SCHEMA_NAME,
-        NO_PROPERTIES,
         OUTPUT_FILE_ERROR,
         INPUT_FILE_ERROR,
-        PROPERTIES_HEADER,
-        PRINT_RELATIONAL_OBJECT,
-        PROPERTY_NOT_SET,
         SET_PROPERTY_SUCCESS,
         UNSET_MISSING_PROPERTY_NAME,
         UNSET_PROPERTY_SUCCESS;
@@ -65,13 +61,9 @@ public class WorkspaceCommandMessages implements StringConstants {
     public enum ImportVdbCommand {
         VdbImportInProgressMsg,
         VdbImportSuccessMsg,
-        InvalidSubCommand,
         ImportFailedMsg,
-        childTypeNotAllowed,
-        ErrorCreatingTempNode,
         DeleteTempVdbFailedMsg,
-        cannotImport_wouldCreateDuplicate,
-        VDB_IMPORTED;
+        cannotImport_wouldCreateDuplicate;
 
         @Override
         public String toString() {
@@ -91,7 +83,6 @@ public class WorkspaceCommandMessages implements StringConstants {
     }
 
     public enum CreateTeiidCommand {
-        CREATE_TEIID_ERROR,
         TEIID_CREATED;
 
         @Override
@@ -112,7 +103,6 @@ public class WorkspaceCommandMessages implements StringConstants {
     }
 
     public enum CreateSchemaCommand {
-        CREATE_SCHEMA_ERROR,
         SCHEMA_CREATED;
 
         @Override
@@ -132,23 +122,8 @@ public class WorkspaceCommandMessages implements StringConstants {
         }
     }
 
-    public enum FindCommand {
-        MISSING_TYPE_NAME,
-        HELP_TYPES_HEADING,
-        FAILURE,
-        INVALID_TYPE,
-        NO_OBJECTS_FOUND,
-        TYPE_HEADER;
-
-        @Override
-        public String toString() {
-            return getEnumName(this) + DOT + name();
-        }
-    }
-
     public enum UploadVdbCommand {
 
-        INVALID_OVERWRITE_ARG,
         MISSING_INPUT_VDB_FILE_PATH,
         MISSING_VDB_NAME,
         VDB_INPUT_FILE_IS_EMPTY,
