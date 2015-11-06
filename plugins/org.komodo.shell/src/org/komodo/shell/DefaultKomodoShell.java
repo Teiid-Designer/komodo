@@ -306,7 +306,7 @@ public class DefaultKomodoShell implements KomodoShell {
                             final String errorMsg = Messages.getString( SHELL.CommandFailure, command.toString() )
                                                     + ' '
                                                     + result.getError().getLocalizedMessage();
-                            KLog.getLogger().error( errorMsg, result.getError() );
+                            KLog.getLogger().debug( errorMsg, result.getError() );
                             PrintUtils.print( getOutputWriter(), CompletionConstants.MESSAGE_INDENT, errorMsg );
                         }
 
