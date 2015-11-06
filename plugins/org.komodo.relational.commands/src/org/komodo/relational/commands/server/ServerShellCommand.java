@@ -58,6 +58,16 @@ abstract class ServerShellCommand extends RelationalShellCommand {
         return kObj!=null;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.RelationalShellCommand#getCategory()
+     */
+    @Override
+    public String getCategory() {
+        return getMessage( ServerCommandMessages.Common.CommandCategory );
+    }
+
     protected String getWorkspaceServerName() throws KException {
         KomodoObject server = getWorkspaceServer();
         if(server!=null) {

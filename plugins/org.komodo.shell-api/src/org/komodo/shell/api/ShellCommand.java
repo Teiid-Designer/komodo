@@ -30,6 +30,13 @@ import java.util.List;
 public interface ShellCommand {
 
     /**
+     * Commands without a category will be placed in a general category.
+     *
+     * @return the command category (can be empty)
+     */
+    String getCategory();
+
+    /**
      * @return the command name (never empty)
      */
     String getName();

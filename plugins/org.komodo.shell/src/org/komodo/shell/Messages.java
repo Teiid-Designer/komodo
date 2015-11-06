@@ -39,6 +39,7 @@ public class Messages implements StringConstants {
     private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME);
 
     public enum SHELL {
+        GeneralCommandCategory,
         CommitSuccess,
         RollbackSuccess,
         FileNotAccessible,
@@ -62,7 +63,8 @@ public class Messages implements StringConstants {
         LOCAL_REPOSITORY_STARTING,
         LOCAL_REPOSITORY_TIMEOUT_ERROR,
     	COMMAND_NOT_FOUND,
-    	Help_COMMAND_LIST_MSG,
+        Help_Category_Header,
+        Help_COMMAND_LIST_MSG,
     	Help_INVALID_COMMAND,
     	Help_USAGE,
     	Help_GET_HELP_1,

@@ -25,6 +25,7 @@ public class ServerCommandMessages implements StringConstants {
 
     @SuppressWarnings( "javadoc" )
     public enum Common {
+        CommandCategory,
         NoTeiidDefined,
         ServerNotConnected,
         Connected,
@@ -168,7 +169,7 @@ public class ServerCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     @SuppressWarnings( "javadoc" )
     public enum ServerDeployVdbCommand {
         VdbExportFailed,
