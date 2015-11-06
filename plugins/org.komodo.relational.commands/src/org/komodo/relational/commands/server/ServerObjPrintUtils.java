@@ -45,7 +45,7 @@ public class ServerObjPrintUtils implements StringConstants {
             // ------------
             PrintUtils.print(writer, indent, "Name: " + vdb.getName()); //$NON-NLS-1$
             PrintUtils.print(writer, indent, "Version: " + vdb.getVersion()); //$NON-NLS-1$
-            
+
             // ------------
             // VDB Type
             // ------------
@@ -57,13 +57,13 @@ public class ServerObjPrintUtils implements StringConstants {
             // ------------
             String status = vdb.isActive() ? "ACTIVE" : "INACTIVE"; //$NON-NLS-1$ //$NON-NLS-2$
             PrintUtils.print(writer, indent, "Status: "+status); //$NON-NLS-1$
-            
+
             // ------------
             // Models
             // ------------
             PrintUtils.print( writer, indent, StringConstants.EMPTY_STRING );
             Collection<String> modelNames = vdb.getModelNames();
-            PrintUtils.printList(writer, new ArrayList(modelNames), "VDB Models"); //$NON-NLS-1$
+            PrintUtils.printList(writer, new ArrayList< String >(modelNames), "VDB Models"); //$NON-NLS-1$
 
             // ------------
             // Properties
@@ -74,7 +74,7 @@ public class ServerObjPrintUtils implements StringConstants {
             PrintUtils.printProperties(writer, vdbProps, "Name", "Value"); //$NON-NLS-1$ //$NON-NLS-2$
         }
     }
-    
+
     /**
      * Print Translator Details
      * @param writer the Writer
@@ -87,7 +87,7 @@ public class ServerObjPrintUtils implements StringConstants {
             // Translator Name
             // ------------
             PrintUtils.print(writer, indent, "Name: " + translator.getName()); //$NON-NLS-1$
-            
+
             // ------------
             // Translator Type
             // ------------
@@ -118,7 +118,7 @@ public class ServerObjPrintUtils implements StringConstants {
             // DataSource Name
             // ------------
             PrintUtils.print(writer, indent, "Name: " + source.getName()); //$NON-NLS-1$
-            
+
             // ------------
             // DataSource Type
             // ------------

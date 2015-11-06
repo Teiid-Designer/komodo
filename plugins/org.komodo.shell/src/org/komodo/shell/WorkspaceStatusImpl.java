@@ -447,9 +447,23 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     public boolean isBooleanProperty( final String name ) {
         ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
         final String propertyName = name.toUpperCase();
-        return propertyName.equals( SHOW_FULL_PATH_IN_PROMPT_KEY ) || propertyName.equals( SHOW_HIDDEN_PROPERTIES_KEY )
-               || propertyName.equals( SHOW_PROP_NAME_PREFIX_KEY ) || propertyName.equals( SHOW_TYPE_IN_PROMPT_KEY )
+        return propertyName.equals( SHOW_COMMAND_CATEGORY )
+               || propertyName.equals( SHOW_FULL_PATH_IN_PROMPT_KEY )
+               || propertyName.equals( SHOW_HIDDEN_PROPERTIES_KEY )
+               || propertyName.equals( SHOW_PROP_NAME_PREFIX_KEY )
+               || propertyName.equals( SHOW_TYPE_IN_PROMPT_KEY )
                || propertyName.equals( AUTO_COMMIT );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.WorkspaceStatus#isShowingCommandCategory()
+     */
+    @Override
+    public boolean isShowingCommandCategory() {
+        assert ( this.wsProperties.containsKey( SHOW_COMMAND_CATEGORY ) );
+        return Boolean.parseBoolean( this.wsProperties.getProperty( SHOW_COMMAND_CATEGORY ) );
     }
 
     /**

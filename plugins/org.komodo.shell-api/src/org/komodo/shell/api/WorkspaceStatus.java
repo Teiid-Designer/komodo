@@ -52,6 +52,11 @@ public interface WorkspaceStatus extends StringConstants {
 	public static final String EXPORT_DEFAULT_DIR_KEY = "EXPORT_DEFAULT_DIR"; //$NON-NLS-1$
 
     /**
+     * Set to <code>true</code> if the command category should be displayed when help displays available commands.
+     */
+    String SHOW_COMMAND_CATEGORY = "SHOW_COMMAND_CATEGORY"; //$NON-NLS-1$
+
+    /**
      * Set to <code>true</code> if the full path of the current context object should be displayed in the prompt.
      */
     String SHOW_FULL_PATH_IN_PROMPT_KEY = "SHOW_FULL_PATH_IN_PROMPT"; //$NON-NLS-1$
@@ -88,6 +93,7 @@ public interface WorkspaceStatus extends StringConstants {
             put( EXPORT_DEFAULT_DIR_KEY, "." ); //$NON-NLS-1$
             put( IMPORT_DEFAULT_DIR_KEY, "." ); //$NON-NLS-1$
             put( RECORDING_FILE_KEY, "./commandOutput.txt" ); //$NON-NLS-1$
+            put( SHOW_COMMAND_CATEGORY, Boolean.TRUE.toString() );
             put( SHOW_FULL_PATH_IN_PROMPT_KEY, Boolean.FALSE.toString() );
             put( SHOW_HIDDEN_PROPERTIES_KEY, Boolean.FALSE.toString() );
             put( SHOW_PROP_NAME_PREFIX_KEY, Boolean.FALSE.toString() );
@@ -175,14 +181,14 @@ public interface WorkspaceStatus extends StringConstants {
      * @return the current workspace context
      */
     KomodoObject getCurrentContext();
-    
+
     /**
      * Get the context at the supplied display path
      * @param displayPath the display path
      * @return the context, null if not found.
      */
     KomodoObject getContextForDisplayPath(String displayPath);
-    
+
     /**
      * Get the display path for the supplied context
      * @param kObj the context
@@ -218,6 +224,12 @@ public interface WorkspaceStatus extends StringConstants {
 	 * @return the recording writer
 	 */
 	Writer getRecordingWriter();
+
+    /**
+     * @return <code>true</code> if the command category is being displayed when help displays the available commands
+     * @see #SHOW_COMMAND_CATEGORY
+     */
+    boolean isShowingCommandCategory();
 
     /**
      * @return <code>true</code> if the full object path is being displayed in the prompt

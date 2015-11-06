@@ -15,6 +15,7 @@
  */
 package org.komodo.shell;
 
+import static org.komodo.shell.Messages.SHELL.GeneralCommandCategory;
 import java.io.File;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -118,6 +119,16 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
         // return result
         assert (result != null);
         return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommand#getCategory()
+     */
+    @Override
+    public String getCategory() {
+        return Messages.getString( GeneralCommandCategory );
     }
 
     /**
