@@ -132,9 +132,15 @@ class ContainsClause extends Clause implements PropertyClause {
             buffer.append(DOT);
         }
 
-        buffer.append(OPEN_SQUARE_BRACKET);
-        buffer.append(getProperty());
-        buffer.append(CLOSE_SQUARE_BRACKET);
+        String property = getProperty();
+        if (STAR.equals(property))
+            buffer.append(property);
+        else {
+            buffer.append(OPEN_SQUARE_BRACKET);
+            buffer.append(property);
+            buffer.append(CLOSE_SQUARE_BRACKET);
+        }
+
         buffer.append(COMMA);
         buffer.append(SPACE);
 

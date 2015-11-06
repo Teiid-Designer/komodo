@@ -28,7 +28,6 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import org.komodo.repository.search.Clause.LogicalOperator;
 import org.komodo.spi.KException;
 import org.komodo.spi.query.sql.SQLConstants;
 import org.komodo.spi.repository.KomodoObject;

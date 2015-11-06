@@ -38,13 +38,6 @@ abstract class Clause implements SQLConstants {
      */
     protected static final String ALIAS = "alias"; //$NON-NLS-1$
 
-    public enum LogicalOperator {
-
-        OR,
-
-        AND
-    }
-
     private final ObjectSearcher parent;
 
     private final LogicalOperator preClauseOperator;

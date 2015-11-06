@@ -31,7 +31,6 @@ import org.komodo.core.KomodoLexicon;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.repository.RepositoryImpl;
 import org.komodo.repository.RepositoryTools;
-import org.komodo.repository.search.Clause.LogicalOperator;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository.KeywordCriteria;
@@ -181,6 +180,17 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
     }
 
     @Test
+    public void addWhereClauseWildcardProperty() throws Exception {
+        String expected = "SELECT [jcr:path], [mode:localName] FROM [nt:unstructured] AS p1 " +
+                                     "WHERE p1.* IN ('value1', 'value2')";
+        ObjectSearcher os = new ObjectSearcher(_repo);
+        os.addFromType(JcrConstants.NT_UNSTRUCTURED, "p1");
+        os.addWhereSetClause(null, "p1", STAR, "value1", "value2");
+
+        assertEquals(expected, os.toString());
+    }
+
+    @Test
     public void addWhereClauseTwoDifferentProperties() throws Exception {
         String expected = "SELECT [jcr:path], [mode:localName] FROM [nt:unstructured] AS p1 " +
                                      "WHERE p1.[property1] IN ('value1', 'value2') " +
@@ -202,6 +212,17 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
         os.addFromType(JcrConstants.NT_UNSTRUCTURED, "p1");
         os.addWhereSetClause(null, "p1", "property1", "value1", "value2");
         os.addWhereContainsClause(LogicalOperator.OR, "p1", "name", "bob");
+
+        assertEquals(expected, os.toString());
+    }
+
+    @Test
+    public void addWhereClauseContainsWildcardProperty() throws Exception {
+        String expected = "SELECT [jcr:path], [mode:localName] FROM [nt:unstructured] AS p1 " +
+                                     "WHERE p1.* IN ('value1', 'value2')";
+        ObjectSearcher os = new ObjectSearcher(_repo);
+        os.addFromType(JcrConstants.NT_UNSTRUCTURED, "p1");
+        os.addWhereSetClause(null, "p1", STAR, "value1", "value2");
 
         assertEquals(expected, os.toString());
     }

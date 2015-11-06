@@ -74,7 +74,7 @@ class SetClause extends Clause implements PropertyClause {
 
     /**
      * Add a value to set of values
-     * 
+     *
      * @param value the value
      */
     public void addValue(String value) {
@@ -119,9 +119,15 @@ class SetClause extends Clause implements PropertyClause {
             buffer.append(DOT);
         }
 
-        buffer.append(OPEN_SQUARE_BRACKET);
-        buffer.append(getProperty());
-        buffer.append(CLOSE_SQUARE_BRACKET);
+        String property = getProperty();
+        if (STAR.equals(property))
+            buffer.append(property);
+        else {
+            buffer.append(OPEN_SQUARE_BRACKET);
+            buffer.append(property);
+            buffer.append(CLOSE_SQUARE_BRACKET);
+        }
+
         buffer.append(SPACE);
         buffer.append(IN);
         buffer.append(SPACE);
