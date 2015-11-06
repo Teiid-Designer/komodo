@@ -11,6 +11,7 @@ import static org.komodo.rest.Messages.Error.COMMIT_TIMEOUT;
 import static org.komodo.rest.Messages.Error.RESOURCE_NOT_FOUND;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -18,20 +19,24 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.Variant;
 import javax.ws.rs.core.Variant.VariantListBuilder;
 import org.komodo.core.KEngine;
+import org.komodo.relational.vdb.Vdb;
+import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.SynchronousCallback;
-import org.komodo.rest.KomodoRestEntity.ResourceNotFound;
+import org.komodo.rest.RestBasicEntity.ResourceNotFound;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
-import org.komodo.rest.json.JsonConstants;
+import org.komodo.rest.relational.RestEntityFactory;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.KLog;
+import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 /**
  * A Komodo service implementation.
  */
-public abstract class KomodoService implements JsonConstants, V1Constants {
+public abstract class KomodoService implements V1Constants {
 
     protected static final KLog LOGGER = KLog.getLogger();
 
@@ -66,6 +71,10 @@ public abstract class KomodoService implements JsonConstants, V1Constants {
 
     protected final Repository repo;
 
+    protected WorkspaceManager wsMgr;
+
+    protected RestEntityFactory entityFactory = new RestEntityFactory();
+
     /**
      * Constructs a Komodo service.
      *
@@ -74,6 +83,12 @@ public abstract class KomodoService implements JsonConstants, V1Constants {
      */
     protected KomodoService( final KEngine engine ) {
         this.repo = engine.getDefaultRepository();
+
+        try {
+            this.wsMgr = WorkspaceManager.getInstance(this.repo);
+        } catch (final Exception e) {
+            throw new ServerErrorException(Messages.getString(Messages.Error.KOMODO_ENGINE_WORKSPACE_MGR_ERROR), Status.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -100,7 +115,7 @@ public abstract class KomodoService implements JsonConstants, V1Constants {
         return value;
     }
 
-    private Object createErrorResponse(List<MediaType> acceptableMediaTypes, String errorMessage) {
+    protected Object createErrorResponse(List<MediaType> acceptableMediaTypes, String errorMessage) {
         Object responseEntity = null;
 
         if (acceptableMediaTypes.contains(MediaType.APPLICATION_JSON_TYPE))
@@ -138,7 +153,7 @@ public abstract class KomodoService implements JsonConstants, V1Constants {
     }
 
     protected Response commit( final UnitOfWork transaction, List<MediaType> acceptableMediaTypes,
-                               final KomodoRestEntity entity ) throws Exception {
+                               final RestBasicEntity entity ) throws Exception {
         assert( transaction.getCallback() instanceof SynchronousCallback );
         final int timeout = TIMEOUT;
         final TimeUnit unit = UNIT;
@@ -170,7 +185,7 @@ public abstract class KomodoService implements JsonConstants, V1Constants {
                       transaction.isRollbackOnly() );
         ResponseBuilder builder = null;
 
-        if ( entity == KomodoRestEntity.NO_CONTENT ) {
+        if ( entity == RestBasicEntity.NO_CONTENT ) {
             builder = Response.noContent();
         } else if ( entity instanceof ResourceNotFound ) {
             final ResourceNotFound resourceNotFound = ( ResourceNotFound )entity;
@@ -199,7 +214,7 @@ public abstract class KomodoService implements JsonConstants, V1Constants {
     }
 
     protected Response commit( final UnitOfWork transaction, List<MediaType> acceptableMediaTypes,
-                               final List<? extends KomodoRestEntity> entities ) throws Exception {
+                               final List<? extends RestBasicEntity> entities ) throws Exception {
         assert( transaction.getCallback() instanceof SynchronousCallback );
         final int timeout = TIMEOUT;
         final TimeUnit unit = UNIT;
@@ -232,7 +247,7 @@ public abstract class KomodoService implements JsonConstants, V1Constants {
                       transaction.isRollbackOnly() );
         ResponseBuilder builder = null;
 
-        KomodoRestEntity entity;
+        RestBasicEntity entity;
         if ( entities.size() == 1 && (entity = entities.iterator().next()) instanceof ResourceNotFound ) {
             final ResourceNotFound resourceNotFound = ( ResourceNotFound )entity;
 
@@ -244,7 +259,7 @@ public abstract class KomodoService implements JsonConstants, V1Constants {
         } else {
 
             if (isAcceptable(acceptableMediaTypes, MediaType.APPLICATION_JSON_TYPE))
-                builder = Response.ok( KomodoJsonMarshaller.marshallArray(entities.toArray(new KomodoRestEntity[0]), true), MediaType.APPLICATION_JSON );
+                builder = Response.ok( KomodoJsonMarshaller.marshallArray(entities.toArray(new RestBasicEntity[0]), true), MediaType.APPLICATION_JSON );
             else {
                 builder = notAcceptableMediaTypesBuilder();
             }
@@ -309,10 +324,22 @@ public abstract class KomodoService implements JsonConstants, V1Constants {
     protected UnitOfWork createTransaction( final String name,
                                             final boolean rollbackOnly ) throws KException {
         final SynchronousCallback callback = new SynchronousCallback();
-        final UnitOfWork result = this.repo.createTransaction( ( getClass().getSimpleName() + ':' + name + ':'
+        final UnitOfWork result = this.repo.createTransaction( ( getClass().getSimpleName() + COLON + name + COLON
                                                                  + System.currentTimeMillis() ),
                                                                rollbackOnly, callback );
         LOGGER.debug( "createTransaction:created '{0}', rollbackOnly = '{1}'", result.getName(), result.isRollbackOnly() ); //$NON-NLS-1$
         return result;
+    }
+
+    protected Vdb findVdb(UnitOfWork uow, String vdbName) throws KException {
+        if (! this.wsMgr.hasChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE ) ) {
+            return null;
+        }
+
+        final KomodoObject kobject = this.wsMgr.getChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
+        final Vdb vdb = this.wsMgr.resolve( uow, kobject, Vdb.class );
+
+        LOGGER.debug( "VDB '{0}' was found", vdbName ); //$NON-NLS-1$
+        return vdb;
     }
 }

@@ -8,20 +8,18 @@
 package org.komodo.rest.relational.json;
 
 import static org.junit.Assert.assertEquals;
-import java.net.URI;
-import javax.ws.rs.core.UriBuilder;
 import org.junit.Before;
 import org.junit.Test;
+import org.komodo.relational.vdb.Vdb;
 import org.komodo.rest.relational.RestVdb;
-import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.PropertyDescriptor;
+import org.mockito.Mockito;
 
 @SuppressWarnings( { "javadoc", "nls" } )
-public final class VdbSerializerTest implements StringConstants {
+public final class VdbSerializerTest extends AbstractSerializerTest  {
 
-    private static final URI BASE_URI = UriBuilder.fromUri("http://localhost:8081/v1/workspace/").build();
-    private static final String VDB_NAME = "MyVdb";
-    private static final String DATA_PATH = "/data/path";
     private static final String DESCRIPTION = "my description";
     private static final String ORIGINAL_FILE = "/Users/ElvisIsKing/MyVdb.xml";
     private static final KomodoType kType = KomodoType.VDB;
@@ -29,11 +27,12 @@ public final class VdbSerializerTest implements StringConstants {
     private static final int VERSION = 1;
 
     private static final String JSON = OPEN_BRACE + NEW_LINE +
-        "  \"keng__id\": \"MyVdb\"," + NEW_LINE +
-        "  \"keng__dataPath\": \"/data/path\"," + NEW_LINE +
+        "  \"keng__id\": \"" + VDB_NAME + "\"," + NEW_LINE +
+        "  \"" + BASE_URI + "\": \"" + MY_BASE_URI + "\"," + NEW_LINE +
+        "  \"keng__dataPath\": \"" + VDB_DATA_PATH + "\"," + NEW_LINE +
         "  \"keng__kType\": \"Vdb\"," + NEW_LINE +
         "  \"keng__hasChildren\": true," + NEW_LINE +
-        "  \"vdb__name\": \"MyVdb\"," + NEW_LINE +
+        "  \"vdb__name\": \"" + VDB_NAME + "\"," + NEW_LINE +
         "  \"vdb__description\": \"my description\"," + NEW_LINE +
         "  \"vdb__originalFile\": \"/Users/ElvisIsKing/MyVdb.xml\"," + NEW_LINE +
         "  \"vdb__preview\": false," + NEW_LINE +
@@ -42,27 +41,27 @@ public final class VdbSerializerTest implements StringConstants {
         "  \"keng___links\": [" + NEW_LINE +
         "    " + OPEN_BRACE + NEW_LINE +
         "      \"rel\": \"self\"," + NEW_LINE +
-        "      \"href\": \"http://localhost:8081/v1/workspace/workspace/vdbs/MyVdb\"" + NEW_LINE +
+        "      \"href\": \"" + BASE_URI_PREFIX + VDB_DATA_PATH + "\"" + NEW_LINE +
         "    " + CLOSE_BRACE + COMMA + NEW_LINE +
         "    " + OPEN_BRACE + NEW_LINE +
         "      \"rel\": \"parent\"," + NEW_LINE +
-        "      \"href\": \"http://localhost:8081/v1/workspace/workspace/vdbs\"" + NEW_LINE +
+        "      \"href\": \"" + BASE_URI_PREFIX + "/workspace/vdbs\"" + NEW_LINE +
         "    " + CLOSE_BRACE + COMMA + NEW_LINE +
         "    " + OPEN_BRACE + NEW_LINE +
         "      \"rel\": \"imports\"," + NEW_LINE +
-        "      \"href\": \"http://localhost:8081/v1/workspace/workspace/vdbs/MyVdb/VdbImports\"" + NEW_LINE +
+        "      \"href\": \"" + BASE_URI_PREFIX + VDB_DATA_PATH + "/VdbImports\"" + NEW_LINE +
         "    " + CLOSE_BRACE + COMMA + NEW_LINE +
         "    " + OPEN_BRACE + NEW_LINE +
         "      \"rel\": \"models\"," + NEW_LINE +
-        "      \"href\": \"http://localhost:8081/v1/workspace/workspace/vdbs/MyVdb/Models\"" + NEW_LINE +
+        "      \"href\": \"" + BASE_URI_PREFIX + VDB_DATA_PATH + "/Models\"" + NEW_LINE +
         "    " + CLOSE_BRACE + COMMA + NEW_LINE +
         "    " + OPEN_BRACE + NEW_LINE +
         "      \"rel\": \"translators\"," + NEW_LINE +
-        "      \"href\": \"http://localhost:8081/v1/workspace/workspace/vdbs/MyVdb/VdbTranslators\"" + NEW_LINE +
+        "      \"href\": \"" + BASE_URI_PREFIX + VDB_DATA_PATH + "/VdbTranslators\"" + NEW_LINE +
         "    " + CLOSE_BRACE + COMMA + NEW_LINE +
         "    " + OPEN_BRACE + NEW_LINE +
         "      \"rel\": \"dataRoles\"," + NEW_LINE +
-        "      \"href\": \"http://localhost:8081/v1/workspace/workspace/vdbs/MyVdb/VdbDataRoles\"" + NEW_LINE +
+        "      \"href\": \"" + BASE_URI_PREFIX + VDB_DATA_PATH + "/VdbDataRoles\"" + NEW_LINE +
         "    " + CLOSE_BRACE + NEW_LINE +
         "  " + CLOSE_SQUARE_BRACKET + NEW_LINE +
         CLOSE_BRACE;
@@ -71,8 +70,16 @@ public final class VdbSerializerTest implements StringConstants {
     private RestVdb vdb;
 
     @Before
-    public void init() {
-        this.vdb = new RestVdb(BASE_URI, VDB_NAME, DATA_PATH, kType, true);
+    public void init() throws Exception {
+        KomodoObject workspace = Mockito.mock(KomodoObject.class);
+        Mockito.when(workspace.getAbsolutePath()).thenReturn(WORKSPACE_DATA_PATH);
+
+        Vdb theVdb = mockObject(Vdb.class, VDB_NAME, VDB_DATA_PATH, kType, true);
+        Mockito.when(theVdb.getPropertyNames(transaction)).thenReturn(new String[0]);
+        Mockito.when(theVdb.getPropertyDescriptors(transaction)).thenReturn(new PropertyDescriptor[0]);
+        Mockito.when(theVdb.getParent(transaction)).thenReturn(workspace);
+
+        this.vdb = new RestVdb(MY_BASE_URI, theVdb, false, transaction);
         this.vdb.setName(VDB_NAME);
         this.vdb.setDescription(DESCRIPTION);
         this.vdb.setOriginalFilePath(ORIGINAL_FILE);
@@ -84,17 +91,17 @@ public final class VdbSerializerTest implements StringConstants {
     @Test
     public void shouldExportJson() {
         String json = KomodoJsonMarshaller.marshall( this.vdb );
-        assertEquals(json, JSON);
+        assertEquals(JSON, json);
     }
 
     @Test
     public void shouldImportJson() {
         final RestVdb descriptor = KomodoJsonMarshaller.unmarshall( JSON, RestVdb.class );
-        assertEquals(descriptor.getName(), VDB_NAME);
-        assertEquals(descriptor.getDescription(), DESCRIPTION);
-        assertEquals(descriptor.getOriginalFilePath(), ORIGINAL_FILE);
-        assertEquals(descriptor.getLinks().size(), 6);
-        assertEquals(descriptor.getProperties().isEmpty(), true);
+        assertEquals(VDB_NAME, descriptor.getName());
+        assertEquals(DESCRIPTION, descriptor.getDescription());
+        assertEquals(ORIGINAL_FILE, descriptor.getOriginalFilePath());
+        assertEquals(6, descriptor.getLinks().size());
+        assertEquals(true, descriptor.getProperties().isEmpty());
     }
 
     @Test( expected = Exception.class )

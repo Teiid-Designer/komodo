@@ -11,19 +11,19 @@ import java.net.URI;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.vdb.ModelSource;
 import org.komodo.relational.vdb.Vdb;
-import org.komodo.rest.KomodoRestEntity;
 import org.komodo.rest.KomodoService;
+import org.komodo.rest.RestBasicEntity;
 import org.komodo.rest.RestLink;
 import org.komodo.rest.RestLink.LinkType;
 import org.komodo.spi.KException;
-import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.utils.ArgCheck;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 /**
  * A VDB model source that can be used by GSON to build a JSON model source representation.
  */
-public final class RestVdbModelSource extends KomodoRestEntity {
+public final class RestVdbModelSource extends RestBasicEntity {
 
     /**
      * Label used to describe jndi name
@@ -35,10 +35,6 @@ public final class RestVdbModelSource extends KomodoRestEntity {
      */
     public static final String TRANSLATOR_LABEL = KomodoService.encode(VdbLexicon.Source.TRANSLATOR);
 
-    private String jndiName;
-
-    private String translator;
-
     /**
      * Constructor for use when deserializing
      */
@@ -48,20 +44,27 @@ public final class RestVdbModelSource extends KomodoRestEntity {
 
     /**
      * Constructor for use when serializing.
-     * @param baseUri the base uri of the vdb
-     * @param id the id of this vdb
-     * @param dataPath the data path of this vdb
-     * @param kType the type of this vdb
-     * @param hasChildren true if vdb has children
-     * @param parentVdb the name of the parent vdb
-     * @param parentModel the name of the parent model
+     * @param baseUri the base uri of the REST request
+     * @param source the source
+     * @param uow the transaction
+     * @throws KException if error occurs
      */
-    public RestVdbModelSource(URI baseUri, String id, String dataPath, KomodoType kType,
-                                                  boolean hasChildren, String parentVdb, String parentModel) {
-        super(baseUri, id, dataPath, kType, hasChildren);
+    public RestVdbModelSource(URI baseUri, ModelSource source, UnitOfWork uow) throws KException {
+        super(baseUri, source, uow);
 
-        addLink(new RestLink(LinkType.SELF, getUriBuilder().buildVdbModelSourceUri(LinkType.SELF, parentVdb, parentModel, id)));
-        addLink(new RestLink(LinkType.PARENT, getUriBuilder().buildVdbModelSourceUri(LinkType.PARENT, parentVdb, parentModel, id)));
+        setJndiName(source.getJndiName(uow));
+        setTranslator(source.getTranslatorName(uow));
+
+        Model model = ancestor(source, Model.class, uow);
+        ArgCheck.isNotNull(model);
+        String modelName = model.getName(uow);
+
+        Vdb vdb = ancestor(model, Vdb.class, uow);
+        ArgCheck.isNotNull(vdb);
+        String vdbName = vdb.getName(uow);
+
+        addLink(new RestLink(LinkType.SELF, getUriBuilder().buildVdbModelSourceUri(LinkType.SELF, vdbName, modelName, getId())));
+        addLink(new RestLink(LinkType.PARENT, getUriBuilder().buildVdbModelSourceUri(LinkType.PARENT, vdbName, modelName, getId())));
     }
 
 
@@ -69,89 +72,29 @@ public final class RestVdbModelSource extends KomodoRestEntity {
      * @return the jndiName
      */
     public String getJndiName() {
-        return this.jndiName;
+        Object jndi = tuples.get(JNDI_NAME_LABEL);
+        return jndi != null ? jndi.toString() : null;
     }
 
     /**
      * @param jndiName the jndiName to set
      */
     public void setJndiName(String jndiName) {
-        this.jndiName = jndiName;
+        tuples.put(JNDI_NAME_LABEL, jndiName);
     }
 
     /**
      * @return the translator
      */
     public String getTranslator() {
-        return this.translator;
+        Object translator = tuples.get(TRANSLATOR_LABEL);
+        return translator != null ? translator.toString() : null;
     }
 
     /**
      * @param translator the translator to set
      */
     public void setTranslator(String translator) {
-        this.translator = translator;
-    }
-
-    /**
-     * @param source the source
-     * @param model source model
-     * @param parentVdb parent Vdb
-     * @param baseUri base uri
-     * @param uow the transaction
-     * @return a new {@link RestVdbModelSource} based on the source {@link Model}
-     * @throws KException if error occurs
-     */
-    public static RestVdbModelSource build(ModelSource source, final Model model, final Vdb parentVdb, final URI baseUri, final UnitOfWork uow) throws KException {
-
-        final String vdbName = parentVdb.getName(uow);
-        final String modelName = model.getName(uow);
-        final RestVdbModelSource entity = new RestVdbModelSource(baseUri, source.getName(uow),
-                                                                 source.getAbsolutePath(), source.getTypeIdentifier(uow),
-                                                                 source.hasChildren(uow), vdbName, modelName);
-
-        entity.setJndiName(source.getJndiName(uow));
-        entity.setTranslator(source.getTranslatorName(uow));
-
-        return entity;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + ((this.jndiName == null) ? 0 : this.jndiName.hashCode());
-        result = prime * result + ((this.translator == null) ? 0 : this.translator.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (!super.equals(obj))
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        RestVdbModelSource other = (RestVdbModelSource)obj;
-        if (this.jndiName == null) {
-            if (other.jndiName != null)
-                return false;
-        } else
-            if (!this.jndiName.equals(other.jndiName))
-                return false;
-        if (this.translator == null) {
-            if (other.translator != null)
-                return false;
-        } else
-            if (!this.translator.equals(other.translator))
-                return false;
-        return true;
-    }
-
-    @SuppressWarnings( "nls" )
-    @Override
-    public String toString() {
-        return "RestVdbModelSource [jndiName=" + this.jndiName + ", translator=" + this.translator + ", id=" + this.id + ", dataPath=" + this.dataPath + ", kType=" + this.kType + ", hasChildren=" + this.hasChildren + ", properties=" + this.properties + ", links=" + this.links + "]";
+        tuples.put(TRANSLATOR_LABEL, translator);
     }
 }

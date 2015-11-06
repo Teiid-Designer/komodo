@@ -7,10 +7,10 @@
 */
 package org.komodo.rest.relational.json;
 
-import org.komodo.rest.KomodoRestEntity;
-import org.komodo.rest.RestProperty;
 import org.komodo.rest.KomodoStatusObject;
+import org.komodo.rest.RestBasicEntity;
 import org.komodo.rest.RestLink;
+import org.komodo.rest.RestProperty;
 import org.komodo.rest.json.LinkSerializer;
 import org.komodo.rest.json.RestPropertySerializer;
 import org.komodo.rest.relational.RestVdb;
@@ -28,14 +28,14 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 /**
- * A JSON serializer and deserializer for {@link KomodoRestEntity Komodo REST objects}.
+ * A JSON serializer and deserializer for {@link RestBasicEntity Komodo REST objects}.
  */
 public final class KomodoJsonMarshaller {
 
     private static final KLog LOGGER = KLog.getLogger();
 
     /**
-     * The shared JSON serialier/deserializer for {@link KomodoRestEntity} objects.
+     * The shared JSON serialier/deserializer for {@link RestBasicEntity} objects.
      */
     protected static final Gson BUILDER;
 
@@ -53,7 +53,8 @@ public final class KomodoJsonMarshaller {
                                                   .registerTypeAdapter( RestVdbPermission.class, new VdbPermissionSerializer() )
                                                   .registerTypeAdapter( RestVdbCondition.class, new VdbConditionSerializer() )
                                                   .registerTypeAdapter( RestVdbMask.class, new VdbMaskSerializer() )
-                                                  .registerTypeAdapter( RestVdbTranslator.class, new VdbTranslatorSerializer() );
+                                                  .registerTypeAdapter( RestVdbTranslator.class, new VdbTranslatorSerializer() )
+                                                  .registerTypeAdapter( RestBasicEntity.class, new BasicEntitySerializer() );
         BUILDER = temp.create();
         PRETTY_BUILDER = temp.setPrettyPrinting().create();
     }
@@ -65,7 +66,7 @@ public final class KomodoJsonMarshaller {
      *        the entity whose JSON representation is being requested (cannot be <code>null</code>)
      * @return the JSON representation (never empty)
      */
-    public static String marshall( final KomodoRestEntity entity ) {
+    public static String marshall( final RestBasicEntity entity ) {
         return marshall( entity, true );
     }
 
@@ -76,7 +77,7 @@ public final class KomodoJsonMarshaller {
      *        <code>true</code> if JSON output should be pretty printed
      * @return the JSON representation (never empty)
      */
-    public static String marshall( final KomodoRestEntity entity,
+    public static String marshall( final RestBasicEntity entity,
                                    final boolean prettyPrint ) {
         ArgCheck.isNotNull( entity, "entity" ); //$NON-NLS-1$
 
@@ -99,7 +100,7 @@ public final class KomodoJsonMarshaller {
      *        <code>true</code> if JSON output should be pretty printed
      * @return the JSON representation (never empty)
      */
-    public static String marshallArray( final KomodoRestEntity[] entities,
+    public static String marshallArray( final RestBasicEntity[] entities,
                                    final boolean prettyPrint ) {
         ArgCheck.isNotNull( entities, "entities" ); //$NON-NLS-1$
 
@@ -140,14 +141,14 @@ public final class KomodoJsonMarshaller {
 
     /**
      * @param <T>
-     *        the {@link KomodoRestEntity} type of the output
+     *        the {@link RestBasicEntity} type of the output
      * @param json
-     *        the JSON representation being converted to a {@link KomodoRestEntity} (cannot be empty)
+     *        the JSON representation being converted to a {@link RestBasicEntity} (cannot be empty)
      * @param entityClass
-     *        the type of {@link KomodoRestEntity} the JSON will be converted to (cannot be <code>null</code>)
-     * @return the {@link KomodoRestEntity} (never <code>null</code>)
+     *        the type of {@link RestBasicEntity} the JSON will be converted to (cannot be <code>null</code>)
+     * @return the {@link RestBasicEntity} (never <code>null</code>)
      */
-    public static < T extends KomodoRestEntity > T unmarshall( final String json,
+    public static < T extends RestBasicEntity > T unmarshall( final String json,
                                                                final Class< T > entityClass ) {
         final T entity = BUILDER.fromJson( json, entityClass );
         LOGGER.debug( "unmarshall: class = {0}, entity = {1}", entityClass, entity ); //$NON-NLS-1$
@@ -156,14 +157,14 @@ public final class KomodoJsonMarshaller {
 
     /**
      * @param <T>
-     *        the {@link KomodoRestEntity} type of the output
+     *        the {@link RestBasicEntity} type of the output
      * @param json
-     *        the JSON representation being converted to a {@link KomodoRestEntity} (cannot be empty)
+     *        the JSON representation being converted to a {@link RestBasicEntity} (cannot be empty)
      * @param entityClass
-     *        the type of {@link KomodoRestEntity} the JSON will be converted to (cannot be <code>null</code>)
-     * @return the {@link KomodoRestEntity} (never <code>null</code>)
+     *        the type of {@link RestBasicEntity} the JSON will be converted to (cannot be <code>null</code>)
+     * @return the {@link RestBasicEntity} (never <code>null</code>)
      */
-    public static < T extends KomodoRestEntity > T[] unmarshallArray( final String json,
+    public static < T extends RestBasicEntity > T[] unmarshallArray( final String json,
                                                                final Class< T[] > entityClass ) {
         final T[] entity = BUILDER.fromJson( json, entityClass );
         LOGGER.debug( "unmarshall: class = {0}, entity = {1}", entityClass, entity ); //$NON-NLS-1$

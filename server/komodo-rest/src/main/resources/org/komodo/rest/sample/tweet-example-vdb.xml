@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 
-<vdb name="twitter" version="1">
+<vdb name="tweet-example-vdb" version="1">
 
     <description>Shows how to call Web Services</description>
 

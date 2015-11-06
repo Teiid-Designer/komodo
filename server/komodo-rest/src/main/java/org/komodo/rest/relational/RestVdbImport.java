@@ -10,14 +10,14 @@ package org.komodo.rest.relational;
 import java.net.URI;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.VdbImport;
-import org.komodo.rest.KomodoRestEntity;
 import org.komodo.rest.KomodoService;
+import org.komodo.rest.RestBasicEntity;
 import org.komodo.rest.RestLink;
 import org.komodo.rest.RestLink.LinkType;
 import org.komodo.spi.KException;
-import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
+import org.teiid.core.util.ArgCheck;
 
 /**
  * A VDB import that can be used by GSON to build a JSON document representation.
@@ -32,7 +32,7 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
  * </code>
  * </pre>
  */
-public final class RestVdbImport extends KomodoRestEntity {
+public final class RestVdbImport extends RestBasicEntity {
 
     /**
      * Label used to describe name
@@ -54,38 +54,42 @@ public final class RestVdbImport extends KomodoRestEntity {
      */
     public static final RestVdbImport[] NO_IMPORTS = new RestVdbImport[ 0 ];
 
-    private String name;
-    private int version = Vdb.DEFAULT_VERSION;
-    private boolean importDataPolicies = VdbImport.DEFAULT_IMPORT_DATA_POLICIES;
-
     /**
      * Constructor for use <strong>only</strong> when deserializing.
      */
     public RestVdbImport() {
-        // nothing to do
+        setVersion(Vdb.DEFAULT_VERSION);
+        setImportDataPolicies(VdbImport.DEFAULT_IMPORT_DATA_POLICIES);
     }
 
     /**
      * Constructor for use when serializing.
-     * @param baseUri the base uri of the vdb
-     * @param id the id of this vdb
-     * @param dataPath the data path of this vdb
-     * @param kType the type of this vdb
-     * @param hasChildren true if vdb has children
-     * @param parentVdb the name of the parent vdb
+     * @param baseUri the base uri of the REST request
+     * @param vdbImport the import
+     * @param uow the transaction
+     * @throws KException if error occurs
      */
-    public RestVdbImport(URI baseUri, String id, String dataPath, KomodoType kType, boolean hasChildren, String parentVdb) {
-        super(baseUri, id, dataPath, kType, hasChildren);
+    public RestVdbImport(URI baseUri, VdbImport vdbImport, UnitOfWork uow) throws KException {
+        super(baseUri, vdbImport, uow);
 
-        addLink(new RestLink(LinkType.SELF, getUriBuilder().buildVdbImportUri(LinkType.SELF, parentVdb, id)));
-        addLink(new RestLink(LinkType.PARENT, getUriBuilder().buildVdbImportUri(LinkType.PARENT, parentVdb, id)));
+        setName(vdbImport.getName(uow));
+        setVersion(vdbImport.getVersion(uow));
+        setImportDataPolicies(vdbImport.isImportDataPolicies(uow));
+
+        Vdb vdb = ancestor(vdbImport, Vdb.class, uow);
+        ArgCheck.isNotNull(vdb);
+        String vdbName = vdb.getName(uow);
+
+        addLink(new RestLink(LinkType.SELF, getUriBuilder().buildVdbImportUri(LinkType.SELF, vdbName, getId())));
+        addLink(new RestLink(LinkType.PARENT, getUriBuilder().buildVdbImportUri(LinkType.PARENT, vdbName, getId())));
     }
 
     /**
      * @return the name (can be empty)
      */
     public String getName() {
-        return this.name;
+        Object value = tuples.get(NAME_LABEL);
+        return value != null ? value.toString() : null;
     }
 
     /**
@@ -93,14 +97,15 @@ public final class RestVdbImport extends KomodoRestEntity {
      *        the new VDB import name (can be empty)
      */
     public void setName( final String newName ) {
-        this.name = newName;
+        tuples.put(NAME_LABEL, newName);
     }
 
     /**
      * @return the VDB version
      */
     public int getVersion() {
-        return this.version;
+        Object value = tuples.get(VERSION_LABEL);
+        return value != null ? Integer.parseInt(value.toString()) : Vdb.DEFAULT_VERSION;
     }
 
     /**
@@ -108,14 +113,15 @@ public final class RestVdbImport extends KomodoRestEntity {
      *        the new VDB import version
      */
     public void setVersion( final int newVersion ) {
-        this.version = newVersion;
+        tuples.put(VERSION_LABEL, newVersion);
     }
 
     /**
      * @return <code>true</code> if importing data policies
      */
     public boolean isImportDataPolicies() {
-        return this.importDataPolicies;
+        Object value = tuples.get(IMPORT_POLICIES_LABEL);
+        return value != null ? Boolean.parseBoolean(value.toString()) : VdbImport.DEFAULT_IMPORT_DATA_POLICIES;
     }
 
     /**
@@ -123,68 +129,6 @@ public final class RestVdbImport extends KomodoRestEntity {
      *        the new import data policies
      */
     public void setImportDataPolicies( final boolean newImportDataPolicies ) {
-        this.importDataPolicies = newImportDataPolicies;
+        tuples.put(IMPORT_POLICIES_LABEL, newImportDataPolicies);
     }
-
-    /**
-     * @param vdbImport the source vdb import
-     * @param parentVdb the parent vdb
-     * @param baseUri base uri
-     * @param uow the transaction
-     * @return a new {@link RestVdbImport} based on the source {@link VdbImport}
-     * @throws KException if error occurs
-     */
-    public static RestVdbImport build(VdbImport vdbImport, Vdb parentVdb, URI baseUri, UnitOfWork uow) throws KException {
-        final String vdbName = parentVdb.getName(uow);
-        final RestVdbImport entity = new RestVdbImport(baseUri,
-                                                                                       vdbImport.getName(uow),
-                                                                                       vdbImport.getAbsolutePath(),
-                                                                                       vdbImport.getTypeIdentifier(uow),
-                                                                                       vdbImport.hasChildren(uow), vdbName);
-
-        entity.setName(vdbImport.getName(uow));
-        entity.setVersion(vdbImport.getVersion(uow));
-        entity.setImportDataPolicies(vdbImport.isImportDataPolicies(uow));
-
-        return entity;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + (this.importDataPolicies ? 1231 : 1237);
-        result = prime * result + ((this.name == null) ? 0 : this.name.hashCode());
-        result = prime * result + this.version;
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (!super.equals(obj))
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        RestVdbImport other = (RestVdbImport)obj;
-        if (this.importDataPolicies != other.importDataPolicies)
-            return false;
-        if (this.name == null) {
-            if (other.name != null)
-                return false;
-        } else
-            if (!this.name.equals(other.name))
-                return false;
-        if (this.version != other.version)
-            return false;
-        return true;
-    }
-
-    @SuppressWarnings( "nls" )
-    @Override
-    public String toString() {
-        return "RestVdbImport [name=" + this.name + ", version=" + this.version + ", importDataPolicies=" + this.importDataPolicies + ", id=" + this.id + ", dataPath=" + this.dataPath + ", kType=" + this.kType + ", hasChildren=" + this.hasChildren + ", properties=" + this.properties + ", links=" + this.links + "]";
-    }
-
 }

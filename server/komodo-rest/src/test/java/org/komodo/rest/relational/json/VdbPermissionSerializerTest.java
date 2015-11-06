@@ -10,26 +10,24 @@ package org.komodo.rest.relational.json;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import javax.ws.rs.core.UriBuilder;
 import org.junit.Before;
 import org.junit.Test;
-import org.komodo.rest.json.JsonConstants;
-import org.komodo.rest.relational.RestVdbCondition;
-import org.komodo.rest.relational.RestVdbMask;
+import org.komodo.relational.vdb.DataRole;
+import org.komodo.relational.vdb.Permission;
+import org.komodo.relational.vdb.Vdb;
 import org.komodo.rest.relational.RestVdbPermission;
 import org.komodo.spi.repository.KomodoType;
+import org.mockito.Mockito;
 
 @SuppressWarnings( { "javadoc", "nls" } )
-public final class VdbPermissionSerializerTest implements JsonConstants {
+public final class VdbPermissionSerializerTest extends AbstractSerializerTest {
 
-    private static final URI BASE_URI = UriBuilder.fromUri("http://localhost:8081/v1/workspace/").build();
-    private static final String PARENT_VDB = "vdb1";
-    private static final String PARENT_DATA_ROLE = "MyDataRole";
+    private static final String DATA_ROLE_NAME = "MyDataRole";
+    private static final String DATA_ROLE_DATA_PATH = VDB_DATA_PATH + "/vdbDataRoles/MyDataRole";
+
     private static final String NAME = "MyPermission";
-    private static final String PERM_DATA_PATH = "/workspace/vdb1/vdbDataRoles/MyDataRole/permissions/" + NAME;
+    private static final String PERM_DATA_PATH = DATA_ROLE_DATA_PATH + "/permissions/" + NAME;
+
     private static final boolean ALLOW_ALTER = true;
     private static final boolean ALLOW_CREATE = false;
     private static final boolean ALLOW_DELETE = true;
@@ -38,71 +36,10 @@ public final class VdbPermissionSerializerTest implements JsonConstants {
     private static final boolean ALLOW_READ = false;
     private static final boolean ALLOW_UPDATE = true;
 
-    private static final List<RestVdbCondition> CONDITIONS = new ArrayList<>();
-    private static final String CONDITION1 = "condition1";
-    private static final String CONDITION2 = "condition2";
-    private static final String CONDITION3 = "condition3";
-    private static final String CONDITION1_DATA_PATH = PERM_DATA_PATH + "/conditions/" + CONDITION1;
-    private static final String CONDITION2_DATA_PATH = PERM_DATA_PATH + "/conditions/" + CONDITION2;
-    private static final String CONDITION3_DATA_PATH = PERM_DATA_PATH + "/conditions/" + CONDITION3;
-
-    private static final List<RestVdbMask> MASKS = new ArrayList<>();
-    private static final String MASK1 = "mask1";
-    private static final String MASK2 = "mask2";
-    private static final String MASK3 = "mask3";
-    private static final String MASK1_DATA_PATH = PERM_DATA_PATH + "/masks/" + MASK1;
-    private static final String MASK2_DATA_PATH = PERM_DATA_PATH + "/masks/" + MASK2;
-    private static final String MASK3_DATA_PATH = PERM_DATA_PATH + "/masks/" + MASK3;
-
-    static {
-        RestVdbCondition condition1 = new RestVdbCondition(BASE_URI, CONDITION1,
-                                                           CONDITION1_DATA_PATH, KomodoType.VDB_CONDITION,
-                                                           false, NAME, PARENT_DATA_ROLE, PARENT_VDB);
-        condition1.setName(CONDITION1);
-        condition1.setConstraint(true);
-
-        RestVdbCondition condition2 = new RestVdbCondition(BASE_URI, CONDITION2,
-                                                           CONDITION2_DATA_PATH, KomodoType.VDB_CONDITION,
-                                                           false, NAME, PARENT_DATA_ROLE, PARENT_VDB);
-        condition2.setName(CONDITION2);
-        condition2.setConstraint(false);
-
-        RestVdbCondition condition3 = new RestVdbCondition(BASE_URI, CONDITION3,
-                                                           CONDITION3_DATA_PATH, KomodoType.VDB_CONDITION,
-                                                           false, NAME, PARENT_DATA_ROLE, PARENT_VDB);
-        condition3.setName(CONDITION3);
-        condition3.setConstraint(true);
-
-        CONDITIONS.add(condition1);
-        CONDITIONS.add(condition2);
-        CONDITIONS.add(condition3);
-
-        RestVdbMask mask1 = new RestVdbMask(BASE_URI, MASK1, MASK1_DATA_PATH,
-                                                                          KomodoType.VDB_MASK, false, NAME, PARENT_DATA_ROLE,
-                                                                          PARENT_VDB);
-        mask1.setName(MASK1);
-        mask1.setOrder("that");
-
-        RestVdbMask mask2 = new RestVdbMask(BASE_URI, MASK2, MASK2_DATA_PATH,
-                                                                        KomodoType.VDB_MASK, false, NAME, PARENT_DATA_ROLE,
-                                                                        PARENT_VDB);
-        mask2.setName(MASK2);
-        mask2.setOrder("or");
-
-        RestVdbMask mask3 = new RestVdbMask(BASE_URI, MASK3, MASK3_DATA_PATH,
-                                                                        KomodoType.VDB_MASK, false, NAME, PARENT_DATA_ROLE,
-                                                                        PARENT_VDB);
-        mask3.setName(MASK3);
-        mask3.setOrder("halfdozenofanother");
-
-        MASKS.add(mask1);
-        MASKS.add(mask2);
-        MASKS.add(mask3);
-    }
-
     private static final String JSON = EMPTY_STRING +
     OPEN_BRACE + NEW_LINE +
     "  \"" + ID + "\": \"" + NAME + "\"," + NEW_LINE +
+    "  \"" + BASE_URI + "\": \"" + MY_BASE_URI + "\"," + NEW_LINE +
     "  \"" + DATA_PATH + "\": \"" + PERM_DATA_PATH + "\"," + NEW_LINE +
     "  \"" + KTYPE + "\": \"" + KomodoType.VDB_PERMISSION.getType() + "\"," + NEW_LINE +
     "  \"" + HAS_CHILDREN + "\": true," + NEW_LINE +
@@ -117,19 +54,19 @@ public final class VdbPermissionSerializerTest implements JsonConstants {
     "  \"" + LINKS + "\": " + OPEN_SQUARE_BRACKET + NEW_LINE +
     "    " + OPEN_BRACE + NEW_LINE +
     "      \"rel\": \"self\"," + NEW_LINE +
-    "      \"href\": \"http://localhost:8081/v1/workspace/workspace/vdbs/vdb1/VdbDataRoles/MyDataRole/VdbPermissions/MyPermission\"" + NEW_LINE +
+    "      \"href\": \"" + BASE_URI_PREFIX + VDB_DATA_PATH + "/VdbDataRoles/MyDataRole/VdbPermissions/MyPermission\"" + NEW_LINE +
     "    " + CLOSE_BRACE + COMMA + NEW_LINE +
     "    " + OPEN_BRACE + NEW_LINE +
     "      \"rel\": \"parent\"," + NEW_LINE +
-    "      \"href\": \"http://localhost:8081/v1/workspace/workspace/vdbs/vdb1/VdbDataRoles/MyDataRole\"" + NEW_LINE +
+    "      \"href\": \"" + BASE_URI_PREFIX + VDB_DATA_PATH + "/VdbDataRoles/MyDataRole\"" + NEW_LINE +
     "    " + CLOSE_BRACE + COMMA + NEW_LINE +
     "    " + OPEN_BRACE + NEW_LINE +
     "      \"rel\": \"conditions\"," + NEW_LINE +
-    "      \"href\": \"http://localhost:8081/v1/workspace/workspace/vdbs/vdb1/VdbDataRoles/MyDataRole/VdbPermissions/MyPermission/VdbConditions\"" + NEW_LINE +
+    "      \"href\": \""+ BASE_URI_PREFIX + VDB_DATA_PATH + "/VdbDataRoles/MyDataRole/VdbPermissions/MyPermission/VdbConditions\"" + NEW_LINE +
     "    " + CLOSE_BRACE + COMMA + NEW_LINE +
     "    " + OPEN_BRACE + NEW_LINE +
     "      \"rel\": \"masks\"," + NEW_LINE +
-    "      \"href\": \"http://localhost:8081/v1/workspace/workspace/vdbs/vdb1/VdbDataRoles/MyDataRole/VdbPermissions/MyPermission/VdbMasks\"" + NEW_LINE +
+    "      \"href\": \"" + BASE_URI_PREFIX + VDB_DATA_PATH + "/VdbDataRoles/MyDataRole/VdbPermissions/MyPermission/VdbMasks\"" + NEW_LINE +
     "    " + CLOSE_BRACE + NEW_LINE +
     "  " + CLOSE_SQUARE_BRACKET + NEW_LINE +
     CLOSE_BRACE;
@@ -137,10 +74,16 @@ public final class VdbPermissionSerializerTest implements JsonConstants {
     private RestVdbPermission permission;
 
     @Before
-    public void init() {
-        this.permission = new RestVdbPermission(BASE_URI, NAME, PERM_DATA_PATH,
-                                                                            KomodoType.VDB_PERMISSION, true,
-                                                                            PARENT_DATA_ROLE, PARENT_VDB);
+    public void init() throws Exception {
+        Vdb theVdb = mockObject(Vdb.class, VDB_NAME, VDB_DATA_PATH, KomodoType.VDB, true);
+
+        DataRole theDataRole = mockObject(DataRole.class, DATA_ROLE_NAME, DATA_ROLE_DATA_PATH, KomodoType.VDB_DATA_ROLE, true);
+        Mockito.when(theDataRole.getParent(transaction)).thenReturn(theVdb);
+
+        Permission thePermission = mockObject(Permission.class, NAME, PERM_DATA_PATH, KomodoType.VDB_PERMISSION, true);
+        Mockito.when(thePermission.getParent(transaction)).thenReturn(theDataRole);
+
+        this.permission = new RestVdbPermission(MY_BASE_URI, thePermission, transaction);
         this.permission.setName(NAME);
         this.permission.setAllowAlter( ALLOW_ALTER );
         this.permission.setAllowCreate( ALLOW_CREATE );

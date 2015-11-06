@@ -33,7 +33,7 @@ public final class RestVdbDataRoleTest {
     @Test
     public void shouldBeEqual() {
         final RestVdbDataRole thatDataRole = new RestVdbDataRole();
-         thatDataRole.setName(this.dataRole.getName() );
+        thatDataRole.setName(this.dataRole.getName() );
         thatDataRole.setAllowCreateTempTables( this.dataRole.isAllowCreateTempTables() );
         thatDataRole.setAnyAuthenticated( this.dataRole.isAnyAuthenticated() );
         thatDataRole.setGrantAll( this.dataRole.isGrantAll() );

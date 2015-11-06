@@ -1,0 +1,87 @@
+/*
+ * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
+ */
+package org.komodo.rest.relational.json;
+
+import java.net.URI;
+import javax.ws.rs.core.UriBuilder;
+import org.junit.Before;
+import org.komodo.rest.json.JsonConstants;
+import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.Repository;
+import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
+import org.mockito.Matchers;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+
+/**
+ *
+ */
+@SuppressWarnings( {"javadoc", "nls" })
+public abstract class AbstractSerializerTest implements JsonConstants {
+
+    protected static final String BASE_URI_PREFIX = "http://localhost:8081/v1";
+
+    protected static final URI MY_BASE_URI = UriBuilder.fromUri(BASE_URI_PREFIX).build();
+
+    protected static final String WORKSPACE_DATA_PATH = "/workspace";
+    protected static final String VDB_NAME = "vdb1";
+    protected static final String VDB_DATA_PATH = "/workspace/vdbs/vdb1";
+
+    @Mock
+    protected UnitOfWork transaction;
+
+    protected Repository repository;
+
+    public AbstractSerializerTest() {
+        super();
+    }
+
+    @Before
+    public void basicInit() throws KException {
+        transaction = Mockito.mock(UnitOfWork.class);
+        Mockito.when(transaction.getState()).thenReturn(State.NOT_STARTED);
+
+        Repository.Id id = Mockito.mock(Repository.Id.class);
+        UnitOfWork uow = Mockito.mock(UnitOfWork.class);
+        Mockito.when(uow.getState()).thenReturn(State.NOT_STARTED);
+
+        repository = Mockito.mock(Repository.class);
+        Mockito.when(repository.getId()).thenReturn(id);
+        Mockito.when(repository.createTransaction(Matchers.anyString(),
+                                                  Matchers.anyBoolean(),
+                                                  Matchers.any())).thenReturn(uow);
+    }
+
+    protected <T extends KomodoObject> T mockObject(Class<T> mockClass, String name, String dataPath, KomodoType kType, boolean hasChildren) throws KException {
+        T kObject = Mockito.mock(mockClass);
+        Mockito.when(kObject.getName(transaction)).thenReturn(name);
+        Mockito.when(kObject.getAbsolutePath()).thenReturn(dataPath);
+        Mockito.when(kObject.getTypeIdentifier(transaction)).thenReturn(kType);
+        Mockito.when(kObject.hasChildren(transaction)).thenReturn(hasChildren);
+        Mockito.when(kObject.getRepository()).thenReturn(repository);
+
+        return kObject;
+    }
+}

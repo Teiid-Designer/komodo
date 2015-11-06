@@ -29,12 +29,13 @@ import javax.ws.rs.core.Response.Status;
 import org.komodo.core.KEngine;
 import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
-import org.komodo.importer.ImportOptions.OptionKeys;
-import org.komodo.importer.vdb.VdbImporter;
+import org.komodo.relational.importer.vdb.VdbImporter;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.SynchronousCallback;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
+import org.komodo.rest.json.JsonConstants;
+import org.komodo.rest.relational.KomodoSearchService;
 import org.komodo.rest.relational.KomodoVdbService;
 import org.komodo.rest.swagger.RestPropertyConverter;
 import org.komodo.rest.swagger.RestVdbConditionConverter;
@@ -65,7 +66,7 @@ public final class KomodoRestV1Application extends Application implements Reposi
     /**
      * Constants associated with version 1 of the Komodo REST application.
      */
-    public static interface V1Constants extends StringConstants {
+    public static interface V1Constants extends JsonConstants {
 
         /**
          * The URI path segment for the Komodo REST application. It is included in the base URI. <strong>DO NOT INCLUDE THIS IN
@@ -192,6 +193,37 @@ public final class KomodoRestV1Application extends Application implements Reposi
          * The name of the URI path segment for loading of the sample vdb data
          */
         String SAMPLE_DATA = "samples"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for searching the workspace
+         */
+        String SEARCH_SEGMENT = "search"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI search contains parameter
+         */
+        String SEARCH_CONTAINS_PARAMETER = "contains"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI search path parameter
+         */
+        String SEARCH_PATH_PARAMETER = "path"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI search path parameter
+         */
+        String SEARCH_TYPE_PARAMETER = "type"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI search parent parameter
+         */
+        String SEARCH_PARENT_PARAMETER = "parent"; //$NON-NLS-1$
+
+        /**
+         * The vdb export xml property
+         */
+        String VDB_EXPORT_XML_PROPERTY = "vdb-export-xml"; //$NON-NLS-1$
+
     }
 
     private static final int TIMEOUT = 1;
@@ -222,6 +254,7 @@ public final class KomodoRestV1Application extends Application implements Reposi
         objs.add( new KomodoExceptionMapper() );
         objs.add( new KomodoUtilService( this.kengine ) );
         objs.add( new KomodoVdbService( this.kengine ) );
+        objs.add( new KomodoSearchService( this.kengine ));
         this.singletons = Collections.unmodifiableSet( objs );
 
         initSwaggerConfiguration();
@@ -379,24 +412,21 @@ public final class KomodoRestV1Application extends Application implements Reposi
     /**
      * Import a vdb into the komodo engine
      *
-     * @param vdbName name of vdb
      * @param vdbStream vdb input stream
      * @throws Exception if error occurs
      */
-    public void importVdb(String vdbName, InputStream vdbStream) throws Exception {
+    public void importVdb(InputStream vdbStream) throws Exception {
         Repository repository = this.kengine.getDefaultRepository();
 
         SynchronousCallback callback = new SynchronousCallback();
-        UnitOfWork uow = repository.createTransaction("Import vdb " + vdbName, false, callback); //$NON-NLS-1$
+        UnitOfWork uow = repository.createTransaction("Import Vdb", false, callback); //$NON-NLS-1$
 
         ImportOptions importOptions = new ImportOptions();
-        importOptions.setOption(OptionKeys.NAME, vdbName);
         ImportMessages importMessages = new ImportMessages();
 
         KomodoObject workspace = repository.komodoWorkspace(uow);
         VdbImporter importer = new VdbImporter(repository);
         importer.importVdb(uow, vdbStream, workspace, importOptions, importMessages);
-
         uow.commit();
         callback.await(3, TimeUnit.MINUTES);
     }

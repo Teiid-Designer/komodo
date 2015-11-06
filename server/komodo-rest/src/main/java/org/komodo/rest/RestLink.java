@@ -9,7 +9,7 @@ package org.komodo.rest;
 
 import java.net.URI;
 import java.util.Collections;
-import java.util.List;
+import java.util.Map;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
@@ -34,6 +34,11 @@ public final class RestLink {
          * A link to the parent resource.
          */
         PARENT,
+
+        /**
+         * A link to the search resource.
+         */
+        SEARCH,
 
         /**
          * A link to a vdb imports resource
@@ -134,7 +139,7 @@ public final class RestLink {
     /**
      * An empty array of links.
      */
-    public static final List<RestLink> NO_LINKS = Collections.emptyList();
+    public static final Map<LinkType, RestLink> NO_LINKS = Collections.emptyMap();
 
     private LinkType rel;
     private URI href;

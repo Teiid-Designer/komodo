@@ -35,6 +35,11 @@ public interface JsonConstants extends StringConstants {
     String ID = KENGINE_PREFIX + "id"; //$NON-NLS-1$
 
     /**
+     * id property
+     */
+    String BASE_URI = KENGINE_PREFIX + "baseUri"; //$NON-NLS-1$
+
+    /**
      * path property
      */
     String DATA_PATH = KENGINE_PREFIX + "dataPath"; //$NON-NLS-1$

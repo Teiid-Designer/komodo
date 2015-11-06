@@ -7,7 +7,6 @@
 */
 package org.komodo.rest.relational;
 
-import static org.komodo.rest.Messages.Error.KOMODO_ENGINE_WORKSPACE_MGR_ERROR;
 import static org.komodo.rest.Messages.General.DELETE_OPERATION_NAME;
 import static org.komodo.rest.Messages.General.GET_OPERATION_NAME;
 import static org.komodo.rest.Messages.General.NO_VALUE;
@@ -50,7 +49,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 import org.komodo.core.KEngine;
 import org.komodo.relational.model.Model;
@@ -64,12 +62,12 @@ import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.VdbImport;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.ObjectImpl;
-import org.komodo.rest.KomodoRestEntity;
-import org.komodo.rest.KomodoRestEntity.ResourceNotFound;
 import org.komodo.rest.KomodoRestException;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.KomodoService;
 import org.komodo.rest.Messages;
+import org.komodo.rest.RestBasicEntity;
+import org.komodo.rest.RestBasicEntity.ResourceNotFound;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
@@ -94,8 +92,6 @@ public final class KomodoVdbService extends KomodoService {
 
     private static final int ALL_AVAILABLE = -1;
 
-    private final WorkspaceManager wsMgr;
-
     /**
      * @param engine
      *        the Komodo Engine (cannot be <code>null</code> and must be started)
@@ -104,13 +100,6 @@ public final class KomodoVdbService extends KomodoService {
      */
     public KomodoVdbService( final KEngine engine ) throws ServerErrorException {
         super( engine );
-
-        try {
-            this.wsMgr = WorkspaceManager.getInstance( this.repo );
-        } catch ( final Exception e ) {
-            throw new ServerErrorException( Messages.getString( KOMODO_ENGINE_WORKSPACE_MGR_ERROR ),
-                                            Status.INTERNAL_SERVER_ERROR );
-        }
     }
 
     /**
@@ -173,7 +162,9 @@ public final class KomodoVdbService extends KomodoService {
                 vdb.rename( uow, vdbNameJson );
             }
 
-            final RestVdb entity = RestVdb.build(vdb, false, uriInfo.getBaseUri(), uow);
+            KomodoProperties properties = new KomodoProperties();
+            properties.addProperty(VDB_EXPORT_XML_PROPERTY, false);
+            final RestVdb entity = entityFactory.create(vdb, uriInfo.getBaseUri(), uow, properties);
             LOGGER.debug("addOrUpdateVdb:VDB '{0}' entity was constructed", vdb.getName(uow)); //$NON-NLS-1$
             final Response response = commit( uow, headers.getAcceptableMediaTypes(), entity );
             return response;
@@ -283,18 +274,6 @@ public final class KomodoVdbService extends KomodoService {
                                                      Messages.getString( GET_OPERATION_NAME)));
     }
 
-    private Vdb findVdb(UnitOfWork uow, List<MediaType> mediaTypes, String vdbName) throws KException {
-        if (! this.wsMgr.hasChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE ) ) {
-            return null;
-        }
-
-        final KomodoObject kobject = this.wsMgr.getChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
-        final Vdb vdb = this.wsMgr.resolve( uow, kobject, Vdb.class );
-
-        LOGGER.debug( "VDB '{0}' was found", vdbName ); //$NON-NLS-1$
-        return vdb;
-    }
-
     private Model findModel(UnitOfWork uow, List<MediaType> mediaTypes,
                                                 String modelName, Vdb vdb) throws KException {
         if (! vdb.hasChild(uow, modelName, VdbLexicon.Vdb.DECLARATIVE_MODEL)) {
@@ -371,7 +350,7 @@ public final class KomodoVdbService extends KomodoService {
                 vdb.remove( uow );
 
                 LOGGER.debug( "deleteVdb:VDB '{0}' was deleted", vdbName ); //$NON-NLS-1$
-                final Response response = commit( uow, headers.getAcceptableMediaTypes(), KomodoRestEntity.NO_CONTENT );
+                final Response response = commit( uow, headers.getAcceptableMediaTypes(), RestBasicEntity.NO_CONTENT );
 
                 return response;
             }
@@ -523,10 +502,12 @@ public final class KomodoVdbService extends KomodoService {
             final List< RestVdb > entities = new ArrayList< >();
             int i = 0;
 
+            KomodoProperties properties = new KomodoProperties();
+            properties.addProperty(VDB_EXPORT_XML_PROPERTY, false);
             for ( final Vdb vdb : vdbs ) {
                 if ( ( start == 0 ) || ( i >= start ) ) {
                     if ( ( size == ALL_AVAILABLE ) || ( entities.size() < size ) ) {
-                        entities.add(RestVdb.build(vdb, false, uriInfo.getBaseUri(), uow));
+                        entities.add(entityFactory.create(vdb, uriInfo.getBaseUri(), uow, properties));
                         LOGGER.debug("getVdbs:VDB '{0}' entity was constructed", vdb.getName(uow)); //$NON-NLS-1$
                     } else {
                         break;
@@ -584,11 +565,13 @@ public final class KomodoVdbService extends KomodoService {
         try {
             uow = createTransaction( "getVdb", true ); //$NON-NLS-1$
 
-            Vdb vdb = findVdb(uow, mediaTypes, vdbName);
+            Vdb vdb = findVdb(uow, vdbName);
             if (vdb == null)
                 return commitNoVdbFound(uow, mediaTypes, vdbName);
 
-            final RestVdb restVdb = RestVdb.build(vdb, mediaTypes.contains(MediaType.APPLICATION_XML_TYPE), uriInfo.getBaseUri(), uow);
+            KomodoProperties properties = new KomodoProperties();
+            properties.addProperty(VDB_EXPORT_XML_PROPERTY, mediaTypes.contains(MediaType.APPLICATION_XML_TYPE));
+            final RestVdb restVdb = entityFactory.create(vdb, uriInfo.getBaseUri(), uow, properties);
             LOGGER.debug("getVdb:VDB '{0}' entity was constructed", vdb.getName(uow)); //$NON-NLS-1$
             return commit( uow, mediaTypes, restVdb );
 
@@ -639,7 +622,7 @@ public final class KomodoVdbService extends KomodoService {
         try {
             uow = createTransaction( "getModels", true ); //$NON-NLS-1$
 
-            Vdb vdb = findVdb(uow, mediaTypes, vdbName);
+            Vdb vdb = findVdb(uow, vdbName);
             if (vdb == null)
                 return commitNoVdbFound(uow, mediaTypes, vdbName);
 
@@ -649,7 +632,7 @@ public final class KomodoVdbService extends KomodoService {
 
             List<RestVdbModel> restModels = new ArrayList<>(models.length);
             for (Model model : models) {
-                restModels.add(RestVdbModel.build(model, vdb, uriInfo.getBaseUri(), uow));
+                restModels.add(entityFactory.create(model, uriInfo.getBaseUri(), uow));
                 LOGGER.debug("getModels:Model from VDB '{0}' entity was constructed", vdbName); //$NON-NLS-1$
             }
 
@@ -707,7 +690,7 @@ public final class KomodoVdbService extends KomodoService {
         try {
             uow = createTransaction( "getModel", true ); //$NON-NLS-1$
 
-            Vdb vdb = findVdb(uow, mediaTypes, vdbName);
+            Vdb vdb = findVdb(uow, vdbName);
             if (vdb == null)
                 return commitNoVdbFound(uow, mediaTypes, vdbName);
 
@@ -716,7 +699,7 @@ public final class KomodoVdbService extends KomodoService {
                 return commitNoModelFound(uow, mediaTypes, modelName, vdbName);
             }
 
-            RestVdbModel restModel = RestVdbModel.build(model, vdb, uriInfo.getBaseUri(), uow);
+            RestVdbModel restModel = entityFactory.create(model, uriInfo.getBaseUri(), uow);
             LOGGER.debug("getModel:Model '{0}' from VDB '{1}' entity was constructed", modelName, vdbName); //$NON-NLS-1$
 
             return commit( uow, mediaTypes, restModel);
@@ -768,7 +751,7 @@ public final class KomodoVdbService extends KomodoService {
         try {
             uow = createTransaction( "getTranslators", true ); //$NON-NLS-1$
 
-            Vdb vdb = findVdb(uow, mediaTypes, vdbName);
+            Vdb vdb = findVdb(uow, vdbName);
             if (vdb == null)
                 return commitNoVdbFound(uow, mediaTypes, vdbName);
 
@@ -778,7 +761,7 @@ public final class KomodoVdbService extends KomodoService {
 
             List<RestVdbTranslator> restTranslators = new ArrayList<>(translators.length);
             for (Translator translator : translators) {
-                restTranslators.add(RestVdbTranslator.build(translator, vdb, uriInfo.getBaseUri(), uow));
+                restTranslators.add(entityFactory.create(translator, uriInfo.getBaseUri(), uow));
                 LOGGER.debug("getTranslators:Translator from VDB '{0}' entity was constructed", vdbName); //$NON-NLS-1$
             }
 
@@ -836,7 +819,7 @@ public final class KomodoVdbService extends KomodoService {
         try {
             uow = createTransaction( "getTranslator", true ); //$NON-NLS-1$
 
-            Vdb vdb = findVdb(uow, mediaTypes, vdbName);
+            Vdb vdb = findVdb(uow, vdbName);
             if (vdb == null)
                 return commitNoVdbFound(uow, mediaTypes, vdbName);
 
@@ -862,7 +845,7 @@ public final class KomodoVdbService extends KomodoService {
                                                    Messages.getString( GET_OPERATION_NAME)));
             }
 
-            RestVdbTranslator restTranslator = RestVdbTranslator.build(translator, vdb, uriInfo.getBaseUri(), uow);
+            RestVdbTranslator restTranslator = entityFactory.create(translator, uriInfo.getBaseUri(), uow);
             LOGGER.debug("getTranslator:Translator '{0}' from VDB '{1}' entity was constructed", translatorName, vdbName); //$NON-NLS-1$
 
             return commit( uow, mediaTypes, restTranslator);
@@ -914,7 +897,7 @@ public final class KomodoVdbService extends KomodoService {
         try {
             uow = createTransaction( "getImports", true ); //$NON-NLS-1$
 
-            Vdb vdb = findVdb(uow, mediaTypes, vdbName);
+            Vdb vdb = findVdb(uow, vdbName);
             if (vdb == null)
                 return commitNoVdbFound(uow, mediaTypes, vdbName);
 
@@ -924,7 +907,7 @@ public final class KomodoVdbService extends KomodoService {
 
             List<RestVdbImport> restImports = new ArrayList<>(imports.length);
             for (VdbImport vdbImport : imports) {
-                restImports.add(RestVdbImport.build(vdbImport, vdb, uriInfo.getBaseUri(), uow));
+                restImports.add(entityFactory.create(vdbImport, uriInfo.getBaseUri(), uow));
                 LOGGER.debug("getImports:Import from VDB '{0}' entity was constructed", vdbName); //$NON-NLS-1$
             }
 
@@ -982,7 +965,7 @@ public final class KomodoVdbService extends KomodoService {
         try {
             uow = createTransaction( "getImport", true ); //$NON-NLS-1$
 
-            Vdb vdb = findVdb(uow, mediaTypes, vdbName);
+            Vdb vdb = findVdb(uow, vdbName);
             if (vdb == null)
                 return commitNoVdbFound(uow, mediaTypes, vdbName);
 
@@ -1008,7 +991,7 @@ public final class KomodoVdbService extends KomodoService {
                                                    Messages.getString( GET_OPERATION_NAME)));
             }
 
-            RestVdbImport restImport = RestVdbImport.build(vdbImport, vdb, uriInfo.getBaseUri(), uow);
+            RestVdbImport restImport = entityFactory.create(vdbImport, uriInfo.getBaseUri(), uow);
             LOGGER.debug("getImport:Import '{0}' from VDB '{1}' entity was constructed", importName, vdbName); //$NON-NLS-1$
 
             return commit( uow, mediaTypes, restImport);
@@ -1043,7 +1026,7 @@ public final class KomodoVdbService extends KomodoService {
                 V1Constants.DATA_ROLES_SEGMENT )
     @Produces( MediaType.APPLICATION_JSON )
     @Consumes ( { MediaType.APPLICATION_JSON} )
-    @ApiOperation(value = "Find all data roles belonging to the vdb", response = RestVdbDataRole[].class)
+    @ApiOperation(value = "Find all data roles belonging to the vdb", response = RestBasicEntity[].class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No vdb could be found with name"),
         @ApiResponse(code = 200, message = "No data roles could be found but an empty list is returned"),
@@ -1060,7 +1043,7 @@ public final class KomodoVdbService extends KomodoService {
         try {
             uow = createTransaction( "getDataRoles", true ); //$NON-NLS-1$
 
-            Vdb vdb = findVdb(uow, mediaTypes, vdbName);
+            Vdb vdb = findVdb(uow, vdbName);
             if (vdb == null)
                 return commitNoVdbFound(uow, mediaTypes, vdbName);
 
@@ -1070,7 +1053,7 @@ public final class KomodoVdbService extends KomodoService {
 
             List<RestVdbDataRole> restDataRoles = new ArrayList<>(dataRoles.length);
             for (DataRole dataRole : dataRoles) {
-                restDataRoles.add(RestVdbDataRole.build(dataRole, vdb, uriInfo.getBaseUri(), uow));
+                restDataRoles.add(entityFactory.create(dataRole, uriInfo.getBaseUri(), uow));
                 LOGGER.debug("getDataRoles:Data role from VDB '{0}' entity was constructed", vdbName); //$NON-NLS-1$
             }
 
@@ -1128,7 +1111,7 @@ public final class KomodoVdbService extends KomodoService {
         try {
             uow = createTransaction( "getDataRole", true ); //$NON-NLS-1$
 
-            Vdb vdb = findVdb(uow, mediaTypes, vdbName);
+            Vdb vdb = findVdb(uow, vdbName);
             if (vdb == null)
                 return commitNoVdbFound(uow, mediaTypes, vdbName);
 
@@ -1137,7 +1120,7 @@ public final class KomodoVdbService extends KomodoService {
                 return commitNoDataRoleFound(uow, mediaTypes, dataRoleId, vdbName);
             }
 
-            RestVdbDataRole restDataRole = RestVdbDataRole.build(dataRole, vdb, uriInfo.getBaseUri(), uow);
+            RestBasicEntity restDataRole = entityFactory.create(dataRole, uriInfo.getBaseUri(), uow);
             LOGGER.debug("getDataRole:data role '{0}' from VDB '{1}' entity was constructed", dataRoleId, vdbName); //$NON-NLS-1$
 
             return commit( uow, mediaTypes, restDataRole);
@@ -1195,7 +1178,7 @@ public final class KomodoVdbService extends KomodoService {
         try {
             uow = createTransaction( "getSources", true ); //$NON-NLS-1$
 
-            Vdb vdb = findVdb(uow, mediaTypes, vdbName);
+            Vdb vdb = findVdb(uow, vdbName);
             if (vdb == null)
                 return commitNoVdbFound(uow, mediaTypes, vdbName);
 
@@ -1210,7 +1193,7 @@ public final class KomodoVdbService extends KomodoService {
 
             List<RestVdbModelSource> restSources = new ArrayList<>(sources.length);
             for (ModelSource source : sources) {
-                restSources.add(RestVdbModelSource.build(source, model, vdb, uriInfo.getBaseUri(), uow));
+                restSources.add(entityFactory.create(source, uriInfo.getBaseUri(), uow));
                 LOGGER.debug("getSources:Source from Model '{0}' from VDB '{1}' entity was constructed", modelName, vdbName); //$NON-NLS-1$
             }
 
@@ -1275,7 +1258,7 @@ public final class KomodoVdbService extends KomodoService {
         try {
             uow = createTransaction( "getSource", true ); //$NON-NLS-1$
 
-            Vdb vdb = findVdb(uow, mediaTypes, vdbName);
+            Vdb vdb = findVdb(uow, vdbName);
             if (vdb == null)
                 return commitNoVdbFound(uow, mediaTypes, vdbName);
 
@@ -1312,7 +1295,7 @@ public final class KomodoVdbService extends KomodoService {
                                                    Messages.getString( GET_OPERATION_NAME)));
             }
 
-            RestVdbModelSource restSource = RestVdbModelSource.build(source, model, vdb, uriInfo.getBaseUri(), uow);
+            RestVdbModelSource restSource = entityFactory.create(source, uriInfo.getBaseUri(), uow);
             LOGGER.debug("getSource:Source '{0}' from Model '{1}' from VDB '{2}' entity was constructed", //$NON-NLS-1$
                          sourceName, modelName, vdbName);
 
@@ -1371,7 +1354,7 @@ public final class KomodoVdbService extends KomodoService {
         try {
             uow = createTransaction( "getPermissions", true ); //$NON-NLS-1$
 
-            Vdb vdb = findVdb(uow, mediaTypes, vdbName);
+            Vdb vdb = findVdb(uow, vdbName);
             if (vdb == null)
                 return commitNoVdbFound(uow, mediaTypes, vdbName);
 
@@ -1386,7 +1369,7 @@ public final class KomodoVdbService extends KomodoService {
 
             List<RestVdbPermission> restPermissions = new ArrayList<>(permissions.length);
             for (Permission permission : permissions) {
-                restPermissions.add(RestVdbPermission.build(permission, dataRole, vdb, uriInfo.getBaseUri(), uow));
+                restPermissions.add(entityFactory.create(permission, uriInfo.getBaseUri(), uow));
                 LOGGER.debug("getPermissions:Permission from Data role '{0}' from VDB '{1}' entity was constructed", dataRoleId, vdbName); //$NON-NLS-1$
             }
 
@@ -1449,7 +1432,7 @@ public final class KomodoVdbService extends KomodoService {
         try {
             uow = createTransaction( "getPermission", true ); //$NON-NLS-1$
 
-            Vdb vdb = findVdb(uow, mediaTypes, vdbName);
+            Vdb vdb = findVdb(uow, vdbName);
             if (vdb == null)
                 return commitNoVdbFound(uow, mediaTypes, vdbName);
 
@@ -1461,7 +1444,7 @@ public final class KomodoVdbService extends KomodoService {
             if (permission == null)
                 return commitNoPermissionFound(uow, mediaTypes, permissionId, dataRoleId, vdbName);
 
-            RestVdbPermission restPermission = RestVdbPermission.build(permission, dataRole, vdb, uriInfo.getBaseUri(), uow);
+            RestVdbPermission restPermission = entityFactory.create(permission, uriInfo.getBaseUri(), uow);
             LOGGER.debug("getPermission:permission '{0}' from data role '{1}' from VDB '{2}' entity was constructed", permissionId, dataRoleId, vdbName); //$NON-NLS-1$
 
             return commit( uow, mediaTypes, restPermission);
@@ -1525,7 +1508,7 @@ public final class KomodoVdbService extends KomodoService {
         try {
             uow = createTransaction( "getConditions", true ); //$NON-NLS-1$
 
-            Vdb vdb = findVdb(uow, mediaTypes, vdbName);
+            Vdb vdb = findVdb(uow, vdbName);
             if (vdb == null)
                 return commitNoVdbFound(uow, mediaTypes, vdbName);
 
@@ -1540,7 +1523,7 @@ public final class KomodoVdbService extends KomodoService {
             Condition[] conditions = permission.getConditions(uow);
             List<RestVdbCondition> restConditions = new ArrayList<>(conditions.length);
             for (Condition condition : conditions) {
-                restConditions.add(RestVdbCondition.build(condition, permission, dataRole, vdb, uriInfo.getBaseUri(), uow));
+                restConditions.add(entityFactory.create(condition, uriInfo.getBaseUri(), uow));
                 LOGGER.debug("getConditions:Condition from Permission from Data Role '{0}' from VDB '{1}' entity was constructed", dataRoleId, vdbName); //$NON-NLS-1$
             }
 
@@ -1609,7 +1592,7 @@ public final class KomodoVdbService extends KomodoService {
         try {
             uow = createTransaction( "getCondition", true ); //$NON-NLS-1$
 
-            Vdb vdb = findVdb(uow, mediaTypes, vdbName);
+            Vdb vdb = findVdb(uow, vdbName);
             if (vdb == null)
                 return commitNoVdbFound(uow, mediaTypes, vdbName);
 
@@ -1650,7 +1633,7 @@ public final class KomodoVdbService extends KomodoService {
                                                                     Messages.getString( GET_OPERATION_NAME)));
             }
 
-            RestVdbCondition restCondition = RestVdbCondition.build(condition, permission, dataRole, vdb, uriInfo.getBaseUri(), uow);
+            RestVdbCondition restCondition = entityFactory.create(condition, uriInfo.getBaseUri(), uow);
             LOGGER.debug("getCondition:condition '{0}' from permission '{1}' from data role '{2}' from VDB '{3}' entity was constructed", permissionId, dataRoleId, vdbName); //$NON-NLS-1$
 
             return commit( uow, mediaTypes, restCondition);
@@ -1714,7 +1697,7 @@ public final class KomodoVdbService extends KomodoService {
         try {
             uow = createTransaction( "getMasks", true ); //$NON-NLS-1$
 
-            Vdb vdb = findVdb(uow, mediaTypes, vdbName);
+            Vdb vdb = findVdb(uow, vdbName);
             if (vdb == null)
                 return commitNoVdbFound(uow, mediaTypes, vdbName);
 
@@ -1729,7 +1712,7 @@ public final class KomodoVdbService extends KomodoService {
             Mask[] masks = permission.getMasks(uow);
             List<RestVdbMask> restMasks = new ArrayList<>(masks.length);
             for (Mask mask : masks) {
-                restMasks.add(RestVdbMask.build(mask, permission, dataRole, vdb, uriInfo.getBaseUri(), uow));
+                restMasks.add(entityFactory.create(mask, uriInfo.getBaseUri(), uow));
                 LOGGER.debug("getMasks:Mask from Permission from Data Role '{0}' from VDB '{1}' entity was constructed", dataRoleId, vdbName); //$NON-NLS-1$
             }
 
@@ -1798,7 +1781,7 @@ public final class KomodoVdbService extends KomodoService {
         try {
             uow = createTransaction( "getMask", true ); //$NON-NLS-1$
 
-            Vdb vdb = findVdb(uow, mediaTypes, vdbName);
+            Vdb vdb = findVdb(uow, vdbName);
             if (vdb == null)
                 return commitNoVdbFound(uow, mediaTypes, vdbName);
 
@@ -1839,7 +1822,7 @@ public final class KomodoVdbService extends KomodoService {
                                                                     Messages.getString( GET_OPERATION_NAME)));
             }
 
-            RestVdbMask restMask = RestVdbMask.build(mask, permission, dataRole, vdb, uriInfo.getBaseUri(), uow);
+            RestVdbMask restMask = entityFactory.create(mask, uriInfo.getBaseUri(), uow);
             LOGGER.debug("getMask:mask '{0}' from permission '{1}' from data role '{2}' from VDB '{3}' entity was constructed", permissionId, dataRoleId, vdbName); //$NON-NLS-1$
 
             return commit( uow, mediaTypes, restMask);

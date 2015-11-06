@@ -12,11 +12,11 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Map;
-import org.komodo.rest.KomodoRestEntity;
-import org.komodo.rest.RestProperty;
-import org.komodo.rest.KomodoService;
+import javax.ws.rs.core.UriBuilder;
 import org.komodo.rest.Messages;
+import org.komodo.rest.RestBasicEntity;
 import org.komodo.rest.RestLink;
+import org.komodo.rest.RestProperty;
 import org.komodo.rest.json.JsonConstants;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.utils.StringUtils;
@@ -29,9 +29,9 @@ import com.google.gson.stream.JsonWriter;
  * A GSON serializer/deserializer for the Komodo REST objects.
  *
  * @param <T>
- *        the {@link KomodoRestEntity} subclass
+ *        the {@link RestBasicEntity} subclass
  */
-public abstract class KomodoRestEntitySerializer< T extends KomodoRestEntity > extends TypeAdapter< T >
+public abstract class AbstractEntitySerializer< T extends RestBasicEntity > extends TypeAdapter< T >
     implements JsonConstants {
 
     protected static final Type BOOLEAN_MAP_TYPE = new TypeToken< Map< String, Boolean > >() {/* nothing to do */}.getType();
@@ -72,6 +72,12 @@ public abstract class KomodoRestEntitySerializer< T extends KomodoRestEntity > e
         String name = in.nextName();
         if (ID.equals(name))
             value.setId(in.nextString());
+        else
+            throw ioException;
+
+        name = in.nextName();
+        if (BASE_URI.equals(name))
+            value.setBaseUri(UriBuilder.fromUri(in.nextString()).build());
         else
             throw ioException;
 
@@ -122,9 +128,13 @@ public abstract class KomodoRestEntitySerializer< T extends KomodoRestEntity > e
         out.name(ID);
         out.value(value.getId());
 
+        // Base URI
+        out.name(BASE_URI);
+        out.value(value.getBaseUri().toString());
+
         // Data path
         out.name(DATA_PATH);
-        out.value(KomodoService.encode(value.getDataPath()));
+        out.value(value.getDataPath());
 
         // Komodo Type
         out.name(KTYPE);
@@ -155,7 +165,7 @@ public abstract class KomodoRestEntitySerializer< T extends KomodoRestEntity > e
      * @param entity the entity
      * @return true if entity's id, data path and kType have been populated, false otherwise
      */
-    protected boolean isComplete(KomodoRestEntity entity) {
+    protected boolean isComplete(T entity) {
         return ! StringUtils.isBlank(entity.getId()) && ! StringUtils.isBlank(entity.getDataPath()) &&
                        entity.getkType() != null;
     }

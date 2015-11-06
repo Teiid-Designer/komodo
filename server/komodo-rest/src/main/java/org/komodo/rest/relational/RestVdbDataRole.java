@@ -8,18 +8,16 @@
 package org.komodo.rest.relational;
 
 import java.net.URI;
-import java.util.Arrays;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Vdb;
-import org.komodo.rest.KomodoRestEntity;
 import org.komodo.rest.KomodoService;
+import org.komodo.rest.RestBasicEntity;
 import org.komodo.rest.RestLink;
 import org.komodo.rest.RestLink.LinkType;
 import org.komodo.spi.KException;
-import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
+import org.teiid.core.util.ArgCheck;
 
 /**
  * A data role that can be used by GSON to build a JSON document representation.
@@ -80,7 +78,7 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
  * </code>
  * </pre>
  */
-public final class RestVdbDataRole extends KomodoRestEntity {
+public final class RestVdbDataRole extends RestBasicEntity {
 
     /**
      * Label used to describe name
@@ -117,77 +115,91 @@ public final class RestVdbDataRole extends KomodoRestEntity {
      */
     public static final RestVdbDataRole[] NO_DATA_ROLES = new RestVdbDataRole[ 0 ];
 
-    private String name;
-    private String description;
-    private boolean allowCreateTempTables = DataRole.DEFAULT_ALLOW_CREATE_TEMP_TABLES;
-    private boolean anyAuthenticated = DataRole.DEFAULT_ANY_AUTHENTICATED;
-    private boolean grantAll = DataRole.DEFAULT_GRANT_ALL;
-    private String[] mappedRoles = StringConstants.EMPTY_ARRAY;
-
     /**
      * Constructor for use <strong>only</strong> when deserializing.
      */
     public RestVdbDataRole() {
-        // nothing to do
+        setAllowCreateTempTables(DataRole.DEFAULT_ALLOW_CREATE_TEMP_TABLES);
+        setAnyAuthenticated(DataRole.DEFAULT_ANY_AUTHENTICATED);
+        setGrantAll(DataRole.DEFAULT_GRANT_ALL);
     }
 
     /**
      * Constructor for use when serializing.
-     * @param baseUri the base uri of the vdb
-     * @param id the id of this vdb
-     * @param dataPath the data path of this vdb
-     * @param kType the type of this vdb component
-     * @param hasChildren true if vdb has children
-     * @param parentVdb the name of the parent vdb
+     * @param baseUri the base uri of the REST request
+     * @param dataRole the data role
+     * @param uow the transaction
+     * @throws KException if error occurs
      */
-    public RestVdbDataRole(URI baseUri, String id, String dataPath, KomodoType kType, boolean hasChildren, String parentVdb) {
-        super(baseUri, id, dataPath, kType, hasChildren);
+    public RestVdbDataRole(URI baseUri, DataRole dataRole, UnitOfWork uow) throws KException {
+        super(baseUri, dataRole, uow);
 
-        addLink(new RestLink(LinkType.SELF, getUriBuilder().buildVdbDataRoleUri(LinkType.SELF, parentVdb, id)));
-        addLink(new RestLink(LinkType.PARENT, getUriBuilder().buildVdbDataRoleUri(LinkType.PARENT, parentVdb, id)));
-        addLink(new RestLink(LinkType.PERMISSIONS, getUriBuilder().buildVdbDataRoleUri(LinkType.PERMISSIONS, parentVdb, id)));
+        setName(dataRole.getName(uow));
+        setDescription(dataRole.getDescription(uow));
+        setAllowCreateTempTables(dataRole.isAllowCreateTempTables(uow));
+        setAnyAuthenticated(dataRole.isAnyAuthenticated(uow));
+        setGrantAll(dataRole.isGrantAll(uow));
+
+        String[] mappedRoles = dataRole.getMappedRoles(uow);
+        if (mappedRoles != null) {
+            setMappedRoles(mappedRoles);
+        }
+
+        Vdb vdb = ancestor(dataRole, Vdb.class, uow);
+        ArgCheck.isNotNull(vdb);
+        String vdbName = vdb.getName(uow);
+
+        addLink(new RestLink(LinkType.SELF, getUriBuilder().buildVdbDataRoleUri(LinkType.SELF, vdbName, getId())));
+        addLink(new RestLink(LinkType.PARENT, getUriBuilder().buildVdbDataRoleUri(LinkType.PARENT, vdbName, getId())));
+        addLink(new RestLink(LinkType.PERMISSIONS, getUriBuilder().buildVdbDataRoleUri(LinkType.PERMISSIONS, vdbName, getId())));
     }
 
     /**
      * @return the description (can be empty)
      */
     public String getDescription() {
-        return this.description;
+        Object description = tuples.get(DESCRIPTION_LABEL);
+        return description != null ? description.toString() : null;
     }
 
     /**
      * @return the mapped roles (never <code>null</code> but can be empty)
      */
     public String[] getMappedRoles() {
-        return this.mappedRoles;
+        Object roles = tuples.get(MAPPED_ROLES_LABEL);
+        return roles != null ? (String[]) roles : EMPTY_ARRAY;
     }
 
     /**
      * @return the name (can be empty)
      */
     public String getName() {
-        return this.name;
+        Object name = tuples.get(NAME_LABEL);
+        return name != null ? name.toString() : null;
     }
 
     /**
      * @return <code>true</code> if allows creating temp tables
      */
     public boolean isAllowCreateTempTables() {
-        return this.allowCreateTempTables;
+        Object value = tuples.get(ALLOW_CREATE_TEMP_TABLES_LABEL);
+        return value != null ? Boolean.parseBoolean(value.toString()) : DataRole.DEFAULT_ALLOW_CREATE_TEMP_TABLES;
     }
 
     /**
      * @return <code>true</code> if any authenticated
      */
     public boolean isAnyAuthenticated() {
-        return this.anyAuthenticated;
+        Object value = tuples.get(ANY_AUTHENTICATED_LABEL);
+        return value != null ? Boolean.parseBoolean(value.toString()) : DataRole.DEFAULT_ANY_AUTHENTICATED;
     }
 
     /**
      * @return <code>true</code> if allowed grant all permissions
      */
     public boolean isGrantAll() {
-        return this.grantAll;
+        Object value = tuples.get(GRANT_ALL_LABEL);
+        return value != null ? Boolean.parseBoolean(value.toString()) : DataRole.DEFAULT_GRANT_ALL;
     }
 
     /**
@@ -195,7 +207,7 @@ public final class RestVdbDataRole extends KomodoRestEntity {
      *        <code>true</code> if allows creating temp tables
      */
     public void setAllowCreateTempTables( final boolean newAllowCreateTempTables ) {
-        this.allowCreateTempTables = newAllowCreateTempTables;
+        tuples.put(ALLOW_CREATE_TEMP_TABLES_LABEL, newAllowCreateTempTables);
     }
 
     /**
@@ -203,7 +215,7 @@ public final class RestVdbDataRole extends KomodoRestEntity {
      *        <code>true</code> if any authenticated
      */
     public void setAnyAuthenticated( final boolean newAnyAuthenticated ) {
-        this.anyAuthenticated = newAnyAuthenticated;
+        tuples.put(ANY_AUTHENTICATED_LABEL, newAnyAuthenticated);
     }
 
     /**
@@ -211,7 +223,7 @@ public final class RestVdbDataRole extends KomodoRestEntity {
      *        the new description (can be empty)
      */
     public void setDescription( final String newDescription ) {
-        this.description = newDescription;
+        tuples.put(DESCRIPTION_LABEL, newDescription);
     }
 
     /**
@@ -219,7 +231,7 @@ public final class RestVdbDataRole extends KomodoRestEntity {
      *        <code>true</code> if allows grant all
      */
     public void setGrantAll( final boolean newGrantAll ) {
-        this.grantAll = newGrantAll;
+        tuples.put(GRANT_ALL_LABEL, newGrantAll);
     }
 
     /**
@@ -227,7 +239,7 @@ public final class RestVdbDataRole extends KomodoRestEntity {
      *        the new mapped roles (can be <code>null</code>)
      */
     public void setMappedRoles( final String[] newMappedRoles ) {
-        this.mappedRoles = ( ( newMappedRoles == null ) ? StringConstants.EMPTY_ARRAY : newMappedRoles );
+        tuples.put(MAPPED_ROLES_LABEL, newMappedRoles);
     }
 
     /**
@@ -235,88 +247,6 @@ public final class RestVdbDataRole extends KomodoRestEntity {
      *        the new translator name (can be empty)
      */
     public void setName( final String newName ) {
-        this.name = newName;
+        tuples.put(NAME_LABEL, newName);
     }
-
-    /**
-     * @param dataRole source data role
-     * @param parentVdb vdb parent
-     * @param baseUri base uri
-     * @param uow the transaction
-     * @return a new {@link RestVdbDataRole} based on the source {@link DataRole}
-     * @throws KException if error occurs
-     */
-    public static RestVdbDataRole build(DataRole dataRole, Vdb parentVdb, URI baseUri, UnitOfWork uow) throws KException {
-        final String vdbName = parentVdb.getName(uow);
-        final RestVdbDataRole entity = new RestVdbDataRole(baseUri,
-                                                                                       dataRole.getName(uow),
-                                                                                       dataRole.getAbsolutePath(),
-                                                                                       dataRole.getTypeIdentifier(uow),
-                                                                                       dataRole.hasChildren(uow), vdbName);
-
-        entity.setName(dataRole.getName(uow));
-        entity.setDescription(dataRole.getDescription(uow));
-        entity.setAllowCreateTempTables(dataRole.isAllowCreateTempTables(uow));
-        entity.setAnyAuthenticated(dataRole.isAnyAuthenticated(uow));
-        entity.setGrantAll(dataRole.isGrantAll(uow));
-
-        String[] mappedRoles = dataRole.getMappedRoles(uow);
-        if (mappedRoles != null) {
-            entity.setMappedRoles(mappedRoles);
-        }
-
-        return entity;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + (this.allowCreateTempTables ? 1231 : 1237);
-        result = prime * result + (this.anyAuthenticated ? 1231 : 1237);
-        result = prime * result + ((this.description == null) ? 0 : this.description.hashCode());
-        result = prime * result + (this.grantAll ? 1231 : 1237);
-        result = prime * result + Arrays.hashCode(this.mappedRoles);
-        result = prime * result + ((this.name == null) ? 0 : this.name.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (!super.equals(obj))
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        RestVdbDataRole other = (RestVdbDataRole)obj;
-        if (this.allowCreateTempTables != other.allowCreateTempTables)
-            return false;
-        if (this.anyAuthenticated != other.anyAuthenticated)
-            return false;
-        if (this.description == null) {
-            if (other.description != null)
-                return false;
-        } else
-            if (!this.description.equals(other.description))
-                return false;
-        if (this.grantAll != other.grantAll)
-            return false;
-        if (!Arrays.equals(this.mappedRoles, other.mappedRoles))
-            return false;
-        if (this.name == null) {
-            if (other.name != null)
-                return false;
-        } else
-            if (!this.name.equals(other.name))
-                return false;
-        return true;
-    }
-
-    @SuppressWarnings( "nls" )
-    @Override
-    public String toString() {
-        return "RestVdbDataRole [name=" + this.name + ", description=" + this.description + ", allowCreateTempTables=" + this.allowCreateTempTables + ", anyAuthenticated=" + this.anyAuthenticated + ", grantAll=" + this.grantAll + ", mappedRoles=" + Arrays.toString(this.mappedRoles) + ", id=" + this.id + ", dataPath=" + this.dataPath + ", kType=" + this.kType + ", hasChildren=" + this.hasChildren + ", properties=" + this.properties + ", links=" + this.links + "]";
-    }
-
 }

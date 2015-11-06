@@ -15,15 +15,20 @@ import java.net.URI;
 import javax.ws.rs.core.UriBuilder;
 import org.junit.Before;
 import org.junit.Test;
-import org.komodo.spi.constants.StringConstants;
+import org.komodo.relational.vdb.Vdb;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.PropertyDescriptor;
+import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.mockito.Mockito;
 
 @SuppressWarnings( {"javadoc", "nls"} )
 public final class RestVdbTest {
 
     private static final URI BASE_URI = UriBuilder.fromUri("http://localhost:8081/v1/workspace/").build();
+    private static final String WORKSPACE_DATA_PATH = "/workspace";
     private static final String VDB_NAME = "MyVdb";
-    private static final String DATA_PATH = "/data/path";
+    private static final String VDB_DATA_PATH = "/workspace/vdbs/vdb1";
     private static final KomodoType kType = KomodoType.VDB;
     private static final String DESCRIPTION = "my description";
     private static final String ORIGINAL_FILE = "/Users/ElvisIsKing/MyVdb.xml";
@@ -33,7 +38,13 @@ public final class RestVdbTest {
     private RestVdb vdb;
 
     private RestVdb copy() {
-        final RestVdb copy = new RestVdb(vdb.getBaseUri(), vdb.getName(), vdb.getDataPath(), vdb.getkType(), vdb.hasChildren());
+        final RestVdb copy = new RestVdb();
+
+        copy.setBaseUri(vdb.getBaseUri());
+        copy.setId(vdb.getName());
+        copy.setDataPath(vdb.getDataPath());
+        copy.setkType(vdb.getkType());
+        copy.setHasChildren(vdb.hasChildren());
         copy.setName(this.vdb.getName());
         copy.setDescription(this.vdb.getDescription());
         copy.setOriginalFilePath(this.vdb.getOriginalFilePath());
@@ -47,8 +58,22 @@ public final class RestVdbTest {
     }
 
     @Before
-    public void init() {
-        this.vdb = new RestVdb(BASE_URI, VDB_NAME, DATA_PATH, kType, true);
+    public void init() throws Exception {
+        UnitOfWork transaction = Mockito.mock(UnitOfWork.class);
+
+        KomodoObject workspace = Mockito.mock(KomodoObject.class);
+        Mockito.when(workspace.getAbsolutePath()).thenReturn(WORKSPACE_DATA_PATH);
+
+        Vdb theVdb = Mockito.mock(Vdb.class);
+        Mockito.when(theVdb.getName(transaction)).thenReturn(VDB_NAME);
+        Mockito.when(theVdb.getAbsolutePath()).thenReturn(VDB_DATA_PATH);
+        Mockito.when(theVdb.getTypeIdentifier(transaction)).thenReturn(kType);
+        Mockito.when(theVdb.hasChildren(transaction)).thenReturn(true);
+        Mockito.when(theVdb.getPropertyNames(transaction)).thenReturn(new String[0]);
+        Mockito.when(theVdb.getPropertyDescriptors(transaction)).thenReturn(new PropertyDescriptor[0]);
+        Mockito.when(theVdb.getParent(transaction)).thenReturn(workspace);
+
+        this.vdb = new RestVdb(BASE_URI, theVdb, false, transaction);
         this.vdb.setName(VDB_NAME);
         this.vdb.setDescription(DESCRIPTION);
         this.vdb.setOriginalFilePath(ORIGINAL_FILE);
@@ -79,16 +104,6 @@ public final class RestVdbTest {
         assertNull(empty.getOriginalFilePath());
         assertEquals(empty.getProperties().isEmpty(), true);
         assertEquals(empty.getLinks().size(), 0);
-    }
-
-    @Test( expected = IllegalArgumentException.class )
-    public void shouldFailWhenVdbNameIsEmpty() {
-        new RestVdb(BASE_URI, StringConstants.EMPTY_STRING, DATA_PATH, kType, true);
-    }
-
-    @Test( expected = IllegalArgumentException.class )
-    public void shouldFailWhenVdbNameIsNull() {
-        new RestVdb(BASE_URI, null, DATA_PATH, kType, true);
     }
 
     @Test

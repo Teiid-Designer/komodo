@@ -1,4 +1,4 @@
-<vdb name="myVDB" version="1">
+<vdb name="teiid-vdb-all-elements" version="1">
     <description>vdb description</description>
     <connection-type>NONE</connection-type>
     <property name="vdb-property2" value="vdb-value2"></property>

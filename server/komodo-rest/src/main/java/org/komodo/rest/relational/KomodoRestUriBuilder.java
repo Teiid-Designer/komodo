@@ -8,6 +8,7 @@
 package org.komodo.rest.relational;
 
 import java.net.URI;
+import java.util.Map;
 import javax.ws.rs.core.UriBuilder;
 import org.komodo.rest.KomodoRestV1Application;
 import org.komodo.rest.RestLink.LinkType;
@@ -342,6 +343,22 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
         return UriBuilder.fromUri(this.baseUri)
                                    .path(WORKSPACE_SEGMENT)
                                    .path(VDBS_SEGMENT).build();
+    }
+
+    /**
+     * @param properties the search parameter properties
+     * @return the URI to use when searching the workspace
+     */
+    public URI generateSearchUri(KomodoProperties properties) {
+        UriBuilder builder = UriBuilder.fromUri(this.baseUri)
+                                    .path(WORKSPACE_SEGMENT)
+                                    .path(SEARCH_SEGMENT);
+
+        for (Map.Entry<String, Object> entry : properties.entrySet()) {
+            builder.queryParam(entry.getKey(), entry.getValue().toString());
+        }
+
+        return builder.build();
     }
 
     /**

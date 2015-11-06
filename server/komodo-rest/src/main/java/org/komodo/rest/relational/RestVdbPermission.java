@@ -11,13 +11,13 @@ import java.net.URI;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Permission;
 import org.komodo.relational.vdb.Vdb;
-import org.komodo.rest.KomodoRestEntity;
 import org.komodo.rest.KomodoService;
+import org.komodo.rest.RestBasicEntity;
 import org.komodo.rest.RestLink;
 import org.komodo.rest.RestLink.LinkType;
 import org.komodo.spi.KException;
-import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.utils.ArgCheck;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 /**
@@ -49,7 +49,7 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
  * </code>
  * </pre>
  */
-public final class RestVdbPermission extends KomodoRestEntity {
+public final class RestVdbPermission extends RestBasicEntity {
 
     /**
      * Label used to describe name
@@ -96,95 +96,113 @@ public final class RestVdbPermission extends KomodoRestEntity {
      */
     public static final RestVdbPermission[] NO_PERMISSIONS = new RestVdbPermission[ 0 ];
 
-    private String name;
-    private boolean allowAlter = Permission.DEFAULT_ALLOW_ALTER;
-    private boolean allowCreate = Permission.DEFAULT_ALLOW_CREATE;
-    private boolean allowDelete = Permission.DEFAULT_ALLOW_DELETE;
-    private boolean allowExecute = Permission.DEFAULT_ALLOW_EXECUTE;
-    private boolean allowLanguage = Permission.DEFAULT_ALLOW_LANGUAGE;
-    private boolean allowRead = Permission.DEFAULT_ALLOW_READ;
-    private boolean allowUpdate = Permission.DEFAULT_ALLOW_UPDATE;
-
     /**
      * Constructor for use <strong>only</strong> when deserializing.
      */
     public RestVdbPermission() {
-        // nothing to do
+        setAllowAlter(Permission.DEFAULT_ALLOW_ALTER);
+        setAllowCreate(Permission.DEFAULT_ALLOW_CREATE);
+        setAllowDelete(Permission.DEFAULT_ALLOW_DELETE);
+        setAllowExecute(Permission.DEFAULT_ALLOW_EXECUTE);
+        setAllowLanguage(Permission.DEFAULT_ALLOW_LANGUAGE);
+        setAllowRead(Permission.DEFAULT_ALLOW_READ);
+        setAllowUpdate(Permission.DEFAULT_ALLOW_UPDATE);
     }
 
     /**
      * Constructor for use when serializing.
-     * @param baseUri the base uri of the vdb
-     * @param id the id of this vdb
-     * @param dataPath the data path of this vdb
-     * @param kType the type of this vdb
-     * @param hasChildren true if vdb has children
-     * @param dataRole the name of the parent data role
-     * @param parentVdb the name of the parent vdb
+     * @param baseUri the base uri of the REST request
+     * @param permission the permission
+     * @param uow the transaction
+     * @throws KException if error occurs
      */
-    public RestVdbPermission(URI baseUri, String id, String dataPath, KomodoType kType, boolean hasChildren,
-                                            String dataRole, String parentVdb) {
-        super(baseUri, id, dataPath, kType, hasChildren);
+    public RestVdbPermission(URI baseUri, Permission permission, UnitOfWork uow) throws KException {
+        super(baseUri, permission, uow);
 
-        addLink(new RestLink(LinkType.SELF, getUriBuilder().buildVdbPermissionUri(LinkType.SELF, parentVdb, dataRole, id)));
-        addLink(new RestLink(LinkType.PARENT, getUriBuilder().buildVdbPermissionUri(LinkType.PARENT, parentVdb, dataRole, id)));
-        addLink(new RestLink(LinkType.CONDITIONS, getUriBuilder().buildVdbPermissionUri(LinkType.CONDITIONS, parentVdb, dataRole, id)));
-        addLink(new RestLink(LinkType.MASKS, getUriBuilder().buildVdbPermissionUri(LinkType.MASKS, parentVdb, dataRole, id)));
+        setName(permission.getName(uow));
+        setAllowAlter(permission.isAllowAlter(uow));
+        setAllowCreate(permission.isAllowCreate(uow));
+        setAllowDelete(permission.isAllowDelete(uow));
+        setAllowExecute(permission.isAllowExecute(uow));
+        setAllowLanguage(permission.isAllowLanguage(uow));
+        setAllowRead(permission.isAllowRead(uow));
+        setAllowUpdate(permission.isAllowUpdate(uow));
+
+        DataRole dataRole = ancestor(permission, DataRole.class, uow);
+        ArgCheck.isNotNull(dataRole);
+        String dataRoleName = dataRole.getName(uow);
+
+        Vdb vdb = ancestor(dataRole, Vdb.class, uow);
+        ArgCheck.isNotNull(vdb);
+        String vdbName = vdb.getName(uow);
+
+        addLink(new RestLink(LinkType.SELF, getUriBuilder().buildVdbPermissionUri(LinkType.SELF, vdbName, dataRoleName, getId())));
+        addLink(new RestLink(LinkType.PARENT, getUriBuilder().buildVdbPermissionUri(LinkType.PARENT, vdbName, dataRoleName, getId())));
+        addLink(new RestLink(LinkType.CONDITIONS, getUriBuilder().buildVdbPermissionUri(LinkType.CONDITIONS, vdbName, dataRoleName, getId())));
+        addLink(new RestLink(LinkType.MASKS, getUriBuilder().buildVdbPermissionUri(LinkType.MASKS, vdbName, dataRoleName, getId())));
     }
 
     /**
      * @return the name (can be empty)
      */
     public String getName() {
-        return this.name;
+        Object name = tuples.get(NAME_LABEL);
+        return name != null ? name.toString() : null;
     }
     /**
      * @return <code>true</code> if allows alter
      */
     public boolean isAllowAlter() {
-        return this.allowAlter;
+        Object value = tuples.get(ALLOW_ALTER_LABEL);
+        return value != null ? Boolean.parseBoolean(value.toString()) : Permission.DEFAULT_ALLOW_ALTER;
     }
 
     /**
      * @return <code>true</code> if allows create
      */
     public boolean isAllowCreate() {
-        return this.allowCreate;
+        Object value = tuples.get(ALLOW_CREATE_LABEL);
+        return value != null ? Boolean.parseBoolean(value.toString()) : Permission.DEFAULT_ALLOW_CREATE;
     }
 
     /**
      * @return <code>true</code> if allows delete
      */
     public boolean isAllowDelete() {
-        return this.allowDelete;
+        Object value = tuples.get(ALLOW_DELETE_LABEL);
+        return value != null ? Boolean.parseBoolean(value.toString()) : Permission.DEFAULT_ALLOW_DELETE;
     }
 
     /**
      * @return <code>true</code> if allows execute
      */
     public boolean isAllowExecute() {
-        return this.allowExecute;
+        Object value = tuples.get(ALLOW_EXECUTE_LABEL);
+        return value != null ? Boolean.parseBoolean(value.toString()) : Permission.DEFAULT_ALLOW_EXECUTE;
     }
 
     /**
      * @return <code>true</code> if allows language
      */
     public boolean isAllowLanguage() {
-        return this.allowLanguage;
+        Object value = tuples.get(ALLOW_LANGUAGE_LABEL);
+        return value != null ? Boolean.parseBoolean(value.toString()) : Permission.DEFAULT_ALLOW_LANGUAGE;
     }
 
     /**
      * @return <code>true</code> if allows read
      */
     public boolean isAllowRead() {
-        return this.allowRead;
+        Object value = tuples.get(ALLOW_READ_LABEL);
+        return value != null ? Boolean.parseBoolean(value.toString()) : Permission.DEFAULT_ALLOW_READ;
     }
 
     /**
      * @return <code>true</code> if allows update
      */
     public boolean isAllowUpdate() {
-        return this.allowUpdate;
+        Object value = tuples.get(ALLOW_UPDATE_LABEL);
+        return value != null ? Boolean.parseBoolean(value.toString()) : Permission.DEFAULT_ALLOW_UPDATE;
     }
 
     /**
@@ -192,7 +210,7 @@ public final class RestVdbPermission extends KomodoRestEntity {
      *        <code>true</code> if allows alter
      */
     public void setAllowAlter( final boolean newAllowAlter ) {
-        this.allowAlter = newAllowAlter;
+        tuples.put(ALLOW_ALTER_LABEL, newAllowAlter);
     }
 
     /**
@@ -200,7 +218,7 @@ public final class RestVdbPermission extends KomodoRestEntity {
      *        <code>true</code> if allows create
      */
     public void setAllowCreate( final boolean newAllowCreate ) {
-        this.allowCreate = newAllowCreate;
+        tuples.put(ALLOW_CREATE_LABEL, newAllowCreate);
     }
 
     /**
@@ -208,7 +226,7 @@ public final class RestVdbPermission extends KomodoRestEntity {
      *        <code>true</code> if allows delete
      */
     public void setAllowDelete( final boolean newAllowDelete ) {
-        this.allowDelete = newAllowDelete;
+        tuples.put(ALLOW_DELETE_LABEL, newAllowDelete);
     }
 
     /**
@@ -216,7 +234,7 @@ public final class RestVdbPermission extends KomodoRestEntity {
      *        <code>true</code> if allows execute
      */
     public void setAllowExecute( final boolean newAllowExecute ) {
-        this.allowExecute = newAllowExecute;
+        tuples.put(ALLOW_EXECUTE_LABEL, newAllowExecute);
     }
 
     /**
@@ -224,7 +242,7 @@ public final class RestVdbPermission extends KomodoRestEntity {
      *        <code>true</code> if allows language
      */
     public void setAllowLanguage( final boolean newAllowLanguage ) {
-        this.allowLanguage = newAllowLanguage;
+        tuples.put(ALLOW_LANGUAGE_LABEL, newAllowLanguage);
     }
 
     /**
@@ -232,7 +250,7 @@ public final class RestVdbPermission extends KomodoRestEntity {
      *        <code>true</code> if allows read
      */
     public void setAllowRead( final boolean newAllowRead ) {
-        this.allowRead = newAllowRead;
+        tuples.put(ALLOW_READ_LABEL, newAllowRead);
     }
 
     /**
@@ -240,7 +258,7 @@ public final class RestVdbPermission extends KomodoRestEntity {
      *        <code>true</code> if allows update
      */
     public void setAllowUpdate( final boolean newAllowUpdate ) {
-        this.allowUpdate = newAllowUpdate;
+        tuples.put(ALLOW_UPDATE_LABEL, newAllowUpdate);
     }
 
     /**
@@ -248,91 +266,6 @@ public final class RestVdbPermission extends KomodoRestEntity {
      *        the new translator name (can be empty)
      */
     public void setName( final String newName ) {
-        this.name = newName;
-    }
-
-    /**
-     * @param permission parent permission
-     * @param dataRole parent data role
-     * @param parentVdb parent vdb
-     * @param baseUri base uri
-     * @param uow the transaction
-     * @return a new {@link RestVdbCondition} based on the source {@link Permission}
-     * @throws KException if error occurs
-     */
-    public static RestVdbPermission build(Permission permission, DataRole dataRole,
-                                                                  Vdb parentVdb, URI baseUri, UnitOfWork uow) throws KException {
-        final String vdbName = parentVdb.getName(uow);
-        final String dataRoleName = dataRole.getName(uow);
-        final RestVdbPermission entity = new RestVdbPermission(baseUri,
-                                                                                       permission.getName(uow),
-                                                                                       permission.getAbsolutePath(),
-                                                                                       permission.getTypeIdentifier(uow),
-                                                                                       permission.hasChildren(uow),
-                                                                                       dataRoleName, vdbName);
-
-        entity.setName(permission.getName(uow));
-        entity.setAllowAlter(permission.isAllowAlter(uow));
-        entity.setAllowCreate(permission.isAllowCreate(uow));
-        entity.setAllowDelete(permission.isAllowDelete(uow));
-        entity.setAllowExecute(permission.isAllowExecute(uow));
-        entity.setAllowLanguage(permission.isAllowLanguage(uow));
-        entity.setAllowRead(permission.isAllowRead(uow));
-        entity.setAllowUpdate(permission.isAllowUpdate(uow));
-
-        return entity;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + (this.allowAlter ? 1231 : 1237);
-        result = prime * result + (this.allowCreate ? 1231 : 1237);
-        result = prime * result + (this.allowDelete ? 1231 : 1237);
-        result = prime * result + (this.allowExecute ? 1231 : 1237);
-        result = prime * result + (this.allowLanguage ? 1231 : 1237);
-        result = prime * result + (this.allowRead ? 1231 : 1237);
-        result = prime * result + (this.allowUpdate ? 1231 : 1237);
-        result = prime * result + ((this.name == null) ? 0 : this.name.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (!super.equals(obj))
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        RestVdbPermission other = (RestVdbPermission)obj;
-        if (this.allowAlter != other.allowAlter)
-            return false;
-        if (this.allowCreate != other.allowCreate)
-            return false;
-        if (this.allowDelete != other.allowDelete)
-            return false;
-        if (this.allowExecute != other.allowExecute)
-            return false;
-        if (this.allowLanguage != other.allowLanguage)
-            return false;
-        if (this.allowRead != other.allowRead)
-            return false;
-        if (this.allowUpdate != other.allowUpdate)
-            return false;
-        if (this.name == null) {
-            if (other.name != null)
-                return false;
-        } else
-            if (!this.name.equals(other.name))
-                return false;
-        return true;
-    }
-
-    @SuppressWarnings( "nls" )
-    @Override
-    public String toString() {
-        return "RestVdbPermission [name=" + this.name + ", allowAlter=" + this.allowAlter + ", allowCreate=" + this.allowCreate + ", allowDelete=" + this.allowDelete + ", allowExecute=" + this.allowExecute + ", allowLanguage=" + this.allowLanguage + ", allowRead=" + this.allowRead + ", allowUpdate=" + this.allowUpdate + ", id=" + this.id + ", dataPath=" + this.dataPath + ", kType=" + this.kType + ", hasChildren=" + this.hasChildren + ", properties=" + this.properties + ", links=" + this.links + "]";
+        tuples.put(NAME_LABEL, newName);
     }
 }

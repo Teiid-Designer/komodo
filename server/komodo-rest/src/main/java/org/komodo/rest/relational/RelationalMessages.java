@@ -184,6 +184,16 @@ public final class RelationalMessages {
         VDB_SAMPLE_IMPORT_SUCCESS,
 
         /**
+         * Import errors occurred during sample vdb import
+         */
+        VDB_SAMPLE_IMPORT_ERRORS,
+
+        /**
+         * Vdb already exists during sample import
+         */
+        VDB_SAMPLE_IMPORT_VDB_EXISTS,
+
+        /**
          * An error occurred while trying to obtain the teiid schema
          */
         SCHEMA_SERVICE_GET_SCHEMA_ERROR,
@@ -196,7 +206,17 @@ public final class RelationalMessages {
         /**
          * The schema was not found
          */
-        SCHEMA_SERVICE_GET_SCHEMA_NOT_FOUND;
+        SCHEMA_SERVICE_GET_SCHEMA_NOT_FOUND,
+
+        /**
+         * An error indicating a VDB search failed
+         */
+        SEARCH_SERVICE_GET_SEARCH_ERROR,
+
+        /**
+         * The search service lacks at least one parameter
+         */
+        SEARCH_SERVICE_NO_PARAMETERS_ERROR;
 
         /**
          * {@inheritDoc}

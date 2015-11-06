@@ -106,11 +106,11 @@ public final class KomodoUtilServiceTest implements StringConstants {
         this.client = ClientBuilder.newClient();
     }
 
-    private void loadVdbs() throws Exception {
-        _restApp.importVdb(TestUtilities.ALL_ELEMENTS_EXAMPLE_NAME, TestUtilities.allElementsExample());
-        _restApp.importVdb(TestUtilities.PORTFOLIO_VDB_NAME, TestUtilities.portfolioExample());
-        _restApp.importVdb(TestUtilities.PARTS_VDB_NAME, TestUtilities.partsExample());
-        _restApp.importVdb(TestUtilities.TWEET_EXAMPLE_NAME, TestUtilities.tweetExample());
+    private void loadSamples() throws Exception {
+        _restApp.importVdb(KomodoUtilService.getVdbSample("parts_dynamic-vdb.xml"));
+        _restApp.importVdb(KomodoUtilService.getVdbSample("portfolio-vdb.xml"));
+        _restApp.importVdb(KomodoUtilService.getVdbSample("teiid-vdb-all-elements.xml"));
+        _restApp.importVdb(KomodoUtilService.getVdbSample("tweet-example-vdb.xml"));
 
         Assert.assertEquals(4, _restApp.getVdbs().length);
     }
@@ -129,7 +129,7 @@ public final class KomodoUtilServiceTest implements StringConstants {
             "    \"Repository Vdb Total\": \"4\"" + NEW_LINE,
             "  " + CLOSE_BRACE + NEW_LINE };
 
-        loadVdbs();
+        loadSamples();
 
         // get
         URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
@@ -177,7 +177,7 @@ public final class KomodoUtilServiceTest implements StringConstants {
         this.response = request(uri).post(null);
 
         final String entity = response.readEntity(String.class);
-        //System.out.println("Response from uri " + uri + ":\n" + entity);
+        System.out.println("Response from uri " + uri + ":\n" + entity);
 
         KomodoStatusObject status = KomodoJsonMarshaller.unmarshallKSO(entity);
         assertNotNull(status);
@@ -191,6 +191,36 @@ public final class KomodoUtilServiceTest implements StringConstants {
             assertEquals(
                          RelationalMessages.getString(RelationalMessages.Error.VDB_SAMPLE_IMPORT_SUCCESS, sample),
                          message);
+        }
+    }
+
+    @Test
+    public void shouldLoadSamplesDataAlreadyExists() throws Exception {
+        loadSamples();
+
+        // get
+        URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
+                                                    .path(V1Constants.SERVICE_SEGMENT)
+                                                    .path(V1Constants.SAMPLE_DATA).build();
+        this.response = request(uri).post(null);
+
+        final String entity = response.readEntity(String.class);
+        System.out.println("Response from uri " + uri + ":\n" + entity);
+
+        KomodoStatusObject status = KomodoJsonMarshaller.unmarshallKSO(entity);
+        assertNotNull(status);
+
+        assertEquals("Sample Vdb Import", status.getTitle());
+        Map<String, String> attributes = status.getAttributes();
+
+        for (String sample : KomodoUtilService.SAMPLES) {
+            String message = attributes.get(sample);
+            assertNotNull(message);
+
+            assertEquals(
+                         RelationalMessages.getString(
+                                                      RelationalMessages.Error.VDB_SAMPLE_IMPORT_VDB_EXISTS,
+                                                      sample), message);
         }
     }
 

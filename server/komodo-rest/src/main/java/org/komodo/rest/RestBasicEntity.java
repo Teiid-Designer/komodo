@@ -10,9 +10,17 @@ package org.komodo.rest;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
-import org.komodo.rest.json.JsonConstants;
+import java.util.Map;
+import javax.ws.rs.core.UriBuilder;
+import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.rest.KomodoRestV1Application.V1Constants;
+import org.komodo.rest.RestLink.LinkType;
+import org.komodo.rest.relational.KomodoProperties;
 import org.komodo.rest.relational.KomodoRestUriBuilder;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
@@ -26,12 +34,12 @@ import org.komodo.utils.StringUtils;
 /**
  * Indicates the objects has a JSON representation.
  */
-public abstract class KomodoRestEntity implements JsonConstants {
+public class RestBasicEntity implements V1Constants {
 
     /**
-     * A {@link KomodoRestEntity} that indicates the resource was not found.
+     * A {@link RestBasicEntity} that indicates the resource was not found.
      */
-    public static class ResourceNotFound extends KomodoRestEntity {
+    public static class ResourceNotFound extends RestBasicEntity {
 
         private final String operationName;
         private final String resourceName;
@@ -70,23 +78,17 @@ public abstract class KomodoRestEntity implements JsonConstants {
     /**
      * Indicates no content is being returned.
      */
-    public static final KomodoRestEntity NO_CONTENT = new KomodoRestEntity() {
+    public static final RestBasicEntity NO_CONTENT = new RestBasicEntity() {
         // nothing to do
     };
 
-    private final transient KomodoRestUriBuilder uriBuilder;
+    private transient KomodoRestUriBuilder uriBuilder;
 
-    protected String id;
+    protected Map<String, Object> tuples = new LinkedHashMap<>();
 
-    protected String dataPath;
+    protected List<RestProperty> properties = new ArrayList<>();
 
-    protected KomodoType kType;
-
-    protected boolean hasChildren;
-
-    protected final List<RestProperty> properties = new ArrayList<>();
-
-    protected List<RestLink> links = RestLink.NO_LINKS;
+    protected Map<LinkType, RestLink> links = RestLink.NO_LINKS;
 
     // Transient to ensure its never serialized by Gson
     private transient String xml;
@@ -94,35 +96,85 @@ public abstract class KomodoRestEntity implements JsonConstants {
     /**
      * Used for NO_CONTENT and ResourceNotFound
      */
-    protected KomodoRestEntity() {
+    public RestBasicEntity() {
         uriBuilder = null;
     }
 
     /**
      * @param baseUri the base uri of the REST request
-     * @param id the id of this entity
-     * @param dataPath the data path of this entity
-     * @param kType the type of this entity
-     * @param hasChildren true if entity has children
+     * @param kObject the kObject
+     * @param uow the transaction
+     * @throws KException if error occurs
      */
-    public KomodoRestEntity(URI baseUri, String id, String dataPath, KomodoType kType, boolean hasChildren) {
+    public RestBasicEntity(URI baseUri, KomodoObject kObject, UnitOfWork uow) throws KException {
         ArgCheck.isNotNull(baseUri, "baseUri"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(id, "id"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(dataPath, "dataPath"); //$NON-NLS-1$
-        ArgCheck.isNotNull(kType, "kType"); //$NON-NLS-1$
+        ArgCheck.isNotNull(kObject, "kObject"); //$NON-NLS-1$
+        ArgCheck.isNotNull(uow, "uow"); //$NON-NLS-1$
 
-        this.uriBuilder = new KomodoRestUriBuilder(baseUri);
-        this.id = id;
-        this.dataPath = dataPath;
-        this.kType = kType;
-        this.hasChildren = hasChildren;
+        setId(kObject.getName(uow));
+        setBaseUri(baseUri);
+        setDataPath(kObject.getAbsolutePath());
+        setkType(kObject.getTypeIdentifier(uow));
+        setHasChildren(kObject.hasChildren(uow));
+
+        KomodoProperties properties = new KomodoProperties();
+        properties.addProperty(SEARCH_PATH_PARAMETER, getDataPath());
+        addLink(new RestLink(LinkType.SELF, getUriBuilder().generateSearchUri(properties)));
+
+        KomodoObject parent = kObject.getParent(uow);
+        properties = new KomodoProperties();
+        properties.addProperty(SEARCH_PATH_PARAMETER, parent.getAbsolutePath());
+        addLink(new RestLink(LinkType.PARENT, getUriBuilder().generateSearchUri(properties)));
+    }
+
+    /**
+     * @param kObject the object
+     * @param parentClass the class of the desired parent
+     * @return the ancestor of the object with the given class
+     */
+    protected <T extends KomodoObject> T ancestor(KomodoObject kObject, Class<T> parentClass, UnitOfWork uow) throws KException {
+        WorkspaceManager wsMgr = WorkspaceManager.getInstance(kObject.getRepository());
+        KomodoObject parent = kObject.getParent(uow);
+        while (parent != null) {
+            T resolvedParent = wsMgr.resolve(uow, parent, parentClass);
+            if (resolvedParent != null)
+                return resolvedParent;
+
+            parent = parent.getParent(uow);
+        }
+
+        return null;
+    }
+
+    /**
+     * @return the tuples
+     */
+    public Map<String, Object> getTuples() {
+        return Collections.unmodifiableMap(this.tuples);
+    }
+
+    /**
+     * @param key the key
+     * @param value the value
+     */
+    public void addTuple(String key, Object value) {
+        tuples.put(key, value);
     }
 
     /**
      * @return the base Uri of this entity
      */
     public URI getBaseUri() {
-        return this.uriBuilder != null ? this.uriBuilder.baseUri() : null;
+        Object uri = tuples.get(BASE_URI);
+        return uri != null ? UriBuilder.fromUri(uri.toString()).build() : null;
+    }
+
+    /**
+     * @param baseUri the base uri
+     */
+    public void setBaseUri(URI baseUri) {
+        tuples.put(BASE_URI, baseUri);
+        this.uriBuilder = new KomodoRestUriBuilder(baseUri);
     }
 
     /**
@@ -136,56 +188,60 @@ public abstract class KomodoRestEntity implements JsonConstants {
      * @return the id
      */
     public String getId() {
-        return this.id;
+        Object id = tuples.get(ID);
+        return id != null ? id.toString() : null;
     }
 
     /**
      * @param id the id to set
      */
     public void setId(String id) {
-        this.id = id;
+        tuples.put(ID, id);
     }
 
     /**
      * @return the dataPath
      */
     public String getDataPath() {
-        return this.dataPath;
+        Object path = tuples.get(DATA_PATH);
+        return path != null ? path.toString() : null;
     }
 
     /**
      * @param dataPath the dataPath to set
      */
     public void setDataPath(String dataPath) {
-        this.dataPath = dataPath;
+        tuples.put(DATA_PATH, dataPath);
     }
 
     /**
      * @return the kType
      */
     public KomodoType getkType() {
-        return this.kType;
+        Object ktype = tuples.get(KTYPE);
+        return ktype != null ? KomodoType.getKomodoType(ktype.toString()) : null;
     }
 
     /**
      * @param kType the kType to set
      */
     public void setkType(KomodoType kType) {
-        this.kType = kType;
+        tuples.put(KTYPE, kType);
     }
 
     /**
      * @return the hasChildren
      */
     public boolean hasChildren() {
-        return this.hasChildren;
+        Object value = tuples.get(HAS_CHILDREN);
+        return value != null ? Boolean.parseBoolean(value.toString()) : false;
     }
 
     /**
      * @param hasChildren the hasChildren to set
      */
     public void setHasChildren(boolean hasChildren) {
-        this.hasChildren = hasChildren;
+        tuples.put(HAS_CHILDREN, hasChildren);
     }
 
     @Override
@@ -196,23 +252,7 @@ public abstract class KomodoRestEntity implements JsonConstants {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        KomodoRestEntity other = (KomodoRestEntity)obj;
-        if (this.dataPath == null) {
-            if (other.dataPath != null)
-                return false;
-        } else
-            if (!this.dataPath.equals(other.dataPath))
-                return false;
-        if (this.hasChildren != other.hasChildren)
-            return false;
-        if (this.id == null) {
-            if (other.id != null)
-                return false;
-        } else
-            if (!this.id.equals(other.id))
-                return false;
-        if (this.kType != other.kType)
-            return false;
+        RestBasicEntity other = (RestBasicEntity)obj;
         if (this.links == null) {
             if (other.links != null)
                 return false;
@@ -225,14 +265,20 @@ public abstract class KomodoRestEntity implements JsonConstants {
         } else
             if (!this.properties.equals(other.properties))
                 return false;
+        if (this.tuples == null) {
+            if (other.tuples != null)
+                return false;
+        } else
+            if (!this.tuples.equals(other.tuples))
+                return false;
         return true;
     }
 
     /**
      * @return the links (never <code>null</code> but can be empty)
      */
-    public final List<RestLink> getLinks() {
-        return this.links;
+    public final Collection<RestLink> getLinks() {
+        return this.links.values();
     }
 
     /**
@@ -246,12 +292,9 @@ public abstract class KomodoRestEntity implements JsonConstants {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((this.dataPath == null) ? 0 : this.dataPath.hashCode());
-        result = prime * result + (this.hasChildren ? 1231 : 1237);
-        result = prime * result + ((this.id == null) ? 0 : this.id.hashCode());
-        result = prime * result + ((this.kType == null) ? 0 : this.kType.hashCode());
         result = prime * result + ((this.links == null) ? 0 : this.links.hashCode());
         result = prime * result + ((this.properties == null) ? 0 : this.properties.hashCode());
+        result = prime * result + ((this.tuples == null) ? 0 : this.tuples.hashCode());
         return result;
     }
 
@@ -261,20 +304,22 @@ public abstract class KomodoRestEntity implements JsonConstants {
      */
     public final void addLink(RestLink newLink) {
         if (this.links == null || this.links == RestLink.NO_LINKS)
-            this.links = new ArrayList<RestLink>();
+            this.links = new LinkedHashMap<>();
 
-        this.links.add(newLink);
+        this.links.put(newLink.getRel(), newLink);
     }
 
     /**
      * @param newLinks
      *        the new links (can be <code>null</code>)
      */
-    public final void setLinks(final List<RestLink> newLinks) {
+    public final void setLinks(final Collection<RestLink> newLinks) {
         if (newLinks == null) {
             this.links = RestLink.NO_LINKS;
         } else {
-            this.links = newLinks;
+            for (RestLink link : newLinks) {
+                addLink(link);
+            }
         }
     }
 
@@ -366,10 +411,20 @@ public abstract class KomodoRestEntity implements JsonConstants {
         this.xml = xml;
     }
 
+    /**
+     * @param instance new entity to clone into
+     */
+    public void clone(RestBasicEntity instance) {
+        instance.tuples = this.tuples;
+        instance.properties = this.properties;
+        instance.links = this.links;
+        instance.uriBuilder = this.uriBuilder;
+        instance.xml = this.xml;
+    }
+
     @SuppressWarnings( "nls" )
     @Override
     public String toString() {
-        return "KomodoRestEntity [id=" + this.id + ", dataPath=" + this.dataPath + ", kType=" + this.kType + ", properties=" + this.properties + "]";
+        return "RestBasicEntity [tuples=" + this.tuples + ", properties=" + this.properties + ", links=" + this.links + "]";
     }
-
 }

@@ -28,8 +28,9 @@ import javax.ws.rs.core.UriInfo;
 import org.komodo.core.KEngine;
 import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
+import org.komodo.importer.ImportOptions.ExistingNodeOptions;
 import org.komodo.importer.ImportOptions.OptionKeys;
-import org.komodo.importer.vdb.VdbImporter;
+import org.komodo.relational.importer.vdb.VdbImporter;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.SynchronousCallback;
@@ -42,6 +43,7 @@ import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.Id;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
+import org.komodo.utils.StringUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -68,9 +70,7 @@ public final class KomodoUtilService extends KomodoService {
     public static final String[] SAMPLES = {
         "parts_dynamic-vdb.xml", "portfolio-vdb.xml",
         "teiid-vdb-all-elements.xml", "tweet-example-vdb.xml"
-      };
-
-    private WorkspaceManager wsMgr;
+    };
 
     /**
      * @param engine
@@ -80,12 +80,6 @@ public final class KomodoUtilService extends KomodoService {
      */
     public KomodoUtilService(final KEngine engine) throws ServerErrorException {
         super(engine);
-
-        try {
-            this.wsMgr = WorkspaceManager.getInstance(this.repo);
-        } catch (final Exception e) {
-            throw new ServerErrorException(Messages.getString(Messages.Error.KOMODO_ENGINE_WORKSPACE_MGR_ERROR), Status.INTERNAL_SERVER_ERROR);
-        }
     }
 
     /**
@@ -138,16 +132,20 @@ public final class KomodoUtilService extends KomodoService {
         }
     }
 
-    private InputStream getVdbSample(String fileName) {
-        String sampleFilePath = "sample" + File.separator + fileName; //$NON-NLS-1$
-        InputStream fileStream = getClass().getResourceAsStream(sampleFilePath);
+    /**
+     * @param sampleName
+     * @return the sample content for the given sample name
+     */
+    static InputStream getVdbSample(String sampleName) {
+        String sampleFilePath = "sample" + File.separator + sampleName; //$NON-NLS-1$
+        InputStream fileStream = KomodoUtilService.class.getResourceAsStream(sampleFilePath);
         if (fileStream == null)
             LOGGER.error(RelationalMessages.getString(
-                                                      RelationalMessages.Error.VDB_SAMPLE_CONTENT_FAILURE, fileName));
+                                                      RelationalMessages.Error.VDB_SAMPLE_CONTENT_FAILURE, sampleName));
 
         else
             LOGGER.info(RelationalMessages.getString(
-                                                     RelationalMessages.Error.VDB_SAMPLE_CONTENT_SUCCESS, fileName));
+                                                     RelationalMessages.Error.VDB_SAMPLE_CONTENT_SUCCESS, sampleName));
 
         return fileStream;
     }
@@ -180,21 +178,42 @@ public final class KomodoUtilService extends KomodoService {
                 SynchronousCallback callback = new SynchronousCallback();
                 uow = repo.createTransaction("Import vdb " + sampleName, false, callback); //$NON-NLS-1$
 
+                String msg = null;
+
                 ImportOptions importOptions = new ImportOptions();
-                importOptions.setOption(OptionKeys.NAME, sampleName);
+                importOptions.setOption(OptionKeys.HANDLE_EXISTING, ExistingNodeOptions.RETURN);
                 ImportMessages importMessages = new ImportMessages();
 
                 KomodoObject workspace = repo.komodoWorkspace(uow);
                 VdbImporter importer = new VdbImporter(repo);
                 importer.importVdb(uow, sampleStream, workspace, importOptions, importMessages);
-
                 uow.commit();
-                if (callback.await(3, TimeUnit.MINUTES))
+
+                String existingVdbMsg = org.komodo.importer.Messages.getString(
+                                                                               org.komodo.importer.Messages.IMPORTER.nodeExistsReturn);
+                List<String> errorMsgs = importMessages.getErrorMessages();
+                if (errorMsgs.isEmpty()) {
+                    msg = RelationalMessages.getString(
+                                                       RelationalMessages.Error.VDB_SAMPLE_IMPORT_SUCCESS,
+                                                                                                              sampleName);
+                } else if (existingVdbMsg.equals(errorMsgs.iterator().next())) {
+                    msg = RelationalMessages.getString(
+                                                       RelationalMessages.Error.VDB_SAMPLE_IMPORT_VDB_EXISTS,
+                                                                                                              sampleName);
+                } else {
+                    String errMsg = StringUtils.toCommaSeparatedList(errorMsgs.toArray());
+                    msg = RelationalMessages.getString(
+                                                           RelationalMessages.Error.VDB_SAMPLE_IMPORT_ERRORS,
+                                                                                                               sampleName, errMsg);
+                }
+
+                if (callback.await(3, TimeUnit.MINUTES)) {
+                    status.addAttribute(sampleName, msg);
+                } else {
                     status.addAttribute(sampleName, RelationalMessages.getString(
-                                                                                 RelationalMessages.Error.VDB_SAMPLE_IMPORT_SUCCESS, sampleName));
-                else
-                    status.addAttribute(sampleName, RelationalMessages.getString(
-                                                                                 RelationalMessages.Error.VDB_SAMPLE_IMPORT_TIMEOUT, sampleName));
+                                                                                 RelationalMessages.Error.VDB_SAMPLE_IMPORT_TIMEOUT,
+                                                                                 sampleName, msg));
+                }
 
             } catch ( final Exception e ) {
                 if ( ( uow != null ) && ( uow.getState() != State.COMMITTED ) ) {

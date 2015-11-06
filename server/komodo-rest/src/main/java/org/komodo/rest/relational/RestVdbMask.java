@@ -12,19 +12,19 @@ import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Mask;
 import org.komodo.relational.vdb.Permission;
 import org.komodo.relational.vdb.Vdb;
-import org.komodo.rest.KomodoRestEntity;
 import org.komodo.rest.KomodoService;
+import org.komodo.rest.RestBasicEntity;
 import org.komodo.rest.RestLink;
 import org.komodo.rest.RestLink.LinkType;
 import org.komodo.spi.KException;
-import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.utils.ArgCheck;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 /**
  * A condition that can be used by GSON to build a JSON document representation.
  */
-public final class RestVdbMask extends KomodoRestEntity {
+public final class RestVdbMask extends RestBasicEntity {
 
     /**
      * Label used to describe name
@@ -41,10 +41,6 @@ public final class RestVdbMask extends KomodoRestEntity {
      */
     public static final RestVdbMask[] NO_MASKS = new RestVdbMask[ 0 ];
 
-    private String name;
-
-    private String order;
-
     /**
      * Constructor for use <strong>only</strong> when deserializing.
      */
@@ -54,119 +50,63 @@ public final class RestVdbMask extends KomodoRestEntity {
 
     /**
      * Constructor for use when serializing.
-     * @param baseUri the base uri of the vdb
-     * @param id the id of this vdb
-     * @param dataPath the data path of this vdb
-     * @param kType the type of this vdb
-     * @param hasChildren true if vdb has children
-     * @param permission the name of the parent permission
-     * @param dataRole the name of the parent data role
-     * @param parentVdb the name of the parent vdb
+     * @param baseUri the base uri of the REST request
+     * @param mask the mask
+     * @param uow the transaction
+     * @throws KException if error occurs
      */
-    public RestVdbMask(URI baseUri, String id, String dataPath, KomodoType kType, boolean hasChildren,
-                                            String permission, String dataRole, String parentVdb) {
-        super(baseUri, id, dataPath, kType, hasChildren);
+    public RestVdbMask(URI baseUri, Mask mask, UnitOfWork uow) throws KException {
+        super(baseUri, mask, uow);
+
+        setName(mask.getName(uow));
+        setOrder(mask.getOrder(uow));
+
+        Permission permission = ancestor(mask, Permission.class, uow);
+        ArgCheck.isNotNull(permission);
+        String permName = permission.getName(uow);
+
+        DataRole dataRole = ancestor(permission, DataRole.class, uow);
+        ArgCheck.isNotNull(dataRole);
+        String dataRoleName = dataRole.getName(uow);
+
+        Vdb vdb = ancestor(dataRole, Vdb.class, uow);
+        ArgCheck.isNotNull(vdb);
+        String vdbName = vdb.getName(uow);
 
         addLink(new RestLink(LinkType.SELF, getUriBuilder()
-                             .buildVdbPermissionChildUri(LinkType.SELF, parentVdb, dataRole, permission, LinkType.MASKS, id)));
+                             .buildVdbPermissionChildUri(LinkType.SELF, vdbName, dataRoleName, permName, LinkType.MASKS, getId())));
         addLink(new RestLink(LinkType.PARENT, getUriBuilder()
-                             .buildVdbPermissionChildUri(LinkType.PARENT, parentVdb, dataRole, permission, LinkType.MASKS, id)));
+                             .buildVdbPermissionChildUri(LinkType.PARENT, vdbName, dataRoleName, permName, LinkType.MASKS, getId())));
     }
 
     /**
      * @return the name (can be empty)
      */
     public String getName() {
-        return this.name;
+        Object value = tuples.get(NAME_LABEL);
+        return value != null ? value.toString() : null;
     }
 
     /**
      * @param newName
-     *        the new translator name (can be empty)
+     *        the new mask name (can be empty)
      */
     public void setName( final String newName ) {
-        this.name = newName;
+        tuples.put(NAME_LABEL, newName);
     }
 
     /**
      * @return the order
      */
     public String getOrder() {
-        return this.order;
+        Object value = tuples.get(ORDER_LABEL);
+        return value != null ? value.toString() : null;
     }
 
     /**
      * @param order the order to set
      */
     public void setOrder(String order) {
-        this.order = order;
-    }
-
-    /**
-     * @param mask the source condition
-     * @param permission parent permission
-     * @param dataRole parent data role
-     * @param parentVdb parent vdb
-     * @param baseUri base uri
-     * @param uow the transaction
-     * @return a new {@link RestVdbMask} based on the source {@link Permission}
-     * @throws KException if error occurs
-     */
-    public static RestVdbMask build(Mask mask, Permission permission, DataRole dataRole,
-                                                                Vdb parentVdb, URI baseUri,
-                                                                UnitOfWork uow) throws KException {
-        final String vdbName = parentVdb.getName(uow);
-        final String dataRoleName = dataRole.getName(uow);
-        final String permissionName = permission.getName(uow);
-        final RestVdbMask entity = new RestVdbMask(baseUri,
-                                                                                       mask.getName(uow),
-                                                                                       mask.getAbsolutePath(),
-                                                                                       mask.getTypeIdentifier(uow),
-                                                                                       mask.hasChildren(uow),
-                                                                                       permissionName, dataRoleName, vdbName);
-
-        entity.setName(mask.getName(uow));
-        entity.setOrder(mask.getOrder(uow));
-
-        return entity;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + ((this.name == null) ? 0 : this.name.hashCode());
-        result = prime * result + ((this.order == null) ? 0 : this.order.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (!super.equals(obj))
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        RestVdbMask other = (RestVdbMask)obj;
-        if (this.name == null) {
-            if (other.name != null)
-                return false;
-        } else
-            if (!this.name.equals(other.name))
-                return false;
-        if (this.order == null) {
-            if (other.order != null)
-                return false;
-        } else
-            if (!this.order.equals(other.order))
-                return false;
-        return true;
-    }
-
-    @SuppressWarnings( "nls" )
-    @Override
-    public String toString() {
-        return "RestVdbMask [name=" + this.name + ", order=" + this.order + ", id=" + this.id + ", dataPath=" + this.dataPath + ", kType=" + this.kType + ", hasChildren=" + this.hasChildren + ", properties=" + this.properties + ", links=" + this.links + "]";
+        tuples.put(ORDER_LABEL, order);
     }
 }
