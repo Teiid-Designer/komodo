@@ -60,7 +60,7 @@ public final class FindCommand extends RelationalShellCommand {
             final KomodoType queryType = getQueryType( typeName );
 
             if ( queryType == null ) {
-                result = new CommandResultImpl( false, getWorkspaceMessage( INVALID_TYPE, typeName ), null );
+                result = new CommandResultImpl( false, getMessage( INVALID_TYPE, typeName ), null );
             } else {
                 // may have a name pattern
                 final String pattern = optionalArgument( 1 );
@@ -107,10 +107,10 @@ public final class FindCommand extends RelationalShellCommand {
     private void printResults( final KomodoType queryType,
                                final String[] foundObjectPaths ) throws Exception {
         if ( foundObjectPaths.length == 0 ) {
-            print( MESSAGE_INDENT, getWorkspaceMessage(NO_OBJECTS_FOUND, queryType.getType() ) );
+            print( MESSAGE_INDENT, getMessage(NO_OBJECTS_FOUND, queryType.getType() ) );
         } else {
             // print header
-            final String header = getWorkspaceMessage(TYPE_HEADER, queryType.getType() );
+            final String header = getMessage(TYPE_HEADER, queryType.getType() );
             print( MESSAGE_INDENT, header );
 
             // print paths of found objects

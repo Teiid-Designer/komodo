@@ -25,29 +25,10 @@ public class ViewCommandMessages implements StringConstants {
 
     @SuppressWarnings( "javadoc" )
     public enum General {
-        MISSING_ACCESS_PATTERN_NAME,
         MISSING_COLUMN_NAME,
-        MISSING_FOREIGN_KEY_NAME,
-        MISSING_INDEX_NAME,
-        MISSING_UNIQUE_CONSTRAINT_NAME,
-        ACCESS_PATTERN_NAME,
-        COLUMN_NAME,
-        FOREIGN_KEY_NAME,
-        INDEX_NAME,
-        UNIQUE_CONSTRAINT_NAME,
         INVALID_ON_COMMIT_PROPERTY_VALUE,
         INVALID_SCHEMA_ELEMENT_TYPE_PROPERTY_VALUE,
         INVALID_TEMPORARY_TABLE_TYPE_PROPERTY_VALUE;
-
-        @Override
-        public String toString() {
-            return getEnumName(this) + DOT + name();
-        }
-    }
-
-    @SuppressWarnings( "javadoc" )
-    public enum AddAccessPatternCommand {
-        ACCESS_PATTERN_ADDED;
 
         @Override
         public String toString() {
@@ -66,78 +47,8 @@ public class ViewCommandMessages implements StringConstants {
     }
 
     @SuppressWarnings( "javadoc" )
-    public enum AddForeignKeyCommand {
-        FOREIGN_KEY_ADDED;
-
-        @Override
-        public String toString() {
-            return getEnumName(this) + DOT + name();
-        }
-    }
-
-    @SuppressWarnings( "javadoc" )
-    public enum AddIndexCommand {
-        INDEX_ADDED;
-
-        @Override
-        public String toString() {
-            return getEnumName(this) + DOT + name();
-        }
-    }
-
-    @SuppressWarnings( "javadoc" )
-    public enum AddUniqueConstraintCommand {
-        UNIQUE_CONSTRAINT_ADDED;
-
-        @Override
-        public String toString() {
-            return getEnumName(this) + DOT + name();
-        }
-    }
-
-    @SuppressWarnings( "javadoc" )
-    public enum DeleteAccessPatternCommand {
-        ACCESS_PATTERN_DELETED;
-
-        @Override
-        public String toString() {
-            return getEnumName(this) + DOT + name();
-        }
-    }
-
-    @SuppressWarnings( "javadoc" )
     public enum DeleteColumnCommand {
         COLUMN_DELETED;
-
-        @Override
-        public String toString() {
-            return getEnumName(this) + DOT + name();
-        }
-    }
-
-    @SuppressWarnings( "javadoc" )
-    public enum DeleteForeignKeyCommand {
-        FOREIGN_KEY_DELETED;
-
-        @Override
-        public String toString() {
-            return getEnumName(this) + DOT + name();
-        }
-    }
-
-    @SuppressWarnings( "javadoc" )
-    public enum DeleteIndexCommand {
-        INDEX_DELETED;
-
-        @Override
-        public String toString() {
-            return getEnumName(this) + DOT + name();
-        }
-    }
-
-    @SuppressWarnings( "javadoc" )
-    public enum DeleteUniqueConstraintCommand {
-        UNIQUE_CONSTRAINT_DELETED;
 
         @Override
         public String toString() {

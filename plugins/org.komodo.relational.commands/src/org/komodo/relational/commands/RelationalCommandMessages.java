@@ -38,8 +38,6 @@ public class RelationalCommandMessages implements StringConstants {
 
     public enum FindCommand {
         MISSING_TYPE_NAME,
-        HELP_TYPES_HEADING,
-        FAILURE,
         INVALID_TYPE,
         NO_OBJECTS_FOUND,
         TYPE_HEADER;

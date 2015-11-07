@@ -25,8 +25,7 @@ public class TabularResultSetCommandMessages implements StringConstants {
 
     @SuppressWarnings( "javadoc" )
     public enum General {
-        MISSING_COLUMN_NAME,
-        COLUMN_NAME;
+        MISSING_COLUMN_NAME;
 
         @Override
         public String toString() {

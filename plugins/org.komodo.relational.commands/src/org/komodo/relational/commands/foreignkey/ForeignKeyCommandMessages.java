@@ -27,8 +27,6 @@ public class ForeignKeyCommandMessages implements StringConstants {
     public enum AddReferenceColumnCommand {
 
         COLUMN_REF_ADDED,
-        COLUMN_PATH_NOT_FOUND,
-        INVALID_COLUMN_PATH,
         INVALID_COLUMN,
         MISSING_COLUMN_PATH;
 
@@ -47,8 +45,6 @@ public class ForeignKeyCommandMessages implements StringConstants {
     public enum DeleteReferenceColumnCommand {
 
         COLUMN_REMOVED,
-        COLUMN_PATH_NOT_FOUND,
-        INVALID_COLUMN_PATH,
         MISSING_COLUMN_PATH;
 
         /**

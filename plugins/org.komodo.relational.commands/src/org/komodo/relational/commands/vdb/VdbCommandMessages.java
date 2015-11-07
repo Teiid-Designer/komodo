@@ -32,7 +32,6 @@ public class VdbCommandMessages implements StringConstants {
         MISSING_MODEL_NAME,
         MISSING_TRANSLATOR_NAME,
         MISSING_TRANSLATOR_TYPE,
-        MISSING_VDB_VERSION,
         NAME_TYPE_DISPLAY;
 
         @Override
@@ -104,18 +103,6 @@ public class VdbCommandMessages implements StringConstants {
         public String toString() {
             return getEnumName(this) + DOT + name();
         }
-    }
-
-    @SuppressWarnings( "javadoc" )
-    public enum ShowVdbCommand {
-
-        PLACEHOLDER;
-
-        @Override
-        public String toString() {
-            return getEnumName(this) + DOT + name();
-        }
-
     }
 
     @SuppressWarnings( "javadoc" )

@@ -26,7 +26,6 @@ public class StoredProcedureCommandMessages implements StringConstants {
     @SuppressWarnings( "javadoc" )
     public enum General {
         MISSING_PARAMETER_NAME,
-        PARAMETER_NAME,
         MISSING_RESULT_SET_TYPE,
         INVALID_RESULT_SET_TYPE,
         INVALID_SCHEMA_ELEMENT_TYPE_PROPERTY_VALUE;

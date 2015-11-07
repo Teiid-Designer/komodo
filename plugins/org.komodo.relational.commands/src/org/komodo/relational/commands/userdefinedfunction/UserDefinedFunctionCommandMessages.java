@@ -26,7 +26,6 @@ public class UserDefinedFunctionCommandMessages implements StringConstants {
     @SuppressWarnings( "javadoc" )
     public enum General {
         MISSING_PARAMETER_NAME,
-        PARAMETER_NAME,
         INVALID_DETERMINISTIC_PROPERTY_VALUE,
         INVALID_SCHEMA_ELEMENT_TYPE_PROPERTY_VALUE;
 
