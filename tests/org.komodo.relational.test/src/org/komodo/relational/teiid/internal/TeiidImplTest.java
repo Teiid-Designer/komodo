@@ -39,6 +39,13 @@ public final class TeiidImplTest extends RelationalModelTest {
     }
     
     @Test
+    public void shouldSetHost() throws Exception {
+        String newValue = "NewHost";
+        this.teiid.setHost( getTransaction(), newValue );
+        assertThat( this.teiid.getHost( getTransaction() ), is( newValue ) );
+    }
+    
+    @Test
     public void shouldHaveDefaultTeiidInstanceUrl() throws Exception {
         TeiidInstance teiidInstance = this.teiid.getTeiidInstance(getTransaction());
         assertThat( teiidInstance.getUrl(), is( "mms://localhost:9999" ) );

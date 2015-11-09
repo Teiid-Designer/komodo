@@ -27,10 +27,11 @@ abstract class TeiidShellCommand extends RelationalShellCommand {
     protected static final String JDBC_PASSWORD = "jdbcPswd"; //$NON-NLS-1$
     protected static final String JDBC_SECURE = "jdbcSecure"; //$NON-NLS-1$
     protected static final String JDBC_USER = "jdbcUser"; //$NON-NLS-1$
+    protected static final String HOST = "host"; //$NON-NLS-1$
 
     protected static final List< String > ALL_PROPS = Arrays.asList( new String[] { ADMIN_PORT, ADMIN_PASSWORD, ADMIN_SECURE,
                                                                                     ADMIN_USER, JDBC_PORT, JDBC_PASSWORD,
-                                                                                    JDBC_SECURE, JDBC_USER } );
+                                                                                    JDBC_SECURE, JDBC_USER, HOST } );
 
     protected TeiidShellCommand( final String name,
                                  final WorkspaceStatus status ) {

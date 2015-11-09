@@ -149,6 +149,14 @@ public interface Teiid extends RelationalObject {
     /**
      * @param uow
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param host the host name
+     * @throws KException if error occurs
+     */
+    void setHost(UnitOfWork uow, String host) throws KException;
+
+    /**
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return value of teiid admin port property
      * @throws KException if error occurs
      */

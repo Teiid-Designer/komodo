@@ -103,11 +103,6 @@ public class ShowStatusCommand extends BuiltInShellCommand {
         final String path = wsStatus.getDisplayPath(currentContext);
         print(MESSAGE_INDENT, Messages.getString(Messages.ShowStatusCommand.CurrentContext, path));
 
-        // Get additional provided statuses for current context
-        List<String> providedStatusList = wsStatus.getProvidedStatusMessages(currentContext);
-        for(String status : providedStatusList) {
-            print(MESSAGE_INDENT, status);
-        }
         // Get additional provided statuses for state objects
         Collection<KomodoObject> stateObjs = wsStatus.getStateObjects().values();
         for(KomodoObject stateObj : stateObjs) {

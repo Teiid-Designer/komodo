@@ -101,6 +101,9 @@ public final class SetTeiidPropertyCommand extends TeiidShellCommand {
                 case JDBC_USER:
                     teiid.setJdbcUsername( transaction, value );
                     break;
+                case HOST:
+                    teiid.setHost( transaction, value );
+                    break;
                 default:
                     errorMsg = getWorkspaceMessage( INVALID_PROPERTY_NAME, name, Teiid.class.getSimpleName() );
                     break;
