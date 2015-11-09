@@ -31,8 +31,7 @@ public class VdbCommandMessages implements StringConstants {
         MISSING_IMPORT_NAME,
         MISSING_MODEL_NAME,
         MISSING_TRANSLATOR_NAME,
-        MISSING_TRANSLATOR_TYPE,
-        NAME_TYPE_DISPLAY;
+        MISSING_TRANSLATOR_TYPE;
 
         @Override
         public String toString() {
@@ -215,7 +214,7 @@ public class VdbCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     @SuppressWarnings( "javadoc" )
     public enum UploadModelCommand {
 

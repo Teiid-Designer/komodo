@@ -59,6 +59,14 @@ public class ModelCommandProvider implements ShellCommandProvider {
         result.add( ExportCommand.class );
         result.add( ImportCommand.class );
 
+        result.add( ShowPushdownFunctionsCommand.class );
+        result.add( ShowSourcesCommand.class );
+        result.add( ShowStoredProceduresCommand.class );
+        result.add( ShowTablesCommand.class );
+        result.add( ShowUserDefinedFunctionsCommand.class );
+        result.add( ShowViewsCommand.class );
+        result.add( ShowVirtualProceduresCommand.class );
+
         return result;
     }
 
