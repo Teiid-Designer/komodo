@@ -106,6 +106,7 @@ import org.komodo.relational.commands.workspace.CreateVdbCommandTest;
 import org.komodo.relational.commands.workspace.DeleteSchemaCommandTest;
 import org.komodo.relational.commands.workspace.DeleteTeiidCommandTest;
 import org.komodo.relational.commands.workspace.DeleteVdbCommandTest;
+import org.komodo.relational.commands.workspace.ExportVdbCommandTest;
 import org.komodo.relational.commands.workspace.UploadVdbCommandTest;
 import org.komodo.relational.commands.workspace.WorkspaceSetPropertyCommandTest;
 import org.komodo.relational.commands.workspace.WorkspaceUnsetPropertyCommandTest;
@@ -136,6 +137,7 @@ import org.komodo.relational.commands.workspace.WorkspaceUnsetPropertyCommandTes
     DeleteVdbCommandTest.class,
 //    ImportVdbCommandTest.class,
     UploadVdbCommandTest.class,
+    ExportVdbCommandTest.class,
     WorkspaceSetPropertyCommandTest.class,
     WorkspaceUnsetPropertyCommandTest.class,
 

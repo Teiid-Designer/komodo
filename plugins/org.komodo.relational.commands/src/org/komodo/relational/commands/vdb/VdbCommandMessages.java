@@ -42,6 +42,8 @@ public class VdbCommandMessages implements StringConstants {
 
     @SuppressWarnings( "javadoc" )
     public enum ExportCommand {
+        OverwriteArgInvalid,
+        FileExistsOverwriteDisabled,
         VDB_EXPORTED;
 
         @Override

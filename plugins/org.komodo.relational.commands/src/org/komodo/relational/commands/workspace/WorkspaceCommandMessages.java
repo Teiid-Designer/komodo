@@ -122,6 +122,18 @@ public class WorkspaceCommandMessages implements StringConstants {
         }
     }
 
+    public enum ExportVdbCommand {
+        OverwriteArgInvalid,
+        FileExistsOverwriteDisabled,
+        VDB_NOT_FOUND,
+        VDB_EXPORTED;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
     public enum UploadVdbCommand {
 
         MISSING_INPUT_VDB_FILE_PATH,

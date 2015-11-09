@@ -47,6 +47,7 @@ public class WorkspaceCommandProvider implements ShellCommandProvider {
         result.add( DeleteVdbCommand.class );
         result.add( ImportVdbCommand.class );
         result.add( UploadVdbCommand.class );
+        result.add( ExportVdbCommand.class );
         result.add( WorkspaceSetPropertyCommand.class );
         result.add( WorkspaceUnsetPropertyCommand.class );
 
