@@ -32,6 +32,7 @@ import org.komodo.spi.constants.ExportConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.StringUtils;
+import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 /**
  * A shell command to export a Vdb from Workspace context.
@@ -74,21 +75,15 @@ public final class ExportVdbCommand extends WorkspaceShellCommand {
                 return new CommandResultImpl( false, getMessage( OverwriteArgInvalid, overwriteArg ), null );
             }
             
-            // Get the VDB to Export
-            final WorkspaceManager mgr = getWorkspaceManager();
-            final KomodoObject[] vdbs = mgr.findVdbs(getTransaction());
-            Vdb vdbToExport = null;
-            for(KomodoObject vdb : vdbs) {
-                if(vdb.getName(getTransaction()).equals(vdbName)) {
-                    vdbToExport = (Vdb)vdb;
-                    break;
-                }
-            }
-            
-            if(vdbToExport==null) {
+            // Determine if the VDB exists
+            if(!getWorkspaceManager().hasChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE)) {
                 return new CommandResultImpl( false, getMessage( VDB_NOT_FOUND, vdbName ), null );
             } 
             
+            // Get the VDB to Export
+            final KomodoObject vdbObj = getWorkspaceManager().getChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+            final Vdb vdbToExport = Vdb.RESOLVER.resolve(getTransaction(), vdbObj);
+
             final File file = new File( fileName );
 
             // If file exists, must have overwrite option

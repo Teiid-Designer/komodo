@@ -20,6 +20,7 @@ import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 /**
  * A shell command to delete a Vdb.
@@ -43,32 +44,22 @@ public final class DeleteVdbCommand extends WorkspaceShellCommand {
      */
     @Override
     protected CommandResult doExecute() {
-        CommandResult result = null;
-
         try {
             final String vdbName = requiredArgument( 0, getMessage( MISSING_VDB_NAME ) );
 
-            final WorkspaceManager mgr = getWorkspaceManager();
-            final KomodoObject[] vdbs = mgr.findVdbs(getTransaction());
-            KomodoObject[] objToDelete = new KomodoObject[1];
-            for(KomodoObject vdb : vdbs) {
-                if(vdb.getName(getTransaction()).equals(vdbName)) {
-                    objToDelete[0] = vdb;
-                    break;
-                }
-            }
-            
-            if(objToDelete[0]==null) {
-                result = new CommandResultImpl( false, getMessage( VDB_NOT_FOUND, vdbName ), null );
-            } else {
-                mgr.delete(getTransaction(), objToDelete);
-                result = new CommandResultImpl( getMessage( VDB_DELETED, vdbName ) );
-            }
-        } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( DELETE_VDB_ERROR ), e );
-        }
+            // Make sure the VDB exists
+            if(!getWorkspaceManager().hasChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE)) {
+                return new CommandResultImpl( false, getMessage( VDB_NOT_FOUND, vdbName ), null );
+            } 
 
-        return result;
+            // Delete the VDB
+            final KomodoObject vdbToDelete = getWorkspaceManager().getChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+            getWorkspaceManager().delete(getTransaction(), vdbToDelete);
+            return new CommandResultImpl( getMessage( VDB_DELETED, vdbName ) );
+            
+        } catch ( final Exception e ) {
+            return new CommandResultImpl( false, getMessage( DELETE_VDB_ERROR ), e );
+        }
     }
 
     /**

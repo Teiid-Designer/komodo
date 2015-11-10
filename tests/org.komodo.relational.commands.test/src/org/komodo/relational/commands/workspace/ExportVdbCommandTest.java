@@ -42,9 +42,6 @@ public class ExportVdbCommandTest extends AbstractCommandTest {
         KomodoObject tweet = TestUtilities.createTweetExampleNode(getTransaction(), kWorkspace);
 
         assertNotNull(tweet);
-
-        traverse(getTransaction(), tweet.getAbsolutePath());
-
         return tweet;
     }
 
@@ -53,9 +50,6 @@ public class ExportVdbCommandTest extends AbstractCommandTest {
         KomodoObject tweet = TestUtilities.createAllElementsExampleNode(getTransaction(), kWorkspace);
 
         assertNotNull(tweet);
-
-        traverse(getTransaction(), tweet.getAbsolutePath());
-
         return tweet;
     }
 

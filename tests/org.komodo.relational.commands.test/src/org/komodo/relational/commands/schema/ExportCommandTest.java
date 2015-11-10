@@ -48,9 +48,6 @@ public final class ExportCommandTest extends AbstractCommandTest {
         schema.setRendition(getTransaction(), TWITTER_VIEW_MODEL_DDL);
 
         assertNotNull(schema);
-
-        traverse(getTransaction(), schema.getAbsolutePath());
-
         return schema;
     }
 
