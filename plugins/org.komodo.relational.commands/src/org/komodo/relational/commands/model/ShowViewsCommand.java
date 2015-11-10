@@ -5,31 +5,30 @@
  *
  * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
  */
-package org.komodo.relational.commands.vdb;
+package org.komodo.relational.commands.model;
 
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowDataRolesCommand.DATA_ROLES_HEADER;
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowDataRolesCommand.NO_DATA_ROLES;
+import static org.komodo.relational.commands.model.ModelCommandMessages.ShowViewsCommand.NO_VIEWS;
+import static org.komodo.relational.commands.model.ModelCommandMessages.ShowViewsCommand.VIEWS_HEADER;
 import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.PRINT_RELATIONAL_OBJECT;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
-import org.komodo.relational.vdb.DataRole;
-import org.komodo.relational.vdb.Vdb;
+import org.komodo.relational.model.Model;
+import org.komodo.relational.model.View;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
- * A shell command to show all data roles in a VDB.
+ * A shell command to show all the {@link View views} of a {@link Model model}.
  */
-public final class ShowDataRolesCommand extends VdbShellCommand {
+public final class ShowViewsCommand extends ModelShellCommand {
 
-    static final String NAME = "show-data-roles"; //$NON-NLS-1$
+    static final String NAME = "show-views"; //$NON-NLS-1$
 
     /**
      * @param status
      *        the shell's workspace status (cannot be <code>null</code>)
      */
-    public ShowDataRolesCommand( final WorkspaceStatus status ) {
+    public ShowViewsCommand( final WorkspaceStatus status ) {
         super( NAME, status );
     }
 
@@ -41,19 +40,21 @@ public final class ShowDataRolesCommand extends VdbShellCommand {
     @Override
     protected CommandResult doExecute() {
         try {
-            final UnitOfWork uow = getTransaction();
-            final Vdb vdb = getVdb();
-            final DataRole[] dataRoles = vdb.getDataRoles( uow );
+            final Model model = getModel();
+            final View[] views = model.getViews( getTransaction() );
 
-            if ( dataRoles.length == 0 ) {
-                print( MESSAGE_INDENT, getMessage( NO_DATA_ROLES, vdb.getName( uow ) ) );
+            if ( views.length == 0 ) {
+                print( MESSAGE_INDENT, getMessage( NO_VIEWS, model.getName( getTransaction() ) ) );
             } else {
-                print( MESSAGE_INDENT, getMessage( DATA_ROLES_HEADER, vdb.getName( uow ) ) );
+                print( MESSAGE_INDENT, getMessage( VIEWS_HEADER, model.getName( getTransaction() ) ) );
 
                 final int indent = (MESSAGE_INDENT * 2);
 
-                for ( final DataRole role : dataRoles ) {
-                    print( indent, getMessage( PRINT_RELATIONAL_OBJECT, role.getName( uow ), role.getTypeDisplayName() ) );
+                for ( final View view : views ) {
+                    print( indent,
+                           getWorkspaceMessage( PRINT_RELATIONAL_OBJECT,
+                                                view.getName( getTransaction() ),
+                                                view.getTypeDisplayName() ) );
                 }
             }
 

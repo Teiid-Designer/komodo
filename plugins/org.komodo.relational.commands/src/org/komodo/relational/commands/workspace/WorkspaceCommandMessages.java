@@ -26,6 +26,7 @@ public class WorkspaceCommandMessages implements StringConstants {
     public enum General {
         ERROR_DDL_EMPTY,
         ERROR_WRITING_FILE,
+        INPUT_FILE_ERROR,
         INVALID_BOOLEAN_PROPERTY_VALUE,
         INVALID_INTEGER_PROPERTY_VALUE,
         INVALID_NULLABLE_PROPERTY_VALUE,
@@ -38,7 +39,7 @@ public class WorkspaceCommandMessages implements StringConstants {
         MISSING_TEIID_NAME,
         MISSING_SCHEMA_NAME,
         OUTPUT_FILE_ERROR,
-        INPUT_FILE_ERROR,
+        PRINT_RELATIONAL_OBJECT,
         SET_PROPERTY_SUCCESS,
         UNSET_MISSING_PROPERTY_NAME,
         UNSET_PROPERTY_SUCCESS;

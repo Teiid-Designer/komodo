@@ -75,7 +75,7 @@ public interface Model extends Exportable, RelationalObject {
      * The resolver of a {@link Model}.
      */
     public static final TypeResolver< Model > RESOLVER = new TypeResolver< Model >() {
-    
+
         /**
          * {@inheritDoc}
          *
@@ -91,16 +91,16 @@ public interface Model extends Exportable, RelationalObject {
                              final RelationalProperties properties ) throws KException {
             final AdapterFactory adapter = new AdapterFactory( );
             final Vdb parentVdb = adapter.adapt( transaction, parent, Vdb.class );
-    
+
             if ( parentVdb == null ) {
                 throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
                                                           parent.getAbsolutePath(),
                                                           Model.class.getSimpleName() ) );
             }
-    
+
             return parentVdb.addModel( transaction, id );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -110,7 +110,7 @@ public interface Model extends Exportable, RelationalObject {
         public KomodoType identifier() {
             return IDENTIFIER;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -120,7 +120,7 @@ public interface Model extends Exportable, RelationalObject {
         public Class< ModelImpl > owningClass() {
             return ModelImpl.class;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -132,7 +132,7 @@ public interface Model extends Exportable, RelationalObject {
                                    final KomodoObject kobject ) throws KException {
             return ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, VdbLexicon.Vdb.DECLARATIVE_MODEL );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -144,7 +144,7 @@ public interface Model extends Exportable, RelationalObject {
                               final KomodoObject kobject ) throws KException {
             return new ModelImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
-    
+
     };
 
     /**
@@ -241,8 +241,6 @@ public interface Model extends Exportable, RelationalObject {
     String getDescription( final UnitOfWork transaction ) throws KException;
 
     /**
-     * No functions are returned.
-     *
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return the functions found in this model (never <code>null</code> but can be empty)

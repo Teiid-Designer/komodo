@@ -9,6 +9,7 @@ package org.komodo.relational.commands.datarole;
 
 import java.util.HashSet;
 import java.util.Set;
+import org.komodo.relational.commands.vdb.ShowDataRolesCommand;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandProvider;
@@ -43,6 +44,9 @@ public class DataRoleCommandProvider implements ShellCommandProvider {
         result.add( DeleteMappedRoleCommand.class );
         result.add( DeletePermissionCommand.class );
         result.add( SetDataRolePropertyCommand.class );
+        result.add( ShowDataRolesCommand.class );
+        result.add( ShowMappedRolesCommand.class );
+        result.add( ShowPermissionsCommand.class );
         result.add( UnsetDataRolePropertyCommand.class );
 
         return result;

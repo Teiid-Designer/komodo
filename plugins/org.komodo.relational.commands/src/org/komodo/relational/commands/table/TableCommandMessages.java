@@ -92,7 +92,7 @@ public class TableCommandMessages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     @SuppressWarnings( "javadoc" )
     public enum AddPrimaryKeyCommand {
         PK_EXISTS_CANT_ADD,
@@ -158,6 +158,54 @@ public class TableCommandMessages implements StringConstants {
     public enum DeletePrimaryKeyCommand {
         NO_PK_TO_REMOVE,
         PRIMARY_KEY_DELETED;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum ShowAccessPatternsCommand {
+
+        ACCESS_PATTERNS_HEADER,
+        NO_ACCESS_PATTERNS;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum ShowColumnsCommand {
+
+        COLUMNS_HEADER,
+        NO_COLUMNS;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum ShowIndexesCommand {
+
+        INDEXES_HEADER,
+        NO_INDEXES;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum ShowUniqueConstraintsCommand {
+
+        NO_UNIQUE_CONSTRAINTS,
+        UNIQUE_CONSTRAINTS_HEADER;
 
         @Override
         public String toString() {

@@ -55,6 +55,11 @@ public class TableCommandProvider implements ShellCommandProvider {
         result.add( SetTablePropertyCommand.class );
         result.add( UnsetTablePropertyCommand.class );
 
+        result.add( ShowAccessPatternsCommand.class );
+        result.add( ShowColumnsCommand.class );
+        result.add( ShowIndexesCommand.class );
+        result.add( ShowUniqueConstraintsCommand.class );
+
         return result;
     }
 

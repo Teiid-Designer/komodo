@@ -7,9 +7,9 @@
  */
 package org.komodo.relational.commands.vdb;
 
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.NAME_TYPE_DISPLAY;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowModelsCommand.MODELS_HEADER;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowModelsCommand.NO_MODELS;
+import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.PRINT_RELATIONAL_OBJECT;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.vdb.Vdb;
@@ -40,29 +40,28 @@ public final class ShowModelsCommand extends VdbShellCommand {
      */
     @Override
     protected CommandResult doExecute() {
-        CommandResult result = null;
-
         try {
             final UnitOfWork uow = getTransaction();
             final Vdb vdb = getVdb();
             final Model[] models = vdb.getModels( uow );
 
             if ( models.length == 0 ) {
-                result = new CommandResultImpl( getMessage( NO_MODELS, vdb.getName( uow ) ) );
+                print( MESSAGE_INDENT, getMessage( NO_MODELS, vdb.getName( uow ) ) );
             } else {
                 print( MESSAGE_INDENT, getMessage( MODELS_HEADER, vdb.getName( uow ) ) );
 
+                final int indent = (MESSAGE_INDENT * 2);
+
                 for ( final Model model : models ) {
-                    print( MESSAGE_INDENT, getMessage( NAME_TYPE_DISPLAY, model.getName( uow ), model.getTypeDisplayName() ) );
+                    print( indent,
+                           getMessage( PRINT_RELATIONAL_OBJECT, model.getName( uow ), model.getTypeDisplayName() ) );
                 }
-
-                result = CommandResult.SUCCESS;
             }
-        } catch ( final Exception e ) {
-            result = new CommandResultImpl( e );
-        }
 
-        return result;
+            return CommandResult.SUCCESS;
+        } catch ( final Exception e ) {
+            return new CommandResultImpl( e );
+        }
     }
 
     /**

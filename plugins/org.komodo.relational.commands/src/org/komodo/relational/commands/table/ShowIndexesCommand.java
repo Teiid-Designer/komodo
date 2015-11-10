@@ -5,31 +5,30 @@
  *
  * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
  */
-package org.komodo.relational.commands.vdb;
+package org.komodo.relational.commands.table;
 
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowDataRolesCommand.DATA_ROLES_HEADER;
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowDataRolesCommand.NO_DATA_ROLES;
+import static org.komodo.relational.commands.table.TableCommandMessages.ShowIndexesCommand.INDEXES_HEADER;
+import static org.komodo.relational.commands.table.TableCommandMessages.ShowIndexesCommand.NO_INDEXES;
 import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.PRINT_RELATIONAL_OBJECT;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
-import org.komodo.relational.vdb.DataRole;
-import org.komodo.relational.vdb.Vdb;
+import org.komodo.relational.model.Index;
+import org.komodo.relational.model.Table;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
- * A shell command to show all data roles in a VDB.
+ * A shell command to show all the {@link Index indexes} of a {@link Table}.
  */
-public final class ShowDataRolesCommand extends VdbShellCommand {
+public final class ShowIndexesCommand extends TableShellCommand {
 
-    static final String NAME = "show-data-roles"; //$NON-NLS-1$
+    static final String NAME = "show-indexes"; //$NON-NLS-1$
 
     /**
      * @param status
      *        the shell's workspace status (cannot be <code>null</code>)
      */
-    public ShowDataRolesCommand( final WorkspaceStatus status ) {
+    public ShowIndexesCommand( final WorkspaceStatus status ) {
         super( NAME, status );
     }
 
@@ -41,19 +40,21 @@ public final class ShowDataRolesCommand extends VdbShellCommand {
     @Override
     protected CommandResult doExecute() {
         try {
-            final UnitOfWork uow = getTransaction();
-            final Vdb vdb = getVdb();
-            final DataRole[] dataRoles = vdb.getDataRoles( uow );
+            final Table table = getTable();
+            final Index[] indexes = table.getIndexes( getTransaction() );
 
-            if ( dataRoles.length == 0 ) {
-                print( MESSAGE_INDENT, getMessage( NO_DATA_ROLES, vdb.getName( uow ) ) );
+            if ( indexes.length == 0 ) {
+                print( MESSAGE_INDENT, getMessage( NO_INDEXES, table.getName( getTransaction() ) ) );
             } else {
-                print( MESSAGE_INDENT, getMessage( DATA_ROLES_HEADER, vdb.getName( uow ) ) );
+                print( MESSAGE_INDENT, getMessage( INDEXES_HEADER, table.getName( getTransaction() ) ) );
 
                 final int indent = (MESSAGE_INDENT * 2);
 
-                for ( final DataRole role : dataRoles ) {
-                    print( indent, getMessage( PRINT_RELATIONAL_OBJECT, role.getName( uow ), role.getTypeDisplayName() ) );
+                for ( final Index index : indexes ) {
+                    print( indent,
+                           getWorkspaceMessage( PRINT_RELATIONAL_OBJECT,
+                                                index.getName( getTransaction() ),
+                                                index.getTypeDisplayName() ) );
                 }
             }
 

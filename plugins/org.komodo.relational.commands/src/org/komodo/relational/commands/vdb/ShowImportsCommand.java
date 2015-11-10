@@ -7,9 +7,9 @@
  */
 package org.komodo.relational.commands.vdb;
 
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.NAME_TYPE_DISPLAY;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowImportsCommand.IMPORTS_HEADER;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowImportsCommand.NO_IMPORTS;
+import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.PRINT_RELATIONAL_OBJECT;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.VdbImport;
@@ -40,30 +40,28 @@ public final class ShowImportsCommand extends VdbShellCommand {
      */
     @Override
     protected CommandResult doExecute() {
-        CommandResult result = null;
-
         try {
             final UnitOfWork uow = getTransaction();
             final Vdb vdb = getVdb();
             final VdbImport[] imports = vdb.getImports( uow );
 
             if ( imports.length == 0 ) {
-                result = new CommandResultImpl( getMessage( NO_IMPORTS, vdb.getName( uow ) ) );
+                print( MESSAGE_INDENT, getMessage( NO_IMPORTS, vdb.getName( uow ) ) );
             } else {
                 print( MESSAGE_INDENT, getMessage( IMPORTS_HEADER, vdb.getName( uow ) ) );
 
+                final int indent = (MESSAGE_INDENT * 2);
+
                 for ( final VdbImport theImport : imports ) {
-                    print( MESSAGE_INDENT,
-                           getMessage( NAME_TYPE_DISPLAY, theImport.getName( uow ), theImport.getTypeDisplayName() ) );
+                    print( indent,
+                           getMessage( PRINT_RELATIONAL_OBJECT, theImport.getName( uow ), theImport.getTypeDisplayName() ) );
                 }
-
-                result = CommandResult.SUCCESS;
             }
-        } catch ( final Exception e ) {
-            result = new CommandResultImpl( e );
-        }
 
-        return result;
+            return CommandResult.SUCCESS;
+        } catch ( final Exception e ) {
+            return new CommandResultImpl( e );
+        }
     }
 
     /**

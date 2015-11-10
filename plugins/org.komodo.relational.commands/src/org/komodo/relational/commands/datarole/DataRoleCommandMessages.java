@@ -74,6 +74,32 @@ public class DataRoleCommandMessages implements StringConstants {
         }
     }
 
+    @SuppressWarnings( "javadoc" )
+    public enum ShowMappedRolesCommand {
+
+        MAPPED_ROLES_HEADER,
+        NO_MAPPED_ROLES;
+
+        @Override
+        public String toString() {
+            return getEnumName( this ) + DOT + name();
+        }
+
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum ShowPermissionsCommand {
+
+        NO_PERMISSIONS,
+        PERMISSIONS_HEADER;
+
+        @Override
+        public String toString() {
+            return getEnumName( this ) + DOT + name();
+        }
+
+    }
+
     private static String getEnumName(Enum<?> enumValue) {
         String className = enumValue.getClass().getName();
         String[] components = className.split("\\$"); //$NON-NLS-1$
