@@ -33,6 +33,7 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.TeiidVdb;
 import org.komodo.utils.StringUtils;
+import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 /**
  * A shell command to deploy a workspace VDB to the connected server.
@@ -71,22 +72,15 @@ public final class ServerDeployVdbCommand extends ServerShellCommand {
                 return new CommandResultImpl( false, getMessage( OverwriteArgInvalid, overwriteArg ), null );
             }
             
-            // Find the VDB to deploy
-            final WorkspaceManager mgr = getWorkspaceManager();
-            final Vdb[] vdbs = mgr.findVdbs(getTransaction());
-            Vdb vdbToDeploy = null;
-            for(Vdb vdb : vdbs) {
-                if(vdb.getName(getTransaction()).equals(vdbName)) {
-                    vdbToDeploy = vdb;
-                    break;
-                }
-            }
-            
             // Return if VDB object not found
-            if(vdbToDeploy==null) {
+            if(!getWorkspaceManager().hasChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE)) {
                 return new CommandResultImpl( false, getMessage( WorkspaceVdbNotFound ), null );
             }
             
+            // Find the VDB to deploy
+            final KomodoObject vdbObj = getWorkspaceManager().getChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+            final Vdb vdbToDeploy = Vdb.RESOLVER.resolve(getTransaction(), vdbObj);
+
             // Validates that a server is connected
             CommandResult validationResult = validateHasConnectedWorkspaceServer();
             if ( !validationResult.isOk() ) {

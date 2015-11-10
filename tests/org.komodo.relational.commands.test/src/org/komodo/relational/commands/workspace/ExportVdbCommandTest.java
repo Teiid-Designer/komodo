@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.komodo.relational.commands.vdb;
+package org.komodo.relational.commands.workspace;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -29,10 +29,10 @@ import org.komodo.test.utils.TestUtilities;
 import org.w3c.dom.Document;
 
 /**
- * Test Class to test VDB {@link ExportCommand}.
+ * Test Class to test VDB {@link ExportVdbCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public class ExportCommandTest extends AbstractCommandTest {
+public class ExportVdbCommandTest extends AbstractCommandTest {
 
     private static final String TWEET_VDB = "./resources/tweet-example-vdb.xml";  //$NON-NLS-1$
     private static final String ALL_ELEMENTS_VDB = "./resources/teiid-vdb-all-elements.xml";  //$NON-NLS-1$
@@ -63,7 +63,7 @@ public class ExportCommandTest extends AbstractCommandTest {
         //
         // Create the export command instructions file
         //
-        File exportCmdFile = File.createTempFile("TestExportCommand", ".txt"); //$NON-NLS-1$  //$NON-NLS-2$
+        File exportCmdFile = File.createTempFile("TestExportVdbCommand", ".txt"); //$NON-NLS-1$  //$NON-NLS-2$
         exportCmdFile.deleteOnExit();
 
         //
@@ -78,8 +78,7 @@ public class ExportCommandTest extends AbstractCommandTest {
         final String[] commands = {
             "commit",
             "workspace",
-            "cd " + tweetVdb.getName(getTransaction()),
-            "export-vdb " + exportDest.getAbsolutePath() };
+            "export-vdb " + tweetVdb.getName(getTransaction()) + " " + exportDest.getAbsolutePath() };
         final CommandResult result = execute( commands );
         assertCommandResultOk(result);
         assertTrue(exportDest.exists());
@@ -103,7 +102,7 @@ public class ExportCommandTest extends AbstractCommandTest {
         //
         // Create the export command instructions file
         //
-        File exportCmdFile = File.createTempFile("TestExportCommand", ".txt"); //$NON-NLS-1$  //$NON-NLS-2$
+        File exportCmdFile = File.createTempFile("TestExportVdbCommand", ".txt"); //$NON-NLS-1$  //$NON-NLS-2$
         exportCmdFile.deleteOnExit();
 
         //
@@ -118,8 +117,7 @@ public class ExportCommandTest extends AbstractCommandTest {
         final String[] commands = {
             "commit",
             "workspace",
-            "cd " + allElementsVdb.getName(getTransaction()),
-            "export-vdb " + exportDest.getAbsolutePath() };
+            "export-vdb " + allElementsVdb.getName(getTransaction()) + " " + exportDest.getAbsolutePath() };
         final CommandResult result = execute( commands );
         assertCommandResultOk(result);
         assertTrue(exportDest.exists());
