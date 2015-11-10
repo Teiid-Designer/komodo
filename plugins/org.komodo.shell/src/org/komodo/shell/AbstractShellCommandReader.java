@@ -105,7 +105,7 @@ public abstract class AbstractShellCommandReader implements ShellCommandReader {
 		String commandName = arguments.removeCommandName();
 
 		// Create the command.
-		ShellCommand command = factory.getCommand(commandName);
+		ShellCommand command = this.wsStatus.getCommand(commandName);
 		command.setArguments(arguments);
 		command.setWriter(getOutputWriter());
 		return command;

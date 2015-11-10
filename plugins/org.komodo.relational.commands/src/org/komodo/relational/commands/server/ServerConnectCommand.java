@@ -59,6 +59,10 @@ public final class ServerConnectCommand extends ServerShellCommand {
                 teiidInstance.connect();
                 boolean connected = teiidInstance.isConnected();
                 String connectStatus = connected ? getMessage( Connected ) : Messages.getString( NotConnected );
+
+                // Updates available commands upon connecting
+                getWorkspaceStatus().updateAvailableCommands();
+                
                 result = new CommandResultImpl( getMessage( TeiidStatus, teiid.getName( getTransaction() ), connectStatus ) );
             } catch ( Exception ex ) {
                 result = new CommandResultImpl( false, getMessage( ConnectionError, ex.getLocalizedMessage() ), ex );

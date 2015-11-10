@@ -70,6 +70,10 @@ public final class ServerSetCommand extends ServerShellCommand {
 
             // Set the server on workspace status
             getWorkspaceStatus().setStateObject( ServerCommandProvider.SERVER_DEFAULT_KEY, wsTeiid );
+            
+            // Updates available commands upon setting server
+            getWorkspaceStatus().updateAvailableCommands();
+            
             result = new CommandResultImpl( getMessage( ServerSetSuccess, serverName ) );
         } catch ( final Exception e ) {
             result = new CommandResultImpl( e );

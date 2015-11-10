@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import org.komodo.core.KEngine;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
@@ -103,11 +104,23 @@ public interface WorkspaceStatus extends StringConstants {
     } );
 
     /**
+     * @return the command names available for the current context (never <code>null</code>)
+     * @throws Exception
+     *         if an error occurs
+     */
+    String[] getAvailableCommandNames() throws Exception;
+
+    /**
      * @return the commands available for the current context (never <code>null</code>)
      * @throws Exception
      *         if an error occurs
      */
-    String[] getAvailableCommands() throws Exception;
+    Set<ShellCommand> getAvailableCommands() throws Exception;
+    
+    /**
+     * Update the available commands for the current context.
+     */
+    void updateAvailableCommands();
 
     /**
      * @param commandName

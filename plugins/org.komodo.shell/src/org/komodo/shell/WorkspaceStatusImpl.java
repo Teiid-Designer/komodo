@@ -41,6 +41,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.ServiceLoader;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 import org.komodo.core.KEngine;
 import org.komodo.repository.ObjectImpl;
@@ -99,6 +100,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     private boolean recordingStatus = false;
     private Writer recordingFileWriter = null;
     private ShellCommandFactory commandFactory;
+    private Set<ShellCommand> currentContextCommands = new HashSet<ShellCommand>();
 
     private Map<String,KomodoObject> stateObjects = new HashMap<String,KomodoObject>();
 
@@ -365,7 +367,51 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
             }
         }
 
+        // Update Available Commands on context change
+        updateAvailableCommands( );
+        
         fireContextChangeEvent();
+    }
+    
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.WorkspaceStatus#getAvailableCommands()
+     */
+    @Override
+    public Set<ShellCommand> getAvailableCommands() {
+        if(this.currentContextCommands.isEmpty()) {
+            updateAvailableCommands();
+        }
+        return this.currentContextCommands;
+    }
+    
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.WorkspaceStatus#getAvailableCommandNames()
+     */
+    @Override
+    public String[] getAvailableCommandNames() throws Exception {
+        final Set< String > commandNames = new TreeSet< >();
+
+        for ( final ShellCommand possible : getAvailableCommands() ) {
+            commandNames.add( possible.getName() );
+        }
+        
+        return commandNames.toArray( new String[0] );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.WorkspaceStatus#updateAvailableCommands()
+     */
+    @Override
+    public void updateAvailableCommands() {
+        this.currentContextCommands.clear();
+        
+        this.currentContextCommands.addAll(this.commandFactory.getCommandsForCurrentContext());
     }
 
     @Override
@@ -677,7 +723,23 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
      */
     @Override
     public ShellCommand getCommand( final String commandName ) throws Exception {
-        return this.commandFactory.getCommand( commandName );
+        Set<ShellCommand> availableCommands = getAvailableCommands();
+        // see if there is a match
+        for ( final ShellCommand possible : availableCommands ) {
+            if ( commandName.equals( possible.getName() ) ) {
+                return possible;
+            }
+        }
+
+        // see if there is a matching alias
+        for ( final ShellCommand possible : availableCommands ) {
+            if ( Arrays.asList( possible.getAliases() ).contains( commandName ) ) {
+                return possible;
+            }
+        }
+
+        // command can't be found
+        return this.getCommandFactory().getCommand(ShellCommand.COMMAND_NOT_FOUND);
     }
 
     /* (non-Javadoc)
@@ -791,16 +853,6 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
                 provider.initWorkspaceState(this);
             }
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.WorkspaceStatus#getAvailableCommands()
-     */
-    @Override
-    public String[] getAvailableCommands() throws Exception {
-        return this.commandFactory.getCommandNamesForCurrentContext().toArray( new String[ 0 ] );
     }
 
     @Override

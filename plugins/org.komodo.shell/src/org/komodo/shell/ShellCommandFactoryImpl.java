@@ -222,8 +222,9 @@ public class ShellCommandFactoryImpl implements ShellCommandFactory {
         _commandNotFound.command = commandName;
         return _commandNotFound;
     }
-
-    private Set< ShellCommand > getCommandsForCurrentContext() throws Exception {
+    
+    @Override
+    public Set< ShellCommand > getCommandsForCurrentContext() {
         final Set< ShellCommand > availableCommands = new HashSet< >();
 
         for ( final String cmdName : this.commandMap.keySet() ) {
@@ -281,7 +282,7 @@ public class ShellCommandFactoryImpl implements ShellCommandFactory {
      * @see org.komodo.shell.api.ShellCommandFactory#getCommandNamesForCurrentContext()
      */
     @Override
-    public Set< String > getCommandNamesForCurrentContext() throws Exception {
+    public Set< String > getCommandNamesForCurrentContext() {
         final Set< String > commandNames = new TreeSet< >();
 
         for ( final ShellCommand possible : getCommandsForCurrentContext() ) {

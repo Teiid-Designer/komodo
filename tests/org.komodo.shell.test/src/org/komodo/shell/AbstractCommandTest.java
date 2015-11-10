@@ -133,7 +133,7 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
     }
 
     protected void assertCommandsNotAvailable( final String... cmdNames ) throws Exception {
-        final Collection< String > available = Arrays.asList( this.wsStatus.getAvailableCommands() );
+        final Collection< String > available = Arrays.asList( this.wsStatus.getAvailableCommandNames() );
 
         for ( final String name : cmdNames ) {
             if ( available.contains( name ) ) {

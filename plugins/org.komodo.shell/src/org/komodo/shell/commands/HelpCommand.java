@@ -157,7 +157,7 @@ public class HelpCommand extends BuiltInShellCommand {
 	 */
 	private void printHelpAll() throws Exception {
         print( MESSAGE_INDENT, Messages.getString( SHELL.Help_COMMAND_LIST_MSG ) );
-        final String[] validCmdNames = getWorkspaceStatus().getAvailableCommands();
+        final String[] validCmdNames = getWorkspaceStatus().getAvailableCommandNames();
 
         if ( getWorkspaceStatus().isShowingCommandCategory() ) {
             final WorkspaceStatus status = getWorkspaceStatus();
@@ -219,7 +219,7 @@ public class HelpCommand extends BuiltInShellCommand {
                               List< CharSequence > candidates ) {
         if ( getArguments().isEmpty() ) {
             try {
-                for ( String candidate : getWorkspaceStatus().getAvailableCommands() ) {
+                for ( String candidate : getWorkspaceStatus().getAvailableCommandNames() ) {
                     if ( lastArgument == null || candidate.startsWith( lastArgument ) ) {
                         candidates.add( candidate );
                     }
