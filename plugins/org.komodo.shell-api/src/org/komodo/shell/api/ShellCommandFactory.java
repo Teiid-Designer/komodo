@@ -30,9 +30,12 @@ public interface ShellCommandFactory {
 
     /**
      * @return a sorted collection of the valid command names for the current context (never <code>null</code>)
-     * @throws Exception
-     *         if error occurs
      */
-    Set< String > getCommandNamesForCurrentContext() throws Exception;
+    Set< String > getCommandNamesForCurrentContext();
+
+    /**
+     * @return a sorted collection of the valid command names for the current context (never <code>null</code>)
+     */
+    Set< ShellCommand > getCommandsForCurrentContext();
 
 }

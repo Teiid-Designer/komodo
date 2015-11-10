@@ -46,7 +46,6 @@ import org.komodo.shell.api.InvalidCommandArgumentException;
 import org.komodo.shell.api.KomodoShell;
 import org.komodo.shell.api.KomodoShellParent;
 import org.komodo.shell.api.ShellCommand;
-import org.komodo.shell.api.ShellCommandFactory;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.ExitCommand;
 import org.komodo.shell.commands.HelpCommand;
@@ -237,7 +236,6 @@ public class DefaultKomodoShell implements KomodoShell {
         startKEngine();
 
         wsStatus = new WorkspaceStatusImpl( this );
-        ShellCommandFactory factory = wsStatus.getCommandFactory();
 
         // load shell properties if they exist
         final String dataDir = getShellDataLocation();
@@ -264,7 +262,7 @@ public class DefaultKomodoShell implements KomodoShell {
         displayWelcomeMessage();
 
         // run help command
-        final ShellCommand helpCmd = factory.getCommand( HelpCommand.NAME );
+        final ShellCommand helpCmd = this.wsStatus.getCommand( HelpCommand.NAME );
         helpCmd.setArguments( new Arguments( EMPTY_STRING ) );
         helpCmd.setWriter( getOutputWriter() );
 

@@ -56,6 +56,10 @@ public final class ServerDisconnectCommand extends ServerShellCommand {
                        getMessage( AttemptingToDisconnect, teiid.getName( getTransaction() ) ) );
 
                 teiidInstance.disconnect();
+                
+                // Updates available commands upon disconnecting
+                getWorkspaceStatus().updateAvailableCommands();
+                
                 result = new CommandResultImpl( getMessage( DisconnectSuccessMsg, teiid.getName( getTransaction() ) ) );
             } else {
                 result = new CommandResultImpl( getMessage( NoServerToDisconnectMsg ) );
