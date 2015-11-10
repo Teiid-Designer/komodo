@@ -29,14 +29,32 @@ import org.modeshape.jcr.api.JcrConstants;
  */
 class ParentPathClause extends PathClause {
 
+    private boolean childrenOnly = false;
+
     /**
      * @param parent parent searcher
      * @param operator the logical operator preceding this clause (can be null if this is the only clause)
      * @param alias the alias of the selector
      * @param path path used in the clause
+     * @param childrenOnly true to return only the direct children
      */
-    public ParentPathClause(ObjectSearcher parent, LogicalOperator operator, String alias, String path) {
+    public ParentPathClause(ObjectSearcher parent, LogicalOperator operator, String alias, String path, boolean childrenOnly) {
         super(parent, operator, alias, path);
+        setChildrenOnly(childrenOnly);
+    }
+
+    /**
+     * @return the childrenOnly
+     */
+    public boolean isChildrenOnly() {
+        return this.childrenOnly;
+    }
+
+    /**
+     * @param childrenOnly the childrenOnly to set
+     */
+    public void setChildrenOnly(boolean childrenOnly) {
+        this.childrenOnly = childrenOnly;
     }
 
     @Override
@@ -50,28 +68,55 @@ class ParentPathClause extends PathClause {
 //        where e.[jcr:path] LIKE '/inf:patient[265]%'
 
         if (! StringUtils.isEmpty(getAlias())) {
-            buffer.append(getAlias());
-            buffer.append(DOT);
+            buffer.append(getAlias())
+                     .append(DOT);
         }
 
-        buffer.append(OPEN_SQUARE_BRACKET);
-        buffer.append(JcrConstants.JCR_PATH);
-        buffer.append(CLOSE_SQUARE_BRACKET);
+        buffer.append(OPEN_SQUARE_BRACKET)
+                 .append(JcrConstants.JCR_PATH)
+                 .append(CLOSE_SQUARE_BRACKET)
 
-        buffer.append(SPACE);
-        buffer.append(LIKE);
-        buffer.append(SPACE);
+                 .append(SPACE)
+                 .append(LIKE)
+                 .append(SPACE)
 
-        buffer.append(QUOTE_MARK);
-        buffer.append(getPath());
-        
+                 .append(QUOTE_MARK)
+                 .append(getPath());
+
         if (! getPath().endsWith(CLOSE_SQUARE_BRACKET) &&
              ! getPath().endsWith(FORWARD_SLASH))
             buffer.append(FORWARD_SLASH);
 
-        buffer.append(PERCENT);
-        buffer.append(QUOTE_MARK);
+        buffer.append(PERCENT)
+                 .append(QUOTE_MARK);
+
+        if (isChildrenOnly()) {
+
+            String path = getPath();
+            if (path.endsWith(PERCENT))
+                path = path.substring(0, path.length() - 2);
+
+            if (path.endsWith(FORWARD_SLASH))
+                path = path.substring(0, path.length() - 2);
+
+            buffer.append(SPACE)
+                     .append(LogicalOperator.AND)
+                     .append(SPACE)
+                     .append("ISCHILDNODE") //$NON-NLS-1$
+                     .append(OPEN_BRACKET);
+
+            if (! StringUtils.isEmpty(getAlias())) {
+                buffer.append(getAlias())
+                         .append(COMMA)
+                         .append(SPACE);
+            }
+
+            buffer.append(QUOTE_MARK)
+                     .append(path)
+                     .append(QUOTE_MARK)
+                     .append(CLOSE_BRACKET);
+        }
 
         return buffer.toString();
-    }    
+    }
 }

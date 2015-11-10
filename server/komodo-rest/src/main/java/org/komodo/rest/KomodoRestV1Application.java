@@ -220,6 +220,11 @@ public final class KomodoRestV1Application extends Application implements Reposi
         String SEARCH_PARENT_PARAMETER = "parent"; //$NON-NLS-1$
 
         /**
+         * The name of the URI search ancestor parameter
+         */
+        String SEARCH_ANCESTOR_PARAMETER = "ancestor"; //$NON-NLS-1$
+
+        /**
          * The vdb export xml property
          */
         String VDB_EXPORT_XML_PROPERTY = "vdb-export-xml"; //$NON-NLS-1$

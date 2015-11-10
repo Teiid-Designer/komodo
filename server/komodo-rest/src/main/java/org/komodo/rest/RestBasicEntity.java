@@ -125,6 +125,10 @@ public class RestBasicEntity implements V1Constants {
         properties = new KomodoProperties();
         properties.addProperty(SEARCH_PATH_PARAMETER, parent.getAbsolutePath());
         addLink(new RestLink(LinkType.PARENT, getUriBuilder().generateSearchUri(properties)));
+
+        properties = new KomodoProperties();
+        properties.addProperty(SEARCH_PARENT_PARAMETER, getDataPath());
+        addLink(new RestLink(LinkType.CHILDREN, getUriBuilder().generateSearchUri(properties)));
     }
 
     /**

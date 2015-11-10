@@ -126,4 +126,45 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
 
         assertPortfolio(vdb);
     }
+
+    @Test
+    public void shouldSearchByParent() throws Exception {
+        loadVdbs();
+
+        // get
+        KomodoProperties properties = new KomodoProperties();
+        properties.addProperty(SEARCH_PARENT_PARAMETER, PORTFOLIO_DATA_PATH);
+        URI uri = _uriBuilder.generateSearchUri(properties);
+
+        this.response = request(uri).get();
+        final String entity = this.response.readEntity(String.class);
+        System.out.println("Response:\n" + entity);
+        RestBasicEntity[] entities = KomodoJsonMarshaller.unmarshallArray(entity, RestBasicEntity[].class);
+        assertEquals(5, entities.length);
+
+        for (RestBasicEntity basicEntity : entities) {
+            RestVdbModel model = RestEntityFactory.resolve(basicEntity, RestVdbModel.class);
+            assertNotNull(model);
+        }
+    }
+
+    @Test
+    public void shouldSearchByAncestor() throws Exception {
+        loadVdbs();
+
+        // get
+        KomodoProperties properties = new KomodoProperties();
+        properties.addProperty(SEARCH_ANCESTOR_PARAMETER, PORTFOLIO_DATA_PATH);
+        URI uri = _uriBuilder.generateSearchUri(properties);
+
+        this.response = request(uri).get();
+        final String entity = this.response.readEntity(String.class);
+        System.out.println("Response:\n" + entity);
+        RestBasicEntity[] entities = KomodoJsonMarshaller.unmarshallArray(entity, RestBasicEntity[].class);
+        assertEquals(94, entities.length);
+
+        for (RestBasicEntity basicEntity : entities) {
+            System.out.println(basicEntity.getDataPath());
+        }
+    }
 }

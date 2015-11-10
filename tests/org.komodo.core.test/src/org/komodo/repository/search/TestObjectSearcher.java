@@ -335,11 +335,11 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
         commit(); // must commit for search queries to work
 
         //
-        // Test object searcher for immediate children beneath testModel1
+        // Test object searcher for immediate descendents beneath testModel1
         //
         ObjectSearcher os = new ObjectSearcher(_repo);
         os.addFromType(KomodoLexicon.VdbModelSource.NODE_TYPE);
-        os.addWhereParentClause(null, null, testModel1.getAbsolutePath());
+        os.addWhereParentClause(null, null, testModel1.getAbsolutePath(), false);
 
         String expected = "SELECT [jcr:path], [mode:localName] FROM " +
                                      OPEN_SQUARE_BRACKET +
@@ -362,9 +362,94 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
         //
         os = new ObjectSearcher(_repo);
         os.addFromType(KomodoLexicon.VdbModelSource.NODE_TYPE);
-        os.addWhereParentClause(null, null, workspace.getAbsolutePath());
+        os.addWhereParentClause(null, null, workspace.getAbsolutePath(), false);
         searchObjects = os.searchObjects(getTransaction());
         assertEquals(sourceTotal * 2, searchObjects.size());
+    }
+
+    @Test
+    public void executeFromQueryWithParentWhereDirectChildren() throws Exception {
+        int sourceTotal = 5;
+        assertNotNull(_repo);
+
+        // Create the komodo workspace
+        KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
+        assertNotNull(workspace);
+
+        KomodoObject testModel1 = workspace.addChild(getTransaction(), "TestModel1", KomodoLexicon.VdbModel.NODE_TYPE);
+        KomodoObject testModel2 = workspace.addChild(getTransaction(), "TestModel2", KomodoLexicon.VdbModel.NODE_TYPE);
+
+        for (int i = 1; i <= sourceTotal; ++i) {
+            KomodoObject child = testModel1.addChild(getTransaction(), "TestModelSource1-" + i, KomodoLexicon.VdbModelSource.NODE_TYPE);
+            child.addChild(getTransaction(), "TestModelSource1-Child" + i, KomodoLexicon.VdbModelSource.NODE_TYPE);
+        }
+
+        KomodoObject[] testNodes = testModel1.getChildrenOfType(getTransaction(), KomodoLexicon.VdbModelSource.NODE_TYPE);
+        assertEquals(sourceTotal, testNodes.length);
+
+        for (int i = 1; i <= sourceTotal; ++i) {
+            KomodoObject child = testModel2.addChild(getTransaction(), "TestModelSource2-" + i, KomodoLexicon.VdbModelSource.NODE_TYPE);
+            child.addChild(getTransaction(), "TestModelSource2-Child" + i, KomodoLexicon.VdbModelSource.NODE_TYPE);
+        }
+
+        testNodes = testModel2.getChildrenOfType(getTransaction(), KomodoLexicon.VdbModelSource.NODE_TYPE);
+        assertEquals(sourceTotal, testNodes.length);
+
+        commit(); // must commit for search queries to work
+
+        //
+        // Test object searcher for immediate children beneath testModel1
+        //
+        ObjectSearcher os = new ObjectSearcher(_repo);
+        os.addFromType(KomodoLexicon.VdbModelSource.NODE_TYPE);
+        os.addWhereParentClause(null, null, testModel1.getAbsolutePath(), true);
+
+        String expected = "SELECT [jcr:path], [mode:localName] FROM " +
+                                     OPEN_SQUARE_BRACKET +
+                                     KomodoLexicon.VdbModelSource.NODE_TYPE +
+                                     CLOSE_SQUARE_BRACKET +
+                                     " WHERE [" + JcrConstants.JCR_PATH + "] LIKE '" +
+                                     testModel1.getAbsolutePath() + "/%'" +
+                                     " AND ISCHILDNODE('" + testModel1.getAbsolutePath() + "')";
+        assertEquals(expected, os.toString());
+        System.out.println(expected);
+
+        List<KomodoObject> searchObjects = os.searchObjects(getTransaction());
+
+        // Only 5 children below testModel1
+        assertEquals(5, searchObjects.size());
+
+        for (KomodoObject searchObject : searchObjects) {
+            String name = searchObject.getName(getTransaction());
+            assertTrue(name.startsWith("TestModelSource1-"));
+        }
+
+        //
+        // Test object searcher for all descendents beneath testModel1
+        //
+        os = new ObjectSearcher(_repo);
+        os.addFromType(KomodoLexicon.VdbModelSource.NODE_TYPE);
+        os.addWhereParentClause(null, null, testModel1.getAbsolutePath(), false);
+
+        expected = "SELECT [jcr:path], [mode:localName] FROM " +
+                                     OPEN_SQUARE_BRACKET +
+                                     KomodoLexicon.VdbModelSource.NODE_TYPE +
+                                     CLOSE_SQUARE_BRACKET +
+                                     " WHERE [" + JcrConstants.JCR_PATH + "] LIKE '" +
+                                     testModel1.getAbsolutePath() + "/%'";
+        assertEquals(expected, os.toString());
+        System.out.println(expected);
+
+        searchObjects = os.searchObjects(getTransaction());
+
+        // 5 children and 5 grandchildren below testModel1
+        assertEquals(10, searchObjects.size());
+
+        for (KomodoObject searchObject : searchObjects) {
+            String name = searchObject.getName(getTransaction());
+            System.out.println(searchObject.getAbsolutePath());
+            assertTrue(name.startsWith("TestModelSource1-"));
+        }
     }
 
     @Test

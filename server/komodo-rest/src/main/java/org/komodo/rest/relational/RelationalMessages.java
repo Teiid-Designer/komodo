@@ -216,7 +216,12 @@ public final class RelationalMessages {
         /**
          * The search service lacks at least one parameter
          */
-        SEARCH_SERVICE_NO_PARAMETERS_ERROR;
+        SEARCH_SERVICE_NO_PARAMETERS_ERROR,
+
+        /**
+         * The search service has both parent and ancestor parameters
+         */
+        SEARCH_SERVICE_PARENT_ANCESTOR_EXCLUSIVE_ERROR;
 
         /**
          * {@inheritDoc}

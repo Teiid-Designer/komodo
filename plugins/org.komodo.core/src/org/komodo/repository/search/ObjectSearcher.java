@@ -229,13 +229,14 @@ public class ObjectSearcher implements SQLConstants {
      * @param operator the AND/OR operator preceding the clause. Can be <null> if the first clause
      * @param alias the alias of the selector
      * @param parentPath the path to be added
+     * @param childrenOnly set as true if to return only the direct children, false to return all descendants
      * @return this search object
      */
-    public ObjectSearcher addWhereParentClause(LogicalOperator operator, String alias, String parentPath) {
+    public ObjectSearcher addWhereParentClause(LogicalOperator operator, String alias, String parentPath, boolean childrenOnly) {
         if (whereClauses == null)
             whereClauses = new ArrayList<Clause>();
 
-        ParentPathClause pathClause = new ParentPathClause(this, operator, alias, parentPath);
+        ParentPathClause pathClause = new ParentPathClause(this, operator, alias, parentPath, childrenOnly);
         whereClauses.add(pathClause);
 
         return this;

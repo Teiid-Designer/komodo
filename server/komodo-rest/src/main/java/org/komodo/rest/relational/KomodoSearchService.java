@@ -176,6 +176,8 @@ public final class KomodoSearchService extends KomodoService {
      *        the request type parameter
      * @param parent
      *        the request parent parameter
+     * @param ancestor
+     *        the request ancestor parameter
      * @param path
      *        the request path of specific object
      * @param contains
@@ -201,6 +203,9 @@ public final class KomodoSearchService extends KomodoService {
                              @ApiParam(value = "The data path of the parent object",
                                                 required = false)
                              @QueryParam(value = SEARCH_PARENT_PARAMETER) String parent,
+                             @ApiParam(value = "The data path of the ancestor object",
+                                                required = false)
+                             @QueryParam(value = SEARCH_ANCESTOR_PARAMETER) String ancestor,
                              @ApiParam(value = "The data path of a specific object",
                                                 required = false)
                              @QueryParam(value = SEARCH_PATH_PARAMETER) String path,
@@ -212,9 +217,20 @@ public final class KomodoSearchService extends KomodoService {
         if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
             return notAcceptableMediaTypesBuilder().build();
 
-        if (type == null && path == null && parent == null && contains == null) {
+        if (type == null && path == null && parent == null &&
+            ancestor == null && contains == null) {
+
             String errorMessage = RelationalMessages.getString(
                                                                RelationalMessages.Error.SEARCH_SERVICE_NO_PARAMETERS_ERROR);
+
+            Object responseEntity = createErrorResponse(mediaTypes, errorMessage);
+            return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+        }
+
+        if (parent != null && ancestor != null) {
+
+            String errorMessage = RelationalMessages.getString(
+                                                           RelationalMessages.Error.SEARCH_SERVICE_PARENT_ANCESTOR_EXCLUSIVE_ERROR);
 
             Object responseEntity = createErrorResponse(mediaTypes, errorMessage);
             return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
@@ -235,7 +251,12 @@ public final class KomodoSearchService extends KomodoService {
 
             LogicalOperator operator = null;
             if (parent != null) {
-                os.addWhereParentClause(null, ALIAS, parent);
+                os.addWhereParentClause(null, ALIAS, parent, true);
+                operator = LogicalOperator.AND;
+            }
+
+            if (ancestor != null) {
+                os.addWhereParentClause(null, ALIAS, ancestor, false);
                 operator = LogicalOperator.AND;
             }
 
@@ -248,8 +269,6 @@ public final class KomodoSearchService extends KomodoService {
                 os.addWhereContainsClause(operator, ALIAS, STAR, contains);
                 operator = LogicalOperator.AND;
             }
-
-            System.out.println("Search String: " + os.toString());
 
             // Execute the search
             List<KomodoObject> searchObjects = os.searchObjects(uow);
