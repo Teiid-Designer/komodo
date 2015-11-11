@@ -54,7 +54,7 @@ To setup a development environment in Eclipse, please refer to this [article](ht
 
 ## Try out VDB Builder
 
-If you want to try out the __VDB Builder__ cli,  please see our [Samples Page](https://github.com/Teiid-Designer/teiid-designer-samples/tree/master/cli) to get started.
+If you want to try out the __VDB Builder__ cli,  please see our [VDB Builder Documentation](https://github.com/Teiid-Designer/komodo/tree/master/documentation/cli) to get started.
 
 ## Contribute fixes and features
 
