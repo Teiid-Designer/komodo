@@ -212,8 +212,14 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest im
         assertThat( this.uow.getState(), is( expectedState ) );
 
         if ( this.callback instanceof TestTransactionListener ) {
-            assertThat( ( ( TestTransactionListener )this.callback ).respondCallbackReceived(), is( true ) );
-            assertThat( ( ( TestTransactionListener )this.callback ).errorCallbackReceived(), is( false ) );
+            final boolean respond = ( UnitOfWork.State.COMMITTED == expectedState );
+
+            if ( !respond ) {
+                assertThat( expectedState, is( UnitOfWork.State.ERROR ) );
+            }
+
+            assertThat( ( ( TestTransactionListener )this.callback ).respondCallbackReceived(), is( respond ) );
+            assertThat( ( ( TestTransactionListener )this.callback ).errorCallbackReceived(), is( !respond ) );
         }
 
         this.callback = nextCallback;

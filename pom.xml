@@ -10,7 +10,7 @@
 	<groupId>org.jboss.tools</groupId>
 	<artifactId>komodo</artifactId>
 	<name>komodo</name>
-	<version>0.0.2-SNAPSHOT</version>
+	<version>0.0.3-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<properties>
@@ -32,8 +32,7 @@
 		<module>features</module>
 		<module>plugins</module>
 		<module>tests</module>
-<!--		<module>integration-tests</module>
--->
+		<module>integration-tests</module>
 		<module>site</module>
 		<module>build</module>
 	</modules>

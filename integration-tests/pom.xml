@@ -4,12 +4,12 @@
 	<parent>
 		<groupId>org.jboss.tools</groupId>
 		<artifactId>komodo</artifactId>
-		<version>0.0.2-SNAPSHOT</version>
+		<version>0.0.3-SNAPSHOT</version>
 	</parent>
 	<groupId>org.jboss.tools.komodo</groupId>
 	<artifactId>integration-tests</artifactId>
 	<name>integration-tests</name>
-	<version>0.0.2-SNAPSHOT</version>
+	<version>0.0.3-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<modules>
 

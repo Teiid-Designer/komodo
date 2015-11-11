@@ -2,7 +2,7 @@
 <feature
       id="org.komodo.ui.feature"
       label="Komodo UI"
-      version="0.0.2.qualifier">
+      version="0.0.3.qualifier">
 
    <description url="http://www.example.com/description">
       %description
@@ -32,12 +32,12 @@
       <import plugin="org.komodo.utils"/>
       <import plugin="org.komodo.modeshape.teiid.sql.sequencer"/>
       <import plugin="org.eclipse.equinox.registry"/>
-      <import plugin="org.komodo.teiid.client" version="0.0.1" match="compatible"/>
-      <import feature="org.komodo.engine.feature" version="0.0.1.qualifier"/>
-      <import plugin="org.komodo.shell-api" version="0.0.1" match="greaterOrEqual"/>
-      <import plugin="org.komodo.shell.lib" version="0.0.1" match="greaterOrEqual"/>
-      <import plugin="org.komodo.relational" version="0.0.1" match="greaterOrEqual"/>
-      <import plugin="org.komodo.importer" version="0.0.1" match="greaterOrEqual"/>
+      <import plugin="org.komodo.teiid.client" version="0.0.3" match="compatible"/>
+      <import feature="org.komodo.engine.feature" version="0.0.3.qualifier"/>
+      <import plugin="org.komodo.shell-api" version="0.0.3" match="greaterOrEqual"/>
+      <import plugin="org.komodo.shell.lib" version="0.0.3" match="greaterOrEqual"/>
+      <import plugin="org.komodo.relational" version="0.0.3" match="greaterOrEqual"/>
+      <import plugin="org.komodo.importer" version="0.0.3" match="greaterOrEqual"/>
    </requires>
 
    <plugin
