@@ -5,11 +5,11 @@
 	<parent>
 		<groupId>org.jboss.tools.komodo.plugins</groupId>
 		<artifactId>libs</artifactId>
-		<version>0.0.2-SNAPSHOT</version>
+		<version>0.0.3-SNAPSHOT</version>
 	</parent>
 	<groupId>org.jboss.tools.komodo.plugins.libs</groupId>
 	<artifactId>org.komodo.shell.lib</artifactId>
-	<version>0.0.2-SNAPSHOT</version>
+	<version>0.0.3-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
 
 	<properties>

@@ -2,9 +2,9 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.komodo.utils
-Bundle-Version: 0.0.2.qualifier
+Bundle-Version: 0.0.3.qualifier
 Bundle-Vendor: %pluginProvider
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Localization: plugin
-Require-Bundle: org.komodo.spi;bundle-version="0.0.1"
+Require-Bundle: org.komodo.spi;bundle-version="0.0.3"
 Export-Package: org.komodo.utils

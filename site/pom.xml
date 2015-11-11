@@ -5,13 +5,13 @@
   <parent>
     <groupId>org.jboss.tools</groupId>
     <artifactId>komodo</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>0.0.3-SNAPSHOT</version>
   </parent>
 
   <groupId>org.jboss.tools.komodo</groupId>
   <artifactId>site</artifactId>
   <name>Teiid Komodo</name>
-  <version>0.0.2-SNAPSHOT</version>
+  <version>0.0.3-SNAPSHOT</version>
   <packaging>eclipse-repository</packaging>
 
   <properties>

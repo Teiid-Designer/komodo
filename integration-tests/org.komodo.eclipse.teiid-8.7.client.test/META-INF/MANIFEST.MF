@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.komodo.eclipse.teiid-8.7.client.test;singleton:=true
-Bundle-Version: 0.0.2.qualifier
+Bundle-Version: 0.0.3.qualifier
 Bundle-Vendor: %pluginProvider
 Bundle-Localization: plugin
 Fragment-Host: org.komodo.teiid.client
@@ -10,7 +10,7 @@ Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Require-Bundle: org.junit;bundle-version="4.11.0",
  org.jboss.tools.locus.mockito;bundle-version="1.9.5",
- org.komodo.eclipse.test.utils;bundle-version="0.0.1"
+ org.komodo.eclipse.test.utils;bundle-version="0.0.3"
 Bundle-ClassPath: .,
  lib/jbossas/jboss-eap-6.1/jboss-modules.jar,
  lib/jbossas/jboss-eap-6.1/modules/system/layers/base/org/jboss/as/cli/main/jboss-as-cli-7.2.0.Alpha1-redhat-4.jar,

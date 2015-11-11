@@ -196,17 +196,6 @@ public final class ObjectImplTest extends AbstractLocalRepositoryTest {
     }
 
     @Test
-    public void shouldNotAllowAddingChildrenAtRoot() throws Exception {
-        try {
-            final KomodoObject kobject = _repo.komodoRoot( getTransaction() );
-            kobject.addChild( getTransaction(), "blah", null );
-            fail( "Should not allow adding children at the root" );
-        } catch ( final KException e ) {
-            // expected
-        }
-    }
-
-    @Test
     public void shouldNotAllowRemovingObjectsWithReservedPaths() throws Exception {
         for ( final String reservedPath : ObjectImpl.RESERVED_PATHS ) {
             try {
