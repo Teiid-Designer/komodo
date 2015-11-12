@@ -22,8 +22,8 @@ import org.komodo.core.KEngine;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.SynchronousCallback;
-import org.komodo.rest.RestBasicEntity.ResourceNotFound;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
+import org.komodo.rest.RestBasicEntity.ResourceNotFound;
 import org.komodo.rest.relational.RestEntityFactory;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.spi.KException;
@@ -119,7 +119,7 @@ public abstract class KomodoService implements V1Constants {
         Object responseEntity = null;
 
         if (acceptableMediaTypes.contains(MediaType.APPLICATION_JSON_TYPE))
-            responseEntity = OPEN_BRACE + "Error: " + errorMessage + CLOSE_BRACE; //$NON-NLS-1$
+            responseEntity = OPEN_BRACE + "\"Error\": \"" + errorMessage + "\"" + CLOSE_BRACE; //$NON-NLS-1$ //$NON-NLS-2$
         else if (acceptableMediaTypes.contains(MediaType.APPLICATION_XML_TYPE))
             responseEntity = "<error message=\"" + errorMessage + "\"></error>"; //$NON-NLS-1$ //$NON-NLS-2$
         else

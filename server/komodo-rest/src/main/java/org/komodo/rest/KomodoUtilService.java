@@ -284,14 +284,16 @@ public final class KomodoUtilService extends KomodoService {
             if (komodoType == null) {
                 String msg = RelationalMessages.getString(
                                                           RelationalMessages.Error.SCHEMA_SERVICE_GET_SCHEMA_UNKNOWN_KTYPE, ktype );
-                return Response.status(Status.NOT_FOUND).entity(msg).build();
+                Object response = createErrorResponse(mediaTypes, msg);
+                return Response.status(Status.NOT_FOUND).entity(response).build();
             }
 
             schema = reader.schemaByKType(komodoType);
             if (EMPTY_STRING.equals(schema)) {
                 String msg = RelationalMessages.getString(
                                                           RelationalMessages.Error.SCHEMA_SERVICE_GET_SCHEMA_NOT_FOUND, ktype );
-                return Response.status(Status.NOT_FOUND).entity(msg).build();
+                Object response = createErrorResponse(mediaTypes, msg);
+                return Response.status(Status.NOT_FOUND).entity(response).build();
             }
 
             return Response.ok().entity(schema).build();
