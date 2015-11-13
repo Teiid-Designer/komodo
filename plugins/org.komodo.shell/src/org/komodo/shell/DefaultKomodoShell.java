@@ -104,6 +104,24 @@ public class DefaultKomodoShell implements KomodoShell {
         };
 
         final DefaultKomodoShell shell = new DefaultKomodoShell( parent, KEngine.getInstance(), System.in, System.out );
+        
+        // Terminate if startup input is not valid
+        if( args.length == 1 && !args[0].equals("-simple") ) {  //$NON-NLS-1$ 
+            PrintUtils.print( shell.getOutputWriter(), false, 0, Messages.getString( SHELL.INVALID_STARTUP_ARGS, args[0] ) );
+            System.exit(0);
+        } else if( args.length > 1 ) { 
+            if(!args[0].equals("-f")) {  //$NON-NLS-1$ 
+                PrintUtils.print( shell.getOutputWriter(), false, 0, Messages.getString( SHELL.INVALID_STARTUP_ARGS, args[0] + " " + args[1] ) );  //$NON-NLS-1$
+                System.exit(0);
+            } else {
+                File inputFile = new File(args[1]);
+                if(!inputFile.isFile()) {
+                    PrintUtils.print( shell.getOutputWriter(), false, 0, Messages.getString( SHELL.INVALID_STARTUP_FILE, args[1] ) ); 
+                    System.exit(0);
+                }
+            }
+        }
+        
         Thread shutdownHook = new Thread( new Runnable() {
             @Override
             public void run() {
