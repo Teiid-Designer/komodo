@@ -8,6 +8,7 @@
 package org.komodo.rest.relational.json;
 
 import static org.junit.Assert.assertEquals;
+import org.jboss.resteasy.util.Encode;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.vdb.Vdb;
@@ -46,6 +47,10 @@ public final class VdbSerializerTest extends AbstractSerializerTest  {
         "    " + OPEN_BRACE + NEW_LINE +
         "      \"rel\": \"parent\"," + NEW_LINE +
         "      \"href\": \"" + BASE_URI_PREFIX + "/workspace/vdbs\"" + NEW_LINE +
+        "    " + CLOSE_BRACE + COMMA + NEW_LINE +
+        "    " + OPEN_BRACE + NEW_LINE +
+        "      \"rel\": \"children\"," + NEW_LINE +
+        "      \"href\": \"" + BASE_URI_PREFIX + SEARCH + "parent\\u003d" + Encode.encodeQueryParam(VDB_DATA_PATH) + "\"" + NEW_LINE +
         "    " + CLOSE_BRACE + COMMA + NEW_LINE +
         "    " + OPEN_BRACE + NEW_LINE +
         "      \"rel\": \"imports\"," + NEW_LINE +
@@ -100,7 +105,7 @@ public final class VdbSerializerTest extends AbstractSerializerTest  {
         assertEquals(VDB_NAME, descriptor.getName());
         assertEquals(DESCRIPTION, descriptor.getDescription());
         assertEquals(ORIGINAL_FILE, descriptor.getOriginalFilePath());
-        assertEquals(6, descriptor.getLinks().size());
+        assertEquals(7, descriptor.getLinks().size());
         assertEquals(true, descriptor.getProperties().isEmpty());
     }
 

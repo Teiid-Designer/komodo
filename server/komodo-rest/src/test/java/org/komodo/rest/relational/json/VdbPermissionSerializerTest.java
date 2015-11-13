@@ -10,6 +10,7 @@ package org.komodo.rest.relational.json;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import org.jboss.resteasy.util.Encode;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.vdb.DataRole;
@@ -59,6 +60,10 @@ public final class VdbPermissionSerializerTest extends AbstractSerializerTest {
     "    " + OPEN_BRACE + NEW_LINE +
     "      \"rel\": \"parent\"," + NEW_LINE +
     "      \"href\": \"" + BASE_URI_PREFIX + VDB_DATA_PATH + "/VdbDataRoles/MyDataRole\"" + NEW_LINE +
+    "    " + CLOSE_BRACE + COMMA + NEW_LINE +
+    "    " + OPEN_BRACE + NEW_LINE +
+    "      \"rel\": \"children\"," + NEW_LINE +
+    "      \"href\": \"" + BASE_URI_PREFIX + SEARCH + "parent\\u003d" + Encode.encodeQueryParam(PERM_DATA_PATH) + "\"" + NEW_LINE +
     "    " + CLOSE_BRACE + COMMA + NEW_LINE +
     "    " + OPEN_BRACE + NEW_LINE +
     "      \"rel\": \"conditions\"," + NEW_LINE +
@@ -111,7 +116,7 @@ public final class VdbPermissionSerializerTest extends AbstractSerializerTest {
         assertThat( permission.isAllowLanguage(), is( ALLOW_LANGUAGE ) );
         assertThat( permission.isAllowRead(), is( ALLOW_READ ) );
         assertThat( permission.isAllowUpdate(), is( ALLOW_UPDATE ) );
-        assertThat( permission.getLinks().size(), is( 4 ) );
+        assertThat( permission.getLinks().size(), is( 5 ) );
         assertThat( permission.getProperties().isEmpty(), is( true ) );
     }
 

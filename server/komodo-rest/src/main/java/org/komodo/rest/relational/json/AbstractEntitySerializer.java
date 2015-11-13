@@ -12,13 +12,10 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Map;
-import javax.ws.rs.core.UriBuilder;
-import org.komodo.rest.Messages;
 import org.komodo.rest.RestBasicEntity;
 import org.komodo.rest.RestLink;
 import org.komodo.rest.RestProperty;
 import org.komodo.rest.json.JsonConstants;
-import org.komodo.spi.repository.KomodoType;
 import org.komodo.utils.StringUtils;
 import com.google.gson.TypeAdapter;
 import com.google.gson.reflect.TypeToken;
@@ -62,44 +59,6 @@ public abstract class AbstractEntitySerializer< T extends RestBasicEntity > exte
     @Override
     public abstract T read( final JsonReader in ) throws IOException;
 
-    protected void readBasicProperties( final JsonReader in, final T value ) throws IOException {
-        IOException ioException = new IOException(Messages.getString(Messages.Error.INCOMPLETE_JSON, value.getClass().getSimpleName()));
-
-        if (! in.hasNext()) {
-            throw ioException;
-        }
-
-        String name = in.nextName();
-        if (ID.equals(name))
-            value.setId(in.nextString());
-        else
-            throw ioException;
-
-        name = in.nextName();
-        if (BASE_URI.equals(name))
-            value.setBaseUri(UriBuilder.fromUri(in.nextString()).build());
-        else
-            throw ioException;
-
-        name = in.nextName();
-        if(DATA_PATH.equals(name))
-            value.setDataPath(in.nextString());
-        else
-            throw ioException;
-
-        name = in.nextName();
-        if(KTYPE.equals(name))
-            value.setkType(KomodoType.getKomodoType(in.nextString()));
-        else
-            throw ioException;
-
-        name = in.nextName();
-        if(HAS_CHILDREN.equals(name))
-            value.setHasChildren(in.nextBoolean());
-        else
-            throw ioException;
-    }
-
     protected void readProperties( final JsonReader in, final T value ) {
         final RestProperty[] props = BUILDER.fromJson( in, RestProperty[].class );
         if (props == null)
@@ -122,28 +81,6 @@ public abstract class AbstractEntitySerializer< T extends RestBasicEntity > exte
      */
     @Override
     public abstract void write( final JsonWriter out, final T value ) throws IOException;
-
-    protected void writeBasicProperties( final JsonWriter out, final T value ) throws IOException {
-        // ID
-        out.name(ID);
-        out.value(value.getId());
-
-        // Base URI
-        out.name(BASE_URI);
-        out.value(value.getBaseUri().toString());
-
-        // Data path
-        out.name(DATA_PATH);
-        out.value(value.getDataPath());
-
-        // Komodo Type
-        out.name(KTYPE);
-        out.value(value.getkType().getType());
-
-        // Has Children
-        out.name(HAS_CHILDREN);
-        out.value(value.hasChildren());
-    }
 
     protected void writeProperties( final JsonWriter out, final T value ) throws IOException {
         if (value.getProperties().isEmpty())

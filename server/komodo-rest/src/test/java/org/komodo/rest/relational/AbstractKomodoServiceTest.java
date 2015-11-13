@@ -154,42 +154,44 @@ public abstract class AbstractKomodoServiceTest implements V1Constants {
         assertEquals("true", property.getValue());
 
         Collection<RestLink> links = vdb.getLinks();
-        assertEquals(6, links.size());
+        assertEquals(7, links.size());
 
         int linkCounter = 0;
         for (RestLink link : links) {
             String href = link.getHref().toString();
-            assertTrue(href.startsWith("http://localhost:8081/v1/workspace/vdbs"));
 
             if (link.getRel().equals(LinkType.SELF)) {
                 linkCounter++;
+                assertTrue(href.startsWith("http://localhost:8081/v1/workspace/vdbs"));
                 assertTrue(href.endsWith(TestUtilities.PORTFOLIO_VDB_NAME));
-            } else
-                if (link.getRel().equals(LinkType.PARENT)) {
+            } else if (link.getRel().equals(LinkType.PARENT)) {
                 linkCounter++;
+                assertTrue(href.startsWith("http://localhost:8081/v1/workspace/vdbs"));
+            } else if (link.getRel().equals(LinkType.CHILDREN)) {
+                linkCounter++;
+                assertTrue(href.startsWith("http://localhost:8081/v1/workspace/search"));
             } else {
+                assertTrue(href.startsWith("http://localhost:8081/v1/workspace/vdbs"));
+
                 String suffixPrefix = TestUtilities.PORTFOLIO_VDB_NAME + FORWARD_SLASH;
 
                 if (link.getRel().equals(LinkType.IMPORTS)) {
                     linkCounter++;
                     assertTrue(href.endsWith(suffixPrefix + LinkType.IMPORTS.uriName()));
-                } else
-                    if (link.getRel().equals(LinkType.MODELS)) {
+                } else if (link.getRel().equals(LinkType.MODELS)) {
                     linkCounter++;
                     assertTrue(href.endsWith(suffixPrefix + LinkType.MODELS.uriName()));
-                } else
-                        if (link.getRel().equals(LinkType.TRANSLATORS)) {
+                } else if (link.getRel().equals(LinkType.TRANSLATORS)) {
                     linkCounter++;
                     assertTrue(href.endsWith(suffixPrefix + LinkType.TRANSLATORS.uriName()));
-                } else
-                            if (link.getRel().equals(LinkType.DATA_ROLES)) {
+                } else if (link.getRel().equals(LinkType.DATA_ROLES)) {
                     linkCounter++;
                     assertTrue(href.endsWith(suffixPrefix + LinkType.DATA_ROLES.uriName()));
                 }
             }
         }
 
-        assertEquals(6, linkCounter);
+        assertEquals(7, linkCounter);
     }
 
 }

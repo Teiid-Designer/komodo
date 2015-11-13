@@ -10,6 +10,7 @@ package org.komodo.rest.relational.json;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import org.jboss.resteasy.util.Encode;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.vdb.Vdb;
@@ -21,7 +22,7 @@ import org.mockito.Mockito;
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class VdbImportSerializerTest extends AbstractSerializerTest {
 
-    private static final String IMP_DATA_PATH = "/workspace/MyVdb/vdbImports/MyImport";
+    private static final String IMP_DATA_PATH = VDB_DATA_PATH + "/vdbImports/MyImport";
     private static final boolean IMPORT_DATA_POLICIES = true;
     private static final String NAME = "MyImport";
     private static final int VERSION = 2;
@@ -43,6 +44,10 @@ public final class VdbImportSerializerTest extends AbstractSerializerTest {
         "    " + OPEN_BRACE + NEW_LINE +
         "      \"rel\": \"parent\"," + NEW_LINE +
         "      \"href\": \"" + BASE_URI_PREFIX + VDB_DATA_PATH + "\"" + NEW_LINE +
+        "    " + CLOSE_BRACE + COMMA + NEW_LINE +
+        "    " + OPEN_BRACE + NEW_LINE +
+        "      \"rel\": \"children\"," + NEW_LINE +
+        "      \"href\": \"" + BASE_URI_PREFIX + SEARCH + "parent\\u003d" + Encode.encodeQueryParam(IMP_DATA_PATH)  + "\"" + NEW_LINE +
         "    " + CLOSE_BRACE + NEW_LINE +
         "  " + CLOSE_SQUARE_BRACKET + NEW_LINE +
       CLOSE_BRACE;
@@ -76,7 +81,7 @@ public final class VdbImportSerializerTest extends AbstractSerializerTest {
         assertThat( vdbImport.isImportDataPolicies(), is( IMPORT_DATA_POLICIES ) );
         assertThat( vdbImport.getName(), is( NAME ) );
         assertThat( vdbImport.getVersion(), is( VERSION ) );
-        assertThat( vdbImport.getLinks().size(), is( 2 ) );
+        assertThat( vdbImport.getLinks().size(), is( 3 ) );
         assertThat( vdbImport.getProperties().isEmpty(), is( true ) );
     }
 

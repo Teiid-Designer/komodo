@@ -12,6 +12,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import java.util.Arrays;
 import java.util.List;
+import org.jboss.resteasy.util.Encode;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.vdb.DataRole;
@@ -26,7 +27,7 @@ public final class VdbDataRoleSerializerTest extends AbstractSerializerTest {
 
     private static final String NAME = "MyDataRole";
     private static final String DESCRIPTION = "my description";
-    private static final String ROLE_DATA_PATH = "/workspace/vdb1/vdbDataRoles/MyDataRole";
+    private static final String ROLE_DATA_PATH = VDB_DATA_PATH + "/vdbDataRoles/MyDataRole";
     private static final boolean ALLOW_CREATE_TEMP_TABLES = true;
     private static final boolean ANY_AUTHENTICATED = false;
     private static final boolean GRANT_ALL = false;
@@ -57,6 +58,10 @@ public final class VdbDataRoleSerializerTest extends AbstractSerializerTest {
         "    " + OPEN_BRACE + NEW_LINE +
         "      \"rel\": \"parent\"," + NEW_LINE +
         "      \"href\": \"" + BASE_URI_PREFIX + VDB_DATA_PATH + "\"" + NEW_LINE +
+        "    " + CLOSE_BRACE + COMMA + NEW_LINE +
+        "    " + OPEN_BRACE + NEW_LINE +
+        "      \"rel\": \"children\"," + NEW_LINE +
+        "      \"href\": \"" + BASE_URI_PREFIX + SEARCH + "parent\\u003d" + Encode.encodeQueryParam(ROLE_DATA_PATH) + "\"" + NEW_LINE +
         "    " + CLOSE_BRACE + COMMA + NEW_LINE +
         "    " + OPEN_BRACE + NEW_LINE +
         "      \"rel\": \"permissions\"," + NEW_LINE +
@@ -96,7 +101,7 @@ public final class VdbDataRoleSerializerTest extends AbstractSerializerTest {
         assertThat(dataRole.isAllowCreateTempTables(), is(ALLOW_CREATE_TEMP_TABLES));
         assertThat(dataRole.isAnyAuthenticated(), is(ANY_AUTHENTICATED));
         assertThat(dataRole.isGrantAll(), is(GRANT_ALL));
-        assertThat(dataRole.getLinks().size(), is(3));
+        assertThat(dataRole.getLinks().size(), is(4));
         assertThat(dataRole.getProperties().isEmpty(), is(true));
         assertThat(dataRole.getMappedRoles().length, is(MAPPED_ROLES.size()));
     }

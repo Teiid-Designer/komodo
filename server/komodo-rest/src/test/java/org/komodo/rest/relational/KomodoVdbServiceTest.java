@@ -255,7 +255,7 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
                 fail("Model has invalid id");
 
             Collection<RestLink> links = model.getLinks();
-            assertEquals(3, links.size());
+            assertEquals(4, links.size());
         }
     }
 
@@ -280,7 +280,7 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         assertEquals(Type.PHYSICAL, model.getModelType());
 
         Collection<RestLink> links = model.getLinks();
-        assertEquals(3, links.size());
+        assertEquals(4, links.size());
     }
 
     @Test
@@ -306,7 +306,7 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         assertEquals("excel", source.getTranslator());
 
         Collection<RestLink> links = source.getLinks();
-        assertEquals(2, links.size());
+        assertEquals(3, links.size());
     }
 
     @Test
@@ -330,7 +330,7 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         assertEquals("excel", source.getTranslator());
 
         Collection<RestLink> links = source.getLinks();
-        assertEquals(2, links.size());
+        assertEquals(3, links.size());
     }
 
     @Test
@@ -356,7 +356,7 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         assertEquals("Rest Web Service translator", translator.getDescription());
 
         Collection<RestLink> links = translator.getLinks();
-        assertEquals(2, links.size());
+        assertEquals(3, links.size());
     }
 
     @Test
@@ -396,7 +396,7 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         assertEquals("Rest Web Service translator", translator.getDescription());
 
         Collection<RestLink> links = translator.getLinks();
-        assertEquals(2, links.size());
+        assertEquals(3, links.size());
     }
 
     @Test
@@ -423,7 +423,7 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         assertEquals(false, vdbImport.isImportDataPolicies());
 
         Collection<RestLink> links = vdbImport.getLinks();
-        assertEquals(2, links.size());
+        assertEquals(3, links.size());
     }
 
     @Test
@@ -464,7 +464,7 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         assertEquals(false, vdbImport.isImportDataPolicies());
 
         Collection<RestLink> links = vdbImport.getLinks();
-        assertEquals(2, links.size());
+        assertEquals(3, links.size());
     }
 
     @Test
@@ -496,7 +496,7 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         assertTrue(dataRole.getMappedRoles()[1].equals("ROLE1") || dataRole.getMappedRoles()[1].equals("ROLE2"));
 
         Collection<RestLink> links = dataRole.getLinks();
-        assertEquals(3, links.size());
+        assertEquals(4, links.size());
     }
 
     @Test
@@ -542,7 +542,7 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         assertTrue(dataRole.getMappedRoles()[1].equals("ROLE1") || dataRole.getMappedRoles()[1].equals("ROLE2"));
 
         Collection<RestLink> links = dataRole.getLinks();
-        assertEquals(3, links.size());
+        assertEquals(4, links.size());
     }
 
     @Test
@@ -564,7 +564,7 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         for (RestVdbPermission permission : permissions) {
             assertEquals(KomodoType.VDB_PERMISSION, permission.getkType());
             Collection<RestLink> links = permission.getLinks();
-            assertEquals(4, links.size());
+            assertEquals(5, links.size());
 
             if (permission.getId().equals("myTable.T1")) {
                 assertFalse(permission.hasChildren());
@@ -641,7 +641,7 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         assertFalse(permission.isAllowUpdate());
 
         Collection<RestLink> links = permission.getLinks();
-        assertEquals(4, links.size());
+        assertEquals(5, links.size());
     }
 
     @Test
@@ -667,7 +667,7 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         assertFalse(condition.isConstraint());
 
         Collection<RestLink> links = condition.getLinks();
-        assertEquals(2, links.size());
+        assertEquals(3, links.size());
     }
 
     @Test
@@ -691,7 +691,7 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         assertFalse(condition.isConstraint());
 
         Collection<RestLink> links = condition.getLinks();
-        assertEquals(2, links.size());
+        assertEquals(3, links.size());
     }
 
     @Test
@@ -717,7 +717,7 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         assertEquals("1", mask.getOrder());
 
         Collection<RestLink> links = mask.getLinks();
-        assertEquals(2, links.size());
+        assertEquals(3, links.size());
     }
 
     @Test
@@ -741,6 +741,6 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         assertEquals("1", mask.getOrder());
 
         Collection<RestLink> links = mask.getLinks();
-        assertEquals(2, links.size());
+        assertEquals(3, links.size());
     }
 }

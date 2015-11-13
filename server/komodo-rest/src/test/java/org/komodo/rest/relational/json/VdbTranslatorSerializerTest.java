@@ -13,6 +13,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
+import org.jboss.resteasy.util.Encode;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.vdb.Translator;
@@ -26,7 +27,7 @@ import org.mockito.Mockito;
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class VdbTranslatorSerializerTest extends AbstractSerializerTest {
 
-    private static final String TR_DATA_PATH = "/workspace/MyVdb/vdbTranslators/MyTranslator";
+    private static final String TR_DATA_PATH = VDB_DATA_PATH + "/vdbTranslators/MyTranslator";
     private static final String DESCRIPTION = "my description";
     private static final String NAME = "MyTranslator";
     private static final int NUM_PROPS = 3;
@@ -71,6 +72,10 @@ public final class VdbTranslatorSerializerTest extends AbstractSerializerTest {
         "    " + OPEN_BRACE + NEW_LINE +
         "      \"rel\": \"parent\"," + NEW_LINE +
         "      \"href\": \"" + BASE_URI_PREFIX + VDB_DATA_PATH + "\"" + NEW_LINE +
+        "    " + CLOSE_BRACE + COMMA + NEW_LINE +
+        "    " + OPEN_BRACE + NEW_LINE +
+        "      \"rel\": \"children\"," + NEW_LINE +
+        "      \"href\": \"" + BASE_URI_PREFIX + SEARCH + "parent\\u003d" + Encode.encodeQueryParam(TR_DATA_PATH) + "\"" + NEW_LINE +
         "    " + CLOSE_BRACE + NEW_LINE +
         "  " + CLOSE_SQUARE_BRACKET + NEW_LINE +
     CLOSE_BRACE;
@@ -109,7 +114,7 @@ public final class VdbTranslatorSerializerTest extends AbstractSerializerTest {
         assertThat( translator.getDescription(), is( DESCRIPTION ) );
         assertThat( translator.getId(), is( NAME ) );
         assertThat( translator.getType(), is( TYPE ) );
-        assertThat( translator.getLinks().size(), is( 2 ) );
+        assertThat( translator.getLinks().size(), is( 3 ) );
         assertEquals( translator.getProperties().size(), NUM_PROPS);
 
         for (RestProperty property : translator.getProperties()) {
