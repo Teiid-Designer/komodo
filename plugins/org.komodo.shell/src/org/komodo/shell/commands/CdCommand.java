@@ -30,7 +30,6 @@ import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoObject;
-import org.komodo.utils.StringUtils;
 
 /**
  * CdCommand - allows changing the workspace context
