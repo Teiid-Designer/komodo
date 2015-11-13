@@ -17,6 +17,7 @@ package org.komodo.shell;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.jboss.aesh.complete.CompleteOperation;
 import org.jboss.aesh.complete.Completion;
 import org.komodo.core.KEngine;
@@ -24,6 +25,7 @@ import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.InvalidCommandArgumentException;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandFactory;
+import org.komodo.utils.StringUtils;
 
 /**
  * Implements tab completion for the interactive
@@ -130,7 +132,16 @@ public class TabCompleter implements Completion {
     						completeOperation.addCompletionCandidate(sequence.toString());
     					}
 
-    					completeOperation.setOffset( tabCompletionResult );
+						int offset;
+						if (list.isEmpty()) {
+							offset = -1;
+						} else if (StringUtils.isBlank(lastArgument)) {
+							offset = 0;
+						} else {
+							offset = command.toString().length() + 1;
+						}
+
+						completeOperation.setOffset(offset);
     				}
     				if (tabCompletionResult == CompletionConstants.NO_APPEND_SEPARATOR) {
     					completeOperation.doAppendSeparator(false);

@@ -112,7 +112,7 @@ public class CdCommand extends BuiltInShellCommand {
 			// The arg is expected to be a path
 			updateTabCompleteCandidatesForPath(candidates, currentContext, true, lastArgument);
 
-            return ( candidates.isEmpty() ? -1 : ( StringUtils.isBlank( lastArgument ) ? 0 : ( toString().length() + 1 ) ) );
+            return CompletionConstants.NO_APPEND_SEPARATOR;
 		}
 
 		return -1;
