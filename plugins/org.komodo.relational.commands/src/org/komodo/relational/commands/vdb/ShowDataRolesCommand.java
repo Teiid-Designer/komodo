@@ -7,9 +7,9 @@
  */
 package org.komodo.relational.commands.vdb;
 
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.NAME_TYPE_DISPLAY;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowDataRolesCommand.DATA_ROLES_HEADER;
 import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowDataRolesCommand.NO_DATA_ROLES;
+import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.PRINT_RELATIONAL_OBJECT;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Vdb;
@@ -40,29 +40,27 @@ public final class ShowDataRolesCommand extends VdbShellCommand {
      */
     @Override
     protected CommandResult doExecute() {
-        CommandResult result = null;
-
         try {
             final UnitOfWork uow = getTransaction();
             final Vdb vdb = getVdb();
             final DataRole[] dataRoles = vdb.getDataRoles( uow );
 
             if ( dataRoles.length == 0 ) {
-                result = new CommandResultImpl( getMessage( NO_DATA_ROLES, vdb.getName( uow ) ) );
+                print( MESSAGE_INDENT, getMessage( NO_DATA_ROLES, vdb.getName( uow ) ) );
             } else {
                 print( MESSAGE_INDENT, getMessage( DATA_ROLES_HEADER, vdb.getName( uow ) ) );
 
+                final int indent = (MESSAGE_INDENT * 2);
+
                 for ( final DataRole role : dataRoles ) {
-                    print( MESSAGE_INDENT, getMessage( NAME_TYPE_DISPLAY, role.getName( uow ), role.getTypeDisplayName() ) );
+                    print( indent, getMessage( PRINT_RELATIONAL_OBJECT, role.getName( uow ), role.getTypeDisplayName() ) );
                 }
-
-                result = CommandResult.SUCCESS;
             }
-        } catch ( final Exception e ) {
-            result = new CommandResultImpl( e );
-        }
 
-        return result;
+            return CommandResult.SUCCESS;
+        } catch ( final Exception e ) {
+            return new CommandResultImpl( e );
+        }
     }
 
     /**

@@ -24,7 +24,6 @@ import org.komodo.shell.commands.SetRecordCommandTest;
 import org.komodo.shell.commands.ShowChildrenCommandTest;
 import org.komodo.shell.commands.ShowDescriptorsCommandTest;
 import org.komodo.shell.commands.ShowGlobalCommandTest;
-import org.komodo.shell.commands.ShowPrimaryTypeCommandTest;
 import org.komodo.shell.commands.ShowPropertiesCommandTest;
 import org.komodo.shell.commands.ShowPropertyCommandTest;
 import org.komodo.shell.commands.ShowStatusCommandTest;
@@ -38,32 +37,31 @@ import org.komodo.shell.commands.WorkspaceCommandTest;
 @RunWith(Suite.class)
 @Suite.SuiteClasses( { AddChildCommandTest.class,
                        AddDescriptorCommandTest.class,
-                       CdCommandTest.class, 
+                       CdCommandTest.class,
                        CommitCommandTest.class,
                        DeleteChildCommandTest.class,
-                       ExitCommandTest.class, 
+                       ExitCommandTest.class,
                        HelpCommandTest.class,
-                       HomeCommandTest.class, 
-                       LibraryCommandTest.class, 
-                       ListCommandTest.class, 
+                       HomeCommandTest.class,
+                       LibraryCommandTest.class,
+                       ListCommandTest.class,
                        PlayCommandTest.class,
                        RemoveDescriptorCommandTest.class,
-                       RenameCommandTest.class, 
-                       RollbackCommandTest.class, 
+                       RenameCommandTest.class,
+                       RollbackCommandTest.class,
                        SetAutoCommitCommandTest.class,
-                       SetGlobalPropertyCommandTest.class, 
+                       SetGlobalPropertyCommandTest.class,
                        SetPrimaryTypeCommandTest.class,
-                       SetPropertyCommandTest.class, 
+                       SetPropertyCommandTest.class,
                        SetRecordCommandTest.class,
-                       ShowChildrenCommandTest.class, 
-                       ShowDescriptorsCommandTest.class, 
-                       ShowGlobalCommandTest.class, 
-                       ShowPrimaryTypeCommandTest.class,
+                       ShowChildrenCommandTest.class,
+                       ShowDescriptorsCommandTest.class,
+                       ShowGlobalCommandTest.class,
                        ShowPropertiesCommandTest.class,
-                       ShowPropertyCommandTest.class, 
-                       ShowStatusCommandTest.class, 
+                       ShowPropertyCommandTest.class,
+                       ShowStatusCommandTest.class,
                        ShowSummaryCommandTest.class,
-                       UnsetPropertyCommandTest.class, 
+                       UnsetPropertyCommandTest.class,
                        WorkspaceCommandTest.class } )
 public class AllTests {
     // nothing to do

@@ -11,6 +11,8 @@ import org.komodo.relational.commands.datarole.AddPermissionCommandTest;
 import org.komodo.relational.commands.datarole.DeleteMappedRoleCommandTest;
 import org.komodo.relational.commands.datarole.DeletePermissionCommandTest;
 import org.komodo.relational.commands.datarole.SetDataRolePropertyCommandTest;
+import org.komodo.relational.commands.datarole.ShowMappedRolesCommandTest;
+import org.komodo.relational.commands.datarole.ShowPermissionsCommandTest;
 import org.komodo.relational.commands.datarole.UnsetDataRolePropertyCommandTest;
 import org.komodo.relational.commands.datatyperesultset.SetDataTypeResultSetPropertyCommandTest;
 import org.komodo.relational.commands.datatyperesultset.UnsetDataTypeResultSetPropertyCommandTest;
@@ -37,6 +39,13 @@ import org.komodo.relational.commands.model.DeleteUserDefinedFunctionCommandTest
 import org.komodo.relational.commands.model.DeleteViewCommandTest;
 import org.komodo.relational.commands.model.DeleteVirtualProcedureCommandTest;
 import org.komodo.relational.commands.model.SetModelPropertyCommandTest;
+import org.komodo.relational.commands.model.ShowPushdownFunctionsCommandTest;
+import org.komodo.relational.commands.model.ShowSourcesCommandTest;
+import org.komodo.relational.commands.model.ShowStoredProceduresCommandTest;
+import org.komodo.relational.commands.model.ShowTablesCommandTest;
+import org.komodo.relational.commands.model.ShowUserDefinedFunctionsCommandTest;
+import org.komodo.relational.commands.model.ShowViewsCommandTest;
+import org.komodo.relational.commands.model.ShowVirtualProceduresCommandTest;
 import org.komodo.relational.commands.model.UnsetModelPropertyCommandTest;
 import org.komodo.relational.commands.modelsource.SetModelSourcePropertyCommandTest;
 import org.komodo.relational.commands.modelsource.UnsetModelSourcePropertyCommandTest;
@@ -47,6 +56,8 @@ import org.komodo.relational.commands.permission.AddMaskCommandTest;
 import org.komodo.relational.commands.permission.DeleteConditionCommandTest;
 import org.komodo.relational.commands.permission.DeleteMaskCommandTest;
 import org.komodo.relational.commands.permission.SetPermissionPropertyCommandTest;
+import org.komodo.relational.commands.permission.ShowConditionsCommandTest;
+import org.komodo.relational.commands.permission.ShowMasksCommandTest;
 import org.komodo.relational.commands.permission.UnsetPermissionPropertyCommandTest;
 import org.komodo.relational.commands.pushdownfunction.SetPushdownFunctionPropertyCommandTest;
 import org.komodo.relational.commands.pushdownfunction.UnsetPushdownFunctionPropertyCommandTest;
@@ -61,13 +72,19 @@ import org.komodo.relational.commands.table.AddAccessPatternCommandTest;
 import org.komodo.relational.commands.table.AddColumnCommandTest;
 import org.komodo.relational.commands.table.AddForeignKeyCommandTest;
 import org.komodo.relational.commands.table.AddIndexCommandTest;
+import org.komodo.relational.commands.table.AddPrimaryKeyCommandTest;
 import org.komodo.relational.commands.table.AddUniqueConstraintCommandTest;
 import org.komodo.relational.commands.table.DeleteAccessPatternCommandTest;
 import org.komodo.relational.commands.table.DeleteColumnCommandTest;
 import org.komodo.relational.commands.table.DeleteForeignKeyCommandTest;
 import org.komodo.relational.commands.table.DeleteIndexCommandTest;
+import org.komodo.relational.commands.table.DeletePrimaryKeyCommandTest;
 import org.komodo.relational.commands.table.DeleteUniqueConstraintCommandTest;
 import org.komodo.relational.commands.table.SetTablePropertyCommandTest;
+import org.komodo.relational.commands.table.ShowAccessPatternsCommandTest;
+import org.komodo.relational.commands.table.ShowColumnsCommandTest;
+import org.komodo.relational.commands.table.ShowIndexesCommandTest;
+import org.komodo.relational.commands.table.ShowUniqueConstraintsCommandTest;
 import org.komodo.relational.commands.table.UnsetTablePropertyCommandTest;
 import org.komodo.relational.commands.tableconstraint.AddConstraintColumnCommandTest;
 import org.komodo.relational.commands.tableconstraint.DeleteConstraintColumnCommandTest;
@@ -104,6 +121,7 @@ import org.komodo.relational.commands.workspace.CreateVdbCommandTest;
 import org.komodo.relational.commands.workspace.DeleteSchemaCommandTest;
 import org.komodo.relational.commands.workspace.DeleteTeiidCommandTest;
 import org.komodo.relational.commands.workspace.DeleteVdbCommandTest;
+import org.komodo.relational.commands.workspace.ExportVdbCommandTest;
 import org.komodo.relational.commands.workspace.UploadVdbCommandTest;
 import org.komodo.relational.commands.workspace.WorkspaceSetPropertyCommandTest;
 import org.komodo.relational.commands.workspace.WorkspaceUnsetPropertyCommandTest;
@@ -123,9 +141,8 @@ import org.komodo.relational.commands.workspace.WorkspaceUnsetPropertyCommandTes
     RelationalAddDescriptorCommandTest.class,
     RelationalRemoveDescriptorCommandTest.class,
     RelationalSetPrimaryTypeCommandTest.class,
-    RelationalShowPrimaryTypeCommandTest.class,
     RelationalShowDescriptorsCommandTest.class,
-    
+
     // Workspace
     CreateSchemaCommandTest.class,
     CreateTeiidCommandTest.class,
@@ -135,6 +152,7 @@ import org.komodo.relational.commands.workspace.WorkspaceUnsetPropertyCommandTes
     DeleteVdbCommandTest.class,
 //    ImportVdbCommandTest.class,
     UploadVdbCommandTest.class,
+    ExportVdbCommandTest.class,
     WorkspaceSetPropertyCommandTest.class,
     WorkspaceUnsetPropertyCommandTest.class,
 
@@ -152,6 +170,8 @@ import org.komodo.relational.commands.workspace.WorkspaceUnsetPropertyCommandTes
     DeleteMappedRoleCommandTest.class,
     DeletePermissionCommandTest.class,
     SetDataRolePropertyCommandTest.class,
+    ShowMappedRolesCommandTest.class,
+    ShowPermissionsCommandTest.class,
     UnsetDataRolePropertyCommandTest.class,
 
     // DataTypeResultSet
@@ -192,6 +212,13 @@ import org.komodo.relational.commands.workspace.WorkspaceUnsetPropertyCommandTes
 //    ImportCommandTest.class,
 //    org.komodo.relational.commands.model.ExportCommandTest.class,
     SetModelPropertyCommandTest.class,
+    ShowPushdownFunctionsCommandTest.class,
+    ShowSourcesCommandTest.class,
+    ShowStoredProceduresCommandTest.class,
+    ShowTablesCommandTest.class,
+    ShowUserDefinedFunctionsCommandTest.class,
+    ShowViewsCommandTest.class,
+    ShowVirtualProceduresCommandTest.class,
     UnsetModelPropertyCommandTest.class,
 
     // ModelSource
@@ -208,6 +235,8 @@ import org.komodo.relational.commands.workspace.WorkspaceUnsetPropertyCommandTes
     DeleteConditionCommandTest.class,
     DeleteMaskCommandTest.class,
     SetPermissionPropertyCommandTest.class,
+    ShowConditionsCommandTest.class,
+    ShowMasksCommandTest.class,
     UnsetPermissionPropertyCommandTest.class,
 
     // PushdownFunction
@@ -244,12 +273,18 @@ import org.komodo.relational.commands.workspace.WorkspaceUnsetPropertyCommandTes
     AddForeignKeyCommandTest.class,
     AddIndexCommandTest.class,
     AddUniqueConstraintCommandTest.class,
+    AddPrimaryKeyCommandTest.class,
     DeleteAccessPatternCommandTest.class,
     DeleteColumnCommandTest.class,
     DeleteForeignKeyCommandTest.class,
     DeleteIndexCommandTest.class,
     DeleteUniqueConstraintCommandTest.class,
+    DeletePrimaryKeyCommandTest.class,
     SetTablePropertyCommandTest.class,
+    ShowAccessPatternsCommandTest.class,
+    ShowColumnsCommandTest.class,
+    ShowIndexesCommandTest.class,
+    ShowUniqueConstraintsCommandTest.class,
     UnsetTablePropertyCommandTest.class,
 
     // TableConstraint

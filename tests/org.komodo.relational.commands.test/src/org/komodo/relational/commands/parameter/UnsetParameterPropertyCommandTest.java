@@ -27,16 +27,14 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test UnsetParameterPropertyCommand
- *
+ * Test Class to test {@link UnsetParameterPropertyCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public class UnsetParameterPropertyCommandTest extends AbstractCommandTest {
+public final class UnsetParameterPropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testUnsetProperty1() throws Exception {
-        final String[] commands = { 
-            "workspace",
+        final String[] commands = {
             "create-vdb myVdb vdbPath",
             "cd myVdb",
             "add-model myModel",
@@ -47,10 +45,7 @@ public class UnsetParameterPropertyCommandTest extends AbstractCommandTest {
             "cd myParameter",
             "set-property datatypeLength 99",
             "unset-property datatypeLength"};
-
-        setup( commands );
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

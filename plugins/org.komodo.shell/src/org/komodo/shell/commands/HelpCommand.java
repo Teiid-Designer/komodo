@@ -15,8 +15,14 @@
  */
 package org.komodo.shell.commands;
 
+import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+import static org.komodo.shell.Messages.SHELL.Help_Category_Header;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.CompletionConstants;
@@ -25,7 +31,6 @@ import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.spi.constants.StringConstants;
 
 /**
  * Implements the 'help' command.
@@ -43,8 +48,19 @@ public class HelpCommand extends BuiltInShellCommand {
      */
     public static final String NAME = "help"; //$NON-NLS-1$
 
-    private static final int CMDS_PER_LINE = 4;
+    private static final int CMDS_PER_LINE = 5;
     private static final int DEFAULT_COLUMN_WIDTH = 10;
+    private static final String INDENT;
+
+    static {
+        final StringBuffer indentBuffer = new StringBuffer( MESSAGE_INDENT );
+
+        for ( int i = 0; i < MESSAGE_INDENT; ++i ) {
+            indentBuffer.append( ' ' );
+        }
+
+        INDENT = indentBuffer.toString();
+    }
 
     /**
      * @param wsStatus
@@ -95,45 +111,87 @@ public class HelpCommand extends BuiltInShellCommand {
         return true;
     }
 
+    private void printCommandNames( final String[] commandNames,
+                                    final boolean categorized ) {
+        int maxCommandLength = DEFAULT_COLUMN_WIDTH;
+
+        // find max length of command names
+        for ( final String cmdName : commandNames ) {
+            if ( cmdName.length() > maxCommandLength ) {
+                maxCommandLength = cmdName.length();
+            }
+        }
+
+        int colCount = 0;
+        final StringBuilder builder = new StringBuilder();
+
+        for ( final String cmdName : commandNames ) {
+            if ( categorized ) {
+                builder.append( INDENT );
+            }
+
+            builder.append( String.format( "%-" + ( maxCommandLength + 5 ) + "s", cmdName ) ); //$NON-NLS-1$ //$NON-NLS-2$
+            ++colCount;
+
+            if ( colCount == CMDS_PER_LINE ) {
+                builder.append( '\n' ).append( INDENT );
+
+                if ( categorized ) {
+                    builder.append( INDENT );
+                }
+
+                colCount = 0;
+            }
+        }
+
+        final int indentSize = ( MESSAGE_INDENT * ( categorized ? 2 : 1 ) );
+        print( indentSize, builder.toString() );
+
+        if ( colCount != 0 ) {
+            print();
+        }
+    }
+
 	/**
 	 * Prints the generic help - all commands for this workspace context
 	 */
 	private void printHelpAll() throws Exception {
-		print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.Help_COMMAND_LIST_MSG));
+        print( MESSAGE_INDENT, Messages.getString( SHELL.Help_COMMAND_LIST_MSG ) );
+        final String[] validCmdNames = getWorkspaceStatus().getAvailableCommandNames();
 
-		StringBuffer indentBuffer = new StringBuffer();
-		for(int i=0; i<CompletionConstants.MESSAGE_INDENT; i++) {
-			indentBuffer.append(StringConstants.SPACE);
-		}
+        if ( getWorkspaceStatus().isShowingCommandCategory() ) {
+            final WorkspaceStatus status = getWorkspaceStatus();
+            final Map< String, List< String > > categoryCommands = new TreeMap< >();
 
-		// Assemble the valid command names and find the max command character length
-		int maxCommandLength = DEFAULT_COLUMN_WIDTH;
-        List<String> validCmdNames = new ArrayList<String>();
-        for (final String cmdName : getWorkspaceStatus().getAvailableCommands()) {
-            if(cmdName.length()>maxCommandLength) {
-                maxCommandLength = cmdName.length();
+            // group commands by category
+            for ( final String cmdName : validCmdNames ) {
+                final String category = status.getCommand( cmdName ).getCategory();
+                List< String > commands = categoryCommands.get( category );
+
+                if ( commands == null ) {
+                    commands = new ArrayList< String >();
+                    categoryCommands.put( category, commands );
+                }
+
+                commands.add( cmdName );
             }
-            validCmdNames.add(cmdName);
+
+            // print command by category
+            for ( final Entry< String, List< String > > entry : categoryCommands.entrySet() ) {
+                if ( categoryCommands.size() > 1 ) {
+                    print( ( MESSAGE_INDENT * 2 ), Messages.getString( Help_Category_Header, entry.getKey() ) );
+                }
+
+                Collections.sort( entry.getValue() );
+                printCommandNames( entry.getValue().toArray( new String[ entry.getValue().size() ] ), true );
+            }
+        } else {
+            printCommandNames( validCmdNames, false );
         }
 
-        // Print appropriate commands per line
-		int colCount = 0;
-		StringBuilder builder = new StringBuilder();
-		for (String cmdName : validCmdNames) {
-            builder.append(String.format("%-"+(maxCommandLength+5)+"s", cmdName)); //$NON-NLS-1$ //$NON-NLS-2$
-            colCount++;
-
-            if (colCount == CMDS_PER_LINE) {
-                builder.append("\n"+indentBuffer.toString()); //$NON-NLS-1$
-                colCount = 0;
-            }
-		}
-
-		print(CompletionConstants.MESSAGE_INDENT,builder.toString());
-		if(colCount!=0) print(CompletionConstants.MESSAGE_INDENT,"\n"); //$NON-NLS-1$
-		print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.Help_GET_HELP_1));
-		print(CompletionConstants.MESSAGE_INDENT,""); //$NON-NLS-1$
-		print(CompletionConstants.MESSAGE_INDENT,Messages.getString(SHELL.Help_GET_HELP_2));
+        print( MESSAGE_INDENT,Messages.getString(SHELL.Help_GET_HELP_1));
+		print( MESSAGE_INDENT,""); //$NON-NLS-1$
+		print( MESSAGE_INDENT,Messages.getString(SHELL.Help_GET_HELP_2));
 	}
 
     private void printHelpForCommand( final String cmdName ) throws Exception {
@@ -161,7 +219,7 @@ public class HelpCommand extends BuiltInShellCommand {
                               List< CharSequence > candidates ) {
         if ( getArguments().isEmpty() ) {
             try {
-                for ( String candidate : getWorkspaceStatus().getAvailableCommands() ) {
+                for ( String candidate : getWorkspaceStatus().getAvailableCommandNames() ) {
                     if ( lastArgument == null || candidate.startsWith( lastArgument ) ) {
                         candidates.add( candidate );
                     }

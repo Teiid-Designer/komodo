@@ -23,24 +23,20 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test DeleteVdbCommand
- *
+ * Test Class to test {@link DeleteVdbCommand}.
  */
 @SuppressWarnings( { "javadoc", "nls" } )
-public class DeleteVdbCommandTest extends AbstractCommandTest {
+public final class DeleteVdbCommandTest extends AbstractCommandTest {
 
     @Test
     public void testDeleteVdb1() throws Exception {
         final String[] commands = { "set-auto-commit false",
-                                    "workspace",
                                     "create-vdb testVdb1 vdbPath",
                                     "create-vdb testVdb2 vdbPath",
                                     "commit",
                                     "delete-vdb testVdb1",
                                     "commit" };
-        setup( commands );
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

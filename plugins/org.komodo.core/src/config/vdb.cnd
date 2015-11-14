@@ -34,7 +34,7 @@
  - vdb:version (long) = '1' autocreated
  - vdb:preview (boolean) = 'false' autocreated
  - vdb:connectionType (string)
- - vdb:originalFile (string) mandatory
+ - vdb:originalFile (string)
  + * (vdb:abstractModel) copy
  + vdb:translators (vdb:translators) copy
  + vdb:dataRoles (vdb:dataRoles) copy

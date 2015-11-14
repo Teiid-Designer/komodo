@@ -43,15 +43,22 @@ public class TableCommandProvider implements ShellCommandProvider {
         result.add( AddForeignKeyCommand.class );
         result.add( AddIndexCommand.class );
         result.add( AddUniqueConstraintCommand.class );
+        result.add( AddPrimaryKeyCommand.class );
 
         result.add( DeleteAccessPatternCommand.class );
         result.add( DeleteColumnCommand.class );
         result.add( DeleteForeignKeyCommand.class );
         result.add( DeleteIndexCommand.class );
         result.add( DeleteUniqueConstraintCommand.class );
+        result.add( DeletePrimaryKeyCommand.class );
 
         result.add( SetTablePropertyCommand.class );
         result.add( UnsetTablePropertyCommand.class );
+
+        result.add( ShowAccessPatternsCommand.class );
+        result.add( ShowColumnsCommand.class );
+        result.add( ShowIndexesCommand.class );
+        result.add( ShowUniqueConstraintsCommand.class );
 
         return result;
     }

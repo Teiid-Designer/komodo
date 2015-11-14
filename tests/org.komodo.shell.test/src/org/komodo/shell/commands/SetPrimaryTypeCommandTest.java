@@ -34,8 +34,7 @@ public class SetPrimaryTypeCommandTest extends AbstractCommandTest {
                                     "add-child myChild",
                                     "cd myChild",
                                     "set-primary-type nt:folder extraArg" };
-        setup( commands );
-        execute();
+        execute( commands );
     }
 
     @Test
@@ -46,9 +45,7 @@ public class SetPrimaryTypeCommandTest extends AbstractCommandTest {
     @Test
     public void shouldNotHaveSetPrimaryTypeAvailableAtWorkspace() throws Exception {
         final String[] commands = { "workspace" };
-        setup( commands );
-        final CommandResult result = execute();
-
+        final CommandResult result = execute( commands );
         assertCommandResultOk( result );
         assertCommandsNotAvailable( SetPrimaryTypeCommand.NAME );
     }
@@ -61,8 +58,7 @@ public class SetPrimaryTypeCommandTest extends AbstractCommandTest {
             "cd myChild",
             "set-primary-type myType"
         };
-        setup( commands );
-        execute();
+        execute( commands );
     }
 
     @Test
@@ -73,9 +69,7 @@ public class SetPrimaryTypeCommandTest extends AbstractCommandTest {
             "cd myChild",
             "set-primary-type nt:folder"
         };
-    	setup( commands );
-
-        final CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk( result );
 
         final KomodoObject workspace = _repo.komodoWorkspace( getTransaction() );

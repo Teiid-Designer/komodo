@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<vdb name="BQTExample" version="1">
+<description/>
+<property name="validationDateTime" value="Mon Jul 06 10:05:02 CDT 2015"/>
+<property name="validationVersion" value="8.7.1"/>
+<model name="BQT2_SQLSS2000">
+<source connection-jndi-name="BQT2_SQLSS2000" name="BQT2_SQLSS2000" translator-name="sqlserver"/>
+<metadata type="DDL"><![CDATA[
+CREATE FOREIGN TABLE ALL_TYPES (
+	type_int integer OPTIONS(NAMEINSOURCE '"type_int"', NATIVE_TYPE 'int', CASE_SENSITIVE false, FIXED_LENGTH true, SEARCHABLE 'ALL_EXCEPT_LIKE'),
+	type_integer integer OPTIONS(NAMEINSOURCE '"type_integer"', NATIVE_TYPE 'int', CASE_SENSITIVE false, FIXED_LENGTH true, SEARCHABLE 'ALL_EXCEPT_LIKE'),
+	type_smallint short OPTIONS(NAMEINSOURCE '"type_smallint"', NATIVE_TYPE 'smallint', CASE_SENSITIVE false, FIXED_LENGTH true, SEARCHABLE 'ALL_EXCEPT_LIKE'),
+	type_tinyint byte OPTIONS(NAMEINSOURCE '"type_tinyint"', NATIVE_TYPE 'tinyint', CASE_SENSITIVE false, FIXED_LENGTH true, SEARCHABLE 'ALL_EXCEPT_LIKE'),
+	type_decimal bigdecimal OPTIONS(NAMEINSOURCE '"type_decimal"', NATIVE_TYPE 'decimal', CASE_SENSITIVE false, FIXED_LENGTH true, SEARCHABLE 'ALL_EXCEPT_LIKE'),
+	type_decimal_5 bigdecimal OPTIONS(NAMEINSOURCE '"type_decimal_5"', NATIVE_TYPE 'decimal', CASE_SENSITIVE false, FIXED_LENGTH true, SEARCHABLE 'ALL_EXCEPT_LIKE'),
+	type_decimal_5_5 bigdecimal OPTIONS(NAMEINSOURCE '"type_decimal_5_5"', NATIVE_TYPE 'decimal', CASE_SENSITIVE false, FIXED_LENGTH true, SEARCHABLE 'ALL_EXCEPT_LIKE'),
+	type_double_precision float OPTIONS(NAMEINSOURCE '"type_double_precision"', NATIVE_TYPE 'float', CASE_SENSITIVE false, FIXED_LENGTH true, SEARCHABLE 'ALL_EXCEPT_LIKE'),
+	type_float float OPTIONS(NAMEINSOURCE '"type_float"', NATIVE_TYPE 'float', CASE_SENSITIVE false, FIXED_LENGTH true, SEARCHABLE 'ALL_EXCEPT_LIKE'),
+	type_float_10 float OPTIONS(NAMEINSOURCE '"type_float_10"', NATIVE_TYPE 'real', CASE_SENSITIVE false, FIXED_LENGTH true, SEARCHABLE 'ALL_EXCEPT_LIKE'),
+	type_numeric bigdecimal OPTIONS(NAMEINSOURCE '"type_numeric"', NATIVE_TYPE 'numeric', CASE_SENSITIVE false, FIXED_LENGTH true, SEARCHABLE 'ALL_EXCEPT_LIKE'),
+	type_numeric_5 bigdecimal OPTIONS(NAMEINSOURCE '"type_numeric_5"', NATIVE_TYPE 'numeric', CASE_SENSITIVE false, FIXED_LENGTH true, SEARCHABLE 'ALL_EXCEPT_LIKE'),
+	type_numeric_5_5 bigdecimal OPTIONS(NAMEINSOURCE '"type_numeric_5_5"', NATIVE_TYPE 'numeric', CASE_SENSITIVE false, FIXED_LENGTH true, SEARCHABLE 'ALL_EXCEPT_LIKE'),
+	type_real float OPTIONS(NAMEINSOURCE '"type_real"', NATIVE_TYPE 'real', CASE_SENSITIVE false, FIXED_LENGTH true, SEARCHABLE 'ALL_EXCEPT_LIKE'),
+	type_bit boolean OPTIONS(NAMEINSOURCE '"type_bit"', NATIVE_TYPE 'bit', CASE_SENSITIVE false, FIXED_LENGTH true, SEARCHABLE 'ALL_EXCEPT_LIKE'),
+	type_character char(1) OPTIONS(NAMEINSOURCE '"type_character"', NATIVE_TYPE 'char', FIXED_LENGTH true),
+	type_character_10 string(10) OPTIONS(NAMEINSOURCE '"type_character_10"', NATIVE_TYPE 'char', FIXED_LENGTH true),
+	type_char char(1) OPTIONS(NAMEINSOURCE '"type_char"', NATIVE_TYPE 'char', FIXED_LENGTH true),
+	type_char_10 string(10) OPTIONS(NAMEINSOURCE '"type_char_10"', NATIVE_TYPE 'char', FIXED_LENGTH true),
+	type_nchar string(1) OPTIONS(NAMEINSOURCE '"type_nchar"', NATIVE_TYPE 'nchar', FIXED_LENGTH true),
+	type_nchar_10 string(10) OPTIONS(NAMEINSOURCE '"type_nchar_10"', NATIVE_TYPE 'nchar', FIXED_LENGTH true),
+	type_varchar string(1) OPTIONS(NAMEINSOURCE '"type_varchar"', NATIVE_TYPE 'varchar'),
+	type_varchar_10 string(10) OPTIONS(NAMEINSOURCE '"type_varchar_10"', NATIVE_TYPE 'varchar'),
+	type_long_nvarchar string(1) OPTIONS(NAMEINSOURCE '"type_long_nvarchar"', NATIVE_TYPE 'nvarchar', FIXED_LENGTH true),
+	type_long_nvarchar_10 string(10) OPTIONS(NAMEINSOURCE '"type_long_nvarchar_10"', NATIVE_TYPE 'nvarchar', FIXED_LENGTH true),
+	type_text clob(2147483647) OPTIONS(NAMEINSOURCE '"type_text"', NATIVE_TYPE 'text', CASE_SENSITIVE false, SEARCHABLE 'LIKE_ONLY'),
+	type_money bigdecimal OPTIONS(NAMEINSOURCE '"type_money"', NATIVE_TYPE 'money', CASE_SENSITIVE false, FIXED_LENGTH true, SEARCHABLE 'ALL_EXCEPT_LIKE'),
+	type_smallmoney bigdecimal OPTIONS(NAMEINSOURCE '"type_smallmoney"', NATIVE_TYPE 'smallmoney', CASE_SENSITIVE false, FIXED_LENGTH true, SEARCHABLE 'ALL_EXCEPT_LIKE'),
+	type_datetime timestamp OPTIONS(NAMEINSOURCE '"type_datetime"', NATIVE_TYPE 'datetime', CASE_SENSITIVE false, FIXED_LENGTH true, SEARCHABLE 'ALL_EXCEPT_LIKE'),
+	type_binary object(1) OPTIONS(NAMEINSOURCE '"type_binary"', NATIVE_TYPE 'binary', CASE_SENSITIVE false, FIXED_LENGTH true, SEARCHABLE 'UNSEARCHABLE'),
+	type_binary_2 object(2) OPTIONS(NAMEINSOURCE '"type_binary_2"', NATIVE_TYPE 'binary', CASE_SENSITIVE false, FIXED_LENGTH true, SEARCHABLE 'UNSEARCHABLE'),
+	type_image blob(2147483647) OPTIONS(NAMEINSOURCE '"type_image"', NATIVE_TYPE 'image', CASE_SENSITIVE false, SEARCHABLE 'UNSEARCHABLE'),
+	type_varbinary string(0) OPTIONS(NAMEINSOURCE '"type_varbinary"', NATIVE_TYPE 'varbinary', CASE_SENSITIVE false, SEARCHABLE 'ALL_EXCEPT_LIKE')
+) OPTIONS(NAMEINSOURCE '"bqt2"."BQT2"."ALL_TYPES"')
+
+]]></metadata>
+</model>
+</vdb>

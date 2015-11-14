@@ -23,19 +23,15 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test CreateTeiidCommand
- *
+ * Test Class to test {@link CreateTeiidCommand}.
  */
 @SuppressWarnings( { "javadoc", "nls" } )
-public class CreateTeiidCommandTest extends AbstractCommandTest {
+public final class CreateTeiidCommandTest extends AbstractCommandTest {
 
     @Test
     public void testCreateTeiid1() throws Exception {
-        final String[] commands = { "workspace",
-                                    "create-teiid testTeiid" };
-        setup( commands  );
-
-        CommandResult result = execute();
+        final String[] commands = { "create-teiid testTeiid" };
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

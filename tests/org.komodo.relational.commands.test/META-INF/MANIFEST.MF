@@ -2,13 +2,13 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name.0
 Bundle-SymbolicName: org.komodo.relational.commands.test;singleton:=true
-Bundle-Version: 0.0.2.qualifier
+Bundle-Version: 0.0.3.qualifier
 Bundle-Vendor: %Bundle-Vendor.0
 Fragment-Host: org.komodo.relational.commands
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Require-Bundle: org.junit;bundle-version="4.11.0",
  org.jboss.tools.locus.mockito;bundle-version="1.9.5",
- org.komodo.test.utils;bundle-version="0.0.1",
- org.komodo.importer;bundle-version="0.0.2"
-Import-Package: org.komodo.shell
+ org.komodo.test.utils;bundle-version="0.0.3",
+ org.komodo.importer;bundle-version="0.0.3",
+ org.komodo.shell.test;bundle-version="0.0.3"

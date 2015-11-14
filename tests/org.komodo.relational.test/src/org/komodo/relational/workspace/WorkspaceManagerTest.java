@@ -754,15 +754,4 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
         }
     }
 
-    @Test
-    public void shouldFilterChildren() throws Exception {
-    	final WorkspaceManager workspaceMgr = WorkspaceManager.getInstance(_repo );
-    	final Vdb vdb = createVdb();
-    	final KomodoObject kobject = _repo.add( getTransaction(), workspaceMgr.getAbsolutePath(), "kobject", null );
-    	assertThat( workspaceMgr.getChildren( getTransaction() ).length, is( 1 ) );
-    	assertThat( workspaceMgr.getChildren( getTransaction() )[0], is( instanceOf( Vdb.class ) ) );
-    	assertThat( workspaceMgr.getRawChildren( getTransaction() ).length, is( 2 ) );
-    	assertThat( Arrays.asList( workspaceMgr.getRawChildren( getTransaction() ) ), hasItems( vdb, kobject ) );
-    }
-
 }

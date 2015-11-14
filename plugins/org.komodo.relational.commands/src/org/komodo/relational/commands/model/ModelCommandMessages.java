@@ -32,14 +32,7 @@ public class ModelCommandMessages implements StringConstants {
         MISSING_TABLE_NAME,
         MISSING_USER_DEFINED_FUNCTION_NAME,
         MISSING_VIEW_NAME,
-        MISSING_VIRTUAL_PROCEDURE_NAME,
-        PUSHDOWN_FUNCTION_NAME,
-        SOURCE_NAME,
-        STORED_PROCEDURE_NAME,
-        TABLE_NAME,
-        USER_DEFINED_FUNCTION_NAME,
-        VIEW_NAME,
-        VIRTUAL_PROCEDURE_NAME;
+        MISSING_VIRTUAL_PROCEDURE_NAME;
 
         @Override
         public String toString() {
@@ -213,6 +206,97 @@ public class ModelCommandMessages implements StringConstants {
         public String toString() {
             return getEnumName(this) + DOT + name();
         }
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum ShowPushdownFunctionsCommand {
+
+        NO_PUSHDOWN_FUNCTIONS,
+        PUSHDOWNS_HEADER;
+
+        @Override
+        public String toString() {
+            return getEnumName( this ) + DOT + name();
+        }
+
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum ShowSourcesCommand {
+
+        NO_SOURCES,
+        SOURCES_HEADER;
+
+        @Override
+        public String toString() {
+            return getEnumName( this ) + DOT + name();
+        }
+
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum ShowStoredProceduresCommand {
+
+        NO_STORED_PROCEDURES,
+        STORED_PROCEDURES_HEADER;
+
+        @Override
+        public String toString() {
+            return getEnumName( this ) + DOT + name();
+        }
+
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum ShowTablesCommand {
+
+        NO_TABLES,
+        TABLES_HEADER;
+
+        @Override
+        public String toString() {
+            return getEnumName( this ) + DOT + name();
+        }
+
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum ShowUserDefinedFunctionsCommand {
+
+        NO_USER_DEFINED_FUNCTIONS,
+        USER_DEFINED_FUNCTIONS_HEADER;
+
+        @Override
+        public String toString() {
+            return getEnumName( this ) + DOT + name();
+        }
+
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum ShowViewsCommand {
+
+        NO_VIEWS,
+        VIEWS_HEADER;
+
+        @Override
+        public String toString() {
+            return getEnumName( this ) + DOT + name();
+        }
+
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum ShowVirtualProceduresCommand {
+
+        NO_VIRTUAL_PROCEDURES,
+        VIRTUAL_PROCEDURES_HEADER;
+
+        @Override
+        public String toString() {
+            return getEnumName( this ) + DOT + name();
+        }
+
     }
 
     private static String getEnumName(Enum<?> enumValue) {

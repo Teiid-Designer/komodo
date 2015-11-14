@@ -23,23 +23,18 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test SetSchemaPropertyCommand
- *
+ * Test Class to test {@link SetSchemaPropertyCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public class SetSchemaPropertyCommandTest extends AbstractCommandTest {
+public final class SetSchemaPropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testSetProperty1() throws Exception {
-        final String[] commands = { 
-            "workspace",
+        final String[] commands = {
             "create-schema testSchema",
             "cd testSchema",
             "set-property rendition \"CREATE FOREIGN TABLE G1 (e1 integer) OPTIONS (ANNOTATION 'test', CARDINALITY '12');\"" };
-
-        setup( commands );
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

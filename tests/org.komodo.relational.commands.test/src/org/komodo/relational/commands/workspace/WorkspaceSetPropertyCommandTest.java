@@ -17,20 +17,17 @@ package org.komodo.relational.commands.workspace;
 
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
-import org.komodo.relational.commands.workspace.WorkspaceSetPropertyCommand;
+import org.komodo.shell.commands.SetPropertyCommand;
 
 /**
  * Test Class to test {@link WorkspaceSetPropertyCommand}.
  */
-@SuppressWarnings( { "javadoc", "nls" } )
+@SuppressWarnings( { "javadoc" } )
 public class WorkspaceSetPropertyCommandTest extends AbstractCommandTest {
 
-    @Test( expected = AssertionError.class )
+    @Test
     public void shouldNotBeAvailableAtWorkspace() throws Exception {
-        final String[] commands = { "workspace",
-                                    "set-property blah blah" };
-        setup( commands );
-        execute();
+        assertCommandsNotAvailable( SetPropertyCommand.NAME );
     }
 
 }

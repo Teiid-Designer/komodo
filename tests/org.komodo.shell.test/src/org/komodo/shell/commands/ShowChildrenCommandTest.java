@@ -29,36 +29,31 @@ public class ShowChildrenCommandTest extends AbstractCommandTest {
     @Test( expected = AssertionError.class )
     public void shouldFailTooManyArgs( ) throws Exception {
         final String[] commands = { "show-children extraArg" };
-        setup( commands );
-        execute();
+        execute( commands );
     }
-    
+
     @Test
     public void shouldShowChildrenNoChildren() throws Exception {
         final String[] commands = { "workspace",
                                     "show-children" };
-        setup( commands );
-
-        CommandResult result = execute();
-        assertCommandResultOk(result);
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
 
         String writerOutput = getCommandOutput();
         assertTrue(writerOutput.contains("There are no children"));
     }
-    
+
     @Test
     public void shouldShowTwoChildren() throws Exception {
         final String child1Name = "blah1";
         final String child2Name = "blah2";
-        final String[] commands = { 
-            "workspace", 
+        final String[] commands = {
+            "workspace",
             "add-child " + child1Name,
             "add-child " + child2Name,
             "show-children" };
-        setup( commands );
-
-        CommandResult result = execute();
-        assertCommandResultOk(result);
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
 
         String writerOutput = getCommandOutput();
         assertTrue(writerOutput.contains(child1Name));

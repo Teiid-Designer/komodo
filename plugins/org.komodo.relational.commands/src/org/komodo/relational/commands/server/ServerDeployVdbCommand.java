@@ -9,12 +9,16 @@ package org.komodo.relational.commands.server;
 
 import static org.komodo.relational.commands.server.ServerCommandMessages.Common.MissingVdbName;
 import static org.komodo.relational.commands.server.ServerCommandMessages.Common.WorkspaceVdbNotFound;
+import static org.komodo.relational.commands.server.ServerCommandMessages.ServerDeployVdbCommand.OverwriteArgInvalid;
 import static org.komodo.relational.commands.server.ServerCommandMessages.ServerDeployVdbCommand.VdbDeployFinished;
+import static org.komodo.relational.commands.server.ServerCommandMessages.ServerDeployVdbCommand.VdbDeploymentOverwriteDisabled;
 import static org.komodo.relational.commands.server.ServerCommandMessages.ServerDeployVdbCommand.VdbExportFailed;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.vdb.Vdb;
@@ -27,6 +31,9 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.runtime.TeiidInstance;
+import org.komodo.spi.runtime.TeiidVdb;
+import org.komodo.utils.StringUtils;
+import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 /**
  * A shell command to deploy a workspace VDB to the connected server.
@@ -35,6 +42,7 @@ public final class ServerDeployVdbCommand extends ServerShellCommand {
 
     static final String NAME = "server-deploy-vdb"; //$NON-NLS-1$
 
+    private static final List< String > VALID_OVERWRITE_ARGS = Arrays.asList( new String[] { "-o", "--overwrite" } ); //$NON-NLS-1$ //$NON-NLS-2$;
     private static final String VDB_DEPLOYMENT_SUFFIX = "-vdb.xml"; //$NON-NLS-1$
     
     /**
@@ -56,23 +64,23 @@ public final class ServerDeployVdbCommand extends ServerShellCommand {
 
         try {
             String vdbName = requiredArgument( 0, getMessage( MissingVdbName ) );
-            
-            // Find the VDB to deploy
-            final WorkspaceManager mgr = getWorkspaceManager();
-            final Vdb[] vdbs = mgr.findVdbs(getTransaction());
-            Vdb vdbToDeploy = null;
-            for(Vdb vdb : vdbs) {
-                if(vdb.getName(getTransaction()).equals(vdbName)) {
-                    vdbToDeploy = vdb;
-                    break;
-                }
+            final String overwriteArg = optionalArgument( 1, null );
+            final boolean overwrite = !StringUtils.isBlank( overwriteArg );
+
+            // make sure overwrite arg is valid
+            if ( overwrite && !VALID_OVERWRITE_ARGS.contains( overwriteArg ) ) {
+                return new CommandResultImpl( false, getMessage( OverwriteArgInvalid, overwriteArg ), null );
             }
             
             // Return if VDB object not found
-            if(vdbToDeploy==null) {
+            if(!getWorkspaceManager().hasChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE)) {
                 return new CommandResultImpl( false, getMessage( WorkspaceVdbNotFound ), null );
             }
             
+            // Find the VDB to deploy
+            final KomodoObject vdbObj = getWorkspaceManager().getChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+            final Vdb vdbToDeploy = Vdb.RESOLVER.resolve(getTransaction(), vdbObj);
+
             // Validates that a server is connected
             CommandResult validationResult = validateHasConnectedWorkspaceServer();
             if ( !validationResult.isOk() ) {
@@ -83,6 +91,13 @@ public final class ServerDeployVdbCommand extends ServerShellCommand {
             Teiid teiid = getWorkspaceServer();
             TeiidInstance teiidInstance = teiid.getTeiidInstance(getTransaction());
             
+            // Determine if the server already has a deployed VDB with this name and version
+            boolean serverHasVdb = serverHasVdb(teiidInstance, vdbToDeploy.getName(getTransaction()), vdbToDeploy.getVersion(getTransaction()));
+            if(serverHasVdb && !overwrite) {
+                return new CommandResultImpl( false, getMessage( VdbDeploymentOverwriteDisabled, vdbName, vdbToDeploy.getVersion(getTransaction()) ), null );
+            }
+            
+            // Get VDB content
             String vdbXml = vdbToDeploy.export(getTransaction(), null);
             if (vdbXml == null || vdbXml.isEmpty()) {
                 return new CommandResultImpl( false, getMessage( VdbExportFailed ), null);
@@ -102,6 +117,23 @@ public final class ServerDeployVdbCommand extends ServerShellCommand {
         return result;
     }
     
+    private boolean serverHasVdb(TeiidInstance teiidInstance, String vdbName, int vdbVersion) throws Exception {
+        // If no VDB with this name, return false;
+        if(!teiidInstance.hasVdb(vdbName)) {
+            return false;
+        }
+        
+        // May be multiple versions deployed - see if there is one matching supplied version
+        Collection<TeiidVdb> serverVdbs = teiidInstance.getVdbs();
+        for(TeiidVdb serverVdb : serverVdbs) {
+            if(serverVdb.getName().equals(vdbName) && serverVdb.getVersion()==vdbVersion) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
     /**
      * {@inheritDoc}
      *
@@ -109,7 +141,7 @@ public final class ServerDeployVdbCommand extends ServerShellCommand {
      */
     @Override
     protected int getMaxArgCount() {
-        return 1;
+        return 2;
     }
 
     /**

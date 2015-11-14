@@ -28,13 +28,9 @@ public class TableCommandMessages implements StringConstants {
         MISSING_ACCESS_PATTERN_NAME,
         MISSING_COLUMN_NAME,
         MISSING_FOREIGN_KEY_NAME,
+        MISSING_PRIMARY_KEY_NAME,
         MISSING_INDEX_NAME,
         MISSING_UNIQUE_CONSTRAINT_NAME,
-        ACCESS_PATTERN_NAME,
-        COLUMN_NAME,
-        FOREIGN_KEY_NAME,
-        INDEX_NAME,
-        UNIQUE_CONSTRAINT_NAME,
         INVALID_ON_COMMIT_PROPERTY_VALUE,
         INVALID_SCHEMA_ELEMENT_TYPE_PROPERTY_VALUE,
         INVALID_TEMPORARY_TABLE_TYPE_PROPERTY_VALUE;
@@ -98,6 +94,17 @@ public class TableCommandMessages implements StringConstants {
     }
 
     @SuppressWarnings( "javadoc" )
+    public enum AddPrimaryKeyCommand {
+        PK_EXISTS_CANT_ADD,
+        PRIMARY_KEY_ADDED;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    @SuppressWarnings( "javadoc" )
     public enum DeleteAccessPatternCommand {
         ACCESS_PATTERN_DELETED;
 
@@ -140,6 +147,65 @@ public class TableCommandMessages implements StringConstants {
     @SuppressWarnings( "javadoc" )
     public enum DeleteUniqueConstraintCommand {
         UNIQUE_CONSTRAINT_DELETED;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum DeletePrimaryKeyCommand {
+        NO_PK_TO_REMOVE,
+        PRIMARY_KEY_DELETED;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum ShowAccessPatternsCommand {
+
+        ACCESS_PATTERNS_HEADER,
+        NO_ACCESS_PATTERNS;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum ShowColumnsCommand {
+
+        COLUMNS_HEADER,
+        NO_COLUMNS;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum ShowIndexesCommand {
+
+        INDEXES_HEADER,
+        NO_INDEXES;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum ShowUniqueConstraintsCommand {
+
+        NO_UNIQUE_CONSTRAINTS,
+        UNIQUE_CONSTRAINTS_HEADER;
 
         @Override
         public String toString() {

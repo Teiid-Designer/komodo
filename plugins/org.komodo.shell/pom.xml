@@ -4,11 +4,11 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 	<parent>
 	  <groupId>org.jboss.tools.komodo</groupId>
 	  <artifactId>plugins</artifactId>
-	  <version>0.0.2-SNAPSHOT</version>
+	  <version>0.0.3-SNAPSHOT</version>
 	</parent>
 	<groupId>org.jboss.tools.komodo.plugins</groupId>
 	<artifactId>org.komodo.shell</artifactId> 
-	<version>0.0.2-SNAPSHOT</version>
+	<version>0.0.3-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
 
     <build>

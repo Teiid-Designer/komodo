@@ -25,26 +25,21 @@ import org.komodo.shell.api.CommandResult;
 import org.komodo.spi.repository.KomodoObject;
 
 /**
- * Test Class to test ServerSetCommand
- *
+ * Test Class to test {@link ServerSetCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public class ServerSetCommandTest extends AbstractCommandTest {
+public final class ServerSetCommandTest extends AbstractCommandTest {
 
     @Test
     public void testSet() throws Exception {
-        final String[] commands = { 
+        final String[] commands = {
             "set-auto-commit false",
-            "workspace",
             "create-teiid myTeiid",
             "commit",
             "set-server myTeiid",
             "commit",
             "show-global" };
-
-        setup( commands );
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

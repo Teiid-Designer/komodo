@@ -7,6 +7,8 @@
  */
 package org.komodo.relational.commands;
 
+import static org.komodo.relational.commands.RelationalCommandMessages.RESOURCE_BUNDLE;
+import static org.komodo.relational.commands.RelationalCommandMessages.General.RELATIONAL_COMMAND_CATEGORY;
 import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.INVALID_OBJECT_TYPE;
 import org.komodo.relational.Messages;
 import org.komodo.relational.RelationalObject;
@@ -39,6 +41,16 @@ public abstract class RelationalShellCommand extends BuiltInShellCommand {
         throw new KException( getMessage(INVALID_OBJECT_TYPE, kobject.getAbsolutePath() ) );
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getCategory()
+     */
+    @Override
+    public String getCategory() {
+        return Messages.getString( RESOURCE_BUNDLE, RELATIONAL_COMMAND_CATEGORY.toString() );
+    }
+
     protected ShellCommand getCommand( final String commandName ) throws Exception {
         return getWorkspaceStatus().getCommand( commandName );
     }
@@ -68,7 +80,7 @@ public abstract class RelationalShellCommand extends BuiltInShellCommand {
     }
 
     protected String getMessage(Enum< ? > key, Object... parameters) {
-        return Messages.getString(WorkspaceCommandMessages.RESOURCE_BUNDLE,key.toString(),parameters);
+        return Messages.getString(RelationalCommandMessages.RESOURCE_BUNDLE,key.toString(),parameters);
     }
 
     protected String getWorkspaceMessage(Enum< ? > key, Object... parameters) {

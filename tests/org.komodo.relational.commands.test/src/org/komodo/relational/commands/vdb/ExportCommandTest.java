@@ -29,8 +29,7 @@ import org.komodo.test.utils.TestUtilities;
 import org.w3c.dom.Document;
 
 /**
- * Test Class to test VDB ExportCommand
- *
+ * Test Class to test VDB {@link ExportCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
 public class ExportCommandTest extends AbstractCommandTest {
@@ -43,9 +42,6 @@ public class ExportCommandTest extends AbstractCommandTest {
         KomodoObject tweet = TestUtilities.createTweetExampleNode(getTransaction(), kWorkspace);
 
         assertNotNull(tweet);
-
-        traverse(getTransaction(), tweet.getAbsolutePath());
-
         return tweet;
     }
 
@@ -54,9 +50,6 @@ public class ExportCommandTest extends AbstractCommandTest {
         KomodoObject tweet = TestUtilities.createAllElementsExampleNode(getTransaction(), kWorkspace);
 
         assertNotNull(tweet);
-
-        traverse(getTransaction(), tweet.getAbsolutePath());
-
         return tweet;
     }
 
@@ -82,19 +75,13 @@ public class ExportCommandTest extends AbstractCommandTest {
             exportDest.delete();
 
         // The test commands
-        final String[] commands = { 
+        final String[] commands = {
             "commit",
             "workspace",
             "cd " + tweetVdb.getName(getTransaction()),
             "export-vdb " + exportDest.getAbsolutePath() };
-
-        setup( commands );
-
-        //
-        // Execute the commands
-        //
-        execute();
-
+        final CommandResult result = execute( commands );
+        assertCommandResultOk(result);
         assertTrue(exportDest.exists());
 
         Document vdbDocument = TestUtilities.createDocument(new FileInputStream(exportDest));
@@ -128,20 +115,13 @@ public class ExportCommandTest extends AbstractCommandTest {
             exportDest.delete();
 
         // The test commands
-        final String[] commands = { 
+        final String[] commands = {
             "commit",
             "workspace",
             "cd " + allElementsVdb.getName(getTransaction()),
             "export-vdb " + exportDest.getAbsolutePath() };
-
-        setup( commands );
-
-        //
-        // Execute the commands
-        //
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
-
         assertTrue(exportDest.exists());
 
         Document vdbDocument = TestUtilities.createDocument(new FileInputStream(exportDest));

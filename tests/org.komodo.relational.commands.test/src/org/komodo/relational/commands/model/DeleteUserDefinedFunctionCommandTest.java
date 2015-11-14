@@ -26,16 +26,14 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test DeleteUserDefinedFunctionCommand
- *
+ * Test Class to test {@link DeleteUserDefinedFunctionCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public class DeleteUserDefinedFunctionCommandTest extends AbstractCommandTest {
+public final class DeleteUserDefinedFunctionCommandTest extends AbstractCommandTest {
 
     @Test
     public void testDelete1() throws Exception {
-        final String[] commands = { 
-            "workspace",
+        final String[] commands = {
             "create-vdb myVdb vdbPath",
             "cd myVdb",
             "add-model myModel",
@@ -43,10 +41,7 @@ public class DeleteUserDefinedFunctionCommandTest extends AbstractCommandTest {
             "add-user-defined-function myUserDefinedFunction1",
             "add-user-defined-function myUserDefinedFunction2",
             "delete-user-defined-function myUserDefinedFunction1" };
-
-        setup( commands );
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

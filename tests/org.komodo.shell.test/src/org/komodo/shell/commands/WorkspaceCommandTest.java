@@ -15,8 +15,8 @@
  */
 package org.komodo.shell.commands;
 
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
+import org.komodo.repository.RepositoryImpl;
 import org.komodo.shell.AbstractCommandTest;
 import org.komodo.shell.api.CommandResult;
 
@@ -24,27 +24,21 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test {@link WorkspaceCommand}.
  */
 @SuppressWarnings( { "javadoc", "nls" } )
-public class WorkspaceCommandTest extends AbstractCommandTest {
+public final class WorkspaceCommandTest extends AbstractCommandTest {
 
     @Test( expected = AssertionError.class )
     public void shouldFailTooManyArgs( ) throws Exception {
         final String[] commands = { "workspace extraArg" };
-        setup( commands );
-        execute();
+        execute( commands );
     }
-    
+
     @Test
-    public void shouldSetWorkspace() throws Exception {
-        final String[] commands = { 
-            "library",
-            "workspace" };
-    	setup( commands );
-
-        CommandResult result = execute();
-        assertCommandResultOk(result);
-
-        String contextPath = wsStatus.getCurrentContextDisplayPath();
-        assertEquals("/workspace", contextPath); 
+    public void shouldGoToWorkspace() throws Exception {
+        final String[] commands = { LibraryCommand.NAME,
+                                    WorkspaceCommand.NAME };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+        assertContextIs( RepositoryImpl.WORKSPACE_ROOT );
     }
 
 }

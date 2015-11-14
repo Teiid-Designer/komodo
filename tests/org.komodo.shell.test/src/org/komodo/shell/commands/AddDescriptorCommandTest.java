@@ -27,16 +27,13 @@ public final class AddDescriptorCommandTest extends AbstractCommandTest {
             "add-child blah",
             "cd blah",
             "add-descriptor aDescriptor extraArg"};
-        setup( commands );
-        execute();
+        execute( commands );
     }
 
     @Test
     public void shouldNotHaveAddDescriptorAvailableAtLibrary() throws Exception {
         final String[] commands = { "library" };
-        setup( commands );
-        final CommandResult result = execute();
-
+        final CommandResult result = execute( commands );
         assertCommandResultOk( result );
         assertCommandsNotAvailable( AddDescriptorCommand.NAME );
     }
@@ -49,9 +46,7 @@ public final class AddDescriptorCommandTest extends AbstractCommandTest {
     @Test
     public void shouldNotHaveAddDescriptorAvailableAtWorkspace() throws Exception {
         final String[] commands = { "workspace" };
-        setup( commands );
-        final CommandResult result = execute();
-
+        final CommandResult result = execute( commands );
         assertCommandResultOk( result );
         assertCommandsNotAvailable( AddDescriptorCommand.NAME );
     }
@@ -64,8 +59,7 @@ public final class AddDescriptorCommandTest extends AbstractCommandTest {
             "add-child " + childName,
             "cd " + childName,
             "add-descriptor aDescriptor"};
-        setup( commands );
-        execute();
+        execute( commands );
     }
 
     @Test
@@ -77,10 +71,8 @@ public final class AddDescriptorCommandTest extends AbstractCommandTest {
             "add-child " + childName,
             "cd " + childName,
             "add-descriptor " + expected };
-        setup( commands );
-
-        final CommandResult result = execute();
-        assertThat( result.isOk(), is( true ) );
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
 
         final KomodoObject workspace = _repo.komodoWorkspace( getTransaction() );
         assertThat( workspace.getChildren( getTransaction() ).length, is( 1 ) );

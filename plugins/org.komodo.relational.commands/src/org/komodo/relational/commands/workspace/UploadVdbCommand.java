@@ -10,6 +10,7 @@ package org.komodo.relational.commands.workspace;
 import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.INPUT_FILE_ERROR;
 import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.UploadVdbCommand.MISSING_INPUT_VDB_FILE_PATH;
 import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.UploadVdbCommand.MISSING_VDB_NAME;
+import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.UploadVdbCommand.OVERWRITE_ARG_INVALID;
 import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.UploadVdbCommand.VDB_INPUT_FILE_IS_EMPTY;
 import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.UploadVdbCommand.VDB_OVERWRITE_DISABLED;
 import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.UploadVdbCommand.VDB_UPLOADED;
@@ -26,6 +27,7 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.utils.StringUtils;
 import org.modeshape.jcr.JcrLexicon;
+import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 /**
  * Loads a {@link Vdb VDB} from a local file.
@@ -34,7 +36,7 @@ public final class UploadVdbCommand extends WorkspaceShellCommand {
 
     static final String NAME = "upload-vdb"; //$NON-NLS-1$
 
-    private static final List< String > VALID_ARGS = Arrays.asList( new String[] { "-o", "--overwrite" } ); //$NON-NLS-1$ //$NON-NLS-2$;
+    private static final List< String > VALID_OVERWRITE_ARGS = Arrays.asList( new String[] { "-o", "--overwrite" } ); //$NON-NLS-1$ //$NON-NLS-2$;
 
     /**
      * @param status
@@ -58,8 +60,8 @@ public final class UploadVdbCommand extends WorkspaceShellCommand {
             final boolean overwrite = !StringUtils.isBlank( overwriteArg );
 
             // make sure overwrite arg is valid
-            if ( overwrite && !VALID_ARGS.contains( overwriteArg ) ) {
-                return new CommandResultImpl( false, getMessage( INPUT_FILE_ERROR, overwriteArg ), null );
+            if ( overwrite && !VALID_OVERWRITE_ARGS.contains( overwriteArg ) ) {
+                return new CommandResultImpl( false, getMessage( OVERWRITE_ARG_INVALID, overwriteArg ), null );
             }
 
             { // Validates the supplied fileNameArg is a valid, readable file, and has property extension
@@ -80,16 +82,9 @@ public final class UploadVdbCommand extends WorkspaceShellCommand {
             final Repository.UnitOfWork uow = getTransaction();
 
             // make sure we can overwrite
-            Vdb[] allVdbs = getWorkspaceManager().findVdbs(uow);
-            boolean hasVdb = false;
-            for(Vdb theVdb : allVdbs) {
-                if(vdbName.equals(theVdb.getName(uow))) {
-                    hasVdb = true;
-                    break;
-                }
-            }
+            boolean hasVdb = getWorkspaceManager().hasChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
             if ( hasVdb && !overwrite ) {
-                return new CommandResultImpl( false, getMessage( VDB_OVERWRITE_DISABLED, fileName ), null );
+                return new CommandResultImpl( false, getMessage( VDB_OVERWRITE_DISABLED, fileName, vdbName ), null );
             }
 
             // create VDB

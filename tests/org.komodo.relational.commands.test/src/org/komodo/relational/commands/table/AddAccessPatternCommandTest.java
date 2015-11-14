@@ -29,12 +29,11 @@ import org.komodo.shell.api.CommandResult;
  * Test Class for {@link AddAccessPatternCommand}.
  */
 @SuppressWarnings( { "javadoc", "nls" } )
-public class AddAccessPatternCommandTest extends AbstractCommandTest {
+public final class AddAccessPatternCommandTest extends AbstractCommandTest {
 
     @Test
     public void testAdd1() throws Exception {
-        final String[] commands = { 
-            "workspace",
+        final String[] commands = {
             "create-vdb myVdb vdbPath",
             "cd myVdb",
             "add-model myModel",
@@ -42,10 +41,7 @@ public class AddAccessPatternCommandTest extends AbstractCommandTest {
             "add-table myTable",
             "cd myTable",
             "add-access-pattern myAccessPattern" };
-        
-        setup(commands);
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

@@ -15,8 +15,8 @@ import java.util.Comparator;
 import java.util.List;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.TableConstraint;
-import org.komodo.repository.ObjectImpl;
 import org.komodo.shell.CommandResultImpl;
+import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoObject;
@@ -49,16 +49,17 @@ public final class DeleteConstraintColumnCommand extends TableConstraintShellCom
         try {
             final String columnPathArg = requiredArgument( 0, getMessage( MISSING_COLUMN_PATH ) );
 
+            // Validate the display Path
+            String validationMsg = validatePath(columnPathArg);
+            if(!validationMsg.equals(CompletionConstants.OK)) {
+                return new CommandResultImpl(false, validationMsg, null);
+            }
+            
+            // Get the Object at the supplied path
+            KomodoObject possible = getWorkspaceStatus().getContextForDisplayPath(columnPathArg.trim());
+            
             Column column = null;
             { // see if valid column
-                String repoPath = getWorkspaceStatus().getLabelProvider().getPath( columnPathArg );
-
-                if ( StringUtils.isBlank( repoPath ) ) {
-                    repoPath = columnPathArg;
-                }
-
-                final KomodoObject possible = new ObjectImpl( getRepository(), repoPath, 0 );
-
                 try {
                     if ( Column.RESOLVER.resolvable( getTransaction(), possible ) ) {
                         column = Column.RESOLVER.resolve( getTransaction(), possible );

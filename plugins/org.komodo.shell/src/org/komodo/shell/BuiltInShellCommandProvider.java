@@ -35,7 +35,6 @@ import org.komodo.shell.commands.SetRecordCommand;
 import org.komodo.shell.commands.ShowChildrenCommand;
 import org.komodo.shell.commands.ShowDescriptorsCommand;
 import org.komodo.shell.commands.ShowGlobalCommand;
-import org.komodo.shell.commands.ShowPrimaryTypeCommand;
 import org.komodo.shell.commands.ShowPropertiesCommand;
 import org.komodo.shell.commands.ShowPropertyCommand;
 import org.komodo.shell.commands.ShowStatusCommand;
@@ -126,7 +125,6 @@ public final class BuiltInShellCommandProvider implements ShellCommandProvider {
         result.add( ShowChildrenCommand.class );
         result.add( ShowDescriptorsCommand.class );
         result.add( ShowGlobalCommand.class );
-        result.add( ShowPrimaryTypeCommand.class );
         result.add( ShowPropertiesCommand.class );
         result.add( ShowPropertyCommand.class );
         result.add( ShowStatusCommand.class );

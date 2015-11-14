@@ -429,6 +429,18 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
     /**
      * @param uow
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * param host the host name
+     * @throws KException
+     *         if error occurs
+     */
+    @Override
+    public void setHost(UnitOfWork uow, String host) throws KException {
+        setObjectProperty(uow, "setHost", KomodoLexicon.Teiid.HOST, host); //$NON-NLS-1$
+    }
+
+    /**
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @return value of teiid admin port property
      * @throws KException
      *         if error occurs

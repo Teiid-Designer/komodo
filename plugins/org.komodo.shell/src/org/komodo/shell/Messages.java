@@ -39,6 +39,7 @@ public class Messages implements StringConstants {
     private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME);
 
     public enum SHELL {
+        GeneralCommandCategory,
         CommitSuccess,
         RollbackSuccess,
         FileNotAccessible,
@@ -49,7 +50,6 @@ public class Messages implements StringConstants {
         PROMPT_WITH_TYPE,
         CHILD_NAME_HEADER,
         CHILD_TYPE_HEADER,
-        PATH_NOT_FOUND,
         PROPERTY_NAME_HEADER,
         PROPERTY_VALUE_HEADER,
         NO_PROPERTY_VALUE,
@@ -57,32 +57,22 @@ public class Messages implements StringConstants {
         TRANSACTION_ROLLBACK_ERROR,
         TRANSACTION_TIMEOUT,
         COMPONENT_STARTED,
-        COMPONENT_FAILED,
         ENGINE_STARTING,
         LOCAL_REPOSITORY_STARTING,
         LOCAL_REPOSITORY_TIMEOUT_ERROR,
     	COMMAND_NOT_FOUND,
-    	Help_COMMAND_LIST_MSG,
+        Help_Category_Header,
+        Help_COMMAND_LIST_MSG,
     	Help_INVALID_COMMAND,
-    	Help_USAGE,
     	Help_GET_HELP_1,
     	Help_GET_HELP_2,
-    	EXITING,
-    	INVALID_ARG,
+        INVALID_STARTUP_ARGS,
+        INVALID_STARTUP_FILE,
+        INVALID_ARG,
     	USAGE,
     	SHUTTING_DOWN,
     	DONE,
     	InvalidArgMsg_EntryPath,
-    	ENTRY_PATH,
-    	ENTRY_LIST_SUMMARY,
-    	ENTRY,
-    	Property_InvalidArgMsg_SubCommand,
-    	Property_InvalidArgMsg_PropertyName,
-    	Property_InvalidArgMsg_PropertyValue,
-    	Property_PropertySet,
-    	Property_PropertyUnset,
-    	Property_InvalidSubCommand,
-    	Property_Failure,
     	NoPropertiesMsg,
     	PropertiesHeader,
     	noChildrenMsg,
@@ -91,8 +81,6 @@ public class Messages implements StringConstants {
     	CommandFailure,
     	InvalidArgMsg_propertiesFile_not_exist,
     	InvalidArgMsg_property_not_correct_format,
-    	InvalidArgMsg_propertiesFile_error_reading,
-    	InvalidArgMsg_propertiesFile_error_reading_line,
     	InvalidArgMsg_PropertyName,
     	InvalidArgMsg_PropertyValue,
     	TOO_MANY_ARGS,
@@ -101,21 +89,18 @@ public class Messages implements StringConstants {
         HelpNoAliases,
         HelpAliasesHeading,
         HelpUsageHeading,
-        HelpDescription,
         HelpDescriptionHeading,
         HelpExamplesHeading,
         WelcomeMessage,
         locationArg_noContextWithThisName,
-        propertyArg_noPropertyWithThisName,
         locationArg_empty,
-        typeArg_childTypeNotAllowed,
-        objectNameNotValid,
         FileNotFound,
         FileArgNotAFile,
         FileCannotRead,
         RecordingFileOutputError,
         RecordingFileCannotWrite,
-        RecordingFileNotDefined;
+        RecordingFileNotDefined,
+        NotMultiValuedProperty;
 
     	@Override
     	public String toString() {
@@ -206,25 +191,10 @@ public class Messages implements StringConstants {
         }
     }
 
-    public enum StatusCommand {
-        Separator,
-        Connected,
-        NotConnected,
-        PingOk,
-        PingFail;
-
-        @Override
-        public String toString() {
-            return getEnumName(this) + DOT + name();
-        }
-    }
-
     public enum PlayCommand {
         InvalidArgMsg_FileName,
         fileExecuted,
-        FileNotAccessible,
-        Failure,
-        CommandFailure;
+        Failure;
 
         @Override
         public String toString() {
@@ -265,7 +235,7 @@ public class Messages implements StringConstants {
           return getEnumName(this) + DOT + name();
       }
     }
-    
+
     public enum SetPrimaryTypeCommand {
         MISSING_TYPE_NAME,
         PRIMARY_TYPE_SET;
@@ -280,18 +250,6 @@ public class Messages implements StringConstants {
         InvalidPropName,
         InvalidPropValue,
         PropertySet;
-
-      @Override
-      public String toString() {
-          return getEnumName(this) + DOT + name();
-      }
-    }
-
-    public enum UnsetPropertyCommand {
-        InvalidArgMsg_GlobalPropertyName,
-        InvalidGlobalProperty,
-        InvalidArgMsg_PropertyValue,
-        GlobalPropertySet;
 
       @Override
       public String toString() {
@@ -318,19 +276,10 @@ public class Messages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     public enum ShowDescriptorsCommand {
         ListHeader,
         NoDescriptors;
-
-      @Override
-      public String toString() {
-          return getEnumName(this) + DOT + name();
-      }
-    }
-
-    public enum ShowPrimaryTypeCommand {
-        ShowType;
 
       @Override
       public String toString() {
@@ -362,49 +311,6 @@ public class Messages implements StringConstants {
         }
     }
 
-    public enum ServerCommand {
-        InvalidArgMsg_SubCommand,
-        InvalidArgMsg_ServerObjType,
-        InvalidArgMsg_ServerObjName,
-        InvalidArgMsg_DeployServerObjType,
-        InvalidArgMsg_DeployServerObjName,
-        InvalidSubCommand,
-        InvalidServerObjectType,
-        InvalidServerDeployObjectType,
-        Failure,
-        NoTeiidDefined,
-        PropertiesHeader,
-        PropertyHeader,
-        ServerNotConnected,
-        ServerTypeHeader,
-        ServerObjDetailsHeader,
-        ObjectNameHeader,
-        AttemptingToConnect,
-        ConnectionError,
-        TeiidStatus,
-        Connected,
-        NotConnected,
-        AttemptingToDisconnect,
-        DisconnectSuccessMsg,
-        NoServerToDisconnectMsg,
-        CouldNotResolve,
-        ServerItemNotFound,
-        CanOnlyCopyDynamicVDBs,
-        VdbExportFailed,
-        VdbDeployFinished,
-        VdbUnDeployFinished,
-        VdbCopyToRepoFinished,
-        InvalidArgMsg_ServerName,
-        noTeiidInstancesDefined,
-        teiidSetOk,
-        noTeiidWithName;
-
-        @Override
-        public String toString() {
-            return getEnumName(this) + DOT + name();
-        }
-    }
-
     /**
      * Localized messages of the {@link RenameCommand}.
      */
@@ -412,7 +318,6 @@ public class Messages implements StringConstants {
         InvalidArgMsg_ObjectName,
         InvalidArgMsg_NewName,
         ObjectRenamed,
-        Failure,
         cannotRename_wouldCreateDuplicate,
         cannotRename_objectDoesNotExist,
         cannotRename_targetContextDoesNotExist;

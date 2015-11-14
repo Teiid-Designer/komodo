@@ -28,16 +28,14 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test AddParameterCommand
- *
+ * Test Class to test {@link AddConstraintColumnCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public class AddConstraintColumnCommandTest extends AbstractCommandTest {
+public final class AddConstraintColumnCommandTest extends AbstractCommandTest {
 
     @Test
     public void testAdd1() throws Exception {
-        final String[] commands = { 
-            "workspace",
+        final String[] commands = {
             "create-vdb myVdb vdbPath",
             "cd myVdb",
             "add-model refModel",
@@ -56,10 +54,7 @@ public class AddConstraintColumnCommandTest extends AbstractCommandTest {
             "add-foreign-key myForeignKey /workspace/myVdb/refModel/refTable",
             "cd myForeignKey",
             "add-column /workspace/myVdb/myModel/myTable/myCol1" };
-
-        setup(commands);
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

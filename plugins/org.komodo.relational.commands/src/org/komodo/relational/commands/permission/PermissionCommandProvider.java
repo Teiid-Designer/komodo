@@ -43,6 +43,8 @@ public class PermissionCommandProvider implements ShellCommandProvider {
         result.add( DeleteConditionCommand.class );
         result.add( DeleteMaskCommand.class );
         result.add( SetPermissionPropertyCommand.class );
+        result.add( ShowConditionsCommand.class );
+        result.add( ShowMasksCommand.class );
         result.add( UnsetPermissionPropertyCommand.class );
 
         return result;

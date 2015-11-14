@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import org.komodo.core.KEngine;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
@@ -50,6 +51,11 @@ public interface WorkspaceStatus extends StringConstants {
 	public static final String IMPORT_DEFAULT_DIR_KEY = "IMPORT_DEFAULT_DIR"; //$NON-NLS-1$
     @SuppressWarnings("javadoc")
 	public static final String EXPORT_DEFAULT_DIR_KEY = "EXPORT_DEFAULT_DIR"; //$NON-NLS-1$
+
+    /**
+     * Set to <code>true</code> if the command category should be displayed when help displays available commands.
+     */
+    String SHOW_COMMAND_CATEGORY = "SHOW_COMMAND_CATEGORY"; //$NON-NLS-1$
 
     /**
      * Set to <code>true</code> if the full path of the current context object should be displayed in the prompt.
@@ -88,6 +94,7 @@ public interface WorkspaceStatus extends StringConstants {
             put( EXPORT_DEFAULT_DIR_KEY, "." ); //$NON-NLS-1$
             put( IMPORT_DEFAULT_DIR_KEY, "." ); //$NON-NLS-1$
             put( RECORDING_FILE_KEY, "./commandOutput.txt" ); //$NON-NLS-1$
+            put( SHOW_COMMAND_CATEGORY, Boolean.TRUE.toString() );
             put( SHOW_FULL_PATH_IN_PROMPT_KEY, Boolean.FALSE.toString() );
             put( SHOW_HIDDEN_PROPERTIES_KEY, Boolean.FALSE.toString() );
             put( SHOW_PROP_NAME_PREFIX_KEY, Boolean.FALSE.toString() );
@@ -97,11 +104,23 @@ public interface WorkspaceStatus extends StringConstants {
     } );
 
     /**
+     * @return the command names available for the current context (never <code>null</code>)
+     * @throws Exception
+     *         if an error occurs
+     */
+    String[] getAvailableCommandNames() throws Exception;
+
+    /**
      * @return the commands available for the current context (never <code>null</code>)
      * @throws Exception
      *         if an error occurs
      */
-    String[] getAvailableCommands() throws Exception;
+    Set<ShellCommand> getAvailableCommands() throws Exception;
+    
+    /**
+     * Update the available commands for the current context.
+     */
+    void updateAvailableCommands();
 
     /**
      * @param commandName
@@ -175,14 +194,14 @@ public interface WorkspaceStatus extends StringConstants {
      * @return the current workspace context
      */
     KomodoObject getCurrentContext();
-    
+
     /**
      * Get the context at the supplied display path
      * @param displayPath the display path
      * @return the context, null if not found.
      */
     KomodoObject getContextForDisplayPath(String displayPath);
-    
+
     /**
      * Get the display path for the supplied context
      * @param kObj the context
@@ -218,6 +237,12 @@ public interface WorkspaceStatus extends StringConstants {
 	 * @return the recording writer
 	 */
 	Writer getRecordingWriter();
+
+    /**
+     * @return <code>true</code> if the command category is being displayed when help displays the available commands
+     * @see #SHOW_COMMAND_CATEGORY
+     */
+    boolean isShowingCommandCategory();
 
     /**
      * @return <code>true</code> if the full object path is being displayed in the prompt

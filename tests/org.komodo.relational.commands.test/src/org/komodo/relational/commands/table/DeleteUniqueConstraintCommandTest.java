@@ -26,16 +26,14 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test DeleteUniqueConstraintCommand
- *
+ * Test Class to test {@link DeleteUniqueConstraintCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public class DeleteUniqueConstraintCommandTest extends AbstractCommandTest {
+public final class DeleteUniqueConstraintCommandTest extends AbstractCommandTest {
 
     @Test
     public void testDelete1() throws Exception {
-        final String[] commands = { 
-            "workspace",
+        final String[] commands = {
             "create-vdb myVdb vdbPath",
             "cd myVdb",
             "add-model myModel",
@@ -45,10 +43,7 @@ public class DeleteUniqueConstraintCommandTest extends AbstractCommandTest {
             "add-unique-constraint myUniqueConstraint1",
             "add-unique-constraint myUniqueConstraint2",
             "delete-unique-constraint myUniqueConstraint1" };
-
-        setup(commands);
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

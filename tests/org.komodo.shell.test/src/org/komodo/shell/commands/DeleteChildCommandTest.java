@@ -23,34 +23,30 @@ public final class DeleteChildCommandTest extends AbstractCommandTest {
     @Test( expected = AssertionError.class )
     public void shouldNotDeleteChildAtRoot() throws Exception {
         final String[] commands = { "delete-child blah" }; // delete-child is not available at root
-        setup( commands );
-        execute();
+        execute( commands );
     }
-    
+
     @Test( expected = AssertionError.class )
     public void shouldFailTooManyArgs( ) throws Exception {
         final String child1Name = "blah1";
-        final String[] commands = { 
-            "library", 
+        final String[] commands = {
+            "library",
             "add-child " + child1Name,
             "delete-child " + child1Name + " optionalType extraArg" };
-        setup( commands );
-        execute();
+        execute( commands );
     }
-    
+
     @Test
     public void shouldDeleteChildAtLibrary() throws Exception {
         final String child1Name = "blah1";
         final String child2Name = "blah2";
-        final String[] commands = { 
-            "library", 
+        final String[] commands = {
+            "library",
             "add-child " + child1Name,
             "add-child " + child2Name,
             "delete-child " + child1Name };
-        setup( commands );
-
-        final CommandResult result = execute();
-        assertThat( result.isOk(), is( true ) );
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
 
         final KomodoObject library = _repo.komodoLibrary( getTransaction() );
         assertThat( library.getChildren( getTransaction() ).length, is( 1 ) );
@@ -61,15 +57,13 @@ public final class DeleteChildCommandTest extends AbstractCommandTest {
     public void shouldDeleteChildAtWorkspace() throws Exception {
         final String child1Name = "blah1";
         final String child2Name = "blah2";
-        final String[] commands = { 
-            "workspace", 
+        final String[] commands = {
+            "workspace",
             "add-child " + child1Name,
             "add-child " + child2Name,
             "delete-child " + child1Name };
-        setup( commands );
-
-        final CommandResult result = execute();
-        assertThat( result.isOk(), is( true ) );
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
 
         final KomodoObject workspace = _repo.komodoWorkspace( getTransaction() );
         assertThat( workspace.getChildren( getTransaction() ).length, is( 1 ) );

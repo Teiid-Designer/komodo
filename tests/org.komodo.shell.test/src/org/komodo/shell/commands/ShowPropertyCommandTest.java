@@ -15,8 +15,6 @@
  */
 package org.komodo.shell.commands;
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.komodo.shell.AbstractCommandTest;
@@ -31,45 +29,40 @@ public class ShowPropertyCommandTest extends AbstractCommandTest {
     @Test( expected = AssertionError.class )
     public void shouldFailTooManyArgs( ) throws Exception {
         final String[] commands = { "show-property aProp extraArg" };
-        setup( commands );
-        execute();
+        execute( commands );
     }
-    
-    @Test( expected = AssertionError.class )
+
+    @Test
     public void shouldNotBeAvailableAtLibrary() throws Exception {
-        final String[] commands = { "library",
-                                    "show-property test" };
-        setup( commands );
-        execute();
+        final String[] commands = { "library" };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+        assertCommandsNotAvailable( ShowPropertyCommand.NAME );
     }
 
-    @Test( expected = AssertionError.class )
+    @Test
     public void shouldNotBeAvailableAtRoot() throws Exception {
-        final String[] commands = { "show-property test" };
-        setup( commands );
-        execute();
+        assertCommandsNotAvailable( ShowPropertyCommand.NAME );
     }
 
-    @Test( expected = AssertionError.class )
+    @Test
     public void shouldNotBeAvailableAtWorkspace() throws Exception {
-        final String[] commands = { "workspace",
-                                    "show-property test" };
-        setup( commands );
-        execute();
+        final String[] commands = { "workspace" };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+        assertCommandsNotAvailable( ShowPropertyCommand.NAME );
     }
-    
+
     @Test
     public void shouldShowProperties() throws Exception {
         final String childName = "blah";
-        final String[] commands = { 
-            "workspace", 
+        final String[] commands = {
+            "workspace",
             "add-child " + childName,
             "cd " + childName,
             "show-property primaryType" };
-        setup( commands );
-
-        final CommandResult result = execute();
-        assertThat( result.isOk(), is( true ) );
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
 
         String writerOutput = getCommandOutput();
         assertTrue(writerOutput.contains("primaryType"));

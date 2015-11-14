@@ -25,6 +25,7 @@ public class RelationalCommandMessages implements StringConstants {
 
     public enum General {
         MISSING_PROPERTY_NAME_VALUE,
+        RELATIONAL_COMMAND_CATEGORY,
         SET_PROPERTY_SUCCESS,
         UNSET_MISSING_PROPERTY_NAME,
         UNSET_PROPERTY_SUCCESS;
@@ -37,8 +38,6 @@ public class RelationalCommandMessages implements StringConstants {
 
     public enum FindCommand {
         MISSING_TYPE_NAME,
-        HELP_TYPES_HEADING,
-        FAILURE,
         INVALID_TYPE,
         NO_OBJECTS_FOUND,
         TYPE_HEADER;

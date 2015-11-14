@@ -30,6 +30,18 @@ import java.util.List;
 public interface ShellCommand {
 
     /**
+     *  The command not found name
+     */
+    String COMMAND_NOT_FOUND = "cmd-not-found";  //$NON-NLS-1$
+    
+    /**
+     * Commands without a category will be placed in a general category.
+     *
+     * @return the command category (can be empty)
+     */
+    String getCategory();
+
+    /**
      * @return the command name (never empty)
      */
     String getName();

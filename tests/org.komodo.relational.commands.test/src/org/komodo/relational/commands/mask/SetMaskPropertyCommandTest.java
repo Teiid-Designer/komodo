@@ -26,15 +26,14 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test SetMaskPropertyCommand
- *
+ * Test Class to test {@link SetMaskPropertyCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public class SetMaskPropertyCommandTest extends AbstractCommandTest {
+public final class SetMaskPropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testSetProperty1() throws Exception {
-        final String[] commands = { "workspace",
+        final String[] commands = {
             "create-vdb myVdb vdbPath",
             "cd myVdb",
             "add-data-role myDataRole",
@@ -44,10 +43,7 @@ public class SetMaskPropertyCommandTest extends AbstractCommandTest {
             "add-mask myMask",
             "cd myMask",
             "set-property order myOrder"};
-
-        setup( commands );
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

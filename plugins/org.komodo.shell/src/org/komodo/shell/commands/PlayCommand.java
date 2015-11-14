@@ -76,11 +76,23 @@ public class PlayCommand  extends BuiltInShellCommand {
                     while ( true ) {
                         final ShellCommand command = reader.read();
 
-                        if ( ( command == null ) || ( command instanceof ExitCommand ) ) {
+                        if ( command == null ) {
                             break;
                         }
 
                         command.setWriter( getWriter() );
+
+                        if ( command instanceof ExitCommand ) {
+                            final ExitCommand exitCmd = ( ExitCommand )command;
+
+                            // make sure max number of arguments has not been exceeded
+                            if ( exitCmd.getArguments().size() > exitCmd.getMaxArgCount() ) {
+                                return new CommandResultImpl( false,
+                                                              Messages.getString( Messages.SHELL.TOO_MANY_ARGS, exitCmd ),
+                                                              null );
+                            }
+                        }
+
                         final CommandResult result = command.execute();
 
                         if ( !result.isOk() ) {

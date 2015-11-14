@@ -16,19 +16,17 @@
 package org.komodo.relational.commands;
 
 import org.junit.Test;
+import org.komodo.shell.commands.RemoveDescriptorCommand;
 
 /**
  * Test Class to test {@link RelationalRemoveDescriptorCommand}.
  */
-@SuppressWarnings( { "javadoc", "nls" } )
-public class RelationalRemoveDescriptorCommandTest extends AbstractCommandTest {
+@SuppressWarnings( { "javadoc" } )
+public final class RelationalRemoveDescriptorCommandTest extends AbstractCommandTest {
 
-    @Test( expected = AssertionError.class )
+    @Test
     public void shouldNotBeAvailableAtWorkspace() throws Exception {
-        final String[] commands = { "workspace",
-                                    "remove-descriptor blah" };
-        setup( commands );
-        execute();
+        assertCommandsNotAvailable( RemoveDescriptorCommand.NAME );
     }
 
 }

@@ -15,6 +15,7 @@
  */
 package org.komodo.shell;
 
+import static org.komodo.shell.Messages.SHELL.GeneralCommandCategory;
 import java.io.File;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -44,9 +45,6 @@ import org.komodo.utils.StringUtils;
  *
  */
 public abstract class BuiltInShellCommand implements ShellCommand, StringConstants {
-
-    protected static final String trueString = Boolean.TRUE.toString();
-    protected static final String falseString = Boolean.FALSE.toString();
 
     private final String name;
     private WorkspaceStatus wsStatus;
@@ -121,6 +119,16 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
         // return result
         assert (result != null);
         return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommand#getCategory()
+     */
+    @Override
+    public String getCategory() {
+        return Messages.getString( GeneralCommandCategory );
     }
 
     /**
@@ -392,7 +400,7 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
 	 */
 	public String validatePath(String displayPath) {
         ArgCheck.isNotNull(displayPath, "displayPath"); //$NON-NLS-1$
-        
+
         displayPath = displayPath.trim();
 		if(displayPath.trim().length()==0) {
 		    return Messages.getString(SHELL.locationArg_empty);
@@ -407,7 +415,7 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
 		        entireDisplayPath = getWorkspaceStatus().getCurrentContextDisplayPath()+FORWARD_SLASH+displayPath;
 		    }
 		}
-		
+
 		// Try to locate the object at the specified path
         KomodoObject newContext = null;
         String repoPath = getWorkspaceStatus().getLabelProvider().getPath(entireDisplayPath);
@@ -422,7 +430,7 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
             if ( KomodoObjectLabelProvider.ENV_PATH.equals( repoPath ) || KomodoObjectLabelProvider.ENV_SLASH_PATH.equals( repoPath ) ) {
                 return CompletionConstants.OK;
             }
-            
+
             //
             try {
                 newContext = wsStatus.getRootContext().getRepository().getFromWorkspace(getTransaction(), repoPath);
@@ -435,41 +443,6 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
 		    return Messages.getString(SHELL.locationArg_noContextWithThisName, displayPath);
 		}
 		return CompletionConstants.OK;
-	}
-
-	/**
-	 * Validates whether the supplied property is a valid property for the supplied context.
-	 * If invalid an error message is printed out.
-	 * @param propName the property name
-	 * @param context the workspace context
-	 * @return 'true' if the property is valid for the context, 'false' if not.
-	 * @exception Exception the exception
-	 */
-    public boolean validateProperty( final String propName,
-                                     final KomodoObject context) throws Exception {
-        if ( !StringUtils.isEmpty( propName ) ) {
-            final List< String > propNames = KomodoObjectUtils.getProperties(getWorkspaceStatus(),context);
-
-            if ( propNames.contains( propName )
-                 || ( !isShowingPropertyNamePrefixes() && propNames.contains( KomodoObjectUtils.attachPrefix( getWorkspaceStatus(),context, propName ) ) ) ) {
-                return true;
-            }
-       }
-
-        return false;
-	}
-
-	/**
-	 * Validates whether the supplied property value is valid for the property
-	 * If invalid an error message is printed out.
-	 * @param propName the property name
-	 * @param propValue the property value
-	 * @param context the workspace context
-	 * @return 'true' if the property is valid for the context, 'false' if not.
-	 */
-	public boolean validatePropertyValue(String propName, String propValue, KomodoObject context) {
-		// TODO: add logic to test
-		return true;
 	}
 
 	/**
@@ -548,7 +521,7 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
     		    ContextPathPair contextPathPair = getMatchingContextAndPathRelative(getWorkspaceStatus(), currentContext, lastArgument);
     		    KomodoObject deepestMatchingContext = contextPathPair.getContext();
     		    String deepestMatchingPath = contextPathPair.getPath();
-    		    
+
     			// Get children of deepest context match to form potentialsList
     		    KomodoObject[] children = deepestMatchingContext.getChildren( getTransaction() );
     			if(children.length!=0) {
@@ -576,7 +549,7 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
 
     	}
     }
-    
+
     /**
      * Get the deepest matching context along the supplied relative path.  If there is no such context, the current context is returned.
      * @param wsStatus the WorkspaceStatus
@@ -628,11 +601,11 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
         }
         return result;
     }
-    
+
     private class ContextPathPair {
         private KomodoObject context;
         private String path;
-        
+
         public void setContext(KomodoObject context) {
             this.context = context;
         }
@@ -643,11 +616,11 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
             return this.context;
         }
         public String getPath() {
-            
+
             return this.path;
         }
     }
-    
+
     /**
      * Determine if the supplied context has multiple children that start with the segmentName
      * @param currentContext the current context
@@ -669,7 +642,7 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
         }
         return nMatching>1;
     }
-    
+
     /**
      * convert the supplied absolute path to a path relative to the supplied context
      * @param wsStatus the WorkspaceContext
@@ -739,11 +712,11 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
 
     protected void updateCandidatesForBooleanProperty( final String lastArgument,
                                                        final List< CharSequence > candidates ) {
-        if ( StringUtils.isBlank( lastArgument ) || trueString.startsWith( lastArgument ) ) {
+        if ( StringUtils.isBlank( lastArgument ) || KomodoObjectUtils.TRUE_STRING.startsWith( lastArgument ) ) {
             candidates.add( Boolean.TRUE.toString() );
         }
 
-        if ( StringUtils.isBlank( lastArgument ) || falseString.startsWith( lastArgument ) ) {
+        if ( StringUtils.isBlank( lastArgument ) || KomodoObjectUtils.FALSE_STRING.startsWith( lastArgument ) ) {
             candidates.add( Boolean.FALSE.toString() );
         }
     }

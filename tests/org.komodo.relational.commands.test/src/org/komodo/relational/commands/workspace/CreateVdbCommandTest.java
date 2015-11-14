@@ -23,19 +23,28 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test CreateVdbCommand
- *
+ * Test Class to test {@link CreateVdbCommand}.
  */
 @SuppressWarnings( { "javadoc", "nls" } )
-public class CreateVdbCommandTest extends AbstractCommandTest {
+public final class CreateVdbCommandTest extends AbstractCommandTest {
 
     @Test
-    public void testCreateVdb1() throws Exception {
-        final String[] commands = { "workspace",
-                                    "create-vdb testVdb vdbPath" };
-        setup( commands  );
+    public void shouldCreateVdbWithoutOptionalPath() throws Exception {
+        final String[] commands = { "create-vdb testVdb" };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk(result);
 
-        CommandResult result = execute();
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        Vdb[] vdbs = wkspMgr.findVdbs(getTransaction());
+
+        assertEquals(1, vdbs.length);
+        assertEquals("testVdb", vdbs[0].getName(getTransaction()));
+    }
+
+    @Test
+    public void shouldCreateVdbWithOptionalPath() throws Exception {
+        final String[] commands = { "create-vdb testVdb vdbPath" };
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

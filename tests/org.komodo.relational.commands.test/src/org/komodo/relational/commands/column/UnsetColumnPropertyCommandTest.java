@@ -32,11 +32,11 @@ import org.komodo.shell.api.CommandResult;
  *
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public class UnsetColumnPropertyCommandTest extends AbstractCommandTest {
+public final class UnsetColumnPropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testUnsetProperty1() throws Exception {
-        final String[] commands = { "workspace",
+        final String[] commands = {
             "create-vdb myVdb vdbPath",
             "cd myVdb",
             "add-model myModel",
@@ -47,9 +47,7 @@ public class UnsetColumnPropertyCommandTest extends AbstractCommandTest {
             "cd myColumn",
             "set-property NAMEINSOURCE myNameInSource",
             "unset-property NAMEINSOURCE" };
-        setup( commands );
-        
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
@@ -63,11 +61,11 @@ public class UnsetColumnPropertyCommandTest extends AbstractCommandTest {
 
         Table[] tables = models[0].getTables(getTransaction());
         assertEquals(1, tables.length);
-        assertEquals("myTable", tables[0].getName(getTransaction())); 
+        assertEquals("myTable", tables[0].getName(getTransaction()));
 
         Column[] columns = tables[0].getColumns(getTransaction());
         assertEquals(1, columns.length);
-        assertEquals("myColumn", columns[0].getName(getTransaction())); 
+        assertEquals("myColumn", columns[0].getName(getTransaction()));
 
         String nameInSource = columns[0].getNameInSource(getTransaction());
         assertNull(nameInSource);

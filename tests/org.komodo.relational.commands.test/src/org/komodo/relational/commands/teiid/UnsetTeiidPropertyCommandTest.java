@@ -23,24 +23,19 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test UnsetTeiidPropertyCommand
- *
+ * Test Class to test {@link UnsetTeiidPropertyCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public class UnsetTeiidPropertyCommandTest extends AbstractCommandTest {
+public final class UnsetTeiidPropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testUnsetProperty1() throws Exception {
-        final String[] commands = { 
-            "workspace",
+        final String[] commands = {
             "create-teiid testTeiid",
             "cd testTeiid",
             "set-property adminPort 88",
             "unset-property adminPort" };
-
-        setup( commands  );
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

@@ -8,6 +8,7 @@
 package org.komodo.shell.api;
 
 import static org.komodo.spi.constants.StringConstants.FORWARD_SLASH;
+import org.komodo.core.KomodoLexicon;
 import org.komodo.repository.RepositoryImpl;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
@@ -50,7 +51,7 @@ public interface KomodoObjectLabelProvider {
     /**
      * The Komodo environment area display name. Value is {@value}.
      */
-    String ENV_DISPLAY_NAME = "environment"; //$NON-NLS-1$
+    String ENV_DISPLAY_NAME = KomodoLexicon.Environment.UNQUALIFIED_NAME;
 
     /**
      * The Komodo environment area display path. Value is {@value}.
@@ -70,7 +71,7 @@ public interface KomodoObjectLabelProvider {
     /**
      * The Komodo library area display name. Value is {@value}.
      */
-    String LIB_DISPLAY_NAME = "library"; //$NON-NLS-1$
+    String LIB_DISPLAY_NAME = KomodoLexicon.Library.UNQUALIFIED_NAME;
 
     /**
      * The Komodo library area display path. Value is {@value}.
@@ -90,7 +91,7 @@ public interface KomodoObjectLabelProvider {
     /**
      * The Komodo workspace area display name. Value is {@value}.
      */
-    String WORKSPACE_DISPLAY_NAME = "workspace"; //$NON-NLS-1$
+    String WORKSPACE_DISPLAY_NAME = KomodoLexicon.Workspace.UNQUALIFIED_NAME;
 
     /**
      * The Komodo workspace area display path. Value is {@value}.
@@ -147,5 +148,5 @@ public interface KomodoObjectLabelProvider {
      *        the workspace status (never <code>null</code>)
      */
     void setWorkspaceStatus( final WorkspaceStatus status );
-    
+
 }

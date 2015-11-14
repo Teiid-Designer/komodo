@@ -75,6 +75,30 @@ public class PermissionCommandMessages implements StringConstants {
         }
     }
 
+    @SuppressWarnings( "javadoc" )
+    public enum ShowConditionsCommand {
+
+        CONDITIONS_HEADER,
+        NO_CONDITIONS;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum ShowMasksCommand {
+
+        MASKS_HEADER,
+        NO_MASKS;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
     private static String getEnumName(Enum<?> enumValue) {
         String className = enumValue.getClass().getName();
         String[] components = className.split("\\$"); //$NON-NLS-1$

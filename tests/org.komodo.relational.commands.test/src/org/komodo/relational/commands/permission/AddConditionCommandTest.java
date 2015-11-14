@@ -26,16 +26,14 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
 
 /**
- * Test Class to test AddConditionCommand
- *
+ * Test Class to test {@link AddConditionCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public class AddConditionCommandTest extends AbstractCommandTest {
+public final class AddConditionCommandTest extends AbstractCommandTest {
 
     @Test
     public void testAdd1() throws Exception {
-        final String[] commands = { 
-            "workspace",
+        final String[] commands = {
             "create-vdb myVdb vdbPath",
             "cd myVdb",
             "add-data-role myDataRole",
@@ -43,10 +41,7 @@ public class AddConditionCommandTest extends AbstractCommandTest {
             "add-permission myPermission",
             "cd myPermission",
             "add-condition myCondition" };
-
-        setup( commands );
-
-        CommandResult result = execute();
+        final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
         WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);

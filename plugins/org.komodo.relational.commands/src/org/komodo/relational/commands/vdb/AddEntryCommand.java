@@ -54,6 +54,11 @@ public final class AddEntryCommand extends VdbShellCommand {
         return result;
     }
 
+    @Override
+    public boolean isEnabled() {
+        return false;
+    }
+    
     /**
      * {@inheritDoc}
      *

@@ -15,6 +15,7 @@ import org.komodo.shell.Messages;
 import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.KomodoObjectLabelProvider;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
@@ -27,6 +28,16 @@ import org.komodo.utils.StringUtils;
  *  Utilities for working with KomodoObject
  */
 public class KomodoObjectUtils implements StringConstants {
+
+    /**
+     * A string representation of {@link Boolean#TRUE}.
+     */
+    public static final String TRUE_STRING = Boolean.TRUE.toString();
+
+    /**
+     * A string representation of {@link Boolean#FALSE}.
+     */
+    public static final String FALSE_STRING = Boolean.FALSE.toString();
 
     /**
      * Get property names for a KomodoObject
@@ -98,7 +109,28 @@ public class KomodoObjectUtils implements StringConstants {
             final Type type = property.getDescriptor( wsStatus.getTransaction() ).getType();
             final boolean propIsReference = ( ( Type.REFERENCE == type ) || ( Type.WEAKREFERENCE == type ) );
             if(propIsReference) {
-                return wsStatus.getLabelProvider().getDisplayPath(displayValue);
+                // Multiple references need to be converted from repo paths to display paths
+                if(property.isMultiple(wsStatus.getTransaction())) {
+                    // Remove square brackets
+                    String absPaths = displayValue.replaceAll("\\[|\\]", "");  //$NON-NLS-1$ //$NON-NLS-2$
+                    // Get multiple paths are separated by commas
+                    String[] splitPaths = absPaths.split(","); //$NON-NLS-1$
+                    
+                    // Convert repo paths to display paths, returning the multiple display paths
+                    StringBuilder sb = new StringBuilder("["); //$NON-NLS-1$ 
+                    boolean first = true;
+                    for(String absPath : splitPaths) {
+                        if(!absPath.isEmpty()) {
+                            if(!first) sb.append(","); //$NON-NLS-1$
+                            sb.append(wsStatus.getLabelProvider().getDisplayPath(absPath));
+                            first = false;
+                        }
+                    }
+                    sb.append("]"); //$NON-NLS-1$
+                    return sb.toString();
+                } else {
+                    return wsStatus.getLabelProvider().getDisplayPath(displayValue);
+                }
             }
 
             return displayValue;
@@ -141,7 +173,7 @@ public class KomodoObjectUtils implements StringConstants {
         ArgCheck.isNotNull( context, "context" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( propertyName, "propertyName" ); //$NON-NLS-1$
 
-        for ( final String name : KomodoObjectUtils.getProperties(wsStatus,context) ) {
+        for ( final String name : getProperties(wsStatus,context) ) {
             if ( propertyName.equals( removePrefix( name ) ) ) {
                 return name;
             }
@@ -210,7 +242,7 @@ public class KomodoObjectUtils implements StringConstants {
 
         return getShortName( wsStatus, kobject );
     }
-    
+
     /**
      * Determine if the supplied KomodoObject is the root (tko:komodo)
      *
@@ -229,7 +261,7 @@ public class KomodoObjectUtils implements StringConstants {
         }
         return false;
     }
-    
+
     /**
      * Determine if the supplied KomodoObject is one of the root children (tko:komodo/tko:workspace, tko:komodo/tko:library, tko:komodo/tko:environment)
      *
@@ -257,6 +289,230 @@ public class KomodoObjectUtils implements StringConstants {
             return true;
         }
         return false;
+    }
+
+    /**
+     * @param status
+     *        the workspace status (cannot be <code>null</code>)
+     * @param context
+     *        the object whose multi-valued property value is being concatenated (cannot be <code>null</code>)
+     * @param name
+     *        the name of the multi-value property (cannot be empty)
+     * @return the concatenated value or <code>null</code> if no value exists
+     * @throws Exception
+     *         if property is not a multi-valued property or if an error occurs
+     */
+    public static String concatMultiValues( final WorkspaceStatus status,
+                                            final KomodoObject context,
+                                            final String name ) throws Exception {
+        ArgCheck.isNotNull( status, "status" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( context, "context" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( name, "name" ); //$NON-NLS-1$
+
+        final String propertyName = status.isShowingPropertyNamePrefixes() ? name : attachPrefix( status, context, name );
+
+        if ( !context.hasProperty( status.getTransaction(), name ) ) {
+            return null;
+        }
+
+        if ( !isMultiValuedProperty( status, context, name ) ) {
+            throw new KException( Messages.getString( Messages.SHELL.NotMultiValuedProperty, name, context.getAbsolutePath() ) );
+        }
+
+        final Property property = context.getProperty( status.getTransaction(), propertyName );
+        final StringBuilder result = new StringBuilder();
+        boolean quoted = false;
+        boolean firstTime = true;
+
+        for ( final Object value : property.getValues( status.getTransaction() ) ) {
+            if ( !firstTime ) {
+                result.append( ',' );
+            } else {
+                firstTime = false;
+            }
+
+            // TODO need to account for escaped values
+
+            final Type type = property.getDescriptor( status.getTransaction() ).getType();
+            final boolean propIsReference = ( ( Type.REFERENCE == type ) || ( Type.WEAKREFERENCE == type ) );
+            String valueAsText = null;
+
+            if ( propIsReference ) {
+                final String path = RepositoryTools.findPathOfReference( status.getTransaction(),
+                                                                         property.getRepository(),
+                                                                         value.toString() );
+                valueAsText = ( StringUtils.isBlank( path ) ? value.toString()
+                                                            : status.getLabelProvider().getDisplayPath( path ) );
+            } else {
+                valueAsText = value.toString();
+
+                if ( ( valueAsText.indexOf( ' ' ) != -1 ) && !quoted ) {
+                    quoted = true;
+                    result.insert( 0, '"' );
+                }
+            }
+
+            result.append( valueAsText );
+        }
+
+        if ( quoted ) {
+            result.append( '"' );
+        }
+
+        return result.toString();
+    }
+
+    /**
+     * @param status
+     *        the workspace status (cannot be <code>null</code>)
+     * @param context
+     *        the object whose property is being checked (cannot be <code>null</code>)
+     * @param name
+     *        the name of the property (cannot be empty)
+     * @return <code>true</code> if the property is multi-valued
+     * @throws Exception
+     *         if an error occurs
+     */
+    public static boolean isMultiValuedProperty( final WorkspaceStatus status,
+                                                 final KomodoObject context,
+                                                 final String name ) throws Exception {
+        ArgCheck.isNotNull( status, "status" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( context, "context" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( name, "name" ); //$NON-NLS-1$
+
+        final String propertyName = status.isShowingPropertyNamePrefixes() ? name : attachPrefix( status, context, name );
+        final PropertyDescriptor descriptor = context.getPropertyDescriptor( status.getTransaction(), propertyName );
+        return ( ( descriptor == null ) ? false : descriptor.isMultiple() );
+    }
+
+    /**
+     * @param status
+     *        the workspace status (cannot be <code>null</code>)
+     * @param propName
+     *        the property name (cannot be empty)
+     * @param context
+     *        the object whose property is being validated (cannot be <code>null</code>)
+     * @return <code>true</code> if the property exists or a property descriptor exists
+     * @exception Exception
+     *            if there is a problem obtaining property information
+     */
+    public static boolean isValidProperty( final WorkspaceStatus status,
+                                           final String propName,
+                                           final KomodoObject context ) throws Exception {
+        ArgCheck.isNotNull( status, "status" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( propName, "propName" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( context, "context" ); //$NON-NLS-1$
+
+        if ( !StringUtils.isEmpty( propName ) ) {
+            final List< String > propNames = getProperties( status, context );
+
+            if ( propNames.contains( propName )
+                 || ( !status.isShowingPropertyNamePrefixes()
+                      && propNames.contains( attachPrefix( status, context, propName ) ) ) ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param status
+     *        the workspace status (cannot be <code>null</code>)
+     * @param propName
+     *        the property name (cannot be empty)
+     * @param propValue
+     *        the property value (can be empty)
+     * @param context
+     *        the workspace context (cannot be <code>null</code>)
+     * @return <code>true</code> if the value is valid for the specified property
+     * @throws KException
+     *         if an error occurs
+     */
+    public static boolean isValidPropertyValue( final WorkspaceStatus status,
+                                                final String propName,
+                                                final String propValue,
+                                                final KomodoObject context ) throws KException {
+        ArgCheck.isNotNull( status, "status" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( propName, "propName" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( context, "context" ); //$NON-NLS-1$
+
+        final PropertyDescriptor descriptor = context.getPropertyDescriptor( status.getTransaction(), propName );
+
+        // empty value is not valid if mandatory
+        if ( StringUtils.isBlank( propValue ) ) {
+            return ( ( descriptor == null ) || !descriptor.isMandatory() );
+        }
+
+        try {
+            // multi-valued property
+            if ( isMultiValuedProperty( status, context, propName ) ) {
+                final String[] multiValues = parseMultiValues( propValue );
+
+                if ( multiValues.length == 0 ) {
+                    return false;
+                }
+
+                // make sure each value is valid
+                for ( final String value : multiValues ) {
+                    if ( !isValidValue( value, descriptor ) ) {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            // single valued property
+            return isValidValue( propValue, descriptor );
+        } catch ( final Exception e ) {
+            return false;
+        }
+    }
+
+    private static boolean isValidValue( final String value,
+                                         final PropertyDescriptor descriptor ) {
+        if ( StringUtils.isBlank( value ) ) {
+            return ( ( descriptor == null ) || !descriptor.isMandatory() );
+        }
+
+        if ( descriptor != null ) {
+            if ( descriptor.getType() == Type.BOOLEAN ) {
+                return ( FALSE_STRING.equals( value ) || TRUE_STRING.equals( value ) );
+            }
+
+            // TODO: maybe add logic to test other property types
+        }
+
+        return true;
+    }
+
+    /**
+     * @param valuesString
+     *        the string being parsed into values (can be empty)
+     * @return the values (never <code>null</code> but can be empty)
+     */
+    public static String[] parseMultiValues( final String valuesString ) {
+        if ( StringUtils.isBlank( valuesString ) ) {
+            return StringConstants.EMPTY_ARRAY;
+        }
+
+        // TODO need to account for escaped values
+
+        String multiValues = null;
+
+        // strip off leading and trailing quotes if necessary
+        if ( valuesString.startsWith( "\"" ) && valuesString.endsWith( "\"" ) ) { //$NON-NLS-1$ //$NON-NLS-2$
+            if ( valuesString.length() == 2 ) {
+                return StringConstants.EMPTY_ARRAY;
+            }
+
+            multiValues = valuesString.substring( 1, valuesString.length() - 1 );
+        } else {
+            multiValues = valuesString;
+        }
+
+        return multiValues.split( "," ); //$NON-NLS-1$
     }
 
 }

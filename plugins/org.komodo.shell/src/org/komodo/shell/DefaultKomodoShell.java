@@ -46,7 +46,6 @@ import org.komodo.shell.api.InvalidCommandArgumentException;
 import org.komodo.shell.api.KomodoShell;
 import org.komodo.shell.api.KomodoShellParent;
 import org.komodo.shell.api.ShellCommand;
-import org.komodo.shell.api.ShellCommandFactory;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.ExitCommand;
 import org.komodo.shell.commands.HelpCommand;
@@ -105,6 +104,24 @@ public class DefaultKomodoShell implements KomodoShell {
         };
 
         final DefaultKomodoShell shell = new DefaultKomodoShell( parent, KEngine.getInstance(), System.in, System.out );
+        
+        // Terminate if startup input is not valid
+        if( args.length == 1 && !args[0].equals("-simple") ) {  //$NON-NLS-1$ 
+            PrintUtils.print( shell.getOutputWriter(), false, 0, Messages.getString( SHELL.INVALID_STARTUP_ARGS, args[0] ) );
+            System.exit(0);
+        } else if( args.length > 1 ) { 
+            if(!args[0].equals("-f")) {  //$NON-NLS-1$ 
+                PrintUtils.print( shell.getOutputWriter(), false, 0, Messages.getString( SHELL.INVALID_STARTUP_ARGS, args[0] + " " + args[1] ) );  //$NON-NLS-1$
+                System.exit(0);
+            } else {
+                File inputFile = new File(args[1]);
+                if(!inputFile.isFile()) {
+                    PrintUtils.print( shell.getOutputWriter(), false, 0, Messages.getString( SHELL.INVALID_STARTUP_FILE, args[1] ) ); 
+                    System.exit(0);
+                }
+            }
+        }
+        
         Thread shutdownHook = new Thread( new Runnable() {
             @Override
             public void run() {
@@ -237,7 +254,6 @@ public class DefaultKomodoShell implements KomodoShell {
         startKEngine();
 
         wsStatus = new WorkspaceStatusImpl( this );
-        ShellCommandFactory factory = wsStatus.getCommandFactory();
 
         // load shell properties if they exist
         final String dataDir = getShellDataLocation();
@@ -264,7 +280,7 @@ public class DefaultKomodoShell implements KomodoShell {
         displayWelcomeMessage();
 
         // run help command
-        final ShellCommand helpCmd = factory.getCommand( HelpCommand.NAME );
+        final ShellCommand helpCmd = this.wsStatus.getCommand( HelpCommand.NAME );
         helpCmd.setArguments( new Arguments( EMPTY_STRING ) );
         helpCmd.setWriter( getOutputWriter() );
 
@@ -306,7 +322,7 @@ public class DefaultKomodoShell implements KomodoShell {
                             final String errorMsg = Messages.getString( SHELL.CommandFailure, command.toString() )
                                                     + ' '
                                                     + result.getError().getLocalizedMessage();
-                            KLog.getLogger().error( errorMsg, result.getError() );
+                            KLog.getLogger().debug( errorMsg, result.getError() );
                             PrintUtils.print( getOutputWriter(), CompletionConstants.MESSAGE_INDENT, errorMsg );
                         }
 

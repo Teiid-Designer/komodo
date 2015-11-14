@@ -15,7 +15,6 @@
  */
 package org.komodo.shell.commands;
 
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.komodo.shell.AbstractCommandTest;
 import org.komodo.shell.api.CommandResult;
@@ -26,23 +25,42 @@ import org.komodo.shell.api.CommandResult;
 @SuppressWarnings( { "javadoc", "nls" } )
 public class ExitCommandTest extends AbstractCommandTest {
 
-//    @Test( expected = AssertionError.class )
-//    public void shouldFailTooManyArgs( ) throws Exception {
-//        final String[] commands = { "exit -s extraArg" };
-//        setup( commands );
-//        execute();
-//    }
-    
+    @Test( expected = AssertionError.class )
+    public void shouldFailTooManyArgs() throws Exception {
+        final String[] commands = { "exit -s extraArg" };
+        execute( commands );
+    }
+
     @Test
-    public void test1() throws Exception {
-        final String[] commands = { "workspace" };
-    	setup( commands );
+    public void shouldExitAfterSavingChanges() throws Exception {
+        final String[] commands = { "workspace",
+                                    "add-child blah",
+                                    "cd blah",
+                                    "set-property sledge hammer",
+                                    "exit -s" };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+    }
 
-        CommandResult result = execute();
-        assertCommandResultOk(result);
+    @Test
+    public void shouldExitIfUnsavedChangesAreAborted() throws Exception {
+        final String[] commands = { "workspace",
+                                    "add-child blah",
+                                    "cd blah",
+                                    "set-property sledge hammer",
+                                    "exit -f" };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+    }
 
-    	// Check WorkspaceContext
-    	assertEquals("/workspace", wsStatus.getCurrentContextDisplayPath());
+    @Test( expected = AssertionError.class )
+    public void shouldNotExitIfUnsavedChanges() throws Exception {
+        final String[] commands = { "workspace",
+                                    "add-child blah",
+                                    "cd blah",
+                                    "set-property sledge hammer",
+                                    "exit" };
+        execute( commands );
     }
 
 }
