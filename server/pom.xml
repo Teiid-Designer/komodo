@@ -40,7 +40,7 @@
     <!-- ================================================================== -->
     <groupId>org.jboss.tools.komodo</groupId>	
     <artifactId>komodo-server</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>0.0.3-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Komodo Server</name>
     <description>Provides access to the Komodo engine</description>
@@ -52,7 +52,7 @@
         <gson.version>2.2.4</gson.version>
         <junit.version>4.11</junit.version>
         <infinispan.version>7.2.0.Final</infinispan.version> <!-- need to override so that resteasy uses same as MS -->
-        <komodo.version>0.0.2-SNAPSHOT</komodo.version>
+        <komodo.version>${project.version}</komodo.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <mockito.version>1.8.4</mockito.version>
@@ -136,11 +136,6 @@
         <dependency>
             <groupId>org.jboss.tools.komodo.plugins</groupId>
             <artifactId>org.komodo.teiid.client</artifactId>
-            <version>${komodo.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.tools.komodo.plugins</groupId>
-            <artifactId>org.komodo.teiid.client.schema</artifactId>
             <version>${komodo.version}</version>
         </dependency>
         <dependency>
