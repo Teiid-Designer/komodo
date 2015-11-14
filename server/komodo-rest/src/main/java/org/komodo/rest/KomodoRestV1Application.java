@@ -61,7 +61,7 @@ import io.swagger.jaxrs.config.BeanConfig;
  * The JAX-RS {@link Application} that provides the Komodo REST API.
  */
 @ApplicationPath( V1Constants.APP_PATH )
-public final class KomodoRestV1Application extends Application implements RepositoryObserver, StringConstants {
+public class KomodoRestV1Application extends Application implements RepositoryObserver, StringConstants {
 
     /**
      * Constants associated with version 1 of the Komodo REST application.

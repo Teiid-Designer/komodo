@@ -17,7 +17,7 @@ import javax.ws.rs.ext.Provider;
  * Maps {@link Throwable errors} to {@link Response responses}.
  */
 @Provider
-public final class KomodoExceptionMapper implements ExceptionMapper< Throwable > {
+public class KomodoExceptionMapper implements ExceptionMapper< Throwable > {
 
     /**
      * {@inheritDoc}
