@@ -53,13 +53,10 @@
         <junit.version>4.11</junit.version>
         <infinispan.version>7.2.0.Final</infinispan.version> <!-- need to override so that resteasy uses same as MS -->
         <komodo.version>0.0.2-SNAPSHOT</komodo.version>
-        <log4j.version>1.2.16</log4j.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <mockito.version>1.8.4</mockito.version>
-        <org.slf4j.version>1.7.2</org.slf4j.version>
         <resteasy.version>3.0.11.Final</resteasy.version>
-        <slf4j.log4j.version>1.7.2</slf4j.log4j.version>
     </properties>
 
     <dependencyManagement>
@@ -97,23 +94,6 @@
                 <version>${mockito.version}</version>
                 <scope>test</scope>
             </dependency>
-            <dependency>
-                <groupId>log4j</groupId>
-                <artifactId>log4j</artifactId>
-                <version>${log4j.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${org.slf4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-log4j12</artifactId>
-                <version>${slf4j.log4j.version}</version>
-                <scope>test</scope>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -131,6 +111,11 @@
         <dependency>
             <groupId>org.jboss.tools.komodo.plugins</groupId>
             <artifactId>org.komodo.utils</artifactId>
+            <version>${komodo.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.tools.komodo.plugins</groupId>
+            <artifactId>org.komodo.utils.logger.modeshape</artifactId>
             <version>${komodo.version}</version>
         </dependency>
         <dependency>
@@ -183,18 +168,6 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
         </dependency>
     </dependencies>
     

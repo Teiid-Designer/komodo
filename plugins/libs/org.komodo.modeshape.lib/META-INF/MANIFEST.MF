@@ -38,8 +38,10 @@ Bundle-ClassPath: .,
  lib/modeshape-schematic.jar,
  lib/modeshape-sequencer-ddl.jar,
  lib/modeshape-sequencer-teiid.jar,
+ lib/tika-core.jar,
+ lib/log4j.jar,
  lib/slf4j-api.jar,
- lib/tika-core.jar
+ lib/slf4j-log4j12.jar
 Export-Package: javax.jcr,
  javax.jcr.lock,
  javax.jcr.nodetype,

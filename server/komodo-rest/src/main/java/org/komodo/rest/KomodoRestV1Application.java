@@ -69,6 +69,11 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
     public static interface V1Constants extends JsonConstants {
 
         /**
+         * Location for the log file passed to {@link KLog} logger
+         */
+        String LOG_FILE_PATH = "log/vdb-builder.log"; //$NON-NLS-1$
+
+        /**
          * The URI path segment for the Komodo REST application. It is included in the base URI. <strong>DO NOT INCLUDE THIS IN
          * OTHER URI SEGMENTS</strong>
          */
@@ -246,6 +251,9 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
      */
     public KomodoRestV1Application() throws ServerErrorException {
         try {
+            // Set the log path to something relative to the deployment location of this application
+            KLog.getLogger().setLogPath(V1Constants.LOG_FILE_PATH);
+
             // Ensure server logging level is reduced to something sane!
             KLog.getLogger().setLevel(Level.INFO);
         } catch (Exception ex) {
@@ -321,7 +329,7 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
 
         if ( !cleared ) {
             throw new ServerErrorException( Messages.getString( KOMODO_ENGINE_CLEAR_TIMEOUT, TIMEOUT, UNIT ),
-                                            Status.REQUEST_TIMEOUT );
+                                            Status.INTERNAL_SERVER_ERROR );
         }
     }
 

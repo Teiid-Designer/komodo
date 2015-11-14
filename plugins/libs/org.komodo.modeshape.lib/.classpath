@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry exported="true" kind="lib" path="lib/log4j.jar" sourcepath="libsrc/log4j-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/slf4j-log4j12.jar" sourcepath="libsrc/slf4j-log4j12-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jboss-marshalling-osgi.jar" sourcepath="libsrc/jboss-marshalling-osgi-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/guava.jar" sourcepath="libsrc/guava-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/hawtjni-runtime.jar" sourcepath="libsrc/hawtjni-runtime-sources.jar"/>
@@ -21,8 +23,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/leveldbjni-win32.jar" sourcepath="libsrc/leveldbjni-win32-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/leveldbjni-win64.jar" sourcepath="libsrc/leveldbjni-win64-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/leveldbjni.jar" sourcepath="libsrc/leveldbjni-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/logback-classic.jar" sourcepath="libsrc/logback-classic-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/logback-core.jar" sourcepath="libsrc/logback-core-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/mapdb.jar" sourcepath="libsrc/mapdb-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/modeshape-common.jar" sourcepath="libsrc/modeshape-common-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/modeshape-jcr-api.jar" sourcepath="libsrc/modeshape-jcr-api-sources.jar"/>

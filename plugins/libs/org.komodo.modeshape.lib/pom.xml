@@ -22,6 +22,8 @@
         <joda.time.version>2.7</joda.time.version>
         <mapdb.version>1.0.6</mapdb.version>
         <tika.version>1.8</tika.version>
+        <log4j.version>1.2.16</log4j.version>
+        <slf4j.log4j.version>1.7.2</slf4j.log4j.version>
     </properties>
 
     <profiles>
@@ -235,14 +237,14 @@
         </dependency>
         <!-- Not included in modeshape bom explicitly but need it for LogConfigurator -->
         <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-core</artifactId>
-            <version>${logback.version}</version>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>${log4j.version}</version>
         </dependency>
         <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>${logback.version}</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>${slf4j.log4j.version}</version>
         </dependency>
     </dependencies>
 </project>

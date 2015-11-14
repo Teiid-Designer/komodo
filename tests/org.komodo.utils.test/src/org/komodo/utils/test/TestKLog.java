@@ -29,6 +29,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.junit.After;
@@ -37,6 +39,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.komodo.spi.constants.SystemConstants;
+import org.komodo.spi.logging.KLogger;
 import org.komodo.utils.FileUtils;
 import org.komodo.utils.KLog;
 
@@ -127,8 +130,7 @@ public class TestKLog {
         logger.info(msg);
 
         String fileMsg = retrieveLogContents(newLogFile);
-        assertTrue(fileMsg.contains("<level>INFO</level>"));
-        assertTrue(fileMsg.contains(msg));
+        assertTrue(fileMsg.contains("INFO  " + KLogger.class.getName() + "  - " + msg));
     }
 
     @Test
@@ -143,8 +145,7 @@ public class TestKLog {
         logger.warn(msg, param1);
 
         String fileMsg = retrieveLogContents(newLogFile);
-        assertTrue(fileMsg.contains("<level>WARNING</level>"));
-        assertTrue(fileMsg.contains(msg.replace("{0}", param1)));
+        assertTrue(fileMsg.contains("WARN  " + KLogger.class.getName() + "  - " + msg.replace("{0}", param1)));
     }
 
     @Test
@@ -155,12 +156,15 @@ public class TestKLog {
 
         String msg = "This is a exception test";
         Exception testException = new Exception("This is a test exception");
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        testException.printStackTrace(pw);
+
         logger.error(msg, testException);
 
         String fileMsg = retrieveLogContents(newLogFile);
-        assertTrue(fileMsg.contains("<level>SEVERE</level>"));
-        assertTrue(fileMsg.contains(msg));
-        assertTrue(fileMsg.contains(testException.getMessage()));
+        assertTrue(fileMsg.contains("ERROR " + KLogger.class.getName() + "  - " + msg));
+        assertTrue(fileMsg.contains(sw.toString()));
     }
 
 }
