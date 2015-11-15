@@ -58,6 +58,9 @@
         <webapp-dir>${project.artifactId}-${project.version}</webapp-dir>
         <webapp-outdir>${basedir}/target/${webapp-dir}</webapp-outdir>
 
+        <!-- To be injected into swagger index.html -->
+        <rest-context>vdb-builder</rest-context>
+        <rest-version>v1</rest-version>
     </properties>
 
     <dependencyManagement>
@@ -156,13 +159,13 @@
     <!-- ================================================================== -->
     <build>
         <!-- Set the name of the war, used as the context root when the app is deployed -->
-        <finalName>${project.artifactId}</finalName>
+        <finalName>${rest-context}</finalName>
 
         <plugins>
             <plugin>
                 <artifactId>maven-war-plugin</artifactId>
                 <configuration>
-                    <warName>komodo-rest</warName>
+                    <warName>${rest-context}</warName>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                     <!--
                         Ensure this never gets added to war and deployed
@@ -173,6 +176,21 @@
                     <packagingExcludes>
                         WEB-INF/lib/jaxrs-ri-*.jar
                      </packagingExcludes>
+
+                     <!-- Avoid filtering certain types of file -->
+                     <nonFilteredFileExtensions>
+                        <!-- default value contains jpg,jpeg,gif,bmp,png -->
+                        <nonFilteredFileExtension>jpg,jpeg,gif,bmp,png,ttf,svg,woff,woff2,eot,map</nonFilteredFileExtension>
+                    </nonFilteredFileExtensions>
+
+                    <!-- Adds the swagger ui files to war, filtering them to include the context -->
+                    <webResources>
+                        <resource>
+                            <directory>api-docs</directory>
+                            <filtering>true</filtering>
+                            <targetPath>api-docs</targetPath>
+                        </resource>
+                    </webResources>
                 </configuration>
             </plugin>
         </plugins>
@@ -228,10 +246,10 @@
                             <!-- http port -->
                             <port>9090</port>
                             <!-- application path always starts with / -->
-                            <path>/</path>
+                            <path>/${rest-context}</path>
                             <systemProperties>
-                                <!-- adds the var/komodo directory to the project structure -->
-                                <komodo.dataDir>var/komodo</komodo.dataDir>
+                                <!-- adds the var/vdb-builder directory to the project structure -->
+                                <komodo.dataDir>var/${rest-context}</komodo.dataDir>
                             </systemProperties>
                         </configuration>
                     </plugin>

@@ -69,6 +69,16 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
     public static interface V1Constants extends JsonConstants {
 
         /**
+         * Application name and context
+         */
+        String APP_NAME = "vdb-builder"; //$NON-NLS-1$
+
+        /**
+         * Version of the application
+         */
+        String APP_VERSION = "0.0.3"; //$NON-NLS-1$
+
+        /**
          * Location for the log file passed to {@link KLog} logger
          */
         String LOG_FILE_PATH = "log/vdb-builder.log"; //$NON-NLS-1$
@@ -293,12 +303,12 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         BeanConfig beanConfig = new BeanConfig();
         beanConfig.setTitle("Vdb Builder");
         beanConfig.setDescription("A tool that allows creating, editing and managing dynamic VDBs and their contents");
-        beanConfig.setVersion("0.0.2");
+        beanConfig.setVersion(V1Constants.APP_VERSION);
         beanConfig.setSchemes(new String[]{"http"});
+        beanConfig.setBasePath(V1Constants.APP_NAME + V1Constants.APP_PATH);
 
         // No need to setHost as it will pick up the one its running on
 
-        beanConfig.setBasePath(V1Constants.APP_PATH);
         beanConfig.setResourcePackage(
                                       RestProperty.class.getPackage().getName() + COMMA +
                                       KomodoVdbService.class.getPackage().getName());
