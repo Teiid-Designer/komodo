@@ -55,7 +55,9 @@ public class KomodoProperties extends HashMap<String, Object> {
      * @return the value of the property or the default value
      */
     public <T> T getProperty(String key, T defaultValue) {
-        Object o = this.getOrDefault(key, defaultValue);
-        return (T) o;
+        if (! this.containsKey(key))
+            return defaultValue;
+
+        return (T) this.get(key);
     }
 }

@@ -24,9 +24,7 @@
 								 modeshape-sequencer-ddl.jar,
 								 modeshape-sequencer-teiid.jar,
 								 modeshape-jcr.jar,
-								 infinispan-cachestore-leveldb.jar,
-								 logback-core.jar,
-								 logback-classic.jar"/>
+								 infinispan-cachestore-leveldb.jar"/>
 
 	<!--
 	   Test whether all the required libraries are present

@@ -31,6 +31,7 @@ import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
+import org.komodo.spi.repository.Repository.UnitOfWorkListener;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -64,15 +65,14 @@ public abstract class AbstractSerializerTest implements JsonConstants {
         transaction = Mockito.mock(UnitOfWork.class);
         Mockito.when(transaction.getState()).thenReturn(State.NOT_STARTED);
 
-        Repository.Id id = Mockito.mock(Repository.Id.class);
         UnitOfWork uow = Mockito.mock(UnitOfWork.class);
         Mockito.when(uow.getState()).thenReturn(State.NOT_STARTED);
 
         repository = Mockito.mock(Repository.class);
-        Mockito.when(repository.getId()).thenReturn(id);
+        UnitOfWorkListener listener = Matchers.any();
         Mockito.when(repository.createTransaction(Matchers.anyString(),
                                                   Matchers.anyBoolean(),
-                                                  Matchers.any())).thenReturn(uow);
+                                                  listener)).thenReturn(uow);
     }
 
     protected <T extends KomodoObject> T mockObject(Class<T> mockClass, String name, String dataPath, KomodoType kType, boolean hasChildren) throws KException {

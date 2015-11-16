@@ -130,6 +130,7 @@ public class TestKLog {
         logger.info(msg);
 
         String fileMsg = retrieveLogContents(newLogFile);
+        System.out.println("The File Message: " + fileMsg);
         assertTrue(fileMsg.contains("INFO  " + KLogger.class.getName() + "  - " + msg));
     }
 
@@ -145,6 +146,7 @@ public class TestKLog {
         logger.warn(msg, param1);
 
         String fileMsg = retrieveLogContents(newLogFile);
+        System.out.println("The File Message: " + fileMsg);
         assertTrue(fileMsg.contains("WARN  " + KLogger.class.getName() + "  - " + msg.replace("{0}", param1)));
     }
 
@@ -163,6 +165,7 @@ public class TestKLog {
         logger.error(msg, testException);
 
         String fileMsg = retrieveLogContents(newLogFile);
+        System.out.println("The File Message: " + fileMsg);
         assertTrue(fileMsg.contains("ERROR " + KLogger.class.getName() + "  - " + msg));
         assertTrue(fileMsg.contains(sw.toString()));
     }

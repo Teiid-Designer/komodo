@@ -65,7 +65,7 @@ public class RestPropertyConverter extends RestEntityConverter<RestProperty> {
             addProperties(model, context);
 
         } catch (Exception ex) {
-            LOGGER.error("Exception occurred whilst resolving the model type " + type.getTypeName());
+            LOGGER.error("Exception occurred whilst resolving the model type " + type.toString());
             return null;
         }
 

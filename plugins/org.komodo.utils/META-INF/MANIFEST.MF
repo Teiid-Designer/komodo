@@ -6,5 +6,6 @@ Bundle-Version: 0.0.3.qualifier
 Bundle-Vendor: %pluginProvider
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Localization: plugin
-Require-Bundle: org.komodo.spi;bundle-version="0.0.3"
+Require-Bundle: org.komodo.spi;bundle-version="0.0.3",
+ org.komodo.utils.logger.modeshape;bundle-version="0.0.3"
 Export-Package: org.komodo.utils

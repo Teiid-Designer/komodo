@@ -507,7 +507,8 @@ public final class KomodoVdbService extends KomodoService {
             for ( final Vdb vdb : vdbs ) {
                 if ( ( start == 0 ) || ( i >= start ) ) {
                     if ( ( size == ALL_AVAILABLE ) || ( entities.size() < size ) ) {
-                        entities.add(entityFactory.create(vdb, uriInfo.getBaseUri(), uow, properties));
+                        RestVdb entity = entityFactory.create(vdb, uriInfo.getBaseUri(), uow, properties);
+                        entities.add(entity);
                         LOGGER.debug("getVdbs:VDB '{0}' entity was constructed", vdb.getName(uow)); //$NON-NLS-1$
                     } else {
                         break;
@@ -632,7 +633,8 @@ public final class KomodoVdbService extends KomodoService {
 
             List<RestVdbModel> restModels = new ArrayList<>(models.length);
             for (Model model : models) {
-                restModels.add(entityFactory.create(model, uriInfo.getBaseUri(), uow));
+                RestVdbModel entity = entityFactory.create(model, uriInfo.getBaseUri(), uow);
+                restModels.add(entity);
                 LOGGER.debug("getModels:Model from VDB '{0}' entity was constructed", vdbName); //$NON-NLS-1$
             }
 
@@ -761,7 +763,8 @@ public final class KomodoVdbService extends KomodoService {
 
             List<RestVdbTranslator> restTranslators = new ArrayList<>(translators.length);
             for (Translator translator : translators) {
-                restTranslators.add(entityFactory.create(translator, uriInfo.getBaseUri(), uow));
+                RestVdbTranslator entity = entityFactory.create(translator, uriInfo.getBaseUri(), uow);
+                restTranslators.add(entity);
                 LOGGER.debug("getTranslators:Translator from VDB '{0}' entity was constructed", vdbName); //$NON-NLS-1$
             }
 
@@ -907,7 +910,8 @@ public final class KomodoVdbService extends KomodoService {
 
             List<RestVdbImport> restImports = new ArrayList<>(imports.length);
             for (VdbImport vdbImport : imports) {
-                restImports.add(entityFactory.create(vdbImport, uriInfo.getBaseUri(), uow));
+                RestVdbImport entity = entityFactory.create(vdbImport, uriInfo.getBaseUri(), uow);
+                restImports.add(entity);
                 LOGGER.debug("getImports:Import from VDB '{0}' entity was constructed", vdbName); //$NON-NLS-1$
             }
 
@@ -1053,7 +1057,8 @@ public final class KomodoVdbService extends KomodoService {
 
             List<RestVdbDataRole> restDataRoles = new ArrayList<>(dataRoles.length);
             for (DataRole dataRole : dataRoles) {
-                restDataRoles.add(entityFactory.create(dataRole, uriInfo.getBaseUri(), uow));
+                RestVdbDataRole entity = entityFactory.create(dataRole, uriInfo.getBaseUri(), uow);
+                restDataRoles.add(entity);
                 LOGGER.debug("getDataRoles:Data role from VDB '{0}' entity was constructed", vdbName); //$NON-NLS-1$
             }
 
@@ -1193,7 +1198,8 @@ public final class KomodoVdbService extends KomodoService {
 
             List<RestVdbModelSource> restSources = new ArrayList<>(sources.length);
             for (ModelSource source : sources) {
-                restSources.add(entityFactory.create(source, uriInfo.getBaseUri(), uow));
+                RestVdbModelSource entity = entityFactory.create(source, uriInfo.getBaseUri(), uow);
+                restSources.add(entity);
                 LOGGER.debug("getSources:Source from Model '{0}' from VDB '{1}' entity was constructed", modelName, vdbName); //$NON-NLS-1$
             }
 
@@ -1369,7 +1375,8 @@ public final class KomodoVdbService extends KomodoService {
 
             List<RestVdbPermission> restPermissions = new ArrayList<>(permissions.length);
             for (Permission permission : permissions) {
-                restPermissions.add(entityFactory.create(permission, uriInfo.getBaseUri(), uow));
+                RestVdbPermission entity = entityFactory.create(permission, uriInfo.getBaseUri(), uow);
+                restPermissions.add(entity);
                 LOGGER.debug("getPermissions:Permission from Data role '{0}' from VDB '{1}' entity was constructed", dataRoleId, vdbName); //$NON-NLS-1$
             }
 
@@ -1523,7 +1530,8 @@ public final class KomodoVdbService extends KomodoService {
             Condition[] conditions = permission.getConditions(uow);
             List<RestVdbCondition> restConditions = new ArrayList<>(conditions.length);
             for (Condition condition : conditions) {
-                restConditions.add(entityFactory.create(condition, uriInfo.getBaseUri(), uow));
+                RestVdbCondition entity = entityFactory.create(condition, uriInfo.getBaseUri(), uow);
+                restConditions.add(entity);
                 LOGGER.debug("getConditions:Condition from Permission from Data Role '{0}' from VDB '{1}' entity was constructed", dataRoleId, vdbName); //$NON-NLS-1$
             }
 
@@ -1712,7 +1720,8 @@ public final class KomodoVdbService extends KomodoService {
             Mask[] masks = permission.getMasks(uow);
             List<RestVdbMask> restMasks = new ArrayList<>(masks.length);
             for (Mask mask : masks) {
-                restMasks.add(entityFactory.create(mask, uriInfo.getBaseUri(), uow));
+                RestVdbMask entity = entityFactory.create(mask, uriInfo.getBaseUri(), uow);
+                restMasks.add(entity);
                 LOGGER.debug("getMasks:Mask from Permission from Data Role '{0}' from VDB '{1}' entity was constructed", dataRoleId, vdbName); //$NON-NLS-1$
             }
 
