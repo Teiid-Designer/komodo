@@ -4,17 +4,22 @@ import java.util.ArrayList;
 import java.util.List;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
-import org.komodo.shell.Messages;
+import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.KomodoObjectUtils;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.utils.i18n.I18n;
 
 /**
- * renames the referenced node
- *
- * @author blafond
- *
+ * A {@link ShellCommand command} that renames the referenced node.
+ * <p>
+ * Usage:
+ * <p>
+ * <code>&nbsp;&nbsp;
+ * rename &lt;object-path&gt; &lt;new-name&gt;
+ * </code>
  */
 public class RenameCommand extends BuiltInShellCommand {
 
@@ -41,8 +46,8 @@ public class RenameCommand extends BuiltInShellCommand {
         String objNameArg=null;
 
         try {
-            objNameArg = requiredArgument( 0, Messages.getString( Messages.RenameCommand.InvalidArgMsg_ObjectName ) );
-            String newName = requiredArgument( 1, Messages.getString( Messages.RenameCommand.InvalidArgMsg_NewName ) );
+            objNameArg = requiredArgument( 0, I18n.bind( ShellI18n.invalidArgMsgObjectName ) );
+            String newName = requiredArgument( 1, I18n.bind( ShellI18n.invalidArgMsgNewName ) );
 
             WorkspaceStatus wsStatus = getWorkspaceStatus();
             // Get the context for current object and target object since they can be supplied with a path
@@ -50,10 +55,7 @@ public class RenameCommand extends BuiltInShellCommand {
 
             // objContext null - Object could not be located
             if ( objContext == null ) {
-                return new CommandResultImpl( false,
-                                              Messages.getString( Messages.RenameCommand.cannotRename_objectDoesNotExist,
-                                                                  objNameArg ),
-                                              null );
+                return new CommandResultImpl( false, I18n.bind( ShellI18n.cannotRenameObjectDoesNotExist, objNameArg ), null );
             }
 
             String[] pathSegs = newName.split(FORWARD_SLASH);
@@ -62,8 +64,7 @@ public class RenameCommand extends BuiltInShellCommand {
             // only allow move to an existing context
             if ( targetContext == null ) {
                 return new CommandResultImpl( false,
-                                              Messages.getString( Messages.RenameCommand.cannotRename_targetContextDoesNotExist,
-                                                                  targetParentPath ),
+                                              I18n.bind( ShellI18n.cannotRenameTargetContextDoesNotExist, targetParentPath ),
                                               null );
             }
 
@@ -72,12 +73,12 @@ public class RenameCommand extends BuiltInShellCommand {
 
             // Validate that the rename would not create a duplicate of same type
             if (!validateNotDuplicateType(objContext,newShortName,targetContext)) {
-                return new CommandResultImpl( Messages.getString( Messages.RenameCommand.cannotRename_wouldCreateDuplicate, newName ) );
+                return new CommandResultImpl( I18n.bind( ShellI18n.cannotRenameWouldCreateDuplicate, newName ) );
             }
 
             // Rename
             rename( objContext, newShortName, targetContext );
-            return new CommandResultImpl( Messages.getString( Messages.RenameCommand.ObjectRenamed, objNameArg, newName ) );
+            return new CommandResultImpl( I18n.bind( ShellI18n.objectRenamed, objNameArg, newName ) );
         } catch ( Exception e ) {
             return new CommandResultImpl( e );
         }
@@ -99,7 +100,7 @@ public class RenameCommand extends BuiltInShellCommand {
         }
         return sb.toString();
     }
-    
+
     /**
      * Validates whether another child of the same name and type already exists
      * @param objToRename the object being renamed
@@ -127,6 +128,36 @@ public class RenameCommand extends BuiltInShellCommand {
     	return true;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.renameHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.renameExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.renameUsage ) );
+    }
+
     private void rename(KomodoObject origObject, String newShortName, KomodoObject targetObject) throws Exception {
         //
         if( origObject != null ) {
@@ -134,7 +165,7 @@ public class RenameCommand extends BuiltInShellCommand {
         	String newChildPath = parentAbsPath + FORWARD_SLASH + newShortName;
         	origObject.rename( getTransaction(), newChildPath );
         } else {
-        	throw new Exception(Messages.getString(Messages.RenameCommand.cannotRename_objectDoesNotExist, origObject));
+        	throw new Exception(I18n.bind(ShellI18n.cannotRenameObjectDoesNotExist, origObject));
         }
     }
 

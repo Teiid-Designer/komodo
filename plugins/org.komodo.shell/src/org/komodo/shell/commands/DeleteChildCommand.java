@@ -7,26 +7,23 @@
  */
 package org.komodo.shell.commands;
 
-import static org.komodo.shell.Messages.DeleteChildCommand.CHILD_DELETED;
-import static org.komodo.shell.Messages.DeleteChildCommand.ERROR_GETTING_CHILD;
-import static org.komodo.shell.Messages.DeleteChildCommand.MISSING_CHILD_NAME;
-import static org.komodo.shell.Messages.DeleteChildCommand.NO_CHILD_WITH_NAME;
-import static org.komodo.shell.Messages.DeleteChildCommand.NO_CHILD_WITH_NAME_AND_TYPE;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
-import org.komodo.shell.Messages;
+import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.utils.StringUtils;
+import org.komodo.utils.i18n.I18n;
 
 /**
- * Deletes a child from a {@link KomodoObject}.
+ * A {@link ShellCommand command} that deletes a child from a {@link KomodoObject}.
  * <p>
  * Usage:
  * <p>
  * <code>&nbsp;&nbsp;
- * delete-child &lt;child-name&gt; {child-type}
+ * delete-child &lt;child-name&gt; [child-type]
  * </code>
  */
 public class DeleteChildCommand extends BuiltInShellCommand {
@@ -52,7 +49,7 @@ public class DeleteChildCommand extends BuiltInShellCommand {
     @Override
     protected CommandResult doExecute() {
         try {
-            final String childNameArg = requiredArgument( 0, Messages.getString( MISSING_CHILD_NAME ) );
+            final String childNameArg = requiredArgument( 0, I18n.bind( ShellI18n.missingChildNameForDelete ) );
             final String childTypeArg = optionalArgument( 1 );
 
             final KomodoObject kobject = getContext();
@@ -60,18 +57,25 @@ public class DeleteChildCommand extends BuiltInShellCommand {
             // Determine if child exists before attempting delete.
             if(!StringUtils.isBlank(childTypeArg)) {
                 if(!kobject.hasChild(getTransaction(), childNameArg, childTypeArg)) {
-                    return new CommandResultImpl( false, Messages.getString(NO_CHILD_WITH_NAME_AND_TYPE, childNameArg, childTypeArg), null);
+                    return new CommandResultImpl( false,
+                                                  I18n.bind( ShellI18n.noChildWithNameAndType, childNameArg, childTypeArg ),
+                                                  null );
                 }
                 childObject = kobject.getChild(getTransaction(), childNameArg, childTypeArg);
             } else {
-                if(!kobject.hasChild(getTransaction(), childNameArg)) return new CommandResultImpl( false, Messages.getString(NO_CHILD_WITH_NAME, childNameArg), null);
+                if ( !kobject.hasChild( getTransaction(), childNameArg ) ) {
+                    return new CommandResultImpl( false, I18n.bind( ShellI18n.noChildWithName, childNameArg ), null );
+                }
+
                 childObject = kobject.getChild(getTransaction(), childNameArg);
             }
 
-            if(childObject==null) return new CommandResultImpl(false, Messages.getString(ERROR_GETTING_CHILD, childNameArg), null);
+            if ( childObject == null ) return new CommandResultImpl( false,
+                                                                     I18n.bind( ShellI18n.errorGettingChild, childNameArg ),
+                                                                     null );
 
             childObject.remove(getTransaction());
-            return new CommandResultImpl( Messages.getString( CHILD_DELETED, childNameArg ) );
+            return new CommandResultImpl( I18n.bind( ShellI18n.childDeleted, childNameArg ) );
         } catch ( final Exception e ) {
             return new CommandResultImpl( e );
         }
@@ -95,6 +99,36 @@ public class DeleteChildCommand extends BuiltInShellCommand {
     @Override
     public boolean isValidForCurrentContext() {
         return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.deleteChildHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.deleteChildExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.deleteChildUsage ) );
     }
 
 }

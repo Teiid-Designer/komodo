@@ -7,22 +7,22 @@
  */
 package org.komodo.shell.commands;
 
-import static org.komodo.shell.Messages.AddChildCommand.CHILD_ADDED;
-import static org.komodo.shell.Messages.AddChildCommand.MISSING_CHILD_NAME;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
-import org.komodo.shell.Messages;
+import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.utils.i18n.I18n;
 
 /**
- * Adds a child to a {@link KomodoObject}.
+ * A {@link ShellCommand command} that adds a child to a {@link KomodoObject}.
  * <p>
  * Usage:
  * <p>
  * <code>&nbsp;&nbsp;
- * add-child &lt;new-child-name&gt; {child-type}
+ * add-child &lt;new-child-name&gt; [child-type]
  * </code>
  */
 public class AddChildCommand extends BuiltInShellCommand {
@@ -48,12 +48,12 @@ public class AddChildCommand extends BuiltInShellCommand {
     @Override
     protected CommandResult doExecute() {
         try {
-            final String childNameArg = requiredArgument( 0, Messages.getString( MISSING_CHILD_NAME ) );
+            final String childNameArg = requiredArgument( 0, I18n.bind( ShellI18n.missingChildNameForAdd ) );
             final String childTypeArg = optionalArgument( 1 );
 
             final KomodoObject kobject = getContext();
             kobject.addChild( getTransaction(), childNameArg, childTypeArg );
-            return new CommandResultImpl( Messages.getString( CHILD_ADDED, childNameArg ) );
+            return new CommandResultImpl( I18n.bind( ShellI18n.childAdded, childNameArg ) );
         } catch ( final Exception e ) {
             return new CommandResultImpl( e );
         }
@@ -77,6 +77,36 @@ public class AddChildCommand extends BuiltInShellCommand {
     @Override
     public boolean isValidForCurrentContext() {
         return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.addChildHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.addChildExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.addChildUsage ) );
     }
 
 }

@@ -7,15 +7,8 @@
  */
 package org.komodo.relational.commands.table;
 
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.INVALID_BOOLEAN_PROPERTY_VALUE;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.INVALID_INTEGER_PROPERTY_VALUE;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.INVALID_PROPERTY_NAME;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.MISSING_PROPERTY_NAME_VALUE;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.SET_PROPERTY_SUCCESS;
-import static org.komodo.relational.commands.table.TableCommandMessages.General.INVALID_ON_COMMIT_PROPERTY_VALUE;
-import static org.komodo.relational.commands.table.TableCommandMessages.General.INVALID_SCHEMA_ELEMENT_TYPE_PROPERTY_VALUE;
-import static org.komodo.relational.commands.table.TableCommandMessages.General.INVALID_TEMPORARY_TABLE_TYPE_PROPERTY_VALUE;
 import java.util.List;
+import org.komodo.relational.commands.workspace.WorkspaceCommandsI18n;
 import org.komodo.relational.model.SchemaElement;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.Table.OnCommit;
@@ -26,6 +19,7 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.SetPropertyCommand;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.StringUtils;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to set Table properties
@@ -52,8 +46,8 @@ public final class SetTablePropertyCommand extends TableShellCommand {
         CommandResult result = null;
 
         try {
-            final String name = requiredArgument( 0, getWorkspaceMessage( MISSING_PROPERTY_NAME_VALUE ) );
-            final String value = requiredArgument( 1, getWorkspaceMessage( MISSING_PROPERTY_NAME_VALUE ) );
+            final String name = requiredArgument( 0, I18n.bind( WorkspaceCommandsI18n.missingPropertyNameValue ) );
+            final String value = requiredArgument( 1, I18n.bind( WorkspaceCommandsI18n.missingPropertyNameValue ) );
 
             final Table table = getTable();
             final UnitOfWork transaction = getTransaction();
@@ -68,7 +62,7 @@ public final class SetTablePropertyCommand extends TableShellCommand {
                         final int cardinality = Integer.parseInt( value );
                         table.setCardinality( transaction, cardinality );
                     } catch ( final NumberFormatException e ) {
-                        errorMsg = getWorkspaceMessage( INVALID_INTEGER_PROPERTY_VALUE, CARDINALITY );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, CARDINALITY );
                     }
 
                     break;
@@ -76,7 +70,7 @@ public final class SetTablePropertyCommand extends TableShellCommand {
                     if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
                         table.setMaterialized( transaction, Boolean.parseBoolean( value ) );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, MATERIALIZED );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, MATERIALIZED );
                     }
 
                     break;
@@ -90,7 +84,7 @@ public final class SetTablePropertyCommand extends TableShellCommand {
                     if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
                         table.setUpdatable( transaction, Boolean.parseBoolean( value ) );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, UPDATABLE );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, UPDATABLE );
                     }
 
                     break;
@@ -103,7 +97,7 @@ public final class SetTablePropertyCommand extends TableShellCommand {
                     } else if ( OnCommit.PRESERVE_ROWS.name().equals( value ) ) {
                         table.setOnCommitValue( transaction, OnCommit.PRESERVE_ROWS );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_ON_COMMIT_PROPERTY_VALUE, ON_COMMIT_VALUE );
+                        errorMsg = I18n.bind( TableCommandsI18n.invalidOnCommitPropertyValue, ON_COMMIT_VALUE );
                     }
 
                     break;
@@ -116,7 +110,7 @@ public final class SetTablePropertyCommand extends TableShellCommand {
                     } else if ( SchemaElement.SchemaElementType.VIRTUAL.name().equals( value ) ) {
                         table.setSchemaElementType( transaction, SchemaElement.SchemaElementType.VIRTUAL );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_SCHEMA_ELEMENT_TYPE_PROPERTY_VALUE, SCHEMA_ELEMENT_TYPE );
+                        errorMsg = I18n.bind( TableCommandsI18n.invalidSchemaElementTypePropertyValue, value );
                     }
 
                     break;
@@ -126,17 +120,17 @@ public final class SetTablePropertyCommand extends TableShellCommand {
                     } else if ( Table.TemporaryType.LOCAL.name().equals( value ) ) {
                         table.setTemporaryTableType( transaction, Table.TemporaryType.LOCAL );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_TEMPORARY_TABLE_TYPE_PROPERTY_VALUE, TEMPORARY_TABLE_TYPE );
+                        errorMsg = I18n.bind( TableCommandsI18n.invalidTemporaryTableTypePropertyValue, value );
                     }
 
                     break;
                 default:
-                    errorMsg = getWorkspaceMessage( INVALID_PROPERTY_NAME, name, Table.class.getSimpleName() );
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Table.class.getSimpleName() );
                     break;
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {
-                result = new CommandResultImpl( getWorkspaceMessage( SET_PROPERTY_SUCCESS, name ) );
+                result = new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.setPropertySuccess, name ) );
             } else {
                 result = new CommandResultImpl( false, errorMsg, null );
             }
@@ -155,6 +149,36 @@ public final class SetTablePropertyCommand extends TableShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 2;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( TableCommandsI18n.setTablePropertyHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( TableCommandsI18n.setTablePropertyExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( TableCommandsI18n.setTablePropertyUsage ) );
     }
 
     /**

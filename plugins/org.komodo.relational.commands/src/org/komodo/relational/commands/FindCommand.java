@@ -7,17 +7,11 @@
  */
 package org.komodo.relational.commands;
 
-import static org.komodo.relational.commands.RelationalCommandMessages.RESOURCE_BUNDLE;
-import static org.komodo.relational.commands.RelationalCommandMessages.FindCommand.INVALID_TYPE;
-import static org.komodo.relational.commands.RelationalCommandMessages.FindCommand.MISSING_TYPE_NAME;
-import static org.komodo.relational.commands.RelationalCommandMessages.FindCommand.NO_OBJECTS_FOUND;
-import static org.komodo.relational.commands.RelationalCommandMessages.FindCommand.TYPE_HEADER;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import org.komodo.relational.Messages;
 import org.komodo.relational.RelationalObject;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.KomodoTypeRegistry;
@@ -27,6 +21,7 @@ import org.komodo.shell.api.KomodoObjectLabelProvider;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.utils.StringUtils;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to find a relational object
@@ -56,11 +51,11 @@ public final class FindCommand extends RelationalShellCommand {
         CommandResult result = null;
 
         try {
-            final String typeName = requiredArgument( 0, getMessage( MISSING_TYPE_NAME ) );
+            final String typeName = requiredArgument( 0, I18n.bind( RelationalCommandsI18n.missingTypeName ) );
             final KomodoType queryType = getQueryType( typeName );
 
             if ( queryType == null ) {
-                result = new CommandResultImpl( false, getMessage( INVALID_TYPE, typeName ), null );
+                result = new CommandResultImpl( false, I18n.bind( RelationalCommandsI18n.invalidType, typeName ), null );
             } else {
                 // may have a name pattern
                 final String pattern = optionalArgument( 1 );
@@ -107,10 +102,10 @@ public final class FindCommand extends RelationalShellCommand {
     private void printResults( final KomodoType queryType,
                                final String[] foundObjectPaths ) throws Exception {
         if ( foundObjectPaths.length == 0 ) {
-            print( MESSAGE_INDENT, getMessage(NO_OBJECTS_FOUND, queryType.getType() ) );
+            print( MESSAGE_INDENT, I18n.bind(RelationalCommandsI18n.noObjectsFound, queryType.getType() ) );
         } else {
             // print header
-            final String header = getMessage(TYPE_HEADER, queryType.getType() );
+            final String header = I18n.bind(RelationalCommandsI18n.typeHeader, queryType.getType() );
             print( MESSAGE_INDENT, header );
 
             // print paths of found objects
@@ -201,19 +196,34 @@ public final class FindCommand extends RelationalShellCommand {
         return -1;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
     @Override
     protected void printHelpDescription( final int indent ) {
-        print( indent, Messages.getString( RESOURCE_BUNDLE, getClass().getSimpleName() + ".help", getName() ) ); //$NON-NLS-1$
+        print( indent, I18n.bind( RelationalCommandsI18n.findHelp, getName() ) );
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
     @Override
     protected void printHelpExamples( final int indent ) {
-        print( indent, Messages.getString( RESOURCE_BUNDLE, getClass().getSimpleName() + ".examples" ) ); //$NON-NLS-1$
+        print( indent, I18n.bind( RelationalCommandsI18n.findExamples ) );
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
     @Override
     protected void printHelpUsage( final int indent ) {
-        print( indent, Messages.getString( RESOURCE_BUNDLE, getClass().getSimpleName() + ".usage" ) ); //$NON-NLS-1$
+        print( indent, I18n.bind( RelationalCommandsI18n.findUsage ) );
     }
 
 

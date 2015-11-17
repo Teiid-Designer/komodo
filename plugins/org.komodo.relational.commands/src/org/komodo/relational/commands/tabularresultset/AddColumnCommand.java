@@ -7,12 +7,11 @@
  */
 package org.komodo.relational.commands.tabularresultset;
 
-import static org.komodo.relational.commands.tabularresultset.TabularResultSetCommandMessages.AddColumnCommand.COLUMN_ADDED;
-import static org.komodo.relational.commands.tabularresultset.TabularResultSetCommandMessages.General.MISSING_COLUMN_NAME;
 import org.komodo.relational.model.TabularResultSet;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to add a Column to a TabularResultSet.
@@ -39,12 +38,12 @@ public final class AddColumnCommand extends TabularResultSetShellCommand {
         CommandResult result = null;
 
         try {
-            final String columnName = requiredArgument( 0, getMessage( MISSING_COLUMN_NAME ) );
+            final String columnName = requiredArgument( 0, I18n.bind( TabularResultSetCommandsI18n.missingColumnName ) );
 
             final TabularResultSet resultSet = getTabularResultSet();
             resultSet.addColumn( getTransaction(), columnName );
 
-            result = new CommandResultImpl( getMessage( COLUMN_ADDED, columnName ) );
+            result = new CommandResultImpl( I18n.bind( TabularResultSetCommandsI18n.columnAdded, columnName ) );
         } catch ( final Exception e ) {
             result = new CommandResultImpl( e );
         }
@@ -60,6 +59,36 @@ public final class AddColumnCommand extends TabularResultSetShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 1;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( TabularResultSetCommandsI18n.addColumnHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( TabularResultSetCommandsI18n.addColumnExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( TabularResultSetCommandsI18n.addColumnUsage ) );
     }
 
 }

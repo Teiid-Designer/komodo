@@ -7,12 +7,11 @@
  */
 package org.komodo.relational.commands.model;
 
-import static org.komodo.relational.commands.model.ModelCommandMessages.AddVirtualProcedureCommand.VIRTUAL_PROCEDURE_ADDED;
-import static org.komodo.relational.commands.model.ModelCommandMessages.General.MISSING_VIRTUAL_PROCEDURE_NAME;
 import org.komodo.relational.model.Model;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to add a Virtual Procedure to a Model.
@@ -39,12 +38,12 @@ public final class AddVirtualProcedureCommand extends ModelShellCommand {
         CommandResult result = null;
 
         try {
-            final String procName = requiredArgument( 0, getMessage( MISSING_VIRTUAL_PROCEDURE_NAME ) );
+            final String procName = requiredArgument( 0, I18n.bind( ModelCommandsI18n.missingVirtualProcedureName ) );
 
             final Model model = getModel();
             model.addVirtualProcedure( getTransaction(), procName );
 
-            result = new CommandResultImpl( getMessage( VIRTUAL_PROCEDURE_ADDED, procName ) );
+            result = new CommandResultImpl( I18n.bind( ModelCommandsI18n.virtualProcedureAdded, procName ) );
         } catch ( final Exception e ) {
             result = new CommandResultImpl( e );
         }
@@ -60,6 +59,36 @@ public final class AddVirtualProcedureCommand extends ModelShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 1;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( ModelCommandsI18n.addVirtualProcedureHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( ModelCommandsI18n.addVirtualProcedureExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( ModelCommandsI18n.addVirtualProcedureUsage ) );
     }
 
 }

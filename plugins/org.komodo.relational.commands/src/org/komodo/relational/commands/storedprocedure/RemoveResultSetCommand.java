@@ -7,11 +7,11 @@
  */
 package org.komodo.relational.commands.storedprocedure;
 
-import static org.komodo.relational.commands.storedprocedure.StoredProcedureCommandMessages.RemoveResultSetCommand.RESULT_SET_REMOVED;
 import org.komodo.relational.model.StoredProcedure;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to remove the result set for a StoredProcedure.
@@ -41,7 +41,7 @@ public final class RemoveResultSetCommand extends StoredProcedureShellCommand {
             final StoredProcedure sp = getStoredProcedure();
             sp.removeResultSet( getTransaction() );
 
-            result = new CommandResultImpl( getMessage( RESULT_SET_REMOVED ) );
+            result = new CommandResultImpl( I18n.bind( StoredProcedureCommandsI18n.resultSetRemoved ) );
         } catch ( final Exception e ) {
             result = new CommandResultImpl( e );
         }
@@ -57,6 +57,36 @@ public final class RemoveResultSetCommand extends StoredProcedureShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 0;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( StoredProcedureCommandsI18n.removeResultSetHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( StoredProcedureCommandsI18n.removeResultSetExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( StoredProcedureCommandsI18n.removeResultSetUsage ) );
     }
 
 }

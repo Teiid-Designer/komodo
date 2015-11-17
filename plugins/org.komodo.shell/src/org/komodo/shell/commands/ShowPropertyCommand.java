@@ -24,17 +24,24 @@ package org.komodo.shell.commands;
 import java.util.List;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
-import org.komodo.shell.Messages;
+import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.KomodoObjectUtils;
 import org.komodo.shell.util.PrintUtils;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.utils.StringUtils;
+import org.komodo.utils.i18n.I18n;
 
 /**
- * ShowPropertyCommand - show a specific property for a KomodoObject
- *
+ * A {@link ShellCommand command} that displays a specific property for a {@link KomodoObject}.
+ * <p>
+ * Usage:
+ * <p>
+ * <code>&nbsp;&nbsp;
+ * show-property &lt;prop-name&gt;
+ * </code>
  */
 public class ShowPropertyCommand extends BuiltInShellCommand {
 
@@ -75,13 +82,11 @@ public class ShowPropertyCommand extends BuiltInShellCommand {
         try {
             // required arg is the property name.  Verify that it is valid for the current object
             String propName = requiredArgument( 0,
-                                                Messages.getString( Messages.ShowPropertyCommand.InvalidArgMsg_PropertyName ) );
+                                                I18n.bind( ShellI18n.invalidArgMsgPropertyName ) );
 
             KomodoObject context = getContext();
             if ( !KomodoObjectUtils.isValidProperty( getWorkspaceStatus(), propName, context ) ) {
-                return new CommandResultImpl( false,
-                                              Messages.getString( Messages.SetPropertyCommand.InvalidPropName, propName ),
-                                              null );
+                return new CommandResultImpl( false, I18n.bind( ShellI18n.invalidPropName, propName ), null );
             }
 
             PrintUtils.printProperty( getWorkspaceStatus(), getWriter(), context, propName );
@@ -99,6 +104,36 @@ public class ShowPropertyCommand extends BuiltInShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 1;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.showPropertyHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.showPropertyExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.showPropertyUsage ) );
     }
 
     /**

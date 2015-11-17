@@ -7,14 +7,8 @@
  */
 package org.komodo.relational.commands.userdefinedfunction;
 
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.INVALID_BOOLEAN_PROPERTY_VALUE;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.INVALID_INTEGER_PROPERTY_VALUE;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.INVALID_PROPERTY_NAME;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.MISSING_PROPERTY_NAME_VALUE;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.SET_PROPERTY_SUCCESS;
-import static org.komodo.relational.commands.userdefinedfunction.UserDefinedFunctionCommandMessages.General.INVALID_DETERMINISTIC_PROPERTY_VALUE;
-import static org.komodo.relational.commands.userdefinedfunction.UserDefinedFunctionCommandMessages.General.INVALID_SCHEMA_ELEMENT_TYPE_PROPERTY_VALUE;
 import java.util.List;
+import org.komodo.relational.commands.workspace.WorkspaceCommandsI18n;
 import org.komodo.relational.model.Function;
 import org.komodo.relational.model.SchemaElement;
 import org.komodo.relational.model.UserDefinedFunction;
@@ -25,6 +19,7 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.SetPropertyCommand;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.StringUtils;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to set UserDefinedFunction properties
@@ -51,8 +46,8 @@ public final class SetUserDefinedFunctionPropertyCommand extends UserDefinedFunc
         CommandResult result = null;
 
         try {
-            final String name = requiredArgument( 0, getWorkspaceMessage( MISSING_PROPERTY_NAME_VALUE ) );
-            final String value = requiredArgument( 1, getWorkspaceMessage( MISSING_PROPERTY_NAME_VALUE ) );
+            final String name = requiredArgument( 0, I18n.bind( WorkspaceCommandsI18n.missingPropertyNameValue ) );
+            final String value = requiredArgument( 1, I18n.bind( WorkspaceCommandsI18n.missingPropertyNameValue ) );
 
             final UserDefinedFunction func = getUserDefinedFunction();
             final UnitOfWork transaction = getTransaction();
@@ -63,7 +58,7 @@ public final class SetUserDefinedFunctionPropertyCommand extends UserDefinedFunc
                     if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
                         func.setAggregate( transaction, Boolean.parseBoolean( value ) );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, AGGREGATE );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, AGGREGATE );
                     }
 
                     break;
@@ -71,7 +66,7 @@ public final class SetUserDefinedFunctionPropertyCommand extends UserDefinedFunc
                     if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
                         func.setAllowsDistinct( transaction, Boolean.parseBoolean( value ) );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, ALLOWS_DISTINCT );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, ALLOWS_DISTINCT );
                     }
 
                     break;
@@ -79,7 +74,7 @@ public final class SetUserDefinedFunctionPropertyCommand extends UserDefinedFunc
                     if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
                         func.setAllowsOrderBy( transaction, Boolean.parseBoolean( value ) );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, ALLOWS_ORDERBY );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, ALLOWS_ORDERBY );
                     }
 
                     break;
@@ -87,7 +82,7 @@ public final class SetUserDefinedFunctionPropertyCommand extends UserDefinedFunc
                     if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
                         func.setAnalytic( transaction, Boolean.parseBoolean( value ) );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, ANALYTIC );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, ANALYTIC );
                     }
 
                     break;
@@ -98,7 +93,7 @@ public final class SetUserDefinedFunctionPropertyCommand extends UserDefinedFunc
                     if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
                         func.setDecomposable( transaction, Boolean.parseBoolean( value ) );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, DECOMPOSABLE );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, DECOMPOSABLE );
                     }
 
                     break;
@@ -119,7 +114,7 @@ public final class SetUserDefinedFunctionPropertyCommand extends UserDefinedFunc
                     } else if ( Function.Determinism.VDB_DETERMINISTIC.name().equals( value ) ) {
                         func.setDeterminism( transaction, Function.Determinism.VDB_DETERMINISTIC );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_DETERMINISTIC_PROPERTY_VALUE, DETERMINISM );
+                        errorMsg = I18n.bind( UserDefinedFunctionCommandsI18n.invalidDeterministicPropertyValue, DETERMINISM );
                     }
 
                     break;
@@ -136,7 +131,7 @@ public final class SetUserDefinedFunctionPropertyCommand extends UserDefinedFunc
                     if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
                         func.setNullOnNull( transaction, Boolean.parseBoolean( value ) );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, NULL_ON_NULL );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, NULL_ON_NULL );
                     }
 
                     break;
@@ -146,7 +141,7 @@ public final class SetUserDefinedFunctionPropertyCommand extends UserDefinedFunc
                     } else if ( SchemaElement.SchemaElementType.VIRTUAL.name().equals( value ) ) {
                         func.setSchemaElementType( transaction, SchemaElement.SchemaElementType.VIRTUAL );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_SCHEMA_ELEMENT_TYPE_PROPERTY_VALUE, SCHEMA_ELEMENT_TYPE );
+                        errorMsg = I18n.bind( UserDefinedFunctionCommandsI18n.invalidSchemaElementTypePropertyValue, SCHEMA_ELEMENT_TYPE );
                     }
 
                     break;
@@ -155,7 +150,7 @@ public final class SetUserDefinedFunctionPropertyCommand extends UserDefinedFunc
                         final long count = Long.parseLong( value );
                         func.setUpdateCount( transaction, count );
                     } catch ( final NumberFormatException e ) {
-                        errorMsg = getWorkspaceMessage( INVALID_INTEGER_PROPERTY_VALUE, UPDATE_COUNT );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, UPDATE_COUNT );
                     }
 
                     break;
@@ -163,7 +158,7 @@ public final class SetUserDefinedFunctionPropertyCommand extends UserDefinedFunc
                     if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
                         func.setUsesDistinctRows( transaction, Boolean.parseBoolean( value ) );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, USES_DISTINCT_ROWS );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, USES_DISTINCT_ROWS );
                     }
 
                     break;
@@ -174,17 +169,17 @@ public final class SetUserDefinedFunctionPropertyCommand extends UserDefinedFunc
                     if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
                         func.setVarArgs( transaction, Boolean.parseBoolean( value ) );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, VAR_ARGS );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, VAR_ARGS );
                     }
 
                     break;
                 default:
-                    errorMsg = getWorkspaceMessage( INVALID_PROPERTY_NAME, name, UserDefinedFunction.class.getSimpleName() );
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, UserDefinedFunction.class.getSimpleName() );
                     break;
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {
-                result = new CommandResultImpl( getWorkspaceMessage( SET_PROPERTY_SUCCESS, name ) );
+                result = new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.setPropertySuccess, name ) );
             } else {
                 result = new CommandResultImpl( false, errorMsg, null );
             }
@@ -203,6 +198,36 @@ public final class SetUserDefinedFunctionPropertyCommand extends UserDefinedFunc
     @Override
     protected int getMaxArgCount() {
         return 2;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( UserDefinedFunctionCommandsI18n.setUserDefinedFunctionPropertyHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( UserDefinedFunctionCommandsI18n.setUserDefinedFunctionPropertyExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( UserDefinedFunctionCommandsI18n.setUserDefinedFunctionPropertyUsage ) );
     }
 
     /**

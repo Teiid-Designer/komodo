@@ -7,12 +7,11 @@
  */
 package org.komodo.relational.commands.virtualprocedure;
 
-import static org.komodo.relational.commands.virtualprocedure.VirtualProcedureCommandMessages.AddParameterCommand.PARAMETER_ADDED;
-import static org.komodo.relational.commands.virtualprocedure.VirtualProcedureCommandMessages.General.MISSING_PARAMETER_NAME;
 import org.komodo.relational.model.VirtualProcedure;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to add a Parameter to a VirtualProcedure.
@@ -39,12 +38,12 @@ public final class AddParameterCommand extends VirtualProcedureShellCommand {
         CommandResult result = null;
 
         try {
-            final String paramName = requiredArgument( 0, getMessage( MISSING_PARAMETER_NAME ) );
+            final String paramName = requiredArgument( 0, I18n.bind( VirtualProcedureCommandsI18n.missingParameterName ) );
 
             final VirtualProcedure proc = getVirtualProcedure();
             proc.addParameter( getTransaction(), paramName );
 
-            result = new CommandResultImpl( getMessage( PARAMETER_ADDED, paramName ) );
+            result = new CommandResultImpl( I18n.bind( VirtualProcedureCommandsI18n.parameterAdded, paramName ) );
         } catch ( final Exception e ) {
             result = new CommandResultImpl( e );
         }
@@ -60,6 +59,36 @@ public final class AddParameterCommand extends VirtualProcedureShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 1;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( VirtualProcedureCommandsI18n.addParameterHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( VirtualProcedureCommandsI18n.addParameterExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( VirtualProcedureCommandsI18n.addParameterUsage ) );
     }
 
 }

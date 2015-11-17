@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.server;
 
-import static org.komodo.relational.commands.server.ServerCommandMessages.ServerDatasourcesCommand.InfoMessage;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,6 +18,7 @@ import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.PrintUtils;
 import org.komodo.spi.runtime.TeiidDataSource;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to show all data sources on a server
@@ -52,7 +52,7 @@ public final class ServerDatasourcesCommand extends ServerShellCommand {
             }
 
             // Print title
-            final String title = getMessage( InfoMessage, getWorkspaceServerName() );
+            final String title = I18n.bind( ServerCommandsI18n.infoMessageDatasources, getWorkspaceServerName() );
             print( MESSAGE_INDENT, title );
 
             Teiid teiid = getWorkspaceServer();
@@ -90,6 +90,36 @@ public final class ServerDatasourcesCommand extends ServerShellCommand {
     @Override
     public final boolean isValidForCurrentContext() {
         return hasConnectedWorkspaceServer();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( ServerCommandsI18n.serverDatasourcesHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( ServerCommandsI18n.serverDatasourcesExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( ServerCommandsI18n.serverDatasourcesUsage ) );
     }
 
 }

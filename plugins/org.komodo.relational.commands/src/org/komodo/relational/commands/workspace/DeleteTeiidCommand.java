@@ -7,10 +7,6 @@
  */
 package org.komodo.relational.commands.workspace;
 
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.DeleteTeiidCommand.DELETE_TEIID_ERROR;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.DeleteTeiidCommand.TEIID_DELETED;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.DeleteTeiidCommand.TEIID_NOT_FOUND;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.MISSING_TEIID_NAME;
 import java.util.ArrayList;
 import java.util.List;
 import org.komodo.relational.workspace.WorkspaceManager;
@@ -20,6 +16,7 @@ import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to delete a Teiid object.
@@ -46,7 +43,7 @@ public final class DeleteTeiidCommand extends WorkspaceShellCommand {
         CommandResult result = null;
 
         try {
-            final String teiidName = requiredArgument( 0, getMessage( MISSING_TEIID_NAME ) );
+            final String teiidName = requiredArgument( 0, I18n.bind( WorkspaceCommandsI18n.missingTeiidName ) );
 
             final WorkspaceManager mgr = getWorkspaceManager();
             final KomodoObject[] teiids = mgr.findTeiids(getTransaction());
@@ -57,15 +54,15 @@ public final class DeleteTeiidCommand extends WorkspaceShellCommand {
                     break;
                 }
             }
-            
+
             if(objToDelete[0]==null) {
-                result = new CommandResultImpl( false, getMessage( TEIID_NOT_FOUND, teiidName ), null );
+                result = new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.teiidNotFound, teiidName ), null );
             } else {
                 mgr.delete(getTransaction(), objToDelete);
-                result = new CommandResultImpl( getMessage( TEIID_DELETED, teiidName ) );
+                result = new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.teiidDeleted, teiidName ) );
             }
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( DELETE_TEIID_ERROR ), e );
+            result = new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.deleteTeiidError ), e );
         }
 
         return result;
@@ -80,7 +77,37 @@ public final class DeleteTeiidCommand extends WorkspaceShellCommand {
     protected int getMaxArgCount() {
         return 1;
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( WorkspaceCommandsI18n.deleteTeiidHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( WorkspaceCommandsI18n.deleteTeiidExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( WorkspaceCommandsI18n.deleteTeiidUsage ) );
+    }
+
     /**
      * {@inheritDoc}
      *

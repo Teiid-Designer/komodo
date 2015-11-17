@@ -7,13 +7,11 @@
  */
 package org.komodo.relational.commands.vdb;
 
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.AddEntryCommand.ENTRY_ADDED;
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_ENTRY_NAME;
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_ENTRY_PATH;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to add an entry to a VDB.
@@ -40,13 +38,13 @@ public final class AddEntryCommand extends VdbShellCommand {
         CommandResult result = null;
 
         try {
-            final String entryName = requiredArgument( 0, getMessage( MISSING_ENTRY_NAME ) );
-            final String entryPath = requiredArgument( 1, getMessage( MISSING_ENTRY_PATH ) );
+            final String entryName = requiredArgument( 0, I18n.bind( VdbCommandsI18n.missingEntryName ) );
+            final String entryPath = requiredArgument( 1, I18n.bind( VdbCommandsI18n.missingEntryPath ) );
 
             final Vdb vdb = getVdb();
             vdb.addEntry( getTransaction(), entryName, entryPath );
 
-            result = new CommandResultImpl( getMessage( ENTRY_ADDED, entryName ) );
+            result = new CommandResultImpl( I18n.bind( VdbCommandsI18n.entryAdded, entryName ) );
         } catch ( final Exception e ) {
             result = new CommandResultImpl( e );
         }
@@ -58,7 +56,7 @@ public final class AddEntryCommand extends VdbShellCommand {
     public boolean isEnabled() {
         return false;
     }
-    
+
     /**
      * {@inheritDoc}
      *
@@ -67,6 +65,36 @@ public final class AddEntryCommand extends VdbShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 2;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( VdbCommandsI18n.addEntryHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( VdbCommandsI18n.addEntryExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( VdbCommandsI18n.addEntryUsage ) );
     }
 
 }

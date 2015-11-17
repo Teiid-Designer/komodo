@@ -7,9 +7,6 @@
  */
 package org.komodo.relational.commands.server;
 
-import static org.komodo.relational.commands.server.ServerCommandMessages.Common.MissingTranslatorName;
-import static org.komodo.relational.commands.server.ServerCommandMessages.Common.ServerTranslatorNotFound;
-import static org.komodo.relational.commands.server.ServerCommandMessages.ServerTranslatorCommand.InfoMessage;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,6 +18,7 @@ import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.runtime.TeiidTranslator;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to show details for a server translator.
@@ -47,8 +45,8 @@ public final class ServerTranslatorCommand extends ServerShellCommand {
         CommandResult result = null;
 
         try {
-            final String translatorName = requiredArgument( 0, getMessage( MissingTranslatorName ) );
-            
+            final String translatorName = requiredArgument( 0, I18n.bind( ServerCommandsI18n.missingTranslatorName ) );
+
             // Validates that a server is connected
             CommandResult validationResult = validateHasConnectedWorkspaceServer();
             if ( !validationResult.isOk() ) {
@@ -58,16 +56,16 @@ public final class ServerTranslatorCommand extends ServerShellCommand {
             Teiid teiid = getWorkspaceServer();
             TeiidTranslator translator = teiid.getTeiidInstance( getTransaction() ).getTranslator(translatorName);
             if(translator==null) {
-                return new CommandResultImpl(false, getMessage( ServerTranslatorNotFound, translatorName ), null);
+                return new CommandResultImpl(false, I18n.bind( ServerCommandsI18n.serverTranslatorNotFound, translatorName ), null);
             }
-            
+
             // Print title
-            final String title = getMessage( InfoMessage, translatorName, getWorkspaceServerName() );
+            final String title = I18n.bind( ServerCommandsI18n.infoMessageTranslator, translatorName, getWorkspaceServerName() );
             print( MESSAGE_INDENT, title );
 
             // Print Translator Info
             ServerObjPrintUtils.printTranslatorDetails(getWriter(), MESSAGE_INDENT, translator);
-            
+
             result = CommandResult.SUCCESS;
         } catch ( final Exception e ) {
             result = new CommandResultImpl( e );
@@ -95,7 +93,37 @@ public final class ServerTranslatorCommand extends ServerShellCommand {
     public final boolean isValidForCurrentContext() {
         return hasConnectedWorkspaceServer();
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( ServerCommandsI18n.serverTranslatorHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( ServerCommandsI18n.serverTranslatorExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( ServerCommandsI18n.serverTranslatorUsage ) );
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -132,5 +160,5 @@ public final class ServerTranslatorCommand extends ServerShellCommand {
         // no tab completion
         return -1;
     }
-    
+
 }

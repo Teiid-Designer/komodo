@@ -9,9 +9,6 @@ package org.komodo.relational.commands.server;
 
 import java.util.ArrayList;
 import java.util.List;
-import static org.komodo.relational.commands.server.ServerCommandMessages.ServerSetCommand.MissingServerNameArg;
-import static org.komodo.relational.commands.server.ServerCommandMessages.ServerSetCommand.ServerDoesNotExist;
-import static org.komodo.relational.commands.server.ServerCommandMessages.ServerSetCommand.ServerSetSuccess;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.CommandResultImpl;
@@ -20,6 +17,7 @@ import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to set the default server name
@@ -46,12 +44,12 @@ public final class ServerSetCommand extends ServerShellCommand {
         CommandResult result = null;
 
         try {
-            String serverName = requiredArgument( 0, getMessage( MissingServerNameArg ) );
+            String serverName = requiredArgument( 0, I18n.bind( ServerCommandsI18n.missingServerNameArg ) );
 
             // Validate that server object with this name exists in the workspace
             Teiid wsTeiid = ServerUtils.getWorkspaceTeiidObject( getWorkspaceManager(), getWorkspaceStatus(), serverName );
             if ( wsTeiid == null ) {
-                return new CommandResultImpl( false, getMessage( ServerDoesNotExist, serverName ), null );
+                return new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.serverDoesNotExist, serverName ), null );
             }
 
             // Check for current server
@@ -59,7 +57,7 @@ public final class ServerSetCommand extends ServerShellCommand {
                 // Request set to current server, no need to reset
                 String currentServerName = getWorkspaceServerName();
                 if ( serverName.equals( currentServerName ) ) {
-                    return new CommandResultImpl( getMessage( ServerSetSuccess, serverName ) );
+                    return new CommandResultImpl( I18n.bind( ServerCommandsI18n.serverSetSuccess, serverName ) );
                 }
 
                 // Has different server currently.  Disconnect it.
@@ -70,11 +68,11 @@ public final class ServerSetCommand extends ServerShellCommand {
 
             // Set the server on workspace status
             getWorkspaceStatus().setStateObject( ServerCommandProvider.SERVER_DEFAULT_KEY, wsTeiid );
-            
+
             // Updates available commands upon setting server
             getWorkspaceStatus().updateAvailableCommands();
-            
-            result = new CommandResultImpl( getMessage( ServerSetSuccess, serverName ) );
+
+            result = new CommandResultImpl( I18n.bind( ServerCommandsI18n.serverSetSuccess, serverName ) );
         } catch ( final Exception e ) {
             result = new CommandResultImpl( e );
         }
@@ -101,7 +99,37 @@ public final class ServerSetCommand extends ServerShellCommand {
     public final boolean isValidForCurrentContext() {
         return true;
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( ServerCommandsI18n.serverSetHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( ServerCommandsI18n.serverSetExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( ServerCommandsI18n.serverSetUsage ) );
+    }
+
     /**
      * {@inheritDoc}
      *

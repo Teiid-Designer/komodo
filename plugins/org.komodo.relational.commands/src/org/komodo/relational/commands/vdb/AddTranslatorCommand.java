@@ -7,13 +7,11 @@
  */
 package org.komodo.relational.commands.vdb;
 
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.AddTranslatorCommand.TRANSLATOR_ADDED;
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_TRANSLATOR_NAME;
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_TRANSLATOR_TYPE;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to add a translator to a VDB.
@@ -40,13 +38,13 @@ public class AddTranslatorCommand extends VdbShellCommand {
         CommandResult result = null;
 
         try {
-            final String translatorName = requiredArgument( 0, getMessage( MISSING_TRANSLATOR_NAME ) );
-            final String translatorType = requiredArgument( 1, getMessage( MISSING_TRANSLATOR_TYPE ) );
+            final String translatorName = requiredArgument( 0, I18n.bind( VdbCommandsI18n.missingTranslatorName ) );
+            final String translatorType = requiredArgument( 1, I18n.bind( VdbCommandsI18n.missingTranslatorType ) );
 
             final Vdb vdb = getVdb();
             vdb.addTranslator( getTransaction(), translatorName, translatorType );
 
-            result = new CommandResultImpl( getMessage( TRANSLATOR_ADDED, translatorName ) );
+            result = new CommandResultImpl( I18n.bind( VdbCommandsI18n.translatorAdded, translatorName ) );
         } catch ( final Exception e ) {
             result = new CommandResultImpl( e );
         }
@@ -62,6 +60,36 @@ public class AddTranslatorCommand extends VdbShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 2;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( VdbCommandsI18n.addTranslatorHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( VdbCommandsI18n.addTranslatorExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( VdbCommandsI18n.addTranslatorUsage ) );
     }
 
 }

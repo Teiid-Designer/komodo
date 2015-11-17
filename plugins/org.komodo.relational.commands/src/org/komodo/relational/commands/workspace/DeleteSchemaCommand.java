@@ -7,10 +7,6 @@
  */
 package org.komodo.relational.commands.workspace;
 
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.DeleteSchemaCommand.DELETE_SCHEMA_ERROR;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.DeleteSchemaCommand.SCHEMA_DELETED;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.DeleteSchemaCommand.SCHEMA_NOT_FOUND;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.MISSING_SCHEMA_NAME;
 import java.util.ArrayList;
 import java.util.List;
 import org.komodo.relational.workspace.WorkspaceManager;
@@ -20,6 +16,7 @@ import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to delete a Schema.
@@ -46,7 +43,7 @@ public final class DeleteSchemaCommand extends WorkspaceShellCommand {
         CommandResult result = null;
 
         try {
-            final String schemaName = requiredArgument( 0, getMessage( MISSING_SCHEMA_NAME ) );
+            final String schemaName = requiredArgument( 0, I18n.bind( WorkspaceCommandsI18n.missingSchemaName ) );
 
             final WorkspaceManager mgr = getWorkspaceManager();
             final KomodoObject[] schemas = mgr.findSchemas(getTransaction());
@@ -57,15 +54,15 @@ public final class DeleteSchemaCommand extends WorkspaceShellCommand {
                     break;
                 }
             }
-            
+
             if(objToDelete[0]==null) {
-                result = new CommandResultImpl( false, getMessage( SCHEMA_NOT_FOUND, schemaName ), null );
+                result = new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.schemaNotFound, schemaName ), null );
             } else {
                 mgr.delete(getTransaction(), objToDelete);
-                result = new CommandResultImpl( getMessage( SCHEMA_DELETED, schemaName ) );
+                result = new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.schemaDeleted, schemaName ) );
             }
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( DELETE_SCHEMA_ERROR ), e );
+            result = new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.deleteSchemaError ), e );
         }
 
         return result;
@@ -80,7 +77,37 @@ public final class DeleteSchemaCommand extends WorkspaceShellCommand {
     protected int getMaxArgCount() {
         return 1;
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( WorkspaceCommandsI18n.deleteSchemaHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( WorkspaceCommandsI18n.deleteSchemaExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( WorkspaceCommandsI18n.deleteSchemaUsage ) );
+    }
+
     /**
      * {@inheritDoc}
      *

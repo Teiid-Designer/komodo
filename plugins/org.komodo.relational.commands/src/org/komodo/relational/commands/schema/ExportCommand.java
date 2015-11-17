@@ -7,14 +7,10 @@
  */
 package org.komodo.relational.commands.schema;
 
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.ERROR_DDL_EMPTY;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.ERROR_WRITING_FILE;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.MISSING_OUTPUT_FILE_NAME;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.OUTPUT_FILE_ERROR;
-import static org.komodo.relational.commands.schema.SchemaCommandMessages.ExportCommand.DDL_EXPORTED;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.Properties;
+import org.komodo.relational.commands.workspace.WorkspaceCommandsI18n;
 import org.komodo.relational.model.Schema;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
@@ -22,6 +18,7 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.constants.ExportConstants;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.StringUtils;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to export the Schema DDL.
@@ -46,7 +43,7 @@ public final class ExportCommand extends SchemaShellCommand {
     @Override
     protected CommandResult doExecute() {
         try {
-            String fileName = requiredArgument( 0, getWorkspaceMessage( MISSING_OUTPUT_FILE_NAME ) );
+            String fileName = requiredArgument( 0, I18n.bind( WorkspaceCommandsI18n.missingOutputFileName ) );
 
             // If there is no file extension, add .ddl
             if ( fileName.indexOf( DOT ) == -1 ) {
@@ -65,20 +62,23 @@ public final class ExportCommand extends SchemaShellCommand {
 
                 // No DDL context to export
                 if(StringUtils.isEmpty(ddl)) {
-                    return new CommandResultImpl( false, getWorkspaceMessage( ERROR_DDL_EMPTY ), null );
+                    return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.errorDdlEmpty ), null );
                 }
 
                 // write file
                 try ( final FileWriter recordingFileWriter = new FileWriter( fileName, false ) ) {
                     recordingFileWriter.write( ddl );
                     recordingFileWriter.flush();
-                    return new CommandResultImpl( getMessage( DDL_EXPORTED, schema.getName( uow ), fileName, override ) );
+                    return new CommandResultImpl( I18n.bind( SchemaCommandsI18n.ddlExported,
+                                                             schema.getName( uow ),
+                                                             fileName,
+                                                             override ) );
                 } catch ( final Exception e ) {
-                    return new CommandResultImpl( false, getWorkspaceMessage( ERROR_WRITING_FILE, fileName ), e );
+                    return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.errorWritingFile, fileName ), e );
                 }
             }
 
-            return new CommandResultImpl( false, getWorkspaceMessage( OUTPUT_FILE_ERROR, fileName ), null );
+            return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.outputFileError, fileName ), null );
         } catch ( final Exception e ) {
             return new CommandResultImpl( e );
         }
@@ -92,6 +92,36 @@ public final class ExportCommand extends SchemaShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 2;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( SchemaCommandsI18n.exportHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( SchemaCommandsI18n.exportExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( SchemaCommandsI18n.exportUsage ) );
     }
 
 }

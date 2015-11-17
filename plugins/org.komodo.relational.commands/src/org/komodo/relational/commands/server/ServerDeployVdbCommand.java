@@ -7,12 +7,6 @@
  */
 package org.komodo.relational.commands.server;
 
-import static org.komodo.relational.commands.server.ServerCommandMessages.Common.MissingVdbName;
-import static org.komodo.relational.commands.server.ServerCommandMessages.Common.WorkspaceVdbNotFound;
-import static org.komodo.relational.commands.server.ServerCommandMessages.ServerDeployVdbCommand.OverwriteArgInvalid;
-import static org.komodo.relational.commands.server.ServerCommandMessages.ServerDeployVdbCommand.VdbDeployFinished;
-import static org.komodo.relational.commands.server.ServerCommandMessages.ServerDeployVdbCommand.VdbDeploymentOverwriteDisabled;
-import static org.komodo.relational.commands.server.ServerCommandMessages.ServerDeployVdbCommand.VdbExportFailed;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -33,6 +27,7 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.TeiidVdb;
 import org.komodo.utils.StringUtils;
+import org.komodo.utils.i18n.I18n;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 /**
@@ -44,7 +39,7 @@ public final class ServerDeployVdbCommand extends ServerShellCommand {
 
     private static final List< String > VALID_OVERWRITE_ARGS = Arrays.asList( new String[] { "-o", "--overwrite" } ); //$NON-NLS-1$ //$NON-NLS-2$;
     private static final String VDB_DEPLOYMENT_SUFFIX = "-vdb.xml"; //$NON-NLS-1$
-    
+
     /**
      * @param status
      *        the shell's workspace status (cannot be <code>null</code>)
@@ -63,20 +58,20 @@ public final class ServerDeployVdbCommand extends ServerShellCommand {
         CommandResult result = null;
 
         try {
-            String vdbName = requiredArgument( 0, getMessage( MissingVdbName ) );
+            String vdbName = requiredArgument( 0, I18n.bind( ServerCommandsI18n.missingVdbName ) );
             final String overwriteArg = optionalArgument( 1, null );
             final boolean overwrite = !StringUtils.isBlank( overwriteArg );
 
             // make sure overwrite arg is valid
             if ( overwrite && !VALID_OVERWRITE_ARGS.contains( overwriteArg ) ) {
-                return new CommandResultImpl( false, getMessage( OverwriteArgInvalid, overwriteArg ), null );
+                return new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.overwriteArgInvalid, overwriteArg ), null );
             }
-            
+
             // Return if VDB object not found
             if(!getWorkspaceManager().hasChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE)) {
-                return new CommandResultImpl( false, getMessage( WorkspaceVdbNotFound ), null );
+                return new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.workspaceVdbNotFound ), null );
             }
-            
+
             // Find the VDB to deploy
             final KomodoObject vdbObj = getWorkspaceManager().getChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
             final Vdb vdbToDeploy = Vdb.RESOLVER.resolve(getTransaction(), vdbObj);
@@ -90,25 +85,31 @@ public final class ServerDeployVdbCommand extends ServerShellCommand {
             // Deploy the selected VDB
             Teiid teiid = getWorkspaceServer();
             TeiidInstance teiidInstance = teiid.getTeiidInstance(getTransaction());
-            
+
             // Determine if the server already has a deployed VDB with this name and version
-            boolean serverHasVdb = serverHasVdb(teiidInstance, vdbToDeploy.getName(getTransaction()), vdbToDeploy.getVersion(getTransaction()));
+            boolean serverHasVdb = serverHasVdb( teiidInstance,
+                                                 vdbToDeploy.getName( getTransaction() ),
+                                                 vdbToDeploy.getVersion( getTransaction() ) );
             if(serverHasVdb && !overwrite) {
-                return new CommandResultImpl( false, getMessage( VdbDeploymentOverwriteDisabled, vdbName, vdbToDeploy.getVersion(getTransaction()) ), null );
+                return new CommandResultImpl( false,
+                                              I18n.bind( ServerCommandsI18n.vdbDeploymentOverwriteDisabled,
+                                                         vdbName,
+                                                         vdbToDeploy.getVersion( getTransaction() ) ),
+                                              null );
             }
-            
+
             // Get VDB content
             String vdbXml = vdbToDeploy.export(getTransaction(), null);
             if (vdbXml == null || vdbXml.isEmpty()) {
-                return new CommandResultImpl( false, getMessage( VdbExportFailed ), null);
+                return new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.vdbExportFailed ), null);
             }
 
             String vdbToDeployName = vdbToDeploy.getName(getTransaction());
             String vdbDeploymentName = vdbToDeployName + VDB_DEPLOYMENT_SUFFIX;
             InputStream stream = new ByteArrayInputStream(vdbXml.getBytes());
             teiidInstance.deployDynamicVdb(vdbDeploymentName, stream);
-            
-            print( MESSAGE_INDENT, getMessage(VdbDeployFinished) );
+
+            print( MESSAGE_INDENT, I18n.bind(ServerCommandsI18n.vdbDeployFinished) );
             result = CommandResult.SUCCESS;
         } catch ( final Exception e ) {
             result = new CommandResultImpl( e );
@@ -116,13 +117,43 @@ public final class ServerDeployVdbCommand extends ServerShellCommand {
 
         return result;
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( ServerCommandsI18n.serverDeployVdbHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( ServerCommandsI18n.serverDeployVdbExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( ServerCommandsI18n.serverDeployVdbUsage ) );
+    }
+
     private boolean serverHasVdb(TeiidInstance teiidInstance, String vdbName, int vdbVersion) throws Exception {
         // If no VDB with this name, return false;
         if(!teiidInstance.hasVdb(vdbName)) {
             return false;
         }
-        
+
         // May be multiple versions deployed - see if there is one matching supplied version
         Collection<TeiidVdb> serverVdbs = teiidInstance.getVdbs();
         for(TeiidVdb serverVdb : serverVdbs) {
@@ -130,10 +161,10 @@ public final class ServerDeployVdbCommand extends ServerShellCommand {
                 return true;
             }
         }
-        
+
         return false;
     }
-    
+
     /**
      * {@inheritDoc}
      *
@@ -153,7 +184,7 @@ public final class ServerDeployVdbCommand extends ServerShellCommand {
     public final boolean isValidForCurrentContext() {
         return (isWorkspaceContext() && hasConnectedWorkspaceServer());
     }
-    
+
     private boolean isWorkspaceContext() {
         try {
             final KomodoType contextType = getContext().getTypeIdentifier( getTransaction() );
@@ -198,5 +229,5 @@ public final class ServerDeployVdbCommand extends ServerShellCommand {
         // no tab completion
         return -1;
     }
-    
+
 }

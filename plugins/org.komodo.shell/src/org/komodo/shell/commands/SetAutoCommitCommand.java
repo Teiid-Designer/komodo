@@ -7,18 +7,23 @@
  */
 package org.komodo.shell.commands;
 
-import static org.komodo.shell.Messages.SHELL.INVALID_BOOLEAN_GLOBAL_PROPERTY_VALUE;
-import static org.komodo.shell.Messages.SetAutoCommitCommand.ENABLE_FLAG_MISSING;
-import static org.komodo.shell.Messages.SetGlobalPropertyCommand.GlobalPropertySet;
 import java.util.List;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
-import org.komodo.shell.Messages;
+import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.utils.i18n.I18n;
 
 /**
- * A command that can enable or disable the automatic committing of commands.
+ * A {@link ShellCommand command} that can enable or disable the automatic committing of commands.
+ * <p>
+ * Usage:
+ * <p>
+ * <code>&nbsp;&nbsp;
+ * set-auto-commit &lt;true | false&gt;
+ * </code>
  */
 public class SetAutoCommitCommand extends BuiltInShellCommand {
 
@@ -43,20 +48,20 @@ public class SetAutoCommitCommand extends BuiltInShellCommand {
     @Override
     protected CommandResult doExecute() {
         try {
-            final String arg = requiredArgument( 0, Messages.getString( ENABLE_FLAG_MISSING ) );
+            final String arg = requiredArgument( 0, I18n.bind( ShellI18n.enable_flag_missing ) );
 
             // Check for invalid arg
             if ( !arg.equalsIgnoreCase( Boolean.TRUE.toString() ) && !arg.equalsIgnoreCase( Boolean.FALSE.toString() ) ) {
                 return new CommandResultImpl( false,
-                                              Messages.getString( INVALID_BOOLEAN_GLOBAL_PROPERTY_VALUE,
-                                                                  arg,
-                                                                  WorkspaceStatus.AUTO_COMMIT ),
+                                              I18n.bind( ShellI18n.invalidBooleanGlobalPropertyValue,
+                                                         arg,
+                                                         WorkspaceStatus.AUTO_COMMIT ),
                                               null );
             }
 
             getWorkspaceStatus().setProperty(WorkspaceStatus.AUTO_COMMIT, arg);
-            
-            return new CommandResultImpl( Messages.getString( GlobalPropertySet, WorkspaceStatus.AUTO_COMMIT ) );
+
+            return new CommandResultImpl( I18n.bind( ShellI18n.globalPropertySet, WorkspaceStatus.AUTO_COMMIT ) );
         } catch ( final Exception e ) {
             return new CommandResultImpl( e );
         }
@@ -80,6 +85,36 @@ public class SetAutoCommitCommand extends BuiltInShellCommand {
     @Override
     public boolean isValidForCurrentContext() {
         return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.setAutoCommitHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.setAutoCommitExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.setAutoCommitUsage ) );
     }
 
     /**

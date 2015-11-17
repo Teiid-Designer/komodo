@@ -7,14 +7,9 @@
 */
 package org.komodo.relational.commands.server;
 
-import static org.komodo.relational.commands.server.ServerCommandMessages.Common.Connected;
-import static org.komodo.relational.commands.server.ServerCommandMessages.Common.CurrentTeiid;
-import static org.komodo.relational.commands.server.ServerCommandMessages.Common.NotConnected;
-import static org.komodo.relational.commands.server.ServerCommandMessages.Common.serverStatusText;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
-import org.komodo.relational.Messages;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.ShellCommand;
@@ -24,6 +19,7 @@ import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.runtime.TeiidInstance;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command provider for VDBs.
@@ -110,18 +106,15 @@ public class ServerCommandProvider implements ShellCommandProvider {
             TeiidInstance teiidInstance = teiid.getTeiidInstance(uow);
             String teiidName = teiid.getName(uow);
             String teiidUrl = teiidInstance.getUrl();
-            String teiidConnected = teiidInstance.isConnected() ? getMessage(Connected) : getMessage(NotConnected);
-            String currentServerText = getMessage(serverStatusText, teiidName, teiidUrl, teiidConnected);
+            String teiidConnected = teiidInstance.isConnected() ? I18n.bind( ServerCommandsI18n.connected )
+                                                                : I18n.bind( ServerCommandsI18n.notConnected );
+            String currentServerText = I18n.bind(ServerCommandsI18n.serverStatusText, teiidName, teiidUrl, teiidConnected);
 
-            String resultMessage = getMessage(CurrentTeiid,currentServerText);
+            String resultMessage = I18n.bind(ServerCommandsI18n.currentTeiid,currentServerText);
 
             return resultMessage;
         }
         return null;
-    }
-
-    private String getMessage(Enum< ? > key, Object... parameters) {
-        return Messages.getString(ServerCommandMessages.RESOURCE_BUNDLE,key.toString(),parameters);
     }
 
     /**

@@ -7,23 +7,23 @@
  */
 package org.komodo.shell.commands;
 
-import static org.komodo.shell.Messages.RemoveDescriptorCommand.DESCRIPTOR_REMOVED;
-import static org.komodo.shell.Messages.RemoveDescriptorCommand.MISSING_DESCRIPTOR_NAME;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
-import org.komodo.shell.Messages;
+import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.KomodoObjectUtils;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.utils.i18n.I18n;
 
 /**
- * Removes a descriptor from a {@link KomodoObject}.
+ * A {@link ShellCommand command} that removes a descriptor from a {@link KomodoObject}.
  * <p>
  * Usage:
  * <p>
  * <code>&nbsp;&nbsp;
- * remove-descriptor &lt;descriptor-name&gt; {child-type}
+ * remove-descriptor &lt;descriptor-name&gt;
  * </code>
  */
 public class RemoveDescriptorCommand extends BuiltInShellCommand {
@@ -49,11 +49,11 @@ public class RemoveDescriptorCommand extends BuiltInShellCommand {
     @Override
     protected CommandResult doExecute() {
         try {
-            final String descriptorNameArg = requiredArgument( 0, Messages.getString( MISSING_DESCRIPTOR_NAME ) );
+            final String descriptorNameArg = requiredArgument( 0, I18n.bind( ShellI18n.missingDescriptorNameForDelete ) );
 
             final KomodoObject kobject = getContext();
             kobject.removeDescriptor(getTransaction(), descriptorNameArg);
-            return new CommandResultImpl( Messages.getString( DESCRIPTOR_REMOVED, descriptorNameArg ) );
+            return new CommandResultImpl( I18n.bind( ShellI18n.descriptorRemoved, descriptorNameArg ) );
         } catch ( final Exception e ) {
             return new CommandResultImpl( e );
         }
@@ -77,6 +77,36 @@ public class RemoveDescriptorCommand extends BuiltInShellCommand {
     @Override
     public boolean isValidForCurrentContext() {
         return ( !KomodoObjectUtils.isRoot(getContext()) && !KomodoObjectUtils.isRootChild(getContext()) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.removeDescriptorHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.removeDescriptorExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.removeDescriptorUsage ) );
     }
 
 }

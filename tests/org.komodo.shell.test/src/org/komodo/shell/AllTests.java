@@ -54,6 +54,7 @@ import org.komodo.shell.commands.WorkspaceCommandTest;
                        SetPrimaryTypeCommandTest.class,
                        SetPropertyCommandTest.class,
                        SetRecordCommandTest.class,
+                       ShellI18nTest.class,
                        ShowChildrenCommandTest.class,
                        ShowDescriptorsCommandTest.class,
                        ShowGlobalCommandTest.class,

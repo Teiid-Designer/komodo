@@ -24,9 +24,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Map;
-import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.ShellCommandFactory;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * An implementation of the {@link ShellCommandReader} that reads data from
@@ -141,7 +141,7 @@ public class FileShellCommandReader extends AbstractShellCommandReader {
 		if (console != null) {
 			return console.readLine(prompt);
 		} else {
-			throw new RuntimeException(Messages.getString(SHELL.FileShellCommandReader_NoConsole));
+			throw new RuntimeException(I18n.bind(ShellI18n.fileShellCommandReaderNoConsole));
 		}
 	}
 
@@ -158,7 +158,7 @@ public class FileShellCommandReader extends AbstractShellCommandReader {
 		if (console != null) {
 			return new String(console.readPassword(prompt));
 		} else {
-			throw new RuntimeException(Messages.getString(SHELL.FileShellCommandReader_NoConsole));
+			throw new RuntimeException(I18n.bind(ShellI18n.fileShellCommandReaderNoConsole));
 		}
 	}
 

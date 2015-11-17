@@ -15,14 +15,14 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.TreeMap;
-import org.komodo.shell.Messages;
-import org.komodo.shell.Messages.SHELL;
+import org.komodo.shell.ShellI18n;
 import org.komodo.shell.util.PrintUtils;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.runtime.TeiidDataSource;
 import org.komodo.spi.runtime.TeiidPropertyDefinition;
 import org.komodo.spi.runtime.TeiidTranslator;
 import org.komodo.spi.runtime.TeiidVdb;
+import org.komodo.utils.i18n.I18n;
 
 /**
  *  Utilities for formatted printing for Server Objects
@@ -151,7 +151,7 @@ public class ServerObjPrintUtils implements StringConstants {
             String name = propDefn.getDisplayName();
             Object value = propDefn.getDefaultValue();
             if(value==null) {
-                value = Messages.getString( SHELL.NO_PROPERTY_VALUE );
+                value = I18n.bind( ShellI18n.noPropertyValue );
             }
 
             if ( maxNameWidth < name.length() ) {

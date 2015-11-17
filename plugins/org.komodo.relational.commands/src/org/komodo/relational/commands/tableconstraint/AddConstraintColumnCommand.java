@@ -7,10 +7,6 @@
  */
 package org.komodo.relational.commands.tableconstraint;
 
-import static org.komodo.relational.commands.tableconstraint.TableConstraintCommandMessages.AddConstraintColumnCommand.COLUMN_REF_ADDED;
-import static org.komodo.relational.commands.tableconstraint.TableConstraintCommandMessages.AddConstraintColumnCommand.INVALID_COLUMN;
-import static org.komodo.relational.commands.tableconstraint.TableConstraintCommandMessages.AddConstraintColumnCommand.INVALID_COLUMN_PATH;
-import static org.komodo.relational.commands.tableconstraint.TableConstraintCommandMessages.AddConstraintColumnCommand.MISSING_COLUMN_PATH;
 import java.util.Arrays;
 import java.util.List;
 import org.komodo.relational.model.Column;
@@ -24,6 +20,7 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.utils.StringUtils;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to add a column to a {@link TableConstraint}.
@@ -50,30 +47,34 @@ public final class AddConstraintColumnCommand extends TableConstraintShellComman
         CommandResult result = null;
 
         try {
-            final String columnPath = requiredArgument( 0, getMessage( MISSING_COLUMN_PATH ) );
+            final String columnPath = requiredArgument( 0, I18n.bind( TableConstraintCommandsI18n.missingColumnPathForAdd ) );
 
             // Validate the display Path
             String validationMsg = validatePath(columnPath);
             if(!validationMsg.equals(CompletionConstants.OK)) {
                 return new CommandResultImpl(false, validationMsg, null);
             }
-            
+
             // Get the Object at the supplied path
             KomodoObject possible = getWorkspaceStatus().getContextForDisplayPath(columnPath.trim());
-            
+
             Column column = null;
             { // see if valid column
                 try {
                     if ( Column.RESOLVER.resolvable( getTransaction(), possible ) ) {
                         column = Column.RESOLVER.resolve( getTransaction(), possible );
                     } else {
-                        result = new CommandResultImpl( false, getMessage( INVALID_COLUMN_PATH, columnPath ), null );
+                        result = new CommandResultImpl( false,
+                                                        I18n.bind( TableConstraintCommandsI18n.invalidColumnPath, columnPath ),
+                                                        null );
                     }
                 } catch ( final Exception e ) {
-                    result = new CommandResultImpl( false, getMessage( INVALID_COLUMN_PATH, columnPath ), null );
+                    result = new CommandResultImpl( false,
+                                                    I18n.bind( TableConstraintCommandsI18n.invalidColumnPath, columnPath ),
+                                                    null );
                 }
             }
-            
+
             if(column!=null) {
                 final TableConstraint constraint = getTableConstraint();
 
@@ -82,10 +83,12 @@ public final class AddConstraintColumnCommand extends TableConstraintShellComman
 
                 if ( parentTable.equals( column.getParent( getTransaction() ) ) ) {
                     constraint.addColumn( getTransaction(), column );
-                    result = new CommandResultImpl( getMessage( COLUMN_REF_ADDED, columnPath, getWorkspaceStatus().getCurrentContextDisplayPath() ) );
+                    result = new CommandResultImpl( I18n.bind( TableConstraintCommandsI18n.columnRefAdded,
+                                                               columnPath,
+                                                               getWorkspaceStatus().getCurrentContextDisplayPath() ) );
                 } else {
                     result = new CommandResultImpl( false,
-                                                    getMessage( INVALID_COLUMN,
+                                                    I18n.bind( TableConstraintCommandsI18n.invalidColumn,
                                                                 getWorkspaceStatus().getDisplayPath( column ),
                                                                 constraint.getName( getTransaction() ) ),
                                                     null );
@@ -97,7 +100,7 @@ public final class AddConstraintColumnCommand extends TableConstraintShellComman
 
         return result;
     }
-    
+
     /**
      * {@inheritDoc}
      *
@@ -106,6 +109,36 @@ public final class AddConstraintColumnCommand extends TableConstraintShellComman
     @Override
     protected int getMaxArgCount() {
         return 1;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( TableConstraintCommandsI18n.addConstraintColumnHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( TableConstraintCommandsI18n.addConstraintColumnExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( TableConstraintCommandsI18n.addConstraintColumnUsage ) );
     }
 
     /**

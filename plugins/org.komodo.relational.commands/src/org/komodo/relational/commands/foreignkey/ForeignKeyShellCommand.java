@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.foreignkey;
 
-import org.komodo.relational.Messages;
 import org.komodo.relational.commands.RelationalShellCommand;
 import org.komodo.relational.model.ForeignKey;
 import org.komodo.shell.api.WorkspaceStatus;
@@ -37,29 +36,8 @@ abstract class ForeignKeyShellCommand extends RelationalShellCommand {
         try {
             return ForeignKey.RESOLVER.resolvable(getTransaction(), getContext());
         } catch (Exception ex) {
-            // exception returns false
+            return false;
         }
-        return false;
-    }
-
-    @Override
-    protected String getMessage(Enum< ? > key, Object... parameters) {
-        return Messages.getString(ForeignKeyCommandMessages.RESOURCE_BUNDLE,key.toString(),parameters);
-    }
-
-    @Override
-    protected void printHelpDescription( final int indent ) {
-        print( indent, Messages.getString( ForeignKeyCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".help", getName() ) ); //$NON-NLS-1$
-    }
-
-    @Override
-    protected void printHelpExamples( final int indent ) {
-        print( indent, Messages.getString( ForeignKeyCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".examples" ) ); //$NON-NLS-1$
-    }
-
-    @Override
-    protected void printHelpUsage( final int indent ) {
-        print( indent, Messages.getString( ForeignKeyCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".usage" ) ); //$NON-NLS-1$
     }
 
 }

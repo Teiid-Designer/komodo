@@ -7,15 +7,14 @@
  */
 package org.komodo.relational.commands.table;
 
-import static org.komodo.relational.commands.table.TableCommandMessages.ShowUniqueConstraintsCommand.NO_UNIQUE_CONSTRAINTS;
-import static org.komodo.relational.commands.table.TableCommandMessages.ShowUniqueConstraintsCommand.UNIQUE_CONSTRAINTS_HEADER;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.PRINT_RELATIONAL_OBJECT;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+import org.komodo.relational.commands.workspace.WorkspaceCommandsI18n;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.UniqueConstraint;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to show all the {@link UniqueConstraint unique constraints} of a {@link Table}.
@@ -44,15 +43,15 @@ public final class ShowUniqueConstraintsCommand extends TableShellCommand {
             final UniqueConstraint[] constraints = table.getUniqueConstraints( getTransaction() );
 
             if ( constraints.length == 0 ) {
-                print( MESSAGE_INDENT, getMessage( NO_UNIQUE_CONSTRAINTS, table.getName( getTransaction() ) ) );
+                print( MESSAGE_INDENT, I18n.bind( TableCommandsI18n.noUniqueConstraints, table.getName( getTransaction() ) ) );
             } else {
-                print( MESSAGE_INDENT, getMessage( UNIQUE_CONSTRAINTS_HEADER, table.getName( getTransaction() ) ) );
+                print( MESSAGE_INDENT, I18n.bind( TableCommandsI18n.uniqueConstraintsHeader, table.getName( getTransaction() ) ) );
 
                 final int indent = (MESSAGE_INDENT * 2);
 
                 for ( final UniqueConstraint constraint : constraints ) {
                     print( indent,
-                           getWorkspaceMessage( PRINT_RELATIONAL_OBJECT,
+                           I18n.bind( WorkspaceCommandsI18n.printRelationalObject,
                                                 constraint.getName( getTransaction() ),
                                                 constraint.getTypeDisplayName() ) );
                 }
@@ -72,6 +71,36 @@ public final class ShowUniqueConstraintsCommand extends TableShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 0;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( TableCommandsI18n.showUniqueConstraintsHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( TableCommandsI18n.showUniqueConstraintsExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( TableCommandsI18n.showUniqueConstraintsUsage ) );
     }
 
 }

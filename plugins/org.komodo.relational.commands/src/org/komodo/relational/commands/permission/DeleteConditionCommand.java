@@ -7,8 +7,6 @@
  */
 package org.komodo.relational.commands.permission;
 
-import static org.komodo.relational.commands.permission.PermissionCommandMessages.DeleteConditionCommand.CONDITION_DELETED;
-import static org.komodo.relational.commands.permission.PermissionCommandMessages.General.MISSING_CONDITION_NAME;
 import java.util.ArrayList;
 import java.util.List;
 import org.komodo.relational.vdb.Condition;
@@ -18,6 +16,7 @@ import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to delete a Condition from a Permission.
@@ -44,12 +43,12 @@ public final class DeleteConditionCommand extends PermissionShellCommand {
         CommandResult result = null;
 
         try {
-            final String conditionName = requiredArgument( 0, getMessage( MISSING_CONDITION_NAME ) );
+            final String conditionName = requiredArgument( 0, I18n.bind( PermissionCommandsI18n.missingConditionName ) );
 
             final Permission permission = getPermission();
             permission.removeCondition( getTransaction(), conditionName );
 
-            result = new CommandResultImpl( getMessage( CONDITION_DELETED, conditionName ) );
+            result = new CommandResultImpl( I18n.bind( PermissionCommandsI18n.conditionDeleted, conditionName ) );
         } catch ( final Exception e ) {
             result = new CommandResultImpl( e );
         }
@@ -65,6 +64,36 @@ public final class DeleteConditionCommand extends PermissionShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 1;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( PermissionCommandsI18n.deleteConditionHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( PermissionCommandsI18n.deleteConditionExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( PermissionCommandsI18n.deleteConditionUsage ) );
     }
 
     /**

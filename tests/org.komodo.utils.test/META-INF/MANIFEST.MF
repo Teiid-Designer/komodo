@@ -7,4 +7,5 @@ Bundle-Vendor: %Bundle-Vendor.0
 Fragment-Host: org.komodo.utils
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Require-Bundle: org.junit;bundle-version="4.11.0"
+Require-Bundle: org.junit;bundle-version="4.11.0",
+ org.komodo.test.utils;bundle-version="0.0.3"

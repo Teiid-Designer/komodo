@@ -7,16 +7,22 @@
  */
 package org.komodo.shell.commands;
 
-import static org.komodo.shell.Messages.SHELL.CommitSuccess;
-import java.util.List;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
-import org.komodo.shell.Messages;
+import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.utils.i18n.I18n;
 
 /**
- * A command that commits the current transaction.
+ * A {@link ShellCommand command} that commits the current transaction.
+ * <p>
+ * Usage:
+ * <p>
+ * <code>&nbsp;&nbsp;
+ * commit
+ * </code>
  */
 public class CommitCommand extends BuiltInShellCommand {
 
@@ -42,7 +48,7 @@ public class CommitCommand extends BuiltInShellCommand {
     protected CommandResult doExecute() {
         try {
             getWorkspaceStatus().commit( CommitCommand.class.getName() );
-            return new CommandResultImpl( Messages.getString( CommitSuccess ) );
+            return new CommandResultImpl( I18n.bind( ShellI18n.commitSuccess ) );
         } catch ( final Exception e ) {
             return new CommandResultImpl( e );
         }
@@ -69,12 +75,33 @@ public class CommitCommand extends BuiltInShellCommand {
     }
 
     /**
-     * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpDescription(int)
      */
     @Override
-    public int tabCompletion( final String lastArgument,
-                              final List< CharSequence > candidates ) throws Exception {
-        return -1; // no candidates to add
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.commitHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.commitExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.commitUsage ) );
     }
 
 }

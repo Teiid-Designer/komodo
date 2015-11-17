@@ -39,7 +39,6 @@ import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.komodo.core.KEngine;
-import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.InvalidCommandArgumentException;
@@ -58,6 +57,7 @@ import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.RepositoryObserver;
 import org.komodo.utils.KLog;
 import org.komodo.utils.StringUtils;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * An interactive shell for working with komodo. This class adapted from
@@ -104,24 +104,27 @@ public class DefaultKomodoShell implements KomodoShell {
         };
 
         final DefaultKomodoShell shell = new DefaultKomodoShell( parent, KEngine.getInstance(), System.in, System.out );
-        
+
         // Terminate if startup input is not valid
-        if( args.length == 1 && !args[0].equals("-simple") ) {  //$NON-NLS-1$ 
-            PrintUtils.print( shell.getOutputWriter(), false, 0, Messages.getString( SHELL.INVALID_STARTUP_ARGS, args[0] ) );
+        if( args.length == 1 && !args[0].equals("-simple") ) {  //$NON-NLS-1$
+            PrintUtils.print( shell.getOutputWriter(), false, 0, I18n.bind( ShellI18n.invalidStartupArgs, args[0] ) );
             System.exit(0);
-        } else if( args.length > 1 ) { 
-            if(!args[0].equals("-f")) {  //$NON-NLS-1$ 
-                PrintUtils.print( shell.getOutputWriter(), false, 0, Messages.getString( SHELL.INVALID_STARTUP_ARGS, args[0] + " " + args[1] ) );  //$NON-NLS-1$
+        } else if( args.length > 1 ) {
+            if(!args[0].equals("-f")) {  //$NON-NLS-1$
+                PrintUtils.print( shell.getOutputWriter(),
+                                  false,
+                                  0,
+                                  I18n.bind( ShellI18n.invalidStartupArgs, args[ 0 ] + " " + args[ 1 ] ) ); //$NON-NLS-1$
                 System.exit(0);
             } else {
                 File inputFile = new File(args[1]);
                 if(!inputFile.isFile()) {
-                    PrintUtils.print( shell.getOutputWriter(), false, 0, Messages.getString( SHELL.INVALID_STARTUP_FILE, args[1] ) ); 
+                    PrintUtils.print( shell.getOutputWriter(), false, 0, I18n.bind( ShellI18n.invalidStartupFile, args[1] ) );
                     System.exit(0);
                 }
             }
         }
-        
+
         Thread shutdownHook = new Thread( new Runnable() {
             @Override
             public void run() {
@@ -266,9 +269,9 @@ public class DefaultKomodoShell implements KomodoShell {
                 props.load( new FileInputStream( startupPropertiesFile ) );
             } catch ( final Exception e ) {
                 this.outStream.println( this.msgIndentStr
-                                        + Messages.getString( SHELL.ERROR_LOADING_PROPERTIES,
-                                                              startupPropertiesFile.getAbsolutePath(),
-                                                              e.getMessage() ) );
+                                        + I18n.bind( ShellI18n.errorLoadingProperties,
+                                                     startupPropertiesFile.getAbsolutePath(),
+                                                     e.getMessage() ) );
             }
 
             this.wsStatus.setProperties( props );
@@ -319,7 +322,7 @@ public class DefaultKomodoShell implements KomodoShell {
                     } else {
                         // log error
                         if ( result.getError() != null ) {
-                            final String errorMsg = Messages.getString( SHELL.CommandFailure, command.toString() )
+                            final String errorMsg = I18n.bind( ShellI18n.commandFailure, command.toString() )
                                                     + ' '
                                                     + result.getError().getLocalizedMessage();
                             KLog.getLogger().debug( errorMsg, result.getError() );
@@ -346,10 +349,10 @@ public class DefaultKomodoShell implements KomodoShell {
             } catch ( InvalidCommandArgumentException e ) {
                 PrintUtils.print( getOutputWriter(),
                                   CompletionConstants.MESSAGE_INDENT,
-                                  Messages.getString( SHELL.INVALID_ARG, e.getMessage() ) );
+                                  I18n.bind( ShellI18n.invalidArg, e.getMessage() ) );
 
                 if ( command != null ) {
-                    PrintUtils.print( getOutputWriter(), CompletionConstants.MESSAGE_INDENT, Messages.getString( SHELL.USAGE ) );
+                    PrintUtils.print( getOutputWriter(), CompletionConstants.MESSAGE_INDENT, I18n.bind( ShellI18n.usage ) );
                     command.printUsage( CompletionConstants.MESSAGE_INDENT );
                 }
 
@@ -410,11 +413,11 @@ public class DefaultKomodoShell implements KomodoShell {
         };
         defaultRepo.addObserver( stateObserver );
 
-        displayMessage( Messages.getString( SHELL.ENGINE_STARTING ) );
+        displayMessage( I18n.bind( ShellI18n.engineStarting ) + NEW_LINE );
         kEngine.start();
-        displayMessage( SPACE + Messages.getString( SHELL.COMPONENT_STARTED ) + NEW_LINE );
+        displayMessage( SPACE + I18n.bind( ShellI18n.componentStarted ) + NEW_LINE );
 
-        displayMessage( Messages.getString( SHELL.LOCAL_REPOSITORY_STARTING ) );
+        displayMessage( I18n.bind( ShellI18n.localRepositoryStarting ) );
 
         TimerTask progressTask = new TimerTask() {
             @Override
@@ -432,8 +435,8 @@ public class DefaultKomodoShell implements KomodoShell {
         // Cancel timer and display repository message
         timer.cancel();
 
-        if ( localRepoWaiting ) displayMessage( SPACE + Messages.getString( SHELL.COMPONENT_STARTED ) );
-        else displayMessage( SPACE + Messages.getString( SHELL.LOCAL_REPOSITORY_TIMEOUT_ERROR ) );
+        if ( localRepoWaiting ) displayMessage( SPACE + I18n.bind( ShellI18n.componentStarted ) );
+        else displayMessage( SPACE + I18n.bind( ShellI18n.localRepositoryTimeoutError ) );
 
         displayMessage( NEW_LINE );
         displayMessage( NEW_LINE );
@@ -447,7 +450,7 @@ public class DefaultKomodoShell implements KomodoShell {
             return; // avoid shutting down twice
         }
 
-        displayMessage( this.msgIndentStr + Messages.getString( SHELL.SHUTTING_DOWN ) );
+        displayMessage( this.msgIndentStr + I18n.bind( ShellI18n.shuttingDown ) + NEW_LINE );
         this.shutdown = true;
 
         // save properties
@@ -486,7 +489,7 @@ public class DefaultKomodoShell implements KomodoShell {
             displayMessage( "Error during shutdown closing shell reader: " + e.getLocalizedMessage() ); //$NON-NLS-1$
         }
 
-        displayMessage( this.msgIndentStr + Messages.getString( SHELL.DONE ) );
+        displayMessage( this.msgIndentStr + I18n.bind( ShellI18n.goodBye ) + NEW_LINE );
     }
 
     private void displayMessage( String message ) {
@@ -497,7 +500,7 @@ public class DefaultKomodoShell implements KomodoShell {
      * Displays a welcome message to the user.
      */
     private void displayWelcomeMessage() {
-        displayMessage( Messages.getString( SHELL.WelcomeMessage ) );
+        displayMessage( I18n.bind( ShellI18n.welcomeMessage ) );
     }
 
     /**
@@ -514,15 +517,17 @@ public class DefaultKomodoShell implements KomodoShell {
                 recordingWriter.flush();
             } catch ( IOException ex ) {
                 String filePath = wsStatus.getProperties().getProperty( WorkspaceStatus.RECORDING_FILE_KEY );
-                PrintUtils.print( recordingWriter, 0, Messages.getString( SHELL.RecordingFileOutputError, filePath ) );
+                PrintUtils.print( recordingWriter, 0, I18n.bind( ShellI18n.recordingFileOutputError, filePath ) );
             }
             // Print error message if the recording file was not defined
         } else {
-            PrintUtils.print( recordingWriter, 0, Messages.getString( SHELL.RecordingFileNotDefined ) );
+            PrintUtils.print( recordingWriter, 0, I18n.bind( ShellI18n.recordingFileNotDefined ) );
         }
     }
 
-    /* (non-Javadoc)
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.shell.api.KomodoShell#getShellPropertiesFile()
      */
     @Override

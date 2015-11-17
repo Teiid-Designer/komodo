@@ -16,7 +16,6 @@
 package org.komodo.shell.commands;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
-import static org.komodo.shell.Messages.SHELL.Help_Category_Header;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -26,20 +25,21 @@ import java.util.TreeMap;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.CompletionConstants;
-import org.komodo.shell.Messages;
-import org.komodo.shell.Messages.SHELL;
+import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.utils.i18n.I18n;
 
 /**
- * Implements the 'help' command.
- *
- * This class adapted from https://github.com/Governance/s-ramp/blob/master/s-ramp-shell
- * - altered generated help messages
- * - altered to use different Messages class
- *
- * @author eric.wittmann@redhat.com
+ * A {@link ShellCommand command} that displays the available commands for the current context or provides information about a
+ * specific command.
+ * <p>
+ * Usage:
+ * <p>
+ * <code>&nbsp;&nbsp;
+ * help [command_name]
+ * </code>
  */
 public class HelpCommand extends BuiltInShellCommand {
 
@@ -156,7 +156,7 @@ public class HelpCommand extends BuiltInShellCommand {
 	 * Prints the generic help - all commands for this workspace context
 	 */
 	private void printHelpAll() throws Exception {
-        print( MESSAGE_INDENT, Messages.getString( SHELL.Help_COMMAND_LIST_MSG ) );
+        print( MESSAGE_INDENT, I18n.bind( ShellI18n.helpCommandListMsg ) + NEW_LINE );
         final String[] validCmdNames = getWorkspaceStatus().getAvailableCommandNames();
 
         if ( getWorkspaceStatus().isShowingCommandCategory() ) {
@@ -179,7 +179,7 @@ public class HelpCommand extends BuiltInShellCommand {
             // print command by category
             for ( final Entry< String, List< String > > entry : categoryCommands.entrySet() ) {
                 if ( categoryCommands.size() > 1 ) {
-                    print( ( MESSAGE_INDENT * 2 ), Messages.getString( Help_Category_Header, entry.getKey() ) );
+                    print( ( MESSAGE_INDENT * 2 ), I18n.bind( ShellI18n.helpCategoryHeader, entry.getKey() ) );
                 }
 
                 Collections.sort( entry.getValue() );
@@ -189,20 +189,49 @@ public class HelpCommand extends BuiltInShellCommand {
             printCommandNames( validCmdNames, false );
         }
 
-        print( MESSAGE_INDENT,Messages.getString(SHELL.Help_GET_HELP_1));
-		print( MESSAGE_INDENT,""); //$NON-NLS-1$
-		print( MESSAGE_INDENT,Messages.getString(SHELL.Help_GET_HELP_2));
+        print( MESSAGE_INDENT,I18n.bind(ShellI18n.helpGetHelp1));
+		print( MESSAGE_INDENT,I18n.bind(ShellI18n.helpGetHelp2) + NEW_LINE );
 	}
 
     private void printHelpForCommand( final String cmdName ) throws Exception {
         final ShellCommand command = getWorkspaceStatus().getCommand( cmdName );
 
         if (command == null) {
-            print( CompletionConstants.MESSAGE_INDENT, Messages.getString( SHELL.Help_INVALID_COMMAND, cmdName ) );
+            print( CompletionConstants.MESSAGE_INDENT, I18n.bind( ShellI18n.helpInvalidCommand, cmdName ) );
         } else {
             command.setWriter( getWriter() );
             command.printHelp( CompletionConstants.MESSAGE_INDENT );
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.helpHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.helpExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.helpUsage ) );
     }
 
 	/**

@@ -7,13 +7,6 @@
  */
 package org.komodo.relational.commands.workspace;
 
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.INPUT_FILE_ERROR;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.MISSING_INPUT_FILE_NAME;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.ImportVdbCommand.DeleteTempVdbFailedMsg;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.ImportVdbCommand.ImportFailedMsg;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.ImportVdbCommand.VdbImportInProgressMsg;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.ImportVdbCommand.VdbImportSuccessMsg;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.ImportVdbCommand.cannotImport_wouldCreateDuplicate;
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 import org.komodo.importer.ImportMessages;
@@ -24,8 +17,7 @@ import org.komodo.relational.vdb.Vdb;
 import org.komodo.repository.SynchronousCallback;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.CompletionConstants;
-import org.komodo.shell.Messages;
-import org.komodo.shell.Messages.SHELL;
+import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
@@ -35,6 +27,7 @@ import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
+import org.komodo.utils.i18n.I18n;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 /**
@@ -60,7 +53,7 @@ public final class ImportVdbCommand extends WorkspaceShellCommand {
     @Override
     protected CommandResult doExecute() {
         try {
-            String fileName = requiredArgument( 0, getWorkspaceMessage( MISSING_INPUT_FILE_NAME ) );
+            String fileName = requiredArgument( 0, I18n.bind( WorkspaceCommandsI18n.missingInputFileName ) );
 
             // If there is no file extension, add .ddl
             if ( fileName.indexOf( DOT ) == -1 ) {
@@ -70,7 +63,7 @@ public final class ImportVdbCommand extends WorkspaceShellCommand {
             // Validates the supplied fileNameArg is a valid, readable file
             String validationResult = validateReadableFileArg(fileName);
             if(!CompletionConstants.OK.equals(validationResult)) {
-                return new CommandResultImpl( false, getWorkspaceMessage( INPUT_FILE_ERROR, fileName, validationResult ), null );
+                return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.inputFileError, fileName, validationResult ), null );
             }
 
             // The import will be performed using the VDB filename.  If successful, it will be renamed to the VDB name
@@ -81,7 +74,9 @@ public final class ImportVdbCommand extends WorkspaceShellCommand {
             // Determine if a VDB with 'filename' already exists
             String validationMessage = validateNotDuplicate(vdbFile.getName(), KomodoType.VDB, getContext());
             if(!CompletionConstants.OK.equals(validationMessage)) {
-                return new CommandResultImpl( false, getWorkspaceMessage( INPUT_FILE_ERROR, fileName, validationResult ), null );
+                return new CommandResultImpl( false,
+                                              I18n.bind( WorkspaceCommandsI18n.inputFileError, fileName, validationResult ),
+                                              null );
             }
 
             // Set up the import.
@@ -90,7 +85,7 @@ public final class ImportVdbCommand extends WorkspaceShellCommand {
 
             if(!importMessages.hasError()) {
 
-                print(CompletionConstants.MESSAGE_INDENT, getMessage(VdbImportInProgressMsg, vdbFile));
+                print(CompletionConstants.MESSAGE_INDENT, I18n.bind(WorkspaceCommandsI18n.vdbImportInProgressMsg, vdbFile));
 
                 KomodoObject theVdb = null;
                 // The commit will initiate sequencing
@@ -102,7 +97,7 @@ public final class ImportVdbCommand extends WorkspaceShellCommand {
                     KomodoObject parentObj = getContext();
                     theVdb = parentObj.getChild(getTransaction(), vdbFile.getName(), VdbLexicon.Vdb.VIRTUAL_DATABASE);
                     if(theVdb==null) {
-                        return new CommandResultImpl( false, getMessage( ImportFailedMsg, fileName ), null );
+                        return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.importFailedMsg, fileName ), null );
                     }
 
                     // Want to rename it to the actual VDB name...
@@ -116,11 +111,11 @@ public final class ImportVdbCommand extends WorkspaceShellCommand {
                         }
                     } else {
                         theVdb.rename(getTransaction(), vdbName);
-                        print(CompletionConstants.MESSAGE_INDENT, getMessage(VdbImportSuccessMsg, fileName));
+                        print(CompletionConstants.MESSAGE_INDENT, I18n.bind(WorkspaceCommandsI18n.vdbImportSuccessMsg, fileName));
                     }
                 // Error here means there was a sequencing problem.  The VDB was created, so need to delete it.
                 } else {
-                    print(CompletionConstants.MESSAGE_INDENT, getMessage(ImportFailedMsg, fileName));
+                    print(CompletionConstants.MESSAGE_INDENT, I18n.bind(WorkspaceCommandsI18n.importFailedMsg, fileName));
                     print(CompletionConstants.MESSAGE_INDENT, importMessages.errorMessagesToString());
 
                     CommandResult deleteResult = deleteVdb(vdbFile.getName());
@@ -130,13 +125,13 @@ public final class ImportVdbCommand extends WorkspaceShellCommand {
                 }
 
             } else {
-                print(CompletionConstants.MESSAGE_INDENT, getMessage(ImportFailedMsg, fileName));
+                print(CompletionConstants.MESSAGE_INDENT, I18n.bind(WorkspaceCommandsI18n.importFailedMsg, fileName));
                 print(CompletionConstants.MESSAGE_INDENT, importMessages.errorMessagesToString());
             }
 
-            return new CommandResultImpl( false, getWorkspaceMessage( INPUT_FILE_ERROR, fileName ), null );
+            return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.inputFileError, fileName ), null );
         } catch ( final Exception e ) {
-            return new CommandResultImpl( false, Messages.getString( SHELL.CommandFailure, NAME ), e );
+            return new CommandResultImpl( false, I18n.bind( ShellI18n.commandFailure, NAME ), e );
         }
     }
 
@@ -182,10 +177,10 @@ public final class ImportVdbCommand extends WorkspaceShellCommand {
             final Repository.UnitOfWork.State txState = trans.getState();
 
             if ( ( error != null ) || !State.COMMITTED.equals( txState ) ) {
-                throw new KException( Messages.getString( SHELL.TRANSACTION_COMMIT_ERROR, txName ), error );
+                throw new KException( I18n.bind( ShellI18n.transactionCommitError, txName ), error );
             }
         } else {
-            throw new KException( Messages.getString( SHELL.TRANSACTION_TIMEOUT, txName ) );
+            throw new KException( I18n.bind( ShellI18n.transactionTimeout, txName ) );
         }
     }
 
@@ -199,9 +194,39 @@ public final class ImportVdbCommand extends WorkspaceShellCommand {
             deleteCommand.setArguments( new Arguments( vdbName ) );
             deleteCommand.execute();
         } catch (Exception e) {
-            result = new CommandResultImpl( false, getMessage(DeleteTempVdbFailedMsg, vdbName ), null );
+            result = new CommandResultImpl( false, I18n.bind(WorkspaceCommandsI18n.deleteTempVdbFailedMsg, vdbName ), null );
         }
         return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( WorkspaceCommandsI18n.importVdbHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( WorkspaceCommandsI18n.importVdbExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( WorkspaceCommandsI18n.importVdbUsage ) );
     }
 
     /**
@@ -226,7 +251,7 @@ public final class ImportVdbCommand extends WorkspaceShellCommand {
 
         // If child exists, print message and return false
         if(child!=null) {
-            return getMessage(cannotImport_wouldCreateDuplicate, objName, kType.getType());
+            return I18n.bind(WorkspaceCommandsI18n.cannotImportWouldCreateDuplicate, objName, kType.getType());
         }
         return CompletionConstants.OK;
     }

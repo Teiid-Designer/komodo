@@ -34,6 +34,7 @@ import org.komodo.shell.api.ShellCommandFactory;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.KomodoObjectUtils;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * Abstract class for all shell command readers.
@@ -208,10 +209,10 @@ public abstract class AbstractShellCommandReader implements ShellCommandReader {
 
         // see if type should be displayed
         if ( this.wsStatus.isShowingTypeInPrompt() && DefaultLabelProvider.shouldShowType( kobject ) ) {
-            return Messages.getString( Messages.SHELL.PROMPT_WITH_TYPE, path, this.wsStatus.getTypeDisplay( kobject ) );
+            return I18n.bind( ShellI18n.promptWithType, path, this.wsStatus.getTypeDisplay( kobject ) );
         }
 
-        return Messages.getString( Messages.SHELL.PROMPT, path );
+        return I18n.bind( ShellI18n.prompt, path );
     }
 
     class NoOpCommand extends BuiltInShellCommand {
@@ -270,6 +271,36 @@ public abstract class AbstractShellCommandReader implements ShellCommandReader {
         @Override
         public void printHelp( final int indent ) {
             // Nothing to do
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+         */
+        @Override
+        protected void printHelpDescription( final int indent ) {
+            // nothing to do
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+         */
+        @Override
+        protected void printHelpExamples( final int indent ) {
+            // nothing to do
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+         */
+        @Override
+        protected void printHelpUsage( final int indent ) {
+            // nothing to do
         }
 
         /**

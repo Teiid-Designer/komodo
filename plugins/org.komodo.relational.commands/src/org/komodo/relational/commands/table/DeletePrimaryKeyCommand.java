@@ -7,12 +7,11 @@
  */
 package org.komodo.relational.commands.table;
 
-import static org.komodo.relational.commands.table.TableCommandMessages.DeletePrimaryKeyCommand.NO_PK_TO_REMOVE;
-import static org.komodo.relational.commands.table.TableCommandMessages.DeletePrimaryKeyCommand.PRIMARY_KEY_DELETED;
 import org.komodo.relational.model.Table;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to delete a PrimaryKey from a Table.
@@ -41,11 +40,11 @@ public final class DeletePrimaryKeyCommand extends TableShellCommand {
         try {
             final Table table = getTable();
             if( table.getPrimaryKey(getTransaction())==null ) {
-                return new CommandResultImpl( getMessage( NO_PK_TO_REMOVE ));
+                return new CommandResultImpl( I18n.bind( TableCommandsI18n.noPkToRemove ));
             }
             table.removePrimaryKey( getTransaction()  );
 
-            result = new CommandResultImpl( getMessage( PRIMARY_KEY_DELETED ) );
+            result = new CommandResultImpl( I18n.bind( TableCommandsI18n.primaryKeyDeleted ) );
         } catch ( final Exception e ) {
             result = new CommandResultImpl( e );
         }
@@ -61,6 +60,36 @@ public final class DeletePrimaryKeyCommand extends TableShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 0;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( TableCommandsI18n.deletePrimaryKeyHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( TableCommandsI18n.deletePrimaryKeyExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( TableCommandsI18n.deletePrimaryKeyUsage ) );
     }
 
 }

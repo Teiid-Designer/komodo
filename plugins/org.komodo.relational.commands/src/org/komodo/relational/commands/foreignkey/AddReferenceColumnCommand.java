@@ -7,10 +7,6 @@
  */
 package org.komodo.relational.commands.foreignkey;
 
-import static org.komodo.relational.commands.foreignkey.ForeignKeyCommandMessages.AddReferenceColumnCommand.COLUMN_REF_ADDED;
-import static org.komodo.relational.commands.foreignkey.ForeignKeyCommandMessages.AddReferenceColumnCommand.INVALID_COLUMN;
-import static org.komodo.relational.commands.foreignkey.ForeignKeyCommandMessages.AddReferenceColumnCommand.MISSING_COLUMN_PATH;
-import static org.komodo.relational.commands.tableconstraint.TableConstraintCommandMessages.AddConstraintColumnCommand.INVALID_COLUMN_PATH;
 import java.util.List;
 import org.komodo.relational.commands.FindCommand;
 import org.komodo.relational.model.Column;
@@ -24,6 +20,7 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.utils.StringUtils;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to add a reference column to a {@link ForeignKey foreign key}.
@@ -50,7 +47,7 @@ public final class AddReferenceColumnCommand extends ForeignKeyShellCommand {
         CommandResult result = null;
 
         try {
-            final String columnPath = requiredArgument( 0, getMessage( MISSING_COLUMN_PATH ) );
+            final String columnPath = requiredArgument( 0, I18n.bind( ForeignKeyCommandsI18n.missingColumnPathForAdd ) );
 
             // get reference of the column at the specified path
             Column column = null;
@@ -67,13 +64,15 @@ public final class AddReferenceColumnCommand extends ForeignKeyShellCommand {
                     if ( Column.RESOLVER.resolvable( getTransaction(), possible ) ) {
                         column = Column.RESOLVER.resolve( getTransaction(), possible );
                     } else {
-                        result = new CommandResultImpl( false, getMessage( INVALID_COLUMN_PATH, columnPath ), null );
+                        result = new CommandResultImpl( false,
+                                                        I18n.bind( ForeignKeyCommandsI18n.invalidColumnPath, columnPath ),
+                                                        null );
                     }
                 } catch ( final Exception e ) {
-                    result = new CommandResultImpl( false, getMessage( INVALID_COLUMN_PATH, columnPath ), null );
+                    result = new CommandResultImpl( false, I18n.bind( ForeignKeyCommandsI18n.invalidColumnPath, columnPath ), e );
                 }
             }
-            
+
             if ( column != null ) {
                 final ForeignKey foreignKey = getForeignKey();
 
@@ -82,14 +81,16 @@ public final class AddReferenceColumnCommand extends ForeignKeyShellCommand {
 
                 if ( parentTable.equals( column.getParent( getTransaction() ) ) ) {
                     result = new CommandResultImpl( false,
-                                                    getMessage( INVALID_COLUMN,
-                                                                getWorkspaceStatus().getLabelProvider()
-                                                                                    .getDisplayPath( column.getAbsolutePath() ),
-                                                                foreignKey.getName( getTransaction() ) ),
+                                                    I18n.bind( ForeignKeyCommandsI18n.invalidColumn,
+                                                               getWorkspaceStatus().getLabelProvider()
+                                                                                   .getDisplayPath( column.getAbsolutePath() ),
+                                                               foreignKey.getName( getTransaction() ) ),
                                                     null );
                 } else {
                     foreignKey.addReferencesColumn( getTransaction(), column );
-                    result = new CommandResultImpl( getMessage( COLUMN_REF_ADDED, columnPath, getContext().getAbsolutePath() ) );
+                    result = new CommandResultImpl( I18n.bind( ForeignKeyCommandsI18n.columnRefAdded,
+                                                               columnPath,
+                                                               getContext().getAbsolutePath() ) );
                 }
             }
         } catch ( final Exception e ) {
@@ -107,6 +108,36 @@ public final class AddReferenceColumnCommand extends ForeignKeyShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 1;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( ForeignKeyCommandsI18n.addReferenceColumnHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( ForeignKeyCommandsI18n.addReferenceColumnExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( ForeignKeyCommandsI18n.addReferenceColumnUsage ) );
     }
 
     /**

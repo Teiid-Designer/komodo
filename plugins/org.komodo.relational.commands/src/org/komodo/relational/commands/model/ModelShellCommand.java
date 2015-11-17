@@ -9,13 +9,12 @@ package org.komodo.relational.commands.model;
 
 import java.util.Arrays;
 import java.util.List;
-import org.komodo.relational.Messages;
 import org.komodo.relational.commands.RelationalShellCommand;
 import org.komodo.relational.model.Model;
 import org.komodo.shell.api.WorkspaceStatus;
 
 /**
- * A base class for @{link {@link Model Model}-related shell commands.
+ * A base class for @{link {@link Model model}-related shell commands.
  */
 abstract class ModelShellCommand extends RelationalShellCommand {
 
@@ -50,26 +49,6 @@ abstract class ModelShellCommand extends RelationalShellCommand {
             // exception returns false
         }
         return false;
-    }
-
-    @Override
-    protected String getMessage(Enum< ? > key, Object... parameters) {
-        return Messages.getString(ModelCommandMessages.RESOURCE_BUNDLE,key.toString(),parameters);
-    }
-
-    @Override
-    protected void printHelpDescription( final int indent ) {
-        print( indent, Messages.getString( ModelCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".help", getName() ) ); //$NON-NLS-1$
-    }
-
-    @Override
-    protected void printHelpExamples( final int indent ) {
-        print( indent, Messages.getString( ModelCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".examples" ) ); //$NON-NLS-1$
-    }
-
-    @Override
-    protected void printHelpUsage( final int indent ) {
-        print( indent, Messages.getString( ModelCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".usage" ) ); //$NON-NLS-1$
     }
 
 }

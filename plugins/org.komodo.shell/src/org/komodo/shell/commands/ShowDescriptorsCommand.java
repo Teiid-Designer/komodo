@@ -12,16 +12,18 @@ import java.util.ArrayList;
 import java.util.List;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
-import org.komodo.shell.Messages;
+import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.KomodoObjectUtils;
 import org.komodo.shell.util.PrintUtils;
 import org.komodo.spi.repository.Descriptor;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.utils.i18n.I18n;
 
 /**
- * Shows the descriptors of a {@link KomodoObject}
+ * A {@link ShellCommand command} that displays the descriptors of a {@link KomodoObject}.
  * <p>
  * Usage:
  * <p>
@@ -59,9 +61,9 @@ public class ShowDescriptorsCommand extends BuiltInShellCommand {
                 items.add(desc.getName());
             }
             if(!items.isEmpty()) {
-                PrintUtils.printList(getWriter(), items, Messages.getString(Messages.ShowDescriptorsCommand.ListHeader));
+                PrintUtils.printList(getWriter(), items, I18n.bind(ShellI18n.listHeader));
             } else {
-                print( MESSAGE_INDENT, Messages.getString(Messages.ShowDescriptorsCommand.NoDescriptors) );
+                print( MESSAGE_INDENT, I18n.bind(ShellI18n.noDescriptors) );
             }
             return CommandResult.SUCCESS;
         } catch ( final Exception e ) {
@@ -87,6 +89,36 @@ public class ShowDescriptorsCommand extends BuiltInShellCommand {
     @Override
     public boolean isValidForCurrentContext() {
         return ( !KomodoObjectUtils.isRoot(getContext()) && !KomodoObjectUtils.isRootChild(getContext()) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.showDescriptorsHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.showDescriptorsExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.showDescriptorsUsage ) );
     }
 
 }

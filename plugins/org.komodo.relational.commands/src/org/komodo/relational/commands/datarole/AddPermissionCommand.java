@@ -7,12 +7,11 @@
  */
 package org.komodo.relational.commands.datarole;
 
-import static org.komodo.relational.commands.datarole.DataRoleCommandMessages.AddPermissionCommand.PERMISSION_ADDED;
-import static org.komodo.relational.commands.datarole.DataRoleCommandMessages.General.MISSING_PERMISSION_NAME;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to add a permission to a {@link DataRole}.
@@ -39,12 +38,12 @@ public final class AddPermissionCommand extends DataRoleShellCommand {
         CommandResult result = null;
 
         try {
-            final String permissionName = requiredArgument( 0, getMessage( MISSING_PERMISSION_NAME ) );
+            final String permissionName = requiredArgument( 0, I18n.bind( DataRoleCommandsI18n.missingPermissionName ) );
 
             final DataRole dataRole = getDataRole();
             dataRole.addPermission( getTransaction(), permissionName );
 
-            result = new CommandResultImpl( getMessage( PERMISSION_ADDED, permissionName ) );
+            result = new CommandResultImpl( I18n.bind( DataRoleCommandsI18n.permissionAdded, permissionName ) );
         } catch ( final Exception e ) {
             result = new CommandResultImpl( e );
         }
@@ -60,6 +59,36 @@ public final class AddPermissionCommand extends DataRoleShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 1;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( DataRoleCommandsI18n.addPermissionHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( DataRoleCommandsI18n.addPermissionExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( DataRoleCommandsI18n.addPermissionUsage ) );
     }
 
 }

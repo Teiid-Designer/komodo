@@ -10,15 +10,23 @@ package org.komodo.shell.commands;
 import java.util.List;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
-import org.komodo.shell.Messages;
+import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.KomodoObjectUtils;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.utils.StringUtils;
+import org.komodo.utils.i18n.I18n;
 
 /**
- * UnsetPropertyCommand - unsets the specified property of a KomodoObject.
+ * A {@link ShellCommand command} that unsets the specified property of a {@link KomodoObject}.
+ * <p>
+ * Usage:
+ * <p>
+ * <code>&nbsp;&nbsp;
+ * unset &lt;prop-name&gt;
+ * </code>
  */
 public class UnsetPropertyCommand extends BuiltInShellCommand {
 
@@ -57,12 +65,10 @@ public class UnsetPropertyCommand extends BuiltInShellCommand {
     @Override
     protected CommandResult doExecute() {
         try {
-            final String propNameArg = requiredArgument( 0, Messages.getString( Messages.SHELL.InvalidArgMsg_PropertyName ) );
+            final String propNameArg = requiredArgument( 0, I18n.bind( ShellI18n.invalidArgMsgPropertyName ) );
 
             if ( !KomodoObjectUtils.isValidProperty( getWorkspaceStatus(), propNameArg, getContext() ) ) {
-                return new CommandResultImpl( false,
-                                              Messages.getString( Messages.SetPropertyCommand.InvalidPropName, propNameArg ),
-                                              null );
+                return new CommandResultImpl( false, I18n.bind( ShellI18n.invalidPropName, propNameArg ), null );
             }
 
             final KomodoObject context = getContext();
@@ -74,7 +80,7 @@ public class UnsetPropertyCommand extends BuiltInShellCommand {
                                                                            : propNameArg );
             context.setProperty( getTransaction(),propertyName, (Object[])null );
 
-            return new CommandResultImpl( getString( "propertyUnset", propNameArg ) ); //$NON-NLS-1$
+            return new CommandResultImpl( I18n.bind( ShellI18n.propertyUnset, propNameArg ) );
         } catch ( final Exception e ) {
             return new CommandResultImpl( e );
         }
@@ -90,9 +96,34 @@ public class UnsetPropertyCommand extends BuiltInShellCommand {
         return 1;
     }
 
-    private String getString( final String msgKey,
-                              final String... args ) {
-        return Messages.getString( UnsetPropertyCommand.class.getSimpleName() + '.' + msgKey, ( Object[] )args );
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.unsetPropertyHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.unsetPropertyExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.unsetPropertyUsage ) );
     }
 
     /**

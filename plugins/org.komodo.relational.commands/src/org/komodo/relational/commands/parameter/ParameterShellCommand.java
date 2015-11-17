@@ -9,13 +9,12 @@ package org.komodo.relational.commands.parameter;
 
 import java.util.Arrays;
 import java.util.List;
-import org.komodo.relational.Messages;
 import org.komodo.relational.commands.RelationalShellCommand;
 import org.komodo.relational.model.Parameter;
 import org.komodo.shell.api.WorkspaceStatus;
 
 /**
- * A base class for @{link {@link Parameter Parameter}-related shell commands.
+ * A base class for @{link {@link Parameter parameter}-related shell commands.
  */
 abstract class ParameterShellCommand extends RelationalShellCommand {
 
@@ -52,29 +51,8 @@ abstract class ParameterShellCommand extends RelationalShellCommand {
         try {
             return Parameter.RESOLVER.resolvable(getTransaction(), getContext());
         } catch (Exception ex) {
-            // exception returns false
+            return false;
         }
-        return false;
-    }
-
-    @Override
-    protected String getMessage(Enum< ? > key, Object... parameters) {
-        return Messages.getString(ParameterCommandMessages.RESOURCE_BUNDLE,key.toString(),parameters);
-    }
-
-    @Override
-    protected void printHelpDescription( final int indent ) {
-        print( indent, Messages.getString( ParameterCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".help", getName() ) ); //$NON-NLS-1$
-    }
-
-    @Override
-    protected void printHelpExamples( final int indent ) {
-        print( indent, Messages.getString( ParameterCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".examples" ) ); //$NON-NLS-1$
-    }
-
-    @Override
-    protected void printHelpUsage( final int indent ) {
-        print( indent, Messages.getString( ParameterCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".usage" ) ); //$NON-NLS-1$
     }
 
 }

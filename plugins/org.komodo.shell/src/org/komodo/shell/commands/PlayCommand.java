@@ -3,15 +3,23 @@ package org.komodo.shell.commands;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.CompletionConstants;
-import org.komodo.shell.Messages;
 import org.komodo.shell.ShellCommandReader;
 import org.komodo.shell.ShellCommandReaderFactory;
+import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.utils.i18n.I18n;
 
 /**
- * This command executes (plays) a saved komodo CLI script on your local file system. It executes all commands as one transaction.
+ * A {@link ShellCommand command} that executes (plays) a saved komodo CLI script on your local file system. It executes all
+ * commands as one transaction.
+ * <p>
+ * Usage:
+ * <p>
+ * <code>&nbsp;&nbsp;
+ * play &lt;file-name&gt;
+ * </code>
  */
 public class PlayCommand  extends BuiltInShellCommand {
 
@@ -46,15 +54,13 @@ public class PlayCommand  extends BuiltInShellCommand {
     @Override
     protected CommandResult doExecute() {
         try {
-            String fileNameArg = requiredArgument( 0, Messages.getString( Messages.PlayCommand.InvalidArgMsg_FileName ) );
+            String fileNameArg = requiredArgument( 0, I18n.bind( ShellI18n.invalidArgMsgFileName ) );
 
             // Validate the supplied path
             String validationResult = validateReadableFileArg( fileNameArg );
             if ( !CompletionConstants.OK.equals( validationResult ) ) {
                 return new CommandResultImpl( false,
-                                              Messages.getString( Messages.SHELL.FileNotAccessible,
-                                                                  fileNameArg,
-                                                                  validationResult ),
+                                              I18n.bind( ShellI18n.fileNotAccessible, fileNameArg, validationResult ),
                                               null );
             }
 
@@ -88,7 +94,7 @@ public class PlayCommand  extends BuiltInShellCommand {
                             // make sure max number of arguments has not been exceeded
                             if ( exitCmd.getArguments().size() > exitCmd.getMaxArgCount() ) {
                                 return new CommandResultImpl( false,
-                                                              Messages.getString( Messages.SHELL.TOO_MANY_ARGS, exitCmd ),
+                                                              I18n.bind( ShellI18n.tooManyArgs, exitCmd ),
                                                               null );
                             }
                         }
@@ -112,9 +118,9 @@ public class PlayCommand  extends BuiltInShellCommand {
                     }
                 }
 
-                return new CommandResultImpl( Messages.getString( Messages.PlayCommand.fileExecuted, fileNameArg ) );
+                return new CommandResultImpl( I18n.bind( ShellI18n.fileExecuted, fileNameArg ) );
             } catch ( Exception e ) {
-                return new CommandResultImpl( false, Messages.getString( Messages.PlayCommand.Failure, fileNameArg ), e );
+                return new CommandResultImpl( false, I18n.bind( ShellI18n.playFailure, fileNameArg ), e );
             } finally {
                 // if AUTO_COMMIT if different (script could've changed value also)
                 if ( getWorkspaceStatus().isAutoCommit() != saveAutoCommit ) {
@@ -135,6 +141,36 @@ public class PlayCommand  extends BuiltInShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 1;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.playHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.playExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.playUsage ) );
     }
 
 }

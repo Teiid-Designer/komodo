@@ -7,12 +7,11 @@
  */
 package org.komodo.relational.commands.table;
 
-import static org.komodo.relational.commands.table.TableCommandMessages.AddIndexCommand.INDEX_ADDED;
-import static org.komodo.relational.commands.table.TableCommandMessages.General.MISSING_INDEX_NAME;
 import org.komodo.relational.model.Table;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to add an Index to a Table.
@@ -39,12 +38,12 @@ public final class AddIndexCommand extends TableShellCommand {
         CommandResult result = null;
 
         try {
-            final String indexName = requiredArgument( 0, getMessage( MISSING_INDEX_NAME ) );
+            final String indexName = requiredArgument( 0, I18n.bind( TableCommandsI18n.missingIndexName ) );
 
             final Table table = getTable();
             table.addIndex( getTransaction(), indexName );
 
-            result = new CommandResultImpl( getMessage( INDEX_ADDED, indexName ) );
+            result = new CommandResultImpl( I18n.bind( TableCommandsI18n.indexAdded, indexName ) );
         } catch ( final Exception e ) {
             result = new CommandResultImpl( e );
         }
@@ -60,6 +59,36 @@ public final class AddIndexCommand extends TableShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 1;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( TableCommandsI18n.addIndexHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( TableCommandsI18n.addIndexExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( TableCommandsI18n.addIndexUsage ) );
     }
 
 }

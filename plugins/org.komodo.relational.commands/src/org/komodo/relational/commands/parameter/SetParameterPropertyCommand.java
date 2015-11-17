@@ -7,15 +7,9 @@
  */
 package org.komodo.relational.commands.parameter;
 
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.INVALID_BOOLEAN_PROPERTY_VALUE;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.INVALID_INTEGER_PROPERTY_VALUE;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.INVALID_PROPERTY_NAME;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.MISSING_PROPERTY_NAME_VALUE;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.SET_PROPERTY_SUCCESS;
-import static org.komodo.relational.commands.parameter.ParameterCommandMessages.General.INVALID_DIRECTION_PROPERTY_VALUE;
-import static org.komodo.relational.commands.parameter.ParameterCommandMessages.General.INVALID_NULLABLE_PROPERTY_VALUE;
 import java.util.List;
 import org.komodo.relational.RelationalConstants.Nullable;
+import org.komodo.relational.commands.workspace.WorkspaceCommandsI18n;
 import org.komodo.relational.model.Parameter;
 import org.komodo.relational.model.Parameter.Direction;
 import org.komodo.shell.CommandResultImpl;
@@ -25,6 +19,7 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.SetPropertyCommand;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.StringUtils;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to set {@link Parameter parameter} properties.
@@ -51,8 +46,8 @@ public final class SetParameterPropertyCommand extends ParameterShellCommand {
         CommandResult result = null;
 
         try {
-            final String name = requiredArgument( 0, getWorkspaceMessage( MISSING_PROPERTY_NAME_VALUE ) );
-            final String value = requiredArgument( 1, getWorkspaceMessage( MISSING_PROPERTY_NAME_VALUE ) );
+            final String name = requiredArgument( 0, I18n.bind( WorkspaceCommandsI18n.missingPropertyNameValue ) );
+            final String value = requiredArgument( 1, I18n.bind( WorkspaceCommandsI18n.missingPropertyNameValue ) );
 
             final Parameter parameter = getParameter();
             final UnitOfWork transaction = getTransaction();
@@ -75,7 +70,7 @@ public final class SetParameterPropertyCommand extends ParameterShellCommand {
                     } else if ( Direction.VARIADIC.name().equals( value ) ) {
                         parameter.setDirection( transaction, Direction.VARIADIC );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_DIRECTION_PROPERTY_VALUE, NULLABLE );
+                        errorMsg = I18n.bind( ParameterCommandsI18n.invalidDirectionPropertyValue, NULLABLE );
                     }
 
                     break;
@@ -84,7 +79,7 @@ public final class SetParameterPropertyCommand extends ParameterShellCommand {
                         final long length = Long.parseLong( value );
                         parameter.setLength( transaction, length );
                     } catch ( final NumberFormatException e ) {
-                        errorMsg = getWorkspaceMessage( INVALID_INTEGER_PROPERTY_VALUE, LENGTH );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, LENGTH );
                     }
 
                     break;
@@ -96,7 +91,7 @@ public final class SetParameterPropertyCommand extends ParameterShellCommand {
                     } else if ( Nullable.NULLABLE_UNKNOWN.name().equals( value ) ) {
                         parameter.setNullable( transaction, Nullable.NULLABLE_UNKNOWN );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_NULLABLE_PROPERTY_VALUE, NULLABLE );
+                        errorMsg = I18n.bind( ParameterCommandsI18n.invalidNullablePropertyValue, NULLABLE );
                     }
 
                     break;
@@ -105,7 +100,7 @@ public final class SetParameterPropertyCommand extends ParameterShellCommand {
                         final long precision = Long.parseLong( value );
                         parameter.setPrecision( transaction, precision );
                     } catch ( final NumberFormatException e ) {
-                        errorMsg = getWorkspaceMessage( INVALID_INTEGER_PROPERTY_VALUE, PRECISION );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, PRECISION );
                     }
 
                     break;
@@ -113,7 +108,7 @@ public final class SetParameterPropertyCommand extends ParameterShellCommand {
                     if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
                         parameter.setResult( transaction, Boolean.parseBoolean( value ) );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, RESULT );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, RESULT );
                     }
 
                     break;
@@ -122,17 +117,17 @@ public final class SetParameterPropertyCommand extends ParameterShellCommand {
                         final long scale = Long.parseLong( value );
                         parameter.setScale( transaction, scale );
                     } catch ( final NumberFormatException e ) {
-                        errorMsg = getWorkspaceMessage( INVALID_INTEGER_PROPERTY_VALUE, SCALE );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, SCALE );
                     }
 
                     break;
                 default:
-                    errorMsg = getWorkspaceMessage( INVALID_PROPERTY_NAME, name, Parameter.class.getSimpleName() );
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Parameter.class.getSimpleName() );
                     break;
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {
-                result = new CommandResultImpl( getWorkspaceMessage( SET_PROPERTY_SUCCESS, name ) );
+                result = new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.setPropertySuccess, name ) );
             } else {
                 result = new CommandResultImpl( false, errorMsg, null );
             }
@@ -151,6 +146,36 @@ public final class SetParameterPropertyCommand extends ParameterShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 2;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( ParameterCommandsI18n.setParameterPropertyHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( ParameterCommandsI18n.setParameterPropertyExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( ParameterCommandsI18n.setParameterPropertyUsage ) );
     }
 
     /**

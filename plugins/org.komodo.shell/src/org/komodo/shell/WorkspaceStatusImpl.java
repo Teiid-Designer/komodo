@@ -47,7 +47,6 @@ import org.komodo.core.KEngine;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.repository.RepositoryImpl;
 import org.komodo.repository.SynchronousCallback;
-import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.KomodoObjectLabelProvider;
 import org.komodo.shell.api.KomodoShell;
 import org.komodo.shell.api.ShellCommand;
@@ -67,6 +66,7 @@ import org.komodo.utils.ArgCheck;
 import org.komodo.utils.FileUtils;
 import org.komodo.utils.KLog;
 import org.komodo.utils.StringUtils;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * Test implementation of WorkspaceStatus
@@ -173,9 +173,9 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
             try ( final FileInputStream fis = new FileInputStream( startupPropertiesFile ) ) {
                 this.wsProperties.load( fis );
             } catch ( final Exception e ) {
-                String msg = Messages.getString( SHELL.ERROR_LOADING_PROPERTIES,
-                                                 startupPropertiesFile.getAbsolutePath(),
-                                                 e.getMessage() );
+                String msg = I18n.bind( ShellI18n.errorLoadingProperties,
+                                        startupPropertiesFile.getAbsolutePath(),
+                                        e.getMessage() );
                 PrintUtils.print(getOutputWriter(), CompletionConstants.MESSAGE_INDENT, msg);
             }
         }
@@ -262,25 +262,25 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
 
                 if ( error != null ) {
                     newTxName += "__commitSuccessWithError"; //$NON-NLS-1$
-                    throw new KException( Messages.getString( SHELL.TRANSACTION_COMMIT_ERROR, txName ), error );
+                    throw new KException( I18n.bind( ShellI18n.transactionCommitError, txName ), error );
                 }
 
                 final Throwable callbackError = this.callback.error();
 
                 if ( callbackError != null ) {
                     newTxName += "__commitSuccessWithCallbackError"; //$NON-NLS-1$
-                    throw new KException( Messages.getString( SHELL.TRANSACTION_COMMIT_ERROR, txName ), callbackError );
+                    throw new KException( I18n.bind( ShellI18n.transactionCommitError, txName ), callbackError );
                 }
 
                 final State txState = this.uow.getState();
 
                 if ( !State.COMMITTED.equals( txState ) ) {
                     newTxName += ( "__commitSuccessWrongState:" + txState ); //$NON-NLS-1$
-                    throw new KException( Messages.getString( SHELL.TRANSACTION_COMMIT_ERROR, txName ) );
+                    throw new KException( I18n.bind( ShellI18n.transactionCommitError, txName ) );
                 }
             } else {
                 newTxName += "__commitFail"; //$NON-NLS-1$
-                throw new KException( Messages.getString( SHELL.TRANSACTION_TIMEOUT, txName ) );
+                throw new KException( I18n.bind( ShellI18n.transactionTimeout, txName ) );
             }
         } catch ( final Exception e ) {
             if ( newTxName.equals( source ) ) {
@@ -317,25 +317,25 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
 
                 if ( error != null ) {
                     newTxName += "__rollbackSuccessWithError"; //$NON-NLS-1$
-                    throw new KException( Messages.getString( SHELL.TRANSACTION_ROLLBACK_ERROR, txName ), error );
+                    throw new KException( I18n.bind( ShellI18n.transactionRollbackError, txName ), error );
                 }
 
                 final Throwable callbackError = this.callback.error();
 
                 if ( callbackError != null ) {
                     newTxName += "__rollbackSuccessWithCallbackError"; //$NON-NLS-1$
-                    throw new KException( Messages.getString( SHELL.TRANSACTION_ROLLBACK_ERROR, txName ), callbackError );
+                    throw new KException( I18n.bind( ShellI18n.transactionRollbackError, txName ), callbackError );
                 }
 
                 final State txState = this.uow.getState();
 
                 if ( !State.ROLLED_BACK.equals( txState ) ) {
                     newTxName += ( "__rollbackSuccessWrongState:" + txState ); //$NON-NLS-1$
-                    throw new KException( Messages.getString( SHELL.TRANSACTION_ROLLBACK_ERROR, txName ) );
+                    throw new KException( I18n.bind( ShellI18n.transactionRollbackError, txName ) );
                 }
             } else {
                 newTxName += "__rollbackFail"; //$NON-NLS-1$
-                throw new KException( Messages.getString( SHELL.TRANSACTION_TIMEOUT, txName ) );
+                throw new KException( I18n.bind( ShellI18n.transactionTimeout, txName ) );
             }
         } catch ( final Exception e ) {
             if ( newTxName.equals( source ) ) {
@@ -369,10 +369,10 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
 
         // Update Available Commands on context change
         updateAvailableCommands( );
-        
+
         fireContextChangeEvent();
     }
-    
+
     /**
      * {@inheritDoc}
      *
@@ -385,7 +385,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         }
         return this.currentContextCommands;
     }
-    
+
     /**
      * {@inheritDoc}
      *
@@ -398,7 +398,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         for ( final ShellCommand possible : getAvailableCommands() ) {
             commandNames.add( possible.getName() );
         }
-        
+
         return commandNames.toArray( new String[0] );
     }
 
@@ -410,7 +410,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     @Override
     public void updateAvailableCommands() {
         this.currentContextCommands.clear();
-        
+
         this.currentContextCommands.addAll(this.commandFactory.getCommandsForCurrentContext());
     }
 
@@ -567,7 +567,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         ArgCheck.isNotEmpty( propertyName, "propertyName" ); //$NON-NLS-1$
 
         if ( !GLOBAL_PROPS.containsKey( propertyName.toUpperCase() ) ) {
-            return Messages.getString( SHELL.INVALID_GLOBAL_PROPERTY_NAME, propertyName );
+            return I18n.bind( ShellI18n.invalidGlobalPropertyName, propertyName );
         }
 
         // empty value means they want to remove or reset to default value
@@ -580,7 +580,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
                 return null;
             }
 
-            return Messages.getString( SHELL.INVALID_BOOLEAN_GLOBAL_PROPERTY_VALUE, proposedValue, propertyName.toUpperCase() );
+            return I18n.bind( ShellI18n.invalidBooleanGlobalPropertyValue, proposedValue, propertyName.toUpperCase() );
         }
 
         return null; // name and value are valid
@@ -680,12 +680,14 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
             outputFile.createNewFile();
             // Make sure we can write to the file
             if(!outputFile.canWrite()) {
-                PrintUtils.print(commandWriter,CompletionConstants.MESSAGE_INDENT, Messages.getString(SHELL.RecordingFileCannotWrite, recordingFilePath));
+                PrintUtils.print( commandWriter,
+                                  CompletionConstants.MESSAGE_INDENT,
+                                  I18n.bind( ShellI18n.recordingFileCannotWrite, recordingFilePath ) );
                 return;
             }
             recordingFileWriter = new FileWriter(outputFile,true);
         } catch (IOException ex) {
-            PrintUtils.print(commandWriter, 0, Messages.getString(SHELL.RecordingFileOutputError,outputFile));
+            PrintUtils.print(commandWriter, 0, I18n.bind(ShellI18n.recordingFileOutputError,outputFile));
         }
     }
 
