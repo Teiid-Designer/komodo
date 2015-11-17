@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.tableconstraint;
 
-import org.komodo.relational.Messages;
 import org.komodo.relational.commands.RelationalShellCommand;
 import org.komodo.relational.model.AccessPattern;
 import org.komodo.relational.model.ForeignKey;
@@ -28,17 +27,6 @@ abstract class TableConstraintShellCommand extends RelationalShellCommand {
     protected TableConstraintShellCommand( final WorkspaceStatus status,
                                            final String name ) {
         super( status, name );
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.commands.RelationalShellCommand#getMessage(java.lang.Enum, java.lang.Object[])
-     */
-    @Override
-    protected String getMessage( final Enum< ? > key,
-                                 final Object... parameters ) {
-        return Messages.getString( TableConstraintCommandMessages.RESOURCE_BUNDLE, key.toString(), parameters );
     }
 
     protected final TableConstraint getTableConstraint() throws Exception {
@@ -66,40 +54,6 @@ abstract class TableConstraintShellCommand extends RelationalShellCommand {
         } catch ( final Exception e ) {
             return false;
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
-     */
-    @Override
-    protected void printHelpDescription( final int indent ) {
-        print( indent, Messages.getString( TableConstraintCommandMessages.RESOURCE_BUNDLE,
-                                           getClass().getSimpleName() + ".help", //$NON-NLS-1$
-                                           getName() ) );
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
-     */
-    @Override
-    protected void printHelpExamples( final int indent ) {
-        print( indent,
-               Messages.getString( TableConstraintCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".examples" ) ); //$NON-NLS-1$
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
-     */
-    @Override
-    protected void printHelpUsage( final int indent ) {
-        print( indent,
-               Messages.getString( TableConstraintCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".usage" ) ); //$NON-NLS-1$
     }
 
 }

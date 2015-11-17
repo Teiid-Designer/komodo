@@ -7,8 +7,6 @@
  */
 package org.komodo.relational.commands.workspace;
 
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.RESOURCE_BUNDLE;
-import org.komodo.relational.Messages;
 import org.komodo.relational.commands.RelationalShellCommand;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.WorkspaceStatus;
@@ -27,17 +25,6 @@ abstract class WorkspaceShellCommand extends RelationalShellCommand {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.commands.RelationalShellCommand#getMessage(java.lang.Enum, java.lang.Object[])
-     */
-    @Override
-    protected String getMessage( final Enum< ? > key,
-                                 final Object... parameters ) {
-        return Messages.getString( RESOURCE_BUNDLE, key.toString(), parameters );
-    }
-
-    /**
-     * {@inheritDoc}
-     *
      * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
      */
     @Override
@@ -48,21 +35,6 @@ abstract class WorkspaceShellCommand extends RelationalShellCommand {
         } catch ( final Exception e ) {
             return false;
         }
-    }
-
-    @Override
-    protected void printHelpDescription( final int indent ) {
-        print( indent, Messages.getString( RESOURCE_BUNDLE, getClass().getSimpleName() + ".help", getName() ) ); //$NON-NLS-1$
-    }
-
-    @Override
-    protected void printHelpExamples( final int indent ) {
-        print( indent, Messages.getString( RESOURCE_BUNDLE, getClass().getSimpleName() + ".examples" ) ); //$NON-NLS-1$
-    }
-
-    @Override
-    protected void printHelpUsage( final int indent ) {
-        print( indent, Messages.getString( RESOURCE_BUNDLE, getClass().getSimpleName() + ".usage" ) ); //$NON-NLS-1$
     }
 
 }

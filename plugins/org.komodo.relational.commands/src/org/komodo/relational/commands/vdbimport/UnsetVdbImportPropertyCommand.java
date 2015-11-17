@@ -7,10 +7,8 @@
  */
 package org.komodo.relational.commands.vdbimport;
 
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.INVALID_PROPERTY_NAME;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.UNSET_MISSING_PROPERTY_NAME;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.UNSET_PROPERTY_SUCCESS;
 import java.util.List;
+import org.komodo.relational.commands.workspace.WorkspaceCommandsI18n;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.VdbImport;
 import org.komodo.shell.CommandResultImpl;
@@ -20,6 +18,7 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.UnsetPropertyCommand;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.StringUtils;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to set a {@link VdbImport VDB import} properties.
@@ -46,7 +45,7 @@ public final class UnsetVdbImportPropertyCommand extends VdbImportShellCommand {
         CommandResult result = null;
 
         try {
-            final String name = requiredArgument( 0, getWorkspaceMessage( UNSET_MISSING_PROPERTY_NAME ) );
+            final String name = requiredArgument( 0, I18n.bind( WorkspaceCommandsI18n.unsetMissingPropertyName ) );
 
             final VdbImport vdbImport = getVdbImport();
             final UnitOfWork transaction = getTransaction();
@@ -60,12 +59,12 @@ public final class UnsetVdbImportPropertyCommand extends VdbImportShellCommand {
                     vdbImport.setVersion( transaction, Vdb.DEFAULT_VERSION );
                     break;
                 default:
-                    errorMsg = getWorkspaceMessage( INVALID_PROPERTY_NAME, name, VdbImport.class.getSimpleName() );
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, VdbImport.class.getSimpleName() );
                     break;
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {
-                result = new CommandResultImpl( getWorkspaceMessage( UNSET_PROPERTY_SUCCESS, name ) );
+                result = new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.unsetPropertySuccess, name ) );
             } else {
                 result = new CommandResultImpl( false, errorMsg, null );
             }
@@ -84,6 +83,36 @@ public final class UnsetVdbImportPropertyCommand extends VdbImportShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 1;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( VdbImportCommandsI18n.unsetVdbImportPropertyHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( VdbImportCommandsI18n.unsetVdbImportPropertyExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( VdbImportCommandsI18n.unsetVdbImportPropertyUsage ) );
     }
 
     /**

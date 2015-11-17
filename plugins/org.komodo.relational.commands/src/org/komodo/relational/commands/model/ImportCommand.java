@@ -7,25 +7,18 @@
  */
 package org.komodo.relational.commands.model;
 
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.INPUT_FILE_ERROR;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.MISSING_INPUT_FILE_NAME;
-import static org.komodo.relational.commands.model.ModelCommandMessages.ImportCommand.DdlImportInProgressMsg;
-import static org.komodo.relational.commands.model.ModelCommandMessages.ImportCommand.DdlImportSuccessMsg;
-import static org.komodo.relational.commands.model.ModelCommandMessages.ImportCommand.DeleteTempContextFailedMsg;
-import static org.komodo.relational.commands.model.ModelCommandMessages.ImportCommand.ErrorCreatingTempNode;
-import static org.komodo.relational.commands.model.ModelCommandMessages.ImportCommand.ImportFailedMsg;
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
-import org.komodo.relational.Messages;
 import org.komodo.relational.commands.workspace.CreateSchemaCommand;
 import org.komodo.relational.commands.workspace.DeleteSchemaCommand;
+import org.komodo.relational.commands.workspace.WorkspaceCommandsI18n;
 import org.komodo.relational.importer.ddl.DdlImporter;
 import org.komodo.repository.SynchronousCallback;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.CompletionConstants;
-import org.komodo.shell.Messages.SHELL;
+import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
@@ -37,6 +30,7 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to import DDL.
@@ -63,7 +57,7 @@ public final class ImportCommand extends ModelShellCommand {
     @Override
     protected CommandResult doExecute() {
         try {
-            String fileName = requiredArgument( 0, getWorkspaceMessage( MISSING_INPUT_FILE_NAME ) );
+            String fileName = requiredArgument( 0, I18n.bind( WorkspaceCommandsI18n.missingInputFileName ) );
 
             // If there is no file extension, add .ddl
             if ( fileName.indexOf( DOT ) == -1 ) {
@@ -73,7 +67,7 @@ public final class ImportCommand extends ModelShellCommand {
             // Validates the supplied fileNameArg is a valid, readable file
             String validationResult = validateReadableFileArg(fileName);
             if(!CompletionConstants.OK.equals(validationResult)) {
-                return new CommandResultImpl( false, getWorkspaceMessage( INPUT_FILE_ERROR, fileName, validationResult ), null );
+                return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.inputFileError, fileName, validationResult ), null );
             }
 
             // Import the DDL into the target context
@@ -84,7 +78,9 @@ public final class ImportCommand extends ModelShellCommand {
             // Create a temp schema to put the imported model
             KomodoObject tempSchema = createSchema(TEMP_IMPORT_CONTEXT);
             if(tempSchema==null) {
-                return new CommandResultImpl( false, getMessage( ErrorCreatingTempNode, TEMP_IMPORT_CONTEXT ), null );
+                return new CommandResultImpl( false,
+                                              I18n.bind( ModelCommandsI18n.errorCreatingTempNode, TEMP_IMPORT_CONTEXT ),
+                                              null );
             }
 
             WorkspaceStatus wsStatus = getWorkspaceStatus();
@@ -93,7 +89,7 @@ public final class ImportCommand extends ModelShellCommand {
 
             if(!importMessages.hasError()) {
 
-                print(CompletionConstants.MESSAGE_INDENT, getMessage(DdlImportInProgressMsg, ddlFile));
+                print(CompletionConstants.MESSAGE_INDENT, I18n.bind(ModelCommandsI18n.ddlImportInProgressMsg, ddlFile));
 
                 // The commit will initiate sequencing
                 commitImport(ImportCommand.class.getSimpleName(), importMessages);
@@ -112,24 +108,24 @@ public final class ImportCommand extends ModelShellCommand {
                     // Clean up the temp schema
                     deleteSchema(wsStatus.getDisplayPath(tempSchema));
 
-                    return new CommandResultImpl( true, getMessage( DdlImportSuccessMsg, fileName ), null );
+                    return new CommandResultImpl( true, I18n.bind( ModelCommandsI18n.ddlImportSuccessMsg, fileName ), null );
                 // Problem with the import.  Fail and delete all the parents children
                 } else {
-                    print(CompletionConstants.MESSAGE_INDENT, getMessage(ImportFailedMsg, fileName));
+                    print(CompletionConstants.MESSAGE_INDENT, I18n.bind(ModelCommandsI18n.importFailedMsg, fileName));
                     print(CompletionConstants.MESSAGE_INDENT, importMessages.errorMessagesToString());
 
                     deleteSchema(wsStatus.getDisplayPath(tempSchema));
                 }
             } else {
-                print(CompletionConstants.MESSAGE_INDENT, getMessage(ImportFailedMsg, fileName));
+                print(CompletionConstants.MESSAGE_INDENT, I18n.bind(ModelCommandsI18n.importFailedMsg, fileName));
                 print(CompletionConstants.MESSAGE_INDENT, importMessages.errorMessagesToString());
 
                 deleteSchema(wsStatus.getDisplayPath(tempSchema));
             }
 
-            return new CommandResultImpl( false, getWorkspaceMessage( INPUT_FILE_ERROR, fileName ), null );
+            return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.inputFileError, fileName ), null );
         } catch ( final Exception e ) {
-            return new CommandResultImpl( false, getMessage( SHELL.CommandFailure, NAME ), e );
+            return new CommandResultImpl( false, I18n.bind( ShellI18n.commandFailure, NAME ), e );
         }
     }
 
@@ -176,10 +172,10 @@ public final class ImportCommand extends ModelShellCommand {
             final Repository.UnitOfWork.State txState = trans.getState();
 
             if ( ( error != null ) || !State.COMMITTED.equals( txState ) ) {
-                throw new KException( Messages.getString( SHELL.TRANSACTION_COMMIT_ERROR, txName ), error );
+                throw new KException( I18n.bind( ShellI18n.transactionCommitError, txName ), error );
             }
         } else {
-            throw new KException( Messages.getString( SHELL.TRANSACTION_TIMEOUT, txName ) );
+            throw new KException( I18n.bind( ShellI18n.transactionTimeout, txName ) );
         }
     }
 
@@ -236,7 +232,7 @@ public final class ImportCommand extends ModelShellCommand {
             deleteCommand.setArguments( new Arguments( schemaName ) );
             deleteCommand.execute();
         } catch (Exception e) {
-            print(CompletionConstants.MESSAGE_INDENT, getMessage(DeleteTempContextFailedMsg, schemaName ));
+            print(CompletionConstants.MESSAGE_INDENT, I18n.bind(ModelCommandsI18n.deleteTempContextFailedMsg, schemaName ));
         }
         CommandResult result = null;
         return result;
@@ -250,6 +246,36 @@ public final class ImportCommand extends ModelShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 1;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( ModelCommandsI18n.importHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( ModelCommandsI18n.importExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( ModelCommandsI18n.importUsage ) );
     }
 
 }

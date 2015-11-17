@@ -7,13 +7,12 @@
  */
 package org.komodo.relational.commands.datarole;
 
-import static org.komodo.relational.commands.datarole.DataRoleCommandMessages.ShowMappedRolesCommand.MAPPED_ROLES_HEADER;
-import static org.komodo.relational.commands.datarole.DataRoleCommandMessages.ShowMappedRolesCommand.NO_MAPPED_ROLES;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to show all the mapped roles of a {@link DataRole}.
@@ -44,9 +43,10 @@ public final class ShowMappedRolesCommand extends DataRoleShellCommand {
             final String[] roles = dataRole.getMappedRoles( getTransaction() );
 
             if ( roles.length == 0 ) {
-                result = new CommandResultImpl( getMessage( NO_MAPPED_ROLES, dataRole.getName( getTransaction() ) ) );
+                result = new CommandResultImpl( I18n.bind( DataRoleCommandsI18n.noMappedRoles,
+                                                           dataRole.getName( getTransaction() ) ) );
             } else {
-                print( MESSAGE_INDENT, getMessage( MAPPED_ROLES_HEADER, dataRole.getName( getTransaction() ) ) );
+                print( MESSAGE_INDENT, I18n.bind( DataRoleCommandsI18n.mappedRolesHeader, dataRole.getName( getTransaction() ) ) );
 
                 final int indent = (MESSAGE_INDENT * 2);
 
@@ -71,6 +71,36 @@ public final class ShowMappedRolesCommand extends DataRoleShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 0;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( DataRoleCommandsI18n.showMappedRolesHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( DataRoleCommandsI18n.showMappedRolesExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( DataRoleCommandsI18n.showMappedRolesUsage ) );
     }
 
 }

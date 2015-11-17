@@ -22,10 +22,10 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.InvalidCommandArgumentException;
 import org.komodo.shell.api.ShellCommandFactory;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * Class that acts as factory method class. It includes the method that depends
@@ -95,8 +95,12 @@ public class ShellCommandReaderFactory {
                         String value = argument.substring(argument.indexOf("=") + 1); //$NON-NLS-1$
                         properties.put(key, value);
                     } else {
-                        throw new Exception("Error Argument: " + argument + " index: " + i + " "  //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
-                                + Messages.getString(SHELL.InvalidArgMsg_property_not_correct_format));
+                        throw new Exception( "Error Argument: " //$NON-NLS-1$
+                                             + argument
+                                             + " index: " //$NON-NLS-1$
+                                             + i
+                                             + " " //$NON-NLS-1$
+                                             + I18n.bind( ShellI18n.invalidArgMsgPropertyNotCorrectFormat ) );
 
                     }
 
@@ -137,11 +141,12 @@ public class ShellCommandReaderFactory {
             props.load(new FileInputStream(f));
         } catch (FileNotFoundException e) {
             throw new InvalidCommandArgumentException(index,
-                    Messages.getString(SHELL.InvalidArgMsg_propertiesFile_not_exist));
+                                                      I18n.bind(ShellI18n.invalidArgMsgPropertiesFileNotExist));
         } catch (IOException e) {
-                throw new InvalidCommandArgumentException(index,
-                        Messages.getString(SHELL.InvalidArgMsg_propertiesFile_not_exist) + ": " //$NON-NLS-1$
-                            + e.getMessage());
+            throw new InvalidCommandArgumentException( index,
+                                                       I18n.bind( ShellI18n.invalidArgMsgPropertiesFileNotExist )
+                                                              + ": " //$NON-NLS-1$
+                                                              + e.getMessage() );
             }
         for (final String name : props.stringPropertyNames()){
             properties.put(name, props.getProperty(name));

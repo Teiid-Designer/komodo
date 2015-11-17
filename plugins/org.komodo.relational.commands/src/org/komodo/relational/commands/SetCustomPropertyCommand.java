@@ -7,15 +7,12 @@
  */
 package org.komodo.relational.commands;
 
-import static org.komodo.relational.commands.RelationalCommandMessages.RESOURCE_BUNDLE;
-import static org.komodo.relational.commands.RelationalCommandMessages.General.MISSING_PROPERTY_NAME_VALUE;
-import static org.komodo.relational.commands.RelationalCommandMessages.General.SET_PROPERTY_SUCCESS;
-import org.komodo.relational.Messages;
 import org.komodo.relational.RelationalObject;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.KomodoObjectUtils;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to set a custom property on a {@link RelationalObject}.
@@ -42,13 +39,13 @@ public final class SetCustomPropertyCommand extends RelationalShellCommand {
         CommandResult result = null;
 
         try {
-            final String name = requiredArgument( 0, getMessage( MISSING_PROPERTY_NAME_VALUE ) );
-            final String value = requiredArgument( 1, getMessage( MISSING_PROPERTY_NAME_VALUE ) );
+            final String name = requiredArgument( 0, I18n.bind( RelationalCommandsI18n.missingPropertyNameValue ) );
+            final String value = requiredArgument( 1, I18n.bind( RelationalCommandsI18n.missingPropertyNameValue ) );
 
             final RelationalObject robject = get();
             robject.setProperty( getTransaction(), name, value );
 
-            result = new CommandResultImpl( getWorkspaceMessage( SET_PROPERTY_SUCCESS, name ) );
+            result = new CommandResultImpl( I18n.bind( RelationalCommandsI18n.setPropertySuccess, name ) );
         } catch ( final Exception e ) {
             result = new CommandResultImpl( e );
         }
@@ -76,19 +73,34 @@ public final class SetCustomPropertyCommand extends RelationalShellCommand {
         return (getContext() instanceof RelationalObject) && (!KomodoObjectUtils.isRootChild(getContext()));
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
     @Override
     protected void printHelpDescription( final int indent ) {
-        print( indent, Messages.getString( RESOURCE_BUNDLE, getClass().getSimpleName() + ".help", getName() ) ); //$NON-NLS-1$
+        print( indent, I18n.bind( RelationalCommandsI18n.setCustomPropertyHelp, getName() ) );
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
     @Override
     protected void printHelpExamples( final int indent ) {
-        print( indent, Messages.getString( RESOURCE_BUNDLE, getClass().getSimpleName() + ".examples" ) ); //$NON-NLS-1$
+        print( indent, I18n.bind( RelationalCommandsI18n.setCustomPropertyExamples ) );
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
     @Override
     protected void printHelpUsage( final int indent ) {
-        print( indent, Messages.getString( RESOURCE_BUNDLE, getClass().getSimpleName() + ".usage" ) ); //$NON-NLS-1$
+        print( indent, I18n.bind( RelationalCommandsI18n.setCustomPropertyUsage ) );
     }
 
 

@@ -59,12 +59,44 @@ public final class RelationalSetPrimaryTypeCommand extends RelationalShellComman
         return false;
     }
 
-    /* (non-Javadoc)
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
      */
     @Override
     public boolean isValidForCurrentContext() {
         return ( getContext() instanceof RelationalObject );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( int indent ) {
+        // nothing to do
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( int indent ) {
+        // nothing to do
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( int indent ) {
+        // nothing to do
     }
 
 }

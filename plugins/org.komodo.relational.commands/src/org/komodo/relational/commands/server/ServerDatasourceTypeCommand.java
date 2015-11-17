@@ -7,9 +7,6 @@
  */
 package org.komodo.relational.commands.server;
 
-import static org.komodo.relational.commands.server.ServerCommandMessages.Common.MissingDatasourceTypeName;
-import static org.komodo.relational.commands.server.ServerCommandMessages.Common.ServerDatasourceTypeNotFound;
-import static org.komodo.relational.commands.server.ServerCommandMessages.ServerDatasourceTypeCommand.InfoMessage;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,6 +20,7 @@ import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.runtime.TeiidPropertyDefinition;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to show details for a server data source type.
@@ -49,8 +47,8 @@ public final class ServerDatasourceTypeCommand extends ServerShellCommand {
         CommandResult result = null;
 
         try {
-            final String sourceTypeName = requiredArgument( 0, getMessage( MissingDatasourceTypeName ) );
-            
+            final String sourceTypeName = requiredArgument( 0, I18n.bind( ServerCommandsI18n.missingDatasourceTypeName ) );
+
             // Validates that a server is connected
             CommandResult validationResult = validateHasConnectedWorkspaceServer();
             if ( !validationResult.isOk() ) {
@@ -60,11 +58,15 @@ public final class ServerDatasourceTypeCommand extends ServerShellCommand {
             Teiid teiid = getWorkspaceServer();
             Collection<TeiidPropertyDefinition> propDefns = teiid.getTeiidInstance( getTransaction() ).getTemplatePropertyDefns(sourceTypeName);
             if(propDefns==null) {
-                return new CommandResultImpl(false, getMessage( ServerDatasourceTypeNotFound, sourceTypeName ), null);
+                return new CommandResultImpl( false,
+                                              I18n.bind( ServerCommandsI18n.serverDatasourceTypeNotFound, sourceTypeName ),
+                                              null );
             }
-            
+
             // Print title
-            final String title = getMessage( InfoMessage, sourceTypeName, getWorkspaceServerName() );
+            final String title = I18n.bind( ServerCommandsI18n.infoMessageDatasourceType,
+                                            sourceTypeName,
+                                            getWorkspaceServerName() );
             print( MESSAGE_INDENT, title );
             print( MESSAGE_INDENT, "DataSource Template Properties:" ); //$NON-NLS-1$
 
@@ -108,7 +110,37 @@ public final class ServerDatasourceTypeCommand extends ServerShellCommand {
     public final boolean isValidForCurrentContext() {
         return hasConnectedWorkspaceServer();
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( ServerCommandsI18n.serverDatasourceTypeHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( ServerCommandsI18n.serverDatasourceTypeExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( ServerCommandsI18n.serverDatasourceTypeUsage ) );
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -144,5 +176,5 @@ public final class ServerDatasourceTypeCommand extends ServerShellCommand {
         // no tab completion
         return -1;
     }
-    
+
 }

@@ -11,8 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.komodo.repository.RepositoryTools;
-import org.komodo.shell.Messages;
-import org.komodo.shell.Messages.SHELL;
+import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.KomodoObjectLabelProvider;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.KException;
@@ -23,6 +22,7 @@ import org.komodo.spi.repository.PropertyDescriptor;
 import org.komodo.spi.repository.PropertyDescriptor.Type;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
+import org.komodo.utils.i18n.I18n;
 
 /**
  *  Utilities for working with KomodoObject
@@ -115,9 +115,9 @@ public class KomodoObjectUtils implements StringConstants {
                     String absPaths = displayValue.replaceAll("\\[|\\]", "");  //$NON-NLS-1$ //$NON-NLS-2$
                     // Get multiple paths are separated by commas
                     String[] splitPaths = absPaths.split(","); //$NON-NLS-1$
-                    
+
                     // Convert repo paths to display paths, returning the multiple display paths
-                    StringBuilder sb = new StringBuilder("["); //$NON-NLS-1$ 
+                    StringBuilder sb = new StringBuilder("["); //$NON-NLS-1$
                     boolean first = true;
                     for(String absPath : splitPaths) {
                         if(!absPath.isEmpty()) {
@@ -155,7 +155,7 @@ public class KomodoObjectUtils implements StringConstants {
             return RepositoryTools.getDisplayValue( wsStatus.getTransaction(), property );
         }
 
-        return Messages.getString( SHELL.NO_PROPERTY_VALUE );
+        return I18n.bind( ShellI18n.noPropertyValue );
     }
 
     /**
@@ -316,7 +316,7 @@ public class KomodoObjectUtils implements StringConstants {
         }
 
         if ( !isMultiValuedProperty( status, context, name ) ) {
-            throw new KException( Messages.getString( Messages.SHELL.NotMultiValuedProperty, name, context.getAbsolutePath() ) );
+            throw new KException( I18n.bind( ShellI18n.notMultiValuedProperty, name, context.getAbsolutePath() ) );
         }
 
         final Property property = context.getProperty( status.getTransaction(), propertyName );

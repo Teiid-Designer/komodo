@@ -24,13 +24,22 @@ package org.komodo.shell.commands;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
+import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.KomodoObjectLabelProvider;
+import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.utils.i18n.I18n;
 
 /**
- * Changes the context to the workspace area.
+ * A {@link ShellCommand command} that changes the context to the workspace area.
+ * <p>
+ * Usage:
+ * <p>
+ * <code>&nbsp;&nbsp;
+ * workspace
+ * </code>
  */
 public class WorkspaceCommand extends BuiltInShellCommand {
 
@@ -84,6 +93,36 @@ public class WorkspaceCommand extends BuiltInShellCommand {
     @Override
     public boolean isValidForCurrentContext() {
         return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.workspaceHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.workspaceExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.workspaceUsage ) );
     }
 
 }

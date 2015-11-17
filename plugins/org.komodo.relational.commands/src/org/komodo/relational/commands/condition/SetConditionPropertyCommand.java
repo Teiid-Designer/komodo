@@ -7,11 +7,8 @@
  */
 package org.komodo.relational.commands.condition;
 
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.INVALID_BOOLEAN_PROPERTY_VALUE;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.INVALID_PROPERTY_NAME;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.MISSING_PROPERTY_NAME_VALUE;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.SET_PROPERTY_SUCCESS;
 import java.util.List;
+import org.komodo.relational.commands.workspace.WorkspaceCommandsI18n;
 import org.komodo.relational.vdb.Condition;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
@@ -20,6 +17,7 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.SetPropertyCommand;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.StringUtils;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to set Condition properties
@@ -46,8 +44,8 @@ public final class SetConditionPropertyCommand extends ConditionShellCommand {
         CommandResult result = null;
 
         try {
-            final String name = requiredArgument( 0, getWorkspaceMessage( MISSING_PROPERTY_NAME_VALUE ) );
-            final String value = requiredArgument( 1, getWorkspaceMessage( MISSING_PROPERTY_NAME_VALUE ) );
+            final String name = requiredArgument( 0, I18n.bind( WorkspaceCommandsI18n.missingPropertyNameValue ) );
+            final String value = requiredArgument( 1, I18n.bind( WorkspaceCommandsI18n.missingPropertyNameValue ) );
 
             final Condition condition = getCondition();
             final UnitOfWork transaction = getTransaction();
@@ -58,17 +56,17 @@ public final class SetConditionPropertyCommand extends ConditionShellCommand {
                     if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
                         condition.setConstraint( transaction, Boolean.parseBoolean( value ) );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, CONSTRAINT );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, CONSTRAINT );
                     }
 
                     break;
                 default:
-                    errorMsg = getWorkspaceMessage( INVALID_PROPERTY_NAME, name, Condition.class.getSimpleName() );
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Condition.class.getSimpleName() );
                     break;
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {
-                result = new CommandResultImpl( getWorkspaceMessage( SET_PROPERTY_SUCCESS, name ) );
+                result = new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.setPropertySuccess, name ) );
             } else {
                 result = new CommandResultImpl( false, errorMsg, null );
             }
@@ -87,6 +85,36 @@ public final class SetConditionPropertyCommand extends ConditionShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 2;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( ConditionCommandsI18n.setConditionPropertyHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( ConditionCommandsI18n.setConditionPropertyExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( ConditionCommandsI18n.setConditionPropertyUsage ) );
     }
 
     /**

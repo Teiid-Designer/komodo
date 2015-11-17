@@ -7,10 +7,8 @@
  */
 package org.komodo.relational.commands.modelsource;
 
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.INVALID_PROPERTY_NAME;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.MISSING_PROPERTY_NAME_VALUE;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.UNSET_PROPERTY_SUCCESS;
 import java.util.List;
+import org.komodo.relational.commands.workspace.WorkspaceCommandsI18n;
 import org.komodo.relational.vdb.ModelSource;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
@@ -19,6 +17,7 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.UnsetPropertyCommand;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.StringUtils;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to set ModelSource properties
@@ -45,7 +44,7 @@ public final class UnsetModelSourcePropertyCommand extends ModelSourceShellComma
         CommandResult result = null;
 
         try {
-            final String name = requiredArgument( 0, getWorkspaceMessage( MISSING_PROPERTY_NAME_VALUE ) );
+            final String name = requiredArgument( 0, I18n.bind( WorkspaceCommandsI18n.unsetMissingPropertyName ) );
 
             final ModelSource source = getModelSource();
             final UnitOfWork transaction = getTransaction();
@@ -59,12 +58,12 @@ public final class UnsetModelSourcePropertyCommand extends ModelSourceShellComma
                     source.setTranslatorName( transaction, null );
                     break;
                 default:
-                    errorMsg = getWorkspaceMessage( INVALID_PROPERTY_NAME, name, ModelSource.class.getSimpleName() );
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, ModelSource.class.getSimpleName() );
                     break;
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {
-                result = new CommandResultImpl( getWorkspaceMessage( UNSET_PROPERTY_SUCCESS, name ) );
+                result = new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.unsetPropertySuccess, name ) );
             } else {
                 result = new CommandResultImpl( false, errorMsg, null );
             }
@@ -83,6 +82,36 @@ public final class UnsetModelSourcePropertyCommand extends ModelSourceShellComma
     @Override
     protected int getMaxArgCount() {
         return 1;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( ModelSourceCommandsI18n.unsetModelSourcePropertyHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( ModelSourceCommandsI18n.unsetModelSourcePropertyExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( ModelSourceCommandsI18n.unsetModelSourcePropertyUsage ) );
     }
 
     /**

@@ -7,9 +7,6 @@
  */
 package org.komodo.relational.commands.server;
 
-import static org.komodo.relational.commands.server.ServerCommandMessages.Common.MissingVdbName;
-import static org.komodo.relational.commands.server.ServerCommandMessages.Common.ServerVdbNotFound;
-import static org.komodo.relational.commands.server.ServerCommandMessages.ServerUndeployVdbCommand.VdbUnDeployFinished;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,6 +18,7 @@ import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.TeiidVdb;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to undeploy a server vdb
@@ -47,8 +45,8 @@ public final class ServerUndeployVdbCommand extends ServerShellCommand {
         CommandResult result = null;
 
         try {
-            String vdbName = requiredArgument( 0, getMessage( MissingVdbName ) );
-            
+            String vdbName = requiredArgument( 0, I18n.bind( ServerCommandsI18n.missingVdbName ) );
+
             // Validates that a server is connected
             CommandResult validationResult = validateHasConnectedWorkspaceServer();
             if ( !validationResult.isOk() ) {
@@ -59,7 +57,7 @@ public final class ServerUndeployVdbCommand extends ServerShellCommand {
             Teiid teiid = getWorkspaceServer();
             TeiidInstance teiidInstance = teiid.getTeiidInstance(getTransaction());
             TeiidVdb vdb = teiidInstance.getVdb(vdbName);
-            
+
             // VDB found - undeploy it
             if(vdb!=null) {
                 if(vdb.isXmlDeployment()) {
@@ -69,10 +67,10 @@ public final class ServerUndeployVdbCommand extends ServerShellCommand {
                 }
             // VDB not found - error
             } else {
-                return new CommandResultImpl( false, getMessage( ServerVdbNotFound, vdbName ), null );
+                return new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.serverVdbNotFound, vdbName ), null );
             }
 
-            print( MESSAGE_INDENT, getMessage(VdbUnDeployFinished) );
+            print( MESSAGE_INDENT, I18n.bind(ServerCommandsI18n.vdbUnDeployFinished) );
 
             result = CommandResult.SUCCESS;
         } catch ( final Exception e ) {
@@ -105,6 +103,36 @@ public final class ServerUndeployVdbCommand extends ServerShellCommand {
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( ServerCommandsI18n.serverUndeployVdbHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( ServerCommandsI18n.serverUndeployVdbExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( ServerCommandsI18n.serverUndeployVdbUsage ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
      */
     @Override
@@ -131,7 +159,7 @@ public final class ServerUndeployVdbCommand extends ServerShellCommand {
         // no tab completion
         return -1;
     }
-    
+
     /*
      * Return the deployed vdbs on the workspace server
      */
@@ -145,5 +173,5 @@ public final class ServerUndeployVdbCommand extends ServerShellCommand {
         }
         return existingVdbNames;
     }
-    
+
 }

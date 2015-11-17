@@ -7,12 +7,11 @@
  */
 package org.komodo.relational.commands.workspace;
 
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.CreateSchemaCommand.SCHEMA_CREATED;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.MISSING_SCHEMA_NAME;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to create a Schema.
@@ -42,12 +41,12 @@ public final class CreateSchemaCommand extends WorkspaceShellCommand {
         CommandResult result = null;
 
         try {
-            final String schemaName = requiredArgument( 0, getMessage( MISSING_SCHEMA_NAME ) );
+            final String schemaName = requiredArgument( 0, I18n.bind( WorkspaceCommandsI18n.missingSchemaName ) );
 
             final WorkspaceManager mgr = getWorkspaceManager();
             mgr.createSchema( getTransaction(), null, schemaName );
 
-            result = new CommandResultImpl( getMessage( SCHEMA_CREATED, schemaName ) );
+            result = new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.schemaCreated, schemaName ) );
         } catch ( final Exception e ) {
             result = new CommandResultImpl( e );
         }
@@ -63,6 +62,36 @@ public final class CreateSchemaCommand extends WorkspaceShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 1;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( WorkspaceCommandsI18n.createSchemaHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( WorkspaceCommandsI18n.createSchemaExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( WorkspaceCommandsI18n.createSchemaUsage ) );
     }
 
 }

@@ -25,15 +25,23 @@ import java.util.List;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.CompletionConstants;
+import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.PrintUtils;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.utils.StringUtils;
+import org.komodo.utils.i18n.I18n;
 
 /**
- * ShowChildrenCommand - show children of a KomodoObject.
- *
+ * A {@link ShellCommand command} that displays the children of a {@link KomodoObject}.
+ * <p>
+ * Usage:
+ * <p>
+ * <code>&nbsp;&nbsp;
+ * show-children
+ * </code>
  */
 public class ShowChildrenCommand extends BuiltInShellCommand {
 
@@ -98,6 +106,36 @@ public class ShowChildrenCommand extends BuiltInShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 1;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.showChildrenHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.showChildrenExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.showChildrenUsage ) );
     }
 
 	/**

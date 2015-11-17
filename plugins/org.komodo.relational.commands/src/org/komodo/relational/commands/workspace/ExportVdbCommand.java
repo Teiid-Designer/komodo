@@ -7,14 +7,6 @@
  */
 package org.komodo.relational.commands.workspace;
 
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.ExportVdbCommand.FileExistsOverwriteDisabled;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.ExportVdbCommand.OverwriteArgInvalid;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.ExportVdbCommand.VDB_EXPORTED;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.ExportVdbCommand.VDB_NOT_FOUND;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.ERROR_WRITING_FILE;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.MISSING_OUTPUT_FILE_NAME;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.MISSING_VDB_NAME;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.OUTPUT_FILE_ERROR;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -32,6 +24,7 @@ import org.komodo.spi.constants.ExportConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.StringUtils;
+import org.komodo.utils.i18n.I18n;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 /**
@@ -59,8 +52,8 @@ public final class ExportVdbCommand extends WorkspaceShellCommand {
     @Override
     protected CommandResult doExecute() {
         try {
-            final String vdbName = requiredArgument( 0, getMessage( MISSING_VDB_NAME ) );
-            String fileName = requiredArgument( 1, getWorkspaceMessage( MISSING_OUTPUT_FILE_NAME ) );
+            final String vdbName = requiredArgument( 0, I18n.bind( WorkspaceCommandsI18n.missingVdbName ) );
+            String fileName = requiredArgument( 1, I18n.bind( WorkspaceCommandsI18n.missingOutputFileName ) );
 
             // If there is no file extension, add .xml
             if ( fileName.indexOf( DOT ) == -1 ) {
@@ -72,14 +65,14 @@ public final class ExportVdbCommand extends WorkspaceShellCommand {
 
             // make sure overwrite arg is valid
             if ( overwrite && !VALID_OVERWRITE_ARGS.contains( overwriteArg ) ) {
-                return new CommandResultImpl( false, getMessage( OverwriteArgInvalid, overwriteArg ), null );
+                return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.overwriteArgInvalid, overwriteArg ), null );
             }
-            
+
             // Determine if the VDB exists
             if(!getWorkspaceManager().hasChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE)) {
-                return new CommandResultImpl( false, getMessage( VDB_NOT_FOUND, vdbName ), null );
-            } 
-            
+                return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.vdbNotFound, vdbName ), null );
+            }
+
             // Get the VDB to Export
             final KomodoObject vdbObj = getWorkspaceManager().getChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
             final Vdb vdbToExport = Vdb.RESOLVER.resolve(getTransaction(), vdbObj);
@@ -88,7 +81,7 @@ public final class ExportVdbCommand extends WorkspaceShellCommand {
 
             // If file exists, must have overwrite option
             if(file.exists() && !overwrite) {
-                return new CommandResultImpl( false, getMessage( FileExistsOverwriteDisabled, fileName ), null );
+                return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.fileExistsOverwriteDisabled, fileName ), null );
             }
 
             if ( file.createNewFile() || ( file.exists() && overwrite ) ) {
@@ -100,13 +93,13 @@ public final class ExportVdbCommand extends WorkspaceShellCommand {
                 // Write the file
                 try{
                     Files.write(Paths.get(file.getPath()), manifest.getBytes());
-                    return new CommandResultImpl( getMessage( VDB_EXPORTED, vdbToExport.getName( uow ), fileName, overwrite ) );
+                    return new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.vdbExported, vdbToExport.getName( uow ), fileName, overwrite ) );
                 } catch ( final Exception e ) {
-                    return new CommandResultImpl( false, getWorkspaceMessage( ERROR_WRITING_FILE, fileName ), e );
+                    return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.errorWritingFile, fileName ), e );
                 }
             }
 
-            return new CommandResultImpl( false, getWorkspaceMessage( OUTPUT_FILE_ERROR, fileName ), null );
+            return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.outputFileError, fileName ), null );
         } catch ( final Exception e ) {
             return new CommandResultImpl( e );
         }
@@ -121,7 +114,37 @@ public final class ExportVdbCommand extends WorkspaceShellCommand {
     protected int getMaxArgCount() {
         return 3;
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( WorkspaceCommandsI18n.exportVdbHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( WorkspaceCommandsI18n.exportVdbExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( WorkspaceCommandsI18n.exportVdbUsage ) );
+    }
+
     /**
      * {@inheritDoc}
      *

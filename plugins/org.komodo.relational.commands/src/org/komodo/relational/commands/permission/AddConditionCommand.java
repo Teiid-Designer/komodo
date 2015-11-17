@@ -7,12 +7,11 @@
  */
 package org.komodo.relational.commands.permission;
 
-import static org.komodo.relational.commands.permission.PermissionCommandMessages.AddConditionCommand.CONDITION_ADDED;
-import static org.komodo.relational.commands.permission.PermissionCommandMessages.General.MISSING_CONDITION_NAME;
 import org.komodo.relational.vdb.Permission;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to add a Condition to a Permission.
@@ -39,12 +38,12 @@ public final class AddConditionCommand extends PermissionShellCommand {
         CommandResult result = null;
 
         try {
-            final String permissionName = requiredArgument( 0, getMessage( MISSING_CONDITION_NAME ) );
+            final String permissionName = requiredArgument( 0, I18n.bind( PermissionCommandsI18n.missingConditionName ) );
 
             final Permission permission = getPermission();
             permission.addCondition( getTransaction(), permissionName );
 
-            result = new CommandResultImpl( getMessage( CONDITION_ADDED, permissionName ) );
+            result = new CommandResultImpl( I18n.bind( PermissionCommandsI18n.conditionAdded, permissionName ) );
         } catch ( final Exception e ) {
             result = new CommandResultImpl( e );
         }
@@ -60,6 +59,36 @@ public final class AddConditionCommand extends PermissionShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 1;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( PermissionCommandsI18n.addConditionHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( PermissionCommandsI18n.addConditionExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( PermissionCommandsI18n.addConditionUsage ) );
     }
 
 }

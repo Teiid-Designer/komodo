@@ -7,10 +7,7 @@
  */
 package org.komodo.relational.commands.server;
 
-import static org.komodo.relational.commands.server.ServerCommandMessages.Common.NoTeiidDefined;
-import static org.komodo.relational.commands.server.ServerCommandMessages.Common.ServerNotConnected;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
-import org.komodo.relational.Messages;
 import org.komodo.relational.commands.RelationalShellCommand;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.vdb.Vdb;
@@ -20,6 +17,7 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.runtime.TeiidInstance;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A base class for @{link {@link Vdb VDB}-related shell commands.
@@ -38,12 +36,12 @@ abstract class ServerShellCommand extends RelationalShellCommand {
      */
     protected CommandResult validateHasConnectedWorkspaceServer() throws KException {
         if(!hasWorkspaceServer()) {
-            return new CommandResultImpl(false, getMessage(NoTeiidDefined), null );
+            return new CommandResultImpl(false, I18n.bind(ServerCommandsI18n.noTeiidDefined), null );
         }
 
         Teiid teiid = getWorkspaceServer();
         if(!isConnected(teiid)) {
-            return new CommandResultImpl(false, getMessage(ServerNotConnected), null );
+            return new CommandResultImpl(false, I18n.bind(ServerCommandsI18n.serverNotConnected), null );
         }
         return CommandResult.SUCCESS;
     }
@@ -65,7 +63,7 @@ abstract class ServerShellCommand extends RelationalShellCommand {
      */
     @Override
     public String getCategory() {
-        return getMessage( ServerCommandMessages.Common.CommandCategory );
+        return I18n.bind( ServerCommandsI18n.commandCategory );
     }
 
     protected String getWorkspaceServerName() throws KException {
@@ -102,26 +100,6 @@ abstract class ServerShellCommand extends RelationalShellCommand {
         }
 
         return isConnected(teiid);
-    }
-
-    @Override
-    protected String getMessage(Enum< ? > key, Object... parameters) {
-        return Messages.getString(ServerCommandMessages.RESOURCE_BUNDLE,key.toString(),parameters);
-    }
-
-    @Override
-    protected void printHelpDescription( final int indent ) {
-        print( indent, Messages.getString( ServerCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".help", getName() ) ); //$NON-NLS-1$
-    }
-
-    @Override
-    protected void printHelpExamples( final int indent ) {
-        print( indent, Messages.getString( ServerCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".examples" ) ); //$NON-NLS-1$
-    }
-
-    @Override
-    protected void printHelpUsage( final int indent ) {
-        print( indent, Messages.getString( ServerCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".usage" ) ); //$NON-NLS-1$
     }
 
 }

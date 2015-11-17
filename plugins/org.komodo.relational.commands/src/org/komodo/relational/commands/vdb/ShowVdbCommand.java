@@ -11,6 +11,7 @@ import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.ShowPropertiesCommand;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to show the complete VDB state.
@@ -87,6 +88,36 @@ public final class ShowVdbCommand extends VdbShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 0;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( VdbCommandsI18n.showVdbHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( VdbCommandsI18n.showVdbExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( VdbCommandsI18n.showVdbUsage ) );
     }
 
 }

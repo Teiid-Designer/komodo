@@ -7,12 +7,11 @@ t * JBoss, Home of Professional Open Source.
  */
 package org.komodo.relational.commands.table;
 
-import static org.komodo.relational.commands.table.TableCommandMessages.AddUniqueConstraintCommand.UNIQUE_CONSTRAINT_ADDED;
-import static org.komodo.relational.commands.table.TableCommandMessages.General.MISSING_UNIQUE_CONSTRAINT_NAME;
 import org.komodo.relational.model.Table;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to add a Unique Constraint to a Table.
@@ -39,12 +38,12 @@ public final class AddUniqueConstraintCommand extends TableShellCommand {
         CommandResult result = null;
 
         try {
-            final String ucName = requiredArgument( 0, getMessage( MISSING_UNIQUE_CONSTRAINT_NAME ) );
+            final String ucName = requiredArgument( 0, I18n.bind( TableCommandsI18n.missingUniqueConstraintName ) );
 
             final Table table = getTable();
             table.addUniqueConstraint( getTransaction(), ucName );
 
-            result = new CommandResultImpl( getMessage( UNIQUE_CONSTRAINT_ADDED, ucName ) );
+            result = new CommandResultImpl( I18n.bind( TableCommandsI18n.uniqueConstraintAdded, ucName ) );
         } catch ( final Exception e ) {
             result = new CommandResultImpl( e );
         }
@@ -60,6 +59,36 @@ public final class AddUniqueConstraintCommand extends TableShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 1;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( TableCommandsI18n.addUniqueConstraintHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( TableCommandsI18n.addUniqueConstraintExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( TableCommandsI18n.addUniqueConstraintUsage ) );
     }
 
 }

@@ -7,15 +7,14 @@
  */
 package org.komodo.relational.commands.table;
 
-import static org.komodo.relational.commands.table.TableCommandMessages.ShowIndexesCommand.INDEXES_HEADER;
-import static org.komodo.relational.commands.table.TableCommandMessages.ShowIndexesCommand.NO_INDEXES;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.PRINT_RELATIONAL_OBJECT;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+import org.komodo.relational.commands.workspace.WorkspaceCommandsI18n;
 import org.komodo.relational.model.Index;
 import org.komodo.relational.model.Table;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to show all the {@link Index indexes} of a {@link Table}.
@@ -44,15 +43,15 @@ public final class ShowIndexesCommand extends TableShellCommand {
             final Index[] indexes = table.getIndexes( getTransaction() );
 
             if ( indexes.length == 0 ) {
-                print( MESSAGE_INDENT, getMessage( NO_INDEXES, table.getName( getTransaction() ) ) );
+                print( MESSAGE_INDENT, I18n.bind( TableCommandsI18n.noIndexes, table.getName( getTransaction() ) ) );
             } else {
-                print( MESSAGE_INDENT, getMessage( INDEXES_HEADER, table.getName( getTransaction() ) ) );
+                print( MESSAGE_INDENT, I18n.bind( TableCommandsI18n.indexesHeader, table.getName( getTransaction() ) ) );
 
                 final int indent = (MESSAGE_INDENT * 2);
 
                 for ( final Index index : indexes ) {
                     print( indent,
-                           getWorkspaceMessage( PRINT_RELATIONAL_OBJECT,
+                           I18n.bind( WorkspaceCommandsI18n.printRelationalObject,
                                                 index.getName( getTransaction() ),
                                                 index.getTypeDisplayName() ) );
                 }
@@ -72,6 +71,36 @@ public final class ShowIndexesCommand extends TableShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 0;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( TableCommandsI18n.showIndexesHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( TableCommandsI18n.showIndexesExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( TableCommandsI18n.showIndexesUsage ) );
     }
 
 }

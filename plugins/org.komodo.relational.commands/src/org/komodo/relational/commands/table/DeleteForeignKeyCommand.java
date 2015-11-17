@@ -7,8 +7,6 @@
  */
 package org.komodo.relational.commands.table;
 
-import static org.komodo.relational.commands.table.TableCommandMessages.DeleteForeignKeyCommand.FOREIGN_KEY_DELETED;
-import static org.komodo.relational.commands.table.TableCommandMessages.General.MISSING_FOREIGN_KEY_NAME;
 import java.util.ArrayList;
 import java.util.List;
 import org.komodo.relational.model.ForeignKey;
@@ -18,6 +16,7 @@ import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to delete a ForeignKey from a Table.
@@ -44,12 +43,12 @@ public final class DeleteForeignKeyCommand extends TableShellCommand {
         CommandResult result = null;
 
         try {
-            final String fkName = requiredArgument( 0, getMessage( MISSING_FOREIGN_KEY_NAME ) );
+            final String fkName = requiredArgument( 0, I18n.bind( TableCommandsI18n.missingForeignKeyName ) );
 
             final Table table = getTable();
             table.removeForeignKey( getTransaction(), fkName );
 
-            result = new CommandResultImpl( getMessage( FOREIGN_KEY_DELETED, fkName ) );
+            result = new CommandResultImpl( I18n.bind( TableCommandsI18n.foreignKeyDeleted, fkName ) );
         } catch ( final Exception e ) {
             result = new CommandResultImpl( e );
         }
@@ -65,6 +64,36 @@ public final class DeleteForeignKeyCommand extends TableShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 1;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( TableCommandsI18n.deleteForeignKeyHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( TableCommandsI18n.deleteForeignKeyExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( TableCommandsI18n.deleteForeignKeyUsage ) );
     }
 
     /**

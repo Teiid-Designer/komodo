@@ -7,17 +7,13 @@
  */
 package org.komodo.relational.commands.server;
 
-import static org.komodo.relational.commands.server.ServerCommandMessages.Common.NoTeiidDefined;
-import static org.komodo.relational.commands.server.ServerCommandMessages.ServerConnectCommand.ConnectionError;
-import static org.komodo.relational.commands.server.ServerCommandMessages.ServerDisconnectCommand.AttemptingToDisconnect;
-import static org.komodo.relational.commands.server.ServerCommandMessages.ServerDisconnectCommand.DisconnectSuccessMsg;
-import static org.komodo.relational.commands.server.ServerCommandMessages.ServerDisconnectCommand.NoServerToDisconnectMsg;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.runtime.TeiidInstance;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to connect to the default server
@@ -42,7 +38,7 @@ public final class ServerDisconnectCommand extends ServerShellCommand {
     @Override
     protected CommandResult doExecute() {
         if ( !hasWorkspaceServer() ) {
-            return new CommandResultImpl( false, getMessage( NoTeiidDefined ), null );
+            return new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.noTeiidDefined ), null );
         }
 
         CommandResult result = null;
@@ -53,19 +49,19 @@ public final class ServerDisconnectCommand extends ServerShellCommand {
 
             if ( teiidInstance.isConnected() ) {
                 print( CompletionConstants.MESSAGE_INDENT,
-                       getMessage( AttemptingToDisconnect, teiid.getName( getTransaction() ) ) );
+                       I18n.bind( ServerCommandsI18n.attemptingToDisconnect, teiid.getName( getTransaction() ) ) );
 
                 teiidInstance.disconnect();
-                
+
                 // Updates available commands upon disconnecting
                 getWorkspaceStatus().updateAvailableCommands();
-                
-                result = new CommandResultImpl( getMessage( DisconnectSuccessMsg, teiid.getName( getTransaction() ) ) );
+
+                result = new CommandResultImpl( I18n.bind( ServerCommandsI18n.disconnectSuccessMsg, teiid.getName( getTransaction() ) ) );
             } else {
-                result = new CommandResultImpl( getMessage( NoServerToDisconnectMsg ) );
+                result = new CommandResultImpl( I18n.bind( ServerCommandsI18n.noServerToDisconnectMsg ) );
             }
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, getMessage( ConnectionError, e.getLocalizedMessage() ), e );
+            result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.connectionError, e.getLocalizedMessage() ), e );
         }
 
         return result;
@@ -89,6 +85,36 @@ public final class ServerDisconnectCommand extends ServerShellCommand {
     @Override
     public final boolean isValidForCurrentContext() {
         return hasConnectedWorkspaceServer();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( ServerCommandsI18n.serverDisconnectHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( ServerCommandsI18n.serverDisconnectExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( ServerCommandsI18n.serverDisconnectUsage ) );
     }
 
 }

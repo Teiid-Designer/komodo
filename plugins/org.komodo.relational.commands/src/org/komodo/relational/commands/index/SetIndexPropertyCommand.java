@@ -7,10 +7,8 @@
  */
 package org.komodo.relational.commands.index;
 
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.INVALID_PROPERTY_NAME;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.MISSING_PROPERTY_NAME_VALUE;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.SET_PROPERTY_SUCCESS;
 import java.util.List;
+import org.komodo.relational.commands.workspace.WorkspaceCommandsI18n;
 import org.komodo.relational.model.Index;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
@@ -19,6 +17,7 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.UnsetPropertyCommand;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.StringUtils;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to set {@link Index index} properties.
@@ -45,7 +44,7 @@ public final class SetIndexPropertyCommand extends IndexShellCommand {
         CommandResult result = null;
 
         try {
-            final String name = requiredArgument( 0, getWorkspaceMessage( MISSING_PROPERTY_NAME_VALUE ) );
+            final String name = requiredArgument( 0, I18n.bind( WorkspaceCommandsI18n.missingPropertyNameValue ) );
             final Index index = getIndex();
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
@@ -55,12 +54,12 @@ public final class SetIndexPropertyCommand extends IndexShellCommand {
                     index.setExpression( transaction, null );
                     break;
                 default:
-                    errorMsg = getWorkspaceMessage( INVALID_PROPERTY_NAME, name, Index.class.getSimpleName() );
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Index.class.getSimpleName() );
                     break;
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {
-                result = new CommandResultImpl( getWorkspaceMessage( SET_PROPERTY_SUCCESS, name ) );
+                result = new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.setPropertySuccess, name ) );
             } else {
                 result = new CommandResultImpl( false, errorMsg, null );
             }
@@ -79,6 +78,36 @@ public final class SetIndexPropertyCommand extends IndexShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 1;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( IndexCommandsI18n.setIndexPropertyHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( IndexCommandsI18n.setIndexPropertyExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( IndexCommandsI18n.setIndexPropertyUsage ) );
     }
 
     /**

@@ -15,13 +15,11 @@
  */
 package org.komodo.shell;
 
-import static org.komodo.shell.Messages.SHELL.GeneralCommandCategory;
 import java.io.File;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.InvalidCommandArgumentException;
@@ -36,6 +34,7 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * Abstract base class for all built-in shell commands.
@@ -105,12 +104,12 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
     public final CommandResult execute() {
         // make sure there aren't too many args
         if ( getArguments().size() > getMaxArgCount() ) {
-            return new CommandResultImpl( false, Messages.getString( Messages.SHELL.TOO_MANY_ARGS, this ), null );
+            return new CommandResultImpl( false, I18n.bind( ShellI18n.tooManyArgs, this ), null );
         }
 
         // Make sure command is valid for the context
         if ( !isValidForCurrentContext() ) {
-            return new CommandResultImpl( false, Messages.getString( SHELL.InvalidCommandForContext ), null );
+            return new CommandResultImpl( false, I18n.bind( ShellI18n.invalidCommandForContext ), null );
         }
 
         // execute command
@@ -128,7 +127,7 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
      */
     @Override
     public String getCategory() {
-        return Messages.getString( GeneralCommandCategory );
+        return I18n.bind( ShellI18n.generalCommandCategory );
     }
 
     /**
@@ -280,7 +279,7 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
      */
     @Override
     public void printUsage( final int indent ) {
-        print( indent, Messages.getString( SHELL.HelpUsageHeading ) );
+        print( indent, I18n.bind( ShellI18n.helpUsageHeading ) );
         printHelpUsage( 2 * indent );
     }
 
@@ -289,7 +288,7 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
         final String[] aliases = getAliases();
 
         if ( aliases.length == 0 ) {
-            print( twoIndents, Messages.getString( SHELL.HelpNoAliases ) );
+            print( twoIndents, I18n.bind( ShellI18n.helpNoAliases ) );
         } else {
             final StringBuilder builder = new StringBuilder();
             boolean firstTime = true;
@@ -314,12 +313,12 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
     @Override
     public void printHelp( final int indent ) {
         // description
-        print( indent, Messages.getString( SHELL.HelpDescriptionHeading ) );
+        print( indent, I18n.bind( ShellI18n.helpDescriptionHeading ) );
         printHelpDescription( indent );
         print();
 
         // aliases
-        print( indent, Messages.getString( SHELL.HelpAliasesHeading ) );
+        print( indent, I18n.bind( ShellI18n.helpAliasesHeading ) );
         printAliases( indent );
         print();
 
@@ -328,21 +327,15 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
         print();
 
         // examples
-        print( indent, Messages.getString( SHELL.HelpExamplesHeading ) );
+        print( indent, I18n.bind( ShellI18n.helpExamplesHeading ) );
         printHelpExamples( indent );
     }
 
-    protected void printHelpDescription( final int indent ) {
-        print( indent, Messages.getString( getClass().getSimpleName() + ".help", getName() ) ); //$NON-NLS-1$
-    }
+    protected abstract void printHelpDescription( final int indent );
 
-    protected void printHelpExamples( final int indent ) {
-        print( indent, Messages.getString( getClass().getSimpleName() + ".examples" ) ); //$NON-NLS-1$
-    }
+    protected abstract void printHelpExamples( final int indent );
 
-    protected void printHelpUsage( final int indent ) {
-        print( indent, Messages.getString( getClass().getSimpleName() + ".usage" ) ); //$NON-NLS-1$
-    }
+    protected abstract void printHelpUsage( final int indent );
 
     protected void print() {
         print( 0, StringConstants.EMPTY_STRING );
@@ -382,11 +375,11 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
         // Check the fileName arg validity
         File theFile = new File(filePath);
         if(!theFile.exists()) {
-            return Messages.getString(SHELL.FileNotFound, filePath);
+            return I18n.bind(ShellI18n.fileNotFound, filePath);
         } else if(!theFile.isFile()) {
-            return Messages.getString(SHELL.FileArgNotAFile, filePath);
+            return I18n.bind(ShellI18n.fileArgNotAFile, filePath);
         } else if(!theFile.canRead()) {
-            return Messages.getString(SHELL.FileCannotRead, filePath);
+            return I18n.bind(ShellI18n.fileCannotRead, filePath);
         }
 
 		return CompletionConstants.OK;
@@ -403,7 +396,7 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
 
         displayPath = displayPath.trim();
 		if(displayPath.trim().length()==0) {
-		    return Messages.getString(SHELL.locationArg_empty);
+		    return I18n.bind(ShellI18n.locationArgEmpty);
 		}
 
 		// If supplied path doesnt start with FORWARD_SLASH, it should be relative to current context
@@ -435,12 +428,12 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
             try {
                 newContext = wsStatus.getRootContext().getRepository().getFromWorkspace(getTransaction(), repoPath);
             } catch (KException ex) {
-                return Messages.getString(SHELL.locationArg_noContextWithThisName, displayPath);
+                return I18n.bind(ShellI18n.locationArgNoContextWithThisName, displayPath);
             }
         }
 
 		if(newContext==null) {
-		    return Messages.getString(SHELL.locationArg_noContextWithThisName, displayPath);
+		    return I18n.bind(ShellI18n.locationArgNoContextWithThisName, displayPath);
 		}
 		return CompletionConstants.OK;
 	}

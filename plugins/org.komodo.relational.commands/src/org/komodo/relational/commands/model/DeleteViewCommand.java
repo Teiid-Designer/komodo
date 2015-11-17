@@ -7,8 +7,6 @@
  */
 package org.komodo.relational.commands.model;
 
-import static org.komodo.relational.commands.model.ModelCommandMessages.DeleteViewCommand.VIEW_DELETED;
-import static org.komodo.relational.commands.model.ModelCommandMessages.General.MISSING_VIEW_NAME;
 import java.util.ArrayList;
 import java.util.List;
 import org.komodo.relational.model.Model;
@@ -18,6 +16,7 @@ import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to delete a view from a Model.
@@ -44,12 +43,12 @@ public final class DeleteViewCommand extends ModelShellCommand {
         CommandResult result = null;
 
         try {
-            final String viewName = requiredArgument( 0, getMessage( MISSING_VIEW_NAME ) );
+            final String viewName = requiredArgument( 0, I18n.bind( ModelCommandsI18n.missingViewName ) );
 
             final Model model = getModel();
             model.removeView( getTransaction(), viewName );
 
-            result = new CommandResultImpl( getMessage( VIEW_DELETED, viewName ) );
+            result = new CommandResultImpl( I18n.bind( ModelCommandsI18n.viewDeleted, viewName ) );
         } catch ( final Exception e ) {
             result = new CommandResultImpl( e );
         }
@@ -65,6 +64,36 @@ public final class DeleteViewCommand extends ModelShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 1;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( ModelCommandsI18n.deleteViewHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( ModelCommandsI18n.deleteViewExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( ModelCommandsI18n.deleteViewUsage ) );
     }
 
     /**

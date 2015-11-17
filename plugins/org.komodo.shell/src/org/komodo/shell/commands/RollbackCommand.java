@@ -7,16 +7,23 @@
  */
 package org.komodo.shell.commands;
 
-import static org.komodo.shell.Messages.SHELL.RollbackSuccess;
 import java.util.List;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
-import org.komodo.shell.Messages;
+import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.utils.i18n.I18n;
 
 /**
- * A command that rolls back the current transaction.
+ * A {@link ShellCommand command} that rolls back the current transaction.
+ * <p>
+ * Usage:
+ * <p>
+ * <code>&nbsp;&nbsp;
+ * rollback
+ * </code>
  */
 public class RollbackCommand extends BuiltInShellCommand {
 
@@ -42,7 +49,7 @@ public class RollbackCommand extends BuiltInShellCommand {
     protected CommandResult doExecute() {
         try {
             getWorkspaceStatus().rollback( RollbackCommand.class.getName() );
-            return new CommandResultImpl( Messages.getString( RollbackSuccess ) );
+            return new CommandResultImpl( I18n.bind( ShellI18n.rollbackSuccess ) );
         } catch ( final Exception e ) {
             return new CommandResultImpl( e );
         }
@@ -66,6 +73,36 @@ public class RollbackCommand extends BuiltInShellCommand {
     @Override
     public boolean isValidForCurrentContext() {
         return !getWorkspaceStatus().isAutoCommit();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.rollbackHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.rollbackExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.rollbackUsage ) );
     }
 
     /**

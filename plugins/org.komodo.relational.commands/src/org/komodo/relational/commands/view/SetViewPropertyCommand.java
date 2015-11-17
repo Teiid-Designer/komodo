@@ -7,15 +7,8 @@
  */
 package org.komodo.relational.commands.view;
 
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.INVALID_BOOLEAN_PROPERTY_VALUE;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.INVALID_INTEGER_PROPERTY_VALUE;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.INVALID_PROPERTY_NAME;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.MISSING_PROPERTY_NAME_VALUE;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.SET_PROPERTY_SUCCESS;
-import static org.komodo.relational.commands.view.ViewCommandMessages.General.INVALID_ON_COMMIT_PROPERTY_VALUE;
-import static org.komodo.relational.commands.view.ViewCommandMessages.General.INVALID_SCHEMA_ELEMENT_TYPE_PROPERTY_VALUE;
-import static org.komodo.relational.commands.view.ViewCommandMessages.General.INVALID_TEMPORARY_TABLE_TYPE_PROPERTY_VALUE;
 import java.util.List;
+import org.komodo.relational.commands.workspace.WorkspaceCommandsI18n;
 import org.komodo.relational.model.SchemaElement;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.Table.OnCommit;
@@ -27,6 +20,7 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.SetPropertyCommand;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.StringUtils;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to set {@link View view} properties.
@@ -53,8 +47,8 @@ public final class SetViewPropertyCommand extends ViewShellCommand {
         CommandResult result = null;
 
         try {
-            final String name = requiredArgument( 0, getWorkspaceMessage( MISSING_PROPERTY_NAME_VALUE ) );
-            final String value = requiredArgument( 1, getWorkspaceMessage( MISSING_PROPERTY_NAME_VALUE ) );
+            final String name = requiredArgument( 0, I18n.bind( WorkspaceCommandsI18n.missingPropertyNameValue ) );
+            final String value = requiredArgument( 1, I18n.bind( WorkspaceCommandsI18n.missingPropertyNameValue ) );
 
             final View view = getView();
             final UnitOfWork transaction = getTransaction();
@@ -69,7 +63,7 @@ public final class SetViewPropertyCommand extends ViewShellCommand {
                         final int cardinality = Integer.parseInt( value );
                         view.setCardinality( transaction, cardinality );
                     } catch ( final NumberFormatException e ) {
-                        errorMsg = getWorkspaceMessage( INVALID_INTEGER_PROPERTY_VALUE, CARDINALITY );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, CARDINALITY );
                     }
 
                     break;
@@ -77,7 +71,7 @@ public final class SetViewPropertyCommand extends ViewShellCommand {
                     if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
                         view.setMaterialized( transaction, Boolean.parseBoolean( value ) );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, MATERIALIZED );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, MATERIALIZED );
                     }
 
                     break;
@@ -91,7 +85,7 @@ public final class SetViewPropertyCommand extends ViewShellCommand {
                     if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
                         view.setUpdatable( transaction, Boolean.parseBoolean( value ) );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, UPDATABLE );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, UPDATABLE );
                     }
 
                     break;
@@ -104,7 +98,7 @@ public final class SetViewPropertyCommand extends ViewShellCommand {
                     } else if ( OnCommit.PRESERVE_ROWS.name().equals( value ) ) {
                         view.setOnCommitValue( transaction, OnCommit.PRESERVE_ROWS );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_ON_COMMIT_PROPERTY_VALUE, ON_COMMIT_VALUE );
+                        errorMsg = I18n.bind( ViewCommandsI18n.invalidOnCommitPropertyValue, ON_COMMIT_VALUE );
                     }
 
                     break;
@@ -117,7 +111,7 @@ public final class SetViewPropertyCommand extends ViewShellCommand {
                     } else if ( SchemaElement.SchemaElementType.VIRTUAL.name().equals( value ) ) {
                         view.setSchemaElementType( transaction, SchemaElement.SchemaElementType.VIRTUAL );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_SCHEMA_ELEMENT_TYPE_PROPERTY_VALUE, SCHEMA_ELEMENT_TYPE );
+                        errorMsg = I18n.bind( ViewCommandsI18n.invalidSchemaElementTypePropertyValue, SCHEMA_ELEMENT_TYPE );
                     }
 
                     break;
@@ -127,17 +121,17 @@ public final class SetViewPropertyCommand extends ViewShellCommand {
                     } else if ( Table.TemporaryType.LOCAL.name().equals( value ) ) {
                         view.setTemporaryTableType( transaction, Table.TemporaryType.LOCAL );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_TEMPORARY_TABLE_TYPE_PROPERTY_VALUE, TEMPORARY_TABLE_TYPE );
+                        errorMsg = I18n.bind( ViewCommandsI18n.invalidTemporaryTableTypePropertyValue, TEMPORARY_TABLE_TYPE );
                     }
 
                     break;
                 default:
-                    errorMsg = getWorkspaceMessage( INVALID_PROPERTY_NAME, name, View.class.getSimpleName() );
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, View.class.getSimpleName() );
                     break;
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {
-                result = new CommandResultImpl( getWorkspaceMessage( SET_PROPERTY_SUCCESS, name ) );
+                result = new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.setPropertySuccess, name ) );
             } else {
                 result = new CommandResultImpl( false, errorMsg, null );
             }
@@ -156,6 +150,36 @@ public final class SetViewPropertyCommand extends ViewShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 2;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( ViewCommandsI18n.setViewPropertyHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( ViewCommandsI18n.setViewPropertyExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( ViewCommandsI18n.setViewPropertyUsage ) );
     }
 
     /**

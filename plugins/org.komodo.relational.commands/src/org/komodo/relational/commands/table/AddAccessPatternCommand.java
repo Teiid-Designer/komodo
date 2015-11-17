@@ -7,12 +7,11 @@
  */
 package org.komodo.relational.commands.table;
 
-import static org.komodo.relational.commands.table.TableCommandMessages.AddAccessPatternCommand.ACCESS_PATTERN_ADDED;
-import static org.komodo.relational.commands.table.TableCommandMessages.General.MISSING_ACCESS_PATTERN_NAME;
 import org.komodo.relational.model.Table;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to add an AccessPattern to a Table.
@@ -39,12 +38,12 @@ public final class AddAccessPatternCommand extends TableShellCommand {
         CommandResult result = null;
 
         try {
-            final String apName = requiredArgument( 0, getMessage( MISSING_ACCESS_PATTERN_NAME ) );
+            final String apName = requiredArgument( 0, I18n.bind( TableCommandsI18n.missingAccessPatternName ) );
 
             final Table table = getTable();
             table.addAccessPattern( getTransaction(), apName );
 
-            result = new CommandResultImpl( getMessage( ACCESS_PATTERN_ADDED, apName ) );
+            result = new CommandResultImpl( I18n.bind( TableCommandsI18n.accessPatternAdded, apName ) );
         } catch ( final Exception e ) {
             result = new CommandResultImpl( e );
         }
@@ -60,6 +59,36 @@ public final class AddAccessPatternCommand extends TableShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 1;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( TableCommandsI18n.addAccessPatternHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( TableCommandsI18n.addAccessPatternExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( TableCommandsI18n.addAccessPatternUsage ) );
     }
 
 }

@@ -7,9 +7,6 @@
  */
 package org.komodo.relational.commands.server;
 
-import static org.komodo.relational.commands.server.ServerCommandMessages.Common.MissingVdbName;
-import static org.komodo.relational.commands.server.ServerCommandMessages.Common.ServerVdbNotFound;
-import static org.komodo.relational.commands.server.ServerCommandMessages.ServerVdbCommand.InfoMessage;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,6 +18,7 @@ import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.runtime.TeiidVdb;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to show details for a server VDB
@@ -47,8 +45,8 @@ public final class ServerVdbCommand extends ServerShellCommand {
         CommandResult result = null;
 
         try {
-            final String vdbName = requiredArgument( 0, getMessage( MissingVdbName ) );
-            
+            final String vdbName = requiredArgument( 0, I18n.bind( ServerCommandsI18n.missingVdbName ) );
+
             // Validates that a server is connected
             CommandResult validationResult = validateHasConnectedWorkspaceServer();
             if ( !validationResult.isOk() ) {
@@ -58,11 +56,11 @@ public final class ServerVdbCommand extends ServerShellCommand {
             Teiid teiid = getWorkspaceServer();
             TeiidVdb vdb = teiid.getTeiidInstance( getTransaction() ).getVdb(vdbName);
             if(vdb==null) {
-                return new CommandResultImpl(false, getMessage( ServerVdbNotFound, vdbName ), null);
+                return new CommandResultImpl(false, I18n.bind( ServerCommandsI18n.serverVdbNotFound, vdbName ), null);
             }
-            
+
             // Print title
-            final String title = getMessage( InfoMessage, vdbName, getWorkspaceServerName() );
+            final String title = I18n.bind( ServerCommandsI18n.infoMessageVdb, vdbName, getWorkspaceServerName() );
             print( MESSAGE_INDENT, title );
 
             // Print VDB Info
@@ -95,7 +93,37 @@ public final class ServerVdbCommand extends ServerShellCommand {
     public final boolean isValidForCurrentContext() {
         return hasConnectedWorkspaceServer();
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( ServerCommandsI18n.serverVdbHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( ServerCommandsI18n.serverVdbExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( ServerCommandsI18n.serverVdbUsage ) );
+    }
+
     /**
      * {@inheritDoc}
      *

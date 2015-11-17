@@ -7,15 +7,14 @@
  */
 package org.komodo.relational.commands.model;
 
-import static org.komodo.relational.commands.model.ModelCommandMessages.ShowSourcesCommand.NO_SOURCES;
-import static org.komodo.relational.commands.model.ModelCommandMessages.ShowSourcesCommand.SOURCES_HEADER;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.PRINT_RELATIONAL_OBJECT;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+import org.komodo.relational.commands.workspace.WorkspaceCommandsI18n;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.vdb.ModelSource;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to show all the {@link ModelSource sources} of a {@link Model model}.
@@ -44,15 +43,15 @@ public final class ShowSourcesCommand extends ModelShellCommand {
             final ModelSource[] sources = model.getSources( getTransaction() );
 
             if ( sources.length == 0 ) {
-                print( MESSAGE_INDENT, getMessage( NO_SOURCES, model.getName( getTransaction() ) ) );
+                print( MESSAGE_INDENT, I18n.bind( ModelCommandsI18n.noSources, model.getName( getTransaction() ) ) );
             } else {
-                print( MESSAGE_INDENT, getMessage( SOURCES_HEADER, model.getName( getTransaction() ) ) );
+                print( MESSAGE_INDENT, I18n.bind( ModelCommandsI18n.sourcesHeader, model.getName( getTransaction() ) ) );
 
                 final int indent = (MESSAGE_INDENT * 2);
 
                 for ( final ModelSource source : sources ) {
                     print( indent,
-                           getWorkspaceMessage( PRINT_RELATIONAL_OBJECT,
+                           I18n.bind( WorkspaceCommandsI18n.printRelationalObject,
                                                 source.getName( getTransaction() ),
                                                 source.getTypeDisplayName() ) );
                 }
@@ -72,6 +71,36 @@ public final class ShowSourcesCommand extends ModelShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 0;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( ModelCommandsI18n.showSourcesHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( ModelCommandsI18n.showSourcesExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( ModelCommandsI18n.showSourcesUsage ) );
     }
 
 }

@@ -7,12 +7,11 @@
  */
 package org.komodo.relational.commands.vdb;
 
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.AddImportCommand.IMPORT_ADDED;
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_IMPORT_NAME;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to add a VDB import to a VDB.
@@ -39,12 +38,12 @@ public final class AddImportCommand extends VdbShellCommand {
         CommandResult result = null;
 
         try {
-            final String importName = requiredArgument( 0, getMessage( MISSING_IMPORT_NAME ) );
+            final String importName = requiredArgument( 0, I18n.bind( VdbCommandsI18n.missingImportName ) );
 
             final Vdb vdb = getVdb();
             vdb.addImport( getTransaction(), importName );
 
-            result = new CommandResultImpl( getMessage( IMPORT_ADDED, importName ) );
+            result = new CommandResultImpl( I18n.bind( VdbCommandsI18n.importAdded, importName ) );
         } catch ( final Exception e ) {
             result = new CommandResultImpl( e );
         }
@@ -60,6 +59,36 @@ public final class AddImportCommand extends VdbShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 1;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( VdbCommandsI18n.addImportHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( VdbCommandsI18n.addImportExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( VdbCommandsI18n.addImportUsage ) );
     }
 
 }

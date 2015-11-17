@@ -25,16 +25,22 @@ import java.util.List;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.CompletionConstants;
-import org.komodo.shell.Messages;
-import org.komodo.shell.Messages.SHELL;
+import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.utils.StringUtils;
+import org.komodo.utils.i18n.I18n;
 
 /**
- * CdCommand - allows changing the workspace context
- *
+ * A {@link ShellCommand command} that changes the workspace context.
+ * <p>
+ * Usage:
+ * <p>
+ * <code>&nbsp;&nbsp;
+ * cd &lt;path&gt;
+ * </code>
  */
 public class CdCommand extends BuiltInShellCommand {
 
@@ -69,7 +75,7 @@ public class CdCommand extends BuiltInShellCommand {
     @Override
     protected CommandResult doExecute() {
         try {
-    		String displayPath = requiredArgument(0, Messages.getString(SHELL.InvalidArgMsg_EntryPath));
+    		String displayPath = requiredArgument(0, I18n.bind(ShellI18n.invalidArgMsgEntryPath));
 
     		// Validate the display Path
     		String validationMsg = validatePath(displayPath);
@@ -99,6 +105,36 @@ public class CdCommand extends BuiltInShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 1;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.cdHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.cdExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.cdUsage ) );
     }
 
 	/**

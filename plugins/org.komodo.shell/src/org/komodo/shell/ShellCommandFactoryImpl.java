@@ -34,7 +34,6 @@ import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.TreeSet;
 import org.komodo.core.KEngine;
-import org.komodo.shell.Messages.SHELL;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandFactory;
@@ -43,6 +42,7 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.FileUtils;
 import org.komodo.utils.KLog;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * Factory used to create shell commands.
@@ -222,7 +222,7 @@ public class ShellCommandFactoryImpl implements ShellCommandFactory {
         _commandNotFound.command = commandName;
         return _commandNotFound;
     }
-    
+
     @Override
     public Set< ShellCommand > getCommandsForCurrentContext() {
         final Set< ShellCommand > availableCommands = new HashSet< >();
@@ -315,29 +315,13 @@ public class ShellCommandFactoryImpl implements ShellCommandFactory {
         }
 
         /**
-         * @see org.komodo.shell.api.ShellCommand#printUsage(int indent)
-         */
-        @Override
-        public void printUsage(int indent) {
-            print( CompletionConstants.MESSAGE_INDENT, Messages.getString( SHELL.COMMAND_NOT_FOUND, this.command ) );
-        }
-
-        /**
-         * @see org.komodo.shell.api.ShellCommand#printHelp(int indent)
-         */
-        @Override
-        public void printHelp(int indent) {
-            print( CompletionConstants.MESSAGE_INDENT, Messages.getString( SHELL.COMMAND_NOT_FOUND, this.command ) );
-        }
-
-        /**
          * {@inheritDoc}
          *
          * @see org.komodo.shell.BuiltInShellCommand#doExecute()
          */
         @Override
         protected CommandResult doExecute() {
-            return new CommandResultImpl( false, Messages.getString( SHELL.COMMAND_NOT_FOUND, this.command ), null );
+            return new CommandResultImpl( false, I18n.bind( ShellI18n.commandNotFound, this.command ), null );
         }
 
         /**
@@ -358,6 +342,52 @@ public class ShellCommandFactoryImpl implements ShellCommandFactory {
         @Override
         public boolean isValidForCurrentContext() {
             return true;
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+         */
+        @Override
+        protected void printHelpDescription( final int indent ) {
+            // nothing to do
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+         */
+        @Override
+        protected void printHelpExamples( final int indent ) {
+            // nothing to do
+        }
+
+        /**
+         * @see org.komodo.shell.api.ShellCommand#printHelp(int indent)
+         */
+        @Override
+        public void printHelp(int indent) {
+            print( CompletionConstants.MESSAGE_INDENT, I18n.bind( ShellI18n.commandNotFound, this.command ) );
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+         */
+        @Override
+        protected void printHelpUsage( final int indent ) {
+            // nothing to do
+        }
+
+        /**
+         * @see org.komodo.shell.api.ShellCommand#printUsage(int indent)
+         */
+        @Override
+        public void printUsage(int indent) {
+            print( CompletionConstants.MESSAGE_INDENT, I18n.bind( ShellI18n.commandNotFound, this.command ) );
         }
 
     }

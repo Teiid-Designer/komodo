@@ -7,15 +7,9 @@
  */
 package org.komodo.relational.commands.column;
 
-import static org.komodo.relational.commands.column.ColumnCommandMessages.General.INVALID_SEARCHABLE_PROPERTY_VALUE;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.INVALID_BOOLEAN_PROPERTY_VALUE;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.INVALID_INTEGER_PROPERTY_VALUE;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.INVALID_NULLABLE_PROPERTY_VALUE;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.INVALID_PROPERTY_NAME;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.MISSING_PROPERTY_NAME_VALUE;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.SET_PROPERTY_SUCCESS;
 import java.util.List;
 import org.komodo.relational.RelationalConstants.Nullable;
+import org.komodo.relational.commands.workspace.WorkspaceCommandsI18n;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.Column.Searchable;
 import org.komodo.shell.CommandResultImpl;
@@ -25,6 +19,7 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.SetPropertyCommand;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.StringUtils;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to set Column properties
@@ -51,8 +46,8 @@ public final class SetColumnPropertyCommand extends ColumnShellCommand {
         CommandResult result = null;
 
         try {
-            final String name = requiredArgument( 0, getWorkspaceMessage( MISSING_PROPERTY_NAME_VALUE ) );
-            final String value = requiredArgument( 1, getWorkspaceMessage( MISSING_PROPERTY_NAME_VALUE ) );
+            final String name = requiredArgument( 0, I18n.bind( WorkspaceCommandsI18n.missingPropertyNameValue ) );
+            final String value = requiredArgument( 1, I18n.bind( WorkspaceCommandsI18n.missingPropertyNameValue ) );
 
             final Column column = getColumn();
             final UnitOfWork transaction = getTransaction();
@@ -63,7 +58,7 @@ public final class SetColumnPropertyCommand extends ColumnShellCommand {
                     if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
                         column.setAutoIncremented( transaction, Boolean.parseBoolean( value ) );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, AUTO_INCREMENTED );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, AUTO_INCREMENTED );
                     }
 
                     break;
@@ -71,7 +66,7 @@ public final class SetColumnPropertyCommand extends ColumnShellCommand {
                     if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
                         column.setCaseSensitive( transaction, Boolean.parseBoolean( value ) );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, CASE_SENSITIVE );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, CASE_SENSITIVE );
                     }
 
                     break;
@@ -80,7 +75,7 @@ public final class SetColumnPropertyCommand extends ColumnShellCommand {
                         final long octetLength = Long.parseLong( value );
                         column.setCharOctetLength( transaction, octetLength );
                     } catch ( final NumberFormatException e ) {
-                        errorMsg = getWorkspaceMessage( INVALID_INTEGER_PROPERTY_VALUE, CHAR_OCTET_LENGTH );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, CHAR_OCTET_LENGTH );
                     }
 
                     break;
@@ -91,7 +86,7 @@ public final class SetColumnPropertyCommand extends ColumnShellCommand {
                     if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
                         column.setCurrency( transaction, Boolean.parseBoolean( value ) );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, CURRENCY );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, CURRENCY );
                     }
 
                     break;
@@ -109,7 +104,7 @@ public final class SetColumnPropertyCommand extends ColumnShellCommand {
                         final long nValues = Long.parseLong( value );
                         column.setDistinctValues( transaction, nValues );
                     } catch ( final NumberFormatException e ) {
-                        errorMsg = getWorkspaceMessage( INVALID_INTEGER_PROPERTY_VALUE, DISTINCT_VALUES );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, DISTINCT_VALUES );
                     }
 
                     break;
@@ -117,7 +112,7 @@ public final class SetColumnPropertyCommand extends ColumnShellCommand {
                     if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
                         column.setFixedLength( transaction, Boolean.parseBoolean( value ) );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, FIXED_LENGTH );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, FIXED_LENGTH );
                     }
 
                     break;
@@ -126,7 +121,7 @@ public final class SetColumnPropertyCommand extends ColumnShellCommand {
                         final long length = Long.parseLong( value );
                         column.setLength( transaction, length );
                     } catch ( final NumberFormatException e ) {
-                        errorMsg = getWorkspaceMessage( INVALID_INTEGER_PROPERTY_VALUE, LENGTH );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, LENGTH );
                     }
 
                     break;
@@ -150,7 +145,7 @@ public final class SetColumnPropertyCommand extends ColumnShellCommand {
                     } else if ( Nullable.NULLABLE_UNKNOWN.name().equals( value ) ) {
                         column.setNullable( transaction, Nullable.NULLABLE_UNKNOWN );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_NULLABLE_PROPERTY_VALUE, NULLABLE );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidNullablePropertyValue, NULLABLE );
                     }
 
                     break;
@@ -159,7 +154,7 @@ public final class SetColumnPropertyCommand extends ColumnShellCommand {
                         final long count = Long.parseLong( value );
                         column.setNullValueCount( transaction, count );
                     } catch ( final NumberFormatException e ) {
-                        errorMsg = getWorkspaceMessage( INVALID_INTEGER_PROPERTY_VALUE, NULL_VALUE_COUNT );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, NULL_VALUE_COUNT );
                     }
 
                     break;
@@ -168,7 +163,7 @@ public final class SetColumnPropertyCommand extends ColumnShellCommand {
                         final long precision = Long.parseLong( value );
                         column.setPrecision( transaction, precision );
                     } catch ( final NumberFormatException e ) {
-                        errorMsg = getWorkspaceMessage( INVALID_INTEGER_PROPERTY_VALUE, PRECISION );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, PRECISION );
                     }
 
                     break;
@@ -177,7 +172,7 @@ public final class SetColumnPropertyCommand extends ColumnShellCommand {
                         final long radix = Long.parseLong( value );
                         column.setRadix( transaction, radix );
                     } catch ( final NumberFormatException e ) {
-                        errorMsg = getWorkspaceMessage( INVALID_INTEGER_PROPERTY_VALUE, RADIX );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, RADIX );
                     }
 
                     break;
@@ -186,7 +181,7 @@ public final class SetColumnPropertyCommand extends ColumnShellCommand {
                         final long scale = Long.parseLong( value );
                         column.setScale( transaction, scale );
                     } catch ( final NumberFormatException e ) {
-                        errorMsg = getWorkspaceMessage( INVALID_INTEGER_PROPERTY_VALUE, SCALE );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, SCALE );
                     }
 
                     break;
@@ -200,7 +195,7 @@ public final class SetColumnPropertyCommand extends ColumnShellCommand {
                     } else if ( Searchable.UNSEARCHABLE.name().equals( value ) ) {
                         column.setSearchable( transaction, Searchable.UNSEARCHABLE );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_SEARCHABLE_PROPERTY_VALUE, SEARCHABLE );
+                        errorMsg = I18n.bind( ColumnCommandsI18n.invalidSearchablePropertyValue, SEARCHABLE );
                     }
 
                     break;
@@ -208,7 +203,7 @@ public final class SetColumnPropertyCommand extends ColumnShellCommand {
                     if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
                         column.setSelectable( transaction, Boolean.parseBoolean( value ) );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, SELECTABLE );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, SELECTABLE );
                     }
 
                     break;
@@ -216,7 +211,7 @@ public final class SetColumnPropertyCommand extends ColumnShellCommand {
                     if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
                         column.setSigned( transaction, Boolean.parseBoolean( value ) );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, SIGNED );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, SIGNED );
                     }
 
                     break;
@@ -224,7 +219,7 @@ public final class SetColumnPropertyCommand extends ColumnShellCommand {
                     if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
                         column.setUpdatable( transaction, Boolean.parseBoolean( value ) );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, UPDATABLE );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, UPDATABLE );
                     }
 
                     break;
@@ -232,12 +227,12 @@ public final class SetColumnPropertyCommand extends ColumnShellCommand {
                     column.setUuid( transaction, value );
                     break;
                 default:
-                    errorMsg = getWorkspaceMessage( INVALID_PROPERTY_NAME, name, Column.class.getSimpleName() );
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Column.class.getSimpleName() );
                     break;
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {
-                result = new CommandResultImpl( getWorkspaceMessage( SET_PROPERTY_SUCCESS, name ) );
+                result = new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.setPropertySuccess, name ) );
             } else {
                 result = new CommandResultImpl( false, errorMsg, null );
             }
@@ -256,6 +251,36 @@ public final class SetColumnPropertyCommand extends ColumnShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 2;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( ColumnCommandsI18n.setColumnPropertyHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( ColumnCommandsI18n.setColumnPropertyExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( ColumnCommandsI18n.setColumnPropertyUsage ) );
     }
 
     /**

@@ -7,18 +7,11 @@
 */
 package org.komodo.relational.commands.vdb;
 
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.UploadModelCommand.MISSING_INPUT_MODEL_FILE_PATH;
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.UploadModelCommand.MISSING_MODEL_NAME;
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.UploadModelCommand.MISSING_MODEL_TYPE;
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.UploadModelCommand.MODEL_TYPE_ERROR;
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.UploadModelCommand.MODEL_INPUT_FILE_IS_EMPTY;
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.UploadModelCommand.MODEL_OVERWRITE_DISABLED;
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.UploadModelCommand.MODEL_UPLOADED;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.INPUT_FILE_ERROR;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import org.komodo.relational.commands.workspace.WorkspaceCommandsI18n;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.shell.CommandResultImpl;
@@ -28,6 +21,7 @@ import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.Repository;
 import org.komodo.utils.StringUtils;
+import org.komodo.utils.i18n.I18n;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlParser;
 
@@ -56,27 +50,29 @@ public final class UploadModelCommand extends VdbShellCommand {
     @Override
     protected CommandResult doExecute() {
         try {
-            final String modelName = requiredArgument( 0, getMessage( MISSING_MODEL_NAME ) );
-            final String modelType = requiredArgument( 1, getMessage( MISSING_MODEL_TYPE ) );
-            final String fileName = requiredArgument( 2, getMessage( MISSING_INPUT_MODEL_FILE_PATH ) );
+            final String modelName = requiredArgument( 0, I18n.bind( VdbCommandsI18n.missingModelNameForUpload ) );
+            final String modelType = requiredArgument( 1, I18n.bind( VdbCommandsI18n.missingModelType ) );
+            final String fileName = requiredArgument( 2, I18n.bind( VdbCommandsI18n.missingInputModelFilePath ) );
             final String overwriteArg = optionalArgument( 3, null );
             final boolean overwrite = !StringUtils.isBlank( overwriteArg );
 
             // make sure ModelType arg is valid
             if(!modelType.equals(Model.Type.PHYSICAL.name()) && !modelType.equals(Model.Type.VIRTUAL.name())) {
-                return new CommandResultImpl( false, getMessage( MODEL_TYPE_ERROR, modelType ), null );
+                return new CommandResultImpl( false, I18n.bind( VdbCommandsI18n.modelTypeError, modelType ), null );
             }
-            
+
             // make sure overwrite arg is valid
             if ( overwrite && !VALID_ARGS.contains( overwriteArg ) ) {
-                return new CommandResultImpl( false, getMessage( INPUT_FILE_ERROR, overwriteArg ), null );
+                return new CommandResultImpl( false, I18n.bind( VdbCommandsI18n.invalidOverwriteArg, overwriteArg ), null );
             }
 
             { // Validates the supplied fileNameArg is a valid, readable file, and has property extension
                 final String validationResult = validateReadableFileArg( fileName );
 
                 if ( !CompletionConstants.OK.equals( validationResult ) ) {
-                    return new CommandResultImpl( false, getMessage( INPUT_FILE_ERROR, fileName, validationResult ), null );
+                    return new CommandResultImpl( false,
+                                                  I18n.bind( WorkspaceCommandsI18n.inputFileError, fileName, validationResult ),
+                                                  null );
                 }
             }
 
@@ -84,7 +80,7 @@ public final class UploadModelCommand extends VdbShellCommand {
             final String content = new String( Files.readAllBytes( Paths.get( fileName ) ) );
 
             if ( StringUtils.isEmpty( content ) ) {
-                return new CommandResultImpl( false, getMessage( MODEL_INPUT_FILE_IS_EMPTY, fileName ), null );
+                return new CommandResultImpl( false, I18n.bind( VdbCommandsI18n.modelInputFileIsEmpty, fileName ), null );
             }
 
             final Repository.UnitOfWork uow = getTransaction();
@@ -100,17 +96,17 @@ public final class UploadModelCommand extends VdbShellCommand {
                 }
             }
             if ( hasModel && !overwrite ) {
-                return new CommandResultImpl( false, getMessage( MODEL_OVERWRITE_DISABLED, fileName ), null );
+                return new CommandResultImpl( false, I18n.bind( VdbCommandsI18n.modelOverwriteDisabled, fileName ), null );
             }
 
             // create Model
             final Model model = vdbContext.addModel( uow, modelName );
-            
+
             model.setModelType(uow, Model.Type.valueOf(modelType));
             model.setModelDefinition(uow, content);
             model.setProperty(uow, StandardDdlLexicon.PARSER_ID, TeiidDdlParser.ID);
 
-            return new CommandResultImpl( getMessage( MODEL_UPLOADED, modelName ) );
+            return new CommandResultImpl( I18n.bind( VdbCommandsI18n.modelUploaded, modelName ) );
         } catch ( final Exception e ) {
             return new CommandResultImpl( e );
         }
@@ -125,7 +121,37 @@ public final class UploadModelCommand extends VdbShellCommand {
     protected int getMaxArgCount() {
         return 4;
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( VdbCommandsI18n.uploadModelHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( VdbCommandsI18n.uploadModelExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( VdbCommandsI18n.uploadModelUsage ) );
+    }
+
     /**
      * {@inheritDoc}
      *

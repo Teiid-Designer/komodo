@@ -7,11 +7,8 @@
  */
 package org.komodo.relational.commands.permission;
 
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.INVALID_BOOLEAN_PROPERTY_VALUE;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.INVALID_PROPERTY_NAME;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.MISSING_PROPERTY_NAME_VALUE;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.SET_PROPERTY_SUCCESS;
 import java.util.List;
+import org.komodo.relational.commands.workspace.WorkspaceCommandsI18n;
 import org.komodo.relational.vdb.Permission;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
@@ -20,6 +17,7 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.SetPropertyCommand;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.StringUtils;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to set Permission properties
@@ -46,8 +44,8 @@ public final class SetPermissionPropertyCommand extends PermissionShellCommand {
         CommandResult result = null;
 
         try {
-            final String name = requiredArgument( 0, getWorkspaceMessage( MISSING_PROPERTY_NAME_VALUE ) );
-            final String value = requiredArgument( 1, getWorkspaceMessage( MISSING_PROPERTY_NAME_VALUE ) );
+            final String name = requiredArgument( 0, I18n.bind( WorkspaceCommandsI18n.missingPropertyNameValue ) );
+            final String value = requiredArgument( 1, I18n.bind( WorkspaceCommandsI18n.missingPropertyNameValue ) );
 
             final Permission permission = getPermission();
 
@@ -59,7 +57,7 @@ public final class SetPermissionPropertyCommand extends PermissionShellCommand {
                     if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
                         permission.setAllowAlter( transaction, Boolean.parseBoolean( value ) );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, ALLOW_ALTER );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, ALLOW_ALTER );
                     }
 
                     break;
@@ -67,7 +65,7 @@ public final class SetPermissionPropertyCommand extends PermissionShellCommand {
                     if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
                         permission.setAllowAlter( transaction, Boolean.parseBoolean( value ) );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, ALLOW_CREATE );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, ALLOW_CREATE );
                     }
 
                     break;
@@ -75,7 +73,7 @@ public final class SetPermissionPropertyCommand extends PermissionShellCommand {
                     if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
                         permission.setAllowAlter( transaction, Boolean.parseBoolean( value ) );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, ALLOW_DELETE );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, ALLOW_DELETE );
                     }
 
                     break;
@@ -83,7 +81,7 @@ public final class SetPermissionPropertyCommand extends PermissionShellCommand {
                     if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
                         permission.setAllowAlter( transaction, Boolean.parseBoolean( value ) );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, ALLOW_EXECUTE );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, ALLOW_EXECUTE );
                     }
 
                     break;
@@ -91,7 +89,7 @@ public final class SetPermissionPropertyCommand extends PermissionShellCommand {
                     if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
                         permission.setAllowAlter( transaction, Boolean.parseBoolean( value ) );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, ALLOW_LANGUAGE );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, ALLOW_LANGUAGE );
                     }
 
                     break;
@@ -99,7 +97,7 @@ public final class SetPermissionPropertyCommand extends PermissionShellCommand {
                     if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
                         permission.setAllowAlter( transaction, Boolean.parseBoolean( value ) );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, ALLOW_READ );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, ALLOW_READ );
                     }
 
                     break;
@@ -107,17 +105,17 @@ public final class SetPermissionPropertyCommand extends PermissionShellCommand {
                     if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
                         permission.setAllowAlter( transaction, Boolean.parseBoolean( value ) );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, ALLOW_UPDATE );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, ALLOW_UPDATE );
                     }
 
                     break;
                 default:
-                    errorMsg = getWorkspaceMessage( INVALID_PROPERTY_NAME, name, Permission.class.getSimpleName() );
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Permission.class.getSimpleName() );
                     break;
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {
-                result = new CommandResultImpl( getWorkspaceMessage( SET_PROPERTY_SUCCESS, name ) );
+                result = new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.setPropertySuccess, name ) );
             } else {
                 result = new CommandResultImpl( false, errorMsg, null );
             }
@@ -136,6 +134,36 @@ public final class SetPermissionPropertyCommand extends PermissionShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 2;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( PermissionCommandsI18n.setPermissionPropertyHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( PermissionCommandsI18n.setPermissionPropertyExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( PermissionCommandsI18n.setPermissionPropertyUsage ) );
     }
 
     /**

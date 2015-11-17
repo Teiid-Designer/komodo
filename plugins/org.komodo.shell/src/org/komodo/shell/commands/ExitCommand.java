@@ -15,27 +15,27 @@
  */
 package org.komodo.shell.commands;
 
-import static org.komodo.shell.Messages.ExitCommand.EXIT_CANCELED;
-import static org.komodo.shell.Messages.ExitCommand.GOOD_BYE;
-import static org.komodo.shell.Messages.ExitCommand.INVALID_EXIT_ARG;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
-import org.komodo.shell.Messages;
+import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.InvalidCommandArgumentException;
+import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.utils.StringUtils;
+import org.komodo.utils.i18n.I18n;
 
 /**
- * Implements the 'exit' command.
- *
- * This class adapted from https://github.com/Governance/s-ramp/blob/master/s-ramp-shell
- * - altered to use different Message class
- *
- * @author eric.wittmann@redhat.com
+ * A {@link ShellCommand command} that exits the shell program.
+ * <p>
+ * Usage:
+ * <p>
+ * <code>&nbsp;&nbsp;
+ * exit [-f | --force | -s | --save]
+ * </code>
  */
 public final class ExitCommand extends BuiltInShellCommand {
 
@@ -75,7 +75,7 @@ public final class ExitCommand extends BuiltInShellCommand {
 
             // make sure arg is valid
             if ( hasArg && !VALID_ARGS.contains( arg ) ) {
-                final String errorMsg = Messages.getString( INVALID_EXIT_ARG, arg );
+                final String errorMsg = I18n.bind( ShellI18n.invalidExitArg, arg );
                 throw new InvalidCommandArgumentException( 0, errorMsg );
             }
 
@@ -102,11 +102,11 @@ public final class ExitCommand extends BuiltInShellCommand {
 
             if ( doExit ) {
                 wsStatus.getShell().exit();
-                return new CommandResultImpl( Messages.getString( GOOD_BYE ) );
+                return CommandResult.SUCCESS;
             }
 
             // transaction has unsaved changes and neither save or force quit arg was present
-            return new CommandResultImpl( false, Messages.getString( EXIT_CANCELED ), null );
+            return new CommandResultImpl( false, I18n.bind( ShellI18n.exitCanceled ), null );
         } catch ( final Exception e ) {
             return new CommandResultImpl( e );
         }
@@ -142,6 +142,36 @@ public final class ExitCommand extends BuiltInShellCommand {
     @Override
     public boolean isValidForCurrentContext() {
         return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.exitHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.exitExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.exitUsage ) );
     }
 
 }

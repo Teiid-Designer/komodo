@@ -7,16 +7,15 @@
  */
 package org.komodo.relational.commands.vdb;
 
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowImportsCommand.IMPORTS_HEADER;
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.ShowImportsCommand.NO_IMPORTS;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.PRINT_RELATIONAL_OBJECT;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+import org.komodo.relational.commands.workspace.WorkspaceCommandsI18n;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.VdbImport;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to show all VDB imports in a VDB.
@@ -46,15 +45,17 @@ public final class ShowImportsCommand extends VdbShellCommand {
             final VdbImport[] imports = vdb.getImports( uow );
 
             if ( imports.length == 0 ) {
-                print( MESSAGE_INDENT, getMessage( NO_IMPORTS, vdb.getName( uow ) ) );
+                print( MESSAGE_INDENT, I18n.bind( VdbCommandsI18n.noImports, vdb.getName( uow ) ) );
             } else {
-                print( MESSAGE_INDENT, getMessage( IMPORTS_HEADER, vdb.getName( uow ) ) );
+                print( MESSAGE_INDENT, I18n.bind( VdbCommandsI18n.importsHeader, vdb.getName( uow ) ) );
 
                 final int indent = (MESSAGE_INDENT * 2);
 
                 for ( final VdbImport theImport : imports ) {
                     print( indent,
-                           getMessage( PRINT_RELATIONAL_OBJECT, theImport.getName( uow ), theImport.getTypeDisplayName() ) );
+                           I18n.bind( WorkspaceCommandsI18n.printRelationalObject,
+                                      theImport.getName( uow ),
+                                      theImport.getTypeDisplayName() ) );
                 }
             }
 
@@ -72,6 +73,36 @@ public final class ShowImportsCommand extends VdbShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 0;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( VdbCommandsI18n.showImportsHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( VdbCommandsI18n.showImportsExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( VdbCommandsI18n.showImportsUsage ) );
     }
 
 }

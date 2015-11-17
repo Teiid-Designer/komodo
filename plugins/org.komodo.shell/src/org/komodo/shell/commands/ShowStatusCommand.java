@@ -26,14 +26,22 @@ import java.util.Collection;
 import java.util.List;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
-import org.komodo.shell.Messages;
+import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
+import org.komodo.utils.i18n.I18n;
 
 /**
- * ShowStatusCommand - show the workspace status (current repo, current context, current server, etc)
+ * A {@link ShellCommand command} that shows contributed workspace status items.
+ * <p>
+ * Usage:
+ * <p>
+ * <code>&nbsp;&nbsp;
+ * show-status
+ * </code>
  */
 public class ShowStatusCommand extends BuiltInShellCommand {
 
@@ -85,6 +93,36 @@ public class ShowStatusCommand extends BuiltInShellCommand {
         return 0;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.showStatusHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.showStatusExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.showStatusUsage ) );
+    }
+
 	/**
 	 * Shows the status at the current workspace context
 	 * @throws Exception
@@ -95,13 +133,13 @@ public class ShowStatusCommand extends BuiltInShellCommand {
 
         // Repo info
         final Repository.Id repoId = context.getRepository().getId();
-        print(MESSAGE_INDENT, Messages.getString(Messages.ShowStatusCommand.CurrentRepoName, repoId.getWorkspaceName()));
-        print(MESSAGE_INDENT, Messages.getString(Messages.ShowStatusCommand.CurrentRepoUrl, repoId.getUrl()));
+        print(MESSAGE_INDENT, I18n.bind(ShellI18n.currentRepoName, repoId.getWorkspaceName()));
+        print(MESSAGE_INDENT, I18n.bind(ShellI18n.currentRepoUrl, repoId.getUrl()));
 
         // Current Context
         KomodoObject currentContext = wsStatus.getCurrentContext();
         final String path = wsStatus.getDisplayPath(currentContext);
-        print(MESSAGE_INDENT, Messages.getString(Messages.ShowStatusCommand.CurrentContext, path));
+        print(MESSAGE_INDENT, I18n.bind(ShellI18n.currentContext, path));
 
         // Get additional provided statuses for state objects
         Collection<KomodoObject> stateObjs = wsStatus.getStateObjects().values();

@@ -7,8 +7,6 @@
  */
 package org.komodo.relational.commands.model;
 
-import static org.komodo.relational.commands.model.ModelCommandMessages.DeleteUserDefinedFunctionCommand.USER_DEFINED_FUNCTION_DELETED;
-import static org.komodo.relational.commands.model.ModelCommandMessages.General.MISSING_USER_DEFINED_FUNCTION_NAME;
 import java.util.ArrayList;
 import java.util.List;
 import org.komodo.relational.model.Function;
@@ -18,6 +16,7 @@ import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to delete a User Defined Function from a Model.
@@ -44,12 +43,12 @@ public final class DeleteUserDefinedFunctionCommand extends ModelShellCommand {
         CommandResult result = null;
 
         try {
-            final String functionName = requiredArgument( 0, getMessage( MISSING_USER_DEFINED_FUNCTION_NAME ) );
+            final String functionName = requiredArgument( 0, I18n.bind( ModelCommandsI18n.missingUserDefinedFunctionName ) );
 
             final Model model = getModel();
             model.removeFunction( getTransaction(), functionName );
 
-            result = new CommandResultImpl( getMessage( USER_DEFINED_FUNCTION_DELETED, functionName ) );
+            result = new CommandResultImpl( I18n.bind( ModelCommandsI18n.userDefinedFunctionDeleted, functionName ) );
         } catch ( final Exception e ) {
             result = new CommandResultImpl( e );
         }
@@ -65,6 +64,36 @@ public final class DeleteUserDefinedFunctionCommand extends ModelShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 1;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( ModelCommandsI18n.deleteUserDefinedFunctionHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( ModelCommandsI18n.deleteUserDefinedFunctionExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( ModelCommandsI18n.deleteUserDefinedFunctionUsage ) );
     }
 
     /**

@@ -7,23 +7,23 @@
  */
 package org.komodo.shell.commands;
 
-import static org.komodo.shell.Messages.AddDescriptorCommand.DESCRIPTOR_ADDED;
-import static org.komodo.shell.Messages.AddDescriptorCommand.MISSING_DESCRIPTOR_NAME;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
-import org.komodo.shell.Messages;
+import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.KomodoObjectUtils;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.utils.i18n.I18n;
 
 /**
- * Adds a descriptor to a {@link KomodoObject}.
+ * A {@link ShellCommand command} that adds a descriptor to a {@link KomodoObject}.
  * <p>
  * Usage:
  * <p>
  * <code>&nbsp;&nbsp;
- * add-descriptor &lt;descriptor-name&gt; {child-type}
+ * add-descriptor &lt;descriptor-name&gt;
  * </code>
  */
 public class AddDescriptorCommand extends BuiltInShellCommand {
@@ -49,11 +49,11 @@ public class AddDescriptorCommand extends BuiltInShellCommand {
     @Override
     protected CommandResult doExecute() {
         try {
-            final String descriptorNameArg = requiredArgument( 0, Messages.getString( MISSING_DESCRIPTOR_NAME ) );
+            final String descriptorNameArg = requiredArgument( 0, I18n.bind( ShellI18n.missingDescriptorNameForAdd ) );
 
             final KomodoObject kobject = getContext();
             kobject.addDescriptor( getTransaction(), descriptorNameArg );
-            return new CommandResultImpl( Messages.getString( DESCRIPTOR_ADDED, descriptorNameArg ) );
+            return new CommandResultImpl( I18n.bind( ShellI18n.descriptorAdded, descriptorNameArg ) );
         } catch ( final Exception e ) {
             return new CommandResultImpl( e );
         }
@@ -77,6 +77,36 @@ public class AddDescriptorCommand extends BuiltInShellCommand {
     @Override
     public boolean isValidForCurrentContext() {
         return ( !KomodoObjectUtils.isRoot(getContext()) && !KomodoObjectUtils.isRootChild(getContext()) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.addDescriptorHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.addDescriptorExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.addDescriptorUsage ) );
     }
 
 }

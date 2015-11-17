@@ -7,12 +7,11 @@
  */
 package org.komodo.relational.commands.workspace;
 
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.CreateTeiidCommand.TEIID_CREATED;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.MISSING_TEIID_NAME;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to create a Teiid object.
@@ -39,12 +38,12 @@ public final class CreateTeiidCommand extends WorkspaceShellCommand {
         CommandResult result = null;
 
         try {
-            final String teiidName = requiredArgument( 0, getMessage( MISSING_TEIID_NAME ) );
+            final String teiidName = requiredArgument( 0, I18n.bind( WorkspaceCommandsI18n.missingTeiidName ) );
 
             final WorkspaceManager mgr = getWorkspaceManager();
             mgr.createTeiid( getTransaction(), null, teiidName );
 
-            result = new CommandResultImpl( getMessage( TEIID_CREATED, teiidName ) );
+            result = new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.teiidCreated, teiidName ) );
         } catch ( final Exception e ) {
             result = new CommandResultImpl( e );
         }
@@ -60,6 +59,36 @@ public final class CreateTeiidCommand extends WorkspaceShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 1;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( WorkspaceCommandsI18n.createTeiidHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( WorkspaceCommandsI18n.createTeiidExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( WorkspaceCommandsI18n.createTeiidUsage ) );
     }
 
 }

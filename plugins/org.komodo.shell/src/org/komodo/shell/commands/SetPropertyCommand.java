@@ -10,8 +10,9 @@ package org.komodo.shell.commands;
 import java.util.List;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
-import org.komodo.shell.Messages;
+import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.KomodoObjectUtils;
 import org.komodo.spi.constants.StringConstants;
@@ -19,9 +20,16 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.PropertyDescriptor;
 import org.komodo.spi.repository.PropertyDescriptor.Type;
 import org.komodo.utils.StringUtils;
+import org.komodo.utils.i18n.I18n;
 
 /**
- * SetPropertyCommand - sets property value on a KomodoObject.
+ * A {@link ShellCommand command} that sets a property value on a {@link KomodoObject}.
+ * <p>
+ * Usage:
+ * <p>
+ * <code>&nbsp;&nbsp;
+ * set-property &lt;prop-name&gt; &lt;prop-value&gt;
+ * </code>
  */
 public class SetPropertyCommand extends BuiltInShellCommand {
 
@@ -61,20 +69,20 @@ public class SetPropertyCommand extends BuiltInShellCommand {
     protected CommandResult doExecute() {
         try {
             // property name and value are required
-            final String propNameArg = requiredArgument( 0, Messages.getString( Messages.SHELL.InvalidArgMsg_PropertyName ) );
-            final String propValueArg = requiredArgument( 1, Messages.getString( Messages.SHELL.InvalidArgMsg_PropertyValue ) );
+            final String propNameArg = requiredArgument( 0, I18n.bind( ShellI18n.invalidArgMsgPropertyName ) );
+            final String propValueArg = requiredArgument( 1, I18n.bind( ShellI18n.invalidArgMsgPropertyValue ) );
             final KomodoObject context = getContext();
 
             // Validate the property value
             if ( !KomodoObjectUtils.isValidPropertyValue( getWorkspaceStatus(), propNameArg, propValueArg, context ) ) {
                 return new CommandResultImpl( false,
-                                              Messages.getString( Messages.SetPropertyCommand.InvalidPropValue, propValueArg ),
+                                              I18n.bind( ShellI18n.invalidPropValue, propValueArg ),
                                               null );
             }
 
             // Set the property
             setProperty( context, propNameArg, propValueArg );
-            return new CommandResultImpl( Messages.getString( Messages.SetPropertyCommand.PropertySet, propNameArg ) );
+            return new CommandResultImpl( I18n.bind( ShellI18n.propertySet, propNameArg ) );
         } catch ( final Exception e ) {
             return new CommandResultImpl( e );
         }
@@ -88,6 +96,36 @@ public class SetPropertyCommand extends BuiltInShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 2;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.setPropertyHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.setPropertyExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.setPropertyUsage ) );
     }
 
     private void setProperty( final KomodoObject context,

@@ -25,15 +25,21 @@ import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.Properties;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
-import org.komodo.shell.Messages;
-import org.komodo.shell.Messages.SHELL;
+import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.PrintUtils;
+import org.komodo.utils.i18n.I18n;
 
 /**
- * ShowGlobalCommand - shows global workspace properties.
- *
+ * A {@link ShellCommand command} that displays the global workspace properties.
+ * <p>
+ * Usage:
+ * <p>
+ * <code>&nbsp;&nbsp;
+ * show-global
+ * </code>
  */
 public class ShowGlobalCommand extends BuiltInShellCommand {
 
@@ -71,12 +77,12 @@ public class ShowGlobalCommand extends BuiltInShellCommand {
             final Properties globalProperties = getWorkspaceStatus().getProperties();
 
             // Print properties header
-            final String globalPropsHeader = Messages.getString( Messages.ShowGlobalCommand.GlobalPropertiesHeader );
+            final String globalPropsHeader = I18n.bind( ShellI18n.globalPropertiesHeader );
             print( MESSAGE_INDENT, globalPropsHeader );
 
             // Print the properties
-            String nameTitle = Messages.getString( SHELL.PROPERTY_NAME_HEADER );
-            String valueTitle = Messages.getString( SHELL.PROPERTY_VALUE_HEADER );
+            String nameTitle = I18n.bind( ShellI18n.propertyNameHeader );
+            String valueTitle = I18n.bind( ShellI18n.propertyValueHeader );
             PrintUtils.printProperties( getWriter(), globalProperties, nameTitle, valueTitle );
 
             return CommandResult.SUCCESS;
@@ -93,6 +99,36 @@ public class ShowGlobalCommand extends BuiltInShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 0;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.showGlobalHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.showGlobalExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.showGlobalUsage ) );
     }
 
 }

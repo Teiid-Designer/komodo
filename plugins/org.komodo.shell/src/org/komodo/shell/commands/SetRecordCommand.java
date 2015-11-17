@@ -15,15 +15,22 @@ import java.util.Date;
 import java.util.List;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
-import org.komodo.shell.Messages;
-import org.komodo.shell.Messages.SHELL;
+import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.utils.StringUtils;
+import org.komodo.utils.i18n.I18n;
 
 /**
- * SetRecordCommand - enable or disable command recording
+ * A {@link ShellCommand command} that enables or disables command recording.
+ * <p>
+ * Usage:
+ * <p>
+ * <code>&nbsp;&nbsp;
+ * set-record &lt;on | off&gt;
+ * </code>
  */
 public class SetRecordCommand extends BuiltInShellCommand {
 
@@ -62,11 +69,11 @@ public class SetRecordCommand extends BuiltInShellCommand {
     @Override
     protected CommandResult doExecute() {
         try {
-            String onOffArg = requiredArgument(0, Messages.getString(Messages.SetRecordCommand.onOffArg_empty));
+            String onOffArg = requiredArgument(0, I18n.bind(ShellI18n.onOffArgEmpty));
 
             // Check for invalid arg
             if(!onOffArg.equalsIgnoreCase(ON) && !onOffArg.equalsIgnoreCase(OFF)) {
-                return new CommandResultImpl( false, Messages.getString(Messages.SetRecordCommand.onOffArg_invalid), null );
+                return new CommandResultImpl( false, I18n.bind(ShellI18n.onOffArgInvalid), null );
             }
 
             // Set WorkspaceStatus
@@ -77,19 +84,18 @@ public class SetRecordCommand extends BuiltInShellCommand {
 
                 // Output message if output file not defined or writer not available.
                 if(StringUtils.isEmpty(recordingFileStr)) {
-                    return new CommandResultImpl(Messages.getString(Messages.SetRecordCommand.recordingFileNotSet));
+                    return new CommandResultImpl(I18n.bind(ShellI18n.recordingFileNotSet));
                 }
 
                 Writer recordingWriter = getWorkspaceStatus().getRecordingWriter();
                 if(recordingWriter==null) {
-                    return new CommandResultImpl( Messages.getString( Messages.SetRecordCommand.recordingFileProblem,
-                                                                      recordingFileStr ) );
+                    return new CommandResultImpl( I18n.bind( ShellI18n.recordingFileProblem, recordingFileStr ) );
                 }
             } else if(onOffArg.equalsIgnoreCase(OFF)) {
                 wsStatus.setRecordingStatus(false);
             }
 
-            String stateChangedMsg = Messages.getString(Messages.SetRecordCommand.setRecordingStateMsg,onOffArg,(new Date()).toString(),recordingFileStr);
+            String stateChangedMsg = I18n.bind(ShellI18n.setRecordingStateMsg,onOffArg,(new Date()).toString(),recordingFileStr);
             outputToRecordingFile("#  ----------\n#  "+stateChangedMsg+"\n#  ----------"); //$NON-NLS-1$ //$NON-NLS-2$
             return new CommandResultImpl(stateChangedMsg);
         } catch ( final Exception e ) {
@@ -105,6 +111,36 @@ public class SetRecordCommand extends BuiltInShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 1;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.setRecordHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.setRecordExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.setRecordUsage ) );
     }
 
     /**
@@ -142,11 +178,11 @@ public class SetRecordCommand extends BuiltInShellCommand {
                 recordingWriter.flush();
             } catch (IOException ex) {
                 String filePath = wsStatus.getProperties().getProperty(WorkspaceStatus.RECORDING_FILE_KEY);
-                print(MESSAGE_INDENT, Messages.getString(SHELL.RecordingFileOutputError,filePath));
+                print(MESSAGE_INDENT, I18n.bind(ShellI18n.recordingFileOutputError, filePath));
             }
         // Print error message if the recording file was not defined
         } else {
-            print(MESSAGE_INDENT,Messages.getString(SHELL.RecordingFileNotDefined));
+            print(MESSAGE_INDENT,I18n.bind(ShellI18n.recordingFileNotDefined));
         }
     }
 

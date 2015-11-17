@@ -7,9 +7,6 @@
  */
 package org.komodo.relational.commands.pushdownfunction;
 
-import static org.komodo.relational.commands.pushdownfunction.PushdownFunctionCommandMessages.SetResultSetCommand.RESULT_SET_TYPE_SET;
-import static org.komodo.relational.commands.pushdownfunction.PushdownFunctionCommandMessages.General.MISSING_RESULT_SET_TYPE;
-import static org.komodo.relational.commands.storedprocedure.StoredProcedureCommandMessages.General.INVALID_RESULT_SET_TYPE;
 import java.util.Arrays;
 import java.util.List;
 import org.komodo.relational.model.DataTypeResultSet;
@@ -19,6 +16,7 @@ import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to set the result set for a PushdownFunction.
@@ -29,7 +27,7 @@ public final class SetResultSetCommand extends PushdownFunctionShellCommand {
 
     protected static final List< String > ALL_TYPES = Arrays.asList( new String[] { DataTypeResultSet.class.getSimpleName(),
                                                                                     TabularResultSet.class.getSimpleName()} );
-    
+
     /**
      * @param status
      *        the shell's workspace status (cannot be <code>null</code>)
@@ -48,7 +46,7 @@ public final class SetResultSetCommand extends PushdownFunctionShellCommand {
         CommandResult result = null;
 
         try {
-            final String rsType = requiredArgument( 0, getMessage( MISSING_RESULT_SET_TYPE ) );
+            final String rsType = requiredArgument( 0, I18n.bind( PushdownFunctionCommandsI18n.missingResultSetType ) );
 
             final PushdownFunction func = getPushdownFunction();
             if(rsType.equals(DataTypeResultSet.class.getSimpleName())) {
@@ -56,10 +54,10 @@ public final class SetResultSetCommand extends PushdownFunctionShellCommand {
             } else if(rsType.equals(TabularResultSet.class.getSimpleName())) {
                 func.setResultSet( getTransaction(), TabularResultSet.class );
             } else {
-                new CommandResultImpl( false, getMessage( INVALID_RESULT_SET_TYPE, rsType ), null );
+                new CommandResultImpl( false, I18n.bind( PushdownFunctionCommandsI18n.invalidResultSetType, rsType ), null );
             }
 
-            result = new CommandResultImpl( getMessage( RESULT_SET_TYPE_SET, rsType ) );
+            result = new CommandResultImpl( I18n.bind( PushdownFunctionCommandsI18n.resultSetTypeSet, rsType ) );
         } catch ( final Exception e ) {
             result = new CommandResultImpl( e );
         }
@@ -76,7 +74,37 @@ public final class SetResultSetCommand extends PushdownFunctionShellCommand {
     protected int getMaxArgCount() {
         return 1;
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( PushdownFunctionCommandsI18n.setResultSetHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( PushdownFunctionCommandsI18n.setResultSetExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( PushdownFunctionCommandsI18n.setResultSetUsage ) );
+    }
+
     /**
      * {@inheritDoc}
      *

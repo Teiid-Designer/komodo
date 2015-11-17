@@ -16,9 +16,9 @@
 package org.komodo.shell.api;
 
 import java.util.ArrayList;
-import org.komodo.shell.api.Messages.SHELLAPI;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.utils.StringUtils;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A class that can parse the arguments that should be passed to a command.
@@ -99,7 +99,7 @@ public class Arguments extends ArrayList<String> {
 		} else if (state == ScannerState.scanningForEndQuote && partialLastArgumentAllowed) {
             add(arguments.substring(startPos+1));
 		} else if (state == ScannerState.scanningForEndQuote && !partialLastArgumentAllowed) {
-		    throw new InvalidCommandArgumentException(size(), Messages.getString(SHELLAPI.invalid_final_arg));
+		    throw new InvalidCommandArgumentException(size(), I18n.bind(ShellApiI18n.invalidFinalArg));
 		}
 	}
 

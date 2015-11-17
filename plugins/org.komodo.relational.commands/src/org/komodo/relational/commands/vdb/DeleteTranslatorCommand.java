@@ -7,8 +7,6 @@
  */
 package org.komodo.relational.commands.vdb;
 
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.DeleteTranslatorCommand.TRANSLATOR_DELETED;
-import static org.komodo.relational.commands.vdb.VdbCommandMessages.General.MISSING_TRANSLATOR_NAME;
 import java.util.ArrayList;
 import java.util.List;
 import org.komodo.relational.vdb.Translator;
@@ -18,6 +16,7 @@ import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to delete a translator from a VDB.
@@ -44,12 +43,12 @@ public class DeleteTranslatorCommand extends VdbShellCommand {
         CommandResult result = null;
 
         try {
-            final String translatorName = requiredArgument( 0, getMessage( MISSING_TRANSLATOR_NAME ) );
+            final String translatorName = requiredArgument( 0, I18n.bind( VdbCommandsI18n.missingTranslatorName ) );
 
             final Vdb vdb = getVdb();
             vdb.removeTranslator( getTransaction(), translatorName );
 
-            result = new CommandResultImpl( getMessage( TRANSLATOR_DELETED, translatorName ) );
+            result = new CommandResultImpl( I18n.bind( VdbCommandsI18n.translatorDeleted, translatorName ) );
         } catch ( final Exception e ) {
             result = new CommandResultImpl( e );
         }
@@ -65,6 +64,36 @@ public class DeleteTranslatorCommand extends VdbShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 1;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( VdbCommandsI18n.deleteTranslatorHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( VdbCommandsI18n.deleteTranslatorExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( VdbCommandsI18n.deleteTranslatorUsage ) );
     }
 
     /**

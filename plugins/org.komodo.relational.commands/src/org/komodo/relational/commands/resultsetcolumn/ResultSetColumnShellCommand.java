@@ -9,14 +9,12 @@ package org.komodo.relational.commands.resultsetcolumn;
 
 import java.util.Arrays;
 import java.util.List;
-import org.komodo.relational.Messages;
 import org.komodo.relational.commands.RelationalShellCommand;
-import org.komodo.relational.model.Column;
 import org.komodo.relational.model.ResultSetColumn;
 import org.komodo.shell.api.WorkspaceStatus;
 
 /**
- * A base class for @{link {@link Column Column}-related shell commands.
+ * A base class for @{link {@link ResultSetColumn result set column}-related shell commands.
  */
 abstract class ResultSetColumnShellCommand extends RelationalShellCommand {
 
@@ -31,7 +29,7 @@ abstract class ResultSetColumnShellCommand extends RelationalShellCommand {
     protected static final String UUID = "UUID"; //$NON-NLS-1$
 
     protected static final List< String > ALL_PROPS = Arrays.asList( new String[] { DATATYPE_NAME, DEFAULT_VALUE, DESCRIPTION,
-                                                                                    LENGTH, NAME_IN_SOURCE, NULLABLE, 
+                                                                                    LENGTH, NAME_IN_SOURCE, NULLABLE,
                                                                                     PRECISION, SCALE, UUID } );
 
     protected ResultSetColumnShellCommand( final String name,
@@ -54,29 +52,8 @@ abstract class ResultSetColumnShellCommand extends RelationalShellCommand {
         try {
             return ResultSetColumn.RESOLVER.resolvable(getTransaction(), getContext());
         } catch (Exception ex) {
-            // exception returns false
+            return false;
         }
-        return false;
-    }
-
-    @Override
-    protected String getMessage(Enum< ? > key, Object... parameters) {
-        return Messages.getString(ResultSetColumnCommandMessages.RESOURCE_BUNDLE,key.toString(),parameters);
-    }
-
-    @Override
-    protected void printHelpDescription( final int indent ) {
-        print( indent, Messages.getString( ResultSetColumnCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".help", getName() ) ); //$NON-NLS-1$
-    }
-
-    @Override
-    protected void printHelpExamples( final int indent ) {
-        print( indent, Messages.getString( ResultSetColumnCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".examples" ) ); //$NON-NLS-1$
-    }
-
-    @Override
-    protected void printHelpUsage( final int indent ) {
-        print( indent, Messages.getString( ResultSetColumnCommandMessages.RESOURCE_BUNDLE, getClass().getSimpleName() + ".usage" ) ); //$NON-NLS-1$
     }
 
 }

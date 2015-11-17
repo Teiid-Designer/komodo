@@ -11,13 +11,21 @@ import java.util.List;
 import java.util.Set;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
-import org.komodo.shell.Messages;
+import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.utils.StringUtils;
+import org.komodo.utils.i18n.I18n;
 
 /**
- * A command to set the value of a global property
+ * A {@link ShellCommand command} to set the value of a global property
+ * <p>
+ * Usage:
+ * <p>
+ * <code>&nbsp;&nbsp;
+ * set-global &lt;prop-name&gt; &lt;prop-value&gt;
+ * </code>
  */
 public class SetGlobalPropertyCommand extends BuiltInShellCommand {
 
@@ -53,22 +61,19 @@ public class SetGlobalPropertyCommand extends BuiltInShellCommand {
     protected CommandResult doExecute() {
         try {
             // property name and value are required
-            String propNameArg = requiredArgument(0, Messages.getString(Messages.SetGlobalPropertyCommand.InvalidArgMsg_GlobalPropertyName));
-            String propValueArg = requiredArgument(1, Messages.getString(Messages.SetGlobalPropertyCommand.InvalidArgMsg_PropertyValue ) );
+            String propNameArg = requiredArgument(0, I18n.bind(ShellI18n.invalidArgMsgGlobalPropertyName));
+            String propValueArg = requiredArgument(1, I18n.bind(ShellI18n.invalidArgMsgPropertyValue ) );
 
             // validate global property name and value
             final String errorMsg = getWorkspaceStatus().validateGlobalPropertyValue( propNameArg, propValueArg );
 
             if ( !StringUtils.isEmpty( errorMsg ) ) {
-                return new CommandResultImpl( false,
-                                              Messages.getString( Messages.SetGlobalPropertyCommand.InvalidGlobalProperty,
-                                                                  errorMsg ),
-                                              null );
+                return new CommandResultImpl( false, I18n.bind( ShellI18n.invalidGlobalProperty, errorMsg ), null );
             }
 
             // Set the property
             setGlobalProperty( propNameArg, propValueArg );
-            return new CommandResultImpl( Messages.getString( Messages.SetGlobalPropertyCommand.GlobalPropertySet, propNameArg ) );
+            return new CommandResultImpl( I18n.bind( ShellI18n.globalPropertySet, propNameArg ) );
         } catch ( final Exception e ) {
             return new CommandResultImpl( e );
         }
@@ -82,6 +87,36 @@ public class SetGlobalPropertyCommand extends BuiltInShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 2;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.setGlobalPropertyHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.setGlobalPropertyExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( ShellI18n.setGlobalPropertyUsage ) );
     }
 
     /**

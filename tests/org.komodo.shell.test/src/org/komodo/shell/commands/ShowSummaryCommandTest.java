@@ -44,9 +44,9 @@ public class ShowSummaryCommandTest extends AbstractCommandTest {
 
         String writerOutput = getCommandOutput();
         assertThat( writerOutput, writerOutput.contains( KomodoObject.class.getSimpleName()
-                                                         + " \""
+                                                         + " '"
                                                          + KomodoObjectLabelProvider.LIB_DISPLAY_PATH
-                                                         + "\"" ),
+                                                         + '\'' ),
                     is( true ) );
     }
 
@@ -58,9 +58,9 @@ public class ShowSummaryCommandTest extends AbstractCommandTest {
 
         String writerOutput = getCommandOutput();
         assertThat( writerOutput, writerOutput.contains( KomodoObject.class.getSimpleName()
-                                                         + " \""
+                                                         + " '"
                                                          + KomodoObjectLabelProvider.ROOT_DISPLAY_NAME
-                                                         + "\"" ),
+                                                         + '\'' ),
                     is( true ) );
     }
 
@@ -73,9 +73,9 @@ public class ShowSummaryCommandTest extends AbstractCommandTest {
 
         String writerOutput = getCommandOutput();
         assertThat( writerOutput, writerOutput.contains( KomodoObject.class.getSimpleName()
-                                                         + " \""
+                                                         + " '"
                                                          + KomodoObjectLabelProvider.WORKSPACE_DISPLAY_PATH
-                                                         + "\"" ),
+                                                         + '\'' ),
                     is( true ) );
     }
 

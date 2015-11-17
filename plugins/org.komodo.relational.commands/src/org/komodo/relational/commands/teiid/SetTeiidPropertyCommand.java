@@ -7,12 +7,9 @@
  */
 package org.komodo.relational.commands.teiid;
 
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.INVALID_BOOLEAN_PROPERTY_VALUE;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.INVALID_INTEGER_PROPERTY_VALUE;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.INVALID_PROPERTY_NAME;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.MISSING_PROPERTY_NAME_VALUE;
-import static org.komodo.relational.commands.workspace.WorkspaceCommandMessages.General.SET_PROPERTY_SUCCESS;
 import java.util.List;
+import org.komodo.relational.commands.mask.MaskCommandsI18n;
+import org.komodo.relational.commands.workspace.WorkspaceCommandsI18n;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
@@ -21,6 +18,7 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.SetPropertyCommand;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.StringUtils;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * A shell command to set Teiid properties
@@ -47,8 +45,8 @@ public final class SetTeiidPropertyCommand extends TeiidShellCommand {
         CommandResult result = null;
 
         try {
-            final String name = requiredArgument( 0, getWorkspaceMessage( MISSING_PROPERTY_NAME_VALUE ) );
-            final String value = requiredArgument( 1, getWorkspaceMessage( MISSING_PROPERTY_NAME_VALUE ) );
+            final String name = requiredArgument( 0, I18n.bind( WorkspaceCommandsI18n.missingPropertyNameValue ) );
+            final String value = requiredArgument( 1, I18n.bind( WorkspaceCommandsI18n.missingPropertyNameValue ) );
 
             final Teiid teiid = getTeiid();
             final UnitOfWork transaction = getTransaction();
@@ -60,7 +58,7 @@ public final class SetTeiidPropertyCommand extends TeiidShellCommand {
                         final int port = Integer.parseInt( value );
                         teiid.setAdminPort( transaction, port );
                     } catch ( final NumberFormatException e ) {
-                        errorMsg = getWorkspaceMessage( INVALID_INTEGER_PROPERTY_VALUE, ADMIN_PORT );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, ADMIN_PORT );
                     }
 
                     break;
@@ -71,7 +69,7 @@ public final class SetTeiidPropertyCommand extends TeiidShellCommand {
                     if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
                         teiid.setAdminSecure( transaction, Boolean.parseBoolean( value ) );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, ADMIN_SECURE );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, ADMIN_SECURE );
                     }
 
                     break;
@@ -83,7 +81,7 @@ public final class SetTeiidPropertyCommand extends TeiidShellCommand {
                         final int port = Integer.parseInt( value );
                         teiid.setJdbcPort( transaction, port );
                     } catch ( final NumberFormatException e ) {
-                        errorMsg = getWorkspaceMessage( INVALID_INTEGER_PROPERTY_VALUE, JDBC_PORT );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, JDBC_PORT );
                     }
 
                     break;
@@ -94,7 +92,7 @@ public final class SetTeiidPropertyCommand extends TeiidShellCommand {
                     if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
                         teiid.setJdbcSecure( transaction, Boolean.parseBoolean( value ) );
                     } else {
-                        errorMsg = getWorkspaceMessage( INVALID_BOOLEAN_PROPERTY_VALUE, JDBC_SECURE );
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, JDBC_SECURE );
                     }
 
                     break;
@@ -105,12 +103,12 @@ public final class SetTeiidPropertyCommand extends TeiidShellCommand {
                     teiid.setHost( transaction, value );
                     break;
                 default:
-                    errorMsg = getWorkspaceMessage( INVALID_PROPERTY_NAME, name, Teiid.class.getSimpleName() );
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Teiid.class.getSimpleName() );
                     break;
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {
-                result = new CommandResultImpl( getWorkspaceMessage( SET_PROPERTY_SUCCESS, name ) );
+                result = new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.setPropertySuccess, name ) );
             } else {
                 result = new CommandResultImpl( false, errorMsg, null );
             }
@@ -129,6 +127,36 @@ public final class SetTeiidPropertyCommand extends TeiidShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 2;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
+     */
+    @Override
+    protected void printHelpDescription( final int indent ) {
+        print( indent, I18n.bind( TeiidCommandsI18n.setTeiidPropertyHelp, getName() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
+     */
+    @Override
+    protected void printHelpExamples( final int indent ) {
+        print( indent, I18n.bind( TeiidCommandsI18n.setTeiidPropertyExamples ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
+     */
+    @Override
+    protected void printHelpUsage( final int indent ) {
+        print( indent, I18n.bind( MaskCommandsI18n.setMaskPropertyUsage ) );
     }
 
     /**

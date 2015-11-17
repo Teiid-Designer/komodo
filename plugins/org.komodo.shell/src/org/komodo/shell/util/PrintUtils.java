@@ -19,15 +19,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.TreeMap;
-import org.komodo.shell.Messages;
-import org.komodo.shell.Messages.SHELL;
-import org.komodo.shell.api.Messages.SHELLAPI;
+import org.komodo.shell.ShellI18n;
+import org.komodo.shell.api.ShellApiI18n;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.KLog;
 import org.komodo.utils.StringUtils;
+import org.komodo.utils.i18n.I18n;
 
 /**
  *  Utilities for formatted printing
@@ -59,7 +59,7 @@ public class PrintUtils implements StringConstants {
     public static void print(Writer writer, boolean addNewLine, int indent,String formattedMessage, Object... params) {
         if(writer==null) return;
 
-        ArgCheck.isNonNegative(indent, Messages.getString(SHELLAPI.negative_indent_supplied));
+        ArgCheck.isNonNegative(indent, I18n.bind(ShellApiI18n.negativeIndentSupplied));
         StringBuffer sb = new StringBuffer();
         for(int i=0; i<indent; i++) {
             sb.append(StringConstants.SPACE);
@@ -99,7 +99,7 @@ public class PrintUtils implements StringConstants {
             print( writer, MESSAGE_INDENT, name );
         }
     }
-    
+
     /**
      * Prints a list with multiple items per line
      * @param indent number of spaces to indent
@@ -113,7 +113,7 @@ public class PrintUtils implements StringConstants {
         for(int i=0; i<indent; i++) {
             indentBuffer.append(StringConstants.SPACE);
         }
-        
+
         int maxNameWidth = DEFAULT_WIDTH;
         for(String item : items) {
             maxNameWidth = updateMaxNameWidth(maxNameWidth,item);
@@ -156,7 +156,7 @@ public class PrintUtils implements StringConstants {
         for(String name : props.stringPropertyNames()) {
             String value = props.getProperty(name);
             if(StringUtils.isEmpty(value)) {
-                value = Messages.getString( SHELL.NO_PROPERTY_VALUE );
+                value = I18n.bind( ShellI18n.noPropertyValue );
             }
 
             if ( maxNameWidth < name.length() ) {
@@ -215,7 +215,7 @@ public class PrintUtils implements StringConstants {
 
         if ( props.isEmpty() ) {
             final String path = wsStatus.getDisplayPath(context);
-            final String noPropsMsg = Messages.getString( SHELL.NoPropertiesMsg, wsStatus.getTypeDisplay(context), path );
+            final String noPropsMsg = I18n.bind( ShellI18n.noPropertiesMsg, wsStatus.getTypeDisplay(context), path );
             print( writer, MESSAGE_INDENT, noPropsMsg );
             return;
         }
@@ -235,7 +235,7 @@ public class PrintUtils implements StringConstants {
                 value = KomodoObjectUtils.getPropertyValue(wsStatus, context, name );
 
                 if ( StringUtils.isBlank( value ) ) {
-                    value = Messages.getString( SHELL.NO_PROPERTY_VALUE );
+                    value = I18n.bind( ShellI18n.noPropertyValue );
                 }
             }
 
@@ -262,14 +262,13 @@ public class PrintUtils implements StringConstants {
         // Print properties header
         final String objType = wsStatus.getTypeDisplay(context); // current object type
         final String path = wsStatus.getDisplayPath(context);
-        final String propListHeader = Messages.getString( SHELL.PropertiesHeader, objType, path );
+        final String propListHeader = I18n.bind( ShellI18n.propertiesHeader, objType, path );
         print( writer, MESSAGE_INDENT, propListHeader );
 
         final String format = PrintUtils.getFormat( maxNameWidth, maxValueWidth );
-        print( writer, MESSAGE_INDENT,
-               String.format( format,
-                              Messages.getString( SHELL.PROPERTY_NAME_HEADER ),
-                              Messages.getString( SHELL.PROPERTY_VALUE_HEADER ) ) );
+        print( writer,
+               MESSAGE_INDENT,
+               String.format( format, I18n.bind( ShellI18n.propertyNameHeader ), I18n.bind( ShellI18n.propertyValueHeader ) ) );
         print( writer, MESSAGE_INDENT, String.format( format, PrintUtils.getHeaderDelimiter( maxNameWidth ), PrintUtils.getHeaderDelimiter( maxValueWidth ) ) );
 
         // print property name and value
@@ -301,7 +300,7 @@ public class PrintUtils implements StringConstants {
         String propValue = KomodoObjectUtils.getPropertyValue(wsStatus, context, propertyName );
 
         if ( StringUtils.isBlank( propValue ) ) {
-            propValue = Messages.getString( SHELL.NO_PROPERTY_VALUE );
+            propValue = I18n.bind( ShellI18n.noPropertyValue );
         }
 
         if ( !wsStatus.isShowingPropertyNamePrefixes() ) {
@@ -320,12 +319,11 @@ public class PrintUtils implements StringConstants {
 
         // Print properties header
         final String path = wsStatus.getDisplayPath(context);
-        String propListHeader = Messages.getString( SHELL.PropertyHeader, wsStatus.getTypeDisplay(context), path );
+        String propListHeader = I18n.bind( ShellI18n.propertyHeader, wsStatus.getTypeDisplay(context), path );
         print( writer, MESSAGE_INDENT, propListHeader );
-        print( writer, MESSAGE_INDENT,
-               String.format( format,
-                              Messages.getString( SHELL.PROPERTY_NAME_HEADER ),
-                              Messages.getString( SHELL.PROPERTY_VALUE_HEADER ) ) );
+        print( writer,
+               MESSAGE_INDENT,
+               String.format( format, I18n.bind( ShellI18n.propertyNameHeader ), I18n.bind( ShellI18n.propertyValueHeader ) ) );
         print( writer, MESSAGE_INDENT, String.format( format, PrintUtils.getHeaderDelimiter( maxNameWidth ), PrintUtils.getHeaderDelimiter( maxValueWidth ) ) );
 
         // propValue less than maximum width
@@ -350,7 +348,7 @@ public class PrintUtils implements StringConstants {
 
         if ( childList.isEmpty() ) {
             final String path = wsStatus.getDisplayPath(context);
-            String noChildrenMsg = Messages.getString( SHELL.noChildrenMsg, wsStatus.getTypeDisplay(context), path );
+            String noChildrenMsg = I18n.bind( ShellI18n.noChildrenMsg, wsStatus.getTypeDisplay(context), path );
             print(writer, MESSAGE_INDENT, noChildrenMsg );
             return;
         }
@@ -406,12 +404,12 @@ public class PrintUtils implements StringConstants {
 
         // Print children header
         final String path = wsStatus.getDisplayPath(context);
-        final String childrenHeader = Messages.getString( SHELL.ChildrenHeader, wsStatus.getTypeDisplay(context), path );
+        final String childrenHeader = I18n.bind( ShellI18n.childrenHeader, wsStatus.getTypeDisplay(context), path );
         print( writer, MESSAGE_INDENT, childrenHeader );
 
         final String format = PrintUtils.getFormat( maxNameWidth, maxTypeWidth );
         print( writer, MESSAGE_INDENT,
-               String.format( format, Messages.getString( SHELL.CHILD_NAME_HEADER ), Messages.getString( SHELL.CHILD_TYPE_HEADER ) ) );
+               String.format( format, I18n.bind( ShellI18n.childNameHeader ), I18n.bind( ShellI18n.childTypeHeader ) ) );
         print( writer, MESSAGE_INDENT, String.format( format, PrintUtils.getHeaderDelimiter( maxNameWidth ), PrintUtils.getHeaderDelimiter( maxTypeWidth ) ) );
 
         // Print each child
