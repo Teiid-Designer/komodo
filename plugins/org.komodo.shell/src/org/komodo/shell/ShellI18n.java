@@ -186,6 +186,8 @@ public final class ShellI18n extends I18n {
     public static String invalidGlobalPropertyName;
     public static String invalidPropName;
     public static String invalidPropValue;
+    public static String invalidStartupArgs;
+    public static String invalidStartupFile;
     public static String listHeader;
     public static String localRepositoryStarting;
     public static String localRepositoryTimeoutError;
