@@ -78,6 +78,10 @@ public final class ShellI18n extends I18n {
     public static String setGlobalPropertyExamples;
     public static String setGlobalPropertyHelp;
     public static String setGlobalPropertyUsage;
+    
+    public static String resetGlobalPropertyExamples;
+    public static String resetGlobalPropertyHelp;
+    public static String resetGlobalPropertyUsage;
 
     public static String setPrimaryTypeExamples;
     public static String setPrimaryTypeHelp;
@@ -158,6 +162,8 @@ public final class ShellI18n extends I18n {
     public static String generalCommandCategory;
     public static String globalPropertiesHeader;
     public static String globalPropertySet;
+    public static String globalPropertyReset;
+    public static String globalResetAllProps;
     public static String goodBye;
     public static String helpAliasesHeading;
     public static String helpCategoryHeader;
@@ -173,6 +179,7 @@ public final class ShellI18n extends I18n {
     public static String invalidArgMsgEntryPath;
     public static String invalidArgMsgFileName;
     public static String invalidArgMsgGlobalPropertyName;
+    public static String invalidArgMsgResetGlobalPropertyName;
     public static String invalidArgMsgNewName;
     public static String invalidArgMsgObjectName;
     public static String invalidArgMsgPropertiesFileNotExist;
