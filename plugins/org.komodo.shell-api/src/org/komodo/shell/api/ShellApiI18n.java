@@ -15,6 +15,7 @@ import org.komodo.utils.i18n.I18n;
 @SuppressWarnings( "javadoc" )
 public final class ShellApiI18n extends I18n {
 
+    public static String generalCommandCategory;
     public static String invalidFinalArg;
     public static String negativeIndentSupplied;
 

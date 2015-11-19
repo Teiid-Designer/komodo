@@ -67,6 +67,7 @@ import org.komodo.utils.FileUtils;
 import org.komodo.utils.KLog;
 import org.komodo.utils.StringUtils;
 import org.komodo.utils.i18n.I18n;
+import org.modeshape.common.collection.Collections;
 
 /**
  * Test implementation of WorkspaceStatus
@@ -383,7 +384,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         if(this.currentContextCommands.isEmpty()) {
             updateAvailableCommands();
         }
-        return this.currentContextCommands;
+        return Collections.unmodifiableSet( this.currentContextCommands );
     }
 
     /**

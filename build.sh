@@ -87,6 +87,7 @@ fi
 #
 if [ "${SKIP}" == "1" ]; then
   SKIP_FLAG="-DskipTests"
+  INTEGRATION_SKIP_FLAG="-Dintegration.skipTests=true"
 fi
 
 #
@@ -94,7 +95,7 @@ fi
 # -P <profiles> : The profiles to be used for downloading jbosstools artifacts
 # -D maven.repo.local : Assign the $LOCAL_REPO as the target repository
 #
-MVN_FLAGS="${MVN_FLAGS} -P target-platform,multiple.target -Dmaven.repo.local=${LOCAL_REPO} -Dno.jbosstools.site -Dtycho.localArtifacts=ignore ${SKIP_FLAG}"
+MVN_FLAGS="${MVN_FLAGS} -P target-platform,multiple.target -Dmaven.repo.local=${LOCAL_REPO} -Dno.jbosstools.site -Dtycho.localArtifacts=ignore ${SKIP_FLAG} ${INTEGRATION_SKIP_FLAG}"
 
 echo "==============="
 

@@ -121,16 +121,6 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.ShellCommand#getCategory()
-     */
-    @Override
-    public String getCategory() {
-        return I18n.bind( ShellI18n.generalCommandCategory );
-    }
-
-    /**
      * @return the maximum number of arguments allowed
      */
     protected abstract int getMaxArgCount();
@@ -217,7 +207,9 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
     }
 
     /**
-     * @param output the output to set
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommand#setWriter(java.io.Writer)
      */
     @Override
     public void setWriter(Writer output) {
@@ -232,38 +224,6 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
     @Override
     public Writer getWriter() {
         return this.writer;
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * Value is {@value}.
-     *
-     * @see org.komodo.shell.api.ShellCommand#isEnabled()
-     */
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * Defaults to {@value}.
-     *
-     * @see org.komodo.shell.api.ShellCommand#isOverridable()
-     */
-    @Override
-    public boolean isOverridable() {
-        return true;
-    }
-
-    /**
-     * @see org.komodo.shell.api.ShellCommand#tabCompletion(java.lang.String, java.util.List)
-     */
-    @Override
-    public int tabCompletion(String lastArgument, List<CharSequence> candidates) throws Exception {
-        return -1;
     }
 
 	protected KomodoObject getContext() {

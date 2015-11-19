@@ -7,14 +7,15 @@
  */
 package org.komodo.relational.commands.vdbimport;
 
-import org.komodo.shell.api.CommandResult;
+import org.komodo.relational.vdb.VdbImport;
+import org.komodo.shell.DisabledShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.RenameCommand;
 
 /**
  * Overrides default RenameCommand to disable it for VdbImport, since VdbImport has no children to rename
  */
-public final class RenameChildCommand extends VdbImportShellCommand {
+public final class RenameChildCommand extends DisabledShellCommand {
 
     static final String NAME = RenameCommand.NAME; // override
 
@@ -23,68 +24,21 @@ public final class RenameChildCommand extends VdbImportShellCommand {
      *        the shell's workspace status (cannot be <code>null</code>)
      */
     public RenameChildCommand( final WorkspaceStatus status ) {
-        super( NAME, status );
+        super( status, NAME );
     }
 
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.shell.BuiltInShellCommand#doExecute()
+     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
      */
     @Override
-    protected CommandResult doExecute() {
-        assert false;
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
-     */
-    @Override
-    protected int getMaxArgCount() {
-        return 0;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.BuiltInShellCommand#isEnabled()
-     */
-    @Override
-    public boolean isEnabled() {
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.BuiltInShellCommand#printHelpDescription(int)
-     */
-    @Override
-    protected void printHelpDescription( final int indent ) {
-        // nothing to do
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.BuiltInShellCommand#printHelpExamples(int)
-     */
-    @Override
-    protected void printHelpExamples( final int indent ) {
-        // nothing to do
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.BuiltInShellCommand#printHelpUsage(int)
-     */
-    @Override
-    protected void printHelpUsage( final int indent ) {
-        // nothing to do
+    public boolean isValidForCurrentContext() {
+        try {
+            return VdbImport.RESOLVER.resolvable( getTransaction(), getContext() );
+        } catch ( final Exception e ) {
+            return false;
+        }
     }
 
 }

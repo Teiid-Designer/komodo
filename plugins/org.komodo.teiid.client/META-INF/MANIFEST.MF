@@ -4,7 +4,7 @@ Bundle-Name: %pluginName
 Bundle-SymbolicName: org.komodo.teiid.client;singleton:=true
 Bundle-Version: 0.0.3.qualifier
 Bundle-Vendor: %pluginProvider
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Localization: plugin
 Require-Bundle: org.komodo.spi;bundle-version="0.0.3",
  org.komodo.utils;bundle-version="0.0.3"
