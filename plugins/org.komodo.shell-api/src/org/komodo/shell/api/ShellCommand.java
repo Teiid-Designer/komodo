@@ -17,6 +17,7 @@ package org.komodo.shell.api;
 
 import java.io.Writer;
 import java.util.List;
+import org.komodo.utils.i18n.I18n;
 
 /**
  * Interface implemented by all shell commands.
@@ -33,13 +34,15 @@ public interface ShellCommand {
      *  The command not found name
      */
     String COMMAND_NOT_FOUND = "cmd-not-found";  //$NON-NLS-1$
-    
+
     /**
      * Commands without a category will be placed in a general category.
      *
      * @return the command category (can be empty)
      */
-    String getCategory();
+    default String getCategory() {
+        return I18n.bind( ShellApiI18n.generalCommandCategory );
+    }
 
     /**
      * @return the command name (never empty)
@@ -85,14 +88,18 @@ public interface ShellCommand {
     boolean isValidForCurrentContext();
 
     /**
-     * @return <code>true</code> if the command can be overridden
-     */
-    boolean isOverridable();
-
-    /**
      * @return <code>true</code> if the command is enabled
      */
-    boolean isEnabled();
+    default boolean isEnabled() {
+        return true;
+    }
+
+    /**
+     * @return <code>true</code> if the command can be overridden
+     */
+    default boolean isOverridable() {
+        return true;
+    }
 
     /**
      * Called to execute the command.
@@ -137,6 +144,9 @@ public interface ShellCommand {
 	 * @return the cursor position
 	 * @throws Exception if errors occur
 	 */
-	int tabCompletion(String lastArgument, List<CharSequence> candidates) throws Exception;
+    default int tabCompletion( final String lastArgument,
+                               final List< CharSequence > candidates ) throws Exception {
+        return -1;
+    }
 
 }

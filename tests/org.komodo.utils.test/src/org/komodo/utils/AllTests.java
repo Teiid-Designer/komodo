@@ -1,4 +1,4 @@
-package org.komodo.utils.test;
+package org.komodo.utils;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;

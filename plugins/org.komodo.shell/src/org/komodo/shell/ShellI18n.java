@@ -136,6 +136,7 @@ public final class ShellI18n extends I18n {
     public static String childrenHeader;
     public static String childTypeHeader;
     public static String commandFailure;
+    public static String commandIsDisabled;
     public static String commandNotFound;
     public static String commitSuccess;
     public static String componentStarted;
@@ -144,6 +145,7 @@ public final class ShellI18n extends I18n {
     public static String currentRepoUrl;
     public static String descriptorAdded;
     public static String descriptorRemoved;
+    public static String disabledCommandMethodNotSupported;
     public static String enable_flag_missing;
     public static String engineStarting;
     public static String errorGettingChild;
@@ -155,7 +157,6 @@ public final class ShellI18n extends I18n {
     public static String fileNotAccessible;
     public static String fileNotFound;
     public static String fileShellCommandReaderNoConsole;
-    public static String generalCommandCategory;
     public static String globalPropertiesHeader;
     public static String globalPropertySet;
     public static String goodBye;
