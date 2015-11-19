@@ -83,7 +83,7 @@ public class ResetGlobalPropertyCommand extends BuiltInShellCommand {
             }
         } 
         
-        return CompletionConstants.NO_APPEND_SEPARATOR;
+        return ( candidates.isEmpty() ? -1 : ( StringUtils.isBlank( lastArgument ) ? 0 : ( toString().length() + 1 ) ) );
     }
 
 	@Override
