@@ -686,7 +686,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         if ( StringUtils.isEmpty( value ) ) {
             this.wsProperties.remove(name);
         } else {
-            this.wsProperties.setProperty( name.toUpperCase(), value );
+            this.wsProperties.setProperty( name, value );
         }
     }
 
