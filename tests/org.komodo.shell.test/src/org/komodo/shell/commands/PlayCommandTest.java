@@ -55,7 +55,7 @@ public final class PlayCommandTest extends AbstractCommandTest {
     @Test
     public void shouldNotAffectAutoCommitFlagWhenAutoCommitIsOff() throws Exception {
         final boolean expected = false;
-        this.wsStatus.setProperty( WorkspaceStatus.AUTO_COMMIT, Boolean.valueOf( expected ).toString() );
+        this.wsStatus.setGlobalProperty( WorkspaceStatus.AUTO_COMMIT, Boolean.valueOf( expected ).toString() );
         assertThat( this.wsStatus.isAutoCommit(), is( expected ) );
 
         setup( "test-command-file.txt" );
@@ -68,7 +68,7 @@ public final class PlayCommandTest extends AbstractCommandTest {
     @Test
     public void shouldNotAffectAutoCommitFlagWhenAutoCommitIsOn() throws Exception {
         final boolean expected = true;
-        this.wsStatus.setProperty( WorkspaceStatus.AUTO_COMMIT, Boolean.valueOf( expected ).toString() );
+        this.wsStatus.setGlobalProperty( WorkspaceStatus.AUTO_COMMIT, Boolean.valueOf( expected ).toString() );
         assertThat( this.wsStatus.isAutoCommit(), is( expected ) );
 
         setup( "test-command-file.txt" );

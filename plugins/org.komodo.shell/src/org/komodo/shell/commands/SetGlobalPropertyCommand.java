@@ -127,7 +127,7 @@ public class SetGlobalPropertyCommand extends BuiltInShellCommand {
      */
     private void setGlobalProperty(String propName, String propValue) throws Exception {
         WorkspaceStatus wsStatus = getWorkspaceStatus();
-        wsStatus.setProperty(propName, propValue);
+        wsStatus.setGlobalProperty(propName, propValue);
     }
 
     /**

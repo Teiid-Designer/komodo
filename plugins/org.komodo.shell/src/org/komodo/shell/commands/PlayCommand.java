@@ -70,7 +70,7 @@ public class PlayCommand  extends BuiltInShellCommand {
             try {
                 // turn auto-commit off for batch
                 if ( saveAutoCommit ) {
-                    wsStatus.setProperty( WorkspaceStatus.AUTO_COMMIT, Boolean.FALSE.toString() );
+                    wsStatus.setGlobalProperty( WorkspaceStatus.AUTO_COMMIT, Boolean.FALSE.toString() );
                 }
 
                 { // play file
@@ -120,8 +120,8 @@ public class PlayCommand  extends BuiltInShellCommand {
             } finally {
                 // if AUTO_COMMIT if different (script could've changed value also)
                 if ( getWorkspaceStatus().isAutoCommit() != saveAutoCommit ) {
-                    getWorkspaceStatus().setProperty( WorkspaceStatus.AUTO_COMMIT,
-                                                      Boolean.valueOf( saveAutoCommit ).toString() );
+                    getWorkspaceStatus().setGlobalProperty( WorkspaceStatus.AUTO_COMMIT,
+                                                            Boolean.valueOf( saveAutoCommit ).toString() );
                 }
             }
         } catch ( final Exception e ) {

@@ -139,9 +139,38 @@ public interface WorkspaceStatus extends StringConstants {
      * @param propValue
      *        the property value (can be empty when changing to the default value)
      */
-    void setProperty( final String propKey,
-                      final String propValue );
+    void setGlobalProperty( final String propKey,
+                            final String propValue );
 
+    /**
+     * Sets provided workspace properties on startup
+     *
+     * @param props
+     *        the properties (can be <code>null</code> or null to remove)
+     * @throws Exception
+     *         if an error occurs
+     */
+    void setProvidedProperties( final Properties props ) throws Exception;
+    
+    /**
+     * Sets the specified provided property value in workspace properties.
+     *
+     * @param propKey
+     *        the property key (cannot be empty)
+     * @param propValue
+     *        the property value (can be empty when changing to the default value)
+     */
+    void setProvidedProperty( final String propKey,
+                              final String propValue );
+
+    /**
+     * Gets a copy of the provided workspace properties.  This returns only the properties that are provided.
+     *
+     * @return the provided workspace properties (never <code>null</code> or empty)
+     * @see #setProvidedProperty(String, String)
+     */
+    Properties getProvidedProperties();
+    
     /**
      * Sets global workspace properties on startup
      *
@@ -150,15 +179,15 @@ public interface WorkspaceStatus extends StringConstants {
      * @throws Exception
      *         if an error occurs
      */
-    void setProperties( final Properties props ) throws Exception;
+    void setGlobalProperties( final Properties props ) throws Exception;
 
     /**
-     * Gets a copy of the global workspace properties.
+     * Gets a copy of the global workspace properties.  This includes the defined global properties and defined hidden properties. 
      *
      * @return the global workspace properties (never <code>null</code> or empty)
-     * @see #setProperty(String, String)
+     * @see #setGlobalProperty(String, String)
      */
-    Properties getProperties();
+    Properties getGlobalProperties();
 
     /**
      * @param propertyName the name of the property being checked (cannot be empty)
@@ -308,14 +337,6 @@ public interface WorkspaceStatus extends StringConstants {
      */
     void commit(String source) throws Exception;
 
-//    /**
-//     * Commit
-//     * @param source identifier for commit
-//     * @param importMessages collects import messages
-//     * @throws Exception
-//     */
-//	void commitImport( final String source, ImportMessages importMessages ) throws Exception;
-
     /**
      * Rolls back any unsaved changes.
      *
@@ -356,8 +377,9 @@ public interface WorkspaceStatus extends StringConstants {
      * Set a generic workspace state object
      * @param key the state key
      * @param stateObj the state object
+     * @throws KException the exception
      */
-    void setStateObject(String key, KomodoObject stateObj);
+    void setStateObject(String key, KomodoObject stateObj) throws KException;
 
     /**
      * Remove a generic workspace state object

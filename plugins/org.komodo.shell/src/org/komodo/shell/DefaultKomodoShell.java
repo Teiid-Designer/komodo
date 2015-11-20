@@ -274,7 +274,8 @@ public class DefaultKomodoShell implements KomodoShell {
                                                      e.getMessage() ) );
             }
 
-            this.wsStatus.setProperties( props );
+            this.wsStatus.setGlobalProperties( props );
+            this.wsStatus.setProvidedProperties( props );
         }
 
         reader = ShellCommandReaderFactory.createCommandReader( args, wsStatus );
@@ -466,7 +467,10 @@ public class DefaultKomodoShell implements KomodoShell {
                 Files.createFile( propFile );
             }
 
-            this.wsStatus.getProperties().store( new FileOutputStream( propFile.toString() ), null );
+            Properties allProps = this.wsStatus.getGlobalProperties();
+            Properties providedProps = this.wsStatus.getProvidedProperties();
+            allProps.putAll(providedProps);
+            allProps.store( new FileOutputStream( propFile.toString() ), null );
             this.wsStatus.closeRecordingWriter();
 
             // should not have any changes at this point unless user ctrl-c
@@ -516,7 +520,7 @@ public class DefaultKomodoShell implements KomodoShell {
                 recordingWriter.write( command.toString() + StringConstants.NEW_LINE );
                 recordingWriter.flush();
             } catch ( IOException ex ) {
-                String filePath = wsStatus.getProperties().getProperty( WorkspaceStatus.RECORDING_FILE_KEY );
+                String filePath = wsStatus.getGlobalProperties().getProperty( WorkspaceStatus.RECORDING_FILE_KEY );
                 PrintUtils.print( recordingWriter, 0, I18n.bind( ShellI18n.recordingFileOutputError, filePath ) );
             }
             // Print error message if the recording file was not defined
