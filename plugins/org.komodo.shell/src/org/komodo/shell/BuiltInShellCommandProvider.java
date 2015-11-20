@@ -26,6 +26,7 @@ import org.komodo.shell.commands.ListCommand;
 import org.komodo.shell.commands.PlayCommand;
 import org.komodo.shell.commands.RemoveDescriptorCommand;
 import org.komodo.shell.commands.RenameCommand;
+import org.komodo.shell.commands.ResetGlobalPropertyCommand;
 import org.komodo.shell.commands.RollbackCommand;
 import org.komodo.shell.commands.SetAutoCommitCommand;
 import org.komodo.shell.commands.SetGlobalPropertyCommand;
@@ -119,6 +120,7 @@ public final class BuiltInShellCommandProvider implements ShellCommandProvider {
         result.add( RollbackCommand.class );
         result.add( SetAutoCommitCommand.class );
         result.add( SetGlobalPropertyCommand.class );
+        result.add( ResetGlobalPropertyCommand.class );
         result.add( SetPrimaryTypeCommand.class );
         result.add( SetPropertyCommand.class );
         result.add( SetRecordCommand.class );
