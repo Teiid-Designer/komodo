@@ -17,6 +17,7 @@ package org.komodo.shell;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.jboss.aesh.complete.CompleteOperation;
 import org.jboss.aesh.complete.Completion;
 import org.komodo.core.KEngine;
@@ -24,6 +25,8 @@ import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.InvalidCommandArgumentException;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandFactory;
+import org.komodo.shell.api.TabCompletionModifier;
+import org.komodo.utils.StringUtils;
 
 /**
  * Implements tab completion for the interactive
@@ -100,13 +103,16 @@ public class TabCompleter implements Completion {
     			command.setArguments(arguments);
 
     			List<CharSequence> list = new ArrayList<CharSequence>();
-    			int tabCompletionResult = -1;
+    			TabCompletionModifier tabCompletionResult=TabCompletionModifier.NO_AUTOCOMPLETION;
                 try {
                     tabCompletionResult = command.tabCompletion(lastArgument, list);
                 } catch (Exception ex) {
                     KEngine.getInstance().getErrorHandler().error(ex.getMessage(), ex);
                 }
 
+                if(tabCompletionResult==TabCompletionModifier.NO_AUTOCOMPLETION){
+                	return; // No autocompletion will be performed
+                }
     			if (!list.isEmpty()) {
     				// In case the tab completion return just one result it
     				// is printed the previous buffer plus the argument
@@ -129,10 +135,19 @@ public class TabCompleter implements Completion {
     					for (CharSequence sequence : list) {
     						completeOperation.addCompletionCandidate(sequence.toString());
     					}
+    					int offset;
+						if (list.isEmpty()) {
+							offset = -1;
+						} else if (StringUtils.isBlank(lastArgument)) {
+							offset = 0;
+						} else {
+							offset = command.toString().length() + 1;
+						}
 
-    					completeOperation.setOffset( tabCompletionResult );
+						completeOperation.setOffset(offset);
+
     				}
-    				if (tabCompletionResult == CompletionConstants.NO_APPEND_SEPARATOR) {
+    				if (tabCompletionResult == TabCompletionModifier.NO_APPEND_SEPARATOR) {
     					completeOperation.doAppendSeparator(false);
     				}
 

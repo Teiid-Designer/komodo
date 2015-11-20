@@ -17,6 +17,7 @@ package org.komodo.shell.api;
 
 import java.io.Writer;
 import java.util.List;
+
 import org.komodo.utils.i18n.I18n;
 
 /**
@@ -124,29 +125,17 @@ public interface ShellCommand {
 	 * Handle tab completion for the command.  This is optional, but provides a mechanism by
 	 * which individual commands can enable command-specific tab completion functionality.
 	 *
-	 * The return value of this method represents the cursor position within lastArgument
-	 * that represents the origin point for all of the candidates.  Return 0 to indicate that
-	 * the candidates are all full-replacements of lastArgument.  Return -1 to indicate that
-	 * no candidates were supplied.  Return a positive, non-negative value if the returned
-	 * candidates are partial completions.
-	 *
-	 * For example, if the user has typed "aar", then a command could return any of:
-	 *
-	 * candidates=[]  rval=-1
-	 * candidates=["aardvark", "aardwolf"]  rval=0
-	 * candidates=["dvark", "dwolf"]  rval=3
-	 *
-	 * In the latter two examples, the tab-completion will be the same, but the user will
-	 * be shown the different candidate values (when more than 1 candidate is returned).
+	 * The return value of this method is tab completion modifier through which an user is
+	 * able to e.g. turn off tab completion or append separator after the auto completed text
 	 *
 	 * @param lastArgument the last arg
 	 * @param candidates the candidates
-	 * @return the cursor position
+	 * @return tab completion modifier
 	 * @throws Exception if errors occur
 	 */
-    default int tabCompletion( final String lastArgument,
+    default TabCompletionModifier tabCompletion( final String lastArgument,
                                final List< CharSequence > candidates ) throws Exception {
-        return -1;
+        return TabCompletionModifier.NO_AUTOCOMPLETION;
     }
 
 }
