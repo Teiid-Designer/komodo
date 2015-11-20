@@ -15,9 +15,12 @@
  */
 package org.komodo.shell.commands;
 
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
 import org.junit.Test;
 import org.komodo.shell.AbstractCommandTest;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.WorkspaceStatus;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class PlayCommandTest extends AbstractCommandTest {
@@ -35,6 +38,44 @@ public final class PlayCommandTest extends AbstractCommandTest {
 
         assertCommandResultOk( result );
         assertContextIs( "/tko:komodo/tko:workspace/blah/blahblah" );
+    }
+
+    @Test
+    public void shouldKeepAutoCommitValueWhenSetInCommandsFile() throws Exception {
+        assertThat( this.wsStatus.isAutoCommit(), is( true ) );
+
+        final boolean expected = false; // set in command file
+        setup( "set-auto-commit.txt" );
+        final CommandResult result = execute();
+
+        assertCommandResultOk( result );
+        assertThat( this.wsStatus.isAutoCommit(), is( expected ) );
+    }
+
+    @Test
+    public void shouldNotAffectAutoCommitFlagWhenAutoCommitIsOff() throws Exception {
+        final boolean expected = false;
+        this.wsStatus.setGlobalProperty( WorkspaceStatus.AUTO_COMMIT, Boolean.valueOf( expected ).toString() );
+        assertThat( this.wsStatus.isAutoCommit(), is( expected ) );
+
+        setup( "test-command-file.txt" );
+        final CommandResult result = execute();
+
+        assertCommandResultOk( result );
+        assertThat( this.wsStatus.isAutoCommit(), is( expected ) );
+    }
+
+    @Test
+    public void shouldNotAffectAutoCommitFlagWhenAutoCommitIsOn() throws Exception {
+        final boolean expected = true;
+        this.wsStatus.setGlobalProperty( WorkspaceStatus.AUTO_COMMIT, Boolean.valueOf( expected ).toString() );
+        assertThat( this.wsStatus.isAutoCommit(), is( expected ) );
+
+        setup( "test-command-file.txt" );
+        final CommandResult result = execute();
+
+        assertCommandResultOk( result );
+        assertThat( this.wsStatus.isAutoCommit(), is( expected ) );
     }
 
 }

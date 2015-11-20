@@ -15,7 +15,9 @@
  */
 package org.komodo.relational.commands.workspace;
 
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.vdb.Vdb;
@@ -52,6 +54,22 @@ public final class CreateVdbCommandTest extends AbstractCommandTest {
 
         assertEquals(1, vdbs.length);
         assertEquals("testVdb", vdbs[0].getName(getTransaction()));
+    }
+
+    @Test
+    public void shouldCreatePartsVdbFromBatchFile() throws Exception {
+        setup( "PartsVDBScript.txt" );
+        final CommandResult result = execute();
+
+        assertCommandResultOk( result );
+
+        final WorkspaceManager mgr = WorkspaceManager.getInstance( _repo );
+        final Vdb[] vdbs = mgr.findVdbs( getTransaction() );
+        assertThat( vdbs[ 0 ].getName( getTransaction() ), is( "PartsVDB" ) );
+
+        final Vdb partsVdb = vdbs[ 0 ];
+        assertThat( partsVdb.getTranslators( getTransaction() ).length, is( 1 ) );
+        assertThat( partsVdb.getTranslators( getTransaction() )[ 0 ].getName( getTransaction() ), is( "custom_oracle" ) );
     }
 
 }
