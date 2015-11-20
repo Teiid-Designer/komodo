@@ -9,6 +9,7 @@ package org.komodo.relational.commands.workspace;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.komodo.relational.commands.server.ServerCommandProvider;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
@@ -58,6 +59,12 @@ public final class DeleteTeiidCommand extends WorkspaceShellCommand {
             if(objToDelete[0]==null) {
                 result = new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.teiidNotFound, teiidName ), null );
             } else {
+                // If server being deleted is the current default server, remove the default
+                KomodoObject defaultTeiid = getWorkspaceStatus().getStateObjects().get( ServerCommandProvider.SERVER_DEFAULT_KEY );
+                if(defaultTeiid!=null && defaultTeiid.getName(getTransaction()).equals(teiidName)) {
+                    getWorkspaceStatus().setStateObject( ServerCommandProvider.SERVER_DEFAULT_KEY, null );
+                }
+
                 mgr.delete(getTransaction(), objToDelete);
                 result = new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.teiidDeleted, teiidName ) );
             }

@@ -124,10 +124,10 @@ public class ServerCommandProvider implements ShellCommandProvider {
      */
     @Override
     public void initWorkspaceState(WorkspaceStatus wsStatus) throws KException {
-        Properties globalProps = wsStatus.getProperties();
+        Properties providedProps = wsStatus.getProvidedProperties();
         // Look for Server default key.  If found, attempt to set the state object
-        if(globalProps.containsKey(ServerCommandProvider.SERVER_DEFAULT_KEY)) {
-            String defaultServerName = globalProps.getProperty(ServerCommandProvider.SERVER_DEFAULT_KEY);
+        if(providedProps.containsKey(ServerCommandProvider.SERVER_DEFAULT_KEY)) {
+            String defaultServerName = providedProps.getProperty(ServerCommandProvider.SERVER_DEFAULT_KEY);
             WorkspaceManager wsMgr = WorkspaceManager.getInstance(wsStatus.getCurrentContext().getRepository());
             Teiid teiid = ServerUtils.getWorkspaceTeiidObject(wsMgr, wsStatus, defaultServerName);
             wsStatus.setStateObject(ServerCommandProvider.SERVER_DEFAULT_KEY, teiid);

@@ -59,7 +59,7 @@ public class SetAutoCommitCommand extends BuiltInShellCommand {
                                               null );
             }
 
-            getWorkspaceStatus().setProperty(WorkspaceStatus.AUTO_COMMIT, arg);
+            getWorkspaceStatus().setGlobalProperty(WorkspaceStatus.AUTO_COMMIT, arg);
 
             return new CommandResultImpl( I18n.bind( ShellI18n.globalPropertySet, WorkspaceStatus.AUTO_COMMIT ) );
         } catch ( final Exception e ) {

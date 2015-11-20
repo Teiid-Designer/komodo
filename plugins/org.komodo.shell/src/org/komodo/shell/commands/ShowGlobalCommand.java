@@ -74,7 +74,8 @@ public class ShowGlobalCommand extends BuiltInShellCommand {
     @Override
     protected CommandResult doExecute() {
         try {
-            final Properties globalProperties = getWorkspaceStatus().getProperties();
+            // Gets all global properties(except hidden).
+            final Properties globalProperties = getWorkspaceStatus().getGlobalProperties();
 
             // Print properties header
             final String globalPropsHeader = I18n.bind( ShellI18n.globalPropertiesHeader );
