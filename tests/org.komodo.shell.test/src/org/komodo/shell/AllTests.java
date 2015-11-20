@@ -31,6 +31,7 @@ import org.komodo.shell.commands.ShowStatusCommandTest;
 import org.komodo.shell.commands.ShowSummaryCommandTest;
 import org.komodo.shell.commands.UnsetPropertyCommandTest;
 import org.komodo.shell.commands.WorkspaceCommandTest;
+import org.komodo.shell.commands.WorkspaceStatusPropertyTest;
 
 /**
  * All Tests for CommandLine
@@ -65,7 +66,8 @@ import org.komodo.shell.commands.WorkspaceCommandTest;
                        ShowStatusCommandTest.class,
                        ShowSummaryCommandTest.class,
                        UnsetPropertyCommandTest.class,
-                       WorkspaceCommandTest.class } )
+                       WorkspaceCommandTest.class,
+                       WorkspaceStatusPropertyTest.class } )
 public class AllTests {
     // nothing to do
 }

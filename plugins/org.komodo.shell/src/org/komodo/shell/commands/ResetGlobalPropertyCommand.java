@@ -7,18 +7,32 @@ import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.utils.StringUtils;
 import org.komodo.utils.i18n.I18n;
 
+/**
+ * A {@link ShellCommand command} that can reset global workspace properties
+ * <p>
+ * Usage:
+ * <p>
+ * <code>&nbsp;&nbsp;
+ * reset-global &lt;propName&gt;
+ * </code>
+ */
 public class ResetGlobalPropertyCommand extends BuiltInShellCommand {
 	/**
 	 * The command name.
 	 */
 	public static final String NAME = "reset-global"; //$NON-NLS-1$
 
-	private final static String ARG_ALL = "--all";
+	private final static String ARG_ALL = "--all"; //$NON-NLS-1$
 
+    /**
+     * @param workspaceStatus
+     *        the workspace status (cannot be <code>null</code>)
+     */
 	public ResetGlobalPropertyCommand(final WorkspaceStatus workspaceStatus) {
 		super(workspaceStatus, NAME);
 	}
@@ -37,13 +51,13 @@ public class ResetGlobalPropertyCommand extends BuiltInShellCommand {
 			WorkspaceStatus status = getWorkspaceStatus();
 			if (firstArgument.equals(ARG_ALL)) {
 				// reset all global properties
-				status.setProperties(null);
+				status.setGlobalProperties(null);
 				return new CommandResultImpl(I18n.bind(ShellI18n.globalResetAllProps)); //Reset all props OK
 			} else { 
 				// reset single property
 				String validationStatus = status.validateGlobalPropertyValue(firstArgument.toUpperCase(), null);
 				if (StringUtils.isEmpty(validationStatus)) {
-					status.setProperty(firstArgument.toUpperCase(), null);
+					status.setGlobalProperty(firstArgument.toUpperCase(), null);
 					return new CommandResultImpl(I18n.bind(ShellI18n.globalPropertyReset,firstArgument));// Reset one prop OK
 				} else { 
 					// invalid property name
@@ -62,6 +76,7 @@ public class ResetGlobalPropertyCommand extends BuiltInShellCommand {
 	}
 	
 
+    @Override
     public int tabCompletion( final String lastArgument, final List< CharSequence > candidates ) throws Exception {
         if ( getArguments().size() == 0 ) {
             // Global property completion options and reset all argument

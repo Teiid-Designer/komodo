@@ -45,14 +45,14 @@ public class ResetGlobalPropertyCommandTest extends AbstractCommandTest {
     public void shouldResetShowTypeInPrompt() throws Exception {
     	String propertyName=WorkspaceStatus.SHOW_TYPE_IN_PROMPT_KEY;
   
-    	wsStatus.setProperty(propertyName, negateBooleanValue(propertyName));
+    	wsStatus.setGlobalProperty(propertyName, negateBooleanValue(propertyName));
         final String[] commands = { "reset-global "+propertyName};
         final CommandResult result = execute( commands );
         assertCommandResultOk( result );
 
         // Check Context and property value
         assertEquals("/", wsStatus.getCurrentContextDisplayPath());
-        assertEquals(WorkspaceStatus.GLOBAL_PROPS.get(propertyName), wsStatus.getProperties().getProperty(propertyName));
+        assertEquals(WorkspaceStatus.GLOBAL_PROPS.get(propertyName), wsStatus.getGlobalProperties().getProperty(propertyName));
     }
 
     @Test
@@ -61,8 +61,8 @@ public class ResetGlobalPropertyCommandTest extends AbstractCommandTest {
     	String secondPropName=WorkspaceStatus.EXPORT_DEFAULT_DIR_KEY;
     	String secondPropNewVal="/tmp";
     	// Modify two global properties
-    	wsStatus.setProperty(firstPropName, negateBooleanValue(firstPropName));
-    	wsStatus.setProperty(secondPropName, secondPropNewVal);
+    	wsStatus.setGlobalProperty(firstPropName, negateBooleanValue(firstPropName));
+    	wsStatus.setGlobalProperty(secondPropName, secondPropNewVal);
     	// Issue command reset all
         final String[] commands = { "reset-global --all"};
         final CommandResult result = execute( commands );
@@ -70,8 +70,8 @@ public class ResetGlobalPropertyCommandTest extends AbstractCommandTest {
 
         // Check Context and properties value
         assertEquals("/", wsStatus.getCurrentContextDisplayPath());
-        assertEquals(WorkspaceStatus.GLOBAL_PROPS.get(firstPropName), wsStatus.getProperties().getProperty(firstPropName));
-        assertEquals(WorkspaceStatus.GLOBAL_PROPS.get(secondPropName), wsStatus.getProperties().getProperty(secondPropName));
+        assertEquals(WorkspaceStatus.GLOBAL_PROPS.get(firstPropName), wsStatus.getGlobalProperties().getProperty(firstPropName));
+        assertEquals(WorkspaceStatus.GLOBAL_PROPS.get(secondPropName), wsStatus.getGlobalProperties().getProperty(secondPropName));
     }
 
     private String negateBooleanValue(String name){
