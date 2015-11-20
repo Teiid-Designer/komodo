@@ -789,7 +789,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         }
 
         // command can't be found
-        return this.getCommandFactory().getCommand(ShellCommand.COMMAND_NOT_FOUND);
+        return this.getCommandFactory().createCommandNotFound(commandName);
     }
 
     /* (non-Javadoc)

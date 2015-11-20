@@ -29,6 +29,13 @@ public interface ShellCommandFactory {
     ShellCommand getCommand( final String commandName ) throws Exception;
 
     /**
+     * @param commandName
+     *        the name of the command not found (cannot be empty)
+     * @return the "command not found" command (never <code>null</code>)
+     */
+    ShellCommand createCommandNotFound( final String commandName );
+
+    /**
      * @return a sorted collection of the valid command names for the current context (never <code>null</code>)
      */
     Set< String > getCommandNamesForCurrentContext();
