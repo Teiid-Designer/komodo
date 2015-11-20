@@ -1,0 +1,7 @@
+workspace
+add-child blah
+cd blah
+set-global AUTO_COMMIT false
+set-property foo bar
+add-child blahblah
+cd blahblah

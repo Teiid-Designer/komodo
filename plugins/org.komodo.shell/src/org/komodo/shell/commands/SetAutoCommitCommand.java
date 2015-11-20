@@ -11,6 +11,7 @@ import java.util.List;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.ShellI18n;
+import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
@@ -50,18 +51,16 @@ public class SetAutoCommitCommand extends BuiltInShellCommand {
         try {
             final String arg = requiredArgument( 0, I18n.bind( ShellI18n.enable_flag_missing ) );
 
-            // Check for invalid arg
-            if ( !arg.equalsIgnoreCase( Boolean.TRUE.toString() ) && !arg.equalsIgnoreCase( Boolean.FALSE.toString() ) ) {
-                return new CommandResultImpl( false,
-                                              I18n.bind( ShellI18n.invalidBooleanGlobalPropertyValue,
-                                                         arg,
-                                                         WorkspaceStatus.AUTO_COMMIT ),
-                                              null );
-            }
+            // at this point we know there is one and only one argument so we can execute the SetGlobalPropertyCommand
+            final ShellCommand delegate = getWorkspaceStatus().getCommand( SetGlobalPropertyCommand.NAME );
+            delegate.setWriter( getWriter() );
 
-            getWorkspaceStatus().setProperty(WorkspaceStatus.AUTO_COMMIT, arg);
+            final Arguments args = new Arguments();
+            args.add( WorkspaceStatus.AUTO_COMMIT );
+            args.add( arg );
+            delegate.setArguments( args );
 
-            return new CommandResultImpl( I18n.bind( ShellI18n.globalPropertySet, WorkspaceStatus.AUTO_COMMIT ) );
+            return delegate.execute();
         } catch ( final Exception e ) {
             return new CommandResultImpl( e );
         }

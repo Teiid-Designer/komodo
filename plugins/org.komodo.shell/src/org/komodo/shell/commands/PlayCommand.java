@@ -105,14 +105,10 @@ public class PlayCommand  extends BuiltInShellCommand {
                             return result;
                         }
 
-                        // check to see if auto-commit command was used in batch
-                        if ( command instanceof SetGlobalPropertyCommand ) {
-                            if ( WorkspaceStatus.AUTO_COMMIT.equals( command.getArguments().get( 0 ) ) ) {
-                                final boolean newValue = Boolean.parseBoolean( command.getArguments().get( 1 ) );
-
-                                if ( saveAutoCommit != newValue ) {
-                                    saveAutoCommit = newValue;
-                                }
+                        // see if auto-commit global property was changed
+                        if ( ( command instanceof SetGlobalPropertyCommand ) || ( command instanceof SetAutoCommitCommand ) ) {
+                            if ( saveAutoCommit != wsStatus.isAutoCommit() ) {
+                                saveAutoCommit = wsStatus.isAutoCommit();
                             }
                         }
                     }
@@ -125,7 +121,7 @@ public class PlayCommand  extends BuiltInShellCommand {
                 // if AUTO_COMMIT if different (script could've changed value also)
                 if ( getWorkspaceStatus().isAutoCommit() != saveAutoCommit ) {
                     getWorkspaceStatus().setProperty( WorkspaceStatus.AUTO_COMMIT,
-                                                      Boolean.toString( getWorkspaceStatus().isAutoCommit() ) );
+                                                      Boolean.valueOf( saveAutoCommit ).toString() );
                 }
             }
         } catch ( final Exception e ) {

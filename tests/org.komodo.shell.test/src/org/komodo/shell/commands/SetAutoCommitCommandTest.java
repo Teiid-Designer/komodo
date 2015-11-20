@@ -24,7 +24,7 @@ import org.komodo.shell.api.CommandResult;
  * Test Class to test {@link SetAutoCommitCommand}.
  */
 @SuppressWarnings( { "javadoc", "nls" } )
-public class SetAutoCommitCommandTest extends AbstractCommandTest {
+public final class SetAutoCommitCommandTest extends AbstractCommandTest {
 
     @Test( expected = AssertionError.class )
     public void shouldFailTooManyArgs( ) throws Exception {
