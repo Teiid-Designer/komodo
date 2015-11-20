@@ -15,6 +15,8 @@ import org.komodo.shell.commands.ListCommandTest;
 import org.komodo.shell.commands.PlayCommandTest;
 import org.komodo.shell.commands.RemoveDescriptorCommandTest;
 import org.komodo.shell.commands.RenameCommandTest;
+import org.komodo.shell.commands.ResetGlobalPropertyCommand;
+import org.komodo.shell.commands.ResetGlobalPropertyCommandTest;
 import org.komodo.shell.commands.RollbackCommandTest;
 import org.komodo.shell.commands.SetAutoCommitCommandTest;
 import org.komodo.shell.commands.SetGlobalPropertyCommandTest;
@@ -51,6 +53,7 @@ import org.komodo.shell.commands.WorkspaceCommandTest;
                        RollbackCommandTest.class,
                        SetAutoCommitCommandTest.class,
                        SetGlobalPropertyCommandTest.class,
+                       ResetGlobalPropertyCommandTest.class,
                        SetPrimaryTypeCommandTest.class,
                        SetPropertyCommandTest.class,
                        SetRecordCommandTest.class,

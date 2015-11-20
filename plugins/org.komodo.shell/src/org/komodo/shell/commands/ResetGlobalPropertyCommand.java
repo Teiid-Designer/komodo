@@ -2,11 +2,9 @@ package org.komodo.shell.commands;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map.Entry;
 
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
-import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
@@ -39,9 +37,7 @@ public class ResetGlobalPropertyCommand extends BuiltInShellCommand {
 			WorkspaceStatus status = getWorkspaceStatus();
 			if (firstArgument.equals(ARG_ALL)) {
 				// reset all global properties
-				for (final Entry<String, String> entry : WorkspaceStatus.GLOBAL_PROPS.entrySet()) {
-					status.setProperty(entry.getKey(), entry.getValue());
-				}
+				status.setProperties(null);
 				return new CommandResultImpl(I18n.bind(ShellI18n.globalResetAllProps)); //Reset all props OK
 			} else { 
 				// reset single property
