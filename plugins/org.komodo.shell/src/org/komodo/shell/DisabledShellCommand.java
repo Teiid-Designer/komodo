@@ -11,6 +11,7 @@ import java.io.Writer;
 import java.util.List;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.utils.i18n.I18n;
@@ -264,7 +265,7 @@ public abstract class DisabledShellCommand extends BuiltInShellCommand {
      * @see org.komodo.shell.api.ShellCommand#tabCompletion(java.lang.String, java.util.List)
      */
     @Override
-    public final int tabCompletion( final String lastArgument,
+    public final TabCompletionModifier tabCompletion( final String lastArgument,
                                     final List< CharSequence > candidates ) throws Exception {
         throw new UnsupportedOperationException( I18n.bind( ShellI18n.disabledCommandMethodNotSupported,
                                                             "tabCompletion", //$NON-NLS-1$

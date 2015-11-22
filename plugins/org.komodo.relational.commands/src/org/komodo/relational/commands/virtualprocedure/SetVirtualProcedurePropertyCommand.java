@@ -14,6 +14,7 @@ import org.komodo.relational.model.VirtualProcedure;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.SetPropertyCommand;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -147,7 +148,7 @@ public final class SetVirtualProcedurePropertyCommand extends VirtualProcedureSh
      * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
      */
     @Override
-    public int tabCompletion( final String lastArgument,
+    public TabCompletionModifier tabCompletion( final String lastArgument,
                               final List< CharSequence > candidates ) throws Exception {
         final Arguments args = getArguments();
 
@@ -161,8 +162,6 @@ public final class SetVirtualProcedurePropertyCommand extends VirtualProcedureSh
                     }
                 }
             }
-
-            return 0;
         }
 
         if ( ( args.size() == 1 ) ) {
@@ -172,9 +171,7 @@ public final class SetVirtualProcedurePropertyCommand extends VirtualProcedureSh
                 candidates.add( SchemaElement.SchemaElementType.VIRTUAL.name() );
             }
         }
-
-        // no tab completion
-        return -1;
+        return TabCompletionModifier.AUTO;
     }
 
 }

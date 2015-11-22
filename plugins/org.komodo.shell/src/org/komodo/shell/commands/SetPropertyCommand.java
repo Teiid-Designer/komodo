@@ -12,6 +12,7 @@ import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.KomodoObjectUtils;
@@ -146,12 +147,10 @@ public class SetPropertyCommand extends BuiltInShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
      */
     @Override
-    public int tabCompletion( final String lastArgument,
+    public TabCompletionModifier tabCompletion( final String lastArgument,
                               final List< CharSequence > candidates ) throws Exception {
         if ( getArguments().size() == 0 ) {
             updateTabCompleteCandidatesForProperty( candidates, getContext(), lastArgument );
-
-            return ( candidates.isEmpty() ? -1 : ( StringUtils.isBlank( lastArgument ) ? 0 : ( toString().length() + 1 ) ) );
         } else if (getArguments().size() == 1) {
             final KomodoObject context = getContext();
             String propArg = getArguments().get(0);
@@ -169,11 +168,9 @@ public class SetPropertyCommand extends BuiltInShellCommand {
             } else {
                 provideCandidates( context, propName, lastArgument, candidates );
             }
-
-            return ( candidates.isEmpty() ? -1 : ( StringUtils.isBlank( lastArgument ) ? 0 : ( toString().length() + 1 ) ) );
         }
 
-        return -1;
+        return TabCompletionModifier.AUTO;
     }
 
     private void provideCandidates( final KomodoObject context,

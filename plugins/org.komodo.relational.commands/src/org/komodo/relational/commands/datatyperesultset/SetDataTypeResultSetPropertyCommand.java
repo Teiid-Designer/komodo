@@ -14,6 +14,7 @@ import org.komodo.relational.model.DataTypeResultSet;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.SetPropertyCommand;
 import org.komodo.shell.util.KomodoObjectUtils;
@@ -236,7 +237,7 @@ public final class SetDataTypeResultSetPropertyCommand extends DataTypeResultSet
      * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
      */
     @Override
-    public int tabCompletion( final String lastArgument,
+    public TabCompletionModifier tabCompletion( final String lastArgument,
                               final List< CharSequence > candidates ) throws Exception {
         final Arguments args = getArguments();
 
@@ -250,8 +251,6 @@ public final class SetDataTypeResultSetPropertyCommand extends DataTypeResultSet
                     }
                 }
             }
-
-            return 0;
         }
 
         if ( ( args.size() >= 1 ) && DATATYPE_NAME.equals( args.get( 0 ) ) ) {
@@ -264,12 +263,8 @@ public final class SetDataTypeResultSetPropertyCommand extends DataTypeResultSet
             } else if ( args.size() == 2 ) {
                 updateCandidatesForBooleanProperty( lastArgument, candidates );
             }
-
-            return ( candidates.isEmpty() ? -1 : ( StringUtils.isBlank( lastArgument ) ? 0 : ( toString().length() + 1 ) ) );
         }
-
-        // no tab completion
-        return -1;
+        return TabCompletionModifier.AUTO;
     }
 
 }

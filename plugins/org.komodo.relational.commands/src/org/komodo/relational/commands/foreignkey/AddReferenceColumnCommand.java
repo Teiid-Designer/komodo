@@ -15,6 +15,7 @@ import org.komodo.relational.model.Table;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
@@ -146,7 +147,7 @@ public final class AddReferenceColumnCommand extends ForeignKeyShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
      */
     @Override
-    public int tabCompletion( final String lastArgument,
+    public TabCompletionModifier tabCompletion( final String lastArgument,
                               final List< CharSequence > candidates ) throws Exception {
         if ( getArguments().isEmpty() ) {
             final Repository.UnitOfWork uow = getTransaction();
@@ -155,7 +156,7 @@ public final class AddReferenceColumnCommand extends ForeignKeyShellCommand {
             final String[] allDisplayPaths = FindCommand.query( getWorkspaceStatus(), KomodoType.COLUMN, null, null );
 
             if ( allDisplayPaths.length == 0 ) {
-                return -1;
+                return TabCompletionModifier.AUTO;
             }
 
             final Table parent = getForeignKey().getTable( uow );
@@ -170,12 +171,10 @@ public final class AddReferenceColumnCommand extends ForeignKeyShellCommand {
                     }
                 }
             }
-
-            return ( candidates.isEmpty() ? -1 : ( toString().length() + 1 ) );
         }
 
         // no completions if more than one arg
-        return -1;
+        return TabCompletionModifier.AUTO;
     }
 
 }

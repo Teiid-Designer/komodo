@@ -17,6 +17,7 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.KomodoTypeRegistry;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.KomodoObjectLabelProvider;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoType;
@@ -160,7 +161,7 @@ public final class FindCommand extends RelationalShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
      */
     @Override
-    public int tabCompletion( final String lastArgument,
+    public TabCompletionModifier tabCompletion( final String lastArgument,
                               final List< CharSequence > candidates ) throws Exception {
         if ( getArguments().isEmpty() ) {
             final boolean noLastArg = StringUtils.isBlank( lastArgument );
@@ -188,12 +189,10 @@ public final class FindCommand extends RelationalShellCommand {
                     return thisType.toString().compareTo( thatType.toString() );
                 }
             });
-
-            return ( candidates.isEmpty() ? -1 : ( toString().length() + 1 ) );
         }
 
         // no completions if more than one arg
-        return -1;
+        return TabCompletionModifier.AUTO;
     }
 
     /**

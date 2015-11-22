@@ -114,31 +114,12 @@ public class TabCompleter implements Completion {
                 	return; // No autocompletion will be performed
                 }
     			if (!list.isEmpty()) {
-    				// In case the tab completion return just one result it
-    				// is printed the previous buffer plus the argument
-    				if (list.size() == 1) {
-    					if (buffer.endsWith(" ")) { //$NON-NLS-1$
-    						completeOperation.addCompletionCandidate(buffer
-    								+ list.get(0).toString().trim());
-    					} else if (buffer.indexOf(" ") != -1) { //$NON-NLS-1$
-    						completeOperation.addCompletionCandidate(buffer.substring(0,
-    								buffer.lastIndexOf(" ")) //$NON-NLS-1$
-    								+ " " + list.get(0).toString().trim()); //$NON-NLS-1$
-    					} else {
-    						completeOperation.addCompletionCandidate(buffer + " " //$NON-NLS-1$
-    								+ list.get(0).toString().trim());
-    					}
-
-    				} else {
-    					// In case the result of the command tab completion
-    					// contains more than one result (like the FileNameCompleter)
     					for (CharSequence sequence : list) {
     						completeOperation.addCompletionCandidate(sequence.toString());
     					}
     					int offset;
-						if (list.isEmpty()) {
-							offset = -1;
-						} else if (StringUtils.isBlank(lastArgument)) {
+
+                        if (StringUtils.isBlank(lastArgument)) {
 							offset = 0;
 						} else {
 							offset = command.toString().length() + 1;
@@ -146,9 +127,17 @@ public class TabCompleter implements Completion {
 
 						completeOperation.setOffset(offset);
 
-    				}
+//    				}
+
     				if (tabCompletionResult == TabCompletionModifier.NO_APPEND_SEPARATOR) {
     					completeOperation.doAppendSeparator(false);
+    				}else if(tabCompletionResult== TabCompletionModifier.AUTO){
+                        if(command instanceof BuiltInShellCommand){
+	                       int maxArgs=((BuiltInShellCommand)command).getMaxArgCount();
+	                       if(arguments.size()>=maxArgs-1){
+	                    	   completeOperation.doAppendSeparator(false);
+	                       }
+                        }
     				}
 
     			}

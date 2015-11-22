@@ -15,6 +15,7 @@ import org.komodo.relational.model.ResultSetColumn;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.SetPropertyCommand;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -171,7 +172,7 @@ public final class SetResultSetColumnPropertyCommand extends ResultSetColumnShel
      * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
      */
     @Override
-    public int tabCompletion( final String lastArgument,
+    public TabCompletionModifier tabCompletion( final String lastArgument,
                               final List< CharSequence > candidates ) throws Exception {
         final Arguments args = getArguments();
 
@@ -185,8 +186,6 @@ public final class SetResultSetColumnPropertyCommand extends ResultSetColumnShel
                     }
                 }
             }
-
-            return 0;
         }
 
         if ( ( args.size() == 1 ) ) {
@@ -196,12 +195,8 @@ public final class SetResultSetColumnPropertyCommand extends ResultSetColumnShel
                 candidates.add( Nullable.NULLABLE.name() );
                 candidates.add( Nullable.NULLABLE_UNKNOWN.name() );
             }
-
-            return ( candidates.isEmpty() ? -1 : ( StringUtils.isBlank( lastArgument ) ? 0 : ( toString().length() + 1 ) ) );
         }
-
-        // no tab completion
-        return -1;
+        return TabCompletionModifier.AUTO;
     }
 
 }

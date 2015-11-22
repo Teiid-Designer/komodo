@@ -22,12 +22,14 @@
 package org.komodo.shell.commands;
 
 import java.util.List;
+
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.ShellCommand;
+import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.KomodoObjectUtils;
 import org.komodo.shell.util.PrintUtils;
@@ -149,17 +151,17 @@ public class ShowPropertiesCommand extends BuiltInShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
      */
     @Override
-    public int tabCompletion(String lastArgument, List<CharSequence> candidates) throws Exception {
+    public TabCompletionModifier tabCompletion(String lastArgument, List<CharSequence> candidates) throws Exception {
 
         if (getArguments().isEmpty()) {
             // The arg is expected to be a path
             updateTabCompleteCandidatesForPath(candidates, getContext(), true, lastArgument);
 
             // Do not put space after it - may want to append more to the path
-            return CompletionConstants.NO_APPEND_SEPARATOR;
+            return TabCompletionModifier.NO_APPEND_SEPARATOR;
         }
 
-    	return -1;
+    	return TabCompletionModifier.AUTO;
     }
 
 }
