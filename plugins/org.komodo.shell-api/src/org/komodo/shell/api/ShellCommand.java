@@ -31,11 +31,6 @@ import org.komodo.utils.i18n.I18n;
 public interface ShellCommand {
 
     /**
-     *  The command not found name
-     */
-    String COMMAND_NOT_FOUND = "cmd-not-found";  //$NON-NLS-1$
-
-    /**
      * Commands without a category will be placed in a general category.
      *
      * @return the command category (can be empty)

@@ -5,6 +5,7 @@ import org.junit.runners.Suite;
 import org.komodo.shell.commands.AddChildCommandTest;
 import org.komodo.shell.commands.AddDescriptorCommandTest;
 import org.komodo.shell.commands.CdCommandTest;
+import org.komodo.shell.commands.CommandNotFoundTest;
 import org.komodo.shell.commands.CommitCommandTest;
 import org.komodo.shell.commands.DeleteChildCommandTest;
 import org.komodo.shell.commands.ExitCommandTest;
@@ -40,6 +41,7 @@ import org.komodo.shell.commands.WorkspaceStatusPropertyTest;
 @Suite.SuiteClasses( { AddChildCommandTest.class,
                        AddDescriptorCommandTest.class,
                        CdCommandTest.class,
+                       CommandNotFoundTest.class,
                        CommitCommandTest.class,
                        DeleteChildCommandTest.class,
                        ExitCommandTest.class,
