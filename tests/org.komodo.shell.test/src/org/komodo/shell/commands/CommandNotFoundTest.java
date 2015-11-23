@@ -15,8 +15,12 @@
  */
 package org.komodo.shell.commands;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.komodo.shell.AbstractCommandTest;
+import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.ShellCommand;
 
 /**
  * Test Class to test entry of an invalid command.
@@ -24,12 +28,15 @@ import org.komodo.shell.AbstractCommandTest;
 @SuppressWarnings({"javadoc", "nls"})
 public class CommandNotFoundTest extends AbstractCommandTest {
 
-    @Test( expected = AssertionError.class )
+    @Test
     public void shouldFailInvalidCommand() throws Exception {
-        final String[] commands = { "workspace",
-                                    "crappy-command" };
-
-        execute( commands );
+        ShellCommand command = wsStatus.getCommand("bad-command");
+        CommandResult result = command.execute();
+        
+        // CommandNotFound - make sure message contains bad command name
+        assertFalse(result.isOk());
+        assertTrue(result.getMessage().contains("bad-command"));
+        assertTrue(result.getMessage().contains("not found"));
     }
 
 }
