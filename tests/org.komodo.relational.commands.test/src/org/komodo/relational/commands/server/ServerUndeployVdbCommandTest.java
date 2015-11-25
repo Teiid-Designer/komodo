@@ -30,7 +30,17 @@ import org.komodo.spi.runtime.TeiidVdb;
 public final class ServerUndeployVdbCommandTest extends AbstractServerCommandTest {
 
     @Test
+    public void shouldNotBeAvailableForServerNotSet() throws Exception {
+        this.assertCommandsNotAvailable(ServerUndeployVdbCommand.NAME);
+    }
+
+    @Test
     public void shouldNotBeAvailableForServerNotConnected() throws Exception {
+        // Initialize a disconnected server
+        initServer("myTeiid", true, false, 
+                   new TeiidVdb[]{VDB1}, new TeiidDataSource[]{DS1}, 
+                   new TeiidTranslator[]{TRANSLATOR1}, new String[]{DS_TYPE1});
+        
         this.assertCommandsNotAvailable(ServerUndeployVdbCommand.NAME);
     }
 
@@ -52,7 +62,7 @@ public final class ServerUndeployVdbCommandTest extends AbstractServerCommandTes
                    new TeiidTranslator[]{TRANSLATOR1}, new String[]{DS_TYPE1});
         
         
-        result = execute(new String[]{"workspace", "server-undeploy-vdb VDB1"});
+        result = execute(new String[]{"server-undeploy-vdb VDB1"});
         
         final String output = getCommandOutput();
         assertThat( output, output.contains( "undeployed successfully" ), is( true ) );

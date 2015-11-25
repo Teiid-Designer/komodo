@@ -30,7 +30,17 @@ import org.komodo.spi.runtime.TeiidVdb;
 public final class ServerTranslatorsCommandTest extends AbstractServerCommandTest {
 
     @Test
+    public void shouldNotBeAvailableForServerNotSet() throws Exception {
+        this.assertCommandsNotAvailable(ServerTranslatorsCommand.NAME);
+    }
+
+    @Test
     public void shouldNotBeAvailableForServerNotConnected() throws Exception {
+        // Initialize a disconnected server
+        initServer("myTeiid", true, false, 
+                   new TeiidVdb[]{VDB1}, new TeiidDataSource[]{DS1}, 
+                   new TeiidTranslator[]{TRANSLATOR1}, new String[]{DS_TYPE1});
+        
         this.assertCommandsNotAvailable(ServerTranslatorsCommand.NAME);
     }
 
@@ -41,9 +51,7 @@ public final class ServerTranslatorsCommandTest extends AbstractServerCommandTes
                    new TeiidVdb[]{VDB1}, new TeiidDataSource[]{DS1}, 
                    new TeiidTranslator[]{TRANSLATOR1}, new String[]{DS_TYPE1});
         
-        final String[] commands = { 
-            "home",  // Need this to force update of cached commands
-            "server-translators"};
+        final String[] commands = { "server-translators" };
         final CommandResult result = execute( commands );
         
         assertCommandResultOk(result);

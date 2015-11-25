@@ -15,11 +15,12 @@
  */
 package org.komodo.relational.commands.server;
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
 import org.junit.Test;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.ShellCommand;
+import org.komodo.spi.runtime.TeiidDataSource;
+import org.komodo.spi.runtime.TeiidTranslator;
+import org.komodo.spi.runtime.TeiidVdb;
 
 /**
  * Test Class to test {@link ServerConnectCommand}.
@@ -33,7 +34,7 @@ public final class ServerConnectCommandTest extends AbstractServerCommandTest {
     }
     
     @Test
-    public void shouldFailNoLocalhostFound() throws Exception {
+    public void shouldConnect() throws Exception {
         final String[] commands = {
             "set-auto-commit false",
             "create-teiid myTeiid",
@@ -42,10 +43,14 @@ public final class ServerConnectCommandTest extends AbstractServerCommandTest {
         CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
+        // Initialize a disconnected server
+        initServer("myTeiid", true, false, 
+                   new TeiidVdb[]{VDB1}, new TeiidDataSource[]{DS1}, 
+                   new TeiidTranslator[]{TRANSLATOR1}, new String[]{DS_TYPE1});
+        
         ShellCommand command = wsStatus.getCommand("server-connect");
         result = command.execute();
-        String output = result.getMessage();
-        assertThat( output, output.contains( "localhost is not available" ), is( true ) );
+        assertCommandResultOk(result);
     }
 
 }

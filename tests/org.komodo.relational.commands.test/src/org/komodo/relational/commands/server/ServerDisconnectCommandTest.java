@@ -20,6 +20,9 @@ import static org.junit.Assert.assertThat;
 import org.junit.Test;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.ShellCommand;
+import org.komodo.spi.runtime.TeiidDataSource;
+import org.komodo.spi.runtime.TeiidTranslator;
+import org.komodo.spi.runtime.TeiidVdb;
 
 /**
  * Test Class to test {@link ServerDisconnectCommand}.
@@ -28,7 +31,17 @@ import org.komodo.shell.api.ShellCommand;
 public final class ServerDisconnectCommandTest extends AbstractServerCommandTest {
 
     @Test
-    public void shouldNotBeAvailableForServerNotDefined() throws Exception {
+    public void shouldNotBeAvailableForServerNotSet() throws Exception {
+        this.assertCommandsNotAvailable(ServerDisconnectCommand.NAME);
+    }
+    
+    @Test
+    public void shouldNotBeAvailableForServerNotConnected() throws Exception {
+        // Initialize a disconnected server
+        initServer("myTeiid", true, false, 
+                   new TeiidVdb[]{VDB1}, new TeiidDataSource[]{DS1}, 
+                   new TeiidTranslator[]{TRANSLATOR1}, new String[]{DS_TYPE1});
+        
         this.assertCommandsNotAvailable(ServerDisconnectCommand.NAME);
     }
     
@@ -66,13 +79,8 @@ public final class ServerDisconnectCommandTest extends AbstractServerCommandTest
         // Initialize a mock server (connected) with no artifacts
         initServer("myTeiid", true, true, null, null, null, null);
         
-        // Workspace command to force command cache refresh
-        ShellCommand command = wsStatus.getCommand("workspace");
-        result = command.execute();
-        assertCommandResultOk(result);
-
         // Disconnect the connected server
-        command = wsStatus.getCommand("server-disconnect");
+        ShellCommand command = wsStatus.getCommand("server-disconnect");
         result = command.execute();
         assertCommandResultOk(result);
         String output = result.getMessage();

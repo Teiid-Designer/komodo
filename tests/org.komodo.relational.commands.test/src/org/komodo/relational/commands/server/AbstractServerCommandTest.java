@@ -96,6 +96,8 @@ public abstract class AbstractServerCommandTest extends AbstractCommandTest {
         when(teiid.getTeiidInstance(getTransaction())).thenReturn(teiidInstance);
         when(teiidInstance.isConnected()).thenReturn(serverConnected);
         when(teiidInstance.hasVdb("myVdb")).thenReturn(false);
+        when(teiidInstance.hasVdb("VDB1")).thenReturn(true);
+        when(teiidInstance.hasVdb("VDB2")).thenReturn(true);
         
         // TeiidPropertyDefinitions
         TeiidPropertyDefinition propDefn1 = mock(TeiidPropertyDefinition.class);
@@ -118,6 +120,9 @@ public abstract class AbstractServerCommandTest extends AbstractCommandTest {
         if(translators!=null) when(teiidInstance.getTranslators()).thenReturn(Arrays.asList(translators));
         if(translators!=null) when(teiidInstance.getTranslator(TRANSLATOR1.getName())).thenReturn(TRANSLATOR1);
         if(translators!=null) when(teiidInstance.getTranslator(TRANSLATOR2.getName())).thenReturn(TRANSLATOR2);
+        
+        // Initing the server may change the commands that are available
+        wsStatus.updateAvailableCommands();
     }
     
 }
