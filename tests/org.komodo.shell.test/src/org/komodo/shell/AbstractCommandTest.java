@@ -3,6 +3,7 @@ package org.komodo.shell;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.StringWriter;
@@ -11,7 +12,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -22,6 +26,7 @@ import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.InvalidCommandArgumentException;
 import org.komodo.shell.api.KomodoShell;
+import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.commands.PlayCommand;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.constants.SystemConstants;
@@ -262,4 +267,33 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
         return this.wsStatus.getTransaction();
     }
 
+    protected void executePlayFile(String name) throws Exception{
+        File file=new File("./resources/playfiles",name);
+        if(!file.exists()){
+        	throw new IllegalArgumentException("File does not exist");
+        }
+        setup(file.getAbsolutePath());
+        assertCommandResultOk( execute() );
+
+    }
+
+    protected void executeTabCompletion(String line, List<CharSequence> expectedCandidates) throws Exception{
+    	List<CharSequence> candidates=new LinkedList<>();
+    	Arguments arguments = null;
+		try {
+			arguments = new Arguments(line, true);
+		} catch (InvalidCommandArgumentException e1) {
+			// should never happen...but if it does, just bail
+		}
+		String commandName = arguments.removeCommandName();
+		String lastArgument = null;
+		if (arguments.size() > 0 && !line.endsWith(" ")) {
+			lastArgument = arguments.remove(arguments.size() - 1);
+		}
+		ShellCommand command=wsStatus.getCommand(commandName);
+		command.setArguments(arguments);
+		command.tabCompletion(lastArgument, candidates);
+        assertEquals("Invalid number of autocompletion candidates",expectedCandidates.size(), candidates.size());
+        Assert.assertTrue("Invalid elements: Expected: "+Arrays.toString(expectedCandidates.toArray())+" Actual: "+Arrays.toString(candidates.toArray()), candidates.containsAll(expectedCandidates));
+    }
 }

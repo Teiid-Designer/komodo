@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.datarole;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.vdb.DataRole;
@@ -53,4 +56,17 @@ public final class SetDataRolePropertyCommandTest extends AbstractCommandTest {
         assertEquals("myDescription", dataRoles[0].getDescription(getTransaction())); //$NON-NLS-1$
     }
 
+    @Test
+    public void testTabCompleter()throws Exception{
+
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	candidates.add("myMappedRole1");
+    	candidates.add("myMappedRole2");
+
+    	executePlayFile("addMappedRoles.cmd");
+    	executeTabCompletion("delete-mapped-role m", candidates);
+
+    	candidates.add("MyMappedRole3");
+        executeTabCompletion("delete-mapped-role ", candidates);
+    }
 }
