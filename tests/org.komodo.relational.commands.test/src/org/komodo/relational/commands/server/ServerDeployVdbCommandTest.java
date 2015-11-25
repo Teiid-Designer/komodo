@@ -19,33 +19,43 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import org.junit.Test;
 import org.komodo.shell.api.CommandResult;
-import org.komodo.shell.api.ShellCommand;
+import org.komodo.spi.runtime.TeiidDataSource;
+import org.komodo.spi.runtime.TeiidTranslator;
+import org.komodo.spi.runtime.TeiidVdb;
 
 /**
- * Test Class to test {@link ServerConnectCommand}.
+ * Test Class to test {@link ServerDeployVdbCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public final class ServerConnectCommandTest extends AbstractServerCommandTest {
+public final class ServerDeployVdbCommandTest extends AbstractServerCommandTest {
 
     @Test
-    public void shouldNotBeAvailableForServerNotDefined() throws Exception {
-        this.assertCommandsNotAvailable(ServerConnectCommand.NAME);
+    public void shouldNotBeAvailableForServerNotConnected() throws Exception {
+        this.assertCommandsNotAvailable(ServerDeployVdbCommand.NAME);
     }
-    
+
     @Test
-    public void shouldFailNoLocalhostFound() throws Exception {
+    public void shouldDeployVdb() throws Exception {
         final String[] commands = {
             "set-auto-commit false",
             "create-teiid myTeiid",
+            "create-vdb myVdb",
             "commit",
-            "set-server myTeiid" };
+            "set-server myTeiid"};
         CommandResult result = execute( commands );
+        
         assertCommandResultOk(result);
-
-        ShellCommand command = wsStatus.getCommand("server-connect");
-        result = command.execute();
-        String output = result.getMessage();
-        assertThat( output, output.contains( "localhost is not available" ), is( true ) );
+        
+        // Initialize mock server with artifacts
+        initServer("myTeiid", true, true, 
+                   new TeiidVdb[]{VDB1}, new TeiidDataSource[]{DS1}, 
+                   new TeiidTranslator[]{TRANSLATOR1}, new String[]{DS_TYPE1});
+        
+        
+        result = execute(new String[]{"workspace", "server-deploy-vdb myVdb"});
+        
+        final String output = getCommandOutput();
+        assertThat( output, output.contains( "deployed successfully" ), is( true ) );
     }
 
 }
