@@ -39,13 +39,24 @@ public final class ShowSourcesCommand extends ModelShellCommand {
     @Override
     protected CommandResult doExecute() {
         try {
+            final String[] namePatterns = processOptionalArguments( 0 );
+            final boolean hasPatterns = ( namePatterns.length != 0 );
             final Model model = getModel();
-            final ModelSource[] sources = model.getSources( getTransaction() );
+            final ModelSource[] sources = model.getSources( getTransaction(), namePatterns );
 
             if ( sources.length == 0 ) {
-                print( MESSAGE_INDENT, I18n.bind( ModelCommandsI18n.noSources, model.getName( getTransaction() ) ) );
+                if ( hasPatterns ) {
+                    print( MESSAGE_INDENT, I18n.bind( ModelCommandsI18n.noMatchingSources, model.getName( getTransaction() ) ) );
+                } else {
+                    print( MESSAGE_INDENT, I18n.bind( ModelCommandsI18n.noSources, model.getName( getTransaction() ) ) );
+                }
             } else {
-                print( MESSAGE_INDENT, I18n.bind( ModelCommandsI18n.sourcesHeader, model.getName( getTransaction() ) ) );
+                if ( hasPatterns ) {
+                    print( MESSAGE_INDENT,
+                           I18n.bind( ModelCommandsI18n.matchedSourcesHeader, model.getName( getTransaction() ) ) );
+                } else {
+                    print( MESSAGE_INDENT, I18n.bind( ModelCommandsI18n.sourcesHeader, model.getName( getTransaction() ) ) );
+                }
 
                 final int indent = (MESSAGE_INDENT * 2);
 
@@ -70,7 +81,7 @@ public final class ShowSourcesCommand extends ModelShellCommand {
      */
     @Override
     protected int getMaxArgCount() {
-        return 0;
+        return -1;
     }
 
     /**

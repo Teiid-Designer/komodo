@@ -59,37 +59,24 @@ public abstract class RelationalChildRestrictedObject extends RelationalObjectIm
     /**
      * {@inheritDoc}
      *
-     * @return an empty array
-     * @see org.komodo.relational.internal.RelationalObjectImpl#getChildren(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    public final KomodoObject[] getChildren( final UnitOfWork uow ) {
-        return KomodoObject.EMPTY_ARRAY;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @return an empty array
-     * @see org.komodo.relational.internal.RelationalObjectImpl#getChildren(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String)
+     * @see org.komodo.repository.ObjectImpl#getChildren(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String[])
      */
     @Override
     public final KomodoObject[] getChildren( final UnitOfWork uow,
-                                             final String name ) {
+                                             final String... namePatterns ) {
         return KomodoObject.EMPTY_ARRAY;
     }
 
     /**
      * {@inheritDoc}
      *
-     * @return an empty array
-     * @see org.komodo.relational.internal.RelationalObjectImpl#getChildrenOfType(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String)
+     * @see org.komodo.repository.ObjectImpl#getChildrenOfType(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String,
+     *      java.lang.String[])
      */
     @Override
     public final KomodoObject[] getChildrenOfType( final UnitOfWork uow,
-                                                   final String type ) {
+                                                   final String type,
+                                                   final String... namePatterns ) {
         return KomodoObject.EMPTY_ARRAY;
     }
 

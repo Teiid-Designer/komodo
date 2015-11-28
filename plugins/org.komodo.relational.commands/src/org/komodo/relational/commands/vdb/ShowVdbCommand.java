@@ -44,17 +44,18 @@ public final class ShowVdbCommand extends VdbShellCommand {
                 return result;
             }
 
+            print();
             result = getCommand( ShowDataRolesCommand.NAME ).execute();
 
             if ( !result.isOk() ) {
                 return result;
             }
-
-            result = getCommand( ShowEntriesCommand.NAME ).execute();
-
-            if ( !result.isOk() ) {
-                return result;
-            }
+//
+//            result = getCommand( ShowEntriesCommand.NAME ).execute();
+//
+//            if ( !result.isOk() ) {
+//                return result;
+//            }
 
             result = getCommand( ShowModelsCommand.NAME ).execute();
 

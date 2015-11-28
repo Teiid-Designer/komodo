@@ -106,6 +106,11 @@ public final class VdbCommandsI18n extends I18n {
     public static String importDeleted;
     public static String importsHeader;
     public static String invalidOverwriteArg;
+    public static String matchingDataRolesHeader;
+    public static String matchingEntriesHeader;
+    public static String matchingImportsHeader;
+    public static String matchingModelsHeader;
+    public static String matchingTranslatorsHeader;
     public static String missingDataRoleName;
     public static String missingEntryName;
     public static String missingEntryPath;
@@ -126,6 +131,11 @@ public final class VdbCommandsI18n extends I18n {
     public static String noDataRoles;
     public static String noEntries;
     public static String noImports;
+    public static String noMatchingDataRoles;
+    public static String noMatchingEntries;
+    public static String noMatchingImports;
+    public static String noMatchingModels;
+    public static String noMatchingTranslators;
     public static String noModels;
     public static String noTranslators;
     public static String overwriteArgInvalid;

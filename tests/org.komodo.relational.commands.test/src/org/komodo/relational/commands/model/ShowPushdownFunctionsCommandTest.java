@@ -31,6 +31,7 @@ public final class ShowPushdownFunctionsCommandTest extends AbstractCommandTest 
 
     private static final String FUNCTION_1 = "my_function";
     private static final String FUNCTION_2 = "your_function";
+    private static final String FUNCTION_3 = "xyz";
 
     @Before
     public void createContext() throws Exception {
@@ -39,9 +40,28 @@ public final class ShowPushdownFunctionsCommandTest extends AbstractCommandTest 
                                     "add-model myModel",
                                     "cd myModel",
                                     "add-pushdown-function " + FUNCTION_1,
-                                    "add-pushdown-function " + FUNCTION_2 };
+                                    "add-pushdown-function " + FUNCTION_2,
+                                    "add-pushdown-function " + FUNCTION_3 };
         final CommandResult result = execute( commands );
         assertCommandResultOk( result );
+    }
+
+    @Test
+    public void shouldAllowMultiplePatterns() throws Exception {
+        final String[] commands = { ShowPushdownFunctionsCommand.NAME
+                                    + SPACE
+                                    + FUNCTION_1
+                                    + SPACE
+                                    + FUNCTION_2
+                                    + SPACE
+                                    + FUNCTION_3 };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final String output = getCommandOutput();
+        assertThat( output, output.contains( FUNCTION_1 ), is( true ) );
+        assertThat( output, output.contains( FUNCTION_2 ), is( true ) );
+        assertThat( output, output.contains( FUNCTION_3 ), is( true ) );
     }
 
     @Test
@@ -53,12 +73,31 @@ public final class ShowPushdownFunctionsCommandTest extends AbstractCommandTest 
         final String output = getCommandOutput();
         assertThat( output, output.contains( FUNCTION_1 ), is( true ) );
         assertThat( output, output.contains( FUNCTION_2 ), is( true ) );
+        assertThat( output, output.contains( FUNCTION_3 ), is( true ) );
     }
 
-    @Test( expected = AssertionError.class )
-    public void shouldNotAllowArguments() throws Exception {
-        final String[] commands = { ShowPushdownFunctionsCommand.NAME + " blah" };
-        execute( commands );
+    @Test
+    public void shouldDisplayPushdownFunctionsThatMatchPattern() throws Exception {
+        final String[] commands = { ShowPushdownFunctionsCommand.NAME + " *z*" };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final String output = getCommandOutput();
+        assertThat( output, output.contains( FUNCTION_1 ), is( false ) );
+        assertThat( output, output.contains( FUNCTION_2 ), is( false ) );
+        assertThat( output, output.contains( FUNCTION_3 ), is( true ) );
+    }
+
+    @Test
+    public void shouldNotMatchPattern() throws Exception {
+        final String[] commands = { ShowPushdownFunctionsCommand.NAME + " *a*"};
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final String output = getCommandOutput();
+        assertThat( output, output.contains( FUNCTION_1 ), is( false ) );
+        assertThat( output, output.contains( FUNCTION_2 ), is( false ) );
+        assertThat( output, output.contains( FUNCTION_3 ), is( false ) );
     }
 
 }

@@ -84,40 +84,38 @@ public interface KomodoObject extends KNode {
                            final String typeName ) throws KException;
 
     /**
-     * Subclasses may choose to implement this so that it may not represent that actual, physical children.
+     * Name patterns may be a full name or a partial name with one or more wildcard characters ("*"). If a node name matches any
+     * of the patterns, it is returned.
      *
      * @param transaction
-     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
-     * @return the child objects (never <code>null</code> but can be empty)
-     * @throws KException
-     *         if an error occurs
-     * @see #getRawChildren(UnitOfWork)
-     */
-    KomodoObject[] getChildren( final UnitOfWork transaction ) throws KException;
-
-    /**
-     * @param transaction
-     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
-     * @param name
-     *        the name of child(ren) being requested (cannot be empty)
+     *        the transaction (cannot be <code>null</code> or must have a state of {@link State#NOT_STARTED}))
+     * @param namePatterns
+     *        optional name patterns of the child(ren) being requested (can be <code>null</code> or empty but cannot have
+     *        <code>null</code> or empty elements)
      * @return the child object(s) (never <code>null</code> but can be empty)
      * @throws KException
      *         if the child does not exist or an error occurs
      */
     KomodoObject[] getChildren( final UnitOfWork transaction,
-                                final String name ) throws KException;
+                                final String... namePatterns ) throws KException;
 
     /**
+     * Name patterns may be a full name or a partial name with one or more wildcard characters ("*"). If a node name matches any
+     * of the patterns, it is returned.
+     *
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
      * @param type
      *        the primary type or mixin of the children being requested (cannot be empty)
+     * @param namePatterns
+     *        optional name patterns (can be <code>null</code> or empty but cannot have <code>null</code> or empty elements)
      * @return the matching children (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
      */
     KomodoObject[] getChildrenOfType( final UnitOfWork transaction,
-                                      final String type ) throws KException;
+                                      final String type,
+                                      final String... namePatterns ) throws KException;
 
     /**
      * @return the types of children that can be created (never <code>null</code> but can be empty if any type is allowed)
@@ -207,11 +205,15 @@ public interface KomodoObject extends KNode {
      *
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
+     * @param namePatterns
+     *        optional name patterns of the child(ren) being requested (can be <code>null</code> or empty but cannot have
+     *        <code>null</code> or empty elements)
      * @return the unfiltered child objects (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
      */
-    KomodoObject[] getRawChildren( final UnitOfWork transaction ) throws KException;
+    KomodoObject[] getRawChildren( final UnitOfWork transaction,
+                                   final String... namePatterns ) throws KException;
 
     /**
      * @param transaction

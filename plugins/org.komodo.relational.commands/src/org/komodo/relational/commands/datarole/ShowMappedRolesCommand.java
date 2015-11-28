@@ -39,14 +39,27 @@ public final class ShowMappedRolesCommand extends DataRoleShellCommand {
         CommandResult result = null;
 
         try {
+            final String[] namePatterns = processOptionalArguments( 0 );
+            final boolean hasPatterns = ( namePatterns.length != 0 );
             final DataRole dataRole = getDataRole();
-            final String[] roles = dataRole.getMappedRoles( getTransaction() );
+            final String[] roles = dataRole.getMappedRoles( getTransaction(), namePatterns );
 
             if ( roles.length == 0 ) {
-                result = new CommandResultImpl( I18n.bind( DataRoleCommandsI18n.noMappedRoles,
-                                                           dataRole.getName( getTransaction() ) ) );
+                if ( hasPatterns ) {
+                    result = new CommandResultImpl( I18n.bind( DataRoleCommandsI18n.noMatchingMappedRoles,
+                                                               dataRole.getName( getTransaction() ) ) );
+                } else {
+                    result = new CommandResultImpl( I18n.bind( DataRoleCommandsI18n.noMappedRoles,
+                                                               dataRole.getName( getTransaction() ) ) );
+                }
             } else {
-                print( MESSAGE_INDENT, I18n.bind( DataRoleCommandsI18n.mappedRolesHeader, dataRole.getName( getTransaction() ) ) );
+                if ( hasPatterns ) {
+                    print( MESSAGE_INDENT,
+                           I18n.bind( DataRoleCommandsI18n.matchingMappedRolesHeader, dataRole.getName( getTransaction() ) ) );
+                } else {
+                    print( MESSAGE_INDENT,
+                           I18n.bind( DataRoleCommandsI18n.mappedRolesHeader, dataRole.getName( getTransaction() ) ) );
+                }
 
                 final int indent = (MESSAGE_INDENT * 2);
 
@@ -70,7 +83,7 @@ public final class ShowMappedRolesCommand extends DataRoleShellCommand {
      */
     @Override
     protected int getMaxArgCount() {
-        return 0;
+        return -1;
     }
 
     /**

@@ -53,10 +53,14 @@ public final class PermissionCommandsI18n extends I18n {
     public static String maskAdded;
     public static String maskDeleted;
     public static String masksHeader;
+    public static String matchedConditionsHeader;
+    public static String matchedMasksHeader;
     public static String missingConditionName;
     public static String missingMaskName;
     public static String noConditions;
     public static String noMasks;
+    public static String noMatchedConditions;
+    public static String noMatchedMasks;
 
     static {
         final PermissionCommandsI18n i18n = new PermissionCommandsI18n();

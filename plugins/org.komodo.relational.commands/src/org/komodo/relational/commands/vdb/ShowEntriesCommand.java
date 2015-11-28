@@ -14,7 +14,6 @@ import org.komodo.relational.vdb.Vdb;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.i18n.I18n;
 
 /**
@@ -40,21 +39,30 @@ public final class ShowEntriesCommand extends VdbShellCommand {
     @Override
     protected CommandResult doExecute() {
         try {
-            final UnitOfWork uow = getTransaction();
+            final String[] namePatterns = processOptionalArguments( 0 );
+            final boolean hasPatterns = ( namePatterns.length != 0 );
             final Vdb vdb = getVdb();
-            final Entry[] entries = vdb.getEntries( uow );
+            final Entry[] entries = vdb.getEntries( getTransaction(), namePatterns );
 
             if ( entries.length == 0 ) {
-                print( MESSAGE_INDENT, I18n.bind( VdbCommandsI18n.noEntries, vdb.getName( uow ) ) );
+                if ( hasPatterns ) {
+                    print( MESSAGE_INDENT, I18n.bind( VdbCommandsI18n.noMatchingEntries, vdb.getName( getTransaction() ) ) );
+                } else {
+                    print( MESSAGE_INDENT, I18n.bind( VdbCommandsI18n.noEntries, vdb.getName( getTransaction() ) ) );
+                }
             } else {
-                print( MESSAGE_INDENT, I18n.bind( VdbCommandsI18n.entriesHeader, vdb.getName( uow ) ) );
+                if ( hasPatterns ) {
+                    print( MESSAGE_INDENT, I18n.bind( VdbCommandsI18n.matchingEntriesHeader, vdb.getName( getTransaction() ) ) );
+                } else {
+                    print( MESSAGE_INDENT, I18n.bind( VdbCommandsI18n.entriesHeader, vdb.getName( getTransaction() ) ) );
+                }
 
                 final int indent = (MESSAGE_INDENT * 2);
 
                 for ( final Entry entry : entries ) {
                     print( indent,
                            I18n.bind( WorkspaceCommandsI18n.printRelationalObject,
-                                      entry.getName( uow ),
+                                      entry.getName( getTransaction() ),
                                       entry.getTypeDisplayName() ) );
                 }
             }
@@ -77,7 +85,7 @@ public final class ShowEntriesCommand extends VdbShellCommand {
      */
     @Override
     protected int getMaxArgCount() {
-        return 0;
+        return -1;
     }
 
     /**

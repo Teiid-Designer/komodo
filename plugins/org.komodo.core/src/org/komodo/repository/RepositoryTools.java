@@ -64,8 +64,8 @@ public class RepositoryTools implements StringConstants {
         String relPath = path.replaceAll("^/+", "").replaceAll("/+$", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 
         // Look for the KomodoObject first ...
-        if (parent.hasChild(transaction, relPath))
-            return parent.getChild(transaction, relPath);
+        if (parent.hasChild(transaction, relPath, defaultType))
+            return parent.getChild(transaction, relPath, defaultType);
 
         // Create the KomodoObject, which has to be done segment by segment ...
         String[] pathSegments = relPath.split("/"); //$NON-NLS-1$

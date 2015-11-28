@@ -39,13 +39,27 @@ public final class ShowPermissionsCommand extends DataRoleShellCommand {
     @Override
     protected CommandResult doExecute() {
         try {
+            final String[] namePatterns = processOptionalArguments( 0 );
+            final boolean hasPatterns = ( namePatterns.length != 0 );
             final DataRole dataRole = getDataRole();
-            final Permission[] permissions = dataRole.getPermissions( getTransaction() );
+            final Permission[] permissions = dataRole.getPermissions( getTransaction(), namePatterns );
 
             if ( permissions.length == 0 ) {
-                print( MESSAGE_INDENT, I18n.bind( DataRoleCommandsI18n.noPermissions, dataRole.getName( getTransaction() ) ) );
+                if ( hasPatterns ) {
+                    print( MESSAGE_INDENT,
+                           I18n.bind( DataRoleCommandsI18n.noMatchingPermissions, dataRole.getName( getTransaction() ) ) );
+                } else {
+                    print( MESSAGE_INDENT,
+                           I18n.bind( DataRoleCommandsI18n.noPermissions, dataRole.getName( getTransaction() ) ) );
+                }
             } else {
-                print( MESSAGE_INDENT, I18n.bind( DataRoleCommandsI18n.permissionsHeader, dataRole.getName( getTransaction() ) ) );
+                if ( hasPatterns ) {
+                    print( MESSAGE_INDENT,
+                           I18n.bind( DataRoleCommandsI18n.matchingPermissionsHeader, dataRole.getName( getTransaction() ) ) );
+                } else {
+                    print( MESSAGE_INDENT,
+                           I18n.bind( DataRoleCommandsI18n.permissionsHeader, dataRole.getName( getTransaction() ) ) );
+                }
 
                 final int indent = (MESSAGE_INDENT * 2);
 
@@ -70,7 +84,7 @@ public final class ShowPermissionsCommand extends DataRoleShellCommand {
      */
     @Override
     protected int getMaxArgCount() {
-        return 0;
+        return -1;
     }
 
     /**

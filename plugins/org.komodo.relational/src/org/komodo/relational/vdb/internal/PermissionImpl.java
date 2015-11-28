@@ -9,9 +9,10 @@ package org.komodo.relational.vdb.internal;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.jcr.RepositoryException;
 import org.komodo.relational.Messages;
-import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.Messages.Relational;
+import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.vdb.Condition;
 import org.komodo.relational.vdb.Mask;
@@ -92,15 +93,37 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.repository.ObjectImpl#getChildren(org.komodo.spi.repository.Repository.UnitOfWork)
+     * @see org.komodo.relational.internal.RelationalObjectImpl#getChildren(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String[])
      */
     @Override
-    public KomodoObject[] getChildren( final UnitOfWork transaction ) throws KException {
+    public KomodoObject[] getChildren( final UnitOfWork transaction,
+                                       final String... namePatterns ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        final Condition[] conditions = getConditions( transaction );
-        final Mask[] masks = getMasks( transaction );
+        if ( ( namePatterns != null ) && ( namePatterns.length == 1 ) ) {
+            if ( VdbLexicon.DataRole.Permission.CONDITIONS.equals( namePatterns[ 0 ] ) ) {
+                final KomodoObject grouping = getConditionsGroupingNode( transaction );
+
+                if ( grouping == null ) {
+                    return KomodoObject.EMPTY_ARRAY;
+                }
+
+                return new KomodoObject[] { grouping };
+            } else if ( VdbLexicon.DataRole.Permission.MASKS.equals( namePatterns[ 0 ] ) ) {
+                final KomodoObject grouping = getMasksGroupingNode( transaction );
+
+                if ( grouping == null ) {
+                    return KomodoObject.EMPTY_ARRAY;
+                }
+
+                return new KomodoObject[] { grouping };
+            }
+        }
+
+        final Condition[] conditions = getConditions( transaction, namePatterns );
+        final Mask[] masks = getMasks( transaction, namePatterns );
 
         final KomodoObject[] result = new KomodoObject[ conditions.length + masks.length ];
         System.arraycopy( conditions, 0, result, 0, conditions.length );
@@ -113,20 +136,21 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
      * {@inheritDoc}
      *
      * @see org.komodo.relational.internal.RelationalObjectImpl#getChildrenOfType(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String)
+     *      java.lang.String, java.lang.String[])
      */
     @Override
     public KomodoObject[] getChildrenOfType( final UnitOfWork transaction,
-                                             final String type ) throws KException {
+                                             final String type,
+                                             final String... namePatterns ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         KomodoObject[] result = null;
 
         if ( VdbLexicon.DataRole.Permission.Condition.CONDITION.equals( type ) ) {
-            result = getConditions( transaction );
+            result = getConditions( transaction, namePatterns );
         } else if ( VdbLexicon.DataRole.Permission.Mask.MASK.equals( type ) ) {
-            result = getMasks( transaction );
+            result = getMasks( transaction, namePatterns );
         } else {
             result = KomodoObject.EMPTY_ARRAY;
         }
@@ -137,23 +161,23 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.vdb.Permission#getConditions(org.komodo.spi.repository.Repository.UnitOfWork)
+     * @see org.komodo.relational.vdb.Permission#getConditions(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String[])
      */
     @Override
-    public Condition[] getConditions( final UnitOfWork transaction ) throws KException {
+    public Condition[] getConditions( final UnitOfWork transaction,
+                                      final String... namePatterns ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         Condition[] result = null;
+        final KomodoObject grouping = getConditionsGroupingNode( transaction );
 
-        if ( hasChild( transaction, VdbLexicon.DataRole.Permission.CONDITIONS, VdbLexicon.DataRole.Permission.CONDITIONS ) ) {
-            final KomodoObject grouping = getChild( transaction,
-                                                    VdbLexicon.DataRole.Permission.CONDITIONS,
-                                                    VdbLexicon.DataRole.Permission.CONDITIONS );
+        if ( grouping != null ) {
             final List< Condition > temp = new ArrayList<>();
 
             for ( final KomodoObject kobject : grouping.getChildrenOfType( transaction,
-                                                                           VdbLexicon.DataRole.Permission.Condition.CONDITION ) ) {
+                                                                           VdbLexicon.DataRole.Permission.Condition.CONDITION,
+                                                                           namePatterns ) ) {
                 final Condition condition = new ConditionImpl( transaction, getRepository(), kobject.getAbsolutePath() );
                 temp.add( condition );
             }
@@ -166,25 +190,40 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
         return result;
     }
 
+    private KomodoObject getConditionsGroupingNode( final UnitOfWork transaction ) {
+        try {
+            if ( hasChild( transaction, VdbLexicon.DataRole.Permission.CONDITIONS, VdbLexicon.DataRole.Permission.CONDITIONS ) ) {
+                return super.getChild( transaction,
+                                       VdbLexicon.DataRole.Permission.CONDITIONS,
+                                       VdbLexicon.DataRole.Permission.CONDITIONS );
+            }
+        } catch ( final KException e ) {
+            // nothing to do
+        }
+
+        return null;
+    }
+
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.vdb.Permission#getMasks(org.komodo.spi.repository.Repository.UnitOfWork)
+     * @see org.komodo.relational.vdb.Permission#getMasks(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String[])
      */
     @Override
-    public Mask[] getMasks( final UnitOfWork transaction ) throws KException {
+    public Mask[] getMasks( final UnitOfWork transaction,
+                            final String... namePatterns ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         Mask[] result = null;
+        final KomodoObject grouping = getMasksGroupingNode( transaction );
 
-        if ( hasChild( transaction, VdbLexicon.DataRole.Permission.MASKS, VdbLexicon.DataRole.Permission.MASKS ) ) {
-            final KomodoObject grouping = getChild( transaction,
-                                                    VdbLexicon.DataRole.Permission.MASKS,
-                                                    VdbLexicon.DataRole.Permission.MASKS );
+        if ( grouping != null ) {
             final List< Mask > temp = new ArrayList<>();
 
-            for ( final KomodoObject kobject : grouping.getChildrenOfType( transaction, VdbLexicon.DataRole.Permission.Mask.MASK ) ) {
+            for ( final KomodoObject kobject : grouping.getChildrenOfType( transaction,
+                                                                           VdbLexicon.DataRole.Permission.Mask.MASK,
+                                                                           namePatterns ) ) {
                 final Mask mask = new MaskImpl( transaction, getRepository(), kobject.getAbsolutePath() );
                 temp.add( mask );
             }
@@ -195,6 +234,20 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
         }
 
         return result;
+    }
+
+    private KomodoObject getMasksGroupingNode( final UnitOfWork transaction ) {
+        try {
+            if ( hasChild( transaction, VdbLexicon.DataRole.Permission.MASKS, VdbLexicon.DataRole.Permission.MASKS ) ) {
+                return super.getChild( transaction,
+                                       VdbLexicon.DataRole.Permission.MASKS,
+                                       VdbLexicon.DataRole.Permission.MASKS );
+            }
+        } catch ( final KException e ) {
+            // nothing to do
+        }
+
+        return null;
     }
 
     /**
@@ -230,6 +283,50 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
     @Override
     public int getTypeId() {
         return TYPE_ID;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#hasChild(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String, java.lang.String)
+     */
+    @Override
+    public boolean hasChild( final UnitOfWork transaction,
+                             final String name,
+                             final String typeName ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state must be NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( typeName, "typeName" ); //$NON-NLS-1$
+
+        if ( VdbLexicon.DataRole.Permission.CONDITIONS.equals( name ) ) {
+            if ( !VdbLexicon.DataRole.Permission.CONDITIONS.equals( typeName ) ) {
+                throw new KException( Messages.getString( Relational.INVALID_GROUPING_NODE_TYPE,
+                                                          VdbLexicon.DataRole.Permission.CONDITIONS,
+                                                          typeName ) );
+            }
+
+            try {
+                return node( transaction ).hasNode( VdbLexicon.DataRole.Permission.CONDITIONS );
+            } catch ( final RepositoryException e ) {
+                throw new KException( e );
+            }
+        } else if ( VdbLexicon.DataRole.Permission.MASKS.equals( name ) ) {
+            if ( !VdbLexicon.DataRole.Permission.MASKS.equals( typeName ) ) {
+                throw new KException( Messages.getString( Relational.INVALID_GROUPING_NODE_TYPE,
+                                                          VdbLexicon.DataRole.Permission.MASKS,
+                                                          typeName ) );
+            }
+
+            try {
+                return node( transaction ).hasNode( VdbLexicon.DataRole.Permission.MASKS );
+            } catch ( final RepositoryException e ) {
+                throw new KException( e );
+            }
+        }
+
+        return super.hasChild( transaction, name, typeName );
     }
 
     /**
@@ -322,22 +419,14 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( conditionToRemove, "conditionToRemove" ); //$NON-NLS-1$
 
-        boolean found = false;
-        final Condition[] conditions = getConditions( transaction );
+        final Condition[] conditions = getConditions( transaction, conditionToRemove );
 
-        if ( conditions.length != 0 ) {
-            for ( final Condition condition : conditions ) {
-                if ( conditionToRemove.equals( condition.getName( transaction ) ) ) {
-                    condition.remove( transaction );
-                    found = true;
-                    break;
-                }
-            }
-        }
-
-        if ( !found ) {
+        if ( conditions.length == 0 ) {
             throw new KException( Messages.getString( Relational.CONDITION_NOT_FOUND_TO_REMOVE, conditionToRemove ) );
         }
+
+        // remove first occurrence
+        conditions[ 0 ].remove( transaction );
     }
 
     /**
@@ -352,22 +441,14 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( maskToRemove, "maskToRemove" ); //$NON-NLS-1$
 
-        boolean found = false;
-        final Mask[] masks = getMasks( transaction );
+        final Mask[] masks = getMasks( transaction, maskToRemove );
 
-        if ( masks.length != 0 ) {
-            for ( final Mask mask : masks ) {
-                if ( maskToRemove.equals( mask.getName( transaction ) ) ) {
-                    mask.remove( transaction );
-                    found = true;
-                    break;
-                }
-            }
-        }
-
-        if ( !found ) {
+        if ( masks.length == 0 ) {
             throw new KException( Messages.getString( Relational.MASK_NOT_FOUND_TO_REMOVE, maskToRemove ) );
         }
+
+        // remove first occurrence
+        masks[ 0 ].remove( transaction );
     }
 
     /**

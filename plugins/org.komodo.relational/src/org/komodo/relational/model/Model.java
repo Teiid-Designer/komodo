@@ -251,11 +251,14 @@ public interface Model extends Exportable, RelationalObject {
     /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param namePatterns
+     *        optional name patterns (can be <code>null</code> or empty but cannot have <code>null</code> or empty elements)
      * @return the functions found in this model (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
      */
-    Function[] getFunctions( final UnitOfWork transaction ) throws KException;
+    Function[] getFunctions( final UnitOfWork transaction,
+                             final String... namePatterns ) throws KException;
 
     /**
      * @param transaction
@@ -291,38 +294,50 @@ public interface Model extends Exportable, RelationalObject {
      *
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param namePatterns
+     *        optional name patterns (can be <code>null</code> or empty but cannot have <code>null</code> or empty elements)
      * @return the procedures found in this model (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
      */
-    Procedure[] getProcedures( final UnitOfWork transaction ) throws KException;
+    Procedure[] getProcedures( final UnitOfWork transaction,
+                               final String... namePatterns ) throws KException;
 
     /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param namePatterns
+     *        optional name patterns (can be <code>null</code> or empty but cannot have <code>null</code> or empty elements)
      * @return the model sources found in this model (can be empty)
      * @throws KException
      *         if an error occurs
      */
-    ModelSource[] getSources( final UnitOfWork transaction ) throws KException;
+    ModelSource[] getSources( final UnitOfWork transaction,
+                              final String... namePatterns ) throws KException;
 
     /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param namePatterns
+     *        optional name patterns (can be <code>null</code> or empty but cannot have <code>null</code> or empty elements)
      * @return the tables found in this model (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
      */
-    Table[] getTables( final UnitOfWork transaction ) throws KException;
+    Table[] getTables( final UnitOfWork transaction,
+                       final String... namePatterns ) throws KException;
 
     /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param namePatterns
+     *        optional name patterns (can be <code>null</code> or empty but cannot have <code>null</code> or empty elements)
      * @return the views found in this model (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
      */
-    View[] getViews( final UnitOfWork transaction ) throws KException;
+    View[] getViews( final UnitOfWork transaction,
+                     final String... namePatterns ) throws KException;
 
     /**
      * @param transaction

@@ -39,13 +39,26 @@ public final class ShowMasksCommand extends PermissionShellCommand {
     @Override
     protected CommandResult doExecute() {
         try {
+            final String[] namePatterns = processOptionalArguments( 0 );
+            final boolean hasPatterns = ( namePatterns.length != 0 );
             final Permission permission = getPermission();
-            final Mask[] masks = permission.getMasks( getTransaction() );
+            final Mask[] masks = permission.getMasks( getTransaction(), namePatterns );
 
             if ( masks.length == 0 ) {
-                print( MESSAGE_INDENT, I18n.bind( PermissionCommandsI18n.noMasks, permission.getName( getTransaction() ) ) );
+                if ( hasPatterns ) {
+                    print( MESSAGE_INDENT,
+                           I18n.bind( PermissionCommandsI18n.noMatchedMasks, permission.getName( getTransaction() ) ) );
+                } else {
+                    print( MESSAGE_INDENT, I18n.bind( PermissionCommandsI18n.noMasks, permission.getName( getTransaction() ) ) );
+                }
             } else {
-                print( MESSAGE_INDENT, I18n.bind( PermissionCommandsI18n.masksHeader, permission.getName( getTransaction() ) ) );
+                if ( hasPatterns ) {
+                    print( MESSAGE_INDENT,
+                           I18n.bind( PermissionCommandsI18n.matchedMasksHeader, permission.getName( getTransaction() ) ) );
+                } else {
+                    print( MESSAGE_INDENT,
+                           I18n.bind( PermissionCommandsI18n.masksHeader, permission.getName( getTransaction() ) ) );
+                }
 
                 final int indent = (MESSAGE_INDENT * 2);
 
@@ -70,7 +83,7 @@ public final class ShowMasksCommand extends PermissionShellCommand {
      */
     @Override
     protected int getMaxArgCount() {
-        return 0;
+        return -1;
     }
 
     /**

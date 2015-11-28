@@ -23,6 +23,7 @@ public final class ShowPermissionsCommandTest extends AbstractCommandTest {
 
     private static final String PERMISSION_1 = "my_permission";
     private static final String PERMISSION_2 = "your_permission";
+    private static final String PERMISSION_3 = "messi";
 
     @Before
     public void createContext() throws Exception {
@@ -31,9 +32,22 @@ public final class ShowPermissionsCommandTest extends AbstractCommandTest {
                                     "add-data-role myDataRole",
                                     "cd myDataRole",
                                     "add-permission " + PERMISSION_1,
-                                    "add-permission " + PERMISSION_2 };
+                                    "add-permission " + PERMISSION_2,
+                                    "add-permission " + PERMISSION_3 };
         final CommandResult result = execute( commands );
         assertCommandResultOk( result );
+    }
+
+    @Test
+    public void shoudAllowMultiplePatterns() throws Exception {
+        final String[] commands = { ShowPermissionsCommand.NAME + SPACE + "mes*" + SPACE + PERMISSION_2 };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final String output = getCommandOutput();
+        assertThat( output, output.contains( PERMISSION_1 ), is( false ) );
+        assertThat( output, output.contains( PERMISSION_2 ), is( true ) );
+        assertThat( output, output.contains( PERMISSION_3 ), is( true ) );
     }
 
     @Test
@@ -45,12 +59,31 @@ public final class ShowPermissionsCommandTest extends AbstractCommandTest {
         final String output = getCommandOutput();
         assertThat( output, output.contains( PERMISSION_1 ), is( true ) );
         assertThat( output, output.contains( PERMISSION_2 ), is( true ) );
+        assertThat( output, output.contains( PERMISSION_3 ), is( true ) );
     }
 
-    @Test( expected = AssertionError.class )
-    public void shouldNotAllowArguments() throws Exception {
+    @Test
+    public void shoudDisplayPermissionsThatMatchPattern() throws Exception {
+        final String[] commands = { ShowPermissionsCommand.NAME + " my_*" };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final String output = getCommandOutput();
+        assertThat( output, output.contains( PERMISSION_1 ), is( true ) );
+        assertThat( output, output.contains( PERMISSION_2 ), is( false ) );
+        assertThat( output, output.contains( PERMISSION_3 ), is( false ) );
+    }
+
+    @Test
+    public void shoudNotMatchPattern() throws Exception {
         final String[] commands = { ShowPermissionsCommand.NAME + " blah" };
-        execute( commands );
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final String output = getCommandOutput();
+        assertThat( output, output.contains( PERMISSION_1 ), is( false ) );
+        assertThat( output, output.contains( PERMISSION_2 ), is( false ) );
+        assertThat( output, output.contains( PERMISSION_3 ), is( false ) );
     }
 
 }
