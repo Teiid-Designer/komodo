@@ -126,6 +126,13 @@ public final class ModelCommandsI18n extends I18n {
     public static String importFailedMsg;
     public static String invalidDDLParentType;
     public static String invalidModelTypePropertyValue;
+    public static String matchedPushdownFunctionsHeader;
+    public static String matchedSourcesHeader;
+    public static String matchedStoredProceduresHeader;
+    public static String matchedTablesHeader;
+    public static String matchedUserDefinedFunctionsHeader;
+    public static String matchedViewsHeader;
+    public static String matchedVirtualProceduresHeader;
     public static String missingPushdownFunctionName;
     public static String missingSourceName;
     public static String missingStoredProcedureName;
@@ -133,6 +140,13 @@ public final class ModelCommandsI18n extends I18n {
     public static String missingUserDefinedFunctionName;
     public static String missingViewName;
     public static String missingVirtualProcedureName;
+    public static String noMatchingPushdownFunctions;
+    public static String noMatchingSources;
+    public static String noMatchingStoredProcedures;
+    public static String noMatchingTables;
+    public static String noMatchingUserDefinedFunctions;
+    public static String noMatchingViews;
+    public static String noMatchingVirtualProcedures;
     public static String noPushdownFunctions;
     public static String noSources;
     public static String noStoredProcedures;

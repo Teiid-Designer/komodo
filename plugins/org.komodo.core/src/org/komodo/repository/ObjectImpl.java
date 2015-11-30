@@ -511,6 +511,17 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( typeName, "typeName" ); //$NON-NLS-1$
 
+        { // try if one child with that name first
+            final KomodoObject kobject = getChild( transaction, name );
+
+            // verify type is right
+            if ( typeName.equals( kobject.getPrimaryType( transaction ).getName() )
+                 || kobject.hasDescriptor( transaction, typeName ) ) {
+                return kobject;
+            }
+        }
+
+        // see if multiple children have same name
         final KomodoObject[] kids = getChildren( transaction, name );
 
         if ( kids.length != 0 ) {
@@ -527,14 +538,16 @@ public class ObjectImpl implements KomodoObject, StringConstants {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.KomodoObject#getChildren(org.komodo.spi.repository.Repository.UnitOfWork)
+     * @see org.komodo.spi.repository.KomodoObject#getChildren(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String[])
      */
     @Override
-    public KomodoObject[] getChildren( final UnitOfWork transaction ) throws KException {
+    public KomodoObject[] getChildren( final UnitOfWork transaction,
+                                       final String... namePatterns ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        final KomodoObject[] result = getRawChildren( transaction );
+        final KomodoObject[] result = getRawChildren( transaction, namePatterns );
         return result;
     }
 
@@ -560,40 +573,25 @@ public class ObjectImpl implements KomodoObject, StringConstants {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.KomodoObject#getChildren(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
-     */
-    @Override
-    public KomodoObject[] getChildren( final UnitOfWork transaction,
-                                       final String name ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(name, "name"); //$NON-NLS-1$
-
-        KomodoObject[] result = null;
-
-        try {
-            result = getChildren(transaction, node(transaction).getNodes(name));
-            return result;
-        } catch (final Exception e) {
-            throw handleError( e );
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
      * @see org.komodo.spi.repository.KomodoObject#getChildrenOfType(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String)
+     *      java.lang.String, java.lang.String[])
      */
     @Override
     public KomodoObject[] getChildrenOfType( final UnitOfWork transaction,
-                                             final String type ) throws KException {
+                                             final String type,
+                                             final String... namePatterns ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( type, "type" ); //$NON-NLS-1$
 
         try {
-            KomodoObject[] kids = getChildren( transaction, node( transaction ).getNodes() );
+            KomodoObject[] kids = null;
+
+            if ( ( namePatterns == null ) || ( namePatterns.length == 0 ) ) {
+                kids = getChildren( transaction, node( transaction ).getNodes() );
+            } else {
+                kids = getChildren( transaction, node( transaction ).getNodes( namePatterns ) );
+            }
 
             if ( kids.length != 0 ) {
                 final List< KomodoObject > matches = new ArrayList< KomodoObject >( kids.length );
@@ -876,15 +874,24 @@ public class ObjectImpl implements KomodoObject, StringConstants {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.KomodoObject#getRawChildren(org.komodo.spi.repository.Repository.UnitOfWork)
+     * @see org.komodo.spi.repository.KomodoObject#getRawChildren(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String[])
      */
     @Override
-    public final KomodoObject[] getRawChildren( final UnitOfWork transaction ) throws KException {
+    public final KomodoObject[] getRawChildren( final UnitOfWork transaction,
+                                                final String... namePatterns ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
+        NodeIterator itr = null;
+
         try {
-            final NodeIterator itr = node( transaction ).getNodes();
+            if ( ( namePatterns == null ) || ( namePatterns.length == 0 ) ) {
+                itr = node( transaction ).getNodes();
+            } else {
+                itr = node( transaction ).getNodes( namePatterns );
+            }
+
             final KomodoObject[] result = getChildren( transaction, itr );
             return result;
         } catch ( final Exception e ) {
@@ -1138,18 +1145,21 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      * @see org.komodo.spi.repository.KomodoObject#hasChild(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String,
      *      java.lang.String)
      */
+    @SuppressWarnings( "unused" )
     @Override
     public boolean hasChild( final UnitOfWork transaction,
                              final String name,
-                             final String typeName ) {
+                             final String typeName ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state must be NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( typeName, "typeName" ); //$NON-NLS-1$
 
         try {
-            getChild( transaction, name, typeName ); // TODO should just query for node count > 0
-            return true;
+            if ( hasChild( transaction, name ) ) {
+                getChild( transaction, name, typeName ); // TODO should just query for node count > 0
+                return true;
+            }
         } catch ( final KException e ) {
             // child not found
         }

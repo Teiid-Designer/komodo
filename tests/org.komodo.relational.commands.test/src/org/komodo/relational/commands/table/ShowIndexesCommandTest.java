@@ -31,6 +31,7 @@ public final class ShowIndexesCommandTest extends AbstractCommandTest {
 
     private static final String INDEX_1 = "my_index";
     private static final String INDEX_2 = "your_index";
+    private static final String INDEX_3 = "sour_index";
 
     @Before
     public void createContext() throws Exception {
@@ -41,9 +42,22 @@ public final class ShowIndexesCommandTest extends AbstractCommandTest {
                                     "add-table myTable",
                                     "cd myTable",
                                     "add-index " + INDEX_1,
-                                    "add-index " + INDEX_2 };
+                                    "add-index " + INDEX_2,
+                                    "add-index " + INDEX_3 };
         final CommandResult result = execute( commands );
         assertCommandResultOk( result );
+    }
+
+    @Test
+    public void shouldAllowMultiplePatterns() throws Exception {
+        final String[] commands = { ShowIndexesCommand.NAME + SPACE + INDEX_1 + SPACE + INDEX_2 };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final String output = getCommandOutput();
+        assertThat( output, output.contains( INDEX_1 ), is( true ) );
+        assertThat( output, output.contains( INDEX_2 ), is( true ) );
+        assertThat( output, output.contains( INDEX_3 ), is( false ) );
     }
 
     @Test
@@ -55,12 +69,31 @@ public final class ShowIndexesCommandTest extends AbstractCommandTest {
         final String output = getCommandOutput();
         assertThat( output, output.contains( INDEX_1 ), is( true ) );
         assertThat( output, output.contains( INDEX_2 ), is( true ) );
+        assertThat( output, output.contains( INDEX_3 ), is( true ) );
     }
 
-    @Test( expected = AssertionError.class )
-    public void shouldNotAllowArguments() throws Exception {
-        final String[] commands = { ShowIndexesCommand.NAME + " blah" };
-        execute( commands );
+    @Test
+    public void shouldDisplayIndexesThatMatchPattern() throws Exception {
+        final String[] commands = { ShowIndexesCommand.NAME + " *our*" };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final String output = getCommandOutput();
+        assertThat( output, output.contains( INDEX_1 ), is( false ) );
+        assertThat( output, output.contains( INDEX_2 ), is( true ) );
+        assertThat( output, output.contains( INDEX_3 ), is( true ) );
+    }
+
+    @Test
+    public void shouldNotMatchPattern() throws Exception {
+        final String[] commands = { ShowIndexesCommand.NAME + " *blah*" };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final String output = getCommandOutput();
+        assertThat( output, output.contains( INDEX_1 ), is( false ) );
+        assertThat( output, output.contains( INDEX_2 ), is( false ) );
+        assertThat( output, output.contains( INDEX_3 ), is( false ) );
     }
 
 }

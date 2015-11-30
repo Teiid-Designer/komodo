@@ -103,50 +103,16 @@ public abstract class RelationalObjectImpl extends ObjectImpl implements Relatio
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.repository.ObjectImpl#getChildren(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    public KomodoObject[] getChildren( final UnitOfWork transaction ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-
-        KomodoObject[] result = null;
-        final KomodoObject[] kids = super.getChildren( transaction );
-
-        if ( kids.length == 0 ) {
-            result = kids;
-        } else {
-            final List< KomodoObject > temp = new ArrayList<>( kids.length );
-
-            for ( final KomodoObject kobject : kids ) {
-                // ensure child has at least one non-filtered descriptor
-                for ( final Descriptor descriptor : getAllDescriptors( transaction, kobject ) ) {
-                    if ( !isDescriptorFiltered( descriptor.getName() ) ) {
-                        temp.add( resolveType( transaction, kobject ) );
-                        break;
-                    }
-                }
-            }
-
-            result = temp.toArray( new KomodoObject[ temp.size() ] );
-        }
-
-        return result;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.repository.ObjectImpl#getChildren(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     * @see org.komodo.repository.ObjectImpl#getChildren(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String[])
      */
     @Override
     public KomodoObject[] getChildren( final UnitOfWork transaction,
-                                       final String name ) throws KException {
+                                       final String... namePatterns ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         KomodoObject[] result = null;
-        final KomodoObject[] kids = super.getChildren( transaction, name );
+        final KomodoObject[] kids = super.getChildren( transaction, namePatterns );
 
         if ( kids.length == 0 ) {
             result = kids;
@@ -172,11 +138,13 @@ public abstract class RelationalObjectImpl extends ObjectImpl implements Relatio
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.repository.ObjectImpl#getChildrenOfType(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     * @see org.komodo.repository.ObjectImpl#getChildrenOfType(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String,
+     *      java.lang.String[])
      */
     @Override
     public KomodoObject[] getChildrenOfType( final UnitOfWork transaction,
-                                             final String type ) throws KException {
+                                             final String type,
+                                             final String... namePatterns ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( type, "type" ); //$NON-NLS-1$
@@ -186,7 +154,7 @@ public abstract class RelationalObjectImpl extends ObjectImpl implements Relatio
         if ( isDescriptorFiltered( type ) ) {
             result = KomodoObject.EMPTY_ARRAY;
         } else {
-            final KomodoObject[] kids = super.getChildrenOfType( transaction, type );
+            final KomodoObject[] kids = super.getChildrenOfType( transaction, type, namePatterns );
 
             if ( kids.length == 0 ) {
                 result = kids;
@@ -433,7 +401,7 @@ public abstract class RelationalObjectImpl extends ObjectImpl implements Relatio
     @Override
     public boolean hasChild( final UnitOfWork transaction,
                              final String name,
-                             final String typeName ) {
+                             final String typeName ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$

@@ -79,6 +79,12 @@ public class Messages implements StringConstants {
         FUNCTION_NOT_FOUND_TO_REMOVE,
 
         /**
+         * An error message indicating grouping node type is invalice. Takes the grouping node name and the invalid type as
+         * parameters.
+         */
+        INVALID_GROUPING_NODE_TYPE,
+
+        /**
          * An error message indicating the type of the parent object is invalid.
          */
         INVALID_PARENT_TYPE,
@@ -305,7 +311,7 @@ public class Messages implements StringConstants {
 
         return MessageFormat.format(text, parameters);
     }
-    
+
     /**
      * @param key
      *        the key of the localized message being requested (cannot be empty)
@@ -354,5 +360,5 @@ public class Messages implements StringConstants {
 
         return MessageFormat.format(text, parameters);
     }
-    
+
 }

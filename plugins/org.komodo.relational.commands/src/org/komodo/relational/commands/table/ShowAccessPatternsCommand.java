@@ -39,13 +39,25 @@ public final class ShowAccessPatternsCommand extends TableShellCommand {
     @Override
     protected CommandResult doExecute() {
         try {
+            final String[] namePatterns = processOptionalArguments( 0 );
+            final boolean hasPatterns = ( namePatterns.length != 0 );
             final Table table = getTable();
-            final AccessPattern[] accessPatterns = table.getAccessPatterns( getTransaction() );
+            final AccessPattern[] accessPatterns = table.getAccessPatterns( getTransaction(), namePatterns );
 
             if ( accessPatterns.length == 0 ) {
-                print( MESSAGE_INDENT, I18n.bind( TableCommandsI18n.noAccessPatterns, table.getName( getTransaction() ) ) );
+                if ( hasPatterns ) {
+                    print( MESSAGE_INDENT, I18n.bind( TableCommandsI18n.noMatchingAccessPatterns, table.getName( getTransaction() ) ) );
+                } else {
+                    print( MESSAGE_INDENT, I18n.bind( TableCommandsI18n.noAccessPatterns, table.getName( getTransaction() ) ) );
+                }
             } else {
-                print( MESSAGE_INDENT, I18n.bind( TableCommandsI18n.accessPatternsHeader, table.getName( getTransaction() ) ) );
+                if ( hasPatterns ) {
+                    print( MESSAGE_INDENT,
+                           I18n.bind( TableCommandsI18n.matchingAccessPatternsHeader, table.getName( getTransaction() ) ) );
+                } else {
+                    print( MESSAGE_INDENT,
+                           I18n.bind( TableCommandsI18n.accessPatternsHeader, table.getName( getTransaction() ) ) );
+                }
 
                 final int indent = (MESSAGE_INDENT * 2);
 
@@ -70,7 +82,7 @@ public final class ShowAccessPatternsCommand extends TableShellCommand {
      */
     @Override
     protected int getMaxArgCount() {
-        return 0;
+        return -1;
     }
 
     /**

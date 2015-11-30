@@ -31,6 +31,7 @@ public final class ShowConditionsCommandTest extends AbstractCommandTest {
 
     private static final String CONDITION_1 = "my_condition";
     private static final String CONDITION_2 = "your_condition";
+    private static final String CONDITION_3 = "mr_condition";
 
     @Before
     public void createContext() throws Exception {
@@ -41,9 +42,22 @@ public final class ShowConditionsCommandTest extends AbstractCommandTest {
                                     "add-permission myPermission",
                                     "cd myPermission",
                                     "add-condition " + CONDITION_1,
-                                    "add-condition " + CONDITION_2 };
+                                    "add-condition " + CONDITION_2,
+                                    "add-condition " + CONDITION_3 };
         final CommandResult result = execute( commands );
         assertCommandResultOk( result );
+    }
+
+    @Test
+    public void shouldAllowMultiplePatterns() throws Exception {
+        final String[] commands = { ShowConditionsCommand.NAME + SPACE + CONDITION_1 + SPACE + CONDITION_2 };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final String output = getCommandOutput();
+        assertThat( output, output.contains( CONDITION_1 ), is( true ) );
+        assertThat( output, output.contains( CONDITION_2 ), is( true ) );
+        assertThat( output, output.contains( CONDITION_3 ), is( false ) );
     }
 
     @Test
@@ -55,12 +69,31 @@ public final class ShowConditionsCommandTest extends AbstractCommandTest {
         final String output = getCommandOutput();
         assertThat( output, output.contains( CONDITION_1 ), is( true ) );
         assertThat( output, output.contains( CONDITION_2 ), is( true ) );
+        assertThat( output, output.contains( CONDITION_3 ), is( true ) );
     }
 
-    @Test( expected = AssertionError.class )
-    public void shouldNotAllowArguments() throws Exception {
+    @Test
+    public void shouldDisplayConditionsThatMatchPattern() throws Exception {
+        final String[] commands = { ShowConditionsCommand.NAME + " m*" };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final String output = getCommandOutput();
+        assertThat( output, output.contains( CONDITION_1 ), is( true ) );
+        assertThat( output, output.contains( CONDITION_2 ), is( false ) );
+        assertThat( output, output.contains( CONDITION_3 ), is( true ) );
+    }
+
+    @Test
+    public void shouldNotMatchPattern() throws Exception {
         final String[] commands = { ShowConditionsCommand.NAME + " blah" };
-        execute( commands );
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final String output = getCommandOutput();
+        assertThat( output, output.contains( CONDITION_1 ), is( false ) );
+        assertThat( output, output.contains( CONDITION_2 ), is( false ) );
+        assertThat( output, output.contains( CONDITION_3 ), is( false ) );
     }
 
 }

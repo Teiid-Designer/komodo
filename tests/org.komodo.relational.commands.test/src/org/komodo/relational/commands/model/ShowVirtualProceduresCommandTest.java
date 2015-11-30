@@ -31,6 +31,7 @@ public final class ShowVirtualProceduresCommandTest extends AbstractCommandTest 
 
     private static final String PROC_1 = "my_virtual_procedure";
     private static final String PROC_2 = "your_virtual_procedure";
+    private static final String PROC_3 = "elvis";
 
     @Before
     public void createContext() throws Exception {
@@ -39,9 +40,22 @@ public final class ShowVirtualProceduresCommandTest extends AbstractCommandTest 
                                     "add-model myModel",
                                     "cd myModel",
                                     "add-virtual-procedure " + PROC_1,
-                                    "add-virtual-procedure " + PROC_2 };
+                                    "add-virtual-procedure " + PROC_2,
+                                    "add-virtual-procedure " + PROC_3 };
         final CommandResult result = execute( commands );
         assertCommandResultOk( result );
+    }
+
+    @Test
+    public void shouldAllowMultiplePatterns() throws Exception {
+        final String[] commands = { ShowVirtualProceduresCommand.NAME + SPACE + PROC_1 + SPACE + "*our*" };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final String output = getCommandOutput();
+        assertThat( output, output.contains( PROC_1 ), is( true ) );
+        assertThat( output, output.contains( PROC_2 ), is( true ) );
+        assertThat( output, output.contains( PROC_3 ), is( false ) );
     }
 
     @Test
@@ -53,12 +67,31 @@ public final class ShowVirtualProceduresCommandTest extends AbstractCommandTest 
         final String output = getCommandOutput();
         assertThat( output, output.contains( PROC_1 ), is( true ) );
         assertThat( output, output.contains( PROC_2 ), is( true ) );
+        assertThat( output, output.contains( PROC_3 ), is( true ) );
     }
 
-    @Test( expected = AssertionError.class )
-    public void shouldNotAllowArguments() throws Exception {
-        final String[] commands = { ShowVirtualProceduresCommand.NAME + " blah" };
-        execute( commands );
+    @Test
+    public void shouldDisplayStoredProceduresThatMatchPattern() throws Exception {
+        final String[] commands = { ShowVirtualProceduresCommand.NAME + " elvis" };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final String output = getCommandOutput();
+        assertThat( output, output.contains( PROC_1 ), is( false ) );
+        assertThat( output, output.contains( PROC_2 ), is( false ) );
+        assertThat( output, output.contains( PROC_3 ), is( true ) );
+    }
+
+    @Test
+    public void shouldNotMatchPattern() throws Exception {
+        final String[] commands = { ShowVirtualProceduresCommand.NAME + " presley"};
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final String output = getCommandOutput();
+        assertThat( output, output.contains( PROC_1 ), is( false ) );
+        assertThat( output, output.contains( PROC_2 ), is( false ) );
+        assertThat( output, output.contains( PROC_3 ), is( false ) );
     }
 
 }

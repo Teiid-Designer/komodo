@@ -9,9 +9,10 @@ package org.komodo.relational.vdb.internal;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.jcr.RepositoryException;
 import org.komodo.relational.Messages;
-import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.Messages.Relational;
+import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Permission;
@@ -56,6 +57,37 @@ public final class DataRoleImpl extends RelationalObjectImpl implements DataRole
     @Override
     public KomodoType getTypeIdentifier(UnitOfWork uow) {
         return DataRole.RESOLVER.identifier();
+    }
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#hasChild(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String, java.lang.String)
+     */
+    @Override
+    public boolean hasChild( final UnitOfWork transaction,
+                             final String name,
+                             final String typeName ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state must be NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( typeName, "typeName" ); //$NON-NLS-1$
+
+        if ( VdbLexicon.DataRole.PERMISSIONS.equals( name ) ) {
+            if ( !VdbLexicon.DataRole.PERMISSIONS.equals( typeName ) ) {
+                throw new KException( Messages.getString( Relational.INVALID_GROUPING_NODE_TYPE,
+                                                          VdbLexicon.DataRole.PERMISSIONS,
+                                                          typeName ) );
+            }
+
+            try {
+                return node( transaction ).hasNode( VdbLexicon.DataRole.PERMISSIONS );
+            } catch ( final RepositoryException e ) {
+                throw new KException( e );
+            }
+        }
+
+        return super.hasChild( transaction, name, typeName );
     }
 
     /**
@@ -110,14 +142,16 @@ public final class DataRoleImpl extends RelationalObjectImpl implements DataRole
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.internal.RelationalObjectImpl#getChildren(org.komodo.spi.repository.Repository.UnitOfWork)
+     * @see org.komodo.relational.internal.RelationalObjectImpl#getChildren(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String[])
      */
     @Override
-    public KomodoObject[] getChildren( final UnitOfWork transaction ) throws KException {
+    public KomodoObject[] getChildren( final UnitOfWork transaction,
+                                       final String... namePatterns ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        final KomodoObject[] result = getPermissions( transaction );
+        final KomodoObject[] result = getPermissions( transaction, namePatterns );
         return result;
     }
 
@@ -125,18 +159,19 @@ public final class DataRoleImpl extends RelationalObjectImpl implements DataRole
      * {@inheritDoc}
      *
      * @see org.komodo.relational.internal.RelationalObjectImpl#getChildrenOfType(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String)
+     *      java.lang.String, java.lang.String[])
      */
     @Override
     public KomodoObject[] getChildrenOfType( final UnitOfWork transaction,
-                                             final String type ) throws KException {
+                                             final String type,
+                                             final String... namePatterns ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         KomodoObject[] result = null;
 
         if ( VdbLexicon.DataRole.Permission.PERMISSION.equals( type ) ) {
-            result = getPermissions( transaction );
+            result = getPermissions( transaction, namePatterns );
         } else {
             result = KomodoObject.EMPTY_ARRAY;
         }
@@ -167,23 +202,39 @@ public final class DataRoleImpl extends RelationalObjectImpl implements DataRole
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.vdb.DataRole#getMappedRoles(org.komodo.spi.repository.Repository.UnitOfWork)
+     * @see org.komodo.relational.vdb.DataRole#getMappedRoles(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String[])
      */
     @Override
-    public String[] getMappedRoles( final UnitOfWork transaction ) throws KException {
+    public String[] getMappedRoles( final UnitOfWork transaction,
+                                    final String... namePatterns ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        String[] result = null;
         final Property property = getProperty( transaction, VdbLexicon.DataRole.MAPPED_ROLE_NAMES );
 
         if ( property == null ) {
-            result = StringConstants.EMPTY_ARRAY;
-        } else {
-            result = property.getStringValues( transaction );
+            return StringConstants.EMPTY_ARRAY;
         }
 
-        return result;
+        final boolean matchPattern = ( ( namePatterns != null ) && ( namePatterns.length != 0 ) );
+        final List< String > roleNames = new ArrayList< >();
+
+        for ( final String value : property.getStringValues( transaction ) ) {
+            if ( matchPattern ) {
+                for ( final String pattern : namePatterns ) {
+                    // convert pattern to a regex
+                    final String regex = pattern.replace( "*", ".*" ); //$NON-NLS-1$ //$NON-NLS-2$
+
+                    if ( value.matches( regex ) ) {
+                        roleNames.add( value );
+                    }
+                }
+            } else {
+                roleNames.add( value );
+            }
+        }
+
+        return roleNames.toArray( new String[ roleNames.size() ] );
     }
 
     /**
@@ -204,10 +255,11 @@ public final class DataRoleImpl extends RelationalObjectImpl implements DataRole
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.vdb.DataRole#getPermissions(org.komodo.spi.repository.Repository.UnitOfWork)
+     * @see org.komodo.relational.vdb.DataRole#getPermissions(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String[])
      */
     @Override
-    public Permission[] getPermissions( final UnitOfWork transaction ) throws KException {
+    public Permission[] getPermissions( final UnitOfWork transaction,
+                                        final String... namePatterns ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
@@ -217,7 +269,9 @@ public final class DataRoleImpl extends RelationalObjectImpl implements DataRole
             final KomodoObject grouping = getChild( transaction, VdbLexicon.DataRole.PERMISSIONS, VdbLexicon.DataRole.PERMISSIONS );
             final List< Permission > temp = new ArrayList<>();
 
-            for ( final KomodoObject kobject : grouping.getChildrenOfType( transaction, VdbLexicon.DataRole.Permission.PERMISSION ) ) {
+            for ( final KomodoObject kobject : grouping.getChildrenOfType( transaction,
+                                                                           VdbLexicon.DataRole.Permission.PERMISSION,
+                                                                           namePatterns ) ) {
                 final Permission permission = new PermissionImpl( transaction, getRepository(), kobject.getAbsolutePath() );
                 temp.add( permission );
             }
@@ -323,22 +377,14 @@ public final class DataRoleImpl extends RelationalObjectImpl implements DataRole
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( permissionToRemove, "permissionToRemove" ); //$NON-NLS-1$
 
-        boolean found = false;
-        final Permission[] permissions = getPermissions( transaction );
+        final Permission[] permissions = getPermissions( transaction, permissionToRemove );
 
-        if ( permissions.length != 0 ) {
-            for ( final Permission permission : permissions ) {
-                if ( permissionToRemove.equals( permission.getName( transaction ) ) ) {
-                    permission.remove( transaction );
-                    found = true;
-                    break;
-                }
-            }
-        }
-
-        if ( !found ) {
+        if ( permissions.length == 0 ) {
             throw new KException( Messages.getString( Relational.PERMISSION_NOT_FOUND_TO_REMOVE, permissionToRemove ) );
         }
+
+        // remove first occurrence
+        permissions[ 0 ].remove( transaction );
     }
 
     /**

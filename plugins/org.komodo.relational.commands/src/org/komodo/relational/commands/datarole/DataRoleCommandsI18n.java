@@ -50,9 +50,13 @@ public final class DataRoleCommandsI18n extends I18n {
     public static String mappedRoleAdded;
     public static String mappedRoleDeleted;
     public static String mappedRolesHeader;
+    public static String matchingMappedRolesHeader;
+    public static String matchingPermissionsHeader;
     public static String missingMappedRoleName;
     public static String missingPermissionName;
     public static String noMappedRoles;
+    public static String noMatchingMappedRoles;
+    public static String noMatchingPermissions;
     public static String noPermissions;
     public static String permissionAdded;
     public static String permissionDeleted;

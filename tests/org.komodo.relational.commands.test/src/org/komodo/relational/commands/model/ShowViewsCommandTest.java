@@ -31,6 +31,7 @@ public final class ShowViewsCommandTest extends AbstractCommandTest {
 
     private static final String VIEW_1 = "my_view";
     private static final String VIEW_2 = "your_view";
+    private static final String VIEW_3 = "elvis";
 
     @Before
     public void createContext() throws Exception {
@@ -39,9 +40,22 @@ public final class ShowViewsCommandTest extends AbstractCommandTest {
                                     "add-model myModel",
                                     "cd myModel",
                                     "add-view " + VIEW_1,
-                                    "add-view " + VIEW_2 };
+                                    "add-view " + VIEW_2,
+                                    "add-view " + VIEW_3 };
         final CommandResult result = execute( commands );
         assertCommandResultOk( result );
+    }
+
+    @Test
+    public void shouldAllowMultiplePatterns() throws Exception {
+        final String[] commands = { ShowViewsCommand.NAME + SPACE + VIEW_1 + SPACE + "el*" + SPACE + "*blah*" };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final String output = getCommandOutput();
+        assertThat( output, output.contains( VIEW_1 ), is( true ) );
+        assertThat( output, output.contains( VIEW_2 ), is( false ) );
+        assertThat( output, output.contains( VIEW_3 ), is( true ) );
     }
 
     @Test
@@ -53,12 +67,31 @@ public final class ShowViewsCommandTest extends AbstractCommandTest {
         final String output = getCommandOutput();
         assertThat( output, output.contains( VIEW_1 ), is( true ) );
         assertThat( output, output.contains( VIEW_2 ), is( true ) );
+        assertThat( output, output.contains( VIEW_3 ), is( true ) );
     }
 
-    @Test( expected = AssertionError.class )
-    public void shouldNotAllowArguments() throws Exception {
+    @Test
+    public void shouldDisplayViewsThatMatchPattern() throws Exception {
+        final String[] commands = { ShowViewsCommand.NAME + " *_*" };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final String output = getCommandOutput();
+        assertThat( output, output.contains( VIEW_1 ), is( true ) );
+        assertThat( output, output.contains( VIEW_2 ), is( true ) );
+        assertThat( output, output.contains( VIEW_3 ), is( false ) );
+    }
+
+    @Test
+    public void shouldNotMatchPattern() throws Exception {
         final String[] commands = { ShowViewsCommand.NAME + " blah" };
-        execute( commands );
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final String output = getCommandOutput();
+        assertThat( output, output.contains( VIEW_1 ), is( false ) );
+        assertThat( output, output.contains( VIEW_2 ), is( false ) );
+        assertThat( output, output.contains( VIEW_3 ), is( false ) );
     }
 
 }

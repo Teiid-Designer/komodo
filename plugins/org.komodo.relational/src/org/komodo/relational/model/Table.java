@@ -143,7 +143,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
      * The resolver of a {@link Table}.
      */
     public static final TypeResolver< Table > RESOLVER = new TypeResolver< Table >() {
-    
+
         /**
          * {@inheritDoc}
          *
@@ -159,16 +159,16 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
                              final RelationalProperties properties ) throws KException {
             final AdapterFactory adapter = new AdapterFactory( );
             final Model parentModel = adapter.adapt( transaction, parent, Model.class );
-    
+
             if ( parentModel == null ) {
                 throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
                                                           parent.getAbsolutePath(),
                                                           Table.class.getSimpleName() ) );
             }
-    
+
             return parentModel.addTable( transaction, id );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -178,7 +178,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
         public KomodoType identifier() {
             return IDENTIFIER;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -188,7 +188,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
         public Class< TableImpl > owningClass() {
             return TableImpl.class;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -200,7 +200,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
                                    final KomodoObject kobject ) throws KException {
             return ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, CreateTable.TABLE_STATEMENT );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -212,7 +212,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
                               final KomodoObject kobject ) throws KException {
             return new TableImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
-    
+
     };
 
     /**
@@ -281,11 +281,14 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
     /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param namePatterns
+     *        optional name patterns (can be <code>null</code> or empty but cannot have <code>null</code> or empty elements)
      * @return the access patterns (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
      */
-    AccessPattern[] getAccessPatterns( final UnitOfWork transaction ) throws KException;
+    AccessPattern[] getAccessPatterns( final UnitOfWork transaction,
+                                       final String... namePatterns ) throws KException;
 
     /**
      * @param transaction
@@ -300,11 +303,14 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
     /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param namePatterns
+     *        optional name patterns (can be <code>null</code> or empty but cannot have <code>null</code> or empty elements)
      * @return the columns (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
      */
-    Column[] getColumns( final UnitOfWork transaction ) throws KException;
+    Column[] getColumns( final UnitOfWork transaction,
+                         final String... namePatterns ) throws KException;
 
     /**
      * @param transaction
@@ -318,20 +324,26 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
     /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param namePatterns
+     *        optional name patterns (can be <code>null</code> or empty but cannot have <code>null</code> or empty elements)
      * @return the foreign keys (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
      */
-    ForeignKey[] getForeignKeys( final UnitOfWork transaction ) throws KException;
+    ForeignKey[] getForeignKeys( final UnitOfWork transaction,
+                                 final String... namePatterns ) throws KException;
 
     /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param namePatterns
+     *        optional name patterns (can be <code>null</code> or empty but cannot have <code>null</code> or empty elements)
      * @return the indexes (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
      */
-    Index[] getIndexes( final UnitOfWork transaction ) throws KException;
+    Index[] getIndexes( final UnitOfWork transaction,
+                        final String... namePatterns ) throws KException;
 
     /**
      * @param transaction
@@ -390,11 +402,14 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
     /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param namePatterns
+     *        optional name patterns (can be <code>null</code> or empty but cannot have <code>null</code> or empty elements)
      * @return the unique constraints (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
      */
-    UniqueConstraint[] getUniqueConstraints( final UnitOfWork transaction ) throws KException;
+    UniqueConstraint[] getUniqueConstraints( final UnitOfWork transaction,
+                                             final String... namePatterns ) throws KException;
 
     /**
      * @param transaction

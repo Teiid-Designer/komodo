@@ -103,7 +103,7 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
     @Override
     public final CommandResult execute() {
         // make sure there aren't too many args
-        if ( getArguments().size() > getMaxArgCount() ) {
+        if ( ( getMaxArgCount() != -1 ) && ( getArguments().size() > getMaxArgCount() ) ) {
             return new CommandResultImpl( false, I18n.bind( ShellI18n.tooManyArgs, this ), null );
         }
 
@@ -121,7 +121,7 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
     }
 
     /**
-     * @return the maximum number of arguments allowed
+     * @return the maximum number of arguments allowed or -1 if there is no maximum
      */
     protected abstract int getMaxArgCount();
 
@@ -204,6 +204,28 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
             return defaultValue;
         }
         return getArguments().get(argIndex);
+    }
+
+    /**
+     * @param startIndex
+     *        the argument index to start the processing
+     * @return an array of the arguments starting at the specified index (never <code>null</code> but can be empty)
+     */
+    protected String[] processOptionalArguments( final int startIndex ) {
+        final int numArgs = getArguments().size();
+
+        if ( ( numArgs == 0 ) || startIndex >= numArgs ) {
+            return EMPTY_ARRAY;
+        }
+
+        final List< String > optionalArgs = new ArrayList< >();
+        int i = startIndex;
+
+        while ( optionalArgument( i ) != null ) {
+            optionalArgs.add( optionalArgument( i++ ) );
+        }
+
+        return optionalArgs.toArray( new String[ optionalArgs.size() ] );
     }
 
     /**
