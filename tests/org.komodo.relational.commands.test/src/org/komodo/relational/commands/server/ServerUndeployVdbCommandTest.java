@@ -15,42 +15,57 @@
  */
 package org.komodo.relational.commands.server;
 
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
 import org.junit.Test;
 import org.komodo.shell.api.CommandResult;
-import org.komodo.shell.api.ShellCommand;
 import org.komodo.spi.runtime.TeiidDataSource;
 import org.komodo.spi.runtime.TeiidTranslator;
 import org.komodo.spi.runtime.TeiidVdb;
 
 /**
- * Test Class to test {@link ServerConnectCommand}.
+ * Test Class to test {@link ServerUndeployVdbCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public final class ServerConnectCommandTest extends AbstractServerCommandTest {
+public final class ServerUndeployVdbCommandTest extends AbstractServerCommandTest {
 
     @Test
-    public void shouldNotBeAvailableForServerNotDefined() throws Exception {
-        this.assertCommandsNotAvailable(ServerConnectCommand.NAME);
+    public void shouldNotBeAvailableForServerNotSet() throws Exception {
+        this.assertCommandsNotAvailable(ServerUndeployVdbCommand.NAME);
     }
-    
-    @Test
-    public void shouldConnect() throws Exception {
-        final String[] commands = {
-            "set-auto-commit false",
-            "create-teiid myTeiid",
-            "commit",
-            "set-server myTeiid" };
-        CommandResult result = execute( commands );
-        assertCommandResultOk(result);
 
+    @Test
+    public void shouldNotBeAvailableForServerNotConnected() throws Exception {
         // Initialize a disconnected server
         initServer("myTeiid", true, false, 
                    new TeiidVdb[]{VDB1}, new TeiidDataSource[]{DS1}, 
                    new TeiidTranslator[]{TRANSLATOR1}, new String[]{DS_TYPE1});
         
-        ShellCommand command = wsStatus.getCommand("server-connect");
-        result = command.execute();
+        this.assertCommandsNotAvailable(ServerUndeployVdbCommand.NAME);
+    }
+
+    @Test
+    public void shouldUndeployVdb() throws Exception {
+        final String[] commands = {
+            "set-auto-commit false",
+            "create-teiid myTeiid",
+            "create-vdb myVdb",
+            "commit",
+            "set-server myTeiid"};
+        CommandResult result = execute( commands );
+        
         assertCommandResultOk(result);
+        
+        // Initialize mock server with artifacts
+        initServer("myTeiid", true, true, 
+                   new TeiidVdb[]{VDB1}, new TeiidDataSource[]{DS1}, 
+                   new TeiidTranslator[]{TRANSLATOR1}, new String[]{DS_TYPE1});
+        
+        
+        result = execute(new String[]{"server-undeploy-vdb VDB1"});
+        
+        final String output = getCommandOutput();
+        assertThat( output, output.contains( "undeployed successfully" ), is( true ) );
     }
 
 }

@@ -13,8 +13,13 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import org.komodo.relational.model.Model;
+import org.komodo.relational.model.Model.Type;
 import org.komodo.relational.teiid.Teiid;
+import org.komodo.relational.vdb.ModelSource;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.CommandResultImpl;
@@ -24,6 +29,7 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.runtime.TeiidDataSource;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.TeiidVdb;
 import org.komodo.utils.StringUtils;
@@ -69,7 +75,7 @@ public final class ServerDeployVdbCommand extends ServerShellCommand {
 
             // Return if VDB object not found
             if(!getWorkspaceManager().hasChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE)) {
-                return new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.workspaceVdbNotFound ), null );
+                return new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.workspaceVdbNotFound, vdbName ), null );
             }
 
             // Find the VDB to deploy
@@ -98,6 +104,17 @@ public final class ServerDeployVdbCommand extends ServerShellCommand {
                                               null );
             }
 
+            // All VDB source model jndis must exist on the connected server
+            Set<String> sourceJndiNames = getPhysicalModelJndis(vdbToDeploy);
+            if(!sourceJndiNames.isEmpty()) {
+                Set<String> serverJndiNames = getServerJndis(teiidInstance);
+                for(String sourceJndiName : sourceJndiNames) {
+                    if(!serverJndiNames.contains(sourceJndiName)) {
+                        return new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.vdbDeployFailedMissingSourceJndi, sourceJndiName ), null);
+                    }
+                }
+            }
+            
             // Get VDB content
             String vdbXml = vdbToDeploy.export(getTransaction(), null);
             if (vdbXml == null || vdbXml.isEmpty()) {
@@ -116,6 +133,49 @@ public final class ServerDeployVdbCommand extends ServerShellCommand {
         }
 
         return result;
+    }
+    
+    /*
+     * Gets the set of unique source jndi names used by the VDB
+     */
+    private Set<String> getPhysicalModelJndis(Vdb theVdb) throws Exception {
+        // The set of Physical Modl Jndis
+        HashSet<String> physicalModelJndis = new HashSet<String>();
+        
+        Model[] models = theVdb.getModels(getTransaction());
+        for(Model model : models) {
+            Model.Type modelType = model.getModelType(getTransaction());
+            if(modelType == Type.PHYSICAL) {
+                ModelSource[] sources = model.getSources(getTransaction());
+                for(ModelSource source : sources) {
+                    String sourceJndiName = source.getJndiName(getTransaction());
+                    if(!StringUtils.isEmpty(sourceJndiName)) {
+                        physicalModelJndis.add(sourceJndiName);
+                    }
+                }
+            }
+        }
+        
+        return physicalModelJndis;
+    }
+    
+    /*
+     * Gets the set of unique jndi names which exist on the connected server
+     */
+    private Set<String> getServerJndis(TeiidInstance teiidInstance) throws Exception {
+        // The current server Jndis
+        HashSet<String> serverJndis = new HashSet<String>();
+        
+        // May be multiple versions deployed - see if there is one matching supplied version
+        Collection<TeiidDataSource> datasources = teiidInstance.getDataSources();
+        for(TeiidDataSource datasource : datasources) {
+            String jndiName = datasource.getPropertyValue("jndi-name");  //$NON-NLS-1$
+            if(!StringUtils.isEmpty(jndiName)) {
+                serverJndis.add(jndiName);
+            }
+        }
+        
+        return serverJndis;
     }
 
     /**

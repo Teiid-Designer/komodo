@@ -15,42 +15,50 @@
  */
 package org.komodo.relational.commands.server;
 
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
 import org.junit.Test;
 import org.komodo.shell.api.CommandResult;
-import org.komodo.shell.api.ShellCommand;
 import org.komodo.spi.runtime.TeiidDataSource;
 import org.komodo.spi.runtime.TeiidTranslator;
 import org.komodo.spi.runtime.TeiidVdb;
 
 /**
- * Test Class to test {@link ServerConnectCommand}.
+ * Test Class to test {@link ServerDatasourcesCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public final class ServerConnectCommandTest extends AbstractServerCommandTest {
+public final class ServerDatasourcesCommandTest extends AbstractServerCommandTest {
 
     @Test
-    public void shouldNotBeAvailableForServerNotDefined() throws Exception {
-        this.assertCommandsNotAvailable(ServerConnectCommand.NAME);
+    public void shouldNotBeAvailableForServerNotSet() throws Exception {
+        this.assertCommandsNotAvailable(ServerDatasourcesCommand.NAME);
     }
-    
-    @Test
-    public void shouldConnect() throws Exception {
-        final String[] commands = {
-            "set-auto-commit false",
-            "create-teiid myTeiid",
-            "commit",
-            "set-server myTeiid" };
-        CommandResult result = execute( commands );
-        assertCommandResultOk(result);
 
+    @Test
+    public void shouldNotBeAvailableForServerNotConnected() throws Exception {
         // Initialize a disconnected server
         initServer("myTeiid", true, false, 
                    new TeiidVdb[]{VDB1}, new TeiidDataSource[]{DS1}, 
                    new TeiidTranslator[]{TRANSLATOR1}, new String[]{DS_TYPE1});
         
-        ShellCommand command = wsStatus.getCommand("server-connect");
-        result = command.execute();
+        this.assertCommandsNotAvailable(ServerDatasourcesCommand.NAME);
+    }
+
+    @Test
+    public void shouldGetServerDatasources() throws Exception {
+        // Initialize mock server with artifacts
+        initServer("myTeiid", true, true, 
+                   new TeiidVdb[]{VDB1}, new TeiidDataSource[]{DS1}, 
+                   new TeiidTranslator[]{TRANSLATOR1}, new String[]{DS_TYPE1});
+        
+        final String[] commands = { "server-datasources" };
+        final CommandResult result = execute( commands );
+        
         assertCommandResultOk(result);
+        
+        final String output = getCommandOutput();
+        assertThat( output, output.contains( "myTeiid" ), is( true ) );
+        assertThat( output, output.contains( DS1.getName() ), is( true ) );
     }
 
 }

@@ -18,7 +18,6 @@ package org.komodo.relational.commands.server;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
-import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
@@ -28,7 +27,7 @@ import org.komodo.spi.repository.KomodoObject;
  * Test Class to test {@link ServerSetCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public final class ServerSetCommandTest extends AbstractCommandTest {
+public final class ServerSetCommandTest extends AbstractServerCommandTest {
 
     @Test
     public void testSet() throws Exception {
