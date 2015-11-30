@@ -9,11 +9,13 @@ package org.komodo.relational.commands.view;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.View;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.i18n.I18n;
@@ -102,7 +104,7 @@ public final class DeleteColumnCommand extends ViewShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
      */
     @Override
-    public int tabCompletion( final String lastArgument,
+    public TabCompletionModifier tabCompletion( final String lastArgument,
                               final List< CharSequence > candidates ) throws Exception {
         final Arguments args = getArguments();
 
@@ -119,17 +121,13 @@ public final class DeleteColumnCommand extends ViewShellCommand {
                 candidates.addAll( existingColumnNames );
             } else {
                 for ( final String item : existingColumnNames ) {
-                    if ( item.toUpperCase().startsWith( lastArgument.toUpperCase() ) ) {
+                    if ( item.startsWith( lastArgument ) ) {
                         candidates.add( item );
                     }
                 }
             }
-
-            return 0;
         }
-
-        // no tab completion
-        return -1;
+        return TabCompletionModifier.AUTO;
     }
 
 }

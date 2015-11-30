@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.vdbimport;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.vdb.Vdb;
@@ -52,4 +55,16 @@ public final class SetVdbImportPropertyCommandTest extends AbstractCommandTest {
         assertEquals(3, imports[0].getVersion(getTransaction()));
     }
 
+    @Test
+    public void testTabCompleter()throws Exception{
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	setup("commandFiles","addVDBImports.cmd");
+    	final String[] commands = { "cd myImport1" };
+    	final CommandResult result = execute( commands );
+        assertCommandResultOk(result);
+
+    	candidates.add(SetVdbImportPropertyCommand.VERSION);
+    	assertTabCompletion("set-property VE", candidates);
+    	assertTabCompletion("set-property Ve", candidates);
+    }
 }

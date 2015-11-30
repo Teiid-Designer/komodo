@@ -22,15 +22,16 @@
 package org.komodo.shell.commands;
 
 import java.util.List;
+
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.ShellCommand;
+import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoObject;
-import org.komodo.utils.StringUtils;
 import org.komodo.utils.i18n.I18n;
 
 /**
@@ -141,17 +142,15 @@ public class CdCommand extends BuiltInShellCommand {
 	 * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
 	 */
 	@Override
-	public int tabCompletion(String lastArgument, List<CharSequence> candidates) throws Exception {
+	public TabCompletionModifier tabCompletion(String lastArgument, List<CharSequence> candidates) throws Exception {
 		if (getArguments().isEmpty()) {
 			KomodoObject currentContext = getWorkspaceStatus().getCurrentContext();
 
 			// The arg is expected to be a path
 			updateTabCompleteCandidatesForPath(candidates, currentContext, true, lastArgument);
-
-            return ( candidates.isEmpty() ? -1 : ( StringUtils.isBlank( lastArgument ) ? 0 : ( toString().length() + 1 ) ) );
 		}
 
-		return -1;
+		return TabCompletionModifier.NO_APPEND_SEPARATOR;
 	}
 
 }

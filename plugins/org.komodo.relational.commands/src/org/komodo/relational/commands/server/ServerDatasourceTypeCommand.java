@@ -8,16 +8,19 @@
 package org.komodo.relational.commands.server;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+
 import org.komodo.relational.RelationalObject;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.runtime.TeiidPropertyDefinition;
 import org.komodo.utils.i18n.I18n;
@@ -147,7 +150,7 @@ public final class ServerDatasourceTypeCommand extends ServerShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
      */
     @Override
-    public int tabCompletion( final String lastArgument,
+    public TabCompletionModifier tabCompletion( final String lastArgument,
                               final List< CharSequence > candidates ) throws Exception {
         final Arguments args = getArguments();
 
@@ -164,17 +167,13 @@ public final class ServerDatasourceTypeCommand extends ServerShellCommand {
                 candidates.addAll( existingTypes );
             } else {
                 for ( final String item : existingTypes ) {
-                    if ( item.toUpperCase().startsWith( lastArgument.toUpperCase() ) ) {
+                    if ( item.startsWith( lastArgument ) ) {
                         candidates.add( item );
                     }
                 }
             }
-
-            return 0;
         }
-
-        // no tab completion
-        return -1;
+        return TabCompletionModifier.AUTO;
     }
 
 }

@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.table;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Column;
@@ -64,4 +67,17 @@ public class DeleteColumnCommandTest extends AbstractCommandTest {
         assertEquals("myColumn2", columns[0].getName(getTransaction())); //$NON-NLS-1$
     }
 
+    @Test
+    public void testTabCompleter()throws Exception{
+
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	candidates.add("myColumn1");
+    	candidates.add("myColumn2");
+
+    	setup("commandFiles","addColumns.cmd");
+    	assertTabCompletion("delete-column myCol", candidates);
+
+    	candidates.add("MyColumn3");
+    	assertTabCompletion("delete-column ", candidates);
+    }
 }

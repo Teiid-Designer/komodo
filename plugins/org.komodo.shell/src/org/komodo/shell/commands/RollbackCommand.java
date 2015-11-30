@@ -12,6 +12,7 @@ import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.utils.i18n.I18n;
@@ -109,9 +110,9 @@ public class RollbackCommand extends BuiltInShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
      */
     @Override
-    public int tabCompletion( final String lastArgument,
+    public TabCompletionModifier tabCompletion( final String lastArgument,
                               final List< CharSequence > candidates ) throws Exception {
-        return -1; // no candidates to add
+        return TabCompletionModifier.AUTO; // no candidates to add
     }
 
 }

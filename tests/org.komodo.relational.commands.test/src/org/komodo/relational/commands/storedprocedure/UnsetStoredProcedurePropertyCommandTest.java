@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.storedprocedure;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Model;
@@ -60,6 +63,19 @@ public final class UnsetStoredProcedurePropertyCommandTest extends AbstractComma
         assertEquals("myStoredProcedure", procs[0].getName(getTransaction())); //$NON-NLS-1$
 
         assertEquals(null, ((StoredProcedure)procs[0]).getNameInSource(getTransaction()));
+    }
+
+    @Test
+    public void testTabCompleter()throws Exception{
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	setup("commandFiles","addStoredProcedures.cmd");
+    	final String[] commands = { "cd myStoredProcedure1" };
+    	final CommandResult result = execute( commands );
+        assertCommandResultOk(result);
+
+    	candidates.add(SetStoredProcedurePropertyCommand.NATIVE_QUERY);
+    	assertTabCompletion("unset-property NAT", candidates);
+    	assertTabCompletion("unset-property nat", candidates);
     }
 
 }

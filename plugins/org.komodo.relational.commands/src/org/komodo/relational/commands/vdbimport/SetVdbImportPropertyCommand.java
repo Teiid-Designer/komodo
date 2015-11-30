@@ -13,6 +13,7 @@ import org.komodo.relational.vdb.VdbImport;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.SetPropertyCommand;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -132,7 +133,7 @@ public final class SetVdbImportPropertyCommand extends VdbImportShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
      */
     @Override
-    public int tabCompletion( final String lastArgument,
+    public TabCompletionModifier tabCompletion( final String lastArgument,
                               final List< CharSequence > candidates ) throws Exception {
         final Arguments args = getArguments();
 
@@ -146,17 +147,12 @@ public final class SetVdbImportPropertyCommand extends VdbImportShellCommand {
                     }
                 }
             }
-
-            return 0;
         }
 
         if ( ( args.size() == 1 ) && IMPORT_DATA_POLICIES.equals( getArguments().get( 0 ) ) ) {
             updateCandidatesForBooleanProperty( lastArgument, candidates );
-            return ( candidates.isEmpty() ? -1 : ( StringUtils.isBlank( lastArgument ) ? 0 : ( toString().length() + 1 ) ) );
         }
-
-        // no tab completion
-        return -1;
+        return TabCompletionModifier.AUTO;
     }
 
 }

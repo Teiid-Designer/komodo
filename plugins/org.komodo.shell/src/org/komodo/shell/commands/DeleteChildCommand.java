@@ -7,11 +7,15 @@
  */
 package org.komodo.shell.commands;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.ShellCommand;
+import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.utils.StringUtils;
@@ -131,4 +135,26 @@ public class DeleteChildCommand extends BuiltInShellCommand {
         print( indent, I18n.bind( ShellI18n.deleteChildUsage ) );
     }
 
+    /**
+     * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
+     */
+	@Override
+	public TabCompletionModifier tabCompletion(String lastArgument, List<CharSequence> candidates) throws Exception {
+		if (getArguments().isEmpty()) {
+			// List of potential completions
+			List<String> potentialsList = new ArrayList<String>();
+			KomodoObject[] children = null;
+			if (lastArgument == null || lastArgument.isEmpty()) {
+				children = getWorkspaceStatus().getCurrentContext().getChildren(getTransaction());
+
+			} else {
+				children = getWorkspaceStatus().getCurrentContext().getChildren(getTransaction(), lastArgument+"*" );
+			}
+			for (KomodoObject wsContext : children) {
+				potentialsList.add(wsContext.getName(getTransaction()));
+			}
+			candidates.addAll(potentialsList);
+		}
+		return TabCompletionModifier.AUTO;
+	}
 }

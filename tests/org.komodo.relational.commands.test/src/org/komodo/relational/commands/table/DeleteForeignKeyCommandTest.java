@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.table;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.ForeignKey;
@@ -73,4 +76,18 @@ public final class DeleteForeignKeyCommandTest extends AbstractCommandTest {
         assertEquals("myForeignKey2", fks[0].getName(getTransaction())); //$NON-NLS-1$
     }
 
+
+    @Test
+    public void testTabCompleter()throws Exception{
+
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	candidates.add("myForeignKey1");
+    	candidates.add("myForeignKey2");
+
+    	setup("commandFiles","addForeignKeys.cmd");
+    	assertTabCompletion("delete-foreign-key myF", candidates);
+
+    	candidates.add("MyForeignKey3");
+    	assertTabCompletion("delete-foreign-key ", candidates);
+    }
 }

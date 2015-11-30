@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.teiid;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.teiid.Teiid;
@@ -47,4 +50,17 @@ public final class UnsetTeiidPropertyCommandTest extends AbstractCommandTest {
         assertEquals(9999, teiids[0].getAdminPort(getTransaction()));
     }
 
+    @Test
+    public void testTabCompleter()throws Exception{
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	setup("commandFiles","addServers.cmd");
+    	final String[] commands = { "cd myServer1" };
+    	final CommandResult result = execute( commands );
+        assertCommandResultOk(result);
+
+    	candidates.add(SetTeiidPropertyCommand.ADMIN_PORT);
+    	candidates.add(SetTeiidPropertyCommand.ADMIN_PASSWORD);
+    	assertTabCompletion("unset-property ADMINP", candidates);
+    	assertTabCompletion("unset-property adminP", candidates);
+    }
 }

@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.table;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Index;
@@ -64,4 +67,17 @@ public class DeleteIndexCommandTest extends AbstractCommandTest {
         assertEquals("myIndex2", indexes[0].getName(getTransaction())); //$NON-NLS-1$
     }
 
+    @Test
+    public void testTabCompleter()throws Exception{
+
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	candidates.add("myIndex1");
+    	candidates.add("myIndex2");
+
+    	setup("commandFiles","addIndexes.cmd");
+    	assertTabCompletion("delete-index myInd", candidates);
+
+    	candidates.add("MyIndex3");
+    	assertTabCompletion("delete-index ", candidates);
+    }
 }

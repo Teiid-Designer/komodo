@@ -15,6 +15,7 @@ import org.komodo.relational.model.TableConstraint;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.utils.StringUtils;
@@ -134,7 +135,7 @@ public final class DeleteConstraintColumnCommand extends TableConstraintShellCom
      * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
      */
     @Override
-    public int tabCompletion( final String lastArgument,
+    public TabCompletionModifier tabCompletion( final String lastArgument,
                               final List< CharSequence > candidates ) throws Exception {
         if ( getArguments().isEmpty() ) {
             final TableConstraint constraint = getTableConstraint();
@@ -142,7 +143,7 @@ public final class DeleteConstraintColumnCommand extends TableConstraintShellCom
 
             // no tab-completion if no columns to remove
             if ( refCols.length == 0 ) {
-                return -1;
+                return TabCompletionModifier.AUTO;
             }
 
             // add matching paths of referenced columns
@@ -170,12 +171,10 @@ public final class DeleteConstraintColumnCommand extends TableConstraintShellCom
                     return thisPath.toString().compareTo( thatPath.toString() );
                 }
             } );
-
-            return ( candidates.isEmpty() ? -1 : ( toString().length() + 1 ) );
         }
 
         // no completions if more than one arg
-        return -1;
+        return TabCompletionModifier.AUTO;
     }
 
 }

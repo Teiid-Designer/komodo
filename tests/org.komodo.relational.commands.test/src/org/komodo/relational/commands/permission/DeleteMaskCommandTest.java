@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.permission;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.vdb.DataRole;
@@ -60,6 +63,19 @@ public final class DeleteMaskCommandTest extends AbstractCommandTest {
         Mask[] masks = permissions[0].getMasks(getTransaction());
         assertEquals(1, masks.length);
         assertEquals("myMask2", masks[0].getName(getTransaction())); //$NON-NLS-1$
+    }
+
+    @Test
+    public void testTabCompleter()throws Exception{
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	setup("commandFiles","addMasks.cmd");
+
+    	candidates.add("myMask1");
+    	candidates.add("myMask2");
+    	assertTabCompletion("delete-mask myM", candidates);
+
+    	candidates.add("MyMask3");
+    	assertTabCompletion("delete-mask ", candidates);
     }
 
 }

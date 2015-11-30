@@ -13,6 +13,7 @@ import org.komodo.relational.teiid.Teiid;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.UnsetPropertyCommand;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -140,7 +141,7 @@ public final class UnsetTeiidPropertyCommand extends TeiidShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
      */
     @Override
-    public int tabCompletion( final String lastArgument,
+    public TabCompletionModifier tabCompletion( final String lastArgument,
                               final List< CharSequence > candidates ) throws Exception {
         final Arguments args = getArguments();
 
@@ -154,12 +155,8 @@ public final class UnsetTeiidPropertyCommand extends TeiidShellCommand {
                     }
                 }
             }
-
-            return 0;
         }
-
-        // no tab completion
-        return -1;
+        return TabCompletionModifier.AUTO;
     }
 
 }

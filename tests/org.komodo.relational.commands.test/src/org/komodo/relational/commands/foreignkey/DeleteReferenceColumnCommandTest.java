@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.foreignkey;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Column;
@@ -84,4 +87,17 @@ public final class DeleteReferenceColumnCommandTest extends AbstractCommandTest 
         assertEquals("refCol2", refCols[0].getName(getTransaction()));
     }
 
+    @Test
+    public void testTabCompleter()throws Exception{
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	setup("commandFiles","addRefColumns.cmd");
+
+    	candidates.add("/workspace/myVDB1/myModel1/myTable2/myColumn1");
+    	candidates.add("/workspace/myVDB1/myModel1/myTable2/myColumn2");
+    	assertTabCompletion("delete-ref-column /workspace/myVDB1/myModel1/myTable2/myC", candidates);
+
+    	candidates.add("/workspace/myVDB1/myModel1/myTable2/MyColumn3");
+    	assertTabCompletion("delete-ref-column ", candidates);
+
+    }
 }

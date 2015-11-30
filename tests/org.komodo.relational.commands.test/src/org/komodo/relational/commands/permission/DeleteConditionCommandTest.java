@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.permission;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.vdb.Condition;
@@ -61,6 +64,19 @@ public final class DeleteConditionCommandTest extends AbstractCommandTest {
         Condition[] conditions = permissions[0].getConditions(getTransaction());
         assertEquals(1, conditions.length);
         assertEquals("myCondition2", conditions[0].getName(getTransaction())); //$NON-NLS-1$
+    }
+
+    @Test
+    public void testTabCompleter()throws Exception{
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	setup("commandFiles","addConditions.cmd");
+
+    	candidates.add("myCondition1");
+    	candidates.add("myCondition2");
+    	assertTabCompletion("delete-condition myC", candidates);
+
+    	candidates.add("MyCondition3");
+    	assertTabCompletion("delete-condition ", candidates);
     }
 
 }

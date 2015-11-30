@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.model;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Model;
@@ -59,4 +62,16 @@ public final class DeleteStoredProcedureCommandTest extends AbstractCommandTest 
         assertEquals("myStoredProcedure2", procs[0].getName(getTransaction())); //$NON-NLS-1$
     }
 
+    @Test
+    public void testTabCompleter()throws Exception{
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	setup("commandFiles","addStoredProcedures.cmd");
+
+    	candidates.add("myStoredProcedure1");
+    	candidates.add("myStoredProcedure2");
+    	assertTabCompletion("delete-stored-procedure myS", candidates);
+
+    	candidates.add("MyStoredProcedure3");
+    	assertTabCompletion("delete-stored-procedure ", candidates);
+    }
 }

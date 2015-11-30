@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.workspace;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.teiid.Teiid;
@@ -46,4 +49,17 @@ public final class DeleteTeiidCommandTest extends AbstractCommandTest {
         assertEquals("testTeiid2",teiids[0].getName(getTransaction()));
     }
 
+    @Test
+    public void testTabCompleter()throws Exception{
+
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	candidates.add("myServer1");
+    	candidates.add("myServer2");
+
+    	setup("commandFiles","addServers.cmd");
+    	assertTabCompletion("delete-teiid myS", candidates);
+
+    	candidates.add("MyServer3");
+    	assertTabCompletion("delete-teiid ", candidates);
+    }
 }

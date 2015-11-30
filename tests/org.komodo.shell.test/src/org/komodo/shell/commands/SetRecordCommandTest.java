@@ -16,6 +16,9 @@
 package org.komodo.shell.commands;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.shell.AbstractCommandTest;
 import org.komodo.shell.api.CommandResult;
@@ -50,5 +53,17 @@ public class SetRecordCommandTest extends AbstractCommandTest {
         assertCommandResultOk( result );
         assertEquals(false, wsStatus.getRecordingStatus());
     }
+
+	@Test
+	public void testTabCompleter() throws Exception {
+		final String[] commands = { "workspace" };
+		final CommandResult result = execute(commands);
+		assertCommandResultOk(result);
+		ArrayList<CharSequence> candidates = new ArrayList<>();
+		candidates.add("on");
+		candidates.add("off");
+
+		assertTabCompletion("set-record ", candidates);
+	}
 
 }

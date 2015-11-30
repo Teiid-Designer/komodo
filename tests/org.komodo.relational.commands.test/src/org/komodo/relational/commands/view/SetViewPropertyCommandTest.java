@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.view;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Model;
@@ -57,6 +60,19 @@ public final class SetViewPropertyCommandTest extends AbstractCommandTest {
         assertEquals("myView", views[0].getName(getTransaction())); //$NON-NLS-1$
 
         assertEquals("myDescription", views[0].getDescription(getTransaction()));  //$NON-NLS-1$
+    }
+
+    @Test
+    public void testTabCompleter()throws Exception{
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	setup("commandFiles","addViews.cmd");
+    	final String[] commands = { "cd myView1" };
+    	final CommandResult result = execute( commands );
+        assertCommandResultOk(result);
+
+    	candidates.add(SetViewPropertyCommand.NAME_IN_SOURCE);
+    	assertTabCompletion("set-property Name", candidates);
+    	assertTabCompletion("set-property NAME", candidates);
     }
 
 }

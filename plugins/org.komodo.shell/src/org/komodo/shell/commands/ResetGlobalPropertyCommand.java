@@ -7,7 +7,7 @@ import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.CommandResult;
-import org.komodo.shell.api.ShellCommand;
+import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.utils.StringUtils;
 import org.komodo.utils.i18n.I18n;
@@ -77,7 +77,7 @@ public class ResetGlobalPropertyCommand extends BuiltInShellCommand {
 	
 
     @Override
-    public int tabCompletion( final String lastArgument, final List< CharSequence > candidates ) throws Exception {
+	public TabCompletionModifier tabCompletion( final String lastArgument, final List< CharSequence > candidates ) throws Exception {
         if ( getArguments().size() == 0 ) {
             // Global property completion options and reset all argument
             List< String > potentials = new LinkedList<>(WorkspaceStatus.GLOBAL_PROPS.keySet());
@@ -92,9 +92,8 @@ public class ResetGlobalPropertyCommand extends BuiltInShellCommand {
                     }
                 }
             }
-        } 
-        
-        return ( candidates.isEmpty() ? -1 : ( StringUtils.isBlank( lastArgument ) ? 0 : ( toString().length() + 1 ) ) );
+        }
+        return TabCompletionModifier.AUTO;
     }
 
 	@Override
@@ -105,13 +104,13 @@ public class ResetGlobalPropertyCommand extends BuiltInShellCommand {
 	@Override
 	protected void printHelpExamples(int indent) {
         print( indent, I18n.bind( ShellI18n.resetGlobalPropertyExamples ) );
-		
+
 	}
 
 	@Override
 	protected void printHelpUsage(int indent) {
         print( indent, I18n.bind( ShellI18n.resetGlobalPropertyUsage ) );
-		
+
 	}
 
 

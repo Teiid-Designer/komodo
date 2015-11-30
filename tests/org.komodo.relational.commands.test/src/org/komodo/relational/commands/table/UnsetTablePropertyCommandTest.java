@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.table;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Model;
@@ -60,4 +63,16 @@ public final class UnsetTablePropertyCommandTest extends AbstractCommandTest {
         assertEquals(-1, tables[0].getCardinality(getTransaction()));
     }
 
+    @Test
+    public void testTabCompleter()throws Exception{
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	setup("commandFiles","addTables.cmd");
+    	final String[] commands = { "cd myTable1" };
+    	final CommandResult result = execute( commands );
+        assertCommandResultOk(result);
+
+    	candidates.add(SetTablePropertyCommand.NAME_IN_SOURCE);
+    	assertTabCompletion("unset-property NA", candidates);
+    	assertTabCompletion("unset-property na", candidates);
+    }
 }

@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.permission;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.vdb.DataRole;
@@ -57,4 +60,16 @@ public final class SetPermissionPropertyCommandTest extends AbstractCommandTest 
         assertEquals(true, permissions[0].isAllowAlter(getTransaction()));
     }
 
+    @Test
+    public void testTabCompleter()throws Exception{
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	setup("commandFiles","addPermissions.cmd");
+    	final String[] commands = { "cd myPermission1" };
+    	final CommandResult result = execute( commands );
+        assertCommandResultOk(result);
+
+    	candidates.add(SetPermissionPropertyCommand.ALLOW_CREATE);
+    	assertTabCompletion("set-property allowCre", candidates);
+    	assertTabCompletion("set-property allowcre", candidates);
+    }
 }

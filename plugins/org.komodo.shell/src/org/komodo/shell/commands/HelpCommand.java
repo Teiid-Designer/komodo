@@ -27,6 +27,7 @@ import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.utils.i18n.I18n;
@@ -244,7 +245,7 @@ public class HelpCommand extends BuiltInShellCommand {
 	 *      java.util.List)
 	 */
 	@Override
-    public int tabCompletion( String lastArgument,
+    public TabCompletionModifier tabCompletion( String lastArgument,
                               List< CharSequence > candidates ) {
         if ( getArguments().isEmpty() ) {
             try {
@@ -256,11 +257,9 @@ public class HelpCommand extends BuiltInShellCommand {
             } catch ( final Exception e ) {
                 throw new RuntimeException( e );
             }
-
-            return 0;
         }
 
-        return -1;
+        return TabCompletionModifier.AUTO;
     }
 
 }
