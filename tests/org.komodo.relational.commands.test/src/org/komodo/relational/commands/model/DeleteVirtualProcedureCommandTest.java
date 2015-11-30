@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.model;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Model;
@@ -59,4 +62,16 @@ public final class DeleteVirtualProcedureCommandTest extends AbstractCommandTest
         assertEquals("myVirtualProcedure2", procs[0].getName(getTransaction())); //$NON-NLS-1$
     }
 
+    @Test
+    public void testTabCompleter()throws Exception{
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	setup("commandFiles","addVirtualProcedures.cmd");
+
+    	candidates.add("myVirtualProcedure1");
+    	candidates.add("myVirtualProcedure2");
+    	assertTabCompletion("delete-virtual-procedure myV", candidates);
+
+    	candidates.add("MyVirtualProcedure3");
+    	assertTabCompletion("delete-virtual-procedure ", candidates);
+    }
 }

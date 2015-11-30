@@ -72,14 +72,14 @@ public class UnsetConditionPropertyCommandTest extends AbstractCommandTest {
     @Test
     public void testTabCompleter()throws Exception{
     	ArrayList<CharSequence> candidates=new ArrayList<>();
-    	executePlayFile("addConditions.cmd");
+    	setup("commandFiles","addConditions.cmd");
     	final String[] commands = { "cd myCondition1" };
     	final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
 
     	candidates.add(SetConditionPropertyCommand.CONSTRAINT);
-    	executeTabCompletion("unset-property CON", candidates);
+    	assertTabCompletion("unset-property CON", candidates);
     }
 
 }

@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.vdb;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Ignore;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
@@ -53,4 +56,17 @@ public final class DeleteEntryCommandTest extends AbstractCommandTest {
         assertEquals("myEntry2", entries[0].getName(getTransaction())); //$NON-NLS-1$
     }
 
+    @Test
+    public void testTabCompleter()throws Exception{
+
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	candidates.add("myEntry1");
+    	candidates.add("myEntry2");
+
+    	setup("commandFiles","addEntries.cmd");
+    	assertTabCompletion("delete-entry myD", candidates);
+
+    	candidates.add("MyEntry3");
+    	assertTabCompletion("delete-entry ", candidates);
+    }
 }

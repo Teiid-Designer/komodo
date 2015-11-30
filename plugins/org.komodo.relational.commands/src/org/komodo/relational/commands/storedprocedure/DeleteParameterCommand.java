@@ -9,6 +9,7 @@ package org.komodo.relational.commands.storedprocedure;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.komodo.relational.model.Parameter;
 import org.komodo.relational.model.StoredProcedure;
 import org.komodo.shell.CommandResultImpl;
@@ -120,7 +121,7 @@ public final class DeleteParameterCommand extends StoredProcedureShellCommand {
                 candidates.addAll( existingParamNames );
             } else {
                 for ( final String item : existingParamNames ) {
-                    if ( item.toUpperCase().startsWith( lastArgument.toUpperCase() ) ) {
+                    if ( item.startsWith( lastArgument ) ) {
                         candidates.add( item );
                     }
                 }

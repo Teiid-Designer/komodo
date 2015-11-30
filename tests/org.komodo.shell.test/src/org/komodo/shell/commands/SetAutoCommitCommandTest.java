@@ -16,6 +16,9 @@
 package org.komodo.shell.commands;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.shell.AbstractCommandTest;
 import org.komodo.shell.api.CommandResult;
@@ -41,4 +44,14 @@ public class SetAutoCommitCommandTest extends AbstractCommandTest {
     	assertEquals(false, wsStatus.isAutoCommit());
     }
 
+    @Test
+    public void testTabCompleter()throws Exception{
+
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	candidates.add("true");
+    	candidates.add("false");
+
+    	setup("commandFiles","addChildren.cmd");
+    	assertTabCompletion("set-auto-commit ", candidates);
+    }
 }

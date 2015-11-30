@@ -8,12 +8,14 @@
 package org.komodo.relational.commands.server;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
 import org.komodo.relational.commands.workspace.UploadVdbCommand;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.shell.CommandResultImpl;
@@ -176,7 +178,7 @@ public final class ServerGetVdbCommand extends ServerShellCommand {
                 candidates.addAll( existingVdbNames );
             } else {
                 for ( final String item : existingVdbNames ) {
-                    if ( item.toUpperCase().startsWith( lastArgument.toUpperCase() ) ) {
+                    if ( item.startsWith( lastArgument ) ) {
                         candidates.add( item );
                     }
                 }

@@ -9,6 +9,7 @@ package org.komodo.relational.commands.model;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Procedure;
 import org.komodo.shell.CommandResultImpl;
@@ -120,7 +121,7 @@ public final class DeleteVirtualProcedureCommand extends ModelShellCommand {
                 candidates.addAll( existingProcNames );
             } else {
                 for ( final String item : existingProcNames ) {
-                    if ( item.toUpperCase().startsWith( lastArgument.toUpperCase() ) ) {
+                    if ( item.startsWith( lastArgument ) ) {
                         candidates.add( item );
                     }
                 }

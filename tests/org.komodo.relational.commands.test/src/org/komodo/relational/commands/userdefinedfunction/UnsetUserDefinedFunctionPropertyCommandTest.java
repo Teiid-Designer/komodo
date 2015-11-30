@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.userdefinedfunction;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Function;
@@ -62,4 +65,18 @@ public final class UnsetUserDefinedFunctionPropertyCommandTest extends AbstractC
         assertEquals(null, ((UserDefinedFunction)functions[0]).getNameInSource(getTransaction()));
     }
 
+    @Test
+    public void testTabCompleter()throws Exception{
+
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	setup("commandFiles","addUserDefinedFunctions.cmd");
+    	final String[] commands = { "cd myUserDefinedFunction1" };
+    	final CommandResult result = execute( commands );
+    	assertCommandResultOk(result);
+
+    	candidates.add("NAMEINSOURCE");
+
+    	assertTabCompletion("unset-property na", candidates);
+        assertTabCompletion("unset-property NA", candidates);
+    }
 }

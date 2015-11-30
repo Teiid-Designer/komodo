@@ -9,6 +9,9 @@ package org.komodo.shell.commands;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.shell.AbstractCommandTest;
 import org.komodo.shell.api.CommandResult;
@@ -70,4 +73,19 @@ public final class DeleteChildCommandTest extends AbstractCommandTest {
         assertThat( workspace.getChildren( getTransaction() )[ 0 ].getName( getTransaction() ), is( child2Name ) );
     }
 
+    @Test
+    public void testTabCompleter()throws Exception{
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+       	setup("commandFiles","addChildren.cmd");
+       	assertTabCompletion("delete-child invalid", candidates);
+
+    	candidates.add("myChild1");
+    	assertTabCompletion("delete-child myChild1", candidates);
+
+    	candidates.add("myChild2");
+    	assertTabCompletion("delete-child myCh", candidates);
+
+    	candidates.add("MyChild3");
+    	assertTabCompletion("delete-child ", candidates);
+    }
 }

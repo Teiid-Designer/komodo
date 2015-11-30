@@ -9,6 +9,7 @@ package org.komodo.relational.commands.vdb;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.komodo.relational.model.Model;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.shell.CommandResultImpl;
@@ -120,7 +121,7 @@ public final class DeleteModelCommand extends VdbShellCommand {
                 candidates.addAll( existingModelNames );
             } else {
                 for ( final String item : existingModelNames ) {
-                    if ( item.toUpperCase().startsWith( lastArgument.toUpperCase() ) ) {
+                    if ( item.startsWith( lastArgument ) ) {
                         candidates.add( item );
                     }
                 }

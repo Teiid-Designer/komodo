@@ -9,6 +9,7 @@ package org.komodo.relational.commands.server;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.CommandResultImpl;
@@ -154,7 +155,7 @@ public final class ServerSetCommand extends ServerShellCommand {
                 candidates.addAll( existingTeiidNames );
             } else {
                 for ( final String item : existingTeiidNames ) {
-                    if ( item.toUpperCase().startsWith( lastArgument.toUpperCase() ) ) {
+                    if ( item.startsWith( lastArgument ) ) {
                         candidates.add( item );
                     }
                 }

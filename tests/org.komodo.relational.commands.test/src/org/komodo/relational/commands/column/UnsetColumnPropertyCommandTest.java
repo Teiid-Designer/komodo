@@ -78,7 +78,7 @@ public final class UnsetColumnPropertyCommandTest extends AbstractCommandTest {
     public void testTabCompleter()throws Exception{
 
     	ArrayList<CharSequence> candidates=new ArrayList<>();
-    	executePlayFile("addColumns.cmd");
+    	setup("commandFiles","addColumns.cmd");
     	final String[] commands = { "cd myColumn1" };
     	final CommandResult result = execute( commands );
     	assertCommandResultOk(result);
@@ -86,8 +86,8 @@ public final class UnsetColumnPropertyCommandTest extends AbstractCommandTest {
     	candidates.add("NAMEINSOURCE");
     	candidates.add("NATIVE_TYPE");
 
-    	executeTabCompletion("unset-property na", candidates);
-        executeTabCompletion("unset-property NA", candidates);
+    	assertTabCompletion("unset-property na", candidates);
+        assertTabCompletion("unset-property NA", candidates);
     }
 
 }

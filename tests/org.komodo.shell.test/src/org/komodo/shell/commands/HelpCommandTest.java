@@ -16,6 +16,10 @@
 package org.komodo.shell.commands;
 
 import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import org.junit.Test;
 import org.komodo.shell.AbstractCommandTest;
 import org.komodo.shell.api.CommandResult;
@@ -57,4 +61,17 @@ public class HelpCommandTest extends AbstractCommandTest {
         assertTrue(writerOutput.contains("cd - change the current workspace context"));
     }
 
+    @Test
+    public void testTabCompleter()throws Exception{
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+
+
+    	assertTabCompletion("help show-S", candidates);
+
+    	candidates.add("show-status");
+    	candidates.add("show-summary");
+    	assertTabCompletion("help show-s", candidates);
+
+    	assertTabCompletion("help ", Arrays.asList(wsStatus.getAvailableCommandNames()));
+    }
 }

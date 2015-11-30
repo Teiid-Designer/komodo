@@ -74,7 +74,7 @@ public final class SetColumnPropertyCommandTest extends AbstractCommandTest {
     public void testTabCompleter()throws Exception{
 
     	ArrayList<CharSequence> candidates=new ArrayList<>();
-    	executePlayFile("addColumns.cmd");
+    	setup("commandFiles","addColumns.cmd");
     	final String[] commands = { "cd myColumn1" };
     	final CommandResult result = execute( commands );
     	assertCommandResultOk(result);
@@ -82,8 +82,8 @@ public final class SetColumnPropertyCommandTest extends AbstractCommandTest {
     	candidates.add("NAMEINSOURCE");
     	candidates.add("NATIVE_TYPE");
 
-    	executeTabCompletion("set-property na", candidates);
-        executeTabCompletion("set-property NA", candidates);
+    	assertTabCompletion("set-property na", candidates);
+        assertTabCompletion("set-property NA", candidates);
     }
 
 }

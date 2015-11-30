@@ -9,6 +9,7 @@ package org.komodo.relational.commands.model;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Table;
 import org.komodo.shell.CommandResultImpl;
@@ -120,7 +121,7 @@ public final class DeleteTableCommand extends ModelShellCommand {
                 candidates.addAll( existingTableNames );
             } else {
                 for ( final String item : existingTableNames ) {
-                    if ( item.toUpperCase().startsWith( lastArgument.toUpperCase() ) ) {
+                    if ( item.startsWith( lastArgument ) ) {
                         candidates.add( item );
                     }
                 }

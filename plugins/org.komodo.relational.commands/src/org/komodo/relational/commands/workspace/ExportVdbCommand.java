@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.CommandResultImpl;
@@ -169,7 +170,7 @@ public final class ExportVdbCommand extends WorkspaceShellCommand {
                 candidates.addAll( existingVdbNames );
             } else {
                 for ( final String item : existingVdbNames ) {
-                    if ( item.toUpperCase().startsWith( lastArgument.toUpperCase() ) ) {
+                    if ( item.startsWith( lastArgument ) ) {
                         candidates.add( item );
                     }
                 }

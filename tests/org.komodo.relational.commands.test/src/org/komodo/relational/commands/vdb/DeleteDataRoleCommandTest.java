@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.vdb;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.vdb.DataRole;
@@ -48,6 +51,20 @@ public final class DeleteDataRoleCommandTest extends AbstractCommandTest {
         DataRole[] dataRoles = vdbs[0].getDataRoles(getTransaction());
         assertEquals(1, dataRoles.length);
         assertEquals("myDataRole2", dataRoles[0].getName(getTransaction())); //$NON-NLS-1$
+    }
+
+    @Test
+    public void testTabCompleter()throws Exception{
+
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	candidates.add("myDatarole1");
+    	candidates.add("myDatarole2");
+
+    	setup("commandFiles","addDataRoles.cmd");
+    	assertTabCompletion("delete-data-role myD", candidates);
+
+    	candidates.add("MyDatarole3");
+    	assertTabCompletion("delete-data-role ", candidates);
     }
 
 }

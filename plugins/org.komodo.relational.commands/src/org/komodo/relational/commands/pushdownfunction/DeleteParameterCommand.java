@@ -120,7 +120,7 @@ public final class DeleteParameterCommand extends PushdownFunctionShellCommand {
                 candidates.addAll( existingParamNames );
             } else {
                 for ( final String item : existingParamNames ) {
-                    if ( item.toUpperCase().startsWith( lastArgument.toUpperCase() ) ) {
+                    if ( item.startsWith( lastArgument ) ) {
                         candidates.add( item );
                     }
                 }

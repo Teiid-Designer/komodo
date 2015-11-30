@@ -53,10 +53,13 @@ public final class DeleteVdbCommandTest extends AbstractCommandTest {
     public void testTabCompleter()throws Exception{
 
     	ArrayList<CharSequence> candidates=new ArrayList<>();
-    	candidates.add("vdbTest1");
-    	candidates.add("vdbTest2");
+    	candidates.add("myVDB1");
+    	candidates.add("myVDB2");
 
-    	executePlayFile("addVDBs.cmd");
-    	executeTabCompletion("delete-vdb myV", candidates);
+    	setup("commandFiles","addVDBs.cmd");
+    	assertTabCompletion("delete-vdb myV", candidates);
+
+    	candidates.add("MyVDB3");
+    	assertTabCompletion("delete-vdb ", candidates);
     }
 }

@@ -9,6 +9,7 @@ package org.komodo.relational.commands.table;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.komodo.relational.model.Index;
 import org.komodo.relational.model.Table;
 import org.komodo.shell.CommandResultImpl;
@@ -120,7 +121,7 @@ public final class DeleteIndexCommand extends TableShellCommand {
                 candidates.addAll( existingIndexNames );
             } else {
                 for ( final String item : existingIndexNames ) {
-                    if ( item.toUpperCase().startsWith( lastArgument.toUpperCase() ) ) {
+                    if ( item.startsWith( lastArgument ) ) {
                         candidates.add( item );
                     }
                 }

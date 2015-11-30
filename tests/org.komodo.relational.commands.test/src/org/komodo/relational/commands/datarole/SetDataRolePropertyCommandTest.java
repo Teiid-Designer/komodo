@@ -58,15 +58,16 @@ public final class SetDataRolePropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testTabCompleter()throws Exception{
-
     	ArrayList<CharSequence> candidates=new ArrayList<>();
-    	candidates.add("myMappedRole1");
-    	candidates.add("myMappedRole2");
+    	setup("commandFiles","addDataRoles.cmd");
+    	final String[] commands = { "cd myDatarole1" };
+    	final CommandResult result = execute( commands );
+        assertCommandResultOk(result);
 
-    	executePlayFile("addMappedRoles.cmd");
-    	executeTabCompletion("delete-mapped-role m", candidates);
+    	assertTabCompletion("set-property ANN", candidates);
 
-    	candidates.add("MyMappedRole3");
-        executeTabCompletion("delete-mapped-role ", candidates);
+    	candidates.add(SetDataRolePropertyCommand.ANY_AUTHENTICATED);
+    	assertTabCompletion("set-property AN", candidates);
+    	assertTabCompletion("set-property An", candidates);
     }
 }

@@ -74,10 +74,10 @@ public class DeleteColumnCommandTest extends AbstractCommandTest {
     	candidates.add("myColumn1");
     	candidates.add("myColumn2");
 
-    	executePlayFile("addColumns.cmd");
-    	executeTabCompletion("delete-column myCol", candidates);
+    	setup("commandFiles","addColumns.cmd");
+    	assertTabCompletion("delete-column myCol", candidates);
 
     	candidates.add("MyColumn3");
-    	executeTabCompletion("delete-column ", candidates);
+    	assertTabCompletion("delete-column ", candidates);
     }
 }

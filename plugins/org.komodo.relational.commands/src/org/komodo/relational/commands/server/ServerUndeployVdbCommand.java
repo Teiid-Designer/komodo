@@ -8,9 +8,11 @@
 package org.komodo.relational.commands.server;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
@@ -148,7 +150,7 @@ public final class ServerUndeployVdbCommand extends ServerShellCommand {
                 candidates.addAll( existingVdbNames );
             } else {
                 for ( final String item : existingVdbNames ) {
-                    if ( item.toUpperCase().startsWith( lastArgument.toUpperCase() ) ) {
+                    if ( item.startsWith( lastArgument ) ) {
                         candidates.add( item );
                     }
                 }

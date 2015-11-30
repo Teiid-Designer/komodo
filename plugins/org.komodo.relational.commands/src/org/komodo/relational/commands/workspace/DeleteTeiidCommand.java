@@ -9,6 +9,7 @@ package org.komodo.relational.commands.workspace;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
@@ -132,7 +133,7 @@ public final class DeleteTeiidCommand extends WorkspaceShellCommand {
                 candidates.addAll( existingTeiidNames );
             } else {
                 for ( final String item : existingTeiidNames ) {
-                    if ( item.toUpperCase().startsWith( lastArgument.toUpperCase() ) ) {
+                    if ( item.startsWith( lastArgument ) ) {
                         candidates.add( item );
                     }
                 }

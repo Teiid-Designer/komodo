@@ -120,7 +120,7 @@ public final class DeleteColumnCommand extends TabularResultSetShellCommand {
                 candidates.addAll( existingColumnNames );
             } else {
                 for ( final String item : existingColumnNames ) {
-                    if ( item.toUpperCase().startsWith( lastArgument.toUpperCase() ) ) {
+                    if ( item.startsWith( lastArgument ) ) {
                         candidates.add( item );
                     }
                 }

@@ -26,7 +26,6 @@ import org.komodo.shell.api.InvalidCommandArgumentException;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandFactory;
 import org.komodo.shell.api.TabCompletionModifier;
-import org.komodo.utils.StringUtils;
 
 /**
  * Implements tab completion for the interactive
@@ -117,15 +116,8 @@ public class TabCompleter implements Completion {
     					for (CharSequence sequence : list) {
     						completeOperation.addCompletionCandidate(sequence.toString());
     					}
-    					int offset;
 
-                        if (StringUtils.isBlank(lastArgument)) {
-							offset = 0;
-						} else {
-							offset = command.toString().length() + 1;
-						}
-
-						completeOperation.setOffset(offset);
+						completeOperation.setOffset(command.toString().length() + 1);
 
 //    				}
 

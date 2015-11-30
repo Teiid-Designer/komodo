@@ -9,6 +9,7 @@ package org.komodo.relational.commands.vdb;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.shell.CommandResultImpl;
@@ -120,7 +121,7 @@ public final class DeleteDataRoleCommand extends VdbShellCommand {
                 candidates.addAll( existingRoleNames );
             } else {
                 for ( final String item : existingRoleNames ) {
-                    if ( item.toUpperCase().startsWith( lastArgument.toUpperCase() ) ) {
+                    if ( item.startsWith( lastArgument ) ) {
                         candidates.add( item );
                     }
                 }

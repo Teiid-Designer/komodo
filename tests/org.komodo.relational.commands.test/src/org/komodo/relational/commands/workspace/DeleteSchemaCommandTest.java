@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.workspace;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Schema;
@@ -44,6 +47,20 @@ public final class DeleteSchemaCommandTest extends AbstractCommandTest {
 
         assertEquals(1, schemas.length);
         assertEquals("testSchema2", schemas[0].getName(getTransaction()));
+    }
+
+    @Test
+    public void testTabCompleter()throws Exception{
+
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	candidates.add("mySchema1");
+    	candidates.add("mySchema2");
+
+    	setup("commandFiles","addSchemas.cmd");
+    	assertTabCompletion("delete-schema myS", candidates);
+
+    	candidates.add("MySchema3");
+    	assertTabCompletion("delete-schema ", candidates);
     }
 
 }

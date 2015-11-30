@@ -62,17 +62,15 @@ public final class DeleteMappedRoleCommandTest extends AbstractCommandTest {
     @Test
     public void testTabCompleter()throws Exception{
 
-    	executePlayFile("addMappedRoles.cmd");
-
+    	setup("commandFiles","addMappedRoles.cmd");
     	ArrayList<CharSequence> candidates=new ArrayList<>();
     	candidates.add("myMappedRole1");
     	candidates.add("myMappedRole2");
 
-
-    	executeTabCompletion("delete-mapped-role m", candidates);
+    	assertTabCompletion("delete-mapped-role m", candidates);
 
     	candidates.add("MyMappedRole3");
-        executeTabCompletion("delete-mapped-role ", candidates);
+        assertTabCompletion("delete-mapped-role ", candidates);
     }
 
 }

@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.translator;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.vdb.Translator;
@@ -52,4 +55,17 @@ public final class SetTranslatorPropertyCommandTest extends AbstractCommandTest 
         assertEquals("myDescription", translators[0].getDescription(getTransaction())); //$NON-NLS-1$
     }
 
+    @Test
+    public void testTabCompleter()throws Exception{
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	setup("commandFiles","addTranslators.cmd");
+    	final String[] commands = { "cd myTranslator1" };
+    	final CommandResult result = execute( commands );
+        assertCommandResultOk(result);
+
+    	candidates.add(SetTranslatorPropertyCommand.TYPE);
+
+    	assertTabCompletion("set-property typ", candidates);
+    	assertTabCompletion("set-property TY", candidates);
+    }
 }

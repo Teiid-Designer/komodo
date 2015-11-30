@@ -9,6 +9,7 @@ package org.komodo.relational.commands.workspace;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
@@ -132,7 +133,7 @@ public final class DeleteSchemaCommand extends WorkspaceShellCommand {
                 candidates.addAll( existingSchemaNames );
             } else {
                 for ( final String item : existingSchemaNames ) {
-                    if ( item.toUpperCase().startsWith( lastArgument.toUpperCase() ) ) {
+                    if ( item.startsWith( lastArgument ) ) {
                         candidates.add( item );
                     }
                 }

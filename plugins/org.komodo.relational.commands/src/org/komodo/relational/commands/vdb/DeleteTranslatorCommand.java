@@ -9,6 +9,7 @@ package org.komodo.relational.commands.vdb;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.shell.CommandResultImpl;
@@ -120,7 +121,7 @@ public class DeleteTranslatorCommand extends VdbShellCommand {
                 candidates.addAll( existingTranslatorNames );
             } else {
                 for ( final String item : existingTranslatorNames ) {
-                    if ( item.toUpperCase().startsWith( lastArgument.toUpperCase() ) ) {
+                    if ( item.startsWith( lastArgument ) ) {
                         candidates.add( item );
                     }
                 }
@@ -128,5 +129,7 @@ public class DeleteTranslatorCommand extends VdbShellCommand {
         }
         return TabCompletionModifier.AUTO;
     }
+
+
 
 }

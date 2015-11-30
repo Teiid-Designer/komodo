@@ -125,7 +125,7 @@ public final class DeleteEntryCommand extends VdbShellCommand {
                 candidates.addAll( existingEntryNames );
             } else {
                 for ( final String item : existingEntryNames ) {
-                    if ( item.toUpperCase().startsWith( lastArgument.toUpperCase() ) ) {
+                    if ( item.startsWith( lastArgument ) ) {
                         candidates.add( item );
                     }
                 }

@@ -124,7 +124,7 @@ public final class DeleteVdbCommand extends WorkspaceShellCommand {
                 candidates.addAll( existingVdbNames );
             } else {
                 for ( final String item : existingVdbNames ) {
-                    if ( item.toUpperCase().startsWith( lastArgument.toUpperCase() ) ) {
+                    if ( item.startsWith( lastArgument ) ) {
                         candidates.add( item );
                     }
                 }

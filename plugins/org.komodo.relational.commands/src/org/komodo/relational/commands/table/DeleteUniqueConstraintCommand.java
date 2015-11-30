@@ -9,6 +9,7 @@ package org.komodo.relational.commands.table;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.UniqueConstraint;
 import org.komodo.shell.CommandResultImpl;
@@ -120,7 +121,7 @@ public final class DeleteUniqueConstraintCommand extends TableShellCommand {
                 candidates.addAll( existingUCNames );
             } else {
                 for ( final String item : existingUCNames ) {
-                    if ( item.toUpperCase().startsWith( lastArgument.toUpperCase() ) ) {
+                    if ( item.startsWith( lastArgument ) ) {
                         candidates.add( item );
                     }
                 }

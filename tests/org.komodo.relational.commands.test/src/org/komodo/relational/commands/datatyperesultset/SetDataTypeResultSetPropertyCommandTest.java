@@ -17,6 +17,7 @@ package org.komodo.relational.commands.datatyperesultset;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+
 import org.junit.Test;
 import org.komodo.shell.api.CommandResult;
 

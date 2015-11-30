@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.datarole;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.vdb.DataRole;
@@ -57,4 +60,17 @@ public class DeletePermissionCommandTest extends AbstractCommandTest {
         assertEquals("myPermission2", permissions[0].getName(getTransaction())); //$NON-NLS-1$
     }
 
+    @Test
+    public void testTabCompleter()throws Exception{
+
+    	setup("commandFiles","addPermissions.cmd");
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	candidates.add("myPermission1");
+    	candidates.add("myPermission2");
+
+    	assertTabCompletion("delete-permission m", candidates);
+
+    	candidates.add("MyPermission3");
+        assertTabCompletion("delete-permission ", candidates);
+    }
 }

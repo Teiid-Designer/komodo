@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.virtualprocedure;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Model;
@@ -64,6 +67,19 @@ public final class DeleteParameterCommandTest extends AbstractCommandTest {
         Parameter[] params = procs[0].getParameters(getTransaction());
         assertEquals(1, params.length);
         assertEquals("myParameter2", params[0].getName(getTransaction())); //$NON-NLS-1$
+    }
+
+    @Test
+    public void testTabCompleter()throws Exception{
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	setup("commandFiles","addVirtualProcParams.cmd");
+
+    	candidates.add("myParameter1");
+    	candidates.add("myParameter1");
+    	assertTabCompletion("delete-parameter myP", candidates);
+
+    	candidates.add("MyParameter3");
+    	assertTabCompletion("delete-parameter ", candidates);
     }
 
 }

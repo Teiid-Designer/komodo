@@ -9,6 +9,7 @@ package org.komodo.relational.commands.permission;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.komodo.relational.vdb.Condition;
 import org.komodo.relational.vdb.Permission;
 import org.komodo.shell.CommandResultImpl;
@@ -120,7 +121,7 @@ public final class DeleteConditionCommand extends PermissionShellCommand {
                 candidates.addAll( existingConditionNames );
             } else {
                 for ( final String item : existingConditionNames ) {
-                    if ( item.toUpperCase().startsWith( lastArgument.toUpperCase() ) ) {
+                    if ( item.startsWith( lastArgument ) ) {
                         candidates.add( item );
                     }
                 }

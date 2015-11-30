@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.vdb;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.vdb.Translator;
@@ -50,4 +53,17 @@ public final class DeleteTranslatorCommandTest extends AbstractCommandTest {
         assertEquals("myTranslator2", translators[0].getName(getTransaction())); //$NON-NLS-1$
     }
 
+    @Test
+    public void testTabCompleter()throws Exception{
+
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	candidates.add("myTranslator1");
+    	candidates.add("myTranslator2");
+
+    	setup("commandFiles","addTranslators.cmd");
+    	assertTabCompletion("delete-translator myT", candidates);
+
+    	candidates.add("MyTranslator3");
+    	assertTabCompletion("delete-translator ", candidates);
+    }
 }

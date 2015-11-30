@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.pushdownfunction;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Function;
@@ -63,4 +66,16 @@ public final class UnsetPushdownFunctionPropertyCommandTest extends AbstractComm
         assertEquals(null, pf.getNameInSource(getTransaction()));
     }
 
+    @Test
+    public void testTabCompleter()throws Exception{
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	setup("commandFiles","addPushdownFunctions.cmd");
+    	final String[] commands = { "cd myPushdownFunction1" };
+    	final CommandResult result = execute( commands );
+        assertCommandResultOk(result);
+
+    	candidates.add(SetPushdownFunctionPropertyCommand.NAME_IN_SOURCE);
+    	assertTabCompletion("unset-property NA", candidates);
+    	assertTabCompletion("unset-property na", candidates);
+    }
 }

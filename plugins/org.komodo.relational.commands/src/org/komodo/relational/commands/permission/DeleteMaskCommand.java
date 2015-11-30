@@ -9,7 +9,8 @@ package org.komodo.relational.commands.permission;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.komodo.relational.vdb.Condition;
+
+import org.komodo.relational.vdb.Mask;
 import org.komodo.relational.vdb.Permission;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
@@ -109,18 +110,18 @@ public final class DeleteMaskCommand extends PermissionShellCommand {
 
         final UnitOfWork uow = getTransaction();
         final Permission permission = getPermission();
-        final Condition[] conditions = permission.getConditions( uow );
-        List<String> existingConditionNames = new ArrayList<String>(conditions.length);
-        for(Condition condition : conditions) {
-            existingConditionNames.add(condition.getName(uow));
+        final Mask[] masks = permission.getMasks( uow );
+        List<String> existingMaskNames = new ArrayList<String>(masks.length);
+        for(Mask mask : masks) {
+            existingMaskNames.add(mask.getName(uow));
         }
 
         if ( args.isEmpty() ) {
             if ( lastArgument == null ) {
-                candidates.addAll( existingConditionNames );
+                candidates.addAll( existingMaskNames );
             } else {
-                for ( final String item : existingConditionNames ) {
-                    if ( item.toUpperCase().startsWith( lastArgument.toUpperCase() ) ) {
+                for ( final String item : existingMaskNames ) {
+                    if ( item.startsWith( lastArgument ) ) {
                         candidates.add( item );
                     }
                 }
