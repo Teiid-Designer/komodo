@@ -144,8 +144,6 @@ public final class DeleteTeiidCommand extends WorkspaceShellCommand {
                     }
                 }
             }
-
-            return 0;
         }
         return TabCompletionModifier.AUTO;
     }
