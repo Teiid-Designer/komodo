@@ -119,8 +119,6 @@ public class TabCompleter implements Completion {
 
 						completeOperation.setOffset(command.toString().length() + 1);
 
-//    				}
-
     				if (tabCompletionResult == TabCompletionModifier.NO_APPEND_SEPARATOR) {
     					completeOperation.doAppendSeparator(false);
     				}else if(tabCompletionResult== TabCompletionModifier.AUTO){
