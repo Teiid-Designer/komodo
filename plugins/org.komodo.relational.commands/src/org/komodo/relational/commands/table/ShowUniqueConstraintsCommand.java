@@ -39,13 +39,27 @@ public final class ShowUniqueConstraintsCommand extends TableShellCommand {
     @Override
     protected CommandResult doExecute() {
         try {
+            final String[] namePatterns = processOptionalArguments( 0 );
+            final boolean hasPatterns = ( namePatterns.length != 0 );
             final Table table = getTable();
-            final UniqueConstraint[] constraints = table.getUniqueConstraints( getTransaction() );
+            final UniqueConstraint[] constraints = table.getUniqueConstraints( getTransaction(), namePatterns );
 
             if ( constraints.length == 0 ) {
-                print( MESSAGE_INDENT, I18n.bind( TableCommandsI18n.noUniqueConstraints, table.getName( getTransaction() ) ) );
+                if ( hasPatterns ) {
+                    print( MESSAGE_INDENT,
+                           I18n.bind( TableCommandsI18n.noMatchingUniqueConstraints, table.getName( getTransaction() ) ) );
+                } else {
+                    print( MESSAGE_INDENT,
+                           I18n.bind( TableCommandsI18n.noUniqueConstraints, table.getName( getTransaction() ) ) );
+                }
             } else {
-                print( MESSAGE_INDENT, I18n.bind( TableCommandsI18n.uniqueConstraintsHeader, table.getName( getTransaction() ) ) );
+                if ( hasPatterns ) {
+                    print( MESSAGE_INDENT,
+                           I18n.bind( TableCommandsI18n.matchingUniqueConstraintsHeader, table.getName( getTransaction() ) ) );
+                } else {
+                    print( MESSAGE_INDENT,
+                           I18n.bind( TableCommandsI18n.uniqueConstraintsHeader, table.getName( getTransaction() ) ) );
+                }
 
                 final int indent = (MESSAGE_INDENT * 2);
 
@@ -70,7 +84,7 @@ public final class ShowUniqueConstraintsCommand extends TableShellCommand {
      */
     @Override
     protected int getMaxArgCount() {
-        return 0;
+        return -1;
     }
 
     /**

@@ -106,6 +106,7 @@ public final class ServerCommandsI18n extends I18n {
     public static String serverVdbNotFound;
     public static String teiidStatus;
     public static String vdbExportFailed;
+    public static String vdbDeployFailedMissingSourceJndi;
     public static String vdbDeployFinished;
     public static String vdbDeploymentOverwriteDisabled;
     public static String workspaceVdbNotFound;

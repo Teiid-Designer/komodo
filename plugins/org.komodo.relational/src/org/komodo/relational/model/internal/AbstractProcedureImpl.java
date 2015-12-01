@@ -113,15 +113,17 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.internal.RelationalObjectImpl#getChildren(org.komodo.spi.repository.Repository.UnitOfWork)
+     * @see org.komodo.relational.internal.RelationalObjectImpl#getChildren(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String[])
      */
     @Override
-    public KomodoObject[] getChildren( final UnitOfWork transaction ) throws KException {
+    public KomodoObject[] getChildren( final UnitOfWork transaction,
+                                       final String... namePatterns ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         KomodoObject[] result = null;
-        final KomodoObject[] kids = super.getChildren( transaction );
+        final KomodoObject[] kids = super.getChildren( transaction, namePatterns );
 
         // do not include statement options
         if ( kids.length == 0 ) {
@@ -186,14 +188,16 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.AbstractProcedure#getParameters(org.komodo.spi.repository.Repository.UnitOfWork)
+     * @see org.komodo.relational.model.AbstractProcedure#getParameters(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String[])
      */
     @Override
-    public Parameter[] getParameters( final UnitOfWork transaction ) throws KException {
+    public Parameter[] getParameters( final UnitOfWork transaction,
+                                      final String... namePatterns ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        final KomodoObject[] parameters = super.getChildrenOfType( transaction, CreateProcedure.PARAMETER );
+        final KomodoObject[] parameters = super.getChildrenOfType( transaction, CreateProcedure.PARAMETER, namePatterns );
         Parameter[] result = null;
 
         if ( parameters.length == 0 ) {
@@ -405,22 +409,14 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( parameterName, "parameterName" ); //$NON-NLS-1$
 
-        boolean found = false;
-        final Parameter[] parameters = getParameters( transaction );
+        final Parameter[] parameters = getParameters( transaction, parameterName );
 
-        if ( parameters.length != 0 ) {
-            for ( final Parameter parameter : parameters ) {
-                if ( parameterName.equals( parameter.getName( transaction ) ) ) {
-                    parameter.remove( transaction );
-                    found = true;
-                    break;
-                }
-            }
-        }
-
-        if ( !found ) {
+        if ( parameters.length == 0 ) {
             throw new KException( Messages.getString( Relational.PARAMETER_NOT_FOUND_TO_REMOVE, parameterName ) );
         }
+
+        // removes first occurrence
+        parameters[0].remove( transaction );
     }
 
     /**

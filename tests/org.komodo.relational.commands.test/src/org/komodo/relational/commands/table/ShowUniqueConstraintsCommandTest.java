@@ -31,6 +31,7 @@ public final class ShowUniqueConstraintsCommandTest extends AbstractCommandTest 
 
     private static final String CONSTRAINT_1 = "my_constraint";
     private static final String CONSTRAINT_2 = "your_constraint";
+    private static final String CONSTRAINT_3 = "gabbie_girl";
 
     @Before
     public void createContext() throws Exception {
@@ -41,9 +42,22 @@ public final class ShowUniqueConstraintsCommandTest extends AbstractCommandTest 
                                     "add-table myTable",
                                     "cd myTable",
                                     "add-unique-constraint " + CONSTRAINT_1,
-                                    "add-unique-constraint " + CONSTRAINT_2 };
+                                    "add-unique-constraint " + CONSTRAINT_2,
+                                    "add-unique-constraint " + CONSTRAINT_3 };
         final CommandResult result = execute( commands );
         assertCommandResultOk( result );
+    }
+
+    @Test
+    public void shouldAllowMultiplePatterns() throws Exception {
+        final String[] commands = { ShowUniqueConstraintsCommand.NAME + SPACE + "*girl" + SPACE + "*our*" + SPACE + "blah" };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final String output = getCommandOutput();
+        assertThat( output, output.contains( CONSTRAINT_1 ), is( false ) );
+        assertThat( output, output.contains( CONSTRAINT_2 ), is( true ) );
+        assertThat( output, output.contains( CONSTRAINT_3 ), is( true ) );
     }
 
     @Test
@@ -55,12 +69,31 @@ public final class ShowUniqueConstraintsCommandTest extends AbstractCommandTest 
         final String output = getCommandOutput();
         assertThat( output, output.contains( CONSTRAINT_1 ), is( true ) );
         assertThat( output, output.contains( CONSTRAINT_2 ), is( true ) );
+        assertThat( output, output.contains( CONSTRAINT_3 ), is( true ) );
     }
 
-    @Test( expected = AssertionError.class )
-    public void shouldNotAllowArguments() throws Exception {
-        final String[] commands = { ShowUniqueConstraintsCommand.NAME + " blah" };
-        execute( commands );
+    @Test
+    public void shouldDisplayUniqueConstraintsThatMatchPattern() throws Exception {
+        final String[] commands = { ShowUniqueConstraintsCommand.NAME + " *bb*" };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final String output = getCommandOutput();
+        assertThat( output, output.contains( CONSTRAINT_1 ), is( false ) );
+        assertThat( output, output.contains( CONSTRAINT_2 ), is( false ) );
+        assertThat( output, output.contains( CONSTRAINT_3 ), is( true ) );
+    }
+
+    @Test
+    public void shouldNotMatchPattern() throws Exception {
+        final String[] commands = { ShowUniqueConstraintsCommand.NAME + " *blah*" };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final String output = getCommandOutput();
+        assertThat( output, output.contains( CONSTRAINT_1 ), is( false ) );
+        assertThat( output, output.contains( CONSTRAINT_2 ), is( false ) );
+        assertThat( output, output.contains( CONSTRAINT_3 ), is( false ) );
     }
 
 }

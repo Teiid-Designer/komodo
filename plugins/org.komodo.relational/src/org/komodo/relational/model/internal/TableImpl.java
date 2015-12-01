@@ -10,8 +10,8 @@ package org.komodo.relational.model.internal;
 import java.util.ArrayList;
 import java.util.List;
 import org.komodo.relational.Messages;
-import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.Messages.Relational;
+import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.AccessPattern;
 import org.komodo.relational.model.Column;
@@ -169,16 +169,18 @@ public class TableImpl extends RelationalObjectImpl implements Table {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.Table#getAccessPatterns(org.komodo.spi.repository.Repository.UnitOfWork)
+     * @see org.komodo.relational.model.Table#getAccessPatterns(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String[])
      */
     @Override
-    public AccessPattern[] getAccessPatterns( final UnitOfWork transaction ) throws KException {
+    public AccessPattern[] getAccessPatterns( final UnitOfWork transaction,
+                                              final String... namePatterns ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         final List< AccessPattern > result = new ArrayList< AccessPattern >();
 
-        for ( final KomodoObject kobject : getChildrenOfType( transaction, Constraint.TABLE_ELEMENT ) ) {
+        for ( final KomodoObject kobject : getChildrenOfType( transaction, Constraint.TABLE_ELEMENT, namePatterns ) ) {
             final Property prop = kobject.getRawProperty( transaction, Constraint.TYPE );
 
             if ( AccessPattern.CONSTRAINT_TYPE.toValue().equals( prop.getStringValue( transaction ) ) ) {
@@ -213,17 +215,20 @@ public class TableImpl extends RelationalObjectImpl implements Table {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.internal.RelationalObjectImpl#getChildren(org.komodo.spi.repository.Repository.UnitOfWork)
+     * @see org.komodo.relational.internal.RelationalObjectImpl#getChildren(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String[])
      */
     @Override
-    public KomodoObject[] getChildren( final UnitOfWork transaction ) throws KException {
+    public KomodoObject[] getChildren( final UnitOfWork transaction,
+                                       final String... namePatterns ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        final KomodoObject[] constraints = getChildrenOfType( transaction, Constraint.TABLE_ELEMENT ); // access patterns, primary key, unique constraints
-        final Column[] columns = getColumns( transaction );
-        final ForeignKey[] foreignKeys = getForeignKeys( transaction );
-        final Index[] indexes = getIndexes( transaction );
+        // constraints are access patterns, primary key, and unique constraints
+        final KomodoObject[] constraints = getChildrenOfType( transaction, Constraint.TABLE_ELEMENT, namePatterns );
+        final Column[] columns = getColumns( transaction, namePatterns );
+        final ForeignKey[] foreignKeys = getForeignKeys( transaction, namePatterns );
+        final Index[] indexes = getIndexes( transaction, namePatterns );
 
         final int size = constraints.length + columns.length + foreignKeys.length + indexes.length;
         final KomodoObject[] result = new KomodoObject[ size ];
@@ -248,16 +253,17 @@ public class TableImpl extends RelationalObjectImpl implements Table {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.Table#getColumns(org.komodo.spi.repository.Repository.UnitOfWork)
+     * @see org.komodo.relational.model.Table#getColumns(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String[])
      */
     @Override
-    public Column[] getColumns( final UnitOfWork transaction ) throws KException {
+    public Column[] getColumns( final UnitOfWork transaction,
+                                final String... namePatterns ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         final List< Column > result = new ArrayList< Column >();
 
-        for ( final KomodoObject kobject : getChildrenOfType( transaction, CreateTable.TABLE_ELEMENT ) ) {
+        for ( final KomodoObject kobject : getChildrenOfType( transaction, CreateTable.TABLE_ELEMENT, namePatterns ) ) {
             final Column column = new ColumnImpl( transaction, getRepository(), kobject.getAbsolutePath() );
             result.add( column );
         }
@@ -292,16 +298,17 @@ public class TableImpl extends RelationalObjectImpl implements Table {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.Table#getForeignKeys(org.komodo.spi.repository.Repository.UnitOfWork)
+     * @see org.komodo.relational.model.Table#getForeignKeys(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String[])
      */
     @Override
-    public ForeignKey[] getForeignKeys( final UnitOfWork transaction ) throws KException {
+    public ForeignKey[] getForeignKeys( final UnitOfWork transaction,
+                                        final String... namePatterns ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         final List< ForeignKey > result = new ArrayList< ForeignKey >();
 
-        for ( final KomodoObject kobject : getChildrenOfType( transaction, Constraint.FOREIGN_KEY_CONSTRAINT ) ) {
+        for ( final KomodoObject kobject : getChildrenOfType( transaction, Constraint.FOREIGN_KEY_CONSTRAINT, namePatterns ) ) {
             final ForeignKey constraint = new ForeignKeyImpl( transaction, getRepository(), kobject.getAbsolutePath() );
             result.add( constraint );
         }
@@ -316,16 +323,17 @@ public class TableImpl extends RelationalObjectImpl implements Table {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.Table#getIndexes(org.komodo.spi.repository.Repository.UnitOfWork)
+     * @see org.komodo.relational.model.Table#getIndexes(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String[])
      */
     @Override
-    public Index[] getIndexes( final UnitOfWork transaction ) throws KException {
+    public Index[] getIndexes( final UnitOfWork transaction,
+                               final String... namePatterns ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         final List< Index > result = new ArrayList< Index >();
 
-        for ( final KomodoObject kobject : getChildrenOfType( transaction, Constraint.INDEX_CONSTRAINT ) ) {
+        for ( final KomodoObject kobject : getChildrenOfType( transaction, Constraint.INDEX_CONSTRAINT, namePatterns ) ) {
             final Index constraint = new IndexImpl( transaction, getRepository(), kobject.getAbsolutePath() );
             result.add( constraint );
         }
@@ -539,16 +547,18 @@ public class TableImpl extends RelationalObjectImpl implements Table {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.Table#getUniqueConstraints(org.komodo.spi.repository.Repository.UnitOfWork)
+     * @see org.komodo.relational.model.Table#getUniqueConstraints(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String[])
      */
     @Override
-    public UniqueConstraint[] getUniqueConstraints( final UnitOfWork transaction ) throws KException {
+    public UniqueConstraint[] getUniqueConstraints( final UnitOfWork transaction,
+                                                    final String... namePatterns ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         final List< UniqueConstraint > result = new ArrayList< UniqueConstraint >();
 
-        for ( final KomodoObject kobject : getChildrenOfType( transaction, Constraint.TABLE_ELEMENT ) ) {
+        for ( final KomodoObject kobject : getChildrenOfType( transaction, Constraint.TABLE_ELEMENT, namePatterns ) ) {
             final Property prop = kobject.getRawProperty( transaction, Constraint.TYPE );
 
             if ( UniqueConstraint.CONSTRAINT_TYPE.toValue().equals( prop.getStringValue( transaction ) ) ) {
@@ -665,24 +675,16 @@ public class TableImpl extends RelationalObjectImpl implements Table {
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( accessPatternToRemove, "accessPatternToRemove" ); //$NON-NLS-1$
 
-        boolean found = false;
-        final AccessPattern[] accessPatterns = getAccessPatterns( transaction );
+        final AccessPattern[] accessPatterns = getAccessPatterns( transaction, accessPatternToRemove );
 
-        if ( accessPatterns.length != 0 ) {
-            for ( final AccessPattern accessPattern : accessPatterns ) {
-                if ( accessPatternToRemove.equals( accessPattern.getName( transaction ) ) ) {
-                    accessPattern.remove( transaction );
-                    found = true;
-                    break;
-                }
-            }
-        }
-
-        if ( !found ) {
+        if ( accessPatterns.length == 0 ) {
             throw new KException( Messages.getString( Relational.CONSTRAINT_NOT_FOUND_TO_REMOVE,
                                                       accessPatternToRemove,
                                                       AccessPattern.CONSTRAINT_TYPE.toString() ) );
         }
+
+        // remove first occurrence
+        accessPatterns[ 0 ].remove( transaction );
     }
 
     /**
@@ -697,22 +699,14 @@ public class TableImpl extends RelationalObjectImpl implements Table {
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( columnToRemove, "columnToRemove" ); //$NON-NLS-1$
 
-        boolean found = false;
-        final Column[] columns = getColumns( transaction );
+        final Column[] columns = getColumns( transaction, columnToRemove );
 
-        if ( columns.length != 0 ) {
-            for ( final Column column : columns ) {
-                if ( columnToRemove.equals( column.getName( transaction ) ) ) {
-                    column.remove( transaction );
-                    found = true;
-                    break;
-                }
-            }
-        }
-
-        if ( !found ) {
+        if ( columns.length == 0 ) {
             throw new KException( Messages.getString( Relational.COLUMN_NOT_FOUND_TO_REMOVE, columnToRemove ) );
         }
+
+        // remove first occurrence
+        columns[ 0 ].remove( transaction );
     }
 
     /**
@@ -727,24 +721,16 @@ public class TableImpl extends RelationalObjectImpl implements Table {
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( foreignKeyToRemove, "foreignKeyToRemove" ); //$NON-NLS-1$
 
-        boolean found = false;
-        final ForeignKey[] foreignKeys = getForeignKeys( transaction );
+        final ForeignKey[] foreignKeys = getForeignKeys( transaction, foreignKeyToRemove );
 
-        if ( foreignKeys.length != 0 ) {
-            for ( final ForeignKey foreignKey : foreignKeys ) {
-                if ( foreignKeyToRemove.equals( foreignKey.getName( transaction ) ) ) {
-                    foreignKey.remove( transaction );
-                    found = true;
-                    break;
-                }
-            }
-        }
-
-        if ( !found ) {
+        if ( foreignKeys.length == 0 ) {
             throw new KException( Messages.getString( Relational.CONSTRAINT_NOT_FOUND_TO_REMOVE,
                                                       foreignKeyToRemove,
                                                       ForeignKey.CONSTRAINT_TYPE.toString() ) );
         }
+
+        // remove first occurrence
+        foreignKeys[ 0 ].remove( transaction );
     }
 
     /**
@@ -759,24 +745,16 @@ public class TableImpl extends RelationalObjectImpl implements Table {
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( indexToRemove, "indexToRemove" ); //$NON-NLS-1$
 
-        boolean found = false;
-        final Index[] indexes = getIndexes( transaction );
+        final Index[] indexes = getIndexes( transaction, indexToRemove );
 
-        if ( indexes.length != 0 ) {
-            for ( final Index index : indexes ) {
-                if ( indexToRemove.equals( index.getName( transaction ) ) ) {
-                    index.remove( transaction );
-                    found = true;
-                    break;
-                }
-            }
-        }
-
-        if ( !found ) {
+        if ( indexes.length == 0 ) {
             throw new KException( Messages.getString( Relational.CONSTRAINT_NOT_FOUND_TO_REMOVE,
                                                       indexToRemove,
                                                       Index.CONSTRAINT_TYPE.toString() ) );
         }
+
+        // remove first occurrence
+        indexes[ 0 ].remove( transaction );
     }
 
     /**
@@ -825,24 +803,16 @@ public class TableImpl extends RelationalObjectImpl implements Table {
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( constraintToRemove, "constraintToRemove" ); //$NON-NLS-1$
 
-        boolean found = false;
-        final UniqueConstraint[] uniqueConstraints = getUniqueConstraints( transaction );
+        final UniqueConstraint[] uniqueConstraints = getUniqueConstraints( transaction, constraintToRemove );
 
-        if ( uniqueConstraints.length != 0 ) {
-            for ( final UniqueConstraint uniqueConstraint : uniqueConstraints ) {
-                if ( constraintToRemove.equals( uniqueConstraint.getName( transaction ) ) ) {
-                    uniqueConstraint.remove( transaction );
-                    found = true;
-                    break;
-                }
-            }
-        }
-
-        if ( !found ) {
+        if ( uniqueConstraints.length == 0 ) {
             throw new KException( Messages.getString( Relational.CONSTRAINT_NOT_FOUND_TO_REMOVE,
                                                       constraintToRemove,
                                                       UniqueConstraint.CONSTRAINT_TYPE.toString() ) );
         }
+
+        // remove first occurrence
+        uniqueConstraints[ 0 ].remove( transaction );
     }
 
     /**

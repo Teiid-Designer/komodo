@@ -73,7 +73,7 @@ public interface Vdb extends Exportable, RelationalObject {
      * The resolver of a {@link Vdb}.
      */
     public static final TypeResolver< Vdb > RESOLVER = new TypeResolver< Vdb >() {
-    
+
         /**
          * {@inheritDoc}
          *
@@ -92,7 +92,7 @@ public interface Vdb extends Exportable, RelationalObject {
             final WorkspaceManager mgr = WorkspaceManager.getInstance( repository );
             return mgr.createVdb( transaction, parent, id, origFilePath );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -102,7 +102,7 @@ public interface Vdb extends Exportable, RelationalObject {
         public KomodoType identifier() {
             return IDENTIFIER;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -112,7 +112,7 @@ public interface Vdb extends Exportable, RelationalObject {
         public Class< VdbImpl > owningClass() {
             return VdbImpl.class;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -124,7 +124,7 @@ public interface Vdb extends Exportable, RelationalObject {
                                    final KomodoObject kobject ) throws KException {
             return ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, VdbLexicon.Vdb.VIRTUAL_DATABASE );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -136,7 +136,7 @@ public interface Vdb extends Exportable, RelationalObject {
                             final KomodoObject kobject ) throws KException {
             return new VdbImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
-    
+
     };
 
     /**
@@ -244,11 +244,14 @@ public interface Vdb extends Exportable, RelationalObject {
     /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param namePatterns
+     *        optional name patterns (can be <code>null</code> or empty but cannot have <code>null</code> or empty elements)
      * @return the data roles (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
      */
-    DataRole[] getDataRoles( final UnitOfWork transaction ) throws KException;
+    DataRole[] getDataRoles( final UnitOfWork transaction,
+                             final String... namePatterns ) throws KException;
 
     /**
      * @param transaction
@@ -262,11 +265,14 @@ public interface Vdb extends Exportable, RelationalObject {
     /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param namePatterns
+     *        optional name patterns (can be <code>null</code> or empty but cannot have <code>null</code> or empty elements)
      * @return the entries (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
      */
-    Entry[] getEntries( final UnitOfWork transaction ) throws KException;
+    Entry[] getEntries( final UnitOfWork transaction,
+                        final String... namePatterns ) throws KException;
 
     /**
      * @param transaction
@@ -280,20 +286,26 @@ public interface Vdb extends Exportable, RelationalObject {
     /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param namePatterns
+     *        optional name patterns (can be <code>null</code> or empty but cannot have <code>null</code> or empty elements)
      * @return the VDB models (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
      */
-    Model[] getModels( final UnitOfWork transaction ) throws KException;
+    Model[] getModels( final UnitOfWork transaction,
+                       final String... namePatterns ) throws KException;
 
     /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param namePatterns
+     *        optional name patterns (can be <code>null</code> or empty but cannot have <code>null</code> or empty elements)
      * @return the VDB imports (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
      */
-    VdbImport[] getImports( final UnitOfWork transaction ) throws KException;
+    VdbImport[] getImports( final UnitOfWork transaction,
+                            final String... namePatterns ) throws KException;
 
     /**
      * @param transaction
@@ -334,11 +346,14 @@ public interface Vdb extends Exportable, RelationalObject {
     /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param namePatterns
+     *        optional name patterns (can be <code>null</code> or empty but cannot have <code>null</code> or empty elements)
      * @return the translators (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
      */
-    Translator[] getTranslators( final UnitOfWork transaction ) throws KException;
+    Translator[] getTranslators( final UnitOfWork transaction,
+                                 final String... namePatterns ) throws KException;
 
     /**
      * A name used by Teiid to reference this VDB.

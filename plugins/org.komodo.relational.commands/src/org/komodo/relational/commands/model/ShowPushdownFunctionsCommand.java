@@ -42,11 +42,19 @@ public final class ShowPushdownFunctionsCommand extends ModelShellCommand {
     @Override
     protected CommandResult doExecute() {
         try {
+            final String[] namePatterns = processOptionalArguments( 0 );
+            final boolean hasPatterns = ( namePatterns.length != 0 );
             final Model model = getModel();
-            final Function[] functions = model.getFunctions( getTransaction() );
+            final Function[] functions = model.getFunctions( getTransaction(), namePatterns );
 
             if ( functions.length == 0 ) {
-                print( MESSAGE_INDENT, I18n.bind( ModelCommandsI18n.noPushdownFunctions, model.getName( getTransaction() ) ) );
+                if ( hasPatterns ) {
+                    print( MESSAGE_INDENT,
+                           I18n.bind( ModelCommandsI18n.noMatchingPushdownFunctions, model.getName( getTransaction() ) ) );
+                } else {
+                    print( MESSAGE_INDENT,
+                           I18n.bind( ModelCommandsI18n.noPushdownFunctions, model.getName( getTransaction() ) ) );
+                }
             } else {
                 final List< Function > pushdowns = new ArrayList< >( functions.length );
 
@@ -57,9 +65,21 @@ public final class ShowPushdownFunctionsCommand extends ModelShellCommand {
                 }
 
                 if ( pushdowns.isEmpty() ) {
-                    print( MESSAGE_INDENT, I18n.bind( ModelCommandsI18n.noPushdownFunctions, model.getName( getTransaction() ) ) );
+                    if ( hasPatterns ) {
+                        print( MESSAGE_INDENT,
+                               I18n.bind( ModelCommandsI18n.noMatchingPushdownFunctions, model.getName( getTransaction() ) ) );
+                    } else {
+                        print( MESSAGE_INDENT,
+                               I18n.bind( ModelCommandsI18n.noPushdownFunctions, model.getName( getTransaction() ) ) );
+                    }
                 } else {
-                    print( MESSAGE_INDENT, I18n.bind( ModelCommandsI18n.pushdownsHeader, model.getName( getTransaction() ) ) );
+                    if ( hasPatterns ) {
+                        print( MESSAGE_INDENT,
+                               I18n.bind( ModelCommandsI18n.matchedPushdownFunctionsHeader, model.getName( getTransaction() ) ) );
+                    } else {
+                        print( MESSAGE_INDENT,
+                               I18n.bind( ModelCommandsI18n.pushdownsHeader, model.getName( getTransaction() ) ) );
+                    }
 
                     final int indent = (MESSAGE_INDENT * 2);
 
@@ -85,7 +105,7 @@ public final class ShowPushdownFunctionsCommand extends ModelShellCommand {
      */
     @Override
     protected int getMaxArgCount() {
-        return 0;
+        return -1;
     }
 
     /**

@@ -39,13 +39,24 @@ public final class ShowIndexesCommand extends TableShellCommand {
     @Override
     protected CommandResult doExecute() {
         try {
+            final String[] namePatterns = processOptionalArguments( 0 );
+            final boolean hasPatterns = ( namePatterns.length != 0 );
             final Table table = getTable();
-            final Index[] indexes = table.getIndexes( getTransaction() );
+            final Index[] indexes = table.getIndexes( getTransaction(), namePatterns );
 
             if ( indexes.length == 0 ) {
-                print( MESSAGE_INDENT, I18n.bind( TableCommandsI18n.noIndexes, table.getName( getTransaction() ) ) );
+                if ( hasPatterns ) {
+                    print( MESSAGE_INDENT, I18n.bind( TableCommandsI18n.noMatchingIndexes, table.getName( getTransaction() ) ) );
+                } else {
+                    print( MESSAGE_INDENT, I18n.bind( TableCommandsI18n.noIndexes, table.getName( getTransaction() ) ) );
+                }
             } else {
-                print( MESSAGE_INDENT, I18n.bind( TableCommandsI18n.indexesHeader, table.getName( getTransaction() ) ) );
+                if ( hasPatterns ) {
+                    print( MESSAGE_INDENT,
+                           I18n.bind( TableCommandsI18n.matchingIndexesHeader, table.getName( getTransaction() ) ) );
+                } else {
+                    print( MESSAGE_INDENT, I18n.bind( TableCommandsI18n.indexesHeader, table.getName( getTransaction() ) ) );
+                }
 
                 final int indent = (MESSAGE_INDENT * 2);
 
@@ -70,7 +81,7 @@ public final class ShowIndexesCommand extends TableShellCommand {
      */
     @Override
     protected int getMaxArgCount() {
-        return 0;
+        return -1;
     }
 
     /**

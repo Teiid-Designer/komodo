@@ -8,8 +8,8 @@
 package org.komodo.relational.model;
 
 import org.komodo.relational.Messages;
-import org.komodo.relational.RelationalObject;
 import org.komodo.relational.Messages.Relational;
+import org.komodo.relational.RelationalObject;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -43,7 +43,7 @@ public interface AbstractProcedure extends OptionContainer, RelationalObject, Sc
             return clazz;
         }
     }
-    
+
     /**
      * The default value of this table's update count. Value is {@value} .
      */
@@ -82,11 +82,15 @@ public interface AbstractProcedure extends OptionContainer, RelationalObject, Sc
     /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param namePatterns
+     *        optional name patterns of the child(ren) being requested (can be <code>null</code> or empty but cannot have
+     *        <code>null</code> or empty elements)
      * @return the input parameters (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
      */
-    Parameter[] getParameters( final UnitOfWork transaction ) throws KException;
+    Parameter[] getParameters( final UnitOfWork transaction,
+                               final String... namePatterns ) throws KException;
 
     /**
      * {@inheritDoc}

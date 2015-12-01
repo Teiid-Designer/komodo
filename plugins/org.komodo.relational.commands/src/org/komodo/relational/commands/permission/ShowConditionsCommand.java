@@ -39,14 +39,28 @@ public final class ShowConditionsCommand extends PermissionShellCommand {
     @Override
     protected CommandResult doExecute() {
         try {
+            final String[] namePatterns = processOptionalArguments( 0 );
+            final boolean hasPatterns = ( namePatterns.length != 0 );
             final Permission permission = getPermission();
-            final Condition[] conditions = permission.getConditions( getTransaction() );
+            final Condition[] conditions = permission.getConditions( getTransaction(), namePatterns );
 
             if ( conditions.length == 0 ) {
-                print( MESSAGE_INDENT, I18n.bind( PermissionCommandsI18n.noConditions, permission.getName( getTransaction() ) ) );
+                if ( hasPatterns ) {
+                    print( MESSAGE_INDENT,
+                           I18n.bind( PermissionCommandsI18n.noMatchedConditions, permission.getName( getTransaction() ) ) );
+                } else {
+                    print( MESSAGE_INDENT,
+                           I18n.bind( PermissionCommandsI18n.noConditions, permission.getName( getTransaction() ) ) );
+                }
             } else {
-                print( MESSAGE_INDENT,
-                       I18n.bind( PermissionCommandsI18n.conditionsHeader, permission.getName( getTransaction() ) ) );
+                if ( hasPatterns ) {
+                    print( MESSAGE_INDENT,
+                           I18n.bind( PermissionCommandsI18n.matchedConditionsHeader, permission.getName( getTransaction() ) ) );
+                } else {
+                    print( MESSAGE_INDENT,
+                           I18n.bind( PermissionCommandsI18n.conditionsHeader, permission.getName( getTransaction() ) ) );
+
+                }
 
                 final int indent = (MESSAGE_INDENT * 2);
 
@@ -71,7 +85,7 @@ public final class ShowConditionsCommand extends PermissionShellCommand {
      */
     @Override
     protected int getMaxArgCount() {
-        return 0;
+        return -1;
     }
 
     /**

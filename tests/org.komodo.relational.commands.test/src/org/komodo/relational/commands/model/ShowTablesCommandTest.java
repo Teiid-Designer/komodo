@@ -31,6 +31,7 @@ public final class ShowTablesCommandTest extends AbstractCommandTest {
 
     private static final String TABLE_1 = "my_table";
     private static final String TABLE_2 = "your_table";
+    private static final String TABLE_3 = "abcdef";
 
     @Before
     public void createContext() throws Exception {
@@ -39,9 +40,22 @@ public final class ShowTablesCommandTest extends AbstractCommandTest {
                                     "add-model myModel",
                                     "cd myModel",
                                     "add-table " + TABLE_1,
-                                    "add-table " + TABLE_2 };
+                                    "add-table " + TABLE_2,
+                                    "add-table " + TABLE_3 };
         final CommandResult result = execute( commands );
         assertCommandResultOk( result );
+    }
+
+    @Test
+    public void shouldAllowMultiplePatterns() throws Exception {
+        final String[] commands = { ShowTablesCommand.NAME + SPACE + "my*" + SPACE + "*def" };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final String output = getCommandOutput();
+        assertThat( output, output.contains( TABLE_1 ), is( true ) );
+        assertThat( output, output.contains( TABLE_2 ), is( false ) );
+        assertThat( output, output.contains( TABLE_3 ), is( true ) );
     }
 
     @Test
@@ -53,12 +67,31 @@ public final class ShowTablesCommandTest extends AbstractCommandTest {
         final String output = getCommandOutput();
         assertThat( output, output.contains( TABLE_1 ), is( true ) );
         assertThat( output, output.contains( TABLE_2 ), is( true ) );
+        assertThat( output, output.contains( TABLE_3 ), is( true ) );
     }
 
-    @Test( expected = AssertionError.class )
-    public void shouldNotAllowArguments() throws Exception {
-        final String[] commands = { ShowTablesCommand.NAME + " blah" };
-        execute( commands );
+    @Test
+    public void shouldDisplayTablesThatMatchPattern() throws Exception {
+        final String[] commands = { ShowTablesCommand.NAME + " *_table"};
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final String output = getCommandOutput();
+        assertThat( output, output.contains( TABLE_1 ), is( true ) );
+        assertThat( output, output.contains( TABLE_2 ), is( true ) );
+        assertThat( output, output.contains( TABLE_3 ), is( false ) );
+    }
+
+    @Test
+    public void shouldNotMatchPattern() throws Exception {
+        final String[] commands = { ShowTablesCommand.NAME + " *blah*"};
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final String output = getCommandOutput();
+        assertThat( output, output.contains( TABLE_1 ), is( false ) );
+        assertThat( output, output.contains( TABLE_2 ), is( false ) );
+        assertThat( output, output.contains( TABLE_3 ), is( false ) );
     }
 
 }

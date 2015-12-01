@@ -62,7 +62,7 @@ public interface DataRole extends RelationalObject {
      * The resolver of a {@link DataRole}.
      */
     public static final TypeResolver< DataRole > RESOLVER = new TypeResolver< DataRole >() {
-    
+
         /**
          * {@inheritDoc}
          *
@@ -78,16 +78,16 @@ public interface DataRole extends RelationalObject {
                                 final RelationalProperties properties ) throws KException {
             final AdapterFactory adapter = new AdapterFactory( );
             final Vdb parentVdb = adapter.adapt( transaction, parent, Vdb.class );
-    
+
             if ( parentVdb == null ) {
                 throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
                                                           parent.getAbsolutePath(),
                                                           DataRole.class.getSimpleName() ) );
             }
-    
+
             return parentVdb.addDataRole( transaction, id );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -97,7 +97,7 @@ public interface DataRole extends RelationalObject {
         public KomodoType identifier() {
             return IDENTIFIER;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -107,7 +107,7 @@ public interface DataRole extends RelationalObject {
         public Class< DataRoleImpl > owningClass() {
             return DataRoleImpl.class;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -119,7 +119,7 @@ public interface DataRole extends RelationalObject {
                                    final KomodoObject kobject ) throws KException {
             return ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, VdbLexicon.DataRole.DATA_ROLE );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -131,7 +131,7 @@ public interface DataRole extends RelationalObject {
                                  final KomodoObject kobject ) throws KException {
             return new DataRoleImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
-    
+
     };
 
     /**
@@ -170,20 +170,26 @@ public interface DataRole extends RelationalObject {
     /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param namePatterns
+     *        optional name patterns (can be <code>null</code> or empty but cannot have <code>null</code> or empty elements)
      * @return the mapped role names (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
      */
-    String[] getMappedRoles( final UnitOfWork transaction ) throws KException;
+    String[] getMappedRoles( final UnitOfWork transaction,
+                             final String... namePatterns ) throws KException;
 
     /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param namePatterns
+     *        optional name patterns (can be <code>null</code> or empty but cannot have <code>null</code> or empty elements)
      * @return the permissions (never <code>null</code> but can be empty)
      * @throws KException
      *         if an error occurs
      */
-    Permission[] getPermissions( final UnitOfWork transaction ) throws KException;
+    Permission[] getPermissions( final UnitOfWork transaction,
+                                 final String... namePatterns ) throws KException;
 
     /**
      * @param transaction

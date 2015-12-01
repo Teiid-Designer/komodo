@@ -102,6 +102,10 @@ public final class TableCommandsI18n extends I18n {
     public static String invalidOnCommitPropertyValue;
     public static String invalidSchemaElementTypePropertyValue;
     public static String invalidTemporaryTableTypePropertyValue;
+    public static String matchingAccessPatternsHeader;
+    public static String matchingColumnsHeader;
+    public static String matchingIndexesHeader;
+    public static String matchingUniqueConstraintsHeader;
     public static String missingAccessPatternName;
     public static String missingColumnName;
     public static String missingForeignKeyName;
@@ -112,6 +116,10 @@ public final class TableCommandsI18n extends I18n {
     public static String noAccessPatterns;
     public static String noColumns;
     public static String noIndexes;
+    public static String noMatchingAccessPatterns;
+    public static String noMatchingColumns;
+    public static String noMatchingIndexes;
+    public static String noMatchingUniqueConstraints;
     public static String noPkToRemove;
     public static String noUniqueConstraints;
     public static String pkExistsCantAdd;

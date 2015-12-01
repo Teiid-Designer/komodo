@@ -39,13 +39,24 @@ public final class ShowTablesCommand extends ModelShellCommand {
     @Override
     protected CommandResult doExecute() {
         try {
+            final String[] namePatterns = processOptionalArguments( 0 );
+            final boolean hasPatterns = ( namePatterns.length != 0 );
             final Model model = getModel();
-            final Table[] tables = model.getTables( getTransaction() );
+            final Table[] tables = model.getTables( getTransaction(), namePatterns );
 
             if ( tables.length == 0 ) {
-                print( MESSAGE_INDENT, I18n.bind( ModelCommandsI18n.noTables, model.getName( getTransaction() ) ) );
+                if ( hasPatterns ) {
+                    print( MESSAGE_INDENT, I18n.bind( ModelCommandsI18n.noMatchingTables, model.getName( getTransaction() ) ) );
+                } else {
+                    print( MESSAGE_INDENT, I18n.bind( ModelCommandsI18n.noTables, model.getName( getTransaction() ) ) );
+                }
             } else {
-                print( MESSAGE_INDENT, I18n.bind( ModelCommandsI18n.tablesHeader, model.getName( getTransaction() ) ) );
+                if ( hasPatterns ) {
+                    print( MESSAGE_INDENT,
+                           I18n.bind( ModelCommandsI18n.matchedTablesHeader, model.getName( getTransaction() ) ) );
+                } else {
+                    print( MESSAGE_INDENT, I18n.bind( ModelCommandsI18n.tablesHeader, model.getName( getTransaction() ) ) );
+                }
 
                 final int indent = (MESSAGE_INDENT * 2);
 
@@ -70,7 +81,7 @@ public final class ShowTablesCommand extends ModelShellCommand {
      */
     @Override
     protected int getMaxArgCount() {
-        return 0;
+        return -1;
     }
 
     /**

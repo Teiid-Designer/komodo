@@ -14,7 +14,6 @@ import org.komodo.relational.vdb.Vdb;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.i18n.I18n;
 
 /**
@@ -40,21 +39,31 @@ public final class ShowDataRolesCommand extends VdbShellCommand {
     @Override
     protected CommandResult doExecute() {
         try {
-            final UnitOfWork uow = getTransaction();
+            final String[] namePatterns = processOptionalArguments( 0 );
+            final boolean hasPatterns = ( namePatterns.length != 0 );
             final Vdb vdb = getVdb();
-            final DataRole[] dataRoles = vdb.getDataRoles( uow );
+            final DataRole[] dataRoles = vdb.getDataRoles( getTransaction(), namePatterns );
 
             if ( dataRoles.length == 0 ) {
-                print( MESSAGE_INDENT, I18n.bind( VdbCommandsI18n.noDataRoles, vdb.getName( uow ) ) );
+                if ( hasPatterns ) {
+                    print( MESSAGE_INDENT, I18n.bind( VdbCommandsI18n.noMatchingDataRoles, vdb.getName( getTransaction() ) ) );
+                } else {
+                    print( MESSAGE_INDENT, I18n.bind( VdbCommandsI18n.noDataRoles, vdb.getName( getTransaction() ) ) );
+                }
             } else {
-                print( MESSAGE_INDENT, I18n.bind( VdbCommandsI18n.dataRolesHeader, vdb.getName( uow ) ) );
+                if ( hasPatterns ) {
+                    print( MESSAGE_INDENT,
+                           I18n.bind( VdbCommandsI18n.matchingDataRolesHeader, vdb.getName( getTransaction() ) ) );
+                } else {
+                    print( MESSAGE_INDENT, I18n.bind( VdbCommandsI18n.dataRolesHeader, vdb.getName( getTransaction() ) ) );
+                }
 
                 final int indent = (MESSAGE_INDENT * 2);
 
                 for ( final DataRole role : dataRoles ) {
                     print( indent,
                            I18n.bind( WorkspaceCommandsI18n.printRelationalObject,
-                                      role.getName( uow ),
+                                      role.getName( getTransaction() ),
                                       role.getTypeDisplayName() ) );
                 }
             }
@@ -72,7 +81,7 @@ public final class ShowDataRolesCommand extends VdbShellCommand {
      */
     @Override
     protected int getMaxArgCount() {
-        return 0;
+        return -1;
     }
 
     /**

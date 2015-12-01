@@ -14,7 +14,6 @@ import org.komodo.relational.vdb.Vdb;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.i18n.I18n;
 
 /**
@@ -40,21 +39,30 @@ public final class ShowModelsCommand extends VdbShellCommand {
     @Override
     protected CommandResult doExecute() {
         try {
-            final UnitOfWork uow = getTransaction();
+            final String[] namePatterns = processOptionalArguments( 0 );
+            final boolean hasPatterns = ( namePatterns.length != 0 );
             final Vdb vdb = getVdb();
-            final Model[] models = vdb.getModels( uow );
+            final Model[] models = vdb.getModels( getTransaction(), namePatterns );
 
             if ( models.length == 0 ) {
-                print( MESSAGE_INDENT, I18n.bind( VdbCommandsI18n.noModels, vdb.getName( uow ) ) );
+                if ( hasPatterns ) {
+                    print( MESSAGE_INDENT, I18n.bind( VdbCommandsI18n.noMatchingModels, vdb.getName( getTransaction() ) ) );
+                } else {
+                    print( MESSAGE_INDENT, I18n.bind( VdbCommandsI18n.noModels, vdb.getName( getTransaction() ) ) );
+                }
             } else {
-                print( MESSAGE_INDENT, I18n.bind( VdbCommandsI18n.modelsHeader, vdb.getName( uow ) ) );
+                if ( hasPatterns ) {
+                    print( MESSAGE_INDENT, I18n.bind( VdbCommandsI18n.matchingModelsHeader, vdb.getName( getTransaction() ) ) );
+                } else {
+                    print( MESSAGE_INDENT, I18n.bind( VdbCommandsI18n.modelsHeader, vdb.getName( getTransaction() ) ) );
+                }
 
                 final int indent = (MESSAGE_INDENT * 2);
 
                 for ( final Model model : models ) {
                     print( indent,
                            I18n.bind( WorkspaceCommandsI18n.printRelationalObject,
-                                      model.getName( uow ),
+                                      model.getName( getTransaction() ),
                                       model.getTypeDisplayName() ) );
                 }
             }
@@ -72,7 +80,7 @@ public final class ShowModelsCommand extends VdbShellCommand {
      */
     @Override
     protected int getMaxArgCount() {
-        return 0;
+        return -1;
     }
 
     /**

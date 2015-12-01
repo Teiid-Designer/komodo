@@ -15,30 +15,76 @@
  */
 package org.komodo.relational.commands.server;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
 import org.junit.Test;
-import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.ShellCommand;
+import org.komodo.spi.runtime.TeiidDataSource;
+import org.komodo.spi.runtime.TeiidTranslator;
+import org.komodo.spi.runtime.TeiidVdb;
 
 /**
  * Test Class to test {@link ServerDisconnectCommand}.
  */
 @SuppressWarnings( {"javadoc", "nls"} )
-public final class ServerDisconnectCommandTest extends AbstractCommandTest {
+public final class ServerDisconnectCommandTest extends AbstractServerCommandTest {
 
+    @Test
+    public void shouldNotBeAvailableForServerNotSet() throws Exception {
+        this.assertCommandsNotAvailable(ServerDisconnectCommand.NAME);
+    }
+    
+    @Test
+    public void shouldNotBeAvailableForServerNotConnected() throws Exception {
+        // Initialize a disconnected server
+        initServer("myTeiid", true, false, 
+                   new TeiidVdb[]{VDB1}, new TeiidDataSource[]{DS1}, 
+                   new TeiidTranslator[]{TRANSLATOR1}, new String[]{DS_TYPE1});
+        
+        this.assertCommandsNotAvailable(ServerDisconnectCommand.NAME);
+    }
+    
     @Test
     public void shouldFailNoServerConnected() throws Exception {
         final String[] commands = {
             "set-auto-commit false",
             "create-teiid myTeiid",
             "commit",
-            "set-server myTeiid",
-            "server-disconnect" };
-        final CommandResult result = execute( commands );
+            "set-server myTeiid"};
+        CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
-        String msg = result.getMessage();
-        assertEquals("something", msg);
+        // Initialize a mock server (not connected) with no artifacts
+        initServer("myTeiid", true, false, null, null, null, null);
+        
+        // Results in 'command not found' - not enabled if server is not connected
+        ShellCommand command = wsStatus.getCommand("server-disconnect");
+        result = command.execute();
+        String output = result.getMessage();
+        assertThat( output, output.contains( ServerDisconnectCommand.NAME ), is( true ) );
+        assertThat( output, output.contains( "not found" ), is( true ) );
     }
+    
+    @Test
+    public void shouldDisconnectServer() throws Exception {
+        final String[] commands = {
+            "set-auto-commit false",
+            "create-teiid myTeiid",
+            "commit",
+            "set-server myTeiid"};
+        CommandResult result = execute( commands );
+        assertCommandResultOk(result);
 
+        // Initialize a mock server (connected) with no artifacts
+        initServer("myTeiid", true, true, null, null, null, null);
+        
+        // Disconnect the connected server
+        ShellCommand command = wsStatus.getCommand("server-disconnect");
+        result = command.execute();
+        assertCommandResultOk(result);
+        String output = result.getMessage();
+        assertThat( output, output.contains( "myTeiid" ), is( true ) );
+        assertThat( output, output.contains( "disconnected" ), is( true ) );
+    }
 }

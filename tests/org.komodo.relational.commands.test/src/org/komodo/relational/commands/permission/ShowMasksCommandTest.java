@@ -31,6 +31,7 @@ public final class ShowMasksCommandTest extends AbstractCommandTest {
 
     private static final String MASK_1 = "my_mask";
     private static final String MASK_2 = "your_mask";
+    private static final String MASK_3 = "batman_mask";
 
     @Before
     public void createContext() throws Exception {
@@ -41,9 +42,22 @@ public final class ShowMasksCommandTest extends AbstractCommandTest {
                                     "add-permission myPermission",
                                     "cd myPermission",
                                     "add-mask " + MASK_1,
-                                    "add-mask " + MASK_2 };
+                                    "add-mask " + MASK_2,
+                                    "add-mask " + MASK_3 };
         final CommandResult result = execute( commands );
         assertCommandResultOk( result );
+    }
+
+    @Test
+    public void shouldAllowMultiplePatterns() throws Exception {
+        final String[] commands = { ShowMasksCommand.NAME + SPACE + "blah" + SPACE + MASK_1 + SPACE + "*foo*" + SPACE + MASK_2 };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final String output = getCommandOutput();
+        assertThat( output, output.contains( MASK_1 ), is( true ) );
+        assertThat( output, output.contains( MASK_2 ), is( true ) );
+        assertThat( output, output.contains( MASK_3 ), is( false ) );
     }
 
     @Test
@@ -55,12 +69,31 @@ public final class ShowMasksCommandTest extends AbstractCommandTest {
         final String output = getCommandOutput();
         assertThat( output, output.contains( MASK_1 ), is( true ) );
         assertThat( output, output.contains( MASK_2 ), is( true ) );
+        assertThat( output, output.contains( MASK_3 ), is( true ) );
     }
 
-    @Test( expected = AssertionError.class )
-    public void shouldNotAllowArguments() throws Exception {
-        final String[] commands = { ShowMasksCommand.NAME + " blah" };
-        execute( commands );
+    @Test
+    public void shouldDisplayMasksThatMatchPattern() throws Exception {
+        final String[] commands = { ShowMasksCommand.NAME + " *our*" };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final String output = getCommandOutput();
+        assertThat( output, output.contains( MASK_1 ), is( false ) );
+        assertThat( output, output.contains( MASK_2 ), is( true ) );
+        assertThat( output, output.contains( MASK_3 ), is( false ) );
+    }
+
+    @Test
+    public void shouldNotMatchPattern() throws Exception {
+        final String[] commands = { ShowMasksCommand.NAME + " *blah*" };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final String output = getCommandOutput();
+        assertThat( output, output.contains( MASK_1 ), is( false ) );
+        assertThat( output, output.contains( MASK_2 ), is( false ) );
+        assertThat( output, output.contains( MASK_3 ), is( false ) );
     }
 
 }

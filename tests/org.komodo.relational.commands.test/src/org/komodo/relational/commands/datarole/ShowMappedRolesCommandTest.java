@@ -23,6 +23,7 @@ public final class ShowMappedRolesCommandTest extends AbstractCommandTest {
 
     private static final String ROLE_1 = "my_role";
     private static final String ROLE_2 = "your_role";
+    private static final String ROLE_3 = "role_3";
 
     @Before
     public void createContext() throws Exception {
@@ -32,9 +33,22 @@ public final class ShowMappedRolesCommandTest extends AbstractCommandTest {
                                     "cd myDataRole",
                                     "add-permission myPermission",
                                     "add-mapped-role " + ROLE_1,
-                                    "add-mapped-role " + ROLE_2 };
+                                    "add-mapped-role " + ROLE_2,
+                                    "add-mapped-role " + ROLE_3 };
         final CommandResult result = execute( commands );
         assertCommandResultOk( result );
+    }
+
+    @Test
+    public void shoudAllowMultiplePatterns() throws Exception {
+        final String[] commands = { ShowMappedRolesCommand.NAME + SPACE + " *r_*" + SPACE + ROLE_1 };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final String output = getCommandOutput();
+        assertThat( output, output.contains( ROLE_1 ), is( true ) );
+        assertThat( output, output.contains( ROLE_2 ), is( true ) );
+        assertThat( output, output.contains( ROLE_3 ), is( false ) );
     }
 
     @Test
@@ -46,12 +60,31 @@ public final class ShowMappedRolesCommandTest extends AbstractCommandTest {
         final String output = getCommandOutput();
         assertThat( output, output.contains( ROLE_1 ), is( true ) );
         assertThat( output, output.contains( ROLE_2 ), is( true ) );
+        assertThat( output, output.contains( ROLE_3 ), is( true ) );
     }
 
-    @Test( expected = AssertionError.class )
-    public void shouldNotAllowArguments() throws Exception {
-        final String[] commands = { ShowMappedRolesCommand.NAME + " blah" };
-        execute( commands );
+    @Test
+    public void shoudDisplayMappedRolesThatMatchPattern() throws Exception {
+        final String[] commands = { ShowMappedRolesCommand.NAME + " *3*" };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final String output = getCommandOutput();
+        assertThat( output, output.contains( ROLE_1 ), is( false ) );
+        assertThat( output, output.contains( ROLE_2 ), is( false ) );
+        assertThat( output, output.contains( ROLE_3 ), is( true ) );
+    }
+
+    @Test
+    public void shoudNotMatchPattern() throws Exception {
+        final String[] commands = { ShowMappedRolesCommand.NAME + " *blah*" };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final String output = getCommandOutput();
+        assertThat( output, output.contains( ROLE_1 ), is( false ) );
+        assertThat( output, output.contains( ROLE_2 ), is( false ) );
+        assertThat( output, output.contains( ROLE_3 ), is( false ) );
     }
 
 }

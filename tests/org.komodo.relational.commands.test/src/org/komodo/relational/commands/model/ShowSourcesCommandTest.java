@@ -31,6 +31,7 @@ public final class ShowSourcesCommandTest extends AbstractCommandTest {
 
     private static final String SOURCE_1 = "my_source";
     private static final String SOURCE_2 = "your_source";
+    private static final String SOURCE_3 = "so_urce";
 
     @Before
     public void createContext() throws Exception {
@@ -39,9 +40,22 @@ public final class ShowSourcesCommandTest extends AbstractCommandTest {
                                     "add-model myModel",
                                     "cd myModel",
                                     "add-source " + SOURCE_1,
-                                    "add-source " + SOURCE_2 };
+                                    "add-source " + SOURCE_2,
+                                    "add-source " + SOURCE_3 };
         final CommandResult result = execute( commands );
         assertCommandResultOk( result );
+    }
+
+    @Test
+    public void shouldAllowMultiplePatterns() throws Exception {
+        final String[] commands = { ShowSourcesCommand.NAME + SPACE + SOURCE_1 + SPACE + "*o_*" };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final String output = getCommandOutput();
+        assertThat( output, output.contains( SOURCE_1 ), is( true ) );
+        assertThat( output, output.contains( SOURCE_2 ), is( false ) );
+        assertThat( output, output.contains( SOURCE_3 ), is( true ) );
     }
 
     @Test
@@ -53,12 +67,31 @@ public final class ShowSourcesCommandTest extends AbstractCommandTest {
         final String output = getCommandOutput();
         assertThat( output, output.contains( SOURCE_1 ), is( true ) );
         assertThat( output, output.contains( SOURCE_2 ), is( true ) );
+        assertThat( output, output.contains( SOURCE_3 ), is( true ) );
     }
 
-    @Test( expected = AssertionError.class )
-    public void shouldNotAllowArguments() throws Exception {
-        final String[] commands = { ShowSourcesCommand.NAME + " blah" };
-        execute( commands );
+    @Test
+    public void shouldDisplaySourcesThatMatchPattern() throws Exception {
+        final String[] commands = { ShowSourcesCommand.NAME + " *y*" };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final String output = getCommandOutput();
+        assertThat( output, output.contains( SOURCE_1 ), is( true ) );
+        assertThat( output, output.contains( SOURCE_2 ), is( true ) );
+        assertThat( output, output.contains( SOURCE_3 ), is( false ) );
+    }
+
+    @Test
+    public void shouldNotMatchPattern() throws Exception {
+        final String[] commands = { ShowSourcesCommand.NAME + " *blah*"};
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final String output = getCommandOutput();
+        assertThat( output, output.contains( SOURCE_1 ), is( false ) );
+        assertThat( output, output.contains( SOURCE_2 ), is( false ) );
+        assertThat( output, output.contains( SOURCE_3 ), is( false ) );
     }
 
 }

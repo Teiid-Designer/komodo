@@ -14,7 +14,6 @@ import org.komodo.relational.vdb.VdbImport;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.i18n.I18n;
 
 /**
@@ -40,21 +39,30 @@ public final class ShowImportsCommand extends VdbShellCommand {
     @Override
     protected CommandResult doExecute() {
         try {
-            final UnitOfWork uow = getTransaction();
+            final String[] namePatterns = processOptionalArguments( 0 );
+            final boolean hasPatterns = ( namePatterns.length != 0 );
             final Vdb vdb = getVdb();
-            final VdbImport[] imports = vdb.getImports( uow );
+            final VdbImport[] imports = vdb.getImports( getTransaction(), namePatterns );
 
             if ( imports.length == 0 ) {
-                print( MESSAGE_INDENT, I18n.bind( VdbCommandsI18n.noImports, vdb.getName( uow ) ) );
+                if ( hasPatterns ) {
+                    print( MESSAGE_INDENT, I18n.bind( VdbCommandsI18n.noMatchingImports, vdb.getName( getTransaction() ) ) );
+                } else {
+                    print( MESSAGE_INDENT, I18n.bind( VdbCommandsI18n.noImports, vdb.getName( getTransaction() ) ) );
+                }
             } else {
-                print( MESSAGE_INDENT, I18n.bind( VdbCommandsI18n.importsHeader, vdb.getName( uow ) ) );
+                if ( hasPatterns ) {
+                    print( MESSAGE_INDENT, I18n.bind( VdbCommandsI18n.matchingImportsHeader, vdb.getName( getTransaction() ) ) );
+                } else {
+                    print( MESSAGE_INDENT, I18n.bind( VdbCommandsI18n.importsHeader, vdb.getName( getTransaction() ) ) );
+                }
 
                 final int indent = (MESSAGE_INDENT * 2);
 
                 for ( final VdbImport theImport : imports ) {
                     print( indent,
                            I18n.bind( WorkspaceCommandsI18n.printRelationalObject,
-                                      theImport.getName( uow ),
+                                      theImport.getName( getTransaction() ),
                                       theImport.getTypeDisplayName() ) );
                 }
             }
@@ -72,7 +80,7 @@ public final class ShowImportsCommand extends VdbShellCommand {
      */
     @Override
     protected int getMaxArgCount() {
-        return 0;
+        return -1;
     }
 
     /**

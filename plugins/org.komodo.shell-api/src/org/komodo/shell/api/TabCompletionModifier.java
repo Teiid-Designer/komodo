@@ -2,12 +2,28 @@ package org.komodo.shell.api;
 
 import static org.komodo.spi.constants.StringConstants.DOT;
 
+/**
+ *Tab completion modifier through which an user is able to customize tab completion
+ *
+ */
 public enum TabCompletionModifier {
 
-	AUTO, // Let engine to select proper value
-	NO_APPEND_SEPARATOR, // Do not add a space after autocompleted text
-	APPEND_SEPARATOR, // Add a space after autocompleted text
-	NO_AUTOCOMPLETION;// Do not perform autocompletion
+	/**
+	 * Let engine to select a proper value
+	 */
+	AUTO, 
+	/**
+	 * Do not add a space after autocompleted text
+	 */
+	NO_APPEND_SEPARATOR, 
+	/**
+	 * Add a space after autocompleted text
+	 */
+	APPEND_SEPARATOR, 
+	/**
+	 * Do not perform autocompletion
+	 */
+	NO_AUTOCOMPLETION;
 
     @Override
     public String toString() {
@@ -16,7 +32,7 @@ public enum TabCompletionModifier {
 
     private static String getEnumName( final Enum< ? > enumValue ) {
         final String className = enumValue.getClass().getName();
-        final String[] components = className.split( "\\$" );
+        final String[] components = className.split( "\\$" ); //$NON-NLS-1$
         return components[ components.length - 1 ];
     }
 }

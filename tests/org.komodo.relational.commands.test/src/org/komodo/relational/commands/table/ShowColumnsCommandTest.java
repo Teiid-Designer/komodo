@@ -31,6 +31,7 @@ public final class ShowColumnsCommandTest extends AbstractCommandTest {
 
     private static final String COLUMN_1 = "my_column";
     private static final String COLUMN_2 = "your_column";
+    private static final String COLUMN_3 = "column_three";
 
     @Before
     public void createContext() throws Exception {
@@ -41,9 +42,22 @@ public final class ShowColumnsCommandTest extends AbstractCommandTest {
                                     "add-table myTable",
                                     "cd myTable",
                                     "add-column " + COLUMN_1,
-                                    "add-column " + COLUMN_2 };
+                                    "add-column " + COLUMN_2,
+                                    "add-column " + COLUMN_3 };
         final CommandResult result = execute( commands );
         assertCommandResultOk( result );
+    }
+
+    @Test
+    public void shouldAllowMultiplePatterns() throws Exception {
+        final String[] commands = { ShowColumnsCommand.NAME + SPACE + COLUMN_3 + SPACE + "*column*" };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final String output = getCommandOutput();
+        assertThat( output, output.contains( COLUMN_1 ), is( true ) );
+        assertThat( output, output.contains( COLUMN_2 ), is( true ) );
+        assertThat( output, output.contains( COLUMN_3 ), is( true ) );
     }
 
     @Test
@@ -55,12 +69,31 @@ public final class ShowColumnsCommandTest extends AbstractCommandTest {
         final String output = getCommandOutput();
         assertThat( output, output.contains( COLUMN_1 ), is( true ) );
         assertThat( output, output.contains( COLUMN_2 ), is( true ) );
+        assertThat( output, output.contains( COLUMN_3 ), is( true ) );
     }
 
-    @Test( expected = AssertionError.class )
-    public void shouldNotAllowArguments() throws Exception {
-        final String[] commands = { ShowColumnsCommand.NAME + " blah" };
-        execute( commands );
+    @Test
+    public void shouldDisplayColumnsThatMatchPattern() throws Exception {
+        final String[] commands = { ShowColumnsCommand.NAME + " *column" };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final String output = getCommandOutput();
+        assertThat( output, output.contains( COLUMN_1 ), is( true ) );
+        assertThat( output, output.contains( COLUMN_2 ), is( true ) );
+        assertThat( output, output.contains( COLUMN_3 ), is( false ) );
+    }
+
+    @Test
+    public void shouldNotMatchPattern() throws Exception {
+        final String[] commands = { ShowColumnsCommand.NAME + " *blah" };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final String output = getCommandOutput();
+        assertThat( output, output.contains( COLUMN_1 ), is( false ) );
+        assertThat( output, output.contains( COLUMN_2 ), is( false ) );
+        assertThat( output, output.contains( COLUMN_3 ), is( false ) );
     }
 
 }
