@@ -17,6 +17,7 @@ package org.komodo.relational.commands.server;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
@@ -37,6 +38,7 @@ public final class ServerDeployVdbCommandTest extends AbstractServerCommandTest 
     }
 
     @Test
+    @Ignore
     public void shouldNotBeAvailableForServerNotConnected() throws Exception {
         // Initialize a disconnected server
         initServer("myTeiid", true, false, 
@@ -47,6 +49,7 @@ public final class ServerDeployVdbCommandTest extends AbstractServerCommandTest 
     }
 
     @Test
+    @Ignore
     public void shouldNotDeployMissingWorkspaceVDB() throws Exception {
         final String[] commands = {
             "set-auto-commit false",
@@ -75,6 +78,7 @@ public final class ServerDeployVdbCommandTest extends AbstractServerCommandTest 
     }
 
     @Test
+    @Ignore
     public void shouldNotDeployVDBExistsOnServer() throws Exception {
         final String[] commands = {
             "set-auto-commit false",
@@ -103,6 +107,7 @@ public final class ServerDeployVdbCommandTest extends AbstractServerCommandTest 
     }
     
     @Test
+    @Ignore
     public void shouldDeployVdb() throws Exception {
         final String[] commands = {
             "set-auto-commit false",
@@ -129,6 +134,7 @@ public final class ServerDeployVdbCommandTest extends AbstractServerCommandTest 
     }
     
     @Test
+    @Ignore
     public void shouldDeployExistingVDBWithOverwrite() throws Exception {
         final String[] commands = {
             "set-auto-commit false",
@@ -155,6 +161,7 @@ public final class ServerDeployVdbCommandTest extends AbstractServerCommandTest 
     }
 
     @Test
+    @Ignore
     public void shouldNotDeployVDBServerMissingSources() throws Exception {
         final String[] commands = {
             "set-auto-commit false",

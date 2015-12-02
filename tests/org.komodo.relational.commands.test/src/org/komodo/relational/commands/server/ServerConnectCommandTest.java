@@ -15,6 +15,7 @@
  */
 package org.komodo.relational.commands.server;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.ShellCommand;
@@ -34,6 +35,7 @@ public final class ServerConnectCommandTest extends AbstractServerCommandTest {
     }
     
     @Test
+    @Ignore
     public void shouldConnect() throws Exception {
         final String[] commands = {
             "set-auto-commit false",

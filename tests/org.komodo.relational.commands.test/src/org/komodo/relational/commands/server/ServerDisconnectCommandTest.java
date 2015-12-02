@@ -17,6 +17,7 @@ package org.komodo.relational.commands.server;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.ShellCommand;
@@ -36,6 +37,7 @@ public final class ServerDisconnectCommandTest extends AbstractServerCommandTest
     }
     
     @Test
+    @Ignore
     public void shouldNotBeAvailableForServerNotConnected() throws Exception {
         // Initialize a disconnected server
         initServer("myTeiid", true, false, 
@@ -46,6 +48,7 @@ public final class ServerDisconnectCommandTest extends AbstractServerCommandTest
     }
     
     @Test
+    @Ignore
     public void shouldFailNoServerConnected() throws Exception {
         final String[] commands = {
             "set-auto-commit false",
@@ -67,6 +70,7 @@ public final class ServerDisconnectCommandTest extends AbstractServerCommandTest
     }
     
     @Test
+    @Ignore
     public void shouldDisconnectServer() throws Exception {
         final String[] commands = {
             "set-auto-commit false",

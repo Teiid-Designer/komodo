@@ -17,6 +17,7 @@ package org.komodo.relational.commands.server;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.spi.runtime.TeiidDataSource;
@@ -35,6 +36,7 @@ public final class ServerTranslatorsCommandTest extends AbstractServerCommandTes
     }
 
     @Test
+    @Ignore
     public void shouldNotBeAvailableForServerNotConnected() throws Exception {
         // Initialize a disconnected server
         initServer("myTeiid", true, false, 
@@ -45,6 +47,7 @@ public final class ServerTranslatorsCommandTest extends AbstractServerCommandTes
     }
 
     @Test
+    @Ignore
     public void shouldGetServerTranslators() throws Exception {
         // Initialize mock server with artifacts
         initServer("myTeiid", true, true, 
