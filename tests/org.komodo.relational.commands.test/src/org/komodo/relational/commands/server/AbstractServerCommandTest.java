@@ -98,6 +98,9 @@ public abstract class AbstractServerCommandTest extends AbstractCommandTest {
         when(teiidInstance.hasVdb("myVdb")).thenReturn(false);
         when(teiidInstance.hasVdb("VDB1")).thenReturn(true);
         when(teiidInstance.hasVdb("VDB2")).thenReturn(true);
+        when(teiidInstance.dataSourceExists("myDs")).thenReturn(false);
+        when(teiidInstance.dataSourceExists("DS1")).thenReturn(true);
+        when(teiidInstance.dataSourceExists("DS2")).thenReturn(true);
         
         // TeiidPropertyDefinitions
         TeiidPropertyDefinition propDefn1 = mock(TeiidPropertyDefinition.class);

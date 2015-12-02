@@ -15,6 +15,10 @@ import org.komodo.utils.i18n.I18n;
 @SuppressWarnings( "javadoc" )
 public final class WorkspaceCommandsI18n extends I18n {
 
+    public static String createDatasourceExamples;
+    public static String createDatasourceHelp;
+    public static String createDatasourceUsage;
+
     public static String createSchemaExamples;
     public static String createSchemaHelp;
     public static String createSchemaUsage;
@@ -26,6 +30,10 @@ public final class WorkspaceCommandsI18n extends I18n {
     public static String createVdbExamples;
     public static String createVdbHelp;
     public static String createVdbUsage;
+
+    public static String deleteDatasourceExamples;
+    public static String deleteDatasourceHelp;
+    public static String deleteDatasourceUsage;
 
     public static String deleteSchemaExamples;
     public static String deleteSchemaHelp;
@@ -52,6 +60,10 @@ public final class WorkspaceCommandsI18n extends I18n {
     public static String uploadVdbUsage;
 
     public static String cannotImportWouldCreateDuplicate;
+    public static String datasourceCreated;
+    public static String datasourceDeleted;
+    public static String datasourceNotFound;
+    public static String deleteDatasourceError;
     public static String deleteSchemaError;
     public static String deleteTeiidError;
     public static String deleteVdbError;
@@ -66,6 +78,7 @@ public final class WorkspaceCommandsI18n extends I18n {
     public static String invalidNullablePropertyValue;
     public static String invalidObjectType;
     public static String invalidPropertyName;
+    public static String missingDatasourceName;
     public static String missingInputFileName;
     public static String missingInputVdbFilePath;
     public static String missingOutputFileName;

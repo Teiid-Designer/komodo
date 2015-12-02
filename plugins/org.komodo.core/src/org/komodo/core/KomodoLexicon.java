@@ -43,6 +43,15 @@ public interface KomodoLexicon extends StringConstants {
          */
         String GROUP_NODE = Namespace.PREFIX + COLON + "dataSources"; //$NON-NLS-1$
 
+        /**
+         * The name of the jndiName property. Value is {@value} .
+         */
+        String JNDI_NAME = Namespace.PREFIX + COLON + "jndiName"; //$NON-NLS-1$
+
+        /**
+         * The name of the driverName property. Value is {@value} .
+         */
+        String DRIVER_NAME = Namespace.PREFIX + COLON + "driverName"; //$NON-NLS-1$
     }
 
     /**

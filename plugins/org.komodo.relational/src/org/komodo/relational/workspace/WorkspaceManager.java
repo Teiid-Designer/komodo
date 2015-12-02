@@ -30,6 +30,8 @@ import org.komodo.relational.RelationalObject;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.RelationalProperty;
 import org.komodo.relational.TypeResolver;
+import org.komodo.relational.datasource.Datasource;
+import org.komodo.relational.datasource.internal.DatasourceImpl;
 import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.internal.TypeResolverRegistry;
 import org.komodo.relational.model.Model;
@@ -66,7 +68,8 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
     /**
      * The allowed child types.
      */
-    private static final KomodoType[] CHILD_TYPES = new KomodoType[] { Vdb.IDENTIFIER, Schema.IDENTIFIER, Teiid.IDENTIFIER };
+    private static final KomodoType[] CHILD_TYPES = new KomodoType[] { Datasource.IDENTIFIER, Vdb.IDENTIFIER, 
+                                                                       Schema.IDENTIFIER, Teiid.IDENTIFIER };
 
     /**
      * The type identifier.
@@ -209,6 +212,26 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
                               final Vdb vdb,
                               final String modelName ) throws KException {
         return RelationalModelFactory.createModel( uow, getRepository(), vdb, modelName );
+    }
+
+    /**
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param parent
+     *        the parent of the datasource object being created (can be <code>null</code>)
+     * @param sourceName
+     *        the name of the datasource to create (cannot be empty)
+     * @return the Datasource object (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    public Datasource createDatasource( final UnitOfWork uow,
+                                        final KomodoObject parent,
+                                        final String sourceName ) throws KException {
+        final String path = ( ( parent == null ) ? getRepository().komodoWorkspace( uow ).getAbsolutePath()
+                                                 : parent.getAbsolutePath() );
+         return RelationalModelFactory.createDatasource( uow, getRepository(), path, sourceName );
     }
 
     /**
@@ -472,6 +495,36 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
 
             for (final String path : paths) {
                 result[i++] = new SchemaImpl(transaction, getRepository(), path);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @return all {@link Datasource}s in the workspace
+     * @throws KException
+     *         if an error occurs
+     */
+    public Datasource[] findDatasources( UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
+                         "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        final String[] paths = findByType(transaction, KomodoLexicon.DataSource.NODE_TYPE);
+        Datasource[] result = null;
+
+        if (paths.length == 0) {
+            result = Datasource.NO_DATASOURCES;
+        } else {
+            result = new Datasource[paths.length];
+            int i = 0;
+
+            for (final String path : paths) {
+                result[i++] = new DatasourceImpl(transaction, getRepository(), path);
             }
         }
 

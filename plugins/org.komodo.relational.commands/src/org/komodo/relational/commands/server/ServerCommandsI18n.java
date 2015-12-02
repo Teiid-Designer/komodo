@@ -35,6 +35,10 @@ public final class ServerCommandsI18n extends I18n {
     public static String serverDatasourceTypesHelp;
     public static String serverDatasourceTypesUsage;
 
+    public static String serverDeployDatasourceExamples;
+    public static String serverDeployDatasourceHelp;
+    public static String serverDeployDatasourceUsage;
+
     public static String serverDeployVdbExamples;
     public static String serverDeployVdbHelp;
     public static String serverDeployVdbUsage;
@@ -42,6 +46,10 @@ public final class ServerCommandsI18n extends I18n {
     public static String serverDisconnectExamples;
     public static String serverDisconnectHelp;
     public static String serverDisconnectUsage;
+
+    public static String serverGetDatasourceExamples;
+    public static String serverGetDatasourceHelp;
+    public static String serverGetDatasourceUsage;
 
     public static String serverGetVdbExamples;
     public static String serverGetVdbHelp;
@@ -58,6 +66,10 @@ public final class ServerCommandsI18n extends I18n {
     public static String serverTranslatorsExamples;
     public static String serverTranslatorsHelp;
     public static String serverTranslatorsUsage;
+
+    public static String serverUndeployDatasourceExamples;
+    public static String serverUndeployDatasourceHelp;
+    public static String serverUndeployDatasourceUsage;
 
     public static String serverUndeployVdbExamples;
     public static String serverUndeployVdbHelp;
@@ -78,6 +90,11 @@ public final class ServerCommandsI18n extends I18n {
     public static String connected;
     public static String connectionError;
     public static String currentTeiid;
+    public static String datasourceCopyToRepoFinished;
+    public static String datasourceDeployFinished;
+    public static String datasourceDeploymentOverwriteDisabled;
+    public static String datasourceDeploymentTypeNotFound;
+    public static String datasourceUnDeployFinished;
     public static String disconnectSuccessMsg;
     public static String infoMessageDatasource;
     public static String infoMessageDatasources;
@@ -109,6 +126,7 @@ public final class ServerCommandsI18n extends I18n {
     public static String vdbDeployFailedMissingSourceJndi;
     public static String vdbDeployFinished;
     public static String vdbDeploymentOverwriteDisabled;
+    public static String workspaceDatasourceNotFound;
     public static String workspaceVdbNotFound;
     public static String vdbCopyToRepoFinished;
     public static String vdbUnDeployFinished;

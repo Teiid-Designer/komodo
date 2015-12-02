@@ -39,9 +39,11 @@ public class WorkspaceCommandProvider implements ShellCommandProvider {
     public Set< Class< ? extends ShellCommand > > provideCommands() {
         final Set< Class< ? extends ShellCommand > > result = new HashSet< >();
 
+        result.add( CreateDatasourceCommand.class );
         result.add( CreateSchemaCommand.class );
         result.add( CreateTeiidCommand.class );
         result.add( CreateVdbCommand.class );
+        result.add( DeleteDatasourceCommand.class );
         result.add( DeleteSchemaCommand.class );
         result.add( DeleteTeiidCommand.class );
         result.add( DeleteVdbCommand.class );

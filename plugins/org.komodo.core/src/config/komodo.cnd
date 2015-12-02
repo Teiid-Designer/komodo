@@ -104,9 +104,10 @@
 
 /*
  * A data source either known by the workspace or known by the library.
- * TODO finish this
  */
 [tko:dataSource] > nt:unstructured, tko:workspaceItem, tko:libraryComponent
+  - tko:jndiName (string)
+  - tko:driverName (string)
 
 /*
  * The Komodo library identifies the Teiid artifacts intended to be reused by multiple VDBs, workspaces, or Komodo repositories.

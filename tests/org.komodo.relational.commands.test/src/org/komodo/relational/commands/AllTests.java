@@ -17,6 +17,9 @@ import org.komodo.relational.commands.datarole.SetDataRolePropertyCommandTest;
 import org.komodo.relational.commands.datarole.ShowMappedRolesCommandTest;
 import org.komodo.relational.commands.datarole.ShowPermissionsCommandTest;
 import org.komodo.relational.commands.datarole.UnsetDataRolePropertyCommandTest;
+import org.komodo.relational.commands.datasource.DatasourceCommandsI18nTest;
+import org.komodo.relational.commands.datasource.SetDatasourcePropertyCommandTest;
+import org.komodo.relational.commands.datasource.UnsetDatasourcePropertyCommandTest;
 import org.komodo.relational.commands.datatyperesultset.DataTypeResultSetCommandsI18nTest;
 import org.komodo.relational.commands.datatyperesultset.SetDataTypeResultSetPropertyCommandTest;
 import org.komodo.relational.commands.datatyperesultset.UnsetDataTypeResultSetPropertyCommandTest;
@@ -86,11 +89,13 @@ import org.komodo.relational.commands.server.ServerDatasourceCommandTest;
 import org.komodo.relational.commands.server.ServerDatasourceTypeCommandTest;
 import org.komodo.relational.commands.server.ServerDatasourceTypesCommandTest;
 import org.komodo.relational.commands.server.ServerDatasourcesCommandTest;
+import org.komodo.relational.commands.server.ServerDeployDatasourceCommandTest;
 import org.komodo.relational.commands.server.ServerDeployVdbCommandTest;
 import org.komodo.relational.commands.server.ServerDisconnectCommandTest;
 import org.komodo.relational.commands.server.ServerSetCommandTest;
 import org.komodo.relational.commands.server.ServerTranslatorCommandTest;
 import org.komodo.relational.commands.server.ServerTranslatorsCommandTest;
+import org.komodo.relational.commands.server.ServerUndeployDatasourceCommandTest;
 import org.komodo.relational.commands.server.ServerUndeployVdbCommandTest;
 import org.komodo.relational.commands.server.ServerVdbCommandTest;
 import org.komodo.relational.commands.server.ServerVdbsCommandTest;
@@ -154,9 +159,11 @@ import org.komodo.relational.commands.view.ViewCommandsI18nTest;
 import org.komodo.relational.commands.virtualprocedure.SetVirtualProcedurePropertyCommandTest;
 import org.komodo.relational.commands.virtualprocedure.UnsetVirtualProcedurePropertyCommandTest;
 import org.komodo.relational.commands.virtualprocedure.VirtualProcedureCommandsI18nTest;
+import org.komodo.relational.commands.workspace.CreateDatasourceCommandTest;
 import org.komodo.relational.commands.workspace.CreateSchemaCommandTest;
 import org.komodo.relational.commands.workspace.CreateTeiidCommandTest;
 import org.komodo.relational.commands.workspace.CreateVdbCommandTest;
+import org.komodo.relational.commands.workspace.DeleteDatasourceCommandTest;
 import org.komodo.relational.commands.workspace.DeleteSchemaCommandTest;
 import org.komodo.relational.commands.workspace.DeleteTeiidCommandTest;
 import org.komodo.relational.commands.workspace.DeleteVdbCommandTest;
@@ -185,9 +192,11 @@ import org.komodo.relational.commands.workspace.WorkspaceUnsetPropertyCommandTes
     RelationalShowDescriptorsCommandTest.class,
 
     // Workspace
+    CreateDatasourceCommandTest.class,
     CreateSchemaCommandTest.class,
     CreateTeiidCommandTest.class,
     CreateVdbCommandTest.class,
+    DeleteDatasourceCommandTest.class,
     DeleteSchemaCommandTest.class,
     DeleteTeiidCommandTest.class,
     DeleteVdbCommandTest.class,
@@ -219,6 +228,11 @@ import org.komodo.relational.commands.workspace.WorkspaceUnsetPropertyCommandTes
     ShowPermissionsCommandTest.class,
     UnsetDataRolePropertyCommandTest.class,
 
+    // Datasource
+    DatasourceCommandsI18nTest.class,
+    SetDatasourcePropertyCommandTest.class,
+    UnsetDatasourcePropertyCommandTest.class,
+    
     // DataTypeResultSet
     DataTypeResultSetCommandsI18nTest.class,
     SetDataTypeResultSetPropertyCommandTest.class,
@@ -320,11 +334,13 @@ import org.komodo.relational.commands.workspace.WorkspaceUnsetPropertyCommandTes
     ServerDatasourcesCommandTest.class,
     ServerDatasourceTypeCommandTest.class,
     ServerDatasourceTypesCommandTest.class,
+    ServerDeployDatasourceCommandTest.class,
     ServerDeployVdbCommandTest.class,
     ServerDisconnectCommandTest.class,
     ServerSetCommandTest.class,
     ServerTranslatorCommandTest.class,
     ServerTranslatorsCommandTest.class,
+    ServerUndeployDatasourceCommandTest.class,
     ServerUndeployVdbCommandTest.class,
     ServerVdbCommandTest.class,
     ServerVdbsCommandTest.class,
