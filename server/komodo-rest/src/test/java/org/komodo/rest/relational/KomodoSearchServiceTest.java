@@ -16,6 +16,7 @@ import org.junit.Test;
 import org.komodo.rest.RestBasicEntity;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.spi.repository.KomodoType;
+import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 @SuppressWarnings( {"javadoc", "nls"} )
@@ -164,6 +165,72 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
         assertEquals(94, entities.length);
 
         for (RestBasicEntity basicEntity : entities) {
+            System.out.println(basicEntity.getDataPath());
+        }
+    }
+
+    @Test
+    public void shouldSearchByType() throws Exception {
+        loadVdbs();
+
+        // get
+        KomodoProperties properties = new KomodoProperties();
+        properties.addProperty(SEARCH_TYPE_PARAMETER, TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+        URI uri = _uriBuilder.generateSearchUri(properties);
+
+        this.response = request(uri).get();
+        final String entity = this.response.readEntity(String.class);
+        System.out.println("Response:\n" + entity);
+        RestBasicEntity[] entities = KomodoJsonMarshaller.unmarshallArray(entity, RestBasicEntity[].class);
+        assertEquals(38, entities.length);
+
+        for (RestBasicEntity basicEntity : entities) {
+            KomodoType kType = basicEntity.getkType();
+            assertEquals(KomodoType.COLUMN, kType);
+        }
+    }
+
+    @Test
+    public void shouldSearchByKType() throws Exception {
+        loadVdbs();
+
+        // get
+        KomodoProperties properties = new KomodoProperties();
+        properties.addProperty(SEARCH_TYPE_PARAMETER, KomodoType.COLUMN.getType());
+        URI uri = _uriBuilder.generateSearchUri(properties);
+
+        this.response = request(uri).get();
+        final String entity = this.response.readEntity(String.class);
+        System.out.println("Response:\n" + entity);
+        RestBasicEntity[] entities = KomodoJsonMarshaller.unmarshallArray(entity, RestBasicEntity[].class);
+        assertEquals(38, entities.length);
+
+        for (RestBasicEntity basicEntity : entities) {
+            KomodoType kType = basicEntity.getkType();
+            assertEquals(KomodoType.COLUMN, kType);
+        }
+    }
+
+    @Test
+    public void shouldSearchByKTypeAndLocalNameParameter() throws Exception {
+        loadVdbs();
+
+        // get
+        KomodoProperties properties = new KomodoProperties();
+        properties.addProperty(SEARCH_TYPE_PARAMETER, KomodoType.COLUMN.getType());
+        properties.addProperty(SEARCH_NAME_PARAMETER, "%ID%");
+        URI uri = _uriBuilder.generateSearchUri(properties);
+
+        this.response = request(uri).get();
+        final String entity = this.response.readEntity(String.class);
+        System.out.println("Response:\n" + entity);
+        RestBasicEntity[] entities = KomodoJsonMarshaller.unmarshallArray(entity, RestBasicEntity[].class);
+        assertEquals(12, entities.length);
+
+        for (RestBasicEntity basicEntity : entities) {
+            KomodoType kType = basicEntity.getkType();
+            assertEquals(KomodoType.COLUMN, kType);
+            assertTrue(basicEntity.getId().contains("ID"));
             System.out.println(basicEntity.getDataPath());
         }
     }
