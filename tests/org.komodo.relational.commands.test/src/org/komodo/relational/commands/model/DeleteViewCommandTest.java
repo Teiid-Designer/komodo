@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.model;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Model;
@@ -57,4 +60,16 @@ public final class DeleteViewCommandTest extends AbstractCommandTest {
         assertEquals("myView2", views[0].getName(getTransaction())); //$NON-NLS-1$
     }
 
+    @Test
+    public void testTabCompleter()throws Exception{
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	setup("commandFiles","addViews.cmd");
+
+    	candidates.add("myView1");
+    	candidates.add("myView2");
+    	assertTabCompletion("delete-view myV", candidates);
+
+    	candidates.add("MyView3");
+    	assertTabCompletion("delete-view ", candidates);
+    }
 }

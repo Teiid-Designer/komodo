@@ -15,6 +15,7 @@ import org.komodo.relational.model.TableConstraint;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.KomodoObjectLabelProvider;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoObject;
@@ -147,7 +148,7 @@ public final class AddConstraintColumnCommand extends TableConstraintShellComman
      * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
      */
     @Override
-    public int tabCompletion( final String lastArgument,
+    public TabCompletionModifier tabCompletion( final String lastArgument,
                               final List< CharSequence > candidates ) throws Exception {
         if ( getArguments().isEmpty() ) {
             final Repository.UnitOfWork uow = getTransaction();
@@ -157,7 +158,7 @@ public final class AddConstraintColumnCommand extends TableConstraintShellComman
             final Column[] columns = parent.getColumns( uow );
 
             if ( columns.length == 0 ) {
-                return -1;
+                return TabCompletionModifier.AUTO;
             }
 
             final KomodoObjectLabelProvider labelProvider = getWorkspaceStatus().getLabelProvider();
@@ -172,12 +173,10 @@ public final class AddConstraintColumnCommand extends TableConstraintShellComman
                     candidates.add( displayPath );
                 }
             }
-
-            return ( candidates.isEmpty() ? -1 : ( toString().length() + 1 ) );
         }
 
         // no completions if more than one arg
-        return -1;
+        return TabCompletionModifier.AUTO;
     }
 
 }

@@ -17,6 +17,9 @@ package org.komodo.relational.commands.table;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Model;
@@ -63,4 +66,15 @@ public class DeletePrimaryKeyCommandTest extends AbstractCommandTest {
         assertNull(pk);
     }
 
+    @Test
+    public void testTabCompleter()throws Exception{
+
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	candidates.add("myPrimaryKey");
+
+    	setup("commandFiles","addPrimaryKey.cmd");
+    	assertTabCompletion("delete-primary-key myPrim", candidates);
+    	assertTabCompletion("delete-primary-key ", candidates);
+
+    }
 }

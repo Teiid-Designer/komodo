@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.schema;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Schema;
@@ -49,4 +52,16 @@ public final class UnsetSchemaPropertyCommandTest extends AbstractCommandTest {
         assertEquals(true, StringUtils.isEmpty(rendition));
     }
 
+    @Test
+    public void testTabCompleter()throws Exception{
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	setup("commandFiles","addSchemas.cmd");
+    	final String[] commands = { "cd mySchema1" };
+    	final CommandResult result = execute( commands );
+        assertCommandResultOk(result);
+
+    	candidates.add(SetSchemaPropertyCommand.RENDITION);
+    	assertTabCompletion("unset-property REN", candidates);
+    	assertTabCompletion("unset-property Ren", candidates);
+    }
 }

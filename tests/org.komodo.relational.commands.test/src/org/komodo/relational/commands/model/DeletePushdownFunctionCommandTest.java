@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.model;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Function;
@@ -59,4 +62,16 @@ public final class DeletePushdownFunctionCommandTest extends AbstractCommandTest
         assertEquals("myPushdownFunction2", functions[0].getName(getTransaction())); //$NON-NLS-1$
     }
 
+    @Test
+    public void testTabCompleter()throws Exception{
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	setup("commandFiles","addPushdownFunctions.cmd");
+
+    	candidates.add("myPushdownFunction1");
+    	candidates.add("myPushdownFunction2");
+    	assertTabCompletion("delete-pushdown-function myP", candidates);
+
+    	candidates.add("MyPushdownFunction3");
+    	assertTabCompletion("delete-pushdown-function ", candidates);
+    }
 }

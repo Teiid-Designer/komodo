@@ -9,15 +9,21 @@ package org.komodo.relational.commands.workspace;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import org.komodo.relational.vdb.Vdb;
+import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.CompletionConstants;
+import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
+import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.StringUtils;
 import org.komodo.utils.i18n.I18n;
 import org.modeshape.jcr.JcrLexicon;
@@ -130,6 +136,38 @@ public final class UploadVdbCommand extends WorkspaceShellCommand {
     @Override
     protected void printHelpUsage( final int indent ) {
         print( indent, I18n.bind( WorkspaceCommandsI18n.uploadVdbUsage ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
+     */
+    @Override
+    public TabCompletionModifier tabCompletion( final String lastArgument,
+                              final List< CharSequence > candidates ) throws Exception {
+        final Arguments args = getArguments();
+
+        final UnitOfWork uow = getTransaction();
+        final WorkspaceManager mgr = getWorkspaceManager();
+        final KomodoObject[] vdbs = mgr.findVdbs(uow);
+        List<String> existingVdbNames = new ArrayList<String>(vdbs.length);
+        for(KomodoObject vdb : vdbs) {
+            existingVdbNames.add(vdb.getName(uow));
+        }
+
+        if ( args.isEmpty() ) {
+            if ( lastArgument == null ) {
+                candidates.addAll( existingVdbNames );
+            } else {
+                for ( final String item : existingVdbNames ) {
+                    if ( item.startsWith( lastArgument ) ) {
+                        candidates.add( item );
+                    }
+                }
+            }
+        }
+        return TabCompletionModifier.AUTO;
     }
 
 }

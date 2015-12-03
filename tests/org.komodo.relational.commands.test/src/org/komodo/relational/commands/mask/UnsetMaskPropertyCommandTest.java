@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.mask;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.vdb.DataRole;
@@ -65,4 +68,18 @@ public final class UnsetMaskPropertyCommandTest extends AbstractCommandTest {
         assertEquals(null, masks[0].getOrder(getTransaction()));
     }
 
+    @Test
+    public void testTabCompleter()throws Exception{
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	setup("commandFiles","addMasks.cmd");
+    	final String[] commands = { "cd myMask1" };
+    	final CommandResult result = execute( commands );
+        assertCommandResultOk(result);
+
+    	assertTabCompletion("unset-property OODE", candidates);
+
+    	candidates.add(SetMaskPropertyCommand.ORDER);
+    	assertTabCompletion("unset-property or", candidates);
+    	assertTabCompletion("unset-property OR", candidates);
+    }
 }

@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.modelsource;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Model;
@@ -59,4 +62,17 @@ public final class SetModelSourcePropertyCommandTest extends AbstractCommandTest
         assertEquals("myJndi", sources[0].getJndiName(getTransaction())); //$NON-NLS-1$
     }
 
+    @Test
+    public void testTabCompleter()throws Exception{
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	setup("commandFiles","addSources.cmd");
+    	final String[] commands = { "cd mySource1" };
+    	final CommandResult result = execute( commands );
+        assertCommandResultOk(result);
+
+    	candidates.add(ModelSourceShellCommand.TRANSLATOR_NAME);
+    	assertTabCompletion("set-property sourceT", candidates);
+
+    	assertTabCompletion("set-property sourcet", candidates);
+    }
 }

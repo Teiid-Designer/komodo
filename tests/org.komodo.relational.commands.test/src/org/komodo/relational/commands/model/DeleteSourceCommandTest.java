@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.model;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Model;
@@ -57,4 +60,16 @@ public final class DeleteSourceCommandTest extends AbstractCommandTest {
         assertEquals("mySource2", sources[0].getName(getTransaction())); //$NON-NLS-1$
     }
 
+    @Test
+    public void testTabCompleter()throws Exception{
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	setup("commandFiles","addSources.cmd");
+
+    	candidates.add("mySource1");
+    	candidates.add("mySource2");
+    	assertTabCompletion("delete-source myS", candidates);
+
+    	candidates.add("MySource3");
+    	assertTabCompletion("delete-source ", candidates);
+    }
 }

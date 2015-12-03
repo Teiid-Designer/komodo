@@ -16,6 +16,10 @@
 package org.komodo.shell.commands;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.LinkedList;
+import java.util.List;
+
 import org.junit.Test;
 import org.komodo.shell.AbstractCommandTest;
 import org.komodo.shell.api.CommandResult;
@@ -72,6 +76,20 @@ public class ResetGlobalPropertyCommandTest extends AbstractCommandTest {
         assertEquals("/", wsStatus.getCurrentContextDisplayPath());
         assertEquals(WorkspaceStatus.GLOBAL_PROPS.get(firstPropName), wsStatus.getGlobalProperties().getProperty(firstPropName));
         assertEquals(WorkspaceStatus.GLOBAL_PROPS.get(secondPropName), wsStatus.getGlobalProperties().getProperty(secondPropName));
+    }
+
+    @Test
+    public void testTabCompleter()throws Exception{
+
+        List<CharSequence> defaultValues = new LinkedList<>(WorkspaceStatus.GLOBAL_PROPS.keySet());
+        defaultValues.add(0,"--all");
+        assertTabCompletion("reset-global ", defaultValues);
+
+        defaultValues.clear();
+        String showTypeParam=WorkspaceStatus.SHOW_TYPE_IN_PROMPT_KEY;
+        defaultValues.add(showTypeParam);
+        assertTabCompletion("reset-global "+showTypeParam.substring(0, showTypeParam.length()-3), defaultValues);
+
     }
 
     private String negateBooleanValue(String name){

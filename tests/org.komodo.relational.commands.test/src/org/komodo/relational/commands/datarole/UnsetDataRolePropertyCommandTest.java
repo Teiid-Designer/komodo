@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.datarole;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.vdb.DataRole;
@@ -53,4 +56,18 @@ public final class UnsetDataRolePropertyCommandTest extends AbstractCommandTest 
         assertEquals(null, dataRoles[0].getDescription(getTransaction()));
     }
 
+    @Test
+    public void testTabCompleter()throws Exception{
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	setup("commandFiles","addDataRoles.cmd");
+    	final String[] commands = { "cd myDatarole1" };
+    	final CommandResult result = execute( commands );
+        assertCommandResultOk(result);
+
+    	assertTabCompletion("unset-property ANN", candidates);
+
+    	candidates.add(SetDataRolePropertyCommand.ANY_AUTHENTICATED);
+    	assertTabCompletion("unset-property AN", candidates);
+    	assertTabCompletion("unset-property An", candidates);
+    }
 }

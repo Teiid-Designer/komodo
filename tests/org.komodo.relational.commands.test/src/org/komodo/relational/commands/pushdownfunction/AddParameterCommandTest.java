@@ -16,6 +16,7 @@
 package org.komodo.relational.commands.pushdownfunction;
 
 import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Function;

@@ -9,11 +9,13 @@ package org.komodo.relational.commands.permission;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.komodo.relational.vdb.Condition;
+
+import org.komodo.relational.vdb.Mask;
 import org.komodo.relational.vdb.Permission;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.i18n.I18n;
@@ -102,34 +104,30 @@ public final class DeleteMaskCommand extends PermissionShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
      */
     @Override
-    public int tabCompletion( final String lastArgument,
+    public TabCompletionModifier tabCompletion( final String lastArgument,
                               final List< CharSequence > candidates ) throws Exception {
         final Arguments args = getArguments();
 
         final UnitOfWork uow = getTransaction();
         final Permission permission = getPermission();
-        final Condition[] conditions = permission.getConditions( uow );
-        List<String> existingConditionNames = new ArrayList<String>(conditions.length);
-        for(Condition condition : conditions) {
-            existingConditionNames.add(condition.getName(uow));
+        final Mask[] masks = permission.getMasks( uow );
+        List<String> existingMaskNames = new ArrayList<String>(masks.length);
+        for(Mask mask : masks) {
+            existingMaskNames.add(mask.getName(uow));
         }
 
         if ( args.isEmpty() ) {
             if ( lastArgument == null ) {
-                candidates.addAll( existingConditionNames );
+                candidates.addAll( existingMaskNames );
             } else {
-                for ( final String item : existingConditionNames ) {
-                    if ( item.toUpperCase().startsWith( lastArgument.toUpperCase() ) ) {
+                for ( final String item : existingMaskNames ) {
+                    if ( item.startsWith( lastArgument ) ) {
                         candidates.add( item );
                     }
                 }
             }
-
-            return 0;
         }
-
-        // no tab completion
-        return -1;
+        return TabCompletionModifier.AUTO;
     }
 
 }

@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.virtualprocedure;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Model;
@@ -59,6 +62,21 @@ public final class SetVirtualProcedurePropertyCommandTest extends AbstractComman
         assertEquals("myVirtualProcedure", procs[0].getName(getTransaction())); //$NON-NLS-1$
 
         assertEquals("myNameInSource", ((VirtualProcedure)procs[0]).getNameInSource(getTransaction())); //$NON-NLS-1$
+    }
+
+    @Test
+    public void testTabCompleter()throws Exception{
+
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	setup("commandFiles","addVirtualProcedures.cmd");
+    	final String[] commands = { "cd myVirtualProcedure1" };
+    	final CommandResult result = execute( commands );
+    	assertCommandResultOk(result);
+
+    	candidates.add(VirtualProcedureShellCommand.NAME_IN_SOURCE);
+
+    	assertTabCompletion("set-property na", candidates);
+        assertTabCompletion("set-property NA", candidates);
     }
 
 }

@@ -6,6 +6,7 @@ import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.KomodoObjectUtils;
@@ -173,7 +174,7 @@ public class RenameCommand extends BuiltInShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
      */
     @Override
-    public int tabCompletion(String lastArgument, List<CharSequence> candidates) throws Exception {
+    public TabCompletionModifier tabCompletion(String lastArgument, List<CharSequence> candidates) throws Exception {
         if (getArguments().isEmpty()) {
 			// List of potential completions
 			List<String> potentialsList = new ArrayList<String>();
@@ -196,9 +197,8 @@ public class RenameCommand extends BuiltInShellCommand {
     				}
     			}
     		}
-            return 0;
         }
-        return -1;
+        return TabCompletionModifier.AUTO;
     }
 
     /**

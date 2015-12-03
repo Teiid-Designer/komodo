@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.table;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Model;
@@ -62,6 +65,20 @@ public final class DeleteUniqueConstraintCommandTest extends AbstractCommandTest
         UniqueConstraint[] ucs = tables[0].getUniqueConstraints(getTransaction());
         assertEquals(1, ucs.length);
         assertEquals("myUniqueConstraint2", ucs[0].getName(getTransaction())); //$NON-NLS-1$
+    }
+
+    @Test
+    public void testTabCompleter()throws Exception{
+
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	candidates.add("myUniqueConstraint1");
+    	candidates.add("myUniqueConstraint2");
+
+    	setup("commandFiles","addUniqueConstraints.cmd");
+    	assertTabCompletion("delete-unique-constraint myU", candidates);
+
+    	candidates.add("MyUniqueConstraint3");
+    	assertTabCompletion("delete-unique-constraint ", candidates);
     }
 
 }

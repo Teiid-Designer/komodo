@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.column;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Column;
@@ -65,6 +68,22 @@ public final class SetColumnPropertyCommandTest extends AbstractCommandTest {
 
         String nameInSource = columns[0].getNameInSource(getTransaction());
         assertEquals("myNameInSource", nameInSource); //$NON-NLS-1$
+    }
+
+    @Test
+    public void testTabCompleter()throws Exception{
+
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	setup("commandFiles","addColumns.cmd");
+    	final String[] commands = { "cd myColumn1" };
+    	final CommandResult result = execute( commands );
+    	assertCommandResultOk(result);
+
+    	candidates.add("NAMEINSOURCE");
+    	candidates.add("NATIVE_TYPE");
+
+    	assertTabCompletion("set-property na", candidates);
+        assertTabCompletion("set-property NA", candidates);
     }
 
 }

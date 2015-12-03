@@ -7,10 +7,16 @@
  */
 package org.komodo.relational.commands.table;
 
+import java.util.List;
+
+import org.komodo.relational.model.PrimaryKey;
 import org.komodo.relational.model.Table;
 import org.komodo.shell.CommandResultImpl;
+import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.i18n.I18n;
 
 /**
@@ -92,4 +98,34 @@ public final class DeletePrimaryKeyCommand extends TableShellCommand {
         print( indent, I18n.bind( TableCommandsI18n.deletePrimaryKeyUsage ) );
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
+     */
+    @Override
+    public TabCompletionModifier tabCompletion( final String lastArgument,
+                              final List< CharSequence > candidates ) throws Exception {
+        final Arguments args = getArguments();
+        final UnitOfWork uow = getTransaction();
+        final Table table = getTable();
+        final PrimaryKey pk = table.getPrimaryKey( uow );
+
+        if(pk == null){
+        	return TabCompletionModifier.NO_AUTOCOMPLETION;
+        }
+        String pkName=pk.getName(uow);
+
+        if ( args.isEmpty() ) {
+            if ( lastArgument == null ) {
+                candidates.add( pkName );
+            } else {
+                    if ( pkName.startsWith( lastArgument ) ) {
+                        candidates.add( pkName );
+                    }
+                }
+            }
+
+        return TabCompletionModifier.AUTO;
+    }
 }

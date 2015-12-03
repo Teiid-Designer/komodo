@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.view;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Model;
@@ -60,4 +63,16 @@ public final class UnsetViewPropertyCommandTest extends AbstractCommandTest {
         assertEquals(null, views[0].getDescription(getTransaction()));
     }
 
+    @Test
+    public void testTabCompleter()throws Exception{
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	setup("commandFiles","addViews.cmd");
+    	final String[] commands = { "cd myView1" };
+    	final CommandResult result = execute( commands );
+        assertCommandResultOk(result);
+
+    	candidates.add(SetViewPropertyCommand.NAME_IN_SOURCE);
+    	assertTabCompletion("unset-property Name", candidates);
+    	assertTabCompletion("unset-property NAME", candidates);
+    }
 }

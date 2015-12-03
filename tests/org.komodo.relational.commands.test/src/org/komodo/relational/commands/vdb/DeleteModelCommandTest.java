@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.vdb;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Model;
@@ -48,6 +51,20 @@ public final class DeleteModelCommandTest extends AbstractCommandTest {
         Model[] models = vdbs[0].getModels(getTransaction());
         assertEquals(1, models.length);
         assertEquals("myModel2", models[0].getName(getTransaction())); //$NON-NLS-1$
+    }
+
+    @Test
+    public void testTabCompleter()throws Exception{
+
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	candidates.add("myModel1");
+    	candidates.add("myModel2");
+
+    	setup("commandFiles","addModels.cmd");
+    	assertTabCompletion("delete-model myM", candidates);
+
+    	candidates.add("MyModel3");
+    	assertTabCompletion("delete-model ", candidates);
     }
 
 }

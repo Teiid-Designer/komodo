@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.table;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.AccessPattern;
@@ -64,4 +67,17 @@ public final class DeleteAccessPatternCommandTest extends AbstractCommandTest {
         assertEquals("myAccessPattern2", accessPatterns[0].getName(getTransaction())); //$NON-NLS-1$
     }
 
+    @Test
+    public void testTabCompleter()throws Exception{
+
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	setup("commandFiles","addTableAccessPatterns.cmd");
+
+    	candidates.add("myAccessPattern1");
+    	candidates.add("myAccessPattern2");
+    	assertTabCompletion("delete-access-pattern myAcc", candidates);
+
+    	candidates.add("MyAccessPattern3");
+    	assertTabCompletion("delete-access-pattern ", candidates);
+    }
 }

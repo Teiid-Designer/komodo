@@ -17,6 +17,7 @@ package org.komodo.shell;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.jboss.aesh.complete.CompleteOperation;
 import org.jboss.aesh.complete.Completion;
 import org.komodo.core.KEngine;
@@ -24,6 +25,7 @@ import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.InvalidCommandArgumentException;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandFactory;
+import org.komodo.shell.api.TabCompletionModifier;
 
 /**
  * Implements tab completion for the interactive
@@ -100,40 +102,32 @@ public class TabCompleter implements Completion {
     			command.setArguments(arguments);
 
     			List<CharSequence> list = new ArrayList<CharSequence>();
-    			int tabCompletionResult = -1;
+    			TabCompletionModifier tabCompletionResult=TabCompletionModifier.NO_AUTOCOMPLETION;
                 try {
                     tabCompletionResult = command.tabCompletion(lastArgument, list);
                 } catch (Exception ex) {
                     KEngine.getInstance().getErrorHandler().error(ex.getMessage(), ex);
                 }
 
+                if(tabCompletionResult==TabCompletionModifier.NO_AUTOCOMPLETION){
+                	return; // No autocompletion will be performed
+                }
     			if (!list.isEmpty()) {
-    				// In case the tab completion return just one result it
-    				// is printed the previous buffer plus the argument
-    				if (list.size() == 1) {
-    					if (buffer.endsWith(" ")) { //$NON-NLS-1$
-    						completeOperation.addCompletionCandidate(buffer
-    								+ list.get(0).toString().trim());
-    					} else if (buffer.indexOf(" ") != -1) { //$NON-NLS-1$
-    						completeOperation.addCompletionCandidate(buffer.substring(0,
-    								buffer.lastIndexOf(" ")) //$NON-NLS-1$
-    								+ " " + list.get(0).toString().trim()); //$NON-NLS-1$
-    					} else {
-    						completeOperation.addCompletionCandidate(buffer + " " //$NON-NLS-1$
-    								+ list.get(0).toString().trim());
-    					}
-
-    				} else {
-    					// In case the result of the command tab completion
-    					// contains more than one result (like the FileNameCompleter)
     					for (CharSequence sequence : list) {
     						completeOperation.addCompletionCandidate(sequence.toString());
     					}
 
-    					completeOperation.setOffset( tabCompletionResult );
-    				}
-    				if (tabCompletionResult == CompletionConstants.NO_APPEND_SEPARATOR) {
+						completeOperation.setOffset(command.toString().length() + 1);
+
+    				if (tabCompletionResult == TabCompletionModifier.NO_APPEND_SEPARATOR) {
     					completeOperation.doAppendSeparator(false);
+    				}else if(tabCompletionResult== TabCompletionModifier.AUTO){
+                        if(command instanceof BuiltInShellCommand){
+	                       int maxArgs=((BuiltInShellCommand)command).getMaxArgCount();
+	                       if(arguments.size()>=maxArgs-1){
+	                    	   completeOperation.doAppendSeparator(false);
+	                       }
+                        }
     				}
 
     			}

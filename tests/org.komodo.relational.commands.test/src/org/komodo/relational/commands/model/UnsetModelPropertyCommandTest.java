@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.model;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Model;
@@ -53,4 +56,17 @@ public final class UnsetModelPropertyCommandTest extends AbstractCommandTest {
         assertEquals(null, models[0].getDescription(getTransaction()));
     }
 
+    @Test
+    public void testTabCompleter()throws Exception{
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	setup("commandFiles","addModels.cmd");
+    	final String[] commands = { "cd myModel1" };
+    	final CommandResult result = execute( commands );
+        assertCommandResultOk(result);
+
+    	candidates.add(SetModelPropertyCommand.MODEL_TYPE);
+    	candidates.add(SetModelPropertyCommand.METADATA_TYPE);
+    	assertTabCompletion("unset-property m", candidates);
+    	assertTabCompletion("unset-property M", candidates);
+    }
 }

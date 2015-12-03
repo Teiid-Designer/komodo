@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.workspace;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.vdb.Vdb;
@@ -46,4 +49,17 @@ public final class DeleteVdbCommandTest extends AbstractCommandTest {
         assertEquals("testVdb2", vdbs[0].getName(getTransaction()));
     }
 
+    @Test
+    public void testTabCompleter()throws Exception{
+
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	candidates.add("myVDB1");
+    	candidates.add("myVDB2");
+
+    	setup("commandFiles","addVDBs.cmd");
+    	assertTabCompletion("delete-vdb myV", candidates);
+
+    	candidates.add("MyVDB3");
+    	assertTabCompletion("delete-vdb ", candidates);
+    }
 }

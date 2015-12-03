@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.schema;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Schema;
@@ -44,6 +47,19 @@ public final class SetSchemaPropertyCommandTest extends AbstractCommandTest {
         assertEquals("testSchema", schemas[0].getName(getTransaction())); //$NON-NLS-1$
 
         assertEquals("CREATE FOREIGN TABLE G1 (e1 integer) OPTIONS (ANNOTATION 'test', CARDINALITY '12');", schemas[0].getRendition(getTransaction())); //$NON-NLS-1$
+    }
+
+    @Test
+    public void testTabCompleter()throws Exception{
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	setup("commandFiles","addSchemas.cmd");
+    	final String[] commands = { "cd mySchema1" };
+    	final CommandResult result = execute( commands );
+        assertCommandResultOk(result);
+
+    	candidates.add(SetSchemaPropertyCommand.RENDITION);
+    	assertTabCompletion("set-property REN", candidates);
+    	assertTabCompletion("set-property Ren", candidates);
     }
 
 }

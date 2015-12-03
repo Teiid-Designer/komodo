@@ -16,6 +16,9 @@
 package org.komodo.relational.commands.condition;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.vdb.Condition;
@@ -64,6 +67,19 @@ public class UnsetConditionPropertyCommandTest extends AbstractCommandTest {
         assertEquals("myCondition", conditions[0].getName(getTransaction())); //$NON-NLS-1$
 
         assertEquals(true, conditions[0].isConstraint(getTransaction()));
+    }
+
+    @Test
+    public void testTabCompleter()throws Exception{
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	setup("commandFiles","addConditions.cmd");
+    	final String[] commands = { "cd myCondition1" };
+    	final CommandResult result = execute( commands );
+        assertCommandResultOk(result);
+
+
+    	candidates.add(SetConditionPropertyCommand.CONSTRAINT);
+    	assertTabCompletion("unset-property CON", candidates);
     }
 
 }
