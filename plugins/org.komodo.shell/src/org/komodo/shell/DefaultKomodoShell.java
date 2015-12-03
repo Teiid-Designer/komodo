@@ -539,17 +539,24 @@ public class DefaultKomodoShell implements KomodoShell {
         return PROPERTIES_FILE_NAME;
     }
     
+    
+    /**
+     * Method that reads version info from properties file
+     * 
+     * @return version info
+     */
     private String getVersion(){
     	
     	Properties properties = new Properties();
     	try {
     		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-			properties.load(classLoader.getResourceAsStream("version.properties"));
-		} catch (IOException e) {
-			displayMessage( "Error during loading Komodo version " + e.getLocalizedMessage() );
+			properties.load(classLoader.getResourceAsStream("info.properties")); //$NON-NLS-1$
+			return properties.getProperty("komodo.version"); //$NON-NLS-1$
+		} catch (Exception e) {
+			displayMessage( I18n.bind( ShellI18n.errorLoadingVersion ) + e.getLocalizedMessage() );
+			return I18n.bind( ShellI18n.errorObtainingVersion );
 		}
-    	
-    	return properties.getProperty("komodo.version");
+    		
     }
 
 }

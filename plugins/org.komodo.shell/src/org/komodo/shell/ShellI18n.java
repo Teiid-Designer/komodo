@@ -240,6 +240,8 @@ public final class ShellI18n extends I18n {
     public static String propertyUnset;
     public static String usage;
     public static String welcomeMessage;
+    public static String errorLoadingVersion;
+    public static String errorObtainingVersion;
 
     static {
         final ShellI18n i18n = new ShellI18n();
