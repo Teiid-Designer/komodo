@@ -8,12 +8,8 @@
 package org.komodo.relational.commands.server;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
-
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
@@ -138,12 +134,7 @@ public final class ServerTranslatorCommand extends ServerShellCommand {
         final Arguments args = getArguments();
 
         Teiid teiid = getWorkspaceServer();
-        List< String > existingTranslatorNames = new ArrayList< String >();
-        Collection< TeiidTranslator > translators = teiid.getTeiidInstance( getTransaction() ).getTranslators();
-        for ( TeiidTranslator translator : translators ) {
-            String name = translator.getName();
-            existingTranslatorNames.add( name );
-        }
+        List< String > existingTranslatorNames = ServerUtils.getTranslatorNames(teiid, getTransaction());
         Collections.sort(existingTranslatorNames);
 
         if ( args.isEmpty() ) {

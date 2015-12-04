@@ -8,13 +8,13 @@
 package org.komodo.relational.commands.server;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.runtime.TeiidDataSource;
 import org.komodo.spi.runtime.TeiidInstance;
@@ -132,12 +132,13 @@ public final class ServerUndeployDatasourceCommand extends ServerShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
      */
     @Override
-    public int tabCompletion( final String lastArgument,
+    public TabCompletionModifier tabCompletion( final String lastArgument,
                               final List< CharSequence > candidates ) throws Exception {
         final Arguments args = getArguments();
 
-        Collection<String> existingDatasourceNames = getDeployedDatasources();
-
+        List<String> existingDatasourceNames = ServerUtils.getDatasourceNames(getWorkspaceServer(), getTransaction());
+        Collections.sort(existingDatasourceNames);
+        
         if ( args.isEmpty() ) {
             if ( lastArgument == null ) {
                 candidates.addAll( existingDatasourceNames );
@@ -148,26 +149,9 @@ public final class ServerUndeployDatasourceCommand extends ServerShellCommand {
                     }
                 }
             }
-
-            return 0;
         }
 
-        // no tab completion
-        return -1;
-    }
-
-    /*
-     * Return the deployed datasources on the workspace server
-     */
-    private Collection<String> getDeployedDatasources() throws Exception {
-        Teiid teiid = getWorkspaceServer();
-        List< String > existingDatasourceNames = new ArrayList< String >();
-        Collection< TeiidDataSource > datasources = teiid.getTeiidInstance( getTransaction() ).getDataSources();
-        for ( TeiidDataSource datasource : datasources ) {
-            String name = datasource.getName();
-            existingDatasourceNames.add( name );
-        }
-        return existingDatasourceNames;
+        return TabCompletionModifier.AUTO;
     }
 
 }

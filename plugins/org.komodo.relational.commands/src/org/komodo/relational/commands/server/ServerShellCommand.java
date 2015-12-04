@@ -24,6 +24,10 @@ import org.komodo.utils.i18n.I18n;
  */
 abstract class ServerShellCommand extends RelationalShellCommand {
 
+    public static final String SERVER_DS_PROP_JNDINAME = "jndi-name";  //$NON-NLS-1$
+    public static final String SERVER_DS_PROP_CLASSNAME = "class-name";  //$NON-NLS-1$
+    public static final String SERVER_DS_PROP_DRIVERNAME = "driver-name";  //$NON-NLS-1$
+    
     protected ServerShellCommand( final String name,
                                   final WorkspaceStatus status ) {
         super( status, name );

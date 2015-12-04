@@ -155,11 +155,8 @@ public final class ServerDatasourceTypeCommand extends ServerShellCommand {
         final Arguments args = getArguments();
 
         Teiid teiid = getWorkspaceServer();
-        List< String > existingTypes = new ArrayList< String >();
         Set< String > types = teiid.getTeiidInstance( getTransaction() ).getDataSourceTypeNames();
-        for ( String type : types ) {
-            existingTypes.add( type );
-        }
+        List< String > existingTypes = new ArrayList< String >(types);
         Collections.sort(existingTypes);
 
         if ( args.isEmpty() ) {

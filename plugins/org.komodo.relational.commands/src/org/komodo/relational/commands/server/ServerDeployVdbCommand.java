@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -170,7 +171,7 @@ public final class ServerDeployVdbCommand extends ServerShellCommand {
         // May be multiple versions deployed - see if there is one matching supplied version
         Collection<TeiidDataSource> datasources = teiidInstance.getDataSources();
         for(TeiidDataSource datasource : datasources) {
-            String jndiName = datasource.getPropertyValue("jndi-name");  //$NON-NLS-1$
+            String jndiName = datasource.getPropertyValue(SERVER_DS_PROP_JNDINAME);
             if(!StringUtils.isEmpty(jndiName)) {
                 serverJndis.add(jndiName);
             }
@@ -272,6 +273,7 @@ public final class ServerDeployVdbCommand extends ServerShellCommand {
         for(KomodoObject vdb : vdbs) {
             existingVdbNames.add(vdb.getName(uow));
         }
+        Collections.sort(existingVdbNames);
 
         if ( args.isEmpty() ) {
             if ( lastArgument == null ) {

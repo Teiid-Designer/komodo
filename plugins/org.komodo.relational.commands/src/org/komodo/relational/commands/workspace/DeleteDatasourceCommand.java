@@ -9,10 +9,12 @@ package org.komodo.relational.commands.workspace;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -40,32 +42,20 @@ public final class DeleteDatasourceCommand extends WorkspaceShellCommand {
      */
     @Override
     protected CommandResult doExecute() {
-        CommandResult result = null;
-
         try {
             final String sourceName = requiredArgument( 0, I18n.bind( WorkspaceCommandsI18n.missingDatasourceName ) );
 
-            final WorkspaceManager mgr = getWorkspaceManager();
-            final KomodoObject[] datasources = mgr.findDatasources(getTransaction());
-            KomodoObject[] objToDelete = new KomodoObject[1];
-            for(KomodoObject datasource : datasources) {
-                if(datasource.getName(getTransaction()).equals(sourceName)) {
-                    objToDelete[0] = datasource;
-                    break;
-                }
-            }
+            final KomodoObject datasourceToDelete = getWorkspaceManager().getChild(getTransaction(), sourceName, KomodoLexicon.DataSource.NODE_TYPE);
 
-            if(objToDelete[0]==null) {
-                result = new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.datasourceNotFound, sourceName ), null );
+            if(datasourceToDelete==null) {
+                return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.datasourceNotFound, sourceName ), null );
             } else {
-                mgr.delete(getTransaction(), objToDelete);
-                result = new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.datasourceDeleted, sourceName ) );
+                getWorkspaceManager().delete(getTransaction(), datasourceToDelete);
+                return new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.datasourceDeleted, sourceName ) );
             }
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.deleteDatasourceError ), e );
+            return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.deleteDatasourceError ), e );
         }
-
-        return result;
     }
 
     /**
@@ -114,7 +104,7 @@ public final class DeleteDatasourceCommand extends WorkspaceShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
      */
     @Override
-    public int tabCompletion( final String lastArgument,
+    public TabCompletionModifier tabCompletion( final String lastArgument,
                               final List< CharSequence > candidates ) throws Exception {
         final Arguments args = getArguments();
 
@@ -136,12 +126,9 @@ public final class DeleteDatasourceCommand extends WorkspaceShellCommand {
                     }
                 }
             }
-
-            return 0;
         }
 
-        // no tab completion
-        return -1;
+        return TabCompletionModifier.AUTO;
     }
 
 }

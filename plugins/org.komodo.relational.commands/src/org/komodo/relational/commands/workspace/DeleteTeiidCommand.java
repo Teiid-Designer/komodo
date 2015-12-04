@@ -9,6 +9,7 @@ package org.komodo.relational.commands.workspace;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.commands.server.ServerCommandProvider;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.CommandResultImpl;
@@ -42,23 +43,13 @@ public final class DeleteTeiidCommand extends WorkspaceShellCommand {
      */
     @Override
     protected CommandResult doExecute() {
-        CommandResult result = null;
-
         try {
             final String teiidName = requiredArgument( 0, I18n.bind( WorkspaceCommandsI18n.missingTeiidName ) );
 
-            final WorkspaceManager mgr = getWorkspaceManager();
-            final KomodoObject[] teiids = mgr.findTeiids(getTransaction());
-            KomodoObject[] objToDelete = new KomodoObject[1];
-            for(KomodoObject teiid : teiids) {
-                if(teiid.getName(getTransaction()).equals(teiidName)) {
-                    objToDelete[0] = teiid;
-                    break;
-                }
-            }
+            final KomodoObject teiidToDelete = getWorkspaceManager().getChild(getTransaction(), teiidName, KomodoLexicon.Teiid.NODE_TYPE);
 
-            if(objToDelete[0]==null) {
-                result = new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.teiidNotFound, teiidName ), null );
+            if(teiidToDelete==null) {
+                return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.teiidNotFound, teiidName ), null );
             } else {
                 // If server being deleted is the current default server, remove the default
                 KomodoObject defaultTeiid = getWorkspaceStatus().getStateObjects().get( ServerCommandProvider.SERVER_DEFAULT_KEY );
@@ -66,14 +57,12 @@ public final class DeleteTeiidCommand extends WorkspaceShellCommand {
                     getWorkspaceStatus().setStateObject( ServerCommandProvider.SERVER_DEFAULT_KEY, null );
                 }
 
-                mgr.delete(getTransaction(), objToDelete);
-                result = new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.teiidDeleted, teiidName ) );
+                getWorkspaceManager().delete(getTransaction(), teiidToDelete);
+                return new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.teiidDeleted, teiidName ) );
             }
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.deleteTeiidError ), e );
+            return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.deleteTeiidError ), e );
         }
-
-        return result;
     }
 
     /**

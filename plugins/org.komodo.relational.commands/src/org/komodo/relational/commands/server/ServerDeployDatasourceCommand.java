@@ -11,20 +11,20 @@ import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.teiid.Teiid;
-import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
-import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.TeiidPropertyDefinition;
 import org.komodo.utils.StringUtils;
@@ -107,6 +107,11 @@ public final class ServerDeployDatasourceCommand extends ServerShellCommand {
 
             // Get the remaining source properties from the repo object necessary for deployment to server
             Properties sourceProps = getPropertiesForServerDeployment(teiidInstance, sourceToDeploy);
+            
+            // If overwriting, delete the existing source first
+            if(serverHasDatasource) {
+                teiidInstance.deleteDataSource(sourceToDeployName);
+            }
             // Create the source
             teiidInstance.getOrCreateDataSource(sourceToDeployName, sourceToDeployName, sourceType, sourceProps);
 
@@ -157,10 +162,14 @@ public final class ServerDeployDatasourceCommand extends ServerShellCommand {
         Collection<TeiidPropertyDefinition> templatePropDefns = teiidInstance.getTemplatePropertyDefns(sourceToDeploy.getDriverName(getTransaction()));
         Collection<String> templatePropNames = getTemplatePropNames(templatePropDefns);
 
-        String driverName = sourceToDeploy.getDriverName(getTransaction());
-        sourceProps.setProperty("driver-name",driverName);  //$NON-NLS-1$
-        String jndiName = sourceToDeploy.getJndiName(getTransaction());
-        sourceProps.setProperty("jndi-name", jndiName);  //$NON-NLS-1$  
+        if(sourceToDeploy.isJdbc(getTransaction())) {
+            String driverName = sourceToDeploy.getDriverName(getTransaction());
+            sourceProps.setProperty(SERVER_DS_PROP_DRIVERNAME,driverName);
+            String jndiName = sourceToDeploy.getJndiName(getTransaction());
+            sourceProps.setProperty(SERVER_DS_PROP_JNDINAME, jndiName);
+        } else {
+            sourceProps.setProperty(SERVER_DS_PROP_CLASSNAME, sourceToDeploy.getClassName(getTransaction()));
+        }
         
         // Iterate the supplied datasource properties.  Compare them against the valid properties for the server source type.
         String[] propNames = sourceToDeploy.getPropertyNames(getTransaction());
@@ -172,11 +181,6 @@ public final class ServerDeployDatasourceCommand extends ServerShellCommand {
                 // Template has no default - set the property
                 if(!hasDefault) {
                     sourceProps.setProperty(propName, sourcePropValue);
-                    // if source has a class-name then it is a RAR and driver-name must be removed.
-                    if(propName.equals("class-name")) { //$NON-NLS-1$ 
-                        sourceProps.remove("driver-name"); //$NON-NLS-1$ 
-                        sourceProps.remove("jndi-name"); //$NON-NLS-1$
-                    }
                 // Template has default - if source property matches it, no need to provide it.
                 } else {
                     String templateDefaultValue = propDefn.getDefaultValue().toString();
@@ -256,17 +260,16 @@ public final class ServerDeployDatasourceCommand extends ServerShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
      */
     @Override
-    public int tabCompletion( final String lastArgument,
+    public TabCompletionModifier tabCompletion( final String lastArgument,
                               final List< CharSequence > candidates ) throws Exception {
         final Arguments args = getArguments();
 
-        final UnitOfWork uow = getTransaction();
-        final WorkspaceManager mgr = getWorkspaceManager();
-        final KomodoObject[] datasources = mgr.findDatasources(uow);
+        final KomodoObject[] datasources = getWorkspaceManager().findDatasources(getTransaction());
         List<String> existingDatasourceNames = new ArrayList<String>(datasources.length);
         for(KomodoObject datasource : datasources) {
-            existingDatasourceNames.add(datasource.getName(uow));
+            existingDatasourceNames.add(datasource.getName(getTransaction()));
         }
+        Collections.sort(existingDatasourceNames);
 
         if ( args.isEmpty() ) {
             if ( lastArgument == null ) {
@@ -278,12 +281,9 @@ public final class ServerDeployDatasourceCommand extends ServerShellCommand {
                     }
                 }
             }
-
-            return 0;
         }
 
-        // no tab completion
-        return -1;
+        return TabCompletionModifier.AUTO;
     }
 
 }

@@ -16,6 +16,8 @@
 package org.komodo.relational.commands.workspace;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.datasource.Datasource;
@@ -29,7 +31,7 @@ import org.komodo.shell.api.CommandResult;
 public final class CreateDatasourceCommandTest extends AbstractCommandTest {
 
     @Test
-    public void shouldCreateDatasource() throws Exception {
+    public void shouldCreateJdbcDatasource() throws Exception {
         final String[] commands = { "create-datasource testSource" };
         final CommandResult result = execute( commands );
         assertCommandResultOk(result);
@@ -39,6 +41,21 @@ public final class CreateDatasourceCommandTest extends AbstractCommandTest {
 
         assertEquals(1, datasources.length);
         assertEquals("testSource", datasources[0].getName(getTransaction()));
+        assertTrue(datasources[0].isJdbc(getTransaction()));
+    }
+
+    @Test
+    public void shouldCreateNonJdbcDatasource() throws Exception {
+        final String[] commands = { "create-datasource testSource false" };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk(result);
+
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        Datasource[] datasources = wkspMgr.findDatasources(getTransaction());
+
+        assertEquals(1, datasources.length);
+        assertEquals("testSource", datasources[0].getName(getTransaction()));
+        assertFalse(datasources[0].isJdbc(getTransaction()));
     }
 
 }

@@ -7,10 +7,12 @@
  */
 package org.komodo.relational.commands.workspace;
 
+import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.shell.util.KomodoObjectUtils;
 import org.komodo.utils.i18n.I18n;
 
 /**
@@ -39,9 +41,17 @@ public final class CreateDatasourceCommand extends WorkspaceShellCommand {
 
         try {
             final String sourceName = requiredArgument( 0, I18n.bind( WorkspaceCommandsI18n.missingDatasourceName ) );
+            
+            // Can optionally supply the type of datasource (jdbc vs non-jdbc)
+            final String isJdbc = optionalArgument( 1, Boolean.TRUE.toString() );
 
+            if ( !KomodoObjectUtils.TRUE_STRING.equals( isJdbc ) && !KomodoObjectUtils.FALSE_STRING.equals( isJdbc ) ) {
+                return new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.invalidDatasourceIndicator, isJdbc ) );
+            }
+            
             final WorkspaceManager mgr = getWorkspaceManager();
-            mgr.createDatasource( getTransaction(), null, sourceName );
+            Datasource datasrc = mgr.createDatasource( getTransaction(), null, sourceName );
+            datasrc.setJdbc(getTransaction(), Boolean.parseBoolean( isJdbc ));
 
             result = new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.datasourceCreated, sourceName ) );
         } catch ( final Exception e ) {

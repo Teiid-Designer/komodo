@@ -8,8 +8,6 @@
 package org.komodo.relational.commands.server;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import org.komodo.relational.teiid.Teiid;
@@ -17,7 +15,6 @@ import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.PrintUtils;
-import org.komodo.spi.runtime.TeiidDataSource;
 import org.komodo.utils.i18n.I18n;
 
 /**
@@ -56,14 +53,10 @@ public final class ServerDatasourcesCommand extends ServerShellCommand {
             print( MESSAGE_INDENT, title );
 
             Teiid teiid = getWorkspaceServer();
-            List< String > objNames = new ArrayList< String >();
-            Collection< TeiidDataSource > sources = teiid.getTeiidInstance( getTransaction() ).getDataSources();
-            for ( TeiidDataSource source : sources ) {
-                String name = source.getDisplayName();
-                objNames.add( name );
-            }
-            Collections.sort(objNames);
-            PrintUtils.printMultiLineItemList( MESSAGE_INDENT, getWriter(), objNames, 4, null );
+            List<String> sourceNames = ServerUtils.getDatasourceDisplayNames(teiid, getTransaction());
+            Collections.sort(sourceNames);
+            
+            PrintUtils.printMultiLineItemList( MESSAGE_INDENT, getWriter(), sourceNames, 4, null );
             result = CommandResult.SUCCESS;
         } catch ( final Exception e ) {
             result = new CommandResultImpl( e );

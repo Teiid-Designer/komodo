@@ -8,11 +8,8 @@
 package org.komodo.relational.commands.server;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
-
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
-
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
@@ -143,7 +140,8 @@ public final class ServerUndeployVdbCommand extends ServerShellCommand {
                               final List< CharSequence > candidates ) throws Exception {
         final Arguments args = getArguments();
 
-        Collection<String> existingVdbNames = getDeployedVdbs();
+        List<String> existingVdbNames = ServerUtils.getVdbNames(getWorkspaceServer(), getTransaction());
+        Collections.sort(existingVdbNames);
 
         if ( args.isEmpty() ) {
             if ( lastArgument == null ) {
@@ -157,20 +155,6 @@ public final class ServerUndeployVdbCommand extends ServerShellCommand {
             }
         }
         return TabCompletionModifier.AUTO;
-    }
-
-    /*
-     * Return the deployed vdbs on the workspace server
-     */
-    private Collection<String> getDeployedVdbs() throws Exception {
-        Teiid teiid = getWorkspaceServer();
-        List< String > existingVdbNames = new ArrayList< String >();
-        Collection< TeiidVdb > vdbs = teiid.getTeiidInstance( getTransaction() ).getVdbs();
-        for ( TeiidVdb vdb : vdbs ) {
-            String name = vdb.getName();
-            existingVdbNames.add( name );
-        }
-        return existingVdbNames;
     }
 
 }

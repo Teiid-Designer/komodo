@@ -7,10 +7,18 @@
 */
 package org.komodo.relational.commands.server;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.runtime.TeiidDataSource;
+import org.komodo.spi.runtime.TeiidTranslator;
+import org.komodo.spi.runtime.TeiidVdb;
 
 /**
  * Common methods used by server commands
@@ -41,6 +49,78 @@ public class ServerUtils {
             }
         }
         return resultTeiid;
+    }
+    
+    /**
+     * Return the deployed datasource names from the TeiidInstance
+     * @param teiid the Teiid instance
+     * @param transaction the transaction
+     * @return the collection of data source names
+     * @throws Exception the exception
+     */
+    public static List<String> getDatasourceNames(Teiid teiid, UnitOfWork transaction) throws Exception {
+        Collection< TeiidDataSource > sources = teiid.getTeiidInstance(transaction).getDataSources();
+        if(sources.isEmpty()) return Collections.EMPTY_LIST;
+        
+        List< String > existingSourceNames = new ArrayList< String >();
+        for ( TeiidDataSource source : sources ) {
+            existingSourceNames.add( source.getName() );
+        }
+        return existingSourceNames;
+    }
+
+    /**
+     * Return the deployed datasource display names from the TeiidInstance
+     * @param teiid the Teiid instance
+     * @param transaction the transaction
+     * @return the collection of data source display names
+     * @throws Exception the exception
+     */
+    public static List<String> getDatasourceDisplayNames(Teiid teiid, UnitOfWork transaction) throws Exception {
+        Collection< TeiidDataSource > sources = teiid.getTeiidInstance(transaction).getDataSources();
+        if(sources.isEmpty()) return Collections.EMPTY_LIST;
+        
+        List< String > existingSourceNames = new ArrayList< String >();
+        for ( TeiidDataSource source : sources ) {
+            existingSourceNames.add( source.getDisplayName() );
+        }
+        return existingSourceNames;
+    }
+
+    /**
+     * Return the deployed VDB names from the TeiidInstance
+     * @param teiid the Teiid instance
+     * @param transaction the transaction
+     * @return the collection of vdb names
+     * @throws Exception the exception
+     */
+    public static List<String> getVdbNames(Teiid teiid, UnitOfWork transaction) throws Exception {
+        Collection< TeiidVdb > vdbs = teiid.getTeiidInstance(transaction).getVdbs();
+        if(vdbs.isEmpty()) return Collections.EMPTY_LIST;
+        
+        List< String > existingVdbNames = new ArrayList< String >();
+        for ( TeiidVdb vdb : vdbs ) {
+            existingVdbNames.add( vdb.getName() );
+        }
+        return existingVdbNames;
+    }
+
+    /**
+     * Return the Translator names from the TeiidInstance
+     * @param teiid the Teiid instance
+     * @param transaction the transaction
+     * @return the collection of translator names
+     * @throws Exception the exception
+     */
+    public static List<String> getTranslatorNames(Teiid teiid, UnitOfWork transaction) throws Exception {
+        Collection< TeiidTranslator > translators = teiid.getTeiidInstance(transaction).getTranslators();
+        if(translators.isEmpty()) return Collections.EMPTY_LIST;
+        
+        List< String > existingTranslatorNames = new ArrayList< String >();
+        for ( TeiidTranslator translator : translators ) {
+            existingTranslatorNames.add( translator.getName() );
+        }
+        return existingTranslatorNames;
     }
 
 }

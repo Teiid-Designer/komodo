@@ -74,6 +74,7 @@ public final class WorkspaceCommandsI18n extends I18n {
     public static String importFailedMsg;
     public static String inputFileError;
     public static String invalidBooleanPropertyValue;
+    public static String invalidDatasourceIndicator;
     public static String invalidIntegerPropertyValue;
     public static String invalidNullablePropertyValue;
     public static String invalidObjectType;

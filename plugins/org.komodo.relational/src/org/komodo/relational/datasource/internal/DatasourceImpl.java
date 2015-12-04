@@ -22,6 +22,7 @@
 package org.komodo.relational.datasource.internal;
 
 import org.komodo.core.KomodoLexicon;
+import org.komodo.relational.ExcludeQNamesFilter;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.internal.RelationalChildRestrictedObject;
 import org.komodo.spi.KException;
@@ -43,6 +44,11 @@ import org.modeshape.jcr.JcrLexicon;
 public class DatasourceImpl extends RelationalChildRestrictedObject implements Datasource, EventManager {
 
     /**
+     * A filter to exclude specific, readonly properties.
+     */
+    private static final Filter PROPS_FILTER = new ExcludeQNamesFilter( KomodoLexicon.DataSource.CLASS_NAME );
+    
+    /**
      * @param uow
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
@@ -56,11 +62,14 @@ public class DatasourceImpl extends RelationalChildRestrictedObject implements D
                       final Repository repository,
                       final String path ) throws KException {
         super(uow, repository, path);
+        
+        // Update filters based on JDBC
+        updatePropFilters(uow);
     }
 
     @Override
     public KomodoType getTypeIdentifier(UnitOfWork uow) {
-        return Datasource.RESOLVER.identifier();
+        return Datasource.IDENTIFIER;
     }
 
     /**
@@ -80,6 +89,16 @@ public class DatasourceImpl extends RelationalChildRestrictedObject implements D
         return result;
     }
     
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KomodoObject#getTypeId()
+     */
+    @Override
+    public int getTypeId() {
+        return TYPE_ID;
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -109,11 +128,49 @@ public class DatasourceImpl extends RelationalChildRestrictedObject implements D
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.KomodoObject#getTypeId()
+     * @see org.komodo.relational.datasource.Datasource#getClassName(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public int getTypeId() {
-        return TYPE_ID;
+    public String getClassName(UnitOfWork uow) throws KException {
+        final String className = getObjectProperty( uow, PropertyValueType.STRING, "getClassName", //$NON-NLS-1$
+                                                     KomodoLexicon.DataSource.CLASS_NAME);
+
+        return className == null ? EMPTY_STRING : className;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.datasource.Datasource#getProfileName(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public String getProfileName(UnitOfWork uow) throws KException {
+        final String profileName = getObjectProperty( uow, PropertyValueType.STRING, "getProfileName", //$NON-NLS-1$
+                                                      KomodoLexicon.DataSource.PROFILE_NAME);
+
+        return profileName == null ? EMPTY_STRING : profileName;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.datasource.Datasource#isJdbc(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public boolean isJdbc(UnitOfWork uow) throws KException {
+       Boolean isJdbc = getObjectProperty(uow, PropertyValueType.BOOLEAN, "isJdbc", KomodoLexicon.DataSource.JDBC); //$NON-NLS-1$
+       return isJdbc != null ? isJdbc : Datasource.DEFAULT_JDBC;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.datasource.Datasource#isPreview(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public boolean isPreview(UnitOfWork uow) throws KException {
+       Boolean isPreview = getObjectProperty(uow, PropertyValueType.BOOLEAN, "isPreview", KomodoLexicon.DataSource.PREVIEW); //$NON-NLS-1$
+       return isPreview != null ? isPreview : Datasource.DEFAULT_PREVIEW;
     }
 
     /**
@@ -138,6 +195,64 @@ public class DatasourceImpl extends RelationalChildRestrictedObject implements D
         setObjectProperty( uow, "setJndiName", KomodoLexicon.DataSource.JNDI_NAME, jndiName ); //$NON-NLS-1$
     }
     
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.datasource.Datasource#setClassName(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     */
+    @Override
+    public void setClassName(UnitOfWork uow,
+                             String className) throws KException {
+        setObjectProperty( uow, "setClassName", KomodoLexicon.DataSource.CLASS_NAME, className ); //$NON-NLS-1$
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.datasource.Datasource#setProfileName(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     */
+    @Override
+    public void setProfileName(UnitOfWork uow,
+                               String profileName) throws KException {
+        setObjectProperty( uow, "setProfileName", KomodoLexicon.DataSource.PROFILE_NAME, profileName ); //$NON-NLS-1$
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.datasource.Datasource#setJdbc(org.komodo.spi.repository.Repository.UnitOfWork, boolean)
+     */
+    @Override
+    public void setJdbc(UnitOfWork uow,
+                        boolean isJdbc) throws KException {
+        setObjectProperty( uow, "setJdbc", KomodoLexicon.DataSource.JDBC, isJdbc ); //$NON-NLS-1$
+        updatePropFilters(uow);
+    }
+    
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.datasource.Datasource#setPreview(org.komodo.spi.repository.Repository.UnitOfWork, boolean)
+     */
+    @Override
+    public void setPreview(UnitOfWork uow,
+                           boolean isPreview) throws KException {
+        setObjectProperty( uow, "isPreview", KomodoLexicon.DataSource.PREVIEW, isPreview ); //$NON-NLS-1$
+    }
+    
+    private void updatePropFilters(UnitOfWork uow) throws KException {
+        // If JDBC, do not show the "class-name" property
+        if(isJdbc(uow)) {
+            // add in filter to hide the constraint type
+            final Filter[] updatedFilters = new Filter[ DEFAULT_FILTERS.length + 1 ];
+            System.arraycopy( DEFAULT_FILTERS, 0, updatedFilters, 0, DEFAULT_FILTERS.length );
+            updatedFilters[ DEFAULT_FILTERS.length ] = PROPS_FILTER;
+            setFilters( updatedFilters );
+        } else {
+            setFilters( DEFAULT_FILTERS );
+        }
+    }
+
     @Override
     public boolean addListener( ExecutionConfigurationListener listener ) {
         return false;

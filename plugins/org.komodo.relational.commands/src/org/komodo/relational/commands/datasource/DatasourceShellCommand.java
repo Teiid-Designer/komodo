@@ -21,8 +21,12 @@ abstract class DatasourceShellCommand extends RelationalShellCommand {
 
     protected static final String JNDI_NAME = "jndiName"; //$NON-NLS-1$
     protected static final String DRIVER_NAME = "driverName"; //$NON-NLS-1$
+    protected static final String CLASS_NAME = "className"; //$NON-NLS-1$
+    protected static final String JDBC = "jdbc"; //$NON-NLS-1$
+    protected static final String PREVIEW = "preview"; //$NON-NLS-1$
+    protected static final String PROFILE_NAME = "profileName"; //$NON-NLS-1$
 
-    protected static final List< String > ALL_PROPS = Arrays.asList( new String[] { JNDI_NAME, DRIVER_NAME } );
+    protected static final List< String > ALL_PROPS = Arrays.asList( new String[] { JNDI_NAME, DRIVER_NAME, CLASS_NAME, JDBC, PREVIEW, PROFILE_NAME } );
 
     protected DatasourceShellCommand( final String name,
                                   final WorkspaceStatus status ) {

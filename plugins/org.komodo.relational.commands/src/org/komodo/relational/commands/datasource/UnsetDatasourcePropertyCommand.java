@@ -13,6 +13,7 @@ import org.komodo.relational.datasource.Datasource;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.UnsetPropertyCommand;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -56,6 +57,18 @@ public final class UnsetDatasourcePropertyCommand extends DatasourceShellCommand
                     break;
                 case DRIVER_NAME:
                     datasource.setDriverName( transaction, null );
+                    break;
+                case CLASS_NAME:
+                    datasource.setDriverName( transaction, null );
+                    break;
+                case PROFILE_NAME:
+                    datasource.setProfileName( transaction, null );
+                    break;
+                case JDBC:
+                    datasource.setJdbc( transaction, Datasource.DEFAULT_JDBC );
+                    break;
+                case PREVIEW:
+                    datasource.setPreview( transaction, Datasource.DEFAULT_PREVIEW );
                     break;
                 default:
                     errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Datasource.class.getSimpleName() );
@@ -120,7 +133,7 @@ public final class UnsetDatasourcePropertyCommand extends DatasourceShellCommand
      * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
      */
     @Override
-    public int tabCompletion( final String lastArgument,
+    public TabCompletionModifier tabCompletion( final String lastArgument,
                               final List< CharSequence > candidates ) throws Exception {
         final Arguments args = getArguments();
 
@@ -134,12 +147,9 @@ public final class UnsetDatasourcePropertyCommand extends DatasourceShellCommand
                     }
                 }
             }
-
-            return 0;
         }
 
-        // no tab completion
-        return -1;
+        return TabCompletionModifier.AUTO;
     }
 
 }

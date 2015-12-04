@@ -113,6 +113,8 @@ public final class ServerCommandsI18n extends I18n {
     public static String noServerToDisconnectMsg;
     public static String noTeiidDefined;
     public static String overwriteArgInvalid;
+    public static String repoDatasourceWithNameExists;
+    public static String repoVdbWithNameExists;
     public static String serverDatasourceNotFound;
     public static String serverDatasourceTypeNotFound;
     public static String serverDoesNotExist;

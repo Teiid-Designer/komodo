@@ -8,12 +8,8 @@
 package org.komodo.relational.commands.server;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
-
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
@@ -138,12 +134,8 @@ public final class ServerDatasourceCommand extends ServerShellCommand {
         final Arguments args = getArguments();
 
         Teiid teiid = getWorkspaceServer();
-        List< String > existingSourceNames = new ArrayList< String >();
-        Collection< TeiidDataSource > sources = teiid.getTeiidInstance( getTransaction() ).getDataSources();
-        for ( TeiidDataSource source : sources ) {
-            String name = source.getName();
-            existingSourceNames.add( name );
-        }
+        
+        List<String> existingSourceNames = ServerUtils.getDatasourceNames(teiid, getTransaction());
         Collections.sort(existingSourceNames);
 
         if ( args.isEmpty() ) {

@@ -8,22 +8,21 @@
 package org.komodo.relational.commands.server;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
-
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
-
+import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.commands.workspace.UploadVdbCommand;
-import org.komodo.relational.teiid.Teiid;
+import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.TeiidVdb;
@@ -59,6 +58,13 @@ public final class ServerGetVdbCommand extends ServerShellCommand {
         try {
             String vdbName = requiredArgument( 0, I18n.bind( ServerCommandsI18n.missingVdbName ) );
 
+            // Make sure no VDB currently in workspace with this name
+            final WorkspaceManager mgr = getWorkspaceManager();
+            KomodoObject[] repoDS = mgr.getChildrenOfType(getTransaction(), KomodoLexicon.Vdb.NODE_TYPE, vdbName);
+            if(repoDS.length!=0) {
+                return new CommandResultImpl( false, I18n.bind(ServerCommandsI18n.repoVdbWithNameExists, vdbName), null );
+            }
+            
             // Validates that a server is connected
             CommandResult validationResult = validateHasConnectedWorkspaceServer();
             if ( !validationResult.isOk() ) {
@@ -66,8 +72,7 @@ public final class ServerGetVdbCommand extends ServerShellCommand {
             }
 
             // Get the teiid instance
-            Teiid teiid = getWorkspaceServer();
-            TeiidInstance teiidInstance = teiid.getTeiidInstance(getTransaction());
+            TeiidInstance teiidInstance = getWorkspaceServer().getTeiidInstance(getTransaction());
 
             // Get the VDB - make sure its a dynamic VDB
             TeiidVdb vdb = teiidInstance.getVdb(vdbName);
@@ -171,7 +176,8 @@ public final class ServerGetVdbCommand extends ServerShellCommand {
                               final List< CharSequence > candidates ) throws Exception {
         final Arguments args = getArguments();
 
-        Collection<String> existingVdbNames = getDeployedVdbs();
+        List<String> existingVdbNames = ServerUtils.getVdbNames(getWorkspaceServer(),getTransaction());
+        Collections.sort(existingVdbNames);
 
         if ( args.isEmpty() ) {
             if ( lastArgument == null ) {
@@ -185,20 +191,6 @@ public final class ServerGetVdbCommand extends ServerShellCommand {
             }
         }
         return TabCompletionModifier.AUTO;
-    }
-
-    /*
-     * Return the deployed vdbs on the workspace server
-     */
-    private Collection<String> getDeployedVdbs() throws Exception {
-        Teiid teiid = getWorkspaceServer();
-        List< String > existingVdbNames = new ArrayList< String >();
-        Collection< TeiidVdb > vdbs = teiid.getTeiidInstance( getTransaction() ).getVdbs();
-        for ( TeiidVdb vdb : vdbs ) {
-            String name = vdb.getName();
-            existingVdbNames.add( name );
-        }
-        return existingVdbNames;
     }
 
 }

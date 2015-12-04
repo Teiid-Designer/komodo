@@ -13,6 +13,7 @@ import org.komodo.relational.datasource.Datasource;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.SetPropertyCommand;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -57,6 +58,28 @@ public final class SetDatasourcePropertyCommand extends DatasourceShellCommand {
                     break;
                 case DRIVER_NAME:
                     datasource.setDriverName( transaction, value );
+                    break;
+                case CLASS_NAME:
+                    datasource.setClassName( transaction, value );
+                    break;
+                case PROFILE_NAME:
+                    datasource.setProfileName( transaction, value );
+                    break;
+                case JDBC:
+                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                        datasource.setJdbc( transaction, Boolean.parseBoolean( value ) );
+                    } else {
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, JDBC );
+                    }
+
+                    break;
+                case PREVIEW:
+                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                        datasource.setPreview( transaction, Boolean.parseBoolean( value ) );
+                    } else {
+                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, PREVIEW );
+                    }
+
                     break;
                 default:
                     errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Datasource.class.getSimpleName() );
@@ -121,7 +144,7 @@ public final class SetDatasourcePropertyCommand extends DatasourceShellCommand {
      * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
      */
     @Override
-    public int tabCompletion( final String lastArgument,
+    public TabCompletionModifier tabCompletion( final String lastArgument,
                               final List< CharSequence > candidates ) throws Exception {
         final Arguments args = getArguments();
 
@@ -135,12 +158,9 @@ public final class SetDatasourcePropertyCommand extends DatasourceShellCommand {
                     }
                 }
             }
-
-            return 0;
         }
 
-        // no tab completion
-        return -1;
+        return TabCompletionModifier.AUTO;
     }
 
 }

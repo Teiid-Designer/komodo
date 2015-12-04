@@ -56,6 +56,16 @@ public interface Datasource extends RelationalObject {
     Datasource[] NO_DATASOURCES = new Datasource[0];
 
     /**
+     * The default value for the <code>jdbc</code> property. Value is {@value} .
+     */
+    boolean DEFAULT_JDBC = true;
+
+    /**
+     * The default value for the <code>preview</code> property. Value is {@value} .
+     */
+    boolean DEFAULT_PREVIEW = false;
+    
+    /**
      * The resolver of a {@link Datasource}.
      */
     public static final TypeResolver< Datasource > RESOLVER = new TypeResolver< Datasource >() {
@@ -118,6 +128,9 @@ public interface Datasource extends RelationalObject {
         @Override
         public Datasource resolve( final UnitOfWork transaction,
                               final KomodoObject kobject ) throws KException {
+            if ( kobject.getTypeId() == Datasource.TYPE_ID ) {
+                return ( Datasource )kobject;
+            }
             return new DatasourceImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
     
@@ -162,4 +175,69 @@ public interface Datasource extends RelationalObject {
      * @throws KException if error occurs
      */
     void setDriverName(UnitOfWork transaction, String driverName) throws KException;
+    
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @return class name of this datasource.
+     * @throws KException if error occurs
+     */
+    String getClassName(UnitOfWork transaction) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param className class name of this datasource
+     * @throws KException if error occurs
+     */
+    void setClassName(UnitOfWork transaction, String className) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @return profile name of this datasource.
+     * @throws KException if error occurs
+     */
+    String getProfileName(UnitOfWork transaction) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param profileName profile name of this datasource
+     * @throws KException if error occurs
+     */
+    void setProfileName(UnitOfWork transaction, String profileName) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @return 'true' if a JDBC source, 'false' if not.
+     * @throws KException if error occurs
+     */
+    boolean isJdbc(UnitOfWork transaction) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param isJdbc 'true' if source is JDBC, 'false' if not.
+     * @throws KException if error occurs
+     */
+    void setJdbc(UnitOfWork transaction, boolean isJdbc) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @return 'true' if a Preview source, 'false' if not.
+     * @throws KException if error occurs
+     */
+    boolean isPreview(UnitOfWork transaction) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param isPreview 'true' if source is Preview, 'false' if not.
+     * @throws KException if error occurs
+     */
+    void setPreview(UnitOfWork transaction, boolean isPreview) throws KException;
+
 }
