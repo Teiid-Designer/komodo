@@ -8,9 +8,9 @@
 package org.komodo.relational.model;
 
 import org.komodo.relational.Messages;
-import org.komodo.relational.TypeResolver;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.TypeResolver;
 import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.model.internal.ForeignKeyImpl;
 import org.komodo.repository.ObjectImpl;
@@ -51,7 +51,7 @@ public interface ForeignKey extends TableConstraint {
      * The resolver of a {@link ForeignKey}.
      */
     public static final TypeResolver< ForeignKey > RESOLVER = new TypeResolver< ForeignKey >() {
-    
+
         /**
          * {@inheritDoc}
          *
@@ -69,16 +69,16 @@ public interface ForeignKey extends TableConstraint {
             final Table parentTable = adapter.adapt( transaction, parent, Table.class );
             final Object keyRefValue = properties.getValue( Constraint.FOREIGN_KEY_CONSTRAINT );
             final Table keyRefTable = adapter.adapt( transaction, keyRefValue, Table.class );
-    
+
             if ( parentTable == null ) {
                 throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
                                                           parent.getAbsolutePath(),
                                                           ForeignKey.class.getSimpleName() ) );
             }
-    
+
             return parentTable.addForeignKey( transaction, id, keyRefTable );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -88,7 +88,7 @@ public interface ForeignKey extends TableConstraint {
         public KomodoType identifier() {
             return IDENTIFIER;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -98,7 +98,7 @@ public interface ForeignKey extends TableConstraint {
         public Class< ForeignKeyImpl > owningClass() {
             return ForeignKeyImpl.class;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -115,7 +115,7 @@ public interface ForeignKey extends TableConstraint {
                                                         Constraint.TYPE,
                                                         CONSTRAINT_TYPE.toValue() );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -125,9 +125,13 @@ public interface ForeignKey extends TableConstraint {
         @Override
         public ForeignKey resolve( final UnitOfWork transaction,
                                    final KomodoObject kobject ) throws KException {
+            if ( kobject.getTypeId() == ForeignKey.TYPE_ID ) {
+                return ( ForeignKey )kobject;
+            }
+
             return new ForeignKeyImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
-    
+
     };
 
     /**

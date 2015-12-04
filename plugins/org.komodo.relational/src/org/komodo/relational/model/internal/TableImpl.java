@@ -541,7 +541,7 @@ public class TableImpl extends RelationalObjectImpl implements Table {
      */
     @Override
     public KomodoType getTypeIdentifier( final UnitOfWork uow ) {
-        return Table.RESOLVER.identifier();
+        return Table.IDENTIFIER;
     }
 
     /**

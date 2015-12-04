@@ -103,7 +103,7 @@ public final class TabularResultSetImpl extends RelationalObjectImpl implements 
      */
     @Override
     public KomodoType getTypeIdentifier( final UnitOfWork uow ) {
-        return TabularResultSet.RESOLVER.identifier();
+        return TabularResultSet.IDENTIFIER;
     }
 
     /**

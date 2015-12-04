@@ -52,7 +52,7 @@ public interface Condition extends RelationalObject {
      * The resolver of a {@link Condition}.
      */
     public static final TypeResolver< Condition > RESOLVER = new TypeResolver< Condition >() {
-    
+
         /**
          * {@inheritDoc}
          *
@@ -68,16 +68,16 @@ public interface Condition extends RelationalObject {
                                  final RelationalProperties properties ) throws KException {
             final AdapterFactory adapter = new AdapterFactory( );
             final Permission parentPerm = adapter.adapt( transaction, parent, Permission.class );
-    
+
             if ( parentPerm == null ) {
                 throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
                                                           parent.getAbsolutePath(),
                                                           Condition.class.getSimpleName() ) );
             }
-    
+
             return parentPerm.addCondition( transaction, id );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -87,7 +87,7 @@ public interface Condition extends RelationalObject {
         public KomodoType identifier() {
             return IDENTIFIER;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -97,7 +97,7 @@ public interface Condition extends RelationalObject {
         public Class< ConditionImpl > owningClass() {
             return ConditionImpl.class;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -112,7 +112,7 @@ public interface Condition extends RelationalObject {
                                             kobject,
                                             VdbLexicon.DataRole.Permission.Condition.CONDITION );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -122,9 +122,13 @@ public interface Condition extends RelationalObject {
         @Override
         public Condition resolve( final UnitOfWork transaction,
                                   final KomodoObject kobject ) throws KException {
+            if ( kobject.getTypeId() == Condition.TYPE_ID ) {
+                return ( Condition )kobject;
+            }
+
             return new ConditionImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
-    
+
     };
 
     /**

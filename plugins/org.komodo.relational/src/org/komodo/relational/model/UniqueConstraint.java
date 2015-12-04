@@ -8,9 +8,9 @@
 package org.komodo.relational.model;
 
 import org.komodo.relational.Messages;
-import org.komodo.relational.TypeResolver;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.TypeResolver;
 import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.model.internal.UniqueConstraintImpl;
 import org.komodo.repository.ObjectImpl;
@@ -50,7 +50,7 @@ public interface UniqueConstraint extends TableConstraint {
      * The resolver of a {@link UniqueConstraint}.
      */
     public static final TypeResolver< UniqueConstraint > RESOLVER = new TypeResolver< UniqueConstraint >() {
-    
+
         /**
          * {@inheritDoc}
          *
@@ -66,16 +66,16 @@ public interface UniqueConstraint extends TableConstraint {
                                         final RelationalProperties properties ) throws KException {
             AdapterFactory adapter = new AdapterFactory( );
             Table parentTable = adapter.adapt( transaction, parent, Table.class );
-    
+
             if ( parentTable == null ) {
                 throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
                                                           parent.getAbsolutePath(),
                                                           UniqueConstraint.class.getSimpleName() ) );
             }
-    
+
             return parentTable.addUniqueConstraint( transaction, id );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -85,7 +85,7 @@ public interface UniqueConstraint extends TableConstraint {
         public KomodoType identifier() {
             return IDENTIFIER;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -95,7 +95,7 @@ public interface UniqueConstraint extends TableConstraint {
         public Class< UniqueConstraintImpl > owningClass() {
             return UniqueConstraintImpl.class;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -112,7 +112,7 @@ public interface UniqueConstraint extends TableConstraint {
                                                         Constraint.TYPE,
                                                         CONSTRAINT_TYPE.toValue() );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -122,9 +122,13 @@ public interface UniqueConstraint extends TableConstraint {
         @Override
         public UniqueConstraint resolve( final UnitOfWork transaction,
                                          final KomodoObject kobject ) throws KException {
+            if ( kobject.getTypeId() == UniqueConstraint.TYPE_ID ) {
+                return ( UniqueConstraint )kobject;
+            }
+
             return new UniqueConstraintImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
-    
+
     };
 
 }

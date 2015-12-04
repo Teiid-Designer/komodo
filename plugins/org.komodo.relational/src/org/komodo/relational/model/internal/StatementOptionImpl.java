@@ -295,7 +295,7 @@ public final class StatementOptionImpl extends RelationalChildRestrictedObject i
      */
     @Override
     public KomodoType getTypeIdentifier( final UnitOfWork transaction ) {
-        return StatementOption.RESOLVER.identifier();
+        return StatementOption.IDENTIFIER;
     }
 
     /**

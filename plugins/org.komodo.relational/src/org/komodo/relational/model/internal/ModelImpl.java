@@ -88,7 +88,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
 
     @Override
     public KomodoType getTypeIdentifier( UnitOfWork uow ) {
-        return Model.RESOLVER.identifier();
+        return Model.IDENTIFIER;
     }
 
     /**

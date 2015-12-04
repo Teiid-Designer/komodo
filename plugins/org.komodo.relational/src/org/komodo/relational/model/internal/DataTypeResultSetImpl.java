@@ -102,7 +102,7 @@ public final class DataTypeResultSetImpl extends ResultSetColumnImpl implements 
      */
     @Override
     public KomodoType getTypeIdentifier( final UnitOfWork uow ) {
-        return DataTypeResultSet.RESOLVER.identifier();
+        return DataTypeResultSet.IDENTIFIER;
     }
 
     /**

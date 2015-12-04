@@ -116,6 +116,10 @@ public interface ResultSetColumn extends OptionContainer, RelationalObject {
         @Override
         public ResultSetColumn resolve( final UnitOfWork transaction,
                                         final KomodoObject kobject ) throws KException {
+            if ( kobject.getTypeId() == ResultSetColumn.TYPE_ID ) {
+                return ( ResultSetColumn )kobject;
+            }
+
             return new ResultSetColumnImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
 

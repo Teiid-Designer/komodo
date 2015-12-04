@@ -60,7 +60,7 @@ public interface Schema extends RelationalObject, Exportable {
      * The resolver of a {@link Schema}.
      */
     public static final TypeResolver< Schema > RESOLVER = new TypeResolver< Schema >() {
-    
+
         /**
          * {@inheritDoc}
          *
@@ -77,7 +77,7 @@ public interface Schema extends RelationalObject, Exportable {
             final WorkspaceManager mgr = WorkspaceManager.getInstance( repository );
             return mgr.createSchema( transaction, parent, id );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -87,7 +87,7 @@ public interface Schema extends RelationalObject, Exportable {
         public KomodoType identifier() {
             return IDENTIFIER;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -97,7 +97,7 @@ public interface Schema extends RelationalObject, Exportable {
         public Class< SchemaImpl > owningClass() {
             return SchemaImpl.class;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -109,7 +109,7 @@ public interface Schema extends RelationalObject, Exportable {
                                    final KomodoObject kobject ) throws KException {
             return ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, KomodoLexicon.Schema.NODE_TYPE );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -119,9 +119,13 @@ public interface Schema extends RelationalObject, Exportable {
         @Override
         public Schema resolve( final UnitOfWork transaction,
                                final KomodoObject kobject ) throws KException {
+            if ( kobject.getTypeId() == Schema.TYPE_ID ) {
+                return ( Schema )kobject;
+            }
+
             return new SchemaImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
-    
+
     };
 
     /**

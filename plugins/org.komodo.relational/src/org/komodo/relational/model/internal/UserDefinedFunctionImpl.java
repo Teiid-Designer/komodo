@@ -138,7 +138,7 @@ public final class UserDefinedFunctionImpl extends FunctionImpl implements UserD
      */
     @Override
     public KomodoType getTypeIdentifier( final UnitOfWork uow ) {
-        return UserDefinedFunction.RESOLVER.identifier();
+        return UserDefinedFunction.IDENTIFIER;
     }
 
     /**

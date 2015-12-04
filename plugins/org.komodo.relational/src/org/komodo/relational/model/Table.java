@@ -210,6 +210,10 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
         @Override
         public Table resolve( final UnitOfWork transaction,
                               final KomodoObject kobject ) throws KException {
+            if ( kobject.getTypeId() == Table.TYPE_ID ) {
+                return ( Table )kobject;
+            }
+
             return new TableImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
 

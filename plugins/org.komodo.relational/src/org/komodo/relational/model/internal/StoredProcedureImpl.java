@@ -8,8 +8,8 @@
 package org.komodo.relational.model.internal;
 
 import org.komodo.relational.Messages;
-import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.Messages.Relational;
+import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.model.DataTypeResultSet;
 import org.komodo.relational.model.ProcedureResultSet;
 import org.komodo.relational.model.StoredProcedure;
@@ -175,7 +175,7 @@ public final class StoredProcedureImpl extends AbstractProcedureImpl implements 
      */
     @Override
     public KomodoType getTypeIdentifier( final UnitOfWork transaction ) {
-        return StoredProcedure.RESOLVER.identifier();
+        return StoredProcedure.IDENTIFIER;
     }
 
     /**

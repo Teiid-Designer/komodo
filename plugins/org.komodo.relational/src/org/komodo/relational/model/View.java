@@ -8,9 +8,9 @@
 package org.komodo.relational.model;
 
 import org.komodo.relational.Messages;
-import org.komodo.relational.TypeResolver;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.TypeResolver;
 import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.model.internal.ViewImpl;
 import org.komodo.repository.ObjectImpl;
@@ -45,7 +45,7 @@ public interface View extends Table {
      * The resolver of a {@link View}.
      */
     public static final TypeResolver< View > RESOLVER = new TypeResolver< View >() {
-    
+
         /**
          * {@inheritDoc}
          *
@@ -61,16 +61,16 @@ public interface View extends Table {
                             final RelationalProperties properties ) throws KException {
             AdapterFactory adapter = new AdapterFactory( );
             Model parentModel = adapter.adapt( transaction, parent, Model.class );
-    
+
             if ( parentModel == null ) {
                 throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
                                                           parent.getAbsolutePath(),
                                                           View.class.getSimpleName() ) );
             }
-    
+
             return parentModel.addView( transaction, id );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -80,7 +80,7 @@ public interface View extends Table {
         public KomodoType identifier() {
             return IDENTIFIER;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -90,7 +90,7 @@ public interface View extends Table {
         public Class< ViewImpl > owningClass() {
             return ViewImpl.class;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -102,7 +102,7 @@ public interface View extends Table {
                                    final KomodoObject kobject ) throws KException {
             return ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, CreateTable.VIEW_STATEMENT );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -112,9 +112,13 @@ public interface View extends Table {
         @Override
         public View resolve( final UnitOfWork transaction,
                              final KomodoObject kobject ) throws KException {
+            if ( kobject.getTypeId() == View.TYPE_ID ) {
+                return ( View )kobject;
+            }
+
             return new ViewImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
-    
+
     };
 
     /**

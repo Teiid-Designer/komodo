@@ -265,7 +265,7 @@ public final class ParameterImpl extends RelationalChildRestrictedObject impleme
      */
     @Override
     public KomodoType getTypeIdentifier( final UnitOfWork uow ) {
-        return Parameter.RESOLVER.identifier();
+        return Parameter.IDENTIFIER;
     }
 
     /**

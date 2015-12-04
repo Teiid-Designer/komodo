@@ -46,7 +46,7 @@ public final class ForeignKeyImpl extends TableConstraintImpl implements Foreign
 
     @Override
     public KomodoType getTypeIdentifier(UnitOfWork uow) {
-        return ForeignKey.RESOLVER.identifier();
+        return ForeignKey.IDENTIFIER;
     }
 
     /**

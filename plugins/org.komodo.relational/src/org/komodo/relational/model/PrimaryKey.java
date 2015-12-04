@@ -8,9 +8,9 @@
 package org.komodo.relational.model;
 
 import org.komodo.relational.Messages;
-import org.komodo.relational.TypeResolver;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.TypeResolver;
 import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.model.internal.PrimaryKeyImpl;
 import org.komodo.repository.ObjectImpl;
@@ -45,7 +45,7 @@ public interface PrimaryKey extends TableConstraint {
      * The resolver of a {@link PrimaryKey}.
      */
     public static final TypeResolver< PrimaryKey > RESOLVER = new TypeResolver< PrimaryKey >() {
-    
+
         /**
          * {@inheritDoc}
          *
@@ -61,16 +61,16 @@ public interface PrimaryKey extends TableConstraint {
                                   final RelationalProperties properties ) throws KException {
             final AdapterFactory adapter = new AdapterFactory( );
             final Table parentTable = adapter.adapt( transaction, parent, Table.class );
-    
+
             if ( parentTable == null ) {
                 throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
                                                           parent.getAbsolutePath(),
                                                           PrimaryKey.class.getSimpleName() ) );
             }
-    
+
             return parentTable.setPrimaryKey( transaction, id );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -80,7 +80,7 @@ public interface PrimaryKey extends TableConstraint {
         public KomodoType identifier() {
             return IDENTIFIER;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -90,7 +90,7 @@ public interface PrimaryKey extends TableConstraint {
         public Class< PrimaryKeyImpl > owningClass() {
             return PrimaryKeyImpl.class;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -107,7 +107,7 @@ public interface PrimaryKey extends TableConstraint {
                                                         Constraint.TYPE,
                                                         CONSTRAINT_TYPE.toValue() );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -117,9 +117,13 @@ public interface PrimaryKey extends TableConstraint {
         @Override
         public PrimaryKey resolve( final UnitOfWork transaction,
                                    final KomodoObject kobject ) throws KException {
+            if ( kobject.getTypeId() == PrimaryKey.TYPE_ID ) {
+                return ( PrimaryKey )kobject;
+            }
+
             return new PrimaryKeyImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
-    
+
     };
 
 }

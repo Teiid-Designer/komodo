@@ -8,8 +8,8 @@
 package org.komodo.relational.model.internal;
 
 import org.komodo.relational.Messages;
-import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.Messages.Relational;
+import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.model.DataTypeResultSet;
 import org.komodo.relational.model.ProcedureResultSet;
 import org.komodo.relational.model.PushdownFunction;
@@ -111,7 +111,7 @@ public final class PushdownFunctionImpl extends FunctionImpl implements Pushdown
      */
     @Override
     public KomodoType getTypeIdentifier( final UnitOfWork uow ) {
-        return PushdownFunction.RESOLVER.identifier();
+        return PushdownFunction.IDENTIFIER;
     }
 
     /**

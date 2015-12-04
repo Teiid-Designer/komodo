@@ -291,7 +291,7 @@ public class ResultSetColumnImpl extends RelationalChildRestrictedObject impleme
      */
     @Override
     public KomodoType getTypeIdentifier( final UnitOfWork uow ) {
-        return ResultSetColumn.RESOLVER.identifier();
+        return ResultSetColumn.IDENTIFIER;
     }
 
     /**

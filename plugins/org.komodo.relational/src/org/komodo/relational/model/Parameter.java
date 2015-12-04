@@ -116,7 +116,7 @@ public interface Parameter extends OptionContainer, RelationalObject {
      * The resolver of a {@link Parameter}.
      */
     public static final TypeResolver< Parameter > RESOLVER = new TypeResolver< Parameter >() {
-    
+
         /**
          * {@inheritDoc}
          *
@@ -133,16 +133,16 @@ public interface Parameter extends OptionContainer, RelationalObject {
             final Class< ? extends AbstractProcedure > clazz = AbstractProcedure.Utils.getProcedureType( transaction, parent );
             final AdapterFactory adapter = new AdapterFactory( );
             final AbstractProcedure parentProc = adapter.adapt( transaction, parent, clazz );
-    
+
             if ( parentProc == null ) {
                 throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
                                                           parent.getAbsolutePath(),
                                                           Parameter.class.getSimpleName() ) );
             }
-    
+
             return parentProc.addParameter( transaction, id );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -152,7 +152,7 @@ public interface Parameter extends OptionContainer, RelationalObject {
         public KomodoType identifier() {
             return IDENTIFIER;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -162,7 +162,7 @@ public interface Parameter extends OptionContainer, RelationalObject {
         public Class< ParameterImpl > owningClass() {
             return ParameterImpl.class;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -174,7 +174,7 @@ public interface Parameter extends OptionContainer, RelationalObject {
                                    final KomodoObject kobject ) throws KException {
             return ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, CreateProcedure.PARAMETER );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -184,9 +184,13 @@ public interface Parameter extends OptionContainer, RelationalObject {
         @Override
         public Parameter resolve( final UnitOfWork transaction,
                                   final KomodoObject kobject ) throws KException {
+            if ( kobject.getTypeId() == Parameter.TYPE_ID ) {
+                return ( Parameter )kobject;
+            }
+
             return new ParameterImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
-    
+
     };
 
     /**

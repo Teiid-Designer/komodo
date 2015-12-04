@@ -113,7 +113,7 @@ public class SchemaImpl extends RelationalObjectImpl implements Schema {
      */
     @Override
     public KomodoType getTypeIdentifier( final UnitOfWork uow ) {
-        return Schema.RESOLVER.identifier();
+        return Schema.IDENTIFIER;
     }
 
     /**

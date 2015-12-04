@@ -37,7 +37,7 @@ public final class UniqueConstraintImpl extends TableConstraintImpl implements U
 
     @Override
     public KomodoType getTypeIdentifier(UnitOfWork uow) {
-        return UniqueConstraint.RESOLVER.identifier();
+        return UniqueConstraint.IDENTIFIER;
     }
 
     /**

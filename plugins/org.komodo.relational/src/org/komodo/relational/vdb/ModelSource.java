@@ -48,7 +48,7 @@ public interface ModelSource extends RelationalObject {
      * The resolver of a {@link ModelSource}.
      */
     public static final TypeResolver< ModelSource > RESOLVER = new TypeResolver< ModelSource >() {
-    
+
         /**
          * {@inheritDoc}
          *
@@ -64,16 +64,16 @@ public interface ModelSource extends RelationalObject {
                                    final RelationalProperties properties ) throws KException {
             final AdapterFactory adapter = new AdapterFactory( );
             final Model parentModel = adapter.adapt( transaction, parent, Model.class );
-    
+
             if ( parentModel == null ) {
                 throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
                                                           parent.getAbsolutePath(),
                                                           ModelSource.class.getSimpleName() ) );
             }
-    
+
             return parentModel.addSource( transaction, id );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -83,7 +83,7 @@ public interface ModelSource extends RelationalObject {
         public KomodoType identifier() {
             return IDENTIFIER;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -93,7 +93,7 @@ public interface ModelSource extends RelationalObject {
         public Class< ModelSourceImpl > owningClass() {
             return ModelSourceImpl.class;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -105,7 +105,7 @@ public interface ModelSource extends RelationalObject {
                                    final KomodoObject kobject ) throws KException {
             return ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, VdbLexicon.Source.SOURCE );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -115,9 +115,13 @@ public interface ModelSource extends RelationalObject {
         @Override
         public ModelSource resolve( final UnitOfWork transaction,
                                     final KomodoObject kobject ) throws KException {
+            if ( kobject.getTypeId() == ModelSource.TYPE_ID ) {
+                return ( ModelSource )kobject;
+            }
+
             return new ModelSourceImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
-    
+
     };
 
     /**

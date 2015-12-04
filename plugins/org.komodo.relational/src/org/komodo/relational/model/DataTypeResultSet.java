@@ -160,6 +160,10 @@ public interface DataTypeResultSet extends ProcedureResultSet, ResultSetColumn {
         @Override
         public DataTypeResultSet resolve( final UnitOfWork transaction,
                                           final KomodoObject kobject ) throws KException {
+            if ( kobject.getTypeId() == DataTypeResultSet.TYPE_ID ) {
+                return ( DataTypeResultSet )kobject;
+            }
+
             return new DataTypeResultSetImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
 
