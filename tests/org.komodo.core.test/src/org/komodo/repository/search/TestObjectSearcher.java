@@ -241,6 +241,28 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
     }
 
     @Test
+    public void addWhereClauseComparisonProperty() throws Exception {
+        String expected = "SELECT [jcr:path], [mode:localName] FROM [nt:unstructured] AS p1 " +
+                                     "WHERE p1.[property1] = 'value1'";
+        ObjectSearcher os = new ObjectSearcher(_repo);
+        os.addFromType(JcrConstants.NT_UNSTRUCTURED, "p1");
+        os.addWhereCompareClause(null, "p1", "property1", ComparisonOperator.EQUALS, "value1");
+
+        assertEquals(expected, os.toString());
+    }
+
+    @Test
+    public void addWhereClauseComparisonProperty2() throws Exception {
+        String expected = "SELECT [jcr:path], [mode:localName] FROM [nt:unstructured] AS p1 " +
+                                     "WHERE p1.[property1] LIKE 'value%1'";
+        ObjectSearcher os = new ObjectSearcher(_repo);
+        os.addFromType(JcrConstants.NT_UNSTRUCTURED, "p1");
+        os.addWhereCompareClause(null, "p1", "property1", ComparisonOperator.LIKE, "value%1");
+
+        assertEquals(expected, os.toString());
+    }
+
+    @Test
     public void executeSingleFromQuery() throws Exception {
         assertNotNull(_repo);
 

@@ -220,6 +220,11 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         String SEARCH_CONTAINS_PARAMETER = "contains"; //$NON-NLS-1$
 
         /**
+         * The name of the URI search name parameter
+         */
+        String SEARCH_NAME_PARAMETER = "name"; //$NON-NLS-1$
+
+        /**
          * The name of the URI search path parameter
          */
         String SEARCH_PATH_PARAMETER = "path"; //$NON-NLS-1$

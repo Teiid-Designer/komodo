@@ -161,6 +161,29 @@ public class ObjectSearcher implements SQLConstants {
     }
 
     /**
+     * Add a comparison sub-clause to the WHERE clause, eg.
+     *   WHERE alias.[property] = 'blah'
+     *   WHERE alias.[property] LIKE 'bl%h'
+     *
+     * @param operator the AND/OR operator preceding the clause. Can be <null> if the first clause
+     * @param alias the alias of the type
+     * @param property the name of the property belonging to the type
+     * @param compareOperator the comparison operator
+     * @param value the value that the property can be
+     * @return this search object
+     */
+    public ObjectSearcher addWhereCompareClause(LogicalOperator operator, String alias, String property,
+                                                                ComparisonOperator compareOperator, String value) {
+        if (whereClauses == null)
+            whereClauses = new ArrayList<Clause>();
+
+        CompareClause whereClause = new CompareClause(this, operator, alias, property, compareOperator, value);
+        whereClauses.add(whereClause);
+
+        return this;
+    }
+
+    /**
      * Add a CONTAINS sub-clause to the WHERE clause, eg. WHERE CONTAINS (alias.property, 'value')
      *
      * @param operator the AND/OR operator preceding the clause. Can be <null> if the first clause
@@ -221,7 +244,6 @@ public class ObjectSearcher implements SQLConstants {
 
         return this;
     }
-
 
     /**
      * Add a parent clause to the Where clause, eg. WHERE alias.[jcr:path] LIKE 'path1/%'

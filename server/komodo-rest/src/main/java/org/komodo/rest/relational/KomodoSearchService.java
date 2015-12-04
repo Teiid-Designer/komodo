@@ -24,6 +24,9 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 import org.komodo.core.KEngine;
 import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.repository.KomodoTypeRegistry;
+import org.komodo.repository.KomodoTypeRegistry.TypeIdentifier;
+import org.komodo.repository.search.ComparisonOperator;
 import org.komodo.repository.search.LogicalOperator;
 import org.komodo.repository.search.ObjectSearcher;
 import org.komodo.rest.KomodoRestException;
@@ -32,6 +35,7 @@ import org.komodo.rest.KomodoService;
 import org.komodo.rest.RestBasicEntity;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.modeshape.jcr.api.JcrConstants;
@@ -168,6 +172,26 @@ public final class KomodoSearchService extends KomodoService {
 //    }
 
     /**
+     * @param type
+     * @return if type is ktype then return its modeshape equivalent
+     */
+    private String convertType(String type) {
+        if (type == null)
+            return JcrConstants.NT_UNSTRUCTURED;
+
+        KomodoType kType = KomodoType.getKomodoType(type);
+        if (kType == null || KomodoType.UNKNOWN.equals(kType))
+            return type; // Not a komodo type
+
+        TypeIdentifier identifier = KomodoTypeRegistry.getInstance().getIdentifier(kType);
+        String lexiconType = identifier.getLexiconType();
+        if (lexiconType != null)
+            return lexiconType;
+
+        return JcrConstants.NT_UNSTRUCTURED;
+    }
+
+    /**
      * @param headers
      *        the request headers (never <code>null</code>)
      * @param uriInfo
@@ -182,6 +206,8 @@ public final class KomodoSearchService extends KomodoService {
      *        the request path of specific object
      * @param contains
      *        the request contains parameter
+     * @param name
+     *        the request name parameter
      * @return a JSON document representing the results of a search in the Komodo workspace
      *                  (never <code>null</code>)
      * @throws KomodoRestException
@@ -211,14 +237,17 @@ public final class KomodoSearchService extends KomodoService {
                              @QueryParam(value = SEARCH_PATH_PARAMETER) String path,
                              @ApiParam(value = "Search term for object with a property that contains value",
                                                 required = false)
-                             @QueryParam(value = SEARCH_CONTAINS_PARAMETER) String contains) throws KomodoRestException {
+                             @QueryParam(value = SEARCH_CONTAINS_PARAMETER) String contains,
+                             @ApiParam(value = "The name of an object. Can use '%' as wildcards for broadening searches",
+                                                required = false)
+                             @QueryParam(value = SEARCH_NAME_PARAMETER) String name) throws KomodoRestException {
 
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
             return notAcceptableMediaTypesBuilder().build();
 
         if (type == null && path == null && parent == null &&
-            ancestor == null && contains == null) {
+            ancestor == null && contains == null && name == null) {
 
             String errorMessage = RelationalMessages.getString(
                                                                RelationalMessages.Error.SEARCH_SERVICE_NO_PARAMETERS_ERROR);
@@ -244,10 +273,7 @@ public final class KomodoSearchService extends KomodoService {
             final String ALIAS = "nt";  //$NON-NLS-1$
             ObjectSearcher os = new ObjectSearcher(this.repo);
 
-            if (type == null)
-                type = JcrConstants.NT_UNSTRUCTURED;
-
-            os.addFromType(type, ALIAS);
+            os.addFromType(convertType(type), ALIAS);
 
             LogicalOperator operator = null;
             if (parent != null) {
@@ -267,6 +293,15 @@ public final class KomodoSearchService extends KomodoService {
 
             if (contains != null) {
                 os.addWhereContainsClause(operator, ALIAS, STAR, contains);
+                operator = LogicalOperator.AND;
+            }
+
+            if (name != null) {
+                ComparisonOperator compOperator = ComparisonOperator.EQUALS;
+                if (name.contains(PERCENT))
+                    compOperator = ComparisonOperator.LIKE;
+
+                os.addWhereCompareClause(operator, ALIAS, "mode:localName", compOperator, name); //$NON-NLS-1$
                 operator = LogicalOperator.AND;
             }
 
