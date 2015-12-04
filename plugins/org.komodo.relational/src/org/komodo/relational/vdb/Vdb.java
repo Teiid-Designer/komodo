@@ -134,6 +134,10 @@ public interface Vdb extends Exportable, RelationalObject {
         @Override
         public Vdb resolve( final UnitOfWork transaction,
                             final KomodoObject kobject ) throws KException {
+            if ( kobject.getTypeId() == Vdb.TYPE_ID ) {
+                return ( Vdb )kobject;
+            }
+
             return new VdbImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
 

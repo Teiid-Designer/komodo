@@ -42,7 +42,7 @@ public final class ConditionImpl extends RelationalChildRestrictedObject impleme
 
     @Override
     public KomodoType getTypeIdentifier(UnitOfWork uow) {
-        return Condition.RESOLVER.identifier();
+        return Condition.IDENTIFIER;
     }
 
     /**

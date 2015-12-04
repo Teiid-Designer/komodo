@@ -8,9 +8,9 @@
 package org.komodo.relational.model;
 
 import org.komodo.relational.Messages;
-import org.komodo.relational.TypeResolver;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.TypeResolver;
 import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.model.internal.UserDefinedFunctionImpl;
 import org.komodo.repository.ObjectImpl;
@@ -47,7 +47,7 @@ public interface UserDefinedFunction extends Function {
      * The resolver of a {@link UserDefinedFunction}.
      */
     public static final TypeResolver< UserDefinedFunction > RESOLVER = new TypeResolver< UserDefinedFunction >() {
-    
+
         /**
          * {@inheritDoc}
          *
@@ -63,16 +63,16 @@ public interface UserDefinedFunction extends Function {
                                            final RelationalProperties properties ) throws KException {
             final AdapterFactory adapter = new AdapterFactory( );
             final Model parentModel = adapter.adapt( transaction, parent, Model.class );
-    
+
             if ( parentModel == null ) {
                 throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
                                                           parent.getAbsolutePath(),
                                                           UserDefinedFunction.class.getSimpleName() ) );
             }
-    
+
             return parentModel.addUserDefinedFunction( transaction, id );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -82,7 +82,7 @@ public interface UserDefinedFunction extends Function {
         public KomodoType identifier() {
             return IDENTIFIER;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -92,7 +92,7 @@ public interface UserDefinedFunction extends Function {
         public Class< UserDefinedFunctionImpl > owningClass() {
             return UserDefinedFunctionImpl.class;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -109,7 +109,7 @@ public interface UserDefinedFunction extends Function {
                                                         SchemaElement.TYPE,
                                                         SchemaElementType.VIRTUAL.name() );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -119,9 +119,13 @@ public interface UserDefinedFunction extends Function {
         @Override
         public UserDefinedFunction resolve( final UnitOfWork transaction,
                                             final KomodoObject kobject ) throws KException {
+            if ( kobject.getTypeId() == UserDefinedFunction.TYPE_ID ) {
+                return ( UserDefinedFunction )kobject;
+            }
+
             return new UserDefinedFunctionImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
-    
+
     };
 
     /**

@@ -37,7 +37,7 @@ public final class PrimaryKeyImpl extends TableConstraintImpl implements Primary
 
     @Override
     public KomodoType getTypeIdentifier(UnitOfWork uow) {
-        return PrimaryKey.RESOLVER.identifier();
+        return PrimaryKey.IDENTIFIER;
     }
 
     /**

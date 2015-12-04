@@ -8,9 +8,9 @@
 package org.komodo.relational.model;
 
 import org.komodo.relational.Messages;
-import org.komodo.relational.TypeResolver;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.TypeResolver;
 import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.model.internal.VirtualProcedureImpl;
 import org.komodo.repository.ObjectImpl;
@@ -47,7 +47,7 @@ public interface VirtualProcedure extends Procedure {
      * The resolver of a {@link VirtualProcedure}.
      */
     public static final TypeResolver< VirtualProcedure > RESOLVER = new TypeResolver< VirtualProcedure >() {
-    
+
         /**
          * {@inheritDoc}
          *
@@ -63,16 +63,16 @@ public interface VirtualProcedure extends Procedure {
                                         final RelationalProperties properties ) throws KException {
             final AdapterFactory adapter = new AdapterFactory( );
             final Model parentModel = adapter.adapt( transaction, parent, Model.class );
-    
+
             if ( parentModel == null ) {
                 throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
                                                           parent.getAbsolutePath(),
                                                           VirtualProcedure.class.getSimpleName() ) );
             }
-    
+
             return parentModel.addVirtualProcedure( transaction, id );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -82,7 +82,7 @@ public interface VirtualProcedure extends Procedure {
         public KomodoType identifier() {
             return IDENTIFIER;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -92,7 +92,7 @@ public interface VirtualProcedure extends Procedure {
         public Class< VirtualProcedureImpl > owningClass() {
             return VirtualProcedureImpl.class;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -109,7 +109,7 @@ public interface VirtualProcedure extends Procedure {
                                                         SchemaElement.TYPE,
                                                         SchemaElementType.VIRTUAL.name() );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -119,9 +119,13 @@ public interface VirtualProcedure extends Procedure {
         @Override
         public VirtualProcedure resolve( final UnitOfWork transaction,
                                          final KomodoObject kobject ) throws KException {
+            if ( kobject.getTypeId() == VirtualProcedure.TYPE_ID ) {
+                return ( VirtualProcedure )kobject;
+            }
+
             return new VirtualProcedureImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
-    
+
     };
 
     /**

@@ -40,10 +40,15 @@ public interface StatementOption extends Property, RelationalObject {
     StatementOption[] NO_OPTIONS = new StatementOption[0];
 
     /**
+     * The type identifier.
+     */
+    int TYPE_ID = StatementOption.class.hashCode();
+
+    /**
      * The resolver of a {@link StatementOption}.
      */
     public static final TypeResolver< StatementOption > RESOLVER = new TypeResolver< StatementOption >() {
-    
+
         /**
          * {@inheritDoc}
          *
@@ -61,16 +66,16 @@ public interface StatementOption extends Property, RelationalObject {
             final Object optionValueValue = properties.getValue( StandardDdlLexicon.VALUE );
             final String optionValue = optionValueValue == null ? null : optionValueValue.toString();
             final OptionContainer parentContainer = adapter.adapt( transaction, parent, OptionContainer.class );
-    
+
             if ( parentContainer == null ) {
                 throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
                                                           parent.getAbsolutePath(),
                                                           StatementOption.class.getSimpleName() ) );
             }
-    
+
             return parentContainer.setStatementOption( transaction, id, optionValue );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -80,7 +85,7 @@ public interface StatementOption extends Property, RelationalObject {
         public KomodoType identifier() {
             return IDENTIFIER;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -90,7 +95,7 @@ public interface StatementOption extends Property, RelationalObject {
         public Class< StatementOptionImpl > owningClass() {
             return StatementOptionImpl.class;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -105,7 +110,7 @@ public interface StatementOption extends Property, RelationalObject {
                                             kobject,
                                             StandardDdlLexicon.TYPE_STATEMENT_OPTION );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -115,9 +120,13 @@ public interface StatementOption extends Property, RelationalObject {
         @Override
         public StatementOption resolve( final UnitOfWork transaction,
                                         final KomodoObject kobject ) throws KException {
+            if ( kobject.getTypeId() == StatementOption.TYPE_ID ) {
+                return ( StatementOption )kobject;
+            }
+
             return new StatementOptionImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
-    
+
     };
 
     /**

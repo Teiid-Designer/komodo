@@ -55,7 +55,7 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
 
     @Override
     public KomodoType getTypeIdentifier(UnitOfWork uow) {
-        return Permission.RESOLVER.identifier();
+        return Permission.IDENTIFIER;
     }
 
     /**

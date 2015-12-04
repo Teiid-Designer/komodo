@@ -150,6 +150,10 @@ public interface Model extends Exportable, RelationalObject {
         @Override
         public Model resolve( final UnitOfWork transaction,
                               final KomodoObject kobject ) throws KException {
+            if ( kobject.getTypeId() == Model.TYPE_ID ) {
+                return ( Model )kobject;
+            }
+
             return new ModelImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
 

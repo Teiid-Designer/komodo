@@ -47,7 +47,7 @@ public interface PushdownFunction extends Function {
      * The resolver of a {@link PushdownFunction}.
      */
     public static final TypeResolver< PushdownFunction > RESOLVER = new TypeResolver< PushdownFunction >() {
-    
+
         /**
          * {@inheritDoc}
          *
@@ -63,16 +63,16 @@ public interface PushdownFunction extends Function {
                                         final RelationalProperties properties ) throws KException {
             final AdapterFactory adapter = new AdapterFactory( );
             final Model parentModel = adapter.adapt( transaction, parent, Model.class );
-    
+
             if ( parentModel == null ) {
                 throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
                                                           parent.getAbsolutePath(),
                                                           PushdownFunction.class.getSimpleName() ) );
             }
-    
+
             return parentModel.addPushdownFunction( transaction, id );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -82,7 +82,7 @@ public interface PushdownFunction extends Function {
         public KomodoType identifier() {
             return IDENTIFIER;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -92,7 +92,7 @@ public interface PushdownFunction extends Function {
         public Class< PushdownFunctionImpl > owningClass() {
             return PushdownFunctionImpl.class;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -109,7 +109,7 @@ public interface PushdownFunction extends Function {
                                                         SchemaElement.TYPE,
                                                         SchemaElementType.FOREIGN.name() );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -119,9 +119,13 @@ public interface PushdownFunction extends Function {
         @Override
         public PushdownFunction resolve( final UnitOfWork transaction,
                                          final KomodoObject kobject ) throws KException {
+            if ( kobject.getTypeId() == PushdownFunction.TYPE_ID ) {
+                return ( PushdownFunction )kobject;
+            }
+
             return new PushdownFunctionImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
-    
+
     };
 
     /**

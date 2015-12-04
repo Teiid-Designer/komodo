@@ -10,10 +10,10 @@ package org.komodo.relational.model;
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalConstants;
-import org.komodo.relational.RelationalObject;
-import org.komodo.relational.TypeResolver;
 import org.komodo.relational.RelationalConstants.Nullable;
+import org.komodo.relational.RelationalObject;
 import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.TypeResolver;
 import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.model.internal.ColumnImpl;
 import org.komodo.repository.ObjectImpl;
@@ -136,7 +136,7 @@ public interface Column extends OptionContainer, RelationalObject {
      * The resolver of a {@link Column}.
      */
     public static final TypeResolver< Column > RESOLVER = new TypeResolver< Column >() {
-    
+
         /**
          * {@inheritDoc}
          *
@@ -152,16 +152,16 @@ public interface Column extends OptionContainer, RelationalObject {
                               RelationalProperties properties ) throws KException {
             AdapterFactory adapter = new AdapterFactory( );
             Table parentTable = adapter.adapt( transaction, parent, Table.class );
-    
+
             if ( parentTable == null ) {
                 throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
                                                           parent.getAbsolutePath(),
                                                           Column.class.getSimpleName() ) );
             }
-    
+
             return parentTable.addColumn( transaction, id );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -171,7 +171,7 @@ public interface Column extends OptionContainer, RelationalObject {
         public KomodoType identifier() {
             return IDENTIFIER;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -181,7 +181,7 @@ public interface Column extends OptionContainer, RelationalObject {
         public Class< ColumnImpl > owningClass() {
             return ColumnImpl.class;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -193,7 +193,7 @@ public interface Column extends OptionContainer, RelationalObject {
                                    final KomodoObject kobject ) throws KException {
             return ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, CreateTable.TABLE_ELEMENT );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -203,9 +203,13 @@ public interface Column extends OptionContainer, RelationalObject {
         @Override
         public Column resolve( final UnitOfWork transaction,
                                final KomodoObject kobject ) throws KException {
+            if ( kobject.getTypeId() == Column.TYPE_ID ) {
+                return ( Column )kobject;
+            }
+
             return new ColumnImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
-    
+
     };
 
     /**

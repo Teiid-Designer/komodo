@@ -439,7 +439,7 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
      */
     @Override
     public KomodoType getTypeIdentifier( final UnitOfWork uow ) {
-        return Column.RESOLVER.identifier();
+        return Column.IDENTIFIER;
     }
 
     /**

@@ -41,7 +41,7 @@ public final class ViewImpl extends TableImpl implements View {
 
     @Override
     public KomodoType getTypeIdentifier(UnitOfWork uow) {
-        return View.RESOLVER.identifier();
+        return View.IDENTIFIER;
     }
 
     /**

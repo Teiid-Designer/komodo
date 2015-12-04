@@ -47,7 +47,7 @@ public interface Mask extends RelationalObject {
      * The resolver of a {@link Mask}.
      */
     public static final TypeResolver< Mask > RESOLVER = new TypeResolver< Mask >() {
-    
+
         /**
          * {@inheritDoc}
          *
@@ -63,16 +63,16 @@ public interface Mask extends RelationalObject {
                             final RelationalProperties properties ) throws KException {
             final AdapterFactory adapter = new AdapterFactory( );
             final Permission parentPerm = adapter.adapt( transaction, parent, Permission.class );
-    
+
             if ( parentPerm == null ) {
                 throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
                                                           parent.getAbsolutePath(),
                                                           Mask.class.getSimpleName() ) );
             }
-    
+
             return parentPerm.addMask( transaction, id );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -82,7 +82,7 @@ public interface Mask extends RelationalObject {
         public KomodoType identifier() {
             return IDENTIFIER;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -92,7 +92,7 @@ public interface Mask extends RelationalObject {
         public Class< MaskImpl > owningClass() {
             return MaskImpl.class;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -107,7 +107,7 @@ public interface Mask extends RelationalObject {
                                             kobject,
                                             VdbLexicon.DataRole.Permission.Mask.MASK );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -117,9 +117,13 @@ public interface Mask extends RelationalObject {
         @Override
         public Mask resolve( final UnitOfWork transaction,
                              final KomodoObject kobject ) throws KException {
+            if ( kobject.getTypeId() == Mask.TYPE_ID ) {
+                return ( Mask )kobject;
+            }
+
             return new MaskImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
-    
+
     };
 
     /**

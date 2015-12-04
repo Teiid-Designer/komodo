@@ -56,7 +56,7 @@ public final class DataRoleImpl extends RelationalObjectImpl implements DataRole
 
     @Override
     public KomodoType getTypeIdentifier(UnitOfWork uow) {
-        return DataRole.RESOLVER.identifier();
+        return DataRole.IDENTIFIER;
     }
     /**
      * {@inheritDoc}

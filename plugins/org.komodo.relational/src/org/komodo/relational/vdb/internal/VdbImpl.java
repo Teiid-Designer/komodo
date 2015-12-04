@@ -243,7 +243,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
 
     @Override
     public KomodoType getTypeIdentifier(UnitOfWork uow) {
-        return Vdb.RESOLVER.identifier();
+        return Vdb.IDENTIFIER;
     }
 
     /**

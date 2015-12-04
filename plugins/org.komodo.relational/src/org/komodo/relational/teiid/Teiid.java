@@ -60,7 +60,7 @@ public interface Teiid extends RelationalObject {
      * The resolver of a {@link Teiid}.
      */
     public static final TypeResolver< Teiid > RESOLVER = new TypeResolver< Teiid >() {
-    
+
         /**
          * {@inheritDoc}
          *
@@ -77,7 +77,7 @@ public interface Teiid extends RelationalObject {
             final WorkspaceManager mgr = WorkspaceManager.getInstance( repository );
             return mgr.createTeiid( transaction, parent, id );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -87,7 +87,7 @@ public interface Teiid extends RelationalObject {
         public KomodoType identifier() {
             return IDENTIFIER;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -97,7 +97,7 @@ public interface Teiid extends RelationalObject {
         public Class< TeiidImpl > owningClass() {
             return TeiidImpl.class;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -109,7 +109,7 @@ public interface Teiid extends RelationalObject {
                                    final KomodoObject kobject ) throws KException {
             return ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, KomodoLexicon.Teiid.NODE_TYPE );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -119,9 +119,13 @@ public interface Teiid extends RelationalObject {
         @Override
         public Teiid resolve( final UnitOfWork transaction,
                               final KomodoObject kobject ) throws KException {
+            if ( kobject.getTypeId() == Teiid.TYPE_ID ) {
+                return ( Teiid )kobject;
+            }
+
             return new TeiidImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
-    
+
     };
 
     /**

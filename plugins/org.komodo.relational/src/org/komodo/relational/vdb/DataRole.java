@@ -129,6 +129,10 @@ public interface DataRole extends RelationalObject {
         @Override
         public DataRole resolve( final UnitOfWork transaction,
                                  final KomodoObject kobject ) throws KException {
+            if ( kobject.getTypeId() == DataRole.TYPE_ID ) {
+                return ( DataRole )kobject;
+            }
+
             return new DataRoleImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
 

@@ -363,7 +363,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
      * Parent of the teiid instance
      */
     private final TeiidParentImpl teiidParent;
-    
+
     private UnitOfWork transaction;
 
     /**
@@ -387,7 +387,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
 
     @Override
     public KomodoType getTypeIdentifier(UnitOfWork uow) {
-        return Teiid.RESOLVER.identifier();
+        return Teiid.IDENTIFIER;
     }
 
     @Override

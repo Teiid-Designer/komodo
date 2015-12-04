@@ -52,7 +52,7 @@ public interface VdbImport extends RelationalObject {
      * The resolver of a {@link VdbImport}.
      */
     public static final TypeResolver< VdbImport > RESOLVER = new TypeResolver< VdbImport >() {
-    
+
         /**
          * {@inheritDoc}
          *
@@ -68,16 +68,16 @@ public interface VdbImport extends RelationalObject {
                                  final RelationalProperties properties ) throws KException {
             final AdapterFactory adapter = new AdapterFactory( );
             final Vdb parentVdb = adapter.adapt( transaction, parent, Vdb.class );
-    
+
             if ( parentVdb == null ) {
                 throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
                                                           parent.getAbsolutePath(),
                                                           VdbImport.class.getSimpleName() ) );
             }
-    
+
             return parentVdb.addImport( transaction, id );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -87,7 +87,7 @@ public interface VdbImport extends RelationalObject {
         public KomodoType identifier() {
             return IDENTIFIER;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -97,7 +97,7 @@ public interface VdbImport extends RelationalObject {
         public Class< VdbImportImpl > owningClass() {
             return VdbImportImpl.class;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -109,7 +109,7 @@ public interface VdbImport extends RelationalObject {
                                    final KomodoObject kobject ) throws KException {
             return ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, VdbLexicon.ImportVdb.IMPORT_VDB );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -119,9 +119,13 @@ public interface VdbImport extends RelationalObject {
         @Override
         public VdbImport resolve( final UnitOfWork transaction,
                                   final KomodoObject kobject ) throws KException {
+            if ( kobject.getTypeId() == VdbImport.TYPE_ID ) {
+                return ( VdbImport )kobject;
+            }
+
             return new VdbImportImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
-    
+
     };
 
     /**

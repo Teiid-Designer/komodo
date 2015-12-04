@@ -8,9 +8,9 @@
 package org.komodo.relational.model;
 
 import org.komodo.relational.Messages;
-import org.komodo.relational.TypeResolver;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.TypeResolver;
 import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.model.internal.IndexImpl;
 import org.komodo.repository.ObjectImpl;
@@ -51,7 +51,7 @@ public interface Index extends TableConstraint {
      * The resolver of a {@link Index}.
      */
     public static final TypeResolver< Index > RESOLVER = new TypeResolver< Index >() {
-    
+
         /**
          * {@inheritDoc}
          *
@@ -67,16 +67,16 @@ public interface Index extends TableConstraint {
                              final RelationalProperties properties ) throws KException {
             final AdapterFactory adapter = new AdapterFactory( );
             final Table parentTable = adapter.adapt( transaction, parent, Table.class );
-    
+
             if ( parentTable == null ) {
                 throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
                                                           parent.getAbsolutePath(),
                                                           Index.class.getSimpleName() ) );
             }
-    
+
             return parentTable.addIndex( transaction, id );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -86,7 +86,7 @@ public interface Index extends TableConstraint {
         public KomodoType identifier() {
             return IDENTIFIER;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -96,7 +96,7 @@ public interface Index extends TableConstraint {
         public Class< IndexImpl > owningClass() {
             return IndexImpl.class;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -113,7 +113,7 @@ public interface Index extends TableConstraint {
                                                         Constraint.TYPE,
                                                         CONSTRAINT_TYPE.toValue() );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -123,9 +123,13 @@ public interface Index extends TableConstraint {
         @Override
         public Index resolve( final UnitOfWork transaction,
                               final KomodoObject kobject ) throws KException {
+            if ( kobject.getTypeId() == Index.TYPE_ID ) {
+                return ( Index )kobject;
+            }
+
             return new IndexImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
-    
+
     };
 
     /**

@@ -52,7 +52,7 @@ public interface StoredProcedure extends Procedure {
      * The resolver of a {@link StoredProcedure}.
      */
     public static final TypeResolver< StoredProcedure > RESOLVER = new TypeResolver< StoredProcedure >() {
-    
+
         /**
          * {@inheritDoc}
          *
@@ -68,16 +68,16 @@ public interface StoredProcedure extends Procedure {
                                        final RelationalProperties properties ) throws KException {
             final AdapterFactory adapter = new AdapterFactory( );
             final Model parentModel = adapter.adapt( transaction, parent, Model.class );
-    
+
             if ( parentModel == null ) {
                 throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
                                                           parent.getAbsolutePath(),
                                                           StoredProcedure.class.getSimpleName() ) );
             }
-    
+
             return parentModel.addStoredProcedure( transaction, id );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -87,7 +87,7 @@ public interface StoredProcedure extends Procedure {
         public KomodoType identifier() {
             return IDENTIFIER;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -97,7 +97,7 @@ public interface StoredProcedure extends Procedure {
         public Class< StoredProcedureImpl > owningClass() {
             return StoredProcedureImpl.class;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -114,7 +114,7 @@ public interface StoredProcedure extends Procedure {
                                                         SchemaElement.TYPE,
                                                         SchemaElementType.FOREIGN.name() );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -124,9 +124,13 @@ public interface StoredProcedure extends Procedure {
         @Override
         public StoredProcedure resolve( final UnitOfWork transaction,
                                         final KomodoObject kobject ) throws KException {
+            if ( kobject.getTypeId() == StoredProcedure.TYPE_ID ) {
+                return ( StoredProcedure )kobject;
+            }
+
             return new StoredProcedureImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
-    
+
     };
 
     /**

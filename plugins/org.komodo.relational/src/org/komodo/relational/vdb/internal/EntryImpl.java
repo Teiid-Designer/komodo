@@ -42,7 +42,7 @@ public final class EntryImpl extends RelationalChildRestrictedObject implements 
 
     @Override
     public KomodoType getTypeIdentifier(UnitOfWork uow) {
-        return Entry.RESOLVER.identifier();
+        return Entry.IDENTIFIER;
     }
 
     /**

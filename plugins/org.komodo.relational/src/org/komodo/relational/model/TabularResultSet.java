@@ -41,7 +41,7 @@ public interface TabularResultSet extends ProcedureResultSet {
      * The resolver of a {@link TabularResultSet}.
      */
     public static final TypeResolver< TabularResultSet > RESOLVER = new TypeResolver< TabularResultSet >() {
-    
+
         /**
          * {@inheritDoc}
          *
@@ -58,24 +58,24 @@ public interface TabularResultSet extends ProcedureResultSet {
             final Class< ? extends AbstractProcedure > clazz = AbstractProcedure.Utils.getProcedureType( transaction, parent );
             final AdapterFactory adapter = new AdapterFactory( );
             final AbstractProcedure parentProc = adapter.adapt( transaction, parent, clazz );
-    
+
             if ( parentProc == null ) {
                 throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
                                                           parent.getAbsolutePath(),
                                                           TabularResultSet.class.getSimpleName() ) );
             }
-    
+
             if ( parentProc instanceof StoredProcedure ) {
                 return ( ( StoredProcedure )parentProc ).setResultSet( transaction, TabularResultSet.class );
             }
-    
+
             if ( parentProc instanceof PushdownFunction ) {
                 return ( ( PushdownFunction )parentProc ).setResultSet( transaction, TabularResultSet.class );
             }
-    
+
             throw new KException( Messages.getString( Relational.UNEXPECTED_RESULT_SET_TYPE, clazz.getName() ) );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -85,7 +85,7 @@ public interface TabularResultSet extends ProcedureResultSet {
         public KomodoType identifier() {
             return IDENTIFIER;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -95,7 +95,7 @@ public interface TabularResultSet extends ProcedureResultSet {
         public Class< TabularResultSetImpl > owningClass() {
             return TabularResultSetImpl.class;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -109,10 +109,10 @@ public interface TabularResultSet extends ProcedureResultSet {
             if ( CreateProcedure.RESULT_SET.equals( kobject.getName( transaction ) ) ) {
                 return ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, CreateProcedure.RESULT_COLUMNS );
             }
-    
+
             return false;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -122,9 +122,13 @@ public interface TabularResultSet extends ProcedureResultSet {
         @Override
         public TabularResultSet resolve( final UnitOfWork transaction,
                                          final KomodoObject kobject ) throws KException {
+            if ( kobject.getTypeId() == TabularResultSet.TYPE_ID ) {
+                return ( TabularResultSet )kobject;
+            }
+
             return new TabularResultSetImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
-    
+
     };
 
     /**

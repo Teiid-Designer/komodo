@@ -39,7 +39,7 @@ public final class IndexImpl extends TableConstraintImpl implements Index {
 
     @Override
     public KomodoType getTypeIdentifier(UnitOfWork uow) {
-        return Index.RESOLVER.identifier();
+        return Index.IDENTIFIER;
     }
 
     /**

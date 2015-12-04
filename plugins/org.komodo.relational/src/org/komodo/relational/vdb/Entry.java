@@ -47,7 +47,7 @@ public interface Entry extends RelationalObject {
      * The resolver of a {@link Entry}.
      */
     static final TypeResolver< Entry > RESOLVER = new TypeResolver< Entry >() {
-    
+
         /**
          * {@inheritDoc}
          *
@@ -65,16 +65,16 @@ public interface Entry extends RelationalObject {
             final String entryPath = entryPathValue == null ? null : entryPathValue.toString();
             final AdapterFactory adapter = new AdapterFactory( );
             final Vdb parentVdb = adapter.adapt( transaction, parent, Vdb.class );
-    
+
             if ( parentVdb == null ) {
                 throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
                                                           parent.getAbsolutePath(),
                                                           Entry.class.getSimpleName() ) );
             }
-    
+
             return parentVdb.addEntry( transaction, id, entryPath );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -84,7 +84,7 @@ public interface Entry extends RelationalObject {
         public KomodoType identifier() {
             return IDENTIFIER;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -94,7 +94,7 @@ public interface Entry extends RelationalObject {
         public Class< EntryImpl > owningClass() {
             return EntryImpl.class;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -106,7 +106,7 @@ public interface Entry extends RelationalObject {
                                    final KomodoObject kobject ) throws KException {
             return ObjectImpl.validateType( transaction, kobject.getRepository(), kobject, VdbLexicon.Entry.ENTRY );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -116,9 +116,13 @@ public interface Entry extends RelationalObject {
         @Override
         public Entry resolve( final UnitOfWork transaction,
                               final KomodoObject kobject ) throws KException {
+            if ( kobject.getTypeId() == Entry.TYPE_ID ) {
+                return ( Entry )kobject;
+            }
+
             return new EntryImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
-    
+
     };
 
     /**

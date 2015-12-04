@@ -37,7 +37,7 @@ public final class AccessPatternImpl extends TableConstraintImpl implements Acce
 
     @Override
     public KomodoType getTypeIdentifier(UnitOfWork uow) {
-        return AccessPattern.RESOLVER.identifier();
+        return AccessPattern.IDENTIFIER;
     }
 
     /**

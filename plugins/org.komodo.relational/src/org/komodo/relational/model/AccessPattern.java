@@ -8,9 +8,9 @@
 package org.komodo.relational.model;
 
 import org.komodo.relational.Messages;
-import org.komodo.relational.TypeResolver;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalProperties;
+import org.komodo.relational.TypeResolver;
 import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.model.internal.AccessPatternImpl;
 import org.komodo.repository.ObjectImpl;
@@ -51,7 +51,7 @@ public interface AccessPattern extends TableConstraint {
      * The resolver of a {@link AccessPattern}.
      */
     public static final TypeResolver< AccessPattern > RESOLVER = new TypeResolver< AccessPattern >() {
-    
+
         /**
          * {@inheritDoc}
          *
@@ -67,16 +67,16 @@ public interface AccessPattern extends TableConstraint {
                                      final RelationalProperties properties ) throws KException {
             final AdapterFactory adapter = new AdapterFactory( );
             final Table parentTable = adapter.adapt( transaction, parent, Table.class );
-    
+
             if ( parentTable == null ) {
                 throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
                                                           parent.getAbsolutePath(),
                                                           AccessPattern.class.getSimpleName() ) );
             }
-    
+
             return parentTable.addAccessPattern( transaction, id );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -86,7 +86,7 @@ public interface AccessPattern extends TableConstraint {
         public KomodoType identifier() {
             return IDENTIFIER;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -96,7 +96,7 @@ public interface AccessPattern extends TableConstraint {
         public Class< AccessPatternImpl > owningClass() {
             return AccessPatternImpl.class;
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -107,7 +107,7 @@ public interface AccessPattern extends TableConstraint {
         public boolean resolvable( final UnitOfWork transaction,
                                    final KomodoObject kobject ) throws KException {
             final Repository repository = kobject.getRepository();
-    
+
             return ObjectImpl.validateType( transaction, repository, kobject, Constraint.TABLE_ELEMENT )
                    && ObjectImpl.validatePropertyValue( transaction,
                                                         repository,
@@ -115,7 +115,7 @@ public interface AccessPattern extends TableConstraint {
                                                         Constraint.TYPE,
                                                         CONSTRAINT_TYPE.toValue() );
         }
-    
+
         /**
          * {@inheritDoc}
          *
@@ -125,6 +125,10 @@ public interface AccessPattern extends TableConstraint {
         @Override
         public AccessPattern resolve( final UnitOfWork transaction,
                                       final KomodoObject kobject ) throws KException {
+            if ( kobject.getTypeId() == AccessPattern.TYPE_ID ) {
+                return ( AccessPattern )kobject;
+            }
+
             return new AccessPatternImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
     };

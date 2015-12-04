@@ -152,6 +152,10 @@ public interface Permission extends RelationalObject {
         @Override
         public Permission resolve( final UnitOfWork transaction,
                                    final KomodoObject kobject ) throws KException {
+            if ( kobject.getTypeId() == Permission.TYPE_ID ) {
+                return ( Permission )kobject;
+            }
+
             return new PermissionImpl( transaction, kobject.getRepository(), kobject.getAbsolutePath() );
         }
 

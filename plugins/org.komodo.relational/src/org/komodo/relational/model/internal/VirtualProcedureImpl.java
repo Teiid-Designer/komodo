@@ -54,7 +54,7 @@ public final class VirtualProcedureImpl extends AbstractProcedureImpl implements
      */
     @Override
     public KomodoType getTypeIdentifier( final UnitOfWork transaction ) {
-        return VirtualProcedure.RESOLVER.identifier();
+        return VirtualProcedure.IDENTIFIER;
     }
 
     /**
