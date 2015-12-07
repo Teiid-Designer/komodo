@@ -504,7 +504,7 @@ public class DefaultKomodoShell implements KomodoShell {
      * Displays a welcome message to the user.
      */
     private void displayWelcomeMessage() {
-        displayMessage( I18n.bind( ShellI18n.welcomeMessage ) );
+        displayMessage( I18n.bind( ShellI18n.welcomeMessage, getVersion() ) );
     }
 
     /**
@@ -537,6 +537,26 @@ public class DefaultKomodoShell implements KomodoShell {
     @Override
     public String getShellPropertiesFile() {
         return PROPERTIES_FILE_NAME;
+    }
+    
+    
+    /**
+     * Method that reads version info from properties file
+     * 
+     * @return version info
+     */
+    private String getVersion(){
+    	
+    	Properties properties = new Properties();
+    	try {
+    		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+			properties.load(classLoader.getResourceAsStream("info.properties")); //$NON-NLS-1$
+			return properties.getProperty("komodo.version"); //$NON-NLS-1$
+		} catch (Exception e) {
+			displayMessage( I18n.bind( ShellI18n.errorLoadingVersion ) + e.getLocalizedMessage() );
+			return I18n.bind( ShellI18n.errorObtainingVersion );
+		}
+    		
     }
 
 }
