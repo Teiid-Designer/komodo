@@ -17,8 +17,8 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.KomodoTypeRegistry;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
-import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.KomodoObjectLabelProvider;
+import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.utils.StringUtils;
@@ -65,7 +65,7 @@ public final class FindCommand extends RelationalShellCommand {
                 final String[] foundObjectPaths = query( getWorkspaceStatus(), queryType, null, pattern );
 
                 // print results
-                printResults( queryType, foundObjectPaths );
+                printResults( queryType, pattern, foundObjectPaths );
                 result = CommandResult.SUCCESS;
             }
         } catch ( final Exception e ) {
@@ -82,7 +82,7 @@ public final class FindCommand extends RelationalShellCommand {
      */
     @Override
     protected int getMaxArgCount() {
-        return 1;
+        return 2;
     }
 
     /**
@@ -101,13 +101,21 @@ public final class FindCommand extends RelationalShellCommand {
     }
 
     private void printResults( final KomodoType queryType,
+                               final String pattern,
                                final String[] foundObjectPaths ) throws Exception {
         if ( foundObjectPaths.length == 0 ) {
-            print( MESSAGE_INDENT, I18n.bind(RelationalCommandsI18n.noObjectsFound, queryType.getType() ) );
+            if(StringUtils.isBlank(pattern)) {
+                print( MESSAGE_INDENT, I18n.bind(RelationalCommandsI18n.noObjectsFound, queryType.getType() ) );
+            } else {
+                print( MESSAGE_INDENT, I18n.bind(RelationalCommandsI18n.noObjectsFoundForPattern, queryType.getType(), pattern ) );
+            }
         } else {
             // print header
-            final String header = I18n.bind(RelationalCommandsI18n.typeHeader, queryType.getType() );
-            print( MESSAGE_INDENT, header );
+            if(StringUtils.isBlank(pattern)) {
+                print( MESSAGE_INDENT, I18n.bind(RelationalCommandsI18n.typeHeader, queryType.getType() ) );
+            } else {
+                print( MESSAGE_INDENT, I18n.bind(RelationalCommandsI18n.typeHeaderForPattern, queryType.getType(), pattern ) );
+            }
 
             // print paths of found objects
             final int indent = ( 2 * MESSAGE_INDENT );
