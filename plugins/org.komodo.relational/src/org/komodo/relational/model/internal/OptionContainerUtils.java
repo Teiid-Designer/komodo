@@ -9,14 +9,17 @@ package org.komodo.relational.model.internal;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import org.komodo.relational.Messages;
-import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.Messages.Relational;
+import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.model.OptionContainer;
 import org.komodo.relational.model.StatementOption;
 import org.komodo.repository.DescriptorImpl;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Descriptor;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
@@ -31,6 +34,90 @@ import org.modeshape.sequencer.ddl.StandardDdlLexicon;
  * Utilities for retrieving and updating standard and custom statement options.
  */
 public final class OptionContainerUtils {
+
+    /**
+     * A {@link PropertyDescriptor property descriptor} for an {@link StatementOption option}.
+     */
+    static class OptionDescriptor implements PropertyDescriptor {
+
+        private final String[] defaultValues;
+        private final String name;
+
+        /**
+         * @param optionName
+         *        the name of the option (cannot be empty)
+         * @param defaultValue
+         *        the default value for the option (can be empty)
+         */
+        public OptionDescriptor( final String optionName,
+                                 final String defaultValue ) {
+            ArgCheck.isNotEmpty( optionName, "optionName" ); //$NON-NLS-1$
+            this.name = optionName;
+            this.defaultValues = ( StringUtils.isBlank( defaultValue ) ? StringConstants.EMPTY_ARRAY
+                                                                       : new String[] { defaultValue } );
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.spi.repository.PropertyDescriptor#getDefaultValues()
+         */
+        @Override
+        public Object[] getDefaultValues() {
+            return this.defaultValues;
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.spi.repository.PropertyDescriptor#getName()
+         */
+        @Override
+        public String getName() {
+            return this.name;
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.spi.repository.PropertyDescriptor#getType()
+         */
+        @Override
+        public Type getType() {
+            return Type.STRING;
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.spi.repository.PropertyDescriptor#isMandatory()
+         */
+        @Override
+        public boolean isMandatory() {
+            return false;
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.spi.repository.PropertyDescriptor#isModifiable()
+         */
+        @Override
+        public boolean isModifiable() {
+            return true;
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.spi.repository.PropertyDescriptor#isMultiple()
+         */
+        @Override
+        public boolean isMultiple() {
+            return false;
+        }
+
+    }
 
     private static class PrimaryTypeDescriptor extends DescriptorImpl {
 
@@ -69,14 +156,14 @@ public final class OptionContainerUtils {
             PropertyDescriptor[] customDescriptors = PropertyDescriptor.NO_DESCRIPTORS;
 
             { // standard statement options
-                final String[] standardNames = this.container.getStandardOptionNames();
+                final Map< String, String > standardOptions = this.container.getStandardOptions();
 
-                if ( standardNames.length > 0 ) {
-                    standardDescriptors = new PropertyDescriptor[ standardNames.length ];
+                if ( !standardOptions.isEmpty() ) {
+                    standardDescriptors = new PropertyDescriptor[ standardOptions.size() ];
                     int i = 0;
 
-                    for ( final String name : standardNames ) {
-                        standardDescriptors[i++] = new StatementOptionImpl.OptionDescriptor( name );
+                    for ( final Entry< String, String > entry : standardOptions.entrySet() ) {
+                        standardDescriptors[ i++ ] = new OptionDescriptor( entry.getKey(), entry.getValue() );
                     }
                 }
             }
@@ -89,7 +176,7 @@ public final class OptionContainerUtils {
                     int i = 0;
 
                     for ( final StatementOption option : customOptions ) {
-                        customDescriptors[i++] = new StatementOptionImpl.OptionDescriptor( option.getName( transaction ) );
+                        customDescriptors[i++] = new OptionDescriptor( option.getName( transaction ), null );
                     }
                 }
             }
@@ -191,9 +278,9 @@ public final class OptionContainerUtils {
      * @throws KException
      *         if an error occurs
      */
-    public static PropertyDescriptor getOptionDescriptor( final UnitOfWork transaction,
-                                                          final OptionContainer container,
-                                                          final String propName ) throws KException {
+    private static PropertyDescriptor getOptionDescriptor( final UnitOfWork transaction,
+                                                           final OptionContainer container,
+                                                           final String propName ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotNull( container, "container" ); //$NON-NLS-1$
@@ -203,7 +290,7 @@ public final class OptionContainerUtils {
 
         // see if standard statement option
         if ( container.isStandardOption( propName ) ) {
-            result = new StatementOptionImpl.OptionDescriptor( propName );
+            result = new OptionDescriptor( propName, container.getStandardOptions().get( propName ) );
         } else {
             // see if there is a custom statement option persisted
             final StatementOption[] customOptions = getCustomOptions( transaction, container );

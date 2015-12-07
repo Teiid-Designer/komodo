@@ -15,6 +15,7 @@ import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import java.util.Arrays;
+import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
@@ -316,7 +317,7 @@ public final class AbstractProcedureImplTest extends RelationalModelTest {
         this.procedure.setStatementOption( getTransaction(), custom, "sledge" );
         boolean customFound = false;
 
-        final String standard = this.procedure.getStandardOptionNames()[0];
+        final String standard = this.procedure.getStandardOptions().keySet().iterator().next();
         this.procedure.setStatementOption( getTransaction(), standard, "hammer" );
         boolean standardFound = false;
 
@@ -351,7 +352,7 @@ public final class AbstractProcedureImplTest extends RelationalModelTest {
 
     @Test
     public void shouldIncludeStandardOptionsWithPrimaryTypePropertyDescriptors() throws Exception {
-        final String[] optionNames = this.procedure.getStandardOptionNames();
+        final Set< String > optionNames = this.procedure.getStandardOptions().keySet();
         final PropertyDescriptor[] propDescriptors = this.procedure.getPrimaryType( getTransaction() ).getPropertyDescriptors( getTransaction() );
 
         for ( final String optionName : optionNames ) {
@@ -372,7 +373,7 @@ public final class AbstractProcedureImplTest extends RelationalModelTest {
 
     @Test
     public void shouldIncludeStandardOptionsWithPropertyDescriptors() throws Exception {
-        final String[] optionNames = this.procedure.getStandardOptionNames();
+        final Set< String > optionNames = this.procedure.getStandardOptions().keySet();
         final PropertyDescriptor[] propDescriptors = this.procedure.getPropertyDescriptors( getTransaction() );
 
         for ( final String optionName : optionNames ) {
@@ -414,7 +415,7 @@ public final class AbstractProcedureImplTest extends RelationalModelTest {
 
     @Test
     public void shouldObtainPropertyDescriptorOfStandardOption() throws Exception {
-        final String standard = this.procedure.getStandardOptionNames()[0];
+        final String standard = this.procedure.getStandardOptions().keySet().iterator().next();
         this.procedure.setStatementOption( getTransaction(), standard, "blah" );
 
         assertThat( this.procedure.getPropertyDescriptor( getTransaction(), standard ), is( notNullValue() ) );
@@ -426,7 +427,7 @@ public final class AbstractProcedureImplTest extends RelationalModelTest {
         final String custom = "blah";
         this.procedure.setStatementOption( getTransaction(), custom, "sledge" );
 
-        final String standard = this.procedure.getStandardOptionNames()[0];
+        final String standard = this.procedure.getStandardOptions().keySet().iterator().next();
         this.procedure.setStatementOption( getTransaction(), standard, "hammer" );
 
         assertThat( this.procedure.getStatementOptionNames( getTransaction() ).length, is( 2 ) );
@@ -435,7 +436,7 @@ public final class AbstractProcedureImplTest extends RelationalModelTest {
 
     @Test
     public void shouldRemoveStandardOptionAsIfProperty() throws Exception {
-        final String option = this.procedure.getStandardOptionNames()[0];
+        final String option = this.procedure.getStandardOptions().keySet().iterator().next();
         final String value = "newValue";
         this.procedure.setProperty( getTransaction(), option, value ); // add
         this.procedure.setProperty( getTransaction(), option, (Object)null ); // remove
@@ -463,7 +464,7 @@ public final class AbstractProcedureImplTest extends RelationalModelTest {
 
     @Test
     public void shouldSetStandardOptionAsIfProperty() throws Exception {
-        final String option = this.procedure.getStandardOptionNames()[0];
+        final String option = this.procedure.getStandardOptions().keySet().iterator().next();
         this.procedure.setStatementOption( getTransaction(), option, "initialValue" );
 
         final String value = "newValue";

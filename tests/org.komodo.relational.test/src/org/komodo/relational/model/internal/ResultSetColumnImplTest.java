@@ -15,6 +15,7 @@ import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import java.util.Arrays;
+import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalConstants;
@@ -305,7 +306,7 @@ public final class ResultSetColumnImplTest extends RelationalModelTest {
         this.column.setStatementOption( getTransaction(), custom, "sledge" );
         boolean customFound = false;
 
-        final String standard = this.column.getStandardOptionNames()[0];
+        final String standard = this.column.getStandardOptions().keySet().iterator().next();
         this.column.setStatementOption( getTransaction(), standard, "hammer" );
         boolean standardFound = false;
 
@@ -340,7 +341,7 @@ public final class ResultSetColumnImplTest extends RelationalModelTest {
 
     @Test
     public void shouldIncludeStandardOptionsWithPrimaryTypePropertyDescriptors() throws Exception {
-        final String[] optionNames = this.column.getStandardOptionNames();
+        final Set< String > optionNames = this.column.getStandardOptions().keySet();
         final PropertyDescriptor[] propDescriptors = this.column.getPrimaryType( getTransaction() ).getPropertyDescriptors( getTransaction() );
 
         for ( final String optionName : optionNames ) {
@@ -361,7 +362,7 @@ public final class ResultSetColumnImplTest extends RelationalModelTest {
 
     @Test
     public void shouldIncludeStandardOptionsWithPropertyDescriptors() throws Exception {
-        final String[] optionNames = this.column.getStandardOptionNames();
+        final Set< String > optionNames = this.column.getStandardOptions().keySet();
         final PropertyDescriptor[] propDescriptors = this.column.getPropertyDescriptors( getTransaction() );
 
         for ( final String optionName : optionNames ) {
@@ -369,6 +370,8 @@ public final class ResultSetColumnImplTest extends RelationalModelTest {
 
             for ( final PropertyDescriptor descriptor : propDescriptors ) {
                 if ( optionName.equals( descriptor.getName() ) ) {
+                    // standard options don't have any default values
+                    assertThat( this.column.getStandardOptions().get( optionName ), is( nullValue() ) );
                     found = true;
                     break;
                 }
@@ -403,7 +406,7 @@ public final class ResultSetColumnImplTest extends RelationalModelTest {
 
     @Test
     public void shouldObtainPropertyDescriptorOfStandardOption() throws Exception {
-        final String standard = this.column.getStandardOptionNames()[0];
+        final String standard = this.column.getStandardOptions().keySet().iterator().next();
         this.column.setStatementOption( getTransaction(), standard, "blah" );
 
         assertThat( this.column.getPropertyDescriptor( getTransaction(), standard ), is( notNullValue() ) );
@@ -415,7 +418,7 @@ public final class ResultSetColumnImplTest extends RelationalModelTest {
         final String custom = "blah";
         this.column.setStatementOption( getTransaction(), custom, "sledge" );
 
-        final String standard = this.column.getStandardOptionNames()[0];
+        final String standard = this.column.getStandardOptions().keySet().iterator().next();
         this.column.setStatementOption( getTransaction(), standard, "hammer" );
 
         assertThat( this.column.getStatementOptionNames( getTransaction() ).length, is( 2 ) );
@@ -424,7 +427,7 @@ public final class ResultSetColumnImplTest extends RelationalModelTest {
 
     @Test
     public void shouldRemoveStandardOptionAsIfProperty() throws Exception {
-        final String option = this.column.getStandardOptionNames()[0];
+        final String option = this.column.getStandardOptions().keySet().iterator().next();
         final String value = "newValue";
         this.column.setProperty( getTransaction(), option, value ); // add
         this.column.setProperty( getTransaction(), option, (Object)null ); // remove
@@ -452,7 +455,7 @@ public final class ResultSetColumnImplTest extends RelationalModelTest {
 
     @Test
     public void shouldSetStandardOptionAsIfProperty() throws Exception {
-        final String option = this.column.getStandardOptionNames()[0];
+        final String option = this.column.getStandardOptions().keySet().iterator().next();
         this.column.setStatementOption( getTransaction(), option, "initialValue" );
 
         final String value = "newValue";

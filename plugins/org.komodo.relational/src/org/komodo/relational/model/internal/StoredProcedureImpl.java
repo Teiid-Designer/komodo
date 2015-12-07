@@ -7,6 +7,9 @@
  */
 package org.komodo.relational.model.internal;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalModelFactory;
@@ -33,6 +36,8 @@ public final class StoredProcedureImpl extends AbstractProcedureImpl implements 
      */
     private static final KomodoType[] KID_TYPES;
 
+    private static Map< String, String > _defaultValues = null;
+
     static {
         KID_TYPES = new KomodoType[ CHILD_TYPES.length + 2 ];
         System.arraycopy( CHILD_TYPES, 0, KID_TYPES, 0, CHILD_TYPES.length );
@@ -42,8 +47,23 @@ public final class StoredProcedureImpl extends AbstractProcedureImpl implements 
 
     private enum StandardOption {
 
-        NATIVE_QUERY( "native-query" ), //$NON-NLS-1$
-        NON_PREPARED( "non-prepared" ); //$NON-NLS-1$
+        NATIVE_QUERY( "native-query", null ), //$NON-NLS-1$
+        NON_PREPARED( "non-prepared", Boolean.toString( StoredProcedure.DEFAULT_NON_PREPARED ) ); //$NON-NLS-1$
+
+        /**
+         * @return an unmodifiable collection of the names and default values of all the standard options (never <code>null</code>
+         *         or empty)
+         */
+        static Map< String, String > defaultValues() {
+            final StandardOption[] options = values();
+            final Map< String, String > result = new HashMap< >();
+
+            for ( final StandardOption option : options ) {
+                result.put( option.name(), option.defaultValue );
+            }
+
+            return result;
+        }
 
         /**
          * @param name
@@ -60,25 +80,13 @@ public final class StoredProcedureImpl extends AbstractProcedureImpl implements 
             return false;
         }
 
-        /**
-         * @return the names of all the options (never <code>null</code> or empty)
-         */
-        static String[] names() {
-            final StandardOption[] options = values();
-            final String[] result = new String[ options.length ];
-            int i = 0;
-
-            for ( final StandardOption option : options ) {
-                result[i++] = option.name();
-            }
-
-            return result;
-        }
-
+        private final String defaultValue;
         private final String name;
 
-        private StandardOption( final String optionName ) {
+        private StandardOption( final String optionName,
+                                final String defaultValue ) {
             this.name = optionName;
+            this.defaultValue = defaultValue;
         }
 
         public String getName() {
@@ -153,19 +161,22 @@ public final class StoredProcedureImpl extends AbstractProcedureImpl implements 
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.OptionContainer#getStandardOptionNames()
+     * @see org.komodo.relational.model.OptionContainer#getStandardOptions()
      */
     @Override
-    public String[] getStandardOptionNames() {
-        final String[] superNames = super.getStandardOptionNames();
-        final String[] names = StandardOption.names();
+    public Map< String, String > getStandardOptions() {
+        if ( _defaultValues == null ) {
+            final Map< String, String > superOptions = super.getStandardOptions();
+            final Map< String, String > options = StandardOption.defaultValues();
 
-        // combine
-        final String[] result = new String[superNames.length + StandardOption.values().length];
-        System.arraycopy( superNames, 0, result, 0, superNames.length );
-        System.arraycopy( names, 0, result, superNames.length, names.length );
+            final Map< String, String > combined = new HashMap< >( superOptions.size() + options.size() );
+            combined.putAll( superOptions );
+            combined.putAll( options );
 
-        return result;
+            _defaultValues = Collections.unmodifiableMap( combined );
+        }
+
+        return _defaultValues;
     }
 
     /**

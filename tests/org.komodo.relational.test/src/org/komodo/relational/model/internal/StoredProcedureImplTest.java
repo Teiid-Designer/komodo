@@ -15,6 +15,9 @@ import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import java.util.Arrays;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
@@ -31,6 +34,7 @@ import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyDescriptor;
+import org.komodo.utils.StringUtils;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class StoredProcedureImplTest extends RelationalModelTest {
@@ -190,7 +194,7 @@ public final class StoredProcedureImplTest extends RelationalModelTest {
         this.procedure.setStatementOption( getTransaction(), custom, "sledge" );
         boolean customFound = false;
 
-        final String standard = this.procedure.getStandardOptionNames()[0];
+        final String standard = this.procedure.getStandardOptions().keySet().iterator().next();
         this.procedure.setStatementOption( getTransaction(), standard, "hammer" );
         boolean standardFound = false;
 
@@ -224,8 +228,30 @@ public final class StoredProcedureImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldIncludeStandardOptionDefaultValuesWithPropertyDescriptors() throws Exception {
+        final Map< String, String > options = this.procedure.getStandardOptions();
+        final PropertyDescriptor[] propDescriptors = this.procedure.getPropertyDescriptors( getTransaction() );
+
+        for ( final Entry< String, String > entry : options.entrySet() ) {
+            for ( final PropertyDescriptor descriptor : propDescriptors ) {
+                if ( entry.getKey().equals( descriptor.getName() ) ) {
+                    final String value = entry.getValue();
+                    final Object[] defaultValues = descriptor.getDefaultValues();
+
+                    if ( StringUtils.isBlank( value ) ) {
+                        assertThat( defaultValues.length, is( 0 ) );
+                    } else {
+                        assertThat( defaultValues.length, is( 1 ) );
+                        assertThat( value, is( defaultValues[0] ) );
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
     public void shouldIncludeStandardOptionsWithPrimaryTypePropertyDescriptors() throws Exception {
-        final String[] optionNames = this.procedure.getStandardOptionNames();
+        final Set< String > optionNames = this.procedure.getStandardOptions().keySet();
         final PropertyDescriptor[] propDescriptors = this.procedure.getPrimaryType( getTransaction() ).getPropertyDescriptors( getTransaction() );
 
         for ( final String optionName : optionNames ) {
@@ -246,7 +272,7 @@ public final class StoredProcedureImplTest extends RelationalModelTest {
 
     @Test
     public void shouldIncludeStandardOptionsWithPropertyDescriptors() throws Exception {
-        final String[] optionNames = this.procedure.getStandardOptionNames();
+        final Set< String > optionNames = this.procedure.getStandardOptions().keySet();
         final PropertyDescriptor[] propDescriptors = this.procedure.getPropertyDescriptors( getTransaction() );
 
         for ( final String optionName : optionNames ) {
@@ -288,7 +314,7 @@ public final class StoredProcedureImplTest extends RelationalModelTest {
 
     @Test
     public void shouldObtainPropertyDescriptorOfStandardOption() throws Exception {
-        final String standard = this.procedure.getStandardOptionNames()[0];
+        final String standard = this.procedure.getStandardOptions().keySet().iterator().next();
         this.procedure.setStatementOption( getTransaction(), standard, "blah" );
 
         assertThat( this.procedure.getPropertyDescriptor( getTransaction(), standard ), is( notNullValue() ) );
@@ -300,7 +326,7 @@ public final class StoredProcedureImplTest extends RelationalModelTest {
         final String custom = "blah";
         this.procedure.setStatementOption( getTransaction(), custom, "sledge" );
 
-        final String standard = this.procedure.getStandardOptionNames()[0];
+        final String standard = this.procedure.getStandardOptions().keySet().iterator().next();
         this.procedure.setStatementOption( getTransaction(), standard, "hammer" );
 
         assertThat( this.procedure.getStatementOptionNames( getTransaction() ).length, is( 2 ) );
@@ -309,7 +335,7 @@ public final class StoredProcedureImplTest extends RelationalModelTest {
 
     @Test
     public void shouldRemoveStandardOptionAsIfProperty() throws Exception {
-        final String option = this.procedure.getStandardOptionNames()[0];
+        final String option = this.procedure.getStandardOptions().keySet().iterator().next();
         final String value = "newValue";
         this.procedure.setProperty( getTransaction(), option, value ); // add
         this.procedure.setProperty( getTransaction(), option, (Object)null ); // remove
@@ -337,7 +363,7 @@ public final class StoredProcedureImplTest extends RelationalModelTest {
 
     @Test
     public void shouldSetStandardOptionAsIfProperty() throws Exception {
-        final String option = this.procedure.getStandardOptionNames()[0];
+        final String option = this.procedure.getStandardOptions().keySet().iterator().next();
         this.procedure.setStatementOption( getTransaction(), option, "initialValue" );
 
         final String value = "newValue";

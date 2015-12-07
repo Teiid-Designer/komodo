@@ -436,7 +436,7 @@ public final class ParameterImplTest extends RelationalModelTest {
 
     @Test
     public void shouldNotHaveStandardOptionNames() throws Exception {
-        assertThat( this.parameter.getStandardOptionNames().length, is( 0 ) );
+        assertThat( this.parameter.getStandardOptions().isEmpty(), is( true ) );
     }
 
     /*

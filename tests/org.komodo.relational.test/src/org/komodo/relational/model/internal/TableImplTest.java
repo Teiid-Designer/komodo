@@ -16,6 +16,9 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import java.util.Arrays;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelFactory;
@@ -39,6 +42,7 @@ import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyDescriptor;
+import org.komodo.utils.StringUtils;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 
@@ -523,7 +527,7 @@ public final class TableImplTest extends RelationalModelTest {
         this.table.setStatementOption( getTransaction(), custom, "sledge" );
         boolean customFound = false;
 
-        final String standard = this.table.getStandardOptionNames()[0];
+        final String standard = this.table.getStandardOptions().keySet().iterator().next();
         this.table.setStatementOption( getTransaction(), standard, "hammer" );
         boolean standardFound = false;
 
@@ -557,8 +561,30 @@ public final class TableImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldIncludeStandardOptionDefaultValuesWithPropertyDescriptors() throws Exception {
+        final Map< String, String > options = this.table.getStandardOptions();
+        final PropertyDescriptor[] propDescriptors = this.table.getPropertyDescriptors( getTransaction() );
+
+        for ( final Entry< String, String > entry : options.entrySet() ) {
+            for ( final PropertyDescriptor descriptor : propDescriptors ) {
+                if ( entry.getKey().equals( descriptor.getName() ) ) {
+                    final String value = entry.getValue();
+                    final Object[] defaultValues = descriptor.getDefaultValues();
+
+                    if ( StringUtils.isBlank( value ) ) {
+                        assertThat( defaultValues.length, is( 0 ) );
+                    } else {
+                        assertThat( defaultValues.length, is( 1 ) );
+                        assertThat( value, is( defaultValues[0] ) );
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
     public void shouldIncludeStandardOptionsWithPrimaryTypePropertyDescriptors() throws Exception {
-        final String[] optionNames = this.table.getStandardOptionNames();
+        final Set< String > optionNames = this.table.getStandardOptions().keySet();
         final PropertyDescriptor[] propDescriptors = this.table.getPrimaryType( getTransaction() ).getPropertyDescriptors( getTransaction() );
 
         for ( final String optionName : optionNames ) {
@@ -579,7 +605,7 @@ public final class TableImplTest extends RelationalModelTest {
 
     @Test
     public void shouldIncludeStandardOptionsWithPropertyDescriptors() throws Exception {
-        final String[] optionNames = this.table.getStandardOptionNames();
+        final Set< String > optionNames = this.table.getStandardOptions().keySet();
         final PropertyDescriptor[] propDescriptors = this.table.getPropertyDescriptors( getTransaction() );
 
         for ( final String optionName : optionNames ) {
@@ -621,7 +647,7 @@ public final class TableImplTest extends RelationalModelTest {
 
     @Test
     public void shouldObtainPropertyDescriptorOfStandardOption() throws Exception {
-        final String standard = this.table.getStandardOptionNames()[0];
+        final String standard = this.table.getStandardOptions().keySet().iterator().next();
         this.table.setStatementOption( getTransaction(), standard, "blah" );
 
         assertThat( this.table.getPropertyDescriptor( getTransaction(), standard ), is( notNullValue() ) );
@@ -633,7 +659,7 @@ public final class TableImplTest extends RelationalModelTest {
         final String custom = "blah";
         this.table.setStatementOption( getTransaction(), custom, "sledge" );
 
-        final String standard = this.table.getStandardOptionNames()[0];
+        final String standard = this.table.getStandardOptions().keySet().iterator().next();
         this.table.setStatementOption( getTransaction(), standard, "hammer" );
 
         assertThat( this.table.getStatementOptionNames( getTransaction() ).length, is( 2 ) );
@@ -642,7 +668,7 @@ public final class TableImplTest extends RelationalModelTest {
 
     @Test
     public void shouldRemoveStandardOptionAsIfProperty() throws Exception {
-        final String option = this.table.getStandardOptionNames()[0];
+        final String option = this.table.getStandardOptions().keySet().iterator().next();
         final String value = "newValue";
         this.table.setProperty( getTransaction(), option, value ); // add
         this.table.setProperty( getTransaction(), option, (Object)null ); // remove
@@ -670,7 +696,7 @@ public final class TableImplTest extends RelationalModelTest {
 
     @Test
     public void shouldSetStandardOptionAsIfProperty() throws Exception {
-        final String option = this.table.getStandardOptionNames()[0];
+        final String option = this.table.getStandardOptions().keySet().iterator().next();
         this.table.setStatementOption( getTransaction(), option, "initialValue" );
 
         final String value = "newValue";
