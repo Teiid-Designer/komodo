@@ -11,7 +11,6 @@ import java.util.Arrays;
 import java.util.List;
 import org.komodo.relational.commands.RelationalShellCommand;
 import org.komodo.relational.datasource.Datasource;
-import org.komodo.relational.model.Schema;
 import org.komodo.shell.api.WorkspaceStatus;
 
 /**
@@ -34,7 +33,7 @@ abstract class DatasourceShellCommand extends RelationalShellCommand {
     }
 
     protected Datasource getDatasource() throws Exception {
-        assert getContext() instanceof Schema;
+        assert getContext() instanceof Datasource;
         return Datasource.RESOLVER.resolve(getTransaction(), getContext());
     }
 

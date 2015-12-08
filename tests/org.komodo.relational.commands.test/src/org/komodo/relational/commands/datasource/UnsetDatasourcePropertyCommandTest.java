@@ -44,7 +44,7 @@ public final class UnsetDatasourcePropertyCommandTest extends AbstractCommandTes
         assertEquals(1, datasources.length);
         assertEquals("testSource", datasources[0].getName(getTransaction())); //$NON-NLS-1$
 
-        assertEquals("", datasources[0].getJndiName(getTransaction()));
+        assertEquals(null, datasources[0].getJndiName(getTransaction()));
     }
 
 }

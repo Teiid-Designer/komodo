@@ -21,6 +21,8 @@
  */
 package org.komodo.relational.datasource.internal;
 
+import java.util.Collection;
+import java.util.Properties;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.ExcludeQNamesFilter;
 import org.komodo.relational.datasource.Datasource;
@@ -35,6 +37,8 @@ import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.spi.runtime.EventManager;
 import org.komodo.spi.runtime.ExecutionConfigurationEvent;
 import org.komodo.spi.runtime.ExecutionConfigurationListener;
+import org.komodo.spi.runtime.TeiidInstance;
+import org.komodo.spi.runtime.TeiidPropertyDefinition;
 import org.komodo.utils.ArgCheck;
 import org.modeshape.jcr.JcrLexicon;
 
@@ -106,10 +110,8 @@ public class DatasourceImpl extends RelationalChildRestrictedObject implements D
      */
     @Override
     public String getJndiName( final UnitOfWork uow ) throws KException {
-        final String jndiName = getObjectProperty( uow, PropertyValueType.STRING, "getJndiName", //$NON-NLS-1$
-                                                   KomodoLexicon.DataSource.JNDI_NAME);
-
-        return jndiName == null ? EMPTY_STRING : jndiName;
+        return getObjectProperty( uow, PropertyValueType.STRING, "getJndiName", //$NON-NLS-1$
+                                  KomodoLexicon.DataSource.JNDI_NAME);
     }
 
     /**
@@ -119,10 +121,8 @@ public class DatasourceImpl extends RelationalChildRestrictedObject implements D
      */
     @Override
     public String getDriverName( final UnitOfWork uow ) throws KException {
-        final String driverName = getObjectProperty( uow, PropertyValueType.STRING, "getDriverName", //$NON-NLS-1$
-                                                     KomodoLexicon.DataSource.DRIVER_NAME);
-
-        return driverName == null ? EMPTY_STRING : driverName;
+        return getObjectProperty( uow, PropertyValueType.STRING, "getDriverName", //$NON-NLS-1$
+                                  KomodoLexicon.DataSource.DRIVER_NAME);
     }
     
     /**
@@ -132,10 +132,8 @@ public class DatasourceImpl extends RelationalChildRestrictedObject implements D
      */
     @Override
     public String getClassName(UnitOfWork uow) throws KException {
-        final String className = getObjectProperty( uow, PropertyValueType.STRING, "getClassName", //$NON-NLS-1$
-                                                     KomodoLexicon.DataSource.CLASS_NAME);
-
-        return className == null ? EMPTY_STRING : className;
+        return getObjectProperty( uow, PropertyValueType.STRING, "getClassName", //$NON-NLS-1$
+                                  KomodoLexicon.DataSource.CLASS_NAME);
     }
 
     /**
@@ -145,10 +143,8 @@ public class DatasourceImpl extends RelationalChildRestrictedObject implements D
      */
     @Override
     public String getProfileName(UnitOfWork uow) throws KException {
-        final String profileName = getObjectProperty( uow, PropertyValueType.STRING, "getProfileName", //$NON-NLS-1$
-                                                      KomodoLexicon.DataSource.PROFILE_NAME);
-
-        return profileName == null ? EMPTY_STRING : profileName;
+        return getObjectProperty( uow, PropertyValueType.STRING, "getProfileName", //$NON-NLS-1$
+                                  KomodoLexicon.DataSource.PROFILE_NAME);
     }
 
     /**
@@ -159,7 +155,11 @@ public class DatasourceImpl extends RelationalChildRestrictedObject implements D
     @Override
     public boolean isJdbc(UnitOfWork uow) throws KException {
        Boolean isJdbc = getObjectProperty(uow, PropertyValueType.BOOLEAN, "isJdbc", KomodoLexicon.DataSource.JDBC); //$NON-NLS-1$
-       return isJdbc != null ? isJdbc : Datasource.DEFAULT_JDBC;
+       if ( isJdbc == null ) {
+           return Datasource.DEFAULT_JDBC;
+       }
+
+       return isJdbc;
     }
 
     /**
@@ -170,7 +170,10 @@ public class DatasourceImpl extends RelationalChildRestrictedObject implements D
     @Override
     public boolean isPreview(UnitOfWork uow) throws KException {
        Boolean isPreview = getObjectProperty(uow, PropertyValueType.BOOLEAN, "isPreview", KomodoLexicon.DataSource.PREVIEW); //$NON-NLS-1$
-       return isPreview != null ? isPreview : Datasource.DEFAULT_PREVIEW;
+       if( isPreview == null ) {
+           return Datasource.DEFAULT_PREVIEW;
+       }
+       return isPreview;
     }
 
     /**
@@ -251,6 +254,60 @@ public class DatasourceImpl extends RelationalChildRestrictedObject implements D
         } else {
             setFilters( DEFAULT_FILTERS );
         }
+    }
+
+    /* (non-Javadoc)
+     * @see org.komodo.relational.datasource.Datasource#getPropertiesForServerDeployment(org.komodo.spi.repository.Repository.UnitOfWork, org.komodo.spi.runtime.TeiidInstance)
+     */
+    @Override
+    public Properties getPropertiesForServerDeployment(UnitOfWork transaction,
+                                                       TeiidInstance teiidInstance) throws Exception {
+        Properties sourceProps = new Properties();
+        
+        // Get the Property Defns for this type of source.
+        Collection<TeiidPropertyDefinition> templatePropDefns = teiidInstance.getTemplatePropertyDefns(getDriverName(transaction));
+
+        if(isJdbc(transaction)) {
+            String driverName = getDriverName(transaction);
+            sourceProps.setProperty(TeiidInstance.DATASOURCE_DRIVERNAME,driverName);
+            String jndiName = getJndiName(transaction);
+            sourceProps.setProperty(TeiidInstance.DATASOURCE_JNDINAME, jndiName);
+        } else {
+            sourceProps.setProperty(TeiidInstance.DATASOURCE_CLASSNAME, getClassName(transaction));
+        }
+        
+        // Iterate the datasource properties.  Compare them against the valid properties for the server source type.
+        String[] propNames = getPropertyNames(transaction);
+        for(String propName : propNames) {
+            TeiidPropertyDefinition propDefn = getTemplatePropertyDefn(templatePropDefns,propName);
+            if(propDefn!=null) {
+                boolean hasDefault = propDefn.getDefaultValue()!=null ? true : false;
+                String sourcePropValue = getProperty(transaction, propName).getStringValue(transaction);
+                // Template has no default - set the property
+                if(!hasDefault) {
+                    sourceProps.setProperty(propName, sourcePropValue);
+                    // Template has default - if source property matches it, no need to provide it.
+                } else {
+                    String templateDefaultValue = propDefn.getDefaultValue().toString();
+                    if(!templateDefaultValue.equals(sourcePropValue)) {
+                        sourceProps.setProperty(propName, sourcePropValue);
+                    }
+                }
+            }
+        }
+        
+        return sourceProps;
+    }
+    
+    private TeiidPropertyDefinition getTemplatePropertyDefn(Collection<TeiidPropertyDefinition> templatePropDefns, String propName) {
+        TeiidPropertyDefinition propDefn = null;
+        for(TeiidPropertyDefinition aDefn : templatePropDefns) {
+            if(propName.equals(aDefn.getName())) {
+                propDefn = aDefn;
+                break;
+            }
+        }
+        return propDefn;
     }
 
     @Override

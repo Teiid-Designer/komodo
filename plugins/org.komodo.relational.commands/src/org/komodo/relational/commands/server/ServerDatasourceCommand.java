@@ -10,7 +10,6 @@ package org.komodo.relational.commands.server;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.Collections;
 import java.util.List;
-import org.komodo.relational.teiid.Teiid;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
@@ -52,8 +51,7 @@ public final class ServerDatasourceCommand extends ServerShellCommand {
                 return validationResult;
             }
 
-            Teiid teiid = getWorkspaceServer();
-            TeiidDataSource source = teiid.getTeiidInstance( getTransaction() ).getDataSource(sourceName);
+            TeiidDataSource source = getWorkspaceTeiidInstance().getDataSource(sourceName);
             if(source==null) {
                 return new CommandResultImpl(false, I18n.bind( ServerCommandsI18n.serverDatasourceNotFound, sourceName ), null);
             }
@@ -81,16 +79,6 @@ public final class ServerDatasourceCommand extends ServerShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 1;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
-     */
-    @Override
-    public final boolean isValidForCurrentContext() {
-        return hasConnectedWorkspaceServer();
     }
 
     /**
@@ -133,9 +121,7 @@ public final class ServerDatasourceCommand extends ServerShellCommand {
                               final List< CharSequence > candidates ) throws Exception {
         final Arguments args = getArguments();
 
-        Teiid teiid = getWorkspaceServer();
-        
-        List<String> existingSourceNames = ServerUtils.getDatasourceNames(teiid, getTransaction());
+        List<String> existingSourceNames = ServerUtils.getDatasourceNames(getWorkspaceTeiidInstance());
         Collections.sort(existingSourceNames);
 
         if ( args.isEmpty() ) {

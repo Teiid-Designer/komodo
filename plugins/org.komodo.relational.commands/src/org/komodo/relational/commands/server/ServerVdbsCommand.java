@@ -51,7 +51,7 @@ public final class ServerVdbsCommand extends ServerShellCommand {
             final String title = I18n.bind( ServerCommandsI18n.infoMessageVdbs, getWorkspaceServerName() );
             print( MESSAGE_INDENT, title );
 
-            List< String > vdbNames = ServerUtils.getVdbNames(getWorkspaceServer(), getTransaction());
+            List< String > vdbNames = ServerUtils.getVdbNames(getWorkspaceTeiidInstance());
             Collections.sort(vdbNames);
             
             PrintUtils.printMultiLineItemList( MESSAGE_INDENT, getWriter(), vdbNames, 4, null );
@@ -71,16 +71,6 @@ public final class ServerVdbsCommand extends ServerShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 0;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
-     */
-    @Override
-    public final boolean isValidForCurrentContext() {
-        return hasConnectedWorkspaceServer();
     }
 
     /**

@@ -10,7 +10,6 @@ package org.komodo.relational.commands.server;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.Collections;
 import java.util.List;
-import org.komodo.relational.teiid.Teiid;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
@@ -52,8 +51,7 @@ public final class ServerDatasourcesCommand extends ServerShellCommand {
             final String title = I18n.bind( ServerCommandsI18n.infoMessageDatasources, getWorkspaceServerName() );
             print( MESSAGE_INDENT, title );
 
-            Teiid teiid = getWorkspaceServer();
-            List<String> sourceNames = ServerUtils.getDatasourceDisplayNames(teiid, getTransaction());
+            List<String> sourceNames = ServerUtils.getDatasourceDisplayNames(getWorkspaceTeiidInstance());
             Collections.sort(sourceNames);
             
             PrintUtils.printMultiLineItemList( MESSAGE_INDENT, getWriter(), sourceNames, 4, null );
@@ -73,16 +71,6 @@ public final class ServerDatasourcesCommand extends ServerShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 0;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
-     */
-    @Override
-    public final boolean isValidForCurrentContext() {
-        return hasConnectedWorkspaceServer();
     }
 
     /**

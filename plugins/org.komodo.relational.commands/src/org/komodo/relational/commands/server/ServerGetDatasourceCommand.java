@@ -20,7 +20,6 @@ import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoObject;
-import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.runtime.TeiidDataSource;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.utils.i18n.I18n;
@@ -65,21 +64,15 @@ public final class ServerGetDatasourceCommand extends ServerShellCommand {
                 return validationResult;
             }
 
-            // Get the teiid instance
-            TeiidInstance teiidInstance = getWorkspaceServer().getTeiidInstance(getTransaction());
-
             // Get the Data Source from the server
-            TeiidDataSource dataSource = teiidInstance.getDataSource(datasourceName);
-            if(dataSource == null) {
+            TeiidDataSource serverDS = getWorkspaceTeiidInstance().getDataSource(datasourceName);
+            if(serverDS == null) {
                 return new CommandResultImpl( false, I18n.bind(ServerCommandsI18n.serverDatasourceNotFound, datasourceName), null );
             }
 
-            Properties serverDsProps = dataSource.getProperties();
-            // TODO: look at other methods - do we need to add setters/getters.
-            
             // Create the Data Source and set properties
             Datasource newDatasource = mgr.createDatasource( getTransaction(), null, datasourceName );
-            setRepoDatasourceProperties(newDatasource, serverDsProps);
+            setRepoDatasourceProperties(newDatasource, serverDS.getProperties());
             
             print( MESSAGE_INDENT, I18n.bind(ServerCommandsI18n.datasourceCopyToRepoFinished) );
             result = CommandResult.SUCCESS;
@@ -110,14 +103,6 @@ public final class ServerGetDatasourceCommand extends ServerShellCommand {
         return (isWorkspaceContext() && hasConnectedWorkspaceServer());
     }
 
-    private boolean isWorkspaceContext() {
-        try {
-            final KomodoType contextType = getContext().getTypeIdentifier( getTransaction() );
-            return ( contextType == KomodoType.WORKSPACE );
-        } catch ( final Exception e ) {
-            return false;
-        }
-    }
 
     /**
      * {@inheritDoc}
@@ -159,7 +144,7 @@ public final class ServerGetDatasourceCommand extends ServerShellCommand {
                               final List< CharSequence > candidates ) throws Exception {
         final Arguments args = getArguments();
 
-        List<String> existingDatasourceNames = ServerUtils.getDatasourceNames(getWorkspaceServer(),getTransaction());
+        List<String> existingDatasourceNames = ServerUtils.getDatasourceNames(getWorkspaceTeiidInstance());
         Collections.sort(existingDatasourceNames);
 
         if ( args.isEmpty() ) {
@@ -167,7 +152,7 @@ public final class ServerGetDatasourceCommand extends ServerShellCommand {
                 candidates.addAll( existingDatasourceNames );
             } else {
                 for ( final String item : existingDatasourceNames ) {
-                    if ( item.toUpperCase().startsWith( lastArgument.toUpperCase() ) ) {
+                    if ( item.startsWith( lastArgument ) ) {
                         candidates.add( item );
                     }
                 }
@@ -183,11 +168,11 @@ public final class ServerGetDatasourceCommand extends ServerShellCommand {
     private void setRepoDatasourceProperties(Datasource repoSource, Properties serverDsProperties) throws Exception {
         for(String key : serverDsProperties.stringPropertyNames()) {
             String value = serverDsProperties.getProperty(key);
-            if(key.equals(SERVER_DS_PROP_JNDINAME)) { 
+            if(key.equals(TeiidInstance.DATASOURCE_JNDINAME)) { 
                 repoSource.setJndiName(getTransaction(), value);
-            } else if(key.equals(SERVER_DS_PROP_DRIVERNAME)) { 
+            } else if(key.equals(TeiidInstance.DATASOURCE_DRIVERNAME)) { 
                 repoSource.setDriverName(getTransaction(), value);
-            } else if(key.equals(SERVER_DS_PROP_CLASSNAME)) { 
+            } else if(key.equals(TeiidInstance.DATASOURCE_CLASSNAME)) { 
                 repoSource.setClassName(getTransaction(), value);
                 repoSource.setJdbc(getTransaction(), false);
             } else {

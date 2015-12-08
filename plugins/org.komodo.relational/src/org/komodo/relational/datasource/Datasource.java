@@ -21,6 +21,7 @@
  */
 package org.komodo.relational.datasource;
 
+import java.util.Properties;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.RelationalObject;
 import org.komodo.relational.RelationalProperties;
@@ -34,6 +35,7 @@ import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
+import org.komodo.spi.runtime.TeiidInstance;
 
 /**
  * A model of a datasource instance
@@ -147,7 +149,7 @@ public interface Datasource extends RelationalObject {
     /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @return jndi name of this datasource.
+     * @return jndi name of this datasource (may be <code>null</code>)
      * @throws KException if error occurs
      */
     String getJndiName(UnitOfWork transaction) throws KException;
@@ -163,7 +165,7 @@ public interface Datasource extends RelationalObject {
     /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @return driver name of this datasource.
+     * @return driver name of this datasource.  (may be <code>null</code>)
      * @throws KException if error occurs
      */
     String getDriverName(UnitOfWork transaction) throws KException;
@@ -179,7 +181,7 @@ public interface Datasource extends RelationalObject {
     /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @return class name of this datasource.
+     * @return class name of this datasource.  (may be <code>null</code>)
      * @throws KException if error occurs
      */
     String getClassName(UnitOfWork transaction) throws KException;
@@ -195,7 +197,7 @@ public interface Datasource extends RelationalObject {
     /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @return profile name of this datasource.
+     * @return profile name of this datasource.  (may be <code>null</code>)
      * @throws KException if error occurs
      */
     String getProfileName(UnitOfWork transaction) throws KException;
@@ -239,5 +241,14 @@ public interface Datasource extends RelationalObject {
      * @throws KException if error occurs
      */
     void setPreview(UnitOfWork transaction, boolean isPreview) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param teiidInstance the teiid instance for deployment
+     * @return the properties for server deployment
+     * @throws Exception if error occurs
+     */
+    Properties getPropertiesForServerDeployment(UnitOfWork transaction, TeiidInstance teiidInstance) throws Exception;
 
 }

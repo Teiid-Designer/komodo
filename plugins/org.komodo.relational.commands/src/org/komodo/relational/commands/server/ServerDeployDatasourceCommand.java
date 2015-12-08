@@ -10,23 +10,18 @@ package org.komodo.relational.commands.server;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.datasource.Datasource;
-import org.komodo.relational.teiid.Teiid;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoObject;
-import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.runtime.TeiidInstance;
-import org.komodo.spi.runtime.TeiidPropertyDefinition;
 import org.komodo.utils.StringUtils;
 import org.komodo.utils.i18n.I18n;
 
@@ -66,14 +61,11 @@ public final class ServerDeployDatasourceCommand extends ServerShellCommand {
                 return new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.overwriteArgInvalid, overwriteArg ), null );
             }
 
-            // Return if workspace Datasource object not found
-            if(!getWorkspaceManager().hasChild(getTransaction(), sourceName, KomodoLexicon.DataSource.NODE_TYPE)) {
+            // Make sure datasource object exists in repo
+            final KomodoObject datasourceObj = getWorkspaceManager().getChild(getTransaction(), sourceName, KomodoLexicon.DataSource.NODE_TYPE);
+            if(datasourceObj==null) {
                 return new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.workspaceDatasourceNotFound, sourceName ), null );
             }
-
-            // Get the Data Source to deploy
-            final KomodoObject datasourceObj = getWorkspaceManager().getChild(getTransaction(), sourceName, KomodoLexicon.DataSource.NODE_TYPE);
-            final Datasource sourceToDeploy = Datasource.RESOLVER.resolve(getTransaction(), datasourceObj);
 
             // Validates that a server is connected
             CommandResult validationResult = validateHasConnectedWorkspaceServer();
@@ -81,13 +73,20 @@ public final class ServerDeployDatasourceCommand extends ServerShellCommand {
                 return validationResult;
             }
 
-            // Deploy the selected Data Source
-            Teiid teiid = getWorkspaceServer();
-            TeiidInstance teiidInstance = teiid.getTeiidInstance(getTransaction());
+            final TeiidInstance teiidInstance = getWorkspaceTeiidInstance();
+            final Datasource sourceToDeploy = Datasource.RESOLVER.resolve(getTransaction(), datasourceObj);
 
+            // Make sure that the sourceType is OK for the connected server.
+            String sourceType = sourceToDeploy.getDriverName(getTransaction());
+            if(StringUtils.isEmpty(sourceType) || !ServerUtils.hasDatasourceType(teiidInstance, sourceType)) {
+                return new CommandResultImpl( false,
+                                              I18n.bind( ServerCommandsI18n.datasourceDeploymentTypeNotFound,
+                                                         sourceType ),
+                                              null );
+            }
+            
             // Determine if the server already has a deployed Datasource with this name
-            String sourceToDeployName = sourceToDeploy.getName(getTransaction());
-            boolean serverHasDatasource = teiidInstance.dataSourceExists(sourceToDeployName);
+            boolean serverHasDatasource = teiidInstance.dataSourceExists(sourceName);
             if(serverHasDatasource && !overwrite) {
                 return new CommandResultImpl( false,
                                               I18n.bind( ServerCommandsI18n.datasourceDeploymentOverwriteDisabled,
@@ -95,25 +94,15 @@ public final class ServerDeployDatasourceCommand extends ServerShellCommand {
                                               null );
             }
             
-            // Validate that the sourceType is OK for the connected server.
-            String sourceType = sourceToDeploy.getDriverName(getTransaction());
-            boolean serverHasDatasourceType = serverHasDatasourceType(teiidInstance, sourceType);
-            if(!serverHasDatasourceType) {
-                return new CommandResultImpl( false,
-                                              I18n.bind( ServerCommandsI18n.datasourceDeploymentTypeNotFound,
-                                                         sourceType ),
-                                              null );
-            }
-
-            // Get the remaining source properties from the repo object necessary for deployment to server
-            Properties sourceProps = getPropertiesForServerDeployment(teiidInstance, sourceToDeploy);
+            // Get the properties necessary for deployment to server
+            Properties sourceProps = sourceToDeploy.getPropertiesForServerDeployment(getTransaction(), teiidInstance);
             
             // If overwriting, delete the existing source first
             if(serverHasDatasource) {
-                teiidInstance.deleteDataSource(sourceToDeployName);
+                teiidInstance.deleteDataSource(sourceName);
             }
             // Create the source
-            teiidInstance.getOrCreateDataSource(sourceToDeployName, sourceToDeployName, sourceType, sourceProps);
+            teiidInstance.getOrCreateDataSource(sourceName, sourceName, sourceType, sourceProps);
 
             print( MESSAGE_INDENT, I18n.bind(ServerCommandsI18n.datasourceDeployFinished) );
             result = CommandResult.SUCCESS;
@@ -154,77 +143,6 @@ public final class ServerDeployDatasourceCommand extends ServerShellCommand {
         print( indent, I18n.bind( ServerCommandsI18n.serverDeployDatasourceUsage ) );
     }
 
-    // Assemble the repo source properties to supply for server deployment
-    private Properties getPropertiesForServerDeployment(TeiidInstance teiidInstance, Datasource sourceToDeploy) throws Exception {
-        Properties sourceProps = new Properties();
-        
-        // Get the Property Defns for this type of source.
-        Collection<TeiidPropertyDefinition> templatePropDefns = teiidInstance.getTemplatePropertyDefns(sourceToDeploy.getDriverName(getTransaction()));
-        Collection<String> templatePropNames = getTemplatePropNames(templatePropDefns);
-
-        if(sourceToDeploy.isJdbc(getTransaction())) {
-            String driverName = sourceToDeploy.getDriverName(getTransaction());
-            sourceProps.setProperty(SERVER_DS_PROP_DRIVERNAME,driverName);
-            String jndiName = sourceToDeploy.getJndiName(getTransaction());
-            sourceProps.setProperty(SERVER_DS_PROP_JNDINAME, jndiName);
-        } else {
-            sourceProps.setProperty(SERVER_DS_PROP_CLASSNAME, sourceToDeploy.getClassName(getTransaction()));
-        }
-        
-        // Iterate the supplied datasource properties.  Compare them against the valid properties for the server source type.
-        String[] propNames = sourceToDeploy.getPropertyNames(getTransaction());
-        for(String propName : propNames) {
-            if(templatePropNames.contains(propName)) {
-                TeiidPropertyDefinition propDefn = getTemplatePropertyDefn(templatePropDefns,propName);
-                boolean hasDefault = propDefn.getDefaultValue()!=null ? true : false;
-                String sourcePropValue = sourceToDeploy.getProperty(getTransaction(), propName).getStringValue(getTransaction());
-                // Template has no default - set the property
-                if(!hasDefault) {
-                    sourceProps.setProperty(propName, sourcePropValue);
-                // Template has default - if source property matches it, no need to provide it.
-                } else {
-                    String templateDefaultValue = propDefn.getDefaultValue().toString();
-                    if(!templateDefaultValue.equals(sourcePropValue)) {
-                        sourceProps.setProperty(propName, sourcePropValue);
-                    }
-                }
-            }
-        }
-        
-        return sourceProps;
-    }
-    
-    private Collection<String> getTemplatePropNames(Collection<TeiidPropertyDefinition> templatePropDefns) {
-        Collection<String> propNames = new ArrayList<String>();
-        for(TeiidPropertyDefinition propDefn : templatePropDefns) {
-            propNames.add(propDefn.getName());
-        }
-        return propNames;
-    }
-
-    private TeiidPropertyDefinition getTemplatePropertyDefn(Collection<TeiidPropertyDefinition> templatePropDefns, String propName) {
-        TeiidPropertyDefinition propDefn = null;
-        for(TeiidPropertyDefinition aDefn : templatePropDefns) {
-            if(propName.equals(aDefn.getName())) {
-                propDefn = aDefn;
-                break;
-            }
-        }
-        return propDefn;
-    }
-    
-    private boolean serverHasDatasourceType(TeiidInstance teiidInstance, String sourceType) throws Exception {
-        // Look for matching name
-        Set<String> serverTypes = teiidInstance.getDataSourceTypeNames();
-        for(String serverType : serverTypes) {
-            if(serverType.equals(sourceType)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     /**
      * {@inheritDoc}
      *
@@ -243,15 +161,6 @@ public final class ServerDeployDatasourceCommand extends ServerShellCommand {
     @Override
     public final boolean isValidForCurrentContext() {
         return (isWorkspaceContext() && hasConnectedWorkspaceServer());
-    }
-
-    private boolean isWorkspaceContext() {
-        try {
-            final KomodoType contextType = getContext().getTypeIdentifier( getTransaction() );
-            return ( contextType == KomodoType.WORKSPACE );
-        } catch ( final Exception e ) {
-            return false;
-        }
     }
 
     /**
@@ -276,7 +185,7 @@ public final class ServerDeployDatasourceCommand extends ServerShellCommand {
                 candidates.addAll( existingDatasourceNames );
             } else {
                 for ( final String item : existingDatasourceNames ) {
-                    if ( item.toUpperCase().startsWith( lastArgument.toUpperCase() ) ) {
+                    if ( item.startsWith( lastArgument ) ) {
                         candidates.add( item );
                     }
                 }

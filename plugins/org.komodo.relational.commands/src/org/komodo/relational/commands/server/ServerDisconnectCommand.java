@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.server;
 
-import org.komodo.relational.teiid.Teiid;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.api.CommandResult;
@@ -44,19 +43,18 @@ public final class ServerDisconnectCommand extends ServerShellCommand {
         CommandResult result = null;
 
         try {
-            Teiid teiid = getWorkspaceServer();
-            TeiidInstance teiidInstance = teiid.getTeiidInstance( getTransaction() );
+            TeiidInstance teiidInstance = getWorkspaceTeiidInstance();
 
             if ( teiidInstance.isConnected() ) {
                 print( CompletionConstants.MESSAGE_INDENT,
-                       I18n.bind( ServerCommandsI18n.attemptingToDisconnect, teiid.getName( getTransaction() ) ) );
+                       I18n.bind( ServerCommandsI18n.attemptingToDisconnect, getWorkspaceServerName() ) );
 
                 teiidInstance.disconnect();
 
                 // Updates available commands upon disconnecting
                 getWorkspaceStatus().updateAvailableCommands();
 
-                result = new CommandResultImpl( I18n.bind( ServerCommandsI18n.disconnectSuccessMsg, teiid.getName( getTransaction() ) ) );
+                result = new CommandResultImpl( I18n.bind( ServerCommandsI18n.disconnectSuccessMsg, getWorkspaceServerName() ) );
             } else {
                 result = new CommandResultImpl( I18n.bind( ServerCommandsI18n.noServerToDisconnectMsg ) );
             }
@@ -75,16 +73,6 @@ public final class ServerDisconnectCommand extends ServerShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 0;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
-     */
-    @Override
-    public final boolean isValidForCurrentContext() {
-        return hasConnectedWorkspaceServer();
     }
 
     /**

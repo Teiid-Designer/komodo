@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Set;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Model.Type;
-import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.vdb.ModelSource;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
@@ -29,9 +28,7 @@ import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoObject;
-import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
-import org.komodo.spi.runtime.TeiidDataSource;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.TeiidVdb;
 import org.komodo.utils.StringUtils;
@@ -91,8 +88,7 @@ public final class ServerDeployVdbCommand extends ServerShellCommand {
             }
 
             // Deploy the selected VDB
-            Teiid teiid = getWorkspaceServer();
-            TeiidInstance teiidInstance = teiid.getTeiidInstance(getTransaction());
+            TeiidInstance teiidInstance = getWorkspaceTeiidInstance();
 
             // Determine if the server already has a deployed VDB with this name and version
             boolean serverHasVdb = serverHasVdb( teiidInstance,
@@ -109,7 +105,7 @@ public final class ServerDeployVdbCommand extends ServerShellCommand {
             // All VDB source model jndis must exist on the connected server
             Set<String> sourceJndiNames = getPhysicalModelJndis(vdbToDeploy);
             if(!sourceJndiNames.isEmpty()) {
-                Set<String> serverJndiNames = getServerJndis(teiidInstance);
+                List<String> serverJndiNames = ServerUtils.getDatasourceJndiNames(teiidInstance);
                 for(String sourceJndiName : sourceJndiNames) {
                     if(!serverJndiNames.contains(sourceJndiName)) {
                         return new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.vdbDeployFailedMissingSourceJndi, sourceJndiName ), null);
@@ -161,25 +157,6 @@ public final class ServerDeployVdbCommand extends ServerShellCommand {
         return physicalModelJndis;
     }
     
-    /*
-     * Gets the set of unique jndi names which exist on the connected server
-     */
-    private Set<String> getServerJndis(TeiidInstance teiidInstance) throws Exception {
-        // The current server Jndis
-        HashSet<String> serverJndis = new HashSet<String>();
-        
-        // May be multiple versions deployed - see if there is one matching supplied version
-        Collection<TeiidDataSource> datasources = teiidInstance.getDataSources();
-        for(TeiidDataSource datasource : datasources) {
-            String jndiName = datasource.getPropertyValue(SERVER_DS_PROP_JNDINAME);
-            if(!StringUtils.isEmpty(jndiName)) {
-                serverJndis.add(jndiName);
-            }
-        }
-        
-        return serverJndis;
-    }
-
     /**
      * {@inheritDoc}
      *
@@ -245,15 +222,6 @@ public final class ServerDeployVdbCommand extends ServerShellCommand {
     @Override
     public final boolean isValidForCurrentContext() {
         return (isWorkspaceContext() && hasConnectedWorkspaceServer());
-    }
-
-    private boolean isWorkspaceContext() {
-        try {
-            final KomodoType contextType = getContext().getTypeIdentifier( getTransaction() );
-            return ( contextType == KomodoType.WORKSPACE );
-        } catch ( final Exception e ) {
-            return false;
-        }
     }
 
     /**

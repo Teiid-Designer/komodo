@@ -10,7 +10,6 @@ package org.komodo.relational.commands.server;
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.util.Collections;
 import java.util.List;
-import org.komodo.relational.teiid.Teiid;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
@@ -54,8 +53,7 @@ public final class ServerUndeployDatasourceCommand extends ServerShellCommand {
             }
 
             // Undeploy the VDB
-            Teiid teiid = getWorkspaceServer();
-            TeiidInstance teiidInstance = teiid.getTeiidInstance(getTransaction());
+            TeiidInstance teiidInstance = getWorkspaceTeiidInstance();
             TeiidDataSource dataSource = teiidInstance.getDataSource(sourceName);
 
             // DataSource found - undeploy it
@@ -84,16 +82,6 @@ public final class ServerUndeployDatasourceCommand extends ServerShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 1;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
-     */
-    @Override
-    public final boolean isValidForCurrentContext() {
-        return hasConnectedWorkspaceServer();
     }
 
     /**
@@ -136,7 +124,7 @@ public final class ServerUndeployDatasourceCommand extends ServerShellCommand {
                               final List< CharSequence > candidates ) throws Exception {
         final Arguments args = getArguments();
 
-        List<String> existingDatasourceNames = ServerUtils.getDatasourceNames(getWorkspaceServer(), getTransaction());
+        List<String> existingDatasourceNames = ServerUtils.getDatasourceNames(getWorkspaceTeiidInstance());
         Collections.sort(existingDatasourceNames);
         
         if ( args.isEmpty() ) {
@@ -144,7 +132,7 @@ public final class ServerUndeployDatasourceCommand extends ServerShellCommand {
                 candidates.addAll( existingDatasourceNames );
             } else {
                 for ( final String item : existingDatasourceNames ) {
-                    if ( item.toUpperCase().startsWith( lastArgument.toUpperCase() ) ) {
+                    if ( item.startsWith( lastArgument ) ) {
                         candidates.add( item );
                     }
                 }

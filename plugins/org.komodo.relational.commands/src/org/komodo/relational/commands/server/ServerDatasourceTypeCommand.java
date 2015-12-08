@@ -8,13 +8,11 @@
 package org.komodo.relational.commands.server;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-
 import org.komodo.relational.RelationalObject;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.shell.CommandResultImpl;
@@ -31,6 +29,9 @@ import org.komodo.utils.i18n.I18n;
 public final class ServerDatasourceTypeCommand extends ServerShellCommand {
 
     static final String NAME = "server-datasource-type"; //$NON-NLS-1$
+    
+    private static final String NAME_HEADER = "Name";  //$NON-NLS-1$
+    private static final String VALUE_HEADER = "Default Value";  //$NON-NLS-1$
 
     /**
      * @param status
@@ -58,8 +59,7 @@ public final class ServerDatasourceTypeCommand extends ServerShellCommand {
                 return validationResult;
             }
 
-            Teiid teiid = getWorkspaceServer();
-            Collection<TeiidPropertyDefinition> propDefns = teiid.getTeiidInstance( getTransaction() ).getTemplatePropertyDefns(sourceTypeName);
+            Collection<TeiidPropertyDefinition> propDefns = getWorkspaceTeiidInstance().getTemplatePropertyDefns(sourceTypeName);
             if(propDefns==null) {
                 return new CommandResultImpl( false,
                                               I18n.bind( ServerCommandsI18n.serverDatasourceTypeNotFound, sourceTypeName ),
@@ -71,10 +71,10 @@ public final class ServerDatasourceTypeCommand extends ServerShellCommand {
                                             sourceTypeName,
                                             getWorkspaceServerName() );
             print( MESSAGE_INDENT, title );
-            print( MESSAGE_INDENT, "DataSource Template Properties:" ); //$NON-NLS-1$
+            print( MESSAGE_INDENT, I18n.bind( ServerCommandsI18n.datasourceTypePropertiesHeader ));
 
             // Print DataSource Template Info
-            ServerObjPrintUtils.printDatasourceTemplateProperties(getWriter(), MESSAGE_INDENT, propDefns, "Name", "Default Value"); //$NON-NLS-1$  //$NON-NLS-2$
+            ServerObjPrintUtils.printDatasourceTemplateProperties(getWriter(), MESSAGE_INDENT, propDefns, NAME_HEADER, VALUE_HEADER);
 
             result = CommandResult.SUCCESS;
         } catch ( final Exception e ) {
@@ -102,16 +102,6 @@ public final class ServerDatasourceTypeCommand extends ServerShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 1;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
-     */
-    @Override
-    public final boolean isValidForCurrentContext() {
-        return hasConnectedWorkspaceServer();
     }
 
     /**

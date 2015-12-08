@@ -142,7 +142,7 @@ public final class UnsetDatasourcePropertyCommand extends DatasourceShellCommand
                 candidates.addAll( ALL_PROPS );
             } else {
                 for ( final String item : ALL_PROPS ) {
-                    if ( item.toUpperCase().startsWith( lastArgument.toUpperCase() ) ) {
+                    if ( item.startsWith( lastArgument ) ) {
                         candidates.add( item );
                     }
                 }

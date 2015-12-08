@@ -54,7 +54,7 @@ public final class ServerDatasourceTypesCommand extends ServerShellCommand {
             final String title = I18n.bind( ServerCommandsI18n.infoMessageDatasourceTypes, getWorkspaceServerName() );
             print( MESSAGE_INDENT, title );
 
-            Set< String > types = getWorkspaceServer().getTeiidInstance( getTransaction() ).getDataSourceTypeNames();
+            Set< String > types = getWorkspaceTeiidInstance().getDataSourceTypeNames();
             List< String > objNames = new ArrayList< String >(types);
             Collections.sort(objNames);
             
@@ -85,16 +85,6 @@ public final class ServerDatasourceTypesCommand extends ServerShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 0;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
-     */
-    @Override
-    public final boolean isValidForCurrentContext() {
-        return hasConnectedWorkspaceServer();
     }
 
     /**

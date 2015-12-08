@@ -23,8 +23,6 @@ import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
-import org.komodo.spi.repository.KomodoType;
-import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.TeiidVdb;
 import org.komodo.utils.i18n.I18n;
 
@@ -71,11 +69,8 @@ public final class ServerGetVdbCommand extends ServerShellCommand {
                 return validationResult;
             }
 
-            // Get the teiid instance
-            TeiidInstance teiidInstance = getWorkspaceServer().getTeiidInstance(getTransaction());
-
             // Get the VDB - make sure its a dynamic VDB
-            TeiidVdb vdb = teiidInstance.getVdb(vdbName);
+            TeiidVdb vdb = getWorkspaceTeiidInstance().getVdb(vdbName);
             if(vdb == null) {
                 return new CommandResultImpl( false, I18n.bind(ServerCommandsI18n.serverVdbNotFound, vdbName), null );
             }
@@ -127,15 +122,6 @@ public final class ServerGetVdbCommand extends ServerShellCommand {
         return (isWorkspaceContext() && hasConnectedWorkspaceServer());
     }
 
-    private boolean isWorkspaceContext() {
-        try {
-            final KomodoType contextType = getContext().getTypeIdentifier( getTransaction() );
-            return ( contextType == KomodoType.WORKSPACE );
-        } catch ( final Exception e ) {
-            return false;
-        }
-    }
-
     /**
      * {@inheritDoc}
      *
@@ -176,7 +162,7 @@ public final class ServerGetVdbCommand extends ServerShellCommand {
                               final List< CharSequence > candidates ) throws Exception {
         final Arguments args = getArguments();
 
-        List<String> existingVdbNames = ServerUtils.getVdbNames(getWorkspaceServer(),getTransaction());
+        List<String> existingVdbNames = ServerUtils.getVdbNames(getWorkspaceTeiidInstance());
         Collections.sort(existingVdbNames);
 
         if ( args.isEmpty() ) {

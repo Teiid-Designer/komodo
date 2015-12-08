@@ -7,7 +7,6 @@
  */
 package org.komodo.relational.commands.server;
 
-import org.komodo.relational.teiid.Teiid;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.api.CommandResult;
@@ -44,10 +43,10 @@ public final class ServerConnectCommand extends ServerShellCommand {
         CommandResult result = null;
 
         try {
-            Teiid teiid = getWorkspaceServer();
-            print( CompletionConstants.MESSAGE_INDENT, I18n.bind( ServerCommandsI18n.attemptingToConnect, teiid.getName( getTransaction() ) ) );
+            final String serverName = getWorkspaceServerName();
+            print( CompletionConstants.MESSAGE_INDENT, I18n.bind( ServerCommandsI18n.attemptingToConnect, serverName ) );
 
-            TeiidInstance teiidInstance = teiid.getTeiidInstance( getTransaction() );
+            TeiidInstance teiidInstance = getWorkspaceTeiidInstance();
 
             try {
                 teiidInstance.connect();
@@ -59,7 +58,7 @@ public final class ServerConnectCommand extends ServerShellCommand {
                 getWorkspaceStatus().updateAvailableCommands();
 
                 result = new CommandResultImpl( I18n.bind( ServerCommandsI18n.teiidStatus,
-                                                           teiid.getName( getTransaction() ),
+                                                           serverName,
                                                            connectStatus ) );
             } catch ( Exception ex ) {
                 result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.connectionError, ex.getLocalizedMessage() ), ex );
