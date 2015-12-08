@@ -8,6 +8,8 @@
 package org.komodo.relational;
 
 import org.komodo.core.KomodoLexicon;
+import org.komodo.relational.datasource.Datasource;
+import org.komodo.relational.datasource.internal.DatasourceImpl;
 import org.komodo.relational.model.AbstractProcedure;
 import org.komodo.relational.model.AccessPattern;
 import org.komodo.relational.model.Column;
@@ -222,6 +224,43 @@ public final class RelationalModelFactory {
         } catch (final Exception e) {
             throw handleError( e );
         }
+    }
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param repository
+     *        the repository where the model object will be created (cannot be <code>null</code>)
+     * @param parentWorkspacePath
+     *        the parent path (can be empty)
+     * @param sourceName
+     *        the name of the datasource fragment to create (cannot be empty)
+     * @return the Datasource model object (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    public static Datasource createDatasource( final UnitOfWork transaction,
+                                               final Repository repository,
+                                               final String parentWorkspacePath,
+                                               final String sourceName ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( sourceName, "sourceName" ); //$NON-NLS-1$
+
+        // make sure path is in the library
+        String parentPath = parentWorkspacePath;
+        final String workspacePath = repository.komodoWorkspace( transaction ).getAbsolutePath();
+
+        if ( StringUtils.isBlank( parentWorkspacePath ) ) {
+            parentPath = workspacePath;
+        } else if ( !parentPath.startsWith( workspacePath ) ) {
+            parentPath = ( workspacePath + parentPath );
+        }
+
+        final KomodoObject kobject = repository.add( transaction, parentPath, sourceName, KomodoLexicon.DataSource.NODE_TYPE );
+        final Datasource result = new DatasourceImpl( transaction, repository, kobject.getAbsolutePath() );
+        return result;
     }
 
     /**

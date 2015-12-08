@@ -9,7 +9,7 @@ package org.komodo.relational.commands.workspace;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
@@ -42,32 +42,20 @@ public final class DeleteSchemaCommand extends WorkspaceShellCommand {
      */
     @Override
     protected CommandResult doExecute() {
-        CommandResult result = null;
-
         try {
             final String schemaName = requiredArgument( 0, I18n.bind( WorkspaceCommandsI18n.missingSchemaName ) );
 
-            final WorkspaceManager mgr = getWorkspaceManager();
-            final KomodoObject[] schemas = mgr.findSchemas(getTransaction());
-            KomodoObject[] objToDelete = new KomodoObject[1];
-            for(KomodoObject schema : schemas) {
-                if(schema.getName(getTransaction()).equals(schemaName)) {
-                    objToDelete[0] = schema;
-                    break;
-                }
-            }
-
-            if(objToDelete[0]==null) {
-                result = new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.schemaNotFound, schemaName ), null );
+            final KomodoObject schemaToDelete = getWorkspaceManager().getChild(getTransaction(), schemaName, KomodoLexicon.Schema.NODE_TYPE);
+            
+            if(schemaToDelete==null) {
+                return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.schemaNotFound, schemaName ), null );
             } else {
-                mgr.delete(getTransaction(), objToDelete);
-                result = new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.schemaDeleted, schemaName ) );
+                getWorkspaceManager().delete(getTransaction(), schemaToDelete);
+                return new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.schemaDeleted, schemaName ) );
             }
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.deleteSchemaError ), e );
+            return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.deleteSchemaError ), e );
         }
-
-        return result;
     }
 
     /**

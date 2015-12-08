@@ -8,6 +8,7 @@
 package org.komodo.relational.commands.server;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.komodo.relational.teiid.Teiid;
@@ -149,6 +150,7 @@ public final class ServerSetCommand extends ServerShellCommand {
         for(KomodoObject teiid : teiids) {
             existingTeiidNames.add(teiid.getName(uow));
         }
+        Collections.sort(existingTeiidNames);
 
         if ( args.isEmpty() ) {
             if ( lastArgument == null ) {

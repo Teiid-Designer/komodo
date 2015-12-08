@@ -46,16 +46,14 @@ public final class DeleteVdbCommand extends WorkspaceShellCommand {
         try {
             final String vdbName = requiredArgument( 0, I18n.bind( WorkspaceCommandsI18n.missingVdbName ) );
 
-            // Make sure the VDB exists
-            if(!getWorkspaceManager().hasChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE)) {
-                return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.vdbNotFound, vdbName ), null );
-            }
-
-            // Delete the VDB
             final KomodoObject vdbToDelete = getWorkspaceManager().getChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
-            getWorkspaceManager().delete(getTransaction(), vdbToDelete);
-            return new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.vdbDeleted, vdbName ) );
-
+            
+            if( vdbToDelete==null ) {
+                return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.vdbNotFound, vdbName ), null );
+            } else {
+                getWorkspaceManager().delete(getTransaction(), vdbToDelete);
+                return new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.vdbDeleted, vdbName ) );
+            }
         } catch ( final Exception e ) {
             return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.deleteVdbError ), e );
         }

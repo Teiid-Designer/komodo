@@ -13,7 +13,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import org.komodo.relational.RelationalObject;
-import org.komodo.relational.teiid.Teiid;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
@@ -55,13 +54,10 @@ public final class ServerDatasourceTypesCommand extends ServerShellCommand {
             final String title = I18n.bind( ServerCommandsI18n.infoMessageDatasourceTypes, getWorkspaceServerName() );
             print( MESSAGE_INDENT, title );
 
-            Teiid teiid = getWorkspaceServer();
-            List< String > objNames = new ArrayList< String >();
-            Set< String > types = teiid.getTeiidInstance( getTransaction() ).getDataSourceTypeNames();
-            for ( String type : types ) {
-                objNames.add( type );
-            }
+            Set< String > types = getWorkspaceTeiidInstance().getDataSourceTypeNames();
+            List< String > objNames = new ArrayList< String >(types);
             Collections.sort(objNames);
+            
             PrintUtils.printMultiLineItemList( MESSAGE_INDENT, getWriter(), objNames, 4, null );
             result = CommandResult.SUCCESS;
         } catch ( final Exception e ) {
@@ -89,16 +85,6 @@ public final class ServerDatasourceTypesCommand extends ServerShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 0;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
-     */
-    @Override
-    public final boolean isValidForCurrentContext() {
-        return hasConnectedWorkspaceServer();
     }
 
     /**

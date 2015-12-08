@@ -30,6 +30,21 @@ import org.komodo.spi.runtime.version.TeiidVersion;
 public interface TeiidInstance extends ExecutionAdmin, HostProvider {
 
     /**
+     * The data source jndi property name.  Value is {@value} .
+     */
+    String DATASOURCE_JNDINAME = "jndi-name";  //$NON-NLS-1$
+    
+    /**
+     * The data source className property name.  Value is {@value} .
+     */
+    String DATASOURCE_CLASSNAME = "class-name";  //$NON-NLS-1$
+
+    /**
+     * The data source driver property name.  Value is {@value} .
+     */
+    String DATASOURCE_DRIVERNAME = "driver-name";  //$NON-NLS-1$
+    
+    /**
      * @return the version information of this instance
      * @throws Exception 
      */

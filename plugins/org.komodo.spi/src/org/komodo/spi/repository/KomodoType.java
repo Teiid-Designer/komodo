@@ -33,6 +33,11 @@ import org.komodo.spi.constants.StringConstants;
 public enum KomodoType {
 
     /**
+     * Datasource
+     */
+    DATASOURCE,
+
+    /**
      * Schema
      */
     SCHEMA,

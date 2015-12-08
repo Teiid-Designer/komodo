@@ -13,6 +13,7 @@ import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.KomodoObjectLabelProvider;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
@@ -29,6 +30,20 @@ abstract class ServerShellCommand extends RelationalShellCommand {
         super( status, name );
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
+     */
+    @Override
+    public boolean isValidForCurrentContext() {
+        return hasConnectedWorkspaceServer();
+    }
+
+    protected boolean isWorkspaceContext() {
+        return KomodoObjectLabelProvider.WORKSPACE_PATH.equals( getContext().getAbsolutePath() );
+    }
+    
     /**
      * Validates the existence of a connected server.
      * @return the result
@@ -80,6 +95,11 @@ abstract class ServerShellCommand extends RelationalShellCommand {
             return (Teiid)kObj;
         }
         return null;
+    }
+
+    protected TeiidInstance getWorkspaceTeiidInstance() throws KException {
+        Teiid wsTeiid = getWorkspaceServer();
+        return (wsTeiid!=null) ? wsTeiid.getTeiidInstance(getTransaction()) : null;
     }
 
     protected boolean isConnected( final Teiid teiid ) {

@@ -10,6 +10,7 @@ package org.komodo.relational;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import org.komodo.core.KomodoLexicon;
+import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.teiid.Teiid;
@@ -97,6 +98,24 @@ public class RelationalModelTest extends AbstractLocalRepositoryTest {
         return teiid;
     }
 
+    protected Datasource createDatasource() throws Exception {
+        return createDatasource( getDefaultTeiidName() );
+    }
+
+    protected Datasource createDatasource( final String dsName ) throws Exception {
+        return createDatasource( dsName, null );
+    }
+
+    protected Datasource createDatasource( final String dsName,
+                                      final KomodoObject parent ) throws Exception {
+        final WorkspaceManager mgr = WorkspaceManager.getInstance( _repo );
+        final Datasource ds = mgr.createDatasource( getTransaction(), parent, dsName );
+
+        assertThat( ds.getPrimaryType( getTransaction() ).getName(), is( KomodoLexicon.DataSource.NODE_TYPE ) );
+        assertThat( ds.getName( getTransaction() ), is( dsName ) );
+        return ds;
+    }
+
     protected String getDefaultModelName() {
         return ( this.name.getMethodName() + "-Model" );
     }
@@ -111,6 +130,10 @@ public class RelationalModelTest extends AbstractLocalRepositoryTest {
 
     protected String getDefaultTeiidName() {
         return ( this.name.getMethodName() + "-Teiid" );
+    }
+
+    protected String getDefaultDatasourceName() {
+        return ( this.name.getMethodName() + "-Datasource" );
     }
 
 }

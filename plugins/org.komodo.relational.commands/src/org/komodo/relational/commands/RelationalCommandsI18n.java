@@ -31,9 +31,11 @@ public final class RelationalCommandsI18n extends I18n {
     public static String missingPropertyNameValue;
     public static String missingTypeName;
     public static String noObjectsFound;
+    public static String noObjectsFoundForPattern;
     public static String relationalCommandCategory;
     public static String setPropertySuccess;
     public static String typeHeader;
+    public static String typeHeaderForPattern;
     public static String unsetMissingPropertyName;
     public static String unsetPropertySuccess;
 

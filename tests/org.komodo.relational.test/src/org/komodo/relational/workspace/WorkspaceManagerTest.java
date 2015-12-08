@@ -20,6 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalProperty;
+import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.model.AccessPattern;
 import org.komodo.relational.model.DataTypeResultSet;
 import org.komodo.relational.model.ForeignKey;
@@ -240,8 +241,8 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveCorrectChildTypes() {
-        assertThat( Arrays.asList( this.wsMgr.getChildTypes() ), hasItems( Vdb.IDENTIFIER, Schema.IDENTIFIER, Teiid.IDENTIFIER ) );
-        assertThat( this.wsMgr.getChildTypes().length, is( 3 ) );
+        assertThat( Arrays.asList( this.wsMgr.getChildTypes() ), hasItems( Datasource.IDENTIFIER, Vdb.IDENTIFIER, Schema.IDENTIFIER, Teiid.IDENTIFIER ) );
+        assertThat( this.wsMgr.getChildTypes().length, is( 4 ) );
     }
 
     @Test( expected = Exception.class )
@@ -340,6 +341,13 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
         final DataRole dataRole = vdb.addDataRole(getTransaction(), "dataRole");
         final KomodoObject kobject = new ObjectImpl(_repo, dataRole.getAbsolutePath(), dataRole.getIndex());
         assertThat(this.wsMgr.resolve(getTransaction(), kobject, DataRole.class), is(instanceOf(DataRole.class)));
+    }
+
+    @Test
+    public void shouldResolveDatasource() throws Exception {
+        final Datasource ds = this.wsMgr.createDatasource(getTransaction(), null, "source");
+        final KomodoObject kobject = new ObjectImpl(_repo, ds.getAbsolutePath(), ds.getIndex());
+        assertThat(this.wsMgr.resolve(getTransaction(), kobject, Datasource.class), is(instanceOf(Datasource.class)));
     }
 
     @Test

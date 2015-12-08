@@ -8,13 +8,8 @@
 package org.komodo.relational.commands.server;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
-
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-
-import org.komodo.relational.teiid.Teiid;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
@@ -56,8 +51,7 @@ public final class ServerVdbCommand extends ServerShellCommand {
                 return validationResult;
             }
 
-            Teiid teiid = getWorkspaceServer();
-            TeiidVdb vdb = teiid.getTeiidInstance( getTransaction() ).getVdb(vdbName);
+            TeiidVdb vdb = getWorkspaceTeiidInstance().getVdb(vdbName);
             if(vdb==null) {
                 return new CommandResultImpl(false, I18n.bind( ServerCommandsI18n.serverVdbNotFound, vdbName ), null);
             }
@@ -85,16 +79,6 @@ public final class ServerVdbCommand extends ServerShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 1;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
-     */
-    @Override
-    public final boolean isValidForCurrentContext() {
-        return hasConnectedWorkspaceServer();
     }
 
     /**
@@ -137,13 +121,7 @@ public final class ServerVdbCommand extends ServerShellCommand {
                               final List< CharSequence > candidates ) throws Exception {
         final Arguments args = getArguments();
 
-        Teiid teiid = getWorkspaceServer();
-        List< String > existingVdbNames = new ArrayList< String >();
-        Collection< TeiidVdb > vdbs = teiid.getTeiidInstance( getTransaction() ).getVdbs();
-        for ( TeiidVdb vdb : vdbs ) {
-            String name = vdb.getName();
-            existingVdbNames.add( name );
-        }
+        List< String > existingVdbNames = ServerUtils.getVdbNames( getWorkspaceTeiidInstance() );
         Collections.sort(existingVdbNames);
 
         if ( args.isEmpty() ) {

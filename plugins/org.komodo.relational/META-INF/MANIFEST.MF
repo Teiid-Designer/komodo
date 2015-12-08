@@ -7,6 +7,7 @@ Bundle-Vendor: %pluginProvider
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Localization: plugin
 Export-Package: org.komodo.relational,
+ org.komodo.relational.datasource,
  org.komodo.relational.importer.ddl,
  org.komodo.relational.importer.vdb,
  org.komodo.relational.model,

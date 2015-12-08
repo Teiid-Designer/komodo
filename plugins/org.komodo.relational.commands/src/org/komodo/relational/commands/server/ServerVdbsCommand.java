@@ -8,16 +8,12 @@
 package org.komodo.relational.commands.server;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import org.komodo.relational.teiid.Teiid;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.PrintUtils;
-import org.komodo.spi.runtime.TeiidVdb;
 import org.komodo.utils.i18n.I18n;
 
 /**
@@ -55,15 +51,10 @@ public final class ServerVdbsCommand extends ServerShellCommand {
             final String title = I18n.bind( ServerCommandsI18n.infoMessageVdbs, getWorkspaceServerName() );
             print( MESSAGE_INDENT, title );
 
-            Teiid teiid = getWorkspaceServer();
-            List< String > objNames = new ArrayList< String >();
-            Collection< TeiidVdb > vdbs = teiid.getTeiidInstance( getTransaction() ).getVdbs();
-            for ( TeiidVdb vdb : vdbs ) {
-                String name = vdb.getName();
-                objNames.add( name );
-            }
-            Collections.sort(objNames);
-            PrintUtils.printMultiLineItemList( MESSAGE_INDENT, getWriter(), objNames, 4, null );
+            List< String > vdbNames = ServerUtils.getVdbNames(getWorkspaceTeiidInstance());
+            Collections.sort(vdbNames);
+            
+            PrintUtils.printMultiLineItemList( MESSAGE_INDENT, getWriter(), vdbNames, 4, null );
             result = CommandResult.SUCCESS;
         } catch ( final Exception e ) {
             result = new CommandResultImpl( e );
@@ -80,16 +71,6 @@ public final class ServerVdbsCommand extends ServerShellCommand {
     @Override
     protected int getMaxArgCount() {
         return 0;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
-     */
-    @Override
-    public final boolean isValidForCurrentContext() {
-        return hasConnectedWorkspaceServer();
     }
 
     /**
