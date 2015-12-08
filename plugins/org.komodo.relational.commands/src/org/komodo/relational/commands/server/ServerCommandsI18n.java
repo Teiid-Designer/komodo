@@ -94,6 +94,8 @@ public final class ServerCommandsI18n extends I18n {
     public static String datasourceDeployFinished;
     public static String datasourceDeploymentOverwriteDisabled;
     public static String datasourceDeploymentTypeNotFound;
+    public static String datasourceTypeDefaultValueLabel;
+    public static String datasourceTypeNameLabel;
     public static String datasourceTypePropertiesHeader;
     public static String datasourceUnDeployFinished;
     public static String disconnectSuccessMsg;

@@ -30,9 +30,6 @@ public final class ServerDatasourceTypeCommand extends ServerShellCommand {
 
     static final String NAME = "server-datasource-type"; //$NON-NLS-1$
     
-    private static final String NAME_HEADER = "Name";  //$NON-NLS-1$
-    private static final String VALUE_HEADER = "Default Value";  //$NON-NLS-1$
-
     /**
      * @param status
      *        the shell's workspace status (cannot be <code>null</code>)
@@ -74,7 +71,9 @@ public final class ServerDatasourceTypeCommand extends ServerShellCommand {
             print( MESSAGE_INDENT, I18n.bind( ServerCommandsI18n.datasourceTypePropertiesHeader ));
 
             // Print DataSource Template Info
-            ServerObjPrintUtils.printDatasourceTemplateProperties(getWriter(), MESSAGE_INDENT, propDefns, NAME_HEADER, VALUE_HEADER);
+            ServerObjPrintUtils.printDatasourceTemplateProperties(getWriter(), MESSAGE_INDENT, propDefns, 
+                                                                  I18n.bind( ServerCommandsI18n.datasourceTypeNameLabel ), 
+                                                                  I18n.bind( ServerCommandsI18n.datasourceTypeDefaultValueLabel ) );
 
             result = CommandResult.SUCCESS;
         } catch ( final Exception e ) {
