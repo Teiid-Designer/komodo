@@ -69,7 +69,8 @@ public final class KomodoUtilService extends KomodoService {
     @SuppressWarnings( "nls" )
     public static final String[] SAMPLES = {
         "parts_dynamic-vdb.xml", "portfolio-vdb.xml",
-        "teiid-vdb-all-elements.xml", "tweet-example-vdb.xml"
+        "teiid-vdb-all-elements.xml", "tweet-example-vdb.xml",
+        "northwind.xml", "financials.xml"
     };
 
     /**
