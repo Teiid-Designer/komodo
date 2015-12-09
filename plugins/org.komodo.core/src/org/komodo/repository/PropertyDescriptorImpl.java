@@ -209,4 +209,14 @@ public class PropertyDescriptorImpl implements PropertyDescriptor {
         return this.multiple;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return getName();
+    }
+
 }
