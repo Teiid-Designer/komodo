@@ -7,6 +7,9 @@
  */
 package org.komodo.relational.model.internal;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import org.komodo.relational.RelationalConstants;
 import org.komodo.relational.RelationalConstants.Nullable;
 import org.komodo.relational.internal.RelationalChildRestrictedObject;
@@ -32,23 +35,44 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
 
     private enum StandardOption {
 
-        ANNOTATION,
-        CASE_SENSITIVE,
-        CHAR_OCTET_LENGTH,
-        CURRENCY,
-        DISTINCT_VALUES,
-        FIXED_LENGTH,
-        MAX_VALUE,
-        MIN_VALUE,
-        NAMEINSOURCE,
-        NATIVE_TYPE,
-        NULL_VALUE_COUNT,
-        RADIX,
-        SEARCHABLE,
-        SELECTABLE,
-        SIGNED,
-        UPDATABLE,
-        UUID;
+        ANNOTATION( null ),
+        CASE_SENSITIVE( Boolean.toString( Column.DEFAULT_CASE_SENSITIVE ) ),
+        CHAR_OCTET_LENGTH( Long.toString( Column.DEFAULT_CHAR_OCTET_LENGTH ) ),
+        CURRENCY( Boolean.toString( Column.DEFAULT_CURRENCY ) ),
+        DISTINCT_VALUES( Long.toString( Column.DEFAULT_DISTINCT_VALUES ) ),
+        FIXED_LENGTH( Boolean.toString( Column.DEFAULT_FIXED_LENGTH ) ),
+        MAX_VALUE( null ),
+        MIN_VALUE( null ),
+        NAMEINSOURCE( null ),
+        NATIVE_TYPE( null ),
+        NULL_VALUE_COUNT( Long.toString( Column.DEFAULT_NULL_VALUE_COUNT ) ),
+        RADIX( Long.toString( Column.DEFAULT_RADIX ) ),
+        SEARCHABLE( Column.Searchable.DEFAULT_VALUE.name() ),
+        SELECTABLE( Boolean.toString( Column.DEFAULT_SELECTABLE ) ),
+        SIGNED( Boolean.toString( Column.DEFAULT_SIGNED ) ),
+        UPDATABLE( Boolean.toString( Column.DEFAULT_UPDATABLE ) ),
+        UUID( null );
+
+        private static Map< String, String > _defaultValues = null;
+
+        /**
+         * @return an unmodifiable collection of the names and default values of all the standard options (never <code>null</code>
+         *         or empty)
+         */
+        static Map< String, String > defaultValues() {
+            if ( _defaultValues == null ) {
+                final StandardOption[] options = values();
+                final Map< String, String > temp = new HashMap< >();
+
+                for ( final StandardOption option : options ) {
+                    temp.put( option.name(), option.defaultValue );
+                }
+
+                _defaultValues = Collections.unmodifiableMap( temp );
+            }
+
+            return _defaultValues;
+        }
 
         /**
          * @param name
@@ -65,19 +89,10 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
             return false;
         }
 
-        /**
-         * @return the names of all the options (never <code>null</code> or empty)
-         */
-        static String[] names() {
-            final StandardOption[] options = values();
-            final String[] result = new String[ options.length ];
-            int i = 0;
+        private final String defaultValue;
 
-            for ( final StandardOption option : options ) {
-                result[i++] = option.name();
-            }
-
-            return result;
+        private StandardOption( final String defaultValue ) {
+            this.defaultValue = defaultValue;
         }
 
     }
@@ -395,11 +410,11 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.OptionContainer#getStandardOptionNames()
+     * @see org.komodo.relational.model.OptionContainer#getStandardOptions()
      */
     @Override
-    public String[] getStandardOptionNames() {
-        return StandardOption.names();
+    public Map< String, String > getStandardOptions() {
+        return StandardOption.defaultValues();
     }
 
     /**

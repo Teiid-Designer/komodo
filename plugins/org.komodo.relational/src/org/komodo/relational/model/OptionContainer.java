@@ -7,6 +7,8 @@
  */
 package org.komodo.relational.model;
 
+import java.util.Collections;
+import java.util.Map;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -27,9 +29,11 @@ public interface OptionContainer extends KomodoObject {
     StatementOption[] getCustomOptions( final UnitOfWork transaction ) throws KException;
 
     /**
-     * @return the names of the standard options that this object may have (never <code>null</code> but can be empty)
+     * @return the names of the standard options and their default value (never <code>null</code> but can be empty)
      */
-    String[] getStandardOptionNames();
+    default Map< String, String > getStandardOptions() {
+        return Collections.emptyMap();
+    }
 
     /**
      * This result includes both the standard statement options and any custom options that have been set.

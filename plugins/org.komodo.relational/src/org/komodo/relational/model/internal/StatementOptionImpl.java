@@ -15,7 +15,7 @@ import org.komodo.relational.Messages;
 import org.komodo.relational.internal.RelationalChildRestrictedObject;
 import org.komodo.relational.model.StatementOption;
 import org.komodo.spi.KException;
-import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.Descriptor;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyDescriptor;
 import org.komodo.spi.repository.PropertyValueType;
@@ -30,76 +30,6 @@ import org.modeshape.sequencer.ddl.StandardDdlLexicon;
  * An implementation of a relational model DDL statement option.
  */
 public final class StatementOptionImpl extends RelationalChildRestrictedObject implements StatementOption {
-
-    static class OptionDescriptor implements PropertyDescriptor {
-
-        private final String name;
-
-        OptionDescriptor( final String optionName ) {
-            this.name = optionName;
-        }
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.spi.repository.PropertyDescriptor#getDefaultValues()
-         */
-        @Override
-        public Object[] getDefaultValues() {
-            return StringConstants.EMPTY_ARRAY;
-        }
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.spi.repository.PropertyDescriptor#getName()
-         */
-        @Override
-        public String getName() {
-            return this.name;
-        }
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.spi.repository.PropertyDescriptor#getType()
-         */
-        @Override
-        public Type getType() {
-            return Type.STRING;
-        }
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.spi.repository.PropertyDescriptor#isMandatory()
-         */
-        @Override
-        public boolean isMandatory() {
-            return false;
-        }
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.spi.repository.PropertyDescriptor#isModifiable()
-         */
-        @Override
-        public boolean isModifiable() {
-            return true;
-        }
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.komodo.spi.repository.PropertyDescriptor#isMultiple()
-         */
-        @Override
-        public boolean isMultiple() {
-            return false;
-        }
-
-    }
 
     private PropertyDescriptor descriptor;
 
@@ -204,7 +134,16 @@ public final class StatementOptionImpl extends RelationalChildRestrictedObject i
     @Override
     public PropertyDescriptor getDescriptor( final UnitOfWork transaction ) throws KException {
         if ( this.descriptor == null ) {
-            this.descriptor = new OptionDescriptor( this.getName( transaction ) );
+            // find descriptor in the primary type
+            final Descriptor primaryType = getPrimaryType( transaction );
+            final String name = getName( transaction );
+
+            for ( final PropertyDescriptor descriptor : primaryType.getPropertyDescriptors( transaction ) ) {
+                if ( name.equals( descriptor.getName() )) {
+                    this.descriptor = descriptor;
+                    break;
+                }
+            }
         }
 
         return this.descriptor;
@@ -359,7 +298,6 @@ public final class StatementOptionImpl extends RelationalChildRestrictedObject i
         } else {
             throw new UnsupportedOperationException( Messages.getString( Messages.Relational.INVALID_STATEMENT_OPTION_VALUE ) );
         }
-
     }
 
     /**

@@ -13,7 +13,6 @@ import org.komodo.relational.internal.RelationalChildRestrictedObject;
 import org.komodo.relational.model.Parameter;
 import org.komodo.relational.model.StatementOption;
 import org.komodo.spi.KException;
-import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Descriptor;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
@@ -216,16 +215,6 @@ public final class ParameterImpl extends RelationalChildRestrictedObject impleme
         }
 
         return value;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.model.OptionContainer#getStandardOptionNames()
-     */
-    @Override
-    public String[] getStandardOptionNames() {
-        return StringConstants.EMPTY_ARRAY; // there are no standard options
     }
 
     /**

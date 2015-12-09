@@ -7,6 +7,9 @@
  */
 package org.komodo.relational.model.internal;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import org.komodo.relational.RelationalConstants;
 import org.komodo.relational.RelationalConstants.Nullable;
 import org.komodo.relational.internal.RelationalChildRestrictedObject;
@@ -35,6 +38,27 @@ public class ResultSetColumnImpl extends RelationalChildRestrictedObject impleme
         NAMEINSOURCE,
         UUID;
 
+        private static Map< String, String > _defaultValues = null;
+
+        /**
+         * @return an unmodifiable collection of the names and default values of all the standard options (never <code>null</code>
+         *         or empty)
+         */
+        static Map< String, String > defaultValues() {
+            if ( _defaultValues == null ) {
+                final StandardOption[] options = values();
+                final Map< String, String > temp = new HashMap< >();
+
+                for ( final StandardOption option : options ) {
+                    temp.put( option.name(), null ); // no default values
+                }
+
+                _defaultValues = Collections.unmodifiableMap( temp );
+            }
+
+            return _defaultValues;
+        }
+
         /**
          * @param name
          *        the name being checked (can be <code>null</code>)
@@ -48,21 +72,6 @@ public class ResultSetColumnImpl extends RelationalChildRestrictedObject impleme
             }
 
             return false;
-        }
-
-        /**
-         * @return the names of all the options (never <code>null</code> or empty)
-         */
-        static String[] names() {
-            final StandardOption[] options = values();
-            final String[] result = new String[ options.length ];
-            int i = 0;
-
-            for ( final StandardOption option : options ) {
-                result[i++] = option.name();
-            }
-
-            return result;
         }
 
     }
@@ -257,11 +266,11 @@ public class ResultSetColumnImpl extends RelationalChildRestrictedObject impleme
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.OptionContainer#getStandardOptionNames()
+     * @see org.komodo.relational.model.OptionContainer#getStandardOptions()
      */
     @Override
-    public String[] getStandardOptionNames() {
-        return StandardOption.names();
+    public Map< String, String > getStandardOptions() {
+        return StandardOption.defaultValues();
     }
 
     /**

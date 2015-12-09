@@ -7,6 +7,9 @@
  */
 package org.komodo.relational.model.internal;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import org.komodo.relational.model.UserDefinedFunction;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoType;
@@ -19,11 +22,28 @@ import org.komodo.spi.repository.Repository.UnitOfWork.State;
  */
 public final class UserDefinedFunctionImpl extends FunctionImpl implements UserDefinedFunction {
 
+    private static Map< String, String > _defaultValues = null;
+
     private enum StandardOption {
 
         CATEGORY,
         JAVA_CLASS,
         JAVA_METHOD;
+
+        /**
+         * @return an unmodifiable collection of the names and default values of all the standard options (never <code>null</code>
+         *         or empty)
+         */
+        static Map< String, String > defaultValues() {
+            final StandardOption[] options = values();
+            final Map< String, String > result = new HashMap< >();
+
+            for ( final StandardOption option : options ) {
+                result.put( option.name(), null ); // no default values
+            }
+
+            return Collections.unmodifiableMap( result );
+        }
 
         /**
          * @param name
@@ -38,21 +58,6 @@ public final class UserDefinedFunctionImpl extends FunctionImpl implements UserD
             }
 
             return false;
-        }
-
-        /**
-         * @return the names of all the options (never <code>null</code> or empty)
-         */
-        static String[] names() {
-            final StandardOption[] options = values();
-            final String[] result = new String[ options.length ];
-            int i = 0;
-
-            for ( final StandardOption option : options ) {
-                result[i++] = option.name();
-            }
-
-            return result;
         }
 
     }
@@ -106,19 +111,22 @@ public final class UserDefinedFunctionImpl extends FunctionImpl implements UserD
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.OptionContainer#getStandardOptionNames()
+     * @see org.komodo.relational.model.OptionContainer#getStandardOptions()
      */
     @Override
-    public String[] getStandardOptionNames() {
-        final String[] superNames = super.getStandardOptionNames();
-        final String[] names = StandardOption.names();
+    public Map< String, String > getStandardOptions() {
+        if ( _defaultValues == null ) {
+            final Map< String, String > superOptions = super.getStandardOptions();
+            final Map< String, String > options = StandardOption.defaultValues();
 
-        // combine
-        final String[] result = new String[ superNames.length + names.length ];
-        System.arraycopy( superNames, 0, result, 0, superNames.length );
-        System.arraycopy( names, 0, result, superNames.length, names.length );
+            final Map< String, String > combined = new HashMap< >( superOptions.size() + options.size() );
+            combined.putAll( superOptions );
+            combined.putAll( options );
 
-        return result;
+            _defaultValues = Collections.unmodifiableMap( combined );
+        }
+
+        return _defaultValues;
     }
 
     /**

@@ -8,7 +8,10 @@
 package org.komodo.relational.model.internal;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.komodo.relational.model.Function;
 import org.komodo.relational.model.StatementOption;
 import org.komodo.spi.KException;
@@ -22,17 +25,34 @@ import org.komodo.utils.ArgCheck;
  */
 public abstract class FunctionImpl extends AbstractProcedureImpl implements Function {
 
+    private static Map< String, String > _defaultValues = null;
+
     private enum StandardOption {
 
-        AGGREGATE( "AGGREGATE" ), //$NON-NLS-1$
-        ALLOWS_DISTINCT( "ALLOWS-DISTINCT" ), //$NON-NLS-1$
-        ALLOWS_ORDERBY( "ALLOWS-ORDERBY" ), //$NON-NLS-1$
-        ANALYTIC( "ANALYTIC" ), //$NON-NLS-1$
-        DECOMPOSABLE( "DECOMPOSABLE" ), //$NON-NLS-1$
-        DETERMINISM( "DETERMINISM" ), //$NON-NLS-1$
-        NULL_ON_NULL( "NULL-ON-NULL" ), //$NON-NLS-1$
-        USES_DISTINCT_ROWS( "USES-DISTINCT-ROWS" ), //$NON-NLS-1$
-        VARARGS( "VARARGS" ); //$NON-NLS-1$
+        AGGREGATE( "AGGREGATE", Boolean.toString( Function.DEFAULT_AGGREGATE ) ), //$NON-NLS-1$
+        ALLOWS_DISTINCT( "ALLOWS-DISTINCT", Boolean.toString( Function.DEFAULT_ALLOWS_DISTINCT ) ), //$NON-NLS-1$
+        ALLOWS_ORDERBY( "ALLOWS-ORDERBY", Boolean.toString( Function.DEFAULT_ALLOWS_ORDER_BY ) ), //$NON-NLS-1$
+        ANALYTIC( "ANALYTIC", Boolean.toString( Function.DEFAULT_ANALYTIC ) ), //$NON-NLS-1$
+        DECOMPOSABLE( "DECOMPOSABLE", Boolean.toString( Function.DEFAULT_DECOMPOSABLE ) ), //$NON-NLS-1$
+        DETERMINISM( "DETERMINISM", Determinism.DEFAULT_VALUE.name() ), //$NON-NLS-1$
+        NULL_ON_NULL( "NULL-ON-NULL", Boolean.toString( Function.DEFAULT_NULL_ON_NULL ) ), //$NON-NLS-1$
+        USES_DISTINCT_ROWS( "USES-DISTINCT-ROWS", Boolean.toString( Function.DEFAULT_USES_DISTINCT_ROWS ) ), //$NON-NLS-1$
+        VARARGS( "VARARGS", Boolean.toString( Function.DEFAULT_VARARGS ) ); //$NON-NLS-1$
+
+        /**
+         * @return an unmodifiable collection of the names and default values of all the standard options (never <code>null</code>
+         *         or empty)
+         */
+        static Map< String, String > defaultValues() {
+            final StandardOption[] options = values();
+            final Map< String, String > result = new HashMap< >();
+
+            for ( final StandardOption option : options ) {
+                result.put( option.name(), option.defaultValue );
+            }
+
+            return result;
+        }
 
         /**
          * @param name
@@ -49,25 +69,13 @@ public abstract class FunctionImpl extends AbstractProcedureImpl implements Func
             return false;
         }
 
-        /**
-         * @return the names of all the options (never <code>null</code> or empty)
-         */
-        static String[] names() {
-            final StandardOption[] options = values();
-            final String[] result = new String[ options.length ];
-            int i = 0;
-
-            for ( final StandardOption option : options ) {
-                result[i++] = option.name();
-            }
-
-            return result;
-        }
-
+        private final String defaultValue;
         private final String name;
 
-        private StandardOption( final String optionName ) {
+        private StandardOption( final String optionName,
+                                final String defaultValue ) {
             this.name = optionName;
+            this.defaultValue = defaultValue;
         }
 
         protected String getName() {
@@ -142,19 +150,23 @@ public abstract class FunctionImpl extends AbstractProcedureImpl implements Func
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.OptionContainer#getStandardOptionNames()
+     * @see org.komodo.relational.model.OptionContainer#getStandardOptions()
      */
     @Override
-    public String[] getStandardOptionNames() {
-        final String[] superNames = super.getStandardOptionNames();
-        final String[] names = StandardOption.names();
+    public Map< String, String > getStandardOptions() {
+        if ( _defaultValues == null ) {
+            final Map< String, String > superOptions = super.getStandardOptions();
+            final Map< String, String > options = StandardOption.defaultValues();
 
-        // combine
-        final String[] result = new String[ superNames.length + names.length ];
-        System.arraycopy( superNames, 0, result, 0, superNames.length );
-        System.arraycopy( names, 0, result, superNames.length, names.length );
+            // combine
+            final Map< String, String > combined = new HashMap< >( superOptions.size() + options.size() );
+            combined.putAll( superOptions );
+            combined.putAll( options );
 
-        return result;
+            _defaultValues = Collections.unmodifiableMap( combined );
+        }
+
+        return _defaultValues;
     }
 
     /**

@@ -8,7 +8,10 @@
 package org.komodo.relational.model.internal;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalModelFactory;
@@ -45,10 +48,31 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
 
     private enum StandardOption {
 
-        ANNOTATION,
-        NAMEINSOURCE,
-        UPDATECOUNT,
-        UUID;
+        ANNOTATION( null ),
+        NAMEINSOURCE( null ),
+        UPDATECOUNT( Integer.toString( AbstractProcedure.DEFAULT_UPDATE_COUNT ) ),
+        UUID( null );
+
+        private static Map< String, String > _defaultValues = null;
+
+        /**
+         * @return an unmodifiable collection of the names and default values of all the standard options (never <code>null</code>
+         *         or empty)
+         */
+        static Map< String, String > defaultValues() {
+            if ( _defaultValues == null ) {
+                final StandardOption[] options = values();
+                final Map< String, String > temp = new HashMap< >();
+
+                for ( final StandardOption option : options ) {
+                    temp.put( option.name(), option.defaultValue );
+                }
+
+                _defaultValues = Collections.unmodifiableMap( temp );
+            }
+
+            return _defaultValues;
+        }
 
         /**
          * @param name
@@ -65,19 +89,10 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
             return false;
         }
 
-        /**
-         * @return the names of all the options (never <code>null</code> or empty)
-         */
-        static String[] names() {
-            final StandardOption[] options = values();
-            final String[] result = new String[ options.length ];
-            int i = 0;
+        private final String defaultValue;
 
-            for ( final StandardOption option : options ) {
-                result[i++] = option.name();
-            }
-
-            return result;
+        private StandardOption( final String defaultValue ) {
+            this.defaultValue = defaultValue;
         }
 
     }
@@ -298,11 +313,11 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.model.OptionContainer#getStandardOptionNames()
+     * @see org.komodo.relational.model.OptionContainer#getStandardOptions()
      */
     @Override
-    public String[] getStandardOptionNames() {
-        return StandardOption.names();
+    public Map< String, String > getStandardOptions() {
+        return StandardOption.defaultValues();
     }
 
     /**

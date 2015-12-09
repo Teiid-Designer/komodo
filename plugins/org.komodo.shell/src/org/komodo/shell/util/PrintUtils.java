@@ -22,8 +22,10 @@ import java.util.TreeMap;
 import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.ShellApiI18n;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.PropertyDescriptor;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.KLog;
 import org.komodo.utils.StringUtils;
@@ -220,14 +222,17 @@ public class PrintUtils implements StringConstants {
             return;
         }
 
-        final Map< String, String > sorted = new TreeMap<>();
+        // key is the property name, value is a 2 element string array holding the current value and the default value
+        final Map< String, String[] > sorted = new TreeMap<>();
+
         int maxNameWidth = DEFAULT_WIDTH;
         int maxValueWidth = DEFAULT_WIDTH;
 
-        // loop through properties getting value, removing namespace prefix if necessary, finding widest property name
+        // loop through properties getting value and default value, removing namespace prefix if necessary, finding widest property name
         for ( int i = 0, size = props.size(); i < size; ++i ) {
             String name = props.get( i );
             String value = null;
+            final String defaultValue = getPropertyDefaultValue( wsStatus, context, name );
 
             if ( showHiddenProps ) {
                 value = KomodoObjectUtils.getUnfilteredPropertyValue(wsStatus, context, name );
@@ -251,7 +256,7 @@ public class PrintUtils implements StringConstants {
                 maxValueWidth = value.length();
             }
 
-            sorted.put( name, value );
+            sorted.put( name, new String[] { value, defaultValue } );
         }
 
         // Puts a hard limit on value column width - some may be extremely long.  (The entire value will still be printed)
@@ -265,19 +270,31 @@ public class PrintUtils implements StringConstants {
         final String propListHeader = I18n.bind( ShellI18n.propertiesHeader, objType, path );
         print( writer, MESSAGE_INDENT, propListHeader );
 
-        final String format = PrintUtils.getFormat( maxNameWidth, maxValueWidth );
+        final String format = getFormat( new int[] { maxNameWidth,
+                                                     maxValueWidth,
+                                                     maxValueWidth } );
+
         print( writer,
                MESSAGE_INDENT,
-               String.format( format, I18n.bind( ShellI18n.propertyNameHeader ), I18n.bind( ShellI18n.propertyValueHeader ) ) );
-        print( writer, MESSAGE_INDENT, String.format( format, PrintUtils.getHeaderDelimiter( maxNameWidth ), PrintUtils.getHeaderDelimiter( maxValueWidth ) ) );
+               String.format( format,
+                              I18n.bind( ShellI18n.propertyNameHeader ),
+                              I18n.bind( ShellI18n.propertyValueHeader ),
+                              I18n.bind( ShellI18n.propertyDefaultValueHeader ) ) );
+        print( writer,
+               MESSAGE_INDENT,
+               String.format( format,
+                              PrintUtils.getHeaderDelimiter( maxNameWidth ),
+                              PrintUtils.getHeaderDelimiter( maxValueWidth ),
+                              PrintUtils.getHeaderDelimiter( maxValueWidth ) ) );
 
-        // print property name and value
-        for ( final Entry< String, String > entry : sorted.entrySet() ) {
+        // print property name, value, and default value
+        for ( final Entry< String, String[] > entry : sorted.entrySet() ) {
             String propName = entry.getKey();
-            String propValue = entry.getValue();
+            String propValue = entry.getValue()[ 0 ];
+            final String defaultValue = entry.getValue()[ 1 ];
             // propValue less than maximum width
             if(propValue.length() <= maxValueWidth) {
-                print( writer, MESSAGE_INDENT, String.format( format, propName, propValue ) );
+                print( writer, MESSAGE_INDENT, String.format( format, propName, propValue, defaultValue ) );
             // propValue exceeds maximum width - splits it up onto separate lines
             } else {
                 printPropWithLongValue(writer,format,propName,propValue,maxValueWidth);
@@ -299,6 +316,9 @@ public class PrintUtils implements StringConstants {
         // Get the value for the supplied property
         String propValue = KomodoObjectUtils.getPropertyValue(wsStatus, context, propertyName );
 
+        // default value
+        final String defaultValue = getPropertyDefaultValue( wsStatus, context, name );
+
         if ( StringUtils.isBlank( propValue ) ) {
             propValue = I18n.bind( ShellI18n.noPropertyValue );
         }
@@ -315,20 +335,28 @@ public class PrintUtils implements StringConstants {
             maxValueWidth = MAX_PROPERTY_VALUE_WIDTH;
         }
 
-        final String format = PrintUtils.getFormat( maxNameWidth, maxValueWidth );
+        final String format = PrintUtils.getFormat( maxNameWidth, maxValueWidth, maxValueWidth );
 
-        // Print properties header
+        // Print property header
         final String path = wsStatus.getDisplayPath(context);
         String propListHeader = I18n.bind( ShellI18n.propertyHeader, wsStatus.getTypeDisplay(context), path );
         print( writer, MESSAGE_INDENT, propListHeader );
         print( writer,
                MESSAGE_INDENT,
-               String.format( format, I18n.bind( ShellI18n.propertyNameHeader ), I18n.bind( ShellI18n.propertyValueHeader ) ) );
-        print( writer, MESSAGE_INDENT, String.format( format, PrintUtils.getHeaderDelimiter( maxNameWidth ), PrintUtils.getHeaderDelimiter( maxValueWidth ) ) );
+               String.format( format,
+                              I18n.bind( ShellI18n.propertyNameHeader ),
+                              I18n.bind( ShellI18n.propertyValueHeader ),
+                              I18n.bind( ShellI18n.propertyDefaultValueHeader ) ) );
+        print( writer,
+               MESSAGE_INDENT,
+               String.format( format,
+                              PrintUtils.getHeaderDelimiter( maxNameWidth ),
+                              PrintUtils.getHeaderDelimiter( maxValueWidth ),
+                              PrintUtils.getHeaderDelimiter( maxValueWidth ) ) );
 
         // propValue less than maximum width
         if(propValue.length() <= maxValueWidth) {
-            print( writer, MESSAGE_INDENT, String.format( format, propertyName, propValue ) );
+            print( writer, MESSAGE_INDENT, String.format( format, propertyName, propValue, defaultValue ) );
         // propValue exceeds maximum width - splits it up onto separate lines
         } else {
             printPropWithLongValue(writer,format,propertyName,propValue,maxValueWidth);
@@ -460,26 +488,20 @@ public class PrintUtils implements StringConstants {
     }
 
     /**
-     * gets a format string for 1 column
-     * @param column1Width the width of column1
-     * @return the format string
+     * Gets a format string for as many columns as there are widths passed in.
+     *
+     * @param widths
+     *        the column widths (cannot be <code>null</code>)
+     * @return the format string (never <code>null</code> but can be empty if no widths are passed in)
      */
-    private static String getFormat( final int column1Width ) {
+    public static String getFormat( final int... widths ) {
+        ArgCheck.isNotNull( widths, "widths" ); //$NON-NLS-1$
         final StringBuilder result = new StringBuilder();
-        result.append( "%-" ).append( column1Width + 5 ).append( 's' ); //$NON-NLS-1$
-        return result.toString();
-    }
 
-    /**
-     * gets a format string for 2 columns
-     * @param column1Width the width of column1
-     * @param column2Width the width of column2
-     * @return the format string
-     */
-    public static String getFormat( final int column1Width,
-                              final int column2Width ) {
-        final StringBuilder result = new StringBuilder();
-        result.append( "%-" ).append( column1Width + 5 ).append( "s%-" ).append( column2Width + 5 ).append( 's' ); //$NON-NLS-1$ //$NON-NLS-2$
+        for ( final int width : widths ) {
+            result.append( "%-" ).append( width + 5 ).append( 's' ); //$NON-NLS-1$
+        }
+
         return result.toString();
     }
 
@@ -503,6 +525,40 @@ public class PrintUtils implements StringConstants {
         }
 
         return dashes.toString();
+    }
+
+    private static String getPropertyDefaultValue( final WorkspaceStatus wsStatus,
+                                                   final KomodoObject kobject,
+                                                   final String propName ) throws KException {
+        final PropertyDescriptor descriptor = kobject.getPropertyDescriptor( wsStatus.getTransaction(), propName );
+
+        // no property descriptor so no way to find default value
+        if ( descriptor == null ) {
+            return StringConstants.EMPTY_STRING;
+        }
+
+        final Object[] defaultValues = descriptor.getDefaultValues();
+
+        // there are no default values in the descriptor
+        if ( ( defaultValues == null ) || ( defaultValues.length == 0 ) ) {
+            return StringConstants.EMPTY_STRING;
+        }
+
+        // delimit default values by a comma
+        final StringBuilder builder = new StringBuilder();
+        boolean firstTime = true;
+
+        for ( final Object obj : defaultValues ) {
+            if ( firstTime ) {
+                firstTime = false;
+            } else {
+                builder.append( ',' );
+            }
+
+            builder.append( obj );
+        }
+
+        return builder.toString();
     }
 
 }

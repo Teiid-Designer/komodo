@@ -78,7 +78,7 @@ public final class ShellI18n extends I18n {
     public static String setGlobalPropertyExamples;
     public static String setGlobalPropertyHelp;
     public static String setGlobalPropertyUsage;
-    
+
     public static String resetGlobalPropertyExamples;
     public static String resetGlobalPropertyHelp;
     public static String resetGlobalPropertyUsage;
@@ -221,6 +221,7 @@ public final class ShellI18n extends I18n {
     public static String prompt;
     public static String promptWithType;
     public static String propertiesHeader;
+    public static String propertyDefaultValueHeader;
     public static String propertyHeader;
     public static String propertyNameHeader;
     public static String propertySet;
