@@ -30,7 +30,6 @@ import org.junit.Test;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.repository.RepositoryImpl;
-import org.komodo.repository.RepositoryTools;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository.KeywordCriteria;
@@ -538,8 +537,6 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
         KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
         assertNotNull(workspace);
 
-        System.out.println(RepositoryTools.traverse(getTransaction(), workspace.getParent(getTransaction())));
-
         commit(); // must commit for search queries to work
 
         ObjectSearcher os = new ObjectSearcher(_repo);
@@ -547,12 +544,23 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
         os.addWherePathClause(null, "nt", RepositoryImpl.WORKSPACE_ROOT);
 
         String expected = "SELECT [jcr:path], [mode:localName] FROM [nt:unstructured] AS nt " +
-                                     "WHERE PATH(nt) = '" + workspace.getAbsolutePath() + "'";
+                                     "WHERE PATH(nt) LIKE '" + workspace.getAbsolutePath() + "'";
         assertEquals(expected, os.toString());
 
         List<KomodoObject> searchObjects = os.searchObjects(getTransaction());
         assertEquals(1, searchObjects.size());
 
         assertEquals(workspace.getAbsolutePath(), searchObjects.iterator().next().getAbsolutePath());
+
+        //
+        // Test with a wildcard path
+        //
+        os = new ObjectSearcher(_repo);
+        os.addFromType(JcrConstants.NT_UNSTRUCTURED, "nt");
+        os.addWherePathClause(null, "nt", "/tko:komodo/%");
+        searchObjects = os.searchObjects(getTransaction());
+
+        // Returns all 3 objects under root
+        assertEquals(3, searchObjects.size());
     }
 }

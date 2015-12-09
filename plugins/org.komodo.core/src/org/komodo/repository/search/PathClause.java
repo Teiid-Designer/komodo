@@ -74,7 +74,7 @@ class PathClause extends Clause {
 
         buffer.append(CLOSE_BRACKET);
         buffer.append(SPACE);
-        buffer.append(EQUALS);
+        buffer.append(LIKE);
         buffer.append(SPACE);
         buffer.append(QUOTE_MARK);
         buffer.append(getPath());
@@ -83,5 +83,5 @@ class PathClause extends Clause {
         return buffer.toString();
     }
 
-    
+
 }
