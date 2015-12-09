@@ -117,6 +117,16 @@ public final class OptionContainerUtils {
             return false;
         }
 
+        /**
+         * {@inheritDoc}
+         *
+         * @see java.lang.Object#toString()
+         */
+        @Override
+        public String toString() {
+            return getName();
+        }
+
     }
 
     private static class PrimaryTypeDescriptor extends DescriptorImpl {

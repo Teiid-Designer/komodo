@@ -135,7 +135,7 @@ public final class StatementOptionImpl extends RelationalChildRestrictedObject i
     public PropertyDescriptor getDescriptor( final UnitOfWork transaction ) throws KException {
         if ( this.descriptor == null ) {
             // find descriptor in the primary type
-            final Descriptor primaryType = getPrimaryType( transaction );
+            final Descriptor primaryType = getParent( transaction ).getPrimaryType( transaction );
             final String name = getName( transaction );
 
             for ( final PropertyDescriptor descriptor : primaryType.getPropertyDescriptors( transaction ) ) {

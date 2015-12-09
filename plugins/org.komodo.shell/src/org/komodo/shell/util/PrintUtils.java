@@ -38,6 +38,7 @@ public class PrintUtils implements StringConstants {
 
     private static final int DEFAULT_WIDTH = 25;
     private static final int MAX_PROPERTY_VALUE_WIDTH = 100;  // Limit on the value column width
+    private static final int MAX_DEFAULT_VALUE_WIDTH = ( MAX_PROPERTY_VALUE_WIDTH / 3 );
 
     /**
      * Print the message to the writer.  A newLine is added after the message.
@@ -180,7 +181,9 @@ public class PrintUtils implements StringConstants {
         final String format = getFormat( maxNameWidth, maxValueWidth );
 
         print( writer, MESSAGE_INDENT, String.format( format, nameTitle, valueTitle ) );
-        print( writer, MESSAGE_INDENT, String.format( format, getHeaderDelimiter( maxNameWidth ), getHeaderDelimiter( maxValueWidth ) ) );
+        print( writer,
+               MESSAGE_INDENT,
+               String.format( format, getHeaderDelimiter( maxNameWidth ), getHeaderDelimiter( maxValueWidth ) ) );
 
         // print property name and value
         for ( final Entry< String, String > entry : sorted.entrySet() ) {
@@ -191,7 +194,7 @@ public class PrintUtils implements StringConstants {
                 print( writer, MESSAGE_INDENT, String.format( format, propName, propValue ) );
                 // propValue exceeds maximum width - splits it up onto separate lines
             } else {
-                printPropWithLongValue(writer,format,propName,propValue,maxValueWidth);
+                printPropWithLongValue(writer,format,propName,propValue,null,maxValueWidth);
             }
         }
     }
@@ -270,9 +273,10 @@ public class PrintUtils implements StringConstants {
         final String propListHeader = I18n.bind( ShellI18n.propertiesHeader, objType, path );
         print( writer, MESSAGE_INDENT, propListHeader );
 
+        final int maxDefaultValueWidth = Math.min( maxValueWidth, MAX_DEFAULT_VALUE_WIDTH );
         final String format = getFormat( new int[] { maxNameWidth,
                                                      maxValueWidth,
-                                                     maxValueWidth } );
+                                                     maxDefaultValueWidth } );
 
         print( writer,
                MESSAGE_INDENT,
@@ -285,7 +289,7 @@ public class PrintUtils implements StringConstants {
                String.format( format,
                               PrintUtils.getHeaderDelimiter( maxNameWidth ),
                               PrintUtils.getHeaderDelimiter( maxValueWidth ),
-                              PrintUtils.getHeaderDelimiter( maxValueWidth ) ) );
+                              PrintUtils.getHeaderDelimiter( maxDefaultValueWidth ) ) );
 
         // print property name, value, and default value
         for ( final Entry< String, String[] > entry : sorted.entrySet() ) {
@@ -297,7 +301,7 @@ public class PrintUtils implements StringConstants {
                 print( writer, MESSAGE_INDENT, String.format( format, propName, propValue, defaultValue ) );
             // propValue exceeds maximum width - splits it up onto separate lines
             } else {
-                printPropWithLongValue(writer,format,propName,propValue,maxValueWidth);
+                printPropWithLongValue(writer,format,propName,propValue,defaultValue,maxValueWidth);
             }
         }
     }
@@ -335,7 +339,8 @@ public class PrintUtils implements StringConstants {
             maxValueWidth = MAX_PROPERTY_VALUE_WIDTH;
         }
 
-        final String format = PrintUtils.getFormat( maxNameWidth, maxValueWidth, maxValueWidth );
+        final int maxDefaultValueWidth = Math.min( maxValueWidth, MAX_DEFAULT_VALUE_WIDTH );
+        final String format = PrintUtils.getFormat( maxNameWidth, maxValueWidth, maxDefaultValueWidth );
 
         // Print property header
         final String path = wsStatus.getDisplayPath(context);
@@ -352,14 +357,14 @@ public class PrintUtils implements StringConstants {
                String.format( format,
                               PrintUtils.getHeaderDelimiter( maxNameWidth ),
                               PrintUtils.getHeaderDelimiter( maxValueWidth ),
-                              PrintUtils.getHeaderDelimiter( maxValueWidth ) ) );
+                              PrintUtils.getHeaderDelimiter( maxDefaultValueWidth ) ) );
 
         // propValue less than maximum width
         if(propValue.length() <= maxValueWidth) {
             print( writer, MESSAGE_INDENT, String.format( format, propertyName, propValue, defaultValue ) );
         // propValue exceeds maximum width - splits it up onto separate lines
         } else {
-            printPropWithLongValue(writer,format,propertyName,propValue,maxValueWidth);
+            printPropWithLongValue(writer,format,propertyName,propValue,defaultValue,maxValueWidth);
         }
 
     }
@@ -454,20 +459,27 @@ public class PrintUtils implements StringConstants {
      * @param format the format
      * @param propName the property name
      * @param propValue the property value
+     * @param defaultValue the default value of the property (can be empty)
      * @param maxValueWidth maximum width of the value
      */
-    public static void printPropWithLongValue(Writer writer, String format, String propName, String propValue, int maxValueWidth) {
+    public static void printPropWithLongValue( Writer writer,
+                                               String format,
+                                               String propName,
+                                               String propValue,
+                                               String defaultValue,
+                                               int maxValueWidth ) {
         // splits long strings into equal length lines of 'maxValueWidth' length.
         List<String> lines = splitEqually(propValue,maxValueWidth);
+        defaultValue = ( StringUtils.isBlank( defaultValue ) ? EMPTY_STRING : defaultValue );
         boolean first = true;
         for(String line : lines) {
             // First line includes the propName
             if(first) {
-                print( writer, MESSAGE_INDENT, String.format( format, propName, line ) );
+                print( writer, MESSAGE_INDENT, String.format( format, propName, line, defaultValue ) );
                 first = false;
             // Subsequent lines the 'name' is just a spacer
             } else {
-                print( writer, MESSAGE_INDENT, String.format( format, EMPTY_STRING, line ) );
+                print( writer, MESSAGE_INDENT, String.format( format, EMPTY_STRING, line, EMPTY_STRING ) );
             }
         }
     }

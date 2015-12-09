@@ -184,7 +184,7 @@ public class ServerObjPrintUtils implements StringConstants {
                 PrintUtils.print( writer, MESSAGE_INDENT, String.format( format, propName, propValue ) );
                 // propValue exceeds maximum width - splits it up onto separate lines
             } else {
-                PrintUtils.printPropWithLongValue(writer,format,propName,propValue,maxValueWidth);
+                PrintUtils.printPropWithLongValue(writer,format,propName,propValue,null,maxValueWidth);
             }
         }
     }
