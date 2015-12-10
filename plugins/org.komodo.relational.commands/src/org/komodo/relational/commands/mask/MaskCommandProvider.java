@@ -63,18 +63,6 @@ public class MaskCommandProvider implements ShellCommandProvider {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.shell.api.ShellCommandProvider#getTypeDisplay(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      org.komodo.spi.repository.KomodoObject)
-     */
-    @Override
-    public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        final Mask resolved = resolve( uow, kObj );
-        return ( ( resolved == null ) ? null : resolved.getTypeDisplayName() );
-    }
-
-    /**
-     * {@inheritDoc}
-     *
      * @see org.komodo.shell.api.ShellCommandProvider#getStatusMessage(org.komodo.spi.repository.Repository.UnitOfWork,
      *      org.komodo.spi.repository.KomodoObject)
      */

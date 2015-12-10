@@ -81,7 +81,7 @@ public class ResetGlobalPropertyCommandTest extends AbstractCommandTest {
     @Test
     public void testTabCompleter()throws Exception{
 
-        List<CharSequence> defaultValues = new LinkedList<>(WorkspaceStatus.GLOBAL_PROPS.keySet());
+        List<String> defaultValues = new LinkedList<>(WorkspaceStatus.GLOBAL_PROPS.keySet());
         defaultValues.add(0,"--all");
         assertTabCompletion("reset-global ", defaultValues);
 

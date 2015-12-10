@@ -44,15 +44,6 @@ public interface ShellCommandProvider {
     public < T extends KomodoObject > T resolve ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException;
 
     /**
-     * Get the type display string for a KomodoObject
-     * @param uow the transaction
-     * @param kObj the KomodoObject
-     * @return the type display string
-     * @throws KException the exception
-     */
-    public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException;
-
-    /**
      * Initialize workspace state for recognized properties
      * @param wsStatus the workspace status
      * @throws KException the exception

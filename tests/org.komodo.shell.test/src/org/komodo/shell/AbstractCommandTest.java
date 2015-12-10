@@ -290,7 +290,7 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
  * @param expectedCandidates expected candidas of autocompletion
  * @throws Exception
  */
-    protected void assertTabCompletion(String line, List<CharSequence> expectedCandidates) throws Exception{
+    protected void assertTabCompletion(String line, final List<? extends CharSequence> expectedCandidates) throws Exception{
     	List<CharSequence> candidates=new LinkedList<>();
     	Arguments arguments = null;
 		try {
@@ -307,7 +307,7 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
 		command.setArguments(arguments);
 		command.tabCompletion(lastArgument, candidates);
 		String compareMessage="Expected: "+Arrays.toString(expectedCandidates.toArray())+" Actual: "+Arrays.toString(candidates.toArray());
-        assertThat("Invalid number of autocompletion candidates "+compareMessage,expectedCandidates.size(), is(candidates.size()));
+        assertThat("Invalid number of autocompletion candidates "+compareMessage,candidates.size(), is(expectedCandidates.size()));
         assertThat("Invalid elements: "+compareMessage, candidates.containsAll(expectedCandidates), is(true));
     }
 }

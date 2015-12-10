@@ -72,15 +72,6 @@ public class WorkspaceCommandProvider implements ShellCommandProvider {
         return null;
     }
 
-    @Override
-    public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(kObj.getRepository());
-        if(wkspMgr.getAbsolutePath().equals(kObj.getAbsolutePath())) {
-            return KomodoType.WORKSPACE.getType();
-        }
-        return null;
-    }
-
     /**
      * @throws KException the exception
      */

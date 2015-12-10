@@ -67,12 +67,6 @@ public class DataRoleCommandProvider implements ShellCommandProvider {
         return null;
     }
 
-    @Override
-    public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        final DataRole resolved = resolve( uow, kObj );
-        return ( ( resolved == null ) ? null : resolved.getTypeDisplayName() );
-    }
-
     /**
      * @throws KException the exception
      */

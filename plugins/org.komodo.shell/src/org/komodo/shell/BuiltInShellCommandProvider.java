@@ -72,22 +72,6 @@ public final class BuiltInShellCommandProvider implements ShellCommandProvider {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.shell.api.ShellCommandProvider#getTypeDisplay(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      org.komodo.spi.repository.KomodoObject)
-     */
-    @Override
-    public String getTypeDisplay( final UnitOfWork transaction,
-                                  final KomodoObject kobject ) {
-        if ( ObjectImpl.class.equals( kobject.getClass() ) ) {
-            return KomodoObject.class.getSimpleName();
-        }
-
-        return kobject.getClass().getSimpleName();
-    }
-
-    /**
-     * {@inheritDoc}
-     *
      * @see org.komodo.shell.api.ShellCommandProvider#initWorkspaceState(org.komodo.shell.api.WorkspaceStatus)
      */
     @Override

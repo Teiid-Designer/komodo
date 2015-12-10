@@ -192,7 +192,7 @@ public class RenameCommand extends BuiltInShellCommand {
     		// --------------------------------------------------------------
     		} else {
     			for (String item : potentialsList) {
-    				if (item.toUpperCase().startsWith(lastArgument.toUpperCase())) {
+    				if (item.startsWith(lastArgument)) {
     					candidates.add(item);
     				}
     			}

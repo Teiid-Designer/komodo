@@ -60,12 +60,6 @@ public class EntryCommandProvider implements ShellCommandProvider {
         return null;
     }
 
-    @Override
-    public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        final Entry resolved = resolve( uow, kObj );
-        return ( ( resolved == null ) ? null : resolved.getTypeDisplayName() );
-    }
-
     /**
      * {@inheritDoc}
      *
