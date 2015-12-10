@@ -19,17 +19,19 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  */
-package org.komodo.rest;
+package org.komodo.rest.relational;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import javax.ws.rs.core.MediaType;
+import org.komodo.rest.KRestEntity;
 import org.komodo.utils.ArgCheck;
 
 
 /**
  * Object to be serialised by GSON that provides key/message pairs
  */
-public class KomodoStatusObject {
+public class KomodoStatusObject implements KRestEntity {
 
     /**
      * Label for the title
@@ -59,6 +61,16 @@ public class KomodoStatusObject {
     public KomodoStatusObject(String title) {
         ArgCheck.isNotNull(title);
         this.title = title;
+    }
+
+    @Override
+    public boolean supports(MediaType mediaType) {
+        return MediaType.APPLICATION_JSON_TYPE.equals(mediaType);
+    }
+
+    @Override
+    public Object getXml() {
+        throw new UnsupportedOperationException();
     }
 
     /**

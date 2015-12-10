@@ -21,7 +21,13 @@
  */
 package org.komodo.repository.search;
 
+import org.komodo.core.KomodoLexicon.Search;
+import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.Repository;
+import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.ArgCheck;
 
 /**
@@ -90,5 +96,24 @@ class FromType {
         } else if (!this.type.equals(other.type))
             return false;
         return true;
+    }
+
+    /**
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param searchObject the parent searchObject
+     * @throws KException
+     *         if an error occurs
+     */
+    void write(UnitOfWork uow, KomodoObject searchObject) throws KException {
+        ArgCheck.isNotNull(uow, "transaction"); //$NON-NLS-1$
+        ArgCheck.isTrue((uow.getState() == State.NOT_STARTED), "transaction state is not NOT_STARTED"); //$NON-NLS-1$
+        ArgCheck.isNotNull(searchObject, "searchObject"); //$NON-NLS-1$
+
+        Repository repository = searchObject.getRepository();
+        KomodoObject ftObject = repository.add(uow, searchObject.getAbsolutePath(), Search.FromType.NODE_TYPE, Search.FromType.NODE_TYPE);
+        ftObject.setProperty(uow, Search.FromType.TYPE, getType());
+        ftObject.setProperty(uow, Search.FromType.ALIAS, getAlias());
     }
 }

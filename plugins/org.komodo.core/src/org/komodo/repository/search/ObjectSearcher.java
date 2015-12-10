@@ -21,16 +21,21 @@
  */
 package org.komodo.repository.search;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import org.komodo.core.KomodoLexicon.Search;
+import org.komodo.core.Messages;
 import org.komodo.spi.KException;
 import org.komodo.spi.query.sql.SQLConstants;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.KeywordCriteria;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -44,6 +49,8 @@ import org.modeshape.jcr.api.JcrConstants;
  * Finder class for searching a repository
  */
 public class ObjectSearcher implements SQLConstants {
+
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss"); //$NON-NLS-1$
 
     private final Repository repository;
 
@@ -104,7 +111,7 @@ public class ObjectSearcher implements SQLConstants {
      * @return set of node types for the From clause
      */
     Set<FromType> getFromTypes() {
-        if (fromTypes == null || fromTypes.isEmpty()) {
+        if (fromTypes == null) {
             return Collections.emptySet();
         }
 
@@ -113,7 +120,7 @@ public class ObjectSearcher implements SQLConstants {
 
     @SuppressWarnings( "unchecked" )
     private <T extends PropertyClause> T findWhereAliasClause(Class<T> clauseType, String alias, String property) {
-        for (Clause clause : whereClauses) {
+        for (Clause clause : getWhereClauses()) {
             if (! (clauseType.isInstance(clause)))
                 continue;
 
@@ -135,6 +142,33 @@ public class ObjectSearcher implements SQLConstants {
     }
 
     /**
+     * @return the whereClauses
+     */
+    public List<Clause> getWhereClauses() {
+        if (whereClauses == null) {
+            return Collections.emptyList();
+        }
+
+        return this.whereClauses;
+    }
+
+    /**
+     * Adds the given where clause
+     *
+     * @param whereClause the where clause
+     */
+    public void addWhereClause(Clause whereClause) {
+        ArgCheck.isTrue(customWhereClause == null,
+                                    "searchObject cannot contain both whereClauses and customWhereClause"); //$NON-NLS-1$
+
+        if (whereClauses == null)
+            whereClauses = new ArrayList<Clause>();
+
+        whereClause.setParent(this);
+        whereClauses.add(whereClause);
+    }
+
+    /**
      * Add an IN sub-clause to the WHERE clause, eg. WHERE alias.property IN (value1, value2, value3)
      *
      * @param operator the AND/OR operator preceding the clause. Can be <null> if the first clause
@@ -144,13 +178,10 @@ public class ObjectSearcher implements SQLConstants {
      * @return this search object
      */
     public ObjectSearcher addWhereSetClause(LogicalOperator operator, String alias, String property, String... values) {
-        if (whereClauses == null)
-            whereClauses = new ArrayList<Clause>();
-
         SetClause whereClause = findWhereAliasClause(SetClause.class, alias, property);
         if (whereClause == null) {
-            whereClause = new SetClause(this, operator, alias, property, values);
-            whereClauses.add(whereClause);
+            whereClause = new SetClause(operator, alias, property, values);
+            addWhereClause(whereClause);
         }
         else {
             for (String value : values)
@@ -174,11 +205,8 @@ public class ObjectSearcher implements SQLConstants {
      */
     public ObjectSearcher addWhereCompareClause(LogicalOperator operator, String alias, String property,
                                                                 ComparisonOperator compareOperator, String value) {
-        if (whereClauses == null)
-            whereClauses = new ArrayList<Clause>();
-
-        CompareClause whereClause = new CompareClause(this, operator, alias, property, compareOperator, value);
-        whereClauses.add(whereClause);
+        CompareClause whereClause = new CompareClause(operator, alias, property, compareOperator, value);
+        addWhereClause(whereClause);
 
         return this;
     }
@@ -196,13 +224,11 @@ public class ObjectSearcher implements SQLConstants {
     public ObjectSearcher addWhereContainsClause(LogicalOperator operator, String alias, String property,
                                                                   KeywordCriteria keywordCriteria,
                                                                   String... keywords) {
-        if (whereClauses == null)
-            whereClauses = new ArrayList<Clause>();
 
         ContainsClause whereClause = findWhereAliasClause(ContainsClause.class, alias, property);
         if (whereClause == null) {
-            whereClause = new ContainsClause(this, operator, alias, property, keywordCriteria, keywords);
-            whereClauses.add(whereClause);
+            whereClause = new ContainsClause(operator, alias, property, keywordCriteria, keywords);
+            addWhereClause(whereClause);
         }
         else {
             for (String keyword : keywords)
@@ -236,11 +262,8 @@ public class ObjectSearcher implements SQLConstants {
      * @return this search object
      */
     public ObjectSearcher addWherePathClause(LogicalOperator operator, String alias, String path) {
-        if (whereClauses == null)
-            whereClauses = new ArrayList<Clause>();
-
-        PathClause pathClause = new PathClause(this, operator, alias, path);
-        whereClauses.add(pathClause);
+        PathClause pathClause = new PathClause(operator, alias, path);
+        addWhereClause(pathClause);
 
         return this;
     }
@@ -255,13 +278,17 @@ public class ObjectSearcher implements SQLConstants {
      * @return this search object
      */
     public ObjectSearcher addWhereParentClause(LogicalOperator operator, String alias, String parentPath, boolean childrenOnly) {
-        if (whereClauses == null)
-            whereClauses = new ArrayList<Clause>();
-
-        ParentPathClause pathClause = new ParentPathClause(this, operator, alias, parentPath, childrenOnly);
-        whereClauses.add(pathClause);
+        ParentPathClause pathClause = new ParentPathClause(operator, alias, parentPath, childrenOnly);
+        addWhereClause(pathClause);
 
         return this;
+    }
+
+    /**
+     * @return the customWhereClause
+     */
+    public String getCustomWhereClause() {
+        return this.customWhereClause;
     }
 
     /**
@@ -277,6 +304,8 @@ public class ObjectSearcher implements SQLConstants {
      */
     public ObjectSearcher setCustomWhereClause(String whereClause) {
         ArgCheck.isNotEmpty(whereClause);
+        ArgCheck.isTrue(whereClauses == null, "searchObject cannot contain both whereClauses and customWhereClause"); //$NON-NLS-1$
+
         this.customWhereClause = whereClause;
         return this;
     }
@@ -378,6 +407,53 @@ public class ObjectSearcher implements SQLConstants {
         return createStatement();
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((this.customWhereClause == null) ? 0 : this.customWhereClause.hashCode());
+        result = prime * result + ((this.fromTypes == null) ? 0 : this.fromTypes.hashCode());
+        result = prime * result + ((this.repository == null) ? 0 : this.repository.hashCode());
+        result = prime * result + ((this.whereClauses == null) ? 0 : this.whereClauses.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ObjectSearcher other = (ObjectSearcher)obj;
+        if (this.customWhereClause == null) {
+            if (other.customWhereClause != null)
+                return false;
+        } else
+            if (!this.customWhereClause.equals(other.customWhereClause))
+                return false;
+        if (this.fromTypes == null) {
+            if (other.fromTypes != null)
+                return false;
+        } else
+            if (!this.fromTypes.equals(other.fromTypes))
+                return false;
+        if (this.repository == null) {
+            if (other.repository != null)
+                return false;
+        } else
+            if (!this.repository.equals(other.repository))
+                return false;
+        if (this.whereClauses == null) {
+            if (other.whereClauses != null)
+                return false;
+        } else
+            if (!this.whereClauses.equals(other.whereClauses))
+                return false;
+        return true;
+    }
+
     /**
      * Performs the search using the parameters of this object seacher
      *
@@ -410,5 +486,124 @@ public class ObjectSearcher implements SQLConstants {
         String statement = createStatement();
         List<KomodoObject> objects = searchObjects(uow, statement);
         return objects;
+    }
+
+    /**
+     * Write the search object to the repository
+     *
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param name the name given to the search object
+     * @return the persisted searchObject
+     * @throws KException
+     *         if an error occurs
+     */
+    public KomodoObject write(final UnitOfWork uow, String name) throws KException {
+        ArgCheck.isNotNull(uow, "transaction"); //$NON-NLS-1$
+        ArgCheck.isTrue((uow.getState() == State.NOT_STARTED), "transaction state is not NOT_STARTED"); //$NON-NLS-1$
+        ArgCheck.isNotNull(getRepository(), "repository"); //$NON-NLS-1$
+        ArgCheck.isNotNull(name, "name"); //$NON-NLS-1$
+
+        // make sure path is in the library
+        String parentPath = getRepository().komodoSearches(uow).getAbsolutePath();
+        KomodoObject searchObject = getRepository().getFromWorkspace(uow, parentPath + FORWARD_SLASH + name);
+
+        if (searchObject != null) {
+            // Overwrite the existing version
+            searchObject.remove(uow);
+        }
+
+        searchObject = getRepository().add(uow, parentPath, name, Search.NODE_TYPE);
+
+        // The date/time this search was created
+        String date = DATE_FORMAT.format(new Date());
+        searchObject.setProperty(uow, Search.SEARCH_DATE, date);
+        for (FromType fromType : getFromTypes()) {
+            fromType.write(uow, searchObject);
+        }
+
+        if (getCustomWhereClause() != null) {
+            searchObject.setProperty(uow, Search.CUSTOM_WHERE, getCustomWhereClause());
+        } else {
+            for (Clause clause : getWhereClauses()) {
+                clause.write(uow, searchObject);
+            }
+        }
+
+        return searchObject;
+    }
+
+    /**
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param name the name of the search to read
+     *
+     * @throws KException name is not a search in the repository or if another error occurs
+     */
+    public void read(UnitOfWork uow, String name) throws KException {
+        ArgCheck.isNotNull(uow, "transaction"); //$NON-NLS-1$
+        ArgCheck.isTrue((uow.getState() == State.NOT_STARTED), "transaction state is not NOT_STARTED"); //$NON-NLS-1$
+        ArgCheck.isNotNull(repository, "repository"); //$NON-NLS-1$
+        ArgCheck.isNotNull(name, "name"); //$NON-NLS-1$
+
+        String parentPath = repository.komodoSearches(uow).getAbsolutePath();
+        KomodoObject searchObject = repository.getFromWorkspace(uow, parentPath + FORWARD_SLASH + name);
+        if (searchObject == null)
+            throw new KException(Messages.getString(Messages.Search.No_Saved_Search, name));
+
+        // Clear any existing data from this object searcher
+        customWhereClause = null;
+
+        if (fromTypes != null)
+            fromTypes.clear();
+
+        if (whereClauses != null)
+            whereClauses.clear();
+
+        if (searchObject.hasProperty(uow, Search.CUSTOM_WHERE)) {
+            Property customWhere = searchObject.getProperty(uow, Search.CUSTOM_WHERE);
+            setCustomWhereClause(customWhere.getStringValue(uow));
+        }
+
+        KomodoObject[] fromTypes = searchObject.getChildrenOfType(uow, Search.FromType.NODE_TYPE);
+        if (fromTypes != null) {
+            for (KomodoObject fromType : fromTypes) {
+                String alias = null;
+                String type = null;
+
+                if (fromType.hasProperty(uow, Search.FromType.ALIAS))
+                    alias = fromType.getProperty(uow, Search.FromType.ALIAS).getStringValue(uow);
+
+                if (fromType.hasProperty(uow, Search.FromType.TYPE))
+                    type = fromType.getProperty(uow, Search.FromType.TYPE).getStringValue(uow);
+
+                addFromType(type, alias);
+            }
+        }
+
+        KomodoObject[] whereClauses = searchObject.getChildren(uow, Search.WHERE_CLAUSE);
+        if (whereClauses != null) {
+            for (KomodoObject whereClauseObject : whereClauses) {
+                String primaryType = whereClauseObject.getPrimaryType(uow).getName();
+
+                Clause clause = null;
+                if (Search.WhereCompareClause.NODE_TYPE.equals(primaryType)) {
+                    clause = new CompareClause(uow, whereClauseObject);
+                } else if (Search.WhereContainsClause.NODE_TYPE.equals(primaryType)) {
+                    clause = new ContainsClause(uow, whereClauseObject);
+                } else if (Search.WhereSetClause.NODE_TYPE.equals(primaryType)) {
+                    clause = new SetClause(uow, whereClauseObject);
+                } else if (Search.WherePathClause.NODE_TYPE.equals(primaryType)) {
+                    clause = new PathClause(uow, whereClauseObject);
+                } else if (Search.WhereParentPathClause.NODE_TYPE.equals(primaryType)) {
+                    clause = new ParentPathClause(uow, whereClauseObject);
+                }
+
+                if (clause != null)
+                    addWhereClause(clause);
+            }
+        }
     }
 }

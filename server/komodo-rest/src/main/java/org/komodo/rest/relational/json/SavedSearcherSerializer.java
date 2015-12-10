@@ -8,23 +8,17 @@
 package org.komodo.rest.relational.json;
 
 import static org.komodo.rest.Messages.Error.UNEXPECTED_JSON_TOKEN;
-import static org.komodo.rest.relational.json.KomodoJsonMarshaller.BUILDER;
 import java.io.IOException;
-import java.lang.reflect.Type;
-import java.util.Map;
 import org.komodo.rest.Messages;
-import org.komodo.rest.relational.KomodoStatusObject;
+import org.komodo.rest.relational.KomodoSavedSearcher;
 import com.google.gson.TypeAdapter;
-import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
 /**
- * A GSON serializer/deserializer for {@status KomodoStatusObject}s.
+ * A GSON serializer/deserializer for {@status KomodoSearchObject}s.
  */
-public final class StatusObjectSerializer extends TypeAdapter< KomodoStatusObject > {
-
-    private static final Type STRING_MAP_TYPE = new TypeToken< Map< String, String > >() {/* nothing to do */}.getType();
+public final class SavedSearcherSerializer extends TypeAdapter< KomodoSavedSearcher > {
 
     /**
      * {@inheritDoc}
@@ -32,20 +26,19 @@ public final class StatusObjectSerializer extends TypeAdapter< KomodoStatusObjec
      * @see com.google.gson.TypeAdapter#read(com.google.gson.stream.JsonReader)
      */
     @Override
-    public KomodoStatusObject read( final JsonReader in ) throws IOException {
-        final KomodoStatusObject status = new KomodoStatusObject();
+    public KomodoSavedSearcher read( final JsonReader in ) throws IOException {
+        final KomodoSavedSearcher status = new KomodoSavedSearcher();
         in.beginObject();
 
         while ( in.hasNext() ) {
             final String name = in.nextName();
 
             switch ( name ) {
-                case KomodoStatusObject.TITLE_LABEL:
-                    status.setTitle(in.nextString());
+                case KomodoSavedSearcher.NAME_LABEL:
+                    status.setName(in.nextString());
                     break;
-                case KomodoStatusObject.INFO_LABEL:
-                    Map<String, String> attributes = BUILDER.fromJson(in, Map.class);
-                    status.setAttributes(attributes);
+                case KomodoSavedSearcher.QUERY_LABEL:
+                    status.setQuery(in.nextString());
                     break;
                 default:
                     throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
@@ -64,16 +57,16 @@ public final class StatusObjectSerializer extends TypeAdapter< KomodoStatusObjec
      */
     @Override
     public void write( final JsonWriter out,
-                       final KomodoStatusObject value ) throws IOException {
+                       final KomodoSavedSearcher value ) throws IOException {
 
         out.beginObject();
 
         // Title of object
-        out.name(KomodoStatusObject.TITLE_LABEL);
-        out.value(value.getTitle());
+        out.name(KomodoSavedSearcher.NAME_LABEL);
+        out.value(value.getName());
 
-        out.name(KomodoStatusObject.INFO_LABEL);
-        BUILDER.toJson(value.getAttributes(), STRING_MAP_TYPE, out);
+        out.name(KomodoSavedSearcher.QUERY_LABEL);
+        out.value(value.getQuery());
 
         out.endObject();
     }

@@ -362,6 +362,23 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
     }
 
     /**
+     * @param properties the search paramater properties
+     * @return the URI to use where requesting the collection of saved searches
+     */
+    public URI generateSavedSearchCollectionUri(KomodoProperties properties) {
+        UriBuilder builder = UriBuilder.fromUri(this.baseUri)
+                                                      .path(WORKSPACE_SEGMENT)
+                                                      .path(SEARCH_SEGMENT)
+                                                      .path(SAVED_SEARCHES_SEGMENT);
+
+        for (Map.Entry<String, Object> entry : properties.entrySet()) {
+            builder.queryParam(entry.getKey(), entry.getValue().toString());
+        }
+
+        return builder.build();
+    }
+
+    /**
      * @param vdbName the vdb name
      * @return the URI for the given vdb
      */

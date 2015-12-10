@@ -215,6 +215,11 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         String SEARCH_SEGMENT = "search"; //$NON-NLS-1$
 
         /**
+         * The name of the URI search saved search parameter
+         */
+        String SEARCH_SAVED_NAME_PARAMETER = "searchName"; //$NON-NLS-1$
+
+        /**
          * The name of the URI search contains parameter
          */
         String SEARCH_CONTAINS_PARAMETER = "contains"; //$NON-NLS-1$
@@ -222,7 +227,7 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         /**
          * The name of the URI search name parameter
          */
-        String SEARCH_NAME_PARAMETER = "name"; //$NON-NLS-1$
+        String SEARCH_OBJECT_NAME_PARAMETER = "objectName"; //$NON-NLS-1$
 
         /**
          * The name of the URI search path parameter
@@ -243,6 +248,11 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
          * The name of the URI search ancestor parameter
          */
         String SEARCH_ANCESTOR_PARAMETER = "ancestor"; //$NON-NLS-1$
+
+        /**
+         * The URI path for the collection of saved searches
+         */
+        String SAVED_SEARCHES_SEGMENT = "savedSearches"; //$NON-NLS-1$
 
         /**
          * The vdb export xml property
@@ -319,6 +329,15 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
                                       KomodoVdbService.class.getPackage().getName());
         beanConfig.setPrettyPrint(true);
         beanConfig.setScan(true);
+    }
+
+    /**
+     * @return the default repository of this application.
+     *            Should only be applicable for testing.
+     *
+     */
+    public Repository getDefaultRepository() {
+        return kengine.getDefaultRepository();
     }
 
     /**

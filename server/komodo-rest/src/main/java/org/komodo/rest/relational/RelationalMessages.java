@@ -214,6 +214,16 @@ public final class RelationalMessages {
         SEARCH_SERVICE_GET_SEARCH_ERROR,
 
         /**
+         * An error indicating a request for saved searched failed
+         */
+        SEARCH_SERVICE_WKSP_SEARCHES_ERROR,
+
+        /**
+         * An error indicating a request to save a search configuration failed
+         */
+        SEARCH_SERVICE_SAVE_SEARCH_ERROR,
+
+        /**
          * The search service lacks at least one parameter
          */
         SEARCH_SERVICE_NO_PARAMETERS_ERROR,

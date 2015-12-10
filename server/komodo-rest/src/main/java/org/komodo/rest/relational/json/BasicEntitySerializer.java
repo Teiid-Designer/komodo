@@ -13,8 +13,6 @@ import java.io.IOException;
 import java.util.Map;
 import org.komodo.rest.Messages;
 import org.komodo.rest.RestBasicEntity;
-import org.komodo.rest.relational.RestVdb;
-import org.komodo.rest.relational.RestVdbDataRole;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
@@ -74,7 +72,7 @@ public class BasicEntitySerializer<T extends RestBasicEntity> extends AbstractEn
         }
 
         if ( !isComplete( entity ) ) {
-            throw new IOException( Messages.getString( INCOMPLETE_JSON, RestVdbDataRole.class.getSimpleName() ) );
+            throw new IOException( Messages.getString( INCOMPLETE_JSON, getClass().getSimpleName() ) );
         }
 
         endRead(in);
@@ -90,7 +88,7 @@ public class BasicEntitySerializer<T extends RestBasicEntity> extends AbstractEn
     @Override
     public void write(final JsonWriter out, final T entity) throws IOException {
         if (!isComplete(entity)) {
-            throw new IOException(Messages.getString(INCOMPLETE_JSON, RestVdb.class.getSimpleName()));
+            throw new IOException(Messages.getString(INCOMPLETE_JSON, getClass().getSimpleName()));
         }
 
         beginWrite(out);

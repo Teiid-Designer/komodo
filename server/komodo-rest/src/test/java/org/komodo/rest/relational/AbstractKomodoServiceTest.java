@@ -29,8 +29,10 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileAttribute;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation;
@@ -44,6 +46,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.komodo.core.KEngine;
+import org.komodo.repository.SynchronousCallback;
+import org.komodo.repository.search.ObjectSearcher;
 import org.komodo.rest.KomodoRestV1Application;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.RestLink;
@@ -51,7 +55,11 @@ import org.komodo.rest.RestLink.LinkType;
 import org.komodo.rest.RestProperty;
 import org.komodo.spi.constants.SystemConstants;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.Repository;
+import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.test.utils.TestUtilities;
+import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
+import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 /**
  *
@@ -123,6 +131,10 @@ public abstract class AbstractKomodoServiceTest implements V1Constants {
         this.client = ClientBuilder.newClient();
     }
 
+    protected KomodoRestV1Application getRestApp() {
+        return _restApp;
+    }
+
     protected void loadVdbs() throws Exception {
         _restApp.importVdb(TestUtilities.allElementsExample());
         _restApp.importVdb(TestUtilities.portfolioExample());
@@ -130,6 +142,40 @@ public abstract class AbstractKomodoServiceTest implements V1Constants {
         _restApp.importVdb(TestUtilities.tweetExample());
 
         Assert.assertEquals(4, _restApp.getVdbs().length);
+    }
+
+    protected List<String> loadSampleSearches() throws Exception {
+        List<String> searchNames = new ArrayList<>();
+        Repository repository = _restApp.getDefaultRepository();
+
+        final SynchronousCallback callback = new SynchronousCallback();
+        UnitOfWork uow = repository.createTransaction(
+                                                      getClass().getSimpleName() + COLON + "SaveSearchInWorkspace" + COLON + System.currentTimeMillis(),
+                                                      false, callback);
+
+        ObjectSearcher vdbsSearch = new ObjectSearcher(repository);
+        vdbsSearch.addFromType(VdbLexicon.Vdb.VIRTUAL_DATABASE, "vdbs");
+        String vdbSearchName = "Vdbs Search";
+        vdbsSearch.write(uow, vdbSearchName);
+
+        ObjectSearcher columnsSearch = new ObjectSearcher(repository);
+        columnsSearch.addFromType(TeiidDdlLexicon.CreateTable.TABLE_ELEMENT, "c");
+        String columnSearchName = "Columns Search";
+        columnsSearch.write(uow, columnSearchName);
+
+        uow.commit();
+
+        if (!callback.await(3, TimeUnit.MINUTES)) {
+            throw new Exception("Timed out while loading saved searches");
+        }
+
+        if (callback.error() != null)
+            throw new Exception(callback.error());
+
+        searchNames.add(vdbSearchName);
+        searchNames.add(columnSearchName);
+
+        return searchNames;
     }
 
     protected Invocation.Builder request(final URI uri) {

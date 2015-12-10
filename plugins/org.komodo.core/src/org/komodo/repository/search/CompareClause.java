@@ -21,6 +21,13 @@
  */
 package org.komodo.repository.search;
 
+import org.komodo.core.KomodoLexicon.Search;
+import org.komodo.core.KomodoLexicon.Search.WhereCompareClause;
+import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.Repository;
+import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
 
@@ -32,23 +39,22 @@ import org.komodo.utils.StringUtils;
  */
 class CompareClause extends Clause implements PropertyClause {
 
-    private final ComparisonOperator compareOperator;
-    private final String value;
+    private ComparisonOperator compareOperator;
+    private String value;
 
 
     /**
      * Constructor
-     * @param parent parent searcher
      * @param logicalOperator the logical operator preceding this clause (can be null if this is the only clause)
      * @param alias the alias
      * @param property the property
      * @param compareOperator the comparison operator
      * @param value the value for comparison
      */
-    public CompareClause(ObjectSearcher parent, LogicalOperator logicalOperator,
+    public CompareClause(LogicalOperator logicalOperator,
                                          String alias, String property, ComparisonOperator compareOperator,
                                          String value) {
-        super(parent, logicalOperator);
+        super(logicalOperator);
 
         ArgCheck.isNotNull(property);
         ArgCheck.isNotNull(compareOperator);
@@ -57,8 +63,33 @@ class CompareClause extends Clause implements PropertyClause {
         setAlias(alias);
         setProperty(PROPERTY, property);
 
-        this.compareOperator = compareOperator;
+        setCompareOperator(compareOperator);
         this.value = value;
+    }
+
+    /**
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param whereClause the where clause object
+     *
+     * @throws KException if error occurs
+     */
+    protected CompareClause(UnitOfWork uow, KomodoObject whereClause) throws KException {
+        super(uow, whereClause);
+
+        if (whereClause.hasProperty(uow, Search.WhereCompareClause.PROPERTY)) {
+            setProperty(whereClause.getProperty(uow, Search.WhereCompareClause.PROPERTY).getStringValue(uow));
+        }
+
+        if (whereClause.hasProperty(uow, WhereCompareClause.COMPARE_OPERATOR)) {
+            String compareOpValue = whereClause.getProperty(uow, Search.WhereCompareClause.COMPARE_OPERATOR).getStringValue(uow);
+            setCompareOperator(ComparisonOperator.findOperator(compareOpValue));
+        }
+
+        if (whereClause.hasProperty(uow, WhereCompareClause.VALUE)) {
+            setValue(whereClause.getProperty(uow, Search.WhereCompareClause.VALUE).getStringValue(uow));
+        }
     }
 
     /**
@@ -67,6 +98,32 @@ class CompareClause extends Clause implements PropertyClause {
     @Override
     public String getProperty() {
         return properties.get(PROPERTY);
+    }
+
+    protected void setProperty(String propertyValue) {
+        properties.put(PROPERTY, propertyValue);
+    }
+
+    /**
+     * @return the compareOperator
+     */
+    public ComparisonOperator getCompareOperator() {
+        return this.compareOperator;
+    }
+
+    protected void setCompareOperator(ComparisonOperator compareOperator) {
+        this.compareOperator = compareOperator;
+    }
+
+    /**
+     * @return the value
+     */
+    public String getValue() {
+        return this.value;
+    }
+
+    protected void setValue(String value) {
+        this.value = value;
     }
 
     @Override
@@ -124,5 +181,23 @@ class CompareClause extends Clause implements PropertyClause {
         buffer.append(QUOTE_MARK);
 
         return buffer.toString();
+    }
+
+    @Override
+    void write(UnitOfWork uow, KomodoObject searchObject) throws KException {
+        ArgCheck.isNotNull(uow, "transaction"); //$NON-NLS-1$
+        ArgCheck.isTrue((uow.getState() == State.NOT_STARTED), "transaction state is not NOT_STARTED"); //$NON-NLS-1$
+        ArgCheck.isNotNull(searchObject, "searchObject"); //$NON-NLS-1$
+
+        Repository repository = searchObject.getRepository();
+        KomodoObject whereObject = repository.add(uow, searchObject.getAbsolutePath(),
+                                                  Search.WHERE_CLAUSE,
+                                                  Search.WhereCompareClause.NODE_TYPE);
+
+        writeProperties(uow, whereObject);
+
+        whereObject.setProperty(uow, Search.WhereCompareClause.PROPERTY, getProperty());
+        whereObject.setProperty(uow, Search.WhereCompareClause.COMPARE_OPERATOR, compareOperator.toString());
+        whereObject.setProperty(uow, Search.WhereCompareClause.VALUE, value);
     }
 }

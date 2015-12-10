@@ -24,6 +24,13 @@ package org.komodo.repository.search;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import org.komodo.core.KomodoLexicon.Search;
+import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.Property;
+import org.komodo.spi.repository.Repository;
+import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
 
@@ -38,14 +45,13 @@ class SetClause extends Clause implements PropertyClause {
 
     /**
      * Constructor
-     * @param parent parent searcher
      * @param operator the logical operator preceding this clause (can be null if this is the only clause)
      * @param alias the alias
      * @param property the property
      * @param values the value(s)
      */
-    public SetClause(ObjectSearcher parent, LogicalOperator operator, String alias, String property, String... values) {
-        super(parent, operator);
+    public SetClause(LogicalOperator operator, String alias, String property, String... values) {
+        super(operator);
 
         ArgCheck.isNotNull(property);
         ArgCheck.isNotEmpty(values, "Where Set clause requires at least 1 value"); //$NON-NLS-1$
@@ -58,11 +64,39 @@ class SetClause extends Clause implements PropertyClause {
     }
 
     /**
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param whereClause the where clause object
+     *
+     * @throws KException if error occurs
+     */
+    protected SetClause(UnitOfWork uow, KomodoObject whereClause) throws KException {
+        super(uow, whereClause);
+
+        if (whereClause.hasProperty(uow, Search.WhereSetClause.PROPERTY)) {
+            setProperty(whereClause.getProperty(uow, Search.WhereCompareClause.PROPERTY).getStringValue(uow));
+        }
+
+        if (whereClause.hasProperty(uow, Search.WhereSetClause.VALUES)) {
+            Property valuesProp = whereClause.getProperty(uow, Search.WhereSetClause.VALUES);
+            String[] values = valuesProp.getStringValues(uow);
+            for (String value : values) {
+                addValue(value);
+            }
+        }
+    }
+
+    /**
      * @return the property
      */
     @Override
     public String getProperty() {
         return properties.get(PROPERTY);
+    }
+
+    protected void setProperty(String propertyValue) {
+        properties.put(PROPERTY, propertyValue);
     }
 
     /**
@@ -138,5 +172,22 @@ class SetClause extends Clause implements PropertyClause {
         buffer.append(CLOSE_BRACKET);
 
         return buffer.toString();
+    }
+
+    @Override
+    void write(UnitOfWork uow, KomodoObject searchObject) throws KException {
+        ArgCheck.isNotNull(uow, "transaction"); //$NON-NLS-1$
+        ArgCheck.isTrue((uow.getState() == State.NOT_STARTED), "transaction state is not NOT_STARTED"); //$NON-NLS-1$
+        ArgCheck.isNotNull(searchObject, "searchObject"); //$NON-NLS-1$
+
+        Repository repository = searchObject.getRepository();
+        KomodoObject whereObject = repository.add(uow, searchObject.getAbsolutePath(),
+                                                  Search.WHERE_CLAUSE,
+                                                  Search.WhereSetClause.NODE_TYPE);
+
+        writeProperties(uow, whereObject);
+
+        whereObject.setProperty(uow, Search.WhereSetClause.PROPERTY, getProperty());
+        whereObject.setProperty(uow, Search.WhereSetClause.VALUES, getValues().toArray());
     }
 }
