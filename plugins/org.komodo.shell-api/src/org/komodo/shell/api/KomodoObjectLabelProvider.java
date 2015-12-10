@@ -8,8 +8,12 @@
 package org.komodo.shell.api;
 
 import static org.komodo.spi.constants.StringConstants.FORWARD_SLASH;
+
+import java.util.List;
+
 import org.komodo.core.KomodoLexicon;
 import org.komodo.repository.RepositoryImpl;
+import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 
@@ -148,5 +152,19 @@ public interface KomodoObjectLabelProvider {
      *        the workspace status (never <code>null</code>)
      */
     void setWorkspaceStatus( final WorkspaceStatus status );
+    
+	 /**
+     * @return Returns a node names which should be omitted from display path
+     */
+	List<String> getGroupingNodes();
+	
+    /**
+     * Get the type display string for a KomodoObject
+     * @param uow the transaction
+     * @param kObj the KomodoObject
+     * @return the type display string
+     * @throws KException the exception
+     */
+    public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj );
 
 }

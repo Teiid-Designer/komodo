@@ -17,6 +17,9 @@ package org.komodo.shell.commands;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.shell.AbstractCommandTest;
 import org.komodo.shell.api.CommandResult;
@@ -60,6 +63,23 @@ public class RenameCommandTest extends AbstractCommandTest {
         final KomodoObject workspace = _repo.komodoWorkspace( getTransaction() );
         assertThat( workspace.getChildren( getTransaction() ).length, is( 1 ) );
         assertThat( workspace.getChildren( getTransaction() )[ 0 ].getName( getTransaction() ), is( newChildName ) );
+    }
+    
+    @Test
+    public void testTabCompleter()throws Exception{
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+       	setup("commandFiles","addChildren.cmd");
+       	
+    	candidates.add("myChild1");
+    	candidates.add("myChild2");
+
+    	assertTabCompletion("rename myChil", candidates);
+
+    	candidates.add("MyChild3");
+    	assertTabCompletion("rename ", candidates);
+       	
+       	
+
     }
 
 }

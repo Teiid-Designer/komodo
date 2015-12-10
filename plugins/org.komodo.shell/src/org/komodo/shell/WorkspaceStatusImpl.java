@@ -853,37 +853,10 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         this.currentContextLabelProvider = (resultLabelProvider!=null) ? resultLabelProvider : defaultLabelProvider;
     }
 
-    @Override
-    public String getTypeDisplay ( final KomodoObject kObj ) {
-        if ( !this.commandFactory.getCommandProviders().isEmpty() ) {
-            ShellCommandProvider defaultProvider = null;
-
-            try {
-                for ( ShellCommandProvider provider : this.commandFactory.getCommandProviders() ) {
-                    try {
-                        if ( provider instanceof BuiltInShellCommandProvider ) {
-                            defaultProvider = provider;
-                            continue;
-                        }
-
-                        String typeString = provider.getTypeDisplay( getTransaction(), kObj );
-                        if ( typeString != null ) return typeString;
-                    } catch ( final Exception e ) {
-                        KLog.getLogger().error( "WorkspaceStatusImpl.getTypeDisplay error in provider \"{0}\"", e, provider ); //$NON-NLS-1$
-                        // continue on to next provider
-                    }
-                }
-
-                return defaultProvider.getTypeDisplay( getTransaction(), kObj );
-            } catch ( KException ex ) {
-                KLog.getLogger().error( "WorkspaceStatusImpl.getTypeDisplay error in built-in provider", ex ); //$NON-NLS-1$
-            }
-        }
-
-        assert false;
-        KLog.getLogger().error( "WorkspaceStatusImpl.getTypeDisplay: no type display found for \"{0}\"", kObj.getAbsolutePath() ); //$NON-NLS-1$
-        return kObj.getClass().getSimpleName();
-    }
+	@Override
+	public String getTypeDisplay(final KomodoObject kObj) {
+			return  getLabelProvider().getTypeDisplay(uow, kObj);
+	}
 
     @Override
     public List<String> getProvidedStatusMessages( final KomodoObject kObj ) {
