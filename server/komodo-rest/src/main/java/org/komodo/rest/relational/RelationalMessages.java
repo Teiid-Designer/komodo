@@ -231,7 +231,12 @@ public final class RelationalMessages {
         /**
          * The search service has both parent and ancestor parameters
          */
-        SEARCH_SERVICE_PARENT_ANCESTOR_EXCLUSIVE_ERROR;
+        SEARCH_SERVICE_PARENT_ANCESTOR_EXCLUSIVE_ERROR,
+
+        /**
+         * The search service cannot parse the request body
+         */
+        SEARCH_SERVICE_REQUEST_PARSING_ERROR;
 
         /**
          * {@inheritDoc}

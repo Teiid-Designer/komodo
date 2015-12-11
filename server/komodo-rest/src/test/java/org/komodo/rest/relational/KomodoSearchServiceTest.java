@@ -218,7 +218,7 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
     }
 
     @Test
-    public void shouldSearchByKTypeAndLocalNameParameter() throws Exception {
+    public void shouldSearchByKTypeAndLocalName() throws Exception {
         loadVdbs();
 
         // get
@@ -331,6 +331,260 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
         assertEquals(searchNames.size() - 1, children.length);
         for (KomodoObject child : children) {
             assertNotEquals(searchName, child.getName(uow));
+        }
+    }
+
+    @Test
+    public void shouldAdvancedSearchForAnythingContainingView() throws Exception {
+        loadVdbs();
+
+        // post
+        KomodoProperties properties = new KomodoProperties();
+        URI uri = _uriBuilder.generateSearchUri(properties);
+
+        KomodoSearcherAttributes searchAttr = new KomodoSearcherAttributes();
+        searchAttr.setContains("view");
+
+        this.response = request(uri).post(Entity.json(searchAttr));
+        final String entity = this.response.readEntity(String.class);
+        System.out.println("Response:\n" + entity);
+
+        RestBasicEntity[] entities = KomodoJsonMarshaller.unmarshallArray(entity, RestBasicEntity[].class);
+        assertEquals(19, entities.length);
+
+        for (RestBasicEntity e : entities) {
+            assertNotNull(e.getId());
+            assertNotNull(e.getBaseUri());
+            assertNotNull(e.getDataPath());
+            assertNotNull(e.getkType());
+            assertNotNull(e.hasChildren());
+            assertNotEquals(KomodoType.UNKNOWN, e.getkType());
+        }
+    }
+
+    @Test
+    public void shouldAdvancedSearchForAnyModelContainingView() throws Exception {
+        loadVdbs();
+
+        // post
+        KomodoProperties properties = new KomodoProperties();
+        URI uri = _uriBuilder.generateSearchUri(properties);
+
+        KomodoSearcherAttributes searchAttr = new KomodoSearcherAttributes();
+        searchAttr.setType(VdbLexicon.Vdb.DECLARATIVE_MODEL);
+        searchAttr.setContains("view");
+
+        this.response = request(uri).post(Entity.json(searchAttr));
+        final String entity = this.response.readEntity(String.class);
+        System.out.println("Response:\n" + entity);
+
+        RestBasicEntity[] entities = KomodoJsonMarshaller.unmarshallArray(entity, RestBasicEntity[].class);
+        assertEquals(5, entities.length);
+
+        for (RestBasicEntity e : entities) {
+            assertNotNull(e.getId());
+            assertNotNull(e.getBaseUri());
+            assertNotNull(e.getDataPath());
+            assertNotNull(e.getkType());
+            assertNotNull(e.hasChildren());
+            assertEquals(KomodoType.MODEL, e.getkType());
+        }
+    }
+
+    @Test
+    public void shouldAdvancedSearchForAnyModelUnderPortfolioContainingView() throws Exception {
+        loadVdbs();
+
+        // post
+        KomodoProperties properties = new KomodoProperties();
+        URI uri = _uriBuilder.generateSearchUri(properties);
+
+        KomodoSearcherAttributes searchAttr = new KomodoSearcherAttributes();
+        searchAttr.setType(VdbLexicon.Vdb.DECLARATIVE_MODEL);
+        searchAttr.setParent(PORTFOLIO_DATA_PATH);
+        searchAttr.setContains("view");
+
+        this.response = request(uri).post(Entity.json(searchAttr));
+        final String entity = this.response.readEntity(String.class);
+        System.out.println("Response:\n" + entity);
+
+        RestBasicEntity[] entities = KomodoJsonMarshaller.unmarshallArray(entity, RestBasicEntity[].class);
+        assertEquals(2, entities.length);
+
+        for (RestBasicEntity e : entities) {
+            assertNotNull(e.getId());
+            assertNotNull(e.getBaseUri());
+            assertNotNull(e.getDataPath());
+            assertNotNull(e.getkType());
+            assertNotNull(e.hasChildren());
+            assertEquals(KomodoType.MODEL, e.getkType());
+            assertTrue(e.getDataPath().startsWith(PORTFOLIO_DATA_PATH));
+        }
+    }
+
+    @Test
+    public void shouldAdvancedSearchByPath() throws Exception {
+        loadVdbs();
+
+        // post
+        KomodoProperties properties = new KomodoProperties();
+        URI uri = _uriBuilder.generateSearchUri(properties);
+
+        KomodoSearcherAttributes searchAttr = new KomodoSearcherAttributes();
+        searchAttr.setPath(PORTFOLIO_DATA_PATH);
+
+        this.response = request(uri).post(Entity.json(searchAttr));
+        final String entity = this.response.readEntity(String.class);
+        System.out.println("Response:\n" + entity);
+        RestBasicEntity[] entities = KomodoJsonMarshaller.unmarshallArray(entity, RestBasicEntity[].class);
+        assertEquals(1, entities.length);
+
+        RestBasicEntity basicEntity = entities[0];
+        RestVdb vdb = RestEntityFactory.resolve(basicEntity, RestVdb.class);
+        assertNotNull(vdb);
+
+        assertPortfolio(vdb);
+    }
+
+    @Test
+    public void shouldAdvancedSearchByParent() throws Exception {
+        loadVdbs();
+
+        // post
+        KomodoProperties properties = new KomodoProperties();
+        URI uri = _uriBuilder.generateSearchUri(properties);
+
+        KomodoSearcherAttributes searchAttr = new KomodoSearcherAttributes();
+        searchAttr.setParent(PORTFOLIO_DATA_PATH);
+
+        this.response = request(uri).post(Entity.json(searchAttr));
+        final String entity = this.response.readEntity(String.class);
+        System.out.println("Response:\n" + entity);
+        RestBasicEntity[] entities = KomodoJsonMarshaller.unmarshallArray(entity, RestBasicEntity[].class);
+        assertEquals(5, entities.length);
+
+        for (RestBasicEntity basicEntity : entities) {
+            RestVdbModel model = RestEntityFactory.resolve(basicEntity, RestVdbModel.class);
+            assertNotNull(model);
+        }
+    }
+
+    @Test
+    public void shouldAdvancedSearchByAncestor() throws Exception {
+        loadVdbs();
+
+        // post
+        KomodoProperties properties = new KomodoProperties();
+        URI uri = _uriBuilder.generateSearchUri(properties);
+
+        KomodoSearcherAttributes searchAttr = new KomodoSearcherAttributes();
+        searchAttr.setAncestor(PORTFOLIO_DATA_PATH);
+
+        this.response = request(uri).post(Entity.json(searchAttr));
+        final String entity = this.response.readEntity(String.class);
+        System.out.println("Response:\n" + entity);
+        RestBasicEntity[] entities = KomodoJsonMarshaller.unmarshallArray(entity, RestBasicEntity[].class);
+        assertEquals(94, entities.length);
+
+        for (RestBasicEntity basicEntity : entities) {
+            System.out.println(basicEntity.getDataPath());
+        }
+    }
+
+    @Test
+    public void shouldAdvancedSearchByType() throws Exception {
+        loadVdbs();
+
+        // post
+        KomodoProperties properties = new KomodoProperties();
+        URI uri = _uriBuilder.generateSearchUri(properties);
+
+        KomodoSearcherAttributes searchAttr = new KomodoSearcherAttributes();
+        searchAttr.setType(TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
+
+        this.response = request(uri).post(Entity.json(searchAttr));
+        final String entity = this.response.readEntity(String.class);
+        System.out.println("Response:\n" + entity);
+        RestBasicEntity[] entities = KomodoJsonMarshaller.unmarshallArray(entity, RestBasicEntity[].class);
+        assertEquals(38, entities.length);
+
+        for (RestBasicEntity basicEntity : entities) {
+            KomodoType kType = basicEntity.getkType();
+            assertEquals(KomodoType.COLUMN, kType);
+        }
+    }
+
+    @Test
+    public void shouldAdvancedSearchByKType() throws Exception {
+        loadVdbs();
+
+        // post
+        KomodoProperties properties = new KomodoProperties();
+        URI uri = _uriBuilder.generateSearchUri(properties);
+
+        KomodoSearcherAttributes searchAttr = new KomodoSearcherAttributes();
+        searchAttr.setType(KomodoType.COLUMN.getType());
+
+        this.response = request(uri).post(Entity.json(searchAttr));
+        final String entity = this.response.readEntity(String.class);
+        System.out.println("Response:\n" + entity);
+        RestBasicEntity[] entities = KomodoJsonMarshaller.unmarshallArray(entity, RestBasicEntity[].class);
+        assertEquals(38, entities.length);
+
+        for (RestBasicEntity basicEntity : entities) {
+            KomodoType kType = basicEntity.getkType();
+            assertEquals(KomodoType.COLUMN, kType);
+        }
+    }
+
+    @Test
+    public void shouldAdvancedSearchByKTypeAndLocalName() throws Exception {
+        loadVdbs();
+
+        // post
+        KomodoProperties properties = new KomodoProperties();
+        URI uri = _uriBuilder.generateSearchUri(properties);
+
+        KomodoSearcherAttributes searchAttr = new KomodoSearcherAttributes();
+        searchAttr.setType(KomodoType.COLUMN.getType());
+        searchAttr.setObjectName("%ID%");
+
+        this.response = request(uri).post(Entity.json(searchAttr));
+        final String entity = this.response.readEntity(String.class);
+        System.out.println("Response:\n" + entity);
+        RestBasicEntity[] entities = KomodoJsonMarshaller.unmarshallArray(entity, RestBasicEntity[].class);
+        assertEquals(12, entities.length);
+
+        for (RestBasicEntity basicEntity : entities) {
+            KomodoType kType = basicEntity.getkType();
+            assertEquals(KomodoType.COLUMN, kType);
+            assertTrue(basicEntity.getId().contains("ID"));
+            System.out.println(basicEntity.getDataPath());
+        }
+    }
+
+    @Test
+    public void shouldAdvancedExecuteSavedSearch()  throws Exception {
+        loadVdbs();
+        List<String> searchNames = loadSampleSearches();
+
+        // post
+        KomodoProperties properties = new KomodoProperties();
+        URI uri = _uriBuilder.generateSearchUri(properties);
+
+        KomodoSearcherAttributes searchAttr = new KomodoSearcherAttributes();
+        searchAttr.setSearchName(searchNames.get(0));
+
+        this.response = request(uri).post(Entity.json(searchAttr));
+        final String entity = this.response.readEntity(String.class);
+        System.out.println("Response:\n" + entity);
+        RestBasicEntity[] entities = KomodoJsonMarshaller.unmarshallArray(entity, RestBasicEntity[].class);
+        assertEquals(4, entities.length);
+
+        for (RestBasicEntity basicEntity : entities) {
+            KomodoType kType = basicEntity.getkType();
+            assertEquals(KomodoType.VDB, kType);
+            System.out.println(basicEntity.getDataPath());
         }
     }
 }

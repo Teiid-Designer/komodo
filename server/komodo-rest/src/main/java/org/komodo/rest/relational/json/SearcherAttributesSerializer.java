@@ -7,12 +7,10 @@
 */
 package org.komodo.rest.relational.json;
 
-import static org.komodo.rest.Messages.Error.INCOMPLETE_JSON;
 import static org.komodo.rest.Messages.Error.UNEXPECTED_JSON_TOKEN;
 import java.io.IOException;
 import org.komodo.rest.Messages;
 import org.komodo.rest.relational.KomodoSearcherAttributes;
-import org.komodo.utils.StringUtils;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
@@ -21,26 +19,6 @@ import com.google.gson.stream.JsonWriter;
  * A GSON serializer/deserializer for {@status KomodoSearchObject}s.
  */
 public final class SearcherAttributesSerializer extends TypeAdapter< KomodoSearcherAttributes > {
-
-    private boolean isComplete(KomodoSearcherAttributes sa) {
-        if (sa.getSearchName() == null)
-            return false;
-
-        if (StringUtils.isBlank(sa.getAncestor()) &&
-            StringUtils.isBlank(sa.getContains()) &&
-            StringUtils.isBlank(sa.getObjectName()) &&
-            StringUtils.isBlank(sa.getParent()) &&
-            StringUtils.isBlank(sa.getPath()) &&
-            StringUtils.isBlank(sa.getType()))
-            return false;
-
-        // Mutually exclusive
-        if (! StringUtils.isBlank(sa.getAncestor()) &&
-            ! StringUtils.isBlank(sa.getParent()))
-            return false;
-
-        return true;
-    }
 
     /**
      * {@inheritDoc}
@@ -84,10 +62,6 @@ public final class SearcherAttributesSerializer extends TypeAdapter< KomodoSearc
 
         in.endObject();
 
-        if ( !isComplete( searcherAttr ) ) {
-            throw new IOException( Messages.getString( INCOMPLETE_JSON, getClass().getSimpleName() ) );
-        }
-
         return searcherAttr;
     }
 
@@ -99,10 +73,6 @@ public final class SearcherAttributesSerializer extends TypeAdapter< KomodoSearc
     @Override
     public void write( final JsonWriter out,
                        final KomodoSearcherAttributes value ) throws IOException {
-
-        if (!isComplete(value)) {
-            throw new IOException(Messages.getString(INCOMPLETE_JSON, getClass().getSimpleName()));
-        }
 
         out.beginObject();
 
