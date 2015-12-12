@@ -55,6 +55,14 @@ public final class PermissionImplTest extends RelationalModelTest {
         assertThat( added.getName( getTransaction() ), is( name ) );
         assertThat( added.getPrimaryType( getTransaction() ).getName(), is( VdbLexicon.DataRole.Permission.Condition.CONDITION ) );
         assertThat( this.permission.getChildren( getTransaction() )[0], is( instanceOf( Condition.class ) ) );
+
+        assertThat( this.permission.hasChild( getTransaction(), name ), is( true ) );
+        assertThat( this.permission.hasChild( getTransaction(), name, VdbLexicon.DataRole.Permission.Condition.CONDITION ),
+                    is( true ) );
+        assertThat( this.permission.hasChildren( getTransaction() ), is( true ) );
+        assertThat( this.permission.getChild( getTransaction(), name ), is( added ) );
+        assertThat( this.permission.getChild( getTransaction(), name, VdbLexicon.DataRole.Permission.Condition.CONDITION ),
+                    is( added ) );
     }
 
     @Test
@@ -69,6 +77,24 @@ public final class PermissionImplTest extends RelationalModelTest {
         assertThat( added.getName( getTransaction() ), is( name ) );
         assertThat( added.getPrimaryType( getTransaction() ).getName(), is( VdbLexicon.DataRole.Permission.Mask.MASK ) );
         assertThat( this.permission.getChildren( getTransaction() )[0], is( instanceOf( Mask.class ) ) );
+
+        assertThat( this.permission.hasChild( getTransaction(), name ), is( true ) );
+        assertThat( this.permission.hasChild( getTransaction(), name, VdbLexicon.DataRole.Permission.Mask.MASK ), is( true ) );
+        assertThat( this.permission.hasChildren( getTransaction() ), is( true ) );
+        assertThat( this.permission.getChild( getTransaction(), name ), is( added ) );
+        assertThat( this.permission.getChild( getTransaction(), name, VdbLexicon.DataRole.Permission.Mask.MASK ), is( added ) );
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailGetChildWhenTypeIsWrong() throws Exception {
+        final String name = "condition";
+        this.permission.addCondition( getTransaction(), name );
+        this.permission.getChild( getTransaction(), name, "bogusType" );
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailWhenChildNotFound() throws Exception {
+        this.permission.getChild( getTransaction(), "bogus" );
     }
 
     @Test

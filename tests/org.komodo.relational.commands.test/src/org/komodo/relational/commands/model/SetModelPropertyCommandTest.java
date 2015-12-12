@@ -16,9 +16,7 @@
 package org.komodo.relational.commands.model;
 
 import static org.junit.Assert.assertEquals;
-
 import java.util.ArrayList;
-
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Model;
@@ -63,8 +61,8 @@ public final class SetModelPropertyCommandTest extends AbstractCommandTest {
     	final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
-    	candidates.add(SetModelPropertyCommand.MODEL_TYPE);
-    	candidates.add(SetModelPropertyCommand.METADATA_TYPE);
+    	candidates.add(ModelShellCommand.MODEL_TYPE);
+    	candidates.add(ModelShellCommand.METADATA_TYPE);
     	assertTabCompletion("set-property m", candidates);
     	assertTabCompletion("set-property M", candidates);
     }

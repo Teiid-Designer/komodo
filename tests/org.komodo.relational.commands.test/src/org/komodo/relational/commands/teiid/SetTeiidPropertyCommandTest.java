@@ -16,9 +16,7 @@
 package org.komodo.relational.commands.teiid;
 
 import static org.junit.Assert.assertEquals;
-
 import java.util.ArrayList;
-
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.teiid.Teiid;
@@ -57,8 +55,8 @@ public final class SetTeiidPropertyCommandTest extends AbstractCommandTest {
     	final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
-    	candidates.add(SetTeiidPropertyCommand.ADMIN_PORT);
-    	candidates.add(SetTeiidPropertyCommand.ADMIN_PASSWORD);
+    	candidates.add(TeiidShellCommand.ADMIN_PORT);
+    	candidates.add(TeiidShellCommand.ADMIN_PASSWORD);
     	assertTabCompletion("set-property ADMINP", candidates);
     	assertTabCompletion("set-property adminP", candidates);
     }

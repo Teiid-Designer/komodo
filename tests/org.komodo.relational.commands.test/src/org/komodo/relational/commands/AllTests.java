@@ -3,9 +3,11 @@ package org.komodo.relational.commands;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.komodo.relational.commands.column.ColumnCommandsI18nTest;
+import org.komodo.relational.commands.column.ColumnRenameCommandTest;
 import org.komodo.relational.commands.column.SetColumnPropertyCommandTest;
 import org.komodo.relational.commands.column.UnsetColumnPropertyCommandTest;
 import org.komodo.relational.commands.condition.ConditionCommandsI18nTest;
+import org.komodo.relational.commands.condition.ConditionRenameCommandTest;
 import org.komodo.relational.commands.condition.SetConditionPropertyCommandTest;
 import org.komodo.relational.commands.condition.UnsetConditionPropertyCommandTest;
 import org.komodo.relational.commands.datarole.AddMappedRoleCommandTest;
@@ -24,6 +26,7 @@ import org.komodo.relational.commands.datatyperesultset.DataTypeResultSetCommand
 import org.komodo.relational.commands.datatyperesultset.SetDataTypeResultSetPropertyCommandTest;
 import org.komodo.relational.commands.datatyperesultset.UnsetDataTypeResultSetPropertyCommandTest;
 import org.komodo.relational.commands.entry.EntryCommandsI18nTest;
+import org.komodo.relational.commands.entry.EntryRenameCommandTest;
 import org.komodo.relational.commands.entry.SetEntryPropertyCommandTest;
 import org.komodo.relational.commands.entry.UnsetEntryPropertyCommandTest;
 import org.komodo.relational.commands.foreignkey.AddReferenceColumnCommandTest;
@@ -33,6 +36,7 @@ import org.komodo.relational.commands.index.IndexCommandsI18nTest;
 import org.komodo.relational.commands.index.SetIndexPropertyCommandTest;
 import org.komodo.relational.commands.index.UnsetIndexPropertyCommandTest;
 import org.komodo.relational.commands.mask.MaskCommandsI18nTest;
+import org.komodo.relational.commands.mask.MaskRenameCommandTest;
 import org.komodo.relational.commands.mask.SetMaskPropertyCommandTest;
 import org.komodo.relational.commands.mask.UnsetMaskPropertyCommandTest;
 import org.komodo.relational.commands.model.AddPushdownFunctionCommandTest;
@@ -75,8 +79,10 @@ import org.komodo.relational.commands.permission.ShowConditionsCommandTest;
 import org.komodo.relational.commands.permission.ShowMasksCommandTest;
 import org.komodo.relational.commands.permission.UnsetPermissionPropertyCommandTest;
 import org.komodo.relational.commands.pushdownfunction.PushdownFunctionCommandsI18nTest;
+import org.komodo.relational.commands.pushdownfunction.PushdownFunctionRenameCommandTest;
 import org.komodo.relational.commands.pushdownfunction.SetPushdownFunctionPropertyCommandTest;
 import org.komodo.relational.commands.pushdownfunction.UnsetPushdownFunctionPropertyCommandTest;
+import org.komodo.relational.commands.resultset.ResultSetRenameCommandTest;
 import org.komodo.relational.commands.resultsetcolumn.ResultSetColumnCommandsI18nTest;
 import org.komodo.relational.commands.resultsetcolumn.SetResultSetColumnPropertyCommandTest;
 import org.komodo.relational.commands.resultsetcolumn.UnsetResultSetColumnPropertyCommandTest;
@@ -92,6 +98,7 @@ import org.komodo.relational.commands.server.ServerDatasourcesCommandTest;
 import org.komodo.relational.commands.server.ServerDeployDatasourceCommandTest;
 import org.komodo.relational.commands.server.ServerDeployVdbCommandTest;
 import org.komodo.relational.commands.server.ServerDisconnectCommandTest;
+import org.komodo.relational.commands.server.ServerRenameCommandTest;
 import org.komodo.relational.commands.server.ServerSetCommandTest;
 import org.komodo.relational.commands.server.ServerTranslatorCommandTest;
 import org.komodo.relational.commands.server.ServerTranslatorsCommandTest;
@@ -101,6 +108,7 @@ import org.komodo.relational.commands.server.ServerVdbCommandTest;
 import org.komodo.relational.commands.server.ServerVdbsCommandTest;
 import org.komodo.relational.commands.storedprocedure.SetStoredProcedurePropertyCommandTest;
 import org.komodo.relational.commands.storedprocedure.StoredProcedureCommandsI18nTest;
+import org.komodo.relational.commands.storedprocedure.StoredProcedureRenameCommandTest;
 import org.komodo.relational.commands.storedprocedure.UnsetStoredProcedurePropertyCommandTest;
 import org.komodo.relational.commands.table.AddAccessPatternCommandTest;
 import org.komodo.relational.commands.table.AddColumnCommandTest;
@@ -132,6 +140,7 @@ import org.komodo.relational.commands.teiid.TeiidCommandsI18nTest;
 import org.komodo.relational.commands.teiid.UnsetTeiidPropertyCommandTest;
 import org.komodo.relational.commands.translator.SetTranslatorPropertyCommandTest;
 import org.komodo.relational.commands.translator.TranslatorCommandsI18nTest;
+import org.komodo.relational.commands.translator.TranslatorRenameCommandTest;
 import org.komodo.relational.commands.translator.UnsetTranslatorPropertyCommandTest;
 import org.komodo.relational.commands.userdefinedfunction.SetUserDefinedFunctionPropertyCommandTest;
 import org.komodo.relational.commands.userdefinedfunction.UnsetUserDefinedFunctionPropertyCommandTest;
@@ -153,6 +162,7 @@ import org.komodo.relational.commands.vdb.VdbCommandsI18nTest;
 import org.komodo.relational.commands.vdbimport.SetVdbImportPropertyCommandTest;
 import org.komodo.relational.commands.vdbimport.UnsetVdbImportPropertyCommandTest;
 import org.komodo.relational.commands.vdbimport.VdbImportCommandsI18nTest;
+import org.komodo.relational.commands.vdbimport.VdbImportRenameCommandTest;
 import org.komodo.relational.commands.view.SetViewPropertyCommandTest;
 import org.komodo.relational.commands.view.UnsetViewPropertyCommandTest;
 import org.komodo.relational.commands.view.ViewCommandsI18nTest;
@@ -209,11 +219,13 @@ import org.komodo.relational.commands.workspace.WorkspaceUnsetPropertyCommandTes
 
     // Column
     ColumnCommandsI18nTest.class,
+    ColumnRenameCommandTest.class,
     SetColumnPropertyCommandTest.class,
     UnsetColumnPropertyCommandTest.class,
 
     // Condition
     ConditionCommandsI18nTest.class,
+    ConditionRenameCommandTest.class,
     SetConditionPropertyCommandTest.class,
     UnsetConditionPropertyCommandTest.class,
 
@@ -232,7 +244,7 @@ import org.komodo.relational.commands.workspace.WorkspaceUnsetPropertyCommandTes
     DatasourceCommandsI18nTest.class,
     SetDatasourcePropertyCommandTest.class,
     UnsetDatasourcePropertyCommandTest.class,
-    
+
     // DataTypeResultSet
     DataTypeResultSetCommandsI18nTest.class,
     SetDataTypeResultSetPropertyCommandTest.class,
@@ -240,6 +252,7 @@ import org.komodo.relational.commands.workspace.WorkspaceUnsetPropertyCommandTes
 
     // Entry
     EntryCommandsI18nTest.class,
+    EntryRenameCommandTest.class,
     SetEntryPropertyCommandTest.class,
     UnsetEntryPropertyCommandTest.class,
 
@@ -255,6 +268,7 @@ import org.komodo.relational.commands.workspace.WorkspaceUnsetPropertyCommandTes
 
     // Mask
     MaskCommandsI18nTest.class,
+    MaskRenameCommandTest.class,
     SetMaskPropertyCommandTest.class,
     UnsetMaskPropertyCommandTest.class,
 
@@ -307,12 +321,16 @@ import org.komodo.relational.commands.workspace.WorkspaceUnsetPropertyCommandTes
     ShowMasksCommandTest.class,
     UnsetPermissionPropertyCommandTest.class,
 
+    // ProcedureResultSet
+    ResultSetRenameCommandTest.class,
+
     // PushdownFunction
     org.komodo.relational.commands.pushdownfunction.AddParameterCommandTest.class,
     org.komodo.relational.commands.pushdownfunction.DeleteParameterCommandTest.class,
     org.komodo.relational.commands.pushdownfunction.SetResultSetCommandTest.class,
     org.komodo.relational.commands.pushdownfunction.RemoveResultSetCommandTest.class,
     PushdownFunctionCommandsI18nTest.class,
+    PushdownFunctionRenameCommandTest.class,
     SetPushdownFunctionPropertyCommandTest.class,
     UnsetPushdownFunctionPropertyCommandTest.class,
 
@@ -337,6 +355,7 @@ import org.komodo.relational.commands.workspace.WorkspaceUnsetPropertyCommandTes
     ServerDeployDatasourceCommandTest.class,
     ServerDeployVdbCommandTest.class,
     ServerDisconnectCommandTest.class,
+    ServerRenameCommandTest.class,
     ServerSetCommandTest.class,
     ServerTranslatorCommandTest.class,
     ServerTranslatorsCommandTest.class,
@@ -352,6 +371,7 @@ import org.komodo.relational.commands.workspace.WorkspaceUnsetPropertyCommandTes
     org.komodo.relational.commands.storedprocedure.RemoveResultSetCommandTest.class,
     SetStoredProcedurePropertyCommandTest.class,
     StoredProcedureCommandsI18nTest.class,
+    StoredProcedureRenameCommandTest.class,
     UnsetStoredProcedurePropertyCommandTest.class,
 
     // Table
@@ -395,6 +415,7 @@ import org.komodo.relational.commands.workspace.WorkspaceUnsetPropertyCommandTes
     // Translator
     SetTranslatorPropertyCommandTest.class,
     TranslatorCommandsI18nTest.class,
+    TranslatorRenameCommandTest.class,
     UnsetTranslatorPropertyCommandTest.class,
 
     // UserDefinedFunction
@@ -425,6 +446,7 @@ import org.komodo.relational.commands.workspace.WorkspaceUnsetPropertyCommandTes
     SetVdbImportPropertyCommandTest.class,
     UnsetVdbImportPropertyCommandTest.class,
     VdbImportCommandsI18nTest.class,
+    VdbImportRenameCommandTest.class,
 
     // View
     org.komodo.relational.commands.view.AddColumnCommandTest.class,

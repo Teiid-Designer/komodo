@@ -103,6 +103,13 @@ public final class VdbImportImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldRename() throws Exception {
+        final String newName = "blah";
+        this.vdbImport.rename( getTransaction(), newName );
+        assertThat( this.vdbImport.getName( getTransaction() ), is( newName ) );
+    }
+
+    @Test
     public void shouldSetImportDataPoliciesValue() throws Exception {
         final boolean newValue = !VdbImport.DEFAULT_IMPORT_DATA_POLICIES;
         this.vdbImport.setImportDataPolicies( getTransaction(), newValue );

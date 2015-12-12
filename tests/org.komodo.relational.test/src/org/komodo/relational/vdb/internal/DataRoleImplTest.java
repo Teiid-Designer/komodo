@@ -83,6 +83,24 @@ public final class DataRoleImplTest extends RelationalModelTest {
         assertThat( added.getName( getTransaction() ), is( name ) );
         assertThat( added.getPrimaryType( getTransaction() ).getName(), is( VdbLexicon.DataRole.Permission.PERMISSION ) );
         assertThat( this.dataRole.getChildren( getTransaction() )[0], is( instanceOf( Permission.class ) ) );
+
+        assertThat( this.dataRole.hasChild( getTransaction(), name ), is( true ) );
+        assertThat( this.dataRole.hasChild( getTransaction(), name, VdbLexicon.DataRole.Permission.PERMISSION ), is( true ) );
+        assertThat( this.dataRole.hasChildren( getTransaction() ), is( true ) );
+        assertThat( this.dataRole.getChild( getTransaction(), name ), is( added ) );
+        assertThat( this.dataRole.getChild( getTransaction(), name, VdbLexicon.DataRole.Permission.PERMISSION ), is( added ) );
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailGetChildWhenTypeIsWrong() throws Exception {
+        final String name = "permission";
+        this.dataRole.addPermission( getTransaction(), name );
+        this.dataRole.getChild( getTransaction(), name, "bogusType" );
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailWhenChildNotFound() throws Exception {
+        this.dataRole.getChild( getTransaction(), "bogus" );
     }
 
     @Test
@@ -202,6 +220,13 @@ public final class DataRoleImplTest extends RelationalModelTest {
 
         this.dataRole.removePermission( getTransaction(), name );
         assertThat( this.dataRole.getPermissions( getTransaction() ).length, is( 0 ) );
+    }
+
+    @Test
+    public void shouldRename() throws Exception {
+        final String newName = "blah";
+        this.dataRole.rename( getTransaction(), newName );
+        assertThat( this.dataRole.getName( getTransaction() ), is( newName ) );
     }
 
     @Test

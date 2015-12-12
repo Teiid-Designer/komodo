@@ -2,15 +2,17 @@ package org.komodo.shell.commands;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.komodo.repository.ObjectImpl;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.CommandResult;
-import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.ShellCommand;
+import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.shell.util.KomodoObjectUtils;
+import org.komodo.spi.repository.Descriptor;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.utils.StringUtils;
 import org.komodo.utils.i18n.I18n;
 
 /**
@@ -19,7 +21,7 @@ import org.komodo.utils.i18n.I18n;
  * Usage:
  * <p>
  * <code>&nbsp;&nbsp;
- * rename &lt;object-path&gt; &lt;new-name&gt;
+ * rename &lt;new-name | child-name&gt;&nbsp;[new-child-name]
  * </code>
  */
 public class RenameCommand extends BuiltInShellCommand {
@@ -44,89 +46,92 @@ public class RenameCommand extends BuiltInShellCommand {
      */
     @Override
     protected CommandResult doExecute() {
-        String objNameArg=null;
-
         try {
-            objNameArg = requiredArgument( 0, I18n.bind( ShellI18n.invalidArgMsgObjectName ) );
-            String newName = requiredArgument( 1, I18n.bind( ShellI18n.invalidArgMsgNewName ) );
+            final String name = requiredArgument( 0, I18n.bind( ShellI18n.missingRenameFirstArg ) );
+            final String newChildName = optionalArgument( 1 ); // for renaming a child
+            final boolean renamingChild = !StringUtils.isBlank( newChildName );
 
-            WorkspaceStatus wsStatus = getWorkspaceStatus();
-            // Get the context for current object and target object since they can be supplied with a path
-            KomodoObject objContext = wsStatus.getContextForDisplayPath(objNameArg);
+            KomodoObject objToRename = null;
+            String newName = null;
+            final KomodoObject context = getContext();
 
-            // objContext null - Object could not be located
-            if ( objContext == null ) {
-                return new CommandResultImpl( false, I18n.bind( ShellI18n.cannotRenameObjectDoesNotExist, objNameArg ), null );
+            if ( renamingChild ) {
+                if ( !context.hasChild( getTransaction(), name ) ) {
+                    return new CommandResultImpl( I18n.bind( ShellI18n.childDoesNotExistToRename,
+                                                             context.getAbsolutePath(),
+                                                             name ) );
+                }
+
+                objToRename = context.getChild( getTransaction(), name );
+                newName = newChildName;
+            } else {
+                objToRename = context;
+                newName = name; // renaming current context
             }
 
-            String[] pathSegs = newName.split(FORWARD_SLASH);
-            String targetParentPath = getPath( pathSegs, pathSegs.length - 1 );
-            KomodoObject targetContext = wsStatus.getContextForDisplayPath(targetParentPath);
-            // only allow move to an existing context
-            if ( targetContext == null ) {
-                return new CommandResultImpl( false,
-                                              I18n.bind( ShellI18n.cannotRenameTargetContextDoesNotExist, targetParentPath ),
-                                              null );
+            assert ( objToRename != null );
+            assert ( newName != null );
+
+            // make sure object being renamed is not core path that can't be renamed
+            final String path = objToRename.getAbsolutePath();
+
+            for ( final String reservedPath : ObjectImpl.RESERVED_PATHS ) {
+                if ( reservedPath.equals( path ) ) {
+                    return new CommandResultImpl( I18n.bind( ShellI18n.cannotRenameReservedPath, reservedPath ) );
+                }
             }
 
-            // Check validity of the new object name
-            String newShortName = pathSegs[ pathSegs.length - 1 ];
+            { // if new name is same as old name do nothing
+                final String oldName = objToRename.getName( getTransaction() );
 
-            // Validate that the rename would not create a duplicate of same type
-            if (!validateNotDuplicateType(objContext,newShortName,targetContext)) {
-                return new CommandResultImpl( I18n.bind( ShellI18n.cannotRenameWouldCreateDuplicate, newName ) );
+                if ( oldName.equals( newName ) ) {
+                    return new CommandResultImpl( false, I18n.bind( ShellI18n.renameNewNameNotDifferent, newName ), null );
+                }
             }
 
-            // Rename
-            rename( objContext, newShortName, targetContext );
-            return new CommandResultImpl( I18n.bind( ShellI18n.objectRenamed, objNameArg, newName ) );
+            { // Make sure rename does not create a duplicate of same type
+                final KomodoObject parent = objToRename.getParent( getTransaction() );
+                final KomodoObject[] sameNamedKids = parent.getChildren( getTransaction(), newName );
+
+                if ( sameNamedKids.length != 0 ) {
+                    final Descriptor primaryType = objToRename.getPrimaryType( getTransaction() );
+
+                    for ( final KomodoObject kid : sameNamedKids ) {
+                        if ( primaryType.equals( kid.getPrimaryType( getTransaction() ) ) ) {
+                            return new CommandResultImpl( false,
+                                                          I18n.bind( ShellI18n.cannotRenameWouldCreateDuplicate, newName ),
+                                                          null );
+                        }
+                    }
+                }
+            }
+
+            // do the rename
+            objToRename.rename( getTransaction(), newName );
+            return new CommandResultImpl( I18n.bind( ShellI18n.objectRenamed, name, newName ) );
         } catch ( Exception e ) {
             return new CommandResultImpl( e );
         }
     }
 
     /**
-     * Builds a path from the specified segments, starting at the root and including nLevels
-     * @param pathSegments the array of segments
-     * @param nLevels number of levels to include
-     * @return the path
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
      */
-    private String getPath(String[] pathSegments, int nLevels) {
-        StringBuilder sb = new StringBuilder();
-        for(int i=0; i<nLevels; i++) {
-            if(i!=0) {
-                sb.append(FORWARD_SLASH);
-            }
-            sb.append(pathSegments[i]);
-        }
-        return sb.toString();
+    @Override
+    protected int getMaxArgCount() {
+        return 2;
     }
 
     /**
-     * Validates whether another child of the same name and type already exists
-     * @param objToRename the object being renamed
-     * @param newName the new child name
-     * @param targetContext the parent context
-     * @return 'true' if exists, 'false' if not.
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
      */
-    private boolean validateNotDuplicateType(KomodoObject objToRename, String newName, KomodoObject targetObject) throws Exception {
-        boolean hasExistingWithName = false;
-        KomodoObject[] objsOfType = targetObject.getChildrenOfType(getTransaction(), objToRename.getTypeIdentifier(getTransaction()).getType());
-
-        for(KomodoObject kObj : objsOfType) {
-            String kObjName = kObj.getName(getTransaction());
-            if(kObjName.equals(newName)) {
-                hasExistingWithName = true;
-                break;
-            }
-        }
-
-        // Existing with supplied name not found - not a duplicate
-        if(hasExistingWithName) {
-            return false;
-        }
-
-    	return true;
+    @Override
+    public boolean isValidForCurrentContext() {
+        return true;
     }
 
     /**
@@ -159,17 +164,6 @@ public class RenameCommand extends BuiltInShellCommand {
         print( indent, I18n.bind( ShellI18n.renameUsage ) );
     }
 
-    private void rename(KomodoObject origObject, String newShortName, KomodoObject targetObject) throws Exception {
-        //
-        if( origObject != null ) {
-        	String parentAbsPath = targetObject.getAbsolutePath();
-        	String newChildPath = parentAbsPath + FORWARD_SLASH + newShortName;
-        	origObject.rename( getTransaction(), newChildPath );
-        } else {
-        	throw new Exception(I18n.bind(ShellI18n.cannotRenameObjectDoesNotExist, origObject));
-        }
-    }
-
     /**
      * @see org.komodo.shell.BuiltInShellCommand#tabCompletion(java.lang.String, java.util.List)
      */
@@ -200,24 +194,5 @@ public class RenameCommand extends BuiltInShellCommand {
         }
         return TabCompletionModifier.AUTO;
     }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
-     */
-    @Override
-    public boolean isValidForCurrentContext() {
-        return !KomodoObjectUtils.isRoot( getContext() );
-    }
-
-    /* (non-Javadoc)
-     * @see org.komodo.shell.BuiltInShellCommand#getMaxArgCount()
-     */
-    @Override
-    protected int getMaxArgCount() {
-        return 2;
-    }
-
 
 }

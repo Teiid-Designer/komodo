@@ -175,6 +175,82 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#getChild(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     */
+    @Override
+    public KomodoObject getChild( UnitOfWork transaction,
+                                  String name ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state must be NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
+
+        // check sources
+        final KomodoObject[] matches = getSources( transaction, name );
+
+        if ( matches.length != 0 ) {
+            return matches[ 0 ];
+        }
+
+        // other child types do not have grouping nodes
+        return super.getChild( transaction, name );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#getChild(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String, java.lang.String)
+     */
+    @Override
+    public KomodoObject getChild( final UnitOfWork transaction,
+                                  final String name,
+                                  final String typeName ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state must be NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( typeName, "typeName" ); //$NON-NLS-1$
+
+        if (VdbLexicon.Source.SOURCE.equals( typeName )) {
+            final KomodoObject[] sources = getSources( transaction, name );
+
+            if ( sources.length != 0 ) {
+                return sources[ 0 ];
+            }
+        } else if (CreateProcedure.FUNCTION_STATEMENT.equals( typeName )) {
+            final KomodoObject[] functions = getFunctions( transaction, name );
+
+            if ( functions.length != 0 ) {
+                return functions[ 0 ];
+            }
+        } else if (CreateProcedure.PROCEDURE_STATEMENT.equals( typeName )) {
+            final KomodoObject[] procedures = getProcedures( transaction, name );
+
+            if ( procedures.length != 0 ) {
+                return procedures[ 0 ];
+            }
+        } else if (CreateTable.TABLE_STATEMENT.equals( typeName )) {
+            final KomodoObject[] tables = getTables( transaction, name );
+
+            if ( tables.length != 0 ) {
+                return tables[ 0 ];
+            }
+        } else if (CreateTable.VIEW_STATEMENT.equals( typeName )) {
+            final KomodoObject[] views = getViews( transaction, name );
+
+            if ( views.length != 0 ) {
+                return views[ 0 ];
+            }
+        }
+
+        // child does not exist
+        throw new KException( Messages.getString( org.komodo.repository.Messages.Komodo.CHILD_NOT_FOUND,
+                                                  name,
+                                                  getAbsolutePath() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.relational.internal.RelationalObjectImpl#getChildren(org.komodo.spi.repository.Repository.UnitOfWork,
      *      java.lang.String[])
      */
@@ -184,41 +260,22 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        // sources are found under a grouping node
-        KomodoObject[] kids = super.getChildren( transaction, namePatterns );
-        KomodoObject[] result = null;
+        final KomodoObject[] functions = getFunctions( transaction, namePatterns );
+        final KomodoObject[] sources = getSources( transaction, namePatterns );
+        final KomodoObject[] procedures = getProcedures( transaction, namePatterns );
+        final KomodoObject[] tables = getTables( transaction, namePatterns );
+        final KomodoObject[] views = getViews( transaction, namePatterns );
 
-        if ( kids.length == 0 ) {
-            result = kids;
-        } else {
-            final List< KomodoObject > temp = new ArrayList<>();
-            boolean foundGroup = false;
-
-            for ( final KomodoObject kid : kids ) {
-                // found sources grouping node so remove grouping node and add in sources
-                if ( VdbLexicon.Vdb.SOURCES.equals( kid.getName( transaction ) ) ) {
-                    foundGroup = true;
-
-                    // just the grouping node was being requested
-                    if ( ( namePatterns != null ) && ( namePatterns.length == 1 ) ) {
-                        temp.add( kid );
-                        break;
-                    }
-
-                    for ( final KomodoObject source : getSources( transaction, namePatterns ) ) {
-                        temp.add( source );
-                    }
-                } else {
-                    temp.add( kid );
-                }
-            }
-
-            if ( foundGroup ) {
-                result = temp.toArray( new KomodoObject[ temp.size() ] );
-            } else {
-                result = kids;
-            }
-        }
+        final KomodoObject[] result = new KomodoObject[ functions.length
+                                                        + sources.length
+                                                        + procedures.length
+                                                        + tables.length
+                                                        + views.length ];
+        System.arraycopy( functions, 0, result, 0, functions.length );
+        System.arraycopy( sources, 0, result, functions.length, sources.length );
+        System.arraycopy( procedures, 0, result, functions.length + sources.length, procedures.length );
+        System.arraycopy( tables, 0, result, functions.length + sources.length + procedures.length, tables.length );
+        System.arraycopy( views, 0, result, functions.length + sources.length + procedures.length + tables.length, views.length );
 
         return result;
     }
@@ -374,30 +431,31 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        ModelSource[] result = null;
         final KomodoObject grouping = getSourcesGroupingNode( transaction );
 
         if ( grouping != null ) {
             final List< ModelSource > temp = new ArrayList<>();
 
-            for ( final KomodoObject kobject : grouping.getChildrenOfType( transaction,
-                                                                           VdbLexicon.Source.SOURCE,
-                                                                           namePatterns ) ) {
-                final ModelSource translator = new ModelSourceImpl( transaction, getRepository(), kobject.getAbsolutePath() );
-                temp.add( translator );
+            for ( final KomodoObject kobject : grouping.getChildren( transaction, namePatterns ) ) {
+                final ModelSource source = new ModelSourceImpl( transaction, getRepository(), kobject.getAbsolutePath() );
+                temp.add( source );
             }
 
-            result = temp.toArray( new ModelSource[ temp.size() ] );
-        } else {
-            result = ModelSource.NO_SOURCES;
+            return temp.toArray( new ModelSource[ temp.size() ] );
         }
 
-        return result;
+        return ModelSource.NO_SOURCES;
     }
 
     private KomodoObject getSourcesGroupingNode( final UnitOfWork transaction ) {
         try {
-            return getChild( transaction, VdbLexicon.Vdb.SOURCES, VdbLexicon.Vdb.SOURCES );
+            final KomodoObject[] groupings = getRawChildren( transaction, VdbLexicon.Vdb.SOURCES );
+
+            if ( groupings.length == 0 ) {
+                return null;
+            }
+
+            return groupings[ 0 ];
         } catch ( final KException e ) {
             return null;
         }
@@ -461,6 +519,49 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
         }
 
         return result.toArray( new View[ result.size() ] );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#hasChild(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     */
+    @Override
+    public boolean hasChild( final UnitOfWork transaction,
+                             final String name ) throws KException {
+        if ( VdbLexicon.Vdb.SOURCES.equals( name ) ) {
+            return false; // use hasRawChild
+        }
+
+        return ( super.hasChild( transaction, name ) || ( getSources( transaction, name ).length != 0 ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#hasChild(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String, java.lang.String)
+     */
+    @Override
+    public boolean hasChild( final UnitOfWork transaction,
+                             final String name,
+                             final String typeName ) throws KException {
+        if ( VdbLexicon.Source.SOURCE.equals( typeName ) ) {
+            return ( getSources( transaction, name ).length != 0 );
+        }
+
+        return super.hasChild( transaction, name, typeName );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#hasChildren(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public boolean hasChildren( final UnitOfWork transaction ) throws KException {
+        // short-circuit with call to super (will also return the sources grouping node)
+        // call to getChildren does not return source grouping node
+        return ( super.hasChildren( transaction ) && ( getChildren( transaction ).length != 0 ) );
     }
 
     /**

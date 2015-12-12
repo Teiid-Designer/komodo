@@ -5,17 +5,18 @@
  *
  * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
  */
-package org.komodo.relational.commands.entry;
+package org.komodo.relational.commands.resultset;
 
-import org.komodo.relational.vdb.Entry;
+import org.komodo.relational.model.DataTypeResultSet;
+import org.komodo.relational.model.TabularResultSet;
 import org.komodo.shell.DisabledShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.RenameCommand;
 
 /**
- * Overrides default RenameCommand to disable it for Entry, since Entry has no children to rename
+ * Overrides the default {@link RenameCommand} to disable it for all result sets.
  */
-public final class RenameChildCommand extends DisabledShellCommand {
+public final class ResultSetRenameCommand extends DisabledShellCommand {
 
     static final String NAME = RenameCommand.NAME; // override
 
@@ -23,7 +24,7 @@ public final class RenameChildCommand extends DisabledShellCommand {
      * @param status
      *        the shell's workspace status (cannot be <code>null</code>)
      */
-    public RenameChildCommand( final WorkspaceStatus status ) {
+    public ResultSetRenameCommand( final WorkspaceStatus status ) {
         super( status, NAME );
     }
 
@@ -33,9 +34,10 @@ public final class RenameChildCommand extends DisabledShellCommand {
      * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
      */
     @Override
-    public final boolean isValidForCurrentContext() {
+    public boolean isValidForCurrentContext() {
         try {
-            return Entry.RESOLVER.resolvable( getTransaction(), getContext() );
+            return ( DataTypeResultSet.RESOLVER.resolvable( getTransaction(), getContext() )
+                     || TabularResultSet.RESOLVER.resolvable( getTransaction(), getContext() ) );
         } catch ( final Exception e ) {
             return false;
         }

@@ -16,9 +16,7 @@
 package org.komodo.relational.commands.datarole;
 
 import static org.junit.Assert.assertEquals;
-
 import java.util.ArrayList;
-
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.vdb.DataRole;
@@ -66,7 +64,7 @@ public final class UnsetDataRolePropertyCommandTest extends AbstractCommandTest 
 
     	assertTabCompletion("unset-property ANN", candidates);
 
-    	candidates.add(SetDataRolePropertyCommand.ANY_AUTHENTICATED);
+    	candidates.add(DataRoleShellCommand.ANY_AUTHENTICATED);
     	assertTabCompletion("unset-property AN", candidates);
     	assertTabCompletion("unset-property An", candidates);
     }

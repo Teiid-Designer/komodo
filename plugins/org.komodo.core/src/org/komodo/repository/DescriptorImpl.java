@@ -47,6 +47,21 @@ public class DescriptorImpl implements Descriptor {
     /**
      * {@inheritDoc}
      *
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals( final Object obj ) {
+        if ( ( obj == null ) || !Descriptor.class.isInstance( obj ) ) {
+            return false;
+        }
+
+        final Descriptor that = ( Descriptor )obj;
+        return this.name.equals( that.getName() );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.spi.repository.Descriptor#getChildDescriptors(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
@@ -116,6 +131,16 @@ public class DescriptorImpl implements Descriptor {
 
     private Session getSession( final UnitOfWork transaction ) {
         return ( ( UnitOfWorkImpl )transaction ).getSession();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        return this.name.hashCode();
     }
 
     /**

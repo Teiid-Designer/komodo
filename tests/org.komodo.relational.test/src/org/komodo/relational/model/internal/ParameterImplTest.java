@@ -417,6 +417,13 @@ public final class ParameterImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldRename() throws Exception {
+        final String newName = "blah";
+        this.parameter.rename( getTransaction(), newName );
+        assertThat( this.parameter.getName( getTransaction() ), is( newName ) );
+    }
+
+    @Test
     public void shouldSetCustomOptionAsIfProperty() throws Exception {
         final String option = "blah";
         this.parameter.setStatementOption( getTransaction(), option, "initialValue" );

@@ -40,7 +40,6 @@ public class DataTypeResultSetCommandProvider implements ShellCommandProvider {
 
         result.add( SetDataTypeResultSetPropertyCommand.class );
         result.add( UnsetDataTypeResultSetPropertyCommand.class );
-        result.add( RenameChildCommand.class );
 
         return result;
     }

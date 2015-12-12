@@ -813,6 +813,13 @@ public final class TableImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldRename() throws Exception {
+        final String newName = "blah";
+        this.table.rename( getTransaction(), newName );
+        assertThat( this.table.getName( getTransaction() ), is( newName ) );
+    }
+
+    @Test
     public void shouldSetCardinality() throws Exception {
         final long value = 10;
         this.table.setCardinality( getTransaction(), value );

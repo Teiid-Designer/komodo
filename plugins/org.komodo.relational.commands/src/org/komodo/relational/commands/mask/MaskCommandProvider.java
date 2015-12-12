@@ -40,7 +40,7 @@ public class MaskCommandProvider implements ShellCommandProvider {
 
         result.add( SetMaskPropertyCommand.class );
         result.add( UnsetMaskPropertyCommand.class );
-        result.add( RenameChildCommand.class );
+        result.add( MaskRenameCommand.class );
 
         return result;
     }

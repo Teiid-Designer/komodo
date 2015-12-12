@@ -40,7 +40,7 @@ public class VdbImportCommandProvider implements ShellCommandProvider {
 
         result.add( SetVdbImportPropertyCommand.class );
         result.add( UnsetVdbImportPropertyCommand.class );
-        result.add( RenameChildCommand.class );
+        result.add( VdbImportRenameCommand.class );
 
         return result;
     }

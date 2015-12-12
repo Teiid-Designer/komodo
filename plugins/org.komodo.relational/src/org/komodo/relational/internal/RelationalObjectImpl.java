@@ -426,13 +426,11 @@ public abstract class RelationalObjectImpl extends ObjectImpl implements Relatio
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        boolean result = super.hasChildren( transaction );
-
-        if ( result ) {
-            result = ( getChildren( transaction ).length != 0 ); // filtered children > 0
+        if ( super.hasChildren( transaction ) ) {
+            return ( getChildren( transaction ).length != 0 ); // filtered children > 0
         }
 
-        return result;
+        return false;
     }
 
     /**

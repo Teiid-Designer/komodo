@@ -132,10 +132,12 @@ public final class ShellI18n extends I18n {
     public static String workspaceUsage;
 
     public static String cannotRenameObjectDoesNotExist;
+    public static String cannotRenameReservedPath;
     public static String cannotRenameTargetContextDoesNotExist;
     public static String cannotRenameWouldCreateDuplicate;
     public static String childAdded;
     public static String childDeleted;
+    public static String childDoesNotExistToRename;
     public static String childNameHeader;
     public static String childrenHeader;
     public static String childTypeHeader;
@@ -205,6 +207,7 @@ public final class ShellI18n extends I18n {
     public static String missingChildNameForDelete;
     public static String missingDescriptorNameForAdd;
     public static String missingDescriptorNameForDelete;
+    public static String missingRenameFirstArg;
     public static String missingTypeName;
     public static String noChildrenMsg;
     public static String noChildWithName;
@@ -231,6 +234,7 @@ public final class ShellI18n extends I18n {
     public static String recordingFileNotSet;
     public static String recordingFileOutputError;
     public static String recordingFileProblem;
+    public static String renameNewNameNotDifferent;
     public static String rollbackSuccess;
     public static String setRecordingStateMsg;
     public static String shuttingDown;

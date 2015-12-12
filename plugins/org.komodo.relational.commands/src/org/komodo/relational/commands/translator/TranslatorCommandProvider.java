@@ -40,7 +40,7 @@ public class TranslatorCommandProvider implements ShellCommandProvider {
 
         result.add( SetTranslatorPropertyCommand.class );
         result.add( UnsetTranslatorPropertyCommand.class );
-        result.add( RenameChildCommand.class );
+        result.add( TranslatorRenameCommand.class );
 
         return result;
     }

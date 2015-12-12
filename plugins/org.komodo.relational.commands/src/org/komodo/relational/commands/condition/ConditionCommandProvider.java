@@ -40,7 +40,7 @@ public class ConditionCommandProvider implements ShellCommandProvider {
 
         result.add( SetConditionPropertyCommand.class );
         result.add( UnsetConditionPropertyCommand.class );
-        result.add( RenameChildCommand.class );
+        result.add( ConditionRenameCommand.class );
 
         return result;
     }

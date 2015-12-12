@@ -77,6 +77,12 @@ public final class VdbImplTest extends RelationalModelTest {
         assertThat( added.getName( getTransaction() ), is( name ) );
         assertThat( added.getPrimaryType( getTransaction() ).getName(), is( VdbLexicon.DataRole.DATA_ROLE ) );
         assertThat( this.vdb.getChildren( getTransaction() )[0], is( instanceOf( DataRole.class ) ) );
+
+        assertThat( this.vdb.hasChild( getTransaction(), name ), is( true ) );
+        assertThat( this.vdb.hasChild( getTransaction(), name, VdbLexicon.DataRole.DATA_ROLE ), is( true ) );
+        assertThat( this.vdb.hasChildren( getTransaction() ), is( true ) );
+        assertThat( this.vdb.getChild( getTransaction(), name ), is( added ) );
+        assertThat( this.vdb.getChild( getTransaction(), name, VdbLexicon.DataRole.DATA_ROLE ), is( added ) );
     }
 
     @Test
@@ -93,6 +99,12 @@ public final class VdbImplTest extends RelationalModelTest {
         assertThat( added.getPrimaryType( getTransaction() ).getName(), is( VdbLexicon.Entry.ENTRY ) );
         assertThat( added.getPath( getTransaction() ), is( path ) );
         assertThat( this.vdb.getChildren( getTransaction() )[0], is( instanceOf( Entry.class ) ) );
+
+        assertThat( this.vdb.hasChild( getTransaction(), name ), is( true ) );
+        assertThat( this.vdb.hasChild( getTransaction(), name, VdbLexicon.Entry.ENTRY ), is( true ) );
+        assertThat( this.vdb.hasChildren( getTransaction() ), is( true ) );
+        assertThat( this.vdb.getChild( getTransaction(), name ), is( added ) );
+        assertThat( this.vdb.getChild( getTransaction(), name, VdbLexicon.Entry.ENTRY ), is( added ) );
     }
 
     @Test
@@ -107,6 +119,12 @@ public final class VdbImplTest extends RelationalModelTest {
         assertThat( added.getName( getTransaction() ), is( name ) );
         assertThat( added.getPrimaryType( getTransaction() ).getName(), is( VdbLexicon.ImportVdb.IMPORT_VDB ) );
         assertThat( this.vdb.getChildren( getTransaction() )[0], is( instanceOf( VdbImport.class ) ) );
+
+        assertThat( this.vdb.hasChild( getTransaction(), name ), is( true ) );
+        assertThat( this.vdb.hasChild( getTransaction(), name, VdbLexicon.ImportVdb.IMPORT_VDB ), is( true ) );
+        assertThat( this.vdb.hasChildren( getTransaction() ), is( true ) );
+        assertThat( this.vdb.getChild( getTransaction(), name ), is( added ) );
+        assertThat( this.vdb.getChild( getTransaction(), name, VdbLexicon.ImportVdb.IMPORT_VDB ), is( added ) );
     }
 
     @Test
@@ -121,6 +139,12 @@ public final class VdbImplTest extends RelationalModelTest {
         assertThat( added.getName( getTransaction() ), is( name ) );
         assertThat( added.getPrimaryType( getTransaction() ).getName(), is( VdbLexicon.Vdb.DECLARATIVE_MODEL ) );
         assertThat( this.vdb.getChildren( getTransaction() )[0], is( instanceOf( Model.class ) ) );
+
+        assertThat( this.vdb.hasChild( getTransaction(), name ), is( true ) );
+        assertThat( this.vdb.hasChild( getTransaction(), name, VdbLexicon.Vdb.DECLARATIVE_MODEL ), is( true ) );
+        assertThat( this.vdb.hasChildren( getTransaction() ), is( true ) );
+        assertThat( this.vdb.getChild( getTransaction(), name ), is( added ) );
+        assertThat( this.vdb.getChild( getTransaction(), name, VdbLexicon.Vdb.DECLARATIVE_MODEL ), is( added ) );
     }
 
     @Test
@@ -137,6 +161,12 @@ public final class VdbImplTest extends RelationalModelTest {
         assertThat( added.getPrimaryType( getTransaction() ).getName(), is( VdbLexicon.Translator.TRANSLATOR ) );
         assertThat( added.getType( getTransaction() ), is( type ) );
         assertThat( added, is( instanceOf( Translator.class ) ) );
+
+        assertThat( this.vdb.hasChild( getTransaction(), name ), is( true ) );
+        assertThat( this.vdb.hasChild( getTransaction(), name, VdbLexicon.Translator.TRANSLATOR ), is( true ) );
+        assertThat( this.vdb.hasChildren( getTransaction() ), is( true ) );
+        assertThat( this.vdb.getChild( getTransaction(), name ), is( added ) );
+        assertThat( this.vdb.getChild( getTransaction(), name, VdbLexicon.Translator.TRANSLATOR ), is( added ) );
     }
 
     @Test
@@ -210,6 +240,18 @@ public final class VdbImplTest extends RelationalModelTest {
                 // expected
             }
         }
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailGetChildWhenTypeIsWrong() throws Exception {
+        final String name = "blah";
+        this.vdb.addDataRole( getTransaction(), name );
+        this.vdb.getChild( getTransaction(), name, "bogusType" );
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailWhenChildNotFound() throws Exception {
+        this.vdb.getChild( getTransaction(), "bogus" );
     }
 
     @Test( expected = IllegalArgumentException.class )

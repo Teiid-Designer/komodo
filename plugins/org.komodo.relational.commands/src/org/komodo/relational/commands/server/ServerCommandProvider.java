@@ -49,6 +49,7 @@ public class ServerCommandProvider implements ShellCommandProvider {
 
         result.add( ServerConnectCommand.class );
         result.add( ServerDisconnectCommand.class );
+        result.add( ServerRenameCommand.class );
         result.add( ServerSetCommand.class );
         result.add( ServerVdbsCommand.class );
         result.add( ServerTranslatorsCommand.class );
