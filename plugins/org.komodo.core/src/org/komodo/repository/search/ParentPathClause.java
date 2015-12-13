@@ -21,6 +21,14 @@
  */
 package org.komodo.repository.search;
 
+
+import org.komodo.core.KomodoLexicon.Search;
+import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.Repository;
+import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
+import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
 import org.modeshape.jcr.api.JcrConstants;
 
@@ -32,15 +40,30 @@ class ParentPathClause extends PathClause {
     private boolean childrenOnly = false;
 
     /**
-     * @param parent parent searcher
      * @param operator the logical operator preceding this clause (can be null if this is the only clause)
      * @param alias the alias of the selector
      * @param path path used in the clause
      * @param childrenOnly true to return only the direct children
      */
-    public ParentPathClause(ObjectSearcher parent, LogicalOperator operator, String alias, String path, boolean childrenOnly) {
-        super(parent, operator, alias, path);
+    public ParentPathClause(LogicalOperator operator, String alias, String path, boolean childrenOnly) {
+        super(operator, alias, path);
         setChildrenOnly(childrenOnly);
+    }
+
+    /**
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param whereClause the where clause object
+     *
+     * @throws KException if error occurs
+     */
+    protected ParentPathClause(UnitOfWork uow, KomodoObject whereClause) throws KException {
+        super(uow, whereClause);
+
+        if (whereClause.hasProperty(uow, Search.WhereParentPathClause.CHILDREN_ONLY)) {
+            setChildrenOnly(whereClause.getProperty(uow, Search.WhereParentPathClause.CHILDREN_ONLY).getBooleanValue(uow));
+        }
     }
 
     /**
@@ -118,5 +141,22 @@ class ParentPathClause extends PathClause {
         }
 
         return buffer.toString();
+    }
+
+    @Override
+    void write(UnitOfWork uow, KomodoObject searchObject) throws KException {
+        ArgCheck.isNotNull(uow, "transaction"); //$NON-NLS-1$
+        ArgCheck.isTrue((uow.getState() == State.NOT_STARTED), "transaction state is not NOT_STARTED"); //$NON-NLS-1$
+        ArgCheck.isNotNull(searchObject, "searchObject"); //$NON-NLS-1$
+
+        Repository repository = searchObject.getRepository();
+        KomodoObject whereObject = repository.add(uow, searchObject.getAbsolutePath(),
+                                                  Search.WHERE_CLAUSE,
+                                                  Search.WhereParentPathClause.NODE_TYPE);
+
+        writeProperties(uow, whereObject);
+
+        whereObject.setProperty(uow, Search.WherePathClause.PATH, getPath());
+        whereObject.setProperty(uow, Search.WhereParentPathClause.CHILDREN_ONLY, isChildrenOnly());
     }
 }

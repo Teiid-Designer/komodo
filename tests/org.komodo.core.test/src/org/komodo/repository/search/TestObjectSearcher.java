@@ -21,6 +21,7 @@
  */
 package org.komodo.repository.search;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -28,6 +29,8 @@ import static org.junit.Assert.fail;
 import java.util.List;
 import org.junit.Test;
 import org.komodo.core.KomodoLexicon;
+import org.komodo.core.KomodoLexicon.Search;
+import org.komodo.core.KomodoLexicon.Search.WhereClause;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.repository.RepositoryImpl;
 import org.komodo.repository.RepositoryTools;
@@ -35,6 +38,7 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository.KeywordCriteria;
 import org.komodo.test.utils.AbstractLocalRepositoryTest;
+import org.modeshape.jcr.JcrNtLexicon;
 import org.modeshape.jcr.api.JcrConstants;
 
 @SuppressWarnings( {"nls", "javadoc"} )
@@ -538,8 +542,6 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
         KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
         assertNotNull(workspace);
 
-        System.out.println(RepositoryTools.traverse(getTransaction(), workspace.getParent(getTransaction())));
-
         commit(); // must commit for search queries to work
 
         ObjectSearcher os = new ObjectSearcher(_repo);
@@ -547,12 +549,366 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
         os.addWherePathClause(null, "nt", RepositoryImpl.WORKSPACE_ROOT);
 
         String expected = "SELECT [jcr:path], [mode:localName] FROM [nt:unstructured] AS nt " +
-                                     "WHERE PATH(nt) = '" + workspace.getAbsolutePath() + "'";
+                                     "WHERE PATH(nt) LIKE '" + workspace.getAbsolutePath() + "'";
         assertEquals(expected, os.toString());
 
         List<KomodoObject> searchObjects = os.searchObjects(getTransaction());
         assertEquals(1, searchObjects.size());
 
         assertEquals(workspace.getAbsolutePath(), searchObjects.iterator().next().getAbsolutePath());
+
+        //
+        // Test with a wildcard path
+        //
+        os = new ObjectSearcher(_repo);
+        os.addFromType(JcrConstants.NT_UNSTRUCTURED, "nt");
+        os.addWherePathClause(null, "nt", "/tko:komodo/%");
+        searchObjects = os.searchObjects(getTransaction());
+
+        // Returns all 3 objects under root
+        assertEquals(3, searchObjects.size());
+    }
+
+    @Test
+    public void shouldWriteToRepository() throws Exception {
+        assertNotNull(_repo);
+
+        // Create the komodo workspace
+        KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
+        assertNotNull(workspace);
+
+        commit(); // must commit for search queries to work
+
+        String alias = JcrNtLexicon.Namespace.PREFIX;
+        String fromTypeType = JcrConstants.NT_UNSTRUCTURED;
+        String wherePath = RepositoryImpl.WORKSPACE_ROOT;
+
+        ObjectSearcher os = new ObjectSearcher(_repo);
+        os.addFromType(fromTypeType, alias);
+        os.addWherePathClause(null, JcrNtLexicon.Namespace.PREFIX, wherePath);
+
+        String searchName = "WorkspaceSearch";
+        KomodoObject searchObject = os.write(getTransaction(), searchName);
+        assertNotNull(searchObject);
+
+        String searchesPath = _repo.komodoSearches(getTransaction()).getAbsolutePath();
+        String searchPath = searchesPath + FORWARD_SLASH + searchName;
+        assertEquals(searchPath, searchObject.getAbsolutePath());
+
+        assertEquals(Search.NODE_TYPE, searchObject.getPrimaryType(getTransaction()).getName());
+        assertNotNull(searchObject.getProperty(getTransaction(), Search.SEARCH_DATE));
+
+        KomodoObject fromTypeObject = searchObject.getChild(getTransaction(), Search.FROM_TYPE);
+        assertEquals(Search.FromType.NODE_TYPE, fromTypeObject.getPrimaryType(getTransaction()).getName());
+
+        assertEquals(fromTypeType,
+                     fromTypeObject.getProperty(getTransaction(), Search.FromType.TYPE).getStringValue(getTransaction()));
+        assertEquals(alias,
+                     fromTypeObject.getProperty(getTransaction(), Search.FromType.ALIAS).getStringValue(getTransaction()));
+
+        KomodoObject whereObject = searchObject.getChild(getTransaction(), Search.WHERE_CLAUSE);
+        assertEquals(Search.WherePathClause.NODE_TYPE, whereObject.getPrimaryType(getTransaction()).getName());
+
+        assertEquals(wherePath,
+                     whereObject.getProperty(getTransaction(), Search.WherePathClause.PATH).getStringValue(getTransaction()));
+        assertEquals(alias,
+                     whereObject.getProperty(getTransaction(), Search.WhereClause.ALIAS).getStringValue(getTransaction()));
+
+        ObjectSearcher testOS = new ObjectSearcher(_repo);
+        testOS.read(getTransaction(), searchName);
+
+        assertEquals(os, testOS);
+    }
+
+    @Test
+    public void shouldReplaceSearch() throws Exception {
+        assertNotNull(_repo);
+
+        // Create the komodo workspace
+        KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
+        assertNotNull(workspace);
+
+        commit(); // must commit for search queries to work
+
+        String alias = JcrNtLexicon.Namespace.PREFIX;
+        String fromTypeType = JcrConstants.NT_UNSTRUCTURED;
+        String wherePath = RepositoryImpl.WORKSPACE_ROOT;
+
+        ObjectSearcher os = new ObjectSearcher(_repo);
+        os.addFromType(fromTypeType, alias);
+        os.addWherePathClause(null, JcrNtLexicon.Namespace.PREFIX, wherePath);
+
+        String searchName = "WorkspaceSearch";
+        KomodoObject searchObject = os.write(getTransaction(), searchName);
+        assertNotNull(searchObject);
+
+        alias = "ms";
+        fromTypeType = KomodoLexicon.VdbModelSource.NODE_TYPE;
+        os = new ObjectSearcher(_repo);
+        os.addFromType(fromTypeType, alias);
+        String whereProperty = KomodoLexicon.VdbModelSource.JNDI_NAME;
+        ComparisonOperator compareOperator = ComparisonOperator.EQUALS;
+        String whereValue = "oracle";
+        os.addWhereCompareClause(null, alias,
+                                 whereProperty,
+                                 compareOperator,
+                                 whereValue);
+
+        // Should replace WorkspaceSearch with new search
+        os.write(getTransaction(), searchName);
+
+        String searchesPath = _repo.komodoSearches(getTransaction()).getAbsolutePath();
+        String searchPath = searchesPath + FORWARD_SLASH + searchName;
+        assertEquals(searchPath, searchObject.getAbsolutePath());
+
+        assertEquals(Search.NODE_TYPE, searchObject.getPrimaryType(getTransaction()).getName());
+        assertNotNull(searchObject.getProperty(getTransaction(), Search.SEARCH_DATE));
+
+        KomodoObject fromTypeObject = searchObject.getChild(getTransaction(), Search.FROM_TYPE);
+        assertEquals(Search.FromType.NODE_TYPE, fromTypeObject.getPrimaryType(getTransaction()).getName());
+
+        assertEquals(fromTypeType,
+                     fromTypeObject.getProperty(getTransaction(), Search.FromType.TYPE).getStringValue(getTransaction()));
+        assertEquals(alias,
+                     fromTypeObject.getProperty(getTransaction(), Search.FromType.ALIAS).getStringValue(getTransaction()));
+
+        KomodoObject whereObject = searchObject.getChild(getTransaction(), Search.WHERE_CLAUSE);
+        assertEquals(Search.WhereCompareClause.NODE_TYPE, whereObject.getPrimaryType(getTransaction()).getName());
+
+        assertEquals(alias,
+                     whereObject.getProperty(getTransaction(), WhereClause.ALIAS).getStringValue(getTransaction()));
+        assertEquals(whereProperty,
+                     whereObject.getProperty(getTransaction(), Search.WhereCompareClause.PROPERTY).getStringValue(getTransaction()));
+        assertEquals(compareOperator.toString(),
+                     whereObject.getProperty(getTransaction(), Search.WhereCompareClause.COMPARE_OPERATOR).getStringValue(getTransaction()));
+        assertEquals(whereValue,
+                     whereObject.getProperty(getTransaction(), Search.WhereCompareClause.VALUE).getStringValue(getTransaction()));
+
+        ObjectSearcher testOS = new ObjectSearcher(_repo);
+        testOS.read(getTransaction(), searchName);
+
+        assertEquals(os, testOS);
+    }
+
+    @Test
+    public void shouldWriteToRepositoryMultipleFromTypes() throws Exception {
+        assertNotNull(_repo);
+
+        // Create the komodo workspace
+        KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
+        assertNotNull(workspace);
+
+        commit(); // must commit for search queries to work
+
+        String[] aliases = {JcrNtLexicon.Namespace.PREFIX, "ms"};
+        String[] fromTypeTypes = {JcrConstants.NT_UNSTRUCTURED, KomodoLexicon.VdbModelSource.NODE_TYPE};
+        String wherePath = RepositoryImpl.WORKSPACE_ROOT;
+
+        ObjectSearcher os = new ObjectSearcher(_repo);
+        os.addFromType(fromTypeTypes[0], aliases[0]);
+        os.addFromType(fromTypeTypes[1], aliases[1]);
+        os.addWherePathClause(null, JcrNtLexicon.Namespace.PREFIX, wherePath);
+
+        String searchName = "WorkspaceSearch";
+        KomodoObject searchObject = os.write(getTransaction(), searchName);
+        assertNotNull(searchObject);
+
+        String searchesPath = _repo.komodoSearches(getTransaction()).getAbsolutePath();
+        String searchPath = searchesPath + FORWARD_SLASH + searchName;
+        assertEquals(searchPath, searchObject.getAbsolutePath());
+
+        assertEquals(Search.NODE_TYPE, searchObject.getPrimaryType(getTransaction()).getName());
+        assertNotNull(searchObject.getProperty(getTransaction(), Search.SEARCH_DATE));
+
+        KomodoObject[] fromTypeObjects = searchObject.getChildren(getTransaction(), Search.FROM_TYPE);
+        assertEquals(2, fromTypeObjects.length);
+
+        for (int i = 0; i < fromTypeObjects.length; ++i) {
+            KomodoObject fromTypeObject  = fromTypeObjects[i];
+            assertEquals(Search.FromType.NODE_TYPE, fromTypeObject.getPrimaryType(getTransaction()).getName());
+
+            assertEquals(fromTypeTypes[i],
+                     fromTypeObject.getProperty(getTransaction(), Search.FromType.TYPE).getStringValue(getTransaction()));
+            assertEquals(aliases[i],
+                     fromTypeObject.getProperty(getTransaction(), Search.FromType.ALIAS).getStringValue(getTransaction()));
+        }
+
+        KomodoObject whereObject = searchObject.getChild(getTransaction(), Search.WHERE_CLAUSE);
+        assertEquals(Search.WherePathClause.NODE_TYPE, whereObject.getPrimaryType(getTransaction()).getName());
+
+        assertEquals(wherePath,
+                     whereObject.getProperty(getTransaction(), Search.WherePathClause.PATH).getStringValue(getTransaction()));
+        assertEquals(aliases[0],
+                     whereObject.getProperty(getTransaction(), Search.WhereClause.ALIAS).getStringValue(getTransaction()));
+
+        System.out.println(RepositoryTools.traverse(getTransaction(), searchObject));
+        ObjectSearcher testOS = new ObjectSearcher(_repo);
+        testOS.read(getTransaction(), searchName);
+
+        assertEquals(os, testOS);
+    }
+
+    @Test
+    public void shouldWriteToRepositoryMultipleWhereClauses() throws Exception {
+        assertNotNull(_repo);
+
+        // Create the komodo workspace
+        KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
+        assertNotNull(workspace);
+
+        commit(); // must commit for search queries to work
+
+        String alias = JcrNtLexicon.Namespace.PREFIX;
+        String fromTypeType = JcrConstants.NT_UNSTRUCTURED;
+        String wherePath = RepositoryImpl.WORKSPACE_ROOT;
+        String whereProperty = KomodoLexicon.VdbModelSource.JNDI_NAME;
+        ComparisonOperator compareOperator = ComparisonOperator.EQUALS;
+        String whereValue = "oracle";
+
+        ObjectSearcher os = new ObjectSearcher(_repo);
+        os.addFromType(fromTypeType, alias);
+        os.addWherePathClause(null, JcrNtLexicon.Namespace.PREFIX, wherePath);
+        os.addWhereCompareClause(LogicalOperator.OR, alias,
+                                 whereProperty,
+                                 compareOperator,
+                                 whereValue);
+
+        String searchName = "WorkspaceSearch";
+        KomodoObject searchObject = os.write(getTransaction(), searchName);
+        assertNotNull(searchObject);
+
+        String searchesPath = _repo.komodoSearches(getTransaction()).getAbsolutePath();
+        String searchPath = searchesPath + FORWARD_SLASH + searchName;
+        assertEquals(searchPath, searchObject.getAbsolutePath());
+
+        assertEquals(Search.NODE_TYPE, searchObject.getPrimaryType(getTransaction()).getName());
+        assertNotNull(searchObject.getProperty(getTransaction(), Search.SEARCH_DATE));
+
+        KomodoObject fromTypeObject = searchObject.getChild(getTransaction(), Search.FROM_TYPE);
+        assertEquals(Search.FromType.NODE_TYPE, fromTypeObject.getPrimaryType(getTransaction()).getName());
+
+        assertEquals(fromTypeType,
+                     fromTypeObject.getProperty(getTransaction(), Search.FromType.TYPE).getStringValue(getTransaction()));
+        assertEquals(alias,
+                     fromTypeObject.getProperty(getTransaction(), Search.FromType.ALIAS).getStringValue(getTransaction()));
+
+        KomodoObject[] whereObjects = searchObject.getChildren(getTransaction(), Search.WHERE_CLAUSE);
+
+        assertEquals(Search.WherePathClause.NODE_TYPE, whereObjects[0].getPrimaryType(getTransaction()).getName());
+        assertEquals(Search.WhereCompareClause.NODE_TYPE, whereObjects[1].getPrimaryType(getTransaction()).getName());
+        assertEquals(wherePath,
+                     whereObjects[0].getProperty(getTransaction(), Search.WherePathClause.PATH).getStringValue(getTransaction()));
+        assertEquals(alias,
+                     whereObjects[0].getProperty(getTransaction(), Search.WhereClause.ALIAS).getStringValue(getTransaction()));
+
+        assertEquals(Search.WhereCompareClause.NODE_TYPE, whereObjects[1].getPrimaryType(getTransaction()).getName());
+        assertEquals(LogicalOperator.OR.toString(),
+                     whereObjects[1].getProperty(getTransaction(), Search.WhereClause.PRE_CLAUSE_OPERATOR).getStringValue(getTransaction()));
+        assertEquals(alias,
+                     whereObjects[1].getProperty(getTransaction(), WhereClause.ALIAS).getStringValue(getTransaction()));
+        assertEquals(whereProperty,
+                     whereObjects[1].getProperty(getTransaction(), Search.WhereCompareClause.PROPERTY).getStringValue(getTransaction()));
+        assertEquals(compareOperator.toString(),
+                     whereObjects[1].getProperty(getTransaction(), Search.WhereCompareClause.COMPARE_OPERATOR).getStringValue(getTransaction()));
+        assertEquals(whereValue,
+                     whereObjects[1].getProperty(getTransaction(), Search.WhereCompareClause.VALUE).getStringValue(getTransaction()));
+
+        ObjectSearcher testOS = new ObjectSearcher(_repo);
+        testOS.read(getTransaction(), searchName);
+
+        assertEquals(os, testOS);
+    }
+
+    @Test
+    public void shouldWriteToRepositoryWhereContainsClause() throws Exception {
+        assertNotNull(_repo);
+
+        // Create the komodo workspace
+        KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
+        assertNotNull(workspace);
+
+        commit(); // must commit for search queries to work
+
+        String alias = JcrNtLexicon.Namespace.PREFIX;
+        String fromTypeType = JcrConstants.NT_UNSTRUCTURED;
+        String whereProperty = KomodoLexicon.VdbModelSource.JNDI_NAME;
+        String[] keywords = {"jndi1", "jndi2", "jndi3"};
+        KeywordCriteria criteria = KeywordCriteria.ANY;
+
+        ObjectSearcher os = new ObjectSearcher(_repo);
+        os.addFromType(fromTypeType, alias);
+        os.addWhereContainsClause(null, alias, whereProperty, criteria, keywords[0], keywords[1], keywords[2]);
+
+        String searchName = "WorkspaceSearch";
+        KomodoObject searchObject = os.write(getTransaction(), searchName);
+        assertNotNull(searchObject);
+
+        String searchesPath = _repo.komodoSearches(getTransaction()).getAbsolutePath();
+        String searchPath = searchesPath + FORWARD_SLASH + searchName;
+        assertEquals(searchPath, searchObject.getAbsolutePath());
+
+        assertEquals(Search.NODE_TYPE, searchObject.getPrimaryType(getTransaction()).getName());
+        assertNotNull(searchObject.getProperty(getTransaction(), Search.SEARCH_DATE));
+
+        KomodoObject whereObject = searchObject.getChild(getTransaction(), Search.WHERE_CLAUSE);
+        assertEquals(Search.WhereContainsClause.NODE_TYPE, whereObject.getPrimaryType(getTransaction()).getName());
+
+        assertEquals(whereProperty,
+                     whereObject.getProperty(getTransaction(), Search.WhereContainsClause.PROPERTY).getStringValue(getTransaction()));
+        assertArrayEquals(keywords,
+                     whereObject.getProperty(getTransaction(), Search.WhereContainsClause.KEYWORDS).getStringValues(getTransaction()));
+        assertEquals(alias,
+                     whereObject.getProperty(getTransaction(), Search.WhereClause.ALIAS).getStringValue(getTransaction()));
+
+        ObjectSearcher testOS = new ObjectSearcher(_repo);
+        testOS.read(getTransaction(), searchName);
+
+        assertEquals(os, testOS);
+    }
+
+    @Test
+    public void shouldWriteToRepositoryWhereSetClause() throws Exception {
+        assertNotNull(_repo);
+
+        // Create the komodo workspace
+        KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
+        assertNotNull(workspace);
+
+        commit(); // must commit for search queries to work
+
+        String alias = JcrNtLexicon.Namespace.PREFIX;
+        String fromTypeType = JcrConstants.NT_UNSTRUCTURED;
+        String whereProperty = KomodoLexicon.VdbModelSource.JNDI_NAME;
+        String[] values = {"jndi1", "jndi2", "jndi3"};
+
+        ObjectSearcher os = new ObjectSearcher(_repo);
+        os.addFromType(fromTypeType, alias);
+        os.addWhereSetClause(null, alias, whereProperty, values[0], values[1], values[2]);
+
+        String searchName = "WorkspaceSearch";
+        KomodoObject searchObject = os.write(getTransaction(), searchName);
+        assertNotNull(searchObject);
+
+        String searchesPath = _repo.komodoSearches(getTransaction()).getAbsolutePath();
+        String searchPath = searchesPath + FORWARD_SLASH + searchName;
+        assertEquals(searchPath, searchObject.getAbsolutePath());
+
+        assertEquals(Search.NODE_TYPE, searchObject.getPrimaryType(getTransaction()).getName());
+        assertNotNull(searchObject.getProperty(getTransaction(), Search.SEARCH_DATE));
+
+        KomodoObject whereObject = searchObject.getChild(getTransaction(), Search.WHERE_CLAUSE);
+        assertEquals(Search.WhereSetClause.NODE_TYPE, whereObject.getPrimaryType(getTransaction()).getName());
+
+        assertEquals(whereProperty,
+                     whereObject.getProperty(getTransaction(), Search.WhereSetClause.PROPERTY).getStringValue(getTransaction()));
+        assertArrayEquals(values,
+                     whereObject.getProperty(getTransaction(), Search.WhereSetClause.VALUES).getStringValues(getTransaction()));
+        assertEquals(alias,
+                     whereObject.getProperty(getTransaction(), Search.WhereClause.ALIAS).getStringValue(getTransaction()));
+
+        ObjectSearcher testOS = new ObjectSearcher(_repo);
+        testOS.read(getTransaction(), searchName);
+
+        assertEquals(os, testOS);
     }
 }

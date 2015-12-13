@@ -16,9 +16,9 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 import org.komodo.relational.workspace.WorkspaceManager;
-import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.RestLink.LinkType;
 import org.komodo.rest.relational.KomodoProperties;
 import org.komodo.rest.relational.KomodoRestUriBuilder;
@@ -34,7 +34,7 @@ import org.komodo.utils.StringUtils;
 /**
  * Indicates the objects has a JSON representation.
  */
-public class RestBasicEntity implements V1Constants {
+public class RestBasicEntity implements KRestEntity {
 
     /**
      * A {@link RestBasicEntity} that indicates the resource was not found.
@@ -98,6 +98,12 @@ public class RestBasicEntity implements V1Constants {
      */
     public RestBasicEntity() {
         uriBuilder = null;
+    }
+
+    @Override
+    public boolean supports(MediaType mediaType) {
+        return MediaType.APPLICATION_JSON_TYPE.equals(mediaType)
+            || MediaType.APPLICATION_XML_TYPE.equals(mediaType);
     }
 
     /**
@@ -404,6 +410,7 @@ public class RestBasicEntity implements V1Constants {
     /**
      * @return the xml
      */
+    @Override
     public String getXml() {
         return this.xml;
     }

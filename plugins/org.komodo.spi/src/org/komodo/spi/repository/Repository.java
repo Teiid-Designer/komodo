@@ -509,6 +509,18 @@ public interface Repository {
                     final String... artifactPaths ) throws KException;
 
     /**
+     * The komodo workspace searches group in the repository, ie. /tko:komodo/tko:workspace/tko:searches
+     *
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     *
+     * @return the komodo workspace searches group
+     * @throws KException if an error occurs
+     */
+    KomodoObject komodoSearches( final UnitOfWork transaction) throws KException;
+
+    /**
      * The root of the Komodo environment area in the repository (i.e., /tko:komodo/tko:environment).
      *
      * @param transaction

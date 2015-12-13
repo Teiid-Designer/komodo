@@ -422,6 +422,184 @@ public interface KomodoLexicon extends StringConstants {
     }
 
     /**
+     * The JCR names associated with searches.
+     */
+    public interface Search {
+        /**
+         * The name and node type name of the Komodo Search grouping node. Value is {@value}.
+         */
+        String GROUP_NODE = Namespace.PREFIX + COLON + "searches"; //$NON-NLS-1$
+
+        /**
+         * The name of the Search node type. Value is {@value} .
+         */
+        String NODE_TYPE = Namespace.PREFIX + COLON + "search"; //$NON-NLS-1$
+
+        /**
+         * The date of when the search was saved. Value is {@value}
+         */
+        String SEARCH_DATE = Namespace.PREFIX + COLON + "searchDate"; //$NON-NLS-1$
+
+        /**
+         * The custom where clause of the search. Value is {@value}
+         */
+        String CUSTOM_WHERE = Namespace.PREFIX + COLON + "customWhereClause"; //$NON-NLS-1$
+
+        /**
+         * The from type of the search. Value is {@value}
+         */
+        String FROM_TYPE = Namespace.PREFIX + COLON + "fromType"; //$NON-NLS-1$
+
+        /**
+         * The where clause of the search. Value is {@value}
+         */
+        String WHERE_CLAUSE = Namespace.PREFIX + COLON + "whereClause"; //$NON-NLS-1$
+
+        /**
+         * The JCR names for search from type
+         */
+        interface FromType {
+            /**
+             * The name of the fromType node type. Value is {@value} .
+             */
+            String NODE_TYPE = Namespace.PREFIX + COLON + "fromType"; //$NON-NLS-1$
+
+            /**
+             * The node type of the fromType. Value is {@value}
+             */
+            String TYPE = Namespace.PREFIX + COLON + "type"; //$NON-NLS-1$
+
+            /**
+             * The alias of the fromType. Value is {@value}
+             */
+            String ALIAS = Namespace.PREFIX + COLON + "alias"; //$NON-NLS-1$
+        }
+
+        /**
+         * The JCR names for search where clause
+         */
+        interface WhereClause {
+            /**
+             * The name of the whereClause node type. Value is {@value} .
+             */
+            String NODE_TYPE = Namespace.PREFIX + COLON + "whereClause"; //$NON-NLS-1$
+
+            /**
+             * The pre clause operator of the where clause (AND, OR). Value is {@value}
+             */
+            String PRE_CLAUSE_OPERATOR = Namespace.PREFIX + COLON + "preClauseOperator"; //$NON-NLS-1$
+
+            /**
+             * The alias of the where clause. Value is {@value}
+             */
+            String ALIAS = Namespace.PREFIX + COLON + "alias"; //$NON-NLS-1$
+        }
+
+        /**
+         * The JCR names for search where compare clause
+         */
+        interface WhereCompareClause extends WhereClause {
+            /**
+             * The name of the whereCompareClause node type. Value is {@value} .
+             */
+            String NODE_TYPE = Namespace.PREFIX + COLON + "whereCompareClause"; //$NON-NLS-1$
+
+            /**
+             * The property of the where compare clause. Value is {@value}
+             */
+            String PROPERTY = Namespace.PREFIX + COLON + "property"; //$NON-NLS-1$
+
+            /**
+             * The compare operator of the where compare clause.
+             * (EQUALS, NOT_EQUALS, LESS_THAN, LESS_THAN_EQUAL_TO, GREATER_THAN,
+             *  GREATER_THAN_EQUAL_TO, LIKE, NOT_LIKE)
+             * Value is {@value}
+             */
+            String COMPARE_OPERATOR = Namespace.PREFIX + COLON + "compareOperator"; //$NON-NLS-1$
+
+            /**
+             * The value of the where compare clause. Value is {@value}
+             */
+            String VALUE = Namespace.PREFIX + COLON + "value"; //$NON-NLS-1$
+        }
+
+        /**
+         * The JCR names for search where contains clause
+         */
+        interface WhereContainsClause extends WhereClause {
+            /**
+             * The name of the whereContainsClause node type. Value is {@value} .
+             */
+            String NODE_TYPE = Namespace.PREFIX + COLON + "whereContainsClause"; //$NON-NLS-1$
+
+            /**
+             * The property of the where contains clause. Value is {@value}
+             */
+            String PROPERTY = Namespace.PREFIX + COLON + "property"; //$NON-NLS-1$
+
+            /**
+             * The keyword criteria of the where contains clause (ALL, ANY, NONE). Value is {@value}
+             */
+            String KEYWORD_CRITERIA = Namespace.PREFIX + COLON + "keywordCriteria"; //$NON-NLS-1$
+
+            /**
+             * The keyword of the where contains clause. Value is {@value}
+             */
+            String KEYWORDS = Namespace.PREFIX + COLON + "keywords"; //$NON-NLS-1$
+        }
+
+        /**
+         * The JCR names for search where set clause
+         */
+        interface WhereSetClause extends WhereClause {
+            /**
+             * The name of the whereSetClause node type. Value is {@value} .
+             */
+            String NODE_TYPE = Namespace.PREFIX + COLON + "whereSetClause"; //$NON-NLS-1$
+
+            /**
+             * The property of the where set clause. Value is {@value}
+             */
+            String PROPERTY = Namespace.PREFIX + COLON + "property"; //$NON-NLS-1$
+
+            /**
+             * The values of the where set clause. Value is {@value}
+             */
+            String VALUES = Namespace.PREFIX + COLON + "values"; //$NON-NLS-1$
+        }
+
+        /**
+         * The JCR names for search where path clause
+         */
+        interface WherePathClause extends WhereClause {
+            /**
+             * The name of the wherePathClause node type. Value is {@value} .
+             */
+            String NODE_TYPE = Namespace.PREFIX + COLON + "wherePathClause"; //$NON-NLS-1$
+
+            /**
+             * The path of the where path clause. Value is {@value}
+             */
+            String PATH = Namespace.PREFIX + COLON + "path"; //$NON-NLS-1$
+        }
+
+        /**
+         * The JCR names for search where parent path clause
+         */
+        interface WhereParentPathClause extends WherePathClause {
+            /**
+             * The name of the whereParentPathClause node type. Value is {@value} .
+             */
+            String NODE_TYPE = Namespace.PREFIX + COLON + "whereParentPathClause"; //$NON-NLS-1$
+
+            /**
+             * The children-only property of the where parent path clause. Value is {@value}
+             */
+            String CHILDREN_ONLY = Namespace.PREFIX + COLON + "childrenOnly"; //$NON-NLS-1$
+        }
+    }
+
+    /**
      * The JCR names associated with Teiid servers.
      */
     public interface Teiid extends WorkspaceItem {

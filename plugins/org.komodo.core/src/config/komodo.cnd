@@ -284,3 +284,66 @@
   - tko:ruleType (string) = 'SNS' mandatory autocreated < 'SNS'
   - tko:matchType (boolean) = 'true' mandatory
 
+/*
+ * A grouping node for searches made on the repository
+ */
+[tko:searches] > nt:unstructured
+ + * (tko:search) copy
+
+/*
+ * A configuration for building a search query on the repository
+ */
+[tko:search] > nt:unstructured
+ - tko:searchDate (string) mandatory
+ - tko:customWhereClause (string)
+ + * (tko:fromType) copy sns
+ + * (tko:whereClause) copy sns
+
+/*
+ * A From clause for a search
+ */
+[tko:fromType] > nt:unstructured
+ - tko:type (string) mandatory
+ - tko:alias (string)
+
+/*
+ * Where clause for a search
+ */
+[tko:whereClause] > nt:unstructured abstract
+ - tko:preClauseOperator (string) < 'AND', 'OR'
+ - tko:alias (string)
+
+/*
+ * Where Compare clause
+ */
+[tko:whereCompareClause] > tko:whereClause
+ - tko:property (string) mandatory
+ - tko:compareOperator (string) mandatory < '=', '!=', '<', '<=', '>', '>=', 'LIKE', 'NOT LIKE'
+ - tko:value (string) mandatory
+
+/*
+ * Where Contains clause
+ */
+[tko:whereContainsClause] > tko:whereClause
+ - tko:property (string) mandatory
+ - tko:keywords (string) multiple
+ - tko:keywordCriteria (string) = 'ALL' autocreated < 'ALL', 'ANY', 'NONE'
+
+/*
+ * Where Set clause
+ */
+[tko:whereSetClause] > tko:whereClause
+ - tko:property (string) mandatory
+ - tko:values (string) multiple
+
+/*
+ * Where Path clause
+ */
+[tko:wherePathClause] > tko:whereClause
+ - tko:path (string) mandatory
+
+/*
+ * Where Parent Path clause
+ */
+[tko:whereParentPathClause] > tko:wherePathClause
+ - tko:childrenOnly (boolean) = 'true'

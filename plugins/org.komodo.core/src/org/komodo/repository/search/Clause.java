@@ -24,7 +24,13 @@ package org.komodo.repository.search;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import org.komodo.core.KomodoLexicon.Search;
+import org.komodo.core.KomodoLexicon.Search.WhereClause;
+import org.komodo.spi.KException;
 import org.komodo.spi.query.sql.SQLConstants;
+import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
 
@@ -38,19 +44,40 @@ abstract class Clause implements SQLConstants {
      */
     protected static final String ALIAS = "alias"; //$NON-NLS-1$
 
-    private final ObjectSearcher parent;
+    private ObjectSearcher parent;
 
-    private final LogicalOperator preClauseOperator;
+    private LogicalOperator preClauseOperator;
 
     protected final Map<String, String> properties = new HashMap<String, String>();
 
     /**
-     * @param parent the parent search of this clause
      * @param operator the logical operator preceding this clause (can be null if this is the only clause)
      */
-    public Clause(ObjectSearcher parent, LogicalOperator operator) {
-        this.parent = parent;
+    public Clause(LogicalOperator operator) {
         this.preClauseOperator = operator;
+    }
+
+    /**
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param whereClause the where clause object
+     *
+     * @throws KException if error occurs
+     */
+    protected Clause(UnitOfWork uow, KomodoObject whereClause) throws KException {
+        ArgCheck.isNotNull(uow, "transaction"); //$NON-NLS-1$
+        ArgCheck.isTrue((uow.getState() == State.NOT_STARTED), "transaction state is not NOT_STARTED"); //$NON-NLS-1$
+        ArgCheck.isNotNull(whereClause, "whereClause"); //$NON-NLS-1$
+
+        if (whereClause.hasProperty(uow, Search.WhereClause.PRE_CLAUSE_OPERATOR)) {
+            String preClauseOperatorValue = whereClause.getProperty(uow, Search.WhereClause.PRE_CLAUSE_OPERATOR).getStringValue(uow);
+            setPreClauseOperator(LogicalOperator.valueOf(preClauseOperatorValue));
+        }
+
+        if (whereClause.hasProperty(uow, Search.WhereClause.ALIAS)) {
+            setAlias(whereClause.getProperty(uow, Search.WhereClause.ALIAS).getStringValue(uow));
+        }
     }
 
     /**
@@ -61,10 +88,21 @@ abstract class Clause implements SQLConstants {
     }
 
     /**
+     * @param parent the parent to set
+     */
+    protected void setParent(ObjectSearcher parent) {
+        this.parent = parent;
+    }
+
+    /**
      * @return the preClauseOperator
      */
     public LogicalOperator getPreClauseOperator() {
         return this.preClauseOperator;
+    }
+
+    protected void setPreClauseOperator(LogicalOperator clauseOperator) {
+        this.preClauseOperator = clauseOperator;
     }
 
     protected void setProperty(String key, String value) {
@@ -81,7 +119,7 @@ abstract class Clause implements SQLConstants {
     /**
      * @param alias the alias to set
      */
-    public void setAlias(String alias) {
+    protected void setAlias(String alias) {
         setProperty(ALIAS, alias);
     }
 
@@ -108,12 +146,15 @@ abstract class Clause implements SQLConstants {
     }
 
     protected String checkWhereAlias(String alias) {
+        if (getParent() == null)
+            return alias;
+
         //
         // Check that where type alias is valid for set of from types
         //
-        if (parent.getFromTypes().size() == 1 && StringUtils.isEmpty(alias)) {
+        if (getParent().getFromTypes().size() == 1 && StringUtils.isEmpty(alias)) {
             // Only 1 from type and alias is empty so assume alias of single from type
-            alias = parent.getFromTypes().iterator().next().getAlias();
+            alias = getParent().getFromTypes().iterator().next().getAlias();
         } else {
             //
             // More than 1 from type or alias is not empty
@@ -121,7 +162,7 @@ abstract class Clause implements SQLConstants {
             ArgCheck.isNotEmpty(alias);
 
             boolean aliasTypeFound = false;
-            for (FromType fromType : parent.getFromTypes()) {
+            for (FromType fromType : getParent().getFromTypes()) {
                 if (fromType.getAlias().equals(alias)) {
                     aliasTypeFound = true;
                     break;
@@ -140,7 +181,6 @@ abstract class Clause implements SQLConstants {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((this.parent == null) ? 0 : this.parent.hashCode());
         result = prime * result + ((this.preClauseOperator == null) ? 0 : this.preClauseOperator.hashCode());
         result = prime * result + ((this.properties == null) ? 0 : this.properties.hashCode());
         return result;
@@ -155,18 +195,29 @@ abstract class Clause implements SQLConstants {
         if (getClass() != obj.getClass())
             return false;
         Clause other = (Clause)obj;
-        if (this.parent == null) {
-            if (other.parent != null)
-                return false;
-        } else if (!this.parent.equals(other.parent))
-            return false;
         if (this.preClauseOperator != other.preClauseOperator)
             return false;
         if (this.properties == null) {
             if (other.properties != null)
                 return false;
-        } else if (!this.properties.equals(other.properties))
-            return false;
+        } else
+            if (!this.properties.equals(other.properties))
+                return false;
         return true;
     }
+
+    protected void writeProperties(UnitOfWork uow, KomodoObject whereObject) throws KException {
+        whereObject.setProperty(uow, WhereClause.PRE_CLAUSE_OPERATOR, getPreClauseOperator());
+        whereObject.setProperty(uow, WhereClause.ALIAS, getAlias());
+    }
+
+    /**
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param searchObject the parent searchObject
+     * @throws KException
+     *         if an error occurs
+     */
+    abstract void write(UnitOfWork uow, KomodoObject searchObject) throws KException;
 }

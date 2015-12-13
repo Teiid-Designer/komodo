@@ -73,6 +73,17 @@ public class Messages implements StringConstants {
         }
     }
 
+    @SuppressWarnings( "javadoc" )
+    public enum Search {
+
+        No_Saved_Search;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
     private static String getEnumName(Enum<?> enumValue) {
         String className = enumValue.getClass().getName();
         String[] components = className.split("\\$"); //$NON-NLS-1$

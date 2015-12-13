@@ -30,6 +30,7 @@ import org.komodo.core.KEngine;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.core.KomodoLexicon.Komodo;
 import org.komodo.core.KomodoLexicon.LibraryComponent;
+import org.komodo.core.KomodoLexicon.Search;
 import org.komodo.core.KomodoLexicon.WorkspaceItem;
 import org.komodo.repository.search.ObjectSearcher;
 import org.komodo.repository.validation.ValidationManagerImpl;
@@ -419,6 +420,11 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
      * The root path of the Komodo repository workspace area.
      */
     public static final String WORKSPACE_ROOT = (KOMODO_ROOT + FORWARD_SLASH + Komodo.WORKSPACE);
+
+    /**
+     * The root path of the Komodo repository workspace searches area
+     */
+    public static final String SEARCHES_ROOT = WORKSPACE_ROOT + FORWARD_SLASH + Search.GROUP_NODE;
 
     protected static final KLog LOGGER = KLog.getLogger();
 
@@ -1230,6 +1236,15 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
      */
     protected KomodoObject komodoRoot(final UnitOfWork uow) throws KException {
         return create(uow, KOMODO_ROOT, KomodoLexicon.Komodo.NODE_TYPE);
+    }
+
+    @Override
+    public KomodoObject komodoSearches(UnitOfWork transaction) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
+        "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        komodoRoot( transaction );
+        return create( transaction, SEARCHES_ROOT, KomodoLexicon.Search.GROUP_NODE );
     }
 
     /**

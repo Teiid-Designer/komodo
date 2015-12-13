@@ -24,7 +24,14 @@ package org.komodo.repository.search;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import org.komodo.core.KomodoLexicon.Search;
+import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.Property;
+import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.KeywordCriteria;
+import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
 
@@ -38,21 +45,20 @@ class ContainsClause extends Clause implements PropertyClause {
 
     private final Set<String> keywords = new LinkedHashSet<String>();
 
-    private final KeywordCriteria keywordCriteria;
+    private KeywordCriteria keywordCriteria;
 
     /**
      * Constructor
-     * @param parent parent searcher
      * @param operator the logical operator preceding this clause (can be null if this is the only clause)
      * @param alias the alias
      * @param property the property
      * @param keywordCriteria settings for the keywords
      * @param keywords the value
      */
-    public ContainsClause(ObjectSearcher parent, LogicalOperator operator,
+    public ContainsClause(LogicalOperator operator,
                                          String alias, String property,
                                          KeywordCriteria keywordCriteria, String... keywords) {
-        super(parent, operator);
+        super(operator);
 
         ArgCheck.isNotNull(property);
         ArgCheck.isNotEmpty(keywords, "Where Contains clause requires at least 1 value"); //$NON-NLS-1$
@@ -67,11 +73,44 @@ class ContainsClause extends Clause implements PropertyClause {
     }
 
     /**
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param whereClause the where clause object
+     *
+     * @throws KException if error occurs
+     */
+    protected ContainsClause(UnitOfWork uow, KomodoObject whereClause) throws KException {
+        super(uow, whereClause);
+
+        if (whereClause.hasProperty(uow, Search.WhereContainsClause.PROPERTY)) {
+            setProperty(whereClause.getProperty(uow, Search.WhereCompareClause.PROPERTY).getStringValue(uow));
+        }
+
+        if (whereClause.hasProperty(uow, Search.WhereContainsClause.KEYWORD_CRITERIA)) {
+            String keywordCriteria = whereClause.getProperty(uow, Search.WhereContainsClause.KEYWORD_CRITERIA).getStringValue(uow);
+            setKeywordCriteria(KeywordCriteria.valueOf(keywordCriteria));
+        }
+
+        if (whereClause.hasProperty(uow, Search.WhereContainsClause.KEYWORDS)) {
+            Property keywordsProp = whereClause.getProperty(uow, Search.WhereContainsClause.KEYWORDS);
+            String[] keywords = keywordsProp.getStringValues(uow);
+            for (String keyword : keywords) {
+                addKeyword(keyword);
+            }
+        }
+    }
+
+    /**
      * @return the property
      */
     @Override
     public String getProperty() {
         return properties.get(PROPERTY);
+    }
+
+    protected void setProperty(String propertyValue) {
+        properties.put(PROPERTY, propertyValue);
     }
 
     /**
@@ -86,6 +125,20 @@ class ContainsClause extends Clause implements PropertyClause {
      */
     public Set<String> getKeywords() {
         return this.keywords;
+    }
+
+    /**
+     * @return the keywordCriteria
+     */
+    public KeywordCriteria getKeywordCriteria() {
+        return this.keywordCriteria;
+    }
+
+    /**
+     * @param keywordCriteria the keywordCriteria to set
+     */
+    protected void setKeywordCriteria(KeywordCriteria keywordCriteria) {
+        this.keywordCriteria = keywordCriteria;
     }
 
     @Override
@@ -170,5 +223,23 @@ class ContainsClause extends Clause implements PropertyClause {
         buffer.append(CLOSE_BRACKET);
 
         return buffer.toString();
+    }
+
+    @Override
+    void write(UnitOfWork uow, KomodoObject searchObject) throws KException {
+        ArgCheck.isNotNull(uow, "transaction"); //$NON-NLS-1$
+        ArgCheck.isTrue((uow.getState() == State.NOT_STARTED), "transaction state is not NOT_STARTED"); //$NON-NLS-1$
+        ArgCheck.isNotNull(searchObject, "searchObject"); //$NON-NLS-1$
+
+        Repository repository = searchObject.getRepository();
+        KomodoObject whereObject = repository.add(uow, searchObject.getAbsolutePath(),
+                                                  Search.WHERE_CLAUSE,
+                                                  Search.WhereContainsClause.NODE_TYPE);
+
+        writeProperties(uow, whereObject);
+
+        whereObject.setProperty(uow, Search.WhereContainsClause.PROPERTY, getProperty());
+        whereObject.setProperty(uow, Search.WhereContainsClause.KEYWORDS, getKeywords().toArray());
+        whereObject.setProperty(uow, Search.WhereContainsClause.KEYWORD_CRITERIA, keywordCriteria.toString());
     }
 }

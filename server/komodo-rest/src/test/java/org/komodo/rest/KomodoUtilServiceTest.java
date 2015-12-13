@@ -36,6 +36,7 @@ import org.junit.rules.TestName;
 import org.komodo.core.KEngine;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.relational.KomodoRestUriBuilder;
+import org.komodo.rest.relational.KomodoStatusObject;
 import org.komodo.rest.relational.RelationalMessages;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.spi.constants.StringConstants;
@@ -179,7 +180,7 @@ public final class KomodoUtilServiceTest implements StringConstants {
         final String entity = response.readEntity(String.class);
         System.out.println("Response from uri " + uri + ":\n" + entity);
 
-        KomodoStatusObject status = KomodoJsonMarshaller.unmarshallKSO(entity);
+        KomodoStatusObject status = KomodoJsonMarshaller.unmarshall(entity, KomodoStatusObject.class);
         assertNotNull(status);
 
         assertEquals("Sample Vdb Import", status.getTitle());
@@ -207,7 +208,7 @@ public final class KomodoUtilServiceTest implements StringConstants {
         final String entity = response.readEntity(String.class);
         System.out.println("Response from uri " + uri + ":\n" + entity);
 
-        KomodoStatusObject status = KomodoJsonMarshaller.unmarshallKSO(entity);
+        KomodoStatusObject status = KomodoJsonMarshaller.unmarshall(entity, KomodoStatusObject.class);
         assertNotNull(status);
 
         assertEquals("Sample Vdb Import", status.getTitle());
