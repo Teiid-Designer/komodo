@@ -8,7 +8,9 @@
 package org.komodo.rest.relational.json;
 
 import static org.komodo.rest.Messages.Error.UNEXPECTED_JSON_TOKEN;
+import static org.komodo.rest.relational.json.KomodoJsonMarshaller.BUILDER;
 import java.io.IOException;
+import java.util.Arrays;
 import org.komodo.rest.Messages;
 import org.komodo.rest.relational.KomodoSavedSearcher;
 import com.google.gson.TypeAdapter;
@@ -40,6 +42,10 @@ public final class SavedSearcherSerializer extends TypeAdapter< KomodoSavedSearc
                 case KomodoSavedSearcher.QUERY_LABEL:
                     status.setQuery(in.nextString());
                     break;
+                case KomodoSavedSearcher.PARAMETER_LABEL:
+                    final String[] parameters = BUILDER.fromJson( in, String[].class );
+                    status.setParameters(Arrays.asList(parameters));
+                    break;
                 default:
                     throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
             }
@@ -67,6 +73,15 @@ public final class SavedSearcherSerializer extends TypeAdapter< KomodoSavedSearc
 
         out.name(KomodoSavedSearcher.QUERY_LABEL);
         out.value(value.getQuery());
+
+        if (value.getParameters() != null && ! value.getParameters().isEmpty()) {
+            out.name(KomodoSavedSearcher.PARAMETER_LABEL);
+            out.beginArray();
+            for (String val: value.getParameters().toArray(new String[0])) {
+                out.value(val);
+            }
+            out.endArray();
+        }
 
         out.endObject();
     }

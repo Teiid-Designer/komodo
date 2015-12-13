@@ -8,10 +8,14 @@
 package org.komodo.rest.relational.json;
 
 import static org.komodo.rest.Messages.Error.UNEXPECTED_JSON_TOKEN;
+import static org.komodo.rest.relational.json.KomodoJsonMarshaller.BUILDER;
 import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.Map;
 import org.komodo.rest.Messages;
 import org.komodo.rest.relational.KomodoSearcherAttributes;
 import com.google.gson.TypeAdapter;
+import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
@@ -19,6 +23,8 @@ import com.google.gson.stream.JsonWriter;
  * A GSON serializer/deserializer for {@status KomodoSearchObject}s.
  */
 public final class SearcherAttributesSerializer extends TypeAdapter< KomodoSearcherAttributes > {
+
+    private static final Type STRING_MAP_TYPE = new TypeToken< Map< String, String > >() {/* nothing to do */}.getType();
 
     /**
      * {@inheritDoc}
@@ -54,6 +60,12 @@ public final class SearcherAttributesSerializer extends TypeAdapter< KomodoSearc
                     break;
                 case KomodoSearcherAttributes.OBJECT_NAME_LABEL:
                     searcherAttr.setObjectName(in.nextString());
+                    break;
+                case KomodoSearcherAttributes.PARAMETERS_LABEL:
+                    Map<String, String> parameters = BUILDER.fromJson(in, Map.class);
+                    for (Map.Entry<String, String> parameter : parameters.entrySet()) {
+                        searcherAttr.setParameter(parameter.getKey(), parameter.getValue());
+                    }
                     break;
                 default:
                     throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
@@ -96,6 +108,11 @@ public final class SearcherAttributesSerializer extends TypeAdapter< KomodoSearc
 
         out.name(KomodoSearcherAttributes.TYPE_LABEL);
         out.value(value.getType());
+
+        if (! value.getParameters().isEmpty()) {
+            out.name(KomodoSearcherAttributes.PARAMETERS_LABEL);
+            BUILDER.toJson(value.getParameters(), STRING_MAP_TYPE, out);
+        }
 
         out.endObject();
     }

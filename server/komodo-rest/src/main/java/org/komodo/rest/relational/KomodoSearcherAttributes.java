@@ -21,6 +21,9 @@
  */
 package org.komodo.rest.relational;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import javax.ws.rs.core.MediaType;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -71,6 +74,11 @@ public class KomodoSearcherAttributes implements KRestEntity {
      */
     public static final String OBJECT_NAME_LABEL = "objectName"; //$NON-NLS-1$
 
+    /**
+     * Label for the parameters
+     */
+    public static final String PARAMETERS_LABEL = "parameters"; //$NON-NLS-1$
+
     @JsonProperty(SEARCH_NAME_LABEL)
     private String searchName;
 
@@ -91,6 +99,9 @@ public class KomodoSearcherAttributes implements KRestEntity {
 
     @JsonProperty(OBJECT_NAME_LABEL)
     private String objectName;
+
+    @JsonProperty(PARAMETERS_LABEL)
+    private Map<String, String> parameters;
 
     /**
      * Default constructor for deserialization
@@ -216,6 +227,28 @@ public class KomodoSearcherAttributes implements KRestEntity {
      */
     public void setObjectName(String objectName) {
         this.objectName = objectName;
+    }
+
+    /**
+     * @return the parameters
+     */
+    public Map<String, String> getParameters() {
+        if (parameters == null)
+            return Collections.emptyMap();
+
+        return Collections.unmodifiableMap(this.parameters);
+    }
+
+    /**
+     * Add a parameter with value
+     * @param name the name
+     * @param value the value
+     */
+    public void setParameter(String name, String value) {
+        if (this.parameters == null)
+            this.parameters = new HashMap<>();
+
+        this.parameters.put(name, value);
     }
 
     @Override

@@ -34,6 +34,7 @@ import org.komodo.core.KomodoLexicon.Search.WhereClause;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.repository.RepositoryImpl;
 import org.komodo.repository.RepositoryTools;
+import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository.KeywordCriteria;
@@ -43,6 +44,28 @@ import org.modeshape.jcr.api.JcrConstants;
 
 @SuppressWarnings( {"nls", "javadoc"} )
 public class TestObjectSearcher extends AbstractLocalRepositoryTest {
+
+    private KomodoObject[] createTestData() throws Exception {
+        // Create the komodo workspace
+        KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
+        assertNotNull(workspace);
+
+        for (int i = 1; i < 6; ++i) {
+            KomodoObject child = workspace.addChild(getTransaction(), "test" + i, KomodoLexicon.VdbModel.NODE_TYPE);
+            child.setProperty(getTransaction(), KomodoLexicon.VdbModel.MODEL_DEFINITION, "DDL");
+        }
+
+        KomodoObject[] testNodes = workspace.getChildrenOfType(getTransaction(), KomodoLexicon.VdbModel.NODE_TYPE);
+        assertEquals(5, testNodes.length);
+        for (KomodoObject testKO : testNodes) {
+            Property property = testKO.getProperty(getTransaction(), KomodoLexicon.VdbModel.MODEL_DEFINITION);
+            assertEquals("DDL", property.getStringValue(getTransaction()));
+        }
+
+        commit(); // must commit for search queries to work
+
+        return testNodes;
+    }
 
     @Test
     public void shouldHaveRepository() {
@@ -299,17 +322,7 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
         KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
         assertNotNull(workspace);
 
-        for (int i = 1; i < 6; ++i) {
-            KomodoObject child = workspace.addChild(getTransaction(), "test" + i, KomodoLexicon.VdbModel.NODE_TYPE);
-            child.setProperty(getTransaction(), KomodoLexicon.VdbModel.MODEL_DEFINITION, "DDL");
-        }
-
-        KomodoObject[] testNodes = workspace.getChildrenOfType(getTransaction(), KomodoLexicon.VdbModel.NODE_TYPE);
-        assertEquals(5, testNodes.length);
-        for (KomodoObject testKO : testNodes) {
-            Property property = testKO.getProperty(getTransaction(), KomodoLexicon.VdbModel.MODEL_DEFINITION);
-            assertEquals("DDL", property.getStringValue(getTransaction()));
-        }
+        KomodoObject[] testNodes = createTestData();
 
         ObjectSearcher os = new ObjectSearcher(_repo);
         os.addFromType(JcrConstants.NT_UNSTRUCTURED, "nt");
@@ -318,8 +331,6 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
         String expected = "SELECT [jcr:path], [mode:localName] FROM [nt:unstructured] AS nt " +
                                      "WHERE CONTAINS(nt.[vdb:modelDefinition], 'DDL')";
         assertEquals(expected, os.toString());
-
-        commit(); // must commit for search queries to work
 
         List<KomodoObject> searchObjects = os.searchObjects(getTransaction());
         assertEquals(testNodes.length, searchObjects.size());
@@ -910,5 +921,68 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
         testOS.read(getTransaction(), searchName);
 
         assertEquals(os, testOS);
+    }
+
+    @Test
+    public void shouldErrorDueToNoParameterValueForFrom() throws Exception {
+        String alias = JcrNtLexicon.Namespace.PREFIX;
+        String fromTypeType = "{fromTypeParam}";
+        String whereProperty = KomodoLexicon.VdbModelSource.JNDI_NAME;
+        String[] values = {"jndi1", "jndi2", "jndi3"};
+
+        ObjectSearcher os = new ObjectSearcher(_repo);
+        os.addFromType(fromTypeType, alias);
+        os.addWhereSetClause(null, alias, whereProperty, values[0], values[1], values[2]);
+
+        try {
+            os.searchObjects(getTransaction());
+            fail("Should fail due to no parameter value");
+        } catch (KException ex) {
+            // Nothing to do
+        }
+    }
+
+    @Test
+    public void shouldErrorDueToNoParameterValueForWhere() throws Exception {
+        String alias = JcrNtLexicon.Namespace.PREFIX;
+        String fromTypeType = "{fromTypeParam}";
+        String whereProperty = KomodoLexicon.VdbModelSource.JNDI_NAME;
+        String[] values = {"jndi1", "jndi2", "{value3}"};
+
+        ObjectSearcher os = new ObjectSearcher(_repo);
+        os.addFromType(fromTypeType, alias);
+        os.addWhereSetClause(null, alias, whereProperty, values[0], values[1], values[2]);
+
+        os.setParameterValue("fromTypeParam", JcrConstants.NT_UNSTRUCTURED);
+
+        try {
+            os.searchObjects(getTransaction());
+            fail("Should fail due to no parameter value");
+        } catch (KException ex) {
+            // Nothing to do
+        }
+    }
+
+    @Test
+    public void shouldSubstituteParameterValues() throws Exception {
+        createTestData();
+
+        String alias = JcrNtLexicon.Namespace.PREFIX;
+        String fromTypeType = "{fromTypeParam}";
+        String containsValue = "{containsValueParam}";
+
+        ObjectSearcher os = new ObjectSearcher(_repo);
+        os.addFromType(fromTypeType, alias);
+        os.addWhereContainsClause(null, alias, KomodoLexicon.VdbModel.MODEL_DEFINITION, containsValue);
+
+        os.setParameterValue("fromTypeParam", JcrConstants.NT_UNSTRUCTURED);
+        os.setParameterValue(containsValue, "DDL");
+
+        try {
+            List<KomodoObject> results = os.searchObjects(getTransaction());
+            assertEquals(5, results.size());
+        } catch (KException ex) {
+            // Nothing to do
+        }
     }
 }

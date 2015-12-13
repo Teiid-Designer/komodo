@@ -224,6 +224,11 @@ public final class RelationalMessages {
         SEARCH_SERVICE_SAVE_SEARCH_ERROR,
 
         /**
+         * An error indicating a request to delete a saved search configuration failed
+         */
+        SEARCH_SERVICE_DELETE_SEARCH_ERROR,
+
+        /**
          * The search service lacks at least one parameter
          */
         SEARCH_SERVICE_NO_PARAMETERS_ERROR,

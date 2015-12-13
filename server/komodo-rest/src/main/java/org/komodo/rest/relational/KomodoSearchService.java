@@ -7,11 +7,13 @@
 */
 package org.komodo.rest.relational;
 
+import static org.komodo.rest.relational.RelationalMessages.Error.SEARCH_SERVICE_DELETE_SEARCH_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.SEARCH_SERVICE_GET_SEARCH_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.SEARCH_SERVICE_SAVE_SEARCH_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.SEARCH_SERVICE_WKSP_SEARCHES_ERROR;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -252,7 +254,9 @@ public final class KomodoSearchService extends KomodoService {
             }
 
             String errorMsg = e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.getClass().getSimpleName();
-            throw new KomodoRestException(RelationalMessages.getString(SEARCH_SERVICE_GET_SEARCH_ERROR, errorMsg), e);
+            errorMsg = RelationalMessages.getString(SEARCH_SERVICE_GET_SEARCH_ERROR, errorMsg);
+            Object responseEntity = createErrorResponse(mediaTypes, errorMsg);
+            return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
         }
     }
 
@@ -278,8 +282,9 @@ public final class KomodoSearchService extends KomodoService {
     @ApiOperation(value = "Advanced search of the workspace where the criteria is encapsulated in the request body",
                              notes = "Syntax of the json request body is of the form " +
                                           "{ searchName='x', type, parent='z', ancestor='z', path='a', contain='b', objectName='c' }" +
-                                          " where at least 1 property has been defined, " +
-                                          " parent and ancestor are mutually exclusive",
+                                          " where at least 1 property has been defined; " +
+                                          " parent and ancestor are mutually exclusive;" +
+                                          " search parameters can be added as key=value properties, eg. {param1}=people",
                              response = RestBasicEntity[].class)
     @ApiResponses(value = {
         @ApiResponse(code = 406, message = "Only JSON is returned by this operation")
@@ -322,6 +327,16 @@ public final class KomodoSearchService extends KomodoService {
                                                           sa.getPath(), sa.getContains(), sa.getObjectName());
             }
 
+            // Resolve any parameters if applicable
+            for(Map.Entry<String, String> parameter : sa.getParameters().entrySet()) {
+                String value = parameter.getValue();
+
+                // Maybe a KType used here so convert them
+                value = convertType(value);
+
+                os.setParameterValue(parameter.getKey(), value);
+            }
+
             // Execute the search
             List<KomodoObject> searchObjects = os.searchObjects(uow);
 
@@ -345,7 +360,9 @@ public final class KomodoSearchService extends KomodoService {
             }
 
             String errorMsg = e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.getClass().getSimpleName();
-            throw new KomodoRestException(RelationalMessages.getString(SEARCH_SERVICE_GET_SEARCH_ERROR, errorMsg), e);
+            errorMsg = RelationalMessages.getString(SEARCH_SERVICE_GET_SEARCH_ERROR, errorMsg);
+            Object responseEntity = createErrorResponse(mediaTypes, errorMsg);
+            return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
         }
     }
 
@@ -368,7 +385,7 @@ public final class KomodoSearchService extends KomodoService {
     @ApiResponses(value = {
         @ApiResponse(code = 406, message = "Only JSON is returned by this operation")
     })
-    public Response findWorkspaceSearches( final @Context HttpHeaders headers,
+    public Response getSavedSearches( final @Context HttpHeaders headers,
                              final @Context UriInfo uriInfo) throws KomodoRestException {
 
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
@@ -416,7 +433,9 @@ public final class KomodoSearchService extends KomodoService {
             }
 
             String errorMsg = e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.getClass().getSimpleName();
-            throw new KomodoRestException(RelationalMessages.getString(SEARCH_SERVICE_WKSP_SEARCHES_ERROR, errorMsg), e);
+            errorMsg = RelationalMessages.getString(SEARCH_SERVICE_WKSP_SEARCHES_ERROR, errorMsg);
+            Object responseEntity = createErrorResponse(mediaTypes, errorMsg);
+            return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
         }
     }
 
@@ -474,7 +493,9 @@ public final class KomodoSearchService extends KomodoService {
             }
 
             String errorMsg = e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.getClass().getSimpleName();
-            throw new KomodoRestException(RelationalMessages.getString(SEARCH_SERVICE_SAVE_SEARCH_ERROR, errorMsg), e);
+            errorMsg = RelationalMessages.getString(SEARCH_SERVICE_SAVE_SEARCH_ERROR, errorMsg);
+            Object responseEntity = createErrorResponse(mediaTypes, errorMsg);
+            return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
         }
     }
 
@@ -531,7 +552,9 @@ public final class KomodoSearchService extends KomodoService {
             }
 
             String errorMsg = e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.getClass().getSimpleName();
-            throw new KomodoRestException(RelationalMessages.getString(SEARCH_SERVICE_SAVE_SEARCH_ERROR, errorMsg), e);
+            errorMsg = RelationalMessages.getString(SEARCH_SERVICE_DELETE_SEARCH_ERROR, errorMsg);
+            Object responseEntity = createErrorResponse(mediaTypes, errorMsg);
+            return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
         }
     }
 }

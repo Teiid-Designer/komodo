@@ -14,6 +14,8 @@ import static org.junit.Assert.assertTrue;
 import java.net.URI;
 import java.util.List;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import org.junit.Test;
 import org.komodo.rest.RestBasicEntity;
@@ -310,6 +312,31 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
     }
 
     @Test
+    public void shouldSaveSearchWithParameters() throws Exception {
+        loadVdbs();
+
+        // post
+        URI uri = _uriBuilder.generateSavedSearchCollectionUri(new KomodoProperties());
+
+        KomodoSearcherAttributes searchAttr = new KomodoSearcherAttributes();
+        String searchName = "Vdbs Search";
+        searchAttr.setSearchName(searchName);
+        searchAttr.setType("{fromTypeParam}");
+
+        this.response = request(uri).post(Entity.json(searchAttr));
+
+        Repository repository = getRestApp().getDefaultRepository();
+        UnitOfWork uow = repository.createTransaction(
+                                                      getClass().getSimpleName() + COLON + "FindSavedSearches" + COLON + System.currentTimeMillis(),
+                                                      true, null);
+
+        KomodoObject searches = repository.komodoSearches(uow);
+        KomodoObject[] children = searches.getChildren(uow);
+        assertEquals(1, children.length);
+        assertEquals(searchName, children[0].getName(uow));
+    }
+
+    @Test
     public void shouldDeleteSavedSearch() throws Exception {
         loadVdbs();
         List<String> searchNames = loadSampleSearches();
@@ -585,6 +612,59 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
             KomodoType kType = basicEntity.getkType();
             assertEquals(KomodoType.VDB, kType);
             System.out.println(basicEntity.getDataPath());
+        }
+    }
+
+    @Test
+    public void shouldAdvancedExecuteSavedSearchWithParameter()  throws Exception {
+        loadVdbs();
+        List<String> searchNames = loadSampleSearches();
+
+        // post
+        KomodoProperties properties = new KomodoProperties();
+        URI uri = _uriBuilder.generateSearchUri(properties);
+
+        KomodoSearcherAttributes searchAttr = new KomodoSearcherAttributes();
+        searchAttr.setSearchName(searchNames.get(2));
+        searchAttr.setParameter("valueParam", "%_ID");
+
+        this.response = request(uri).post(Entity.json(searchAttr));
+        assertEquals(Response.Status.OK.getStatusCode(), this.response.getStatus());
+        assertEquals(MediaType.APPLICATION_JSON_TYPE, this.response.getMediaType());
+        final String entity = this.response.readEntity(String.class);
+        System.out.println("Response:\n" + entity);
+        RestBasicEntity[] entities = KomodoJsonMarshaller.unmarshallArray(entity, RestBasicEntity[].class);
+        assertEquals(12, entities.length);
+
+        for (RestBasicEntity basicEntity : entities) {
+            KomodoType kType = basicEntity.getkType();
+            assertEquals(KomodoType.COLUMN, kType);
+            assertTrue(basicEntity.getId().endsWith("_ID"));
+        }
+    }
+
+    @Test
+    public void shouldAdvancedExecuteSavedSearchWithKTypeParameter()  throws Exception {
+        loadVdbs();
+        List<String> searchNames = loadSampleSearches();
+
+        // post
+        KomodoProperties properties = new KomodoProperties();
+        URI uri = _uriBuilder.generateSearchUri(properties);
+
+        KomodoSearcherAttributes searchAttr = new KomodoSearcherAttributes();
+        searchAttr.setSearchName(searchNames.get(3));
+        searchAttr.setParameter("fromTypeParam", "Vdb");
+
+        this.response = request(uri).post(Entity.json(searchAttr));
+        final String entity = this.response.readEntity(String.class);
+        System.out.println("Response:\n" + entity);
+        RestBasicEntity[] entities = KomodoJsonMarshaller.unmarshallArray(entity, RestBasicEntity[].class);
+        assertEquals(4, entities.length);
+
+        for (RestBasicEntity basicEntity : entities) {
+            KomodoType kType = basicEntity.getkType();
+            assertEquals(KomodoType.VDB, kType);
         }
     }
 }
