@@ -644,6 +644,28 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
     }
 
     @Test
+    public void shouldFailToSavedSearchDueToLackofParameter()  throws Exception {
+        loadVdbs();
+        List<String> searchNames = loadSampleSearches();
+
+        // post
+        KomodoProperties properties = new KomodoProperties();
+        URI uri = _uriBuilder.generateSearchUri(properties);
+
+        KomodoSearcherAttributes searchAttr = new KomodoSearcherAttributes();
+        searchAttr.setSearchName(searchNames.get(2));
+
+        this.response = request(uri).post(Entity.json(searchAttr));
+        assertEquals(Response.Status.FORBIDDEN.getStatusCode(), this.response.getStatus());
+        assertEquals(MediaType.APPLICATION_JSON_TYPE, this.response.getMediaType());
+        final String entity = this.response.readEntity(String.class);
+        System.out.println("Response:\n" + entity);
+        assertEquals("An error occurred whilst searching the workspace: " +
+                            "'Search requires the parameter valueParam but has not been provided a value'", entity);
+
+    }
+
+    @Test
     public void shouldAdvancedExecuteSavedSearchWithKTypeParameter()  throws Exception {
         loadVdbs();
         List<String> searchNames = loadSampleSearches();

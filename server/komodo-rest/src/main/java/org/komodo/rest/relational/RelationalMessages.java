@@ -24,6 +24,8 @@ package org.komodo.rest.relational;
 import static org.komodo.spi.constants.StringConstants.CLOSE_ANGLE_BRACKET;
 import static org.komodo.spi.constants.StringConstants.DOT;
 import static org.komodo.spi.constants.StringConstants.OPEN_ANGLE_BRACKET;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import org.komodo.spi.repository.KomodoType;
@@ -284,6 +286,18 @@ public final class RelationalMessages {
         }
     }
 
+    private static void expandParameters(Object parameter, List<Object> paramList) {
+        if (parameter instanceof Object[]) {
+            Object[] parameters = (Object[]) parameter;
+            for (Object param : parameters) {
+                expandParameters(param, paramList);
+            }
+            return;
+        }
+
+        paramList.add(parameter);
+    }
+
     /**
      * @param key
      *        the message key (cannot be <code>null</code>)
@@ -305,8 +319,11 @@ public final class RelationalMessages {
             return text;
         }
 
+        List<Object> expandedParam = new ArrayList<>();
+        expandParameters(parameters, expandedParam);
+
         // return formatted message
-        return String.format( text, parameters );
+        return String.format( text, expandedParam.toArray() );
     }
 
     /**

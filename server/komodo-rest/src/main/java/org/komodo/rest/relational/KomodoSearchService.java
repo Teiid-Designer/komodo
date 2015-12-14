@@ -184,7 +184,8 @@ public final class KomodoSearchService extends KomodoService {
     @ApiOperation(value = "Search the workspace using criteria",
                              response = RestBasicEntity[].class)
     @ApiResponses(value = {
-        @ApiResponse(code = 406, message = "Only JSON is returned by this operation")
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
     })
     public Response searchWorkspace( final @Context HttpHeaders headers,
                              final @Context UriInfo uriInfo,
@@ -253,10 +254,7 @@ public final class KomodoSearchService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            String errorMsg = e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.getClass().getSimpleName();
-            errorMsg = RelationalMessages.getString(SEARCH_SERVICE_GET_SEARCH_ERROR, errorMsg);
-            Object responseEntity = createErrorResponse(mediaTypes, errorMsg);
-            return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+            return createErrorResponse(mediaTypes, e, SEARCH_SERVICE_GET_SEARCH_ERROR);
         }
     }
 
@@ -287,7 +285,8 @@ public final class KomodoSearchService extends KomodoService {
                                           " search parameters can be added as key=value properties, eg. {param1}=people",
                              response = RestBasicEntity[].class)
     @ApiResponses(value = {
-        @ApiResponse(code = 406, message = "Only JSON is returned by this operation")
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
     })
     public Response searchWorkspace( final @Context HttpHeaders headers,
                              final @Context UriInfo uriInfo,
@@ -359,10 +358,7 @@ public final class KomodoSearchService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            String errorMsg = e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.getClass().getSimpleName();
-            errorMsg = RelationalMessages.getString(SEARCH_SERVICE_GET_SEARCH_ERROR, errorMsg);
-            Object responseEntity = createErrorResponse(mediaTypes, errorMsg);
-            return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+            return createErrorResponse(mediaTypes, e, SEARCH_SERVICE_GET_SEARCH_ERROR);
         }
     }
 
@@ -383,7 +379,8 @@ public final class KomodoSearchService extends KomodoService {
     @ApiOperation(value = "Fetch saved searches from the workspace",
                              response = RestBasicEntity[].class)
     @ApiResponses(value = {
-        @ApiResponse(code = 406, message = "Only JSON is returned by this operation")
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
     })
     public Response getSavedSearches( final @Context HttpHeaders headers,
                              final @Context UriInfo uriInfo) throws KomodoRestException {
@@ -432,10 +429,7 @@ public final class KomodoSearchService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            String errorMsg = e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.getClass().getSimpleName();
-            errorMsg = RelationalMessages.getString(SEARCH_SERVICE_WKSP_SEARCHES_ERROR, errorMsg);
-            Object responseEntity = createErrorResponse(mediaTypes, errorMsg);
-            return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+            return createErrorResponse(mediaTypes, e, SEARCH_SERVICE_WKSP_SEARCHES_ERROR);
         }
     }
 
@@ -457,7 +451,8 @@ public final class KomodoSearchService extends KomodoService {
     @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Save a search to the workspace")
     @ApiResponses(value = {
-        @ApiResponse(code = 406, message = "Only JSON is returned by this operation")
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
     })
     public Response saveSearch( final @Context HttpHeaders headers,
                              final @Context UriInfo uriInfo,
@@ -492,10 +487,7 @@ public final class KomodoSearchService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            String errorMsg = e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.getClass().getSimpleName();
-            errorMsg = RelationalMessages.getString(SEARCH_SERVICE_SAVE_SEARCH_ERROR, errorMsg);
-            Object responseEntity = createErrorResponse(mediaTypes, errorMsg);
-            return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+            return createErrorResponse(mediaTypes, e, SEARCH_SERVICE_SAVE_SEARCH_ERROR);
         }
     }
 
@@ -515,7 +507,8 @@ public final class KomodoSearchService extends KomodoService {
     @Produces( MediaType.APPLICATION_JSON )
     @ApiOperation(value = "Delete a search from the workspace")
     @ApiResponses(value = {
-        @ApiResponse(code = 406, message = "Only JSON is returned by this operation")
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
     })
     public Response deleteSavedSearch( final @Context HttpHeaders headers,
                              final @Context UriInfo uriInfo,
@@ -551,10 +544,7 @@ public final class KomodoSearchService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            String errorMsg = e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.getClass().getSimpleName();
-            errorMsg = RelationalMessages.getString(SEARCH_SERVICE_DELETE_SEARCH_ERROR, errorMsg);
-            Object responseEntity = createErrorResponse(mediaTypes, errorMsg);
-            return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+            return createErrorResponse(mediaTypes, e, SEARCH_SERVICE_DELETE_SEARCH_ERROR);
         }
     }
 }
