@@ -108,12 +108,11 @@ public final class KomodoUtilServiceTest implements StringConstants {
     }
 
     private void loadSamples() throws Exception {
-        _restApp.importVdb(KomodoUtilService.getVdbSample("parts_dynamic-vdb.xml"));
-        _restApp.importVdb(KomodoUtilService.getVdbSample("portfolio-vdb.xml"));
-        _restApp.importVdb(KomodoUtilService.getVdbSample("teiid-vdb-all-elements.xml"));
-        _restApp.importVdb(KomodoUtilService.getVdbSample("tweet-example-vdb.xml"));
+        for (String sample : KomodoUtilService.SAMPLES) {
+            _restApp.importVdb(KomodoUtilService.getVdbSample(sample));
+        }
 
-        Assert.assertEquals(4, _restApp.getVdbs().length);
+        Assert.assertEquals(KomodoUtilService.SAMPLES.length, _restApp.getVdbs().length);
     }
 
     protected Invocation.Builder request(final URI uri) {
@@ -127,7 +126,7 @@ public final class KomodoUtilServiceTest implements StringConstants {
             "  \"Information\": " +  OPEN_BRACE + NEW_LINE,
             "    \"Repository Workspace\": \"komodoLocalWorkspace\"," + NEW_LINE,
             "    \"Repository Configuration\"", // Configuration Url contains local file names so impossible to test
-            "    \"Repository Vdb Total\": \"4\"" + NEW_LINE,
+            "    \"Repository Vdb Total\": \"" + KomodoUtilService.SAMPLES.length + "\"" + NEW_LINE,
             "  " + CLOSE_BRACE + NEW_LINE };
 
         loadSamples();
