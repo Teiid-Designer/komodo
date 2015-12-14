@@ -26,10 +26,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.regex.Pattern;
 import org.komodo.core.KomodoLexicon.Search;
 import org.komodo.core.Messages;
 import org.komodo.spi.KException;
@@ -60,6 +64,8 @@ public class ObjectSearcher implements SQLConstants {
 
     private String customWhereClause;
 
+    private Map<String, String> parameters = new HashMap<>();
+
     /**
      * @param repository the repository to search
      */
@@ -70,6 +76,38 @@ public class ObjectSearcher implements SQLConstants {
 
     private boolean isEmpty(Collection<?> list) {
         return list == null || list.isEmpty();
+    }
+
+    /**
+     * @param type
+     */
+    private void scanForParameters(String clause) {
+        StringTokenizer tokenizer = new StringTokenizer(clause);
+        while (tokenizer.hasMoreTokens()) {
+            String token = tokenizer.nextToken();
+
+            int openBrace = token.indexOf(OPEN_BRACE);
+            if (openBrace == -1)
+                continue;
+
+            int closeBrace = token.indexOf(CLOSE_BRACE);
+            if (closeBrace == -1)
+                continue;
+
+            if (closeBrace < openBrace)
+                continue; // very odd syntax!
+
+            //
+            // Leave off the braces while storing
+            //
+            token = token.substring(openBrace + 1, closeBrace);
+
+            // value will be null until a value is plugged in
+            // which needs to be done prior to search
+            String value = parameters.get(token);
+            if (value == null)
+                parameters.put(token, null);
+        }
     }
 
     /**
@@ -91,6 +129,8 @@ public class ObjectSearcher implements SQLConstants {
 
         if (fromTypes == null)
             fromTypes = new LinkedHashSet<FromType>();
+
+        scanForParameters(type);
 
         fromTypes.add(new FromType(type, alias));
         return this;
@@ -164,6 +204,8 @@ public class ObjectSearcher implements SQLConstants {
         if (whereClauses == null)
             whereClauses = new ArrayList<Clause>();
 
+        scanForParameters(whereClause.clauseString(0));
+
         whereClause.setParent(this);
         whereClauses.add(whereClause);
     }
@@ -184,8 +226,10 @@ public class ObjectSearcher implements SQLConstants {
             addWhereClause(whereClause);
         }
         else {
-            for (String value : values)
+            for (String value : values) {
+                scanForParameters(value);
                 whereClause.addValue(value);
+            }
         }
 
         return this;
@@ -231,8 +275,10 @@ public class ObjectSearcher implements SQLConstants {
             addWhereClause(whereClause);
         }
         else {
-            for (String keyword : keywords)
+            for (String keyword : keywords) {
+                scanForParameters(keyword);
                 whereClause.addKeyword(keyword);
+            }
         }
 
         return this;
@@ -306,12 +352,43 @@ public class ObjectSearcher implements SQLConstants {
         ArgCheck.isNotEmpty(whereClause);
         ArgCheck.isTrue(whereClauses == null, "searchObject cannot contain both whereClauses and customWhereClause"); //$NON-NLS-1$
 
+        scanForParameters(whereClause);
+
         this.customWhereClause = whereClause;
         return this;
     }
 
     private boolean hasWhere() {
         return (whereClauses != null && ! whereClauses.isEmpty()) || customWhereClause != null;
+    }
+
+    /**
+     * @return the parameters
+     */
+    public Collection<String> getParameters() {
+        return Collections.unmodifiableCollection(this.parameters.keySet());
+    }
+
+    /**
+     * Set the value of a parameter.
+     * Do not expect parameter to be surrounded by braces. If it does they will be stripped off
+     *
+     * @param parameter the parameter
+     * @param value the value
+     */
+    public void setParameterValue(String parameter, String value) {
+        if (parameter == null || value == null)
+            return;
+
+        if (parameter.startsWith(OPEN_BRACE))
+            parameter = parameter.substring(1);
+
+        if (parameter.endsWith(CLOSE_BRACE))
+            parameter = parameter.substring(0, parameter.length() - 1);
+
+        // More efficient to simply overwrite rather than
+        // using contains to check its in the list
+        parameters.put(parameter, value);
     }
 
     private void createSelect(StringBuffer buffer) {
@@ -468,6 +545,16 @@ public class ObjectSearcher implements SQLConstants {
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         List<KomodoObject> results = Collections.emptyList();
+
+        // plug in parameters
+        for (Map.Entry<String, String> entry : parameters.entrySet()) {
+            if (entry.getValue() == null)
+                throw new KException("Search requires the parameter " + entry.getKey() + " but has not been provided a value"); //$NON-NLS-1$ //$NON-NLS-2$
+
+            String parameter = OPEN_BRACE + entry.getKey() + CLOSE_BRACE;
+            String quotedParameter = Pattern.quote(parameter);
+            statement = statement.replaceAll(quotedParameter, entry.getValue());
+        }
 
         // execute query
         results = getRepository().query(transaction, statement);

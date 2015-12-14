@@ -21,6 +21,9 @@
  */
 package org.komodo.rest.relational;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import javax.ws.rs.core.MediaType;
 import org.komodo.rest.KRestEntity;
 import org.komodo.utils.ArgCheck;
@@ -41,9 +44,16 @@ public class KomodoSavedSearcher implements KRestEntity {
      */
     public static final String QUERY_LABEL = "query"; //$NON-NLS-1$
 
+    /**
+     * Label for the parameters
+     */
+    public static final String PARAMETER_LABEL = "parameters"; //$NON-NLS-1$
+
     private String name;
 
     private String query;
+
+    private List<String> parameters;
 
     /**
      * Default constructor for deserialization
@@ -83,6 +93,25 @@ public class KomodoSavedSearcher implements KRestEntity {
      */
     public void setQuery(String query) {
         this.query = query;
+    }
+
+    /**
+     * @return the parameters
+     */
+    public List<String> getParameters() {
+        return this.parameters;
+    }
+
+    /**
+     * Set the parameters of the object
+     *
+     * @param parameters the parameters
+     */
+    public void setParameters(Collection<String> parameters) {
+        if (parameters == null || parameters.isEmpty())
+            return;
+
+        this.parameters = new ArrayList<String>(parameters);
     }
 
     /**

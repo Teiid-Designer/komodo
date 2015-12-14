@@ -24,6 +24,8 @@ package org.komodo.rest.relational;
 import static org.komodo.spi.constants.StringConstants.CLOSE_ANGLE_BRACKET;
 import static org.komodo.spi.constants.StringConstants.DOT;
 import static org.komodo.spi.constants.StringConstants.OPEN_ANGLE_BRACKET;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import org.komodo.spi.repository.KomodoType;
@@ -224,6 +226,11 @@ public final class RelationalMessages {
         SEARCH_SERVICE_SAVE_SEARCH_ERROR,
 
         /**
+         * An error indicating a request to delete a saved search configuration failed
+         */
+        SEARCH_SERVICE_DELETE_SEARCH_ERROR,
+
+        /**
          * The search service lacks at least one parameter
          */
         SEARCH_SERVICE_NO_PARAMETERS_ERROR,
@@ -231,7 +238,12 @@ public final class RelationalMessages {
         /**
          * The search service has both parent and ancestor parameters
          */
-        SEARCH_SERVICE_PARENT_ANCESTOR_EXCLUSIVE_ERROR;
+        SEARCH_SERVICE_PARENT_ANCESTOR_EXCLUSIVE_ERROR,
+
+        /**
+         * The search service cannot parse the request body
+         */
+        SEARCH_SERVICE_REQUEST_PARSING_ERROR;
 
         /**
          * {@inheritDoc}
@@ -274,6 +286,18 @@ public final class RelationalMessages {
         }
     }
 
+    private static void expandParameters(Object parameter, List<Object> paramList) {
+        if (parameter instanceof Object[]) {
+            Object[] parameters = (Object[]) parameter;
+            for (Object param : parameters) {
+                expandParameters(param, paramList);
+            }
+            return;
+        }
+
+        paramList.add(parameter);
+    }
+
     /**
      * @param key
      *        the message key (cannot be <code>null</code>)
@@ -295,8 +319,11 @@ public final class RelationalMessages {
             return text;
         }
 
+        List<Object> expandedParam = new ArrayList<>();
+        expandParameters(parameters, expandedParam);
+
         // return formatted message
-        return String.format( text, parameters );
+        return String.format( text, expandedParam.toArray() );
     }
 
     /**

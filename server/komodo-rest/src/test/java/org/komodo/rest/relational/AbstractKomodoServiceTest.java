@@ -47,6 +47,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.komodo.core.KEngine;
 import org.komodo.repository.SynchronousCallback;
+import org.komodo.repository.search.ComparisonOperator;
 import org.komodo.repository.search.ObjectSearcher;
 import org.komodo.rest.KomodoRestV1Application;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
@@ -58,6 +59,7 @@ import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.test.utils.TestUtilities;
+import org.modeshape.jcr.ModeShapeLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
@@ -163,6 +165,17 @@ public abstract class AbstractKomodoServiceTest implements V1Constants {
         String columnSearchName = "Columns Search";
         columnsSearch.write(uow, columnSearchName);
 
+        ObjectSearcher columnsWithParamSearch = new ObjectSearcher(repository);
+        columnsWithParamSearch.addFromType(TeiidDdlLexicon.CreateTable.TABLE_ELEMENT, "c");
+        columnsWithParamSearch.addWhereCompareClause(null, "c", ModeShapeLexicon.LOCALNAME.getString(), ComparisonOperator.LIKE, "{valueParam}");
+        String columnsWithParamSearchName = "Columns Search With Where Parameter";
+        columnsWithParamSearch.write(uow, columnsWithParamSearchName);
+
+        ObjectSearcher fromParameterSearch = new ObjectSearcher(repository);
+        fromParameterSearch.addFromType("{fromTypeParam}", "c");
+        String fromParamSearchName = "From Parameter Search";
+        fromParameterSearch.write(uow, fromParamSearchName);
+
         uow.commit();
 
         if (!callback.await(3, TimeUnit.MINUTES)) {
@@ -174,6 +187,8 @@ public abstract class AbstractKomodoServiceTest implements V1Constants {
 
         searchNames.add(vdbSearchName);
         searchNames.add(columnSearchName);
+        searchNames.add(columnsWithParamSearchName);
+        searchNames.add(fromParamSearchName);
 
         return searchNames;
     }

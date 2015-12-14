@@ -24,6 +24,7 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.SynchronousCallback;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.RestBasicEntity.ResourceNotFound;
+import org.komodo.rest.relational.RelationalMessages;
 import org.komodo.rest.relational.RestEntityFactory;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.spi.KException;
@@ -126,6 +127,19 @@ public abstract class KomodoService implements V1Constants {
             responseEntity = errorMessage;
 
         return responseEntity;
+    }
+
+    protected Response createErrorResponse(List<MediaType> mediaTypes, Exception ex,
+                                                                       RelationalMessages.Error errorType, Object... errorMsgInputs) {
+        String errorMsg = ex.getLocalizedMessage() != null ? ex.getLocalizedMessage() : ex.getClass().getSimpleName();
+
+        if (errorMsgInputs == null || errorMsgInputs.length == 0)
+            errorMsg = RelationalMessages.getString(errorType, errorMsg);
+        else
+            errorMsg = RelationalMessages.getString(errorType, errorMsgInputs, errorMsg);
+
+        Object responseEntity = createErrorResponse(mediaTypes, errorMsg);
+        return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
     }
 
     protected ResponseBuilder notAcceptableMediaTypesBuilder() {

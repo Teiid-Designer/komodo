@@ -7,6 +7,8 @@
 */
 package org.komodo.rest;
 
+import static org.komodo.rest.relational.RelationalMessages.Error.SCHEMA_SERVICE_GET_SCHEMA_ERROR;
+import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_VDBS_ERROR;
 import java.io.File;
 import java.io.InputStream;
 import java.util.List;
@@ -95,6 +97,9 @@ public final class KomodoUtilService extends KomodoService {
     @GET
     @Path(V1Constants.ABOUT)
     @ApiOperation( value = "Display status of this rest service", response = String.class )
+    @ApiResponses(value = {
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
     public Response about(final @Context HttpHeaders headers,
                                           final @Context UriInfo uriInfo) throws KomodoRestException {
         KomodoStatusObject repoStatus = new KomodoStatusObject();
@@ -130,7 +135,7 @@ public final class KomodoUtilService extends KomodoService {
         try {
             return commit(uow, mediaTypes, repoStatus);
         } catch (Exception ex) {
-            throw new KomodoRestException(ex);
+            return createErrorResponse(mediaTypes, ex, VDB_SERVICE_GET_VDBS_ERROR);
         }
     }
 
@@ -163,6 +168,9 @@ public final class KomodoUtilService extends KomodoService {
     @Produces( MediaType.APPLICATION_JSON )
     @ApiOperation(value = "Import sample data into VdbBuilder and display the status of the operation",
                              response = KomodoStatusObject.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
     public Response importSampleData() {
 
         KomodoStatusObject status = new KomodoStatusObject("Sample Vdb Import");
@@ -253,7 +261,8 @@ public final class KomodoUtilService extends KomodoService {
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "If ktype is not a recognised type"),
         @ApiResponse(code = 404, message = "If ktype is recognised but not associated with a teiid schema element"),
-        @ApiResponse(code = 406, message = "Only JSON is returned by this operation")
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
     })
     public Response getSchema( final @Context HttpHeaders headers,
                              final @Context UriInfo uriInfo,
@@ -305,9 +314,7 @@ public final class KomodoUtilService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            String errorMsg = e.getLocalizedMessage() != null ? e.getLocalizedMessage() : e.getClass().getSimpleName();
-            throw new KomodoRestException( RelationalMessages.getString(
-                                                                             RelationalMessages.Error.SCHEMA_SERVICE_GET_SCHEMA_ERROR, errorMsg ), e );
+            return createErrorResponse(mediaTypes, e, SCHEMA_SERVICE_GET_SCHEMA_ERROR);
         }
     }
 }
