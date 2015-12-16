@@ -13,7 +13,6 @@ import java.util.List;
 
 import org.komodo.core.KomodoLexicon;
 import org.komodo.repository.RepositoryImpl;
-import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 
@@ -155,15 +154,15 @@ public interface KomodoObjectLabelProvider {
     
 	 /**
      * @return Returns a node names which should be omitted from display path
+     *         (Never <code>null</code>. Returns empty list if not grouping nodes are available)
      */
-	List<String> getGroupingNodes();
+	List<String> skippedPathSegmentNames();
 	
     /**
      * Get the type display string for a KomodoObject
-     * @param uow the transaction
-     * @param kObj the KomodoObject
-     * @return the type display string
-     * @throws KException the exception
+     * @param uow the transaction (never <code>null</code>)
+     * @param kObj the KomodoObject (never <code>null</code>)
+     * @return the type display string (never returns <code>null</code>)
      */
     public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj );
 

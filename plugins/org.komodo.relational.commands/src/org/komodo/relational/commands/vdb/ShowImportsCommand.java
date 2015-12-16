@@ -8,6 +8,7 @@
 package org.komodo.relational.commands.vdb;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+
 import org.komodo.relational.commands.workspace.WorkspaceCommandsI18n;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.VdbImport;
@@ -63,7 +64,7 @@ public final class ShowImportsCommand extends VdbShellCommand {
                     print( indent,
                            I18n.bind( WorkspaceCommandsI18n.printRelationalObject,
                                       theImport.getName( getTransaction() ),
-                                      theImport.getTypeDisplayName() ) );
+                                      getWorkspaceStatus().getLabelProvider().getTypeDisplay(getTransaction(), theImport) ) );
                 }
             }
 

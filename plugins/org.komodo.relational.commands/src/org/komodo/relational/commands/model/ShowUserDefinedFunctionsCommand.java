@@ -8,8 +8,10 @@
 package org.komodo.relational.commands.model;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import org.komodo.relational.commands.workspace.WorkspaceCommandsI18n;
 import org.komodo.relational.model.Function;
 import org.komodo.relational.model.Model;
@@ -87,7 +89,7 @@ public final class ShowUserDefinedFunctionsCommand extends ModelShellCommand {
                         print( indent,
                                I18n.bind( WorkspaceCommandsI18n.printRelationalObject,
                                                     function.getName( getTransaction() ),
-                                                    function.getTypeDisplayName() ) );
+                                                    getWorkspaceStatus().getLabelProvider().getTypeDisplay(getTransaction(), function) ) );
                     }
                 }
             }

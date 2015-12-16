@@ -24,7 +24,6 @@ import org.junit.Test;
 import org.komodo.shell.AbstractCommandTest;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.KomodoObjectLabelProvider;
-import org.komodo.spi.repository.KomodoObject;
 
 /**
  * Test Class to test {@link ShowSummaryCommand}.
@@ -46,7 +45,7 @@ public class ShowSummaryCommandTest extends AbstractCommandTest {
         assertCommandResultOk( result );
 
         String writerOutput = getCommandOutput();
-        assertThat( writerOutput, writerOutput.contains( KomodoObject.class.getSimpleName()
+        assertThat( writerOutput, writerOutput.contains( KomodoObjectLabelProvider.LIB_DISPLAY_NAME
                                                          + " '"
                                                          + KomodoObjectLabelProvider.LIB_DISPLAY_PATH
                                                          + '\'' ),
@@ -60,9 +59,9 @@ public class ShowSummaryCommandTest extends AbstractCommandTest {
         assertCommandResultOk( result );
 
         String writerOutput = getCommandOutput();
-        assertThat( writerOutput, writerOutput.contains( KomodoObject.class.getSimpleName()
+        assertThat( writerOutput, writerOutput.contains( KomodoObjectLabelProvider.ROOT_DISPLAY_NAME
                                                          + " '"
-                                                         + KomodoObjectLabelProvider.ROOT_DISPLAY_NAME
+                                                         + KomodoObjectLabelProvider.ROOT_DISPLAY_PATH
                                                          + '\'' ),
                     is( true ) );
     }
@@ -75,19 +74,19 @@ public class ShowSummaryCommandTest extends AbstractCommandTest {
         assertCommandResultOk( result );
 
         String writerOutput = getCommandOutput();
-        assertThat( writerOutput, writerOutput.contains( KomodoObject.class.getSimpleName()
+        assertThat( writerOutput, writerOutput.contains( KomodoObjectLabelProvider.WORKSPACE_DISPLAY_NAME
                                                          + " '"
                                                          + KomodoObjectLabelProvider.WORKSPACE_DISPLAY_PATH
                                                          + '\'' ),
                     is( true ) );
     }
-    
+
     @Test
     public void testTabCompleter()throws Exception{
     	ArrayList<CharSequence> candidates=new ArrayList<>();
        	setup("commandFiles","addChildren.cmd");
        	assertTabCompletion("show-summary invalid", candidates);
-       	    
+
     	candidates.add("myChild1/");
     	candidates.add("myChild2/");
     	assertTabCompletion("show-summary myCh", candidates);

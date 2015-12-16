@@ -147,16 +147,6 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.RelationalObject#getTypeDisplayName()
-     */
-    @Override
-    public String getTypeDisplayName() {
-        return Messages.getString( WorkspaceManager.class.getSimpleName() + ".typeName" ); //$NON-NLS-1$
-    }
-
-    /**
-     * {@inheritDoc}
-     *
      * @see org.komodo.repository.ObjectImpl#getTypeId()
      */
     @Override

@@ -5,15 +5,14 @@
  *
  * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
  */
-package org.komodo.relational.commands;
+package org.komodo.relational;
 
 import java.util.Arrays;
 import java.util.List;
 
-import org.komodo.relational.RelationalObject;
+import org.komodo.relational.internal.TypeResolverRegistry;
 import org.komodo.shell.DefaultLabelProvider;
 import org.komodo.shell.ShellI18n;
-import org.komodo.shell.api.ShellCommandProvider;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -25,7 +24,7 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
  * A label provider for relational objects.
  */
 public class RelationalLabelProvider extends DefaultLabelProvider {
-  
+
     /**
      * A collection of grouping node names that should be removed from the display paths.
      */
@@ -48,35 +47,43 @@ public class RelationalLabelProvider extends DefaultLabelProvider {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.shell.api.KomodoObjectLabelProvider#getGroupingNodes(java.lang.String)
+     * @see org.komodo.shell.api.KomodoObjectLabelProvider#skippedPathSegmentNames(java.lang.String)
      */
 	@Override
-	public List<String> getGroupingNodes(){
+	public List<String> skippedPathSegmentNames(){
 		return GROUPING_NODES;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
-	 * @throws KException 
-	 * 
+	 *
+	 *
 	 * @see org.komodo.shell.api.KomodoObjectLabelProvider#getTypeDisplay(org.komodo.spi.repository.Repository.UnitOfWork,
 	 *      org.komodo.spi.repository.KomodoObject)
 	 */
 	@Override
-	public String getTypeDisplay(UnitOfWork uow, KomodoObject kobject){
-		for(ShellCommandProvider provider:status.getCommandFactory().getCommandProviders()){
-			KomodoObject komodoObject=null;
-			try {
-				komodoObject = provider.resolve(status.getTransaction(), kobject);
-			} catch (KException ex) {
-				KLog.getLogger().error( I18n.bind( ShellI18n.internalError) , ex );
-				continue;
-			}
-			if(komodoObject instanceof RelationalObject){
-				return ((RelationalObject)komodoObject).getTypeDisplayName();
-			}
+	public String getTypeDisplay(UnitOfWork uow, KomodoObject kobject) {
+		if (kobject instanceof RelationalObject) {
+			return getTypeFromObject((RelationalObject) kobject);
 		}
-		return super.getTypeDisplay(status.getTransaction(), kobject);
+
+		try {
+			TypeResolver<?> resolver = TypeResolverRegistry.getInstance().getResolver(kobject.getTypeIdentifier(uow));
+			if (resolver != null) {
+				KomodoObject resolvedObject = resolver.resolve(uow, kobject);
+				if (resolvedObject instanceof RelationalObject) {
+					return getTypeFromObject((RelationalObject) resolvedObject);
+				}
+			}
+		} catch (KException e) {
+			KLog.getLogger().error(I18n.bind(ShellI18n.internalError), e);
+		}
+
+		return super.getTypeDisplay(uow, kobject);
 	}
-    
+
+	private String getTypeFromObject(RelationalObject relObject) {
+		return org.komodo.relational.Messages.getString(relObject.getClass().getSimpleName() + ".typeName"); //$NON-NLS-1$
+	}
+
 }

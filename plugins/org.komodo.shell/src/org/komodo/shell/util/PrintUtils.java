@@ -8,6 +8,7 @@
 package org.komodo.shell.util;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.TreeMap;
+
 import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.ShellApiI18n;
 import org.komodo.shell.api.WorkspaceStatus;
@@ -397,7 +399,7 @@ public class PrintUtils implements StringConstants {
                 maxNameWidth = name.length();
             }
 
-            final String type = wsStatus.getTypeDisplay(childList.get(0));
+            final String type = wsStatus.getTypeDisplay(childList.get(i));
 
             if ( maxTypeWidth < type.length() ) {
                 maxTypeWidth = type.length();

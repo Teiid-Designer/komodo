@@ -8,6 +8,7 @@
 package org.komodo.relational.commands.table;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+
 import org.komodo.relational.commands.workspace.WorkspaceCommandsI18n;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.UniqueConstraint;
@@ -67,7 +68,7 @@ public final class ShowUniqueConstraintsCommand extends TableShellCommand {
                     print( indent,
                            I18n.bind( WorkspaceCommandsI18n.printRelationalObject,
                                                 constraint.getName( getTransaction() ),
-                                                constraint.getTypeDisplayName() ) );
+                                                getWorkspaceStatus().getLabelProvider().getTypeDisplay(getTransaction(), constraint) ) );
                 }
             }
 

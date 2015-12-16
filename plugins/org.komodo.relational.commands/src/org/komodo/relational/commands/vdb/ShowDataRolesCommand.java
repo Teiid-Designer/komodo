@@ -8,6 +8,7 @@
 package org.komodo.relational.commands.vdb;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+
 import org.komodo.relational.commands.workspace.WorkspaceCommandsI18n;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Vdb;
@@ -64,7 +65,7 @@ public final class ShowDataRolesCommand extends VdbShellCommand {
                     print( indent,
                            I18n.bind( WorkspaceCommandsI18n.printRelationalObject,
                                       role.getName( getTransaction() ),
-                                      role.getTypeDisplayName() ) );
+                                      getWorkspaceStatus().getLabelProvider().getTypeDisplay(getTransaction(), role) ) );
                 }
             }
 

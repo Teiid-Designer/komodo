@@ -8,6 +8,7 @@
 package org.komodo.relational.commands.model;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+
 import org.komodo.relational.commands.workspace.WorkspaceCommandsI18n;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.vdb.ModelSource;
@@ -64,7 +65,7 @@ public final class ShowSourcesCommand extends ModelShellCommand {
                     print( indent,
                            I18n.bind( WorkspaceCommandsI18n.printRelationalObject,
                                                 source.getName( getTransaction() ),
-                                                source.getTypeDisplayName() ) );
+                                                getWorkspaceStatus().getLabelProvider().getTypeDisplay(getTransaction(), source) ) );
                 }
             }
 

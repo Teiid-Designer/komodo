@@ -350,16 +350,6 @@ public abstract class RelationalObjectImpl extends ObjectImpl implements Relatio
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.RelationalObject#getTypeDisplayName()
-     */
-    @Override
-    public String getTypeDisplayName() {
-        return org.komodo.relational.Messages.getString( getClass().getSimpleName() + ".typeName" ); //$NON-NLS-1$
-    }
-
-    /**
-     * {@inheritDoc}
-     *
      * @see org.komodo.repository.ObjectImpl#hasChild(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
      */
     @Override

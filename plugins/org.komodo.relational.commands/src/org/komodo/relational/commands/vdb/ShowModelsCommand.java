@@ -8,6 +8,7 @@
 package org.komodo.relational.commands.vdb;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+
 import org.komodo.relational.commands.workspace.WorkspaceCommandsI18n;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.vdb.Vdb;
@@ -63,7 +64,7 @@ public final class ShowModelsCommand extends VdbShellCommand {
                     print( indent,
                            I18n.bind( WorkspaceCommandsI18n.printRelationalObject,
                                       model.getName( getTransaction() ),
-                                      model.getTypeDisplayName() ) );
+                                      getWorkspaceStatus().getLabelProvider().getTypeDisplay(getTransaction(), model) ) );
                 }
             }
 

@@ -8,8 +8,10 @@
 package org.komodo.relational.commands.model;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import org.komodo.relational.commands.workspace.WorkspaceCommandsI18n;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Procedure;
@@ -85,7 +87,7 @@ public final class ShowStoredProceduresCommand extends ModelShellCommand {
                         print( indent,
                                I18n.bind( WorkspaceCommandsI18n.printRelationalObject,
                                                     storedProc.getName( getTransaction() ),
-                                                    storedProc.getTypeDisplayName() ) );
+                                                    getWorkspaceStatus().getLabelProvider().getTypeDisplay(getTransaction(), storedProc)) );
                     }
                 }
             }

@@ -8,6 +8,7 @@
 package org.komodo.relational.commands.table;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+
 import org.komodo.relational.commands.workspace.WorkspaceCommandsI18n;
 import org.komodo.relational.model.Index;
 import org.komodo.relational.model.Table;
@@ -64,7 +65,7 @@ public final class ShowIndexesCommand extends TableShellCommand {
                     print( indent,
                            I18n.bind( WorkspaceCommandsI18n.printRelationalObject,
                                                 index.getName( getTransaction() ),
-                                                index.getTypeDisplayName() ) );
+                                                getWorkspaceStatus().getLabelProvider().getTypeDisplay(getTransaction(), index) ) );
                 }
             }
 

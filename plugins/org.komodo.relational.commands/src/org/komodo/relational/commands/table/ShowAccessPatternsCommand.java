@@ -8,6 +8,7 @@
 package org.komodo.relational.commands.table;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+
 import org.komodo.relational.commands.workspace.WorkspaceCommandsI18n;
 import org.komodo.relational.model.AccessPattern;
 import org.komodo.relational.model.Table;
@@ -65,7 +66,7 @@ public final class ShowAccessPatternsCommand extends TableShellCommand {
                     print( indent,
                            I18n.bind( WorkspaceCommandsI18n.printRelationalObject,
                                                 accessPattern.getName( getTransaction() ),
-                                                accessPattern.getTypeDisplayName() ) );
+                                                getWorkspaceStatus().getLabelProvider().getTypeDisplay(getTransaction(), accessPattern) ) );
                 }
             }
 

@@ -8,6 +8,7 @@
 package org.komodo.relational.commands.permission;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+
 import org.komodo.relational.commands.workspace.WorkspaceCommandsI18n;
 import org.komodo.relational.vdb.Mask;
 import org.komodo.relational.vdb.Permission;
@@ -66,7 +67,7 @@ public final class ShowMasksCommand extends PermissionShellCommand {
                     print( indent,
                            I18n.bind( WorkspaceCommandsI18n.printRelationalObject,
                                                 mask.getName( getTransaction() ),
-                                                mask.getTypeDisplayName() ) );
+                                                getWorkspaceStatus().getLabelProvider().getTypeDisplay(getTransaction(), mask)) );
                 }
             }
 

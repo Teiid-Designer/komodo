@@ -8,6 +8,7 @@
 package org.komodo.relational.commands.datarole;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+
 import org.komodo.relational.commands.workspace.WorkspaceCommandsI18n;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Permission;
@@ -67,7 +68,8 @@ public final class ShowPermissionsCommand extends DataRoleShellCommand {
                     print( indent,
                            I18n.bind( WorkspaceCommandsI18n.printRelationalObject,
                                                 permission.getName( getTransaction() ),
-                                                permission.getTypeDisplayName() ) );
+                                                getWorkspaceStatus().getLabelProvider().getTypeDisplay(getTransaction(), permission)
+ ) );
                 }
             }
 
