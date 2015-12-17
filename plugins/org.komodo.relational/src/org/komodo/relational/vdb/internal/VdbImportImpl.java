@@ -8,6 +8,7 @@
 package org.komodo.relational.vdb.internal;
 
 import org.komodo.relational.internal.RelationalChildRestrictedObject;
+import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.VdbImport;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
@@ -51,12 +52,12 @@ public class VdbImportImpl extends RelationalChildRestrictedObject implements Vd
      * @see org.komodo.relational.internal.RelationalObjectImpl#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public KomodoObject getParent( final UnitOfWork transaction ) throws KException {
+    public Vdb getParent( final UnitOfWork transaction ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state must be NOT_STARTED" ); //$NON-NLS-1$
 
         final KomodoObject grouping = super.getParent( transaction );
-        final KomodoObject result = resolveType( transaction, grouping.getParent( transaction ) );
+        final Vdb result = Vdb.RESOLVER.resolve( transaction, grouping.getParent( transaction ) );
         return result;
     }
 

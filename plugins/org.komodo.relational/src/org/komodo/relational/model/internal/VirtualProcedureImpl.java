@@ -7,13 +7,16 @@
  */
 package org.komodo.relational.model.internal;
 
+import org.komodo.relational.model.Model;
 import org.komodo.relational.model.VirtualProcedure;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
+import org.komodo.utils.ArgCheck;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
 
 /**
@@ -55,6 +58,21 @@ public final class VirtualProcedureImpl extends AbstractProcedureImpl implements
     @Override
     public KomodoType getTypeIdentifier( final UnitOfWork transaction ) {
         return VirtualProcedure.IDENTIFIER;
+    }
+    
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public Model getParent( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state must be NOT_STARTED" ); //$NON-NLS-1$
+
+        final KomodoObject parent = super.getParent( transaction );
+        final Model result = Model.RESOLVER.resolve( transaction, parent );
+        return result;
     }
 
     /**

@@ -50,6 +50,14 @@ public interface Model extends Exportable, RelationalObject {
      * Identifier of this object
      */
     KomodoType IDENTIFIER = KomodoType.MODEL;
+    
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KNode#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    Vdb getParent( final UnitOfWork transaction ) throws KException;
 
     /**
      * The type of a model.

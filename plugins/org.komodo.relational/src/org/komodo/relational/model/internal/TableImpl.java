@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalModelFactory;
@@ -20,6 +21,7 @@ import org.komodo.relational.model.AccessPattern;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.ForeignKey;
 import org.komodo.relational.model.Index;
+import org.komodo.relational.model.Model;
 import org.komodo.relational.model.PrimaryKey;
 import org.komodo.relational.model.StatementOption;
 import org.komodo.relational.model.Table;
@@ -599,6 +601,21 @@ public class TableImpl extends RelationalObjectImpl implements Table {
     @Override
     public String getUuid( final UnitOfWork transaction ) throws KException {
         return OptionContainerUtils.getOption( transaction, this, StandardOption.UUID.name() );
+    }
+    
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public Model getParent( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state must be NOT_STARTED" ); //$NON-NLS-1$
+
+        final KomodoObject parent = super.getParent( transaction );
+        final Model result = Model.RESOLVER.resolve( transaction, parent );
+        return result;
     }
 
     /**

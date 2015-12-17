@@ -9,12 +9,15 @@ package org.komodo.relational.vdb.internal;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.jcr.RepositoryException;
+
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.vdb.Condition;
+import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Mask;
 import org.komodo.relational.vdb.Permission;
 import org.komodo.spi.KException;
@@ -256,12 +259,12 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
      * @see org.komodo.relational.internal.RelationalObjectImpl#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public KomodoObject getParent( final UnitOfWork transaction ) throws KException {
+    public DataRole getParent( final UnitOfWork transaction ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state must be NOT_STARTED" ); //$NON-NLS-1$
 
         final KomodoObject grouping = super.getParent( transaction );
-        final KomodoObject result = resolveType( transaction, grouping.getParent( transaction ) );
+        final DataRole result = DataRole.RESOLVER.resolve( transaction, grouping.getParent( transaction ) );
         return result;
     }
 

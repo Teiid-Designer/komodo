@@ -8,11 +8,14 @@
 package org.komodo.relational.model.internal;
 
 import org.komodo.relational.model.PrimaryKey;
+import org.komodo.relational.model.Table;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
+import org.komodo.utils.ArgCheck;
 
 /**
  * An implementation of a relational model primary key.
@@ -58,6 +61,21 @@ public final class PrimaryKeyImpl extends TableConstraintImpl implements Primary
     @Override
     public int getTypeId() {
         return TYPE_ID;
+    }
+    
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public Table getParent( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state must be NOT_STARTED" ); //$NON-NLS-1$
+
+        final KomodoObject parent = super.getParent( transaction );
+        final Table result = Table.RESOLVER.resolve( transaction, parent );
+        return result;
     }
 
 }

@@ -40,6 +40,15 @@ public interface PrimaryKey extends TableConstraint {
      * The constraint type for a primary key. Value is {@value} .
      */
     ConstraintType CONSTRAINT_TYPE = ConstraintType.PRIMARY_KEY;
+    
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KNode#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    Table getParent( final UnitOfWork transaction ) throws KException;
+
 
     /**
      * The resolver of a {@link PrimaryKey}.

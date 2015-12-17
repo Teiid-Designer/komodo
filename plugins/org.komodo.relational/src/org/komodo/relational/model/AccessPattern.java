@@ -46,6 +46,14 @@ public interface AccessPattern extends TableConstraint {
      * An empty collection of access pattern constraints.
      */
     AccessPattern[] NO_ACCESS_PATTERNS = new AccessPattern[0];
+    
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KNode#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    Table getParent( final UnitOfWork transaction ) throws KException;
 
     /**
      * The resolver of a {@link AccessPattern}.

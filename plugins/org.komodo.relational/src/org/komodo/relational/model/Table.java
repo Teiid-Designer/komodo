@@ -138,6 +138,14 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
      * An empty array of tables.
      */
     Table[] NO_TABLES = new Table[0];
+    
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KNode#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    Model getParent( final UnitOfWork transaction ) throws KException;
 
     /**
      * The resolver of a {@link Table}.

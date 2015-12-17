@@ -9,6 +9,7 @@ package org.komodo.relational.vdb.internal;
 
 import org.komodo.relational.internal.RelationalChildRestrictedObject;
 import org.komodo.relational.vdb.Condition;
+import org.komodo.relational.vdb.Permission;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
@@ -51,12 +52,12 @@ public final class ConditionImpl extends RelationalChildRestrictedObject impleme
      * @see org.komodo.relational.internal.RelationalObjectImpl#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public KomodoObject getParent( final UnitOfWork transaction ) throws KException {
+    public Permission getParent( final UnitOfWork transaction ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state must be NOT_STARTED" ); //$NON-NLS-1$
 
         final KomodoObject grouping = super.getParent( transaction );
-        final KomodoObject result = resolveType( transaction, grouping.getParent( transaction ) );
+        final Permission result = Permission.RESOLVER.resolve( transaction, grouping.getParent( transaction ) );
         return result;
     }
 

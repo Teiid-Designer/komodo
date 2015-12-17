@@ -10,10 +10,12 @@ package org.komodo.relational.model.internal;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.model.DataTypeResultSet;
+import org.komodo.relational.model.Model;
 import org.komodo.relational.model.ProcedureResultSet;
 import org.komodo.relational.model.StoredProcedure;
 import org.komodo.relational.model.TabularResultSet;
@@ -187,6 +189,21 @@ public final class StoredProcedureImpl extends AbstractProcedureImpl implements 
     @Override
     public KomodoType getTypeIdentifier( final UnitOfWork transaction ) {
         return StoredProcedure.IDENTIFIER;
+    }
+    
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public Model getParent( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state must be NOT_STARTED" ); //$NON-NLS-1$
+
+        final KomodoObject parent = super.getParent( transaction );
+        final Model result = Model.RESOLVER.resolve( transaction, parent );
+        return result;
     }
 
     /**

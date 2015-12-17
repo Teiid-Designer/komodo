@@ -10,13 +10,16 @@ package org.komodo.relational.model.internal;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.komodo.relational.RelationalConstants;
 import org.komodo.relational.RelationalConstants.Nullable;
 import org.komodo.relational.internal.RelationalChildRestrictedObject;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.StatementOption;
+import org.komodo.relational.model.Table;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Descriptor;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.PropertyDescriptor;
@@ -24,6 +27,7 @@ import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
+import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateTable;
@@ -465,6 +469,21 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
     @Override
     public String getUuid( final UnitOfWork transaction ) throws KException {
         return OptionContainerUtils.getOption( transaction, this, StandardOption.UUID.name() );
+    }
+    
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public Table getParent( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state must be NOT_STARTED" ); //$NON-NLS-1$
+
+        final KomodoObject parent = super.getParent( transaction );
+        final Table result = Table.RESOLVER.resolve( transaction, parent );
+        return result;
     }
 
     /**

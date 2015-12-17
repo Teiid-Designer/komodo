@@ -77,6 +77,14 @@ public interface Permission extends RelationalObject {
      * An empty array of permissions.
      */
     Permission[] NO_PERMISSIONS = new Permission[0];
+    
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KNode#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    DataRole getParent( final UnitOfWork transaction ) throws KException;
 
     /**
      * The resolver of a {@link Permission}.
