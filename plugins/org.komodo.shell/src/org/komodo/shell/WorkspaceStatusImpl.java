@@ -43,6 +43,7 @@ import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
+
 import org.komodo.core.KEngine;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.repository.RepositoryImpl;
@@ -675,7 +676,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
             }
         }
     }
-    
+
     /* (non-Javadoc)
      * @see org.komodo.shell.api.WorkspaceStatus#setStateProperty(java.lang.String, java.lang.String)
      */
@@ -844,7 +845,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         KomodoObjectLabelProvider resultLabelProvider = null;
         if(!this.alternateLabelProviders.isEmpty()) {
             for(KomodoObjectLabelProvider altProvider : this.alternateLabelProviders) {
-                if( !StringUtils.isEmpty(altProvider.getDisplayPath(context)) ) {
+                if( !StringUtils.isEmpty(altProvider.getTypeDisplay(getTransaction(),context)) ) {
                     resultLabelProvider = altProvider;
                     break;
                 }
@@ -855,7 +856,13 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
 
 	@Override
 	public String getTypeDisplay(final KomodoObject kObj) {
-			return  getLabelProvider().getTypeDisplay(uow, kObj);
+		String type=currentContextLabelProvider.getTypeDisplay(getTransaction(), kObj);
+		if(type!=null){
+			return type;
+		}else{
+			return  defaultLabelProvider.getTypeDisplay(getTransaction(), kObj);
+		}
+
 	}
 
     @Override

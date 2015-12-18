@@ -65,7 +65,7 @@ public final class ShowTablesCommand extends ModelShellCommand {
                     print( indent,
                            I18n.bind( WorkspaceCommandsI18n.printRelationalObject,
                                                 table.getName( getTransaction() ),
-                                                getWorkspaceStatus().getLabelProvider().getTypeDisplay(getTransaction(), table) ) );
+                                                getWorkspaceStatus().getTypeDisplay(table) ) );
                 }
             }
 

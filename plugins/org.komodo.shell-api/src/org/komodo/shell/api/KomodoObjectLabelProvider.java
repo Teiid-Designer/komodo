@@ -151,19 +151,19 @@ public interface KomodoObjectLabelProvider {
      *        the workspace status (never <code>null</code>)
      */
     void setWorkspaceStatus( final WorkspaceStatus status );
-    
+
 	 /**
      * @return Returns a node names which should be omitted from display path
      *         (Never <code>null</code>. Returns empty list if not grouping nodes are available)
      */
 	List<String> skippedPathSegmentNames();
-	
+
     /**
      * Get the type display string for a KomodoObject
      * @param uow the transaction (never <code>null</code>)
      * @param kObj the KomodoObject (never <code>null</code>)
      * @return the type display string (never returns <code>null</code>)
      */
-    public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj );
+    String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj );
 
 }

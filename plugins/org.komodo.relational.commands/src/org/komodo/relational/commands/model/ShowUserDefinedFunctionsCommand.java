@@ -89,7 +89,7 @@ public final class ShowUserDefinedFunctionsCommand extends ModelShellCommand {
                         print( indent,
                                I18n.bind( WorkspaceCommandsI18n.printRelationalObject,
                                                     function.getName( getTransaction() ),
-                                                    getWorkspaceStatus().getLabelProvider().getTypeDisplay(getTransaction(), function) ) );
+                                                    getWorkspaceStatus().getTypeDisplay(function) ) );
                     }
                 }
             }

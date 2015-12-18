@@ -331,7 +331,7 @@ public class DefaultLabelProvider implements KomodoObjectLabelProvider {
 	 * @param path Absolute path to object
 	 * @return Name of the area object (Workspace, Library,..) or null if the path doesn't lead to area object
 	 */
-	private String getNameForAreaObject(String path){
+	protected String getNameForAreaObject(String path){
         // /tko:komodo
         if ( ROOT_PATH.equals( path ) || ROOT_SLASH_PATH.equals( path ) ) {
             return ROOT_DISPLAY_NAME;

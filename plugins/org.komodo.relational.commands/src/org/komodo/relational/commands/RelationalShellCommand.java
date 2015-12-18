@@ -56,10 +56,10 @@ public abstract class RelationalShellCommand extends BuiltInShellCommand {
         return getDisplayType( get() );
     }
 
-    protected String getDisplayType( final KomodoObject kobject ) throws Exception {
-        if ( kobject instanceof RelationalObject ) {
-            return getWorkspaceStatus().getLabelProvider().getTypeDisplay(getWorkspaceStatus().getTransaction(), kobject);
-        }
+	protected String getDisplayType(final KomodoObject kobject) throws Exception {
+		if (kobject instanceof RelationalObject) {
+			return getWorkspaceStatus().getTypeDisplay( kobject );
+		}
 
         throw new KException( I18n.bind( WorkspaceCommandsI18n.invalidObjectType, kobject.getAbsolutePath() ) );
     }

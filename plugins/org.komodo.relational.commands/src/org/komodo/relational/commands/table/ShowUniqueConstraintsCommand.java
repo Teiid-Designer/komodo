@@ -68,7 +68,7 @@ public final class ShowUniqueConstraintsCommand extends TableShellCommand {
                     print( indent,
                            I18n.bind( WorkspaceCommandsI18n.printRelationalObject,
                                                 constraint.getName( getTransaction() ),
-                                                getWorkspaceStatus().getLabelProvider().getTypeDisplay(getTransaction(), constraint) ) );
+                                                getWorkspaceStatus().getTypeDisplay(constraint) ) );
                 }
             }
 

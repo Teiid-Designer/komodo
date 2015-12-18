@@ -69,7 +69,7 @@ public final class ShowConditionsCommand extends PermissionShellCommand {
                     print( indent,
                            I18n.bind( WorkspaceCommandsI18n.printRelationalObject,
                                                 condition.getName( getTransaction() ),
-                                                getWorkspaceStatus().getLabelProvider().getTypeDisplay(getTransaction(), condition) ) );
+                                                getWorkspaceStatus().getTypeDisplay(condition) ) );
                 }
             }
 

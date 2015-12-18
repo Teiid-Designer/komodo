@@ -65,7 +65,7 @@ public final class ShowIndexesCommand extends TableShellCommand {
                     print( indent,
                            I18n.bind( WorkspaceCommandsI18n.printRelationalObject,
                                                 index.getName( getTransaction() ),
-                                                getWorkspaceStatus().getLabelProvider().getTypeDisplay(getTransaction(), index) ) );
+                                                getWorkspaceStatus().getTypeDisplay(index) ) );
                 }
             }
 

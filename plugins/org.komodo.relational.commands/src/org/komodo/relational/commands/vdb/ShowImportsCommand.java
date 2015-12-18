@@ -64,7 +64,7 @@ public final class ShowImportsCommand extends VdbShellCommand {
                     print( indent,
                            I18n.bind( WorkspaceCommandsI18n.printRelationalObject,
                                       theImport.getName( getTransaction() ),
-                                      getWorkspaceStatus().getLabelProvider().getTypeDisplay(getTransaction(), theImport) ) );
+                                      getWorkspaceStatus().getTypeDisplay(theImport) ) );
                 }
             }
 
