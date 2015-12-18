@@ -131,6 +131,7 @@ public final class ShellI18n extends I18n {
     public static String workspaceHelp;
     public static String workspaceUsage;
 
+    public static String cannotRenameKomodoRoot;
     public static String cannotRenameObjectDoesNotExist;
     public static String cannotRenameReservedPath;
     public static String cannotRenameTargetContextDoesNotExist;

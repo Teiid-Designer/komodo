@@ -17,9 +17,8 @@ package org.komodo.shell.commands;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 import org.junit.Test;
-import org.komodo.repository.ObjectImpl;
+import org.komodo.repository.RepositoryImpl;
 import org.komodo.shell.AbstractCommandTest;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.spi.repository.KomodoObject;
@@ -55,6 +54,14 @@ public final class RenameCommandTest extends AbstractCommandTest {
     }
 
     @Test( expected = AssertionError.class )
+    public void shouldNotRenameEnvironmentRoot() throws Exception {
+        final String reservedPath = this.wsStatus.getLabelProvider().getDisplayPath( RepositoryImpl.ENV_ROOT );
+        final String[] commands = { ( "cd " + reservedPath ),
+                                    "rename blah" };
+        execute( commands );
+    }
+
+    @Test( expected = AssertionError.class )
     public void shouldNotRenameIfDuplicateNameAndTypeChild() throws Exception {
         final String name1 = "name1";
         final String name2 = "name2";
@@ -63,6 +70,13 @@ public final class RenameCommandTest extends AbstractCommandTest {
                                     "add-child " + name2,
                                     "rename " + name1 + " " + name2 };
 
+        execute( commands );
+    }
+
+    @Test( expected = AssertionError.class )
+    public void shouldNotRenameIfChildDoesNotExist() throws Exception {
+        final String[] commands = { "workspace",
+                                    "rename foo bar" };
         execute( commands );
     }
 
@@ -76,18 +90,26 @@ public final class RenameCommandTest extends AbstractCommandTest {
         execute( commands );
     }
 
-    @Test
-    public void shouldNotRenameReservedPaths() throws Exception {
-        for ( final String reservedPath : ObjectImpl.RESERVED_PATHS ) {
-            this.wsStatus.setCurrentContext( new ObjectImpl( _repo, reservedPath, 0 ) );
+    @Test( expected = AssertionError.class )
+    public void shouldNotRenameKomodoRoot() throws Exception {
+        final String[] commands = { "rename blah" };
+        execute( commands );
+    }
 
-            try {
-                this.wsStatus.getCurrentContext().rename( getTransaction(), "blah" );
-                fail("Renaming of path '" + reservedPath + "' should not be allowed");
-            } catch ( final Exception e ) {
-                // expected
-            }
-        }
+    @Test( expected = AssertionError.class )
+    public void shouldNotRenameLibraryRoot() throws Exception {
+        final String reservedPath = this.wsStatus.getLabelProvider().getDisplayPath( RepositoryImpl.LIBRARY_ROOT );
+        final String[] commands = { ( "cd " + reservedPath ),
+                                    "rename blah" };
+        execute( commands );
+    }
+
+    @Test( expected = AssertionError.class )
+    public void shouldNotRenameWorkspaceRoot() throws Exception {
+        final String reservedPath = this.wsStatus.getLabelProvider().getDisplayPath( RepositoryImpl.WORKSPACE_ROOT );
+        final String[] commands = { ( "cd " + reservedPath ),
+                                    "rename blah" };
+        execute( commands );
     }
 
     @Test

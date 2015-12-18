@@ -2,7 +2,6 @@ package org.komodo.shell.commands;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.komodo.repository.ObjectImpl;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.ShellI18n;
@@ -57,9 +56,10 @@ public class RenameCommand extends BuiltInShellCommand {
 
             if ( renamingChild ) {
                 if ( !context.hasChild( getTransaction(), name ) ) {
-                    return new CommandResultImpl( I18n.bind( ShellI18n.childDoesNotExistToRename,
-                                                             context.getAbsolutePath(),
-                                                             name ) );
+                    return new CommandResultImpl( false, I18n.bind( ShellI18n.childDoesNotExistToRename,
+                                                                    getWorkspaceStatus().getDisplayPath( context ),
+                                                                    name ),
+                                                  null );
                 }
 
                 objToRename = context.getChild( getTransaction(), name );
@@ -72,15 +72,6 @@ public class RenameCommand extends BuiltInShellCommand {
             assert ( objToRename != null );
             assert ( newName != null );
 
-            // make sure object being renamed is not core path that can't be renamed
-            final String path = objToRename.getAbsolutePath();
-
-            for ( final String reservedPath : ObjectImpl.RESERVED_PATHS ) {
-                if ( reservedPath.equals( path ) ) {
-                    return new CommandResultImpl( I18n.bind( ShellI18n.cannotRenameReservedPath, reservedPath ) );
-                }
-            }
-
             { // if new name is same as old name do nothing
                 final String oldName = objToRename.getName( getTransaction() );
 
@@ -91,6 +82,12 @@ public class RenameCommand extends BuiltInShellCommand {
 
             { // Make sure rename does not create a duplicate of same type
                 final KomodoObject parent = objToRename.getParent( getTransaction() );
+
+                // cannot rename Komodo root
+                if ( parent == null ) {
+                    return new CommandResultImpl( false, I18n.bind( ShellI18n.cannotRenameKomodoRoot ), null );
+                }
+
                 final KomodoObject[] sameNamedKids = parent.getChildren( getTransaction(), newName );
 
                 if ( sameNamedKids.length != 0 ) {
