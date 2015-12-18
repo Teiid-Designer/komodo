@@ -116,6 +116,13 @@ public final class UserDefinedFunctionImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldRename() throws Exception {
+        final String newName = "blah";
+        this.function.rename( getTransaction(), newName );
+        assertThat( this.function.getName( getTransaction() ), is( newName ) );
+    }
+
+    @Test
     public void shouldSetCategory() throws Exception {
         final String value = "category";
         this.function.setCategory( getTransaction(), value );

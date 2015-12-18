@@ -40,7 +40,7 @@ public class ColumnCommandProvider implements ShellCommandProvider {
 
         result.add( SetColumnPropertyCommand.class );
         result.add( UnsetColumnPropertyCommand.class );
-        result.add( RenameChildCommand.class );
+        result.add( ColumnRenameCommand.class );
 
         return result;
     }

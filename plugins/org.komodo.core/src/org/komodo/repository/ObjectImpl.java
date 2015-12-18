@@ -53,10 +53,14 @@ import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
 public class ObjectImpl implements KomodoObject, StringConstants {
 
     private static final KLog LOGGER = KLog.getLogger();
-    static final Collection< String > RESERVED_PATHS = Arrays.asList( new String[] { RepositoryImpl.KOMODO_ROOT,
-                                                                                     RepositoryImpl.WORKSPACE_ROOT,
-                                                                                     RepositoryImpl.LIBRARY_ROOT,
-                                                                                     RepositoryImpl.ENV_ROOT } );
+
+    /**
+     * Reserved paths of the repository.
+     */
+    public static final Collection< String > RESERVED_PATHS = Arrays.asList( new String[] { RepositoryImpl.KOMODO_ROOT,
+                                                                                            RepositoryImpl.WORKSPACE_ROOT,
+                                                                                            RepositoryImpl.LIBRARY_ROOT,
+                                                                                            RepositoryImpl.ENV_ROOT } );
 
     protected static Descriptor[] getAllDescriptors( final UnitOfWork transaction,
                                                      final KomodoObject kobject ) throws KException {
@@ -706,25 +710,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      */
     @Override
     public KomodoObject getParent( final UnitOfWork transaction ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-
-        if (RepositoryImpl.KOMODO_ROOT.equals( getAbsolutePath() )) {
-            return null;
-        }
-
-        try {
-            final Node parent = node(transaction).getParent();
-            String parentPath = parent.getPath();
-
-            if (!parentPath.endsWith(FORWARD_SLASH)) {
-                parentPath += FORWARD_SLASH;
-            }
-
-            return new ObjectImpl(this.repository, parent.getPath(), 0);
-        } catch (final Exception e) {
-            throw handleError( e );
-        }
+        return getRawParent( transaction );
     }
 
     /**
@@ -928,6 +914,34 @@ public class ObjectImpl implements KomodoObject, StringConstants {
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.spi.repository.KomodoObject#getRawParent(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public final KomodoObject getRawParent( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state must be NOT_STARTED" ); //$NON-NLS-1$
+
+        if (RepositoryImpl.KOMODO_ROOT.equals( getAbsolutePath() )) {
+            return null;
+        }
+
+        try {
+            final Node parent = node(transaction).getParent();
+            String parentPath = parent.getPath();
+
+            if (!parentPath.endsWith(FORWARD_SLASH)) {
+                parentPath += FORWARD_SLASH;
+            }
+
+            return new ObjectImpl(this.repository, parent.getPath(), 0);
+        } catch (final Exception e) {
+            throw handleError( e );
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.spi.repository.KomodoObject#getRawProperty(org.komodo.spi.repository.Repository.UnitOfWork,
      *      java.lang.String)
      */
@@ -963,7 +977,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      * @see org.komodo.spi.repository.KomodoObject#getRawPropertyDescriptors(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
-    public PropertyDescriptor[] getRawPropertyDescriptors( final UnitOfWork transaction ) throws KException {
+    public final PropertyDescriptor[] getRawPropertyDescriptors( final UnitOfWork transaction ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
@@ -1127,16 +1141,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
     @Override
     public boolean hasChild( final UnitOfWork transaction,
                              final String name ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
-
-        try {
-            final boolean result = node( transaction ).hasNode( name );
-            return result;
-        } catch ( final Exception e ) {
-            throw handleError( e );
-        }
+        return hasRawChild( transaction, name );
     }
 
     /**
@@ -1145,26 +1150,11 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      * @see org.komodo.spi.repository.KomodoObject#hasChild(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String,
      *      java.lang.String)
      */
-    @SuppressWarnings( "unused" )
     @Override
     public boolean hasChild( final UnitOfWork transaction,
                              final String name,
                              final String typeName ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state must be NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( typeName, "typeName" ); //$NON-NLS-1$
-
-        try {
-            if ( hasChild( transaction, name ) ) {
-                getChild( transaction, name, typeName ); // TODO should just query for node count > 0
-                return true;
-            }
-        } catch ( final KException e ) {
-            // child not found
-        }
-
-        return false;
+        return hasRawChild( transaction, name, typeName );
     }
 
     /**
@@ -1174,15 +1164,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      */
     @Override
     public boolean hasChildren( final UnitOfWork transaction ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-
-        try {
-            final boolean result = node(transaction).hasNodes();
-            return result;
-        } catch (final Exception e) {
-            throw handleError( e );
-        }
+        return hasRawChildren( transaction );
     }
 
     /**
@@ -1243,12 +1225,82 @@ public class ObjectImpl implements KomodoObject, StringConstants {
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.spi.repository.KomodoObject#hasRawChild(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     */
+    @Override
+    public final boolean hasRawChild( final UnitOfWork transaction,
+                                      final String name ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
+
+        try {
+            final boolean result = node( transaction ).hasNode( name );
+            return result;
+        } catch ( final Exception e ) {
+            throw handleError( e );
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KomodoObject#hasRawChild(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String,
+     *      java.lang.String)
+     */
+    @SuppressWarnings( "unused" )
+    @Override
+    public final boolean hasRawChild( final UnitOfWork transaction,
+                                      final String name,
+                                      final String typeName ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state must be NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( typeName, "typeName" ); //$NON-NLS-1$
+
+        try {
+            if ( hasRawChild( transaction, name ) ) {
+                for ( final KomodoObject kid : getRawChildren( transaction, name ) ) {
+                    if ( typeName.equals( kid.getPrimaryType( transaction ).getName() )
+                         || kid.hasDescriptor( transaction, typeName ) ) {
+                        return true;
+                    }
+                }
+            }
+        } catch ( final KException e ) {
+            // child not found
+        }
+
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KomodoObject#hasRawChildren(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public final boolean hasRawChildren( UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        try {
+            final boolean result = node( transaction ).hasNodes();
+            return result;
+        } catch ( final Exception e ) {
+            throw handleError( e );
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.spi.repository.KomodoObject#hasRawProperty(org.komodo.spi.repository.Repository.UnitOfWork,
      *      java.lang.String)
      */
     @Override
-    public boolean hasRawProperty( final UnitOfWork transaction,
-                                   final String name ) throws KException {
+    public final boolean hasRawProperty( final UnitOfWork transaction,
+                                         final String name ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty(name, "name"); //$NON-NLS-1$
@@ -1412,7 +1464,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         // If the supplied newName is not an absolute path, assume its a simple name and append the parent absolute path
         String newPath = newName;
         if(!newPath.startsWith(FORWARD_SLASH)) {
-        	newPath = getParent( transaction ).getAbsolutePath();
+        	newPath = getRawParent( transaction ).getAbsolutePath();
         	if(!newPath.endsWith(FORWARD_SLASH)) {
         		newPath += FORWARD_SLASH;
         	}

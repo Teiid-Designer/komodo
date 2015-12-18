@@ -40,7 +40,7 @@ public class EntryCommandProvider implements ShellCommandProvider {
 
         result.add( SetEntryPropertyCommand.class );
         result.add( UnsetEntryPropertyCommand.class );
-        result.add( RenameChildCommand.class );
+        result.add( EntryRenameCommand.class );
 
         return result;
     }

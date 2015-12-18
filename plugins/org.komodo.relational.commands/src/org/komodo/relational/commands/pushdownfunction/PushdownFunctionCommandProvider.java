@@ -40,8 +40,9 @@ public class PushdownFunctionCommandProvider implements ShellCommandProvider {
 
         result.add( AddParameterCommand.class );
         result.add( DeleteParameterCommand.class );
-        result.add( SetResultSetCommand.class );
+        result.add( PushdownFunctionRenameCommand.class );
         result.add( RemoveResultSetCommand.class );
+        result.add( SetResultSetCommand.class );
         result.add( SetPushdownFunctionPropertyCommand.class );
         result.add( UnsetPushdownFunctionPropertyCommand.class );
 

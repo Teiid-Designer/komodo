@@ -16,9 +16,7 @@
 package org.komodo.relational.commands.translator;
 
 import static org.junit.Assert.assertEquals;
-
 import java.util.ArrayList;
-
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.vdb.Translator;
@@ -63,7 +61,7 @@ public final class SetTranslatorPropertyCommandTest extends AbstractCommandTest 
     	final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
-    	candidates.add(SetTranslatorPropertyCommand.TYPE);
+    	candidates.add(TranslatorShellCommand.TYPE);
 
     	assertTabCompletion("set-property typ", candidates);
     	assertTabCompletion("set-property TY", candidates);

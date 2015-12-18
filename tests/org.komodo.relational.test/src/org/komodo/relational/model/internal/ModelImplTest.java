@@ -33,6 +33,9 @@ import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
+import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
+import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateTable;
+import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class ModelImplTest extends RelationalModelTest {
@@ -53,6 +56,12 @@ public final class ModelImplTest extends RelationalModelTest {
         assertThat( function.getName( getTransaction() ), is( name ) );
         assertThat( this.model.getFunctions( getTransaction() ).length, is( 1 ) );
         assertThat( this.model.getChildren( getTransaction() )[0], is( instanceOf( PushdownFunction.class ) ) );
+
+        assertThat( this.model.hasChild( getTransaction(), name ), is( true ) );
+        assertThat( this.model.hasChild( getTransaction(), name, CreateProcedure.FUNCTION_STATEMENT ), is( true ) );
+        assertThat( this.model.hasChildren( getTransaction() ), is( true ) );
+        assertThat( this.model.getChild( getTransaction(), name ), is( function ) );
+        assertThat( this.model.getChild( getTransaction(), name, CreateProcedure.FUNCTION_STATEMENT ), is( function ) );
     }
 
     @Test
@@ -63,6 +72,12 @@ public final class ModelImplTest extends RelationalModelTest {
         assertThat( source.getName( getTransaction() ), is( name ) );
         assertThat( this.model.getSources( getTransaction() ).length, is( 1 ) );
         assertThat( this.model.getChildren( getTransaction() )[0], is( instanceOf( ModelSource.class ) ) );
+
+        assertThat( this.model.hasChild( getTransaction(), name ), is( true ) );
+        assertThat( this.model.hasChild( getTransaction(), name, VdbLexicon.Source.SOURCE ), is( true ) );
+        assertThat( this.model.hasChildren( getTransaction() ), is( true ) );
+        assertThat( this.model.getChild( getTransaction(), name ), is( source ) );
+        assertThat( this.model.getChild( getTransaction(), name, VdbLexicon.Source.SOURCE ), is( source ) );
     }
 
     @Test
@@ -73,6 +88,12 @@ public final class ModelImplTest extends RelationalModelTest {
         assertThat( procedure.getName( getTransaction() ), is( name ) );
         assertThat( this.model.getProcedures( getTransaction() ).length, is( 1 ) );
         assertThat( this.model.getChildren( getTransaction() )[0], is( instanceOf( StoredProcedure.class ) ) );
+
+        assertThat( this.model.hasChild( getTransaction(), name ), is( true ) );
+        assertThat( this.model.hasChild( getTransaction(), name, CreateProcedure.PROCEDURE_STATEMENT ), is( true ) );
+        assertThat( this.model.hasChildren( getTransaction() ), is( true ) );
+        assertThat( this.model.getChild( getTransaction(), name ), is( procedure ) );
+        assertThat( this.model.getChild( getTransaction(), name, CreateProcedure.PROCEDURE_STATEMENT ), is( procedure ) );
     }
 
     @Test
@@ -83,6 +104,12 @@ public final class ModelImplTest extends RelationalModelTest {
         assertThat( table.getName( getTransaction() ), is( name ) );
         assertThat( this.model.getTables( getTransaction() ).length, is( 1 ) );
         assertThat( this.model.getChildren( getTransaction() )[0], is( instanceOf( Table.class ) ) );
+
+        assertThat( this.model.hasChild( getTransaction(), name ), is( true ) );
+        assertThat( this.model.hasChild( getTransaction(), name, CreateTable.TABLE_STATEMENT ), is( true ) );
+        assertThat( this.model.hasChildren( getTransaction() ), is( true ) );
+        assertThat( this.model.getChild( getTransaction(), name ), is( table ) );
+        assertThat( this.model.getChild( getTransaction(), name, CreateTable.TABLE_STATEMENT ), is( table ) );
     }
 
     @Test
@@ -93,6 +120,12 @@ public final class ModelImplTest extends RelationalModelTest {
         assertThat( function.getName( getTransaction() ), is( name ) );
         assertThat( this.model.getFunctions( getTransaction() ).length, is( 1 ) );
         assertThat( this.model.getChildren( getTransaction() )[0], is( instanceOf( UserDefinedFunction.class ) ) );
+
+        assertThat( this.model.hasChild( getTransaction(), name ), is( true ) );
+        assertThat( this.model.hasChild( getTransaction(), name, CreateProcedure.FUNCTION_STATEMENT ), is( true ) );
+        assertThat( this.model.hasChildren( getTransaction() ), is( true ) );
+        assertThat( this.model.getChild( getTransaction(), name ), is( function ) );
+        assertThat( this.model.getChild( getTransaction(), name, CreateProcedure.FUNCTION_STATEMENT ), is( function ) );
     }
 
     @Test
@@ -103,6 +136,12 @@ public final class ModelImplTest extends RelationalModelTest {
         assertThat( view.getName( getTransaction() ), is( name ) );
         assertThat( this.model.getViews( getTransaction() ).length, is( 1 ) );
         assertThat( this.model.getChildren( getTransaction() )[0], is( instanceOf( View.class ) ) );
+
+        assertThat( this.model.hasChild( getTransaction(), name ), is( true ) );
+        assertThat( this.model.hasChild( getTransaction(), name, CreateTable.VIEW_STATEMENT ), is( true ) );
+        assertThat( this.model.hasChildren( getTransaction() ), is( true ) );
+        assertThat( this.model.getChild( getTransaction(), name ), is( view ) );
+        assertThat( this.model.getChild( getTransaction(), name, CreateTable.VIEW_STATEMENT ), is( view ) );
     }
 
     @Test
@@ -113,6 +152,12 @@ public final class ModelImplTest extends RelationalModelTest {
         assertThat( procedure.getName( getTransaction() ), is( name ) );
         assertThat( this.model.getProcedures( getTransaction() ).length, is( 1 ) );
         assertThat( this.model.getChildren( getTransaction() )[0], is( instanceOf( VirtualProcedure.class ) ) );
+
+        assertThat( this.model.hasChild( getTransaction(), name ), is( true ) );
+        assertThat( this.model.hasChild( getTransaction(), name, CreateProcedure.PROCEDURE_STATEMENT ), is( true ) );
+        assertThat( this.model.hasChildren( getTransaction() ), is( true ) );
+        assertThat( this.model.getChild( getTransaction(), name ), is( procedure ) );
+        assertThat( this.model.getChild( getTransaction(), name, CreateProcedure.PROCEDURE_STATEMENT ), is( procedure ) );
     }
 
     @Test
@@ -224,6 +269,18 @@ public final class ModelImplTest extends RelationalModelTest {
                 // expected
             }
         }
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailGetChildWhenTypeIsWrong() throws Exception {
+        final String name = "blah";
+        this.model.addSource( getTransaction(), name );
+        this.model.getChild( getTransaction(), name, "bogusType" );
+    }
+
+    @Test( expected = KException.class )
+    public void shouldFailWhenChildNotFound() throws Exception {
+        this.model.getChild( getTransaction(), "bogus" );
     }
 
     @Test( expected = IllegalArgumentException.class )
@@ -529,6 +586,13 @@ public final class ModelImplTest extends RelationalModelTest {
         this.model.addVirtualProcedure( getTransaction(), name );
         this.model.removeProcedure( getTransaction(), name );
         assertThat( this.model.getProcedures( getTransaction() ).length, is( 0 ) );
+    }
+
+    @Test
+    public void shouldRename() throws Exception {
+        final String newName = "blah";
+        this.model.rename( getTransaction(), newName );
+        assertThat( this.model.getName( getTransaction() ), is( newName ) );
     }
 
     @Test

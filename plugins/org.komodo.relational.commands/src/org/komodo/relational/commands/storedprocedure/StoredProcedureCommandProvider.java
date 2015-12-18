@@ -40,9 +40,10 @@ public class StoredProcedureCommandProvider implements ShellCommandProvider {
 
         result.add( AddParameterCommand.class );
         result.add( DeleteParameterCommand.class );
-        result.add( SetResultSetCommand.class );
         result.add( RemoveResultSetCommand.class );
+        result.add( SetResultSetCommand.class );
         result.add( SetStoredProcedurePropertyCommand.class );
+        result.add( StoredProcedureRenameCommand.class );
         result.add( UnsetStoredProcedurePropertyCommand.class );
 
         return result;

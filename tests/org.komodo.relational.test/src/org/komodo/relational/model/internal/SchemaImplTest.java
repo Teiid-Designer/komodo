@@ -86,6 +86,13 @@ public class SchemaImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldRename() throws Exception {
+        final String newName = "blah";
+        this.schema.rename( getTransaction(), newName );
+        assertThat( this.schema.getName( getTransaction() ), is( newName ) );
+    }
+
+    @Test
     public void shouldsetRendition() throws Exception {
         setRenditionValueAwaitSequencing(DDL_VIEW);
         assertThat(this.schema.getRendition(getTransaction()), is(DDL_VIEW));

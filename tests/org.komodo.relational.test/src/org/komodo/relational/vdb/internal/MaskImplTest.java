@@ -103,6 +103,13 @@ public final class MaskImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldRename() throws Exception {
+        final String newName = "blah";
+        this.mask.rename( getTransaction(), newName );
+        assertThat( this.mask.getName( getTransaction() ), is( newName ) );
+    }
+
+    @Test
     public void shouldSetOrder() throws Exception {
         final String newValue = "newOrder";
         this.mask.setOrder( getTransaction(), newValue );

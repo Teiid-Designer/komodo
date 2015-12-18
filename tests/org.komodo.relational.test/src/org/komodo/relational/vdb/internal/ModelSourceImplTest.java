@@ -133,6 +133,13 @@ public final class ModelSourceImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldRename() throws Exception {
+        final String newName = "blah";
+        this.source.rename( getTransaction(), newName );
+        assertThat( this.source.getName( getTransaction() ), is( newName ) );
+    }
+
+    @Test
     public void shouldSetJndiName() throws Exception {
         final String name = "jndiName";
         this.source.setJndiName( getTransaction(), name );

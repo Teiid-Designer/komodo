@@ -16,9 +16,7 @@
 package org.komodo.relational.commands.translator;
 
 import static org.junit.Assert.assertEquals;
-
 import java.util.ArrayList;
-
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.vdb.Translator;
@@ -64,7 +62,7 @@ public final class UnsetTranslatorPropertyCommandTest extends AbstractCommandTes
     	final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
-    	candidates.add(SetTranslatorPropertyCommand.DESCRIPTION);
+    	candidates.add(TranslatorShellCommand.DESCRIPTION);
 
     	assertTabCompletion("unset-property desc", candidates);
     	assertTabCompletion("unset-property Desc", candidates);

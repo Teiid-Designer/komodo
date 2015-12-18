@@ -200,8 +200,8 @@ public interface KomodoObject extends KNode {
     String[] getPropertyNames( final UnitOfWork transaction ) throws KException;
 
     /**
-     * Subclasses may implement {@link #getChildren(UnitOfWork)} in such a way that it does not represent the actual set of child
-     * nodes. This method obtains the actual child nodes.
+     * Subclasses may implement {@link #getChildren(UnitOfWork, String...)} in such a way that it does not represent the actual
+     * set of child nodes. This method obtains the actual child nodes.
      *
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
@@ -237,6 +237,16 @@ public interface KomodoObject extends KNode {
      */
     Property getRawProperty( final UnitOfWork transaction,
                              final String name ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> and must have a state of
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED}
+     * @return the physical parent {@link KomodoObject Komodo object} (can be <code>null</code> if at the Komodo root)
+     * @throws KException
+     *         if an error occurs
+     */
+    KomodoObject getRawParent( final UnitOfWork transaction ) throws KException;
 
     /**
      * @param transaction
@@ -276,7 +286,8 @@ public interface KomodoObject extends KNode {
     KomodoType getTypeIdentifier( final UnitOfWork transaction ) throws KException;
 
     /**
-     * Indicates if a child exists with the specified name, regardless of the type.
+     * Indicates if a child exists with the specified name, regardless of the type. This method can be overridden by subclasses to
+     * filter out child nodes.
      *
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
@@ -290,7 +301,8 @@ public interface KomodoObject extends KNode {
                       final String name ) throws KException;
 
     /**
-     * Indicates if a child exists with the specified name and the specified primary type or mixin.
+     * Indicates if a child exists with the specified name and the specified primary type or mixin. This method can be overridden
+     * by subclasses to filter out child nodes.
      *
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
@@ -307,6 +319,8 @@ public interface KomodoObject extends KNode {
                       final String typeName ) throws KException;
 
     /**
+     * This method can be overridden by subclasses to filter out child nodes.
+     *
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED}))
      * @return <code>true</code> if children exist
@@ -347,6 +361,46 @@ public interface KomodoObject extends KNode {
      */
     boolean hasProperty( final UnitOfWork transaction,
                          final String name ) throws KException;
+
+    /**
+     * Indicates if a child, filtered or unfiltered, exists with the specified name, regardless of the type.
+     *
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state other than {@link State#NOT_STARTED}))
+     * @param name
+     *        the name of the child whose existence is being checked (cannot be empty)
+     * @return <code>true</code> if a child with the supplied name exists
+     * @throws KException
+     *         if an error occurs
+     */
+    boolean hasRawChild( final UnitOfWork transaction,
+                         final String name ) throws KException;
+
+    /**
+     * Indicates if a child, filtered or unfiltered, exists with the specified name and the specified primary type or mixin.
+     *
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state other than {@link State#NOT_STARTED}))
+     * @param name
+     *        the name of the child whose existence is being checked (cannot be empty)
+     * @param typeName
+     *        the primary type or mixin (cannot be empty)
+     * @return <code>true</code> if a child with the supplied name and type exists
+     * @throws KException
+     *         if an error occurs
+     */
+    boolean hasRawChild( final UnitOfWork transaction,
+                         final String name,
+                         final String typeName ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state other than {@link State#NOT_STARTED}))
+     * @return <code>true</code> if children exist
+     * @throws KException
+     *         if an error occurs
+     */
+    boolean hasRawChildren( final UnitOfWork transaction ) throws KException;
 
     /**
      * @param transaction

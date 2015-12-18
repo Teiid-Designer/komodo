@@ -344,6 +344,13 @@ public final class StoredProcedureImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldRename() throws Exception {
+        final String newName = "blah";
+        this.procedure.rename( getTransaction(), newName );
+        assertThat( this.procedure.getName( getTransaction() ), is( newName ) );
+    }
+
+    @Test
     public void shouldSetCustomOptionAsIfProperty() throws Exception {
         final String option = "blah";
         this.procedure.setStatementOption( getTransaction(), option, "initialValue" );

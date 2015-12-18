@@ -47,6 +47,7 @@ public final class PushdownFunctionCommandsI18n extends I18n {
     public static String parameterAdded;
     public static String parameterDeleted;
     public static String resultSetRemoved;
+    public static String resultSetRenameError;
     public static String resultSetTypeSet;
 
     static {

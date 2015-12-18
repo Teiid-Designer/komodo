@@ -16,9 +16,7 @@
 package org.komodo.relational.commands.table;
 
 import static org.junit.Assert.assertEquals;
-
 import java.util.ArrayList;
-
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Model;
@@ -71,7 +69,7 @@ public final class UnsetTablePropertyCommandTest extends AbstractCommandTest {
     	final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
-    	candidates.add(SetTablePropertyCommand.NAME_IN_SOURCE);
+    	candidates.add(TableShellCommand.NAME_IN_SOURCE);
     	assertTabCompletion("unset-property NA", candidates);
     	assertTabCompletion("unset-property na", candidates);
     }

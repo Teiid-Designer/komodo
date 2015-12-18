@@ -105,6 +105,13 @@ public final class ViewImplTest extends RelationalModelTest {
         }
     }
 
+    @Test
+    public void shouldRename() throws Exception {
+        final String newName = "blah";
+        this.view.rename( getTransaction(), newName );
+        assertThat( this.view.getName( getTransaction() ), is( newName ) );
+    }
+
     /*
      * ********************************************************************
      * *****                  Resolver Tests                          *****

@@ -102,6 +102,13 @@ public final class ConditionImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldRename() throws Exception {
+        final String newName = "blah";
+        this.condition.rename( getTransaction(), newName );
+        assertThat( this.condition.getName( getTransaction() ), is( newName ) );
+    }
+
+    @Test
     public void shouldSetConstraintValue() throws Exception {
         final boolean newValue = !Condition.DEFAULT_CONSTRAINT;
         this.condition.setConstraint( getTransaction(), newValue );
