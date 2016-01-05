@@ -161,7 +161,7 @@ public final class AddConstraintColumnCommand extends TableConstraintShellComman
                 return TabCompletionModifier.AUTO;
             }
 
-            final KomodoObjectLabelProvider labelProvider = getWorkspaceStatus().getLabelProvider();
+            final KomodoObjectLabelProvider labelProvider = getWorkspaceStatus().getCurrentContextLabelProvider();
 
             for ( final Column column : Arrays.asList( columns ) ) {
                 final String absolutePath = column.getAbsolutePath();

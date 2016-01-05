@@ -152,7 +152,7 @@ public final class FindCommand extends RelationalShellCommand {
             return searchResults;
         }
 
-        final KomodoObjectLabelProvider labelProvider = wsStatus.getLabelProvider();
+        final KomodoObjectLabelProvider labelProvider = wsStatus.getCurrentContextLabelProvider();
         final String[] result = new String[ searchResults.length ];
         int i = 0;
         for ( final String absolutePath : searchResults ) {

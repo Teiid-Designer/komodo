@@ -150,7 +150,7 @@ public final class DeleteConstraintColumnCommand extends TableConstraintShellCom
             final boolean noLastArg = StringUtils.isBlank( lastArgument );
 
             for ( final Column column : refCols ) {
-                final String displayPath = getWorkspaceStatus().getLabelProvider().getDisplayPath( column );
+                final String displayPath = getWorkspaceStatus().getCurrentContextLabelProvider().getDisplayPath( column );
                 final String absolutePath = column.getAbsolutePath();
 
                 if ( noLastArg || displayPath.startsWith( lastArgument ) || absolutePath.startsWith( lastArgument ) ) {

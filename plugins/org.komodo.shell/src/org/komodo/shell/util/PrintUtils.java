@@ -22,6 +22,7 @@ import java.util.Properties;
 import java.util.TreeMap;
 
 import org.komodo.shell.ShellI18n;
+import org.komodo.shell.api.KomodoObjectLabelProvider;
 import org.komodo.shell.api.ShellApiI18n;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.KException;
@@ -393,13 +394,14 @@ public class PrintUtils implements StringConstants {
 
         // loop through children getting name, type, and finding widest child name
         for ( int i = 0, size = childList.size(); i < size; ++i ) {
-            final String name = wsStatus.getLabelProvider().getDisplayName( childList.get( i ) );
+        	KomodoObjectLabelProvider labelProvider=wsStatus.getObjectLabelProvider(childList.get( i ));
+            final String name = labelProvider.getDisplayName( childList.get( i ) );
 
             if ( maxNameWidth < name.length() ) {
                 maxNameWidth = name.length();
             }
 
-            final String type = wsStatus.getTypeDisplay(childList.get(i));
+            final String type = labelProvider.getTypeDisplay(wsStatus.getTransaction(),childList.get(i));
 
             if ( maxTypeWidth < type.length() ) {
                 maxTypeWidth = type.length();
@@ -418,12 +420,14 @@ public class PrintUtils implements StringConstants {
             public int compare( final KomodoObject thisContext,
                                 final KomodoObject thatContext ) {
                 try {
+                	KomodoObjectLabelProvider thisLabelProvider=wsStatus.getObjectLabelProvider(thisContext);
+                	KomodoObjectLabelProvider thatLabelProvider=wsStatus.getObjectLabelProvider(thatContext);
                     final String thisType = wsStatus.getTypeDisplay(thisContext);
                     int result = thisType.compareTo( wsStatus.getTypeDisplay(thatContext) );
 
                     if ( result == 0 ) {
-                        final String thisName = wsStatus.getLabelProvider().getDisplayName( thisContext );
-                        final String thatName = wsStatus.getLabelProvider().getDisplayName( thatContext );
+                        final String thisName = thisLabelProvider.getDisplayName( thisContext );
+                        final String thatName = thatLabelProvider.getDisplayName( thatContext );
                         return thisName.compareTo( thatName );
                     }
 
@@ -449,8 +453,9 @@ public class PrintUtils implements StringConstants {
 
         // Print each child
         for ( final KomodoObject childContext : childList ) {
-            final String childName = wsStatus.getLabelProvider().getDisplayName( childContext );
-            final String childType = wsStatus.getTypeDisplay(childContext);
+        	KomodoObjectLabelProvider labelProvider=wsStatus.getObjectLabelProvider(childContext);
+            final String childName = labelProvider.getDisplayName( childContext );
+            final String childType = labelProvider.getTypeDisplay(wsStatus.getTransaction(),childContext);
             print( writer, MESSAGE_INDENT, String.format( format, childName, childType ) );
         }
     }

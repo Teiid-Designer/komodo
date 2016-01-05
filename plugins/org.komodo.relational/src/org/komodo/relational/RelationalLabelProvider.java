@@ -67,14 +67,6 @@ public class RelationalLabelProvider extends DefaultLabelProvider {
 			return getTypeFromObject((RelationalObject) kobject);
 		}
 
-        if ( WORKSPACE_PATH.equals( kobject.getAbsolutePath() ) || WORKSPACE_SLASH_PATH.equals( kobject.getAbsolutePath()  ) ) {
-            return WORKSPACE_DISPLAY_NAME;
-        }
-
-		String areaObjectName=getNameForAreaObject(kobject.getAbsolutePath());
-		if(areaObjectName != null){
-			return areaObjectName;
-		}
 		try {
 			TypeResolver<?> resolver = TypeResolverRegistry.getInstance().getResolver(kobject.getTypeIdentifier(uow));
 			if (resolver != null) {

@@ -122,14 +122,14 @@ public class KomodoObjectUtils implements StringConstants {
                     for(String absPath : splitPaths) {
                         if(!absPath.isEmpty()) {
                             if(!first) sb.append(","); //$NON-NLS-1$
-                            sb.append(wsStatus.getLabelProvider().getDisplayPath(absPath));
+                            sb.append(wsStatus.getCurrentContextLabelProvider().getDisplayPath(absPath));
                             first = false;
                         }
                     }
                     sb.append("]"); //$NON-NLS-1$
                     return sb.toString();
                 } else {
-                    return wsStatus.getLabelProvider().getDisplayPath(displayValue);
+                    return wsStatus.getCurrentContextLabelProvider().getDisplayPath(displayValue);
                 }
             }
 
@@ -211,7 +211,7 @@ public class KomodoObjectUtils implements StringConstants {
      */
     public static String getShortName( final WorkspaceStatus wsStatus,
                                       final KomodoObject kobject ) {
-        final String name = wsStatus.getLabelProvider().getDisplayName( kobject );
+        final String name = wsStatus.getCurrentContextLabelProvider().getDisplayName( kobject );
 
         if ( StringUtils.isBlank( name ) ) {
             final String[] segments = kobject.getAbsolutePath().split( FORWARD_SLASH );
@@ -342,7 +342,7 @@ public class KomodoObjectUtils implements StringConstants {
                                                                          property.getRepository(),
                                                                          value.toString() );
                 valueAsText = ( StringUtils.isBlank( path ) ? value.toString()
-                                                            : status.getLabelProvider().getDisplayPath( path ) );
+                                                            : status.getCurrentContextLabelProvider().getDisplayPath( path ) );
             } else {
                 valueAsText = value.toString();
 
