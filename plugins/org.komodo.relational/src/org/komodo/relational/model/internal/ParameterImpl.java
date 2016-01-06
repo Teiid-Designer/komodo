@@ -10,6 +10,7 @@ package org.komodo.relational.model.internal;
 import org.komodo.relational.RelationalConstants;
 import org.komodo.relational.RelationalConstants.Nullable;
 import org.komodo.relational.internal.RelationalChildRestrictedObject;
+import org.komodo.relational.model.AbstractProcedure;
 import org.komodo.relational.model.Parameter;
 import org.komodo.relational.model.StatementOption;
 import org.komodo.spi.KException;
@@ -255,6 +256,16 @@ public final class ParameterImpl extends RelationalChildRestrictedObject impleme
     @Override
     public KomodoType getTypeIdentifier( final UnitOfWork uow ) {
         return Parameter.IDENTIFIER;
+    }
+    
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public AbstractProcedure getParent( final UnitOfWork transaction ) throws KException {
+        return (AbstractProcedure) super.getParent(transaction);
     }
 
     /**

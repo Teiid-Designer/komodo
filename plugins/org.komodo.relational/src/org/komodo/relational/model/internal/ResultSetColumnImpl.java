@@ -316,21 +316,6 @@ public class ResultSetColumnImpl extends RelationalChildRestrictedObject impleme
     public String getUuid( final UnitOfWork transaction ) throws KException {
         return OptionContainerUtils.getOption( transaction, this, StandardOption.UUID.name() );
     }
-    
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.internal.RelationalObjectImpl#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    public TabularResultSet getParent( final UnitOfWork transaction ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state must be NOT_STARTED" ); //$NON-NLS-1$
-
-        final KomodoObject parent = super.getParent( transaction );
-        final TabularResultSet result = TabularResultSet.RESOLVER.resolve( transaction, parent );
-        return result;
-    }
 
     /**
      * {@inheritDoc}
