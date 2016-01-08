@@ -290,7 +290,11 @@ public class RepositoryTools implements StringConstants {
                 buffer.append(indent + TAB + AT + getDisplayNameAndValue(transaction, property) + NEW_LINE);
             }
 
-            KomodoObject[] children = object.getChildren(transaction);
+            //
+            // Avoid relational filters of object's children
+            //
+            ObjectImpl bareObject = new ObjectImpl(object.getRepository(), object.getAbsolutePath(), object.getIndex());
+            KomodoObject[] children = bareObject.getChildren(transaction);
             for (int i = 0; i < children.length; ++i)
                 children[i].accept(transaction, this);
 

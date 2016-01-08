@@ -116,9 +116,6 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
                                 "SHIPPER_ID bigdecimal(2) OPTIONS (NAMEINSOURCE '\"SHIPPER_ID\"', FIXED_LENGTH TRUE, SEARCHABLE 'All_Except_Like', NATIVE_TYPE 'numeric')" + NEW_LINE +
                             ") OPTIONS (NAMEINSOURCE '\"partssupplier\".\"dbo\".\"SUPPLIER_PARTS\"', UPDATABLE TRUE);";
 
-    private static final String PORTFOLIO_VDB = "portfolio-vdb.xml";
-    private static final String PORTFOLIO_VDB_NAME = "Portfolio";
-
     private static final String BOOKS_EXAMPLE_FILE_FULL = "books.xml";
     private static final String BOOKS_EXAMPLE_FILE_PROPS_ONLY = "books_props_only.xml";
     private static final String BOOKS_EXAMPLE_FILE_SOURCE_MODEL_ONLY = "books_source_model_only.xml";
@@ -1304,12 +1301,10 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
     @Test
     public void testPorfolioVdb() throws Exception {
-        InputStream vdbStream = TestUtilities.getResourceAsStream(getClass(),
-                                                                  VDB_DIRECTORY, PORTFOLIO_VDB);
+        InputStream vdbStream = TestUtilities.portfolioExample();
 
         // Options for the import (default)
         ImportOptions importOptions = new ImportOptions();
-        importOptions.setOption(OptionKeys.NAME, PORTFOLIO_VDB_NAME);
 
         // Saves Messages during import
         ImportMessages importMessages = new ImportMessages();
@@ -1321,7 +1316,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         commitHandleErrors(importMessages);
 
         // Test that a vdb was created
-        KomodoObject vdbNode = workspace.getChild(getTransaction(), PORTFOLIO_VDB_NAME, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        KomodoObject vdbNode = workspace.getChild(getTransaction(),TestUtilities.PORTFOLIO_VDB_NAME, VdbLexicon.Vdb.VIRTUAL_DATABASE);
         assertNotNull("Failed - No Vdb Created ", vdbNode);
 
         // Test vdb name

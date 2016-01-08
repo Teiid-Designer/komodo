@@ -419,7 +419,7 @@ public class TestTeiidDdlImporter extends AbstractImporterTest {
     	// Commit the transaction and handle any import exceptions
     	commitHandleErrors(importMessages);
 
-    	// Retrive model after import
+    	// Retrieve model after import
     	assertEquals(1, vdb.getModels(getTransaction()).length);
     	Model modelNode = vdb.getModels(getTransaction())[0];
 
