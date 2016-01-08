@@ -41,6 +41,11 @@ public final class RestLink {
         CHILDREN,
 
         /**
+         * A link to the reference resources.
+         */
+        REFERENCE,
+
+        /**
          * A link to the search resource.
          */
         SEARCH,

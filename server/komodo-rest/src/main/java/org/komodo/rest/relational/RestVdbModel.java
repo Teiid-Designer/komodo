@@ -17,6 +17,7 @@ import org.komodo.rest.RestBasicEntity;
 import org.komodo.rest.RestLink;
 import org.komodo.rest.RestLink.LinkType;
 import org.komodo.rest.json.JsonConstants;
+import org.komodo.rest.relational.KomodoRestUriBuilder.SettingNames;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.modeshape.sequencer.teiid.lexicon.CoreLexicon;
@@ -83,9 +84,12 @@ public final class RestVdbModel extends RestBasicEntity {
         ArgCheck.isNotNull(vdb);
         String vdbName = vdb.getName(uow);
 
-        addLink(new RestLink(LinkType.SELF, getUriBuilder().buildVdbModelUri(LinkType.SELF, vdbName, getId())));
-        addLink(new RestLink(LinkType.PARENT, getUriBuilder().buildVdbModelUri(LinkType.PARENT, vdbName, getId())));
-        addLink(new RestLink(LinkType.SOURCES, getUriBuilder().buildVdbModelUri(LinkType.SOURCES, vdbName, getId())));
+        Properties settings = getUriBuilder().createSettings(SettingNames.VDB_NAME, vdbName);
+        getUriBuilder().addSetting(settings, SettingNames.MODEL_NAME, getId());
+
+        addLink(new RestLink(LinkType.SELF, getUriBuilder().buildVdbModelUri(LinkType.SELF, settings)));
+        addLink(new RestLink(LinkType.PARENT, getUriBuilder().buildVdbModelUri(LinkType.PARENT, settings)));
+        addLink(new RestLink(LinkType.SOURCES, getUriBuilder().buildVdbModelUri(LinkType.SOURCES, settings)));
     }
 
     /**
