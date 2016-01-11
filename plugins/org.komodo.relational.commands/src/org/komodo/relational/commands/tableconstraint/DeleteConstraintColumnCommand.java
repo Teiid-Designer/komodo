@@ -10,11 +10,13 @@ package org.komodo.relational.commands.tableconstraint;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.TableConstraint;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.KomodoObjectLabelProvider;
 import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoObject;
@@ -148,33 +150,34 @@ public final class DeleteConstraintColumnCommand extends TableConstraintShellCom
 
             // add matching paths of referenced columns
             final boolean noLastArg = StringUtils.isBlank( lastArgument );
+            if(refCols.length!=0){
+				KomodoObjectLabelProvider provider = getWorkspaceStatus().getObjectLabelProvider(refCols[0]);
+				for (final Column column : refCols) {
+					final String displayPath = provider.getDisplayPath(column);
+					final String absolutePath = column.getAbsolutePath();
 
-            for ( final Column column : refCols ) {
-                final String displayPath = getWorkspaceStatus().getCurrentContextLabelProvider().getDisplayPath( column );
-                final String absolutePath = column.getAbsolutePath();
+					if (noLastArg || displayPath.startsWith(lastArgument) || absolutePath.startsWith(lastArgument)) {
+						candidates.add(displayPath);
+					}
+				}
 
-                if ( noLastArg || displayPath.startsWith( lastArgument ) || absolutePath.startsWith( lastArgument ) ) {
-                    candidates.add( displayPath );
-                }
-            }
+				Collections.sort(candidates, new Comparator<CharSequence>() {
 
-            Collections.sort( candidates, new Comparator< CharSequence >() {
-
-                /**
-                 * {@inheritDoc}
-                 *
-                 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-                 */
-                @Override
-                public int compare( final CharSequence thisPath,
-                                    final CharSequence thatPath ) {
-                    return thisPath.toString().compareTo( thatPath.toString() );
-                }
-            } );
-        }
-
-        // no completions if more than one arg
-        return TabCompletionModifier.AUTO;
-    }
+					/**
+					 * {@inheritDoc}
+					 *
+					 * @see java.util.Comparator#compare(java.lang.Object,
+					 *      java.lang.Object)
+					 */
+					@Override
+					public int compare(final CharSequence thisPath, final CharSequence thatPath) {
+						return thisPath.toString().compareTo(thatPath.toString());
+					}
+				});
+			}
+		}
+		// no completions if more than one arg
+		return TabCompletionModifier.AUTO;
+	}
 
 }

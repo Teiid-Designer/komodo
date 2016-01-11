@@ -9,14 +9,15 @@ package org.komodo.relational.commands.tableconstraint;
 
 import java.util.Arrays;
 import java.util.List;
+
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.TableConstraint;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.api.CommandResult;
-import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.KomodoObjectLabelProvider;
+import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
@@ -161,7 +162,7 @@ public final class AddConstraintColumnCommand extends TableConstraintShellComman
                 return TabCompletionModifier.AUTO;
             }
 
-            final KomodoObjectLabelProvider labelProvider = getWorkspaceStatus().getCurrentContextLabelProvider();
+            final KomodoObjectLabelProvider labelProvider =getWorkspaceStatus().getObjectLabelProvider(columns[0]);
 
             for ( final Column column : Arrays.asList( columns ) ) {
                 final String absolutePath = column.getAbsolutePath();

@@ -10,6 +10,7 @@ package org.komodo.shell.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import org.komodo.repository.RepositoryTools;
 import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.KomodoObjectLabelProvider;
@@ -122,14 +123,14 @@ public class KomodoObjectUtils implements StringConstants {
                     for(String absPath : splitPaths) {
                         if(!absPath.isEmpty()) {
                             if(!first) sb.append(","); //$NON-NLS-1$
-                            sb.append(wsStatus.getCurrentContextLabelProvider().getDisplayPath(absPath));
+                            sb.append(wsStatus.getObjectLabelProvider(resolvedObj).getDisplayPath(absPath));
                             first = false;
                         }
                     }
                     sb.append("]"); //$NON-NLS-1$
                     return sb.toString();
                 } else {
-                    return wsStatus.getCurrentContextLabelProvider().getDisplayPath(displayValue);
+                    return wsStatus.getObjectLabelProvider(resolvedObj).getDisplayPath(displayValue);
                 }
             }
 
@@ -211,7 +212,7 @@ public class KomodoObjectUtils implements StringConstants {
      */
     public static String getShortName( final WorkspaceStatus wsStatus,
                                       final KomodoObject kobject ) {
-        final String name = wsStatus.getCurrentContextLabelProvider().getDisplayName( kobject );
+        final String name = wsStatus.getObjectLabelProvider(kobject).getDisplayName( kobject );
 
         if ( StringUtils.isBlank( name ) ) {
             final String[] segments = kobject.getAbsolutePath().split( FORWARD_SLASH );
@@ -342,7 +343,7 @@ public class KomodoObjectUtils implements StringConstants {
                                                                          property.getRepository(),
                                                                          value.toString() );
                 valueAsText = ( StringUtils.isBlank( path ) ? value.toString()
-                                                            : status.getCurrentContextLabelProvider().getDisplayPath( path ) );
+                                                            : status.getObjectLabelProvider(context).getDisplayPath( path ) );
             } else {
                 valueAsText = value.toString();
 
