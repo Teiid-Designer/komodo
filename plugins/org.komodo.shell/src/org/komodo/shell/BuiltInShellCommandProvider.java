@@ -9,7 +9,7 @@ package org.komodo.shell;
 
 import java.util.HashSet;
 import java.util.Set;
-import org.komodo.repository.ObjectImpl;
+
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandProvider;
 import org.komodo.shell.api.WorkspaceStatus;
@@ -67,22 +67,6 @@ public final class BuiltInShellCommandProvider implements ShellCommandProvider {
     public String getStatusMessage( final UnitOfWork transaction,
                                     final KomodoObject kobject ) {
         return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.ShellCommandProvider#getTypeDisplay(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      org.komodo.spi.repository.KomodoObject)
-     */
-    @Override
-    public String getTypeDisplay( final UnitOfWork transaction,
-                                  final KomodoObject kobject ) {
-        if ( ObjectImpl.class.equals( kobject.getClass() ) ) {
-            return KomodoObject.class.getSimpleName();
-        }
-
-        return kobject.getClass().getSimpleName();
     }
 
     /**

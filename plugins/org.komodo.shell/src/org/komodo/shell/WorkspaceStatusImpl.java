@@ -43,6 +43,7 @@ import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
+
 import org.komodo.core.KEngine;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.repository.RepositoryImpl;
@@ -107,6 +108,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
 
     private KomodoObjectLabelProvider currentContextLabelProvider;
     private KomodoObjectLabelProvider defaultLabelProvider;
+    private KomodoObjectLabelProvider lastUsedLabelProvider;
     private Collection<KomodoObjectLabelProvider> alternateLabelProviders = new ArrayList<>();
 
     /**
@@ -422,12 +424,12 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
 
     @Override
     public String getCurrentContextDisplayPath() {
-        return getLabelProvider().getDisplayPath(this.currentContext);
+        return getCurrentContextLabelProvider().getDisplayPath(this.currentContext);
     }
 
     @Override
     public String getDisplayPath(KomodoObject context) {
-        return getLabelProvider().getDisplayPath(context);
+        return getCurrentContextLabelProvider().getDisplayPath(context);
     }
 
     @Override
@@ -675,7 +677,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
             }
         }
     }
-    
+
     /* (non-Javadoc)
      * @see org.komodo.shell.api.WorkspaceStatus#setStateProperty(java.lang.String, java.lang.String)
      */
@@ -828,62 +830,57 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.shell.api.WorkspaceStatus#getLabelProvider()
+     * @see org.komodo.shell.api.WorkspaceStatus#getCurrentContextLabelProvider()
      */
     @Override
-    public KomodoObjectLabelProvider getLabelProvider() {
+    public KomodoObjectLabelProvider getCurrentContextLabelProvider() {
         return this.currentContextLabelProvider;
     }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @see org.komodo.shell.api.WorkspaceStatus#getObjectLabelProvider(KomodoObject)
+	 */
+	@Override
+	public KomodoObjectLabelProvider getObjectLabelProvider(KomodoObject kobject) {
+		if (lastUsedLabelProvider != null &&
+		    !lastUsedLabelProvider.getClass().getName().equals(DefaultLabelProvider.class.getName()) &&
+		    lastUsedLabelProvider.getTypeDisplay(uow, kobject) != null ) {
+			return lastUsedLabelProvider;
+		}
+		// If an alternate provider yields a type for this KomodoObject, it is used.  Otherwise, the defaultProvider is used.
+    	 KomodoObjectLabelProvider resultLabelProvider = null;
+         if(!this.alternateLabelProviders.isEmpty()) {
+             for(KomodoObjectLabelProvider altProvider : this.alternateLabelProviders) {
+                 if( !StringUtils.isEmpty(altProvider.getTypeDisplay(getTransaction(),kobject)) ) {
+                     resultLabelProvider = altProvider;
+                     break;
+                 }
+             }
+         }
+         lastUsedLabelProvider=(resultLabelProvider != null) ? resultLabelProvider : defaultLabelProvider;
+         return lastUsedLabelProvider;
+	}
 
     /*
      * Set the Label provider for the supplied context
      * @param context the context
      */
     private void setLabelProvider(KomodoObject context) {
-        // If an alternate provider yields a path for this KomodoObject, it is used.  Otherwise, the defaultProvider is used.
-        KomodoObjectLabelProvider resultLabelProvider = null;
-        if(!this.alternateLabelProviders.isEmpty()) {
-            for(KomodoObjectLabelProvider altProvider : this.alternateLabelProviders) {
-                if( !StringUtils.isEmpty(altProvider.getDisplayPath(context)) ) {
-                    resultLabelProvider = altProvider;
-                    break;
-                }
-            }
-        }
-        this.currentContextLabelProvider = (resultLabelProvider!=null) ? resultLabelProvider : defaultLabelProvider;
+        this.currentContextLabelProvider = getObjectLabelProvider(context);
     }
 
-    @Override
-    public String getTypeDisplay ( final KomodoObject kObj ) {
-        if ( !this.commandFactory.getCommandProviders().isEmpty() ) {
-            ShellCommandProvider defaultProvider = null;
+	@Override
+	public String getTypeDisplay(final KomodoObject kObj) {
+		String type=currentContextLabelProvider.getTypeDisplay(getTransaction(), kObj);
+		if(type!=null){
+			return type;
+		}else{
+			return  defaultLabelProvider.getTypeDisplay(getTransaction(), kObj);
+		}
 
-            try {
-                for ( ShellCommandProvider provider : this.commandFactory.getCommandProviders() ) {
-                    try {
-                        if ( provider instanceof BuiltInShellCommandProvider ) {
-                            defaultProvider = provider;
-                            continue;
-                        }
-
-                        String typeString = provider.getTypeDisplay( getTransaction(), kObj );
-                        if ( typeString != null ) return typeString;
-                    } catch ( final Exception e ) {
-                        KLog.getLogger().error( "WorkspaceStatusImpl.getTypeDisplay error in provider \"{0}\"", e, provider ); //$NON-NLS-1$
-                        // continue on to next provider
-                    }
-                }
-
-                return defaultProvider.getTypeDisplay( getTransaction(), kObj );
-            } catch ( KException ex ) {
-                KLog.getLogger().error( "WorkspaceStatusImpl.getTypeDisplay error in built-in provider", ex ); //$NON-NLS-1$
-            }
-        }
-
-        assert false;
-        KLog.getLogger().error( "WorkspaceStatusImpl.getTypeDisplay: no type display found for \"{0}\"", kObj.getAbsolutePath() ); //$NON-NLS-1$
-        return kObj.getClass().getSimpleName();
-    }
+	}
 
     @Override
     public List<String> getProvidedStatusMessages( final KomodoObject kObj ) {
@@ -1137,7 +1134,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
             return getRootContext();
         }
 
-        String repoPath = getLabelProvider().getPath(entireDisplayPath);
+        String repoPath = getCurrentContextLabelProvider().getPath(entireDisplayPath);
         if(repoPath==null) return null;
 
         KomodoObject resultObject = null;

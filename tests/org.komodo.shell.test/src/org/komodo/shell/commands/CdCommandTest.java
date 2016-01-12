@@ -16,6 +16,9 @@
 package org.komodo.shell.commands;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.komodo.repository.RepositoryImpl;
 import org.komodo.shell.AbstractCommandTest;
@@ -71,6 +74,29 @@ public class CdCommandTest extends AbstractCommandTest {
 
         String contextPath = wsStatus.getCurrentContextDisplayPath();
         assertEquals("/workspace", contextPath);
+    }
+    
+    @Test
+    public void testTabCompleter()throws Exception{
+    	ArrayList<CharSequence> candidates=new ArrayList<>();
+       	setup("commandFiles","addChildren.cmd");
+       	assertTabCompletion("cd invalid", candidates);
+       	    
+    	candidates.add("myChild1/");
+    	candidates.add("myChild2/");
+    	assertTabCompletion("cd myCh", candidates);
+
+    	candidates.add("MyChild3/");
+    	candidates.add("..");
+    	assertTabCompletion("cd ", candidates);
+
+    	candidates.clear();
+    	candidates.add("myChild1/mySubChild1/");
+    	candidates.add("myChild1/mySubChild2/");
+    	assertTabCompletion("cd myChild1/myS", candidates);
+
+    	candidates.add("myChild1/MySubChild3/");
+    	assertTabCompletion("cd myChild1/", candidates);
     }
 
 }

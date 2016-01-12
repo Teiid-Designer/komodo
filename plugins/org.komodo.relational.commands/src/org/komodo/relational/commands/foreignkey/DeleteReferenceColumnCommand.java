@@ -51,7 +51,7 @@ public final class DeleteReferenceColumnCommand extends ForeignKeyShellCommand {
             // get reference of the column at the specified path
             Column column = null;
             { // see if valid column
-                String repoPath = getWorkspaceStatus().getLabelProvider().getPath( columnPathArg );
+                String repoPath = getWorkspaceStatus().getCurrentContextLabelProvider().getPath( columnPathArg );
 
                 if ( StringUtils.isBlank( repoPath ) ) {
                     repoPath = columnPathArg;
@@ -150,7 +150,7 @@ public final class DeleteReferenceColumnCommand extends ForeignKeyShellCommand {
             final boolean noLastArg = StringUtils.isBlank( lastArgument );
 
             for ( final Column column : refCols ) {
-                final String displayPath = getWorkspaceStatus().getLabelProvider().getDisplayPath( column );
+                final String displayPath = getWorkspaceStatus().getCurrentContextLabelProvider().getDisplayPath( column );
                 final String absolutePath = column.getAbsolutePath();
 
                 if ( noLastArg || displayPath.startsWith( lastArgument ) || absolutePath.startsWith( lastArgument ) ) {

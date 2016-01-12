@@ -49,19 +49,6 @@ public class TableConstraintCommandProvider implements ShellCommandProvider {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.shell.api.ShellCommandProvider#getTypeDisplay(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      org.komodo.spi.repository.KomodoObject)
-     */
-    @Override
-    public String getTypeDisplay( final UnitOfWork uow,
-                                  final KomodoObject kObject ) throws KException {
-        final TableConstraint resolved = resolve( uow, kObject );
-        return ( ( resolved == null ) ? null : resolved.getTypeDisplayName() );
-    }
-
-    /**
-     * {@inheritDoc}
-     *
      * @see org.komodo.shell.api.ShellCommandProvider#initWorkspaceState(org.komodo.shell.api.WorkspaceStatus)
      */
     @Override

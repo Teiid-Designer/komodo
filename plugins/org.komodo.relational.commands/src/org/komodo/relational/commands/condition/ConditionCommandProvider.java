@@ -60,12 +60,6 @@ public class ConditionCommandProvider implements ShellCommandProvider {
         return null;
     }
 
-    @Override
-    public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        final Condition resolved = resolve( uow, kObj );
-        return ( ( resolved == null ) ? null : resolved.getTypeDisplayName() );
-    }
-
     /**
      * {@inheritDoc}
      *

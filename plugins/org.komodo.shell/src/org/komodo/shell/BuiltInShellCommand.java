@@ -393,7 +393,7 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
 
 		// Try to locate the object at the specified path
         KomodoObject newContext = null;
-        String repoPath = getWorkspaceStatus().getLabelProvider().getPath(entireDisplayPath);
+        String repoPath = getWorkspaceStatus().getCurrentContextLabelProvider().getPath(entireDisplayPath);
         if(!StringUtils.isBlank(repoPath)) {
             // TODO: probably need to add getFromLibrary method similar to getFromWorkspace instead of the below...
             // /tko:komodo/library
@@ -459,7 +459,7 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
     	if(lastArgument==null) {
     	    KomodoObject[] children = currentContext.getChildren( getTransaction() );
     		for(KomodoObject wsContext : children) {
-    		    final String contextName = this.wsStatus.getLabelProvider().getDisplayName( wsContext );
+    		    final String contextName = this.wsStatus.getCurrentContextLabelProvider().getDisplayName( wsContext );
     			potentialsList.add(contextName+FORWARD_SLASH);
     		}
     		candidates.addAll(potentialsList);
@@ -551,7 +551,7 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
                     result.setPath(prevPath);
                     break;
                 } else {
-                    String currContextPath = wsStatus.getLabelProvider().getDisplayPath(currentContext);
+                    String currContextPath = wsStatus.getCurrentContextLabelProvider().getDisplayPath(currentContext);
                     String displayPath = currContextPath + FORWARD_SLASH + segment;
                     KomodoObject theContext = wsStatus.getContextForDisplayPath(displayPath);
 
@@ -606,7 +606,7 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
         int nMatching = 0;
         try {
             for(KomodoObject theContext : currentContext.getChildren(wsStatus.getTransaction())) {
-                final String contextName = wsStatus.getLabelProvider().getDisplayName( theContext );
+                final String contextName = wsStatus.getCurrentContextLabelProvider().getDisplayName( theContext );
                 if(contextName.startsWith(segmentName)) {
                     nMatching++;
                     if(nMatching>1) break;
@@ -633,7 +633,7 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
         ArgCheck.isNotEmpty( absolutePath, "absolutePath" ); //$NON-NLS-1$
 
         final String absContextPath = wsStatus.getDisplayPath(context);
-        final String displayPath = wsStatus.getLabelProvider().getDisplayPath( absolutePath );
+        final String displayPath = wsStatus.getCurrentContextLabelProvider().getDisplayPath( absolutePath );
         String path = ( StringUtils.isBlank( displayPath ) ? absolutePath : displayPath );
 
         if ( path.startsWith( absContextPath ) ) {
