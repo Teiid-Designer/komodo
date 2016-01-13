@@ -55,10 +55,6 @@ public final class VdbCommandsI18n extends I18n {
     public static String deleteTranslatorHelp;
     public static String deleteTranslatorUsage;
 
-    public static String exportExamples;
-    public static String exportHelp;
-    public static String exportUsage;
-
     public static String setVdbPropertyExamples;
     public static String setVdbPropertyHelp;
     public static String setVdbPropertyUsage;
@@ -101,7 +97,6 @@ public final class VdbCommandsI18n extends I18n {
     public static String entriesHeader;
     public static String entryAdded;
     public static String entryDeleted;
-    public static String fileExistsOverwriteDisabled;
     public static String importAdded;
     public static String importDeleted;
     public static String importsHeader;
@@ -138,11 +133,9 @@ public final class VdbCommandsI18n extends I18n {
     public static String noMatchingTranslators;
     public static String noModels;
     public static String noTranslators;
-    public static String overwriteArgInvalid;
     public static String translatorAdded;
     public static String translatorDeleted;
     public static String translatorsHeader;
-    public static String vdbExported;
 
 
     static {

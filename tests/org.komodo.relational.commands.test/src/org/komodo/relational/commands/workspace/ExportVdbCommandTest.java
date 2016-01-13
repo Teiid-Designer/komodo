@@ -57,7 +57,16 @@ public class ExportVdbCommandTest extends AbstractCommandTest {
     }
 
     @Test
-    public void testExportCommandTweetVdb() throws Exception {
+    public void shouldExportTweetVdbFromVdbContext() throws Exception {
+        testExportTweetVdb( false );
+    }
+
+    @Test
+    public void shouldExportTweetVdbFromWorkspaceContext() throws Exception {
+        testExportTweetVdb( true );
+    }
+
+    private void testExportTweetVdb( final boolean exportFromWorkspaceContext ) throws Exception {
         //
         // Create the vdb in the repository
         //
@@ -78,10 +87,17 @@ public class ExportVdbCommandTest extends AbstractCommandTest {
             exportDest.delete();
 
         // The test commands
-        final String[] commands = {
-            "commit",
-            "workspace",
-            "export-vdb " + tweetVdb.getName(getTransaction()) + " " + exportDest.getAbsolutePath() };
+        final String[] commands = new String[ exportFromWorkspaceContext ? 2 : 3 ];
+
+        if ( exportFromWorkspaceContext ) {
+            commands[ 0 ] = "commit";
+            commands[ 1 ] = "export-vdb " + tweetVdb.getName( getTransaction() ) + " " + exportDest.getAbsolutePath();
+        } else {
+            commands[ 0 ] = "commit";
+            commands[ 1 ] = "cd " + tweetVdb.getName( getTransaction() );
+            commands[ 2 ] = "export-vdb " + exportDest.getAbsolutePath();
+        }
+
         final CommandResult result = execute( commands );
         assertCommandResultOk(result);
         assertTrue(exportDest.exists());
@@ -96,7 +112,16 @@ public class ExportVdbCommandTest extends AbstractCommandTest {
     }
 
     @Test
-    public void testExportCommandAllElementsVdb() throws Exception {
+    public void shouldExportAllElementsVdbFromVdbContext() throws Exception {
+        testExportAllElementsVdb( false );
+    }
+
+    @Test
+    public void shouldExportAllElementsVdbFromWorkspaceContext() throws Exception {
+        testExportAllElementsVdb( true );
+    }
+
+    private void testExportAllElementsVdb( final boolean exportFromWorkspaceContext ) throws Exception {
         //
         // Create the vdb in the repository
         //
@@ -117,10 +142,17 @@ public class ExportVdbCommandTest extends AbstractCommandTest {
             exportDest.delete();
 
         // The test commands
-        final String[] commands = {
-            "commit",
-            "workspace",
-            "export-vdb " + allElementsVdb.getName(getTransaction()) + " " + exportDest.getAbsolutePath() };
+        final String[] commands = new String[ exportFromWorkspaceContext ? 2 : 3 ];
+
+        if ( exportFromWorkspaceContext ) {
+            commands[ 0 ] = "commit";
+            commands[ 1 ] = "export-vdb " + allElementsVdb.getName(getTransaction()) + " " + exportDest.getAbsolutePath();
+        } else {
+            commands[ 0 ] = "commit";
+            commands[ 1 ] = "cd " + allElementsVdb.getName(getTransaction() );
+            commands[ 2 ] = "export-vdb " + exportDest.getAbsolutePath();
+        }
+
         final CommandResult result = execute( commands );
         assertCommandResultOk(result);
         assertTrue(exportDest.exists());

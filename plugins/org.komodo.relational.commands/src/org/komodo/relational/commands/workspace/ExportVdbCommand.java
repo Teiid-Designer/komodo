@@ -10,18 +10,18 @@ package org.komodo.relational.commands.workspace;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
-
+import org.komodo.relational.commands.RelationalShellCommand;
 import org.komodo.relational.vdb.Vdb;
-import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.KomodoObjectLabelProvider;
 import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.spi.KException;
 import org.komodo.spi.constants.ExportConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -32,11 +32,13 @@ import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
 /**
  * A shell command to export a Vdb from Workspace context.
  */
-public final class ExportVdbCommand extends WorkspaceShellCommand {
+public final class ExportVdbCommand extends RelationalShellCommand {
 
     static final String NAME = "export-vdb"; //$NON-NLS-1$
 
-    private static final List< String > VALID_OVERWRITE_ARGS = Arrays.asList( new String[] { "-o", "--overwrite" } ); //$NON-NLS-1$ //$NON-NLS-2$;
+    private static final String OVERWRITE_1 = "-o"; //$NON-NLS-1$
+    private static final String OVERWRITE_2 = "--overwrite"; //$NON-NLS-1$
+    private static final List< String > VALID_OVERWRITE_ARGS = Arrays.asList( new String[] { OVERWRITE_1, OVERWRITE_2 } );
 
     /**
      * @param status
@@ -53,16 +55,26 @@ public final class ExportVdbCommand extends WorkspaceShellCommand {
      */
     @Override
     protected CommandResult doExecute() {
+        final boolean workspaceContext = isWorkspaceContext();
+        final int fileNameIndex = ( workspaceContext ? 1 : 0 );
+        String vdbName = null;
+        String fileName = null;
+
         try {
-            final String vdbName = requiredArgument( 0, I18n.bind( WorkspaceCommandsI18n.missingVdbName ) );
-            String fileName = requiredArgument( 1, I18n.bind( WorkspaceCommandsI18n.missingOutputFileName ) );
+            if ( workspaceContext ) {
+                vdbName = requiredArgument( 0, I18n.bind( WorkspaceCommandsI18n.missingVdbName ) );
+            } else {
+                vdbName = getContext().getName( getTransaction() );
+            }
+
+            fileName = requiredArgument( fileNameIndex, I18n.bind( WorkspaceCommandsI18n.missingOutputFileName ) );
 
             // If there is no file extension, add .xml
             if ( fileName.indexOf( DOT ) == -1 ) {
                 fileName = fileName + DOT + "xml"; //$NON-NLS-1$
             }
 
-            final String overwriteArg = optionalArgument( 2, null );
+            final String overwriteArg = optionalArgument( ( fileNameIndex + 1 ), null );
             final boolean overwrite = !StringUtils.isBlank( overwriteArg );
 
             // make sure overwrite arg is valid
@@ -71,19 +83,19 @@ public final class ExportVdbCommand extends WorkspaceShellCommand {
             }
 
             // Determine if the VDB exists
-            if(!getWorkspaceManager().hasChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE)) {
+            if ( workspaceContext
+                 && !getWorkspaceManager().hasChild( getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE ) ) {
                 return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.vdbNotFound, vdbName ), null );
             }
 
-            // Get the VDB to Export
-            final KomodoObject vdbObj = getWorkspaceManager().getChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
-            final Vdb vdbToExport = Vdb.RESOLVER.resolve(getTransaction(), vdbObj);
-
+            final Vdb vdbToExport = getVdb( workspaceContext, vdbName );
             final File file = new File( fileName );
 
             // If file exists, must have overwrite option
             if(file.exists() && !overwrite) {
-                return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.fileExistsOverwriteDisabled, fileName ), null );
+                return new CommandResultImpl( false,
+                                              I18n.bind( WorkspaceCommandsI18n.fileExistsOverwriteDisabled, fileName ),
+                                              null );
             }
 
             if ( file.createNewFile() || ( file.exists() && overwrite ) ) {
@@ -95,7 +107,10 @@ public final class ExportVdbCommand extends WorkspaceShellCommand {
                 // Write the file
                 try{
                     Files.write(Paths.get(file.getPath()), manifest.getBytes());
-                    return new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.vdbExported, vdbToExport.getName( uow ), fileName, overwrite ) );
+                    return new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.vdbExported,
+                                                             vdbToExport.getName( uow ),
+                                                             fileName,
+                                                             overwrite ) );
                 } catch ( final Exception e ) {
                     return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.errorWritingFile, fileName ), e );
                 }
@@ -114,7 +129,46 @@ public final class ExportVdbCommand extends WorkspaceShellCommand {
      */
     @Override
     protected int getMaxArgCount() {
-        return 3;
+        return ( isWorkspaceContext() ? 3 : 2 );
+    }
+
+    private Vdb getVdb( final boolean workspaceContext,
+                        final String vdbName ) throws KException {
+        assert !StringUtils.isBlank( vdbName );
+        KomodoObject kobject = null;
+
+        if ( workspaceContext ) {
+            kobject = getWorkspaceManager().getChild( getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
+        } else {
+            kobject = getContext();
+        }
+
+        assert ( kobject != null );
+        return Vdb.RESOLVER.resolve( getTransaction(), kobject );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommand#isValidForCurrentContext()
+     */
+    @Override
+    public boolean isValidForCurrentContext() {
+        return ( isVdbContext() || isWorkspaceContext() );
+    }
+
+    private boolean isVdbContext() {
+        try {
+            return Vdb.RESOLVER.resolvable( getTransaction(), getContext() );
+        } catch ( final Exception e ) {
+            return false;
+        }
+    }
+
+    private boolean isWorkspaceContext() {
+        final String path = getContext().getAbsolutePath();
+        return ( KomodoObjectLabelProvider.WORKSPACE_PATH.equals( path )
+                 || KomodoObjectLabelProvider.WORKSPACE_SLASH_PATH.equals( path ) );
     }
 
     /**
@@ -154,28 +208,29 @@ public final class ExportVdbCommand extends WorkspaceShellCommand {
      */
     @Override
     public TabCompletionModifier tabCompletion( final String lastArgument,
-                              final List< CharSequence > candidates ) throws Exception {
+                                                final List< CharSequence > candidates ) throws Exception {
         final Arguments args = getArguments();
 
-        final UnitOfWork uow = getTransaction();
-        final WorkspaceManager mgr = getWorkspaceManager();
-        final KomodoObject[] vdbs = mgr.findVdbs(uow);
-        List<String> existingVdbNames = new ArrayList<String>(vdbs.length);
-        for(KomodoObject vdb : vdbs) {
-            existingVdbNames.add(vdb.getName(uow));
-        }
+        if ( isWorkspaceContext() ) {
+            // arg 0 = vdb name, arg 1 = output file name, arg 2 = overwrite
+            final KomodoObject[] vdbs = getWorkspaceManager().findVdbs( getTransaction() );
 
-        if ( args.isEmpty() ) {
-            if ( lastArgument == null ) {
-                candidates.addAll( existingVdbNames );
-            } else {
-                for ( final String item : existingVdbNames ) {
-                    if ( item.startsWith( lastArgument ) ) {
-                        candidates.add( item );
+            if ( args.isEmpty() && ( vdbs.length != 0 ) ) {
+                for ( final KomodoObject vdb : vdbs ) {
+                    final String name = vdb.getName( getTransaction() );
+
+                    if ( ( lastArgument == null ) || name.startsWith( lastArgument ) ) {
+                        candidates.add( name );
                     }
                 }
+            } else if ( args.size() == 2 ) {
+                candidates.add( OVERWRITE_2 );
             }
+        } else if ( args.size() == 1 ) { // VDB context
+            // arg 0 = output file name (no completion), arg 1 = overwrite
+            candidates.add( OVERWRITE_2 );
         }
+
         return TabCompletionModifier.AUTO;
     }
 
