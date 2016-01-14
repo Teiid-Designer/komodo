@@ -9,6 +9,7 @@ package org.komodo.rest.relational;
 
 import java.net.URI;
 import java.util.Map;
+import java.util.Properties;
 import javax.ws.rs.core.UriBuilder;
 import org.komodo.rest.KomodoRestV1Application;
 import org.komodo.rest.RestLink.LinkType;
@@ -18,6 +19,56 @@ import org.komodo.utils.ArgCheck;
  * Komodo REST URI builder.
  */
 public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Constants {
+
+    /**
+     * Property names for the settings used in building Uris
+     */
+    public static enum SettingNames {
+        /**
+         * Name of the vdb
+         */
+        VDB_NAME,
+
+        /**
+         * Name of the model
+         */
+        MODEL_NAME,
+
+        /**
+         * Name of the source
+         */
+        SOURCE_NAME,
+
+        /**
+         * Name of the translator
+         */
+        TRANSLATOR_NAME,
+
+        /**
+         * Name of the import
+         */
+        IMPORT_NAME,
+
+        /**
+         * Data role id
+         */
+        DATA_ROLE_ID,
+
+        /**
+         * Permission id
+         */
+        PERMISSION_ID,
+
+        /**
+         * Permission child id
+         */
+        PERMISSION_CHILD_ID,
+
+        /**
+         * Permission child type
+         */
+        PERMISSION_CHILD_TYPE;
+    }
 
     private final URI baseUri;
 
@@ -30,6 +81,39 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
         this.baseUri = baseUri;
     }
 
+    private String setting(final Properties settings, SettingNames settingName) {
+        String value = settings.getProperty(settingName.name());
+        ArgCheck.isNotEmpty(value, settingName.name());
+        return value;
+    }
+
+    private String vdbName(final Properties settings) {
+        return setting(settings, SettingNames.VDB_NAME);
+    }
+
+    private String modelName(final Properties settings) {
+        return setting(settings, SettingNames.MODEL_NAME);
+    }
+
+    private String sourceName(final Properties settings) {
+        return setting(settings, SettingNames.SOURCE_NAME);
+    }
+
+    private String dataRoleId(final Properties settings) {
+        return setting(settings, SettingNames.DATA_ROLE_ID);
+    }
+
+    private String permissionId(final Properties settings) {
+        return setting(settings, SettingNames.PERMISSION_ID);
+    }
+
+    private URI buildVdbTranslatorUri(final Properties settings) {
+        String parentVdb = vdbName(settings);
+        String translatorName = setting(settings, SettingNames.TRANSLATOR_NAME);
+        URI myTranslatorUri = generateVdbChildUri(parentVdb, LinkType.TRANSLATORS, translatorName);
+        return myTranslatorUri;
+    }
+
     /**
      * @return the base uri
      */
@@ -40,29 +124,37 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
     /**
      * @param linkType
      *        the type of URI being created (cannot be <code>null</code>)
-     * @param vdbName
-     *        the VDB name (cannot be empty)
+     * @param settings
+     *        configuration settings for this uri
      * @return the VDB URI for the specified VDB (never <code>null</code>)
      */
-    public URI buildVdbUri(final LinkType linkType, final String vdbName) {
+    public URI buildVdbUri(final LinkType linkType, final Properties settings) {
         ArgCheck.isNotNull(linkType, "linkType"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(vdbName, "vdbName"); //$NON-NLS-1$
+        ArgCheck.isNotNull(settings, "settings"); //$NON-NLS-1$
 
         URI result = null;
 
         switch (linkType) {
             case SELF:
+            {
+                String vdbName = vdbName(settings);
                 result = generateVdbUri(vdbName);
                 break;
+            }
             case PARENT:
+            {
                 result = generateVdbsUri();
                 break;
+            }
             case IMPORTS:
             case MODELS:
             case TRANSLATORS:
             case DATA_ROLES:
+            {
+                String vdbName = vdbName(settings);
                 result = generateVdbChildGroupUri(vdbName, linkType);
                 break;
+            }
             default:
                 throw new RuntimeException("LinkType " + linkType + " not handled"); //$NON-NLS-1$ //$NON-NLS-2$
         }
@@ -74,27 +166,26 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
     /**
      * @param linkType
      *        the type of URI being created (cannot be <code>null</code>)
-     * @param parentVdb
-     *        the parent VDB name (cannot be empty)
-     * @param modelName
-     *        the Vdb model name
+     * @param settings
+     *        configuration settings for this uri
      * @return the VDB model URI for the specified VDB (never <code>null</code>)
      */
-    public URI buildVdbModelUri(LinkType linkType, String parentVdb, String modelName) {
+    public URI buildVdbModelUri(LinkType linkType, final Properties settings) {
         ArgCheck.isNotNull(linkType, "linkType"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(parentVdb, "parentVdb"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(modelName, "modelName"); //$NON-NLS-1$
+        ArgCheck.isNotNull(settings, "settings"); //$NON-NLS-1$)
 
         URI result = null;
-        URI vdbUri = generateVdbUri(parentVdb);
-        URI myModelUri = generateVdbChildUri(parentVdb, LinkType.MODELS, modelName);
+        String parentName = vdbName(settings);
+
+        String modelName = modelName(settings);
+        URI myModelUri = generateVdbChildUri(parentName, LinkType.MODELS, modelName);
 
         switch (linkType) {
             case SELF:
                 result = myModelUri;
                 break;
             case PARENT:
-                result = vdbUri;
+                result = generateVdbUri(parentName);
                 break;
             case SOURCES:
                 result = UriBuilder.fromUri(myModelUri).path(linkType.uriName()).build();
@@ -110,30 +201,28 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
     /**
      * @param linkType
      *        the type of URI being created (cannot be <code>null</code>)
-     * @param parentVdb
-     *        the parent VDB name (cannot be empty)
-     * @param modelName
-     *        the Vdb model name
-     * @param sourceName
-     *        the source name
+     * @param settings
+     *        configuration settings for this uri
      * @return the VDB model source URI for the specified VDB (never <code>null</code>)
      */
-    public URI buildVdbModelSourceUri(LinkType linkType, String parentVdb, String modelName, String sourceName) {
+    public URI buildVdbModelSourceUri(LinkType linkType, final Properties settings) {
         ArgCheck.isNotNull(linkType, "linkType"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(parentVdb, "parentVdb"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(modelName, "modelName"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(sourceName, "sourceName"); //$NON-NLS-1$
+        ArgCheck.isNotNull(settings, "settings"); //$NON-NLS-1$)
 
         URI result = null;
-        URI modelUri = generateVdbChildUri(parentVdb, LinkType.MODELS, modelName);
+        URI modelUri = generateVdbChildUri(vdbName(settings), LinkType.MODELS, modelName(settings));
 
         switch (linkType) {
             case SELF:
+                String sourceName = sourceName(settings);
                 result = UriBuilder.fromUri(modelUri).path(LinkType.SOURCES.uriName()).path(sourceName).build();
                 break;
             case PARENT:
                 result = modelUri;
                 break;
+            case REFERENCE:
+                result = buildVdbTranslatorUri(settings);
+                break;
             default:
                 throw new RuntimeException("LinkType " + linkType + " not handled"); //$NON-NLS-1$ //$NON-NLS-2$
         }
@@ -145,27 +234,23 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
     /**
      * @param linkType
      *        the type of URI being created (cannot be <code>null</code>)
-     * @param parentVdb
-     *        the parent VDB name (cannot be empty)
-     * @param translatorName
-     *        the Vdb translator name
+     * @param settings
+     *        configuration settings for this uri
      * @return the VDB model URI for the specified VDB (never <code>null</code>)
      */
-    public URI buildVdbTranslatorUri(LinkType linkType, String parentVdb, String translatorName) {
+    public URI buildVdbTranslatorUri(LinkType linkType, final Properties settings) {
         ArgCheck.isNotNull(linkType, "linkType"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(parentVdb, "parentVdb"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(translatorName, "translatorName"); //$NON-NLS-1$
+        ArgCheck.isNotNull(settings, "settings"); //$NON-NLS-1$)
 
         URI result = null;
-        URI vdbUri = generateVdbUri(parentVdb);
-        URI myTranslatorUri = generateVdbChildUri(parentVdb, LinkType.TRANSLATORS, translatorName);
+        String parentVdb = vdbName(settings);
 
         switch (linkType) {
             case SELF:
-                result = myTranslatorUri;
+                result = buildVdbTranslatorUri(settings);
                 break;
             case PARENT:
-                result = vdbUri;
+                result = generateVdbUri(parentVdb);
                 break;
             default:
                 throw new RuntimeException("LinkType " + linkType + " not handled"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -178,27 +263,25 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
     /**
      * @param linkType
      *        the type of URI being created (cannot be <code>null</code>)
-     * @param parentVdb
-     *        the parent VDB name (cannot be empty)
-     * @param importName
-     *        the Vdb translator name
+     * @param settings
+     *        configuration settings for this uri
      * @return the VDB model URI for the specified VDB (never <code>null</code>)
      */
-    public URI buildVdbImportUri(LinkType linkType, String parentVdb, String importName) {
+    public URI buildVdbImportUri(LinkType linkType, final Properties settings) {
         ArgCheck.isNotNull(linkType, "linkType"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(parentVdb, "parentVdb"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(importName, "importName"); //$NON-NLS-1$
+        ArgCheck.isNotNull(settings, "settings"); //$NON-NLS-1$)
 
         URI result = null;
-        URI vdbUri = generateVdbUri(parentVdb);
-        URI myImportUri = generateVdbChildUri(parentVdb, LinkType.IMPORTS, importName);
+
+        String parentVdb = vdbName(settings);
 
         switch (linkType) {
             case SELF:
-                result = myImportUri;
+                String importName = setting(settings, SettingNames.IMPORT_NAME);
+                result = generateVdbChildUri(parentVdb, LinkType.IMPORTS, importName);
                 break;
             case PARENT:
-                result = vdbUri;
+                result = generateVdbUri(parentVdb);
                 break;
             default:
                 throw new RuntimeException("LinkType " + linkType + " not handled"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -211,19 +294,18 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
     /**
      * @param linkType
      *        the type of URI being created (cannot be <code>null</code>)
-     * @param parentVdb
-     *        the parent VDB name (cannot be empty)
-     * @param dataRoleId
-     *        the Vdb data role name
+     * @param settings
+     *        configuration settings for this uri
      * @return the VDB data role URI for the specified VDB (never <code>null</code>)
      */
-    public URI buildVdbDataRoleUri(LinkType linkType, String parentVdb, String dataRoleId) {
+    public URI buildVdbDataRoleUri(LinkType linkType, final Properties settings) {
         ArgCheck.isNotNull(linkType, "linkType"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(parentVdb, "parentVdb"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(dataRoleId, "dataRoleId"); //$NON-NLS-1$
+        ArgCheck.isNotNull(settings, "settings"); //$NON-NLS-1$)
 
         URI result = null;
-        URI vdbUri = generateVdbUri(parentVdb);
+
+        String parentVdb = vdbName(settings);
+        String dataRoleId = dataRoleId(settings);
         URI myDataRoleUri = generateVdbChildUri(parentVdb, LinkType.DATA_ROLES, dataRoleId);
 
         switch (linkType) {
@@ -231,7 +313,7 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
                 result = myDataRoleUri;
                 break;
             case PARENT:
-                result = vdbUri;
+                result = generateVdbUri(parentVdb);
                 break;
             case PERMISSIONS:
                 result = UriBuilder.fromUri(myDataRoleUri).path(linkType.uriName()).build();
@@ -247,21 +329,18 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
     /**
      * @param linkType
      *        the type of URI being created (cannot be <code>null</code>)
-     * @param parentVdb
-     *        the parent VDB name (cannot be empty)
-     * @param dataRoleId
-     *        the Vdb data role id
-     * @param permissionId
-     *        the Vdb permission id
+     * @param settings
+     *        configuration settings for this uri
      * @return the VDB permission URI for the specified VDB (never <code>null</code>)
      */
-    public URI buildVdbPermissionUri(LinkType linkType, String parentVdb, String dataRoleId, String permissionId) {
+    public URI buildVdbPermissionUri(LinkType linkType, final Properties settings) {
         ArgCheck.isNotNull(linkType, "linkType"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(parentVdb, "parentVdb"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(dataRoleId, "dataRoleId"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(permissionId, "permissionId"); //$NON-NLS-1$
+        ArgCheck.isNotNull(settings, "settings"); //$NON-NLS-1$)
 
         URI result = null;
+        String parentVdb = vdbName(settings);
+        String dataRoleId = dataRoleId(settings);
+        String permissionId = permissionId(settings);
         URI myDataRoleUri = generateVdbChildUri(parentVdb, LinkType.DATA_ROLES, dataRoleId);
         URI myPermUri = UriBuilder.fromUri(myDataRoleUri)
                                                    .path(LinkType.PERMISSIONS.uriName())
@@ -290,28 +369,19 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
     /**
      * @param linkType
      *        the type of URI being created (cannot be <code>null</code>)
-     * @param parentVdb
-     *        the parent VDB name (cannot be empty)
-     * @param dataRoleId
-     *        the Vdb data role id
-     * @param permissionId
-     *        the Vdb permission id
-     * @param childType
-     *        the type of the child
-     * @param childId
-     *        the child id of the permission
+     * @param settings
+     *        configuration settings for this uri
      * @return the permission child URI for the specified VDB (never <code>null</code>)
      */
-    public URI buildVdbPermissionChildUri(LinkType linkType, String parentVdb,
-                                                                  String dataRoleId, String permissionId, LinkType childType, String childId) {
+    public URI buildVdbPermissionChildUri(LinkType linkType, final Properties settings) {
         ArgCheck.isNotNull(linkType, "linkType"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(parentVdb, "parentVdb"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(dataRoleId, "dataRoleId"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(permissionId, "permissionId"); //$NON-NLS-1$
-        ArgCheck.isNotNull(childType, "childType"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(childId, "childId"); //$NON-NLS-1$
+        ArgCheck.isNotNull(settings, "settings"); //$NON-NLS-1$)
 
         URI result = null;
+        String parentVdb = vdbName(settings);
+        String dataRoleId = dataRoleId(settings);
+        String permissionId = permissionId(settings);
+
         URI myDataRoleUri = generateVdbChildUri(parentVdb, LinkType.DATA_ROLES, dataRoleId);
         URI myPermUri = UriBuilder.fromUri(myDataRoleUri)
                                                    .path(LinkType.PERMISSIONS.uriName())
@@ -320,8 +390,10 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
 
         switch (linkType) {
             case SELF:
+                String childType = setting(settings, SettingNames.PERMISSION_CHILD_TYPE);
+                String childId = setting(settings, SettingNames.PERMISSION_CHILD_ID);
                 result = UriBuilder.fromUri(myPermUri)
-                                            .path(childType.uriName())
+                                            .path(childType)
                                             .path(childId)
                                             .build();
                 break;
@@ -408,4 +480,23 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
         return UriBuilder.fromUri(groupUri).path(childName).build();
     }
 
+    /**
+     * @param settingName setting name
+     * @param value the value
+     * @return the new settings object
+     */
+    public Properties createSettings(SettingNames settingName, String value) {
+        Properties properties = new Properties();
+        properties.setProperty(settingName.name(), value);
+        return properties;
+    }
+
+    /**
+     * @param settings the settings
+     * @param settingName setting name
+     * @param value the value
+     */
+    public void addSetting(Properties settings, SettingNames settingName, String value) {
+        settings.setProperty(settingName.name(), value);
+    }
 }

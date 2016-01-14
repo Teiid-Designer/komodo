@@ -8,6 +8,7 @@
 package org.komodo.rest.relational;
 
 import java.net.URI;
+import java.util.Properties;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Mask;
 import org.komodo.relational.vdb.Permission;
@@ -16,6 +17,7 @@ import org.komodo.rest.KomodoService;
 import org.komodo.rest.RestBasicEntity;
 import org.komodo.rest.RestLink;
 import org.komodo.rest.RestLink.LinkType;
+import org.komodo.rest.relational.KomodoRestUriBuilder.SettingNames;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.ArgCheck;
@@ -73,10 +75,16 @@ public final class RestVdbMask extends RestBasicEntity {
         ArgCheck.isNotNull(vdb);
         String vdbName = vdb.getName(uow);
 
+        Properties settings = getUriBuilder().createSettings(SettingNames.VDB_NAME, vdbName);
+        getUriBuilder().addSetting(settings, SettingNames.DATA_ROLE_ID, dataRoleName);
+        getUriBuilder().addSetting(settings, SettingNames.PERMISSION_ID, permName);
+        getUriBuilder().addSetting(settings, SettingNames.PERMISSION_CHILD_TYPE, LinkType.MASKS.uriName());
+        getUriBuilder().addSetting(settings, SettingNames.PERMISSION_CHILD_ID, getId());
+
         addLink(new RestLink(LinkType.SELF, getUriBuilder()
-                             .buildVdbPermissionChildUri(LinkType.SELF, vdbName, dataRoleName, permName, LinkType.MASKS, getId())));
+                             .buildVdbPermissionChildUri(LinkType.SELF, settings)));
         addLink(new RestLink(LinkType.PARENT, getUriBuilder()
-                             .buildVdbPermissionChildUri(LinkType.PARENT, vdbName, dataRoleName, permName, LinkType.MASKS, getId())));
+                             .buildVdbPermissionChildUri(LinkType.PARENT, settings)));
     }
 
     /**

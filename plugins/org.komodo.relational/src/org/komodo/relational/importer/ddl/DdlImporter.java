@@ -23,7 +23,6 @@ package org.komodo.relational.importer.ddl;
 
 import java.io.File;
 import java.io.InputStream;
-
 import org.komodo.importer.AbstractImporter;
 import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
@@ -64,7 +63,7 @@ public class DdlImporter extends AbstractImporter {
 
     	// Get the parentObject type that we are importing into
     	KomodoType kType = parentObject.getTypeIdentifier(transaction);
-    	
+
         switch(kType) {
             case MODEL:
             {
@@ -83,12 +82,12 @@ public class DdlImporter extends AbstractImporter {
                 return;
             }
             default:
-                throw new UnsupportedOperationException();
+                throw new UnsupportedOperationException("DDL Import parent object should be either a model or schema"); //$NON-NLS-1$
         }
     }
 
     /**
-	 * @throws KException  
+	 * @throws KException
 	 */
     @Override
     protected boolean handleExistingNode(UnitOfWork transaction,
@@ -97,7 +96,7 @@ public class DdlImporter extends AbstractImporter {
 
     	return true;
     }
-    
+
     /**
      * Perform the DDL import using the specified DDL File.  The DDL constructs must be valid to put directly beneath the parentObject.
      * @param uow the transaction
@@ -131,7 +130,8 @@ public class DdlImporter extends AbstractImporter {
         try {
             doImport(uow, toString(ddlStream), parentObject, importOptions, importMessages);
         } catch (Exception ex) {
-            importMessages.addErrorMessage(ex.getLocalizedMessage());
+            String errorMsg = ex.getLocalizedMessage() != null ? ex.getLocalizedMessage() : ex.getClass().getSimpleName();
+            importMessages.addErrorMessage(errorMsg);
         }
     }
 

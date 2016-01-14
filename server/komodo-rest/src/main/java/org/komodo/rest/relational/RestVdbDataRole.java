@@ -8,12 +8,14 @@
 package org.komodo.rest.relational;
 
 import java.net.URI;
+import java.util.Properties;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.rest.KomodoService;
 import org.komodo.rest.RestBasicEntity;
 import org.komodo.rest.RestLink;
 import org.komodo.rest.RestLink.LinkType;
+import org.komodo.rest.relational.KomodoRestUriBuilder.SettingNames;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
@@ -149,9 +151,12 @@ public final class RestVdbDataRole extends RestBasicEntity {
         ArgCheck.isNotNull(vdb);
         String vdbName = vdb.getName(uow);
 
-        addLink(new RestLink(LinkType.SELF, getUriBuilder().buildVdbDataRoleUri(LinkType.SELF, vdbName, getId())));
-        addLink(new RestLink(LinkType.PARENT, getUriBuilder().buildVdbDataRoleUri(LinkType.PARENT, vdbName, getId())));
-        addLink(new RestLink(LinkType.PERMISSIONS, getUriBuilder().buildVdbDataRoleUri(LinkType.PERMISSIONS, vdbName, getId())));
+        Properties settings = getUriBuilder().createSettings(SettingNames.VDB_NAME, vdbName);
+        getUriBuilder().addSetting(settings, SettingNames.DATA_ROLE_ID, getId());
+
+        addLink(new RestLink(LinkType.SELF, getUriBuilder().buildVdbDataRoleUri(LinkType.SELF, settings)));
+        addLink(new RestLink(LinkType.PARENT, getUriBuilder().buildVdbDataRoleUri(LinkType.PARENT, settings)));
+        addLink(new RestLink(LinkType.PERMISSIONS, getUriBuilder().buildVdbDataRoleUri(LinkType.PERMISSIONS, settings)));
     }
 
     /**

@@ -26,8 +26,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.utils.ArgCheck;
 import org.modeshape.common.text.Position;
 import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlParsingException;
 
@@ -77,6 +77,8 @@ public class ImportMessages implements StringConstants {
      * @param exception the exception
      */
     public void addErrorMessage(Throwable exception) {
+        ArgCheck.isNotNull(exception, "error"); //$NON-NLS-1$
+
     	while (exception.getCause() != null) {
     		//
     		// Zero down to the root cause of the exception
@@ -98,12 +100,14 @@ public class ImportMessages implements StringConstants {
     	errorMessages.add(message);
     }
 
-    
+
     /**
      * Add an error message
      * @param message the error message
      */
     public void addErrorMessage(String message) {
+        ArgCheck.isNotNull(message, "error message"); //$NON-NLS-1$
+
         if (errorMessages == null) {
             errorMessages = new ArrayList<String>();
         }
@@ -310,7 +314,7 @@ public class ImportMessages implements StringConstants {
     public void setParseErrorIndex(int index) {
         this.parseErrorIndex = index;
     }
-    
+
     @Override
     public String toString() {
     	List<String> allMessages = getAllMessages();

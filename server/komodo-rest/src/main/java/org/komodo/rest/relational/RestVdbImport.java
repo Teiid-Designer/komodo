@@ -8,12 +8,14 @@
 package org.komodo.rest.relational;
 
 import java.net.URI;
+import java.util.Properties;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.VdbImport;
 import org.komodo.rest.KomodoService;
 import org.komodo.rest.RestBasicEntity;
 import org.komodo.rest.RestLink;
 import org.komodo.rest.RestLink.LinkType;
+import org.komodo.rest.relational.KomodoRestUriBuilder.SettingNames;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
@@ -80,8 +82,11 @@ public final class RestVdbImport extends RestBasicEntity {
         ArgCheck.isNotNull(vdb);
         String vdbName = vdb.getName(uow);
 
-        addLink(new RestLink(LinkType.SELF, getUriBuilder().buildVdbImportUri(LinkType.SELF, vdbName, getId())));
-        addLink(new RestLink(LinkType.PARENT, getUriBuilder().buildVdbImportUri(LinkType.PARENT, vdbName, getId())));
+        Properties settings = getUriBuilder().createSettings(SettingNames.VDB_NAME, vdbName);
+        getUriBuilder().addSetting(settings, SettingNames.IMPORT_NAME, getId());
+
+        addLink(new RestLink(LinkType.SELF, getUriBuilder().buildVdbImportUri(LinkType.SELF, settings)));
+        addLink(new RestLink(LinkType.PARENT, getUriBuilder().buildVdbImportUri(LinkType.PARENT, settings)));
     }
 
     /**
