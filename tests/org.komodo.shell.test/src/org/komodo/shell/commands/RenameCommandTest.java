@@ -17,9 +17,7 @@ package org.komodo.shell.commands;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-
 import java.util.ArrayList;
-
 import org.junit.Test;
 import org.komodo.repository.RepositoryImpl;
 import org.komodo.shell.AbstractCommandTest;
@@ -58,7 +56,7 @@ public final class RenameCommandTest extends AbstractCommandTest {
 
     @Test( expected = AssertionError.class )
     public void shouldNotRenameEnvironmentRoot() throws Exception {
-        final String reservedPath = this.wsStatus.getLabelProvider().getDisplayPath( RepositoryImpl.ENV_ROOT );
+        final String reservedPath = this.wsStatus.getCurrentContextLabelProvider().getDisplayPath( RepositoryImpl.ENV_ROOT );
         final String[] commands = { ( "cd " + reservedPath ),
                                     "rename blah" };
         execute( commands );
@@ -101,7 +99,7 @@ public final class RenameCommandTest extends AbstractCommandTest {
 
     @Test( expected = AssertionError.class )
     public void shouldNotRenameLibraryRoot() throws Exception {
-        final String reservedPath = this.wsStatus.getLabelProvider().getDisplayPath( RepositoryImpl.LIBRARY_ROOT );
+        final String reservedPath = this.wsStatus.getCurrentContextLabelProvider().getDisplayPath( RepositoryImpl.LIBRARY_ROOT );
         final String[] commands = { ( "cd " + reservedPath ),
                                     "rename blah" };
         execute( commands );
@@ -109,7 +107,8 @@ public final class RenameCommandTest extends AbstractCommandTest {
 
     @Test( expected = AssertionError.class )
     public void shouldNotRenameWorkspaceRoot() throws Exception {
-        final String reservedPath = this.wsStatus.getLabelProvider().getDisplayPath( RepositoryImpl.WORKSPACE_ROOT );
+        final String reservedPath = this.wsStatus.getCurrentContextLabelProvider()
+                                                 .getDisplayPath( RepositoryImpl.WORKSPACE_ROOT );
         final String[] commands = { ( "cd " + reservedPath ),
                                     "rename blah" };
         execute( commands );
@@ -131,12 +130,12 @@ public final class RenameCommandTest extends AbstractCommandTest {
         assertThat( workspace.getChildren( getTransaction() ).length, is( 1 ) );
         assertThat( workspace.getChildren( getTransaction() )[ 0 ].getName( getTransaction() ), is( newChildName ) );
     }
-    
+
     @Test
     public void testTabCompleter()throws Exception{
     	ArrayList<CharSequence> candidates=new ArrayList<>();
        	setup("commandFiles","addChildren.cmd");
-       	
+
     	candidates.add("myChild1");
     	candidates.add("myChild2");
 
@@ -144,8 +143,8 @@ public final class RenameCommandTest extends AbstractCommandTest {
 
     	candidates.add("MyChild3");
     	assertTabCompletion("rename ", candidates);
-       	
-       	
+
+
 
     }
 

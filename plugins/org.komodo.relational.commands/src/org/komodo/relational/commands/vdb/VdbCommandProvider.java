@@ -58,7 +58,6 @@ public class VdbCommandProvider implements ShellCommandProvider {
 
         result.add( ShowVdbCommand.class );
         result.add( SetVdbPropertyCommand.class );
-        result.add( ExportCommand.class );
         result.add( UnsetVdbPropertyCommand.class );
 
         result.add( UploadModelCommand.class );

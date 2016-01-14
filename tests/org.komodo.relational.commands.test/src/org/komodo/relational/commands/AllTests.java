@@ -436,7 +436,6 @@ import org.komodo.relational.commands.workspace.WorkspaceUnsetPropertyCommandTes
     DeleteImportCommandTest.class,
     DeleteModelCommandTest.class,
     DeleteTranslatorCommandTest.class,
-    org.komodo.relational.commands.vdb.ExportCommandTest.class,
     SetVdbPropertyCommandTest.class,
     UnsetVdbPropertyCommandTest.class,
     UploadModelCommandTest.class,
