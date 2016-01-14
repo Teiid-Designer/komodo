@@ -18,12 +18,6 @@
 
 	<!-- Comma-separated minimum list of required libraries -->
 	<property name="libs" value="jcr.jar,
-		 						 modeshape-jcr-api.jar,
-								 modeshape-common.jar,
-								 modeshape-schematic.jar,
-								 modeshape-sequencer-ddl.jar,
-								 modeshape-sequencer-teiid.jar,
-								 modeshape-jcr.jar,
 								 infinispan-cachestore-leveldb.jar"/>
 
 	<!--

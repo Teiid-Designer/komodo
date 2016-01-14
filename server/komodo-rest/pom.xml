@@ -48,9 +48,9 @@
     <!-- ================================================================== -->
     <properties>
         <gson.version>2.2.4</gson.version>
-        <infinispan.version>7.2.0.Final</infinispan.version> <!-- need to override so that resteasy uses same as MS -->
+        <infinispan.version>5.2.10.Final</infinispan.version> <!-- need to override so that resteasy uses same as MS -->
         <resteasy.version>3.0.11.Final</resteasy.version>
-        <guava.version>16.0.1</guava.version>
+        <guava.version>12.0</guava.version>
         <swagger.version>1.5.0</swagger.version>
         <jaxrs.version>2.13</jaxrs.version>
         <xsom.version>20130531</xsom.version>
