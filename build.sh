@@ -9,6 +9,7 @@ function show_help {
 	echo "Usage: $0 [-d] [-h]"
 	echo "-d - enable maven debugging"
 	echo "-s - skip test execution"
+	echo "-q - skip integration test execution"
   exit 1
 }
 
@@ -46,12 +47,13 @@ DEBUG=0
 #
 # Determine the command line options
 #
-while getopts "bdhs" opt;
+while getopts "bdhsq" opt;
 do
 	case $opt in
 	d) DEBUG=1 ;;
 	h) show_help ;;
   s) SKIP=1 ;;
+  q) INT_SKIP=1 ;;
 	*) show_help ;;
 	esac
 done
@@ -87,6 +89,10 @@ fi
 #
 if [ "${SKIP}" == "1" ]; then
   SKIP_FLAG="-DskipTests"
+  INTEGRATION_SKIP_FLAG="-Dintegration.skipTests=true"
+fi
+
+if [ "${INT_SKIP}" == "1" ]; then
   INTEGRATION_SKIP_FLAG="-Dintegration.skipTests=true"
 fi
 
