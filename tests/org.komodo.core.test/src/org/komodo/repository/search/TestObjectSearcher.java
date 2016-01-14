@@ -45,6 +45,9 @@ import org.modeshape.jcr.api.JcrConstants;
 @SuppressWarnings( {"nls", "javadoc"} )
 public class TestObjectSearcher extends AbstractLocalRepositoryTest {
 
+    private static final String TEIIDSQL = "TeiidSQL";
+    private static final String DDL = "DDL";
+
     private KomodoObject[] createTestData() throws Exception {
         // Create the komodo workspace
         KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
@@ -52,14 +55,14 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
 
         for (int i = 1; i < 6; ++i) {
             KomodoObject child = workspace.addChild(getTransaction(), "test" + i, KomodoLexicon.VdbModel.NODE_TYPE);
-            child.setProperty(getTransaction(), KomodoLexicon.VdbModel.MODEL_DEFINITION, "DDL");
+            child.setProperty(getTransaction(), KomodoLexicon.VdbModel.MODEL_DEFINITION, DDL);
         }
 
         KomodoObject[] testNodes = workspace.getChildrenOfType(getTransaction(), KomodoLexicon.VdbModel.NODE_TYPE);
         assertEquals(5, testNodes.length);
         for (KomodoObject testKO : testNodes) {
             Property property = testKO.getProperty(getTransaction(), KomodoLexicon.VdbModel.MODEL_DEFINITION);
-            assertEquals("DDL", property.getStringValue(getTransaction()));
+            assertEquals(DDL, property.getStringValue(getTransaction()));
         }
 
         commit(); // must commit for search queries to work
@@ -290,6 +293,32 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
     }
 
     @Test
+    public void addWhereClauseComparisonWithFunction() throws Exception {
+        String expected = "SELECT [jcr:path], [mode:localName] FROM [nt:unstructured] AS p1 " +
+                                     "WHERE LOWER(NAME(p1)) LIKE 'value%1'";
+        ObjectSearcher os = new ObjectSearcher(_repo);
+        os.addFromType(JcrConstants.NT_UNSTRUCTURED, "p1");
+        os.addWhereCompareClause(null, null, "NAME(p1)", ComparisonOperator.LIKE, "value%1", true);
+
+        assertEquals(expected, os.toString());
+    }
+
+    @Test
+    public void addWhereParanthesisClause() throws Exception {
+        String expected = "SELECT [jcr:path], [mode:localName] FROM [nt:unstructured] AS p1 " +
+                                    "WHERE (p1.[property1] LIKE 'value%1' OR p1.[property1] LIKE 'value%2')";
+        ObjectSearcher os = new ObjectSearcher(_repo);
+        os.addFromType(JcrConstants.NT_UNSTRUCTURED, "p1");
+
+        CompareClause clause1 = new CompareClause(null, "p1", "property1", ComparisonOperator.LIKE, "value%1");
+        CompareClause clause2 = new CompareClause(null, "p1", "property1", ComparisonOperator.LIKE, "value%2");
+
+        os.addWhereParanthesisClause(null, clause1, clause2);
+
+        assertEquals(expected, os.toString());
+    }
+
+    @Test
     public void executeSingleFromQuery() throws Exception {
         assertNotNull(_repo);
 
@@ -326,7 +355,7 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
 
         ObjectSearcher os = new ObjectSearcher(_repo);
         os.addFromType(JcrConstants.NT_UNSTRUCTURED, "nt");
-        os.addWhereContainsClause(null, "nt", KomodoLexicon.VdbModel.MODEL_DEFINITION, "DDL");
+        os.addWhereContainsClause(null, "nt", KomodoLexicon.VdbModel.MODEL_DEFINITION, DDL);
 
         String expected = "SELECT [jcr:path], [mode:localName] FROM [nt:unstructured] AS nt " +
                                      "WHERE CONTAINS(nt.[vdb:modelDefinition], 'DDL')";
@@ -339,7 +368,7 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
             assertTrue(name.startsWith("test"));
 
             Property property = searchObject.getProperty(getTransaction(), KomodoLexicon.VdbModel.MODEL_DEFINITION);
-            assertEquals("DDL", property.getStringValue(getTransaction()));
+            assertEquals(DDL, property.getStringValue(getTransaction()));
         }
     }
 
@@ -499,19 +528,19 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
 
         for (int i = 1; i < 6; ++i) {
             KomodoObject child = workspace.addChild(getTransaction(), "test" + i, KomodoLexicon.VdbModel.NODE_TYPE);
-            child.setProperty(getTransaction(), KomodoLexicon.VdbModel.MODEL_DEFINITION, "DDL");
+            child.setProperty(getTransaction(), KomodoLexicon.VdbModel.MODEL_DEFINITION, DDL);
         }
 
         for (int i = 6; i < 11; ++i) {
             KomodoObject child = workspace.addChild(getTransaction(), "test" + i, KomodoLexicon.VdbModel.NODE_TYPE);
-            child.setProperty(getTransaction(), KomodoLexicon.VdbModel.MODEL_DEFINITION, "TEIIDSQL");
+            child.setProperty(getTransaction(), KomodoLexicon.VdbModel.MODEL_DEFINITION, TEIIDSQL);
         }
 
         KomodoObject[] testNodes = workspace.getChildrenOfType(getTransaction(), KomodoLexicon.VdbModel.NODE_TYPE);
         assertEquals(10, testNodes.length);
         for (KomodoObject testKO : testNodes) {
             Property property = testKO.getProperty(getTransaction(), KomodoLexicon.VdbModel.MODEL_DEFINITION);
-            assertTrue(property.getStringValue(getTransaction()).equals("DDL") || property.getStringValue(getTransaction()).equals("TEIIDSQL"));
+            assertTrue(property.getStringValue(getTransaction()).equals(DDL) || property.getStringValue(getTransaction()).equals(TEIIDSQL));
         }
 
         ObjectSearcher os = new ObjectSearcher(_repo);
@@ -519,10 +548,10 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
         os.addWhereContainsClause(null, "nt",
                                                      KomodoLexicon.VdbModel.MODEL_DEFINITION,
                                                      KeywordCriteria.ANY,
-                                                     "DDL", "TEIIDSQL");
+                                                     DDL, TEIIDSQL);
 
         String expected = "SELECT [jcr:path], [mode:localName] FROM [nt:unstructured] AS nt " +
-                                     "WHERE CONTAINS(nt.[vdb:modelDefinition], 'DDL OR TEIIDSQL')";
+                                     "WHERE CONTAINS(nt.[vdb:modelDefinition], '" + DDL + " OR " + TEIIDSQL + "')";
         assertEquals(expected, os.toString());
 
         commit(); // must commit for search queries to work
@@ -539,9 +568,75 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
 
             Property property = searchObject.getProperty(getTransaction(), KomodoLexicon.VdbModel.MODEL_DEFINITION);
             if (index < 6)
-                assertEquals("DDL", property.getStringValue(getTransaction()));
+                assertEquals(DDL, property.getStringValue(getTransaction()));
             else
-                assertEquals("TEIIDSQL", property.getStringValue(getTransaction()));
+                assertEquals(TEIIDSQL, property.getStringValue(getTransaction()));
+        }
+    }
+
+    @Test
+    public void executeFromQueryWithParanthesisWhereClause() throws Exception {
+        assertNotNull(_repo);
+
+        // Create the komodo workspace
+        KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
+        assertNotNull(workspace);
+
+        for (int i = 1; i < 6; ++i) {
+            KomodoObject child = workspace.addChild(getTransaction(), "test" + i, KomodoLexicon.VdbModel.NODE_TYPE);
+            child.setProperty(getTransaction(), KomodoLexicon.VdbModel.MODEL_DEFINITION, DDL);
+        }
+
+        for (int i = 6; i < 11; ++i) {
+            KomodoObject child = workspace.addChild(getTransaction(), "test" + i, KomodoLexicon.VdbModel.NODE_TYPE);
+            child.setProperty(getTransaction(), KomodoLexicon.VdbModel.MODEL_DEFINITION, TEIIDSQL);
+        }
+
+        KomodoObject[] testNodes = workspace.getChildrenOfType(getTransaction(), KomodoLexicon.VdbModel.NODE_TYPE);
+        assertEquals(10, testNodes.length);
+        for (KomodoObject testKO : testNodes) {
+            Property property = testKO.getProperty(getTransaction(), KomodoLexicon.VdbModel.MODEL_DEFINITION);
+            assertTrue(property.getStringValue(getTransaction()).equals(DDL) || property.getStringValue(getTransaction()).equals(TEIIDSQL));
+        }
+
+        ObjectSearcher os = new ObjectSearcher(_repo);
+        os.addFromType(JcrConstants.NT_UNSTRUCTURED, "nt");
+
+        //
+        // Clause 1 is set to be case sensitive
+        //
+        CompareClause clause1 = new CompareClause(null, "nt", KomodoLexicon.VdbModel.MODEL_DEFINITION,
+                                                                                      ComparisonOperator.LIKE, DDL);
+        //
+        // Clause 2 is case insensitive with the literal purposely not the
+        // same case as the property being tested.
+        //
+        CompareClause clause2 = new CompareClause(null, "nt", KomodoLexicon.VdbModel.MODEL_DEFINITION,
+                                                                                      ComparisonOperator.LIKE, "TEIIDSQL", true);
+
+        os.addWhereParanthesisClause(null, clause1, clause2);
+
+        String expected = "SELECT [jcr:path], [mode:localName] FROM [nt:unstructured] AS nt " +
+                                     "WHERE (nt.[vdb:modelDefinition] LIKE 'DDL' OR LOWER(nt.[vdb:modelDefinition]) LIKE 'teiidsql')";
+        assertEquals(expected, os.toString());
+
+        commit(); // must commit for search queries to work
+
+        List<KomodoObject> searchObjects = os.searchObjects(getTransaction());
+        assertEquals(testNodes.length, searchObjects.size());
+        for (KomodoObject searchObject : searchObjects) {
+            String name = searchObject.getName(getTransaction());
+            assertTrue(name.startsWith("test"));
+
+            String indexStr = name.substring(4);
+            int index = Integer.parseInt(indexStr);
+            assertTrue(index > 0 && index < 11);
+
+            Property property = searchObject.getProperty(getTransaction(), KomodoLexicon.VdbModel.MODEL_DEFINITION);
+            if (index < 6)
+                assertEquals(DDL, property.getStringValue(getTransaction()));
+            else
+                assertEquals(TEIIDSQL, property.getStringValue(getTransaction()));
         }
     }
 
@@ -831,6 +926,83 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
     }
 
     @Test
+    public void shouldWriteToRepositoryParathensisWhereClauses() throws Exception {
+        assertNotNull(_repo);
+
+        // Create the komodo workspace
+        KomodoObject workspace = _repo.komodoWorkspace(getTransaction());
+        assertNotNull(workspace);
+
+        commit(); // must commit for search queries to work
+
+        String alias = JcrNtLexicon.Namespace.PREFIX;
+        String fromTypeType = JcrConstants.NT_UNSTRUCTURED;
+        String wherePath = RepositoryImpl.WORKSPACE_ROOT;
+        String whereProperty = KomodoLexicon.VdbModelSource.JNDI_NAME;
+        ComparisonOperator compareOperator = ComparisonOperator.EQUALS;
+        String whereValue = "oracle";
+
+        ObjectSearcher os = new ObjectSearcher(_repo);
+        os.addFromType(fromTypeType, alias);
+
+        PathClause clause1 = new PathClause(null, JcrNtLexicon.Namespace.PREFIX, wherePath);
+        CompareClause clause2 = new CompareClause(LogicalOperator.OR, alias, whereProperty,
+                                                                                      compareOperator, whereValue);
+
+        os.addWhereParanthesisClause(null, clause1, clause2);
+
+        String searchName = "WorkspaceSearch";
+        KomodoObject searchObject = os.write(getTransaction(), searchName);
+        assertNotNull(searchObject);
+
+        String searchesPath = _repo.komodoSearches(getTransaction()).getAbsolutePath();
+        String searchPath = searchesPath + FORWARD_SLASH + searchName;
+        assertEquals(searchPath, searchObject.getAbsolutePath());
+
+        assertEquals(Search.NODE_TYPE, searchObject.getPrimaryType(getTransaction()).getName());
+        assertNotNull(searchObject.getProperty(getTransaction(), Search.SEARCH_DATE));
+
+        KomodoObject fromTypeObject = searchObject.getChild(getTransaction(), Search.FROM_TYPE);
+        assertEquals(Search.FromType.NODE_TYPE, fromTypeObject.getPrimaryType(getTransaction()).getName());
+
+        assertEquals(fromTypeType,
+                     fromTypeObject.getProperty(getTransaction(), Search.FromType.TYPE).getStringValue(getTransaction()));
+        assertEquals(alias,
+                     fromTypeObject.getProperty(getTransaction(), Search.FromType.ALIAS).getStringValue(getTransaction()));
+
+        KomodoObject[] whereObjects = searchObject.getChildren(getTransaction(), Search.WHERE_CLAUSE);
+        assertEquals(1, whereObjects.length);
+        assertEquals(Search.WhereParanthesisClause.NODE_TYPE, whereObjects[0].getPrimaryType(getTransaction()).getName());
+
+        KomodoObject[] subWhereObjects = whereObjects[0].getChildren(getTransaction(), Search.WHERE_CLAUSE);
+        assertEquals(2, subWhereObjects.length);
+
+        assertEquals(Search.WherePathClause.NODE_TYPE, subWhereObjects[0].getPrimaryType(getTransaction()).getName());
+        assertEquals(Search.WhereCompareClause.NODE_TYPE, subWhereObjects[1].getPrimaryType(getTransaction()).getName());
+        assertEquals(wherePath,
+                     subWhereObjects[0].getProperty(getTransaction(), Search.WherePathClause.PATH).getStringValue(getTransaction()));
+        assertEquals(alias,
+                     subWhereObjects[0].getProperty(getTransaction(), Search.WhereClause.ALIAS).getStringValue(getTransaction()));
+
+        assertEquals(Search.WhereCompareClause.NODE_TYPE, subWhereObjects[1].getPrimaryType(getTransaction()).getName());
+        assertEquals(LogicalOperator.OR.toString(),
+                     subWhereObjects[1].getProperty(getTransaction(), Search.WhereClause.PRE_CLAUSE_OPERATOR).getStringValue(getTransaction()));
+        assertEquals(alias,
+                     subWhereObjects[1].getProperty(getTransaction(), WhereClause.ALIAS).getStringValue(getTransaction()));
+        assertEquals(whereProperty,
+                     subWhereObjects[1].getProperty(getTransaction(), Search.WhereCompareClause.PROPERTY).getStringValue(getTransaction()));
+        assertEquals(compareOperator.toString(),
+                     subWhereObjects[1].getProperty(getTransaction(), Search.WhereCompareClause.COMPARE_OPERATOR).getStringValue(getTransaction()));
+        assertEquals(whereValue,
+                     subWhereObjects[1].getProperty(getTransaction(), Search.WhereCompareClause.VALUE).getStringValue(getTransaction()));
+
+        ObjectSearcher testOS = new ObjectSearcher(_repo);
+        testOS.read(getTransaction(), searchName);
+
+        assertEquals(os, testOS);
+    }
+
+    @Test
     public void shouldWriteToRepositoryWhereContainsClause() throws Exception {
         assertNotNull(_repo);
 
@@ -976,7 +1148,7 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
         os.addWhereContainsClause(null, alias, KomodoLexicon.VdbModel.MODEL_DEFINITION, containsValue);
 
         os.setParameterValue("fromTypeParam", JcrConstants.NT_UNSTRUCTURED);
-        os.setParameterValue(containsValue, "DDL");
+        os.setParameterValue(containsValue, DDL);
 
         try {
             List<KomodoObject> results = os.searchObjects(getTransaction());

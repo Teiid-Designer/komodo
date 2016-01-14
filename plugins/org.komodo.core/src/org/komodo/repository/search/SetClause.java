@@ -39,7 +39,7 @@ import org.komodo.utils.StringUtils;
  *
  * alias.property IN (value1, value2, value3)
  */
-class SetClause extends Clause implements PropertyClause {
+public class SetClause extends Clause implements PropertyClause {
 
     private final Set<String> values = new LinkedHashSet<String>();
 

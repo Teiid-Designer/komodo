@@ -37,7 +37,7 @@ import org.komodo.utils.StringUtils;
 /**
  * Abstract Clause implementation
  */
-abstract class Clause implements SQLConstants {
+public abstract class Clause implements SQLConstants {
 
     /**
      * Alias property
@@ -49,6 +49,26 @@ abstract class Clause implements SQLConstants {
     private LogicalOperator preClauseOperator;
 
     protected final Map<String, String> properties = new HashMap<String, String>();
+
+    static Clause createClause(UnitOfWork uow, KomodoObject whereClauseObject) throws KException {
+        String primaryType = whereClauseObject.getPrimaryType(uow).getName();
+
+        Clause clause = null;
+        if (Search.WhereCompareClause.NODE_TYPE.equals(primaryType)) {
+            clause = new CompareClause(uow, whereClauseObject);
+        } else if (Search.WhereContainsClause.NODE_TYPE.equals(primaryType)) {
+            clause = new ContainsClause(uow, whereClauseObject);
+        } else if (Search.WhereSetClause.NODE_TYPE.equals(primaryType)) {
+            clause = new SetClause(uow, whereClauseObject);
+        } else if (Search.WherePathClause.NODE_TYPE.equals(primaryType)) {
+            clause = new PathClause(uow, whereClauseObject);
+        } else if (Search.WhereParentPathClause.NODE_TYPE.equals(primaryType)) {
+            clause = new ParentPathClause(uow, whereClauseObject);
+        } else if (Search.WhereParanthesisClause.NODE_TYPE.equals(primaryType)) {
+            clause = new ParanthesisClause(uow, whereClauseObject);
+        }
+        return clause;
+    }
 
     /**
      * @param operator the logical operator preceding this clause (can be null if this is the only clause)
@@ -175,6 +195,10 @@ abstract class Clause implements SQLConstants {
         return alias;
     }
 
+    /**
+     * @param index the index of this clause
+     * @return the string representation for this clause
+     */
     public abstract String clauseString(int index);
 
     @Override

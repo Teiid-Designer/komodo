@@ -41,7 +41,7 @@ import org.komodo.utils.StringUtils;
  * CONTAINS(tagged.[acme:tagName], 'foo')
  *
  */
-class ContainsClause extends Clause implements PropertyClause {
+public class ContainsClause extends Clause implements PropertyClause {
 
     private final Set<String> keywords = new LinkedHashSet<String>();
 

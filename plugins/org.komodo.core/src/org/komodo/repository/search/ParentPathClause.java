@@ -35,7 +35,7 @@ import org.modeshape.jcr.api.JcrConstants;
 /**
  * A Parent Path Clause
  */
-class ParentPathClause extends PathClause {
+public class ParentPathClause extends PathClause {
 
     private boolean childrenOnly = false;
 

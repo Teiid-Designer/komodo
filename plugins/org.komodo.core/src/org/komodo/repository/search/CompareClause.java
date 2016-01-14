@@ -37,11 +37,38 @@ import org.komodo.utils.StringUtils;
  * tagged.[acme:tagName] = 'foo'
  *
  */
-class CompareClause extends Clause implements PropertyClause {
+public class CompareClause extends Clause implements PropertyClause {
 
     private ComparisonOperator compareOperator;
     private String value;
+    private boolean caseInsensitive = false;
 
+
+    /**
+     * Constructor
+     * @param logicalOperator the logical operator preceding this clause (can be null if this is the only clause)
+     * @param alias the alias
+     * @param property the property
+     * @param compareOperator the comparison operator
+     * @param value the value for comparison
+     * @param caseInsensitive the case insensitive flag
+     */
+    public CompareClause(LogicalOperator logicalOperator,
+                                         String alias, String property, ComparisonOperator compareOperator,
+                                         String value, boolean caseInsensitive) {
+        super(logicalOperator);
+
+        ArgCheck.isNotNull(property);
+        ArgCheck.isNotNull(compareOperator);
+        ArgCheck.isNotNull(value);
+
+        setAlias(alias);
+        setProperty(PROPERTY, property);
+
+        setCompareOperator(compareOperator);
+        this.value = value;
+        this.caseInsensitive = caseInsensitive;
+    }
 
     /**
      * Constructor
@@ -54,17 +81,7 @@ class CompareClause extends Clause implements PropertyClause {
     public CompareClause(LogicalOperator logicalOperator,
                                          String alias, String property, ComparisonOperator compareOperator,
                                          String value) {
-        super(logicalOperator);
-
-        ArgCheck.isNotNull(property);
-        ArgCheck.isNotNull(compareOperator);
-        ArgCheck.isNotNull(value);
-
-        setAlias(alias);
-        setProperty(PROPERTY, property);
-
-        setCompareOperator(compareOperator);
-        this.value = value;
+        this(logicalOperator, alias, property, compareOperator, value, false);
     }
 
     /**
@@ -89,6 +106,10 @@ class CompareClause extends Clause implements PropertyClause {
 
         if (whereClause.hasProperty(uow, WhereCompareClause.VALUE)) {
             setValue(whereClause.getProperty(uow, Search.WhereCompareClause.VALUE).getStringValue(uow));
+        }
+
+        if (whereClause.hasProperty(uow, WhereCompareClause.CASE_INSENSITIVE)) {
+            setCaseInsensitive(whereClause.getProperty(uow, Search.WhereCompareClause.CASE_INSENSITIVE).getBooleanValue(uow));
         }
     }
 
@@ -126,10 +147,29 @@ class CompareClause extends Clause implements PropertyClause {
         this.value = value;
     }
 
+    /**
+     * @return case insensitive flag
+     */
+    public boolean isCaseInsensitive() {
+        return caseInsensitive;
+    }
+
+    protected void setCaseInsensitive(boolean caseInsensitive) {
+        this.caseInsensitive = caseInsensitive;
+    }
+
+    /**
+     * @return where the property is wrapped with functions such as NAME
+     */
+    private boolean isFunctionProperty() {
+        return getProperty().contains(OPEN_BRACKET);
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
+        result = prime * result + (this.caseInsensitive ? 1231 : 1237);
         result = prime * result + ((this.compareOperator == null) ? 0 : this.compareOperator.hashCode());
         result = prime * result + ((this.value == null) ? 0 : this.value.hashCode());
         return result;
@@ -144,6 +184,8 @@ class CompareClause extends Clause implements PropertyClause {
         if (getClass() != obj.getClass())
             return false;
         CompareClause other = (CompareClause)obj;
+        if (this.caseInsensitive != other.caseInsensitive)
+            return false;
         if (this.compareOperator != other.compareOperator)
             return false;
         if (this.value == null) {
@@ -161,23 +203,43 @@ class CompareClause extends Clause implements PropertyClause {
 
         appendLogicalOperator(index, buffer);
 
-        setAlias(checkWhereAlias(getAlias()));
+        if (!isFunctionProperty())
+            setAlias(checkWhereAlias(getAlias()));
 
-        if (! StringUtils.isEmpty(getAlias())) {
-            buffer.append(getAlias());
-            buffer.append(DOT);
+        if (isCaseInsensitive()) {
+            buffer.append("LOWER"); //$NON-NLS-1$
+            buffer.append(OPEN_BRACKET);
         }
 
-        buffer.append(OPEN_SQUARE_BRACKET);
-        buffer.append(getProperty());
-        buffer.append(CLOSE_SQUARE_BRACKET);
+        if (isFunctionProperty()) {
+            buffer.append(getProperty());
+        } else {
+            // Normal property
+
+            if (! StringUtils.isEmpty(getAlias())) {
+                buffer.append(getAlias());
+                buffer.append(DOT);
+            }
+            buffer.append(OPEN_SQUARE_BRACKET);
+            buffer.append(getProperty());
+            buffer.append(CLOSE_SQUARE_BRACKET);
+        }
+
+        if (isCaseInsensitive()) {
+            buffer.append(CLOSE_BRACKET);
+        }
 
         buffer.append(SPACE);
         buffer.append(compareOperator);
         buffer.append(SPACE);
 
         buffer.append(QUOTE_MARK);
-        buffer.append(value);
+
+        if (isCaseInsensitive())
+            buffer.append(value.toLowerCase());
+        else
+            buffer.append(value);
+
         buffer.append(QUOTE_MARK);
 
         return buffer.toString();
@@ -199,5 +261,6 @@ class CompareClause extends Clause implements PropertyClause {
         whereObject.setProperty(uow, Search.WhereCompareClause.PROPERTY, getProperty());
         whereObject.setProperty(uow, Search.WhereCompareClause.COMPARE_OPERATOR, compareOperator.toString());
         whereObject.setProperty(uow, Search.WhereCompareClause.VALUE, value);
+        whereObject.setProperty(uow, Search.WhereCompareClause.CASE_INSENSITIVE, caseInsensitive);
     }
 }

@@ -21,6 +21,9 @@
  */
 package org.komodo.repository.search;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.komodo.core.KomodoLexicon.Search;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
@@ -28,27 +31,26 @@ import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.ArgCheck;
-import org.komodo.utils.StringUtils;
 
 /**
- * A Path Clause
+ * A Paranthesis clause
+ *
+ * (clause1 OR/AND clause2)
  */
-public class PathClause extends Clause {
+public class ParanthesisClause extends Clause {
 
-    private final static String PATH = "path"; //$NON-NLS-1$
+    private List<Clause> childClauses = new ArrayList<>();
 
     /**
      * @param operator the logical operator preceding this clause (can be null if this is the only clause)
-     * @param alias the alias of the selector
-     * @param path path used in the clause
+     * @param childClauses child clauses
      */
-    public PathClause(LogicalOperator operator, String alias, String path) {
+    public ParanthesisClause(LogicalOperator operator, Clause... childClauses) {
         super(operator);
 
-        ArgCheck.isNotEmpty(path, "Where Path clause requires a path"); //$NON-NLS-1$
+        ArgCheck.isNotNull(childClauses);
 
-        setAlias(alias);
-        setPath(path);
+        this.childClauses.addAll(Arrays.asList(childClauses));
     }
 
     /**
@@ -59,52 +61,70 @@ public class PathClause extends Clause {
      *
      * @throws KException if error occurs
      */
-    protected PathClause(UnitOfWork uow, KomodoObject whereClause) throws KException {
+    protected ParanthesisClause(UnitOfWork uow, KomodoObject whereClause) throws KException {
         super(uow, whereClause);
 
-        if (whereClause.hasProperty(uow, Search.WherePathClause.PATH)) {
-            setPath(whereClause.getProperty(uow, Search.WherePathClause.PATH).getStringValue(uow));
+        KomodoObject[] children = whereClause.getChildren(uow, Search.WHERE_CLAUSE);
+        ArgCheck.isNotNull(children);
+        ArgCheck.isTrue(children.length > 0, "sub where clauses cannot be empty"); //$NON-NLS-1$
+
+        for (KomodoObject whereClauseObject : children) {
+            Clause clause = Clause.createClause(uow, whereClauseObject);
+            if (clause != null)
+                addWhereClause(clause);
         }
     }
 
     /**
-     * @return the path
+     * @param childClause the child clause
      */
-    public String getPath() {
-        return properties.get(PATH);
-    }
-
-    /**
-     * @param path the path to be added
-     */
-    public void setPath(String path) {
-        properties.put(PATH, path);
+    public void addWhereClause(Clause childClause) {
+        childClauses.add(childClause);
     }
 
     @Override
-    public String clauseString(int position) {
+    public String clauseString(int index) {
         StringBuffer buffer = new StringBuffer();
 
-        appendLogicalOperator(position, buffer);
+        appendLogicalOperator(index, buffer);
 
-        setAlias(checkWhereAlias(getAlias()));
-
-        buffer.append("PATH"); //$NON-NLS-1$
         buffer.append(OPEN_BRACKET);
 
-        if (! StringUtils.isEmpty(getAlias())) {
-            buffer.append(getAlias());
+        for (int i = 0; i < childClauses.size(); ++i) {
+            buffer.append(childClauses.get(i).clauseString(i));
+            if (i < (childClauses.size() - 1))
+                buffer.append(SPACE);
         }
 
         buffer.append(CLOSE_BRACKET);
-        buffer.append(SPACE);
-        buffer.append(LIKE);
-        buffer.append(SPACE);
-        buffer.append(QUOTE_MARK);
-        buffer.append(getPath());
-        buffer.append(QUOTE_MARK);
 
         return buffer.toString();
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((this.childClauses == null) ? 0 : this.childClauses.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ParanthesisClause other = (ParanthesisClause)obj;
+        if (this.childClauses == null) {
+            if (other.childClauses != null)
+                return false;
+        } else
+            if (!this.childClauses.equals(other.childClauses))
+                return false;
+        return true;
     }
 
     @Override
@@ -116,10 +136,11 @@ public class PathClause extends Clause {
         Repository repository = searchObject.getRepository();
         KomodoObject whereObject = repository.add(uow, searchObject.getAbsolutePath(),
                                                   Search.WHERE_CLAUSE,
-                                                  Search.WherePathClause.NODE_TYPE);
+                                                  Search.WhereParanthesisClause.NODE_TYPE);
 
-        writeProperties(uow, whereObject);
-
-        whereObject.setProperty(uow, Search.WherePathClause.PATH, getPath());
+        for (Clause childClause : childClauses) {
+            childClause.write(uow, whereObject);
+        }
     }
+
 }
