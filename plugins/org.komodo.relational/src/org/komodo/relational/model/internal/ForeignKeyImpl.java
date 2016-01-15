@@ -162,6 +162,21 @@ public final class ForeignKeyImpl extends TableConstraintImpl implements Foreign
     public int getTypeId() {
         return TYPE_ID;
     }
+    
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public Table getParent( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state must be NOT_STARTED" ); //$NON-NLS-1$
+
+        final KomodoObject parent = super.getParent( transaction );
+        final Table result = Table.RESOLVER.resolve( transaction, parent );
+        return result;
+    }
 
     /**
      * {@inheritDoc}

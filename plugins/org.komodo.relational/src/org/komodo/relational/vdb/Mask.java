@@ -44,6 +44,14 @@ public interface Mask extends RelationalObject {
     Mask[] NO_MASKS = new Mask[0];
 
     /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KNode#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    Permission getParent( final UnitOfWork transaction ) throws KException;
+    
+    /**
      * The resolver of a {@link Mask}.
      */
     public static final TypeResolver< Mask > RESOLVER = new TypeResolver< Mask >() {

@@ -47,6 +47,15 @@ public interface Translator extends RelationalObject {
      * An empty array of translators.
      */
     Translator[] NO_TRANSLATORS = new Translator[0];
+    
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KNode#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    Vdb getParent( final UnitOfWork transaction ) throws KException;
+
 
     /**
      * The resolver of a {@link Translator}.

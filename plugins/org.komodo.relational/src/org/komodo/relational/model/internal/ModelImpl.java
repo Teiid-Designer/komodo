@@ -10,6 +10,7 @@ package org.komodo.relational.model.internal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+
 import org.komodo.core.KomodoLexicon;
 import org.komodo.modeshape.visitor.DdlNodeVisitor;
 import org.komodo.relational.ExcludeQNamesFilter;
@@ -28,6 +29,7 @@ import org.komodo.relational.model.UserDefinedFunction;
 import org.komodo.relational.model.View;
 import org.komodo.relational.model.VirtualProcedure;
 import org.komodo.relational.vdb.ModelSource;
+import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.internal.ModelSourceImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
@@ -519,6 +521,21 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
         }
 
         return result.toArray( new View[ result.size() ] );
+    }
+    
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public Vdb getParent( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state must be NOT_STARTED" ); //$NON-NLS-1$
+
+        final KomodoObject parent = super.getParent( transaction );
+        final Vdb result = Vdb.RESOLVER.resolve( transaction, parent );
+        return result;
     }
 
     /**

@@ -9,6 +9,7 @@ package org.komodo.relational.model.internal;
 
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
+import org.komodo.relational.model.AbstractProcedure;
 import org.komodo.relational.model.DataTypeResultSet;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoType;
@@ -103,6 +104,16 @@ public final class DataTypeResultSetImpl extends ResultSetColumnImpl implements 
     @Override
     public KomodoType getTypeIdentifier( final UnitOfWork uow ) {
         return DataTypeResultSet.IDENTIFIER;
+    }
+    
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public AbstractProcedure getParent( final UnitOfWork transaction ) throws KException {
+        return (AbstractProcedure) super.getParent(transaction);
     }
 
     /**

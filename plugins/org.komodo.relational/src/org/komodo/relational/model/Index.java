@@ -46,6 +46,14 @@ public interface Index extends TableConstraint {
      * An empty collection of index constraints.
      */
     Index[] NO_INDEXES = new Index[0];
+    
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KNode#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    Table getParent( final UnitOfWork transaction ) throws KException;
 
     /**
      * The resolver of a {@link Index}.

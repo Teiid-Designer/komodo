@@ -111,6 +111,14 @@ public interface Parameter extends OptionContainer, RelationalObject {
      * An empty array of parameters.
      */
     Parameter[] NO_PARAMETERS = new Parameter[0];
+    
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KNode#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    AbstractProcedure getParent( final UnitOfWork transaction ) throws KException;
 
     /**
      * The resolver of a {@link Parameter}.

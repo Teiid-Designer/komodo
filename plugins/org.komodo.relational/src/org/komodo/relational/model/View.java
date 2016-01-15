@@ -40,6 +40,14 @@ public interface View extends Table {
      * An empty array of views.
      */
     View[] NO_VIEWS = new View[0];
+    
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KNode#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    Model getParent( final UnitOfWork transaction ) throws KException;
 
     /**
      * The resolver of a {@link View}.

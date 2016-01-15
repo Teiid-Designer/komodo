@@ -10,12 +10,16 @@ package org.komodo.relational.model.internal;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.komodo.relational.model.Model;
 import org.komodo.relational.model.UserDefinedFunction;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
+import org.komodo.utils.ArgCheck;
 
 /**
  * An implementation of a UDF.
@@ -147,6 +151,21 @@ public final class UserDefinedFunctionImpl extends FunctionImpl implements UserD
     @Override
     public KomodoType getTypeIdentifier( final UnitOfWork uow ) {
         return UserDefinedFunction.IDENTIFIER;
+    }
+    
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public Model getParent( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state must be NOT_STARTED" ); //$NON-NLS-1$
+
+        final KomodoObject parent = super.getParent( transaction );
+        final Model result = Model.RESOLVER.resolve( transaction, parent );
+        return result;
     }
 
     /**

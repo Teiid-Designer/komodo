@@ -9,10 +9,12 @@ package org.komodo.relational.model.internal;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.internal.RelationalObjectImpl;
+import org.komodo.relational.model.AbstractProcedure;
 import org.komodo.relational.model.ResultSetColumn;
 import org.komodo.relational.model.TabularResultSet;
 import org.komodo.spi.KException;
@@ -104,6 +106,16 @@ public final class TabularResultSetImpl extends RelationalObjectImpl implements 
     @Override
     public KomodoType getTypeIdentifier( final UnitOfWork uow ) {
         return TabularResultSet.IDENTIFIER;
+    }
+    
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public AbstractProcedure getParent( final UnitOfWork transaction ) throws KException {
+        return (AbstractProcedure) super.getParent(transaction);
     }
 
     /**

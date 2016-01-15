@@ -74,6 +74,14 @@ public interface DataTypeResultSet extends ProcedureResultSet, ResultSetColumn {
      * The type identifier.
      */
     int TYPE_ID = DataTypeResultSet.class.hashCode();
+    
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KNode#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    AbstractProcedure getParent( final UnitOfWork transaction ) throws KException;
 
     /**
      * The resolver of a {@link DataTypeResultSet}.

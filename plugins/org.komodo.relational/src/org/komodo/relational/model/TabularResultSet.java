@@ -36,6 +36,14 @@ public interface TabularResultSet extends ProcedureResultSet {
      * The type identifier.
      */
     int TYPE_ID = TabularResultSet.class.hashCode();
+    
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KNode#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    AbstractProcedure getParent( final UnitOfWork transaction ) throws KException;
 
     /**
      * The resolver of a {@link TabularResultSet}.

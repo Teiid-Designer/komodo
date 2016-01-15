@@ -42,6 +42,14 @@ public interface PushdownFunction extends Function {
      * The type identifier.
      */
     int TYPE_ID = PushdownFunction.class.hashCode();
+    
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.KNode#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    Model getParent( final UnitOfWork transaction ) throws KException;
 
     /**
      * The resolver of a {@link PushdownFunction}.
