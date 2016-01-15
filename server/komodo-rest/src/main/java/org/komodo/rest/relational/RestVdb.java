@@ -14,6 +14,7 @@ import org.komodo.rest.KomodoService;
 import org.komodo.rest.RestBasicEntity;
 import org.komodo.rest.RestLink;
 import org.komodo.rest.RestLink.LinkType;
+import org.komodo.rest.relational.KomodoRestUriBuilder.SettingNames;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
@@ -87,12 +88,14 @@ public final class RestVdb extends RestBasicEntity {
             setXml(xml);
         }
 
-        addLink(new RestLink(LinkType.SELF, getUriBuilder().buildVdbUri(LinkType.SELF, getId())));
-        addLink(new RestLink(LinkType.PARENT, getUriBuilder().buildVdbUri(LinkType.PARENT, getId())));
-        addLink(new RestLink(LinkType.IMPORTS, getUriBuilder().buildVdbUri(LinkType.IMPORTS, getId())));
-        addLink(new RestLink(LinkType.MODELS, getUriBuilder().buildVdbUri(LinkType.MODELS, getId())));
-        addLink(new RestLink(LinkType.TRANSLATORS, getUriBuilder().buildVdbUri(LinkType.TRANSLATORS, getId())));
-        addLink(new RestLink(LinkType.DATA_ROLES, getUriBuilder().buildVdbUri(LinkType.DATA_ROLES, getId())));
+        Properties settings = getUriBuilder().createSettings(SettingNames.VDB_NAME, getId());
+
+        addLink(new RestLink(LinkType.SELF, getUriBuilder().buildVdbUri(LinkType.SELF, settings)));
+        addLink(new RestLink(LinkType.PARENT, getUriBuilder().buildVdbUri(LinkType.PARENT, settings)));
+        addLink(new RestLink(LinkType.IMPORTS, getUriBuilder().buildVdbUri(LinkType.IMPORTS, settings)));
+        addLink(new RestLink(LinkType.MODELS, getUriBuilder().buildVdbUri(LinkType.MODELS, settings)));
+        addLink(new RestLink(LinkType.TRANSLATORS, getUriBuilder().buildVdbUri(LinkType.TRANSLATORS, settings)));
+        addLink(new RestLink(LinkType.DATA_ROLES, getUriBuilder().buildVdbUri(LinkType.DATA_ROLES, settings)));
     }
 
     /**

@@ -163,7 +163,7 @@ public class CommandResultImpl implements CommandResult {
     public void setPersistable( final boolean newPersistable ) {
         this.persistable = newPersistable;
     }
-    
+
     /**
      * {@inheritDoc}
      *
@@ -177,7 +177,7 @@ public class CommandResultImpl implements CommandResult {
             buff.append("isOK : true");  //$NON-NLS-1$
         } else {
             buff.append("isOk : false");  //$NON-NLS-1$
-            buff.append("msg  : "+getMessage());  //$NON-NLS-1$
+            buff.append(" msg  : " + getMessage());  //$NON-NLS-1$
         }
         return buff.toString();
     }

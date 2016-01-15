@@ -40,7 +40,7 @@ public class ConditionCommandProvider implements ShellCommandProvider {
 
         result.add( SetConditionPropertyCommand.class );
         result.add( UnsetConditionPropertyCommand.class );
-        result.add( RenameChildCommand.class );
+        result.add( ConditionRenameCommand.class );
 
         return result;
     }
@@ -58,12 +58,6 @@ public class ConditionCommandProvider implements ShellCommandProvider {
             return Condition.RESOLVER.resolve(uow, kObj);
         }
         return null;
-    }
-
-    @Override
-    public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        final Condition resolved = resolve( uow, kObj );
-        return ( ( resolved == null ) ? null : resolved.getTypeDisplayName() );
     }
 
     /**

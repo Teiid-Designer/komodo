@@ -40,7 +40,7 @@ public class MaskCommandProvider implements ShellCommandProvider {
 
         result.add( SetMaskPropertyCommand.class );
         result.add( UnsetMaskPropertyCommand.class );
-        result.add( RenameChildCommand.class );
+        result.add( MaskRenameCommand.class );
 
         return result;
     }
@@ -58,18 +58,6 @@ public class MaskCommandProvider implements ShellCommandProvider {
             return Mask.RESOLVER.resolve(uow, kObj);
         }
         return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.ShellCommandProvider#getTypeDisplay(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      org.komodo.spi.repository.KomodoObject)
-     */
-    @Override
-    public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        final Mask resolved = resolve( uow, kObj );
-        return ( ( resolved == null ) ? null : resolved.getTypeDisplayName() );
     }
 
     /**

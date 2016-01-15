@@ -104,6 +104,13 @@ public final class UniqueConstraintImplTest extends RelationalModelTest {
         }
     }
 
+    @Test
+    public void shouldRename() throws Exception {
+        final String newName = "blah";
+        this.uniqueConstraint.rename( getTransaction(), newName );
+        assertThat( this.uniqueConstraint.getName( getTransaction() ), is( newName ) );
+    }
+
     /*
      * ********************************************************************
      * *****                  Resolver Tests                          *****

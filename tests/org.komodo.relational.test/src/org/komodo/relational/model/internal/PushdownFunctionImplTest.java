@@ -119,6 +119,13 @@ public final class PushdownFunctionImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldRename() throws Exception {
+        final String newName = "blah";
+        this.function.rename( getTransaction(), newName );
+        assertThat( this.function.getName( getTransaction() ), is( newName ) );
+    }
+
+    @Test
     public void shouldSetDataTypeResultSet() throws Exception {
         assertThat( this.function.setResultSet( getTransaction(), DataTypeResultSet.class ), is( notNullValue() ) );
         assertThat( this.function.getResultSet( getTransaction() ), is( instanceOf( DataTypeResultSet.class ) ) );

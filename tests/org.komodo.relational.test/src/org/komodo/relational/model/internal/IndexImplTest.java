@@ -153,6 +153,13 @@ public final class IndexImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldRename() throws Exception {
+        final String newName = "blah";
+        this.index.rename( getTransaction(), newName );
+        assertThat( this.index.getName( getTransaction() ), is( newName ) );
+    }
+
+    @Test
     public void shouldSetExpression() throws Exception {
         final String value = "expression";
         this.index.setExpression( getTransaction(), value );

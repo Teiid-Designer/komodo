@@ -40,8 +40,9 @@ public class PushdownFunctionCommandProvider implements ShellCommandProvider {
 
         result.add( AddParameterCommand.class );
         result.add( DeleteParameterCommand.class );
-        result.add( SetResultSetCommand.class );
+        result.add( PushdownFunctionRenameCommand.class );
         result.add( RemoveResultSetCommand.class );
+        result.add( SetResultSetCommand.class );
         result.add( SetPushdownFunctionPropertyCommand.class );
         result.add( UnsetPushdownFunctionPropertyCommand.class );
 
@@ -61,18 +62,6 @@ public class PushdownFunctionCommandProvider implements ShellCommandProvider {
             return PushdownFunction.RESOLVER.resolve(uow, kObj);
         }
         return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.ShellCommandProvider#getTypeDisplay(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      org.komodo.spi.repository.KomodoObject)
-     */
-    @Override
-    public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        final PushdownFunction resolved = resolve( uow, kObj );
-        return ( ( resolved == null ) ? null : resolved.getTypeDisplayName() );
     }
 
     /**

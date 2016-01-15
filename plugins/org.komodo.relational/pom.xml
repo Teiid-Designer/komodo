@@ -47,6 +47,16 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
             <artifactId>org.komodo.utils</artifactId>
             <version>${project.version}</version>
         </dependency>
+	    <dependency>
+            <groupId>org.jboss.tools.komodo.plugins</groupId>
+            <artifactId>org.komodo.shell</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+	    <dependency>
+            <groupId>org.jboss.tools.komodo.plugins</groupId>
+            <artifactId>org.komodo.shell-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 	</dependencies>
  
     <build>

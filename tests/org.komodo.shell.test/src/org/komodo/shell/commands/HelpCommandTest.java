@@ -73,5 +73,6 @@ public class HelpCommandTest extends AbstractCommandTest {
     	assertTabCompletion("help show-s", candidates);
 
     	assertTabCompletion("help ", Arrays.asList(wsStatus.getAvailableCommandNames()));
+    	
     }
 }

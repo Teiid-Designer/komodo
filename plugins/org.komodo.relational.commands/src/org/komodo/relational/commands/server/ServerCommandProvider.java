@@ -49,6 +49,7 @@ public class ServerCommandProvider implements ShellCommandProvider {
 
         result.add( ServerConnectCommand.class );
         result.add( ServerDisconnectCommand.class );
+        result.add( ServerRenameCommand.class );
         result.add( ServerSetCommand.class );
         result.add( ServerVdbsCommand.class );
         result.add( ServerTranslatorsCommand.class );
@@ -81,18 +82,6 @@ public class ServerCommandProvider implements ShellCommandProvider {
             return Teiid.RESOLVER.resolve(uow, kObj);
         }
         return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.ShellCommandProvider#getTypeDisplay(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      org.komodo.spi.repository.KomodoObject)
-     */
-    @Override
-    public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        final Teiid resolved = resolve( uow, kObj );
-        return ( ( resolved == null ) ? null : resolved.getTypeDisplayName() );
     }
 
     /**

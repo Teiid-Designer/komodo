@@ -350,16 +350,6 @@ public abstract class RelationalObjectImpl extends ObjectImpl implements Relatio
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.RelationalObject#getTypeDisplayName()
-     */
-    @Override
-    public String getTypeDisplayName() {
-        return org.komodo.relational.Messages.getString( getClass().getSimpleName() + ".typeName" ); //$NON-NLS-1$
-    }
-
-    /**
-     * {@inheritDoc}
-     *
      * @see org.komodo.repository.ObjectImpl#hasChild(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
      */
     @Override
@@ -426,13 +416,11 @@ public abstract class RelationalObjectImpl extends ObjectImpl implements Relatio
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        boolean result = super.hasChildren( transaction );
-
-        if ( result ) {
-            result = ( getChildren( transaction ).length != 0 ); // filtered children > 0
+        if ( super.hasChildren( transaction ) ) {
+            return ( getChildren( transaction ).length != 0 ); // filtered children > 0
         }
 
-        return result;
+        return false;
     }
 
     /**

@@ -16,9 +16,7 @@
 package org.komodo.relational.commands.condition;
 
 import static org.junit.Assert.assertEquals;
-
 import java.util.ArrayList;
-
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.vdb.Condition;
@@ -78,7 +76,7 @@ public class UnsetConditionPropertyCommandTest extends AbstractCommandTest {
         assertCommandResultOk(result);
 
 
-    	candidates.add(SetConditionPropertyCommand.CONSTRAINT);
+    	candidates.add(ConditionShellCommand.CONSTRAINT);
     	assertTabCompletion("unset-property CON", candidates);
     }
 

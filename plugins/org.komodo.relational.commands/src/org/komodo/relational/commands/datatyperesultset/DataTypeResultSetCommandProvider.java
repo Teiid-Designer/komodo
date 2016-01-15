@@ -40,7 +40,6 @@ public class DataTypeResultSetCommandProvider implements ShellCommandProvider {
 
         result.add( SetDataTypeResultSetPropertyCommand.class );
         result.add( UnsetDataTypeResultSetPropertyCommand.class );
-        result.add( RenameChildCommand.class );
 
         return result;
     }
@@ -58,18 +57,6 @@ public class DataTypeResultSetCommandProvider implements ShellCommandProvider {
             return DataTypeResultSet.RESOLVER.resolve(uow, kObj);
         }
         return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.ShellCommandProvider#getTypeDisplay(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      org.komodo.spi.repository.KomodoObject)
-     */
-    @Override
-    public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        final DataTypeResultSet resolved = resolve( uow, kObj );
-        return ( ( resolved == null ) ? null : resolved.getTypeDisplayName() );
     }
 
     /**

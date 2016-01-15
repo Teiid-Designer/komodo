@@ -117,6 +117,13 @@ public final class EntryImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldRename() throws Exception {
+        final String newName = "blah";
+        this.entry.rename( getTransaction(), newName );
+        assertThat( this.entry.getName( getTransaction() ), is( newName ) );
+    }
+
+    @Test
     public void shouldSetDescription() throws Exception {
         final String newValue = "newDescription";
         this.entry.setDescription( getTransaction(), newValue );

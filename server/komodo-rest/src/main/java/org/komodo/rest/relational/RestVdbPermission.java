@@ -8,6 +8,7 @@
 package org.komodo.rest.relational;
 
 import java.net.URI;
+import java.util.Properties;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Permission;
 import org.komodo.relational.vdb.Vdb;
@@ -15,6 +16,7 @@ import org.komodo.rest.KomodoService;
 import org.komodo.rest.RestBasicEntity;
 import org.komodo.rest.RestLink;
 import org.komodo.rest.RestLink.LinkType;
+import org.komodo.rest.relational.KomodoRestUriBuilder.SettingNames;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.ArgCheck;
@@ -136,10 +138,14 @@ public final class RestVdbPermission extends RestBasicEntity {
         ArgCheck.isNotNull(vdb);
         String vdbName = vdb.getName(uow);
 
-        addLink(new RestLink(LinkType.SELF, getUriBuilder().buildVdbPermissionUri(LinkType.SELF, vdbName, dataRoleName, getId())));
-        addLink(new RestLink(LinkType.PARENT, getUriBuilder().buildVdbPermissionUri(LinkType.PARENT, vdbName, dataRoleName, getId())));
-        addLink(new RestLink(LinkType.CONDITIONS, getUriBuilder().buildVdbPermissionUri(LinkType.CONDITIONS, vdbName, dataRoleName, getId())));
-        addLink(new RestLink(LinkType.MASKS, getUriBuilder().buildVdbPermissionUri(LinkType.MASKS, vdbName, dataRoleName, getId())));
+        Properties settings = getUriBuilder().createSettings(SettingNames.VDB_NAME, vdbName);
+        getUriBuilder().addSetting(settings, SettingNames.DATA_ROLE_ID, dataRoleName);
+        getUriBuilder().addSetting(settings, SettingNames.PERMISSION_ID, getId());
+
+        addLink(new RestLink(LinkType.SELF, getUriBuilder().buildVdbPermissionUri(LinkType.SELF, settings)));
+        addLink(new RestLink(LinkType.PARENT, getUriBuilder().buildVdbPermissionUri(LinkType.PARENT, settings)));
+        addLink(new RestLink(LinkType.CONDITIONS, getUriBuilder().buildVdbPermissionUri(LinkType.CONDITIONS, settings)));
+        addLink(new RestLink(LinkType.MASKS, getUriBuilder().buildVdbPermissionUri(LinkType.MASKS, settings)));
     }
 
     /**

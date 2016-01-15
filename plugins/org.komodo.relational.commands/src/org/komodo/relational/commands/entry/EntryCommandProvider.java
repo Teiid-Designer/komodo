@@ -40,7 +40,7 @@ public class EntryCommandProvider implements ShellCommandProvider {
 
         result.add( SetEntryPropertyCommand.class );
         result.add( UnsetEntryPropertyCommand.class );
-        result.add( RenameChildCommand.class );
+        result.add( EntryRenameCommand.class );
 
         return result;
     }
@@ -58,12 +58,6 @@ public class EntryCommandProvider implements ShellCommandProvider {
             return Entry.RESOLVER.resolve(uow, kObj);
         }
         return null;
-    }
-
-    @Override
-    public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        final Entry resolved = resolve( uow, kObj );
-        return ( ( resolved == null ) ? null : resolved.getTypeDisplayName() );
     }
 
     /**

@@ -16,9 +16,7 @@
 package org.komodo.relational.commands.vdbimport;
 
 import static org.junit.Assert.assertEquals;
-
 import java.util.ArrayList;
-
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.vdb.Vdb;
@@ -64,7 +62,7 @@ public final class UnsetVdbImportPropertyCommandTest extends AbstractCommandTest
     	final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
-    	candidates.add(SetVdbImportPropertyCommand.VERSION);
+    	candidates.add(VdbImportShellCommand.VERSION);
     	assertTabCompletion("unset-property VE", candidates);
     	assertTabCompletion("unset-property Ve", candidates);
     }

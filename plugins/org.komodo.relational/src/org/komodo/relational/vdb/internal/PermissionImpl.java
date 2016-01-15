@@ -9,9 +9,6 @@ package org.komodo.relational.vdb.internal;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.jcr.RepositoryException;
-
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalModelFactory;
@@ -86,6 +83,73 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#getChild(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String)
+     */
+    @Override
+    public KomodoObject getChild( final UnitOfWork transaction,
+                                  final String name ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state must be NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
+
+        // check conditions
+        KomodoObject[] matches = getConditions( transaction, name );
+
+        if ( matches.length != 0 ) {
+            return matches[ 0 ];
+        }
+
+        matches = getMasks( transaction, name );
+
+        if ( matches.length != 0 ) {
+            return matches[ 0 ];
+        }
+
+        // child does not exist
+        throw new KException( Messages.getString( org.komodo.repository.Messages.Komodo.CHILD_NOT_FOUND,
+                                                  name,
+                                                  getAbsolutePath() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#getChild(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String, java.lang.String)
+     */
+    @Override
+    public KomodoObject getChild( final UnitOfWork transaction,
+                                  final String name,
+                                  final String typeName ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state must be NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( typeName, "typeName" ); //$NON-NLS-1$
+
+        if ( VdbLexicon.DataRole.Permission.Condition.CONDITION.equals( typeName ) ) {
+            final KomodoObject[] conditions = getConditions( transaction, name );
+
+            if ( conditions.length != 0 ) {
+                return conditions[ 0 ];
+            }
+        } else if ( VdbLexicon.DataRole.Permission.Mask.MASK.equals( typeName ) ) {
+            final KomodoObject[] masks = getMasks( transaction, name );
+
+            if ( masks.length != 0 ) {
+                return masks[ 0 ];
+            }
+        }
+
+        // child does not exist
+        throw new KException( Messages.getString( org.komodo.repository.Messages.Komodo.CHILD_NOT_FOUND,
+                                                  name,
+                                                  getAbsolutePath() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.repository.ObjectImpl#getChildTypes()
      */
     @Override
@@ -114,7 +178,9 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
                 }
 
                 return new KomodoObject[] { grouping };
-            } else if ( VdbLexicon.DataRole.Permission.MASKS.equals( namePatterns[ 0 ] ) ) {
+            }
+
+            if ( VdbLexicon.DataRole.Permission.MASKS.equals( namePatterns[ 0 ] ) ) {
                 final KomodoObject grouping = getMasksGroupingNode( transaction );
 
                 if ( grouping == null ) {
@@ -195,10 +261,10 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
 
     private KomodoObject getConditionsGroupingNode( final UnitOfWork transaction ) {
         try {
-            if ( hasChild( transaction, VdbLexicon.DataRole.Permission.CONDITIONS, VdbLexicon.DataRole.Permission.CONDITIONS ) ) {
-                return super.getChild( transaction,
-                                       VdbLexicon.DataRole.Permission.CONDITIONS,
-                                       VdbLexicon.DataRole.Permission.CONDITIONS );
+            if ( hasRawChild( transaction,
+                              VdbLexicon.DataRole.Permission.CONDITIONS,
+                              VdbLexicon.DataRole.Permission.CONDITIONS ) ) {
+                return getRawChildren( transaction, VdbLexicon.DataRole.Permission.CONDITIONS )[ 0 ];
             }
         } catch ( final KException e ) {
             // nothing to do
@@ -241,10 +307,8 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
 
     private KomodoObject getMasksGroupingNode( final UnitOfWork transaction ) {
         try {
-            if ( hasChild( transaction, VdbLexicon.DataRole.Permission.MASKS, VdbLexicon.DataRole.Permission.MASKS ) ) {
-                return super.getChild( transaction,
-                                       VdbLexicon.DataRole.Permission.MASKS,
-                                       VdbLexicon.DataRole.Permission.MASKS );
+            if ( hasRawChild( transaction, VdbLexicon.DataRole.Permission.MASKS, VdbLexicon.DataRole.Permission.MASKS ) ) {
+                return getRawChildren( transaction, VdbLexicon.DataRole.Permission.MASKS )[ 0 ];
             }
         } catch ( final KException e ) {
             // nothing to do
@@ -291,6 +355,17 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#hasChild(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     */
+    @Override
+    public boolean hasChild( final UnitOfWork transaction,
+                             final String name ) throws KException {
+        return ( ( getConditions( transaction, name ).length != 0 ) || ( getMasks( transaction, name ).length != 0 ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.relational.internal.RelationalObjectImpl#hasChild(org.komodo.spi.repository.Repository.UnitOfWork,
      *      java.lang.String, java.lang.String)
      */
@@ -303,33 +378,29 @@ public final class PermissionImpl extends RelationalObjectImpl implements Permis
         ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( typeName, "typeName" ); //$NON-NLS-1$
 
-        if ( VdbLexicon.DataRole.Permission.CONDITIONS.equals( name ) ) {
-            if ( !VdbLexicon.DataRole.Permission.CONDITIONS.equals( typeName ) ) {
-                throw new KException( Messages.getString( Relational.INVALID_GROUPING_NODE_TYPE,
-                                                          VdbLexicon.DataRole.Permission.CONDITIONS,
-                                                          typeName ) );
-            }
-
-            try {
-                return node( transaction ).hasNode( VdbLexicon.DataRole.Permission.CONDITIONS );
-            } catch ( final RepositoryException e ) {
-                throw new KException( e );
-            }
-        } else if ( VdbLexicon.DataRole.Permission.MASKS.equals( name ) ) {
-            if ( !VdbLexicon.DataRole.Permission.MASKS.equals( typeName ) ) {
-                throw new KException( Messages.getString( Relational.INVALID_GROUPING_NODE_TYPE,
-                                                          VdbLexicon.DataRole.Permission.MASKS,
-                                                          typeName ) );
-            }
-
-            try {
-                return node( transaction ).hasNode( VdbLexicon.DataRole.Permission.MASKS );
-            } catch ( final RepositoryException e ) {
-                throw new KException( e );
-            }
+        if ( VdbLexicon.DataRole.Permission.Condition.CONDITION.equals( typeName ) ) {
+            return ( getConditions( transaction, name ).length != 0 );
         }
 
-        return super.hasChild( transaction, name, typeName );
+        if ( VdbLexicon.DataRole.Permission.Mask.MASK.equals( typeName ) ) {
+            return ( getMasks( transaction, name ).length != 0 );
+        }
+
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#hasChildren(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public boolean hasChildren( UnitOfWork transaction ) throws KException {
+        if ( super.hasChildren( transaction ) ) {
+            return ( ( getConditions( transaction ).length != 0 ) || ( getMasks( transaction ).length != 0 ) );
+        }
+
+        return false;
     }
 
     /**

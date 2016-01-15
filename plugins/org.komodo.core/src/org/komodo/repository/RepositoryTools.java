@@ -64,8 +64,14 @@ public class RepositoryTools implements StringConstants {
         String relPath = path.replaceAll("^/+", "").replaceAll("/+$", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 
         // Look for the KomodoObject first ...
-        if (parent.hasChild(transaction, relPath, defaultType))
-            return parent.getChild(transaction, relPath, defaultType);
+        if ( parent.hasRawChild( transaction, relPath, defaultType ) ) {
+            for ( final KomodoObject kid : parent.getRawChildren( transaction, relPath ) ) {
+                if ( defaultType.equals( kid.getPrimaryType( transaction ).getName() )
+                     || kid.hasDescriptor( transaction, defaultType ) ) {
+                    return kid;
+                }
+            }
+        }
 
         // Create the KomodoObject, which has to be done segment by segment ...
         String[] pathSegments = relPath.split("/"); //$NON-NLS-1$
@@ -74,9 +80,9 @@ public class RepositoryTools implements StringConstants {
             String pathSegment = pathSegments[i];
             pathSegment = pathSegment.trim();
             if (pathSegment.length() == 0) continue;
-            if (komodoObject.hasChild(transaction, pathSegment)) {
+            if (komodoObject.hasRawChild(transaction, pathSegment)) {
                 // Find the existing KomodoObject ...
-                komodoObject = komodoObject.getChild(transaction, pathSegment);
+                komodoObject = parent.getRawChildren( transaction, pathSegment )[ 0 ];
             } else {
                 // Make sure there is no index on the final segment ...
                 String pathSegmentWithNoIndex = pathSegment.replaceAll("(\\[\\d+\\])+$", ""); //$NON-NLS-1$ //$NON-NLS-2$
@@ -284,7 +290,11 @@ public class RepositoryTools implements StringConstants {
                 buffer.append(indent + TAB + AT + getDisplayNameAndValue(transaction, property) + NEW_LINE);
             }
 
-            KomodoObject[] children = object.getChildren(transaction);
+            //
+            // Avoid relational filters of object's children
+            //
+            ObjectImpl bareObject = new ObjectImpl(object.getRepository(), object.getAbsolutePath(), object.getIndex());
+            KomodoObject[] children = bareObject.getChildren(transaction);
             for (int i = 0; i < children.length; ++i)
                 children[i].accept(transaction, this);
 

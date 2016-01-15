@@ -59,12 +59,6 @@ public class ResultSetColumnCommandProvider implements ShellCommandProvider {
         return null;
     }
 
-    @Override
-    public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        final ResultSetColumn resolved = resolve( uow, kObj );
-        return ( ( resolved == null ) ? null : resolved.getTypeDisplayName() );
-    }
-
     /**
      * {@inheritDoc}
      *

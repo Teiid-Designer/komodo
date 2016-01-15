@@ -24,6 +24,7 @@ package org.komodo.repository;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+
 import org.komodo.core.KomodoLexicon;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.spi.constants.StringConstants;
@@ -119,6 +120,8 @@ public class KomodoTypeRegistry implements StringConstants {
         index(KomodoType.COLUMN, TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
 
         index(KomodoType.DATA_TYPE_RESULT_SET, TeiidDdlLexicon.CreateProcedure.RESULT_DATA_TYPE);
+
+        index(KomodoType.DATASOURCE, KomodoLexicon.DataSource.NODE_TYPE);
 
         index(KomodoType.FOREIGN_KEY, TeiidDdlLexicon.Constraint.FOREIGN_KEY_CONSTRAINT);
 

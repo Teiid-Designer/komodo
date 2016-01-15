@@ -40,7 +40,7 @@ public class VdbImportCommandProvider implements ShellCommandProvider {
 
         result.add( SetVdbImportPropertyCommand.class );
         result.add( UnsetVdbImportPropertyCommand.class );
-        result.add( RenameChildCommand.class );
+        result.add( VdbImportRenameCommand.class );
 
         return result;
     }
@@ -58,18 +58,6 @@ public class VdbImportCommandProvider implements ShellCommandProvider {
             return VdbImport.RESOLVER.resolve(uow, kObj);
         }
         return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.ShellCommandProvider#getTypeDisplay(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      org.komodo.spi.repository.KomodoObject)
-     */
-    @Override
-    public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        final VdbImport resolved = resolve( uow, kObj );
-        return ( ( resolved == null ) ? null : resolved.getTypeDisplayName() );
     }
 
     /**

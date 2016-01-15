@@ -8,18 +8,22 @@
 package org.komodo.relational.commands;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
 import org.komodo.relational.RelationalObject;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.KomodoTypeRegistry;
+import org.komodo.repository.ObjectImpl;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.KomodoObjectLabelProvider;
 import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.utils.StringUtils;
 import org.komodo.utils.i18n.I18n;
@@ -152,7 +156,14 @@ public final class FindCommand extends RelationalShellCommand {
             return searchResults;
         }
 
-        final KomodoObjectLabelProvider labelProvider = wsStatus.getLabelProvider();
+        KomodoObject unknownObject=new ObjectImpl(wsStatus.getCurrentContext().getRepository(), searchResults[0], 0);
+        KomodoObject resolvedObject=wsStatus.resolve(unknownObject);
+        KomodoObjectLabelProvider labelProvider;
+        if(resolvedObject == null){
+        	labelProvider = wsStatus.getCurrentContextLabelProvider();
+        }else{
+            labelProvider = wsStatus.getObjectLabelProvider(resolvedObject);
+        }
         final String[] result = new String[ searchResults.length ];
         int i = 0;
         for ( final String absolutePath : searchResults ) {

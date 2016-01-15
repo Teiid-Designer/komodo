@@ -111,6 +111,7 @@ public final class ServerCommandsI18n extends I18n {
     public static String missingDatasourceName;
     public static String missingDatasourceTypeName;
     public static String missingServerNameArg;
+    public static String missingServerNewNameArg;
     public static String missingTranslatorName;
     public static String notConnected;
     public static String noServerToDisconnectMsg;

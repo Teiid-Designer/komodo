@@ -28,7 +28,7 @@ public abstract class AbstractServerCommandTest extends AbstractCommandTest {
     protected static final TeiidDataSource DS2 = mock(TeiidDataSource.class);
     protected static final String DS_TYPE1 = "DS_TYPE1";
     protected static final String DS_TYPE2 = "DS_TYPE2";
-    
+
     // Mock server artifact returns
     static {
         // VDBs
@@ -44,7 +44,7 @@ public abstract class AbstractServerCommandTest extends AbstractCommandTest {
         when(VDB2.getModelNames()).thenReturn(Arrays.asList(new String[]{"Model1","Model2"}));
         when(VDB1.getProperties()).thenReturn(new Properties());
         when(VDB2.getProperties()).thenReturn(new Properties());
-        
+
         // Translators
         when(TRANSLATOR1.getName()).thenReturn("TRANSLATOR1");
         when(TRANSLATOR2.getName()).thenReturn("TRANSLATOR2");
@@ -52,7 +52,7 @@ public abstract class AbstractServerCommandTest extends AbstractCommandTest {
         when(TRANSLATOR2.getType()).thenReturn("salesforce");
         when(TRANSLATOR1.getProperties()).thenReturn(new Properties());
         when(TRANSLATOR2.getProperties()).thenReturn(new Properties());
-        
+
         // DataSources
         when(DS1.getName()).thenReturn("DS1");
         when(DS2.getName()).thenReturn("DS2");
@@ -68,15 +68,15 @@ public abstract class AbstractServerCommandTest extends AbstractCommandTest {
      * Inits a mock server for the test
      * @param teiidName the name for the server
      * @param makeDefaultServer 'true' to set the server as the workspace default
-     * @param serverConnected 'true' if the server state is 'connected', 'false' if not connected. 
+     * @param serverConnected 'true' if the server state is 'connected', 'false' if not connected.
      * @param vdbs the server VDBs
      * @param dataSources the server Datasources
      * @param translators the server Translators
      * @param dataSourceTypes the server Datasource Types
      * @throws Exception
      */
-    protected void initServer(String teiidName, boolean makeDefaultServer, boolean serverConnected, 
-                              TeiidVdb[] vdbs, TeiidDataSource[] dataSources, 
+    protected void initServer(String teiidName, boolean makeDefaultServer, boolean serverConnected,
+                              TeiidVdb[] vdbs, TeiidDataSource[] dataSources,
                               TeiidTranslator[] translators, String[] dataSourceTypes) throws Exception {
         // Set up the Teiid mock instance
         Teiid teiid = mock(Teiid.class);
@@ -90,7 +90,7 @@ public abstract class AbstractServerCommandTest extends AbstractCommandTest {
             wsStatus.setStateObject(ServerCommandProvider.SERVER_DEFAULT_KEY, teiid);
         }
         _repo.add(getTransaction(), null, teiidName, KomodoLexicon.Teiid.NODE_TYPE);
-        
+
         // The TeiidInstance
         TeiidInstance teiidInstance = mock(TeiidInstance.class);
         when(teiid.getTeiidInstance(getTransaction())).thenReturn(teiidInstance);
@@ -101,7 +101,7 @@ public abstract class AbstractServerCommandTest extends AbstractCommandTest {
         when(teiidInstance.dataSourceExists("myDs")).thenReturn(false);
         when(teiidInstance.dataSourceExists("DS1")).thenReturn(true);
         when(teiidInstance.dataSourceExists("DS2")).thenReturn(true);
-        
+
         // TeiidPropertyDefinitions
         TeiidPropertyDefinition propDefn1 = mock(TeiidPropertyDefinition.class);
         when(propDefn1.getDisplayName()).thenReturn("Prop1");
@@ -111,7 +111,7 @@ public abstract class AbstractServerCommandTest extends AbstractCommandTest {
         when(propDefn2.getDefaultValue()).thenReturn("Value2");
         when(teiidInstance.getTemplatePropertyDefns(DS_TYPE1)).thenReturn(Arrays.asList(new TeiidPropertyDefinition[]{propDefn1,propDefn2}));
         when(teiidInstance.getTemplatePropertyDefns(DS_TYPE2)).thenReturn(Arrays.asList(new TeiidPropertyDefinition[]{propDefn1,propDefn2}));
-             
+
         // The returned objects
         if(vdbs!=null) when(teiidInstance.getVdbs()).thenReturn(Arrays.asList(vdbs));
         if(vdbs!=null) when(teiidInstance.getVdb(VDB1.getName())).thenReturn(VDB1);
@@ -119,13 +119,13 @@ public abstract class AbstractServerCommandTest extends AbstractCommandTest {
         if(dataSources!=null) when(teiidInstance.getDataSources()).thenReturn(Arrays.asList(dataSources));
         if(dataSources!=null) when(teiidInstance.getDataSource(DS1.getName())).thenReturn(DS1);
         if(dataSources!=null) when(teiidInstance.getDataSource(DS2.getName())).thenReturn(DS2);
-        if(dataSourceTypes!=null) when(teiidInstance.getDataSourceTypeNames()).thenReturn(new HashSet(Arrays.asList(dataSourceTypes)));
+        if(dataSourceTypes!=null) when(teiidInstance.getDataSourceTypeNames()).thenReturn(new HashSet< String >(Arrays.asList(dataSourceTypes)));
         if(translators!=null) when(teiidInstance.getTranslators()).thenReturn(Arrays.asList(translators));
         if(translators!=null) when(teiidInstance.getTranslator(TRANSLATOR1.getName())).thenReturn(TRANSLATOR1);
         if(translators!=null) when(teiidInstance.getTranslator(TRANSLATOR2.getName())).thenReturn(TRANSLATOR2);
-        
+
         // Initing the server may change the commands that are available
         wsStatus.updateAvailableCommands();
     }
-    
+
 }

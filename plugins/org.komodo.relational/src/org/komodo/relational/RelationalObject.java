@@ -129,9 +129,4 @@ public interface RelationalObject extends KomodoObject {
      */
     void setFilters( final Filter[] newFilters );
 
-    /**
-     * @return the short name of the object type used for display purposes (never empty)
-     */
-    String getTypeDisplayName();
-
 }

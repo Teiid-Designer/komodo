@@ -125,6 +125,13 @@ public final class PrimaryKeyImplTest extends RelationalModelTest {
         }
     }
 
+    @Test
+    public void shouldRename() throws Exception {
+        final String newName = "blah";
+        this.primaryKey.rename( getTransaction(), newName );
+        assertThat( this.primaryKey.getName( getTransaction() ), is( newName ) );
+    }
+
     /*
      * ********************************************************************
      * *****                  Resolver Tests                          *****

@@ -16,9 +16,7 @@
 package org.komodo.relational.commands.schema;
 
 import static org.junit.Assert.assertEquals;
-
 import java.util.ArrayList;
-
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Schema;
@@ -60,7 +58,7 @@ public final class UnsetSchemaPropertyCommandTest extends AbstractCommandTest {
     	final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
-    	candidates.add(SetSchemaPropertyCommand.RENDITION);
+    	candidates.add(SchemaShellCommand.RENDITION);
     	assertTabCompletion("unset-property REN", candidates);
     	assertTabCompletion("unset-property Ren", candidates);
     }

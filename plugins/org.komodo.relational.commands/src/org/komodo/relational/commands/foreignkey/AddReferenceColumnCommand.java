@@ -8,6 +8,7 @@
 package org.komodo.relational.commands.foreignkey;
 
 import java.util.List;
+
 import org.komodo.relational.commands.FindCommand;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.ForeignKey;
@@ -53,7 +54,7 @@ public final class AddReferenceColumnCommand extends ForeignKeyShellCommand {
             // get reference of the column at the specified path
             Column column = null;
             { // see if valid column
-                String repoPath = getWorkspaceStatus().getLabelProvider().getPath( columnPath );
+                String repoPath = getWorkspaceStatus().getCurrentContextLabelProvider().getPath( columnPath );
 
                 if ( StringUtils.isBlank( repoPath ) ) {
                     repoPath = columnPath;
@@ -83,7 +84,7 @@ public final class AddReferenceColumnCommand extends ForeignKeyShellCommand {
                 if ( parentTable.equals( column.getParent( getTransaction() ) ) ) {
                     result = new CommandResultImpl( false,
                                                     I18n.bind( ForeignKeyCommandsI18n.invalidColumn,
-                                                               getWorkspaceStatus().getLabelProvider()
+                                                               getWorkspaceStatus().getCurrentContextLabelProvider()
                                                                                    .getDisplayPath( column.getAbsolutePath() ),
                                                                foreignKey.getName( getTransaction() ) ),
                                                     null );
@@ -161,7 +162,7 @@ public final class AddReferenceColumnCommand extends ForeignKeyShellCommand {
 
             final Table parent = getForeignKey().getTable( uow );
             final String parentPath = parent.getAbsolutePath();
-            final String parentDisplayPath = getWorkspaceStatus().getLabelProvider().getDisplayPath( parentPath );
+            final String parentDisplayPath = getWorkspaceStatus().getCurrentContextLabelProvider().getDisplayPath( parentPath );
 
             // only add columns NOT found in the parent table
             for ( final String displayPath : allDisplayPaths ) {

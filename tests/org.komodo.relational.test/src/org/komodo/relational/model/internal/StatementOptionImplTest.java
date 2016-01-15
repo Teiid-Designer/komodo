@@ -14,9 +14,9 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Test;
+import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalObject.Filter;
-import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.RelationalProperty;
 import org.komodo.relational.internal.RelationalObjectImpl;
@@ -106,6 +106,13 @@ public final class StatementOptionImplTest extends RelationalModelTest {
                 assertThat( filter.rejectProperty( name ), is( false ) );
             }
         }
+    }
+
+    @Test
+    public void shouldRename() throws Exception {
+        final String newName = "blah";
+        this.option.rename( getTransaction(), newName );
+        assertThat( this.option.getName( getTransaction() ), is( newName ) );
     }
 
     @Test

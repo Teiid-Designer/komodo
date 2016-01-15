@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+
 import org.komodo.core.KEngine;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
@@ -116,7 +117,7 @@ public interface WorkspaceStatus extends StringConstants {
      *         if an error occurs
      */
     Set<ShellCommand> getAvailableCommands() throws Exception;
-    
+
     /**
      * Update the available commands for the current context.
      */
@@ -151,7 +152,7 @@ public interface WorkspaceStatus extends StringConstants {
      *         if an error occurs
      */
     void setProvidedProperties( final Properties props ) throws Exception;
-    
+
     /**
      * Sets the specified provided property value in workspace properties.
      *
@@ -170,7 +171,7 @@ public interface WorkspaceStatus extends StringConstants {
      * @see #setProvidedProperty(String, String)
      */
     Properties getProvidedProperties();
-    
+
     /**
      * Sets global workspace properties on startup
      *
@@ -182,7 +183,7 @@ public interface WorkspaceStatus extends StringConstants {
     void setGlobalProperties( final Properties props ) throws Exception;
 
     /**
-     * Gets a copy of the global workspace properties.  This includes the defined global properties and defined hidden properties. 
+     * Gets a copy of the global workspace properties.  This includes the defined global properties and defined hidden properties.
      *
      * @return the global workspace properties (never <code>null</code> or empty)
      * @see #setGlobalProperty(String, String)
@@ -397,10 +398,17 @@ public interface WorkspaceStatus extends StringConstants {
     < T extends KomodoObject > T resolve ( final KomodoObject kObj ) throws KException;
 
     /**
-     * Get the label provider
+     * Get the label provider for current context
      * @return the current label provider (never <code>null</code>)
      */
-    KomodoObjectLabelProvider getLabelProvider();
+    KomodoObjectLabelProvider getCurrentContextLabelProvider();
+
+    /**
+     * Get the label provider for specified object
+     * @param KomodoObject to be processed by label provider
+     * @return the current label provider (never <code>null</code>)
+     */
+    KomodoObjectLabelProvider getObjectLabelProvider(KomodoObject kobject);
 
     /**
      * Get the object type string for display

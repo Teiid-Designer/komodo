@@ -17,9 +17,9 @@ import static org.mockito.Mockito.mock;
 import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
+import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalObject.Filter;
-import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.RelationalProperty;
 import org.komodo.relational.internal.RelationalObjectImpl;
@@ -175,6 +175,13 @@ public final class ForeignKeyImplTest extends RelationalModelTest {
 
         this.foreignKey.removeReferencesColumn( getTransaction(), columnA );
         assertThat( this.foreignKey.getReferencesColumns( getTransaction() ).length, is( 0 ) );
+    }
+
+    @Test
+    public void shouldRename() throws Exception {
+        final String newName = "blah";
+        this.foreignKey.rename( getTransaction(), newName );
+        assertThat( this.foreignKey.getName( getTransaction() ), is( newName ) );
     }
 
     @Test

@@ -40,9 +40,10 @@ public class StoredProcedureCommandProvider implements ShellCommandProvider {
 
         result.add( AddParameterCommand.class );
         result.add( DeleteParameterCommand.class );
-        result.add( SetResultSetCommand.class );
         result.add( RemoveResultSetCommand.class );
+        result.add( SetResultSetCommand.class );
         result.add( SetStoredProcedurePropertyCommand.class );
+        result.add( StoredProcedureRenameCommand.class );
         result.add( UnsetStoredProcedurePropertyCommand.class );
 
         return result;
@@ -61,18 +62,6 @@ public class StoredProcedureCommandProvider implements ShellCommandProvider {
             return StoredProcedure.RESOLVER.resolve(uow, kObj);
         }
         return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.ShellCommandProvider#getTypeDisplay(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      org.komodo.spi.repository.KomodoObject)
-     */
-    @Override
-    public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        final StoredProcedure resolved = resolve( uow, kObj );
-        return ( ( resolved == null ) ? null : resolved.getTypeDisplayName() );
     }
 
     /**

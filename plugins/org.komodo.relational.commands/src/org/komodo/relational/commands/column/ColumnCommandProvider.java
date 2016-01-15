@@ -40,7 +40,7 @@ public class ColumnCommandProvider implements ShellCommandProvider {
 
         result.add( SetColumnPropertyCommand.class );
         result.add( UnsetColumnPropertyCommand.class );
-        result.add( RenameChildCommand.class );
+        result.add( ColumnRenameCommand.class );
 
         return result;
     }
@@ -60,18 +60,6 @@ public class ColumnCommandProvider implements ShellCommandProvider {
         return null;
     }
 
-    @Override
-    public String getTypeDisplay ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
-        final Column resolved = resolve( uow, kObj );
-        return ( ( resolved == null ) ? null : resolved.getTypeDisplayName() );
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.shell.api.ShellCommandProvider#getStatusMessage(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      org.komodo.spi.repository.KomodoObject)
-     */
     @Override
     public String getStatusMessage ( final Repository.UnitOfWork uow, final KomodoObject kObj ) {
         return null;

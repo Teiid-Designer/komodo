@@ -117,6 +117,13 @@ public final class TranslatorImplTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldRename() throws Exception {
+        final String newName = "blah";
+        this.translator.rename( getTransaction(), newName );
+        assertThat( this.translator.getName( getTransaction() ), is( newName ) );
+    }
+
+    @Test
     public void shouldSetCustomProperty() throws Exception {
         final String propName = "custom";
         final String propValue = "value";

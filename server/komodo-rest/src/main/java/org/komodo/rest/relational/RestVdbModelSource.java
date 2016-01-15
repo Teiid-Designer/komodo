@@ -8,13 +8,16 @@
 package org.komodo.rest.relational;
 
 import java.net.URI;
+import java.util.Properties;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.vdb.ModelSource;
+import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.rest.KomodoService;
 import org.komodo.rest.RestBasicEntity;
 import org.komodo.rest.RestLink;
 import org.komodo.rest.RestLink.LinkType;
+import org.komodo.rest.relational.KomodoRestUriBuilder.SettingNames;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.ArgCheck;
@@ -53,7 +56,8 @@ public final class RestVdbModelSource extends RestBasicEntity {
         super(baseUri, source, uow);
 
         setJndiName(source.getJndiName(uow));
-        setTranslator(source.getTranslatorName(uow));
+        String translatorName = source.getTranslatorName(uow);
+        setTranslator(translatorName);
 
         Model model = ancestor(source, Model.class, uow);
         ArgCheck.isNotNull(model);
@@ -63,10 +67,19 @@ public final class RestVdbModelSource extends RestBasicEntity {
         ArgCheck.isNotNull(vdb);
         String vdbName = vdb.getName(uow);
 
-        addLink(new RestLink(LinkType.SELF, getUriBuilder().buildVdbModelSourceUri(LinkType.SELF, vdbName, modelName, getId())));
-        addLink(new RestLink(LinkType.PARENT, getUriBuilder().buildVdbModelSourceUri(LinkType.PARENT, vdbName, modelName, getId())));
-    }
+        Properties settings = getUriBuilder().createSettings(SettingNames.VDB_NAME, vdbName);
+        getUriBuilder().addSetting(settings, SettingNames.MODEL_NAME, modelName);
+        getUriBuilder().addSetting(settings, SettingNames.SOURCE_NAME, getId());
 
+        addLink(new RestLink(LinkType.SELF, getUriBuilder().buildVdbModelSourceUri(LinkType.SELF, settings)));
+        addLink(new RestLink(LinkType.PARENT, getUriBuilder().buildVdbModelSourceUri(LinkType.PARENT, settings)));
+
+        Translator[] translators = vdb.getTranslators(uow, translatorName);
+        if (translators != null && translators.length == 1) {
+            getUriBuilder().addSetting(settings, SettingNames.TRANSLATOR_NAME, translatorName);
+            addLink(new RestLink(LinkType.REFERENCE, getUriBuilder().buildVdbModelSourceUri(LinkType.REFERENCE, settings)));
+        }
+    }
 
     /**
      * @return the jndiName
