@@ -34,7 +34,9 @@ import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.KomodoTypeRegistry;
 import org.komodo.repository.KomodoTypeRegistry.TypeIdentifier;
+import org.komodo.repository.search.CompareClause;
 import org.komodo.repository.search.ComparisonOperator;
+import org.komodo.repository.search.ContainsClause;
 import org.komodo.repository.search.LogicalOperator;
 import org.komodo.repository.search.ObjectSearcher;
 import org.komodo.rest.KomodoRestException;
@@ -46,6 +48,7 @@ import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.Repository.KeywordCriteria;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.modeshape.jcr.api.JcrConstants;
@@ -117,7 +120,18 @@ public final class KomodoSearchService extends KomodoService {
         }
 
         if (contains != null) {
-            os.addWhereContainsClause(operator, ALIAS, STAR, contains);
+            //
+            // The jcr:name is not included in full-text searches in modeshape versions prior to 4.0
+            // so we need to create a combination clause that checks the properties and the name
+            // of each node. Cannot use jcr:name since its a modeshape pseudo-column but can use
+            // NAME(node).
+            //
+            ContainsClause clause1 = new ContainsClause(null, ALIAS, STAR, KeywordCriteria.ANY, STAR + contains + STAR);
+            // Use custom function property
+            CompareClause clause2 = new CompareClause(LogicalOperator.OR, null,
+                                                                                  "NAME" + OPEN_BRACKET + ALIAS + CLOSE_BRACKET, //$NON-NLS-1$
+                                                                                  ComparisonOperator.LIKE, PERCENT + contains + PERCENT);
+            os.addWhereParanthesisClause(operator, clause1, clause2);
             operator = LogicalOperator.AND;
         }
 

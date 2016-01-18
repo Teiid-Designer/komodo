@@ -13,13 +13,9 @@
     <packaging>eclipse-plugin</packaging>
 
     <properties>
-        <modeshape.version>4.4.0.Final</modeshape.version>
-        <infinispan.version>7.2.3.Final</infinispan.version>
-        <javax.servlet.version>3.1.0</javax.servlet.version>
-        <javax.jacc.version>1.0.0.Final</javax.jacc.version>
-        <joda.time.version>2.7</joda.time.version>
-        <mapdb.version>1.0.6</mapdb.version>
-        <tika.version>1.8</tika.version>
+        <modeshape.version>3.8.3.GA-redhat-8</modeshape.version>
+        <jcr.version>2.0</jcr.version>
+        <infinispan.version>5.2.10.Final</infinispan.version>
         <log4j.version>1.2.16</log4j.version>
         <slf4j.log4j.version>1.7.2</slf4j.log4j.version>
     </properties>
@@ -48,9 +44,10 @@
                                     <skip>false</skip>
                                     <stripVersion>true</stripVersion>
                                     <excludeGroupIds>
-                            			org.jboss.tools.komodo.plugins,
-                            			org.jboss.tools.komodo.plugins.libs
-                           			</excludeGroupIds>
+                                        org.jboss.tools.komodo.plugins,
+                                        org.jboss.tools.komodo.plugins.libs,
+                                        org.modeshape
+                                    </excludeGroupIds>
                                     <outputDirectory>${project.basedir}/libsrc</outputDirectory>
                                 </configuration>
                             </execution>
@@ -77,8 +74,9 @@
                             <stripVersion>true</stripVersion>
                             <overWriteIfNewer>false</overWriteIfNewer>
                             <excludeGroupIds>
-                            	org.jboss.tools.komodo.plugins,
-                            	org.jboss.tools.komodo.plugins.libs
+                                org.jboss.tools.komodo.plugins,
+                                org.jboss.tools.komodo.plugins.libs,
+                                org.modeshape
                             </excludeGroupIds>
                             <outputDirectory>${project.basedir}/lib</outputDirectory>
                         </configuration>
@@ -178,25 +176,59 @@
 
     <dependencyManagement>
         <dependencies>
-            <!-- Import the ModeShape BOM for embedded usage. This adds to 
-                the "dependenciesManagement" section defaults for all of the modules we might 
-                need, but we still have to include in the "dependencies" section the modules 
-                we DO need. The benefit is that we don't have to specify the versions of 
-                any of those modules. -->
             <dependency>
-                <groupId>org.modeshape.bom</groupId>
-                <artifactId>modeshape-bom-embedded</artifactId>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-common</artifactId>
                 <version>${modeshape.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-common</artifactId>
+                <version>${modeshape.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-jcr</artifactId>
+                <version>${modeshape.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-sequencer-ddl</artifactId>
+                <version>${modeshape.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-sequencer-teiid</artifactId>
+                <version>${modeshape.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-schematic</artifactId>
+                <version>${modeshape.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-jcr-api</artifactId>
+                <version>${modeshape.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-extractor-tika</artifactId>
+                <version>${modeshape.version}</version>
             </dependency>
 
-            <!-- Force the upgrade to 13.0.1 to match komodo-web dependencies -->
             <dependency>
-                <groupId>com.google.guava</groupId>
-                <artifactId>guava</artifactId>
-                <version>13.0.1</version>
+                <groupId>javax.jcr</groupId>
+                <artifactId>jcr</artifactId>
+                <version>${jcr.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>org.infinispan</groupId>
+                <artifactId>infinispan-cachestore-leveldb</artifactId>
+                <version>${infinispan.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
     
@@ -230,6 +262,10 @@
             <artifactId>modeshape-jcr-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.modeshape</groupId>
+            <artifactId>modeshape-extractor-tika</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.infinispan</groupId>
             <artifactId>infinispan-cachestore-leveldb</artifactId>
         </dependency>
@@ -245,4 +281,20 @@
             <version>${slf4j.log4j.version}</version>
         </dependency>
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>redhat-product-repository</id>
+            <name>Red Hat Product Repository</name>
+            <url>http://maven.repository.redhat.com/ga</url>
+            <layout>default</layout>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
 </project>

@@ -521,6 +521,11 @@ public interface KomodoLexicon extends StringConstants {
              * The value of the where compare clause. Value is {@value}
              */
             String VALUE = Namespace.PREFIX + COLON + "value"; //$NON-NLS-1$
+
+            /**
+             * The case insensitive flag of the where compare clause. Value is {@value}
+             */
+            String CASE_INSENSITIVE = Namespace.PREFIX + COLON + "caseInsensitive"; //$NON-NLS-1$
         }
 
         /**
@@ -596,6 +601,16 @@ public interface KomodoLexicon extends StringConstants {
              * The children-only property of the where parent path clause. Value is {@value}
              */
             String CHILDREN_ONLY = Namespace.PREFIX + COLON + "childrenOnly"; //$NON-NLS-1$
+        }
+
+        /**
+         * The JCR names for search where paranthesis clause
+         */
+        interface WhereParanthesisClause extends WhereClause {
+            /**
+             * The name of the whereParanthesisClause node type. Value is {@value} .
+             */
+            String NODE_TYPE = Namespace.PREFIX + COLON + "whereParanthesisClause"; //$NON-NLS-1$
         }
     }
 

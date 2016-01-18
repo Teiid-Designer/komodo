@@ -35,10 +35,10 @@ import java.util.concurrent.TimeUnit;
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.Session;
-import org.infinispan.commons.util.FileLookupFactory;
-import org.infinispan.commons.util.StringPropertyReplacer;
 import org.infinispan.schematic.document.EditableDocument;
 import org.infinispan.schematic.document.Editor;
+import org.infinispan.util.FileLookupFactory;
+import org.infinispan.util.StringPropertyReplacer;
 import org.komodo.core.KEngine;
 import org.komodo.core.KomodoLexicon.Komodo;
 import org.komodo.repository.KSequencerController;
@@ -467,6 +467,9 @@ public class ModeshapeEngineThread extends Thread implements StringConstants {
                                                                    Messages.LocalRepository.Configuration_Problem,
                                                                    problem.getMessageString()),
                                                                    problem.getThrowable());
+                        case WARNING:
+                            KEngine.getInstance().getErrorHandler().warn(problem.getMessageString());
+                            break;
                         default:
                             KEngine.getInstance().getErrorHandler().error(problem.getThrowable());
                     }

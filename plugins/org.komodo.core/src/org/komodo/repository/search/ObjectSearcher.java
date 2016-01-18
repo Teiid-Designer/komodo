@@ -245,12 +245,32 @@ public class ObjectSearcher implements SQLConstants {
      * @param property the name of the property belonging to the type
      * @param compareOperator the comparison operator
      * @param value the value that the property can be
+     * @param caseInsensitive the case insensitive flag
+     * @return this search object
+     */
+    public ObjectSearcher addWhereCompareClause(LogicalOperator operator, String alias, String property,
+                                                                ComparisonOperator compareOperator, String value, boolean caseInsensitive) {
+        CompareClause whereClause = new CompareClause(operator, alias, property, compareOperator, value, caseInsensitive);
+        addWhereClause(whereClause);
+
+        return this;
+    }
+
+    /**
+     * Add a comparison sub-clause to the WHERE clause, eg.
+     *   WHERE alias.[property] = 'blah'
+     *   WHERE alias.[property] LIKE 'bl%h'
+     *
+     * @param operator the AND/OR operator preceding the clause. Can be <null> if the first clause
+     * @param alias the alias of the type
+     * @param property the name of the property belonging to the type
+     * @param compareOperator the comparison operator
+     * @param value the value that the property can be
      * @return this search object
      */
     public ObjectSearcher addWhereCompareClause(LogicalOperator operator, String alias, String property,
                                                                 ComparisonOperator compareOperator, String value) {
-        CompareClause whereClause = new CompareClause(operator, alias, property, compareOperator, value);
-        addWhereClause(whereClause);
+        addWhereCompareClause(operator, alias, property, compareOperator, value, false);
 
         return this;
     }
@@ -326,6 +346,18 @@ public class ObjectSearcher implements SQLConstants {
     public ObjectSearcher addWhereParentClause(LogicalOperator operator, String alias, String parentPath, boolean childrenOnly) {
         ParentPathClause pathClause = new ParentPathClause(operator, alias, parentPath, childrenOnly);
         addWhereClause(pathClause);
+
+        return this;
+    }
+
+    /**
+     * @param operator the AND/OR operator preceding the clause. Can be <null> if the first clause
+     * @param childClauses the child clauses to be nested in the paranthesis
+     * @return this search object
+     */
+    public ObjectSearcher addWhereParanthesisClause(LogicalOperator operator, Clause... childClauses) {
+        ParanthesisClause parClause = new ParanthesisClause(operator, childClauses);
+        addWhereClause(parClause);
 
         return this;
     }
@@ -457,7 +489,7 @@ public class ObjectSearcher implements SQLConstants {
         buffer.append(WHERE);
         buffer.append(SPACE);
 
-        if (! whereClauses.isEmpty()) {
+        if (whereClauses != null && ! whereClauses.isEmpty()) {
             for (int i = 0; i < whereClauses.size(); i++) {
                 Clause clause = whereClauses.get(i);
                 buffer.append(clause.clauseString(i));
@@ -673,21 +705,7 @@ public class ObjectSearcher implements SQLConstants {
         KomodoObject[] whereClauses = searchObject.getChildren(uow, Search.WHERE_CLAUSE);
         if (whereClauses != null) {
             for (KomodoObject whereClauseObject : whereClauses) {
-                String primaryType = whereClauseObject.getPrimaryType(uow).getName();
-
-                Clause clause = null;
-                if (Search.WhereCompareClause.NODE_TYPE.equals(primaryType)) {
-                    clause = new CompareClause(uow, whereClauseObject);
-                } else if (Search.WhereContainsClause.NODE_TYPE.equals(primaryType)) {
-                    clause = new ContainsClause(uow, whereClauseObject);
-                } else if (Search.WhereSetClause.NODE_TYPE.equals(primaryType)) {
-                    clause = new SetClause(uow, whereClauseObject);
-                } else if (Search.WherePathClause.NODE_TYPE.equals(primaryType)) {
-                    clause = new PathClause(uow, whereClauseObject);
-                } else if (Search.WhereParentPathClause.NODE_TYPE.equals(primaryType)) {
-                    clause = new ParentPathClause(uow, whereClauseObject);
-                }
-
+                Clause clause = Clause.createClause(uow, whereClauseObject);
                 if (clause != null)
                     addWhereClause(clause);
             }

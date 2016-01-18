@@ -48,8 +48,10 @@ import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.SynchronousCallback;
+import org.komodo.repository.search.ObjectSearcher;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
+import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.test.utils.TestUtilities;
 import org.komodo.utils.KLog;
@@ -1344,5 +1346,54 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
         // Ddl Sequenced
         verify(model, "stockPricesMatView", JcrConstants.NT_UNSTRUCTURED, TeiidDdlLexicon.CreateTable.VIEW_STATEMENT);
+    }
+
+    /**
+     * Import a vdb into the komodo engine
+     *
+     * @param vdbStream vdb input stream
+     * @throws Exception if error occurs
+     */
+    private void importVdb(InputStream vdbStream) throws Exception {
+        SynchronousCallback callback = new SynchronousCallback();
+        UnitOfWork uow = _repo.createTransaction("Import Vdb", false, callback); //$NON-NLS-1$
+
+        ImportOptions importOptions = new ImportOptions();
+        ImportMessages importMessages = new ImportMessages();
+
+        KomodoObject workspace = _repo.komodoWorkspace(uow);
+        VdbImporter importer = new VdbImporter(_repo);
+        importer.importVdb(uow, vdbStream, workspace, importOptions, importMessages);
+        uow.commit();
+        callback.await(3, TimeUnit.MINUTES);
+    }
+
+    /**
+     * Tests both the import and search acting together
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testImportAndSearch() throws Exception {
+        importVdb(TestUtilities.allElementsExample());
+        importVdb(TestUtilities.portfolioExample());
+        importVdb(TestUtilities.partsExample());
+        importVdb(TestUtilities.tweetExample());
+
+//        SELECT [jcr:path], [mode:localName]
+//        FROM [nt:unstructured] AS nt
+//        WHERE (CONTAINS(nt.*, 'view') OR LOWER(NAME(nt)) LIKE '%view%')
+
+        ObjectSearcher os = new ObjectSearcher(_repo);
+        String ALIAS = "nt";
+        os.addFromType(JcrConstants.NT_UNSTRUCTURED, ALIAS);
+        String whereSql = "(CONTAINS(nt.*, '*view*') OR LOWER(NAME(nt)) LIKE '%view%')";
+        os.setCustomWhereClause(whereSql);
+
+        List<KomodoObject> results = os.searchObjects(getTransaction());
+        for (KomodoObject ko : results)
+            System.out.println(ko.getAbsolutePath());
+
+        assertEquals(23, results.size());
     }
 }

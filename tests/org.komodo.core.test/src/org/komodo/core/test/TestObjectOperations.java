@@ -268,7 +268,7 @@ public class TestObjectOperations implements StringConstants {
          * testNodePath = /testNode
          * testNode.getPath() = /testNode[2]
          *
-         * FIXED in Modeshape 4.3
+         * FIXED in Modeshape 4.3 and backported 8.3.x - MODE-2463
          */
         assertEquals(testNodePath, newTestNode.getPath());
 
@@ -279,7 +279,7 @@ public class TestObjectOperations implements StringConstants {
          * /testNode[2] so should be able to find it from session2,
          * except this throws a PathNotFoundException
          *
-         * NO LONGER AN ISSUE in Modeshape 4.3
+         * NO LONGER AN ISSUE in Modeshape 4.3 and backported 8.3.x - MODE-2463
          */
 //        try {
 //            session2.getNode(testNodePath + "[2]"); //$NON-NLS-1$
@@ -299,7 +299,7 @@ public class TestObjectOperations implements StringConstants {
          *
          * Conclusion: bug in node.getPath(), returning incorrect absolute path
          *
-         * FIXED IN Modeshape 4.3
+         * FIXED IN Modeshape 4.3 and backported 8.3.x - MODE-2463
          */
         try {
             Node node = session2.getNode(testNodePath);

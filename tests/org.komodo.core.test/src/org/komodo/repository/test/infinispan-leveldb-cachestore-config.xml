@@ -1,23 +1,23 @@
 <infinispan xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="urn:infinispan:config:7.2 http://www.infinispan.org/schemas/infinispan-config-7.2.xsd"
-    xmlns="urn:infinispan:config:7.2">
+    xsi:schemaLocation="urn:infinispan:config:5.2 http://www.infinispan.org/schemas/infinispan-config-5.2.xsd"
+    xmlns="urn:infinispan:config:5.2">
 
-    <cache-container>
-        <local-cache name="Test Repository">
-            <transaction
-                transaction-manager-lookup="org.infinispan.transaction.lookup.GenericTransactionManagerLookup"
-                mode="NON_XA"
-                locking="PESSIMISTIC"/>
+    <namedCache name="Test Repository">
+        <transaction
+                transactionManagerLookupClass="org.infinispan.transaction.lookup.GenericTransactionManagerLookup"
+                transactionMode="TRANSACTIONAL"
+                lockingMode="PESSIMISTIC"/>
 
-            <persistence passivation="false">
-                <leveldb-store xmlns="urn:infinispan:config:store:leveldb:7.2"
-                    purge="false"
-                    path="${java.io.tmpdir}/TestLocalLevelDBRepoPersistence/data">
-                    <expiration path="${java.io.tmpdir}/TestLocalLevelDBRepoPersistence/expired"/>
-                    <implementation type="JAVA"/>
-                </leveldb-store>
-            </persistence>
-        </local-cache>
-    </cache-container>
+        <loaders passivation="false" shared="true" preload="true">
+            <loader class="org.infinispan.loaders.leveldb.LevelDBCacheStore"
+                fetchPersistentState="false" ignoreModifications="false"
+                purgeOnStartup="false">
+                <properties>
+                    <property name="location" value="${java.io.tmpdir}/TestLocalLevelDBRepoPersistence/data" />
+                    <property name="expiredLocation" value="${java.io.tmpdir}/TestLocalLevelDBRepoPersistence/expired" />
+                </properties>
+            </loader>
+        </loaders>
+    </namedCache>
 
 </infinispan>
