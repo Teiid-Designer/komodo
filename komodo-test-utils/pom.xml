@@ -1,0 +1,65 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.komodo</groupId>
+		<artifactId>komodo</artifactId>
+		<version>0.0.4-SNAPSHOT</version>
+	</parent>
+	<artifactId>komodo-test-utils</artifactId>
+	<name>Komodo Test Utils</name>
+	<description>Komodo Test Utilities</description>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.komodo</groupId>
+			<artifactId>komodo-modeshape</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.komodo</groupId>
+			<artifactId>komodo-spi</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.komodo</groupId>
+			<artifactId>komodo-utils</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.komodo</groupId>
+			<artifactId>komodo-core</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>compile</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<scope>compile</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest-core</artifactId>
+			<scope>compile</scope>
+		</dependency>
+	</dependencies>
+</project>

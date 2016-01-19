@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.modeshape</groupId>
+        <artifactId>modeshape-parent</artifactId>
+        <version>3.8.4.GA</version>
+        <relativePath>../modeshape-parent/pom.xml</relativePath>
+    </parent>
+
+    <!-- The groupId and version values are inherited from parent -->
+    <artifactId>modeshape-jcr</artifactId>
+    <packaging>jar</packaging>
+    <name>ModeShape JCR Repository</name>
+    <description>ModeShape implementation of the JCR API</description>
+    <url>http://www.modeshape.org</url>
+
+    <!--
+      Define the dependencies. Note that all version and scopes default to those defined in the dependencyManagement section of the
+      parent pom.
+    -->
+    <dependencies>
+        <!-- Public API (beyond JCR 2.0) -->
+        <dependency>
+            <groupId>org.modeshape</groupId>
+            <artifactId>modeshape-jcr-api</artifactId>
+        </dependency>
+        <!-- This should eventually get refactored into this project -->
+        <dependency>
+            <groupId>org.modeshape</groupId>
+            <artifactId>modeshape-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+        </dependency>
+        <!-- Infinispan -->
+        <dependency>
+            <groupId>org.modeshape</groupId>
+            <artifactId>modeshape-schematic</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.infinispan</groupId>
+            <artifactId>infinispan-core</artifactId>
+        </dependency>
+
+        <!--Event bus clustering. Note the scope in the parent (provided) - this should be optional from a MS perspective -->
+        <dependency>
+            <groupId>org.jgroups</groupId>
+            <artifactId>jgroups</artifactId>
+        </dependency>
+        <!-- Hibernate Search engine (does not use Hibernate Core or JPA!) -->
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-search-engine</artifactId>
+        </dependency>
+        <!--Required by Hibernate Search-->
+        <dependency>
+            <groupId>org.hibernate.common</groupId>
+            <artifactId>hibernate-commons-annotations</artifactId>
+        </dependency>
+        <!-- Hibernate Search engine (does not use Hibernate Core or JPA!) -->
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-regex</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.spec.javax.jms</groupId>
+            <artifactId>jboss-jms-api_1.1_spec</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- MIME-type detection. This can be excluded in applications and components that depend on ModeShape
+             if MIME type detection is to be disabled in ModeShape. -->
+        <dependency>
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss.spec.javax.servlet</groupId>
+            <artifactId>jboss-servlet-api_3.0_spec</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss.spec.javax.security.jacc</groupId>
+            <artifactId>jboss-jacc-api_1.4_spec</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!--  Used in tests -->
+
+        <!--
+            not used directly, but
+             a) is a transitive dep of some of the test dependencies and
+             b) the BOM brings it as compile,
+            so we need to overwrite it here
+        -->
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!--
+            not used directly, but
+             a) is a transitive dep of some of the test dependencies and
+             b) the BOM brings it as compile,
+            so we need to overwrite it here
+        -->
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.modeshape</groupId>
+            <artifactId>modeshape-common</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>  
+        <dependency>
+            <groupId>org.modeshape</groupId>
+            <artifactId>modeshape-schematic</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.infinispan</groupId>
+            <artifactId>infinispan-cachestore-bdbje</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.infinispan</groupId>
+            <artifactId>infinispan-cachestore-jdbm</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.mchange</groupId>
+            <artifactId>c3p0</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.infinispan</groupId>
+            <artifactId>infinispan-cachestore-jdbc</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongo-java-driver</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>de.flapdoodle.embed</groupId>
+            <artifactId>de.flapdoodle.embed.mongo</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-library</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.jbossts.jta</groupId>
+            <artifactId>narayana-jta</artifactId>
+        </dependency>
+
+        <!--
+         Defined in parent BOM
+
+         Used for Base64 testing. This may overlap or vary with the JBoss AS7 integration, so we fully-specify the version
+         we want to use here. It's only to validate our Base64 functionality, so we can use an older version.
+        -->
+        <dependency>
+            <groupId>org.jboss</groupId>
+            <artifactId>jboss-common-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!--
+            Tika Parsers for testing, so that we test using a Tika environment with all the specific extensions
+        -->
+        <dependency>
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-parsers</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!--
+        Logging (require SLF4J API for compiling, but use Log4J and its SLF4J binding for testing)
+        -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+        </dependency>
+        <!--
+          Apache JCR API unit tests (for any JCR implementation), which is a subset of the official TCK
+        -->
+        <dependency>
+            <groupId>org.apache.jackrabbit</groupId>
+            <artifactId>jackrabbit-jcr-tests</artifactId>
+        </dependency>
+        <!--
+          PicketBox (JAAS implementation used in test cases)
+          -->
+        <dependency>
+            <groupId>org.picketbox</groupId>
+            <artifactId>picketbox-bare</artifactId>
+        </dependency>
+
+        <!--
+            Atomikos Transaction Manager (for testing only)
+        -->
+        <dependency>
+            <groupId>com.atomikos</groupId>
+            <artifactId>transactions</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.atomikos</groupId>
+            <artifactId>transactions-jta</artifactId>
+        </dependency>
+
+        <!-- Cassandra binary storage -->
+        <dependency>
+            <groupId>org.apache-extras.cassandra-jdbc</groupId>
+            <artifactId>cassandra-jdbc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.datastax.cassandra</groupId>
+            <artifactId>cassandra-driver-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.cassandra</groupId>
+            <artifactId>cassandra-all</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.avro</groupId>
+            <artifactId>avro</artifactId>
+        </dependency>
+    </dependencies>
+    <build>
+        <resources>
+            <resource>
+                <filtering>false</filtering>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>*</include>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+            <!-- Apply the properties set in the POM to the resource files -->
+            <resource>
+                <filtering>true</filtering>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**/repository.properties</include>
+                </includes>
+            </resource>
+        </resources>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <filtering>false</filtering>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+                <excludes>
+                    <exclude>config/db/**</exclude>
+                </excludes>
+            </testResource>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>config/db/**</include>
+                </includes>
+            </testResource>
+        </testResources>        
+    </build>
+    <profiles>
+        <profile>
+            <id>exclude-tck-known-issues</id>
+            <activation>
+                <property>
+                    <name>!runAllTck</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <!--Configure SureFire to use the "known issues" variable which causes certain TCK tests to not be reported as failures -->
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <systemProperties>
+                                <property>
+                                    <name>known.issues</name>
+                                    <value>
+                                        <!-- 
+                                        List each test method that is not passing because of known issues, where the method is
+                                        of the form "package#method". One per line. For example:
+                                        org.apache.jackrabbit.test.api.ShareableNodeTest#testModifyDescendantAndSave
+                                        -->
+                                    </value>
+                                </property>
+                            </systemProperties>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>ipv6_if_windows</id>
+            <activation>
+                <os>
+                    <family>Windows</family>
+                </os>
+            </activation>
+            <properties>
+                <!--Force Ipv6, because JGroups seems to be a lot faster with it on Windows-->
+                <preferIpv4>false</preferIpv4>
+                <preferIpv6>true</preferIpv6>
+            </properties>
+        </profile>
+    </profiles>
+</project>

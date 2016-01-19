@@ -9,6 +9,7 @@ package org.komodo.rest.relational;
 
 import java.net.URI;
 import java.util.Properties;
+
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Model.Type;
 import org.komodo.relational.vdb.Vdb;
@@ -20,9 +21,9 @@ import org.komodo.rest.json.JsonConstants;
 import org.komodo.rest.relational.KomodoRestUriBuilder.SettingNames;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.utils.ArgCheck;
 import org.modeshape.sequencer.teiid.lexicon.CoreLexicon;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
-import org.teiid.core.util.ArgCheck;
 
 /**
  * A VDB model that can be used by GSON to build a JSON document model representation.

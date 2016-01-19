@@ -1,0 +1,486 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<parent>
+		<groupId>org.jboss.integration-platform</groupId>
+		<artifactId>jboss-integration-platform-parent</artifactId>
+		<version>6.0.0.Final</version>
+	</parent>
+
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.komodo</groupId>
+	<artifactId>komodo-parent</artifactId>
+	<version>0.0.4-SNAPSHOT</version>
+	<name>Komodo Parent</name>
+
+	<url>http://www.jboss.org/teiiddesigner</url>
+	<packaging>pom</packaging>
+	<description> tool that allows creating, editing and managing dynamic VDBs for the Teiid server.</description>
+	<inceptionYear>2013</inceptionYear>
+
+	<organization>
+		<name>JBoss, a division of Red Hat</name>
+		<url>http://www.jboss.org</url>
+	</organization>
+
+	<licenses>
+		<license>
+			<name>GNU Lesser General Public License</name>
+			<url>http://repository.jboss.org/licenses/lgpl-2.1.txt</url>
+			<!--url>http://www.gnu.org/licenses/lgpl.html</url -->
+			<distribution>repo</distribution>
+			<comments>A business-friendly OSS license</comments>
+		</license>
+	</licenses>
+
+	<scm>
+		<connection>scm:git:git://github.com/Teiid-Designer/komodo.git</connection>
+		<developerConnection>scm:git:git@github.com:Teiid-Designer/komodo.git</developerConnection>
+		<url>http://github.com/Teiid-Designer/komodo</url>
+	</scm>
+
+	<issueManagement>
+		<system>jira</system>
+		<url>http://issues.jboss.org/browse/TEIIDDES</url>
+	</issueManagement>
+
+	<developers>
+		<developer>
+			<name>Barry Lafond</name>
+			<id>blafond</id>
+			<email>blafond@redhat.com</email>
+			<organization>JBoss, a division of Red Hat</organization>
+			<roles>
+				<role>Project Lead</role>
+				<role>Developer</role>
+			</roles>
+			<timezone>-6</timezone>
+		</developer>
+		<developer>
+			<name>Dan Florian</name>
+			<id>danflo</id>
+			<email>dflorian@redhat.com</email>
+			<organization>JBoss, a division of Red Hat</organization>
+			<roles>
+				<role>Developer</role>
+			</roles>
+			<timezone>-6</timezone>
+		</developer>
+		<developer>
+			<name>Paul Richardson</name>
+			<id>phantomjinx</id>
+			<email>p.g.richardson@redhat.com</email>
+			<organization>JBoss, a division of Red Hat</organization>
+			<roles>
+				<role>Developer</role>
+			</roles>
+			<timezone>0</timezone>
+		</developer>
+		<developer>
+			<name>Mark Drilling</name>
+			<id>mdrilling</id>
+			<email>mdrillin@redhat.com</email>
+			<organization>JBoss, a division of Red Hat</organization>
+			<roles>
+				<role>Developer</role>
+			</roles>
+			<timezone>-6</timezone>
+		</developer>
+		<developer>
+			<name>Ted Jones</name>
+			<id>tejones</id>
+			<email>tejones@redhat.com</email>
+			<organization>JBoss, a division of Red Hat</organization>
+			<roles>
+				<role>Developer</role>
+			</roles>
+			<timezone>-6</timezone>
+		</developer>
+	</developers>
+
+	<contributors>
+	</contributors>
+
+	<properties>
+
+		<version.ip-bom>6.0.0.Final</version.ip-bom>
+
+		<!-- Instruct the build to use only UTF-8 encoding for source code -->
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+		<debug.argline />
+
+		<!--Skip long running tests by default -->
+		<skipLongRunningTests>true</skipLongRunningTests>
+
+		<!-- PLUGIN BUG: Test dependencies not correctly checked -->
+		<managed-deps.checkProfiles>false</managed-deps.checkProfiles>
+	</properties>
+
+	<profiles>
+
+		<!-- ################################################################### 
+			Enable remotely debugging on the command line ################################################################### 
+			To use, specify "-Ddebug=true" on the Maven command line (typically used 
+			when running a single test). Then, start remote debugger (on port 1044) and 
+			connect. -->
+		<profile>
+			<id>debug</id>
+			<activation>
+				<property>
+					<name>debug</name>
+					<value>true</value>
+				</property>
+			</activation>
+			<properties>
+				<!-- Useful for remotely debugging the unit tests run by Surefire ... -->
+				<debug.argline>-Xdebug
+					-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=1044</debug.argline>
+			</properties>
+		</profile>
+
+		<profile>
+			<id>performance</id>
+			<properties>
+				<skipLongRunningTests>false</skipLongRunningTests>
+			</properties>
+		</profile>
+	</profiles>
+
+	<build>
+		<!-- This section defines the default plugin settings inherited by child 
+			projects. -->
+		<pluginManagement>
+			<plugins>
+				<!-- Specify the compiler options and settings -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<configuration>
+						<showDeprecation>false</showDeprecation>
+						<showWarnings>false</showWarnings>
+					</configuration>
+				</plugin>
+				<!-- Fixes how test resources of a project can be used in projects dependent 
+					on it -->
+				<plugin>
+					<groupId>org.apache.felix</groupId>
+					<artifactId>maven-bundle-plugin</artifactId>
+					<extensions>true</extensions>
+					<configuration>
+						<instructions>
+							<Export-Package>org.komodo.*</Export-Package>
+						</instructions>
+					</configuration>
+				</plugin>
+
+<!-- 				<plugin> -->
+<!-- 					<artifactId>maven-assembly-plugin</artifactId> -->
+<!-- 					<dependencies> -->
+<!-- 						<dependency> -->
+<!-- 							<groupId>org.komodo</groupId> -->
+<!-- 							<artifactId>modeshape-assembly-descriptors</artifactId> -->
+<!-- 							<version>${project.version}</version> -->
+<!-- 						</dependency> -->
+<!-- 					</dependencies> -->
+<!-- 					<executions> -->
+<!-- 						<execution> -->
+<!-- 							<phase>package</phase> -->
+<!-- 							<goals> -->
+<!-- 								<goal>single</goal> -->
+<!-- 							</goals> -->
+<!-- 						</execution> -->
+<!-- 					</executions> -->
+<!-- 				</plugin> -->
+
+				<!-- Inform m2e to ignore build errors. These errors started occurring 
+					after upgrading to Eclipse Indigo (3.7). This issue is discussed/solved here: 
+					http://stackoverflow.com/questions/8706017/maven-dependency-plugin-goals-copy-dependencies-unpack-is-not-supported-b -->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<!-- copy-dependency plugin -->
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.apache.maven.plugins</groupId>
+										<artifactId>maven-dependency-plugin</artifactId>
+										<versionRange>[1.0.0,)</versionRange>
+										<goals>
+											<goal>copy-dependencies</goal>
+											<goal>unpack</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore />
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+		<plugins>
+
+			<!-- Produce source jars during package and test-source jars during the 
+				'verify' phase -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>attach-test-sources</id>
+						<goals>
+							<goal>test-jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<!-- Manually specify the JUnit provider -->
+				<dependencies>
+					<dependency>
+						<groupId>org.apache.maven.surefire</groupId>
+						<!--artifactId>surefire-junit47</artifactId -->
+						<artifactId>surefire-junit4</artifactId>
+						<!--artifactId>surefire-junit3</artifactId -->
+						<version>${version.surefire.plugin}</version>
+					</dependency>
+				</dependencies>
+				<configuration>
+					<systemProperties combine.children="append">
+						<property>
+							<name>java.io.tmpdir</name>
+							<value>${basedir}/target</value>
+						</property>
+						<property>
+							<name>skipLongRunningTests</name>
+							<value>${skipLongRunningTests}</value>
+						</property>
+					</systemProperties>
+					<argLine>-Xmx1524M ${debug.argline} -XX:MaxPermSize=256M
+						-Djava.awt.headless=true</argLine>
+					<useFile>false</useFile>
+					<enableAssertions>true</enableAssertions>
+				</configuration>
+			</plugin>
+
+			<!-- Build a test-jar for each project, so that src/test/* resources and 
+				classes can be used in other projects. Also customize how the jar files are 
+				assembled. -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>test-jar</id>
+						<goals>
+							<goal>test-jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <configuration>
+                    <pushChanges>false</pushChanges>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <configuration>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
+            </plugin>
+		</plugins>
+	</build>
+
+	<!-- This section defines the default dependency settings inherited by child 
+		projects. Note that this section does not add dependencies, but rather provide 
+		default settings. -->
+	<dependencyManagement>
+		<dependencies>
+			<!--IP-Platform BOM -->
+			<dependency>
+				<groupId>org.jboss.integration-platform</groupId>
+				<artifactId>jboss-integration-platform-bom</artifactId>
+				<version>${version.ip-bom}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<!-- komodo-shell-api komodo-shell komodo-importer komodo-relational komodo-relational-commands 
+				komodo-server-rest -->
+
+			<!-- Komodo subprojects -->
+			<dependency>
+				<groupId>org.komodo</groupId>
+				<artifactId>komodo-modeshape</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.komodo</groupId>
+				<artifactId>komodo-spi</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.komodo</groupId>
+				<artifactId>komodo-utils-modeshape-logger</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.komodo</groupId>
+				<artifactId>komodo-utils</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.komodo</groupId>
+				<artifactId>komodo-teiid-client</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.komodo</groupId>
+				<artifactId>komodo-core</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.komodo</groupId>
+				<artifactId>komodo-modeshape-sequencer-teiid-sql</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.komodo</groupId>
+				<artifactId>komodo-vdb</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.komodo</groupId>
+				<artifactId>komodo-shell-api</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.komodo</groupId>
+				<artifactId>komodo-shell</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.komodo</groupId>
+				<artifactId>komodo-importer</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.komodo</groupId>
+				<artifactId>komodo-modeshape-vdb</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.komodo</groupId>
+				<artifactId>komodo-relational</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.komodo</groupId>
+				<artifactId>komodo-relational-commands</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.komodo</groupId>
+				<artifactId>komodo-server-rest</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.komodo</groupId>
+				<artifactId>komodo-test-utils</artifactId>
+				<version>${project.version}</version>
+				<type>test-jar</type>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.komodo</groupId>
+				<artifactId>komodo-core-tests</artifactId>
+				<version>${project.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.komodo</groupId>
+				<artifactId>komodo-shell</artifactId>
+				<version>${project.version}</version>
+				<type>test-jar</type>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.komodo</groupId>
+				<artifactId>komodo-modeshape-sequencer-teiid-sql-tests</artifactId>
+				<version>${project.version}</version>
+				<scope>test</scope>
+			</dependency>
+
+			<!--Inherited from BOM, but changes the default scope to "test" -->
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>${version.junit}</version>
+				<scope>test</scope>
+			</dependency>
+
+			<!--Inherited from BOM, but changes the default scope to "test" -->
+			<dependency>
+				<groupId>org.hamcrest</groupId>
+				<artifactId>hamcrest-library</artifactId>
+				<version>${version.org.hamcrest}</version>
+				<scope>test</scope>
+			</dependency>
+
+			<!--Inherited from BOM, but changes the default scope to "test" -->
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-core</artifactId>
+				<version>${version.org.mockito}</version>
+				<scope>test</scope>
+			</dependency>
+
+			<!--Inherited from BOM, but changes the default scope to "test" -->
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-api</artifactId>
+				<version>${version.org.slf4j}</version>
+			</dependency>
+
+			<!--Inherited from BOM, but changes the default scope to "test" -->
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-log4j12</artifactId>
+				<version>${version.org.slf4j}</version>
+			</dependency>
+
+			<!--Inherited from BOM, but changes the default scope to "test" -->
+			<dependency>
+				<groupId>log4j</groupId>
+				<artifactId>log4j</artifactId>
+				<version>${version.log4j}</version>
+			</dependency>
+
+		</dependencies>
+	</dependencyManagement>
+</project>

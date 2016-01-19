@@ -1,79 +1,73 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <parent>
-    <groupId>org.jboss.tools</groupId>
-    <artifactId>komodo</artifactId>
-    <version>0.0.3-SNAPSHOT</version>
-  </parent>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<parent>
+		<groupId>org.komodo</groupId>
+		<artifactId>komodo</artifactId>
+		<version>0.0.4-SNAPSHOT</version>
+	</parent>
 
-  <groupId>org.jboss.tools</groupId>
-  <artifactId>vdbbuilder.build</artifactId>
-  <name>VDB Builder Build</name>
+	<artifactId>vdbbuilder.build</artifactId>
+	<name>VDB Builder Build</name>
 
-  <modelVersion>4.0.0</modelVersion>
+	<modelVersion>4.0.0</modelVersion>
 
-  <properties>
-    <org.komodo.version>0.0.3-SNAPSHOT</org.komodo.version>
-  </properties>
+	<build>
+		<outputDirectory>target/kits</outputDirectory>
+		<resources>
+			<resource>
+				<directory>kits/</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>**/*.bat</include>
+					<include>**/*.sh</include>
+					<include>**/*.properties</include>
+				</includes>
+			</resource>
+		</resources>
 
-  <build>
-    <outputDirectory>target/kits</outputDirectory>
-    <resources>
-      <resource>
-        <directory>kits/</directory>
-        <filtering>true</filtering>
-        <includes>
-          <include>**/*.bat</include>
-          <include>**/*.sh</include>
-          <include>**/*.properties</include>
-        </includes>
-      </resource>
-    </resources>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<artifactId>maven-assembly-plugin</artifactId>
+					<configuration>
+						<archiverConfig>
+							<fileMode>0644</fileMode>
+							<directoryMode>0755</directoryMode>
+							<defaultDirectoryMode>0755</defaultDirectoryMode>
+						</archiverConfig>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <artifactId>maven-assembly-plugin</artifactId>
-          <version>2.4</version>
-          <configuration>
-            <archiverConfig>
-              <fileMode>0644</fileMode>
-              <directoryMode>0755</directoryMode>
-              <defaultDirectoryMode>0755</defaultDirectoryMode>
-            </archiverConfig>
-          </configuration>
-         </plugin>
-      </plugins>
-    </pluginManagement>
+		<plugins>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<descriptors>
+						<descriptor>assembly/cli.xml</descriptor>
+					</descriptors>
+				</configuration>
 
-    <plugins>
-      <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <configuration>
-          <descriptors>
-            <descriptor>assembly/cli.xml</descriptor>
-          </descriptors>
-        </configuration>
+				<executions>
+					<execution>
+						<id>create-assemblies</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 
-        <executions>
-          <execution>
-            <id>create-assemblies</id>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
+		</plugins>
+	</build>
 
-    </plugins>
-  </build>
-
-  <dependencies>
-    <dependency>
-      <groupId>org.jboss.tools.komodo.plugins</groupId>
-      <artifactId>org.komodo.shell</artifactId>
-      <version>${org.komodo.version}</version>
-    </dependency>
-  </dependencies>
+	<dependencies>
+		<dependency>
+			<groupId>org.komodo</groupId>
+			<artifactId>komodo-shell</artifactId>
+		</dependency>
+	</dependencies>
 
 </project>

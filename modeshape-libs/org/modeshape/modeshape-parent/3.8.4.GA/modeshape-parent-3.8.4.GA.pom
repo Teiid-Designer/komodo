@@ -1,0 +1,2092 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <parent>
+        <groupId>org.jboss.integration-platform</groupId>
+        <artifactId>jboss-integration-platform-parent</artifactId>
+        <version>6.0.0.Final</version>
+    </parent>
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.modeshape</groupId>
+    <artifactId>modeshape-parent</artifactId>
+    <version>3.8.4.GA</version>
+    <name>ModeShape Parent</name>
+
+    <url>http://www.modeshape.org</url>
+    <packaging>pom</packaging>
+    <description>ModeShape is a JCR repository implementation with support for federation and sequencing.</description>
+    <inceptionYear>2008</inceptionYear>
+
+    <organization>
+        <name>JBoss, a division of Red Hat</name>
+        <url>http://www.jboss.org</url>
+    </organization>
+
+    <licenses>
+        <license>
+            <name>GNU Lesser General Public License</name>
+            <url>http://repository.jboss.org/licenses/lgpl-2.1.txt</url>
+            <!--url>http://www.gnu.org/licenses/lgpl.html</url-->
+            <distribution>repo</distribution>
+            <comments>A business-friendly OSS license</comments>
+        </license>
+    </licenses>
+
+    <scm>
+        <connection>scm:git:git://github.com/ModeShape/modeshape.git</connection>
+        <developerConnection>scm:git:git@github.com:ModeShape/modeshape.git</developerConnection>
+        <url>http://github.com/ModeShape/modeshape</url>
+    </scm>
+
+    <issueManagement>
+        <system>jira</system>
+        <url>http://issues.jboss.org/browse/MODE</url>
+    </issueManagement>
+
+    <developers>
+        <developer>
+            <name>Randall Hauch</name>
+            <id>randall</id>
+            <email>rhauch@redhat.com</email>
+            <organization>JBoss, a division of Red Hat</organization>
+            <roles>
+                <role>Project Lead</role>
+                <role>Developer</role>
+            </roles>
+            <timezone>-6</timezone>
+        </developer>
+        <developer>
+            <name>Van Halbert</name>
+            <id>vhalbert@redhat.com</id>
+            <email>vhalbert@redhat.com</email>
+            <organization>JBoss, a division of Red Hat</organization>
+            <roles>
+                <role>Developer</role>
+            </roles>
+            <timezone>-6</timezone>
+        </developer>
+        <developer>
+            <name>Horia Chiorean</name>
+            <id>hchiorea@redhat.com</id>
+            <email>hchiorea@redhat.com</email>
+            <organization>JBoss, a division of Red Hat</organization>
+            <roles>
+                <role>Developer</role>
+            </roles>
+            <timezone>+2</timezone>
+        </developer>
+        <developer>
+            <name>Dan Florian</name>
+            <id>dan</id>
+            <email>dflorian@redhat.com</email>
+            <organization>JBoss, a division of Red Hat</organization>
+            <roles>
+                <role>Developer</role>
+            </roles>
+            <timezone>-5</timezone>
+        </developer>
+        <developer>
+            <name>Stefano Maestri</name>
+            <id>stefano</id>
+            <email>stefano.maestri@javalinux.it</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+            <timezone>+1</timezone>
+        </developer>
+        <developer>
+            <name>Serge Pagop</name>
+            <id>spagop</id>
+            <email>Serge.Pagop@innoq.com</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+            <timezone>+1</timezone>
+        </developer>
+        <developer>
+            <name>Michael Trezzi</name>
+            <id>mathwizard</id>
+            <email>michael@mathwizard.org</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+            <timezone>+1</timezone>
+        </developer>
+        <developer>
+            <name>Alexandre Porcelli</name>
+            <id>porcelli</id>
+            <email>porcelli@devexp.com.br</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+            <timezone>-3</timezone>
+        </developer>
+        <developer>
+            <name>Sergiy Litsenko</name>
+            <id>lisbor</id>
+            <email>litsenko_sergey@yahoo.com</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+            <timezone>+10</timezone>
+        </developer>
+        <developer>
+            <name>Vijay Kiran</name>
+            <id>vijay.duvvuri</id>
+            <email>mail@vijaykiran.com</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+            <timezone>+1</timezone>
+        </developer>
+        <developer>
+            <name>Oleg Kulikov</name>
+            <id>okulikov</id>
+            <email>okulikov@redhat.com</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+            <timezone>+4</timezone>
+        </developer>
+        <developer>
+            <name>Ted Jones</name>
+            <id>tejones</id>
+            <email>tejones@redhat.com</email>
+            <organization>JBoss, a division of Red Hat</organization>
+            <roles>
+                <role>Developer</role>
+            </roles>
+            <timezone>-6</timezone>
+        </developer>
+        <developer>
+            <name>Barry LaFond</name>
+            <id>blafond</id>
+            <email>blafond@redhat.com</email>
+            <organization>JBoss, a division of Red Hat</organization>
+            <roles>
+                <role>Developer</role>
+            </roles>
+            <timezone>-6</timezone>
+        </developer>
+        <developer>
+            <name>John Verhaeg</name>
+            <id>jverhaeg</id>
+            <email>jverhaeg@redhat.com</email>
+            <organization>JBoss, a division of Red Hat</organization>
+            <roles>
+                <role>Developer</role>
+            </roles>
+            <timezone>-6</timezone>
+        </developer>
+    </developers>
+
+    <contributors>
+        <contributor>
+            <name>Greg Haber</name>
+            <organization>JBoss, a division of Red Hat</organization>
+            <timezone>-5</timezone>
+        </contributor>
+        <contributor>
+            <name>George Gastaldi</name>
+            <email>gegastaldi@gmail.com</email>
+            <timezone>-3</timezone>
+        </contributor>
+    </contributors>
+
+    <properties>
+
+        <version.ip-bom>6.0.0.Final</version.ip-bom>
+
+        <!--
+            Versions of COMPILE artifacts *specific* to ModeShape, which do not appear in the BOM or are in conflict
+        -->
+
+        <!--Tika 1.3 and the Office Sequencer require THIS versions of apache POI -->
+        <version.org.apache.poi>3.10.1</version.org.apache.poi>
+        <!-- Apache Open CMIS requires THIS version -->
+        <version.com.sun.xml.bind>2.2.5</version.com.sun.xml.bind>
+        
+        <!--The following list of eclipse dependencies IS A MESS but needs to be exactly this because of the sequencers -->
+        <version.org.eclipse.osgi>3.3.0-v20070530</version.org.eclipse.osgi>
+        <version.org.eclipse.core.resources>3.3.0-v20070604</version.org.eclipse.core.resources>
+        <version.org.eclipse.core.expressions>3.3.0-v20070606-0010</version.org.eclipse.core.expressions>
+        <version.org.eclipse.core.runtime>3.3.100-v20070530</version.org.eclipse.core.runtime>
+        <version.org.eclipse.core.jobs>3.3.0-v20070423</version.org.eclipse.core.jobs>
+        <version.org.eclipse.core.contenttype>3.2.100-v20070319</version.org.eclipse.core.contenttype>
+        <version.org.eclipse.equinox.common>3.3.0-v20070426</version.org.eclipse.equinox.common>
+        <version.org.eclipse.equinox.registry>3.3.0-v20070522</version.org.eclipse.equinox.registry>
+        <version.org.eclipse.equinox.preferences>3.2.100-v20070522</version.org.eclipse.equinox.preferences>
+        <version.org.eclipse.emf.common>2.4.0</version.org.eclipse.emf.common>
+        <version.org.eclipse.emf.ecore>2.4.2</version.org.eclipse.emf.ecore>
+        <version.org.eclipse.emf.ecore-change>2.2.3</version.org.eclipse.emf.ecore-change>
+        <version.org.eclipse.emf.ecore-xmi>2.4.1</version.org.eclipse.emf.ecore-xmi>
+        <version.org.eclipse.jdt.core>3.3.0-v_771</version.org.eclipse.jdt.core>
+        <version.org.eclipse.xsd>2.2.3</version.org.eclipse.xsd>
+
+        <!--
+            The following is a list of TEST artifacts dependencies. These are all ModeShape specific as the BOM does not
+            enforce test versions or because we want certain version overwritten
+        -->
+        <version.org.jboss.ironjacamar>1.0.26.Final</version.org.jboss.ironjacamar>
+        <version.org.apache.jackrabbit.jcr-tests>2.6.0</version.org.apache.jackrabbit.jcr-tests>
+        <version.org.apache.jackrabbit.core>2.7.3</version.org.apache.jackrabbit.core>
+        <version.com.atomikos.transactions>3.8.0</version.com.atomikos.transactions>
+        <version.com.googlecode.sardine>146</version.com.googlecode.sardine>
+        <version.de.undercouch.bson4jackson>1.1.2</version.de.undercouch.bson4jackson>
+        <version.de.flapdoodle.embed.mongo>1.28</version.de.flapdoodle.embed.mongo>
+        <version.com.googlecode.json-simple>1.1</version.com.googlecode.json-simple>
+        <version.org.jmock>2.6.0</version.org.jmock>
+        <version.org.springframework.webmvc>2.5.2</version.org.springframework.webmvc>
+        <version.org.springframework.mock>2.0.8</version.org.springframework.mock>
+        <version.commons-naming.commons-naming-core>20031116.223527</version.commons-naming.commons-naming-core>
+        <version.org.apache-extras.cassandra-jdbc>1.2.5</version.org.apache-extras.cassandra-jdbc>
+        <version.org.apache.cassandra.cassandra-all>1.2.0</version.org.apache.cassandra.cassandra-all>
+        <version.org.apache.avro>1.4.0</version.org.apache.avro>
+
+        <version.postgresql>9.2-1002.jdbc4</version.postgresql>
+        <version.mysql.mysql-connector-java>5.1.25</version.mysql.mysql-connector-java>
+        <version.com.oracle.ojdbc6>11.2.0.4</version.com.oracle.ojdbc6>
+        <version.com.sybase.jconnect>6.0.5</version.com.sybase.jconnect>
+        <version.com.microsoft.sqlserver.msjdbc>4.0.2206</version.com.microsoft.sqlserver.msjdbc>
+
+        <!--Overwriten from BOM for Cassandra testing -->
+        <version.org.antlr>3.2</version.org.antlr>
+
+        <!--
+          Maven test plugins related properties
+        -->
+        <cargo.container>jetty7x</cargo.container>
+        <version.org.codehaus.cargo.plugin>1.3.3</version.org.codehaus.cargo.plugin>
+
+        <!-- Used to define the JCR Descriptor value -->
+        <jcr.repository.vendor>${project.organization.name}</jcr.repository.vendor>
+        <jcr.repository.vendor.url>http://www.modeshape.org</jcr.repository.vendor.url>
+        <jcr.repository.name>ModeShape</jcr.repository.name>
+
+        <!-- Instruct the build to use only UTF-8 encoding for source code -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!--
+              These are properties used in the database profiles. Must initialize
+              them to be empty so that Maven applies them via filtering to the
+              resources. If a project needs files filtered, however, make sure to
+              include a 'testResources' fragment in the 'build' section of the
+              child project POM to say which files need to be filtered.
+          -->
+        <dataSource.maximumConnectionsInPool>2</dataSource.maximumConnectionsInPool>
+        <dataSource.minimumConnectionsInPool>1</dataSource.minimumConnectionsInPool>
+        <dataSource.numberOfConnectionsToAcquireAsNeeded>1</dataSource.numberOfConnectionsToAcquireAsNeeded>
+        <dataSource.maximumSizeOfStatementCache>100</dataSource.maximumSizeOfStatementCache>
+        <dataSource.maximumConnectionIdleTimeInSeconds>10</dataSource.maximumConnectionIdleTimeInSeconds>
+        <dataSource.retryLimit>0</dataSource.retryLimit>
+
+        <!--By default, we use whatever the underlying machine supports. However, certain sub-modules may change this -->
+        <preferIpv4>true</preferIpv4>
+        <preferIpv6>false</preferIpv6>
+        <debug.argline/>
+        
+        <!--
+          Versions overwritten from BOM which should be as close as possible (i.e. what's available in exotic Maven repos)
+          to the versions coming from whatever EAP and JDG version we should integrate against.
+       -->
+        <version.org.hibernate.search>4.6.0.Final-redhat-2</version.org.hibernate.search>
+        <version.org.apache.lucene>3.6.2.redhat-7</version.org.apache.lucene>
+       
+        <!--
+             JBOSS AS/EAP constants
+         -->
+        <version.org.jboss.eap.bom>6.4.0.Beta1</version.org.jboss.eap.bom>
+        <version.org.jboss.as>7.5.0.Final-redhat-17</version.org.jboss.as>
+        
+        <!--Properties which must be used when installing locally an EAP ZIP distribution -->
+        <jboss.eap.groupId>org.jboss.as</jboss.eap.groupId>
+        <jboss.eap.artifactId>jboss-eap</jboss.eap.artifactId>
+        <jboss.eap.version>6.4.4</jboss.eap.version>
+        <jboss.eap.root.folder>jboss-eap-6.4</jboss.eap.root.folder>
+
+        <!--The root folder under EAP/AS where the ModeShape & related modules should be placed-->
+        <jboss.eap.modules.location>modules</jboss.eap.modules.location>
+
+        <!-- The id of the maven distribution which is building the current kit -->
+        <jboss.eap.distribution.id>jbosseap-dist</jboss.eap.distribution.id>
+        
+        <!-- A set of EAP modules on which ModeShape depends -->
+        <jboss.eap.infispan.module>main</jboss.eap.infispan.module>
+        <jboss.eap.hibernate.search.module>main</jboss.eap.hibernate.search.module>
+        <jboss.eap.lucene.module>main</jboss.eap.lucene.module>
+        
+        <!--Skip long running tests by default-->
+        <skipLongRunningTests>true</skipLongRunningTests>
+
+        <!-- PLUGIN BUG: Test dependencies not correctly checked  -->
+        <managed-deps.checkProfiles>false</managed-deps.checkProfiles>
+    </properties>
+
+    <profiles>
+
+        <!--
+              ###################################################################
+              Clustering-related profiles
+              ###################################################################
+
+              To use, specify "-DpreferIpv6" on the Maven command line,
+              depending upon your environment's network configuration.
+          -->
+        <profile>
+            <id>preferIpv6</id>
+            <activation>
+                <property>
+                    <name>preferIpv6</name>
+                </property>
+            </activation>
+            <properties>
+                <preferIpv4>false</preferIpv4>
+                <preferIpv6>true</preferIpv6>
+            </properties>
+        </profile>
+
+        <!--
+              ###################################################################
+              Enable remotely debugging on the command line
+              ###################################################################
+
+              To use, specify "-Ddebug=true" on the Maven command line
+              (typically used when running a single test). Then, start
+              remote debugger (on port 1044) and connect.
+          -->
+        <profile>
+            <id>debug</id>
+            <activation>
+                <property>
+                    <name>debug</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <properties>
+                <!-- Useful for remotely debugging the unit tests run by Surefire ... -->
+                <debug.argline>-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=1044</debug.argline>
+            </properties>
+        </profile>
+
+        <!--
+            ###################################################################
+            Database profiles to specify which DBMS is used for tests.
+            ###################################################################
+        -->
+
+        <!-- The default test environment is H2 -->
+        <profile>
+            <id>default_dbms</id>
+            <activation>
+                <property>
+                    <name>!database</name>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>com.h2database</groupId>
+                    <artifactId>h2</artifactId>
+                </dependency>
+            </dependencies>
+            <properties>
+                <database>h2</database>
+                <dataSource.driverClassName>org.h2.Driver</dataSource.driverClassName>
+                <dataSource.url>jdbc:h2:mem:modeshape;DB_CLOSE_DELAY=-1</dataSource.url>
+                <dataSource.username>sa</dataSource.username>
+                <dataSource.password/>
+                <infinispan.jdbc.id_column.type>VARCHAR(400)</infinispan.jdbc.id_column.type>
+                <infinispan.jdbc.data_column.type>BINARY</infinispan.jdbc.data_column.type>
+                <infinispan.jdbc.timestamp_column.type>BIGINT</infinispan.jdbc.timestamp_column.type>
+            </properties>
+        </profile>
+
+        <!-- The HSQLDB test environment -->
+        <profile>
+            <id>hsqldb</id>
+            <activation>
+                <property>
+                    <name>database</name>
+                    <value>hsqldb</value>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <!--Must be JDBC 4 (Java 6) compliant-->
+                    <groupId>org.hsqldb</groupId>
+                    <artifactId>hsqldb</artifactId>
+                </dependency>
+            </dependencies>
+            <properties>
+                <database>hsqldb</database>
+                <dataSource.driverClassName>org.hsqldb.jdbcDriver</dataSource.driverClassName>
+                <dataSource.url>jdbc:hsqldb:mem:modeshape</dataSource.url>
+                <dataSource.username>sa</dataSource.username>
+                <dataSource.password />
+                <infinispan.jdbc.id_column.type>VARCHAR(400)</infinispan.jdbc.id_column.type>
+                <infinispan.jdbc.data_column.type>BINARY</infinispan.jdbc.data_column.type>
+                <infinispan.jdbc.timestamp_column.type>BIGINT</infinispan.jdbc.timestamp_column.type>
+            </properties>
+        </profile>
+
+        <!-- The MySQL5 test environment -->
+        <profile>
+            <id>mysql5</id>
+            <activation>
+                <property>
+                    <name>database</name>
+                    <value>mysql5</value>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <!--Must be JDBC 4 (Java 6) compliant-->
+                    <groupId>mysql</groupId>
+                    <artifactId>mysql-connector-java</artifactId>
+                </dependency>
+            </dependencies>
+            <properties>
+                <database>mysql5</database>
+                <dataSource.dialect>org.hibernate.dialect.MySQL5InnoDBDialect</dataSource.dialect>
+                <dataSource.driverClassName>com.mysql.jdbc.Driver</dataSource.driverClassName>
+                <dataSource.url>jdbc:mysql://db01.mw.lab.eng.bos.redhat.com:3306/dballo02</dataSource.url>
+                <dataSource.username>dballo02</dataSource.username>
+                <dataSource.password>dballo02</dataSource.password>
+                <infinispan.jdbc.id_column.type>VARCHAR(400)</infinispan.jdbc.id_column.type>
+                <infinispan.jdbc.data_column.type>BLOB</infinispan.jdbc.data_column.type>
+                <infinispan.jdbc.timestamp_column.type>BIGINT</infinispan.jdbc.timestamp_column.type>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>mysql5_local</id>
+            <activation>
+                <property>
+                    <name>database</name>
+                    <value>mysql5</value>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <!--Must be JDBC 4 (Java 6) compliant-->
+                    <groupId>mysql</groupId>
+                    <artifactId>mysql-connector-java</artifactId>
+                </dependency>
+            </dependencies>
+            <properties>
+                <database>mysql5</database>
+                <dataSource.dialect>org.hibernate.dialect.MySQL5InnoDBDialect</dataSource.dialect>
+                <dataSource.driverClassName>com.mysql.jdbc.Driver</dataSource.driverClassName>
+                <dataSource.url>jdbc:mysql://localhost:3306/modeshape</dataSource.url>
+                <dataSource.username>root</dataSource.username>
+                <dataSource.password></dataSource.password>
+                <infinispan.jdbc.id_column.type>VARCHAR(400)</infinispan.jdbc.id_column.type>
+                <infinispan.jdbc.data_column.type>BLOB</infinispan.jdbc.data_column.type>
+                <infinispan.jdbc.timestamp_column.type>BIGINT</infinispan.jdbc.timestamp_column.type>
+            </properties>
+        </profile>
+
+        <!-- The PostgreSQL test environment -->
+        <profile>
+            <id>postgresql8</id>
+            <activation>
+                <property>
+                    <name>database</name>
+                    <value>postgresql8</value>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <!--Must be JDBC 4 (Java 6) compliant-->
+                    <groupId>postgresql</groupId>
+                    <artifactId>postgresql</artifactId>
+                </dependency>
+            </dependencies>
+            <properties>
+                <database>postgresql8</database>
+                <dataSource.driverClassName>org.postgresql.Driver</dataSource.driverClassName>
+                <dataSource.url>jdbc:postgresql://postgresql04.mw.lab.eng.bos.redhat.com:5432/dballo01</dataSource.url>
+                <dataSource.username>dballo01</dataSource.username>
+                <dataSource.password>dballo01</dataSource.password>
+                <infinispan.jdbc.id_column.type>VARCHAR(400)</infinispan.jdbc.id_column.type>
+                <infinispan.jdbc.data_column.type>BYTEA</infinispan.jdbc.data_column.type>
+                <infinispan.jdbc.timestamp_column.type>BIGINT</infinispan.jdbc.timestamp_column.type>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>postgresql9</id>
+            <activation>
+                <property>
+                    <name>database</name>
+                    <value>postgresql9</value>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <!--Must be JDBC 4 (Java 6) compliant-->
+                    <groupId>postgresql</groupId>
+                    <artifactId>postgresql</artifactId>
+                </dependency>
+            </dependencies>
+            <properties>
+                <database>postgresq9</database>
+                <dataSource.driverClassName>org.postgresql.Driver</dataSource.driverClassName>
+                <dataSource.url>jdbc:postgresql://db14.mw.lab.eng.bos.redhat.com:5432/dballo04</dataSource.url>
+                <dataSource.username>dballo04</dataSource.username>
+                <dataSource.password>dballo04</dataSource.password>
+                <infinispan.jdbc.id_column.type>VARCHAR(400)</infinispan.jdbc.id_column.type>
+                <infinispan.jdbc.data_column.type>BYTEA</infinispan.jdbc.data_column.type>
+                <infinispan.jdbc.timestamp_column.type>BIGINT</infinispan.jdbc.timestamp_column.type>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>postgresql9_local</id>
+            <activation>
+                <property>
+                    <name>database</name>
+                    <value>postgresql9</value>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <!--Must be JDBC 4 (Java 6) compliant-->
+                    <groupId>postgresql</groupId>
+                    <artifactId>postgresql</artifactId>
+                </dependency>
+            </dependencies>
+            <properties>
+                <database>postgresql9</database>
+                <dataSource.dialect>org.hibernate.dialect.PostgreSQLDialect</dataSource.dialect>
+                <dataSource.driverClassName>org.postgresql.Driver</dataSource.driverClassName>
+                <dataSource.url>jdbc:postgresql://localhost:5432/modeshape</dataSource.url>
+                <dataSource.username>postgres</dataSource.username>
+                <dataSource.password>postgres</dataSource.password>
+                <infinispan.jdbc.id_column.type>VARCHAR(400)</infinispan.jdbc.id_column.type>
+                <infinispan.jdbc.data_column.type>BYTEA</infinispan.jdbc.data_column.type>
+                <infinispan.jdbc.timestamp_column.type>BIGINT</infinispan.jdbc.timestamp_column.type>
+            </properties>
+        </profile>
+
+        <!-- The Oracle10g test environment -->
+        <profile>
+            <id>oracle10g</id>
+            <activation>
+                <property>
+                    <name>database</name>
+                    <value>oracle10g</value>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <!--Must be JDBC 4 (Java 6) compliant-->
+                    <groupId>com.oracle</groupId>
+                    <artifactId>ojdbc6</artifactId>
+                </dependency>
+            </dependencies>
+            <properties>
+                <database>oracle10g</database>
+                <dataSource.dialect>org.hibernate.dialect.Oracle10gDialect</dataSource.dialect>
+                <dataSource.driverClassName>oracle.jdbc.driver.OracleDriver</dataSource.driverClassName>
+                <dataSource.url>jdbc:oracle:thin:@vmg05.mw.lab.eng.bos.redhat.com:1521:qaora10</dataSource.url>
+                <dataSource.username>dballo03</dataSource.username>
+                <dataSource.password>dballo03</dataSource.password>
+                <infinispan.jdbc.id_column.type>NVARCHAR2(400)</infinispan.jdbc.id_column.type>
+                <infinispan.jdbc.data_column.type>BLOB</infinispan.jdbc.data_column.type>
+                <infinispan.jdbc.timestamp_column.type>NUMBER</infinispan.jdbc.timestamp_column.type>
+            </properties>
+        </profile>
+
+        <!-- The Oracle11g test environment -->
+        <profile>
+            <id>oracle11g</id>
+            <activation>
+                <property>
+                    <name>database</name>
+                    <value>oracle11g</value>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <!--Must be JDBC 4 (Java 6) compliant-->
+                    <groupId>com.oracle</groupId>
+                    <artifactId>ojdbc6</artifactId>
+                </dependency>
+            </dependencies>
+            <properties>
+                <database>oracle11g</database>
+                <dataSource.driverClassName>oracle.jdbc.driver.OracleDriver</dataSource.driverClassName>
+                <dataSource.url>jdbc:oracle:thin:@db04.mw.lab.eng.bos.redhat.com:1521:qaora11</dataSource.url>
+                <dataSource.username>DBALLO02</dataSource.username>
+                <dataSource.password>DBALLO02</dataSource.password>
+                <infinispan.jdbc.id_column.type>NVARCHAR2(400)</infinispan.jdbc.id_column.type>
+                <infinispan.jdbc.data_column.type>BLOB</infinispan.jdbc.data_column.type>
+                <infinispan.jdbc.timestamp_column.type>NUMBER</infinispan.jdbc.timestamp_column.type>
+            </properties>
+        </profile>
+
+        <!-- The Sybase 15 test environment -->
+        <profile>
+            <id>sybase15</id>
+            <activation>
+                <property>
+                    <name>database</name>
+                    <value>sybase15</value>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <!--Must be JDBC 4 (Java 6) compliant-->
+                    <groupId>com.sybase</groupId>
+                    <artifactId>jconnect</artifactId>
+                </dependency>
+            </dependencies>
+            <properties>
+                <database>sybase15</database>
+                <dataSource.dialect>org.hibernate.dialect.SybaseDialect</dataSource.dialect>
+                <dataSource.driverClassName>com.sybase.jdbc3.jdbc.SybDriver</dataSource.driverClassName>
+                <dataSource.url>jdbc:sybase:Tds:vmg07.mw.lab.eng.bos.redhat.com:5000/modeshape</dataSource.url>
+                <dataSource.username>modeshape</dataSource.username>
+                <dataSource.password>modeshape</dataSource.password>
+                <infinispan.jdbc.id_column.type>VARCHAR(255)</infinispan.jdbc.id_column.type>
+                <infinispan.jdbc.data_column.type>IMAGE</infinispan.jdbc.data_column.type>
+                <infinispan.jdbc.timestamp_column.type>NUMERIC</infinispan.jdbc.timestamp_column.type>
+            </properties>
+        </profile>
+
+        <!-- The SQLServer2008 (MS JDBC) test environment -->
+        <profile>
+            <id>mssql2008</id>
+            <activation>
+                <property>
+                    <name>database</name>
+                    <value>mssql2008</value>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <!--Must be JDBC 4 (Java 6) compliant-->
+                    <groupId>com.microsoft.sqlserver</groupId>
+                    <artifactId>msjdbc</artifactId>
+                </dependency>
+            </dependencies>
+            <properties>
+                <database>mssql2008</database>
+                <metadata.collectorClassName>org.modeshape.connector.meta.jdbc.SqlServerMetadataCollector</metadata.collectorClassName>
+                <dataSource.dialect>org.hibernate.dialect.SQLServerDialect</dataSource.dialect>
+                <dataSource.driverClassName>com.microsoft.sqlserver.jdbc.SQLServerDriver</dataSource.driverClassName>
+                <dataSource.url>jdbc:sqlserver://mssql01.mw.lab.eng.bos.redhat.com:1433;DatabaseName=dballo00</dataSource.url>
+                <dataSource.username>dballo00</dataSource.username>
+                <dataSource.password>dballo00</dataSource.password>
+                <infinispan.jdbc.id_column.type>NVARCHAR(400)</infinispan.jdbc.id_column.type>
+                <infinispan.jdbc.data_column.type>IMAGE</infinispan.jdbc.data_column.type>
+                <infinispan.jdbc.timestamp_column.type>BIGINT</infinispan.jdbc.timestamp_column.type>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>performance</id>
+            <properties>
+                <skipLongRunningTests>false</skipLongRunningTests>
+            </properties>
+        </profile>
+    </profiles>
+
+    <build>
+        <!--
+              This section defines the default plugin settings inherited by child
+              projects.
+          -->
+        <pluginManagement>
+            <plugins>
+                <!-- Specify the compiler options and settings -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <configuration>
+                        <showDeprecation>false</showDeprecation>
+                        <showWarnings>false</showWarnings>
+                    </configuration>
+                </plugin>
+                <!--
+                        Fixes how test resources of a project can be used in projects
+                        dependent on it
+                    -->
+                <plugin>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>maven-bundle-plugin</artifactId>
+                    <extensions>true</extensions>
+                    <configuration>
+                        <instructions>
+                            <Export-Package>org.modeshape.*</Export-Package>
+                        </instructions>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.modeshape</groupId>
+                            <artifactId>modeshape-assembly-descriptors</artifactId>
+                            <version>${project.version}</version>
+                        </dependency>
+                    </dependencies>
+                    <executions>
+                        <execution>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>single</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.codehaus.cargo</groupId>
+                    <artifactId>cargo-maven2-plugin</artifactId>
+                    <version>${version.org.codehaus.cargo.plugin}</version>
+                    <executions>
+                        <execution>
+                            <id>start-container</id>
+                            <phase>pre-integration-test</phase>
+                            <goals>
+                                <goal>start</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>stop-container</id>
+                            <phase>post-integration-test</phase>
+                            <goals>
+                                <goal>stop</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <skip>${skipTests}</skip>
+                        <container>
+                            <containerId>${cargo.container}</containerId>
+                            <log>${project.build.directory}/cargo.log</log>
+                            <home>${project.build.directory}/cargo</home>
+                            <type>embedded</type>
+                        </container>
+                        <configuration>
+                            <properties>
+                                <cargo.logging>high</cargo.logging>
+                                <cargo.servlet.users>dnauser:password:connect,readwrite,admin|unauthorized:password:bogus</cargo.servlet.users>
+                                <cargo.servlet.port>8090</cargo.servlet.port>
+                            </properties>
+                        </configuration>
+                    </configuration>
+                </plugin>
+
+                <!--
+                    Inform m2e to ignore build errors. These errors started occurring after upgrading to Eclipse Indigo (3.7). This
+                    issue is discussed/solved here: http://stackoverflow.com/questions/8706017/maven-dependency-plugin-goals-copy-dependencies-unpack-is-not-supported-b
+                -->
+                <plugin>
+                    <groupId>org.eclipse.m2e</groupId>
+                    <artifactId>lifecycle-mapping</artifactId>
+                    <configuration>
+                        <lifecycleMappingMetadata>
+                            <pluginExecutions>
+                                <!-- copy-dependency plugin -->
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>org.apache.maven.plugins</groupId>
+                                        <artifactId>maven-dependency-plugin</artifactId>
+                                        <versionRange>[1.0.0,)</versionRange>
+                                        <goals>
+                                            <goal>copy-dependencies</goal>
+                                            <goal>unpack</goal>
+                                         </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <ignore />
+                                    </action>
+                                </pluginExecution>
+                            </pluginExecutions>
+                        </lifecycleMappingMetadata>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+
+            <!-- Produce source jars during package and test-source jars during the 'verify' phase -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                    <id>attach-sources</id>
+                    <goals>
+                        <goal>jar-no-fork</goal>
+                    </goals>
+                    </execution>
+                    <execution>
+                        <id>attach-test-sources</id>
+                        <goals>
+                            <goal>test-jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <!-- Manually specify the JUnit provider; see MODE-1140 -->
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.maven.surefire</groupId>
+                        <!--artifactId>surefire-junit47</artifactId-->
+                        <artifactId>surefire-junit4</artifactId>
+                        <!--artifactId>surefire-junit3</artifactId-->
+                        <version>${version.surefire.plugin}</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <systemProperties combine.children="append">
+                        <property>
+                            <name>java.io.tmpdir</name>
+                            <value>${basedir}/target</value>
+                        </property>
+                        <property>
+                            <name>java.net.preferIPv4Stack</name>
+                            <value>${preferIpv4}</value>
+                        </property>
+                        <property>
+                            <name>java.net.preferIPv6Addresses</name>
+                            <value>${preferIpv6}</value>
+                        </property>
+                        <property>
+                            <name>skipLongRunningTests</name>
+                            <value>${skipLongRunningTests}</value>
+                        </property>
+                    </systemProperties>
+                    <argLine>-Xmx1524M ${debug.argline} -XX:MaxPermSize=256M -Djava.awt.headless=true</argLine>
+                    <runOrder>alphabetical</runOrder>
+                    <useFile>false</useFile>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-eclipse-plugin</artifactId>
+            </plugin>
+
+            <!--
+                   Build a test-jar for each project, so that src/test/* resources and
+                   classes can be used in other projects. Also customize how the jar
+                   files are assembled.
+               -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>test-jar</id>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <!--Used so that OSGI information can be added without changing the packaging type-->
+                <configuration>
+                    <skipIfEmpty>true</skipIfEmpty>
+                    <archive>
+                        <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+                    </archive>
+                </configuration>
+            </plugin>
+            <!--Add OSGI metadata to manifest-->
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>bundle-manifest</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>manifest</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <!--
+         This section defines the default dependency settings inherited by
+         child projects. Note that this section does not add dependencies, but
+         rather provide default settings.
+     -->
+    <dependencyManagement>
+        <dependencies>
+            <!--IP-Platform BOM-->
+            <dependency>
+                <groupId>org.jboss.integration-platform</groupId>
+                <artifactId>jboss-integration-platform-bom</artifactId>
+                <version>${version.ip-bom}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- ModeShape subprojects -->
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-common</artifactId>
+                <version>${project.version}</version>
+                <type>test-jar</type>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-jcr</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-jcr</artifactId>
+                <version>${project.version}</version>
+                <scope>test</scope>
+                <type>test-jar</type>
+            </dependency>
+
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-schematic</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-schematic</artifactId>
+                <version>${project.version}</version>
+                <type>test-jar</type>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-jcr-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-jcr-tck</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-connector-git</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-connector-jdbc-metadata</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-sequencer-ddl</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-sequencer-images</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-sequencer-java</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-sequencer-mp3</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-sequencer-msoffice</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-sequencer-sramp</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-sequencer-teiid</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-sequencer-text</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-sequencer-xml</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-sequencer-xsd</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-sequencer-wsdl</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-sequencer-zip</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-extractor-tika</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-web-jcr-rest</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-web-jcr-rest-client</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-web-jcr-rest-war</artifactId>
+                <version>${project.version}</version>
+                <type>war</type>
+            </dependency>
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-web-jcr</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-webdav</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-webdav-war</artifactId>
+                <version>${project.version}</version>
+                <scope>test</scope>
+                <type>test-jar</type>
+            </dependency>
+
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-webdav-war</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-web-jcr-webdav</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-web-jcr-webdav-war</artifactId>
+                <version>${project.version}</version>
+                <scope>test</scope>
+                <type>test-jar</type>
+            </dependency>
+
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-web-jcr-webdav-war</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-web-cmis</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-web-explorer</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-jdbc-local</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-jdbc-local</artifactId>
+                <version>${project.version}</version>
+                <scope>test</scope>
+                <type>test-jar</type>
+            </dependency>
+
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-jdbc</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-jdbc</artifactId>
+                <version>${project.version}</version>
+                <scope>test</scope>
+                <type>test-jar</type>
+            </dependency>
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-jdbc</artifactId>
+                <version>${project.version}</version>
+                <classifier>jar-with-dependencies</classifier>
+            </dependency>
+
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-jca</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+           <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-jbossas-subsystem</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-unit-test</artifactId>
+                <version>${project.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!--The client artifact is produced during the assembly profile, by the modeshape-jdbc profile -->
+            <dependency>
+                <groupId>org.modeshape</groupId>
+                <artifactId>modeshape-client</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+    
+            <!--
+                 Inherited from BOM, but with custom exclusions & version
+             -->
+            <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-search-engine</artifactId>
+                <version>${version.org.hibernate.search}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.hibernate</groupId>
+                        <artifactId>hibernate-search-analyzers</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <!--Inherited from BOM, but with custom version-->
+            <dependency>
+                <groupId>org.apache.lucene</groupId>
+                <artifactId>lucene-core</artifactId>
+                <version>${version.org.apache.lucene}</version>
+            </dependency>
+            
+            <!--
+                 Inherited from BOM, but with custom version
+             -->
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi</artifactId>
+                <version>${version.org.apache.poi}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-ooxml</artifactId>
+                <version>${version.org.apache.poi}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-ooxml-schemas</artifactId>
+                <version>${version.org.apache.poi}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-scratchpad</artifactId>
+                <version>${version.org.apache.poi}</version>
+            </dependency>
+
+            <!--Inherited from BOM, but changes the default scope to "test"-->
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${version.junit}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!--Inherited from BOM, but changes the default scope to "test"-->
+            <dependency>
+                <groupId>org.hamcrest</groupId>
+                <artifactId>hamcrest-library</artifactId>
+                <version>${version.org.hamcrest}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!--Inherited from BOM, but changes the default scope to "test"-->
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>${version.org.mockito}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!--
+                Various database tests activated by profiles
+            -->
+            <dependency>
+                <!--Must be JDBC 4 (Java 6) compliant-->
+                <groupId>com.microsoft.sqlserver</groupId>
+                <artifactId>msjdbc</artifactId>
+                <version>${version.com.microsoft.sqlserver.msjdbc}</version>
+                <classifier>4</classifier>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <!--Must be JDBC 4 (Java 6) compliant-->
+                <groupId>com.sybase</groupId>
+                <artifactId>jconnect</artifactId>
+                <version>${version.com.sybase.jconnect}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <!--Must be JDBC 4 (Java 6) compliant-->
+                <groupId>com.oracle</groupId>
+                <artifactId>ojdbc6</artifactId>
+                <version>${version.com.oracle.ojdbc6}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <!--Must be JDBC 4 (Java 6) compliant-->
+                <groupId>postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>${version.postgresql}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <!--Must be JDBC 4 (Java 6) compliant-->
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>${version.mysql.mysql-connector-java}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <!--Must be JDBC 4 (Java 6) compliant-->
+                <groupId>org.hsqldb</groupId>
+                <artifactId>hsqldb</artifactId>
+                <version>${version.org.hsqldb}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.h2database</groupId>
+                <artifactId>h2</artifactId>
+                <version>${version.com.h2database}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!--
+              Logging (all of the libraries should be optional, as the logging implementation falls back to JUL if nothing is found)
+            -->
+
+            <!--Inherited from BOM, but changes the default scope to "test"-->
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${version.org.slf4j}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!--Inherited from BOM, but changes the default scope to "test"-->
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-log4j12</artifactId>
+                <version>${version.org.slf4j}</version>
+                <scope>test</scope>
+            </dependency>
+            <!--Inherited from BOM, but changes the default scope to "test"-->
+            <dependency>
+                <groupId>log4j</groupId>
+                <artifactId>log4j</artifactId>
+                <version>${version.log4j}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!--
+               WebDAV servlet test dependencies
+             -->
+            <!--Specific to ModeShape tests-->
+            <dependency>
+                <groupId>org.jmock</groupId>
+                <artifactId>jmock</artifactId>
+                <version>${version.org.jmock}</version>
+                <scope>test</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.hamcrest</groupId>
+                        <artifactId>hamcrest-core</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <!--Specific to ModeShape tests-->
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-webmvc</artifactId>
+                <version>${version.org.springframework.webmvc}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!--Specific to ModeShape tests-->
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-mock</artifactId>
+                <version>${version.org.springframework.mock}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!--Specific to ModeShape tests-->
+            <dependency>
+                <groupId>com.googlecode.sardine</groupId>
+                <artifactId>sardine</artifactId>
+                <version>${version.com.googlecode.sardine}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!--
+                CMIS connector tests
+            -->
+            <!--Version is defined in BOM, but this is specific to ModeShape tests-->
+            <dependency>
+                <groupId>org.apache.chemistry.opencmis</groupId>
+                <artifactId>chemistry-opencmis-server-inmemory</artifactId>
+                <version>${version.org.apache.chemistry.opencmis}</version>
+                <type>war</type>
+                <scope>test</scope>
+            </dependency>
+
+            <!--
+                   Apache JCR API unit tests (for any JCR implementation), which is a
+                   subset of the official TCK
+               -->
+
+            <!--Specific to ModeShape tests-->
+            <dependency>
+                <groupId>org.apache.jackrabbit</groupId>
+                <artifactId>jackrabbit-jcr-tests</artifactId>
+                <version>${version.org.apache.jackrabbit.jcr-tests}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.jackrabbit</groupId>
+                <artifactId>jackrabbit-core</artifactId>
+                <version>${version.org.apache.jackrabbit.core}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!--
+               PicketBox (JAAS implementation used in test cases)
+            -->
+            <!--Specific to ModeShape tests-->
+            <dependency>
+                <groupId>org.picketbox</groupId>
+                <artifactId>picketbox-bare</artifactId>
+                <version>${version.org.picketbox}</version>
+                <scope>test</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>apache-xalan</groupId>
+                        <artifactId>xalan</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>apache-xalan</groupId>
+                        <artifactId>serializer</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>apache-xerces</groupId>
+                        <artifactId>xml-apis</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>apache-xerces</groupId>
+                        <artifactId>xercesImpl</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.hibernate</groupId>
+                        <artifactId>hibernate</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <!--
+               Web Modules dependencies
+            -->
+            <!--
+                Apache Chemistry requires another (older) version than the BOM
+            -->
+            <dependency>
+                <groupId>com.sun.xml.bind</groupId>
+                <artifactId>jaxb-core</artifactId>
+                <version>${version.com.sun.xml.bind}</version>
+                <scope>runtime</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.sun.xml.bind</groupId>
+                <artifactId>jaxb-impl</artifactId>
+                <version>${version.com.sun.xml.bind}</version>
+                <scope>runtime</scope>
+            </dependency>
+            
+            <!--Inherited from BOM, but has some custom exclusions -->
+            <dependency>
+                <groupId>org.jboss.resteasy</groupId>
+                <artifactId>resteasy-jaxrs</artifactId>
+                <version>${version.org.jboss.resteasy}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-simple</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>jcl-over-slf4j</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <!--Inherited from BOM, but has some custom exclusions -->
+            <dependency>
+                <groupId>org.jboss.resteasy</groupId>
+                <artifactId>resteasy-jaxb-provider</artifactId>
+                <version>${version.org.jboss.resteasy}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.sun.xml.bind</groupId>
+                        <artifactId>jaxb-impl</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.sun.xml.stream</groupId>
+                        <artifactId>stream.buffer</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <!--Inherited from BOM, but has some custom exclusions -->
+            <dependency>
+                <groupId>org.jboss.resteasy</groupId>
+                <artifactId>resteasy-multipart-provider</artifactId>
+                <version>${version.org.jboss.resteasy}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.sun.xml.bind</groupId>
+                        <artifactId>jaxb-impl</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.sun.xml.stream</groupId>
+                        <artifactId>stream.buffer</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <!--Inherited from BOM, but has some custom exclusions -->
+            <dependency>
+                <groupId>org.codehaus.jettison</groupId>
+                <artifactId>jettison</artifactId>
+                <version>${version.org.codehaus.jettison}</version>
+                <exclusions>
+                    <!-- This results in duplicate stax-api jars. This is the older one.
+                         A newer is brought in by com.sun.xml.bind:jaxb-impl
+                    -->
+                    <exclusion>
+                        <groupId>stax</groupId>
+                        <artifactId>stax-api</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <!--
+                Sequencers
+            -->
+
+            <!-- Eclipse JDT artifacts declare their dependencies using ranges. (yikes!)
+                 So we need to specify exact versions, and we can do that in a dependencyManagement section.
+                 Here are the dependencies showing the last combination that we could get working:
+                 +- org.eclipse.equinox:common:jar:3.3.0-v20070426:compile
+                     +- org.eclipse.jdt:core:jar:3.3.0-v_771:compile
+                     |  +- org.eclipse.core:resources:jar:3.3.0-v20070604:compile
+                     |  |  \- org.eclipse.core:expressions:jar:3.3.0-v20070606-0010:compile
+                     |  \- org.eclipse.core:runtime:jar:3.3.100-v20070530:compile
+                     |     +- org.eclipse:osgi:jar:3.3.0-v20070530:compile
+                     |     +- org.eclipse.core:jobs:jar:3.3.0-v20070423:compile
+                     |     +- org.eclipse.equinox:registry:jar:3.3.0-v20070522:compile
+                     |     +- org.eclipse.equinox:preferences:jar:3.2.100-v20070522:compile
+                     |     \- org.eclipse.core:contenttype:jar:3.2.100-v20070319:compile
+            -->
+            <!--
+                Java sequencer
+            -->
+            <dependency>
+                <groupId>org.eclipse</groupId>
+                <artifactId>osgi</artifactId>
+                <version>${version.org.eclipse.osgi}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.core</groupId>
+                <artifactId>resources</artifactId>
+                <version>${version.org.eclipse.core.resources}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.core</groupId>
+                <artifactId>expressions</artifactId>
+                <version>${version.org.eclipse.core.expressions}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.core</groupId>
+                <artifactId>runtime</artifactId>
+                <version>${version.org.eclipse.core.runtime}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.core</groupId>
+                <artifactId>jobs</artifactId>
+                <version>${version.org.eclipse.core.jobs}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.core</groupId>
+                <artifactId>contenttype</artifactId>
+                <version>${version.org.eclipse.core.contenttype}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.equinox</groupId>
+                <artifactId>common</artifactId>
+                <version>${version.org.eclipse.equinox.common}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.equinox</groupId>
+                <artifactId>registry</artifactId>
+                <version>${version.org.eclipse.equinox.registry}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.equinox</groupId>
+                <artifactId>preferences</artifactId>
+                <version>${version.org.eclipse.equinox.preferences}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.emf</groupId>
+                <artifactId>common</artifactId>
+                <version>${version.org.eclipse.emf.common}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.emf</groupId>
+                <artifactId>ecore</artifactId>
+                <version>${version.org.eclipse.emf.ecore}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.emf</groupId>
+                <artifactId>ecore-change</artifactId>
+                <version>${version.org.eclipse.emf.ecore-change}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.emf</groupId>
+                <artifactId>ecore-xmi</artifactId>
+                <version>${version.org.eclipse.emf.ecore-xmi}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jdt</groupId>
+                <artifactId>core</artifactId>
+                <version>${version.org.eclipse.jdt.core}</version>
+            </dependency>
+
+            <!--
+                XSD sequencer
+            -->
+            <dependency>
+                <groupId>org.eclipse.xsd</groupId>
+                <artifactId>xsd</artifactId>
+                <version>${version.org.eclipse.xsd}</version>
+            </dependency>
+
+            <!--TIKA text extractor
+                This Tika dependency brings in a lot of 3rd party libraries. We'll exclude
+                most of them and only keep a few that are for Microsoft Office documents,
+                HTML, XML and PDF. When others are needed, they can simply be added to
+                an application's dependencies.
+             -->
+
+            <!--Defined in BOM but needs custom exclusions-->
+            <dependency>
+                <groupId>org.apache.tika</groupId>
+                <artifactId>tika-parsers</artifactId>
+                <version>${version.org.apache.tika}</version>
+                <exclusions>
+                    <!--
+                    The NetCDF and HDF files are often used in the scientific community, so we exclude this
+                    library (and the Commons HTTP Client library) by default.
+                    -->
+                    <exclusion>
+                        <groupId>edu.ucar</groupId>
+                        <artifactId>netcdf</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>commons-httpclient</groupId>
+                        <artifactId>commons-httpclient</artifactId>
+                    </exclusion>
+
+                    <!--
+                    Image metadata isn't often for text extraction,
+                    so exclude this library by default.
+                    -->
+                    <exclusion>
+                        <groupId>com.drewnoakes</groupId>
+                        <artifactId>metadata-extractor</artifactId>
+                    </exclusion>
+                    <!--
+                    RSS and Atom feeds aren't often used for text extraction,
+                    so exclude this library by default.
+                    -->
+                    <exclusion>
+                        <groupId>rome</groupId>
+                        <artifactId>rome</artifactId>
+                    </exclusion>
+                    <!--
+                    Boilerpipe HTML templates are likely not used,
+                    so exclude this library by default.
+                    -->
+                    <exclusion>
+                        <groupId>de.l3s.boilerpipe</groupId>
+                        <artifactId>boilerpipe</artifactId>
+                    </exclusion>
+                    <!--
+                    PDFBox declares the Bouncy Castle dependencies
+                    as optional, and Tika always depends on them to avoid
+                    problems with encrypted PDFs (see TIKA-370).
+                    We exclude them by default.
+                    -->
+                    <exclusion>
+                      <groupId>org.bouncycastle</groupId>
+                      <artifactId>bcmail-jdk15</artifactId>
+                    </exclusion>
+                    <exclusion>
+                      <groupId>org.bouncycastle</groupId>
+                      <artifactId>bcprov-jdk15</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <!--
+                Schematic dependencies
+            -->
+            <!--Specific to ModeShape tests-->
+            <dependency>
+                <groupId>de.undercouch</groupId>
+                <artifactId>bson4jackson</artifactId>
+                <version>${version.de.undercouch.bson4jackson}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!--
+               MongoDB binary store test
+            -->
+            <!--Specific to ModeShape tests-->
+            <dependency>
+                <groupId>de.flapdoodle.embed</groupId>
+                <artifactId>de.flapdoodle.embed.mongo</artifactId>
+                <version>${version.de.flapdoodle.embed.mongo}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!--Specific to ModeShape tests-->
+            <dependency>
+                <groupId>com.googlecode.json-simple</groupId>
+                <artifactId>json-simple</artifactId>
+                <version>${version.com.googlecode.json-simple}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!--Specific to ModeShape tests, but must use the generic org.jboss.jbossts version from the BOM -->
+            <dependency>
+                <groupId>org.jboss.jbossts.jta</groupId>
+                <artifactId>narayana-jta</artifactId>
+                <version>${version.org.jboss.jbossts.jta}</version>
+                <scope>test</scope>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>commons-httpclient</artifactId>
+                        <groupId>commons-httpclient</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>ironjacamar-spec-api</artifactId>
+                        <groupId>org.jboss.ironjacamar</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>jboss-logging-spi</artifactId>
+                        <groupId>org.jboss.logging</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>jboss-logging</artifactId>
+                        <groupId>org.jboss.logging</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>jboss-logging-processor</artifactId>
+                        <groupId>org.jboss.logging</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>jboss-logging-generator</artifactId>
+                        <groupId>org.jboss.logging</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>jbossws-native-core</artifactId>
+                        <groupId>org.jboss.ws.native</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>emma</artifactId>
+                        <groupId>emma</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>emma_ant</artifactId>
+                        <groupId>emma</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>hornetq-core</artifactId>
+                        <groupId>org.hornetq</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>netty</artifactId>
+                        <groupId>org.jboss.netty</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>wrapper</artifactId>
+                        <groupId>tanukisoft</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>jacorb</artifactId>
+                        <groupId>jacorb</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>jfreechart</artifactId>
+                        <groupId>jfree</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>jboss-corba-ots-spi</artifactId>
+                        <groupId>org.jboss.integration</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>jboss-server-manager</artifactId>
+                        <groupId>org.jboss.jbossas</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>jboss-ejb-api_3.1_spec</artifactId>
+                        <groupId>org.jboss.spec.javax.ejb</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>jnp-client</artifactId>
+                        <groupId>org.jboss.naming</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>jboss-servlet-api_3.0_spec</artifactId>
+                        <groupId>org.jboss.spec.javax.servlet</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>jbossws-common</artifactId>
+                        <groupId>org.jboss.ws</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>jcl-over-slf4j</artifactId>
+                        <groupId>org.slf4j</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>stax-api</artifactId>
+                        <groupId>stax</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>idl</artifactId>
+                        <groupId>jacorb</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>jboss-logging-tools</artifactId>
+                        <groupId>org.jboss.logging</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>jboss-connector-api_1.5_spec</artifactId>
+                        <groupId>org.jboss.spec.javax.resource</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>jboss-transaction-spi</artifactId>
+                        <groupId>org.jboss.integration</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>jboss-remoting</artifactId>
+                        <groupId>org.jboss.remoting</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>slf4j-api</artifactId>
+                        <groupId>org.slf4j</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>dom4j</artifactId>
+                        <groupId>dom4j</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>commons-codec</artifactId>
+                        <groupId>commons-codec</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>jboss-logmanager</artifactId>
+                        <groupId>org.jboss.logmanager</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>hibernate-jpa-2.0-api</artifactId>
+                        <groupId>org.hibernate.javax.persistence</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>commons-logging</artifactId>
+                        <groupId>commons-logging</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>jcommon</artifactId>
+                        <groupId>jfree</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>jboss-transaction-api_1.1_spec</artifactId>
+                        <groupId>org.jboss.spec.javax.transaction</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>byteman</artifactId>
+                        <groupId>org.jboss.byteman</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>byteman-submit</artifactId>
+                        <groupId>org.jboss.byteman</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>hornetq-core</artifactId>
+                        <groupId>org.hornetq</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>hornetq-commons</artifactId>
+                        <groupId>org.hornetq</groupId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <!--
+              JBOSS AS subsystem
+             -->
+            <!--These dependencies are NOT PUBLIC nor are they present in the BOM (see version), so they must be local to ModeShape -->
+            <dependency>
+                <groupId>org.jboss.as</groupId>
+                <artifactId>jboss-as-controller</artifactId>
+                <version>${version.org.jboss.as}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.as</groupId>
+                <artifactId>jboss-as-naming</artifactId>
+                <version>${version.org.jboss.as}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.as</groupId>
+                <artifactId>jboss-as-security</artifactId>
+                <version>${version.org.jboss.as}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.as</groupId>
+                <artifactId>jboss-as-clustering-jgroups</artifactId>
+                <version>${version.org.jboss.as}</version>
+                <scope>provided</scope>
+            </dependency>
+            <!-- 
+             Even though not used directly, we need to define it locally because we're using another version of org.jboss.as
+             than what's coming from the BOM.
+            -->
+            <dependency>
+                <groupId>org.jboss.as</groupId>
+                <artifactId>jboss-as-server</artifactId>
+                <version>${version.org.jboss.as}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.as</groupId>
+                <artifactId>jboss-as-subsystem-test-framework</artifactId>
+                <version>${version.org.jboss.as}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!--Specific to ModeShape tests-->
+            <!--
+                JCA adapter testing
+            -->
+            <dependency>
+                <groupId>org.jboss.ironjacamar</groupId>
+                <artifactId>ironjacamar-depchain</artifactId>
+                <version>${version.org.jboss.ironjacamar}</version>
+                <scope>test</scope>
+                <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.ironjacamar</groupId>
+                <artifactId>ironjacamar-deployers-common</artifactId>
+                <version>${version.org.jboss.ironjacamar}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.ironjacamar</groupId>
+                <artifactId>ironjacamar-deployers-fungal</artifactId>
+                <version>${version.org.jboss.ironjacamar}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.ironjacamar</groupId>
+                <artifactId>ironjacamar-embedded-arquillian</artifactId>
+                <version>${version.org.jboss.ironjacamar}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.ironjacamar</groupId>
+                <artifactId>ironjacamar-embedded</artifactId>
+                <version>${version.org.jboss.ironjacamar}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.ironjacamar</groupId>
+                <artifactId>ironjacamar-common-impl-papaki</artifactId>
+                <version>${version.org.jboss.ironjacamar}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!--
+                Atomikos Transaction Manager (for testing only)
+            -->
+            <dependency>
+                <groupId>com.atomikos</groupId>
+                <artifactId>transactions</artifactId>
+                <version>${version.com.atomikos.transactions}</version>
+                <scope>test</scope>
+                <!-- 
+                    Exclude mockito-all since it's banned by the IP BOM
+                -->
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.mockito</groupId>
+                        <artifactId>mockito-all</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>com.atomikos</groupId>
+                <artifactId>transactions-jta</artifactId>
+                <version>${version.com.atomikos.transactions}</version>
+                <scope>test</scope>
+                <!-- 
+                    Exclude mockito-all since it's banned by the IP BOM
+                -->
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.mockito</groupId>
+                        <artifactId>mockito-all</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <!-- Mongo DB JDBC driver (changes scope from BOM) -->
+            <dependency>
+                <groupId>org.mongodb</groupId>
+                <artifactId>mongo-java-driver</artifactId>
+                <version>${version.org.mongodb.mongo-java-driver}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!-- Cassandra JDBC driver (changes scope from BOM) -->
+            <dependency>
+                <groupId>com.datastax.cassandra</groupId>
+                <artifactId>cassandra-driver-core</artifactId>
+                <version>${version.com.datastax.cassandra.cassandra-driver-core}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache-extras.cassandra-jdbc</groupId>
+                <artifactId>cassandra-jdbc</artifactId>
+                <version>${version.org.apache-extras.cassandra-jdbc}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.cassandra</groupId>
+                <artifactId>cassandra-all</artifactId>
+                <version>${version.org.apache.cassandra.cassandra-all}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.avro</groupId>
+                <artifactId>avro</artifactId>
+                <version>${version.org.apache.avro}</version>
+                <scope>test</scope>
+            </dependency>
+            <!--ANTLR deps are overriden for testing, because the Cassandra tests require a specific version-->
+            <dependency>
+                <groupId>org.antlr</groupId>
+                <artifactId>antlr-runtime</artifactId>
+                <version>${version.org.antlr}</version>
+                <scope>test</scope>
+            </dependency>
+           <dependency>
+                <groupId>org.antlr</groupId>
+                <artifactId>antlr</artifactId>
+                <version>${version.org.antlr}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!--Test dependency which allows custom JNDI bindings-->
+            <dependency>
+                <groupId>commons-naming</groupId>
+                <artifactId>commons-naming-core</artifactId>
+                <version>${version.commons-naming.commons-naming-core}</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>

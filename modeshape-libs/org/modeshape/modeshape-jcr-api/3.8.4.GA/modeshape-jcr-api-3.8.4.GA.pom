@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.modeshape</groupId>
+        <artifactId>modeshape-parent</artifactId>
+        <version>3.8.4.GA</version>
+        <relativePath>../modeshape-parent/pom.xml</relativePath>
+    </parent>
+
+    <!-- The groupId and version values are inherited from parent -->
+    <artifactId>modeshape-jcr-api</artifactId>
+    <packaging>jar</packaging>
+    <name>ModeShape Repository API</name>
+    <description>ModeShape JCR Repository API</description>
+    <url>http://www.modeshape.org</url>
+
+    <!--
+    Define the dependencies.  Note that all version and scopes default to those
+    defined in the dependencyManagement section of the parent pom.
+    -->
+    <dependencies>
+        <!--
+          Java Content Repository API
+        -->
+        <dependency>
+            <groupId>javax.jcr</groupId>
+            <artifactId>jcr</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss.spec.javax.servlet</groupId>
+            <artifactId>jboss-servlet-api_3.0_spec</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- See MODE-1140 -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
+    </dependencies>
+
+   <build>
+        <resources>
+            <resource>
+                <filtering>false</filtering>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>*</include>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+        </resources>
+    </build>
+</project>

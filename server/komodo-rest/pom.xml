@@ -1,287 +1,351 @@
-<?xml version="1.0"?>
-<!--
- ~ JBoss, Home of Professional Open Source.
- ~ See the COPYRIGHT.txt file distributed with this work for information
- ~ regarding copyright ownership.  Some portions may be licensed
- ~ to Red Hat, Inc. under one or more contributor license agreements.
- ~
- ~ This library is free software; you can redistribute it and/or
- ~ modify it under the terms of the GNU Lesser General Public
- ~ License as published by the Free Software Foundation; either
- ~ version 2.1 of the License, or (at your option) any later version.
- ~
- ~ This library is distributed in the hope that it will be useful,
- ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
- ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- ~ Lesser General Public License for more details.
- ~
- ~ You should have received a copy of the GNU Lesser General Public
- ~ License along with this library; if not, write to the Free Software
- ~ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
- ~ 02110-1301 USA.
--->
-<project
-    xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <!-- ================================================================== -->
-    <!-- Parent -->
-    <!-- ================================================================== -->
-    <parent>
-        <groupId>org.jboss.tools.komodo</groupId>
-        <artifactId>komodo-server</artifactId>
-        <version>0.0.3-SNAPSHOT</version>
-    </parent>
+	<parent>
+		<groupId>org.komodo</groupId>
+		<artifactId>komodo-server</artifactId>
+		<version>0.0.4-SNAPSHOT</version>
+	</parent>
 
-    <!-- ================================================================== -->
-    <!-- Self -->
-    <!-- ================================================================== -->
-    <groupId>org.jboss.tools.komodo.server</groupId>
-    <artifactId>komodo-rest</artifactId>
-    <packaging>war</packaging>
-    <name>Komodo REST</name>
-    <description>Provides RESTful access to the Komodo engine</description>
-    <!-- ================================================================== -->
-    <!-- Properties -->
-    <!-- ================================================================== -->
-    <properties>
-        <gson.version>2.2.4</gson.version>
-        <infinispan.version>5.2.10.Final</infinispan.version> <!-- need to override so that resteasy uses same as MS -->
-        <resteasy.version>3.0.11.Final</resteasy.version>
-        <guava.version>12.0</guava.version>
-        <swagger.version>1.5.0</swagger.version>
-        <jaxrs.version>2.13</jaxrs.version>
-        <xsom.version>20130531</xsom.version>
-        <relaxngDatatype.version>20020414</relaxngDatatype.version>
-        <webapp-dir>${project.artifactId}-${project.version}</webapp-dir>
-        <webapp-outdir>${basedir}/target/${webapp-dir}</webapp-outdir>
+	<artifactId>komodo-rest</artifactId>
+	<name>Komodo REST</name>
+	<description>Provides RESTful access to the Komodo engine</description>
+	<packaging>war</packaging>
 
-        <!-- To be injected into swagger index.html -->
-        <rest-context>vdb-builder</rest-context>
-        <rest-version>v1</rest-version>
-    </properties>
+	<properties>
+		<gson.version>2.2.4</gson.version>
+		<infinispan.version>5.2.10.Final</infinispan.version> <!-- need to override so that resteasy uses same as MS -->
+		<resteasy.version>3.0.11.Final</resteasy.version>
+		<guava.version>12.0</guava.version>
+		<swagger.version>1.5.0</swagger.version>
+		<jaxrs.version>2.13</jaxrs.version>
+		<xsom.version>20130531</xsom.version>
+		<relaxngDatatype.version>20020414</relaxngDatatype.version>
+		<webapp-dir>${project.artifactId}-${project.version}</webapp-dir>
+		<webapp-outdir>${basedir}/target/${webapp-dir}</webapp-outdir>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>com.sun.xsom</groupId>
-                <artifactId>xsom</artifactId>
-                <version>${xsom.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>relaxngDatatype</groupId>
-                <artifactId>relaxngDatatype</artifactId>
-                <version>${relaxngDatatype.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.google.code.gson</groupId>
-                <artifactId>gson</artifactId>
-                <version>${gson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.google.guava</groupId>
-                <artifactId>guava</artifactId>
-                <version>${guava.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.infinispan</groupId>
-                <artifactId>infinispan-core</artifactId>
-                <version>${infinispan.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.resteasy</groupId>
-                <artifactId>resteasy-bom</artifactId>
-                <version>${resteasy.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>io.swagger</groupId>
-                <artifactId>swagger-jaxrs</artifactId>
-                <version>${swagger.version}</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
+		<!-- To be injected into swagger index.html -->
+		<rest-context>vdb-builder</rest-context>
+		<rest-version>v1</rest-version>
+	</properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>com.sun.xsom</groupId>
-            <artifactId>xsom</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>relaxngDatatype</groupId>
-            <artifactId>relaxngDatatype</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            </dependency>
-        <dependency>
-            <groupId>org.infinispan</groupId>
-            <artifactId>infinispan-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.resteasy</groupId>
-            <artifactId>resteasy-jaxrs</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.resteasy</groupId>
-            <artifactId>resteasy-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.resteasy</groupId>
-            <artifactId>resteasy-json-p-provider</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.resteasy</groupId>
-            <artifactId>resteasy-jackson-provider</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.undertow</groupId>
-            <artifactId>undertow-servlet</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.resteasy</groupId>
-            <artifactId>resteasy-undertow</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.swagger</groupId>
-            <artifactId>swagger-jaxrs</artifactId>
-        </dependency>
-    </dependencies>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>com.sun.xsom</groupId>
+				<artifactId>xsom</artifactId>
+				<version>${xsom.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>relaxngDatatype</groupId>
+				<artifactId>relaxngDatatype</artifactId>
+				<version>${relaxngDatatype.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.code.gson</groupId>
+				<artifactId>gson</artifactId>
+				<version>${gson.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<version>${guava.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.infinispan</groupId>
+				<artifactId>infinispan-core</artifactId>
+				<version>${infinispan.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.resteasy</groupId>
+				<artifactId>resteasy-bom</artifactId>
+				<version>${resteasy.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>io.swagger</groupId>
+				<artifactId>swagger-annotations</artifactId>
+				<version>${swagger.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.swagger</groupId>
+				<artifactId>swagger-core</artifactId>
+				<version>${swagger.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.swagger</groupId>
+				<artifactId>swagger-models</artifactId>
+				<version>${swagger.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.swagger</groupId>
+				<artifactId>swagger-jaxrs</artifactId>
+				<version>${swagger.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
-    <!-- ================================================================== -->
-    <!-- Build -->
-    <!-- ================================================================== -->
-    <build>
-        <!-- Set the name of the war, used as the context root when the app is deployed -->
-        <finalName>${rest-context}</finalName>
+	<dependencies>
+		<dependency>
+			<groupId>org.komodo</groupId>
+			<artifactId>komodo-spi</artifactId>
+		</dependency>
 
-        <plugins>
-            <plugin>
-                <artifactId>maven-war-plugin</artifactId>
-                <configuration>
-                    <warName>${rest-context}</warName>
-                    <failOnMissingWebXml>false</failOnMissingWebXml>
-                    <!--
-                        Ensure this never gets added to war and deployed
-                        since only required for local testing using tomcat.
-                        This works since the tomcat7:run-war uses the exploded
-                        version of the war and not the war archive itself. 
-                     -->
-                    <packagingExcludes>
-                        WEB-INF/lib/jaxrs-ri-*.jar
-                     </packagingExcludes>
+		<dependency>
+			<groupId>org.komodo</groupId>
+			<artifactId>komodo-utils</artifactId>
+		</dependency>
 
-                     <!-- Avoid filtering certain types of file -->
-                     <nonFilteredFileExtensions>
-                        <!-- default value contains jpg,jpeg,gif,bmp,png -->
-                        <nonFilteredFileExtension>jpg,jpeg,gif,bmp,png,ttf,svg,woff,woff2,eot,map</nonFilteredFileExtension>
-                    </nonFilteredFileExtensions>
+		<dependency>
+			<groupId>org.komodo</groupId>
+			<artifactId>komodo-core</artifactId>
+		</dependency>
 
-                    <!-- Adds the swagger ui files to war, filtering them to include the context -->
-                    <webResources>
-                        <resource>
-                            <directory>api-docs</directory>
-                            <filtering>true</filtering>
-                            <targetPath>api-docs</targetPath>
-                        </resource>
-                    </webResources>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+		<dependency>
+			<groupId>org.komodo</groupId>
+			<artifactId>komodo-importer</artifactId>
+		</dependency>
 
-    <profiles>
+		<dependency>
+			<groupId>org.komodo</groupId>
+			<artifactId>komodo-relational</artifactId>
+		</dependency>
 
-        <profile>
-            <id>jboss</id>
+		<dependency>
+			<groupId>com.sun.xsom</groupId>
+			<artifactId>xsom</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>relaxngDatatype</groupId>
+			<artifactId>relaxngDatatype</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-core-asl</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-mapper-asl</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.infinispan</groupId>
+			<artifactId>infinispan-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-jaxrs</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-json-p-provider</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-jackson-provider</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.swagger</groupId>
+			<artifactId>swagger-annotations</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.swagger</groupId>
+			<artifactId>swagger-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.swagger</groupId>
+			<artifactId>swagger-models</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.swagger</groupId>
+			<artifactId>swagger-jaxrs</artifactId>
+		</dependency>
 
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
+		<dependency>
+			<groupId>io.undertow</groupId>
+			<artifactId>undertow-servlet</artifactId>
+			<scope>test</scope>
+		</dependency>
 
-            <dependencies>
-                <dependency>
-                    <groupId>org.jboss.resteasy</groupId>
-                    <artifactId>resteasy-jaxrs</artifactId>
-                    <scope>provided</scope>
-                </dependency>
-                <dependency>
-                    <groupId>org.jboss.resteasy</groupId>
-                    <artifactId>resteasy-client</artifactId>
-                    <scope>provided</scope>
-                </dependency>
-                <dependency>
-                    <groupId>org.jboss.resteasy</groupId>
-                    <artifactId>resteasy-json-p-provider</artifactId>
-                    <scope>provided</scope>
-                </dependency>
-            
-            </dependencies>
-        </profile>
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-undertow</artifactId>
+			<scope>test</scope>
+		</dependency>
 
-        <!--
-            Profile that adds in the glassfish jaxrs implementation to
-            execute rest applications in tomcat. Note: this is NOT
-            required when deploying the war to jboss / wildfly.
+		<dependency>
+			<groupId>org.komodo</groupId>
+			<artifactId>komodo-test-utils</artifactId>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
 
-            To use do
-            mvn clean -P tomcat-test-server tomcat7:run-war
-        -->
-        <profile>
-            <id>tomcat-test-server</id>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
 
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.tomcat.maven</groupId>
-                        <artifactId>tomcat7-maven-plugin</artifactId>
-                        <version>2.3-SNAPSHOT</version>
-                        <configuration>
-                            <!-- http port -->
-                            <port>9090</port>
-                            <!-- application path always starts with / -->
-                            <path>/${rest-context}</path>
-                            <systemProperties>
-                                <!-- adds the var/vdb-builder directory to the project structure -->
-                                <komodo.dataDir>var/${rest-context}</komodo.dataDir>
-                            </systemProperties>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
 
-            <dependencies>
-                <dependency>
-                    <groupId>org.jboss.resteasy</groupId>
-                    <artifactId>resteasy-jaxrs</artifactId>
-                </dependency>
-                <dependency>
-                    <groupId>org.jboss.resteasy</groupId>
-                    <artifactId>resteasy-client</artifactId>
-                </dependency>
-                <dependency>
-                    <groupId>org.jboss.resteasy</groupId>
-                    <artifactId>resteasy-json-p-provider</artifactId>
-                </dependency>
+	<build>
+		<!-- Set the name of the war, used as the context root when the app is 
+			deployed -->
+		<finalName>${rest-context}</finalName>
 
-                <!-- Used with tomcat test server as jaxrs implementation -->
-                <dependency>
-                    <groupId>org.glassfish.jersey.bundles</groupId>
-                    <artifactId>jaxrs-ri</artifactId>
-                    <version>${jaxrs.version}</version>
-                </dependency>
-            </dependencies>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-war-plugin</artifactId>
+				<configuration>
+					<warName>${rest-context}</warName>
+					<failOnMissingWebXml>false</failOnMissingWebXml>
+					<!-- Ensure this never gets added to war and deployed since only required 
+						for local testing using tomcat. This works since the tomcat7:run-war uses 
+						the exploded version of the war and not the war archive itself. -->
+					<packagingExcludes>
+						WEB-INF/lib/jaxrs-ri-*.jar
+					</packagingExcludes>
 
-        </profile>
-    </profiles>
+					<!-- Avoid filtering certain types of file -->
+					<nonFilteredFileExtensions>
+						<!-- default value contains jpg,jpeg,gif,bmp,png -->
+						<nonFilteredFileExtension>jpg,jpeg,gif,bmp,png,ttf,svg,woff,woff2,eot,map</nonFilteredFileExtension>
+					</nonFilteredFileExtensions>
+
+					<!-- Adds the swagger ui files to war, filtering them to include the 
+						context -->
+					<webResources>
+						<resource>
+							<directory>api-docs</directory>
+							<filtering>true</filtering>
+							<targetPath>api-docs</targetPath>
+						</resource>
+					</webResources>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<profiles>
+
+		<profile>
+			<id>jboss</id>
+
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+
+			<dependencies>
+				<dependency>
+					<groupId>org.jboss.resteasy</groupId>
+					<artifactId>resteasy-jaxrs</artifactId>
+					<scope>provided</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.jboss.resteasy</groupId>
+					<artifactId>resteasy-client</artifactId>
+					<scope>provided</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.jboss.resteasy</groupId>
+					<artifactId>resteasy-json-p-provider</artifactId>
+					<scope>provided</scope>
+				</dependency>
+
+			</dependencies>
+		</profile>
+
+		<!-- Profile that adds in the glassfish jaxrs implementation to execute 
+			rest applications in tomcat. Note: this is NOT required when deploying the 
+			war to jboss / wildfly. To use do mvn clean -P tomcat-test-server tomcat7:run-war -->
+		<profile>
+			<id>tomcat-test-server</id>
+
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.tomcat.maven</groupId>
+						<artifactId>tomcat7-maven-plugin</artifactId>
+						<version>2.3-SNAPSHOT</version>
+						<configuration>
+							<!-- http port -->
+							<port>9090</port>
+							<!-- application path always starts with / -->
+							<path>/${rest-context}</path>
+							<systemProperties>
+								<!-- adds the var/vdb-builder directory to the project structure -->
+								<komodo.dataDir>var/${rest-context}</komodo.dataDir>
+							</systemProperties>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+
+			<dependencies>
+				<dependency>
+					<groupId>org.jboss.resteasy</groupId>
+					<artifactId>resteasy-jaxrs</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.jboss.resteasy</groupId>
+					<artifactId>resteasy-client</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.jboss.resteasy</groupId>
+					<artifactId>resteasy-json-p-provider</artifactId>
+				</dependency>
+
+				<!-- Used with tomcat test server as jaxrs implementation -->
+				<dependency>
+					<groupId>org.glassfish.jersey.bundles</groupId>
+					<artifactId>jaxrs-ri</artifactId>
+				</dependency>
+			</dependencies>
+
+			<dependencyManagement>
+				<dependencies>
+					<dependency>
+						<groupId>org.glassfish.jersey.bundles</groupId>
+						<artifactId>jaxrs-ri</artifactId>
+						<version>${jaxrs.version}</version>
+					</dependency>
+				</dependencies>
+			</dependencyManagement>
+
+		</profile>
+	</profiles>
 </project>

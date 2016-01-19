@@ -1,185 +1,238 @@
-<project
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>org.jboss.tools</groupId>
-		<artifactId>parent</artifactId>
-		<version>4.2.0.Final-SNAPSHOT</version>
-	</parent>
-	<groupId>org.jboss.tools</groupId>
+
+  <parent>
+    <groupId>org.komodo</groupId>
+    <artifactId>komodo-parent</artifactId>
+	<version>0.0.4-SNAPSHOT</version>
+    <relativePath>komodo-parent/pom.xml</relativePath>
+  </parent>
+
 	<artifactId>komodo</artifactId>
-	<name>komodo</name>
-	<version>0.0.3-SNAPSHOT</version>
+
 	<packaging>pom</packaging>
-
-	<properties>
-		<jboss-tycho-version>${tychoVersion}</jboss-tycho-version>
-		<tycho.scmUrl>scm:git:https://github.com/Teiid-Designer/komodo.git</tycho.scmUrl>
-
-		<!-- Specify our own TP using the JBT-IS rather than using the definition in the parent pom -->
-		<no-target-platform>true</no-target-platform>
-
-		<k.tpc.groupId>org.jboss.tools.integration-stack</k.tpc.groupId>
-		<k.tpc.artifactId>target-platform</k.tpc.artifactId>
-		<k.tpc.version>4.2.0.Final</k.tpc.version>
-		<k.tpc.type>target</k.tpc.type>
-		<k.tpc.classifier>base</k.tpc.classifier>
-	</properties>
+	<name>Komodo</name>
+	<description>Builds the entire Komodo distribution.</description>
 
 	<modules>
-		<module>target-platform</module>
-		<module>features</module>
-		<module>plugins</module>
-		<module>tests</module>
-		<module>integration-tests</module>
-		<module>site</module>
-		<module>build</module>
-		<module>server</module>
+        <!-- Order is important -->
+
+        <!-- First these -->
+        <module>komodo-parent</module>
+        
+        <!-- TODO MIGHT NEED THIS LATER -->
+        <!--<module>komodo-assembly-descriptors</module>-->
+        
+        <module>komodo-modeshape</module>
+        <module>komodo-spi</module>
+        <module>komodo-utils-logger</module>
+        <module>komodo-utils</module>
+        <module>komodo-teiid-client</module>
+        <module>komodo-modeshape-sequencer-teiid-sql</module>
+        <module>komodo-core</module>
+
+        <!-- For Testing only -->
+        <module>komodo-test-utils</module>
+        <module>komodo-modeshape-sequencer-teiid-sql-tests</module>
+        <module>komodo-core-tests</module>
+
+        <module>komodo-modeshape-vdb</module>
+        <module>komodo-shell-api</module>
+        <module>komodo-shell</module>
+        <module>komodo-importer</module>
+        <module>komodo-relational</module>
+        <module>komodo-relational-commands</module>
+        <module>server</module>
+
+        <module>build</module>
+
+        <!-- TODO Might need this later -->
+        <!--
+          The JBoss AS7 subsystem needs the web components and (local) JDBC drivers.
+        -->
+        <!--<module>deploy/jbossas</module>-->
+        <!--<module>komodo-distribution</module>-->
+        
 	</modules>
 
-	<build>
-		<plugins>
+	<properties>
+		<rootDir>${project.basedir}</rootDir>
+		<modeshape.version>3.8.4.GA</modeshape.version>
+		<jcr.version>2.0</jcr.version>
+		<infinispan.version>5.2.10.Final</infinispan.version>
+		<log4j.version>1.2.16</log4j.version>
+		<slf4j.log4j.version>1.7.2</slf4j.log4j.version>
+		<xnio.version>3.2.0.Final</xnio.version>
+	</properties>
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<version>1.7</version>
-				<executions>
-					<execution>
-						<phase>validate</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<configuration>
-							<target>
-								<echo>basedir: ${basedir}</echo>
-								<echo>project.basedir: ${project.basedir}</echo>
-								<echo>project.baseUri: ${project.baseUri}</echo>
-								<echo>project.version: ${project.version}</echo>
-								<echo>project.groupId: ${project.groupId}</echo>
-								<echo>project.artifactId: ${project.artifactId}</echo>
-								<echo>project.name: ${project.name}</echo>
-								<echo>project.build.sourceDirectory: ${project.build.sourceDirectory}</echo>
-								<echo>project.build.scriptSourceDirectory: ${project.build.scriptSourceDirectory}</echo>
-								<echo>project.build.testSourceDirectory: ${project.build.testSourceDirectory}</echo>
-								<echo>project.build.outputDirectory: ${project.build.outputDirectory}</echo>
-								<echo>project.build.testOutputDirectory: ${project.build.testOutputDirectory}</echo>
-								<echo>project.build.directory: ${project.build.directory}</echo>
-								<echo>eclipse.tycho.version: ${tychoVersion}</echo>
-								<echo>eclipse.target.version: ${targetEclipseVersion}</echo>
-								<echo>not.using.jbt.parent.pom.tp: ${no-target-platform}</echo>
-								<echo>komodo.tp.group.id: ${k.tpc.groupId}</echo>
-								<echo>komodo.tp.artifact.id: ${k.tpc.artifactId}</echo>
-								<echo>komodo.tp.version: ${k.tpc.version}</echo>
-								<echo>komodo.tp.type: ${k.tpc.type}</echo>
-								<echo>komodo.tp.classifier: ${k.tpc.classifier}</echo>
-							</target>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
+	<profiles>		
+		<!-- 
+		  This profile is used to run longer-running performance tests,
+		  and must be activated manually, as in "mvn ... -Pperformance ..."
+		-->
+        <profile>
+            <id>performance</id>
+            <modules>
+                <!--
+                    The JBoss AS7 subsystem needs the web components and (local) JDBC drivers.
+                -->
+                <module>komodo-performance-tests</module>
+            </modules>
+        </profile>
+		
+        <!-- TODO Might need later -->
+		<!-- 
+		  This profile is used to build everything for a release, including all assemblies,
+			and must be activated manually, as in "mvn ... -Passembly ..."
+		-->
+        <!--
+        <profile>
+            <id>assembly</id>
+            <modules>
+                <module>komodo-jca-rar</module>
+                <module>komodo-client</module>
+                <module>integration</module>
+            </modules>
+        </profile>
+        -->
+	</profiles>
 
-			<plugin>
-				<groupId>org.eclipse.tycho</groupId>
-				<artifactId>target-platform-configuration</artifactId>
-				<version>${tychoVersion}</version>
-				<configuration>
-					<resolver>p2</resolver>
-					<ignoreTychoRepositories>true</ignoreTychoRepositories>
-					<target>
-						<artifact>
-							<groupId>${k.tpc.groupId}</groupId>
-							<artifactId>${k.tpc.artifactId}</artifactId>
-							<version>${k.tpc.version}</version>
-							<type>${k.tpc.type}</type>
-							<classifier>${k.tpc.classifier}</classifier>
-						</artifact>
-					</target>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.modeshape</groupId>
+				<artifactId>modeshape-common</artifactId>
+				<version>${modeshape.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.modeshape</groupId>
+				<artifactId>modeshape-jcr</artifactId>
+				<version>${modeshape.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.modeshape</groupId>
+				<artifactId>modeshape-sequencer-ddl</artifactId>
+				<version>${modeshape.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.modeshape</groupId>
+				<artifactId>modeshape-sequencer-teiid</artifactId>
+				<version>${modeshape.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.modeshape</groupId>
+				<artifactId>modeshape-schematic</artifactId>
+				<version>${modeshape.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.modeshape</groupId>
+				<artifactId>modeshape-jcr-api</artifactId>
+				<version>${modeshape.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.modeshape</groupId>
+				<artifactId>modeshape-extractor-tika</artifactId>
+				<version>${modeshape.version}</version>
+			</dependency>
 
-	<!-- Repositories -->
-	<repositories>
+			<dependency>
+				<groupId>javax.jcr</groupId>
+				<artifactId>jcr</artifactId>
+				<version>${jcr.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.infinispan</groupId>
+				<artifactId>infinispan-cachestore-leveldb</artifactId>
+				<version>${infinispan.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jboss.xnio</groupId>
+				<artifactId>xnio-api</artifactId>
+				<version>${xnio.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jboss.xnio</groupId>
+				<artifactId>xnio-nio</artifactId>
+				<version>${xnio.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<dependencies>
+		<dependency>
+		<groupId>org.modeshape</groupId>
+		<artifactId>modeshape-common</artifactId>
+		</dependency>
+		<dependency>
+		<groupId>org.modeshape</groupId>
+		<artifactId>modeshape-jcr</artifactId>
+		</dependency>
+		<dependency>
+		<groupId>org.modeshape</groupId>
+		<artifactId>modeshape-sequencer-ddl</artifactId>
+		</dependency>
+		<dependency>
+		<groupId>org.modeshape</groupId>
+		<artifactId>modeshape-sequencer-teiid</artifactId>
+		</dependency>
+		<dependency>
+		<groupId>org.modeshape</groupId>
+		<artifactId>modeshape-schematic</artifactId>
+		</dependency>
+		<dependency>
+		<groupId>org.modeshape</groupId>
+		<artifactId>modeshape-jcr-api</artifactId>
+		</dependency>
+		<dependency>
+		<groupId>org.modeshape</groupId>
+		<artifactId>modeshape-extractor-tika</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>javax.jcr</groupId>
+			<artifactId>jcr</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.infinispan</groupId>
+			<artifactId>infinispan-cachestore-leveldb</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+		</dependency>
+	</dependencies>
+
+	<repositories>	
+		<!-- In Project repository -->
 		<repository>
-			<id>jboss-public-repository-group</id>
-			<name>JBoss Public Repository Group</name>
-			<url>http://repository.jboss.org/nexus/content/groups/public/</url>
-			<layout>default</layout>
+			<id>modeshape-in-project</id>
+			<name>Modeshape Project Repo</name>
+			<url>file://${project.basedir}/modeshape-libs</url>
 			<releases>
 				<enabled>true</enabled>
-				<updatePolicy>never</updatePolicy>
 			</releases>
 			<snapshots>
-				<enabled>true</enabled>
-				<updatePolicy>daily</updatePolicy>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>sonatype</id>
-			<url>http://oss.sonatype.org/content/repositories/snapshots</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<releases>
 				<enabled>false</enabled>
-			</releases>
-		</repository>
-		<repository>
-			<id>jboss-maven2-release-repository</id>
-			<url>https://repository.jboss.org/nexus/content/groups/m2-proxy/</url>
-		</repository>
-		<repository>
-			<id>redhat-techpreview-all-repository</id>
-			<name>Red Hat Tech Preview repository (all)</name>
-			<url>http://maven.repository.redhat.com/techpreview/all/</url>
-			<layout>default</layout>
-			<releases>
-				<enabled>true</enabled>
-				<updatePolicy>never</updatePolicy>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-				<updatePolicy>never</updatePolicy>
 			</snapshots>
 		</repository>
+
 		<repository>
-			<id>jboss-earlyaccess</id>
-			<name>JBoss Early Access</name>
-			<url>https://maven.repository.redhat.com/earlyaccess/all/</url>
+			<id>redhat-product-repository</id>
+			<name>Red Hat Product Repository</name>
+			<url>http://maven.repository.redhat.com/ga</url>
 			<layout>default</layout>
 			<releases>
 				<enabled>true</enabled>
-				<updatePolicy>never</updatePolicy>
 			</releases>
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
 		</repository>
 	</repositories>
-
-	<pluginRepositories>
-		<pluginRepository>
-			<id>jboss-public-repository-group</id>
-			<name>JBoss Public Repository Group</name>
-			<url>http://repository.jboss.org/nexus/content/groups/public/</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</pluginRepository>
-		<pluginRepository>
-			<id>codehaus-public-repository</id>
-			<name>Codehaus Public Repository</name>
-			<url>https://nexus.codehaus.org/content/repositories/releases</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-		</pluginRepository>
-	</pluginRepositories>
-  
 </project>

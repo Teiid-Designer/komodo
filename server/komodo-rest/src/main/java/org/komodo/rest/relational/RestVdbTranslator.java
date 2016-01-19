@@ -9,6 +9,7 @@ package org.komodo.rest.relational;
 
 import java.net.URI;
 import java.util.Properties;
+
 import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.rest.KomodoService;
@@ -18,8 +19,8 @@ import org.komodo.rest.RestLink.LinkType;
 import org.komodo.rest.relational.KomodoRestUriBuilder.SettingNames;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.utils.ArgCheck;
 import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
-import org.teiid.core.util.ArgCheck;
 
 /**
  * A translator that can be used by GSON to build a JSON document representation.

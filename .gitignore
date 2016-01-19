@@ -6,22 +6,7 @@ tmp
 # OS X (Mac)
 .DS_Store
 
-# Eclipse
-.metadata
+*/gen
+**/commandOutput.txt
 
-plugins/*/launch
-plugins/*/gen
-plugins/*/lib/*.*
-plugins/*/libsrc/*.jar
-plugins/libs/*/lib/*.*
-plugins/libs/*/libsrc/*.jar
-plugins/org.komodo.shell/commandOutput.txt
-
-tests/*/lib/*.jar
-tests/*/lib/jboss*
-tests/org.komodo.shell.test/commandOutput.txt
-
-integration-tests/*/lib/*.jar
-integration-tests/*/lib/jboss*
-
-target-platform/*.target
+**/_remote.repositories

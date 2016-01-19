@@ -1,0 +1,127 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.komodo</groupId>
+		<artifactId>komodo</artifactId>
+		<version>0.0.4-SNAPSHOT</version>
+	</parent>
+	<artifactId>komodo-modeshape-sequencer-teiid-sql</artifactId>
+	<name>Modeshape Teiid SQL Sequencer</name>
+	<description>Sequences Teiid SQL into Modeshape nodes</description>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>demigen</source>
+								<source>gen</source>
+							</sources>
+						</configuration>
+					</execution>
+					<execution>
+            			<id>add-resource</id>
+            			<phase>generate-resources</phase>
+            			<goals>
+              				<goal>add-resource</goal>
+            			</goals>
+            			<configuration>
+              				<resources>
+                				<resource>
+                  					<directory>demigen-resources</directory>
+                				</resource>
+              				</resources>
+            			</configuration>
+          			</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-clean-plugin</artifactId>
+				<configuration>
+					<filesets>
+						<fileset>
+							<directory>${project.basedir}/gen/org/komodo/modeshape/teiid/</directory>
+							<includes>
+								<include name="**/*.java" />
+							</includes>
+						</fileset>
+					</filesets>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>javacc-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>javacc</id>
+						<goals>
+							<goal>jjtree-javacc</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<sourceDirectory>${project.basedir}</sourceDirectory>
+					<includes>
+						<include>gen/javacc/*Parser.jjt</include>
+					</includes>
+					<!-- These options should be an identical superset of the options configured 
+						in the javacc/*.jjt files -->
+					<buildNodeFiles>false</buildNodeFiles>
+					<errorReporting>true</errorReporting>
+					<grammarEncoding>UTF-8</grammarEncoding>
+					<ignoreCase>true</ignoreCase>
+					<interimDirectory>${project.basedir}/gen</interimDirectory>
+					<isStatic>false</isStatic>
+					<javaUnicodeEscape>true</javaUnicodeEscape>
+					<keepLineColumn>true</keepLineColumn>
+					<multi>true</multi>
+					<nodeClass>ASTNode</nodeClass>
+					<nodeDefaultVoid>true</nodeDefaultVoid>
+					<nodeFactory>TeiidNodeFactory</nodeFactory>
+					<nodePackage>org.komodo.modeshape.teiid.sql.lang</nodePackage>
+					<nodePrefix />
+					<nodeScopeHook>false</nodeScopeHook>
+					<nodeUsesParser>true</nodeUsesParser>
+					<outputDirectory>${project.basedir}/gen</outputDirectory>
+					<unicodeInput>false</unicodeInput>
+					<visitor>false</visitor>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.komodo</groupId>
+			<artifactId>komodo-spi</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.komodo</groupId>
+			<artifactId>komodo-utils</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.komodo</groupId>
+			<artifactId>komodo-teiid-client</artifactId>
+		</dependency>
+
+	</dependencies>
+</project>

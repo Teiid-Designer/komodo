@@ -177,7 +177,7 @@ public final class KomodoUtilServiceTest implements StringConstants {
         this.response = request(uri).post(null);
 
         final String entity = response.readEntity(String.class);
-        System.out.println("Response from uri " + uri + ":\n" + entity);
+        // System.out.println("Response from uri " + uri + ":\n" + entity);
 
         KomodoStatusObject status = KomodoJsonMarshaller.unmarshall(entity, KomodoStatusObject.class);
         assertNotNull(status);
@@ -205,7 +205,7 @@ public final class KomodoUtilServiceTest implements StringConstants {
         this.response = request(uri).post(null);
 
         final String entity = response.readEntity(String.class);
-        System.out.println("Response from uri " + uri + ":\n" + entity);
+        // System.out.println("Response from uri " + uri + ":\n" + entity);
 
         KomodoStatusObject status = KomodoJsonMarshaller.unmarshall(entity, KomodoStatusObject.class);
         assertNotNull(status);

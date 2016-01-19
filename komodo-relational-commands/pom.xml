@@ -1,0 +1,140 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.komodo</groupId>
+		<artifactId>komodo</artifactId>
+		<version>0.0.4-SNAPSHOT</version>
+	</parent>
+	<artifactId>komodo-relational-commands</artifactId>
+	<name>Komodo Relational Commands</name>
+	<description>Commands framework for the relational modelling</description>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+			<plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>process-test-classes</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>assembly/with-dependencies.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                </executions> 
+             </plugin>
+		</plugins>
+		<pluginManagement>
+			<plugins>
+				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.apache.maven.plugins
+										</groupId>
+										<artifactId>
+											maven-assembly-plugin
+										</artifactId>
+										<versionRange>
+											[2.5.5,)
+										</versionRange>
+										<goals>
+											<goal>single</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<execute></execute>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.komodo</groupId>
+			<artifactId>komodo-spi</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.komodo</groupId>
+			<artifactId>komodo-utils</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.komodo</groupId>
+			<artifactId>komodo-core</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.komodo</groupId>
+			<artifactId>komodo-importer</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.komodo</groupId>
+			<artifactId>komodo-shell-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.komodo</groupId>
+			<artifactId>komodo-shell</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.komodo</groupId>
+			<artifactId>komodo-relational</artifactId>
+		</dependency>
+
+		<!-- Allows test classes in other modules to extend the classes in this module -->
+		<dependency>
+			<groupId>org.komodo</groupId>
+			<artifactId>komodo-shell</artifactId>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.komodo</groupId>
+			<artifactId>komodo-test-utils</artifactId>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>

@@ -1,7 +1,0 @@
-*.jj
-
-gen/org/komodo/modeshape/teiid/*
-lib/*
-libsrc/*
-
-src/org/komodo/modeshape/teiid/parser/syntax/*

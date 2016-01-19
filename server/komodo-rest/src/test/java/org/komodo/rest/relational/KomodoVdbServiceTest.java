@@ -52,7 +52,7 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         final String entities = response.readEntity(String.class);
         assertThat(entities, is(notNullValue()));
 
-        System.out.println("Response:\n" + entities);
+        // System.out.println("Response:\n" + entities);
         // make sure the VDB JSON document is returned for each vdb
         RestVdb[] vdbs = KomodoJsonMarshaller.unmarshallArray(entities, RestVdb[].class);
         assertEquals(4, vdbs.length);
@@ -275,7 +275,7 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         final String entity = this.response.readEntity(String.class);
         assertThat(entity, is(notNullValue()));
 
-        System.out.println("Response from uri " + uri + ":\n" + entity);
+        // System.out.println("Response from uri " + uri + ":\n" + entity);
 
         RestVdbModel model = KomodoJsonMarshaller.unmarshall(entity, RestVdbModel.class);
         assertNotNull(model);
