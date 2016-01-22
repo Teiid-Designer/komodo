@@ -7,6 +7,7 @@
  */
 package org.komodo.spi.repository.validation;
 
+import java.util.Map;
 import org.komodo.spi.KException;
 import org.komodo.spi.outcome.Outcome.Level;
 import org.komodo.spi.repository.KomodoObject;
@@ -40,7 +41,7 @@ public interface Rule {
          * The localized message key for the error message used when a child of a required type is not found. Value is {@value} .
          */
         CHILD_OF_REQUIRED_TYPE_NOT_FOUND,
-
+        
         /**
          * The localized message key for the description. Value is {@value} .
          */
@@ -196,6 +197,11 @@ public interface Rule {
     }
 
     /**
+     * An empty array of rules.
+     */
+    Rule[] NO_RULES = new Rule[0];
+
+    /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param kobject
@@ -257,6 +263,15 @@ public interface Rule {
      *         if an error occurs
      */
     String getNodeType( final UnitOfWork transaction ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @return the map of property name-value that the node type must possess. (never empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    Map<String,String> getNodePropRestrictions( final UnitOfWork transaction ) throws KException;
 
     /**
      * @param transaction
