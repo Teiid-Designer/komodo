@@ -6,7 +6,10 @@ tmp
 # OS X (Mac)
 .DS_Store
 
-*/gen
+*/gen/org/teiid/query/parser/v7/**/*.java
+*/gen/org/teiid/query/parser/v8/**/*.java
+*/gen/org/teiid/query/sql/lang/**/*.java
+
 **/commandOutput.txt
 
 **/_remote.repositories
