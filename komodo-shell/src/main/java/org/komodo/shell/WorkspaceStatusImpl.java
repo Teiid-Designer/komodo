@@ -43,7 +43,6 @@ import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
-
 import org.komodo.core.KEngine;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.repository.RepositoryImpl;
@@ -156,6 +155,9 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         // initialize the global properties
         initGlobalProperties();
 
+        // initialize the validation rules
+        initValidationRules(true);
+
         this.defaultLabelProvider = new DefaultLabelProvider();
         this.defaultLabelProvider.setRepository( repo );
         this.defaultLabelProvider.setWorkspaceStatus( this );
@@ -191,6 +193,15 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
 
         // Let the providers init any provided states
         initProvidedStates(this.wsProperties);
+    }
+
+    private void initValidationRules(boolean overrideExisting) throws KException {
+        // load shell properties if they exist
+        final String dataDir = this.shell.getShellDataLocation();
+        final File validationRulesFile = new File( dataDir, this.shell.getShellValidationRulesFile() );
+
+        final Repository repo = getEngine().getDefaultRepository();
+        repo.getValidationManager().importRules(validationRulesFile, getTransaction(), overrideExisting);
     }
 
     private void createTransaction(final String source ) throws Exception {

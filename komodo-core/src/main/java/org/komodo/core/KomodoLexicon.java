@@ -326,6 +326,21 @@ public interface KomodoLexicon extends StringConstants {
          * The name of the property used for the node type the rule pertains to. Value is {@value} .
          */
         String NODE_TYPE = Namespace.PREFIX + COLON + "nodeType"; //$NON-NLS-1$
+        
+        /**
+         * The name of the property restrictions grouping node.  Value is {@value} .
+         */
+        String PROP_RESTRICTIONS_GROUPING = Namespace.PREFIX + COLON + "propRestrictions"; //$NON-NLS-1$
+
+        /**
+         * The name of the property restriction node. Value is {@value} .
+         */
+        String PROP_RESTRICTION = Namespace.PREFIX + COLON + "propRestriction"; //$NON-NLS-1$
+
+        /**
+         * The name of the property used for the node restricted to property value. Value is {@value} .
+         */
+        String PROP_VALUE = Namespace.PREFIX + COLON + "propValue"; //$NON-NLS-1$
 
         /**
          * The name of the node type for a number rule.
