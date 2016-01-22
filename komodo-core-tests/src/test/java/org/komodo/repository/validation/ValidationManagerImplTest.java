@@ -73,27 +73,27 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         assertThat( errors.get( 1 ).contains( "Duplicate unique value [es]" ), is( true ) );
         assertThat( errors.get( 2 ).contains( "Duplicate unique value [nz]" ), is( true ) );
         assertThat( errors.get( 3 ).contains( "Duplicate unique value [vdb:connectionType]" ), is( true ) );
-        assertThat( errors.get( 4 ).contains( "Duplicate unique value [vdb:dataRole] declared for identity constraint of element \"nodeValidation\""), is( true ) );
+        assertThat( errors.get( 4 ).contains( "Duplicate unique value [vdb:dataRole] declared for identity constraint \"childValidationJcrNameKey\" of element \"nodeValidation\""), is( true ) );
         assertThat( errors.get( 5 ).contains( "Duplicate unique value [ca]" ), is( true ) );
         assertThat( errors.get( 6 ).contains( "Duplicate unique value [ddl:statementOption]" ), is( true ) );
         // Duplicate nodeValidation types now allowed - added optional property Restrictions
         //assertThat( errors.get( 7 ).contains( "Duplicate unique value [vdb:virtualDatabase]" ), is( true ) );
         assertThat( errors.get( 7 ).contains( "Duplicate unique value [ddl:statementOption.value]" ), is( true ) );
-        assertThat( errors.get( 8 ).contains( "Duplicate unique value [ab] declared for identity constraint of element \"propertyValidation\"" ),
+        assertThat( errors.get( 8 ).contains( "Duplicate unique value [ab] declared for identity constraint \"propertyRequiredRuleDescriptionLocaleKey\" of element \"propertyValidation\"" ),
                     is( true ) );
-        assertThat( errors.get( 9 ).contains( "Duplicate unique value [cd] declared for identity constraint of element \"propertyValidation\"" ),
+        assertThat( errors.get( 9 ).contains( "Duplicate unique value [cd] declared for identity constraint \"propertyValueRuleDescriptionLocaleKey\" of element \"propertyValidation\"" ),
                     is( true ) );
-        assertThat( errors.get( 10 ).contains( "Duplicate unique value [ef] declared for identity constraint of element \"propertyValidation\"" ),
+        assertThat( errors.get( 10 ).contains( "Duplicate unique value [ef] declared for identity constraint \"propertyRelationshipRuleDescriptionLocaleKey\" of element \"propertyValidation\"" ),
                     is( true ) );
-        assertThat( errors.get( 11 ).contains( "Duplicate unique value [gh] declared for identity constraint of element \"propertyValidation\"" ),
+        assertThat( errors.get( 11 ).contains( "Duplicate unique value [gh] declared for identity constraint \"propertyValueRangeRuleDescriptionLocaleKey\" of element \"propertyValidation\"" ),
                     is( true ) );
-        assertThat( errors.get( 12 ).contains( "Duplicate unique value [REQUIRED_PROPERTY_NOT_FOUND,ij] declared for identity constraint of element \"propertyValidation\"" ),
+        assertThat( errors.get( 12 ).contains( "Duplicate unique value [REQUIRED_PROPERTY_NOT_FOUND,ij] declared for identity constraint \"propertyRequiredRuleMessageLocaleKey\" of element \"propertyValidation\"" ),
                     is( true ) );
-        assertThat( errors.get( 13 ).contains( "Duplicate unique value [PATTERN_RULE_INVALID_PROPERTY_VALUE,kl] declared for identity constraint of element \"propertyValidation\"" ),
+        assertThat( errors.get( 13 ).contains( "Duplicate unique value [PATTERN_RULE_INVALID_PROPERTY_VALUE,kl] declared for identity constraint \"propertyValueRuleMessageLocaleKey\" of element \"propertyValidation\"" ),
                     is( true ) );
-        assertThat( errors.get( 14 ).contains( "Duplicate unique value [PROPERTY_RULE_REQUIRED_PROPERTY_NOT_FOUND,mn] declared for identity constraint of element \"propertyValidation\"" ),
+        assertThat( errors.get( 14 ).contains( "Duplicate unique value [PROPERTY_RULE_REQUIRED_PROPERTY_NOT_FOUND,mn] declared for identity constraint \"propertyRelationshipRuleMessageLocaleKey\" of element \"propertyValidation\"" ),
                     is( true ) );
-        assertThat( errors.get( 15 ).contains( "Duplicate unique value [PROPERTY_RULE_VALUE_ABOVE_MAX_VALUE,op] declared for identity constraint of element \"propertyValidation\"" ),
+        assertThat( errors.get( 15 ).contains( "Duplicate unique value [PROPERTY_RULE_VALUE_ABOVE_MAX_VALUE,op] declared for identity constraint \"propertyValueRangeRuleMessageLocaleKey\" of element \"propertyValidation\"" ),
                     is( true ) );
     }
 
