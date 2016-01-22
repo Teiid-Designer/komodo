@@ -68,6 +68,8 @@ public class DefaultKomodoShell implements KomodoShell {
 
     private static final String LOCALE_PROPERTY = "komodo.shell.locale"; //$NON-NLS-1$
     private static final String PROPERTIES_FILE_NAME = "vdbbuilder.properties"; //$NON-NLS-1$
+    private static final String VALIDATION_RULES_FILE_NAME = "validationRules.xml"; //$NON-NLS-1$
+    private static final String VALIDATION_RULES_SCHEMA_FILE_NAME = "komodoValidation.xsd"; //$NON-NLS-1$
     private String msgIndentStr = StringConstants.EMPTY_STRING;
 
     /**
@@ -400,7 +402,7 @@ public class DefaultKomodoShell implements KomodoShell {
 
     private void startKEngine() throws KException, InterruptedException {
         final Repository defaultRepo = kEngine.getDefaultRepository();
-
+        
         // Latch for awaiting the start of the default repository
         final CountDownLatch updateLatch = new CountDownLatch( 1 );
 
@@ -539,7 +541,24 @@ public class DefaultKomodoShell implements KomodoShell {
         return PROPERTIES_FILE_NAME;
     }
     
-    
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.KomodoShell#getShellValidationRulesFile()
+     */
+    @Override
+    public String getShellValidationRulesFile() {
+        return VALIDATION_RULES_FILE_NAME;
+    }
+        
+    /* (non-Javadoc)
+     * @see org.komodo.shell.api.KomodoShell#getShellValidationRulesSchemaFile()
+     */
+    @Override
+    public String getShellValidationRulesSchemaFile() {
+        return VALIDATION_RULES_SCHEMA_FILE_NAME;
+    }
+
     /**
      * Method that reads version info from properties file
      * 

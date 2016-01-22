@@ -8,111 +8,29 @@
 package org.komodo.repository.validation;
 
 import java.io.File;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.jcr.Node;
-import javax.jcr.Session;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
+import java.util.Map;
 import org.komodo.core.KomodoLexicon;
-import org.komodo.repository.ObjectImpl;
-import org.komodo.repository.RepositoryImpl;
-import org.komodo.repository.RepositoryImpl.UnitOfWorkImpl;
 import org.komodo.spi.KException;
-import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.outcome.Outcome;
+import org.komodo.spi.repository.Descriptor;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.spi.repository.ValidationManager;
+import org.komodo.spi.repository.validation.Result;
 import org.komodo.spi.repository.validation.Rule;
-import org.komodo.spi.repository.validation.Rule.MessageKey;
-import org.komodo.spi.utils.LocalizedMessage;
 import org.komodo.utils.ArgCheck;
-import org.komodo.utils.KLog;
-import org.modeshape.jcr.api.JcrTools;
-import org.xml.sax.SAXParseException;
-import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * An implementation of an {@link ValidationManager} that can be used by repositories.
  */
 public class ValidationManagerImpl implements ValidationManager {
 
-    /**
-     * A handler that can be used with validation parsing.
-     */
-    public static class ValidationHandler extends DefaultHandler {
-
-        private final List< String > errors = new ArrayList<>();
-        private final List< String > fatals = new ArrayList<>();
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.xml.sax.helpers.DefaultHandler#error(org.xml.sax.SAXParseException)
-         */
-        @Override
-        public void error( final SAXParseException e ) {
-            this.errors.add( e.getLocalizedMessage() );
-        }
-
-        /**
-         * {@inheritDoc}
-         *
-         * @see org.xml.sax.helpers.DefaultHandler#fatalError(org.xml.sax.SAXParseException)
-         */
-        @Override
-        public void fatalError( final SAXParseException e ) {
-            this.fatals.add( e.getLocalizedMessage() );
-        }
-
-        /**
-         * @return the error messages output from the last parse operation (never <code>null</code> but can be empty)
-         */
-        public List< String > getErrors() {
-            return this.errors;
-        }
-
-        /**
-         * @return the fatal error messages output from the last parse operation (never <code>null</code> but can be empty)
-         */
-        public List< String > getFatalErrors() {
-            return this.fatals;
-        }
-
-    }
-
-    private static SAXParser _parser;
-
-    private static final KLog LOGGER = KLog.getLogger();
-
-    /**
-     * The root path of the Komodo environment validation area.
-     */
-    public static String VALIDATION_ROOT = ( RepositoryImpl.ENV_ROOT + StringConstants.FORWARD_SLASH + KomodoLexicon.Environment.VALIDATION );
-
-    private static void setupValidationParser() throws Exception {
-        // load validation XSD for validation using parser
-    	InputStream schemaStream = ValidationManagerImpl.class.getClassLoader().getResourceAsStream("komodoValidation.xsd");
-        if (schemaStream == null) {
-            throw new IllegalStateException( "Validation schema file does not exist" ); //$NON-NLS-1$
-        }
-
-        // create parser
-        final SAXParserFactory factory = SAXParserFactory.newInstance();
-        factory.setNamespaceAware( true );
-        factory.setValidating( true );
-
-        _parser = factory.newSAXParser();
-        _parser.setProperty( "http://java.sun.com/xml/jaxp/properties/schemaLanguage", "http://www.w3.org/2001/XMLSchema" ); //$NON-NLS-1$ //$NON-NLS-2$
-        _parser.setProperty( "http://java.sun.com/xml/jaxp/properties/schemaSource", schemaStream ); //$NON-NLS-1$
-    }
-
     private final Repository repo;
+    private final File rulesSchemaFile = new File(getClass().getClassLoader().getResource("komodoValidation.xsd").getFile());
 
     /**
      * Constructs an environment store delegate.
@@ -121,498 +39,9 @@ public class ValidationManagerImpl implements ValidationManager {
      *        the repository this is a delegate for (cannot be <code>null</code>)
      */
     public ValidationManagerImpl( final Repository repo ) {
+        ArgCheck.isNotNull( repo, "repo" ); //$NON-NLS-1$
+        
         this.repo = repo;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.spi.repository.ValidationManager#addChildCountValidationRule(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String, java.lang.String, java.lang.String, java.lang.Number, boolean, java.lang.Number, boolean,
-     *      java.util.List, java.util.List)
-     */
-    @Override
-    public Rule addChildCountValidationRule( final UnitOfWork transaction,
-                                             final String name,
-                                             final String nodeType,
-                                             final String childType,
-                                             final Number minValue,
-                                             final boolean minInclusive,
-                                             final Number maxValue,
-                                             final boolean maxInclusive,
-                                             final List< LocalizedMessage > descriptions,
-                                             final List< LocalizedMessage > messages ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( childType, "childType" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( minValue != null ) || ( maxValue != null ), "minValue or maxValue must not be null" ); //$NON-NLS-1$
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug( "addChildCountValidationRule: transaction = {0}, name = {1}", transaction.getName(), name ); //$NON-NLS-1$
-        }
-
-        try {
-            final RuleImpl rule = createRule( transaction,
-                                              name,
-                                              KomodoLexicon.Rule.NUMBER_RULE,
-                                              Rule.ValidationType.CHILD,
-                                              Rule.RuleType.NUMBER,
-                                              nodeType,
-                                              descriptions,
-                                              messages );
-            rule.setProperty( transaction, KomodoLexicon.Rule.JCR_NAME, childType );
-
-            if (minValue != null) {
-                rule.setProperty( transaction, KomodoLexicon.Rule.MIN_VALUE, minValue.toString() );
-                rule.setProperty( transaction, KomodoLexicon.Rule.MIN_VALUE_INCLUSIVE, minInclusive );
-            }
-
-            if (maxValue != null) {
-                rule.setProperty( transaction, KomodoLexicon.Rule.MAX_VALUE, maxValue.toString() );
-                rule.setProperty( transaction, KomodoLexicon.Rule.MAX_VALUE_INCLUSIVE, maxInclusive );
-            }
-
-            return rule;
-        } catch (final Exception e) {
-            throw ObjectImpl.handleError( e );
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.spi.repository.ValidationManager#addChildRelationshipValidationRule(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String, java.lang.String, java.lang.String, java.util.List, java.util.List, java.util.List, java.util.List,
-     *      java.util.List, java.util.List)
-     */
-    @Override
-    public Rule addChildRelationshipValidationRule( final UnitOfWork transaction,
-                                                    final String name,
-                                                    final String nodeType,
-                                                    final String childType,
-                                                    final List< String > propsThatMustExist,
-                                                    final List< String > propsThatMustNotExist,
-                                                    final List< String > childTypesThatMustExist,
-                                                    final List< String > childTypesThatMustNotExist,
-                                                    final List< LocalizedMessage > descriptions,
-                                                    final List< LocalizedMessage > messages ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( childType, "childType" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( ( propsThatMustExist != null ) && !propsThatMustExist.isEmpty() )
-                         || ( ( propsThatMustNotExist != null ) && !propsThatMustNotExist.isEmpty() )
-                         || ( ( childTypesThatMustExist != null ) && !childTypesThatMustExist.isEmpty() )
-                         || ( ( childTypesThatMustNotExist != null ) && !childTypesThatMustNotExist.isEmpty() ),
-                         "at least one relationship collection must not be empty" ); //$NON-NLS-1$
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug( "addChildRelationshipValidationRule: transaction = {0}, name = {1}", transaction.getName(), name ); //$NON-NLS-1$
-        }
-
-        try {
-            final RuleImpl rule = createRule( transaction,
-                                              name,
-                                              KomodoLexicon.Rule.RELATIONSHIP_RULE,
-                                              Rule.ValidationType.CHILD,
-                                              Rule.RuleType.RELATIONSHIP,
-                                              nodeType,
-                                              descriptions,
-                                              messages );
-
-            processMultiValuedProperty( transaction, rule, KomodoLexicon.Rule.PROP_EXISTS, propsThatMustExist );
-            processMultiValuedProperty( transaction, rule, KomodoLexicon.Rule.PROP_ABSENT, propsThatMustNotExist );
-            processMultiValuedProperty( transaction, rule, KomodoLexicon.Rule.CHILD_EXISTS, childTypesThatMustExist );
-            processMultiValuedProperty( transaction, rule, KomodoLexicon.Rule.CHILD_ABSENT, childTypesThatMustNotExist );
-
-            return rule;
-        } catch (final Exception e) {
-            throw ObjectImpl.handleError( e );
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.spi.repository.ValidationManager#addChildTypeRequiredRule(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String, java.lang.String, java.lang.String, java.util.List, java.util.List)
-     */
-    @Override
-    public Rule addChildTypeRequiredRule( final UnitOfWork transaction,
-                                          final String name,
-                                          final String nodeType,
-                                          final String childType,
-                                          final List< LocalizedMessage > descriptions,
-                                          final List< LocalizedMessage > messages ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( childType, "childType" ); //$NON-NLS-1$
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug( "addChildTypeRequiredRule: transaction = {0}, name = {1}", transaction.getName(), name ); //$NON-NLS-1$
-        }
-
-        try {
-            final RuleImpl rule = createRule( transaction,
-                                              name,
-                                              KomodoLexicon.Rule.REQUIRED_RULE,
-                                              Rule.ValidationType.CHILD,
-                                              Rule.RuleType.REQUIRED,
-                                              nodeType,
-                                              descriptions,
-                                              messages );
-            rule.setProperty( transaction, KomodoLexicon.Rule.JCR_NAME, childType );
-            return rule;
-        } catch (final Exception e) {
-            throw ObjectImpl.handleError( e );
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.spi.repository.ValidationManager#addNodeNameRule(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String, java.lang.String, java.lang.String, java.util.List, java.util.List)
-     */
-    @Override
-    public Rule addNodeNameRule( final UnitOfWork transaction,
-                                 final String name,
-                                 final String nodeType,
-                                 final String pattern,
-                                 final List< LocalizedMessage > descriptions,
-                                 final List< LocalizedMessage > messages ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( pattern, "pattern" ); //$NON-NLS-1$
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug( "addNodeNameRule: transaction = {0}, name = {1}", transaction.getName(), name ); //$NON-NLS-1$
-        }
-
-        try {
-            final RuleImpl rule = createRule( transaction,
-                                              name,
-                                              KomodoLexicon.Rule.PATTERN_RULE,
-                                              Rule.ValidationType.NODE,
-                                              Rule.RuleType.PATTERN,
-                                              nodeType,
-                                              descriptions,
-                                              messages );
-            rule.setProperty( transaction, KomodoLexicon.Rule.PATTERN, pattern );
-            return rule;
-        } catch (final Exception e) {
-            throw ObjectImpl.handleError( e );
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.spi.repository.ValidationManager#addPropertyPatternRule(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.util.List, java.util.List)
-     */
-    @Override
-    public Rule addPropertyPatternRule( final UnitOfWork transaction,
-                                        final String name,
-                                        final String nodeType,
-                                        final String propertyName,
-                                        final String pattern,
-                                        final List< LocalizedMessage > descriptions,
-                                        final List< LocalizedMessage > messages ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( propertyName, "propertyName" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( pattern, "pattern" ); //$NON-NLS-1$
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug( "addPropertyPatternRule: transaction = {0}, name = {1}", transaction.getName(), name ); //$NON-NLS-1$
-        }
-
-        try {
-            final RuleImpl rule = createRule( transaction,
-                                              name,
-                                              KomodoLexicon.Rule.PATTERN_RULE,
-                                              Rule.ValidationType.PROPERTY,
-                                              Rule.RuleType.PATTERN,
-                                              nodeType,
-                                              descriptions,
-                                              messages );
-            rule.setProperty( transaction, KomodoLexicon.Rule.JCR_NAME, propertyName );
-            rule.setProperty( transaction, KomodoLexicon.Rule.PATTERN, pattern );
-            return rule;
-        } catch (final Exception e) {
-            throw ObjectImpl.handleError( e );
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.spi.repository.ValidationManager#addPropertyRelationshipValidationRule(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String, java.lang.String, java.lang.String, java.util.List, java.util.List, java.util.List, java.util.List,
-     *      java.util.List, java.util.List)
-     */
-    @Override
-    public Rule addPropertyRelationshipValidationRule( final UnitOfWork transaction,
-                                                       final String name,
-                                                       final String nodeType,
-                                                       final String propertyName,
-                                                       final List< String > propsThatMustExist,
-                                                       final List< String > propsThatMustNotExist,
-                                                       final List< String > childTypesThatMustExist,
-                                                       final List< String > childTypesThatMustNotExist,
-                                                       final List< LocalizedMessage > descriptions,
-                                                       final List< LocalizedMessage > messages ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( propertyName, "propertyName" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( ( propsThatMustExist != null ) && !propsThatMustExist.isEmpty() )
-                         || ( ( propsThatMustNotExist != null ) && !propsThatMustNotExist.isEmpty() )
-                         || ( ( childTypesThatMustExist != null ) && !childTypesThatMustExist.isEmpty() )
-                         || ( ( childTypesThatMustNotExist != null ) && !childTypesThatMustNotExist.isEmpty() ),
-                         "at least one relationship collection must not be empty" ); //$NON-NLS-1$
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug( "addPropertyRelationshipValidationRule: transaction = {0}, name = {1}", transaction.getName(), name ); //$NON-NLS-1$
-        }
-
-        try {
-            final RuleImpl rule = createRule( transaction,
-                                              name,
-                                              KomodoLexicon.Rule.RELATIONSHIP_RULE,
-                                              Rule.ValidationType.PROPERTY,
-                                              Rule.RuleType.RELATIONSHIP,
-                                              nodeType,
-                                              descriptions,
-                                              messages );
-            rule.setProperty( transaction, KomodoLexicon.Rule.JCR_NAME, propertyName );
-            processMultiValuedProperty( transaction, rule, KomodoLexicon.Rule.PROP_EXISTS, propsThatMustExist );
-            processMultiValuedProperty( transaction, rule, KomodoLexicon.Rule.PROP_ABSENT, propsThatMustNotExist );
-            processMultiValuedProperty( transaction, rule, KomodoLexicon.Rule.CHILD_EXISTS, childTypesThatMustExist );
-            processMultiValuedProperty( transaction, rule, KomodoLexicon.Rule.CHILD_ABSENT, childTypesThatMustNotExist );
-            return rule;
-        } catch (final Exception e) {
-            throw ObjectImpl.handleError( e );
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.spi.repository.ValidationManager#addPropertyRequiredRule(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String, java.lang.String, java.lang.String, java.util.List, java.util.List)
-     */
-    @Override
-    public Rule addPropertyRequiredRule( final UnitOfWork transaction,
-                                         final String name,
-                                         final String nodeType,
-                                         final String propertyName,
-                                         final List< LocalizedMessage > descriptions,
-                                         final List< LocalizedMessage > messages ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( propertyName, "propertyName" ); //$NON-NLS-1$
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug( "addPropertyRequiredRule: transaction = {0}, name = {1}", transaction.getName(), name ); //$NON-NLS-1$
-        }
-
-        try {
-            final RuleImpl rule = createRule( transaction,
-                                              name,
-                                              KomodoLexicon.Rule.REQUIRED_RULE,
-                                              Rule.ValidationType.PROPERTY,
-                                              Rule.RuleType.REQUIRED,
-                                              nodeType,
-                                              descriptions,
-                                              messages );
-            rule.setProperty( transaction, KomodoLexicon.Rule.JCR_NAME, propertyName );
-            return rule;
-        } catch (final Exception e) {
-            throw ObjectImpl.handleError( e );
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.spi.repository.ValidationManager#addPropertyValueNumberValidationRule(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String, java.lang.String, java.lang.String, java.lang.Number, boolean, java.lang.Number, boolean,
-     *      java.util.List, java.util.List)
-     */
-    @Override
-    public Rule addPropertyValueNumberValidationRule( final UnitOfWork transaction,
-                                                      final String name,
-                                                      final String nodeType,
-                                                      final String propertyName,
-                                                      final Number minValue,
-                                                      final boolean minInclusive,
-                                                      final Number maxValue,
-                                                      final boolean maxInclusive,
-                                                      final List< LocalizedMessage > descriptions,
-                                                      final List< LocalizedMessage > messages ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( propertyName, "propertyName" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( minValue != null ) || ( maxValue != null ), "minValue or maxValue must not be null" ); //$NON-NLS-1$
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug( "addPropertyValueNumberValidationRule: transaction = {0}, name = {1}", transaction.getName(), name ); //$NON-NLS-1$
-        }
-
-        try {
-            final RuleImpl rule = createRule( transaction,
-                                              name,
-                                              KomodoLexicon.Rule.NUMBER_RULE,
-                                              Rule.ValidationType.PROPERTY,
-                                              Rule.RuleType.NUMBER,
-                                              nodeType,
-                                              descriptions,
-                                              messages );
-            rule.setProperty( transaction, KomodoLexicon.Rule.JCR_NAME, propertyName );
-
-            if (minValue != null) {
-                rule.setProperty( transaction, KomodoLexicon.Rule.MIN_VALUE, minValue.toString() );
-                rule.setProperty( transaction, KomodoLexicon.Rule.MIN_VALUE_INCLUSIVE, minInclusive );
-            }
-
-            if (maxValue != null) {
-                rule.setProperty( transaction, KomodoLexicon.Rule.MAX_VALUE, maxValue.toString() );
-                rule.setProperty( transaction, KomodoLexicon.Rule.MAX_VALUE_INCLUSIVE, maxInclusive );
-            }
-
-            return rule;
-        } catch (final Exception e) {
-            throw ObjectImpl.handleError( e );
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.spi.repository.ValidationManager#addSameNameSiblingValidationRule(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String, java.lang.String, boolean, java.util.List, java.util.List)
-     */
-    @Override
-    public Rule addSameNameSiblingValidationRule( final UnitOfWork transaction,
-                                                  final String name,
-                                                  final String nodeType,
-                                                  final boolean matchType,
-                                                  final List< LocalizedMessage > descriptions,
-                                                  final List< LocalizedMessage > messages ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug( "addSameNameSiblingValidationRule: transaction = {0}, name = {1}", transaction.getName(), name ); //$NON-NLS-1$
-        }
-
-        try {
-            final RuleImpl rule = createRule( transaction,
-                                              name,
-                                              KomodoLexicon.Rule.SNS_RULE,
-                                              Rule.ValidationType.CHILD,
-                                              Rule.RuleType.SAME_NAME_SIBLING,
-                                              nodeType,
-                                              descriptions,
-                                              messages );
-            rule.setProperty( transaction, KomodoLexicon.Rule.MATCH_TYPE, matchType );
-            return rule;
-        } catch (final Exception e) {
-            throw ObjectImpl.handleError( e );
-        }
-    }
-
-    private RuleImpl createRule( final UnitOfWork uow,
-                                 final String name,
-                                 final String nodeType,
-                                 final Rule.ValidationType validationType,
-                                 final Rule.RuleType ruleType,
-                                 final String ruleNodeType,
-                                 final List< LocalizedMessage > descriptions,
-                                 final List< LocalizedMessage > messages ) throws Exception {
-        assert ( uow != null );
-        assert ( validationType != null );
-        assert ( ruleType != null );
-        ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( nodeType, "nodeType" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( ruleNodeType, "ruleNodeType" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( descriptions, "descriptions" ); //$NON-NLS-1$
-
-        final KomodoObject parent = getValidationAreaNode( uow );
-        final KomodoObject rule = parent.addChild( uow, name, nodeType );
-        rule.setProperty( uow, KomodoLexicon.Rule.NODE_TYPE, ruleNodeType );
-        rule.setProperty( uow, KomodoLexicon.Rule.VALIDATION_TYPE, validationType.name() );
-
-        // add description and optional messages
-        final KomodoObject messagesNode = rule.addChild( uow,
-                                                         KomodoLexicon.Rule.MESSAGES,
-                                                         KomodoLexicon.Rule.LOCALIZED_MESSAGE_GROUPING );
-
-        { // add descriptions
-            final KomodoObject description = messagesNode.addChild( uow,
-                                                                    MessageKey.DESCRIPTION.name(),
-                                                                    KomodoLexicon.Rule.LOCALIZED_MESSAGE );
-
-            for (final LocalizedMessage localizedDescription : descriptions) {
-                final KomodoObject node = description.addChild( uow,
-                                                                localizedDescription.getLocaleCode(),
-                                                                KomodoLexicon.Rule.LOCALIZED_TEXT_TYPE );
-                node.setProperty( uow, KomodoLexicon.Rule.LOCALIZED_TEXT, localizedDescription.getMessage() );
-            }
-        }
-
-        { // add messages
-            if (( messages != null ) && !messages.isEmpty()) {
-                for (final LocalizedMessage localizedMessage : messages) {
-                    final String id = localizedMessage.getId();
-                    KomodoObject message = null;
-
-                    if (messagesNode.hasChild( uow, id, KomodoLexicon.Rule.LOCALIZED_MESSAGE )) {
-                        message = messagesNode.getChild( uow, id, KomodoLexicon.Rule.LOCALIZED_MESSAGE );
-                    } else {
-                        message = messagesNode.addChild( uow, id, KomodoLexicon.Rule.LOCALIZED_MESSAGE );
-                    }
-
-                    final KomodoObject node = message.addChild( uow,
-                                                                localizedMessage.getLocaleCode(),
-                                                                KomodoLexicon.Rule.LOCALIZED_TEXT_TYPE );
-                    node.setProperty( uow, KomodoLexicon.Rule.LOCALIZED_TEXT, localizedMessage.getMessage() );
-                }
-            }
-        }
-
-        return new RuleImpl( uow, this.repo, rule.getAbsolutePath() );
-    }
-
-    protected Session getSession( final UnitOfWork transaction ) {
-        return ( ( UnitOfWorkImpl )transaction ).getSession();
-    }
-
-    private KomodoObject getValidationAreaNode( final UnitOfWork transaction ) throws Exception {
-        assert ( transaction != null );
-
-        final Session session = getSession( transaction );
-        final JcrTools jcrTools = new JcrTools();
-        final Node node = jcrTools.findOrCreateNode( session, VALIDATION_ROOT );
-
-        return new ObjectImpl( this.repo, node.getPath(), node.getIndex() );
-    }
-
-    private void processMultiValuedProperty( final UnitOfWork uow,
-                                             final KomodoObject rule,
-                                             final String propName,
-                                             final List< String > values ) throws Exception {
-        if (( values != null ) && !values.isEmpty()) {
-            final String[] result = new String[ values.size() ];
-            int i = 0;
-
-            for (final String value : values) {
-                ArgCheck.isNotEmpty( value, "value" ); //$NON-NLS-1$
-                result[i++] = value;
-            }
-
-            rule.setProperty( uow, propName, ( Object[] )result );
-        }
     }
 
     /**
@@ -625,21 +54,341 @@ public class ValidationManagerImpl implements ValidationManager {
         ArgCheck.isNotNull( rulesXmlFile, "rulesXmlFile" ); //$NON-NLS-1$
 
         try {
-            if ( _parser == null ) {
-                setupValidationParser();
-            }
-
-            ValidationHandler handler = new ValidationHandler();
-            _parser.parse( rulesXmlFile, handler );
+            RuleValidationParser parser = new RuleValidationParser(rulesSchemaFile);
+            parser.parse(rulesXmlFile);
 
             // return any errors
             List< String > result = new ArrayList<>();
-            result.addAll( handler.getFatalErrors() );
-            result.addAll( handler.getErrors() );
+            result.addAll( parser.getFatalErrors() );
+            result.addAll( parser.getErrors() );
             return result;
         } catch ( final Exception e ) {
             throw new KException( e );
         }
+    }
+
+    /* (non-Javadoc)
+     * @see org.komodo.spi.repository.ValidationManager#importRules(java.io.File)
+     */
+    @Override
+    public void importRules(final File rulesXmlFile, final UnitOfWork uow, boolean overwriteExisting) throws KException {
+        ArgCheck.isNotNull( rulesXmlFile, "rulesXmlFile" ); //$NON-NLS-1$
+
+        try {
+            RuleParser parser = new RuleParser(rulesSchemaFile, this.repo, uow);
+            
+            // If overwriting existing rules, then clear them first
+            if(overwriteExisting) {
+                clearValidationRules(uow);
+            }
+            
+            // Successful parsing adds rules to the repo
+            parser.parse(rulesXmlFile);
+        } catch ( final Exception e ) {
+            throw new KException( e );
+        }
+    }
+    
+    private void clearValidationRules(final UnitOfWork uow) throws Exception {
+        KomodoObject defaultValidationArea = RuleFactory.getValidationDefaultAreaNode(uow, this.repo);
+        KomodoObject[] rules = defaultValidationArea.getChildren(uow);
+        for(KomodoObject rule : rules) {
+            rule.remove(uow);
+        }
+    }
+    
+    /* (non-Javadoc)
+     * @see org.komodo.spi.repository.ValidationManager#getAllRules(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public Rule[] getAllRules( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        final List< Rule > result = new ArrayList<>();
+        KomodoObject defaultValidationArea = RuleFactory.getValidationDefaultAreaNode(transaction, this.repo);
+
+        // Add SNS_RULE
+        for ( final KomodoObject kobject : defaultValidationArea.getChildrenOfType( transaction,
+                                                                                    KomodoLexicon.Rule.SNS_RULE ) ) {
+            final Rule rule = new RuleImpl( transaction, this.repo, kobject.getAbsolutePath() );
+            result.add( rule );
+        }
+
+        // Add NUMBER_RULE
+        for ( final KomodoObject kobject : defaultValidationArea.getChildrenOfType( transaction,
+                                                                                    KomodoLexicon.Rule.NUMBER_RULE ) ) {
+            final Rule rule = new RuleImpl( transaction, this.repo, kobject.getAbsolutePath() );
+            result.add( rule );
+        }
+
+        // Add PATTERN_RULE
+        for ( final KomodoObject kobject : defaultValidationArea.getChildrenOfType( transaction,
+                                                                                    KomodoLexicon.Rule.PATTERN_RULE ) ) {
+            final Rule rule = new RuleImpl( transaction, this.repo, kobject.getAbsolutePath() );
+            result.add( rule );
+        }
+
+        // Add RELATIONSHIP_RULE
+        for ( final KomodoObject kobject : defaultValidationArea.getChildrenOfType( transaction,
+                                                                                    KomodoLexicon.Rule.RELATIONSHIP_RULE ) ) {
+            final Rule rule = new RuleImpl( transaction, this.repo, kobject.getAbsolutePath() );
+            result.add( rule );
+        }
+
+        // Add REQUIRED_RULE
+        for ( final KomodoObject kobject : defaultValidationArea.getChildrenOfType( transaction,
+                                                                                    KomodoLexicon.Rule.REQUIRED_RULE ) ) {
+            final Rule rule = new RuleImpl( transaction, this.repo, kobject.getAbsolutePath() );
+            result.add( rule );
+        }
+
+        if ( result.isEmpty() ) {
+            return Rule.NO_RULES;
+        }
+
+        return result.toArray( new Rule[ result.size() ] );
+    }
+
+    /* (non-Javadoc)
+     * @see org.komodo.spi.repository.ValidationManager#getRule(java.lang.String,org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public Rule getRule( String ruleId, final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        KomodoObject defaultValidationArea = RuleFactory.getValidationDefaultAreaNode(transaction, this.repo);
+
+        // Check SNS_RULE
+        for ( final KomodoObject ruleObj : defaultValidationArea.getChildrenOfType( transaction,
+                                                                                    KomodoLexicon.Rule.SNS_RULE ) ) {
+            if(ruleObj.getName(transaction).equals(ruleId)) {
+                return new RuleImpl( transaction, this.repo, ruleObj.getAbsolutePath() );
+            }
+        }
+
+        // Check NUMBER_RULE
+        for ( final KomodoObject ruleObj : defaultValidationArea.getChildrenOfType( transaction,
+                                                                                    KomodoLexicon.Rule.NUMBER_RULE ) ) {
+            if(ruleObj.getName(transaction).equals(ruleId)) {
+                return new RuleImpl( transaction, this.repo, ruleObj.getAbsolutePath() );
+            }
+        }
+
+        // Check PATTERN_RULE
+        for ( final KomodoObject ruleObj : defaultValidationArea.getChildrenOfType( transaction,
+                                                                                    KomodoLexicon.Rule.PATTERN_RULE ) ) {
+            if(ruleObj.getName(transaction).equals(ruleId)) {
+                return new RuleImpl( transaction, this.repo, ruleObj.getAbsolutePath() );
+            }
+        }
+
+        // Check RELATIONSHIP_RULE
+        for ( final KomodoObject ruleObj : defaultValidationArea.getChildrenOfType( transaction,
+                                                                                    KomodoLexicon.Rule.RELATIONSHIP_RULE ) ) {
+            if(ruleObj.getName(transaction).equals(ruleId)) {
+                return new RuleImpl( transaction, this.repo, ruleObj.getAbsolutePath() );
+            }
+        }
+
+        // Check REQUIRED_RULE
+        for ( final KomodoObject ruleObj : defaultValidationArea.getChildrenOfType( transaction,
+                                                                                    KomodoLexicon.Rule.REQUIRED_RULE ) ) {
+            if(ruleObj.getName(transaction).equals(ruleId)) {
+                return new RuleImpl( transaction, this.repo, ruleObj.getAbsolutePath() );
+            }
+        }
+
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see org.komodo.spi.repository.ValidationManager#ruleValid(java.lang.String, org.komodo.spi.repository.Repository.UnitOfWork, org.komodo.spi.repository.KomodoObject)
+     */
+    @Override
+    public boolean ruleValid(String ruleId,
+                             UnitOfWork uow,
+                             KomodoObject kObj) throws KException {
+        
+        Rule rule = getRule(ruleId,uow);
+        return ruleValidForKObj(uow,rule,kObj);
+    }
+
+    /* (non-Javadoc)
+     * @see org.komodo.spi.repository.ValidationManager#getRules(org.komodo.spi.repository.Repository.UnitOfWork, org.komodo.spi.repository.KomodoObject)
+     */
+    @Override
+    public Rule[] getRules(UnitOfWork transaction, KomodoObject kObj) throws KException {
+        ArgCheck.isNotNull( kObj, "kObj" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        final List< Rule > result = new ArrayList<>();
+        KomodoObject defaultValidationArea = RuleFactory.getValidationDefaultAreaNode(transaction, this.repo);
+
+        // Add SNS_RULE(s) for the nodeType
+        for ( final KomodoObject ruleObj : defaultValidationArea.getChildrenOfType( transaction,
+                                                                                    KomodoLexicon.Rule.SNS_RULE ) ) {
+            final Rule rule = new RuleImpl( transaction, this.repo, ruleObj.getAbsolutePath() );
+            if(ruleValidForKObj(transaction,rule,kObj)) {
+                result.add( rule );
+            }
+        }
+
+        // Add NUMBER_RULE(s) for the nodeType
+        for ( final KomodoObject ruleObj : defaultValidationArea.getChildrenOfType( transaction,
+                                                                                    KomodoLexicon.Rule.NUMBER_RULE ) ) {
+            final Rule rule = new RuleImpl( transaction, this.repo, ruleObj.getAbsolutePath() );
+            if(ruleValidForKObj(transaction,rule,kObj)) {
+                result.add( rule );
+            }
+        }
+
+        // Add PATTERN_RULE(s) for the nodeType
+        for ( final KomodoObject ruleObj : defaultValidationArea.getChildrenOfType( transaction,
+                                                                                    KomodoLexicon.Rule.PATTERN_RULE ) ) {
+            final Rule rule = new RuleImpl( transaction, this.repo, ruleObj.getAbsolutePath() );
+            if(ruleValidForKObj(transaction,rule,kObj)) {
+                result.add( rule );
+            }
+        }
+
+        // Add RELATIONSHIP_RULE(s) for the nodeType
+        for ( final KomodoObject ruleObj : defaultValidationArea.getChildrenOfType( transaction,
+                                                                                    KomodoLexicon.Rule.RELATIONSHIP_RULE ) ) {
+            final Rule rule = new RuleImpl( transaction, this.repo, ruleObj.getAbsolutePath() );
+            if(ruleValidForKObj(transaction,rule,kObj)) {
+                result.add( rule );
+            }
+        }
+
+        // Add REQUIRED_RULE(s) for the nodeType
+        for ( final KomodoObject ruleObj : defaultValidationArea.getChildrenOfType( transaction,
+                                                                                    KomodoLexicon.Rule.REQUIRED_RULE ) ) {
+            final Rule rule = new RuleImpl( transaction, this.repo, ruleObj.getAbsolutePath() );
+            if(ruleValidForKObj(transaction,rule,kObj)) {
+                result.add( rule );
+            }
+        }
+
+        if ( result.isEmpty() ) {
+            return Rule.NO_RULES;
+        }
+
+        return result.toArray( new Rule[ result.size() ] );
+    }
+
+    private boolean ruleValidForKObj(final UnitOfWork transaction, final Rule rule, final KomodoObject kObj) throws KException {
+        // Object type must be compatible with the rule
+        if (!objectTypeMatches(rule.getNodeType(transaction),transaction,kObj)) return false;
+        
+        if (!objectPropsPassRestrictions(rule.getNodePropRestrictions(transaction), transaction, kObj)) return false;
+        
+        return true;
+   }
+    
+    /* (non-Javadoc)
+     * @see org.komodo.spi.repository.ValidationManager#setRuleEnabled(java.lang.String, boolean,org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public void setRuleEnabled(String ruleId,
+                               boolean isEnabled,
+                               final UnitOfWork transaction ) throws KException {
+        Rule theRule = getRule(ruleId,transaction);
+        if(theRule!=null) theRule.setEnabled(transaction, isEnabled);
+    }
+
+    /* (non-Javadoc)
+     * @see org.komodo.spi.repository.ValidationManager#setRuleSeverity(java.lang.String, java.lang.String, org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public void setRuleSeverity(String ruleId,
+                                Outcome.Level severity,
+                                final UnitOfWork transaction ) throws KException {
+        Rule theRule = getRule(ruleId,transaction);
+        if(theRule!=null) theRule.setSeverity(transaction, severity);
+    }
+
+    /* (non-Javadoc)
+     * @see org.komodo.spi.repository.ValidationManager#evaluate(org.komodo.spi.repository.KomodoObject, org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public Result[] evaluate(KomodoObject kObject, final UnitOfWork transaction ) throws KException {
+        // Evaluate against all rules that are valid for this object.
+        Rule[] rules = getRules(transaction, kObject);
+        
+        final Result[] results = new Result[rules.length];
+        int i = 0;
+        for(Rule rule : rules) {
+            Result result = rule.evaluate(transaction, kObject);
+            results[i++] = result;
+        }
+        return results;
+    }
+
+    /* (non-Javadoc)
+     * @see org.komodo.spi.repository.ValidationManager#evaluate(org.komodo.spi.repository.KomodoObject, org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     */
+    @Override
+    public Result[] evaluate(final KomodoObject kObject,
+                             final UnitOfWork transaction,
+                             final String... ruleIds) throws KException {
+
+
+        final Result[] results = new Result[ruleIds.length];
+        int i = 0;
+        for(String ruleId : ruleIds) {
+            Rule rule = getRule(ruleId,transaction);
+            // Rule not found
+            if(rule==null) throw new KException("The ruleId is not valid: "+ruleId);
+            // Rule not valid for the kObject type
+            if(!objectTypeMatches(rule.getNodeType(transaction), transaction, kObject)) {
+                throw new KException("The ruleId is not valid for nodeType: "+kObject.getPrimaryType(transaction).getName());
+            }
+            // Rule not valid for the kObject type
+            if(!objectPropsPassRestrictions(rule.getNodePropRestrictions(transaction), transaction, kObject)) {
+                throw new KException("The object does not have the required properties ");
+            }
+
+            Result result = rule.evaluate(transaction, kObject);
+            results[i++] = result;
+        }
+        return results;
+    }
+
+    private boolean objectTypeMatches (final String ruleNodeType, final UnitOfWork transaction, final KomodoObject kObj) throws KException {
+        String primaryType = kObj.getPrimaryType(transaction).getName();
+        if(primaryType.equals(ruleNodeType)) {
+            return true;
+        }
+        
+        Descriptor[] mixinTypes = kObj.getDescriptors(transaction);
+        for(Descriptor mixinType : mixinTypes) {
+            if(mixinType.getName().equals(ruleNodeType)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean objectPropsPassRestrictions (final Map<String,String> propRestrictionMap, final UnitOfWork transaction, final KomodoObject kObj) throws KException {
+        if(propRestrictionMap.isEmpty()) return true;
+        
+        String propKey = propRestrictionMap.keySet().iterator().next();
+        String rqdValue = propRestrictionMap.get(propKey);
+        
+        // Check that object has the property
+        if(!kObj.hasRawProperty(transaction, propKey)) {
+            return false;
+        }
+        
+        // Check that object has correct property value
+        String objPropValue = kObj.getRawProperty(transaction, propKey).getStringValue(transaction);
+        if(!rqdValue.equals(objPropValue)) {
+            return false;
+        }
+        return true;
     }
 
 }

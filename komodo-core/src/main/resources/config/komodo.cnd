@@ -231,6 +231,18 @@
   - tko:text (string) mandatory
 
 /*
+ * The propRestrictions grouping node used by rule. Child nodes represent the property restriction.
+ */
+[tko:propRestrictions] > nt:unstructured
+  + * (tko:propRestriction) copy
+
+/*
+ * A property restriction. Node name is the property name.
+ */
+[tko:propRestriction] > nt:unstructured
+  - tko:propValue (string)
+  
+/*
  * A validation rule.
  */
 [tko:rule] > nt:unstructured abstract
@@ -238,9 +250,10 @@
   - tko:builtIn (boolean) = 'false' mandatory autocreated
   - tko:validationType (string) mandatory < 'CHILD', 'NODE', 'PROPERTY'
   - tko:jcrName (string) // could be a property name or a child node type name
-  - tko:ruleType (string) mandatory < 'NUMBER', 'PATTERN', 'RELATIONSHIP', 'REQUIRED', 'SNS'
+  - tko:ruleType (string) mandatory < 'NUMBER', 'PATTERN', 'RELATIONSHIP', 'REQUIRED', 'SAME_NAME_SIBLING'
   - tko:enabled (boolean) = 'true' mandatory autocreated
   - tko:severity (string) = 'ERROR' mandatory autocreated < 'ERROR', 'WARNING', 'INFO', 'OK'
+  + tko:propRestrictions (tko:propRestrictions) copy
   + tko:messages (tko:localizedMessageGroup) = tko:localizedMessageGroup copy
   
 /*
@@ -281,7 +294,7 @@
  * A validation rule that requires sibling nodes to not have the same name.
  */
 [tko:snsRule] > tko:rule
-  - tko:ruleType (string) = 'SNS' mandatory autocreated < 'SNS'
+  - tko:ruleType (string) = 'SAME_NAME_SIBLING' mandatory autocreated < 'SAME_NAME_SIBLING'
   - tko:matchType (boolean) = 'true' mandatory
 
 /*
@@ -314,19 +327,12 @@
  - tko:alias (string)
 
 /*
- * Where Paranthesis clause
- */
-[tko:whereParanthesisClause] > tko:whereClause
- + * (tko:whereClause) copy sns
-
-/*
  * Where Compare clause
  */
 [tko:whereCompareClause] > tko:whereClause
  - tko:property (string) mandatory
  - tko:compareOperator (string) mandatory < '=', '!=', '<', '<=', '>', '>=', 'LIKE', 'NOT LIKE'
  - tko:value (string) mandatory
- - tko:caseInsensitive (boolean) = 'false' mandatory
 
 /*
  * Where Contains clause
