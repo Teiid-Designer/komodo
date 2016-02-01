@@ -30,6 +30,7 @@ public interface RuleConstants {
         String SEVERITY = "severity"; //$NON-NLS-1$
         String MATCH_TYPE = "matchType"; //$NON-NLS-1$
         String VALUE = "value"; //$NON-NLS-1$
+        String REQUIRED = "required"; //$NON-NLS-1$
     }
 
     /**
@@ -52,7 +53,6 @@ public interface RuleConstants {
         String NODE_VALIDATION = "nodeValidation"; //$NON-NLS-1$
         String NAME_VALIDATION = "nameValidation"; //$NON-NLS-1$
         String PROPERTY_VALIDATION = "propertyValidation"; //$NON-NLS-1$
-        String REQUIRED_VALIDATION = "requiredValidation"; //$NON-NLS-1$
         String SAME_NAME_SIBLING_VALIDATION = "sameNameSiblingValidation"; //$NON-NLS-1$
         String CHILD_COUNT_VALIDATION = "childCountValidation"; //$NON-NLS-1$
         String VALUE_VALIDATION = "valueValidation"; //$NON-NLS-1$

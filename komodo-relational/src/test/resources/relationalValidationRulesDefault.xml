@@ -23,11 +23,8 @@
         </nameValidation>
 
         <!-- The VDB Name property is required -->
-        <propertyValidation jcrName="vdb:name">
+        <propertyValidation jcrName="vdb:name" required="true">
             <message locale="en">Rules that validate the property 'vdb:name' of the 'vdb:virtualDatabase' node type.</message>
-            <requiredValidation id="default.vdb.name.propertyRequired" severity="ERROR">
-                <description locale="en">The VDB must have a 'vdb:name' property.</description>
-            </requiredValidation>
             <valueValidation id="default.vdb.name.propertyValue" severity="ERROR">
                 <description locale="en">The VDB 'vdb:name' property must match the specified pattern.</description>
                 <pattern>^[a-zA-Z]+[a-zA-Z0-9]*$</pattern>
@@ -35,12 +32,9 @@
         </propertyValidation>
 
         <!-- The VDB Version property is required and must be a non-zero positive integer -->
-        <propertyValidation jcrName="vdb:version">
+        <propertyValidation jcrName="vdb:version" required="true">
             <message locale="en">Rules that validate the property 'vdb:version' of the 'vdb:virtualDatabase' node type.
             </message>
-            <requiredValidation id="default.vdb.version.propertyRequired" severity="ERROR">
-                <description locale="en">The VDB must have a 'vdb:version' property.</description>
-            </requiredValidation>
             <valueValidation id="default.vdb.version.propertyValue" severity="ERROR">
                 <description locale="en">The VDB 'vdb:version' property must be a non-zero integer.</description>
                 <pattern>^[1-9]\d*$</pattern>
@@ -48,12 +42,9 @@
         </propertyValidation>
 
         <!-- The VDB connectionType property is required and must be valid -->
-        <propertyValidation jcrName="vdb:connectionType">
+        <propertyValidation jcrName="vdb:connectionType" required="true">
             <message locale="en">Rules that validate the property 'vdb:connectionType' of the 'vdb:virtualDatabase' node type.
             </message>
-            <requiredValidation id="default.vdb.connectionType.propertyRequired" severity="ERROR">
-                <description locale="en">The VDB must have a 'vdb:connectionType' property.</description>
-            </requiredValidation>
             <valueValidation id="default.vdb.connectionType.propertyValue" severity="ERROR">
                 <description locale="en">The VDB 'vdb:connectionType' property must match the specified pattern.</description>
                 <pattern>^[a-zA-Z]+[a-zA-Z0-9]*$</pattern>
@@ -243,34 +234,49 @@
         </nameValidation>
         
         <!-- Validation rules for table column children -->
-        <childValidation jcrName="vdb:column">
+        <childValidation jcrName="teiidddl:tableElement" required="true">
             <message locale="en">Validation rules for child node type 'vdb:column' of the 'vdb:table' node type.
             </message>
-            <requiredValidation id="default.table.column.childRequired" severity="ERROR">
-                <description locale="en">The table must have a child column.</description>
-            </requiredValidation>
             <sameNameSiblingValidation id="default.table.column.childSNSValidation" severity="ERROR">
-                <description locale="en">A table column must have a unique name.</description>
+                <description locale="en">A Table column must have a unique name.</description>
             </sameNameSiblingValidation>
-            <childCountValidation id="default.table.column.childCount" severity="WARNING">
-                <description locale="en">A Table must have at least one child.</description>
+            <childCountValidation id="default.table.column.childCount" severity="ERROR">
+                <description locale="en">A Table must have at least one column.</description>
                 <minValue inclusive="true">1</minValue>
             </childCountValidation>
         </childValidation>
         
         <!-- The Table nameInSource property is required and must be valid -->
-        <propertyValidation jcrName="vdb:nameInSource">
-            <message locale="en">Rules that validate the property 'vdb:nameInSource' of the 'vdb:table' node type.
+        <propertyValidation jcrName="NAMEINSOURCE" required="true">
+            <message locale="en">Rules that validate the 'NAMEINSOURCE' property of the 'teiidddl:createTable' node type.
             </message>
-            <requiredValidation id="default.table.nameInSource.propertyRequired" severity="ERROR">
-                <description locale="en">The Table must have a 'vdb:nameInSource' property.</description>
-            </requiredValidation>
-            <valueValidation id="default.table.nameInSource.propertyValue" severity="ERROR">
-                <description locale="en">The Table 'vdb:nameInSource' property must match the specified pattern.</description>
-                <pattern>^[1-9]\d*$</pattern>
+            <valueValidation id="default.table.nameInSource.propertyValue" severity="WARNING">
+                <description locale="en">The Table 'NAMEINSOURCE' property must match the specified pattern.</description>
+                <pattern>^[a-zA-Z]+[a-zA-Z0-9]*$</pattern>
             </valueValidation>
         </propertyValidation>
 
+    </nodeValidation>
+
+    <!-- =========================================== -->
+    <!-- Virtual Materialized Table Validation Rules -->
+    <!-- =========================================== -->
+    <nodeValidation jcrName="teiidddl:createTable">
+        <propRestriction value="VIRTUAL">teiidddl:schemaElementType</propRestriction>
+        <propRestriction value="true">MATERIALIZED</propRestriction>
+        <message locale="en">Validation rules for the 'vdb:table' (virtual,materialized) node type.</message>
+
+        <!-- Validation rules for materialized table columns -->
+        <childValidation jcrName="teiidddl:tableElement" required="false">
+            <propRestriction value="object">ddl:datatypeName</propRestriction>
+            <message locale="en">Validation rules for child node type 'teiidddl:tableElement' of the 'teiidddl:createTable' node type.
+            </message>
+            <childCountValidation id="default.materializedTable.column.propertyValue" severity="ERROR">
+                <description locale="en">A Materialized table cannot have columns of type 'object'</description>
+                <minValue inclusive="true">0</minValue>
+                <maxValue inclusive="true">0</maxValue>
+            </childCountValidation>
+        </childValidation>
     </nodeValidation>
     
     <!-- =========================== -->
@@ -286,17 +292,14 @@
         </nameValidation>
         
         <!-- Validation rules for view column children -->
-        <childValidation jcrName="vdb:column">
+        <childValidation jcrName="teiidddl:tableElement" required="true">
             <message locale="en">Validation rules for child node type 'vdb:column' of the 'vdb:view' node type.
             </message>
-            <requiredValidation id="default.view.column.childRequired" severity="ERROR">
-                <description locale="en">The view must have a child column.</description>
-            </requiredValidation>
             <sameNameSiblingValidation id="default.view.column.childSNSValidation" severity="ERROR">
-                <description locale="en">A view column must have a unique name.</description>
+                <description locale="en">A View column must have a unique name.</description>
             </sameNameSiblingValidation>
-            <childCountValidation id="default.view.column.childCount" severity="WARNING">
-                <description locale="en">A view must have at least one child.</description>
+            <childCountValidation id="default.view.column.childCount" severity="ERROR">
+                <description locale="en">A View must have at least one column.</description>
                 <minValue inclusive="true">1</minValue>
             </childCountValidation>
         </childValidation>
@@ -328,16 +331,49 @@
         </nameValidation>
         
         <!-- The datatype  property is required and must be a valid datatype -->
-        <propertyValidation jcrName="vdb:datatype">
+        <propertyValidation jcrName="ddl:datatypeName" required="true">
             <message locale="en">Rules that validate the property 'vdb:datatype' of the 'vdb:column' node type.
             </message>
-            <requiredValidation id="default.table.datatype.propertyRequired" severity="ERROR">
-                <description locale="en">The Table must have a 'vdb:datatype' property.</description>
-            </requiredValidation>
-            <valueValidation id="default.table.datatype.propertyValue" severity="ERROR">
-                <description locale="en">The Table 'vdb:datatype' property must be valid.</description>
+            <valueValidation id="default.column.datatype.propertyValue" severity="ERROR">
+                <description locale="en">The Column 'ddl:datatypeName' property must match the specified pattern.</description>
                 <pattern>^[a-zA-Z]+[a-zA-Z0-9]*$</pattern> 
             </valueValidation>
+        </propertyValidation>
+    </nodeValidation>
+    
+    <!-- =================================== -->
+    <!-- Column(string) Validation Rules     -->
+    <!-- =================================== -->
+    <nodeValidation jcrName="teiidddl:tableElement">
+        <propRestriction value="string">ddl:datatypeName</propRestriction>
+        <message locale="en">Validation rules for the Columns with datatype 'string'</message>
+
+        <!-- The datatype  property is required and must be a valid datatype -->
+        <propertyValidation jcrName="ddl:datatypeLength" required="true">
+            <message locale="en">Rules that validate the property 'ddl:datatypeLength' of the 'teiidddl:tableElement'(string) node type.
+            </message>
+            <valueRangeValidation id="default.column.stringDatatype.lengthPropertyValue" severity="ERROR">
+                <description locale="en">The length property of a string Column must be 1 or greater.</description>
+                <minValue inclusive="true">1</minValue>
+            </valueRangeValidation>
+        </propertyValidation>
+    </nodeValidation>
+    
+    <!-- =================================== -->
+    <!-- Column(numeric) Validation Rules     -->
+    <!-- =================================== -->
+    <nodeValidation jcrName="teiidddl:tableElement">
+        <propRestriction value="decimal">ddl:datatypeName</propRestriction>
+        <message locale="en">Validation rules for the Columns with numeric datatypes</message>
+
+        <!-- The datatype  property is required and must be a valid datatype -->
+        <propertyValidation jcrName="ddl:datatypePrecision" required="true">
+            <message locale="en">Rules that validate the property 'ddl:datatypePrecision' of numeric 'teiidddl:tableElement' node type.
+            </message>
+            <valueRangeValidation id="default.column.numericDatatype.precisionPropertyValue" severity="ERROR">
+                <description locale="en">The precision property of a numeric Column must be 1 or greater.</description>
+                <minValue inclusive="true">1</minValue>
+            </valueRangeValidation>
         </propertyValidation>
     </nodeValidation>
 
@@ -457,6 +493,47 @@
             <pattern>^[a-zA-Z]+[a-zA-Z0-9]*$</pattern> 
         </nameValidation>
         
+        <!-- The UserDefinedFunction requires a return parameter -->
+        <childValidation jcrName="teiidddl:procedureParameter">
+            <propRestriction value="OUT">teiidddl:parameterType</propRestriction>
+            <message locale="en">Validation rules for return Parameter children of a UserDefinedFunction.</message>
+            <childCountValidation id="default.userDefinedFunction.returnParameterCount" severity="ERROR">
+                <description locale="en">A UserDefinedFunction must have one return parameter.</description>
+                <minValue inclusive="true">1</minValue>
+                <maxValue inclusive="true">1</maxValue>
+            </childCountValidation>
+        </childValidation>
+        
+        <!-- The UserDefinedFunction CATEGORY property is required and must be valid -->
+        <propertyValidation jcrName="CATEGORY" required="true">
+            <message locale="en">Rules that validate the property 'CATEGORY' of the UserDefinedFunction node type.
+            </message>
+            <valueValidation id="default.userDefinedFunction.category.propertyValue" severity="ERROR">
+                <description locale="en">The UserDefinedFunction 'CATEGORY' property must match the specified pattern.</description>
+                <pattern>^[a-zA-Z]+[a-zA-Z0-9]*$</pattern>
+            </valueValidation>
+        </propertyValidation>
+
+        <!-- The UserDefinedFunction JAVA_METHOD property is required and must be valid -->
+        <propertyValidation jcrName="JAVA_METHOD" required="true">
+            <message locale="en">Rules that validate the property 'JAVA_METHOD' of the UserDefinedFunction node type.
+            </message>
+            <valueValidation id="default.userDefinedFunction.javaMethod.propertyValue" severity="ERROR">
+                <description locale="en">The UserDefinedFunction 'JAVA_METHOD' property must match the specified pattern.</description>
+                <pattern>^[a-zA-Z]+[a-zA-Z0-9]*$</pattern>
+            </valueValidation>
+        </propertyValidation>
+
+        <!-- The UserDefinedFunction JAVA_CLASS property is required and must be valid -->
+        <propertyValidation jcrName="JAVA_CLASS" required="true">
+            <message locale="en">Rules that validate the property 'JAVA_CLASS' of the UserDefinedFunction node type.
+            </message>
+            <valueValidation id="default.userDefinedFunction.javaClass.propertyValue" severity="ERROR">
+                <description locale="en">The UserDefinedFunction 'JAVA_CLASS' property must match the specified pattern.</description>
+                <pattern>^[a-zA-Z]+[a-zA-Z0-9]*$</pattern>
+            </valueValidation>
+        </propertyValidation>
+        
     </nodeValidation>
 
     <!-- ================================== -->
@@ -488,12 +565,9 @@
         
         <!-- The datatype  property is required and must be a valid datatype -->
         <!-- 
-        <propertyValidation jcrName="vdb:datatype">
+        <propertyValidation jcrName="vdb:datatype" required="true">
             <message locale="en">Rules that validate the property 'vdb:datatype' of the 'vdb:parameter' node type.
             </message>
-            <requiredValidation id="default.parameter.datatype.propertyRequired" severity="ERROR">
-                <description locale="en">The Parameter must have a 'vdb:datatype' property.</description>
-            </requiredValidation>
             <valueValidation id="default.parameter.datatype.propertyValue" severity="ERROR">
                 <description locale="en">The Parameter 'vdb:datatype' property must be valid.</description>
                 <pattern>^[a-zA-Z]+[a-zA-Z0-9]*$</pattern> 

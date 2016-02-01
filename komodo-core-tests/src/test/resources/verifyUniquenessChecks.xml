@@ -21,13 +21,14 @@
             <pattern>[a-z]*</pattern>
         </nameValidation>
 
-        <propertyValidation jcrName="vdb:connectionType">
+        <propertyValidation jcrName="vdb:connectionType" required="true">
             <!-- Error 3: duplicate locale -->
             <message locale="nz">Validates the property 'vdb:connectionType' of the 'vdb:virtualDatabase' node type.</message>
             <message locale="nz">Validates the property 'vdb:connectionType' of the 'vdb:virtualDatabase' node type.</message>
-            <requiredValidation id="vdb.connectionType.required">
+            <valueValidation id="vdb.connectionType.required" severity="ERROR">
                 <description locale="en">The VDB connection type is required.</description>
-            </requiredValidation>
+                <pattern>^[1-9]\d*$</pattern>
+            </valueValidation>
         </propertyValidation>
 
         <!-- Error 4: duplicate property -->
@@ -39,21 +40,23 @@
             </valueValidation>
         </propertyValidation>
         
+        <childValidation jcrName="vdb:dataRole">
+            <message locale="en">Validation rules for child node type 'vdb:dataRole' of the 'vdb:virtualDatabase' node type.
+            </message>
+            <childCountValidation id="vdb.dataRole.required" severity="WARNING">
+                <description locale="en">A VDB dataRole is required.</description>
+                <minValue inclusive="true">1</minValue>
+            </childCountValidation>
+        </childValidation>
+
         <!-- Error 5: duplicate child validation -->
         <childValidation jcrName="vdb:dataRole">
             <message locale="en">Validation rules for child node type 'vdb:dataRole' of the 'vdb:virtualDatabase' node type.
             </message>
-            <requiredValidation id="vdb.dataRole.required">
+            <childCountValidation id="vdb.dataRole.required2" severity="WARNING">
                 <description locale="en">A VDB dataRole is required.</description>
-            </requiredValidation>
-        </childValidation>
-
-        <childValidation jcrName="vdb:dataRole">
-            <message locale="en">Validation rules for child node type 'vdb:dataRole' of the 'vdb:virtualDatabase' node type.
-            </message>
-            <requiredValidation id="vdb.dataRole.required2">
-                <description locale="en">A VDB dataRole is required.</description>
-            </requiredValidation>
+                <minValue inclusive="true">1</minValue>
+            </childCountValidation>
         </childValidation>
     </nodeValidation>
 
@@ -70,9 +73,10 @@
     <!-- Error 7: duplicate property validation JCR name -->
     <propertyValidation jcrName="ddl:statementOption">
         <message locale="ab">Validates the property 'ddl:statementOption' of any node type.</message>
-        <requiredValidation id="vdb.connectionType.mandatory">
+        <valueValidation id="vdb:connectionType.mandatory">
             <description locale="en">The DDL statement option is required.</description>
-        </requiredValidation>
+            <pattern>[a-zA-Z\-]{0,64}\.[a-zA-Z\-]{0,64}</pattern>
+        </valueValidation>
     </propertyValidation>
 
     <!-- Error 8: duplicate node validation JCR name -->
@@ -94,13 +98,14 @@
     </nodeValidation>
 
     <!-- Duplicate required rule description -->
-    <propertyValidation jcrName="vdb:presley">
+    <propertyValidation jcrName="vdb:presley" required="true">
         <message locale="ab">Validates the property 'vdb:presley' of any node type.</message>
-        <requiredValidation id="vdb.presley.required">
+        <valueValidation id="vdb.presley.required">
             <description locale="ab">The DDL statement option is required.</description>
             <!-- Error 10: duplicate rule description locale -->
             <description locale="ab">This is a duplicate description.</description>
-        </requiredValidation>
+            <pattern>[a-zA-Z\-]{0,64}\.[a-zA-Z\-]{0,64}</pattern>
+        </valueValidation>
     </propertyValidation>
 
     <!-- Duplicate value rule description -->
@@ -139,9 +144,9 @@
     </propertyValidation>
 
     <!-- Duplicate required rule message -->
-    <propertyValidation jcrName="vdb:lennon">
+    <propertyValidation jcrName="vdb:lennon" required="true">
         <message locale="ab">Validates the property 'vdb:lennon' of any node type.</message>
-        <requiredValidation id="vdb.lennon.required">
+        <valueRangeValidation id="vdb.lennon.required">
             <description locale="en">The DDL statement option is required.</description>
             <message
                 key="REQUIRED_PROPERTY_NOT_FOUND"
@@ -150,7 +155,9 @@
             <message
                 key="REQUIRED_PROPERTY_NOT_FOUND"
                 locale="ij">This is a duplicate message.</message>
-        </requiredValidation>
+            <minValue inclusive="true">1</minValue>
+            <maxValue inclusive="false">10</maxValue>
+        </valueRangeValidation>
     </propertyValidation>
 
     <!-- Duplicate value rule message -->

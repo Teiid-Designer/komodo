@@ -212,6 +212,14 @@ public class RelationalValidationTest extends AbstractLocalRepositoryTest {
         return column;
     }
 
+    protected Column addColumn( final View view,
+                                final String columnName ) throws Exception {
+        final Column column = view.addColumn( getTransaction(), columnName );
+
+        assertThat( column.getName( getTransaction() ), is( columnName ) );
+        return column;
+    }
+
     protected PrimaryKey addPrimaryKey( final Table table,
                                         final String pkName ) throws Exception {
         final PrimaryKey pk = table.setPrimaryKey( getTransaction(), pkName );

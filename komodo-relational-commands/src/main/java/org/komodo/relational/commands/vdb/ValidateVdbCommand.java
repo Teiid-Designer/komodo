@@ -7,11 +7,13 @@
  */
 package org.komodo.relational.commands.vdb;
 
+import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+import org.komodo.relational.vdb.Vdb;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.spi.outcome.Outcome;
 import org.komodo.spi.repository.validation.Result;
-import org.komodo.spi.repository.validation.Rule;
 import org.komodo.utils.i18n.I18n;
 
 /**
@@ -36,24 +38,60 @@ public final class ValidateVdbCommand extends VdbShellCommand {
      */
     @Override
     protected CommandResult doExecute() {
+        
+        // Default is to do a 'full' validation (validate the node and all its ancestors).  Can specify to validate this node only.
+        final boolean fullValidation = Boolean.getBoolean( optionalArgument( 0, "true" ) ); //$NON-NLS-1$
+        
         try {
-            // Get the current rules
-            final Rule[] rules = getRepository().getValidationManager().getAllRules(getTransaction());
+            Vdb vdb = getVdb();
+            String vdbName = vdb.getName(getTransaction());
+            final Result[] results = getRepository().getValidationManager().evaluate(getTransaction(), vdb, fullValidation);
 
-            // Evaluate the vdb against the rules.
-            for( Rule theRule : rules ) {
-                final Result ruleResult = theRule.evaluate( getTransaction(), getVdb() );
-                if(!ruleResult.isOK()) {
-                    return new CommandResultImpl( false, I18n.bind( VdbCommandsI18n.validationError, ruleResult.getMessage() ), null );
+            // Determine if any Errors or Warnings
+            boolean hasErrors = hasLevel(results,Outcome.Level.ERROR);
+            boolean hasWarnings = hasLevel(results,Outcome.Level.WARNING);
+            
+            // If none, print success message
+            if( !hasErrors && !hasWarnings ) {
+                print( MESSAGE_INDENT, I18n.bind( VdbCommandsI18n.vdbValidationSuccessMsg, vdbName ) );
+                return CommandResult.SUCCESS;
+            }
+            
+            // Print validation errors
+            if( hasErrors ) {
+                print( MESSAGE_INDENT, I18n.bind( VdbCommandsI18n.vdbValidationErrorsHeader, vdbName ) );
+                for(Result result : results) {
+                    if( result.getLevel() == Outcome.Level.ERROR ) {
+                        print( MESSAGE_INDENT, result.getMessage() );
+                    }
+                }
+            }
+
+            // Print validation warnings
+            if( hasWarnings ) {
+                print( MESSAGE_INDENT, I18n.bind( VdbCommandsI18n.vdbValidationWarningsHeader, vdbName ) );
+                for(Result result : results) {
+                    if( result.getLevel() == Outcome.Level.ERROR ) {
+                        print( MESSAGE_INDENT, result.getMessage() );
+                    }
                 }
             }
             
-            return new CommandResultImpl( I18n.bind( VdbCommandsI18n.validationSuccess, getVdb().getName(getTransaction()) ) );
+            return CommandResult.SUCCESS;
         } catch ( final Exception e ) {
             return new CommandResultImpl( e );
         }
     }
 
+    private boolean hasLevel( final Result[] results, Outcome.Level outcome ) {
+        for( Result result : results ) {
+            if(result.getLevel() == outcome) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
     /**
      * {@inheritDoc}
      *

@@ -95,21 +95,22 @@ public interface ValidationManager {
     
     /**
      * Evaluate the supplied object using all applicable rules for the object.
-     * @param kObject
      * @param uow the transaction
+     * @param kObject the object to validate
+     * @param full <code>true</code> will validate the node and all of its ancestors.  <code>false</code> only validates the supplied node.
      * @return the results from all rule validations (never <code>null</code> but can be empty)
      * @throws KException if an error occurs
      */
-    Result[] evaluate( final KomodoObject kObject, final UnitOfWork uow ) throws KException;
+    Result[] evaluate( final UnitOfWork uow, final KomodoObject kObject, boolean full  ) throws KException;
 
     /**
-     * Evaluate the supplied object using the specified rule (if the rule is applicable for the object).
-     * @param kObject the kObj
+     * Evaluate the supplied object using the specified rules (if the rule is applicable for the object).
      * @param uow the transaction
+     * @param kObject the kObj
      * @param ruleId the rule IDs
      * @return the results of the evaluation (never <code>null</code> but can be empty)
      * @throws KException if an error occurs
      */
-    Result[] evaluate( final KomodoObject kObject, final UnitOfWork uow, final String... ruleId ) throws KException;
+    Result[] evaluate( final UnitOfWork uow, final KomodoObject kObject, final String... ruleId ) throws KException;
 
 }

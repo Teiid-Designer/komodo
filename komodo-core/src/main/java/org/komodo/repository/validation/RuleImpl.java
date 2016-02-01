@@ -95,13 +95,13 @@ public class RuleImpl extends ObjectImpl implements Rule {
             final String country = locale.getCountry();
 
             if ( !StringUtils.isBlank( country ) ) {
-                result.append( '_' ).append( country );
+                result.append( StringConstants.UNDERSCORE_CHAR ).append( country );
 
                 if ( includeVariant ) {
                     final String variant = locale.getVariant();
 
                     if ( !StringUtils.isBlank( variant ) ) {
-                        result.append( '_' ).append( variant );
+                        result.append( StringConstants.UNDERSCORE_CHAR ).append( variant );
                     }
                 }
 
@@ -176,24 +176,36 @@ public class RuleImpl extends ObjectImpl implements Rule {
         assert ( childTypeProp != null );
 
         final String childType = childTypeProp.getStringValue( transaction );
+        final Map<String,String> propRestrictions = getPropRestrictions(transaction,PropertyRestriction.CHILD);
+        
+        // Determine if a child that passes the type and property restrictions exists
+        KomodoObject[] matchingChildren = ValidationUtils.getChildrenMatchingTypeAndPropRestrictions(transaction, kobject, childType, propRestrictions);
+        boolean hasChildWithTypeAndRestrictions = matchingChildren.length > 0;
+        
+        // Determine if the property is required
+        final Property childRequired = getProperty( transaction, KomodoLexicon.Rule.REQUIRED );
+        boolean childRqd = false;
+        if(childRequired!=null) {
+            childRqd = childRequired.getBooleanValue( transaction );
+        }
+        
         String errorMsg = null;
         String[] args = null;
 
-        switch ( ruleType ) {
-            case REQUIRED: {
-                if ( kobject.getChildrenOfType( transaction, childType ).length == 0 ) {
-                    args = new String[] { childType, kobject.getName( transaction ), kobject.getAbsolutePath() };
-                    
-                    // Default msg - used if problem getting supplied message or definition
-                    String defaultMsg = Messages.getString( Messages.Validation.CHILD_OF_REQUIRED_TYPE_NOT_FOUND, ( Object[] )args );
-
-                    errorMsg = getRuleMessage( transaction, defaultMsg, MessageKey.CHILD_OF_REQUIRED_TYPE_NOT_FOUND.name(), args );
-                }
-
-                break;
+        // Child required but does not exist.
+        if(childRqd && !hasChildWithTypeAndRestrictions) {
+            // Use rule description if found, otherwise use a default 'child not found' message.
+            errorMsg = getDescription( transaction );
+            if( StringUtils.isBlank(errorMsg) ) {
+                args = new String[] { childType, kobject.getName( transaction ), kobject.getAbsolutePath() };
+                errorMsg = Messages.getString( Messages.Validation.CHILD_OF_REQUIRED_TYPE_NOT_FOUND, ( Object[] )args );
             }
+            return new ResultImpl( kobject.getAbsolutePath(), getName( transaction ), getSeverity( transaction ), errorMsg );
+        }
+        
+        switch ( ruleType ) {
             case NUMBER: {
-                final Integer childCount = kobject.getChildrenOfType( transaction, childType ).length;
+                final Integer childCount = matchingChildren.length;
                 boolean minChecked = false;
                 boolean maxChecked = false;
 
@@ -215,14 +227,13 @@ public class RuleImpl extends ObjectImpl implements Rule {
                             final int result = Double.compare( childCount.doubleValue(), minValue.doubleValue() );
 
                             if ( ( inclusive && ( result < 0 ) ) || ( !inclusive && ( result <= 0 ) ) ) {
-                                args = new String[] { kobject.getName( transaction ), kobject.getAbsolutePath(),
-                                    childCount.toString(), childType, minString };
-                                
-                                // Default msg - used if problem getting supplied message or definition
-                                String defaultMsg = Messages.getString( Messages.Validation.CHILD_COUNT_BELOW_MIN_VALUE,
-                                                                        ( Object[] )args );
-
-                                errorMsg = getRuleMessage( transaction, defaultMsg, MessageKey.CHILD_COUNT_BELOW_MIN_VALUE.name(), args );
+                                // Get specific message or description
+                                errorMsg = getMessageOrDescription( transaction, MessageKey.CHILD_COUNT_BELOW_MIN_VALUE.name() );
+                                // If rule does not have message or description for the locale, use a default.
+                                if(StringUtils.isBlank(errorMsg)) {
+                                    args = new String[] { kobject.getName( transaction ), kobject.getAbsolutePath(), childCount.toString(), childType, minString };
+                                    errorMsg = Messages.getString( Messages.Validation.CHILD_COUNT_BELOW_MIN_VALUE, ( Object[] )args );
+                                }
                             }
                         }
                     }
@@ -234,8 +245,7 @@ public class RuleImpl extends ObjectImpl implements Rule {
                             if ( maxValueProp != null ) {
                                 maxChecked = true;
                                 boolean inclusive = true;
-                                final Property maxInclusiveProp = getProperty( transaction,
-                                                                               KomodoLexicon.Rule.MAX_VALUE_INCLUSIVE );
+                                final Property maxInclusiveProp = getProperty( transaction, KomodoLexicon.Rule.MAX_VALUE_INCLUSIVE );
 
                                 if ( maxInclusiveProp != null ) {
                                     inclusive = maxInclusiveProp.getBooleanValue( transaction );
@@ -246,48 +256,48 @@ public class RuleImpl extends ObjectImpl implements Rule {
                                 final int result = Double.compare( childCount.doubleValue(), maxValue.doubleValue() );
 
                                 if ( ( inclusive && ( result > 0 ) ) || ( !inclusive && ( result >= 0 ) ) ) {
-                                    args = new String[] { kobject.getName( transaction ), kobject.getAbsolutePath(),
-                                        childCount.toString(), childType, maxString };
-
-                                    // Default msg - used if problem getting supplied message or definition
-                                    String defaultMsg = Messages.getString( Messages.Validation.CHILD_COUNT_ABOVE_MAX_VALUE,
-                                                                            ( Object[] )args );
-                                    
-                                    errorMsg = getRuleMessage( transaction, defaultMsg, MessageKey.CHILD_COUNT_ABOVE_MAX_VALUE.name(), args );
+                                    // Get specific message or description
+                                    errorMsg = getMessageOrDescription( transaction, MessageKey.CHILD_COUNT_ABOVE_MAX_VALUE.name() );
+                                    // If rule does not have message or description for the locale, use a default.
+                                    if(StringUtils.isBlank(errorMsg)) {
+                                        args = new String[] { kobject.getName( transaction ), kobject.getAbsolutePath(), childCount.toString(), childType, maxString };
+                                        errorMsg = Messages.getString( Messages.Validation.CHILD_COUNT_ABOVE_MAX_VALUE, ( Object[] )args );
+                                    }
                                 }
                             }
                         }
                     }
 
                     if ( StringUtils.isBlank( errorMsg ) && !minChecked && !maxChecked ) {
-                        args = new String[] { getName( transaction ) };
-
-                        // Default msg - used if problem getting supplied message or definition
-                        String defaultMsg = Messages.getString( Messages.Validation.NUMBER_RULE_HAS_NO_VALUES, ( Object[] )args );
-                        
-                        errorMsg = getRuleMessage( transaction, defaultMsg, MessageKey.NUMBER_RULE_HAS_NO_VALUES.name(), args );
+                        // Get specific message or description
+                        errorMsg = getMessageOrDescription( transaction, MessageKey.NUMBER_RULE_HAS_NO_VALUES.name() );
+                        // If rule does not have message or description for the locale, use a default.
+                        if(StringUtils.isBlank(errorMsg)) {
+                            args = new String[] { getName( transaction ) };
+                            errorMsg = Messages.getString( Messages.Validation.NUMBER_RULE_HAS_NO_VALUES, ( Object[] )args );
+                        }
                     }
                 } catch ( final ParseException ex ) {
                     // not a valid number rule and should be caught by XSD validation
-                    args = new String[] { getName( transaction ) };
-
-                    // Default msg - used if problem getting supplied message or definition
-                    String defaultMsg = Messages.getString( Messages.Validation.NUMBER_RULE_NON_NUMERIC_VALUES, ( Object[] )args );
-                    
-                    errorMsg = getRuleMessage( transaction, defaultMsg, MessageKey.NUMBER_RULE_NON_NUMERIC_VALUES.name(), args );
+                    // Get specific message or description
+                    errorMsg = getMessageOrDescription( transaction, MessageKey.NUMBER_RULE_NON_NUMERIC_VALUES.name() );
+                    // If rule does not have message or description for the locale, use a default.
+                    if(StringUtils.isBlank(errorMsg)) {
+                        args = new String[] { getName( transaction ) };
+                        errorMsg = Messages.getString( Messages.Validation.NUMBER_RULE_NON_NUMERIC_VALUES, ( Object[] )args );
+                    }
                 }
 
                 break;
             }
             case RELATIONSHIP: {
                 // must have at least one child of this type to invoke this rule
-                KomodoObject[] kids = kobject.getChildrenOfType( transaction, childType );
-                if ( kids.length == 0 ) {
+                if ( !hasChildWithTypeAndRestrictions ) {
                     break;
                 }
                 
                 // Check all of the children of the specified type
-                for( KomodoObject kidObj : kids ) {
+                for( KomodoObject kidObj : matchingChildren ) {
                     
                     { // props exist
                         final Property propExistsProp = getProperty( transaction, KomodoLexicon.Rule.PROP_EXISTS );
@@ -295,16 +305,13 @@ public class RuleImpl extends ObjectImpl implements Rule {
                         if ( propExistsProp != null ) {
                             for ( final String prop : propExistsProp.getStringValues( transaction ) ) {
                                 if ( !kidObj.hasProperty( transaction, prop ) ) {
-                                    args = new String[] { kidObj.getName( transaction ), kidObj.getAbsolutePath(), childType, prop };
-
-                                    // Default msg - used if problem getting supplied message or definition
-                                    String defaultMsg = Messages.getString( Messages.Validation.RELATIONSHIP_RULE_REQUIRED_PROPERTY_NOT_FOUND,
-                                                                            ( Object[] )args );
-                                    
-                                    errorMsg = getRuleMessage( transaction,
-                                                               defaultMsg, 
-                                                               MessageKey.RELATIONSHIP_RULE_REQUIRED_PROPERTY_NOT_FOUND.name(),
-                                                               args );
+                                    // Get specific message or description
+                                    errorMsg = getMessageOrDescription( transaction, MessageKey.RELATIONSHIP_RULE_REQUIRED_PROPERTY_NOT_FOUND.name() );
+                                    // If rule does not have message or description for the locale, use a default.
+                                    if(StringUtils.isBlank(errorMsg)) {
+                                        args = new String[] { kidObj.getName( transaction ), kidObj.getAbsolutePath(), childType, prop };
+                                        errorMsg = Messages.getString( Messages.Validation.RELATIONSHIP_RULE_REQUIRED_PROPERTY_NOT_FOUND, ( Object[] )args );
+                                    }
                                     break;
                                 }
                             }
@@ -321,16 +328,13 @@ public class RuleImpl extends ObjectImpl implements Rule {
                         if ( propAbsentProp != null ) {
                             for ( final String prop : propAbsentProp.getStringValues( transaction ) ) {
                                 if ( kidObj.hasProperty( transaction, prop ) ) {
-                                    args = new String[] { kidObj.getName( transaction ), kidObj.getAbsolutePath(), childType, prop };
-
-                                    // Default msg - used if problem getting supplied message or definition
-                                    String defaultMsg = Messages.getString( Messages.Validation.RELATIONSHIP_RULE_ABSENT_PROPERTY_FOUND,
-                                                                            ( Object[] )args );
-                                    
-                                    errorMsg = getRuleMessage( transaction,
-                                                               defaultMsg, 
-                                                               MessageKey.RELATIONSHIP_RULE_ABSENT_PROPERTY_FOUND.name(),
-                                                               args );
+                                    // Get specific message or description
+                                    errorMsg = getMessageOrDescription( transaction, MessageKey.RELATIONSHIP_RULE_ABSENT_PROPERTY_FOUND.name() );
+                                    // If rule does not have message or description for the locale, use a default.
+                                    if(StringUtils.isBlank(errorMsg)) {
+                                        args = new String[] { kidObj.getName( transaction ), kidObj.getAbsolutePath(), childType, prop };
+                                        errorMsg = Messages.getString( Messages.Validation.RELATIONSHIP_RULE_ABSENT_PROPERTY_FOUND, ( Object[] )args );
+                                    }
                                     break;
                                 }
                             }
@@ -347,17 +351,13 @@ public class RuleImpl extends ObjectImpl implements Rule {
                         if ( childExistsProp != null ) {
                             for ( final String kidType : childExistsProp.getStringValues( transaction ) ) {
                                 if ( kidObj.getChildrenOfType( transaction, kidType ).length == 0 ) {
-                                    args = new String[] { kidObj.getName( transaction ), kidObj.getAbsolutePath(), childType,
-                                        kidType };
-
-                                    // Default msg - used if problem getting supplied message or definition
-                                    String defaultMsg = Messages.getString( Messages.Validation.RELATIONSHIP_RULE_REQUIRED_CHILD_NOT_FOUND,
-                                                                            ( Object[] )args );
-                                    
-                                    errorMsg = getRuleMessage( transaction,
-                                                               defaultMsg, 
-                                                               MessageKey.RELATIONSHIP_RULE_REQUIRED_CHILD_NOT_FOUND.name(),
-                                                               args );
+                                    // Get specific message or description
+                                    errorMsg = getMessageOrDescription( transaction, MessageKey.RELATIONSHIP_RULE_REQUIRED_CHILD_NOT_FOUND.name() );
+                                    // If rule does not have message or description for the locale, use a default.
+                                    if(StringUtils.isBlank(errorMsg)) {
+                                        args = new String[] { kidObj.getName( transaction ), kidObj.getAbsolutePath(), childType, kidType };
+                                        errorMsg = Messages.getString( Messages.Validation.RELATIONSHIP_RULE_REQUIRED_CHILD_NOT_FOUND, ( Object[] )args );
+                                    }
                                     break;
                                 }
                             }
@@ -374,15 +374,14 @@ public class RuleImpl extends ObjectImpl implements Rule {
                         if ( childAbsentProp != null ) {
                             for ( final String kidType : childAbsentProp.getStringValues( transaction ) ) {
                                 if ( kidObj.getChildrenOfType( transaction, kidType ).length > 0 ) {
-                                    args = new String[] { kidObj.getName( transaction ), kidObj.getAbsolutePath(), childType,
-                                        kidType };
+                                    args = new String[] { kidObj.getName( transaction ), kidObj.getAbsolutePath(), childType, kidType };
 
-                                    // Default msg - used if problem getting supplied message or definition
-                                    String defaultMsg = Messages.getString( Messages.Validation.RELATIONSHIP_RULE_ABSENT_CHILD_FOUND,
-                                                                            ( Object[] )args );
-                                    
-                                    errorMsg = getRuleMessage( transaction, defaultMsg, MessageKey.RELATIONSHIP_RULE_ABSENT_CHILD_FOUND.name(), args );
-
+                                    // Get specific message or description
+                                    errorMsg = getMessageOrDescription( transaction, MessageKey.RELATIONSHIP_RULE_ABSENT_CHILD_FOUND.name() );
+                                    // If rule does not have message or description for the locale, use a default.
+                                    if(StringUtils.isBlank(errorMsg)) {
+                                        errorMsg = Messages.getString( Messages.Validation.RELATIONSHIP_RULE_ABSENT_CHILD_FOUND, ( Object[] )args );
+                                    }
                                     break;
                                 }
                             }
@@ -404,7 +403,7 @@ public class RuleImpl extends ObjectImpl implements Rule {
                 
                 KomodoObject[] kids = null;
                 if(matchOnType) {
-                    kids = kobject.getChildrenOfType( transaction, childType );
+                    kids = matchingChildren;
                 } else {
                     kids = kobject.getChildren( transaction );
                 }
@@ -417,11 +416,12 @@ public class RuleImpl extends ObjectImpl implements Rule {
                     if ( !names.add( name ) ) {
                         args = new String[] { kobject.getName( transaction ), kobject.getAbsolutePath(), name, childType };
 
-                        // Default msg - used if problem getting supplied message or definition
-                        String defaultMsg = Messages.getString( Messages.Validation.RELATIONSHIP_RULE_SNS_FOUND, ( Object[] )args );
-                        
-                        errorMsg = getRuleMessage( transaction, defaultMsg, MessageKey.RELATIONSHIP_RULE_SNS_FOUND.name(), args );
-
+                        // Get specific message or description
+                        errorMsg = getMessageOrDescription( transaction, MessageKey.RELATIONSHIP_RULE_SNS_FOUND.name() );
+                        // If rule does not have message or description for the locale, use a default.
+                        if(StringUtils.isBlank(errorMsg)) {
+                            errorMsg = Messages.getString( Messages.Validation.RELATIONSHIP_RULE_SNS_FOUND, ( Object[] )args );
+                        }
                         break;
                     }
                 }
@@ -443,7 +443,7 @@ public class RuleImpl extends ObjectImpl implements Rule {
         assert ( !StringUtils.isBlank( errorMsg ) );
         return new ResultImpl( kobject.getAbsolutePath(), getName( transaction ), getSeverity( transaction ), errorMsg );
     }
-
+    
     private Result evaluateNodeRule( final UnitOfWork transaction,
                                      final KomodoObject kobject,
                                      final RuleType ruleType ) throws KException {
@@ -460,15 +460,16 @@ public class RuleImpl extends ObjectImpl implements Rule {
                 if ( !name.matches( patternProp.getStringValue( transaction ) ) ) {
                     args = new String[] { kobject.getName( transaction ), kobject.getAbsolutePath() };
 
-                    // Default msg - used if problem getting supplied message or definition
-                    String defaultMsg = Messages.getString( Messages.Validation.PATTERN_RULE_INVALID_NODE_NAME, ( Object[] )args );
-                    
-                    errorMsg = getRuleMessage( transaction, defaultMsg, MessageKey.PATTERN_RULE_INVALID_NODE_NAME.name(), args );
+                    // Get specific message or description
+                    errorMsg = getMessageOrDescription( transaction, MessageKey.PATTERN_RULE_INVALID_NODE_NAME.name() );
+                    // If rule does not have message or description for the locale, use a default.
+                    if(StringUtils.isBlank(errorMsg)) {
+                        errorMsg = Messages.getString( Messages.Validation.PATTERN_RULE_INVALID_NODE_NAME, ( Object[] )args );
+                    }
                 }
 
                 break;
             }
-            case REQUIRED:
             case NUMBER:
             case RELATIONSHIP:
             case SAME_NAME_SIBLING:
@@ -495,34 +496,31 @@ public class RuleImpl extends ObjectImpl implements Rule {
 
         final String propName = jcrNameProp.getStringValue( transaction );
         final boolean exists = kobject.hasProperty( transaction, propName );
+        
+        // Determine if the property is required
+        final Property propRequired = getProperty( transaction, KomodoLexicon.Rule.REQUIRED );
+        boolean propRqd = false;
+        if(propRequired!=null) {
+            propRqd = propRequired.getBooleanValue( transaction );
+        }
+        
         String errorMsg = null;
         String[] args = null;
+        
+        // Property is required but does not exist
+        if ( propRqd && !exists ) {
+            // Use rule description if found, otherwise use a default 'property not found' message.
+            errorMsg = getDescription( transaction );
+            if( StringUtils.isBlank(errorMsg) ) {
+                args = new String[] { kobject.getName( transaction ), kobject.getAbsolutePath(), propName };
+                errorMsg = Messages.getString( Messages.Validation.REQUIRED_PROPERTY_NOT_FOUND, ( Object[] )args );
+            }
+            return new ResultImpl( kobject.getAbsolutePath(), getName( transaction ), getSeverity( transaction ), errorMsg );
+        }
 
         switch ( ruleType ) {
-            case REQUIRED: {
-                if ( !exists ) {
-                    args = new String[] { kobject.getName( transaction ), kobject.getAbsolutePath(), propName };
-
-                    // Default msg - used if problem getting supplied message or definition
-                    String defaultMsg = Messages.getString( Messages.Validation.RULE_MESSAGE_NOT_FOUND, MessageKey.REQUIRED_PROPERTY_NOT_FOUND.name(), getAbsolutePath() );
-                    
-                    errorMsg = getRuleMessage( transaction, defaultMsg, MessageKey.REQUIRED_PROPERTY_NOT_FOUND.name(), args );
-                }
-
-                break;
-            }
             case PATTERN: {
-                // property must exist
-                if ( !exists ) {
-                    args = new String[] { kobject.getName( transaction ), kobject.getAbsolutePath(), propName };
-
-                    // Default msg - used if problem getting supplied message or definition
-                    String defaultMsg = Messages.getString( Messages.Validation.PATTERN_RULE_INVALID_PROPERTY_VALUE, ( Object[] )args );
-                    
-                    errorMsg = getRuleMessage( transaction, defaultMsg, MessageKey.PATTERN_RULE_INVALID_PROPERTY_VALUE.name(), args );
-                    break;
-                }
-
+                // check value against the pattern
                 final Property patternProp = getProperty( transaction, KomodoLexicon.Rule.PATTERN );
                 assert ( patternProp != null );
 
@@ -531,20 +529,17 @@ public class RuleImpl extends ObjectImpl implements Rule {
                 if ( !value.matches( patternProp.getStringValue( transaction ) ) ) {
                     args = new String[] { kobject.getName( transaction ), kobject.getAbsolutePath(), propName };
 
-                    // Default msg - used if problem getting supplied message or definition
-                    String defaultMsg = Messages.getString( Messages.Validation.PATTERN_RULE_INVALID_PROPERTY_VALUE, ( Object[] )args );
-                    
-                    errorMsg = getRuleMessage( transaction, defaultMsg, MessageKey.PATTERN_RULE_INVALID_PROPERTY_VALUE.name(), args );
+                    // Get specific message or description
+                    errorMsg = getMessageOrDescription( transaction, MessageKey.PATTERN_RULE_INVALID_PROPERTY_VALUE.name() );
+                    // If rule does not have message or description for the locale, use a default.
+                    if(StringUtils.isBlank(errorMsg)) {
+                        errorMsg = Messages.getString( Messages.Validation.PATTERN_RULE_INVALID_PROPERTY_VALUE, ( Object[] )args );
+                    }
                 }
 
                 break;
             }
             case NUMBER: {
-                // property must exist
-                if ( !exists ) {
-                    break;
-                }
-
                 boolean minChecked = false;
                 boolean maxChecked = false;
                 final String valueString = kobject.getProperty( transaction, propName ).getStringValue( transaction );
@@ -559,8 +554,7 @@ public class RuleImpl extends ObjectImpl implements Rule {
                             if ( minValueProp != null ) {
                                 minChecked = true;
                                 boolean inclusive = true;
-                                final Property minInclusiveProp = getProperty( transaction,
-                                                                               KomodoLexicon.Rule.MIN_VALUE_INCLUSIVE );
+                                final Property minInclusiveProp = getProperty( transaction, KomodoLexicon.Rule.MIN_VALUE_INCLUSIVE );
 
                                 if ( minInclusiveProp != null ) {
                                     inclusive = minInclusiveProp.getBooleanValue( transaction );
@@ -571,17 +565,14 @@ public class RuleImpl extends ObjectImpl implements Rule {
                                 final int result = Double.compare( value.doubleValue(), minValue.doubleValue() );
 
                                 if ( ( inclusive && ( result < 0 ) ) || ( !inclusive && ( result <= 0 ) ) ) {
-                                    args = new String[] { kobject.getName( transaction ), kobject.getAbsolutePath(), propName,
-                                        valueString, minString };
+                                    args = new String[] { kobject.getName( transaction ), kobject.getAbsolutePath(), propName, valueString, minString };
 
-                                    // Default msg - used if problem getting supplied message or definition
-                                    String defaultMsg = Messages.getString( Messages.Validation.PROPERTY_RULE_VALUE_BELOW_MIN_VALUE,
-                                                                            ( Object[] )args );
-                                    
-                                    errorMsg = getRuleMessage( transaction,
-                                                               defaultMsg, 
-                                                               MessageKey.PROPERTY_RULE_VALUE_BELOW_MIN_VALUE.name(),
-                                                               args );
+                                    // Get specific message or description
+                                    errorMsg = getMessageOrDescription( transaction, MessageKey.PROPERTY_RULE_VALUE_BELOW_MIN_VALUE.name() );
+                                    // If rule does not have message or description for the locale, use a default.
+                                    if(StringUtils.isBlank(errorMsg)) {
+                                        errorMsg = Messages.getString( Messages.Validation.PROPERTY_RULE_VALUE_BELOW_MIN_VALUE, ( Object[] )args );
+                                    }
                                 }
                             }
                         }
@@ -605,17 +596,14 @@ public class RuleImpl extends ObjectImpl implements Rule {
                                     final int result = Double.compare( value.doubleValue(), maxValue.doubleValue() );
 
                                     if ( ( inclusive && ( result > 0 ) ) || ( !inclusive && ( result >= 0 ) ) ) {
-                                        args = new String[] { kobject.getName( transaction ), kobject.getAbsolutePath(),
-                                            propName, valueString, maxString };
+                                        args = new String[] { kobject.getName( transaction ), kobject.getAbsolutePath(), propName, valueString, maxString };
 
-                                        // Default msg - used if problem getting supplied message or definition
-                                        String defaultMsg = Messages.getString( Messages.Validation.PROPERTY_RULE_VALUE_ABOVE_MAX_VALUE,
-                                                                                ( Object[] )args );
-                                        
-                                        errorMsg = getRuleMessage( transaction,
-                                                                   defaultMsg, 
-                                                                   MessageKey.PROPERTY_RULE_VALUE_ABOVE_MAX_VALUE.name(),
-                                                                   args );
+                                        // Get specific message or description
+                                        errorMsg = getMessageOrDescription( transaction, MessageKey.PROPERTY_RULE_VALUE_ABOVE_MAX_VALUE.name() );
+                                        // If rule does not have message or description for the locale, use a default.
+                                        if(StringUtils.isBlank(errorMsg)) {
+                                            errorMsg = Messages.getString( Messages.Validation.PROPERTY_RULE_VALUE_ABOVE_MAX_VALUE, ( Object[] )args );
+                                        }
                                     }
                                 }
                             }
@@ -624,29 +612,29 @@ public class RuleImpl extends ObjectImpl implements Rule {
                         if ( StringUtils.isBlank( errorMsg ) && !minChecked && !maxChecked ) {
                             args = new String[] { getName( transaction ) };
 
-                            // Default msg - used if problem getting supplied message or definition
-                            String defaultMsg = Messages.getString( Messages.Validation.NUMBER_RULE_HAS_NO_VALUES, ( Object[] )args );
-                            
-                            errorMsg = getRuleMessage( transaction, defaultMsg, MessageKey.NUMBER_RULE_HAS_NO_VALUES.name(), args );
+                            // Get specific message or description
+                            errorMsg = getMessageOrDescription( transaction, MessageKey.NUMBER_RULE_HAS_NO_VALUES.name() );
+                            // If rule does not have message or description for the locale, use a default.
+                            if(StringUtils.isBlank(errorMsg)) {
+                                errorMsg = Messages.getString( Messages.Validation.NUMBER_RULE_HAS_NO_VALUES, ( Object[] )args );
+                            }
                         }
                     } catch ( final ParseException ex ) {
                         // not a valid number rule and should be caught by XSD validation
                         args = new String[] { getName( transaction ) };
 
-                        // Default msg - used if problem getting supplied message or definition
-                        String defaultMsg = Messages.getString( Messages.Validation.NUMBER_RULE_NON_NUMERIC_VALUES, ( Object[] )args );
-                        
-                        errorMsg = getRuleMessage( transaction, defaultMsg, MessageKey.NUMBER_RULE_NON_NUMERIC_VALUES.name(), args );
+                        // Get specific message or description
+                        errorMsg = getMessageOrDescription( transaction, MessageKey.NUMBER_RULE_NON_NUMERIC_VALUES.name() );
+                        // If rule does not have message or description for the locale, use a default.
+                        if(StringUtils.isBlank(errorMsg)) {
+                            errorMsg = Messages.getString( Messages.Validation.NUMBER_RULE_NON_NUMERIC_VALUES, ( Object[] )args );
+                        }
                     }
                 }
 
                 break;
             }
             case RELATIONSHIP: {
-                if ( !exists ) {
-                    break;
-                }
-
                 { // props exist
                     final Property propExistsProp = getProperty( transaction, KomodoLexicon.Rule.PROP_EXISTS );
 
@@ -655,15 +643,12 @@ public class RuleImpl extends ObjectImpl implements Rule {
                             if ( !kobject.hasProperty( transaction, prop ) ) {
                                 args = new String[] { kobject.getName( transaction ), kobject.getAbsolutePath(), propName, prop };
 
-                                // Default msg - used if problem getting supplied message or definition
-                                String defaultMsg = Messages.getString( Messages.Validation.PROPERTY_RULE_REQUIRED_PROPERTY_NOT_FOUND,
-                                                                        ( Object[] )args );
-                                
-                                errorMsg = getRuleMessage( transaction,
-                                                           defaultMsg, 
-                                                           MessageKey.PROPERTY_RULE_REQUIRED_PROPERTY_NOT_FOUND.name(),
-                                                           args );
-
+                                // Get specific message or description
+                                errorMsg = getMessageOrDescription( transaction, MessageKey.PROPERTY_RULE_REQUIRED_PROPERTY_NOT_FOUND.name() );
+                                // If rule does not have message or description for the locale, use a default.
+                                if(StringUtils.isBlank(errorMsg)) {
+                                    errorMsg = Messages.getString( Messages.Validation.PROPERTY_RULE_REQUIRED_PROPERTY_NOT_FOUND, ( Object[] )args );
+                                }
                                 break;
                             }
                         }
@@ -682,12 +667,12 @@ public class RuleImpl extends ObjectImpl implements Rule {
                             if ( kobject.hasProperty( transaction, prop ) ) {
                                 args = new String[] { kobject.getName( transaction ), kobject.getAbsolutePath(), propName, prop };
 
-                                // Default msg - used if problem getting supplied message or definition
-                                String defaultMsg = Messages.getString( Messages.Validation.PROPERTY_RULE_ABSENT_PROPERTY_FOUND,
-                                                                        ( Object[] )args );
-                                
-                                errorMsg = getRuleMessage( transaction, defaultMsg, MessageKey.PROPERTY_RULE_ABSENT_PROPERTY_FOUND.name(), args );
-
+                                // Get specific message or description
+                                errorMsg = getMessageOrDescription( transaction, MessageKey.PROPERTY_RULE_ABSENT_PROPERTY_FOUND.name() );
+                                // If rule does not have message or description for the locale, use a default.
+                                if(StringUtils.isBlank(errorMsg)) {
+                                    errorMsg = Messages.getString( Messages.Validation.PROPERTY_RULE_ABSENT_PROPERTY_FOUND, ( Object[] )args );
+                                }
                                 break;
                             }
                         }
@@ -704,18 +689,14 @@ public class RuleImpl extends ObjectImpl implements Rule {
                     if ( childExistsProp != null ) {
                         for ( final String childType : childExistsProp.getStringValues( transaction ) ) {
                             if ( kobject.getChildrenOfType( transaction, childType ).length == 0 ) {
-                                args = new String[] { kobject.getName( transaction ), kobject.getAbsolutePath(), propName,
-                                    childType };
+                                args = new String[] { kobject.getName( transaction ), kobject.getAbsolutePath(), propName, childType };
 
-                                // Default msg - used if problem getting supplied message or definition
-                                String defaultMsg = Messages.getString( Messages.Validation.RELATIONSHIP_RULE_REQUIRED_CHILD_NOT_FOUND,
-                                                                        ( Object[] )args );
-                                
-                                errorMsg = getRuleMessage( transaction,
-                                                           defaultMsg, 
-                                                           MessageKey.RELATIONSHIP_RULE_REQUIRED_CHILD_NOT_FOUND.name(),
-                                                           args );
-
+                                // Get specific message or description
+                                errorMsg = getMessageOrDescription( transaction, MessageKey.RELATIONSHIP_RULE_REQUIRED_CHILD_NOT_FOUND.name() );
+                                // If rule does not have message or description for the locale, use a default.
+                                if(StringUtils.isBlank(errorMsg)) {
+                                    errorMsg = Messages.getString( Messages.Validation.RELATIONSHIP_RULE_REQUIRED_CHILD_NOT_FOUND, ( Object[] )args );
+                                }
                                 break;
                             }
                         }
@@ -732,15 +713,14 @@ public class RuleImpl extends ObjectImpl implements Rule {
                     if ( childAbsentProp != null ) {
                         for ( final String childType : childAbsentProp.getStringValues( transaction ) ) {
                             if ( kobject.getChildrenOfType( transaction, childType ).length > 0 ) {
-                                args = new String[] { kobject.getName( transaction ), kobject.getAbsolutePath(), propName,
-                                    childType };
+                                args = new String[] { kobject.getName( transaction ), kobject.getAbsolutePath(), propName, childType };
 
-                                // Default msg - used if problem getting supplied message or definition
-                                String defaultMsg = Messages.getString( Messages.Validation.PROPERTY_RULE_ABSENT_CHILD_FOUND,
-                                                                        ( Object[] )args );
-                                
-                                errorMsg = getRuleMessage( transaction, defaultMsg, MessageKey.PROPERTY_RULE_ABSENT_CHILD_FOUND.name(), args );
-
+                                // Get specific message or description
+                                errorMsg = getMessageOrDescription( transaction, MessageKey.PROPERTY_RULE_ABSENT_CHILD_FOUND.name() );
+                                // If rule does not have message or description for the locale, use a default.
+                                if(StringUtils.isBlank(errorMsg)) {
+                                    errorMsg = Messages.getString( Messages.Validation.PROPERTY_RULE_ABSENT_CHILD_FOUND, ( Object[] )args );
+                                }
                                 break;
                             }
                         }
@@ -788,12 +768,11 @@ public class RuleImpl extends ObjectImpl implements Rule {
      * {@inheritDoc}
      *
      * @see org.komodo.spi.repository.validation.Rule#getMessage(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String, java.lang.String[])
+     *      java.lang.String)
      */
     @Override
     public String getMessage( final UnitOfWork transaction,
-                              final String key,
-                              final String... args ) throws KException {
+                              final String key ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
@@ -825,7 +804,6 @@ public class RuleImpl extends ObjectImpl implements Rule {
 
         if ( localizedText == null ) {
             return null;
-            //return Messages.getString( Messages.Validation.RULE_MESSAGE_NOT_FOUND, key, getAbsolutePath() );
         }
 
         final Property prop = localizedText.getProperty( transaction, KomodoLexicon.Rule.LOCALIZED_TEXT );
@@ -833,25 +811,18 @@ public class RuleImpl extends ObjectImpl implements Rule {
     }
     
     /*
-     * Gets the Rule message. If a 'message' is found, it is used.  Otherwise, the required 'definition' is used. 
+     * Gets the message for the specified key.  If a 'message' is not found for the key, the rule 'definition' is returned. 
      */
-    private String getRuleMessage( final UnitOfWork transaction,
-                                   final String defaultMsg,
-                                   final String key,
-                                   final String... args ) throws KException {
+    private String getMessageOrDescription( final UnitOfWork transaction,
+                                            final String key ) throws KException {
         
-        String errorMsg = getMessage( transaction, key, args );
+        String errorMsg = getMessage( transaction, key );
 
-        // if no error message found use default definition
+        // if error message for specified key not found, use description.
         if ( StringUtils.isBlank( errorMsg ) ) {
             errorMsg = getDescription( transaction );
         }
         
-        // if no error message or definition found use default message
-        if ( StringUtils.isBlank( errorMsg ) ) {
-            errorMsg = defaultMsg;
-        }
-
         return errorMsg;
     }
 
@@ -865,11 +836,13 @@ public class RuleImpl extends ObjectImpl implements Rule {
         return getObjectProperty( transaction, PropertyValueType.STRING, "getNodeType", KomodoLexicon.Rule.NODE_TYPE ); //$NON-NLS-1$
     }
 
-    /* (non-Javadoc)
-     * @see org.komodo.spi.repository.validation.Rule#getNodePropRestrictions(org.komodo.spi.repository.Repository.UnitOfWork)
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.validation.Rule#getPropRestrictions(org.komodo.spi.repository.Repository.UnitOfWork,org.komodo.spi.repository.validation.Rule.PropertyRestriction)
      */
     @Override
-    public Map<String, String> getNodePropRestrictions(UnitOfWork transaction) throws KException {
+    public Map<String, String> getPropRestrictions(UnitOfWork transaction, PropertyRestriction restrictionType) throws KException {
         Map<String,String> resultMap = new HashMap<String,String>();
         
         if ( hasChild( transaction, KomodoLexicon.Rule.PROP_RESTRICTIONS_GROUPING ) ) {
@@ -881,7 +854,10 @@ public class RuleImpl extends ObjectImpl implements Rule {
             for(KomodoObject kObj : restrictionNodes) {
                 String propName = kObj.getName(transaction);
                 String propValue = kObj.getProperty(transaction, KomodoLexicon.Rule.PROP_VALUE).getStringValue(transaction);
-                resultMap.put(propName, propValue);
+                String type = kObj.getProperty(transaction, KomodoLexicon.Rule.RESTRICTION_TYPE).getStringValue(transaction);
+                if(restrictionType.name().equals(type)) {
+                    resultMap.put(propName, propValue);
+                }
             }
         }
 
@@ -931,7 +907,8 @@ public class RuleImpl extends ObjectImpl implements Rule {
      */
     @Override
     public ValidationType getValidationType( final UnitOfWork transaction ) throws KException {
-        final String value = getObjectProperty( transaction, PropertyValueType.STRING, "getValidationType", //$NON-NLS-1$
+        final String value = getObjectProperty( transaction, 
+                                                PropertyValueType.STRING, "getValidationType", //$NON-NLS-1$
                                                 KomodoLexicon.Rule.VALIDATION_TYPE );
 
         try {
@@ -940,6 +917,47 @@ public class RuleImpl extends ObjectImpl implements Rule {
         } catch ( final Exception e ) {
             throw new KException( e );
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.validation.Rule#isRequired(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public boolean isRequired(UnitOfWork transaction) throws KException {
+        final Boolean required = getObjectProperty( transaction,
+                                                    PropertyValueType.BOOLEAN,
+                                                    "isRequired", KomodoLexicon.Rule.REQUIRED ); //$NON-NLS-1$
+        return ( required == null ) ? true : required;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.validation.Rule#setRequired(org.komodo.spi.repository.Repository.UnitOfWork, boolean)
+     */
+    @Override
+    public void setRequired(UnitOfWork transaction,
+                            boolean newRequired) throws KException {
+        setObjectProperty( transaction, "setRequired", KomodoLexicon.Rule.REQUIRED, newRequired ); //$NON-NLS-1$
+    }
+    
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.validation.Rule#isApplicable(org.komodo.spi.repository.Repository.UnitOfWork, org.komodo.spi.repository.KomodoObject)
+     */
+    @Override
+    public boolean isApplicable(UnitOfWork transaction,
+                                KomodoObject kObject) throws KException {
+        // Object type must be compatible with the rule.
+        if (!ValidationUtils.objectTypeMatches(transaction, kObject, getNodeType(transaction))) return false;
+        
+        // Object properties must be compatible with the rule.
+        if (!ValidationUtils.objectPropsPassRestrictions(transaction, kObject, getPropRestrictions(transaction,Rule.PropertyRestriction.NODE))) return false;
+        
+        return true;
     }
 
     /**

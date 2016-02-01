@@ -21,6 +21,7 @@ public abstract class AbstractCommandTest extends org.komodo.shell.AbstractComma
 
     private static final KLog LOGGER = KLog.getLogger();
     private static final Path SHELL_DATA_DIRECTORY;
+    private static final String TEST_VALIDATION_RULES = "relationalValidationRulesDefault.xml"; //$NON-NLS-1$
 
     private static Path _saveShellDataDirectory;
 
@@ -29,6 +30,13 @@ public abstract class AbstractCommandTest extends org.komodo.shell.AbstractComma
 
         // create data directory for shell
         try {
+//            InputStream rulesStream = TestUtilities.getResourceAsStream(AbstractCommandTest.class, "rules", TEST_VALIDATION_RULES);
+//            File tempRulesFile = File.createTempFile("rulesFile", ".xml");
+//            Files.copy(rulesStream, tempRulesFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+//            tempRulesFile.deleteOnExit();
+//
+            // Set up the vdb reimport stream
+            
             tempDataDir = Files.createTempDirectory( "VdbBuilderDataDir" );
             tempDataDir.toFile().deleteOnExit();
             System.setProperty( SystemConstants.VDB_BUILDER_DATA_DIR, tempDataDir.toString() );
@@ -90,9 +98,24 @@ public abstract class AbstractCommandTest extends org.komodo.shell.AbstractComma
         _shellDataDirectory = SHELL_DATA_DIRECTORY;
         System.setProperty( SystemConstants.VDB_BUILDER_DATA_DIR, _shellDataDirectory.toString() );
     }
+    
+//    private void initRulesFile() throws Exception {
+//      InputStream rulesStream = TestUtilities.getResourceAsStream(AbstractCommandTest.class, "rules", TEST_VALIDATION_RULES);
+//      File tempRulesFile = File.createTempFile("rulesFile", ".xml");
+//      Files.copy(rulesStream, tempRulesFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+//      tempRulesFile.deleteOnExit();
+////        File rulesFile = new File( getClass().getClassLoader().getResource(TEST_VALIDATION_RULES).getFile() );
+//        
+//        _repo.getValidationManager().validateRules( tempRulesFile );
+//        _repo.getValidationManager().importRules( tempRulesFile , getTransaction(), true);
+//        
+//        wsStatus.setValidationRules(tempRulesFile, true);
+//    }
 
     @Before
     public void startInWorkspace() throws Exception {
+//        initRulesFile();
+        
         final String[] commands = { "workspace" };
         final CommandResult result = execute( commands );
         assertCommandResultOk( result );
