@@ -13,7 +13,9 @@ import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+
 import java.util.Properties;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
@@ -32,7 +34,7 @@ public class SchemaImplTest extends RelationalModelTest {
     private static final String DDL_VIEW = "CREATE VIEW G1 (" + NEW_LINE +
                                                                         TAB + "e1 integer," + NEW_LINE +
                                                                         TAB + "e2 varchar" + NEW_LINE +
-                                                                        ") OPTIONS (CARDINALITY '1234567954432')" + NEW_LINE +
+                                                                        ") OPTIONS (\"CARDINALITY\" '1234567954432')" + NEW_LINE +
                                                                         "AS" + NEW_LINE +
                                                                         "SELECT e1, e2 FROM foo.bar;\n";
 

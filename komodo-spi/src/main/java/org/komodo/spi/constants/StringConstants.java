@@ -202,7 +202,7 @@ public interface StringConstants {
     /**
      * Ampersand Symbol
      */
-    String AMPERSAND = "@"; //$NON-NLS-1$
+    String AMPERSAND = "&"; //$NON-NLS-1$
 
     /**
      * Open Angle Bracket
