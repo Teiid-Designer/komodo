@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<validationRuleSet
+    xmlns:val="http://www.jboss.org/tools/komodo/validation/2015"
+    xmlns:ddl="http://www.modeshape.org/ddl/1.0"
+    xmlns:vdb="http://www.metamatrix.com/metamodels/VirtualDatabase"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.jboss.org/tools/komodo/validation/2015 http://www.jboss.org/tools/komodo/validation/2015/komodoValidation.xsd"
+    xmlns="http://www.jboss.org/tools/komodo/validation/2015">
+
+    <description locale="en">This is a test validation file.</description>
+    <description locale="es">Este es un archivo de validación de pruebas.</description>
+
+    <nodeValidation jcrName="vdb:virtualDatabase">
+        <message locale="en">Validation rules for a VDB.</message>
+        <message locale="es">Las reglas de validación para el tipo de nodo 'vdb:virtualDatabase.'</message>
+
+        <childValidation jcrName="vdb:declarativeModel" required="true">
+            <message locale="en">Validates child count under a vdb.</message>
+            <childCountValidation id="vdb.childCount" severity="WARNING">
+                <description locale="en">A VDB must have between 1 and 5 child models.</description>
+                <minValue inclusive="true">1</minValue>
+                <maxValue inclusive="true">5</maxValue>
+            </childCountValidation>
+        </childValidation>
+    </nodeValidation>
+
+</validationRuleSet>

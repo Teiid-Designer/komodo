@@ -18,7 +18,9 @@ import java.util.Map;
 import java.util.Stack;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+import org.komodo.core.Messages;
 import org.komodo.spi.KException;
+import org.komodo.spi.outcome.Outcome;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
@@ -34,10 +36,9 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
-
 /**
- * The <code>RuleParser</code> parses validation rule definition files.   Each file is validated
- * against a validation rule definition schema.
+ * The <code>RuleValidationParser</code> parses a validation rule definition file.  This parser will generate the Rules in the repository and return the
+ * array of generated rules.
  */
 public class RuleParser {
 
@@ -45,7 +46,6 @@ public class RuleParser {
 
     private final Repository repo;
     private final UnitOfWork uow;
-    //private final File ruleSchemaFile;
     private Handler handler;
     /**
      * The parser of the rules file
@@ -62,6 +62,7 @@ public class RuleParser {
      * @throws Exception if there were problems with the rules schema file
      */
     public RuleParser(final File rulesSchemaFile, final Repository repo, final UnitOfWork transaction) throws Exception {
+        ArgCheck.isNotNull( rulesSchemaFile, "rulesSchemaFile" ); //$NON-NLS-1$
         ArgCheck.isNotNull( repo, "repo" ); //$NON-NLS-1$
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
@@ -69,17 +70,14 @@ public class RuleParser {
         this.repo = repo;
         this.uow = transaction;
         
-        // load validation XSD for validation using parser
-        //this.ruleSchemaFile = new File( "../../plugins/org.komodo.core/resources/komodoValidation.xsd" ); //$NON-NLS-1$
-        
         setupParser(rulesSchemaFile);
     }
     
     private void setupParser(File schemaFile) throws Exception {
         if (!schemaFile.exists()) {
-            throw new IllegalStateException( "Validation schema file does not exist" ); //$NON-NLS-1$
+            throw new IllegalStateException( Messages.getString(Messages.RuleParser.Rules_Schema_File_Not_Found));
         }
-
+        
         // create parser
         final SAXParserFactory factory = SAXParserFactory.newInstance();
         factory.setNamespaceAware( true );
@@ -139,11 +137,11 @@ public class RuleParser {
     }
 
     /**
-     * @param rulesFile the rules input stream (cannot be <code>null</code>)
+     * @param rulesFile the rules file (cannot be <code>null</code>)
      * @return the Rules (never <code>null</code>)
      * @throws Exception if the definition file is <code>null</code> or if there is a problem parsing the file
      */
-    public Collection<Rule> parse( File rulesFile ) throws Exception {
+    public Rule[] parse( File rulesFile ) throws Exception {
         this.handler = new Handler();
         this.parser.parse(rulesFile, handler);
         return this.handler.getRules();
@@ -155,11 +153,12 @@ public class RuleParser {
     class Handler extends DefaultHandler {
 
         private final Map<String,String> nodePropRestrictionMap;
+        private final Map<String,String> childPropRestrictionMap;
         private final Map<String,String> nodeValidationMessageMap;
         private final Map<String,String> propertyValidationMessageMap;
         private final Map<String,String> childValidationMessageMap;
-        private final Map<String,String> ruleMessageMap;
-        private final Map<String,String> ruleDescriptionMap;
+        private final List<LocalizedMessage> ruleLocalizedMessages;
+        private final List<LocalizedMessage> ruleLocalizedDescriptions;
         
         private final Collection<String> fatals;
         private final Collection<String> errors;
@@ -189,6 +188,8 @@ public class RuleParser {
         private String nodeValidationJcrName;
         private String childValidationJcrName;
         private String propertyValidationJcrName;
+        private String propertyValidationPropRequired;
+        private String childValidationChildRequired;
         private String descriptionLocale;
         private String messageLocale;
         private String messageKey;
@@ -206,11 +207,12 @@ public class RuleParser {
             this.warnings = new ArrayList<String>();
             this.rules = new ArrayList<Rule>();
             this.nodePropRestrictionMap = new HashMap<String,String>();
+            this.childPropRestrictionMap = new HashMap<String,String>();
             this.nodeValidationMessageMap = new HashMap<String,String>();
             this.propertyValidationMessageMap = new HashMap<String,String>();
             this.childValidationMessageMap = new HashMap<String,String>();
-            this.ruleMessageMap = new HashMap<String,String>();
-            this.ruleDescriptionMap = new HashMap<String,String>();
+            this.ruleLocalizedDescriptions = new ArrayList<LocalizedMessage>();
+            this.ruleLocalizedMessages = new ArrayList<LocalizedMessage>();
             this.propMustExistList = new ArrayList<String>();
             this.propMustNotExistList = new ArrayList<String>();
             this.childTypeMustExistList = new ArrayList<String>();
@@ -266,12 +268,18 @@ public class RuleParser {
             if(RuleConstants.Elements.NODE_VALIDATION.equals(localName)) {
                 this.nodeValidationJcrName = null;
             } else if(RuleConstants.Elements.NAME_VALIDATION.equals(localName)) {
-                List<LocalizedMessage> descriptions = getLocalizedMessageList(MessageKey.DESCRIPTION.name(), ruleDescriptionMap);
-                List<LocalizedMessage> messages = getLocalizedMessageList(MessageKey.PATTERN_RULE_INVALID_NODE_NAME.name(), ruleMessageMap);
-                
                 Rule theRule = null;
                 try {
-                    theRule = RuleFactory.createNodeNameRule(uow, repo, ruleId, nodeValidationJcrName, nodePropRestrictionMap, pattern.toString(), descriptions, messages);
+                    Outcome.Level levelSeverity = Outcome.Level.valueOf(severity);
+                    theRule = RuleFactory.createNodeNameRule(uow, 
+                                                             repo, 
+                                                             ruleId, 
+                                                             nodeValidationJcrName, 
+                                                             nodePropRestrictionMap, 
+                                                             pattern.toString(), 
+                                                             levelSeverity, 
+                                                             ruleLocalizedDescriptions, 
+                                                             ruleLocalizedMessages);
                 } catch (KException ex) {
                     LOGGER.error("RuleParser - error creating NodeNameRule : ", ex); //$NON-NLS-1$
                 }
@@ -279,35 +287,12 @@ public class RuleParser {
                 
                 this.ruleId = null;
                 pattern.setLength(0);
-                ruleDescriptionMap.clear();
-                ruleMessageMap.clear();
+                ruleLocalizedDescriptions.clear();
+                ruleLocalizedMessages.clear();
             } else if(RuleConstants.Elements.PROPERTY_VALIDATION.equals(localName)) {
                 this.propertyValidationJcrName = null;
-            } else if(RuleConstants.Elements.REQUIRED_VALIDATION.equals(localName)) {
-                List<LocalizedMessage> descriptions = getLocalizedMessageList(MessageKey.DESCRIPTION.name(), ruleDescriptionMap);
-                List<LocalizedMessage> messages = getLocalizedMessageList(MessageKey.REQUIRED_PROPERTY_NOT_FOUND.name(), ruleMessageMap);
-                
-                boolean hasChildNodeJcrName = (StringUtils.isEmpty(childValidationJcrName)) ? false : true;
-
-                Rule theRule = null;
-                try {
-                    if( hasChildNodeJcrName ) {
-                        theRule = RuleFactory.createChildTypeRequiredRule(uow, repo, ruleId, nodeValidationJcrName, nodePropRestrictionMap, childValidationJcrName, descriptions, messages);
-                    } else {
-                        theRule = RuleFactory.createPropertyRequiredRule(uow, repo, ruleId, nodeValidationJcrName, nodePropRestrictionMap, propertyValidationJcrName, descriptions, messages);
-                    }
-                } catch (KException ex) {
-                    LOGGER.error("RuleParser - error creating PropertyRequiredRule : ", ex); //$NON-NLS-1$
-                }
-                if(theRule!=null) rules.add(theRule);
-
-                this.ruleId = null;
-                ruleDescriptionMap.clear();
-                ruleMessageMap.clear();
+                this.propertyValidationPropRequired = null;
             } else if(RuleConstants.Elements.SAME_NAME_SIBLING_VALIDATION.equals(localName)) {
-                List<LocalizedMessage> descriptions = getLocalizedMessageList(MessageKey.DESCRIPTION.name(), ruleDescriptionMap);
-                List<LocalizedMessage> messages = getLocalizedMessageList(MessageKey.RELATIONSHIP_RULE_SNS_FOUND.name(), ruleMessageMap);
-
                 boolean bMatchType = true;
                 if(matchType!=null) {
                     bMatchType = Boolean.parseBoolean(matchType);
@@ -315,7 +300,24 @@ public class RuleParser {
                 
                 Rule theRule = null;
                 try {
-                    theRule = RuleFactory.createSameNameSiblingValidationRule(uow, repo, ruleId, nodeValidationJcrName, nodePropRestrictionMap, childValidationJcrName, bMatchType, descriptions, messages);
+                    boolean bChildRqd = false;
+                    if(childValidationChildRequired!=null) {
+                        bChildRqd = Boolean.parseBoolean(childValidationChildRequired);
+                    }
+
+                    Outcome.Level levelSeverity = Outcome.Level.valueOf(severity);
+                    theRule = RuleFactory.createSameNameSiblingValidationRule(uow, 
+                                                                              repo, 
+                                                                              ruleId, 
+                                                                              nodeValidationJcrName, 
+                                                                              nodePropRestrictionMap, 
+                                                                              childValidationJcrName,
+                                                                              childPropRestrictionMap,
+                                                                              bChildRqd, 
+                                                                              bMatchType, 
+                                                                              levelSeverity, 
+                                                                              ruleLocalizedDescriptions, 
+                                                                              ruleLocalizedMessages);
                 } catch (KException ex) {
                     LOGGER.error("RuleParser - error creating SameNameSiblingValidationRule : ", ex); //$NON-NLS-1$
                 }
@@ -323,12 +325,9 @@ public class RuleParser {
                 
                 this.ruleId = null;
                 this.matchType = null;
-                ruleDescriptionMap.clear();
-                ruleMessageMap.clear();
+                ruleLocalizedDescriptions.clear();
+                ruleLocalizedMessages.clear();
             } else if(RuleConstants.Elements.CHILD_COUNT_VALIDATION.equals(localName)) {
-                List<LocalizedMessage> descriptions = getLocalizedMessageList(MessageKey.DESCRIPTION.name(), ruleDescriptionMap);
-                List<LocalizedMessage> messages = getLocalizedMessageList(MessageKey.CHILD_COUNT_ABOVE_MAX_VALUE.name(), ruleMessageMap);
-                
                 boolean bMinInclusive = true;
                 if(minInclusive!=null) {
                     bMinInclusive = Boolean.parseBoolean(minInclusive);
@@ -341,26 +340,38 @@ public class RuleParser {
                 Number nMinValue = null;
                 Number nMaxValue = null;
                 try {
-                    nMinValue = NumberFormat.getInstance().parse( minValue.toString() );
-                    nMaxValue = NumberFormat.getInstance().parse( maxValue.toString() );
+                    if(minValue!=null && minValue.length()>0) {
+                        nMinValue = NumberFormat.getInstance().parse( minValue.toString() );
+                    }
+                    if(maxValue!=null && maxValue.length()>0) {
+                        nMaxValue = NumberFormat.getInstance().parse( maxValue.toString() );
+                    }
                 } catch (ParseException ex) {
                     LOGGER.error("RuleParser - error parsing property min-max values : ", ex); //$NON-NLS-1$
                 }
                 
                 Rule theRule = null;
                 try {
+                    boolean bChildRqd = false;
+                    if(childValidationChildRequired!=null) {
+                        bChildRqd = Boolean.parseBoolean(childValidationChildRequired);
+                    }
+                    Outcome.Level levelSeverity = Outcome.Level.valueOf(severity);
                     theRule = RuleFactory.createChildCountValidationRule(uow, 
-                                                                            repo, 
-                                                                            ruleId, 
-                                                                            nodeValidationJcrName, 
-                                                                            nodePropRestrictionMap, 
-                                                                            childValidationJcrName, 
-                                                                            nMinValue, 
-                                                                            bMinInclusive, 
-                                                                            nMaxValue, 
-                                                                            bMaxInclusive, 
-                                                                            descriptions, 
-                                                                            messages);
+                                                                         repo, 
+                                                                         ruleId, 
+                                                                         nodeValidationJcrName, 
+                                                                         nodePropRestrictionMap, 
+                                                                         childValidationJcrName,
+                                                                         childPropRestrictionMap,
+                                                                         bChildRqd,
+                                                                         nMinValue, 
+                                                                         bMinInclusive, 
+                                                                         nMaxValue, 
+                                                                         bMaxInclusive,
+                                                                         levelSeverity,
+                                                                         ruleLocalizedDescriptions, 
+                                                                         ruleLocalizedMessages);
                 } catch (KException ex) {
                     LOGGER.error("RuleParser - error creating ChildCountValidationRule : ", ex); //$NON-NLS-1$
                 }
@@ -371,18 +382,31 @@ public class RuleParser {
                 maxValue.setLength(0);
                 minInclusive = null;
                 maxInclusive = null;
-                ruleDescriptionMap.clear();
-                ruleMessageMap.clear();
+                ruleLocalizedDescriptions.clear();
+                ruleLocalizedMessages.clear();
             } else if(RuleConstants.Elements.VALUE_VALIDATION.equals(localName)) {
-                List<LocalizedMessage> descriptions = getLocalizedMessageList(MessageKey.DESCRIPTION.name(), ruleDescriptionMap);
-                List<LocalizedMessage> messages = getLocalizedMessageList(MessageKey.PROPERTY_RULE_ABSENT_PROPERTY_FOUND.name(), ruleMessageMap);
-                
                 boolean hasChildNodeJcrName = (StringUtils.isEmpty(childValidationJcrName)) ? false : true;
                 String nodeName = hasChildNodeJcrName ? childValidationJcrName : nodeValidationJcrName;
 
                 Rule theRule = null;
                 try {
-                    theRule = RuleFactory.createPropertyPatternRule(uow, repo, ruleId, nodeName, nodePropRestrictionMap, propertyValidationJcrName, pattern.toString(), descriptions, messages);
+                    boolean bPropRqd = false;
+                    if(propertyValidationPropRequired!=null) {
+                        bPropRqd = Boolean.parseBoolean(propertyValidationPropRequired);
+                    }
+                    
+                    Outcome.Level levelSeverity = Outcome.Level.valueOf(severity);
+                    theRule = RuleFactory.createPropertyPatternRule(uow, 
+                                                                    repo, 
+                                                                    ruleId, 
+                                                                    nodeName, 
+                                                                    nodePropRestrictionMap, 
+                                                                    propertyValidationJcrName, 
+                                                                    bPropRqd, 
+                                                                    pattern.toString(), 
+                                                                    levelSeverity, 
+                                                                    ruleLocalizedDescriptions, 
+                                                                    ruleLocalizedMessages);
                 } catch (KException ex) {
                     LOGGER.error("RuleParser - error creating PropertyPatternRule : ", ex); //$NON-NLS-1$
                 }
@@ -390,42 +414,54 @@ public class RuleParser {
 
                 this.ruleId = null;
                 pattern.setLength(0);
-                ruleDescriptionMap.clear();
-                ruleMessageMap.clear();
+                ruleLocalizedDescriptions.clear();
+                ruleLocalizedMessages.clear();
             } else if(RuleConstants.Elements.RELATIONSHIP_VALIDATION.equals(localName)) {
-                List<LocalizedMessage> descriptions = getLocalizedMessageList(MessageKey.DESCRIPTION.name(), ruleDescriptionMap);
-                List<LocalizedMessage> messages = getLocalizedMessageList(MessageKey.PROPERTY_RULE_ABSENT_PROPERTY_FOUND.name(), ruleMessageMap);
- 
                 boolean hasChildNodeJcrName = (StringUtils.isEmpty(childValidationJcrName)) ? false : true;
 
                 Rule theRule = null;
                 try {
                     if(hasChildNodeJcrName) {
+                        boolean bChildRqd = false;
+                        if(childValidationChildRequired!=null) {
+                            bChildRqd = Boolean.parseBoolean(childValidationChildRequired);
+                        }
+                        Outcome.Level levelSeverity = Outcome.Level.valueOf(severity);
                         theRule = RuleFactory.createChildRelationshipValidationRule(uow, 
                                                                                     repo, 
                                                                                     ruleId, 
                                                                                     nodeValidationJcrName, 
                                                                                     nodePropRestrictionMap, 
-                                                                                    childValidationJcrName, 
+                                                                                    childValidationJcrName,
+                                                                                    childPropRestrictionMap,
+                                                                                    bChildRqd,
                                                                                     propMustExistList, 
                                                                                     propMustNotExistList, 
                                                                                     childTypeMustExistList, 
-                                                                                    childTypeMustNotExistList, 
-                                                                                    descriptions, 
-                                                                                    messages);
+                                                                                    childTypeMustNotExistList,
+                                                                                    levelSeverity,
+                                                                                    ruleLocalizedDescriptions, 
+                                                                                    ruleLocalizedMessages);
                     } else {
+                        boolean bPropRqd = false;
+                        if(propertyValidationPropRequired!=null) {
+                            bPropRqd = Boolean.parseBoolean(propertyValidationPropRequired);
+                        }
+                        Outcome.Level levelSeverity = Outcome.Level.valueOf(severity);
                         theRule = RuleFactory.createPropertyRelationshipValidationRule(uow, 
                                                                                        repo, 
                                                                                        ruleId, 
                                                                                        nodeValidationJcrName, 
                                                                                        nodePropRestrictionMap, 
-                                                                                       propertyValidationJcrName, 
+                                                                                       propertyValidationJcrName,
+                                                                                       bPropRqd,
                                                                                        propMustExistList, 
                                                                                        propMustNotExistList, 
                                                                                        childTypeMustExistList, 
-                                                                                       childTypeMustNotExistList, 
-                                                                                       descriptions, 
-                                                                                       messages);
+                                                                                       childTypeMustNotExistList,
+                                                                                       levelSeverity,
+                                                                                       ruleLocalizedDescriptions, 
+                                                                                       ruleLocalizedMessages);
                     }
                 } catch (KException ex) {
                     LOGGER.error("RuleParser - error creating ChildRelationshipValidationRule : ", ex); //$NON-NLS-1$
@@ -438,12 +474,9 @@ public class RuleParser {
                 propMustNotExistList.clear();
                 childTypeMustExistList.clear();
                 childTypeMustNotExistList.clear();
-                ruleDescriptionMap.clear();
-                ruleMessageMap.clear();
+                ruleLocalizedDescriptions.clear();
+                ruleLocalizedMessages.clear();
             } else if(RuleConstants.Elements.VALUE_RANGE_VALIDATION.equals(localName)) {
-                List<LocalizedMessage> descriptions = getLocalizedMessageList(MessageKey.DESCRIPTION.name(), ruleDescriptionMap);
-                List<LocalizedMessage> messages = getLocalizedMessageList(MessageKey.PROPERTY_RULE_ABSENT_PROPERTY_FOUND.name(), ruleMessageMap);
-                
                 boolean hasChildNodeJcrName = (StringUtils.isEmpty(childValidationJcrName)) ? false : true;
                 String nodeName = hasChildNodeJcrName ? childValidationJcrName : nodeValidationJcrName;
 
@@ -459,26 +492,37 @@ public class RuleParser {
                 Number nMinValue = null;
                 Number nMaxValue = null;
                 try {
-                    nMinValue = NumberFormat.getInstance().parse( minValue.toString() );
-                    nMaxValue = NumberFormat.getInstance().parse( maxValue.toString() );
+                    if(minValue!=null && minValue.length()>0) {
+                        nMinValue = NumberFormat.getInstance().parse( minValue.toString() );
+                    }
+                    if(maxValue!=null && maxValue.length()>0) {
+                        nMaxValue = NumberFormat.getInstance().parse( maxValue.toString() );
+                    }
                 } catch (ParseException ex) {
                     LOGGER.error("RuleParser - error parsing property min-max values : ", ex); //$NON-NLS-1$
                 }
                 
                 Rule theRule = null;
                 try {
+                    boolean bPropRqd = false;
+                    if(propertyValidationPropRequired!=null) {
+                        bPropRqd = Boolean.parseBoolean(propertyValidationPropRequired);
+                    }
+                    Outcome.Level levelSeverity = Outcome.Level.valueOf(severity);
                     theRule = RuleFactory.createPropertyValueNumberValidationRule(uow, 
                                                                                      repo, 
                                                                                      ruleId, 
                                                                                      nodeName, 
                                                                                      nodePropRestrictionMap, 
                                                                                      propertyValidationJcrName, 
+                                                                                     bPropRqd,
                                                                                      nMinValue, 
                                                                                      bMinInclusive, 
                                                                                      nMaxValue, 
-                                                                                     bMaxInclusive, 
-                                                                                     descriptions, 
-                                                                                     messages);
+                                                                                     bMaxInclusive,
+                                                                                     levelSeverity,
+                                                                                     ruleLocalizedDescriptions, 
+                                                                                     ruleLocalizedMessages);
                 } catch (KException ex) {
                     LOGGER.error("RuleParser - error creating PropertyValueNumberValidationRule : ", ex); //$NON-NLS-1$
                 }
@@ -489,29 +533,34 @@ public class RuleParser {
                 maxValue.setLength(0);
                 minInclusive = null;
                 maxInclusive = null;
-                ruleDescriptionMap.clear();
-                ruleMessageMap.clear();
+                ruleLocalizedDescriptions.clear();
+                ruleLocalizedMessages.clear();
             } else if(RuleConstants.Elements.CHILD_VALIDATION.equals(localName)) {
                 this.childValidationJcrName = null;
+                this.childValidationChildRequired = null;
             } else if(RuleConstants.Elements.MESSAGE.equals(localName)) {
                 // Put the locale and message into the proper message map
                 if(this.ruleId!=null) {
-                    this.ruleMessageMap.put(this.messageLocale, this.message.toString());
+                    this.ruleLocalizedMessages.add(new LocalizedMessage(this.messageKey,this.messageLocale, this.message.toString()));
                 }
                 
                 this.messageLocale = null;
                 this.messageKey = null;
                 this.message.setLength(0);
             } else if(RuleConstants.Elements.PROP_RESTRICTION.equals(localName)) {
-                // Put the prop name and value into the map
-                this.nodePropRestrictionMap.put(this.propRestrictionName.toString(), this.propRestrictionValue);
+                // Put the prop name and value into the property restriction map
+                if(this.childValidationJcrName != null) {
+                    this.childPropRestrictionMap.put(this.propRestrictionName.toString(), this.propRestrictionValue);
+                } else {
+                    this.nodePropRestrictionMap.put(this.propRestrictionName.toString(), this.propRestrictionValue);
+                }
                 
                 this.propRestrictionValue = null;
                 this.propRestrictionName.setLength(0);
             } else if(RuleConstants.Elements.DESCRIPTION.equals(localName)) {
                 // Put the locale and description into the proper description map
                 if(this.ruleId!=null) {
-                    this.ruleDescriptionMap.put(this.descriptionLocale, this.description.toString());
+                    this.ruleLocalizedDescriptions.add(new LocalizedMessage(MessageKey.DESCRIPTION.name(),this.descriptionLocale, this.description.toString()));
                 }
                 
                 this.descriptionLocale = null;
@@ -535,16 +584,6 @@ public class RuleParser {
             super.endElement(uri, localName, qName);
         }
 
-        // Creates the collection of localized messages using the supplied key and locale-message map
-        private List<LocalizedMessage> getLocalizedMessageList(String messageKey, Map<String,String> localeMessageMap) {
-            List<LocalizedMessage> localizedList = new ArrayList(localeMessageMap.size());
-            for(String locale : localeMessageMap.keySet()) {
-                LocalizedMessage message = new LocalizedMessage(messageKey, locale, localeMessageMap.get(locale));
-                localizedList.add(message);
-            }
-            return localizedList;
-        }
-        
         /**
          * {@inheritDoc}
          * 
@@ -614,19 +653,11 @@ public class RuleParser {
             return this.warnings;
         }
 
-        Collection<Rule> getRules() {
-            return this.rules;
-        }
-
         /**
-         * {@inheritDoc}
-         * 
-         * @see org.xml.sax.helpers.DefaultHandler#skippedEntity(java.lang.String)
+         * @return the rules (never <code>null</code> but can be empty)
          */
-        @Override
-        public void skippedEntity( String name ) {
-            // this.infos.add(NLS.bind(Messages.parserFoundUnparsedEntityDeclaration, name));
-            this.infos.add("Found Unparsed Entity Declaration: "+name);
+        Rule[] getRules() {
+            return rules.toArray( new Rule[ rules.size() ] );
         }
 
         /**
@@ -651,44 +682,48 @@ public class RuleParser {
                 this.nodePropRestrictionMap.clear();
             } else if(RuleConstants.Elements.NAME_VALIDATION.equals(localName)) {
                 this.ruleId = attributes.getValue(RuleConstants.Attributes.ID);
-                this.ruleMessageMap.clear();
-                this.ruleDescriptionMap.clear();
+                this.ruleLocalizedMessages.clear();
+                this.ruleLocalizedDescriptions.clear();
+                this.severity = attributes.getValue(RuleConstants.Attributes.SEVERITY);
             } else if(RuleConstants.Elements.PROPERTY_VALIDATION.equals(localName)) {
                 this.propertyValidationJcrName = attributes.getValue(RuleConstants.Attributes.JCR_NAME);
+                this.propertyValidationPropRequired = attributes.getValue(RuleConstants.Attributes.REQUIRED);
                 this.propertyValidationMessageMap.clear();
-            } else if(RuleConstants.Elements.REQUIRED_VALIDATION.equals(localName)) {
-                this.ruleId = attributes.getValue(RuleConstants.Attributes.ID);
-                this.ruleMessageMap.clear();
-                this.ruleDescriptionMap.clear();
             } else if(RuleConstants.Elements.SAME_NAME_SIBLING_VALIDATION.equals(localName)) {
                 this.ruleId = attributes.getValue(RuleConstants.Attributes.ID);
                 this.matchType = attributes.getValue(RuleConstants.Attributes.MATCH_TYPE);
-                this.ruleMessageMap.clear();
-                this.ruleDescriptionMap.clear();
+                this.ruleLocalizedMessages.clear();
+                this.ruleLocalizedDescriptions.clear();
+                this.severity = attributes.getValue(RuleConstants.Attributes.SEVERITY);
             } else if(RuleConstants.Elements.CHILD_COUNT_VALIDATION.equals(localName)) {
                 this.ruleId = attributes.getValue(RuleConstants.Attributes.ID);
-                this.ruleMessageMap.clear();
-                this.ruleDescriptionMap.clear();
+                this.ruleLocalizedMessages.clear();
+                this.ruleLocalizedDescriptions.clear();
                 this.severity = attributes.getValue(RuleConstants.Attributes.SEVERITY);
             } else if(RuleConstants.Elements.VALUE_VALIDATION.equals(localName)) {
                 this.ruleId = attributes.getValue(RuleConstants.Attributes.ID);
-                this.ruleMessageMap.clear();
-                this.ruleDescriptionMap.clear();
+                this.ruleLocalizedMessages.clear();
+                this.ruleLocalizedDescriptions.clear();
+                this.severity = attributes.getValue(RuleConstants.Attributes.SEVERITY);
             } else if(RuleConstants.Elements.RELATIONSHIP_VALIDATION.equals(localName)) {
                 this.ruleId = attributes.getValue(RuleConstants.Attributes.ID);
-                this.ruleMessageMap.clear();
-                this.ruleDescriptionMap.clear();
+                this.ruleLocalizedMessages.clear();
+                this.ruleLocalizedDescriptions.clear();
                 this.propMustExistList.clear();
                 this.propMustNotExistList.clear();
                 this.childTypeMustExistList.clear();
                 this.childTypeMustNotExistList.clear();
+                this.severity = attributes.getValue(RuleConstants.Attributes.SEVERITY);
             } else if(RuleConstants.Elements.VALUE_RANGE_VALIDATION.equals(localName)) {
                 this.ruleId = attributes.getValue(RuleConstants.Attributes.ID);
-                this.ruleMessageMap.clear();
-                this.ruleDescriptionMap.clear();
+                this.ruleLocalizedMessages.clear();
+                this.ruleLocalizedDescriptions.clear();
+                this.severity = attributes.getValue(RuleConstants.Attributes.SEVERITY);
             } else if(RuleConstants.Elements.CHILD_VALIDATION.equals(localName)) {
                 this.childValidationJcrName = attributes.getValue(RuleConstants.Attributes.JCR_NAME);
+                this.childValidationChildRequired = attributes.getValue(RuleConstants.Attributes.REQUIRED);
                 this.childValidationMessageMap.clear();
+                this.childPropRestrictionMap.clear();
             } else if(RuleConstants.Elements.DESCRIPTION.equals(localName)) {
                 this.descriptionLocale = attributes.getValue(RuleConstants.Attributes.LOCALE);
             } else if(RuleConstants.Elements.MESSAGE.equals(localName)) {
@@ -708,6 +743,16 @@ public class RuleParser {
         /**
          * {@inheritDoc}
          * 
+         * @see org.xml.sax.helpers.DefaultHandler#skippedEntity(java.lang.String)
+         */
+        @Override
+        public void skippedEntity( String name ) {
+            this.infos.add(Messages.getString(Messages.RuleParser.Rules_Schema_File_Not_Found,name));
+        }
+
+        /**
+         * {@inheritDoc}
+         * 
          * @see org.xml.sax.helpers.DefaultHandler#unparsedEntityDecl(java.lang.String, java.lang.String, java.lang.String,
          *      java.lang.String)
          */
@@ -716,8 +761,7 @@ public class RuleParser {
                                         String publicId,
                                         String systemId,
                                         String notationName ) {
-//            this.infos.add(NLS.bind(Messages.parserFoundUnparsedEntityDeclaration, name));
-            this.infos.add("Unparsed entity declaration for: "+name);
+            this.infos.add(Messages.getString(Messages.RuleParser.Rules_Schema_File_Not_Found,name));
         }
 
     }

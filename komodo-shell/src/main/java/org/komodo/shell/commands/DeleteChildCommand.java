@@ -17,6 +17,7 @@ import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.utils.StringUtils;
 import org.komodo.utils.i18n.I18n;
@@ -148,7 +149,7 @@ public class DeleteChildCommand extends BuiltInShellCommand {
 				children = getWorkspaceStatus().getCurrentContext().getChildren(getTransaction());
 
 			} else {
-				children = getWorkspaceStatus().getCurrentContext().getChildren(getTransaction(), lastArgument+"*" );
+				children = getWorkspaceStatus().getCurrentContext().getChildren(getTransaction(), lastArgument+StringConstants.STAR );
 			}
 			for (KomodoObject wsContext : children) {
 				potentialsList.add(wsContext.getName(getTransaction()));

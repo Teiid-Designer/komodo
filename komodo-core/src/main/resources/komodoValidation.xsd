@@ -173,7 +173,7 @@
     <!-- -->
     <xs:complexType name="nodeValidationType">
         <xs:complexContent>
-            <xs:extension base="jcrValidationType">
+            <xs:extension base="jcrNodeValidationType">
                 <xs:choice
                     minOccurs="1"
                     maxOccurs="unbounded">
@@ -209,17 +209,9 @@
     <!-- -->
     <xs:complexType name="childValidationType">
         <xs:complexContent>
-            <xs:extension base="jcrValidationType">
+            <xs:extension base="jcrChildValidationType">
                 <xs:choice>
                     <xs:sequence>
-                        <xs:element
-                            name="requiredValidation"
-                            type="requiredRuleType">
-                            <xs:annotation>
-                                <xs:documentation>Indicates that a child of this node type must exist.</xs:documentation>
-                            </xs:annotation>
-                        </xs:element>
-
                         <xs:element
                             name="sameNameSiblingValidation"
                             minOccurs="0"
@@ -318,17 +310,9 @@
     <!-- -->
     <xs:complexType name="propertyValidationType">
         <xs:complexContent>
-            <xs:extension base="jcrValidationType">
+            <xs:extension base="jcrPropertyValidationType">
                 <xs:choice>
                     <xs:sequence>
-                        <xs:element
-                            name="requiredValidation"
-                            type="requiredRuleType">
-                            <xs:annotation>
-                                <xs:documentation>Indicates that this property must have a value.</xs:documentation>
-                            </xs:annotation>
-                        </xs:element>
-
                         <xs:element
                             name="valueValidation"
                             type="patternRuleType"
@@ -428,7 +412,7 @@
     <!-- -->
     <!-- A base type for validation that is based on a JCR property, node type, or mixin. -->
     <!-- -->
-    <xs:complexType name="jcrValidationType">
+    <xs:complexType name="jcrNodeValidationType">
         <xs:sequence>
             <xs:element
                 name="propRestriction"
@@ -462,12 +446,84 @@
     </xs:complexType>
 
     <!-- -->
-    <!-- A rule that indicates a property value or child node of a certain type must exist. -->
+    <!-- A base type for validation that is based on a JCR property, node type, or mixin. -->
     <!-- -->
-    <xs:complexType name="requiredRuleType">
-        <xs:complexContent>
-            <xs:extension base="ruleType"></xs:extension>
-        </xs:complexContent>
+    <xs:complexType name="jcrPropertyValidationType">
+        <xs:sequence>
+            <xs:element
+                name="message"
+                type="localizedDescriptionType"
+                minOccurs="1"
+                maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>One or more locale-specific messages describing this validation.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+
+        <xs:attribute
+            name="jcrName"
+            type="xs:QName"
+            use="required">
+            <xs:annotation>
+                <xs:documentation>The fully-qualified name of the JCR property, node type, or mixin being validated.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute
+            name="required"
+            type="xs:boolean"
+            default="true">
+            <xs:annotation>
+                <xs:documentation>Indicates whether the specified property is required.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <!-- -->
+    <!-- A base type for validation that is based on a JCR property, node type, or mixin. -->
+    <!-- -->
+    <xs:complexType name="jcrChildValidationType">
+        <xs:sequence>
+            <xs:element
+                name="propRestriction"
+                type="propRestrictionType"
+                minOccurs="0"
+                maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>One or more properties for the validation.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element
+                name="message"
+                type="localizedDescriptionType"
+                minOccurs="1"
+                maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>One or more locale-specific messages describing this validation.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+
+        <xs:attribute
+            name="jcrName"
+            type="xs:QName"
+            use="required">
+            <xs:annotation>
+                <xs:documentation>The fully-qualified name of the JCR property, node type, or mixin being validated.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute
+            name="required"
+            type="xs:boolean"
+            default="true">
+            <xs:annotation>
+                <xs:documentation>Indicates whether the specified property is required.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
     </xs:complexType>
 
     <!-- -->
