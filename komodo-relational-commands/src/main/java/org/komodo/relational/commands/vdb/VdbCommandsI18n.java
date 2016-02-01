@@ -143,7 +143,9 @@ public final class VdbCommandsI18n extends I18n {
     public static String validationError;
     public static String validationSuccess;
     public static String vdbExported;
-
+    public static String vdbValidationErrorsHeader;
+    public static String vdbValidationSuccessMsg;
+    public static String vdbValidationWarningsHeader;
 
     static {
         final VdbCommandsI18n i18n = new VdbCommandsI18n();

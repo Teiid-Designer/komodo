@@ -343,6 +343,11 @@ public interface KomodoLexicon extends StringConstants {
         String PROP_VALUE = Namespace.PREFIX + COLON + "propValue"; //$NON-NLS-1$
 
         /**
+         * The type of validation for this restriction. Value is {@value} .
+         */
+        String RESTRICTION_TYPE = Namespace.PREFIX + COLON + "type"; //$NON-NLS-1$
+
+        /**
          * The name of the node type for a number rule.
          */
         String NUMBER_RULE = Namespace.PREFIX + COLON + "numberRule"; //$NON-NLS-1$
@@ -373,9 +378,9 @@ public interface KomodoLexicon extends StringConstants {
         String RELATIONSHIP_RULE = Namespace.PREFIX + COLON + "relationshipRule"; //$NON-NLS-1$
 
         /**
-         * The name of the node type for a required rule.
+         * The name of the property used to indicate if the rule property or child is required. Value is {@value} .
          */
-        String REQUIRED_RULE = Namespace.PREFIX + COLON + "requiredRule"; //$NON-NLS-1$
+        String REQUIRED = Namespace.PREFIX + COLON + "required"; //$NON-NLS-1$
 
         /**
          * The name of the abstract node type for a rule.

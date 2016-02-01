@@ -163,11 +163,6 @@ public interface Rule {
         RELATIONSHIP,
 
         /**
-         * Validates the existence of a property or a child of a specific node type.
-         */
-        REQUIRED,
-
-        /**
          * Validates that sibling nodes do not have the same name.
          */
         SAME_NAME_SIBLING
@@ -194,6 +189,22 @@ public interface Rule {
          */
         PROPERTY
 
+    }
+    
+    /**
+     * Indicates property restriction type
+     */
+    enum PropertyRestriction {
+
+        /**
+         * Property restriction applies to a CHILD validation.
+         */
+        CHILD,
+
+        /**
+         * Property restriction applies to a NODE validation.
+         */
+        NODE
     }
 
     /**
@@ -236,15 +247,12 @@ public interface Rule {
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param key
      *        the message key (cannot be empty)
-     * @param args
-     *        the message arguments (can be null or empty but not contain empty elements)
      * @return the localized rule message (never empty)
      * @throws KException
      *         if an error occurs
      */
     String getMessage( final UnitOfWork transaction,
-                       final String key,
-                       final String... args ) throws KException;
+                       final String key ) throws KException;
 
     /**
      * @param transaction
@@ -267,11 +275,12 @@ public interface Rule {
     /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param restrictionType the restriction type (NODE or CHILD).
      * @return the map of property name-value that the node type must possess. (never empty)
      * @throws KException
      *         if an error occurs
      */
-    Map<String,String> getNodePropRestrictions( final UnitOfWork transaction ) throws KException;
+    Map<String,String> getPropRestrictions( final UnitOfWork transaction, PropertyRestriction restrictionType ) throws KException;
 
     /**
      * @param transaction
@@ -299,6 +308,38 @@ public interface Rule {
      *         if an error occurs
      */
     ValidationType getValidationType( final UnitOfWork transaction ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @return <code>true</code> if the property or child that this rule pertains to is required.
+     * @throws KException
+     *         if an error occurs
+     */
+    boolean isRequired( final UnitOfWork transaction ) throws KException;
+
+    /**
+     * Determine if the rule applies to the supplied KomodoObject.  
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param kObject
+     *         the KomodoObject to test
+     * @return <code>true</code> if the rule applies to the supplied object.
+     * @throws KException
+     *         if an error occurs
+     */
+    boolean isApplicable( final UnitOfWork transaction, final KomodoObject kObject ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param newRequired
+     *        the new required indicator
+     * @throws KException
+     *         if an error occurs
+     */
+    void setRequired( final UnitOfWork transaction,
+                      final boolean newRequired ) throws KException;
 
     /**
      * @param transaction

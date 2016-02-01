@@ -22,7 +22,6 @@
 package org.komodo.shell.commands;
 
 import java.util.List;
-
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.ShellI18n;
@@ -33,7 +32,6 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.KomodoObjectUtils;
 import org.komodo.shell.util.PrintUtils;
 import org.komodo.spi.repository.KomodoObject;
-import org.komodo.utils.StringUtils;
 import org.komodo.utils.i18n.I18n;
 
 /**
@@ -145,9 +143,6 @@ public class ShowPropertyCommand extends BuiltInShellCommand {
     public TabCompletionModifier tabCompletion(String lastArgument, List<CharSequence> candidates) throws Exception {
         if(getArguments().isEmpty()) {
             updateTabCompleteCandidatesForProperty(candidates, getContext(), lastArgument);
-
-            if ( StringUtils.isBlank( lastArgument ) ) {
-            }
         }
         return TabCompletionModifier.AUTO;
     }

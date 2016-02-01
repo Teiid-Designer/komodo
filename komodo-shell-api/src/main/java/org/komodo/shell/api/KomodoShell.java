@@ -62,18 +62,6 @@ public interface KomodoShell extends StringConstants {
     String getShellPropertiesFile();
     
     /**
-     * Get the shell validation rules file
-     * @return the validation rules file
-     */
-    String getShellValidationRulesFile();
-
-    /**
-     * Get the shell validation rules schema file
-     * @return the validation rules schema file
-     */
-    String getShellValidationRulesSchemaFile();
-
-    /**
      * Must be called before the shell is running.
      *
      * @param dataDirectory

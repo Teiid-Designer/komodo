@@ -37,7 +37,7 @@ public class KomodoErrorHandler implements KErrorHandler {
     private Set<KErrorHandler> errorHandlers = Collections.emptySet();
 
     /**
-     * @param errorHandler
+     * @param errorHandler the error handler
      */
     public void add(KErrorHandler errorHandler) {
         if (! (errorHandlers instanceof HashSet))
@@ -47,7 +47,7 @@ public class KomodoErrorHandler implements KErrorHandler {
     }
 
     /**
-     * @param errorHandler
+     * @param errorHandler the error handler
      */
     public void remove(KErrorHandler errorHandler) {
         if (errorHandlers.isEmpty())

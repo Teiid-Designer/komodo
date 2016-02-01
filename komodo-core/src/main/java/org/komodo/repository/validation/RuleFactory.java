@@ -7,6 +7,7 @@
  */
 package org.komodo.repository.validation;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import javax.jcr.Node;
@@ -17,6 +18,7 @@ import org.komodo.repository.RepositoryImpl;
 import org.komodo.repository.RepositoryImpl.UnitOfWorkImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.outcome.Outcome;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -52,8 +54,14 @@ public final class RuleFactory {
      *        the unique rule name (cannot be empty)
      * @param nodeType
      *        the node type name this rule is validating (cannot be empty)
+     * @param nodePropRestrictionMap
+     *        the additional property restrictions for this rule (cannot be <code>null</code>)
      * @param childType
      *        the name of the child type whose child count range is being validated (cannot be empty)
+     * @param childPropRestrictionMap
+     *        the additional child property restrictions for this rule (cannot be <code>null</code>)
+     * @param childRequired
+     *        <code>true</code> if a child of this type must exist.
      * @param minValue
      *        the minimum allowed number of children with the specified type (cannot be <code>null</code>)
      * @param minInclusive
@@ -62,6 +70,8 @@ public final class RuleFactory {
      *        the maximum allowed number of children with the specified type (cannot be <code>null</code>)
      * @param maxInclusive
      *        <code>true</code> if the number of children can equal the maximum value
+     * @param severity
+     *        the severity of the rule.
      * @param descriptions
      *        the localized descriptions (cannot be <code>null</code>, include empty elements, or be empty)
      * @param messages
@@ -74,12 +84,15 @@ public final class RuleFactory {
                                                        final Repository repository,
                                                        final String name,
                                                        final String nodeType,
-                                                       final Map<String,String> nodePropRestrictedMap,
+                                                       final Map<String,String> nodePropRestrictionMap,
                                                        final String childType,
+                                                       final Map<String,String> childPropRestrictionMap,
+                                                       final boolean childRequired,
                                                        final Number minValue,
                                                        final boolean minInclusive,
                                                        final Number maxValue,
                                                        final boolean maxInclusive,
+                                                       final Outcome.Level severity,
                                                        final List< LocalizedMessage > descriptions,
                                                        final List< LocalizedMessage > messages ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
@@ -100,10 +113,13 @@ public final class RuleFactory {
                                               Rule.ValidationType.CHILD,
                                               Rule.RuleType.NUMBER,
                                               nodeType,
-                                              nodePropRestrictedMap,
+                                              nodePropRestrictionMap,
+                                              childPropRestrictionMap,
+                                              severity,
                                               descriptions,
                                               messages );
             rule.setProperty( transaction, KomodoLexicon.Rule.JCR_NAME, childType );
+            rule.setProperty( transaction, KomodoLexicon.Rule.REQUIRED, childRequired );
 
             if (minValue != null) {
                 rule.setProperty( transaction, KomodoLexicon.Rule.MIN_VALUE, minValue.toString() );
@@ -133,8 +149,14 @@ public final class RuleFactory {
      *        the unique rule name (cannot be empty)
      * @param nodeType
      *        the node type name this rule is validating (cannot be empty)
+     * @param nodePropRestrictionMap
+     *        the additional property restrictions for this rule (cannot be <code>null</code>)
      * @param childType
      *        the node type whose relationships are being validated (cannot be empty)
+     * @param childPropRestrictionMap
+     *        the additional child property restrictions for this rule (cannot be <code>null</code>)
+     * @param childRequired
+     *        <code>true</code> if a child of this type must exist.
      * @param propsThatMustExist
      *        a list of properties that must exist if a child with the specified type exists (can be <code>null</code> or empty)
      * @param propsThatMustNotExist
@@ -146,6 +168,8 @@ public final class RuleFactory {
      * @param childTypesThatMustNotExist
      *        a list of node types that no child must have if a child with the specified type exists (can be <code>null</code> or
      *        empty)
+     * @param severity
+     *        the severity of the rule.
      * @param descriptions
      *        the localized descriptions (cannot be <code>null</code>, include empty elements, or be empty)
      * @param messages
@@ -158,16 +182,20 @@ public final class RuleFactory {
                                                               final Repository repository,
                                                               final String name,
                                                               final String nodeType,
-                                                              final Map<String,String> nodePropRestrictedMap,
+                                                              final Map<String,String> nodePropRestrictionMap,
                                                               final String childType,
+                                                              final Map<String,String> childPropRestrictionMap,
+                                                              final boolean childRequired,
                                                               final List< String > propsThatMustExist,
                                                               final List< String > propsThatMustNotExist,
                                                               final List< String > childTypesThatMustExist,
                                                               final List< String > childTypesThatMustNotExist,
+                                                              final Outcome.Level severity,
                                                               final List< LocalizedMessage > descriptions,
                                                               final List< LocalizedMessage > messages ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( childType, "childType" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( ( propsThatMustExist != null ) && !propsThatMustExist.isEmpty() )
                          || ( ( propsThatMustNotExist != null ) && !propsThatMustNotExist.isEmpty() )
@@ -187,11 +215,14 @@ public final class RuleFactory {
                                               Rule.ValidationType.CHILD,
                                               Rule.RuleType.RELATIONSHIP,
                                               nodeType,
-                                              nodePropRestrictedMap,
+                                              nodePropRestrictionMap,
+                                              childPropRestrictionMap,
+                                              severity,
                                               descriptions,
                                               messages );
 
             rule.setProperty( transaction, KomodoLexicon.Rule.JCR_NAME, childType );
+            rule.setProperty( transaction, KomodoLexicon.Rule.REQUIRED, childRequired );
 
             processMultiValuedProperty( transaction, rule, KomodoLexicon.Rule.PROP_EXISTS, propsThatMustExist );
             processMultiValuedProperty( transaction, rule, KomodoLexicon.Rule.PROP_ABSENT, propsThatMustNotExist );
@@ -216,64 +247,12 @@ public final class RuleFactory {
      *        the unique rule name (cannot be empty)
      * @param nodeType
      *        the node type name this rule is validating (cannot be empty)
-     * @param childType
-     *        the name of the child type that must have at least one child (cannot be empty)
-     * @param descriptions
-     *        the localized descriptions (cannot be <code>null</code>, include empty elements, or be empty)
-     * @param messages
-     *        the localized error messages (cannot be <code>null</code>, include empty elements, or be empty)
-     * @return the new rule (never <code>null</code>)
-     * @throws KException
-     *         if an error occurs
-     */
-    public static Rule createChildTypeRequiredRule( final UnitOfWork transaction,
-                                                    final Repository repository,
-                                                    final String name,
-                                                    final String nodeType,
-                                                    final Map<String,String> nodePropRestrictedMap,
-                                                    final String childType,
-                                                    final List< LocalizedMessage > descriptions,
-                                                    final List< LocalizedMessage > messages ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( childType, "childType" ); //$NON-NLS-1$
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug( "createChildTypeRequiredRule: transaction = {0}, name = {1}", transaction.getName(), name ); //$NON-NLS-1$
-        }
-
-        try {
-            final RuleImpl rule = createRule( transaction,
-                                              repository,
-                                              name,
-                                              KomodoLexicon.Rule.REQUIRED_RULE,
-                                              Rule.ValidationType.CHILD,
-                                              Rule.RuleType.REQUIRED,
-                                              nodeType,
-                                              nodePropRestrictedMap,
-                                              descriptions,
-                                              messages );
-            rule.setProperty( transaction, KomodoLexicon.Rule.JCR_NAME, childType );
-            return rule;
-        } catch (final Exception e) {
-            throw ObjectImpl.handleError( e );
-        }
-    }
-
-    /**
-     * The error message and description list elements must be 2 element arrays with the first element being the locale and the
-     * second element being the translated text.
-     *
-     * @param transaction
-     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @param repository
-     *        the repository (cannot be <code>null</code>)
-     * @param name
-     *        the unique rule name (cannot be empty)
-     * @param nodeType
-     *        the node type name this rule is validating (cannot be empty)
+     * @param nodePropRestrictionMap
+     *        the additional property restrictions for this rule (cannot be <code>null</code>)
      * @param pattern
      *        the regular expression that the child node name must match (cannot be empty)
+     * @param severity
+     *        the severity of the rule.
      * @param descriptions
      *        the localized descriptions (cannot be <code>null</code>, include empty elements, or be empty)
      * @param messages
@@ -286,12 +265,14 @@ public final class RuleFactory {
                                            final Repository repository,
                                            final String name,
                                            final String nodeType,
-                                           final Map<String,String> nodePropRestrictedMap,
+                                           final Map<String,String> nodePropRestrictionMap,
                                            final String pattern,
+                                           final Outcome.Level severity,
                                            final List< LocalizedMessage > descriptions,
                                            final List< LocalizedMessage > messages ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( pattern, "pattern" ); //$NON-NLS-1$
 
         if (LOGGER.isDebugEnabled()) {
@@ -306,7 +287,9 @@ public final class RuleFactory {
                                               Rule.ValidationType.NODE,
                                               Rule.RuleType.PATTERN,
                                               nodeType,
-                                              nodePropRestrictedMap,
+                                              nodePropRestrictionMap,
+                                              Collections.EMPTY_MAP,
+                                              severity,
                                               descriptions,
                                               messages );
             rule.setProperty( transaction, KomodoLexicon.Rule.PATTERN, pattern );
@@ -328,10 +311,16 @@ public final class RuleFactory {
      *        the unique rule name (cannot be empty)
      * @param nodeType
      *        the node type name this rule is validating (cannot be empty)
+     * @param nodePropRestrictionMap
+     *        the additional property restrictions for this rule (cannot be <code>null</code>)
      * @param propertyName
      *        the name of the property whose value is being validated (cannot be empty)
+     * @param propertyRequired
+     *        <code>true</code> if the property is required.
      * @param pattern
      *        the regular expression that the property value must match (cannot be empty)
+     * @param severity
+     *        the severity of the rule.
      * @param descriptions
      *        the localized descriptions (cannot be <code>null</code>, include empty elements, or be empty)
      * @param messages
@@ -344,13 +333,16 @@ public final class RuleFactory {
                                                   final Repository repository,
                                                   final String name,
                                                   final String nodeType,
-                                                  final Map<String,String> nodePropRestrictedMap,
+                                                  final Map<String,String> nodePropRestrictionMap,
                                                   final String propertyName,
+                                                  final boolean propertyRequired,
                                                   final String pattern,
+                                                  final Outcome.Level severity,
                                                   final List< LocalizedMessage > descriptions,
                                                   final List< LocalizedMessage > messages ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( propertyName, "propertyName" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( pattern, "pattern" ); //$NON-NLS-1$
 
@@ -366,10 +358,13 @@ public final class RuleFactory {
                                               Rule.ValidationType.PROPERTY,
                                               Rule.RuleType.PATTERN,
                                               nodeType,
-                                              nodePropRestrictedMap,
+                                              nodePropRestrictionMap,
+                                              Collections.EMPTY_MAP,
+                                              severity,
                                               descriptions,
                                               messages );
             rule.setProperty( transaction, KomodoLexicon.Rule.JCR_NAME, propertyName );
+            rule.setProperty( transaction, KomodoLexicon.Rule.REQUIRED, propertyRequired );
             rule.setProperty( transaction, KomodoLexicon.Rule.PATTERN, pattern );
             return rule;
         } catch (final Exception e) {
@@ -389,8 +384,12 @@ public final class RuleFactory {
      *        the unique rule name (cannot be empty)
      * @param nodeType
      *        the node type name this rule is validating (cannot be empty)
+     * @param nodePropRestrictionMap
+     *        the additional property restrictions for this rule (cannot be <code>null</code>)
      * @param propertyName
      *        the property whose relationships are being validated (cannot be empty)
+     * @param propertyRequired
+     *        <code>true</code> if the property must exist.
      * @param propsThatMustExist
      *        a list of properties that must exist (can be <code>null</code> or empty)
      * @param propsThatMustNotExist
@@ -399,6 +398,8 @@ public final class RuleFactory {
      *        a list of node types that at least one child must have (can be <code>null</code> or empty)
      * @param childTypesThatMustNotExist
      *        a list of node types that no child must have (can be <code>null</code> or empty)
+     * @param severity
+     *        the severity of the rule.
      * @param descriptions
      *        the localized descriptions (cannot be <code>null</code>, include empty elements, or be empty)
      * @param messages
@@ -411,16 +412,19 @@ public final class RuleFactory {
                                                                  final Repository repository,
                                                                  final String name,
                                                                  final String nodeType,
-                                                                 final Map<String,String> nodePropRestrictedMap,
+                                                                 final Map<String,String> nodePropRestrictionMap,
                                                                  final String propertyName,
+                                                                 final boolean propertyRequired,
                                                                  final List< String > propsThatMustExist,
                                                                  final List< String > propsThatMustNotExist,
                                                                  final List< String > childTypesThatMustExist,
                                                                  final List< String > childTypesThatMustNotExist,
+                                                                 final Outcome.Level severity,
                                                                  final List< LocalizedMessage > descriptions,
                                                                  final List< LocalizedMessage > messages ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( propertyName, "propertyName" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( ( propsThatMustExist != null ) && !propsThatMustExist.isEmpty() )
                          || ( ( propsThatMustNotExist != null ) && !propsThatMustNotExist.isEmpty() )
@@ -440,10 +444,13 @@ public final class RuleFactory {
                                               Rule.ValidationType.PROPERTY,
                                               Rule.RuleType.RELATIONSHIP,
                                               nodeType,
-                                              nodePropRestrictedMap,
+                                              nodePropRestrictionMap,
+                                              Collections.EMPTY_MAP,
+                                              severity,
                                               descriptions,
                                               messages );
             rule.setProperty( transaction, KomodoLexicon.Rule.JCR_NAME, propertyName );
+            rule.setProperty( transaction, KomodoLexicon.Rule.REQUIRED, propertyRequired );
             processMultiValuedProperty( transaction, rule, KomodoLexicon.Rule.PROP_EXISTS, propsThatMustExist );
             processMultiValuedProperty( transaction, rule, KomodoLexicon.Rule.PROP_ABSENT, propsThatMustNotExist );
             processMultiValuedProperty( transaction, rule, KomodoLexicon.Rule.CHILD_EXISTS, childTypesThatMustExist );
@@ -466,64 +473,12 @@ public final class RuleFactory {
      *        the unique rule name (cannot be empty)
      * @param nodeType
      *        the node type name this rule is validating (cannot be empty)
-     * @param propertyName
-     *        the name of the property that is required (cannot be empty)
-     * @param descriptions
-     *        the localized descriptions (cannot be <code>null</code>, include empty elements, or be empty)
-     * @param messages
-     *        the localized error messages (cannot be <code>null</code>, include empty elements, or be empty)
-     * @return the new rule (never <code>null</code>)
-     * @throws KException
-     *         if an error occurs
-     */
-    public static Rule createPropertyRequiredRule( final UnitOfWork transaction,
-                                                   final Repository repository,
-                                                   final String name,
-                                                   final String nodeType,
-                                                   final Map<String,String> nodePropRestrictedMap,
-                                                   final String propertyName,
-                                                   final List< LocalizedMessage > descriptions,
-                                                   final List< LocalizedMessage > messages ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( propertyName, "propertyName" ); //$NON-NLS-1$
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug( "createPropertyRequiredRule: transaction = {0}, name = {1}", transaction.getName(), name ); //$NON-NLS-1$
-        }
-
-        try {
-            final RuleImpl rule = createRule( transaction,
-                                              repository,
-                                              name,
-                                              KomodoLexicon.Rule.REQUIRED_RULE,
-                                              Rule.ValidationType.PROPERTY,
-                                              Rule.RuleType.REQUIRED,
-                                              nodeType,
-                                              nodePropRestrictedMap,
-                                              descriptions,
-                                              messages );
-            rule.setProperty( transaction, KomodoLexicon.Rule.JCR_NAME, propertyName );
-            return rule;
-        } catch (final Exception e) {
-            throw ObjectImpl.handleError( e );
-        }
-    }
-
-    /**
-     * The error message and description list elements must be 2 element arrays with the first element being the locale and the
-     * second element being the translated text.
-     *
-     * @param transaction
-     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @param repository
-     *        the repository (cannot be <code>null</code>)
-     * @param name
-     *        the unique rule name (cannot be empty)
-     * @param nodeType
-     *        the node type name this rule is validating (cannot be empty)
+     * @param nodePropRestrictionMap
+     *        the additional property restrictions for this rule (cannot be <code>null</code>)
      * @param propertyName
      *        the name of the property whose value range is being validated (cannot be empty)
+     * @param propertyRequired
+     *        <code>true</code> if the property must exist.
      * @param minValue
      *        the minimum allowed value (cannot be <code>null</code>)
      * @param minInclusive
@@ -532,6 +487,8 @@ public final class RuleFactory {
      *        the maximum allowed value (cannot be <code>null</code>)
      * @param maxInclusive
      *        <code>true</code> if the property value can equal the maximum value
+     * @param severity
+     *        the severity of the rule.
      * @param descriptions
      *        the localized descriptions (cannot be <code>null</code>, include empty elements, or be empty)
      * @param messages
@@ -544,16 +501,19 @@ public final class RuleFactory {
                                                                 final Repository repository,
                                                                 final String name,
                                                                 final String nodeType,
-                                                                final Map<String,String> nodePropRestrictedMap,
+                                                                final Map<String,String> nodePropRestrictionMap,
                                                                 final String propertyName,
+                                                                final boolean propertyRequired,
                                                                 final Number minValue,
                                                                 final boolean minInclusive,
                                                                 final Number maxValue,
                                                                 final boolean maxInclusive,
+                                                                final Outcome.Level severity,
                                                                 final List< LocalizedMessage > descriptions,
                                                                 final List< LocalizedMessage > messages ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( propertyName, "propertyName" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( minValue != null ) || ( maxValue != null ), "minValue or maxValue must not be null" ); //$NON-NLS-1$
 
@@ -569,10 +529,13 @@ public final class RuleFactory {
                                               Rule.ValidationType.PROPERTY,
                                               Rule.RuleType.NUMBER,
                                               nodeType,
-                                              nodePropRestrictedMap,
+                                              nodePropRestrictionMap,
+                                              Collections.EMPTY_MAP,
+                                              severity,
                                               descriptions,
                                               messages );
             rule.setProperty( transaction, KomodoLexicon.Rule.JCR_NAME, propertyName );
+            rule.setProperty( transaction, KomodoLexicon.Rule.REQUIRED, propertyRequired );
 
             if (minValue != null) {
                 rule.setProperty( transaction, KomodoLexicon.Rule.MIN_VALUE, minValue.toString() );
@@ -602,10 +565,18 @@ public final class RuleFactory {
      *        the unique rule name (cannot be empty)
      * @param nodeType
      *        the node type name this rule is validating (cannot be empty)
+     * @param nodePropRestrictionMap
+     *        the additional property restrictions for this rule (cannot be <code>null</code>)
      * @param childType
      *        the child type whose names are being validated (cannot be empty)
+     * @param childPropRestrictionMap
+     *        the additional child property restrictions for this rule (cannot be <code>null</code>)
+     * @param childRequired
+     *        <code>true</code> if a child of this type must exist.
      * @param matchType
      *        <code>true</code> if only children of the same type can't have the same name
+     * @param severity
+     *        the severity of the rule.
      * @param descriptions
      *        the localized descriptions (cannot be <code>null</code>, include empty elements, or be empty)
      * @param messages
@@ -618,13 +589,17 @@ public final class RuleFactory {
                                                             final Repository repository,
                                                             final String name,
                                                             final String nodeType,
-                                                            final Map<String,String> nodePropRestrictedMap,
+                                                            final Map<String,String> nodePropRestrictionMap,
                                                             final String childType,
+                                                            final Map<String,String> childPropRestrictionMap,
+                                                            final boolean childRequired,
                                                             final boolean matchType,
+                                                            final Outcome.Level severity,
                                                             final List< LocalizedMessage > descriptions,
                                                             final List< LocalizedMessage > messages ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug( "createSameNameSiblingValidationRule: transaction = {0}, name = {1}", transaction.getName(), name ); //$NON-NLS-1$
@@ -638,11 +613,14 @@ public final class RuleFactory {
                                               Rule.ValidationType.CHILD,
                                               Rule.RuleType.SAME_NAME_SIBLING,
                                               nodeType,
-                                              nodePropRestrictedMap,
+                                              nodePropRestrictionMap,
+                                              childPropRestrictionMap,
+                                              severity,
                                               descriptions,
                                               messages );
             rule.setProperty( transaction, KomodoLexicon.Rule.MATCH_TYPE, matchType );
             rule.setProperty( transaction, KomodoLexicon.Rule.JCR_NAME, childType );
+            rule.setProperty( transaction, KomodoLexicon.Rule.REQUIRED, childRequired );
             return rule;
         } catch (final Exception e) {
             throw ObjectImpl.handleError( e );
@@ -656,12 +634,16 @@ public final class RuleFactory {
                                         final Rule.ValidationType validationType,
                                         final Rule.RuleType ruleType,
                                         final String ruleNodeType,
-                                        final Map<String,String> nodePropRestrictedMap,
+                                        final Map<String,String> nodePropertyRestrictions,
+                                        final Map<String,String> childPropertyRestrictions,
+                                        final Outcome.Level severity,
                                         final List< LocalizedMessage > descriptions,
                                         final List< LocalizedMessage > messages ) throws Exception {
         assert ( uow != null );
         assert ( validationType != null );
         assert ( ruleType != null );
+        ArgCheck.isNotNull( nodePropertyRestrictions );
+        ArgCheck.isNotNull( childPropertyRestrictions );
         ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( nodeType, "nodeType" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( ruleNodeType, "ruleNodeType" ); //$NON-NLS-1$
@@ -671,19 +653,28 @@ public final class RuleFactory {
         final KomodoObject rule = parent.addChild( uow, name, nodeType );
         rule.setProperty( uow, KomodoLexicon.Rule.NODE_TYPE, ruleNodeType );
         rule.setProperty( uow, KomodoLexicon.Rule.VALIDATION_TYPE, validationType.name() );
+        rule.setProperty( uow, KomodoLexicon.Rule.SEVERITY, severity );
         
         // Add optional property restrictions
         { 
             // Add grouping node if necessary
-            if(!nodePropRestrictedMap.isEmpty()) {
+            if(!nodePropertyRestrictions.isEmpty() || !childPropertyRestrictions.isEmpty()) {
                 final KomodoObject propRestrictionsNode = rule.addChild( uow,
                                                                          KomodoLexicon.Rule.PROP_RESTRICTIONS_GROUPING,
                                                                          KomodoLexicon.Rule.PROP_RESTRICTIONS_GROUPING);
-                for (final String propName : nodePropRestrictedMap.keySet()) {
+                for (final String propName : nodePropertyRestrictions.keySet()) {
                     final KomodoObject node = propRestrictionsNode.addChild( uow,
                                                                              propName,
                                                                              KomodoLexicon.Rule.PROP_RESTRICTION);
-                    node.setProperty( uow, KomodoLexicon.Rule.PROP_VALUE, nodePropRestrictedMap.get(propName) );
+                    node.setProperty( uow, KomodoLexicon.Rule.PROP_VALUE, nodePropertyRestrictions.get(propName) );
+                    node.setProperty( uow, KomodoLexicon.Rule.RESTRICTION_TYPE, Rule.PropertyRestriction.NODE.name() );
+                }
+                for (final String propName : childPropertyRestrictions.keySet()) {
+                    final KomodoObject node = propRestrictionsNode.addChild( uow,
+                                                                             propName,
+                                                                             KomodoLexicon.Rule.PROP_RESTRICTION);
+                    node.setProperty( uow, KomodoLexicon.Rule.PROP_VALUE, childPropertyRestrictions.get(propName) );
+                    node.setProperty( uow, KomodoLexicon.Rule.RESTRICTION_TYPE, Rule.PropertyRestriction.CHILD.name() );
                 }
             }
         }
@@ -733,8 +724,20 @@ public final class RuleFactory {
         return ( ( UnitOfWorkImpl )transaction ).getSession();
     }
 
+    /**
+     * Get the Validation defaults location from the repository
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param repository
+     *        the repository (cannot be <code>null</code>)
+     * @return the validation area
+     * @throws KException
+     *         if an error occurs
+     */
     public static KomodoObject getValidationDefaultAreaNode( final UnitOfWork transaction, final Repository repository ) throws KException {
-        assert ( transaction != null );
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
 
         final Session session = getSession( transaction );
         final JcrTools jcrTools = new JcrTools();

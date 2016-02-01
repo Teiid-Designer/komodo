@@ -12,17 +12,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+import org.komodo.core.Messages;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
-
 /**
- * The <code>ValidationRuleParser</code> parses validation rule definition input streams. Each input stream is validated
- * against a validation rule definition schema.
+ * The <code>RuleValidationParser</code> parses a validation rule definition file.  This parser is used for validation only - the parse errors can be obtained
+ * if parsing fails.
  */
 public class RuleValidationParser {
 
-    //private final File ruleSchemaFile;
     private Handler handler;
 
     /**
@@ -36,15 +35,12 @@ public class RuleValidationParser {
      * @throws Exception if there were problems with the rules schema file
      */
     public RuleValidationParser( File rulesSchemaFile ) throws Exception {
-        // load validation XSD for validation using parser
-        //this.ruleSchemaFile = new File( "../../plugins/org.komodo.core/resources/komodoValidation.xsd" ); //$NON-NLS-1$
-        
         setupParser(rulesSchemaFile);
     }
     
     private void setupParser(File schemaFile) throws Exception {
         if (!schemaFile.exists()) {
-            throw new IllegalStateException( "Validation schema file does not exist" ); //$NON-NLS-1$
+            throw new IllegalStateException( Messages.getString(Messages.RuleValidationParser.Rules_Schema_File_Not_Found));
         }
 
         // create parser
@@ -136,7 +132,6 @@ public class RuleValidationParser {
         Collection<String> getFatalErrors() {
             return this.fatals;
         }
-
     }
 
 }

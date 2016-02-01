@@ -231,7 +231,7 @@
   - tko:text (string) mandatory
 
 /*
- * The propRestrictions grouping node used by rule. Child nodes represent the property restriction.
+ * The propRestrictions grouping node used by rule. 
  */
 [tko:propRestrictions] > nt:unstructured
   + * (tko:propRestriction) copy
@@ -240,6 +240,7 @@
  * A property restriction. Node name is the property name.
  */
 [tko:propRestriction] > nt:unstructured
+  - tko:type (string) = 'NODE' mandatory autocreated < 'NODE', 'CHILD'
   - tko:propValue (string)
   
 /*
@@ -251,6 +252,7 @@
   - tko:validationType (string) mandatory < 'CHILD', 'NODE', 'PROPERTY'
   - tko:jcrName (string) // could be a property name or a child node type name
   - tko:ruleType (string) mandatory < 'NUMBER', 'PATTERN', 'RELATIONSHIP', 'REQUIRED', 'SAME_NAME_SIBLING'
+  - tko:required (boolean) = 'false' mandatory autocreated
   - tko:enabled (boolean) = 'true' mandatory autocreated
   - tko:severity (string) = 'ERROR' mandatory autocreated < 'ERROR', 'WARNING', 'INFO', 'OK'
   + tko:propRestrictions (tko:propRestrictions) copy
@@ -283,12 +285,6 @@
   - tko:propAbsent (string) multiple // properties that must not exist
   - tko:childExists (string) multiple // child node types that a child must have
   - tko:childAbsent (string) multiple // child node types that children cannot be
-  
-/*
- * A validation rule that requires a child node or a property to exist.
- */
-[tko:requiredRule] > tko:rule
-  - tko:ruleType (string) = 'REQUIRED' mandatory autocreated < 'REQUIRED'
   
 /*
  * A validation rule that requires sibling nodes to not have the same name.

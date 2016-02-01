@@ -29,8 +29,7 @@ import org.komodo.shell.api.CommandResult;
 @SuppressWarnings( {"javadoc", "nls"} )
 public class UploadModelCommandTest extends AbstractCommandTest {
 
-    private static final String UPLOAD_MODEL = UploadVdbCommandTest.class.getClassLoader()
-																							.getResource("PartsOracle.ddl").getFile();;
+    private static final String UPLOAD_MODEL = UploadVdbCommandTest.class.getClassLoader().getResource("PartsOracle.ddl").getFile();
 
     @Test
     public void shouldUploadPartsOraclePhysical() throws Exception {

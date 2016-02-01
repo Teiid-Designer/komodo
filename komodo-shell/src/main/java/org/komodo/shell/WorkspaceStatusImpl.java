@@ -52,6 +52,7 @@ import org.komodo.shell.api.KomodoShell;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandFactory;
 import org.komodo.shell.api.ShellCommandProvider;
+import org.komodo.shell.api.ValidationRulesProvider;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.api.WorkspaceStatusEventHandler;
 import org.komodo.shell.util.KomodoObjectUtils;
@@ -70,7 +71,7 @@ import org.komodo.utils.i18n.I18n;
 import org.modeshape.common.collection.Collections;
 
 /**
- * Test implementation of WorkspaceStatus
+ * Implementation of WorkspaceStatus
  */
 public class WorkspaceStatusImpl implements WorkspaceStatus {
 
@@ -155,15 +156,12 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         // initialize the global properties
         initGlobalProperties();
 
-        // initialize the validation rules
-        initValidationRules(true);
-
         this.defaultLabelProvider = new DefaultLabelProvider();
         this.defaultLabelProvider.setRepository( repo );
         this.defaultLabelProvider.setWorkspaceStatus( this );
 
-        // Discover any other label providers
-        discoverLabelProviders();
+        // Discover other label providers and rule providers
+        discoverProviders();
         setLabelProvider(this.currentContext);
     }
 
@@ -193,15 +191,6 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
 
         // Let the providers init any provided states
         initProvidedStates(this.wsProperties);
-    }
-
-    private void initValidationRules(boolean overrideExisting) throws KException {
-        // load shell properties if they exist
-        final String dataDir = this.shell.getShellDataLocation();
-        final File validationRulesFile = new File( dataDir, this.shell.getShellValidationRulesFile() );
-
-        final Repository repo = getEngine().getDefaultRepository();
-        repo.getValidationManager().importRules(validationRulesFile, getTransaction(), overrideExisting);
     }
 
     private void createTransaction(final String source ) throws Exception {
@@ -943,7 +932,8 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         return Boolean.parseBoolean( this.wsProperties.getProperty( AUTO_COMMIT ) );
     }
 
-    private void discoverLabelProviders( ) {
+    // Discovers Label Providers and ValidationRule Providers
+    private void discoverProviders( ) {
         final List< ClassLoader > commandClassloaders = new ArrayList< >();
         commandClassloaders.add( Thread.currentThread().getContextClassLoader() );
 
@@ -980,8 +970,10 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
             }
         }
 
+        // Discover the additional LabelProviders and Validation Rule Providers
         // iterate through the ClassLoaders and use the Java ServiceLoader mechanism to load the providers
         for ( final ClassLoader classLoader : commandClassloaders ) {
+            // Label Providers
             for ( final KomodoObjectLabelProvider provider : ServiceLoader.load( KomodoObjectLabelProvider.class, classLoader ) ) {
                 if ( !Modifier.isAbstract( provider.getClass().getModifiers() ) ) {
                     provider.setRepository(getEngine().getDefaultRepository());
@@ -990,8 +982,22 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
                     this.alternateLabelProviders.add( provider );
                 }
             }
+            // Rule Providers
+            for ( final ValidationRulesProvider provider : ServiceLoader.load( ValidationRulesProvider.class, classLoader ) ) {
+                if ( !Modifier.isAbstract( provider.getClass().getModifiers() ) ) {
+                    boolean loaded = false;
+                    try {
+                        provider.importRules(getEngine().getDefaultRepository(), uow, true);
+                        loaded = true;
+                    } catch (KException ex) {
+                        LOGGER.debug( "WorkspaceStatusImpl: error adding RulesProvider \"{0}\"", provider.getClass().getName() ); //$NON-NLS-1$
+                    }
+                    if(loaded) {
+                        LOGGER.debug( "WorkspaceStatusImpl: imported rules from RulesProvider \"{0}\"", provider.getClass().getName() ); //$NON-NLS-1$
+                    }
+                }
+            }
         }
-
         LOGGER.debug( "WorkspaceStatusImpl: found \"{0}\" LabelProviders", alternateLabelProviders.size() ); //$NON-NLS-1$
     }
 
