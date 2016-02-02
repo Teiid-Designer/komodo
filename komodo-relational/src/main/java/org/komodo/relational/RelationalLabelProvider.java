@@ -9,7 +9,6 @@ package org.komodo.relational;
 
 import java.util.Arrays;
 import java.util.List;
-
 import org.komodo.relational.internal.TypeResolverRegistry;
 import org.komodo.shell.DefaultLabelProvider;
 import org.komodo.shell.ShellI18n;
@@ -47,7 +46,7 @@ public class RelationalLabelProvider extends DefaultLabelProvider {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.shell.api.KomodoObjectLabelProvider#skippedPathSegmentNames(java.lang.String)
+     * @see org.komodo.shell.api.KomodoObjectLabelProvider#skippedPathSegmentNames()
      */
 	@Override
 	public List<String> skippedPathSegmentNames(){

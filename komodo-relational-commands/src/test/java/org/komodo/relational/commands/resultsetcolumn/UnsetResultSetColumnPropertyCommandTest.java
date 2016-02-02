@@ -17,9 +17,7 @@ package org.komodo.relational.commands.resultsetcolumn;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-
 import java.util.ArrayList;
-
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Function;
@@ -92,7 +90,7 @@ public final class UnsetResultSetColumnPropertyCommandTest extends AbstractComma
     	final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
-    	candidates.add(SetResultSetColumnPropertyCommand.NAME_IN_SOURCE);
+    	candidates.add(ResultSetColumnShellCommand.NAME_IN_SOURCE);
     	assertTabCompletion("unset-property NA", candidates);
     	assertTabCompletion("unset-property na", candidates);
     }

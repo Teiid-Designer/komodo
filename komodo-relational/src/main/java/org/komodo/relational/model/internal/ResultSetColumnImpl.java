@@ -10,16 +10,13 @@ package org.komodo.relational.model.internal;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.komodo.relational.RelationalConstants;
 import org.komodo.relational.RelationalConstants.Nullable;
 import org.komodo.relational.internal.RelationalChildRestrictedObject;
 import org.komodo.relational.model.ResultSetColumn;
 import org.komodo.relational.model.StatementOption;
-import org.komodo.relational.model.TabularResultSet;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Descriptor;
-import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.PropertyDescriptor;
@@ -27,7 +24,6 @@ import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
-import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
 import org.modeshape.sequencer.ddl.StandardDdlLexicon;
 

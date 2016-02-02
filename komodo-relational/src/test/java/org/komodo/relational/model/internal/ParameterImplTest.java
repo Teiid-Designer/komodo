@@ -220,7 +220,7 @@ public final class ParameterImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveParentProcedureAfterConstruction() throws Exception {
-        assertThat( ( AbstractProcedure )this.parameter.getParent( getTransaction() ), is( this.procedure ) );
+        assertThat( this.parameter.getParent( getTransaction() ), is( this.procedure ) );
     }
 
     @Test( expected = UnsupportedOperationException.class )

@@ -26,7 +26,7 @@
         <propertyValidation jcrName="vdb:name" required="true">
             <message locale="en">Rules that validate the property 'vdb:name' of the 'vdb:virtualDatabase' node type.</message>
             <valueValidation id="default.vdb.name.propertyValue" severity="ERROR">
-                <description locale="en">The VDB 'vdb:name' property must match the specified pattern.</description>
+                <description locale="en">The VDB 'vdb:name' property is required and must match the specified pattern.</description>
                 <pattern>^[a-zA-Z]+[a-zA-Z0-9]*$</pattern>
             </valueValidation>
         </propertyValidation>
@@ -36,7 +36,7 @@
             <message locale="en">Rules that validate the property 'vdb:version' of the 'vdb:virtualDatabase' node type.
             </message>
             <valueValidation id="default.vdb.version.propertyValue" severity="ERROR">
-                <description locale="en">The VDB 'vdb:version' property must be a non-zero integer.</description>
+                <description locale="en">The VDB 'vdb:version' property is required and must be a non-zero integer.</description>
                 <pattern>^[1-9]\d*$</pattern>
             </valueValidation>
         </propertyValidation>
@@ -46,7 +46,7 @@
             <message locale="en">Rules that validate the property 'vdb:connectionType' of the 'vdb:virtualDatabase' node type.
             </message>
             <valueValidation id="default.vdb.connectionType.propertyValue" severity="ERROR">
-                <description locale="en">The VDB 'vdb:connectionType' property must match the specified pattern.</description>
+                <description locale="en">The VDB 'vdb:connectionType' property is required and must match the specified pattern.</description>
                 <pattern>^[a-zA-Z]+[a-zA-Z0-9]*$</pattern>
             </valueValidation>
         </propertyValidation>
@@ -251,7 +251,7 @@
             <message locale="en">Rules that validate the 'NAMEINSOURCE' property of the 'teiidddl:createTable' node type.
             </message>
             <valueValidation id="default.table.nameInSource.propertyValue" severity="WARNING">
-                <description locale="en">The Table 'NAMEINSOURCE' property must match the specified pattern.</description>
+                <description locale="en">The Table 'NAMEINSOURCE' property is required and must match the specified pattern.</description>
                 <pattern>^[a-zA-Z]+[a-zA-Z0-9]*$</pattern>
             </valueValidation>
         </propertyValidation>
@@ -335,7 +335,7 @@
             <message locale="en">Rules that validate the property 'vdb:datatype' of the 'vdb:column' node type.
             </message>
             <valueValidation id="default.column.datatype.propertyValue" severity="ERROR">
-                <description locale="en">The Column 'ddl:datatypeName' property must match the specified pattern.</description>
+                <description locale="en">The Column 'ddl:datatypeName' property is required and must match the specified pattern.</description>
                 <pattern>^[a-zA-Z]+[a-zA-Z0-9]*$</pattern> 
             </valueValidation>
         </propertyValidation>
@@ -353,7 +353,7 @@
             <message locale="en">Rules that validate the property 'ddl:datatypeLength' of the 'teiidddl:tableElement'(string) node type.
             </message>
             <valueRangeValidation id="default.column.stringDatatype.lengthPropertyValue" severity="ERROR">
-                <description locale="en">The length property of a string Column must be 1 or greater.</description>
+                <description locale="en">The length property of a string Column is required and must be 1 or greater.</description>
                 <minValue inclusive="true">1</minValue>
             </valueRangeValidation>
         </propertyValidation>
@@ -371,7 +371,7 @@
             <message locale="en">Rules that validate the property 'ddl:datatypePrecision' of numeric 'teiidddl:tableElement' node type.
             </message>
             <valueRangeValidation id="default.column.numericDatatype.precisionPropertyValue" severity="ERROR">
-                <description locale="en">The precision property of a numeric Column must be 1 or greater.</description>
+                <description locale="en">The precision property of a numeric Column is required and must be 1 or greater.</description>
                 <minValue inclusive="true">1</minValue>
             </valueRangeValidation>
         </propertyValidation>
@@ -509,7 +509,7 @@
             <message locale="en">Rules that validate the property 'CATEGORY' of the UserDefinedFunction node type.
             </message>
             <valueValidation id="default.userDefinedFunction.category.propertyValue" severity="ERROR">
-                <description locale="en">The UserDefinedFunction 'CATEGORY' property must match the specified pattern.</description>
+                <description locale="en">The UserDefinedFunction 'CATEGORY' property is required and must match the specified pattern.</description>
                 <pattern>^[a-zA-Z]+[a-zA-Z0-9]*$</pattern>
             </valueValidation>
         </propertyValidation>
@@ -519,7 +519,7 @@
             <message locale="en">Rules that validate the property 'JAVA_METHOD' of the UserDefinedFunction node type.
             </message>
             <valueValidation id="default.userDefinedFunction.javaMethod.propertyValue" severity="ERROR">
-                <description locale="en">The UserDefinedFunction 'JAVA_METHOD' property must match the specified pattern.</description>
+                <description locale="en">The UserDefinedFunction 'JAVA_METHOD' property is required and must match the specified pattern.</description>
                 <pattern>^[a-zA-Z]+[a-zA-Z0-9]*$</pattern>
             </valueValidation>
         </propertyValidation>
@@ -529,7 +529,7 @@
             <message locale="en">Rules that validate the property 'JAVA_CLASS' of the UserDefinedFunction node type.
             </message>
             <valueValidation id="default.userDefinedFunction.javaClass.propertyValue" severity="ERROR">
-                <description locale="en">The UserDefinedFunction 'JAVA_CLASS' property must match the specified pattern.</description>
+                <description locale="en">The UserDefinedFunction 'JAVA_CLASS' property is required and must match the specified pattern.</description>
                 <pattern>^[a-zA-Z]+[a-zA-Z0-9]*$</pattern>
             </valueValidation>
         </propertyValidation>

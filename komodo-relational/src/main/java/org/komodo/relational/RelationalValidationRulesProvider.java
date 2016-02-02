@@ -38,7 +38,7 @@ public class RelationalValidationRulesProvider extends AbstractValidationRulesPr
         InputStream rulesStream = getClass().getClassLoader().getResourceAsStream(VALIDATION_RULES_FILE_NAME);
         File tempRulesFile;
         try {
-            tempRulesFile = File.createTempFile("rulesFile", ".xml");
+            tempRulesFile = File.createTempFile("rulesFile", ".xml"); //$NON-NLS-1$ //$NON-NLS-2$
             Files.copy(rulesStream, tempRulesFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException ex) {
             throw new KException(ex);

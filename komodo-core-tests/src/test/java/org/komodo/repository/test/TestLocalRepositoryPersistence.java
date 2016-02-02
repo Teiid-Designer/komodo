@@ -29,12 +29,10 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
-
 import java.io.File;
 import java.net.URL;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,7 +42,6 @@ import org.komodo.repository.LocalRepository.LocalRepositoryId;
 import org.komodo.repository.RepositoryImpl;
 import org.komodo.repository.SynchronousCallback;
 import org.komodo.spi.KException;
-import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository.State;
@@ -58,8 +55,7 @@ import org.modeshape.jcr.api.JcrConstants;
 import org.modeshape.jcr.api.observation.Event.Sequencing;
 
 @SuppressWarnings( {"javadoc", "nls"} )
-public class TestLocalRepositoryPersistence extends AbstractLoggingTest
-                                                                       implements StringConstants, Sequencing {
+public class TestLocalRepositoryPersistence extends AbstractLoggingTest implements Sequencing {
 
     protected static final long TIME_TO_WAIT = 3; // in minutes
 

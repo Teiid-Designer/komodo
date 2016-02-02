@@ -12,6 +12,7 @@ import static org.junit.Assert.assertThat;
 import java.io.File;
 import org.junit.Before;
 import org.junit.Test;
+import org.komodo.relational.RelationalValidationRulesProvider;
 import org.komodo.relational.model.AccessPattern;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.DataTypeResultSet;
@@ -47,7 +48,7 @@ import org.komodo.spi.repository.validation.Rule;
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class VdbValidationTest extends RelationalValidationTest {
 
-    private final File RULES_FILE = new File( getClass().getClassLoader().getResource("relationalValidationRulesDefault.xml").getFile() );
+    private final File RULES_FILE = new File( RelationalValidationRulesProvider.class.getClassLoader().getResource("relationalValidationRulesDefault.xml").getFile() );
     
     @Before
     public void init() throws Exception {
@@ -417,7 +418,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
         assertThat( results.length, is( 1 ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The VDB 'vdb:name' property must match the specified pattern."));
+        assertThat( results[0].getMessage(), is( "The VDB 'vdb:name' property is required and must match the specified pattern."));
     }
 
     @Test
@@ -448,7 +449,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
         assertThat( results.length, is( 1 ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The VDB 'vdb:connectionType' property must match the specified pattern."));
+        assertThat( results[0].getMessage(), is( "The VDB 'vdb:connectionType' property is required and must match the specified pattern."));
     }
 
     // ==============================================================================================
@@ -772,7 +773,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
         assertThat( results.length, is( 1 ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.WARNING));
-        assertThat( results[0].getMessage(), is( "The Table 'NAMEINSOURCE' property must match the specified pattern."));
+        assertThat( results[0].getMessage(), is( "The Table 'NAMEINSOURCE' property is required and must match the specified pattern."));
     }
     
     @Test
@@ -996,7 +997,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
         assertThat( results.length, is( 1 ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The UserDefinedFunction 'CATEGORY' property must match the specified pattern."));
+        assertThat( results[0].getMessage(), is( "The UserDefinedFunction 'CATEGORY' property is required and must match the specified pattern."));
     }
     
     @Test
@@ -1021,7 +1022,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
         assertThat( results.length, is( 1 ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The UserDefinedFunction 'JAVA_CLASS' property must match the specified pattern."));
+        assertThat( results[0].getMessage(), is( "The UserDefinedFunction 'JAVA_CLASS' property is required and must match the specified pattern."));
     }
 
     @Test
@@ -1046,7 +1047,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
         assertThat( results.length, is( 1 ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The UserDefinedFunction 'JAVA_METHOD' property must match the specified pattern."));
+        assertThat( results[0].getMessage(), is( "The UserDefinedFunction 'JAVA_METHOD' property is required and must match the specified pattern."));
     }
     
     @Test
@@ -1352,7 +1353,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
         assertThat( results.length, is( 1 ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The Column 'ddl:datatypeName' property must match the specified pattern."));
+        assertThat( results[0].getMessage(), is( "The Column 'ddl:datatypeName' property is required and must match the specified pattern."));
     }
 
     @Test
@@ -1381,7 +1382,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
         assertThat( results.length, is( 1 ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The length property of a string Column must be 1 or greater."));
+        assertThat( results[0].getMessage(), is( "The length property of a string Column is required and must be 1 or greater."));
     }
 
     @Test
@@ -1397,7 +1398,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
         assertThat( results.length, is( 1 ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The length property of a string Column must be 1 or greater."));
+        assertThat( results[0].getMessage(), is( "The length property of a string Column is required and must be 1 or greater."));
     }
 
     @Test
@@ -1426,7 +1427,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
         assertThat( results.length, is( 1 ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The precision property of a numeric Column must be 1 or greater."));
+        assertThat( results[0].getMessage(), is( "The precision property of a numeric Column is required and must be 1 or greater."));
     }
 
     @Test
@@ -1442,7 +1443,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
         assertThat( results.length, is( 1 ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The precision property of a numeric Column must be 1 or greater."));
+        assertThat( results[0].getMessage(), is( "The precision property of a numeric Column is required and must be 1 or greater."));
     }
 
     // ==============================================================================================
