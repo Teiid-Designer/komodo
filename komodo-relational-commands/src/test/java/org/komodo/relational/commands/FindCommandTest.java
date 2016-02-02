@@ -16,10 +16,6 @@
 package org.komodo.relational.commands;
 
 import static org.junit.Assert.assertTrue;
-
-import java.net.URL;
-import java.net.URLClassLoader;
-
 import org.junit.Test;
 import org.komodo.shell.api.CommandResult;
 
