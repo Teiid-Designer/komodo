@@ -76,7 +76,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
     private static final String DYNAMIC_CUSTOMER_VDB = "dynamic-customer-vdb.xml";
     private static final String DYNAMIC_CUSTOMER_VDB_NAME = "DynamicCustomer";
 
-    private static final String PARTS_DYNAMIC_VDB = "parts_dynamic-vdb.xml";
+    //private static final String PARTS_DYNAMIC_VDB = "parts_dynamic-vdb.xml";
     private static final String PARTS_DYNAMIC_VDB_NAME = "MyPartsVDB_Dynamic";
     private static final String PARTS_DYNAMIC_PARTSVIEW_DDL = EMPTY_STRING +
                               "CREATE VIEW PartsSummary ( " +

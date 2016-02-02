@@ -37,7 +37,7 @@ public final class ValidateVdbCommandTest extends AbstractCommandTest {
 
         // Check the output
         String writerOutput = getCommandOutput();
-        assertTrue( writerOutput.contains( "The VDB 'vdb:connectionType' property must match the specified pattern" ) );
+        assertTrue( writerOutput.contains( "The VDB 'vdb:connectionType' property is required and must match the specified pattern" ) );
     }
 
 }

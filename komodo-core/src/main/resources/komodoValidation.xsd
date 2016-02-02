@@ -47,14 +47,6 @@
             <xs:field xpath="@locale" />
         </xs:unique>
 
-        <!-- Make sure the JCR name attribute is unique across all nodeValidations -->
-        <!--
-        <xs:unique name="nodeValidationAtRootJcrNameKey">
-            <xs:selector xpath=".//tko:nodeValidation" />
-            <xs:field xpath="@jcrName" />
-        </xs:unique>
-        -->
-
         <!-- Make sure the JCR name attribute is unique across all propertyValidations -->
         <xs:unique name="propertyValidationJcrNameKey">
             <xs:selector xpath=".//tko:propertyValidation" />
@@ -78,14 +70,6 @@
             <xs:documentation>A collection of node type validations.</xs:documentation>
         </xs:annotation>
 
-        <!-- Make sure the JCR name attribute is unique across all propertyValidation within nodeValidation -->
-        <!--
-        <xs:unique name="propertyValidationJcrNameKey">
-            <xs:selector xpath=".//tko:propertyValidation" />
-            <xs:field xpath="@jcrName" />
-        </xs:unique>
-        -->
-        
         <!-- Make sure the JCR name attribute is unique across all childValidation within nodeValidations -->
         <xs:unique name="childValidationJcrNameKey">
             <xs:selector xpath=".//tko:childValidation" />

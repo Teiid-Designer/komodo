@@ -16,9 +16,7 @@
 package org.komodo.relational.commands.mask;
 
 import static org.junit.Assert.assertEquals;
-
 import java.util.ArrayList;
-
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.vdb.DataRole;
@@ -77,7 +75,7 @@ public final class SetMaskPropertyCommandTest extends AbstractCommandTest {
 
     	assertTabCompletion("set-property OODE", candidates);
 
-    	candidates.add(SetMaskPropertyCommand.ORDER);
+    	candidates.add(MaskShellCommand.ORDER);
     	assertTabCompletion("set-property or", candidates);
     	assertTabCompletion("set-property OR", candidates);
     }

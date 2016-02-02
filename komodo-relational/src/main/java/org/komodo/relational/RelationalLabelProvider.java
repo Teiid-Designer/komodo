@@ -46,7 +46,7 @@ public class RelationalLabelProvider extends DefaultLabelProvider {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.shell.api.KomodoObjectLabelProvider#skippedPathSegmentNames(java.lang.String)
+     * @see org.komodo.shell.api.KomodoObjectLabelProvider#skippedPathSegmentNames()
      */
 	@Override
 	public List<String> skippedPathSegmentNames(){
