@@ -47,6 +47,10 @@ public final class WorkspaceCommandsI18n extends I18n {
     public static String deleteVdbHelp;
     public static String deleteVdbUsage;
 
+    public static String exportDatasourceExamples;
+    public static String exportDatasourceHelp;
+    public static String exportDatasourceUsage;
+
     public static String exportVdbExamples;
     public static String exportVdbHelp;
     public static String exportVdbUsage;
@@ -55,6 +59,10 @@ public final class WorkspaceCommandsI18n extends I18n {
     public static String importVdbHelp;
     public static String importVdbUsage;
 
+    public static String uploadDatasourceExamples;
+    public static String uploadDatasourceHelp;
+    public static String uploadDatasourceUsage;
+
     public static String uploadVdbExamples;
     public static String uploadVdbHelp;
     public static String uploadVdbUsage;
@@ -62,7 +70,12 @@ public final class WorkspaceCommandsI18n extends I18n {
     public static String cannotImportWouldCreateDuplicate;
     public static String datasourceCreated;
     public static String datasourceDeleted;
+    public static String datasourceExported;
+    public static String datasourceInputFileIsEmpty;
     public static String datasourceNotFound;
+    public static String datasourceOverwriteDisabled;
+    public static String datasourceParserErrors;
+    public static String datasourcesUploaded;
     public static String deleteDatasourceError;
     public static String deleteSchemaError;
     public static String deleteTeiidError;
@@ -80,6 +93,7 @@ public final class WorkspaceCommandsI18n extends I18n {
     public static String invalidObjectType;
     public static String invalidPropertyName;
     public static String missingDatasourceName;
+    public static String missingInputDatasourceFilePath;
     public static String missingInputFileName;
     public static String missingInputVdbFilePath;
     public static String missingOutputFileName;

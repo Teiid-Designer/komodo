@@ -310,6 +310,26 @@ public class DatasourceImpl extends RelationalChildRestrictedObject implements D
         return propDefn;
     }
 
+    /* (non-Javadoc)
+     * @see org.komodo.spi.repository.Exportable#export(org.komodo.spi.repository.Repository.UnitOfWork, java.util.Properties)
+     */
+    @Override
+    public String export(UnitOfWork transaction,
+                         Properties exportProperties) throws KException {
+
+        // Get the XML result
+        DatasourceNodeVisitor visitor = new DatasourceNodeVisitor(transaction, this, exportProperties);
+        String xmlResult = visitor.getXml();
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("DataSourceImpl#export: transaction = {0}, xml = {1}", //$NON-NLS-1$
+                         transaction.getName(),
+                         xmlResult);
+        }
+        
+        return xmlResult;
+    }
+    
     @Override
     public boolean addListener( ExecutionConfigurationListener listener ) {
         return false;
