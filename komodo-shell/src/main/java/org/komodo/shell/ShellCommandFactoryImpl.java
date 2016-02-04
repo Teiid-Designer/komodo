@@ -73,7 +73,7 @@ public class ShellCommandFactoryImpl implements ShellCommandFactory {
     public ShellCommandFactoryImpl(final WorkspaceStatus wsStatus ) throws Exception {
         ArgCheck.isNotNull( wsStatus, "wsStatus" ); //$NON-NLS-1$
 
-        this.commandMap = new HashMap<>();
+        this.commandMap = new HashMap< String, Map< String, ShellCommand > >();
         _commandNotFound = new CommandNotFoundCommand( wsStatus );
 
         discoverProviders( wsStatus );
@@ -112,7 +112,7 @@ public class ShellCommandFactoryImpl implements ShellCommandFactory {
     }
 
     private void discoverProviders( final WorkspaceStatus wsStatus ) {
-        final List< ClassLoader > commandClassloaders = new ArrayList< >();
+        final List< ClassLoader > commandClassloaders = new ArrayList< ClassLoader >();
         commandClassloaders.add( Thread.currentThread().getContextClassLoader() );
 
         // Find providers in the user's commands directory
@@ -130,7 +130,7 @@ public class ShellCommandFactoryImpl implements ShellCommandFactory {
                 final Collection< File > jarFiles = FileUtils.getFilesForPattern( commandsDir.getCanonicalPath(), "", ".jar" ); //$NON-NLS-1$ //$NON-NLS-2$
 
                 if ( !jarFiles.isEmpty() ) {
-                    final List< URL > jarURLs = new ArrayList< >( jarFiles.size() );
+                    final List< URL > jarURLs = new ArrayList< URL >( jarFiles.size() );
 
                     for ( final File jarFile : jarFiles ) {
                         final URL jarUrl = jarFile.toURI().toURL();
@@ -149,7 +149,7 @@ public class ShellCommandFactoryImpl implements ShellCommandFactory {
         }
 
         // add built-in provider and discover other providers
-        final Set< ShellCommandProvider > tempProviders = new HashSet< >();
+        final Set< ShellCommandProvider > tempProviders = new HashSet< ShellCommandProvider >();
         final ShellCommandProvider builtInProvider = new BuiltInShellCommandProvider();
         tempProviders.add( builtInProvider );
         registerContributedCommands( builtInProvider, wsStatus );
@@ -180,7 +180,7 @@ public class ShellCommandFactoryImpl implements ShellCommandFactory {
         Map<String, ShellCommand> commands = this.commandMap.get( cmdName );
 
         if (commands == null) {
-            commands = new HashMap<>();
+            commands = new HashMap<String, ShellCommand>();
             this.commandMap.put( cmdName, commands );
         }
 
@@ -221,7 +221,7 @@ public class ShellCommandFactoryImpl implements ShellCommandFactory {
         // command can't be found
         return createCommandNotFound(commandName);
     }
-    
+
     /* (non-Javadoc)
      * @see org.komodo.shell.api.ShellCommandFactory#createCommandNotFound(java.lang.String)
      */
@@ -233,7 +233,7 @@ public class ShellCommandFactoryImpl implements ShellCommandFactory {
 
     @Override
     public Set< ShellCommand > getCommandsForCurrentContext() {
-        final Set< ShellCommand > availableCommands = new HashSet< >();
+        final Set< ShellCommand > availableCommands = new HashSet< ShellCommand >();
 
         for ( final String cmdName : this.commandMap.keySet() ) {
             final Map< String, ShellCommand > commands = this.commandMap.get( cmdName );
@@ -291,7 +291,7 @@ public class ShellCommandFactoryImpl implements ShellCommandFactory {
      */
     @Override
     public Set< String > getCommandNamesForCurrentContext() {
-        final Set< String > commandNames = new TreeSet< >();
+        final Set< String > commandNames = new TreeSet< String >();
 
         for ( final ShellCommand possible : getCommandsForCurrentContext() ) {
             commandNames.add( possible.getName() );

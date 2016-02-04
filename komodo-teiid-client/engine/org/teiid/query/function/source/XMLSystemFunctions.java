@@ -3,17 +3,17 @@
  * See the COPYRIGHT.txt file distributed with this work for information
  * regarding copyright ownership.  Some portions may be licensed
  * to Red Hat, Inc. under one or more contributor license agreements.
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
@@ -64,19 +64,6 @@ import javax.xml.transform.stax.StAXSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.xpath.XPathExpressionException;
-import net.sf.saxon.expr.JPConverter;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.Name11Checker;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.sxpath.XPathEvaluator;
-import net.sf.saxon.sxpath.XPathExpression;
-import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.DateTimeValue;
-import net.sf.saxon.value.DateValue;
-import net.sf.saxon.value.DayTimeDurationValue;
-import net.sf.saxon.value.TimeValue;
 import org.teiid.common.buffer.FileStore;
 import org.teiid.common.buffer.FileStoreInputStreamFactory;
 import org.teiid.common.buffer.impl.MemoryStorageManager;
@@ -107,15 +94,28 @@ import org.teiid.runtime.client.Messages;
 import org.teiid.runtime.client.TeiidClientException;
 import org.teiid.util.StAXSQLXML;
 import org.teiid.util.StAXSQLXML.StAXSourceProvider;
+import net.sf.saxon.expr.JPConverter;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.Name11Checker;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.sxpath.XPathEvaluator;
+import net.sf.saxon.sxpath.XPathExpression;
+import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.DateTimeValue;
+import net.sf.saxon.value.DateValue;
+import net.sf.saxon.value.DayTimeDurationValue;
+import net.sf.saxon.value.TimeValue;
 
 
-/** 
+/**
  * This class contains scalar system functions supporting for XML manipulation.
- * 
+ *
  *
  */
 public class XMLSystemFunctions {
-	
+
 	private static final Charset UTF_32BE = Charset.forName("UTF-32BE"); //$NON-NLS-1$
 	private static final Charset UTF_16BE = Charset.forName("UTF-16BE"); //$NON-NLS-1$
 	private static final Charset UTF_32LE = Charset.forName("UTF-32LE"); //$NON-NLS-1$
@@ -176,19 +176,19 @@ public class XMLSystemFunctions {
 					public XMLEvent nextEvent() throws XMLStreamException {
 						return replaceStart(super.nextEvent());
 					}
-					
+
 					@Override
 					public XMLEvent peek() throws XMLStreamException {
 						return replaceStart(super.peek());
 					}
-	
+
 					private XMLEvent replaceStart(XMLEvent event) {
 						if (event != null && event.getEventType() == XMLEvent.START_DOCUMENT) {
 							return start;
 						}
 						return event;
 					}
-					
+
 					@Override
 					public Object next() {
 						try {
@@ -214,7 +214,7 @@ public class XMLSystemFunctions {
 
 		private LinkedList<String> nameStack = new LinkedList<String>();
 		private LinkedList<XMLEvent> eventStack = new LinkedList<XMLEvent>();
-		
+
 		private boolean rootArray;
 		private boolean end;
 		private boolean declaredNs;
@@ -242,7 +242,7 @@ public class XMLSystemFunctions {
 		}
 
 		private void start() {
-			eventStack.add(eventFactory.createStartElement("", "", nameStack.peek())); //$NON-NLS-1$ //$NON-NLS-2$ 
+			eventStack.add(eventFactory.createStartElement("", "", nameStack.peek())); //$NON-NLS-1$ //$NON-NLS-2$
 			if (!declaredNs) {
 				eventStack.add(eventFactory.createNamespace("xsi", XMLConstants.W3C_XML_SCHEMA_INSTANCE_NS_URI)); //$NON-NLS-1$
 				declaredNs = true;
@@ -290,7 +290,7 @@ public class XMLSystemFunctions {
 		}
 
 		private void end() {
-			eventStack.add(eventFactory.createEndElement("", "", nameStack.peek())); //$NON-NLS-1$ //$NON-NLS-2$ 
+			eventStack.add(eventFactory.createEndElement("", "", nameStack.peek())); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
 		@Override
@@ -388,20 +388,23 @@ public class XMLSystemFunctions {
 
 		@Override
 		public void remove() {
-			throw new UnsupportedOperationException();			
+			throw new UnsupportedOperationException();
 		}
 	}
-	
+
 	static ThreadLocal<XMLOutputFactory> threadLocalOutputFactory = new ThreadLocal<XMLOutputFactory>() {
-		protected XMLOutputFactory initialValue() {
+		@Override
+        protected XMLOutputFactory initialValue() {
 			return newXmlOutputFactory();
 		}
 	};
 	static ThreadLocal<XMLEventFactory> threadLocalEventtFactory = new ThreadLocal<XMLEventFactory>() {
-		protected XMLEventFactory initialValue() {
-			return XMLEventFactory.newFactory();
+		@Override
+        protected XMLEventFactory initialValue() {
+			return XMLEventFactory.newInstance();
 		}
-		public XMLEventFactory get() {
+		@Override
+        public XMLEventFactory get() {
 			XMLEventFactory eventFactory = super.get();
 			eventFactory.setLocation(null);
 			return eventFactory;
@@ -416,7 +419,7 @@ public class XMLSystemFunctions {
 		return factory;
 	}
 	static XMLOutputFactory xmlOutputFactory = newXmlOutputFactory();
-	
+
 	private static XMLEventReader getXMLEventReader(StAXSource source) throws XMLStreamException {
 		XMLEventReader reader = source.getXMLEventReader();
 		if (reader == null) {
@@ -425,16 +428,16 @@ public class XMLSystemFunctions {
 		}
 		return reader;
 	}
-	
+
 	public static XMLOutputFactory getOutputFactory() throws FactoryConfigurationError {
 		if (XMLType.isThreadSafeXmlFactories()) {
 			return xmlOutputFactory;
 		}
 		return threadLocalOutputFactory.get();
 	}
-	
+
 	public static ClobType xslTransform(CommandContext context, Object xml, Object styleSheet) throws Exception {
-    	Source styleSource = null; 
+    	Source styleSource = null;
 		Source xmlSource = null;
 		try {
 			styleSource = convertToSource(styleSheet);
@@ -442,10 +445,10 @@ public class XMLSystemFunctions {
 			final Source xmlParam = xmlSource;
 			TransformerFactory factory = StandardXMLTranslator.getThreadLocalTransformerFactory();
             final Transformer transformer = factory.newTransformer(styleSource);
-            
+
 			//this creates a non-validated sqlxml - it may not be valid xml/root-less xml
 			SQLXMLImpl result = saveToBufferManager(new XMLTranslator() {
-				
+
 				@Override
 				public void translate(Writer writer) throws TransformerException {
 	                //transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes"); //$NON-NLS-1$
@@ -473,7 +476,7 @@ public class XMLSystemFunctions {
 		}
 
 		XMLType result = new XMLType(XMLSystemFunctions.saveToBufferManager(new XMLTranslator() {
-			
+
 			@Override
 			public void translate(Writer writer) throws TransformerException,
 					IOException {
@@ -490,13 +493,13 @@ public class XMLSystemFunctions {
 					eventWriter.close();
 				} catch (XMLStreamException e) {
 					throw new TransformerException(e);
-				} 
+				}
 			}
 		}));
 		result.setType(Type.CONTENT);
 		return result;
 	}
-	
+
 	/**
 	 * Basic support for xmlelement.  namespaces are not yet supported.
 	 * @param context
@@ -505,10 +508,10 @@ public class XMLSystemFunctions {
 	 * @return
 	 * @throws Exception
 	 */
-	public static XMLType xmlElement(final String name, 
+	public static XMLType xmlElement(final String name,
 			final NameValuePair<String>[] namespaces, final NameValuePair<?>[] attributes, final List<?> contents) throws Exception {
 		    XMLType result = new XMLType(saveToBufferManager(new XMLTranslator() {
-			
+
 			@Override
 			public void translate(Writer writer) throws TransformerException,
 					IOException {
@@ -520,14 +523,14 @@ public class XMLSystemFunctions {
 					eventWriter.close();
 				} catch (XMLStreamException e) {
 					throw new TransformerException(e);
-				} 
+				}
 			}
 
 		}));
 		result.setType(Type.ELEMENT);
 		return result;
 	}
-	
+
 	private static void addElement(final String name, Writer writer, XMLEventWriter eventWriter, XMLEventFactory eventFactory,
 			NameValuePair<String> namespaces[], NameValuePair<?> attributes[], List<?> contents) throws XMLStreamException, IOException, TransformerException {
 		eventWriter.add(eventFactory.createStartElement("", null, name)); //$NON-NLS-1$
@@ -538,7 +541,7 @@ public class XMLSystemFunctions {
 						eventWriter.add(eventFactory.createNamespace(XMLConstants.NULL_NS_URI));
 					} else {
 						eventWriter.add(eventFactory.createNamespace(nameValuePair.value));
-					} 
+					}
 				} else {
 					eventWriter.add(eventFactory.createNamespace(nameValuePair.name, nameValuePair.value));
 				}
@@ -552,13 +555,13 @@ public class XMLSystemFunctions {
 			}
 		}
 		//add empty chars to close the start tag
-		eventWriter.add(eventFactory.createCharacters("")); //$NON-NLS-1$ 
+		eventWriter.add(eventFactory.createCharacters("")); //$NON-NLS-1$
 		for (Object object : contents) {
 			convertValue(writer, eventWriter, eventFactory, object);
 		}
 		eventWriter.add(eventFactory.createEndElement("", null, name)); //$NON-NLS-1$
 	}
-	
+
 	public static XMLType xmlConcat(CommandContext context, final XMLType xml, final Object... other) throws Exception {
 		//determine if there is just a single xml value and return it
 		XMLType singleValue = xml;
@@ -580,7 +583,7 @@ public class XMLSystemFunctions {
 		if (type == null) {
 			return singleValue;
 		}
-		
+
 		XmlConcat concat = new XmlConcat();
 		concat.addValue(xml);
 		for (Object object : other) {
@@ -595,7 +598,7 @@ public class XMLSystemFunctions {
 		private FileStoreInputStreamFactory fsisf;
 		private FileStore fs;
 		private Type type;
-		
+
 		public XmlConcat() throws TeiidClientException {
 		    MemoryStorageManager manager = new MemoryStorageManager();
 			fs = manager.createFileStore("xml"); //$NON-NLS-1$
@@ -609,7 +612,7 @@ public class XMLSystemFunctions {
 				 throw new TeiidClientException(e);
 			}
 		}
-		
+
 		public void addValue(Object object) throws TeiidClientException {
 			if (type == null) {
 				if (object instanceof XMLType) {
@@ -623,13 +626,13 @@ public class XMLSystemFunctions {
 			} catch (Exception e) {
 				fs.remove();
 				 throw new TeiidClientException(e);
-			}			
+			}
 		}
-		
+
 		public Writer getWriter() {
 			return writer;
 		}
-		
+
 		public XMLType close() throws TeiidClientException {
 			try {
 				eventWriter.flush();
@@ -649,13 +652,13 @@ public class XMLSystemFunctions {
 	        }
 	        return result;
 		}
-		
+
 	}
-	
+
 	public static XMLType xmlPi(String name) {
 		return xmlPi(name, ""); //$NON-NLS-1$
 	}
-	
+
 	public static XMLType xmlPi(String name, String content) {
 		int start = 0;
 		char[] chars = content.toCharArray();
@@ -666,7 +669,7 @@ public class XMLSystemFunctions {
 		result.setType(Type.PI);
 		return result;
 	}
-	
+
 	public static AtomicValue convertToAtomicValue(Object value) throws TransformerException {
 		if (value instanceof java.util.Date) { //special handling for time types
         	java.util.Date d = (java.util.Date)value;
@@ -684,7 +687,7 @@ public class XMLSystemFunctions {
 		JPConverter converter = JPConverter.allocate(value.getClass(), null);
 		return (AtomicValue)converter.convert(value, null);
 	}
-	
+
 	static void convertValue(Writer writer, XMLEventWriter eventWriter, XMLEventFactory eventFactory, Object object) throws IOException,
 			FactoryConfigurationError, XMLStreamException,
 			TransformerException {
@@ -720,7 +723,7 @@ public class XMLSystemFunctions {
 			throws Exception {
 		switch(type) {
 		case CONTENT:
-		case ELEMENT: 
+		case ELEMENT:
 		case PI:
 		case COMMENT: {//write the value directly to the writer
 			eventWriter.flush();
@@ -766,7 +769,7 @@ public class XMLSystemFunctions {
 			break;
 		}
 	}
-	
+
 	public static XMLType xmlComment(String comment) {
 		return new XMLType(new SQLXMLImpl("<!--" + comment + "-->")); //$NON-NLS-1$ //$NON-NLS-2$
 	}
@@ -798,7 +801,7 @@ public class XMLSystemFunctions {
         if (!(source instanceof StreamSource)) {
             return;
         }
-        
+
         StreamSource stream = (StreamSource)source;
         try {
             if (stream.getInputStream() != null) {
@@ -819,14 +822,14 @@ public class XMLSystemFunctions {
         try {
         	s = convertToSource(doc);
             XPathEvaluator eval = new XPathEvaluator();
-            // Wrap the string() function to force a string return             
+            // Wrap the string() function to force a string return
             XPathExpression expr = eval.createExpression(xpath);
             Object o = expr.evaluateSingle(s);
-            
+
             if(o == null) {
                 return null;
             }
-            
+
             // Return string value of node type
             if(o instanceof Item) {
             	Item i = (Item)o;
@@ -834,15 +837,15 @@ public class XMLSystemFunctions {
             		return null;
             	}
                 return i.getStringValue();
-            }  
-            
+            }
+
             // Return string representation of non-node value
             return o.toString();
         } finally {
         	closeSource(s);
         }
     }
-    
+
 	public static boolean isNull(Item i) {
 		if (i instanceof NodeInfo) {
 			NodeInfo ni = (NodeInfo)i;
@@ -855,22 +858,22 @@ public class XMLSystemFunctions {
 		}
 		return false;
 	}
-    
+
     /**
      * Validate whether the XPath is a valid XPath.  If not valid, an XPathExpressionException will be thrown.
      * @param xpath An xpath expression, for example: a/b/c/getText()
-     * @throws XPathExpressionException 
-     * @throws XPathException 
+     * @throws XPathExpressionException
+     * @throws XPathException
      */
     public static void validateXpath(String xpath) throws XPathException {
-        if(xpath == null) { 
+        if(xpath == null) {
             return;
         }
-        
+
         XPathEvaluator eval = new XPathEvaluator();
         eval.createExpression(xpath);
     }
-    
+
     public static String escapeName(String name, boolean fully) {
     	StringBuilder sb = new StringBuilder();
     	char[] chars = name.toCharArray();
@@ -887,7 +890,7 @@ public class XMLSystemFunctions {
     			if (fully || i == 0) {
     				sb.append(escapeChar(chr));
     				continue;
-    			} 
+    			}
     			break;
     		case '_':
     			if (chars.length > i && chars[i+1] == 'x') {
@@ -925,7 +928,7 @@ public class XMLSystemFunctions {
     public static SQLXML jsonToXml(final String rootName, final Blob json) throws Exception {
     	return jsonToXml(rootName, json, false);
     }
-    
+
     public static SQLXML jsonToXml(final String rootName, final Blob json, boolean stream) throws Exception {
 		Reader r = getJsonReader(json);
 		return jsonToXml(rootName, r, stream);
@@ -941,13 +944,13 @@ public class XMLSystemFunctions {
 		if (read > 3) {
 			if (encoding[0] == 0 && encoding[2] == 0) {
 				if (encoding[1] == 0) {
-					charset = UTF_32BE; 
+					charset = UTF_32BE;
 				} else {
 					charset = UTF_16BE;
 				}
 			} else if (encoding[1] == 0 && encoding[3] == 0) {
 				if (encoding[2] == 0) {
-					charset = UTF_32LE; 
+					charset = UTF_32LE;
 				} else {
 					charset = UTF_16LE;
 				}
@@ -959,11 +962,11 @@ public class XMLSystemFunctions {
 	public static SQLXML jsonToXml(final String rootName, final Clob json) throws Exception {
         return jsonToXml(rootName, json, false);
     }
-    
+
     public static SQLXML jsonToXml(final String rootName, final Clob json, boolean stream) throws Exception {
         return jsonToXml(rootName, json.getCharacterStream(), stream);
     }
-    
+
     private static SQLXML jsonToXml(
             final String rootName, final Reader r, boolean stream) throws Exception {
         JSONParser parser = new JSONParser();
@@ -981,14 +984,14 @@ public class XMLSystemFunctions {
             }
         } else {
             sqlXml = saveToBufferManager(new XMLTranslator() {
-                
+
                 @Override
                 public void translate(Writer writer) throws TransformerException,
                         IOException {
                     try {
                         XMLOutputFactory factory = getOutputFactory();
                         final XMLEventWriter streamWriter = factory.createXMLEventWriter(writer);
-    
+
                         streamWriter.add(reader);
                         streamWriter.flush(); //woodstox needs a flush rather than a close
                     } catch (XMLStreamException e) {
@@ -997,7 +1000,7 @@ public class XMLSystemFunctions {
                         try {
                             r.close();
                         } catch (IOException e) {
-                            
+
                         }
                     }
                 }
@@ -1012,12 +1015,12 @@ public class XMLSystemFunctions {
      * This method saves the given XML object to the buffer manager's disk process
      * Documents less than the maxMemorySize will be held directly in memory
      */
-    public static SQLXMLImpl saveToBufferManager(XMLTranslator translator) throws Exception {        
+    public static SQLXMLImpl saveToBufferManager(XMLTranslator translator) throws Exception {
         boolean success = false;
         MemoryStorageManager manager = new MemoryStorageManager();
         final FileStore lobBuffer = manager.createFileStore("xml"); //$NON-NLS-1$
         FileStoreInputStreamFactory fsisf = new FileStoreInputStreamFactory(lobBuffer, Streamable.ENCODING);
-        try{  
+        try{
             Writer writer = fsisf.getWriter();
             translator.translate(writer);
             writer.close();
@@ -1036,7 +1039,7 @@ public class XMLSystemFunctions {
 		Type type = value.getType();
 		final Charset encoding;
 		if (xs.getEncoding() != null) {
-			encoding = Charset.forName(xs.getEncoding());					
+			encoding = Charset.forName(xs.getEncoding());
 		} else {
 			encoding = UTF_8;
 		}
@@ -1088,12 +1091,12 @@ public class XMLSystemFunctions {
 				if (!Charset.forName(value.getEncoding()).equals(encoding)) {
 					is = new ReaderInputStream(value.getCharacterStream(), encoding);
 				} else {
-					is = value.getBinaryStream();					
+					is = value.getBinaryStream();
 				}
 				byte[] bytes = ObjectConverterUtil.convertToByteArray(is, DefaultDataTypeManager.MAX_LOB_MEMORY_BYTES);
 				return new BinaryTypeImpl(bytes);
 			} catch (SQLException e) {
-				throw new TeiidClientException(e, Messages.gs(Messages.TEIID.TEIID10080, "XML", "VARBINARY")); //$NON-NLS-1$ //$NON-NLS-2$ 
+				throw new TeiidClientException(e, Messages.gs(Messages.TEIID.TEIID10080, "XML", "VARBINARY")); //$NON-NLS-1$ //$NON-NLS-2$
 		    } catch (IOException e) {
 		    	throw new TeiidClientException(e, Messages.gs(Messages.TEIID.TEIID10080, "XML", "VARBINARY")); //$NON-NLS-1$ //$NON-NLS-2$
 		    }
@@ -1102,7 +1105,8 @@ public class XMLSystemFunctions {
 		if (!Charset.forName(value.getEncoding()).equals(encoding)) {
 			//create a wrapper for the input stream
 			isf = new InputStreamFactory.SQLXMLInputStreamFactory(value) {
-				public InputStream getInputStream() throws IOException {
+				@Override
+                public InputStream getInputStream() throws IOException {
 					try {
 						return new ReaderInputStream(sqlxml.getCharacterStream(), encoding);
 					} catch (SQLException e) {
@@ -1115,5 +1119,5 @@ public class XMLSystemFunctions {
 		}
 		return new BlobType(new BlobImpl(isf));
 	}
-    
+
 }

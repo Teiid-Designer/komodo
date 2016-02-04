@@ -15,7 +15,7 @@ import org.modeshape.jcr.JcrLexicon;
 import org.modeshape.jcr.JcrMixLexicon;
 import org.modeshape.jcr.JcrNtLexicon;
 import org.modeshape.jcr.ModeShapeLexicon;
-import org.modeshape.sequencer.ddl.StandardDdlLexicon;
+import org.teiid.modeshape.sequencer.ddl.StandardDdlLexicon;
 
 /**
  * A {@link KomodoObject} related to a relational model.

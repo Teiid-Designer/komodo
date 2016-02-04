@@ -52,34 +52,24 @@ public final class UnsetParameterPropertyCommand extends ParameterShellCommand {
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            switch ( name ) {
-                case DATATYPE_NAME:
-                    parameter.setDatatypeName( transaction, null );
-                    break;
-                case DEFAULT_VALUE:
-                    parameter.setDefaultValue( transaction, null );
-                    break;
-                case DIRECTION:
-                    parameter.setDirection( transaction, null );
-                    break;
-                case LENGTH:
-                    parameter.setLength( transaction, RelationalConstants.DEFAULT_LENGTH );
-                    break;
-                case NULLABLE:
-                    parameter.setNullable( transaction, null );
-                    break;
-                case PRECISION:
-                    parameter.setPrecision( transaction, RelationalConstants.DEFAULT_PRECISION );
-                    break;
-                case RESULT:
-                    parameter.setResult( transaction, Parameter.DEFAULT_RESULT );
-                    break;
-                case SCALE:
-                    parameter.setScale( transaction, RelationalConstants.DEFAULT_SCALE );
-                    break;
-                default:
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Parameter.class.getSimpleName() );
-                    break;
+            if ( DATATYPE_NAME.equals( name ) ) {
+                parameter.setDatatypeName( transaction, null );
+            } else if ( DEFAULT_VALUE.equals( name ) ) {
+                parameter.setDefaultValue( transaction, null );
+            } else if ( DIRECTION.equals( name ) ) {
+                parameter.setDirection( transaction, null );
+            } else if ( LENGTH.equals( name ) ) {
+                parameter.setLength( transaction, RelationalConstants.DEFAULT_LENGTH );
+            } else if ( NULLABLE.equals( name ) ) {
+                parameter.setNullable( transaction, null );
+            } else if ( PRECISION.equals( name ) ) {
+                parameter.setPrecision( transaction, RelationalConstants.DEFAULT_PRECISION );
+            } else if ( RESULT.equals( name ) ) {
+                parameter.setResult( transaction, Parameter.DEFAULT_RESULT );
+            } else if ( SCALE.equals( name ) ) {
+                parameter.setScale( transaction, RelationalConstants.DEFAULT_SCALE );
+            } else {
+                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Parameter.class.getSimpleName() );
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {

@@ -9,7 +9,7 @@
 	<artifactId>komodo-spi</artifactId>
 	<name>Komodo SPI</name>
 	<description>System Interfaces for Komodo modules</description>
-
+<!--
 	<build>
 		<plugins>
 			<plugin>
@@ -22,4 +22,5 @@
 			</plugin>
 		</plugins>
 	</build>
+-->
 </project>

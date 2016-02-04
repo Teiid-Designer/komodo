@@ -54,77 +54,61 @@ public final class SetParameterPropertyCommand extends ParameterShellCommand {
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            switch ( name ) {
-                case DATATYPE_NAME:
-                    parameter.setDatatypeName( transaction, value );
-                    break;
-                case DEFAULT_VALUE:
-                    parameter.setDefaultValue( transaction, value );
-                    break;
-                case DIRECTION:
-                    if ( Direction.IN.name().equals( value ) ) {
-                        parameter.setDirection( transaction, Direction.IN );
-                    } else if ( Direction.IN_OUT.name().equals( value ) ) {
-                        parameter.setDirection( transaction, Direction.IN_OUT );
-                    } else if ( Direction.OUT.name().equals( value ) ) {
-                        parameter.setDirection( transaction, Direction.OUT );
-                    } else if ( Direction.VARIADIC.name().equals( value ) ) {
-                        parameter.setDirection( transaction, Direction.VARIADIC );
-                    } else {
-                        errorMsg = I18n.bind( ParameterCommandsI18n.invalidDirectionPropertyValue, NULLABLE );
-                    }
-
-                    break;
-                case LENGTH:
-                    try {
-                        final long length = Long.parseLong( value );
-                        parameter.setLength( transaction, length );
-                    } catch ( final NumberFormatException e ) {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, LENGTH );
-                    }
-
-                    break;
-                case NULLABLE:
-                    if ( Nullable.NO_NULLS.name().equals( value ) ) {
-                        parameter.setNullable( transaction, Nullable.NO_NULLS );
-                    } else if ( Nullable.NULLABLE.name().equals( value ) ) {
-                        parameter.setNullable( transaction, Nullable.NULLABLE );
-                    } else if ( Nullable.NULLABLE_UNKNOWN.name().equals( value ) ) {
-                        parameter.setNullable( transaction, Nullable.NULLABLE_UNKNOWN );
-                    } else {
-                        errorMsg = I18n.bind( ParameterCommandsI18n.invalidNullablePropertyValue, NULLABLE );
-                    }
-
-                    break;
-                case PRECISION:
-                    try {
-                        final long precision = Long.parseLong( value );
-                        parameter.setPrecision( transaction, precision );
-                    } catch ( final NumberFormatException e ) {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, PRECISION );
-                    }
-
-                    break;
-                case RESULT:
-                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                        parameter.setResult( transaction, Boolean.parseBoolean( value ) );
-                    } else {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, RESULT );
-                    }
-
-                    break;
-                case SCALE:
-                    try {
-                        final long scale = Long.parseLong( value );
-                        parameter.setScale( transaction, scale );
-                    } catch ( final NumberFormatException e ) {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, SCALE );
-                    }
-
-                    break;
-                default:
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Parameter.class.getSimpleName() );
-                    break;
+            if ( DATATYPE_NAME.equals( name ) ) {
+                parameter.setDatatypeName( transaction, value );
+            } else if ( DEFAULT_VALUE.equals( name ) ) {
+                parameter.setDefaultValue( transaction, value );
+            } else if ( DIRECTION.equals( name ) ) {
+                if ( Direction.IN.name().equals( value ) ) {
+                    parameter.setDirection( transaction, Direction.IN );
+                } else if ( Direction.IN_OUT.name().equals( value ) ) {
+                    parameter.setDirection( transaction, Direction.IN_OUT );
+                } else if ( Direction.OUT.name().equals( value ) ) {
+                    parameter.setDirection( transaction, Direction.OUT );
+                } else if ( Direction.VARIADIC.name().equals( value ) ) {
+                    parameter.setDirection( transaction, Direction.VARIADIC );
+                } else {
+                    errorMsg = I18n.bind( ParameterCommandsI18n.invalidDirectionPropertyValue, NULLABLE );
+                }
+            } else if ( LENGTH.equals( name ) ) {
+                try {
+                    final long length = Long.parseLong( value );
+                    parameter.setLength( transaction, length );
+                } catch ( final NumberFormatException e ) {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, LENGTH );
+                }
+            } else if ( NULLABLE.equals( name ) ) {
+                if ( Nullable.NO_NULLS.name().equals( value ) ) {
+                    parameter.setNullable( transaction, Nullable.NO_NULLS );
+                } else if ( Nullable.NULLABLE.name().equals( value ) ) {
+                    parameter.setNullable( transaction, Nullable.NULLABLE );
+                } else if ( Nullable.NULLABLE_UNKNOWN.name().equals( value ) ) {
+                    parameter.setNullable( transaction, Nullable.NULLABLE_UNKNOWN );
+                } else {
+                    errorMsg = I18n.bind( ParameterCommandsI18n.invalidNullablePropertyValue, NULLABLE );
+                }
+            } else if ( PRECISION.equals( name ) ) {
+                try {
+                    final long precision = Long.parseLong( value );
+                    parameter.setPrecision( transaction, precision );
+                } catch ( final NumberFormatException e ) {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, PRECISION );
+                }
+            } else if ( RESULT.equals( name ) ) {
+                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                    parameter.setResult( transaction, Boolean.parseBoolean( value ) );
+                } else {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, RESULT );
+                }
+            } else if ( SCALE.equals( name ) ) {
+                try {
+                    final long scale = Long.parseLong( value );
+                    parameter.setScale( transaction, scale );
+                } catch ( final NumberFormatException e ) {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, SCALE );
+                }
+            } else {
+                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Parameter.class.getSimpleName() );
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {

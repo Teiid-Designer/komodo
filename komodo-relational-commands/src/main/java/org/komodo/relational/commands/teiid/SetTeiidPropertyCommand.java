@@ -53,59 +53,44 @@ public final class SetTeiidPropertyCommand extends TeiidShellCommand {
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            switch ( name ) {
-                case ADMIN_PORT:
-                    try {
-                        final int port = Integer.parseInt( value );
-                        teiid.setAdminPort( transaction, port );
-                    } catch ( final NumberFormatException e ) {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, ADMIN_PORT );
-                    }
-
-                    break;
-                case ADMIN_PASSWORD:
-                    teiid.setAdminPassword( transaction, value );
-                    break;
-                case ADMIN_SECURE:
-                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                        teiid.setAdminSecure( transaction, Boolean.parseBoolean( value ) );
-                    } else {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, ADMIN_SECURE );
-                    }
-
-                    break;
-                case ADMIN_USER:
-                    teiid.setAdminUser( transaction, value );
-                    break;
-                case JDBC_PORT:
-                    try {
-                        final int port = Integer.parseInt( value );
-                        teiid.setJdbcPort( transaction, port );
-                    } catch ( final NumberFormatException e ) {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, JDBC_PORT );
-                    }
-
-                    break;
-                case JDBC_PASSWORD:
-                    teiid.setJdbcPassword( transaction, value );
-                    break;
-                case JDBC_SECURE:
-                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                        teiid.setJdbcSecure( transaction, Boolean.parseBoolean( value ) );
-                    } else {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, JDBC_SECURE );
-                    }
-
-                    break;
-                case JDBC_USER:
-                    teiid.setJdbcUsername( transaction, value );
-                    break;
-                case HOST:
-                    teiid.setHost( transaction, value );
-                    break;
-                default:
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Teiid.class.getSimpleName() );
-                    break;
+            if ( ADMIN_PORT.equals( name ) ) {
+                try {
+                    final int port = Integer.parseInt( value );
+                    teiid.setAdminPort( transaction, port );
+                } catch ( final NumberFormatException e ) {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, ADMIN_PORT );
+                }
+            } else if ( ADMIN_PASSWORD.equals( name ) ) {
+                teiid.setAdminPassword( transaction, value );
+            } else if ( ADMIN_SECURE.equals( name ) ) {
+                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                    teiid.setAdminSecure( transaction, Boolean.parseBoolean( value ) );
+                } else {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, ADMIN_SECURE );
+                }
+            } else if ( ADMIN_USER.equals( name ) ) {
+                teiid.setAdminUser( transaction, value );
+            } else if ( JDBC_PORT.equals( name ) ) {
+                try {
+                    final int port = Integer.parseInt( value );
+                    teiid.setJdbcPort( transaction, port );
+                } catch ( final NumberFormatException e ) {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, JDBC_PORT );
+                }
+            } else if ( JDBC_PASSWORD.equals( name ) ) {
+                teiid.setJdbcPassword( transaction, value );
+            } else if ( JDBC_SECURE.equals( name ) ) {
+                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                    teiid.setJdbcSecure( transaction, Boolean.parseBoolean( value ) );
+                } else {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, JDBC_SECURE );
+                }
+            } else if ( JDBC_USER.equals( name ) ) {
+                teiid.setJdbcUsername( transaction, value );
+            } else if ( HOST.equals( name ) ) {
+                teiid.setHost( transaction, value );
+            } else {
+                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Teiid.class.getSimpleName() );
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {

@@ -17,9 +17,7 @@ package org.komodo.shell.commands;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-
 import java.util.ArrayList;
-
 import org.junit.Test;
 import org.komodo.shell.AbstractCommandTest;
 import org.komodo.shell.api.CommandResult;
@@ -83,7 +81,7 @@ public class ShowSummaryCommandTest extends AbstractCommandTest {
 
     @Test
     public void testTabCompleter()throws Exception{
-    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	ArrayList<CharSequence> candidates=new ArrayList<CharSequence>();
        	setup("commandFiles","addChildren.cmd");
        	assertTabCompletion("show-summary invalid", candidates);
 

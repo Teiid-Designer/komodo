@@ -63,7 +63,7 @@ public class TableConstraintCommandProvider implements ShellCommandProvider {
      */
     @Override
     public Set< Class< ? extends ShellCommand > > provideCommands() {
-        final Set< Class< ? extends ShellCommand > > result = new HashSet< >();
+        final Set< Class< ? extends ShellCommand > > result = new HashSet< Class< ? extends ShellCommand > >();
 
         result.add( AddConstraintColumnCommand.class );
         result.add( DeleteConstraintColumnCommand.class );

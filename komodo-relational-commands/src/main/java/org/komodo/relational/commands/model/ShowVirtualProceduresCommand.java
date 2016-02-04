@@ -8,10 +8,8 @@
 package org.komodo.relational.commands.model;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import org.komodo.relational.commands.workspace.WorkspaceCommandsI18n;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Procedure;
@@ -58,7 +56,7 @@ public final class ShowVirtualProceduresCommand extends ModelShellCommand {
                            I18n.bind( ModelCommandsI18n.noVirtualProcedures, model.getName( getTransaction() ) ) );
                 }
             } else {
-                final List< Procedure > virtualProcedures = new ArrayList< >( procedures.length );
+                final List< Procedure > virtualProcedures = new ArrayList< Procedure >( procedures.length );
 
                 for ( final Procedure procedure : procedures ) {
                     if ( VirtualProcedure.RESOLVER.resolvable( getTransaction(), procedure ) ) {

@@ -19,7 +19,7 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateTable;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon.CreateTable;
 
 /**
  * Represents a relational model view.
@@ -40,7 +40,7 @@ public interface View extends Table {
      * An empty array of views.
      */
     View[] NO_VIEWS = new View[0];
-    
+
     /**
      * {@inheritDoc}
      *

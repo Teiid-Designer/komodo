@@ -52,27 +52,21 @@ public final class SetVdbImportPropertyCommand extends VdbImportShellCommand {
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            switch ( name ) {
-                case IMPORT_DATA_POLICIES:
-                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                        vdbImport.setImportDataPolicies( transaction, Boolean.parseBoolean( value ) );
-                    } else {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, IMPORT_DATA_POLICIES );
-                    }
-
-                    break;
-                case VERSION:
-                    try {
-                        final int version = Integer.parseInt( value );
-                        vdbImport.setVersion( transaction, version );
-                    } catch ( final NumberFormatException e ) {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, VERSION );
-                    }
-
-                    break;
-                default:
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, VdbImport.class.getSimpleName() );
-                    break;
+            if ( IMPORT_DATA_POLICIES.equals( name ) ) {
+                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                    vdbImport.setImportDataPolicies( transaction, Boolean.parseBoolean( value ) );
+                } else {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, IMPORT_DATA_POLICIES );
+                }
+            } else if ( VERSION.equals( name ) ) {
+                try {
+                    final int version = Integer.parseInt( value );
+                    vdbImport.setVersion( transaction, version );
+                } catch ( final NumberFormatException e ) {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, VERSION );
+                }
+            } else {
+                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, VdbImport.class.getSimpleName() );
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {

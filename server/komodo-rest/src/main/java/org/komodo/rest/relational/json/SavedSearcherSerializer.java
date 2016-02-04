@@ -30,24 +30,27 @@ public final class SavedSearcherSerializer extends TypeAdapter< KomodoSavedSearc
     @Override
     public KomodoSavedSearcher read( final JsonReader in ) throws IOException {
         final KomodoSavedSearcher status = new KomodoSavedSearcher();
+        boolean foundName = false;
+        boolean foundQuery = false;
+        boolean foundParameter = false;
+
         in.beginObject();
 
         while ( in.hasNext() ) {
             final String name = in.nextName();
 
-            switch ( name ) {
-                case KomodoSavedSearcher.NAME_LABEL:
-                    status.setName(in.nextString());
-                    break;
-                case KomodoSavedSearcher.QUERY_LABEL:
-                    status.setQuery(in.nextString());
-                    break;
-                case KomodoSavedSearcher.PARAMETER_LABEL:
-                    final String[] parameters = BUILDER.fromJson( in, String[].class );
-                    status.setParameters(Arrays.asList(parameters));
-                    break;
-                default:
-                    throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
+            if ( !foundName && KomodoSavedSearcher.NAME_LABEL.equals( name ) ) {
+                status.setName( in.nextString() );
+                foundName = true;
+            } else if ( !foundQuery && KomodoSavedSearcher.QUERY_LABEL.equals( name ) ) {
+                status.setQuery( in.nextString() );
+                foundQuery = true;
+            } else if ( !foundParameter && KomodoSavedSearcher.PARAMETER_LABEL.equals( name ) ) {
+                final String[] parameters = BUILDER.fromJson( in, String[].class );
+                status.setParameters( Arrays.asList( parameters ) );
+                foundParameter = true;
+            } else {
+                throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
             }
         }
 

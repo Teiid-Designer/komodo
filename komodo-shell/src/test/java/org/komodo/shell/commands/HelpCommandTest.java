@@ -16,10 +16,8 @@
 package org.komodo.shell.commands;
 
 import static org.junit.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.Arrays;
-
 import org.junit.Test;
 import org.komodo.shell.AbstractCommandTest;
 import org.komodo.shell.api.CommandResult;
@@ -63,7 +61,7 @@ public class HelpCommandTest extends AbstractCommandTest {
 
     @Test
     public void testTabCompleter()throws Exception{
-    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	ArrayList<CharSequence> candidates=new ArrayList<CharSequence>();
 
 
     	assertTabCompletion("help show-S", candidates);
@@ -73,6 +71,6 @@ public class HelpCommandTest extends AbstractCommandTest {
     	assertTabCompletion("help show-s", candidates);
 
     	assertTabCompletion("help ", Arrays.asList(wsStatus.getAvailableCommandNames()));
-    	
+
     }
 }

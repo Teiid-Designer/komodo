@@ -39,36 +39,27 @@ public final class SearcherAttributesSerializer extends TypeAdapter< KomodoSearc
         while ( in.hasNext() ) {
             final String name = in.nextName();
 
-            switch ( name ) {
-                case KomodoSearcherAttributes.SEARCH_NAME_LABEL:
-                    searcherAttr.setSearchName(in.nextString());
-                    break;
-                case KomodoSearcherAttributes.TYPE_LABEL:
-                    searcherAttr.setType(in.nextString());
-                    break;
-                case KomodoSearcherAttributes.PARENT_LABEL:
-                    searcherAttr.setParent(in.nextString());
-                    break;
-                case KomodoSearcherAttributes.ANCESTOR_LABEL:
-                    searcherAttr.setAncestor(in.nextString());
-                    break;
-                case KomodoSearcherAttributes.PATH_LABEL:
-                    searcherAttr.setPath(in.nextString());
-                    break;
-                case KomodoSearcherAttributes.CONTAINS_LABEL:
-                    searcherAttr.setContains(in.nextString());
-                    break;
-                case KomodoSearcherAttributes.OBJECT_NAME_LABEL:
-                    searcherAttr.setObjectName(in.nextString());
-                    break;
-                case KomodoSearcherAttributes.PARAMETERS_LABEL:
-                    Map<String, String> parameters = BUILDER.fromJson(in, Map.class);
-                    for (Map.Entry<String, String> parameter : parameters.entrySet()) {
-                        searcherAttr.setParameter(parameter.getKey(), parameter.getValue());
-                    }
-                    break;
-                default:
-                    throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
+            if ( KomodoSearcherAttributes.SEARCH_NAME_LABEL.equals( name ) ) {
+                searcherAttr.setSearchName( in.nextString() );
+            } else if ( KomodoSearcherAttributes.TYPE_LABEL.equals( name ) ) {
+                searcherAttr.setType( in.nextString() );
+            } else if ( KomodoSearcherAttributes.PARENT_LABEL.equals( name ) ) {
+                searcherAttr.setParent( in.nextString() );
+            } else if ( KomodoSearcherAttributes.ANCESTOR_LABEL.equals( name ) ) {
+                searcherAttr.setAncestor( in.nextString() );
+            } else if ( KomodoSearcherAttributes.PATH_LABEL.equals( name ) ) {
+                searcherAttr.setPath( in.nextString() );
+            } else if ( KomodoSearcherAttributes.CONTAINS_LABEL.equals( name ) ) {
+                searcherAttr.setContains( in.nextString() );
+            } else if ( KomodoSearcherAttributes.OBJECT_NAME_LABEL.equals( name ) ) {
+                searcherAttr.setObjectName( in.nextString() );
+            } else if ( KomodoSearcherAttributes.PARAMETERS_LABEL.equals( name ) ) {
+                Map< String, String > parameters = BUILDER.fromJson( in, Map.class );
+                for ( Map.Entry< String, String > parameter : parameters.entrySet() ) {
+                    searcherAttr.setParameter( parameter.getKey(), parameter.getValue() );
+                }
+            } else {
+                throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
             }
         }
 

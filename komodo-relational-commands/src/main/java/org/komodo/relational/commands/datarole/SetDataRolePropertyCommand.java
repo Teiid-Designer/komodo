@@ -52,37 +52,28 @@ public final class SetDataRolePropertyCommand extends DataRoleShellCommand {
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            switch ( name ) {
-                case ALLOWED_CREATE_TEMPORARY_TABLES:
-                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                        dataRole.setAllowCreateTempTables( transaction, Boolean.parseBoolean( value ) );
-                    } else {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, ALLOWED_CREATE_TEMPORARY_TABLES );
-                    }
-
-                    break;
-                case ANY_AUTHENTICATED:
-                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                        dataRole.setAnyAuthenticated( transaction, Boolean.parseBoolean( value ) );
-                    } else {
-                        I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, ANY_AUTHENTICATED );
-                    }
-
-                    break;
-                case DESCRIPTION:
-                    dataRole.setDescription( transaction, value );
-                    break;
-                case GRANT_ALL:
-                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                        dataRole.setGrantAll( transaction, Boolean.parseBoolean( value ) );
-                    } else {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, GRANT_ALL );
-                    }
-
-                    break;
-                default:
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, DataRole.class.getSimpleName() );
-                    break;
+            if ( ALLOWED_CREATE_TEMPORARY_TABLES.equals( name ) ) {
+                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                    dataRole.setAllowCreateTempTables( transaction, Boolean.parseBoolean( value ) );
+                } else {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, ALLOWED_CREATE_TEMPORARY_TABLES );
+                }
+            } else if ( ANY_AUTHENTICATED.equals( name ) ) {
+                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                    dataRole.setAnyAuthenticated( transaction, Boolean.parseBoolean( value ) );
+                } else {
+                    I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, ANY_AUTHENTICATED );
+                }
+            } else if ( DESCRIPTION.equals( name ) ) {
+                dataRole.setDescription( transaction, value );
+            } else if ( GRANT_ALL.equals( name ) ) {
+                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                    dataRole.setGrantAll( transaction, Boolean.parseBoolean( value ) );
+                } else {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, GRANT_ALL );
+                }
+            } else {
+                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, DataRole.class.getSimpleName() );
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {

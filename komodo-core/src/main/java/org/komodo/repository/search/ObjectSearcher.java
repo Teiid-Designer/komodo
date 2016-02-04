@@ -64,7 +64,7 @@ public class ObjectSearcher implements SQLConstants {
 
     private String customWhereClause;
 
-    private Map<String, String> parameters = new HashMap<>();
+    private Map<String, String> parameters = new HashMap<String, String>();
 
     /**
      * @param repository the repository to search

@@ -9,7 +9,7 @@
 	<artifactId>komodo-utils-modeshape-logger</artifactId>
 	<name>Komodo Logger</name>
 	<description>Komodo Logger Modeshape Implementation</description>
-
+<!--
 	<build>
 		<plugins>
 			<plugin>
@@ -22,7 +22,7 @@
 			</plugin>
 		</plugins>
 	</build>
-
+-->
 	<dependencies>
 		<dependency>
 			<groupId>org.komodo</groupId>

@@ -51,16 +51,12 @@ public final class UnsetModelSourcePropertyCommand extends ModelSourceShellComma
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            switch ( name ) {
-                case JNDI_NAME:
-                    source.setJndiName( transaction, null );
-                    break;
-                case TRANSLATOR_NAME:
-                    source.setTranslatorName( transaction, null );
-                    break;
-                default:
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, ModelSource.class.getSimpleName() );
-                    break;
+            if ( JNDI_NAME.equals( name ) ) {
+                source.setJndiName( transaction, null );
+            } else if ( TRANSLATOR_NAME.equals( name ) ) {
+                source.setTranslatorName( transaction, null );
+            } else {
+                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, ModelSource.class.getSimpleName() );
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {

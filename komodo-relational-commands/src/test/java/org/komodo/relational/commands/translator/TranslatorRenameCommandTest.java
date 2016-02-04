@@ -45,7 +45,7 @@ public final class TranslatorRenameCommandTest extends AbstractCommandTest {
         final String[] commands = { "cd myTranslator1" };
         final CommandResult result = execute( commands );
         assertCommandResultOk( result );
-        assertTabCompletion( "rename ", Collections.emptyList() );
+        assertTabCompletion( "rename ", Collections.<CharSequence>emptyList() );
     }
 
     @Test

@@ -50,7 +50,7 @@ public final class UnsetTeiidPropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testTabCompleter()throws Exception{
-    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	ArrayList<CharSequence> candidates=new ArrayList<CharSequence>();
     	setup("commandFiles","addServers.cmd");
     	final String[] commands = { "cd myServer1" };
     	final CommandResult result = execute( commands );

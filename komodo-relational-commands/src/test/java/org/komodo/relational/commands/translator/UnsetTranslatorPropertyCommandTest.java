@@ -56,7 +56,7 @@ public final class UnsetTranslatorPropertyCommandTest extends AbstractCommandTes
 
     @Test
     public void testTabCompleter()throws Exception{
-    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	ArrayList<CharSequence> candidates=new ArrayList<CharSequence>();
     	setup("commandFiles","addTranslators.cmd");
     	final String[] commands = { "cd myTranslator1" };
     	final CommandResult result = execute( commands );

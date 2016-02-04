@@ -52,34 +52,24 @@ public final class UnsetDataTypeResultSetPropertyCommand extends DataTypeResultS
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            switch ( name ) {
-                case DATATYPE_NAME:
-                    rs.setType( transaction, null );
-                    break;
-                case DESCRIPTION:
-                    rs.setDescription( transaction, null );
-                    break;
-                case LENGTH:
-                    rs.setLength( transaction, RelationalConstants.DEFAULT_LENGTH );
-                    break;
-                case NAME_IN_SOURCE:
-                    rs.setNameInSource( transaction, null );
-                    break;
-                case NULLABLE:
-                    rs.setNullable( transaction, null );
-                    break;
-                case PRECISION:
-                    rs.setPrecision( transaction, RelationalConstants.DEFAULT_PRECISION );
-                    break;
-                case SCALE:
-                    rs.setScale( transaction, RelationalConstants.DEFAULT_SCALE );
-                    break;
-                case UUID:
-                    rs.setUuid( transaction, null );
-                    break;
-                default:
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, DataTypeResultSet.class.getSimpleName() );
-                    break;
+            if ( DATATYPE_NAME.equals( name ) ) {
+                rs.setType( transaction, null );
+            } else if ( DESCRIPTION.equals( name ) ) {
+                rs.setDescription( transaction, null );
+            } else if ( LENGTH.equals( name ) ) {
+                rs.setLength( transaction, RelationalConstants.DEFAULT_LENGTH );
+            } else if ( NAME_IN_SOURCE.equals( name ) ) {
+                rs.setNameInSource( transaction, null );
+            } else if ( NULLABLE.equals( name ) ) {
+                rs.setNullable( transaction, null );
+            } else if ( PRECISION.equals( name ) ) {
+                rs.setPrecision( transaction, RelationalConstants.DEFAULT_PRECISION );
+            } else if ( SCALE.equals( name ) ) {
+                rs.setScale( transaction, RelationalConstants.DEFAULT_SCALE );
+            } else if ( UUID.equals( name ) ) {
+                rs.setUuid( transaction, null );
+            } else {
+                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, DataTypeResultSet.class.getSimpleName() );
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {

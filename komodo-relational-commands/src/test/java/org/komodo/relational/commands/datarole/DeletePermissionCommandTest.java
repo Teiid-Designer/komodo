@@ -16,9 +16,7 @@
 package org.komodo.relational.commands.datarole;
 
 import static org.junit.Assert.assertEquals;
-
 import java.util.ArrayList;
-
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.vdb.DataRole;
@@ -64,7 +62,7 @@ public class DeletePermissionCommandTest extends AbstractCommandTest {
     public void testTabCompleter()throws Exception{
 
     	setup("commandFiles","addPermissions.cmd");
-    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	ArrayList<CharSequence> candidates=new ArrayList<CharSequence>();
     	candidates.add("myPermission1");
     	candidates.add("myPermission2");
 

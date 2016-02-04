@@ -117,7 +117,7 @@ public abstract class RelationalObjectImpl extends ObjectImpl implements Relatio
         if ( kids.length == 0 ) {
             result = kids;
         } else {
-            final List< KomodoObject > temp = new ArrayList<>( kids.length );
+            final List< KomodoObject > temp = new ArrayList< KomodoObject >( kids.length );
 
             for ( final KomodoObject kobject : kids ) {
                 // ensure child has at least one non-filtered descriptor
@@ -159,7 +159,7 @@ public abstract class RelationalObjectImpl extends ObjectImpl implements Relatio
             if ( kids.length == 0 ) {
                 result = kids;
             } else {
-                final List< KomodoObject > temp = new ArrayList<>( kids.length );
+                final List< KomodoObject > temp = new ArrayList< KomodoObject >( kids.length );
 
                 for ( final KomodoObject kobject : kids ) {
                     // ensure child has at least one non-filtered descriptor
@@ -213,7 +213,7 @@ public abstract class RelationalObjectImpl extends ObjectImpl implements Relatio
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         final Descriptor[] temp = super.getDescriptors( transaction );
-        final List< Descriptor > result = new ArrayList<>( temp.length );
+        final List< Descriptor > result = new ArrayList< Descriptor >( temp.length );
 
         if ( ( temp.length != 0 ) && ( getFilters().length != 0 ) ) {
             for ( final Descriptor descriptor : temp ) {
@@ -306,7 +306,7 @@ public abstract class RelationalObjectImpl extends ObjectImpl implements Relatio
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         final PropertyDescriptor[] descriptors = super.getPropertyDescriptors( transaction );
-        final List< PropertyDescriptor > result = new ArrayList<>( descriptors.length );
+        final List< PropertyDescriptor > result = new ArrayList< PropertyDescriptor >( descriptors.length );
 
         for ( final PropertyDescriptor descriptor : descriptors ) {
             if ( !isPropertyFiltered( descriptor.getName() ) ) {
@@ -329,7 +329,7 @@ public abstract class RelationalObjectImpl extends ObjectImpl implements Relatio
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         final String[] props = super.getPropertyNames( transaction );
-        final List< String > result = new ArrayList<>( props.length );
+        final List< String > result = new ArrayList< String >( props.length );
 
         for ( final String propName : props ) {
             if ( !isPropertyFiltered( propName ) ) {
@@ -633,7 +633,7 @@ public abstract class RelationalObjectImpl extends ObjectImpl implements Relatio
                 return descriptors;
             }
 
-            final List< Descriptor > result = new ArrayList<>( descriptors.length );
+            final List< Descriptor > result = new ArrayList< Descriptor >( descriptors.length );
 
             for ( final Descriptor descriptor : descriptors ) {
                 if ( !RelationalObjectImpl.this.isDescriptorFiltered( descriptor.getName() ) ) {
@@ -667,7 +667,7 @@ public abstract class RelationalObjectImpl extends ObjectImpl implements Relatio
                 return descriptors;
             }
 
-            final List< PropertyDescriptor > result = new ArrayList<>( descriptors.length );
+            final List< PropertyDescriptor > result = new ArrayList< PropertyDescriptor >( descriptors.length );
 
             for ( final PropertyDescriptor descriptor : descriptors ) {
                 if ( !RelationalObjectImpl.this.isPropertyFiltered( descriptor.getName() ) ) {

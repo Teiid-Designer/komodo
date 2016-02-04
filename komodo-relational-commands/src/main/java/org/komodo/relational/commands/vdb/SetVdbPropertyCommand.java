@@ -52,60 +52,44 @@ public final class SetVdbPropertyCommand extends VdbShellCommand {
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            switch ( name ) {
-                case ALLOWED_LANGUAGES:
-                    vdb.setAllowedLanguages( transaction, value );
-                    break;
-                case AUTHENTICATION_TYPE:
-                    vdb.setAuthenticationType( transaction, value );
-                    break;
-                case CONNECTION_TYPE:
-                    vdb.setConnectionType( transaction, value );
-                    break;
-                case DESCRIPTION:
-                    vdb.setDescription( transaction, value );
-                    break;
-                case GSS_PATTERN:
-                    vdb.setGssPattern( transaction, value );
-                    break;
-                case ORIGINAL_FILE_PATH:
-                    vdb.setOriginalFilePath( transaction, value );
-                    break;
-                case PASSWORD_PATTERN:
-                    vdb.setPasswordPattern( transaction, value );
-                    break;
-                case PREVIEW:
-                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                        vdb.setPreview( transaction, Boolean.parseBoolean( value ) );
-                    } else {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, PREVIEW );
-                    }
-
-                    break;
-                case QUERY_TIMEOUT:
-                    try {
-                        final int timeout = Integer.parseInt( value );
-                        vdb.setQueryTimeout( transaction, timeout );
-                    } catch ( final NumberFormatException e ) {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, QUERY_TIMEOUT );
-                    }
-
-                    break;
-                case SECURITY_DOMAIN:
-                    vdb.setSecurityDomain( transaction, value );
-                    break;
-                case VERSION:
-                    try {
-                        final int version = Integer.parseInt( value );
-                        vdb.setVersion( transaction, version );
-                    } catch ( final NumberFormatException e ) {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, VERSION );
-                    }
-
-                    break;
-                default:
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Vdb.class.getSimpleName() );
-                    break;
+            if ( ALLOWED_LANGUAGES.equals( name ) ) {
+                vdb.setAllowedLanguages( transaction, value );
+            } else if ( AUTHENTICATION_TYPE.equals( name ) ) {
+                vdb.setAuthenticationType( transaction, value );
+            } else if ( CONNECTION_TYPE.equals( name ) ) {
+                vdb.setConnectionType( transaction, value );
+            } else if ( DESCRIPTION.equals( name ) ) {
+                vdb.setDescription( transaction, value );
+            } else if ( GSS_PATTERN.equals( name ) ) {
+                vdb.setGssPattern( transaction, value );
+            } else if ( ORIGINAL_FILE_PATH.equals( name ) ) {
+                vdb.setOriginalFilePath( transaction, value );
+            } else if ( PASSWORD_PATTERN.equals( name ) ) {
+                vdb.setPasswordPattern( transaction, value );
+            } else if ( PREVIEW.equals( name ) ) {
+                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                    vdb.setPreview( transaction, Boolean.parseBoolean( value ) );
+                } else {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, PREVIEW );
+                }
+            } else if ( QUERY_TIMEOUT.equals( name ) ) {
+                try {
+                    final int timeout = Integer.parseInt( value );
+                    vdb.setQueryTimeout( transaction, timeout );
+                } catch ( final NumberFormatException e ) {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, QUERY_TIMEOUT );
+                }
+            } else if ( SECURITY_DOMAIN.equals( name ) ) {
+                vdb.setSecurityDomain( transaction, value );
+            } else if ( VERSION.equals( name ) ) {
+                try {
+                    final int version = Integer.parseInt( value );
+                    vdb.setVersion( transaction, version );
+                } catch ( final NumberFormatException e ) {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, VERSION );
+                }
+            } else {
+                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Vdb.class.getSimpleName() );
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {

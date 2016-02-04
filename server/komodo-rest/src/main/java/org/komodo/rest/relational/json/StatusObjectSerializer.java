@@ -34,21 +34,23 @@ public final class StatusObjectSerializer extends TypeAdapter< KomodoStatusObjec
     @Override
     public KomodoStatusObject read( final JsonReader in ) throws IOException {
         final KomodoStatusObject status = new KomodoStatusObject();
+        boolean foundTitle = false;
+        boolean foundInfo = false;
+
         in.beginObject();
 
         while ( in.hasNext() ) {
             final String name = in.nextName();
 
-            switch ( name ) {
-                case KomodoStatusObject.TITLE_LABEL:
-                    status.setTitle(in.nextString());
-                    break;
-                case KomodoStatusObject.INFO_LABEL:
-                    Map<String, String> attributes = BUILDER.fromJson(in, Map.class);
-                    status.setAttributes(attributes);
-                    break;
-                default:
-                    throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
+            if ( !foundTitle && KomodoStatusObject.TITLE_LABEL.equals( name ) ) {
+                status.setTitle( in.nextString() );
+                foundTitle = true;
+            } else if ( !foundInfo && KomodoStatusObject.INFO_LABEL.equals( name ) ) {
+                Map< String, String > attributes = BUILDER.fromJson( in, Map.class );
+                status.setAttributes( attributes );
+                foundInfo = true;
+            } else {
+                throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
             }
         }
 

@@ -51,13 +51,10 @@ public final class UnsetMaskPropertyCommand extends MaskShellCommand {
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            switch ( name ) {
-                case ORDER:
-                    mask.setOrder( transaction, null );
-                    break;
-                default:
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Mask.class.getSimpleName() );
-                    break;
+            if ( ORDER.equals( name ) ) {
+                mask.setOrder( transaction, null );
+            } else {
+                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Mask.class.getSimpleName() );
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {

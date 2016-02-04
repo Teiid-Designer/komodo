@@ -52,31 +52,22 @@ public final class UnsetStoredProcedurePropertyCommand extends StoredProcedureSh
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            switch ( name ) {
-                case DESCRIPTION:
-                    proc.setDescription( getTransaction(), null );
-                    break;
-                case NAME_IN_SOURCE:
-                    proc.setNameInSource( getTransaction(), null );
-                    break;
-                case NATIVE_QUERY:
-                    proc.setNativeQuery( transaction, null );
-                    break;
-                case NON_PREPARED:
-                    proc.setNonPrepared( transaction, StoredProcedure.DEFAULT_NON_PREPARED );
-                    break;
-                case SCHEMA_ELEMENT_TYPE:
-                    proc.setSchemaElementType( transaction, null );
-                    break;
-                case UPDATE_COUNT:
-                    proc.setUpdateCount( transaction, AbstractProcedure.DEFAULT_UPDATE_COUNT );
-                    break;
-                case UUID:
-                    proc.setUuid( getTransaction(), null );
-                    break;
-                default:
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, StoredProcedure.class.getSimpleName() );
-                    break;
+            if ( DESCRIPTION.equals( name ) ) {
+                proc.setDescription( getTransaction(), null );
+            } else if ( NAME_IN_SOURCE.equals( name ) ) {
+                proc.setNameInSource( getTransaction(), null );
+            } else if ( NATIVE_QUERY.equals( name ) ) {
+                proc.setNativeQuery( transaction, null );
+            } else if ( NON_PREPARED.equals( name ) ) {
+                proc.setNonPrepared( transaction, StoredProcedure.DEFAULT_NON_PREPARED );
+            } else if ( SCHEMA_ELEMENT_TYPE.equals( name ) ) {
+                proc.setSchemaElementType( transaction, null );
+            } else if ( UPDATE_COUNT.equals( name ) ) {
+                proc.setUpdateCount( transaction, AbstractProcedure.DEFAULT_UPDATE_COUNT );
+            } else if ( UUID.equals( name ) ) {
+                proc.setUuid( getTransaction(), null );
+            } else {
+                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, StoredProcedure.class.getSimpleName() );
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {

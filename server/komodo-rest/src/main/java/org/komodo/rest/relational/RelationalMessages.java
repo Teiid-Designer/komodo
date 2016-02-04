@@ -319,7 +319,7 @@ public final class RelationalMessages {
             return text;
         }
 
-        List<Object> expandedParam = new ArrayList<>();
+        List<Object> expandedParam = new ArrayList<Object>();
         expandParameters(parameters, expandedParam);
 
         // return formatted message

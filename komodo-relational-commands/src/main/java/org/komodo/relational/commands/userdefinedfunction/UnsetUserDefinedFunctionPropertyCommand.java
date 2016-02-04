@@ -53,61 +53,44 @@ public final class UnsetUserDefinedFunctionPropertyCommand extends UserDefinedFu
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            switch ( name ) {
-                case AGGREGATE:
-                    func.setAggregate( transaction, Function.DEFAULT_AGGREGATE );
-                    break;
-                case ALLOWS_DISTINCT:
-                    func.setAllowsDistinct( transaction, Function.DEFAULT_ALLOWS_DISTINCT );
-                    break;
-                case ALLOWS_ORDERBY:
-                    func.setAllowsOrderBy( transaction, Function.DEFAULT_ALLOWS_ORDER_BY );
-                    break;
-                case ANALYTIC:
-                    func.setAnalytic( transaction, Function.DEFAULT_ANALYTIC );
-                    break;
-                case CATEGORY:
-                    func.setCategory( getTransaction(), null );
-                    break;
-                case DECOMPOSABLE:
-                    func.setDecomposable( transaction, Function.DEFAULT_DECOMPOSABLE );
-                    break;
-                case DESCRIPTION:
-                    func.setDescription( getTransaction(), null );
-                    break;
-                case DETERMINISM:
-                    func.setDeterminism( transaction, Function.Determinism.COMMAND_DETERMINISTIC );
-                    break;
-                case JAVA_CLASS:
-                    func.setJavaClass( getTransaction(), null );
-                    break;
-                case JAVA_METHOD:
-                    func.setJavaMethod( getTransaction(), null );
-                    break;
-                case NAME_IN_SOURCE:
-                    func.setNameInSource( getTransaction(), null );
-                    break;
-                case NULL_ON_NULL:
-                    func.setNullOnNull( transaction, Function.DEFAULT_NULL_ON_NULL );
-                    break;
-                case SCHEMA_ELEMENT_TYPE:
-                    func.setSchemaElementType( transaction, null );
-                    break;
-                case UPDATE_COUNT:
-                    func.setUpdateCount( transaction, AbstractProcedure.DEFAULT_UPDATE_COUNT );
-                    break;
-                case USES_DISTINCT_ROWS:
-                    func.setUsesDistinctRows( transaction, Function.DEFAULT_USES_DISTINCT_ROWS );
-                    break;
-                case UUID:
-                    func.setUuid( getTransaction(), null );
-                    break;
-                case VAR_ARGS:
-                    func.setVarArgs( transaction, Function.DEFAULT_VARARGS );
-                    break;
-                default:
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, UserDefinedFunction.class.getSimpleName() );
-                    break;
+            if ( AGGREGATE.equals( name ) ) {
+                func.setAggregate( transaction, Function.DEFAULT_AGGREGATE );
+            } else if ( ALLOWS_DISTINCT.equals( name ) ) {
+                func.setAllowsDistinct( transaction, Function.DEFAULT_ALLOWS_DISTINCT );
+            } else if ( ALLOWS_ORDERBY.equals( name ) ) {
+                func.setAllowsOrderBy( transaction, Function.DEFAULT_ALLOWS_ORDER_BY );
+            } else if ( ANALYTIC.equals( name ) ) {
+                func.setAnalytic( transaction, Function.DEFAULT_ANALYTIC );
+            } else if ( CATEGORY.equals( name ) ) {
+                func.setCategory( getTransaction(), null );
+            } else if ( DECOMPOSABLE.equals( name ) ) {
+                func.setDecomposable( transaction, Function.DEFAULT_DECOMPOSABLE );
+            } else if ( DESCRIPTION.equals( name ) ) {
+                func.setDescription( getTransaction(), null );
+            } else if ( DETERMINISM.equals( name ) ) {
+                func.setDeterminism( transaction, Function.Determinism.COMMAND_DETERMINISTIC );
+            } else if ( JAVA_CLASS.equals( name ) ) {
+                func.setJavaClass( getTransaction(), null );
+            } else if ( JAVA_METHOD.equals( name ) ) {
+                func.setJavaMethod( getTransaction(), null );
+            } else if ( NAME_IN_SOURCE.equals( name ) ) {
+                func.setNameInSource( getTransaction(), null );
+            } else if ( NULL_ON_NULL.equals( name ) ) {
+                func.setNullOnNull( transaction, Function.DEFAULT_NULL_ON_NULL );
+            } else if ( SCHEMA_ELEMENT_TYPE.equals( name ) ) {
+                func.setSchemaElementType( transaction, null );
+            } else if ( UPDATE_COUNT.equals( name ) ) {
+                func.setUpdateCount( transaction, AbstractProcedure.DEFAULT_UPDATE_COUNT );
+            } else if ( USES_DISTINCT_ROWS.equals( name ) ) {
+                func.setUsesDistinctRows( transaction, Function.DEFAULT_USES_DISTINCT_ROWS );
+            } else if ( UUID.equals( name ) ) {
+                func.setUuid( getTransaction(), null );
+            } else if ( VAR_ARGS.equals( name ) ) {
+                func.setVarArgs( transaction, Function.DEFAULT_VARARGS );
+            } else {
+                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName,
+                                      name,
+                                      UserDefinedFunction.class.getSimpleName() );
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {

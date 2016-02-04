@@ -7,7 +7,7 @@
 */
 package org.komodo.relational.commands.resultset;
 
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 import org.komodo.relational.model.DataTypeResultSet;
 import org.komodo.relational.model.ProcedureResultSet;
@@ -60,7 +60,9 @@ public class ResultSetCommandProvider implements ShellCommandProvider {
      */
     @Override
     public Set< Class< ? extends ShellCommand > > provideCommands() {
-        return Collections.singleton( ResultSetRenameCommand.class );
+        final Set< Class< ? extends ShellCommand > > result = new HashSet< Class< ? extends ShellCommand > >( 1 );
+        result.add( ResultSetRenameCommand.class );
+        return result;
     }
 
     /**

@@ -65,7 +65,7 @@ public final class UnsetStoredProcedurePropertyCommandTest extends AbstractComma
 
     @Test
     public void testTabCompleter()throws Exception{
-    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	ArrayList<CharSequence> candidates=new ArrayList<CharSequence>();
     	setup("commandFiles","addStoredProcedures.cmd");
     	final String[] commands = { "cd myStoredProcedure1" };
     	final CommandResult result = execute( commands );

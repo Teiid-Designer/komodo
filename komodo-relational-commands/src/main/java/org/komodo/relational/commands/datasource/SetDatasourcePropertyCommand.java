@@ -52,38 +52,28 @@ public final class SetDatasourcePropertyCommand extends DatasourceShellCommand {
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            switch ( name ) {
-                case JNDI_NAME:
-                    datasource.setJndiName( transaction, value );
-                    break;
-                case DRIVER_NAME:
-                    datasource.setDriverName( transaction, value );
-                    break;
-                case CLASS_NAME:
-                    datasource.setClassName( transaction, value );
-                    break;
-                case PROFILE_NAME:
-                    datasource.setProfileName( transaction, value );
-                    break;
-                case JDBC:
-                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                        datasource.setJdbc( transaction, Boolean.parseBoolean( value ) );
-                    } else {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, JDBC );
-                    }
-
-                    break;
-                case PREVIEW:
-                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                        datasource.setPreview( transaction, Boolean.parseBoolean( value ) );
-                    } else {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, PREVIEW );
-                    }
-
-                    break;
-                default:
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Datasource.class.getSimpleName() );
-                    break;
+            if ( JNDI_NAME.equals( name ) ) {
+                datasource.setJndiName( transaction, value );
+            } else if ( DRIVER_NAME.equals( name ) ) {
+                datasource.setDriverName( transaction, value );
+            } else if ( CLASS_NAME.equals( name ) ) {
+                datasource.setClassName( transaction, value );
+            } else if ( PROFILE_NAME.equals( name ) ) {
+                datasource.setProfileName( transaction, value );
+            } else if ( JDBC.equals( name ) ) {
+                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                    datasource.setJdbc( transaction, Boolean.parseBoolean( value ) );
+                } else {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, JDBC );
+                }
+            } else if ( PREVIEW.equals( name ) ) {
+                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                    datasource.setPreview( transaction, Boolean.parseBoolean( value ) );
+                } else {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, PREVIEW );
+                }
+            } else {
+                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Datasource.class.getSimpleName() );
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {

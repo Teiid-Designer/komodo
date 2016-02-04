@@ -47,7 +47,7 @@ public final class EntryRenameCommandTest extends AbstractCommandTest {
         final String[] commands = { "cd myEntry1" };
         final CommandResult result = execute( commands );
         assertCommandResultOk( result );
-        assertTabCompletion( "rename ", Collections.emptyList() );
+        assertTabCompletion( "rename ", Collections.<CharSequence>emptyList() );
     }
 
     @Test

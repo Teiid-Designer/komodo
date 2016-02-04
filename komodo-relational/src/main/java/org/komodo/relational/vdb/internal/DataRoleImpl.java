@@ -26,7 +26,7 @@ import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.ArgCheck;
-import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
+import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 /**
  * An implementation of a VDB data role.
@@ -238,7 +238,7 @@ public final class DataRoleImpl extends RelationalObjectImpl implements DataRole
         }
 
         final boolean matchPattern = ( ( namePatterns != null ) && ( namePatterns.length != 0 ) );
-        final List< String > roleNames = new ArrayList< >();
+        final List< String > roleNames = new ArrayList< String >();
 
         for ( final String value : property.getStringValues( transaction ) ) {
             if ( matchPattern ) {
@@ -287,7 +287,7 @@ public final class DataRoleImpl extends RelationalObjectImpl implements DataRole
         final KomodoObject grouping = getPermissionsGroupingNode( transaction );
 
         if ( grouping != null ) {
-            final List< Permission > temp = new ArrayList<>();
+            final List< Permission > temp = new ArrayList< Permission >();
 
             for ( final KomodoObject kobject : grouping.getChildren( transaction, namePatterns ) ) {
                 final Permission permission = new PermissionImpl( transaction, getRepository(), kobject.getAbsolutePath() );

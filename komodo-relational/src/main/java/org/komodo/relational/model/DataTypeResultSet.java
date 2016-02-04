@@ -21,7 +21,7 @@ import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon.CreateProcedure;
 
 /**
  * Represents a data type result set.
@@ -74,7 +74,7 @@ public interface DataTypeResultSet extends ProcedureResultSet, ResultSetColumn {
      * The type identifier.
      */
     int TYPE_ID = DataTypeResultSet.class.hashCode();
-    
+
     /**
      * {@inheritDoc}
      *

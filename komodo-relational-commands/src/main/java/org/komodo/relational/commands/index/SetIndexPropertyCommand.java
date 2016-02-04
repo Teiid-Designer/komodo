@@ -50,13 +50,10 @@ public final class SetIndexPropertyCommand extends IndexShellCommand {
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            switch ( name ) {
-                case EXPRESSION:
-                    index.setExpression( transaction, null );
-                    break;
-                default:
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Index.class.getSimpleName() );
-                    break;
+            if ( EXPRESSION.equals( name ) ) {
+                index.setExpression( transaction, null );
+            } else {
+                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Index.class.getSimpleName() );
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {

@@ -39,7 +39,7 @@ import org.komodo.utils.ArgCheck;
  */
 public class ParanthesisClause extends Clause {
 
-    private List<Clause> childClauses = new ArrayList<>();
+    private List<Clause> childClauses = new ArrayList<Clause>();
 
     /**
      * @param operator the logical operator preceding this clause (can be null if this is the only clause)

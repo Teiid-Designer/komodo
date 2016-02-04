@@ -53,41 +53,31 @@ public final class SetVirtualProcedurePropertyCommand extends VirtualProcedureSh
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            switch ( name ) {
-                case AS_CLAUSE_STATEMENT:
-                    proc.setAsClauseStatement( getTransaction(), value );
-                    break;
-                case DESCRIPTION:
-                    proc.setDescription( getTransaction(), value );
-                    break;
-                case NAME_IN_SOURCE:
-                    proc.setNameInSource( getTransaction(), value );
-                    break;
-                case SCHEMA_ELEMENT_TYPE:
-                    if ( SchemaElement.SchemaElementType.FOREIGN.name().equals( value ) ) {
-                        proc.setSchemaElementType( transaction, SchemaElement.SchemaElementType.FOREIGN );
-                    } else if ( SchemaElement.SchemaElementType.VIRTUAL.name().equals( value ) ) {
-                        proc.setSchemaElementType( transaction, SchemaElement.SchemaElementType.VIRTUAL );
-                    } else {
-                        errorMsg = I18n.bind( VirtualProcedureCommandsI18n.invalidSchemaElementTypePropertyValue, value );
-                    }
-
-                    break;
-                case UPDATE_COUNT:
-                    try {
-                        final long count = Long.parseLong( value );
-                        proc.setUpdateCount( transaction, count );
-                    } catch ( final NumberFormatException e ) {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, value );
-                    }
-
-                    break;
-                case UUID:
-                    proc.setUuid( getTransaction(), value );
-                    break;
-                default:
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, VirtualProcedure.class.getSimpleName() );
-                    break;
+            if ( AS_CLAUSE_STATEMENT.equals( name ) ) {
+                proc.setAsClauseStatement( getTransaction(), value );
+            } else if ( DESCRIPTION.equals( name ) ) {
+                proc.setDescription( getTransaction(), value );
+            } else if ( NAME_IN_SOURCE.equals( name ) ) {
+                proc.setNameInSource( getTransaction(), value );
+            } else if ( SCHEMA_ELEMENT_TYPE.equals( name ) ) {
+                if ( SchemaElement.SchemaElementType.FOREIGN.name().equals( value ) ) {
+                    proc.setSchemaElementType( transaction, SchemaElement.SchemaElementType.FOREIGN );
+                } else if ( SchemaElement.SchemaElementType.VIRTUAL.name().equals( value ) ) {
+                    proc.setSchemaElementType( transaction, SchemaElement.SchemaElementType.VIRTUAL );
+                } else {
+                    errorMsg = I18n.bind( VirtualProcedureCommandsI18n.invalidSchemaElementTypePropertyValue, value );
+                }
+            } else if ( UPDATE_COUNT.equals( name ) ) {
+                try {
+                    final long count = Long.parseLong( value );
+                    proc.setUpdateCount( transaction, count );
+                } catch ( final NumberFormatException e ) {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, value );
+                }
+            } else if ( UUID.equals( name ) ) {
+                proc.setUuid( getTransaction(), value );
+            } else {
+                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, VirtualProcedure.class.getSimpleName() );
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {

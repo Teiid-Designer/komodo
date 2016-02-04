@@ -51,43 +51,30 @@ public final class UnsetTablePropertyCommand extends TableShellCommand {
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            switch ( name ) {
-                case DESCRIPTION:
-                    table.setDescription( transaction, null );
-                    break;
-                case CARDINALITY:
-                    table.setCardinality( transaction, Table.DEFAULT_CARDINALITY );
-                    break;
-                case MATERIALIZED:
-                    table.setMaterialized( transaction, Table.DEFAULT_MATERIALIZED );
-                    break;
-                case MATERIALIZED_TABLE:
-                    table.setMaterializedTable( transaction, null );
-                    break;
-                case NAME_IN_SOURCE:
-                    table.setNameInSource( transaction, null );
-                    break;
-                case UPDATABLE:
-                    table.setUpdatable( transaction, Table.DEFAULT_UPDATABLE );
-                    break;
-                case UUID:
-                    table.setUuid( transaction, null );
-                    break;
-                case ON_COMMIT_VALUE:
-                    table.setOnCommitValue( transaction, null );
-                    break;
-                case QUERY_EXPRESSION:
-                    table.setQueryExpression( transaction, null );
-                    break;
-                case SCHEMA_ELEMENT_TYPE:
-                    table.setSchemaElementType( transaction, null );
-                    break;
-                case TEMPORARY_TABLE_TYPE:
-                    table.setTemporaryTableType( transaction, null );
-                    break;
-                default:
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Table.class.getSimpleName() );
-                    break;
+            if ( DESCRIPTION.equals( name ) ) {
+                table.setDescription( transaction, null );
+            } else if ( CARDINALITY.equals( name ) ) {
+                table.setCardinality( transaction, Table.DEFAULT_CARDINALITY );
+            } else if ( MATERIALIZED.equals( name ) ) {
+                table.setMaterialized( transaction, Table.DEFAULT_MATERIALIZED );
+            } else if ( MATERIALIZED_TABLE.equals( name ) ) {
+                table.setMaterializedTable( transaction, null );
+            } else if ( NAME_IN_SOURCE.equals( name ) ) {
+                table.setNameInSource( transaction, null );
+            } else if ( UPDATABLE.equals( name ) ) {
+                table.setUpdatable( transaction, Table.DEFAULT_UPDATABLE );
+            } else if ( UUID.equals( name ) ) {
+                table.setUuid( transaction, null );
+            } else if ( ON_COMMIT_VALUE.equals( name ) ) {
+                table.setOnCommitValue( transaction, null );
+            } else if ( QUERY_EXPRESSION.equals( name ) ) {
+                table.setQueryExpression( transaction, null );
+            } else if ( SCHEMA_ELEMENT_TYPE.equals( name ) ) {
+                table.setSchemaElementType( transaction, null );
+            } else if ( TEMPORARY_TABLE_TYPE.equals( name ) ) {
+                table.setTemporaryTableType( transaction, null );
+            } else {
+                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Table.class.getSimpleName() );
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {

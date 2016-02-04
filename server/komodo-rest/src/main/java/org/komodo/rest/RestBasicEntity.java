@@ -84,9 +84,9 @@ public class RestBasicEntity implements KRestEntity {
 
     private transient KomodoRestUriBuilder uriBuilder;
 
-    protected Map<String, Object> tuples = new LinkedHashMap<>();
+    protected Map<String, Object> tuples = new LinkedHashMap<String, Object>();
 
-    protected List<RestProperty> properties = new ArrayList<>();
+    protected List<RestProperty> properties = new ArrayList<RestProperty>();
 
     protected Map<LinkType, RestLink> links = RestLink.NO_LINKS;
 
@@ -314,7 +314,7 @@ public class RestBasicEntity implements KRestEntity {
      */
     public final void addLink(RestLink newLink) {
         if (this.links == null || this.links == RestLink.NO_LINKS)
-            this.links = new LinkedHashMap<>();
+            this.links = new LinkedHashMap<LinkType, RestLink>();
 
         this.links.put(newLink.getRel(), newLink);
     }
@@ -371,7 +371,7 @@ public class RestBasicEntity implements KRestEntity {
      * @throws KException if error occurs
      */
     public void addExecutionProperties(UnitOfWork uow, KomodoObject kObject) throws KException {
-        final List<String> propNames = new ArrayList<>(Arrays.asList(kObject.getPropertyNames(uow))); // props with values
+        final List<String> propNames = new ArrayList<String>(Arrays.asList(kObject.getPropertyNames(uow))); // props with values
         final PropertyDescriptor[] descriptors = kObject.getPropertyDescriptors(uow);
 
         if (descriptors.length != 0) {

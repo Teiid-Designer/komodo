@@ -288,7 +288,7 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         this.latch = new CountDownLatch( 1 );
         this.kengine = start();
 
-        final Set< Object > objs = new HashSet< >();
+        final Set< Object > objs = new HashSet< Object >();
         objs.add( new KomodoExceptionMapper() );
         objs.add( new KomodoUtilService( this.kengine ) );
         objs.add( new KomodoVdbService( this.kengine ) );

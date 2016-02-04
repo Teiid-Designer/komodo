@@ -50,22 +50,16 @@ public final class UnsetDataRolePropertyCommand extends DataRoleShellCommand {
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            switch ( name ) {
-                case ALLOWED_CREATE_TEMPORARY_TABLES:
-                    dataRole.setAllowCreateTempTables( transaction, DataRole.DEFAULT_ALLOW_CREATE_TEMP_TABLES );
-                    break;
-                case ANY_AUTHENTICATED:
-                    dataRole.setAnyAuthenticated( transaction, DataRole.DEFAULT_ANY_AUTHENTICATED );
-                    break;
-                case DESCRIPTION:
-                    dataRole.setDescription( transaction, null );
-                    break;
-                case GRANT_ALL:
-                    dataRole.setGrantAll( transaction, DataRole.DEFAULT_GRANT_ALL );
-                    break;
-                default:
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, DataRole.class.getSimpleName() );
-                    break;
+            if ( ALLOWED_CREATE_TEMPORARY_TABLES.equals( name ) ) {
+                dataRole.setAllowCreateTempTables( transaction, DataRole.DEFAULT_ALLOW_CREATE_TEMP_TABLES );
+            } else if ( ANY_AUTHENTICATED.equals( name ) ) {
+                dataRole.setAnyAuthenticated( transaction, DataRole.DEFAULT_ANY_AUTHENTICATED );
+            } else if ( DESCRIPTION.equals( name ) ) {
+                dataRole.setDescription( transaction, null );
+            } else if ( GRANT_ALL.equals( name ) ) {
+                dataRole.setGrantAll( transaction, DataRole.DEFAULT_GRANT_ALL );
+            } else {
+                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, DataRole.class.getSimpleName() );
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {

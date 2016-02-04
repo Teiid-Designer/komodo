@@ -18,8 +18,6 @@ package org.komodo.shell.api;
 import java.io.Writer;
 import java.util.List;
 
-import org.komodo.utils.i18n.I18n;
-
 /**
  * Interface implemented by all shell commands.
  *
@@ -36,19 +34,17 @@ public interface ShellCommand {
      *
      * @return the command category (can be empty)
      */
-    default String getCategory() {
-        return I18n.bind( ShellApiI18n.generalCommandCategory );
-    }
+    String getCategory();
 
     /**
      * @return the command name (never empty)
      */
     String getName();
 
-	/**
-	 * @return the command name aliases (never <code>null</code> but can be empty)
-	 */
-	String[] getAliases();
+    /**
+     * @return the command name aliases (never <code>null</code> but can be empty)
+     */
+    String[] getAliases();
 
     /**
      * @return the command arguments (can be <code>null</code>)
@@ -61,22 +57,22 @@ public interface ShellCommand {
      */
     void setArguments(Arguments arguments);
 
-	/**
-	 * Configure the command's output.
-	 * @param output the writer
-	 */
-	void setWriter(Writer output);
+    /**
+     * Configure the command's output.
+     * @param output the writer
+     */
+    void setWriter(Writer output);
 
-	/**
-	 * @return the stream writer (can be <code>null</code> if not set)
-	 */
-	Writer getWriter();
+    /**
+     * @return the stream writer (can be <code>null</code> if not set)
+     */
+    Writer getWriter();
 
-	/**
-	 * Get the WorkspaceStatus
-	 * @return the workspace status
-	 */
-	WorkspaceStatus getWorkspaceStatus();
+    /**
+     * Get the WorkspaceStatus
+     * @return the workspace status
+     */
+    WorkspaceStatus getWorkspaceStatus();
 
     /**
      * @return <code>true</code> if command is valid for the current context
@@ -86,16 +82,12 @@ public interface ShellCommand {
     /**
      * @return <code>true</code> if the command is enabled
      */
-    default boolean isEnabled() {
-        return true;
-    }
+    boolean isEnabled();
 
     /**
      * @return <code>true</code> if the command can be overridden
      */
-    default boolean isOverridable() {
-        return true;
-    }
+    boolean isOverridable();
 
     /**
      * Called to execute the command.
@@ -104,33 +96,31 @@ public interface ShellCommand {
      */
     CommandResult execute();
 
-	/**
-	 * Prints the usage help for this command.
-	 * @param indent number of spaces to indent
-	 */
-	void printUsage(int indent);
+    /**
+     * Prints the usage help for this command.
+     * @param indent number of spaces to indent
+     */
+    void printUsage(int indent);
 
-	/**
-	 * Prints the help text for this command.
-	 * @param indent number of spaces to indent
-	 */
-	void printHelp(int indent);
+    /**
+     * Prints the help text for this command.
+     * @param indent number of spaces to indent
+     */
+    void printHelp(int indent);
 
-	/**
-	 * Handle tab completion for the command.  This is optional, but provides a mechanism by
-	 * which individual commands can enable command-specific tab completion functionality.
-	 *
-	 * The return value of this method is tab completion modifier through which an user is
-	 * able to e.g. turn off tab completion or append separator after the auto completed text
-	 *
-	 * @param lastArgument the last arg
-	 * @param candidates the candidates
-	 * @return tab completion modifier
-	 * @throws Exception if errors occur
-	 */
-    default TabCompletionModifier tabCompletion( final String lastArgument,
-                               final List< CharSequence > candidates ) throws Exception {
-        return TabCompletionModifier.NO_AUTOCOMPLETION;
-    }
+    /**
+     * Handle tab completion for the command.  This is optional, but provides a mechanism by
+     * which individual commands can enable command-specific tab completion functionality.
+     *
+     * The return value of this method is tab completion modifier through which an user is
+     * able to e.g. turn off tab completion or append separator after the auto completed text
+     *
+     * @param lastArgument the last arg
+     * @param candidates the candidates
+     * @return tab completion modifier
+     * @throws Exception if errors occur
+     */
+    TabCompletionModifier tabCompletion( final String lastArgument,
+                                         final List< CharSequence > candidates ) throws Exception;
 
 }

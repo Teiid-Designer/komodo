@@ -53,7 +53,7 @@
 		"threadPool" : "modeshape-workers",
 		"sequencers" : {
 			"VDB Sequencer" : {
-				"classname" : "VdbSequencer"
+				"classname" : "org.teiid.modeshape.sequencer.vdb.VdbSequencer"
 	        },
 			"DDL Sequencer" : {
 				"classname" : "org.komodo.modeshape.lib.sequencer.KDdlSequencer"

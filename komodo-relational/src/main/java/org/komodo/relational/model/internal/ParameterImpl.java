@@ -7,6 +7,8 @@
  */
 package org.komodo.relational.model.internal;
 
+import java.util.Collections;
+import java.util.Map;
 import org.komodo.relational.RelationalConstants;
 import org.komodo.relational.RelationalConstants.Nullable;
 import org.komodo.relational.internal.RelationalChildRestrictedObject;
@@ -24,8 +26,8 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
-import org.modeshape.sequencer.ddl.StandardDdlLexicon;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
+import org.teiid.modeshape.sequencer.ddl.StandardDdlLexicon;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon.CreateProcedure;
 
 /**
  * An implementation of a relational model procedure parameter.
@@ -221,6 +223,16 @@ public final class ParameterImpl extends RelationalChildRestrictedObject impleme
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.relational.model.OptionContainer#getStandardOptions()
+     */
+    @Override
+    public Map< String, String > getStandardOptions() {
+        return Collections.emptyMap();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.relational.model.OptionContainer#getStatementOptionNames(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
@@ -257,7 +269,7 @@ public final class ParameterImpl extends RelationalChildRestrictedObject impleme
     public KomodoType getTypeIdentifier( final UnitOfWork uow ) {
         return Parameter.IDENTIFIER;
     }
-    
+
     /**
      * {@inheritDoc}
      *

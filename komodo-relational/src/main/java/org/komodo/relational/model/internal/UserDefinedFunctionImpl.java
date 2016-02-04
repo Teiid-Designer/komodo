@@ -10,7 +10,6 @@ package org.komodo.relational.model.internal;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.UserDefinedFunction;
 import org.komodo.spi.KException;
@@ -40,7 +39,7 @@ public final class UserDefinedFunctionImpl extends FunctionImpl implements UserD
          */
         static Map< String, String > defaultValues() {
             final StandardOption[] options = values();
-            final Map< String, String > result = new HashMap< >();
+            final Map< String, String > result = new HashMap< String, String >();
 
             for ( final StandardOption option : options ) {
                 result.put( option.name(), null ); // no default values
@@ -123,7 +122,7 @@ public final class UserDefinedFunctionImpl extends FunctionImpl implements UserD
             final Map< String, String > superOptions = super.getStandardOptions();
             final Map< String, String > options = StandardOption.defaultValues();
 
-            final Map< String, String > combined = new HashMap< >( superOptions.size() + options.size() );
+            final Map< String, String > combined = new HashMap< String, String >( superOptions.size() + options.size() );
             combined.putAll( superOptions );
             combined.putAll( options );
 
@@ -152,7 +151,7 @@ public final class UserDefinedFunctionImpl extends FunctionImpl implements UserD
     public KomodoType getTypeIdentifier( final UnitOfWork uow ) {
         return UserDefinedFunction.IDENTIFIER;
     }
-    
+
     /**
      * {@inheritDoc}
      *

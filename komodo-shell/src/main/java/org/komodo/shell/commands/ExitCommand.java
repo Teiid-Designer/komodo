@@ -49,7 +49,7 @@ public final class ExitCommand extends BuiltInShellCommand {
     private static final List< String > VALID_ARGS;
 
     static {
-        VALID_ARGS = new ArrayList<>(FORCE_ARGS.size() + SAVE_ARGS.size());
+        VALID_ARGS = new ArrayList< String >(FORCE_ARGS.size() + SAVE_ARGS.size());
         VALID_ARGS.addAll( FORCE_ARGS );
         VALID_ARGS.addAll( SAVE_ARGS );
     }

@@ -16,9 +16,7 @@
 package org.komodo.relational.commands.modelsource;
 
 import static org.junit.Assert.assertEquals;
-
 import java.util.ArrayList;
-
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Model;
@@ -64,7 +62,7 @@ public final class SetModelSourcePropertyCommandTest extends AbstractCommandTest
 
     @Test
     public void testTabCompleter()throws Exception{
-    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	ArrayList<CharSequence> candidates=new ArrayList<CharSequence>();
     	setup("commandFiles","addSources.cmd");
     	final String[] commands = { "cd mySource1" };
     	final CommandResult result = execute( commands );

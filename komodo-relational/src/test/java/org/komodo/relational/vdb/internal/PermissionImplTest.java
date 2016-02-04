@@ -28,7 +28,7 @@ import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
-import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
+import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class PermissionImplTest extends RelationalModelTest {
@@ -60,9 +60,9 @@ public final class PermissionImplTest extends RelationalModelTest {
         assertThat( this.permission.hasChild( getTransaction(), name, VdbLexicon.DataRole.Permission.Condition.CONDITION ),
                     is( true ) );
         assertThat( this.permission.hasChildren( getTransaction() ), is( true ) );
-        assertThat( this.permission.getChild( getTransaction(), name ), is( added ) );
+        assertThat( this.permission.getChild( getTransaction(), name ), is( ( KomodoObject )added ) );
         assertThat( this.permission.getChild( getTransaction(), name, VdbLexicon.DataRole.Permission.Condition.CONDITION ),
-                    is( added ) );
+                    is( ( KomodoObject )added ) );
     }
 
     @Test
@@ -81,8 +81,9 @@ public final class PermissionImplTest extends RelationalModelTest {
         assertThat( this.permission.hasChild( getTransaction(), name ), is( true ) );
         assertThat( this.permission.hasChild( getTransaction(), name, VdbLexicon.DataRole.Permission.Mask.MASK ), is( true ) );
         assertThat( this.permission.hasChildren( getTransaction() ), is( true ) );
-        assertThat( this.permission.getChild( getTransaction(), name ), is( added ) );
-        assertThat( this.permission.getChild( getTransaction(), name, VdbLexicon.DataRole.Permission.Mask.MASK ), is( added ) );
+        assertThat( this.permission.getChild( getTransaction(), name ), is( ( KomodoObject )added ) );
+        assertThat( this.permission.getChild( getTransaction(), name, VdbLexicon.DataRole.Permission.Mask.MASK ),
+                    is( ( KomodoObject )added ) );
     }
 
     @Test( expected = KException.class )

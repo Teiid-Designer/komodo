@@ -54,64 +54,49 @@ public final class SetResultSetColumnPropertyCommand extends ResultSetColumnShel
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            switch ( name ) {
-                case DATATYPE_NAME:
-                    column.setDatatypeName( transaction, value );
-                    break;
-                case DEFAULT_VALUE:
-                    column.setDefaultValue( transaction, value );
-                    break;
-                case DESCRIPTION:
-                    column.setDescription( transaction, value );
-                    break;
-                case LENGTH:
-                    try {
-                        final long length = Long.parseLong( value );
-                        column.setLength( transaction, length );
-                    } catch ( final NumberFormatException e ) {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, LENGTH );
-                    }
-
-                    break;
-                case NAME_IN_SOURCE:
-                    column.setNameInSource( transaction, value );
-                    break;
-                case NULLABLE:
-                    if ( Nullable.NO_NULLS.name().equals( value ) ) {
-                        column.setNullable( transaction, Nullable.NO_NULLS );
-                    } else if ( Nullable.NULLABLE.name().equals( value ) ) {
-                        column.setNullable( transaction, Nullable.NULLABLE );
-                    } else if ( Nullable.NULLABLE_UNKNOWN.name().equals( value ) ) {
-                        column.setNullable( transaction, Nullable.NULLABLE_UNKNOWN );
-                    } else {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidNullablePropertyValue, NULLABLE );
-                    }
-
-                    break;
-                case PRECISION:
-                    try {
-                        final long precision = Long.parseLong( value );
-                        column.setPrecision( transaction, precision );
-                    } catch ( final NumberFormatException e ) {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, PRECISION );
-                    }
-
-                    break;
-                case SCALE:
-                    try {
-                        final long scale = Long.parseLong( value );
-                        column.setScale( transaction, scale );
-                    } catch ( final NumberFormatException e ) {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, SCALE );
-                    }
-
-                    break;
-                case UUID:
-                    column.setUuid( transaction, value );
-                    break;
-                default:
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Column.class.getSimpleName() );
-                    break;
+            if ( DATATYPE_NAME.equals( name ) ) {
+                column.setDatatypeName( transaction, value );
+            } else if ( DEFAULT_VALUE.equals( name ) ) {
+                column.setDefaultValue( transaction, value );
+            } else if ( DESCRIPTION.equals( name ) ) {
+                column.setDescription( transaction, value );
+            } else if ( LENGTH.equals( name ) ) {
+                try {
+                    final long length = Long.parseLong( value );
+                    column.setLength( transaction, length );
+                } catch ( final NumberFormatException e ) {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, LENGTH );
+                }
+            } else if ( NAME_IN_SOURCE.equals( name ) ) {
+                column.setNameInSource( transaction, value );
+            } else if ( NULLABLE.equals( name ) ) {
+                if ( Nullable.NO_NULLS.name().equals( value ) ) {
+                    column.setNullable( transaction, Nullable.NO_NULLS );
+                } else if ( Nullable.NULLABLE.name().equals( value ) ) {
+                    column.setNullable( transaction, Nullable.NULLABLE );
+                } else if ( Nullable.NULLABLE_UNKNOWN.name().equals( value ) ) {
+                    column.setNullable( transaction, Nullable.NULLABLE_UNKNOWN );
+                } else {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidNullablePropertyValue, NULLABLE );
+                }
+            } else if ( PRECISION.equals( name ) ) {
+                try {
+                    final long precision = Long.parseLong( value );
+                    column.setPrecision( transaction, precision );
+                } catch ( final NumberFormatException e ) {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, PRECISION );
+                }
+            } else if ( SCALE.equals( name ) ) {
+                try {
+                    final long scale = Long.parseLong( value );
+                    column.setScale( transaction, scale );
+                } catch ( final NumberFormatException e ) {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, SCALE );
+                }
+            } else if ( UUID.equals( name ) ) {
+                column.setUuid( transaction, value );
+            } else {
+                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Column.class.getSimpleName() );
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {

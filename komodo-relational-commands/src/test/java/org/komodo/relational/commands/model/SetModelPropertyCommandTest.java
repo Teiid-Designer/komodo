@@ -55,7 +55,7 @@ public final class SetModelPropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testTabCompleter()throws Exception{
-    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	ArrayList<CharSequence> candidates=new ArrayList<CharSequence>();
     	setup("commandFiles","addModels.cmd");
     	final String[] commands = { "cd myModel1" };
     	final CommandResult result = execute( commands );

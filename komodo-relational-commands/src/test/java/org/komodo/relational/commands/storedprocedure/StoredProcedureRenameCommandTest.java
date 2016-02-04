@@ -19,7 +19,7 @@ import java.util.Collections;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.shell.api.CommandResult;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon.CreateProcedure;
 
 /**
  * Test Class to test {@link StoredProcedureRenameCommand}.
@@ -53,7 +53,7 @@ public final class StoredProcedureRenameCommandTest extends AbstractCommandTest 
                                     "set-result-set DataTypeResultSet" };
         final CommandResult result = execute( commands );
         assertCommandResultOk( result );
-        assertTabCompletion( "rename ", Collections.emptyList() );
+        assertTabCompletion( "rename ", Collections.<CharSequence>emptyList() );
     }
 
 }

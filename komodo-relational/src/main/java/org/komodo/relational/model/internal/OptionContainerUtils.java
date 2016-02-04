@@ -28,7 +28,7 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
-import org.modeshape.sequencer.ddl.StandardDdlLexicon;
+import org.teiid.modeshape.sequencer.ddl.StandardDdlLexicon;
 
 /**
  * Utilities for retrieving and updating standard and custom statement options.
@@ -243,7 +243,7 @@ public final class OptionContainerUtils {
             return options;
         }
 
-        final List< StatementOption > custom = new ArrayList<>( options.length );
+        final List< StatementOption > custom = new ArrayList< StatementOption >( options.length );
 
         for ( final StatementOption option : options ) {
             if ( !container.isStandardOption( option.getName( transaction ) ) ) {

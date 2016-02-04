@@ -51,28 +51,20 @@ public final class UnsetDatasourcePropertyCommand extends DatasourceShellCommand
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            switch ( name ) {
-                case JNDI_NAME:
-                    datasource.setJndiName( transaction, null );
-                    break;
-                case DRIVER_NAME:
-                    datasource.setDriverName( transaction, null );
-                    break;
-                case CLASS_NAME:
-                    datasource.setDriverName( transaction, null );
-                    break;
-                case PROFILE_NAME:
-                    datasource.setProfileName( transaction, null );
-                    break;
-                case JDBC:
-                    datasource.setJdbc( transaction, Datasource.DEFAULT_JDBC );
-                    break;
-                case PREVIEW:
-                    datasource.setPreview( transaction, Datasource.DEFAULT_PREVIEW );
-                    break;
-                default:
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Datasource.class.getSimpleName() );
-                    break;
+            if ( JNDI_NAME.equals( name ) ) {
+                datasource.setJndiName( transaction, null );
+            } else if ( DRIVER_NAME.equals( name ) ) {
+                datasource.setDriverName( transaction, null );
+            } else if ( CLASS_NAME.equals( name ) ) {
+                datasource.setDriverName( transaction, null );
+            } else if ( PROFILE_NAME.equals( name ) ) {
+                datasource.setProfileName( transaction, null );
+            } else if ( JDBC.equals( name ) ) {
+                datasource.setJdbc( transaction, Datasource.DEFAULT_JDBC );
+            } else if ( PREVIEW.equals( name ) ) {
+                datasource.setPreview( transaction, Datasource.DEFAULT_PREVIEW );
+            } else {
+                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Datasource.class.getSimpleName() );
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {

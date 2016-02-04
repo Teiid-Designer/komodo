@@ -8,10 +8,8 @@
 package org.komodo.relational.commands.model;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import org.komodo.relational.commands.workspace.WorkspaceCommandsI18n;
 import org.komodo.relational.model.Function;
 import org.komodo.relational.model.Model;
@@ -58,7 +56,7 @@ public final class ShowPushdownFunctionsCommand extends ModelShellCommand {
                            I18n.bind( ModelCommandsI18n.noPushdownFunctions, model.getName( getTransaction() ) ) );
                 }
             } else {
-                final List< Function > pushdowns = new ArrayList< >( functions.length );
+                final List< Function > pushdowns = new ArrayList< Function >( functions.length );
 
                 for ( final Function function : functions ) {
                     if ( PushdownFunction.RESOLVER.resolvable( getTransaction(), function ) ) {

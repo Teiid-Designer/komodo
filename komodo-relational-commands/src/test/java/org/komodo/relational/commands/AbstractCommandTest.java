@@ -46,7 +46,10 @@ public abstract class AbstractCommandTest extends org.komodo.shell.AbstractComma
                 final Path targetDir = Paths.get( relativeTargetPath );
                 LOGGER.debug( "AbstractCommandTest: Looking for jar here: {0}", targetDir );
 
-                try ( final DirectoryStream< Path > stream = Files.newDirectoryStream( targetDir, "*-with-dependencies.jar" ) ) {
+                DirectoryStream< Path > stream = null;
+
+                try {
+                    stream = Files.newDirectoryStream( targetDir, "*-with-dependencies.jar" );
                     final Iterator< Path > itr = stream.iterator();
 
                     if ( itr.hasNext() ) {
@@ -69,6 +72,10 @@ public abstract class AbstractCommandTest extends org.komodo.shell.AbstractComma
                     }
                 } catch ( final IOException e ) {
                     Assert.fail( "Failed to copy jar to commands directory: " + e.getMessage() ); //$NON-NLS-1$
+                } finally {
+                    if ( stream != null ) {
+                        stream.close();
+                    }
                 }
             }
         } catch ( final Exception e ) {

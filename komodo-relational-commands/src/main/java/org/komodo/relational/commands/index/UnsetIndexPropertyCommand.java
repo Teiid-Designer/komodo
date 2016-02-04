@@ -13,8 +13,8 @@ import org.komodo.relational.model.Index;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
-import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.ShellCommand;
+import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.commands.UnsetPropertyCommand;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -52,13 +52,10 @@ public final class UnsetIndexPropertyCommand extends IndexShellCommand {
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            switch ( name ) {
-                case EXPRESSION:
-                    index.setExpression( transaction, null );
-                    break;
-                default:
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Index.class.getSimpleName() );
-                    break;
+            if ( EXPRESSION.equals( name ) ) {
+                index.setExpression( transaction, null );
+            } else {
+                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Index.class.getSimpleName() );
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {

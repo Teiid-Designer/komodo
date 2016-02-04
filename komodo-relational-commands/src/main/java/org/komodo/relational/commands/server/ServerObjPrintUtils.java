@@ -143,7 +143,7 @@ public class ServerObjPrintUtils implements StringConstants {
      * @param valueTitle the title of the value column
      */
     public static void printDatasourceTemplateProperties(Writer writer, int indent, Collection<TeiidPropertyDefinition> propDefns, String nameTitle, String valueTitle) {
-        final Map< String, String > sorted = new TreeMap<>();
+        final Map< String, String > sorted = new TreeMap< String, String >();
         int maxNameWidth = DEFAULT_WIDTH;
         int maxValueWidth = DEFAULT_WIDTH;
 

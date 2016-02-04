@@ -34,7 +34,7 @@ public final class SetSchemaPropertyCommandTest extends AbstractCommandTest {
         final String[] commands = {
             "create-schema testSchema",
             "cd testSchema",
-            "set-property rendition \"CREATE FOREIGN TABLE G1 (e1 integer) OPTIONS (ANNOTATION 'test', CARDINALITY '12');\"" };
+            "set-property rendition \"CREATE FOREIGN TABLE G1 (e1 integer) OPTIONS (ANNOTATION 'test', CARDINALITY '12');\""};
         final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
@@ -49,7 +49,7 @@ public final class SetSchemaPropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testTabCompleter()throws Exception{
-    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	ArrayList<CharSequence> candidates=new ArrayList<CharSequence>();
     	setup("commandFiles","addSchemas.cmd");
     	final String[] commands = { "cd mySchema1" };
     	final CommandResult result = execute( commands );

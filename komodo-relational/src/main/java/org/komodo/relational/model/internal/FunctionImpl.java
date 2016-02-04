@@ -45,7 +45,7 @@ public abstract class FunctionImpl extends AbstractProcedureImpl implements Func
          */
         static Map< String, String > defaultValues() {
             final StandardOption[] options = values();
-            final Map< String, String > result = new HashMap< >();
+            final Map< String, String > result = new HashMap< String, String >();
 
             for ( final StandardOption option : options ) {
                 result.put( option.name(), option.defaultValue );
@@ -115,7 +115,7 @@ public abstract class FunctionImpl extends AbstractProcedureImpl implements Func
         StatementOption[] result = StatementOption.NO_OPTIONS;
 
         if ( superOptions.length != 0 ) {
-            final List< StatementOption > temp = new ArrayList<>( superOptions.length );
+            final List< StatementOption > temp = new ArrayList< StatementOption >( superOptions.length );
 
             for ( final StatementOption option : superOptions ) {
                 if ( !isStandardOption( option.getName( transaction ) ) ) {
@@ -159,7 +159,7 @@ public abstract class FunctionImpl extends AbstractProcedureImpl implements Func
             final Map< String, String > options = StandardOption.defaultValues();
 
             // combine
-            final Map< String, String > combined = new HashMap< >( superOptions.size() + options.size() );
+            final Map< String, String > combined = new HashMap< String, String >( superOptions.size() + options.size() );
             combined.putAll( superOptions );
             combined.putAll( options );
 

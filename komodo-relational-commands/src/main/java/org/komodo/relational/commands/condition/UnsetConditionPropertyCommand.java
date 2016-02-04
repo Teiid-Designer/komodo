@@ -50,13 +50,10 @@ public final class UnsetConditionPropertyCommand extends ConditionShellCommand {
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            switch ( name ) {
-                case CONSTRAINT:
-                    condition.setConstraint( transaction, Condition.DEFAULT_CONSTRAINT );
-                    break;
-                default:
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Condition.class.getSimpleName() );
-                    break;
+            if ( CONSTRAINT.equals( name ) ) {
+                condition.setConstraint( transaction, Condition.DEFAULT_CONSTRAINT );
+            } else {
+                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Condition.class.getSimpleName() );
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {

@@ -54,129 +54,112 @@ public final class SetDataTypeResultSetPropertyCommand extends DataTypeResultSet
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            switch ( name ) {
-                case DATATYPE_NAME: {
-                    if ( DataTypeResultSet.Type.BIGDECIMAL.name().equals( value ) ) {
-                        rs.setType( transaction, DataTypeResultSet.Type.BIGDECIMAL );
-                    } else if ( DataTypeResultSet.Type.BIGINT.name().equals( value ) ) {
-                        rs.setType( transaction, DataTypeResultSet.Type.BIGINT );
-                    } else if ( DataTypeResultSet.Type.BIGINTEGER.name().equals( value ) ) {
-                        rs.setType( transaction, DataTypeResultSet.Type.BIGINTEGER );
-                    } else if ( DataTypeResultSet.Type.BLOB.name().equals( value ) ) {
-                        rs.setType( transaction, DataTypeResultSet.Type.BLOB );
-                    } else if ( DataTypeResultSet.Type.BOOLEAN.name().equals( value ) ) {
-                        rs.setType( transaction, DataTypeResultSet.Type.BOOLEAN );
-                    } else if ( DataTypeResultSet.Type.BYTE.name().equals( value ) ) {
-                        rs.setType( transaction, DataTypeResultSet.Type.BYTE );
-                    } else if ( DataTypeResultSet.Type.CHAR.name().equals( value ) ) {
-                        rs.setType( transaction, DataTypeResultSet.Type.CHAR );
-                    } else if ( DataTypeResultSet.Type.CLOB.name().equals( value ) ) {
-                        rs.setType( transaction, DataTypeResultSet.Type.CLOB );
-                    } else if ( DataTypeResultSet.Type.DATE.name().equals( value ) ) {
-                        rs.setType( transaction, DataTypeResultSet.Type.DATE );
-                    } else if ( DataTypeResultSet.Type.DECIMAL.name().equals( value ) ) {
-                        rs.setType( transaction, DataTypeResultSet.Type.DECIMAL );
-                    } else if ( DataTypeResultSet.Type.DEFAULT_VALUE.name().equals( value ) ) {
-                        rs.setType( transaction, DataTypeResultSet.Type.DEFAULT_VALUE );
-                    } else if ( DataTypeResultSet.Type.DOUBLE.name().equals( value ) ) {
-                        rs.setType( transaction, DataTypeResultSet.Type.DOUBLE );
-                    } else if ( DataTypeResultSet.Type.FLOAT.name().equals( value ) ) {
-                        rs.setType( transaction, DataTypeResultSet.Type.FLOAT );
-                    } else if ( DataTypeResultSet.Type.INTEGER.name().equals( value ) ) {
-                        rs.setType( transaction, DataTypeResultSet.Type.INTEGER );
-                    } else if ( DataTypeResultSet.Type.LONG.name().equals( value ) ) {
-                        rs.setType( transaction, DataTypeResultSet.Type.LONG );
-                    } else if ( DataTypeResultSet.Type.OBJECT.name().equals( value ) ) {
-                        rs.setType( transaction, DataTypeResultSet.Type.OBJECT );
-                    } else if ( DataTypeResultSet.Type.REAL.name().equals( value ) ) {
-                        rs.setType( transaction, DataTypeResultSet.Type.REAL );
-                    } else if ( DataTypeResultSet.Type.SHORT.name().equals( value ) ) {
-                        rs.setType( transaction, DataTypeResultSet.Type.SHORT );
-                    } else if ( DataTypeResultSet.Type.SMALLINT.name().equals( value ) ) {
-                        rs.setType( transaction, DataTypeResultSet.Type.SMALLINT );
-                    } else if ( DataTypeResultSet.Type.STRING.name().equals( value ) ) {
-                        rs.setType( transaction, DataTypeResultSet.Type.STRING );
-                    } else if ( DataTypeResultSet.Type.TIME.name().equals( value ) ) {
-                        rs.setType( transaction, DataTypeResultSet.Type.TIME );
-                    } else if ( DataTypeResultSet.Type.TIMESTAMP.name().equals( value ) ) {
-                        rs.setType( transaction, DataTypeResultSet.Type.TIMESTAMP );
-                    } else if ( DataTypeResultSet.Type.TINYINT.name().equals( value ) ) {
-                        rs.setType( transaction, DataTypeResultSet.Type.TINYINT );
-                    } else if ( DataTypeResultSet.Type.VARBINARY.name().equals( value ) ) {
-                        rs.setType( transaction, DataTypeResultSet.Type.VARBINARY );
-                    } else if ( DataTypeResultSet.Type.VARCHAR.name().equals( value ) ) {
-                        rs.setType( transaction, DataTypeResultSet.Type.VARCHAR );
-                    } else if ( DataTypeResultSet.Type.XML.name().equals( value ) ) {
-                        rs.setType( transaction, DataTypeResultSet.Type.XML );
-                    } else {
-                        errorMsg = I18n.bind( DataTypeResultSetCommandsI18n.invalidDataTypeName, DATATYPE_NAME );
-                    }
-
-                    // check to see if needs to be an array type
-                    if ( StringUtils.isBlank( errorMsg ) ) {
-                        final String arrayArg = optionalArgument( 2, Boolean.FALSE.toString() );
-
-                        if ( KomodoObjectUtils.TRUE_STRING.equals( arrayArg )
-                             || KomodoObjectUtils.FALSE_STRING.equals( arrayArg ) ) {
-                            rs.setArray( transaction, Boolean.parseBoolean( arrayArg ) );
-                        } else {
-                            errorMsg = I18n.bind( DataTypeResultSetCommandsI18n.invalidDataTypeArrayIndicator );
-                        }
-                    }
-
-                    break;
+            if ( DATATYPE_NAME.equals( name ) ) {
+                if ( DataTypeResultSet.Type.BIGDECIMAL.name().equals( value ) ) {
+                    rs.setType( transaction, DataTypeResultSet.Type.BIGDECIMAL );
+                } else if ( DataTypeResultSet.Type.BIGINT.name().equals( value ) ) {
+                    rs.setType( transaction, DataTypeResultSet.Type.BIGINT );
+                } else if ( DataTypeResultSet.Type.BIGINTEGER.name().equals( value ) ) {
+                    rs.setType( transaction, DataTypeResultSet.Type.BIGINTEGER );
+                } else if ( DataTypeResultSet.Type.BLOB.name().equals( value ) ) {
+                    rs.setType( transaction, DataTypeResultSet.Type.BLOB );
+                } else if ( DataTypeResultSet.Type.BOOLEAN.name().equals( value ) ) {
+                    rs.setType( transaction, DataTypeResultSet.Type.BOOLEAN );
+                } else if ( DataTypeResultSet.Type.BYTE.name().equals( value ) ) {
+                    rs.setType( transaction, DataTypeResultSet.Type.BYTE );
+                } else if ( DataTypeResultSet.Type.CHAR.name().equals( value ) ) {
+                    rs.setType( transaction, DataTypeResultSet.Type.CHAR );
+                } else if ( DataTypeResultSet.Type.CLOB.name().equals( value ) ) {
+                    rs.setType( transaction, DataTypeResultSet.Type.CLOB );
+                } else if ( DataTypeResultSet.Type.DATE.name().equals( value ) ) {
+                    rs.setType( transaction, DataTypeResultSet.Type.DATE );
+                } else if ( DataTypeResultSet.Type.DECIMAL.name().equals( value ) ) {
+                    rs.setType( transaction, DataTypeResultSet.Type.DECIMAL );
+                } else if ( DataTypeResultSet.Type.DEFAULT_VALUE.name().equals( value ) ) {
+                    rs.setType( transaction, DataTypeResultSet.Type.DEFAULT_VALUE );
+                } else if ( DataTypeResultSet.Type.DOUBLE.name().equals( value ) ) {
+                    rs.setType( transaction, DataTypeResultSet.Type.DOUBLE );
+                } else if ( DataTypeResultSet.Type.FLOAT.name().equals( value ) ) {
+                    rs.setType( transaction, DataTypeResultSet.Type.FLOAT );
+                } else if ( DataTypeResultSet.Type.INTEGER.name().equals( value ) ) {
+                    rs.setType( transaction, DataTypeResultSet.Type.INTEGER );
+                } else if ( DataTypeResultSet.Type.LONG.name().equals( value ) ) {
+                    rs.setType( transaction, DataTypeResultSet.Type.LONG );
+                } else if ( DataTypeResultSet.Type.OBJECT.name().equals( value ) ) {
+                    rs.setType( transaction, DataTypeResultSet.Type.OBJECT );
+                } else if ( DataTypeResultSet.Type.REAL.name().equals( value ) ) {
+                    rs.setType( transaction, DataTypeResultSet.Type.REAL );
+                } else if ( DataTypeResultSet.Type.SHORT.name().equals( value ) ) {
+                    rs.setType( transaction, DataTypeResultSet.Type.SHORT );
+                } else if ( DataTypeResultSet.Type.SMALLINT.name().equals( value ) ) {
+                    rs.setType( transaction, DataTypeResultSet.Type.SMALLINT );
+                } else if ( DataTypeResultSet.Type.STRING.name().equals( value ) ) {
+                    rs.setType( transaction, DataTypeResultSet.Type.STRING );
+                } else if ( DataTypeResultSet.Type.TIME.name().equals( value ) ) {
+                    rs.setType( transaction, DataTypeResultSet.Type.TIME );
+                } else if ( DataTypeResultSet.Type.TIMESTAMP.name().equals( value ) ) {
+                    rs.setType( transaction, DataTypeResultSet.Type.TIMESTAMP );
+                } else if ( DataTypeResultSet.Type.TINYINT.name().equals( value ) ) {
+                    rs.setType( transaction, DataTypeResultSet.Type.TINYINT );
+                } else if ( DataTypeResultSet.Type.VARBINARY.name().equals( value ) ) {
+                    rs.setType( transaction, DataTypeResultSet.Type.VARBINARY );
+                } else if ( DataTypeResultSet.Type.VARCHAR.name().equals( value ) ) {
+                    rs.setType( transaction, DataTypeResultSet.Type.VARCHAR );
+                } else if ( DataTypeResultSet.Type.XML.name().equals( value ) ) {
+                    rs.setType( transaction, DataTypeResultSet.Type.XML );
+                } else {
+                    errorMsg = I18n.bind( DataTypeResultSetCommandsI18n.invalidDataTypeName, DATATYPE_NAME );
                 }
-                case DESCRIPTION:
-                    rs.setDescription( transaction, value );
-                    break;
-                case LENGTH:
-                    try {
-                        final long length = Long.parseLong( value );
-                        rs.setLength( transaction, length );
-                    } catch ( final NumberFormatException e ) {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, LENGTH );
-                    }
 
-                    break;
-                case NAME_IN_SOURCE:
-                    rs.setNameInSource( transaction, value );
-                    break;
-                case NULLABLE:
-                    if ( Nullable.NO_NULLS.name().equals( value ) ) {
-                        rs.setNullable( transaction, Nullable.NO_NULLS );
-                    } else if ( Nullable.NULLABLE.name().equals( value ) ) {
-                        rs.setNullable( transaction, Nullable.NULLABLE );
-                    } else if ( Nullable.NULLABLE_UNKNOWN.name().equals( value ) ) {
-                        rs.setNullable( transaction, Nullable.NULLABLE_UNKNOWN );
+                // check to see if needs to be an array type
+                if ( StringUtils.isBlank( errorMsg ) ) {
+                    final String arrayArg = optionalArgument( 2, Boolean.FALSE.toString() );
+
+                    if ( KomodoObjectUtils.TRUE_STRING.equals( arrayArg ) || KomodoObjectUtils.FALSE_STRING.equals( arrayArg ) ) {
+                        rs.setArray( transaction, Boolean.parseBoolean( arrayArg ) );
                     } else {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidNullablePropertyValue, NULLABLE );
+                        errorMsg = I18n.bind( DataTypeResultSetCommandsI18n.invalidDataTypeArrayIndicator );
                     }
-
-                    break;
-                case PRECISION:
-                    try {
-                        final long precision = Long.parseLong( value );
-                        rs.setPrecision( transaction, precision );
-                    } catch ( final NumberFormatException e ) {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, PRECISION );
-                    }
-
-                    break;
-                case SCALE:
-                    try {
-                        final long scale = Long.parseLong( value );
-                        rs.setScale( transaction, scale );
-                    } catch ( final NumberFormatException e ) {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, SCALE );
-                    }
-
-                    break;
-                case UUID:
-                    rs.setUuid( transaction, value );
-                    break;
-                default:
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, DataTypeResultSet.class.getSimpleName() );
-                    break;
+                }
+            } else if ( DESCRIPTION.equals( name ) ) {
+                rs.setDescription( transaction, value );
+            } else if ( LENGTH.equals( name ) ) {
+                try {
+                    final long length = Long.parseLong( value );
+                    rs.setLength( transaction, length );
+                } catch ( final NumberFormatException e ) {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, LENGTH );
+                }
+            } else if ( NAME_IN_SOURCE.equals( name ) ) {
+                rs.setNameInSource( transaction, value );
+            } else if ( NULLABLE.equals( name ) ) {
+                if ( Nullable.NO_NULLS.name().equals( value ) ) {
+                    rs.setNullable( transaction, Nullable.NO_NULLS );
+                } else if ( Nullable.NULLABLE.name().equals( value ) ) {
+                    rs.setNullable( transaction, Nullable.NULLABLE );
+                } else if ( Nullable.NULLABLE_UNKNOWN.name().equals( value ) ) {
+                    rs.setNullable( transaction, Nullable.NULLABLE_UNKNOWN );
+                } else {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidNullablePropertyValue, NULLABLE );
+                }
+            } else if ( PRECISION.equals( name ) ) {
+                try {
+                    final long precision = Long.parseLong( value );
+                    rs.setPrecision( transaction, precision );
+                } catch ( final NumberFormatException e ) {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, PRECISION );
+                }
+            } else if ( SCALE.equals( name ) ) {
+                try {
+                    final long scale = Long.parseLong( value );
+                    rs.setScale( transaction, scale );
+                } catch ( final NumberFormatException e ) {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, SCALE );
+                }
+            } else if ( UUID.equals( name ) ) {
+                rs.setUuid( transaction, value );
+            } else {
+                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, DataTypeResultSet.class.getSimpleName() );
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {

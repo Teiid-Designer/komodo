@@ -52,16 +52,12 @@ public final class UnsetVdbImportPropertyCommand extends VdbImportShellCommand {
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            switch ( name ) {
-                case IMPORT_DATA_POLICIES:
-                    vdbImport.setImportDataPolicies( transaction, VdbImport.DEFAULT_IMPORT_DATA_POLICIES );
-                    break;
-                case VERSION:
-                    vdbImport.setVersion( transaction, Vdb.DEFAULT_VERSION );
-                    break;
-                default:
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, VdbImport.class.getSimpleName() );
-                    break;
+            if ( IMPORT_DATA_POLICIES.equals( name ) ) {
+                vdbImport.setImportDataPolicies( transaction, VdbImport.DEFAULT_IMPORT_DATA_POLICIES );
+            } else if ( VERSION.equals( name ) ) {
+                vdbImport.setVersion( transaction, Vdb.DEFAULT_VERSION );
+            } else {
+                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, VdbImport.class.getSimpleName() );
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {

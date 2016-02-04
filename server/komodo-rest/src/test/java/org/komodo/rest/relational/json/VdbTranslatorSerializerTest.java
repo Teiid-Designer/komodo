@@ -34,7 +34,7 @@ public final class VdbTranslatorSerializerTest extends AbstractSerializerTest {
     private static final String TYPE = "oracle";
     private static final String[] PROPS_KEYS = {"larry", "magic", "michael"};
     private static final String[] PROPS_VALUES = {"bird", "johnson", "jordan"};
-    private static final List<RestProperty> PROPS = new ArrayList<>();
+    private static final List<RestProperty> PROPS = new ArrayList<RestProperty>();
     static {
         for (int i = 0; i < PROPS_KEYS.length; ++i) {
             PROPS.add(new RestProperty(PROPS_KEYS[i], PROPS_VALUES[i]));

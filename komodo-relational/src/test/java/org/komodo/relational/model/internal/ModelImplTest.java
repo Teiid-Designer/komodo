@@ -33,9 +33,9 @@ import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateTable;
-import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon.CreateProcedure;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon.CreateTable;
+import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class ModelImplTest extends RelationalModelTest {
@@ -60,8 +60,9 @@ public final class ModelImplTest extends RelationalModelTest {
         assertThat( this.model.hasChild( getTransaction(), name ), is( true ) );
         assertThat( this.model.hasChild( getTransaction(), name, CreateProcedure.FUNCTION_STATEMENT ), is( true ) );
         assertThat( this.model.hasChildren( getTransaction() ), is( true ) );
-        assertThat( this.model.getChild( getTransaction(), name ), is( function ) );
-        assertThat( this.model.getChild( getTransaction(), name, CreateProcedure.FUNCTION_STATEMENT ), is( function ) );
+        assertThat( this.model.getChild( getTransaction(), name ), is( ( KomodoObject )function ) );
+        assertThat( this.model.getChild( getTransaction(), name, CreateProcedure.FUNCTION_STATEMENT ),
+                    is( ( KomodoObject )function ) );
     }
 
     @Test
@@ -76,8 +77,8 @@ public final class ModelImplTest extends RelationalModelTest {
         assertThat( this.model.hasChild( getTransaction(), name ), is( true ) );
         assertThat( this.model.hasChild( getTransaction(), name, VdbLexicon.Source.SOURCE ), is( true ) );
         assertThat( this.model.hasChildren( getTransaction() ), is( true ) );
-        assertThat( this.model.getChild( getTransaction(), name ), is( source ) );
-        assertThat( this.model.getChild( getTransaction(), name, VdbLexicon.Source.SOURCE ), is( source ) );
+        assertThat( this.model.getChild( getTransaction(), name ), is( ( KomodoObject )source ) );
+        assertThat( this.model.getChild( getTransaction(), name, VdbLexicon.Source.SOURCE ), is( ( KomodoObject )source ) );
     }
 
     @Test
@@ -92,8 +93,9 @@ public final class ModelImplTest extends RelationalModelTest {
         assertThat( this.model.hasChild( getTransaction(), name ), is( true ) );
         assertThat( this.model.hasChild( getTransaction(), name, CreateProcedure.PROCEDURE_STATEMENT ), is( true ) );
         assertThat( this.model.hasChildren( getTransaction() ), is( true ) );
-        assertThat( this.model.getChild( getTransaction(), name ), is( procedure ) );
-        assertThat( this.model.getChild( getTransaction(), name, CreateProcedure.PROCEDURE_STATEMENT ), is( procedure ) );
+        assertThat( this.model.getChild( getTransaction(), name ), is( ( KomodoObject )procedure ) );
+        assertThat( this.model.getChild( getTransaction(), name, CreateProcedure.PROCEDURE_STATEMENT ),
+                    is( ( KomodoObject )procedure ) );
     }
 
     @Test
@@ -108,8 +110,8 @@ public final class ModelImplTest extends RelationalModelTest {
         assertThat( this.model.hasChild( getTransaction(), name ), is( true ) );
         assertThat( this.model.hasChild( getTransaction(), name, CreateTable.TABLE_STATEMENT ), is( true ) );
         assertThat( this.model.hasChildren( getTransaction() ), is( true ) );
-        assertThat( this.model.getChild( getTransaction(), name ), is( table ) );
-        assertThat( this.model.getChild( getTransaction(), name, CreateTable.TABLE_STATEMENT ), is( table ) );
+        assertThat( this.model.getChild( getTransaction(), name ), is( ( KomodoObject )table ) );
+        assertThat( this.model.getChild( getTransaction(), name, CreateTable.TABLE_STATEMENT ), is( ( KomodoObject )table ) );
     }
 
     @Test
@@ -124,8 +126,9 @@ public final class ModelImplTest extends RelationalModelTest {
         assertThat( this.model.hasChild( getTransaction(), name ), is( true ) );
         assertThat( this.model.hasChild( getTransaction(), name, CreateProcedure.FUNCTION_STATEMENT ), is( true ) );
         assertThat( this.model.hasChildren( getTransaction() ), is( true ) );
-        assertThat( this.model.getChild( getTransaction(), name ), is( function ) );
-        assertThat( this.model.getChild( getTransaction(), name, CreateProcedure.FUNCTION_STATEMENT ), is( function ) );
+        assertThat( this.model.getChild( getTransaction(), name ), is( ( KomodoObject )function ) );
+        assertThat( this.model.getChild( getTransaction(), name, CreateProcedure.FUNCTION_STATEMENT ),
+                    is( ( KomodoObject )function ) );
     }
 
     @Test
@@ -140,8 +143,8 @@ public final class ModelImplTest extends RelationalModelTest {
         assertThat( this.model.hasChild( getTransaction(), name ), is( true ) );
         assertThat( this.model.hasChild( getTransaction(), name, CreateTable.VIEW_STATEMENT ), is( true ) );
         assertThat( this.model.hasChildren( getTransaction() ), is( true ) );
-        assertThat( this.model.getChild( getTransaction(), name ), is( view ) );
-        assertThat( this.model.getChild( getTransaction(), name, CreateTable.VIEW_STATEMENT ), is( view ) );
+        assertThat( this.model.getChild( getTransaction(), name ), is( ( KomodoObject )view ) );
+        assertThat( this.model.getChild( getTransaction(), name, CreateTable.VIEW_STATEMENT ), is( ( KomodoObject )view ) );
     }
 
     @Test
@@ -156,8 +159,9 @@ public final class ModelImplTest extends RelationalModelTest {
         assertThat( this.model.hasChild( getTransaction(), name ), is( true ) );
         assertThat( this.model.hasChild( getTransaction(), name, CreateProcedure.PROCEDURE_STATEMENT ), is( true ) );
         assertThat( this.model.hasChildren( getTransaction() ), is( true ) );
-        assertThat( this.model.getChild( getTransaction(), name ), is( procedure ) );
-        assertThat( this.model.getChild( getTransaction(), name, CreateProcedure.PROCEDURE_STATEMENT ), is( procedure ) );
+        assertThat( this.model.getChild( getTransaction(), name ), is( ( KomodoObject )procedure ) );
+        assertThat( this.model.getChild( getTransaction(), name, CreateProcedure.PROCEDURE_STATEMENT ),
+                    is( ( KomodoObject )procedure ) );
     }
 
     @Test

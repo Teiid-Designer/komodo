@@ -9,7 +9,7 @@
 	<artifactId>komodo-utils</artifactId>
 	<name>Komodo Utils</name>
 	<description>Miscellaneous utilities</description>
-
+<!--
 	<build>
 		<plugins>
 			<plugin>
@@ -22,7 +22,7 @@
 			</plugin>
 		</plugins>
 	</build>
-
+-->
 	<dependencies>
 		<dependency>
 			<groupId>org.komodo</groupId>
