@@ -9,7 +9,7 @@
 	<artifactId>komodo-modeshape-vdb</artifactId>
 	<name>Komodo Modeshape Vdb</name>
 	<description>Tools for handling Teiid Vdbs in Modeshape</description>
-
+<!--
 	<build>
 		<plugins>
 			<plugin>
@@ -22,7 +22,7 @@
 			</plugin>
 		</plugins>
 	</build>
-
+-->
 	<dependencies>
 		<dependency>
 			<groupId>org.komodo</groupId>

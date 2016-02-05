@@ -36,7 +36,7 @@ public class IndexCommandProvider implements ShellCommandProvider {
      */
     @Override
     public Set< Class< ? extends ShellCommand > > provideCommands() {
-        final Set< Class< ? extends ShellCommand > > result = new HashSet< >();
+        final Set< Class< ? extends ShellCommand > > result = new HashSet< Class< ? extends ShellCommand > >();
 
         result.add( SetIndexPropertyCommand.class );
         result.add( UnsetIndexPropertyCommand.class );

@@ -29,7 +29,7 @@ import java.util.Map;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.utils.ArgCheck;
 import org.modeshape.common.text.Position;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlParsingException;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlParsingException;
 
 /**
  * ImportMessages

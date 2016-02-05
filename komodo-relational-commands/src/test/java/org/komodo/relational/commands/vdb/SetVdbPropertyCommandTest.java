@@ -49,7 +49,7 @@ public final class SetVdbPropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testTabCompleter()throws Exception{
-    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	ArrayList<CharSequence> candidates=new ArrayList<CharSequence>();
     	setup("commandFiles","addVDBs.cmd");
     	final String[] commands = { "cd myVDB1" };
     	final CommandResult result = execute( commands );

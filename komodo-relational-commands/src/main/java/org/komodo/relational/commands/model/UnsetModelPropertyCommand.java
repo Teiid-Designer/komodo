@@ -51,22 +51,16 @@ public final class UnsetModelPropertyCommand extends ModelShellCommand {
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            switch ( name ) {
-                case DESCRIPTION:
-                    model.setDescription( transaction, null );
-                    break;
-                case METADATA_TYPE:
-                    model.setMetadataType( transaction, null );
-                    break;
-                case MODEL_TYPE:
-                    model.setModelType( transaction, null );
-                    break;
-                case VISIBLE:
-                    model.setVisible( transaction, Model.DEFAULT_VISIBLE );
-                    break;
-                default:
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Model.class.getSimpleName() );
-                    break;
+            if ( DESCRIPTION.equals( name ) ) {
+                model.setDescription( transaction, null );
+            } else if ( METADATA_TYPE.equals( name ) ) {
+                model.setMetadataType( transaction, null );
+            } else if ( MODEL_TYPE.equals( name ) ) {
+                model.setModelType( transaction, null );
+            } else if ( VISIBLE.equals( name ) ) {
+                model.setVisible( transaction, Model.DEFAULT_VISIBLE );
+            } else {
+                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Model.class.getSimpleName() );
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {

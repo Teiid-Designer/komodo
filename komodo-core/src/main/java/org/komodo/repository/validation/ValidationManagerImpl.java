@@ -11,12 +11,10 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.jcr.Node;
 import javax.jcr.Session;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-
 import org.komodo.core.KomodoLexicon;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.repository.RepositoryImpl;
@@ -47,8 +45,8 @@ public class ValidationManagerImpl implements ValidationManager {
      */
     public static class ValidationHandler extends DefaultHandler {
 
-        private final List< String > errors = new ArrayList<>();
-        private final List< String > fatals = new ArrayList<>();
+        private final List< String > errors = new ArrayList< String >();
+        private final List< String > fatals = new ArrayList< String >();
 
         /**
          * {@inheritDoc}
@@ -633,7 +631,7 @@ public class ValidationManagerImpl implements ValidationManager {
             _parser.parse( rulesXmlFile, handler );
 
             // return any errors
-            List< String > result = new ArrayList<>();
+            List< String > result = new ArrayList< String >();
             result.addAll( handler.getFatalErrors() );
             result.addAll( handler.getErrors() );
             return result;

@@ -52,18 +52,14 @@ public final class SetConditionPropertyCommand extends ConditionShellCommand {
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            switch ( name ) {
-                case CONSTRAINT:
-                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                        condition.setConstraint( transaction, Boolean.parseBoolean( value ) );
-                    } else {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, CONSTRAINT );
-                    }
-
-                    break;
-                default:
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Condition.class.getSimpleName() );
-                    break;
+            if ( CONSTRAINT.equals( name ) ) {
+                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                    condition.setConstraint( transaction, Boolean.parseBoolean( value ) );
+                } else {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, CONSTRAINT );
+                }
+            } else {
+                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Condition.class.getSimpleName() );
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {

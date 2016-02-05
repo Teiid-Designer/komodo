@@ -5,7 +5,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.StringWriter;
@@ -18,7 +17,6 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -130,9 +128,17 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
         final File cmdFile = File.createTempFile( "TestCommand", ".txt" ); //$NON-NLS-1$  //$NON-NLS-2$
         cmdFile.deleteOnExit();
 
-        try ( final FileWriter writer = new FileWriter( cmdFile ) ) {
+        FileWriter writer = null;
+
+        try {
+            writer = new FileWriter( cmdFile );
+
             for ( final String command : commands ) {
                 writer.write( command + NEW_LINE );
+            }
+        } finally {
+            if ( writer != null ) {
+                writer.close();
             }
         }
 
@@ -308,7 +314,7 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
  * @throws Exception
  */
     protected void assertTabCompletion(String line, final List<? extends CharSequence> expectedCandidates) throws Exception{
-    	List<CharSequence> candidates=new LinkedList<>();
+    	List<CharSequence> candidates=new LinkedList<CharSequence>();
     	Arguments arguments = null;
 		try {
 			arguments = new Arguments(line, true);

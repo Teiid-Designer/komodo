@@ -36,22 +36,24 @@ public final class LinkSerializer extends TypeAdapter< RestLink > {
     @Override
     public RestLink read( final JsonReader in ) throws IOException {
         final RestLink link = new RestLink();
+        boolean foundHref = false;
+        boolean foundRel = false;
+
         in.beginObject();
 
         while ( in.hasNext() ) {
             final String name = in.nextName();
 
-            switch ( name ) {
-                case JsonConstants.HREF:
-                    final String uri = in.nextString();
-                    link.setHref( UriBuilder.fromUri( uri ).build() );
-                    break;
-                case JsonConstants.REL:
-                    final String rel = in.nextString();
-                    link.setRel( LinkType.fromString( rel ) );
-                    break;
-                default:
-                    throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
+            if ( !foundHref && JsonConstants.HREF.equals( name ) ) {
+                final String uri = in.nextString();
+                link.setHref( UriBuilder.fromUri( uri ).build() );
+                foundHref = true;
+            } else if ( !foundRel && JsonConstants.REL.equals( name ) ) {
+                final String rel = in.nextString();
+                link.setRel( LinkType.fromString( rel ) );
+                foundRel = true;
+            } else {
+                throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
             }
         }
 

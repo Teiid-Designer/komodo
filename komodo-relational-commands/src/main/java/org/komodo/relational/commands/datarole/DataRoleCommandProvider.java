@@ -37,7 +37,7 @@ public class DataRoleCommandProvider implements ShellCommandProvider {
      */
     @Override
     public Set< Class< ? extends ShellCommand > > provideCommands() {
-        final Set< Class< ? extends ShellCommand > > result = new HashSet< >();
+        final Set< Class< ? extends ShellCommand > > result = new HashSet< Class< ? extends ShellCommand > >();
 
         result.add( AddMappedRoleCommand.class );
         result.add( AddPermissionCommand.class );

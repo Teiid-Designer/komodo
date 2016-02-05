@@ -50,16 +50,12 @@ public final class UnsetEntryPropertyCommand extends EntryShellCommand {
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            switch ( name ) {
-                case DESCRIPTION:
-                    entry.setDescription( transaction, null );
-                    break;
-                case PATH:
-                    entry.setPath( transaction, null );
-                    break;
-                default:
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Entry.class.getSimpleName() );
-                    break;
+            if ( DESCRIPTION.equals( name ) ) {
+                entry.setDescription( transaction, null );
+            } else if ( PATH.equals( name ) ) {
+                entry.setPath( transaction, null );
+            } else {
+                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Entry.class.getSimpleName() );
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {

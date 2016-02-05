@@ -63,7 +63,7 @@ public final class UnsetTablePropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testTabCompleter()throws Exception{
-    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	ArrayList<CharSequence> candidates=new ArrayList<CharSequence>();
     	setup("commandFiles","addTables.cmd");
     	final String[] commands = { "cd myTable1" };
     	final CommandResult result = execute( commands );

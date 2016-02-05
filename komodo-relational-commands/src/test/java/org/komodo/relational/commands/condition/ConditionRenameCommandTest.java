@@ -20,6 +20,7 @@ import static org.junit.Assert.assertThat;
 import java.util.Collections;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
+import org.komodo.relational.commands.storedprocedure.StoredProcedureRenameCommand;
 import org.komodo.shell.api.CommandResult;
 
 /**
@@ -45,7 +46,7 @@ public final class ConditionRenameCommandTest extends AbstractCommandTest {
         final String[] commands = { "cd myCondition1" };
         final CommandResult result = execute( commands );
         assertCommandResultOk( result );
-        assertTabCompletion( "rename ", Collections.emptyList() );
+        assertTabCompletion( "rename ", Collections.<CharSequence>emptyList() );
     }
 
     @Test

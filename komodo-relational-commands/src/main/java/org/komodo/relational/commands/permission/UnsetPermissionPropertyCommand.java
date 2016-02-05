@@ -51,31 +51,22 @@ public final class UnsetPermissionPropertyCommand extends PermissionShellCommand
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            switch ( name ) {
-                case ALLOW_ALTER:
-                    permission.setAllowAlter( transaction, Permission.DEFAULT_ALLOW_ALTER );
-                    break;
-                case ALLOW_CREATE:
-                    permission.setAllowCreate( transaction, Permission.DEFAULT_ALLOW_CREATE );
-                    break;
-                case ALLOW_DELETE:
-                    permission.setAllowDelete( transaction, Permission.DEFAULT_ALLOW_DELETE );
-                    break;
-                case ALLOW_EXECUTE:
-                    permission.setAllowExecute( transaction, Permission.DEFAULT_ALLOW_EXECUTE );
-                    break;
-                case ALLOW_LANGUAGE:
-                    permission.setAllowLanguage( transaction, Permission.DEFAULT_ALLOW_LANGUAGE );
-                    break;
-                case ALLOW_READ:
-                    permission.setAllowRead( transaction, Permission.DEFAULT_ALLOW_READ );
-                    break;
-                case ALLOW_UPDATE:
-                    permission.setAllowUpdate( transaction, Permission.DEFAULT_ALLOW_UPDATE );
-                    break;
-                default:
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Permission.class.getSimpleName() );
-                    break;
+            if ( ALLOW_ALTER.equals( name ) ) {
+                permission.setAllowAlter( transaction, Permission.DEFAULT_ALLOW_ALTER );
+            } else if ( ALLOW_CREATE.equals( name ) ) {
+                permission.setAllowCreate( transaction, Permission.DEFAULT_ALLOW_CREATE );
+            } else if ( ALLOW_DELETE.equals( name ) ) {
+                permission.setAllowDelete( transaction, Permission.DEFAULT_ALLOW_DELETE );
+            } else if ( ALLOW_EXECUTE.equals( name ) ) {
+                permission.setAllowExecute( transaction, Permission.DEFAULT_ALLOW_EXECUTE );
+            } else if ( ALLOW_LANGUAGE.equals( name ) ) {
+                permission.setAllowLanguage( transaction, Permission.DEFAULT_ALLOW_LANGUAGE );
+            } else if ( ALLOW_READ.equals( name ) ) {
+                permission.setAllowRead( transaction, Permission.DEFAULT_ALLOW_READ );
+            } else if ( ALLOW_UPDATE.equals( name ) ) {
+                permission.setAllowUpdate( transaction, Permission.DEFAULT_ALLOW_UPDATE );
+            } else {
+                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Permission.class.getSimpleName() );
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {

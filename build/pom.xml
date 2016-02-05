@@ -12,7 +12,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<build>
-		<outputDirectory>target/kits</outputDirectory>
+		<outputDirectory>target/kits/</outputDirectory>
 		<resources>
 			<resource>
 				<directory>kits/</directory>

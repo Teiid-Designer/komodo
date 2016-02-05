@@ -54,129 +54,102 @@ public final class SetUserDefinedFunctionPropertyCommand extends UserDefinedFunc
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            switch ( name ) {
-                case AGGREGATE:
-                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                        func.setAggregate( transaction, Boolean.parseBoolean( value ) );
-                    } else {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, AGGREGATE );
-                    }
-
-                    break;
-                case ALLOWS_DISTINCT:
-                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                        func.setAllowsDistinct( transaction, Boolean.parseBoolean( value ) );
-                    } else {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, ALLOWS_DISTINCT );
-                    }
-
-                    break;
-                case ALLOWS_ORDERBY:
-                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                        func.setAllowsOrderBy( transaction, Boolean.parseBoolean( value ) );
-                    } else {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, ALLOWS_ORDERBY );
-                    }
-
-                    break;
-                case ANALYTIC:
-                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                        func.setAnalytic( transaction, Boolean.parseBoolean( value ) );
-                    } else {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, ANALYTIC );
-                    }
-
-                    break;
-                case CATEGORY:
-                    func.setCategory( getTransaction(), value );
-                    break;
-                case DECOMPOSABLE:
-                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                        func.setDecomposable( transaction, Boolean.parseBoolean( value ) );
-                    } else {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, DECOMPOSABLE );
-                    }
-
-                    break;
-                case DESCRIPTION:
-                    func.setDescription( getTransaction(), value );
-                    break;
-                case DETERMINISM:
-                    if ( Function.Determinism.COMMAND_DETERMINISTIC.name().equals( value ) ) {
-                        func.setDeterminism( transaction, Function.Determinism.COMMAND_DETERMINISTIC );
-                    } else if ( Function.Determinism.DETERMINISTIC.name().equals( value ) ) {
-                        func.setDeterminism( transaction, Function.Determinism.DETERMINISTIC );
-                    } else if ( Function.Determinism.NONDETERMINISTIC.name().equals( value ) ) {
-                        func.setDeterminism( transaction, Function.Determinism.NONDETERMINISTIC );
-                    } else if ( Function.Determinism.SESSION_DETERMINISTIC.name().equals( value ) ) {
-                        func.setDeterminism( transaction, Function.Determinism.SESSION_DETERMINISTIC );
-                    } else if ( Function.Determinism.USER_DETERMINISTIC.name().equals( value ) ) {
-                        func.setDeterminism( transaction, Function.Determinism.USER_DETERMINISTIC );
-                    } else if ( Function.Determinism.VDB_DETERMINISTIC.name().equals( value ) ) {
-                        func.setDeterminism( transaction, Function.Determinism.VDB_DETERMINISTIC );
-                    } else {
-                        errorMsg = I18n.bind( UserDefinedFunctionCommandsI18n.invalidDeterministicPropertyValue, DETERMINISM );
-                    }
-
-                    break;
-                case JAVA_CLASS:
-                    func.setJavaClass( getTransaction(), value );
-                    break;
-                case JAVA_METHOD:
-                    func.setJavaMethod( getTransaction(), value );
-                    break;
-                case NAME_IN_SOURCE:
-                    func.setNameInSource( getTransaction(), value );
-                    break;
-                case NULL_ON_NULL:
-                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                        func.setNullOnNull( transaction, Boolean.parseBoolean( value ) );
-                    } else {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, NULL_ON_NULL );
-                    }
-
-                    break;
-                case SCHEMA_ELEMENT_TYPE:
-                    if ( SchemaElement.SchemaElementType.FOREIGN.name().equals( value ) ) {
-                        func.setSchemaElementType( transaction, SchemaElement.SchemaElementType.FOREIGN );
-                    } else if ( SchemaElement.SchemaElementType.VIRTUAL.name().equals( value ) ) {
-                        func.setSchemaElementType( transaction, SchemaElement.SchemaElementType.VIRTUAL );
-                    } else {
-                        errorMsg = I18n.bind( UserDefinedFunctionCommandsI18n.invalidSchemaElementTypePropertyValue, SCHEMA_ELEMENT_TYPE );
-                    }
-
-                    break;
-                case UPDATE_COUNT:
-                    try {
-                        final long count = Long.parseLong( value );
-                        func.setUpdateCount( transaction, count );
-                    } catch ( final NumberFormatException e ) {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, UPDATE_COUNT );
-                    }
-
-                    break;
-                case USES_DISTINCT_ROWS:
-                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                        func.setUsesDistinctRows( transaction, Boolean.parseBoolean( value ) );
-                    } else {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, USES_DISTINCT_ROWS );
-                    }
-
-                    break;
-                case UUID:
-                    func.setUuid( getTransaction(), value );
-                    break;
-                case VAR_ARGS:
-                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                        func.setVarArgs( transaction, Boolean.parseBoolean( value ) );
-                    } else {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, VAR_ARGS );
-                    }
-
-                    break;
-                default:
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, UserDefinedFunction.class.getSimpleName() );
-                    break;
+            if ( AGGREGATE.equals( name ) ) {
+                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                    func.setAggregate( transaction, Boolean.parseBoolean( value ) );
+                } else {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, AGGREGATE );
+                }
+            } else if ( ALLOWS_DISTINCT.equals( name ) ) {
+                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                    func.setAllowsDistinct( transaction, Boolean.parseBoolean( value ) );
+                } else {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, ALLOWS_DISTINCT );
+                }
+            } else if ( ALLOWS_ORDERBY.equals( name ) ) {
+                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                    func.setAllowsOrderBy( transaction, Boolean.parseBoolean( value ) );
+                } else {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, ALLOWS_ORDERBY );
+                }
+            } else if ( ANALYTIC.equals( name ) ) {
+                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                    func.setAnalytic( transaction, Boolean.parseBoolean( value ) );
+                } else {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, ANALYTIC );
+                }
+            } else if ( CATEGORY.equals( name ) ) {
+                func.setCategory( getTransaction(), value );
+            } else if ( DECOMPOSABLE.equals( name ) ) {
+                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                    func.setDecomposable( transaction, Boolean.parseBoolean( value ) );
+                } else {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, DECOMPOSABLE );
+                }
+            } else if ( DESCRIPTION.equals( name ) ) {
+                func.setDescription( getTransaction(), value );
+            } else if ( DETERMINISM.equals( name ) ) {
+                if ( Function.Determinism.COMMAND_DETERMINISTIC.name().equals( value ) ) {
+                    func.setDeterminism( transaction, Function.Determinism.COMMAND_DETERMINISTIC );
+                } else if ( Function.Determinism.DETERMINISTIC.name().equals( value ) ) {
+                    func.setDeterminism( transaction, Function.Determinism.DETERMINISTIC );
+                } else if ( Function.Determinism.NONDETERMINISTIC.name().equals( value ) ) {
+                    func.setDeterminism( transaction, Function.Determinism.NONDETERMINISTIC );
+                } else if ( Function.Determinism.SESSION_DETERMINISTIC.name().equals( value ) ) {
+                    func.setDeterminism( transaction, Function.Determinism.SESSION_DETERMINISTIC );
+                } else if ( Function.Determinism.USER_DETERMINISTIC.name().equals( value ) ) {
+                    func.setDeterminism( transaction, Function.Determinism.USER_DETERMINISTIC );
+                } else if ( Function.Determinism.VDB_DETERMINISTIC.name().equals( value ) ) {
+                    func.setDeterminism( transaction, Function.Determinism.VDB_DETERMINISTIC );
+                } else {
+                    errorMsg = I18n.bind( UserDefinedFunctionCommandsI18n.invalidDeterministicPropertyValue, DETERMINISM );
+                }
+            } else if ( JAVA_CLASS.equals( name ) ) {
+                func.setJavaClass( getTransaction(), value );
+            } else if ( JAVA_METHOD.equals( name ) ) {
+                func.setJavaMethod( getTransaction(), value );
+            } else if ( NAME_IN_SOURCE.equals( name ) ) {
+                func.setNameInSource( getTransaction(), value );
+            } else if ( NULL_ON_NULL.equals( name ) ) {
+                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                    func.setNullOnNull( transaction, Boolean.parseBoolean( value ) );
+                } else {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, NULL_ON_NULL );
+                }
+            } else if ( SCHEMA_ELEMENT_TYPE.equals( name ) ) {
+                if ( SchemaElement.SchemaElementType.FOREIGN.name().equals( value ) ) {
+                    func.setSchemaElementType( transaction, SchemaElement.SchemaElementType.FOREIGN );
+                } else if ( SchemaElement.SchemaElementType.VIRTUAL.name().equals( value ) ) {
+                    func.setSchemaElementType( transaction, SchemaElement.SchemaElementType.VIRTUAL );
+                } else {
+                    errorMsg = I18n.bind( UserDefinedFunctionCommandsI18n.invalidSchemaElementTypePropertyValue,
+                                          SCHEMA_ELEMENT_TYPE );
+                }
+            } else if ( UPDATE_COUNT.equals( name ) ) {
+                try {
+                    final long count = Long.parseLong( value );
+                    func.setUpdateCount( transaction, count );
+                } catch ( final NumberFormatException e ) {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, UPDATE_COUNT );
+                }
+            } else if ( USES_DISTINCT_ROWS.equals( name ) ) {
+                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                    func.setUsesDistinctRows( transaction, Boolean.parseBoolean( value ) );
+                } else {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, USES_DISTINCT_ROWS );
+                }
+            } else if ( UUID.equals( name ) ) {
+                func.setUuid( getTransaction(), value );
+            } else if ( VAR_ARGS.equals( name ) ) {
+                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                    func.setVarArgs( transaction, Boolean.parseBoolean( value ) );
+                } else {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, VAR_ARGS );
+                }
+            } else {
+                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName,
+                                      name,
+                                      UserDefinedFunction.class.getSimpleName() );
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {

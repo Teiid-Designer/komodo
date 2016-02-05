@@ -27,8 +27,8 @@ import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.CommandResult;
-import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.ShellCommand;
+import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.utils.i18n.I18n;
 
@@ -162,7 +162,7 @@ public class HelpCommand extends BuiltInShellCommand {
 
         if ( getWorkspaceStatus().isShowingCommandCategory() ) {
             final WorkspaceStatus status = getWorkspaceStatus();
-            final Map< String, List< String > > categoryCommands = new TreeMap< >();
+            final Map< String, List< String > > categoryCommands = new TreeMap< String, List< String > >();
 
             // group commands by category
             for ( final String cmdName : validCmdNames ) {

@@ -52,43 +52,30 @@ public final class UnsetViewPropertyCommand extends ViewShellCommand {
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            switch ( name ) {
-                case DESCRIPTION:
-                    view.setDescription( transaction, null );
-                    break;
-                case CARDINALITY:
-                    view.setCardinality( transaction, Table.DEFAULT_CARDINALITY );
-                    break;
-                case MATERIALIZED:
-                    view.setMaterialized( transaction, Table.DEFAULT_MATERIALIZED );
-                    break;
-                case MATERIALIZED_TABLE:
-                    view.setMaterializedTable( transaction, null );
-                    break;
-                case NAME_IN_SOURCE:
-                    view.setNameInSource( transaction, null );
-                    break;
-                case UPDATABLE:
-                    view.setUpdatable( transaction, Table.DEFAULT_UPDATABLE );
-                    break;
-                case UUID:
-                    view.setUuid( transaction, null );
-                    break;
-                case ON_COMMIT_VALUE:
-                    view.setOnCommitValue( transaction, null );
-                    break;
-                case QUERY_EXPRESSION:
-                    view.setQueryExpression( transaction, null );
-                    break;
-                case SCHEMA_ELEMENT_TYPE:
-                    view.setSchemaElementType( transaction, null );
-                    break;
-                case TEMPORARY_TABLE_TYPE:
-                    view.setTemporaryTableType( transaction, null );
-                    break;
-                default:
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, View.class.getSimpleName() );
-                    break;
+            if ( DESCRIPTION.equals( name ) ) {
+                view.setDescription( transaction, null );
+            } else if ( CARDINALITY.equals( name ) ) {
+                view.setCardinality( transaction, Table.DEFAULT_CARDINALITY );
+            } else if ( MATERIALIZED.equals( name ) ) {
+                view.setMaterialized( transaction, Table.DEFAULT_MATERIALIZED );
+            } else if ( MATERIALIZED_TABLE.equals( name ) ) {
+                view.setMaterializedTable( transaction, null );
+            } else if ( NAME_IN_SOURCE.equals( name ) ) {
+                view.setNameInSource( transaction, null );
+            } else if ( UPDATABLE.equals( name ) ) {
+                view.setUpdatable( transaction, Table.DEFAULT_UPDATABLE );
+            } else if ( UUID.equals( name ) ) {
+                view.setUuid( transaction, null );
+            } else if ( ON_COMMIT_VALUE.equals( name ) ) {
+                view.setOnCommitValue( transaction, null );
+            } else if ( QUERY_EXPRESSION.equals( name ) ) {
+                view.setQueryExpression( transaction, null );
+            } else if ( SCHEMA_ELEMENT_TYPE.equals( name ) ) {
+                view.setSchemaElementType( transaction, null );
+            } else if ( TEMPORARY_TABLE_TYPE.equals( name ) ) {
+                view.setTemporaryTableType( transaction, null );
+            } else {
+                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, View.class.getSimpleName() );
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {

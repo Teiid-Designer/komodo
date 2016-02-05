@@ -36,7 +36,7 @@ public class ModelCommandProvider implements ShellCommandProvider {
      */
     @Override
     public Set< Class< ? extends ShellCommand > > provideCommands() {
-        final Set< Class< ? extends ShellCommand > > result = new HashSet< >();
+        final Set< Class< ? extends ShellCommand > > result = new HashSet< Class< ? extends ShellCommand > >();
 
         result.add( AddPushdownFunctionCommand.class );
         result.add( AddSourceCommand.class );

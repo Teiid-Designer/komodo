@@ -10,7 +10,6 @@ package org.komodo.relational.model.internal;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.komodo.relational.RelationalConstants;
 import org.komodo.relational.RelationalConstants.Nullable;
 import org.komodo.relational.internal.RelationalChildRestrictedObject;
@@ -29,8 +28,8 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
-import org.modeshape.sequencer.ddl.StandardDdlLexicon;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateTable;
+import org.teiid.modeshape.sequencer.ddl.StandardDdlLexicon;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon.CreateTable;
 
 /**
  * An implementation of a relational model column.
@@ -66,7 +65,7 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
         static Map< String, String > defaultValues() {
             if ( _defaultValues == null ) {
                 final StandardOption[] options = values();
-                final Map< String, String > temp = new HashMap< >();
+                final Map< String, String > temp = new HashMap< String, String >();
 
                 for ( final StandardOption option : options ) {
                     temp.put( option.name(), option.defaultValue );
@@ -470,7 +469,7 @@ public final class ColumnImpl extends RelationalChildRestrictedObject implements
     public String getUuid( final UnitOfWork transaction ) throws KException {
         return OptionContainerUtils.getOption( transaction, this, StandardOption.UUID.name() );
     }
-    
+
     /**
      * {@inheritDoc}
      *

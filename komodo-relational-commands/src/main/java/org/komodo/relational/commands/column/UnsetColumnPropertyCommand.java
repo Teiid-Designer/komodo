@@ -51,89 +51,64 @@ public final class UnsetColumnPropertyCommand extends ColumnShellCommand {
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            switch ( name ) {
-                case AUTO_INCREMENTED:
-                    column.setAutoIncremented( transaction, Column.DEFAULT_AUTO_INCREMENTED );
-                    break;
-                case CASE_SENSITIVE:
-                    column.setCaseSensitive( transaction, Column.DEFAULT_CASE_SENSITIVE );
-                    break;
-                case CHAR_OCTET_LENGTH:
-                    column.setCharOctetLength(transaction, Column.DEFAULT_CHAR_OCTET_LENGTH);
-                    break;
-                case COLLATION_NAME:
-                    column.setCollationName( transaction, null );
-                    break;
-                case CURRENCY:
-                    column.setCurrency( transaction, Column.DEFAULT_CURRENCY );
-                    break;
-                case DATATYPE_NAME:
-                    column.setDatatypeName( transaction, null );
-                    break;
-                case DEFAULT_VALUE:
-                    column.setDefaultValue( transaction, null );
-                    break;
-                case DESCRIPTION:
-                    column.setDescription( transaction, null );
-                    break;
-                case DISTINCT_VALUES:
-                    column.setDistinctValues( transaction, Column.DEFAULT_DISTINCT_VALUES );
-                    break;
-                case FIXED_LENGTH:
-                    column.setFixedLength( transaction, Column.DEFAULT_FIXED_LENGTH );
-                    break;
-                case LENGTH:
-                    column.setLength( transaction, RelationalConstants.DEFAULT_LENGTH );
-                    break;
-                case MAX_VALUE:
-                    column.setMaxValue( transaction, null );
-                    break;
-                case MIN_VALUE:
-                    column.setMinValue( transaction, null );
-                    break;
-                case NAME_IN_SOURCE:
-                    column.setNameInSource( transaction, null );
-                    break;
-                case NATIVE_TYPE:
-                    column.setNativeType( transaction, null );
-                    break;
-                case NULLABLE:
-                    column.setNullable( transaction, null );
-                    break;
-                case NULL_VALUE_COUNT:
-                    column.setNullValueCount( transaction, Column.DEFAULT_NULL_VALUE_COUNT );
-                    break;
-                case PRECISION:
-                    column.setPrecision( transaction, RelationalConstants.DEFAULT_PRECISION );
-                    break;
-                case RADIX:
-                    column.setRadix( transaction, Column.DEFAULT_RADIX );
-                    break;
-                case SCALE:
-                    column.setScale( transaction, RelationalConstants.DEFAULT_SCALE );
-                    break;
-                case SEARCHABLE:
-                    column.setSearchable( transaction, null );
-                    break;
-                case SELECTABLE:
-                    column.setSelectable( transaction, Column.DEFAULT_SELECTABLE );
-                    break;
-                case SIGNED:
-                    column.setSigned( transaction, Column.DEFAULT_SIGNED );
-                    break;
-                case UPDATABLE:
-                    column.setUpdatable( transaction, Column.DEFAULT_UPDATABLE );
-                    break;
-                case UUID:
-                    column.setUuid( transaction, null );
-                    break;
-                default:
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Column.class.getSimpleName() );
-                    break;
+            if ( AUTO_INCREMENTED.equals( name ) ) {
+                column.setAutoIncremented( transaction, Column.DEFAULT_AUTO_INCREMENTED );
+            } else if ( CASE_SENSITIVE.equals( name ) ) {
+                column.setCaseSensitive( transaction, Column.DEFAULT_CASE_SENSITIVE );
+            } else if ( CHAR_OCTET_LENGTH.equals( name ) ) {
+                column.setCharOctetLength( transaction, Column.DEFAULT_CHAR_OCTET_LENGTH );
+            } else if ( COLLATION_NAME.equals( name ) ) {
+                column.setCollationName( transaction, null );
+            } else if ( CURRENCY.equals( name ) ) {
+                column.setCurrency( transaction, Column.DEFAULT_CURRENCY );
+            } else if ( DATATYPE_NAME.equals( name ) ) {
+                column.setDatatypeName( transaction, null );
+            } else if ( DEFAULT_VALUE.equals( name ) ) {
+                column.setDefaultValue( transaction, null );
+            } else if ( DESCRIPTION.equals( name ) ) {
+                column.setDescription( transaction, null );
+            } else if ( DISTINCT_VALUES.equals( name ) ) {
+                column.setDistinctValues( transaction, Column.DEFAULT_DISTINCT_VALUES );
+            } else if ( FIXED_LENGTH.equals( name ) ) {
+                column.setFixedLength( transaction, Column.DEFAULT_FIXED_LENGTH );
+            } else if ( LENGTH.equals( name ) ) {
+                column.setLength( transaction, RelationalConstants.DEFAULT_LENGTH );
+            } else if ( MAX_VALUE.equals( name ) ) {
+                column.setMaxValue( transaction, null );
+            } else if ( MIN_VALUE.equals( name ) ) {
+                column.setMinValue( transaction, null );
+            } else if ( NAME_IN_SOURCE.equals( name ) ) {
+                column.setNameInSource( transaction, null );
+            } else if ( NATIVE_TYPE.equals( name ) ) {
+                column.setNativeType( transaction, null );
+            } else if ( NULLABLE.equals( name ) ) {
+                column.setNullable( transaction, null );
+            } else if ( NULL_VALUE_COUNT.equals( name ) ) {
+                column.setNullValueCount( transaction, Column.DEFAULT_NULL_VALUE_COUNT );
+            } else if ( PRECISION.equals( name ) ) {
+                column.setPrecision( transaction, RelationalConstants.DEFAULT_PRECISION );
+            } else if ( RADIX.equals( name ) ) {
+                column.setRadix( transaction, Column.DEFAULT_RADIX );
+            } else if ( SCALE.equals( name ) ) {
+                column.setScale( transaction, RelationalConstants.DEFAULT_SCALE );
+            } else if ( SEARCHABLE.equals( name ) ) {
+                column.setSearchable( transaction, null );
+            } else if ( SELECTABLE.equals( name ) ) {
+                column.setSelectable( transaction, Column.DEFAULT_SELECTABLE );
+            } else if ( SIGNED.equals( name ) ) {
+                column.setSigned( transaction, Column.DEFAULT_SIGNED );
+            } else if ( UPDATABLE.equals( name ) ) {
+                column.setUpdatable( transaction, Column.DEFAULT_UPDATABLE );
+            } else if ( UUID.equals( name ) ) {
+                column.setUuid( transaction, null );
+            } else {
+                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Column.class.getSimpleName() );
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {
-                result = new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.unsetPropertySuccess, column.getName( transaction ), name ) );
+                result = new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.unsetPropertySuccess,
+                                                           column.getName( transaction ),
+                                                           name ) );
             } else {
                 result = new CommandResultImpl( false, errorMsg, null );
             }

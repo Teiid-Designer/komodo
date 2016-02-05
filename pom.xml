@@ -62,6 +62,7 @@
 		<infinispan.version>5.2.10.Final</infinispan.version>
 		<log4j.version>1.2.16</log4j.version>
 		<slf4j.log4j.version>1.7.2</slf4j.log4j.version>
+		<teiid.modeshape.version>0.0.1-SNAPSHOT</teiid.modeshape.version>
 		<xnio.version>3.2.0.Final</xnio.version>
 	</properties>
 
@@ -110,14 +111,14 @@
 				<version>${modeshape.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.modeshape</groupId>
-				<artifactId>modeshape-sequencer-ddl</artifactId>
-				<version>${modeshape.version}</version>
+				<groupId>org.jboss.teiid.modeshape</groupId>
+				<artifactId>teiid-modeshape-sequencer-vdb</artifactId>
+				<version>${teiid.modeshape.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.modeshape</groupId>
-				<artifactId>modeshape-sequencer-teiid</artifactId>
-				<version>${modeshape.version}</version>
+				<groupId>org.jboss.teiid.modeshape</groupId>
+				<artifactId>teiid-modeshape-sequencer-ddl</artifactId>
+				<version>${teiid.modeshape.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.modeshape</groupId>
@@ -171,12 +172,12 @@
 		<artifactId>modeshape-jcr</artifactId>
 		</dependency>
 		<dependency>
-		<groupId>org.modeshape</groupId>
-		<artifactId>modeshape-sequencer-ddl</artifactId>
+            <groupId>org.jboss.teiid.modeshape</groupId>
+            <artifactId>teiid-modeshape-sequencer-ddl</artifactId>
 		</dependency>
 		<dependency>
-		<groupId>org.modeshape</groupId>
-		<artifactId>modeshape-sequencer-teiid</artifactId>
+            <groupId>org.jboss.teiid.modeshape</groupId>
+            <artifactId>teiid-modeshape-sequencer-vdb</artifactId>
 		</dependency>
 		<dependency>
 		<groupId>org.modeshape</groupId>

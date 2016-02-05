@@ -9,7 +9,6 @@ package org.komodo.relational.commands.workspace;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
@@ -19,7 +18,7 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.i18n.I18n;
-import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
+import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 /**
  * A shell command to delete a Vdb.
@@ -47,7 +46,7 @@ public final class DeleteVdbCommand extends WorkspaceShellCommand {
             final String vdbName = requiredArgument( 0, I18n.bind( WorkspaceCommandsI18n.missingVdbName ) );
 
             final KomodoObject vdbToDelete = getWorkspaceManager().getChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
-            
+
             if( vdbToDelete==null ) {
                 return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.vdbNotFound, vdbName ), null );
             } else {

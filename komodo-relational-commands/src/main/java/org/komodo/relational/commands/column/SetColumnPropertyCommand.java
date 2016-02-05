@@ -54,182 +54,139 @@ public final class SetColumnPropertyCommand extends ColumnShellCommand {
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            switch ( name ) {
-                case AUTO_INCREMENTED:
-                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                        column.setAutoIncremented( transaction, Boolean.parseBoolean( value ) );
-                    } else {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, AUTO_INCREMENTED );
-                    }
-
-                    break;
-                case CASE_SENSITIVE:
-                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                        column.setCaseSensitive( transaction, Boolean.parseBoolean( value ) );
-                    } else {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, CASE_SENSITIVE );
-                    }
-
-                    break;
-                case CHAR_OCTET_LENGTH:
-                    try {
-                        final long octetLength = Long.parseLong( value );
-                        column.setCharOctetLength( transaction, octetLength );
-                    } catch ( final NumberFormatException e ) {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, CHAR_OCTET_LENGTH );
-                    }
-
-                    break;
-                case COLLATION_NAME:
-                    column.setCollationName( transaction, value );
-                    break;
-                case CURRENCY:
-                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                        column.setCurrency( transaction, Boolean.parseBoolean( value ) );
-                    } else {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, CURRENCY );
-                    }
-
-                    break;
-                case DATATYPE_NAME:
-                    column.setDatatypeName( transaction, value );
-                    break;
-                case DEFAULT_VALUE:
-                    column.setDefaultValue( transaction, value );
-                    break;
-                case DESCRIPTION:
-                    column.setDescription( transaction, value );
-                    break;
-                case DISTINCT_VALUES:
-                    try {
-                        final long nValues = Long.parseLong( value );
-                        column.setDistinctValues( transaction, nValues );
-                    } catch ( final NumberFormatException e ) {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, DISTINCT_VALUES );
-                    }
-
-                    break;
-                case FIXED_LENGTH:
-                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                        column.setFixedLength( transaction, Boolean.parseBoolean( value ) );
-                    } else {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, FIXED_LENGTH );
-                    }
-
-                    break;
-                case LENGTH:
-                    try {
-                        final long length = Long.parseLong( value );
-                        column.setLength( transaction, length );
-                    } catch ( final NumberFormatException e ) {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, LENGTH );
-                    }
-
-                    break;
-                case MAX_VALUE:
-                    column.setMaxValue( transaction, value );
-                    break;
-                case MIN_VALUE:
-                    column.setMinValue( transaction, value );
-                    break;
-                case NAME_IN_SOURCE:
-                    column.setNameInSource( transaction, value );
-                    break;
-                case NATIVE_TYPE:
-                    column.setNativeType( transaction, value );
-                    break;
-                case NULLABLE:
-                    if ( Nullable.NO_NULLS.name().equals( value ) ) {
-                        column.setNullable( transaction, Nullable.NO_NULLS );
-                    } else if ( Nullable.NULLABLE.name().equals( value ) ) {
-                        column.setNullable( transaction, Nullable.NULLABLE );
-                    } else if ( Nullable.NULLABLE_UNKNOWN.name().equals( value ) ) {
-                        column.setNullable( transaction, Nullable.NULLABLE_UNKNOWN );
-                    } else {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidNullablePropertyValue, NULLABLE );
-                    }
-
-                    break;
-                case NULL_VALUE_COUNT:
-                    try {
-                        final long count = Long.parseLong( value );
-                        column.setNullValueCount( transaction, count );
-                    } catch ( final NumberFormatException e ) {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, NULL_VALUE_COUNT );
-                    }
-
-                    break;
-                case PRECISION:
-                    try {
-                        final long precision = Long.parseLong( value );
-                        column.setPrecision( transaction, precision );
-                    } catch ( final NumberFormatException e ) {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, PRECISION );
-                    }
-
-                    break;
-                case RADIX:
-                    try {
-                        final long radix = Long.parseLong( value );
-                        column.setRadix( transaction, radix );
-                    } catch ( final NumberFormatException e ) {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, RADIX );
-                    }
-
-                    break;
-                case SCALE:
-                    try {
-                        final long scale = Long.parseLong( value );
-                        column.setScale( transaction, scale );
-                    } catch ( final NumberFormatException e ) {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, SCALE );
-                    }
-
-                    break;
-                case SEARCHABLE:
-                    if ( Searchable.ALL_EXCEPT_LIKE.name().equals( value ) ) {
-                        column.setSearchable( transaction, Searchable.ALL_EXCEPT_LIKE );
-                    } else if ( Searchable.LIKE_ONLY.name().equals( value ) ) {
-                        column.setSearchable( transaction, Searchable.LIKE_ONLY );
-                    } else if ( Searchable.SEARCHABLE.name().equals( value ) ) {
-                        column.setSearchable( transaction, Searchable.SEARCHABLE );
-                    } else if ( Searchable.UNSEARCHABLE.name().equals( value ) ) {
-                        column.setSearchable( transaction, Searchable.UNSEARCHABLE );
-                    } else {
-                        errorMsg = I18n.bind( ColumnCommandsI18n.invalidSearchablePropertyValue, SEARCHABLE );
-                    }
-
-                    break;
-                case SELECTABLE:
-                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                        column.setSelectable( transaction, Boolean.parseBoolean( value ) );
-                    } else {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, SELECTABLE );
-                    }
-
-                    break;
-                case SIGNED:
-                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                        column.setSigned( transaction, Boolean.parseBoolean( value ) );
-                    } else {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, SIGNED );
-                    }
-
-                    break;
-                case UPDATABLE:
-                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                        column.setUpdatable( transaction, Boolean.parseBoolean( value ) );
-                    } else {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, UPDATABLE );
-                    }
-
-                    break;
-                case UUID:
-                    column.setUuid( transaction, value );
-                    break;
-                default:
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Column.class.getSimpleName() );
-                    break;
+            if ( AUTO_INCREMENTED.equals( name ) ) {
+                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                    column.setAutoIncremented( transaction, Boolean.parseBoolean( value ) );
+                } else {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, AUTO_INCREMENTED );
+                }
+            } else if ( CASE_SENSITIVE.equals( name ) ) {
+                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                    column.setCaseSensitive( transaction, Boolean.parseBoolean( value ) );
+                } else {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, CASE_SENSITIVE );
+                }
+            } else if ( CHAR_OCTET_LENGTH.equals( name ) ) {
+                try {
+                    final long octetLength = Long.parseLong( value );
+                    column.setCharOctetLength( transaction, octetLength );
+                } catch ( final NumberFormatException e ) {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, CHAR_OCTET_LENGTH );
+                }
+            } else if ( COLLATION_NAME.equals( name ) ) {
+                column.setCollationName( transaction, value );
+            } else if ( CURRENCY.equals( name ) ) {
+                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                    column.setCurrency( transaction, Boolean.parseBoolean( value ) );
+                } else {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, CURRENCY );
+                }
+            } else if ( DATATYPE_NAME.equals( name ) ) {
+                column.setDatatypeName( transaction, value );
+            } else if ( DEFAULT_VALUE.equals( name ) ) {
+                column.setDefaultValue( transaction, value );
+            } else if ( DESCRIPTION.equals( name ) ) {
+                column.setDescription( transaction, value );
+            } else if ( DISTINCT_VALUES.equals( name ) ) {
+                try {
+                    final long nValues = Long.parseLong( value );
+                    column.setDistinctValues( transaction, nValues );
+                } catch ( final NumberFormatException e ) {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, DISTINCT_VALUES );
+                }
+            } else if ( FIXED_LENGTH.equals( name ) ) {
+                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                    column.setFixedLength( transaction, Boolean.parseBoolean( value ) );
+                } else {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, FIXED_LENGTH );
+                }
+            } else if ( LENGTH.equals( name ) ) {
+                try {
+                    final long length = Long.parseLong( value );
+                    column.setLength( transaction, length );
+                } catch ( final NumberFormatException e ) {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, LENGTH );
+                }
+            } else if ( MAX_VALUE.equals( name ) ) {
+                column.setMaxValue( transaction, value );
+            } else if ( MIN_VALUE.equals( name ) ) {
+                column.setMinValue( transaction, value );
+            } else if ( NAME_IN_SOURCE.equals( name ) ) {
+                column.setNameInSource( transaction, value );
+            } else if ( NATIVE_TYPE.equals( name ) ) {
+                column.setNativeType( transaction, value );
+            } else if ( NULLABLE.equals( name ) ) {
+                if ( Nullable.NO_NULLS.name().equals( value ) ) {
+                    column.setNullable( transaction, Nullable.NO_NULLS );
+                } else if ( Nullable.NULLABLE.name().equals( value ) ) {
+                    column.setNullable( transaction, Nullable.NULLABLE );
+                } else if ( Nullable.NULLABLE_UNKNOWN.name().equals( value ) ) {
+                    column.setNullable( transaction, Nullable.NULLABLE_UNKNOWN );
+                } else {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidNullablePropertyValue, NULLABLE );
+                }
+            } else if ( NULL_VALUE_COUNT.equals( name ) ) {
+                try {
+                    final long count = Long.parseLong( value );
+                    column.setNullValueCount( transaction, count );
+                } catch ( final NumberFormatException e ) {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, NULL_VALUE_COUNT );
+                }
+            } else if ( PRECISION.equals( name ) ) {
+                try {
+                    final long precision = Long.parseLong( value );
+                    column.setPrecision( transaction, precision );
+                } catch ( final NumberFormatException e ) {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, PRECISION );
+                }
+            } else if ( RADIX.equals( name ) ) {
+                try {
+                    final long radix = Long.parseLong( value );
+                    column.setRadix( transaction, radix );
+                } catch ( final NumberFormatException e ) {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, RADIX );
+                }
+            } else if ( SCALE.equals( name ) ) {
+                try {
+                    final long scale = Long.parseLong( value );
+                    column.setScale( transaction, scale );
+                } catch ( final NumberFormatException e ) {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, SCALE );
+                }
+            } else if ( SEARCHABLE.equals( name ) ) {
+                if ( Searchable.ALL_EXCEPT_LIKE.name().equals( value ) ) {
+                    column.setSearchable( transaction, Searchable.ALL_EXCEPT_LIKE );
+                } else if ( Searchable.LIKE_ONLY.name().equals( value ) ) {
+                    column.setSearchable( transaction, Searchable.LIKE_ONLY );
+                } else if ( Searchable.SEARCHABLE.name().equals( value ) ) {
+                    column.setSearchable( transaction, Searchable.SEARCHABLE );
+                } else if ( Searchable.UNSEARCHABLE.name().equals( value ) ) {
+                    column.setSearchable( transaction, Searchable.UNSEARCHABLE );
+                } else {
+                    errorMsg = I18n.bind( ColumnCommandsI18n.invalidSearchablePropertyValue, SEARCHABLE );
+                }
+            } else if ( SELECTABLE.equals( name ) ) {
+                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                    column.setSelectable( transaction, Boolean.parseBoolean( value ) );
+                } else {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, SELECTABLE );
+                }
+            } else if ( SIGNED.equals( name ) ) {
+                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                    column.setSigned( transaction, Boolean.parseBoolean( value ) );
+                } else {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, SIGNED );
+                }
+            } else if ( UPDATABLE.equals( name ) ) {
+                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                    column.setUpdatable( transaction, Boolean.parseBoolean( value ) );
+                } else {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, UPDATABLE );
+                }
+            } else if ( UUID.equals( name ) ) {
+                column.setUuid( transaction, value );
+            } else {
+                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Column.class.getSimpleName() );
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {

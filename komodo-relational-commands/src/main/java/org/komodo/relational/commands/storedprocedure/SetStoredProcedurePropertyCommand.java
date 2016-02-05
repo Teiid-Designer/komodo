@@ -53,49 +53,37 @@ public final class SetStoredProcedurePropertyCommand extends StoredProcedureShel
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            switch ( name ) {
-                case DESCRIPTION:
-                    proc.setDescription( getTransaction(), value );
-                    break;
-                case NAME_IN_SOURCE:
-                    proc.setNameInSource( getTransaction(), value );
-                    break;
-                case NATIVE_QUERY:
-                    proc.setNativeQuery( transaction, value );
-                    break;
-                case NON_PREPARED:
-                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                        proc.setNonPrepared( transaction, Boolean.parseBoolean( value ) );
-                    } else {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, NON_PREPARED );
-                    }
-
-                    break;
-                case SCHEMA_ELEMENT_TYPE:
-                    if ( SchemaElement.SchemaElementType.FOREIGN.name().equals( value ) ) {
-                        proc.setSchemaElementType( transaction, SchemaElement.SchemaElementType.FOREIGN );
-                    } else if ( SchemaElement.SchemaElementType.VIRTUAL.name().equals( value ) ) {
-                        proc.setSchemaElementType( transaction, SchemaElement.SchemaElementType.VIRTUAL );
-                    } else {
-                        errorMsg = I18n.bind( StoredProcedureCommandsI18n.invalidSchemaElementTypePropertyValue, value );
-                    }
-
-                    break;
-                case UPDATE_COUNT:
-                    try {
-                        final long count = Long.parseLong( value );
-                        proc.setUpdateCount( transaction, count );
-                    } catch ( final NumberFormatException e ) {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, UPDATE_COUNT );
-                    }
-
-                    break;
-                case UUID:
-                    proc.setUuid( getTransaction(), value );
-                    break;
-                default:
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, StoredProcedure.class.getSimpleName() );
-                    break;
+            if ( DESCRIPTION.equals( name ) ) {
+                proc.setDescription( getTransaction(), value );
+            } else if ( NAME_IN_SOURCE.equals( name ) ) {
+                proc.setNameInSource( getTransaction(), value );
+            } else if ( NATIVE_QUERY.equals( name ) ) {
+                proc.setNativeQuery( transaction, value );
+            } else if ( NON_PREPARED.equals( name ) ) {
+                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                    proc.setNonPrepared( transaction, Boolean.parseBoolean( value ) );
+                } else {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, NON_PREPARED );
+                }
+            } else if ( SCHEMA_ELEMENT_TYPE.equals( name ) ) {
+                if ( SchemaElement.SchemaElementType.FOREIGN.name().equals( value ) ) {
+                    proc.setSchemaElementType( transaction, SchemaElement.SchemaElementType.FOREIGN );
+                } else if ( SchemaElement.SchemaElementType.VIRTUAL.name().equals( value ) ) {
+                    proc.setSchemaElementType( transaction, SchemaElement.SchemaElementType.VIRTUAL );
+                } else {
+                    errorMsg = I18n.bind( StoredProcedureCommandsI18n.invalidSchemaElementTypePropertyValue, value );
+                }
+            } else if ( UPDATE_COUNT.equals( name ) ) {
+                try {
+                    final long count = Long.parseLong( value );
+                    proc.setUpdateCount( transaction, count );
+                } catch ( final NumberFormatException e ) {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, UPDATE_COUNT );
+                }
+            } else if ( UUID.equals( name ) ) {
+                proc.setUuid( getTransaction(), value );
+            } else {
+                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, StoredProcedure.class.getSimpleName() );
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {

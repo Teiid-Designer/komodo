@@ -7,6 +7,7 @@
  */
 package org.komodo.utils.i18n;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -113,8 +114,10 @@ public abstract class I18n {
         final String bundleName = thisClass.getName().replaceAll( "\\.", "/" ).concat( ".properties" ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         final Collection< String > errors = new ArrayList< String >();
         final Properties props = new I18nProperties( fields, thisClass, errors );
+        InputStream stream = null;
 
-        try ( final InputStream stream = thisClass.getClassLoader().getResource( bundleName ).openStream() ) {
+        try {
+            stream = thisClass.getClassLoader().getResource( bundleName ).openStream();
             props.load( stream );
 
             // log errors for any properties keys that don't have fields
@@ -139,6 +142,15 @@ public abstract class I18n {
         } catch ( final Exception e ) {
             throw new IllegalStateException( I18n.bind( UtilsI18n.problemLoadingI18nProperties, getClass().getName() ), e );
         } finally {
+            if (stream != null) {
+                try {
+                    stream.close();
+                } catch ( final IOException e ) {
+                    throw new IllegalStateException( I18n.bind( UtilsI18n.problemLoadingI18nProperties, getClass().getName() ),
+                                                     e );
+                }
+            }
+
             if ( problem != null ) {
                 throw problem;
             }

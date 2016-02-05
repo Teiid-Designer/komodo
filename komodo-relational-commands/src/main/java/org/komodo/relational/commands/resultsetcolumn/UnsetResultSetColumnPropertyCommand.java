@@ -52,37 +52,26 @@ public final class UnsetResultSetColumnPropertyCommand extends ResultSetColumnSh
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            switch ( name ) {
-                case DATATYPE_NAME:
-                    column.setDatatypeName( transaction, null );
-                    break;
-                case DEFAULT_VALUE:
-                    column.setDefaultValue( transaction, null );
-                    break;
-                case DESCRIPTION:
-                    column.setDescription( transaction, null );
-                    break;
-                case LENGTH:
-                    column.setLength( transaction, RelationalConstants.DEFAULT_LENGTH );
-                    break;
-                case NAME_IN_SOURCE:
-                    column.setNameInSource( transaction, null );
-                    break;
-                case NULLABLE:
-                    column.setNullable( transaction, null );
-                    break;
-                case PRECISION:
-                    column.setPrecision( transaction, RelationalConstants.DEFAULT_PRECISION );
-                    break;
-                case SCALE:
-                    column.setScale( transaction, RelationalConstants.DEFAULT_SCALE );
-                    break;
-                case UUID:
-                    column.setUuid( transaction, null );
-                    break;
-                default:
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Column.class.getSimpleName() );
-                    break;
+            if ( DATATYPE_NAME.equals( name ) ) {
+                column.setDatatypeName( transaction, null );
+            } else if ( DEFAULT_VALUE.equals( name ) ) {
+                column.setDefaultValue( transaction, null );
+            } else if ( DESCRIPTION.equals( name ) ) {
+                column.setDescription( transaction, null );
+            } else if ( LENGTH.equals( name ) ) {
+                column.setLength( transaction, RelationalConstants.DEFAULT_LENGTH );
+            } else if ( NAME_IN_SOURCE.equals( name ) ) {
+                column.setNameInSource( transaction, null );
+            } else if ( NULLABLE.equals( name ) ) {
+                column.setNullable( transaction, null );
+            } else if ( PRECISION.equals( name ) ) {
+                column.setPrecision( transaction, RelationalConstants.DEFAULT_PRECISION );
+            } else if ( SCALE.equals( name ) ) {
+                column.setScale( transaction, RelationalConstants.DEFAULT_SCALE );
+            } else if ( UUID.equals( name ) ) {
+                column.setUuid( transaction, null );
+            } else {
+                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Column.class.getSimpleName() );
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {

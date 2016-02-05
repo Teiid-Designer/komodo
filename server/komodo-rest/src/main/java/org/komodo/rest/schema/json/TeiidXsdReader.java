@@ -136,7 +136,7 @@ public class TeiidXsdReader implements XSVisitor, JsonConstants {
         }
     }
 
-    private static KeyInValueHashMap<String, AliasMapper> ALIAS_CACHE = new KeyInValueHashMap<>(new AliasMapperAdapter());
+    private static KeyInValueHashMap<String, AliasMapper> ALIAS_CACHE = new KeyInValueHashMap<String, AliasMapper>(new AliasMapperAdapter());
 
     static {
         AliasMapper vdbMapper = new AliasMapper("vdb");

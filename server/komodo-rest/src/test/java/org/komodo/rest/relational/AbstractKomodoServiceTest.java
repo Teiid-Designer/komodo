@@ -60,8 +60,8 @@ import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.test.utils.TestUtilities;
 import org.modeshape.jcr.ModeShapeLexicon;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
-import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon;
+import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 /**
  *
@@ -147,7 +147,7 @@ public abstract class AbstractKomodoServiceTest implements V1Constants {
     }
 
     protected List<String> loadSampleSearches() throws Exception {
-        List<String> searchNames = new ArrayList<>();
+        List<String> searchNames = new ArrayList<String>();
         Repository repository = _restApp.getDefaultRepository();
 
         final SynchronousCallback callback = new SynchronousCallback();

@@ -27,7 +27,7 @@ import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
-import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
+import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class DataRoleImplTest extends RelationalModelTest {
@@ -87,8 +87,9 @@ public final class DataRoleImplTest extends RelationalModelTest {
         assertThat( this.dataRole.hasChild( getTransaction(), name ), is( true ) );
         assertThat( this.dataRole.hasChild( getTransaction(), name, VdbLexicon.DataRole.Permission.PERMISSION ), is( true ) );
         assertThat( this.dataRole.hasChildren( getTransaction() ), is( true ) );
-        assertThat( this.dataRole.getChild( getTransaction(), name ), is( added ) );
-        assertThat( this.dataRole.getChild( getTransaction(), name, VdbLexicon.DataRole.Permission.PERMISSION ), is( added ) );
+        assertThat( this.dataRole.getChild( getTransaction(), name ), is( ( KomodoObject )added ) );
+        assertThat( this.dataRole.getChild( getTransaction(), name, VdbLexicon.DataRole.Permission.PERMISSION ),
+                    is( ( KomodoObject )added ) );
     }
 
     @Test( expected = KException.class )

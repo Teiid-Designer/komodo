@@ -52,7 +52,7 @@ public final class UnsetSchemaPropertyCommandTest extends AbstractCommandTest {
 
     @Test
     public void testTabCompleter()throws Exception{
-    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	ArrayList<CharSequence> candidates=new ArrayList<CharSequence>();
     	setup("commandFiles","addSchemas.cmd");
     	final String[] commands = { "cd mySchema1" };
     	final CommandResult result = execute( commands );

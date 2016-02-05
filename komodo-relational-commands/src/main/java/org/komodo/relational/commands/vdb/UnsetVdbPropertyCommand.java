@@ -51,43 +51,30 @@ public final class UnsetVdbPropertyCommand extends VdbShellCommand {
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            switch ( name ) {
-                case ALLOWED_LANGUAGES:
-                    vdb.setAllowedLanguages( transaction, null );
-                    break;
-                case AUTHENTICATION_TYPE:
-                    vdb.setAuthenticationType( transaction, null );
-                    break;
-                case CONNECTION_TYPE:
-                    vdb.setConnectionType( transaction, null );
-                    break;
-                case DESCRIPTION:
-                    vdb.setDescription( transaction, null );
-                    break;
-                case GSS_PATTERN:
-                    vdb.setGssPattern( transaction, null );
-                    break;
-                case ORIGINAL_FILE_PATH:
-                    vdb.setOriginalFilePath( transaction, null );
-                    break;
-                case PASSWORD_PATTERN:
-                    vdb.setPasswordPattern( transaction, null );
-                    break;
-                case PREVIEW:
-                    vdb.setPreview( transaction, Vdb.DEFAULT_PREVIEW );
-                    break;
-                case QUERY_TIMEOUT:
-                    vdb.setQueryTimeout( transaction, -1 );
-                    break;
-                case SECURITY_DOMAIN:
-                    vdb.setSecurityDomain( transaction, null );
-                    break;
-                case VERSION:
-                    vdb.setVersion( transaction, Vdb.DEFAULT_VERSION );
-                    break;
-                default:
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Vdb.class.getSimpleName() );
-                    break;
+            if ( ALLOWED_LANGUAGES.equals( name ) ) {
+                vdb.setAllowedLanguages( transaction, null );
+            } else if ( AUTHENTICATION_TYPE.equals( name ) ) {
+                vdb.setAuthenticationType( transaction, null );
+            } else if ( CONNECTION_TYPE.equals( name ) ) {
+                vdb.setConnectionType( transaction, null );
+            } else if ( DESCRIPTION.equals( name ) ) {
+                vdb.setDescription( transaction, null );
+            } else if ( GSS_PATTERN.equals( name ) ) {
+                vdb.setGssPattern( transaction, null );
+            } else if ( ORIGINAL_FILE_PATH.equals( name ) ) {
+                vdb.setOriginalFilePath( transaction, null );
+            } else if ( PASSWORD_PATTERN.equals( name ) ) {
+                vdb.setPasswordPattern( transaction, null );
+            } else if ( PREVIEW.equals( name ) ) {
+                vdb.setPreview( transaction, Vdb.DEFAULT_PREVIEW );
+            } else if ( QUERY_TIMEOUT.equals( name ) ) {
+                vdb.setQueryTimeout( transaction, -1 );
+            } else if ( SECURITY_DOMAIN.equals( name ) ) {
+                vdb.setSecurityDomain( transaction, null );
+            } else if ( VERSION.equals( name ) ) {
+                vdb.setVersion( transaction, Vdb.DEFAULT_VERSION );
+            } else {
+                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Vdb.class.getSimpleName() );
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {

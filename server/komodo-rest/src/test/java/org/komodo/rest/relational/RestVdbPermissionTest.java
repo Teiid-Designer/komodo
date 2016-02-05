@@ -28,9 +28,9 @@ public final class RestVdbPermissionTest {
     private static final boolean ALLOW_READ = true;
     private static final boolean ALLOW_UPDATE = true;
 
-    private static final List<RestVdbCondition> CONDITIONS = new ArrayList<>();
+    private static final List<RestVdbCondition> CONDITIONS = new ArrayList<RestVdbCondition>();
 
-    private static final List<RestVdbMask> MASKS = new ArrayList<>();
+    private static final List<RestVdbMask> MASKS = new ArrayList<RestVdbMask>();
 
     static {
         RestVdbCondition condition1 = new RestVdbCondition();

@@ -2,11 +2,11 @@ package org.komodo.shell.commands;
 
 import java.util.LinkedList;
 import java.util.List;
-
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.CommandResult;
+import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.utils.StringUtils;
@@ -45,7 +45,7 @@ public class ResetGlobalPropertyCommand extends BuiltInShellCommand {
 	@Override
 	protected CommandResult doExecute() {
 		try {
-		
+
 			String firstArgument = requiredArgument(0, I18n.bind(ShellI18n.invalidArgMsgResetGlobalPropertyName,ARG_ALL));
 
 			WorkspaceStatus status = getWorkspaceStatus();
@@ -53,13 +53,13 @@ public class ResetGlobalPropertyCommand extends BuiltInShellCommand {
 				// reset all global properties
 				status.setGlobalProperties(null);
 				return new CommandResultImpl(I18n.bind(ShellI18n.globalResetAllProps)); //Reset all props OK
-			} else { 
+			} else {
 				// reset single property
 				String validationStatus = status.validateGlobalPropertyValue(firstArgument.toUpperCase(), null);
 				if (StringUtils.isEmpty(validationStatus)) {
 					status.setGlobalProperty(firstArgument.toUpperCase(), null);
 					return new CommandResultImpl(I18n.bind(ShellI18n.globalPropertyReset,firstArgument));// Reset one prop OK
-				} else { 
+				} else {
 					// invalid property name
 	                return new CommandResultImpl( false, I18n.bind( ShellI18n.invalidGlobalProperty, validationStatus ), null );
 				}
@@ -74,15 +74,15 @@ public class ResetGlobalPropertyCommand extends BuiltInShellCommand {
 	protected int getMaxArgCount() {
 		return 1;
 	}
-	
+
 
     @Override
 	public TabCompletionModifier tabCompletion( final String lastArgument, final List< CharSequence > candidates ) throws Exception {
         if ( getArguments().size() == 0 ) {
             // Global property completion options and reset all argument
-            List< String > potentials = new LinkedList<>(WorkspaceStatus.GLOBAL_PROPS.keySet());
+            List< String > potentials = new LinkedList< String >(WorkspaceStatus.GLOBAL_PROPS.keySet());
             potentials.add(0,ARG_ALL);
-            
+
             if ( lastArgument == null ) {
                 candidates.addAll( potentials );
             } else {

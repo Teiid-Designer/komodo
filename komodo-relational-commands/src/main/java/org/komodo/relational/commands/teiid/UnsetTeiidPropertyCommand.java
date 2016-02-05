@@ -53,34 +53,24 @@ public final class UnsetTeiidPropertyCommand extends TeiidShellCommand {
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            switch ( name ) {
-                case ADMIN_PORT:
-                    teiid.setAdminPort( transaction, TeiidAdminInfo.DEFAULT_PORT );
-                    break;
-                case ADMIN_PASSWORD:
-                    teiid.setAdminPassword( transaction, null );
-                    break;
-                case ADMIN_SECURE:
-                    teiid.setAdminSecure( transaction, TeiidAdminInfo.DEFAULT_SECURE );
-                    break;
-                case ADMIN_USER:
-                    teiid.setAdminUser( transaction, null );
-                    break;
-                case JDBC_PORT:
-                    teiid.setJdbcPort( transaction, TeiidJdbcInfo.DEFAULT_PORT );
-                    break;
-                case JDBC_PASSWORD:
-                    teiid.setJdbcPassword( transaction, null );
-                    break;
-                case JDBC_SECURE:
-                    teiid.setJdbcSecure( transaction, TeiidJdbcInfo.DEFAULT_SECURE );
-                    break;
-                case JDBC_USER:
-                    teiid.setJdbcUsername( transaction, null );
-                    break;
-                default:
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Teiid.class.getSimpleName() );
-                    break;
+            if ( ADMIN_PORT.equals( name ) ) {
+                teiid.setAdminPort( transaction, TeiidAdminInfo.DEFAULT_PORT );
+            } else if ( ADMIN_PASSWORD.equals( name ) ) {
+                teiid.setAdminPassword( transaction, null );
+            } else if ( ADMIN_SECURE.equals( name ) ) {
+                teiid.setAdminSecure( transaction, TeiidAdminInfo.DEFAULT_SECURE );
+            } else if ( ADMIN_USER.equals( name ) ) {
+                teiid.setAdminUser( transaction, null );
+            } else if ( JDBC_PORT.equals( name ) ) {
+                teiid.setJdbcPort( transaction, TeiidJdbcInfo.DEFAULT_PORT );
+            } else if ( JDBC_PASSWORD.equals( name ) ) {
+                teiid.setJdbcPassword( transaction, null );
+            } else if ( JDBC_SECURE.equals( name ) ) {
+                teiid.setJdbcSecure( transaction, TeiidJdbcInfo.DEFAULT_SECURE );
+            } else if ( JDBC_USER.equals( name ) ) {
+                teiid.setJdbcUsername( transaction, null );
+            } else {
+                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Teiid.class.getSimpleName() );
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {

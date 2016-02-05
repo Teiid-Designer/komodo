@@ -75,7 +75,7 @@ public class CommandResultImpl implements CommandResult {
         ArgCheck.isNotEmpty( key, "key" ); //$NON-NLS-1$
 
         if ( this.detailMap == null ) {
-            this.detailMap = new HashMap< >();
+            this.detailMap = new HashMap< String, Object >();
         }
 
         this.detailMap.put( key, detail );

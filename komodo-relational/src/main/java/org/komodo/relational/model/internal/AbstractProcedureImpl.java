@@ -32,9 +32,9 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
-import org.modeshape.sequencer.ddl.StandardDdlLexicon;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.SchemaElement;
+import org.teiid.modeshape.sequencer.ddl.StandardDdlLexicon;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon.CreateProcedure;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon.SchemaElement;
 
 /**
  * A base implementation of a relational model procedure or function.
@@ -62,7 +62,7 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
         static Map< String, String > defaultValues() {
             if ( _defaultValues == null ) {
                 final StandardOption[] options = values();
-                final Map< String, String > temp = new HashMap< >();
+                final Map< String, String > temp = new HashMap< String, String >();
 
                 for ( final StandardOption option : options ) {
                     temp.put( option.name(), option.defaultValue );
@@ -144,7 +144,7 @@ abstract class AbstractProcedureImpl extends RelationalObjectImpl implements Abs
         if ( kids.length == 0 ) {
             result = kids;
         } else {
-            final List< KomodoObject > temp = new ArrayList<>();
+            final List< KomodoObject > temp = new ArrayList< KomodoObject >();
 
             for ( final KomodoObject kid : kids ) {
                 if ( kid.hasDescriptor( transaction, StandardDdlLexicon.TYPE_STATEMENT_OPTION ) ) {

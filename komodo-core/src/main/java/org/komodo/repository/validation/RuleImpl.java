@@ -395,7 +395,7 @@ public class RuleImpl extends ObjectImpl implements Rule {
                 break;
             }
             case SAME_NAME_SIBLING: {
-                final Set< String > names = new HashSet<>();
+                final Set< String > names = new HashSet< String >();
 
                 for ( final KomodoObject kid : kobject.getChildrenOfType( transaction, childType ) ) {
                     final String name = kid.getName( transaction );

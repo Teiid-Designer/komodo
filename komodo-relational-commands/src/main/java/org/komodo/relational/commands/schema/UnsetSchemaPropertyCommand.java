@@ -51,13 +51,10 @@ public final class UnsetSchemaPropertyCommand extends SchemaShellCommand {
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            switch ( name ) {
-                case RENDITION:
-                    teiid.setRendition( transaction, null );
-                    break;
-                default:
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Schema.class.getSimpleName() );
-                    break;
+            if ( RENDITION.equals( name ) ) {
+                teiid.setRendition( transaction, null );
+            } else {
+                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Schema.class.getSimpleName() );
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {

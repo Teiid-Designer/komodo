@@ -14,8 +14,6 @@ import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,7 +43,7 @@ import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyDescriptor;
-import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
+import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -81,8 +79,8 @@ public final class VdbImplTest extends RelationalModelTest {
         assertThat( this.vdb.hasChild( getTransaction(), name ), is( true ) );
         assertThat( this.vdb.hasChild( getTransaction(), name, VdbLexicon.DataRole.DATA_ROLE ), is( true ) );
         assertThat( this.vdb.hasChildren( getTransaction() ), is( true ) );
-        assertThat( this.vdb.getChild( getTransaction(), name ), is( added ) );
-        assertThat( this.vdb.getChild( getTransaction(), name, VdbLexicon.DataRole.DATA_ROLE ), is( added ) );
+        assertThat( this.vdb.getChild( getTransaction(), name ), is( ( KomodoObject )added ) );
+        assertThat( this.vdb.getChild( getTransaction(), name, VdbLexicon.DataRole.DATA_ROLE ), is( ( KomodoObject )added ) );
     }
 
     @Test
@@ -103,8 +101,8 @@ public final class VdbImplTest extends RelationalModelTest {
         assertThat( this.vdb.hasChild( getTransaction(), name ), is( true ) );
         assertThat( this.vdb.hasChild( getTransaction(), name, VdbLexicon.Entry.ENTRY ), is( true ) );
         assertThat( this.vdb.hasChildren( getTransaction() ), is( true ) );
-        assertThat( this.vdb.getChild( getTransaction(), name ), is( added ) );
-        assertThat( this.vdb.getChild( getTransaction(), name, VdbLexicon.Entry.ENTRY ), is( added ) );
+        assertThat( this.vdb.getChild( getTransaction(), name ), is( ( KomodoObject )added ) );
+        assertThat( this.vdb.getChild( getTransaction(), name, VdbLexicon.Entry.ENTRY ), is( ( KomodoObject )added ) );
     }
 
     @Test
@@ -123,8 +121,8 @@ public final class VdbImplTest extends RelationalModelTest {
         assertThat( this.vdb.hasChild( getTransaction(), name ), is( true ) );
         assertThat( this.vdb.hasChild( getTransaction(), name, VdbLexicon.ImportVdb.IMPORT_VDB ), is( true ) );
         assertThat( this.vdb.hasChildren( getTransaction() ), is( true ) );
-        assertThat( this.vdb.getChild( getTransaction(), name ), is( added ) );
-        assertThat( this.vdb.getChild( getTransaction(), name, VdbLexicon.ImportVdb.IMPORT_VDB ), is( added ) );
+        assertThat( this.vdb.getChild( getTransaction(), name ), is( ( KomodoObject )added ) );
+        assertThat( this.vdb.getChild( getTransaction(), name, VdbLexicon.ImportVdb.IMPORT_VDB ), is( ( KomodoObject )added ) );
     }
 
     @Test
@@ -143,8 +141,8 @@ public final class VdbImplTest extends RelationalModelTest {
         assertThat( this.vdb.hasChild( getTransaction(), name ), is( true ) );
         assertThat( this.vdb.hasChild( getTransaction(), name, VdbLexicon.Vdb.DECLARATIVE_MODEL ), is( true ) );
         assertThat( this.vdb.hasChildren( getTransaction() ), is( true ) );
-        assertThat( this.vdb.getChild( getTransaction(), name ), is( added ) );
-        assertThat( this.vdb.getChild( getTransaction(), name, VdbLexicon.Vdb.DECLARATIVE_MODEL ), is( added ) );
+        assertThat( this.vdb.getChild( getTransaction(), name ), is( ( KomodoObject )added ) );
+        assertThat( this.vdb.getChild( getTransaction(), name, VdbLexicon.Vdb.DECLARATIVE_MODEL ), is( ( KomodoObject )added ) );
     }
 
     @Test
@@ -165,8 +163,8 @@ public final class VdbImplTest extends RelationalModelTest {
         assertThat( this.vdb.hasChild( getTransaction(), name ), is( true ) );
         assertThat( this.vdb.hasChild( getTransaction(), name, VdbLexicon.Translator.TRANSLATOR ), is( true ) );
         assertThat( this.vdb.hasChildren( getTransaction() ), is( true ) );
-        assertThat( this.vdb.getChild( getTransaction(), name ), is( added ) );
-        assertThat( this.vdb.getChild( getTransaction(), name, VdbLexicon.Translator.TRANSLATOR ), is( added ) );
+        assertThat( this.vdb.getChild( getTransaction(), name ), is( ( KomodoObject )added ) );
+        assertThat( this.vdb.getChild( getTransaction(), name, VdbLexicon.Translator.TRANSLATOR ), is( ( KomodoObject )added ) );
     }
 
     @Test
@@ -328,7 +326,7 @@ public final class VdbImplTest extends RelationalModelTest {
     @Test
     public void shouldIncludeSpecialPropertiesInPrimaryTypePropertyDescriptors() throws Exception {
         final PropertyDescriptor[] descriptors = this.vdb.getPrimaryType( getTransaction() ).getPropertyDescriptors( getTransaction() );
-        final List< String > specialProps = new ArrayList<>( Arrays.asList( VdbImpl.SpecialProperty.valuesAsTeiidNames() ) );
+        final List< String > specialProps = new ArrayList< String >( Arrays.asList( VdbImpl.SpecialProperty.valuesAsTeiidNames() ) );
 
         // make sure we are returning more than just the special props
         assertThat( descriptors.length > specialProps.size(), is( true ) );

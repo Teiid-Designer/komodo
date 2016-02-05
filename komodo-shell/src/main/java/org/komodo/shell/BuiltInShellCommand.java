@@ -24,7 +24,9 @@ import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.InvalidCommandArgumentException;
 import org.komodo.shell.api.KomodoObjectLabelProvider;
+import org.komodo.shell.api.ShellApiI18n;
 import org.komodo.shell.api.ShellCommand;
+import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.KomodoObjectUtils;
 import org.komodo.shell.util.PrintUtils;
@@ -218,7 +220,7 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
             return EMPTY_ARRAY;
         }
 
-        final List< String > optionalArgs = new ArrayList< >();
+        final List< String > optionalArgs = new ArrayList< String >();
         int i = startIndex;
 
         while ( optionalArgument( i ) != null ) {
@@ -248,9 +250,39 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
         return this.writer;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommand#getCategory()
+     */
+    @Override
+    public String getCategory() {
+        return I18n.bind( ShellApiI18n.generalCommandCategory );
+    }
+
 	protected KomodoObject getContext() {
 	    return getWorkspaceStatus().getCurrentContext();
 	}
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommand#isEnabled()
+     */
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommand#isOverridable()
+     */
+    @Override
+    public boolean isOverridable() {
+        return true;
+    }
 
 	protected boolean isShowingPropertyNamePrefixes() {
 	    return getWorkspaceStatus().isShowingPropertyNamePrefixes();
@@ -327,6 +359,17 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
                           final String formattedMessage,
                           final Object... params ) {
         PrintUtils.print( getWriter(), indent, formattedMessage, params );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommand#tabCompletion(java.lang.String, java.util.List)
+     */
+    @Override
+    public TabCompletionModifier tabCompletion( final String lastArgument,
+                                                final List< CharSequence > candidates ) throws Exception {
+        return TabCompletionModifier.NO_AUTOCOMPLETION;
     }
 
     /**
@@ -668,7 +711,7 @@ public abstract class BuiltInShellCommand implements ShellCommand, StringConstan
         if ( isShowingPropertyNamePrefixes() ) {
             potentials = propNames;
         } else {
-            potentials = new ArrayList<>( propNames.size() );
+            potentials = new ArrayList<String>( propNames.size() );
 
             // strip off prefix
             for ( final String name : propNames ) {

@@ -52,16 +52,12 @@ public final class SetTranslatorPropertyCommand extends TranslatorShellCommand {
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            switch ( name ) {
-                case DESCRIPTION:
-                    translator.setDescription( transaction, value );
-                    break;
-                case TYPE:
-                    translator.setType( transaction, value );
-                    break;
-                default:
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Translator.class.getSimpleName() );
-                    break;
+            if ( DESCRIPTION.equals( name ) ) {
+                translator.setDescription( transaction, value );
+            } else if ( TYPE.equals( name ) ) {
+                translator.setType( transaction, value );
+            } else {
+                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Translator.class.getSimpleName() );
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {

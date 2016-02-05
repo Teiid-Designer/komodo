@@ -42,10 +42,10 @@ import org.komodo.utils.StringUtils;
 import org.modeshape.jcr.JcrNtLexicon;
 import org.modeshape.jcr.JcrSession;
 import org.modeshape.jcr.api.JcrTools;
-import org.modeshape.sequencer.ddl.DdlConstants;
-import org.modeshape.sequencer.ddl.StandardDdlLexicon;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlConstants;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
+import org.teiid.modeshape.sequencer.ddl.DdlConstants;
+import org.teiid.modeshape.sequencer.ddl.StandardDdlLexicon;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlConstants;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon;
 
 /**
  * An implementation of a {@link KomodoObject Komodo object}.
@@ -985,7 +985,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
             return PropertyDescriptor.NO_DESCRIPTORS;
         }
 
-        final List< PropertyDescriptor > result = new ArrayList<>();
+        final List< PropertyDescriptor > result = new ArrayList< PropertyDescriptor >();
 
         for ( final Descriptor descriptor : getAllDescriptors( transaction, this ) ) {
             result.addAll( Arrays.asList( descriptor.getPropertyDescriptors( transaction ) ) );

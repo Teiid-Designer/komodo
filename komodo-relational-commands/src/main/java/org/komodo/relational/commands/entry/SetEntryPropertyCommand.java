@@ -52,16 +52,12 @@ public final class SetEntryPropertyCommand extends EntryShellCommand {
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            switch ( name ) {
-                case DESCRIPTION:
-                    entry.setDescription( transaction, value );
-                    break;
-                case PATH:
-                    entry.setPath( transaction, value );
-                    break;
-                default:
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Entry.class.getSimpleName() );
-                    break;
+            if ( DESCRIPTION.equals( name ) ) {
+                entry.setDescription( transaction, value );
+            } else if ( PATH.equals( name ) ) {
+                entry.setPath( transaction, value );
+            } else {
+                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Entry.class.getSimpleName() );
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {

@@ -60,7 +60,7 @@ public final class SetPermissionPropertyCommandTest extends AbstractCommandTest 
 
     @Test
     public void testTabCompleter()throws Exception{
-    	ArrayList<CharSequence> candidates=new ArrayList<>();
+    	ArrayList<CharSequence> candidates=new ArrayList<CharSequence>();
     	setup("commandFiles","addPermissions.cmd");
     	final String[] commands = { "cd myPermission1" };
     	final CommandResult result = execute( commands );

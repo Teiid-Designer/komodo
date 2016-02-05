@@ -10,7 +10,7 @@
 
 	<artifactId>komodo-modeshape</artifactId>
 	<packaging>jar</packaging>
-
+<!--
 	<build>
 		<plugins>
 			<plugin>
@@ -23,5 +23,5 @@
 			</plugin>
 		</plugins>
 	</build>
-
+-->
 </project>

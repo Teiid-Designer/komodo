@@ -8,7 +8,6 @@
 package org.komodo.shell.util;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
-
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -20,7 +19,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.TreeMap;
-
 import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.KomodoObjectLabelProvider;
 import org.komodo.shell.api.ShellApiI18n;
@@ -155,7 +153,7 @@ public class PrintUtils implements StringConstants {
      * @param valueTitle the value title
      */
     public static void printProperties(final Writer writer, Properties props, String nameTitle, String valueTitle) {
-        final Map< String, String > sorted = new TreeMap<>();
+        final Map< String, String > sorted = new TreeMap< String, String >();
         int maxNameWidth = DEFAULT_WIDTH;
         int maxValueWidth = DEFAULT_WIDTH;
 
@@ -229,7 +227,7 @@ public class PrintUtils implements StringConstants {
         }
 
         // key is the property name, value is a 2 element string array holding the current value and the default value
-        final Map< String, String[] > sorted = new TreeMap<>();
+        final Map< String, String[] > sorted = new TreeMap< String, String[] >();
 
         int maxNameWidth = DEFAULT_WIDTH;
         int maxValueWidth = DEFAULT_WIDTH;

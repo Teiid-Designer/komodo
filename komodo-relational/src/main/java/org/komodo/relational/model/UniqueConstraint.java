@@ -19,7 +19,7 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.Constraint;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon.Constraint;
 
 /**
  * Represents a relational model unique constraint.
@@ -45,7 +45,7 @@ public interface UniqueConstraint extends TableConstraint {
      * An empty collection of unique constraints.
      */
     UniqueConstraint[] NO_UNIQUE_CONSTRAINTS = new UniqueConstraint[0];
-    
+
     /**
      * {@inheritDoc}
      *

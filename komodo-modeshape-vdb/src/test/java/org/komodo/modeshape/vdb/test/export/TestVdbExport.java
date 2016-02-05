@@ -23,23 +23,20 @@ package org.komodo.modeshape.vdb.test.export;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.concurrent.TimeUnit;
-
 import javax.jcr.Node;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamWriter;
-
 import org.junit.Test;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.visitor.VdbNodeVisitor;
 import org.komodo.test.utils.AbstractSequencerTest;
 import org.komodo.test.utils.SynchronousSequencerListener;
 import org.komodo.test.utils.TestUtilities;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon;
 import org.w3c.dom.Document;
 
 /**
@@ -148,7 +145,7 @@ public class TestVdbExport extends AbstractSequencerTest {
         // still equal.
         TestUtilities.compareDocuments(compareDoc, testDoc);
     }
-    
+
     @Test(timeout=3000000)
     public void testAllElementsVdbExport() throws Exception {
         Node allElementsNode = TestUtilities.createAllElementsExampleNode(rootNode);

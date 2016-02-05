@@ -19,7 +19,7 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.Constraint;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon.Constraint;
 
 
 /**
@@ -46,7 +46,7 @@ public interface AccessPattern extends TableConstraint {
      * An empty collection of access pattern constraints.
      */
     AccessPattern[] NO_ACCESS_PATTERNS = new AccessPattern[0];
-    
+
     /**
      * {@inheritDoc}
      *

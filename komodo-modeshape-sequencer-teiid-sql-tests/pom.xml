@@ -9,7 +9,7 @@
 	<artifactId>komodo-modeshape-sequencer-teiid-sql-tests</artifactId>
 	<name>Komodo Modeshape Teiid SQL Sequencer Tests</name>
 	<description>Tests for sequencer that are separate to avoid cyclic dependencies</description>
-
+<!--
 	<build>
 		<plugins>
 			<plugin>
@@ -22,7 +22,7 @@
 			</plugin>
 		</plugins>
 	</build>
-
+-->
 	<dependencies>
 		<dependency>
 			<groupId>org.komodo</groupId>

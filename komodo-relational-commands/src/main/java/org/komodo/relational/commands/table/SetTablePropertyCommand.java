@@ -54,80 +54,61 @@ public final class SetTablePropertyCommand extends TableShellCommand {
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            switch ( name ) {
-                case DESCRIPTION:
-                    table.setDescription( transaction, value );
-                    break;
-                case CARDINALITY:
-                    try {
-                        final int cardinality = Integer.parseInt( value );
-                        table.setCardinality( transaction, cardinality );
-                    } catch ( final NumberFormatException e ) {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, CARDINALITY );
-                    }
-
-                    break;
-                case MATERIALIZED:
-                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                        table.setMaterialized( transaction, Boolean.parseBoolean( value ) );
-                    } else {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, MATERIALIZED );
-                    }
-
-                    break;
-                case MATERIALIZED_TABLE:
-                    table.setMaterializedTable( transaction, value );
-                    break;
-                case NAME_IN_SOURCE:
-                    table.setNameInSource( transaction, value );
-                    break;
-                case UPDATABLE:
-                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                        table.setUpdatable( transaction, Boolean.parseBoolean( value ) );
-                    } else {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, UPDATABLE );
-                    }
-
-                    break;
-                case UUID:
-                    table.setUuid( transaction, value );
-                    break;
-                case ON_COMMIT_VALUE:
-                    if ( OnCommit.DELETE_ROWS.name().equals( value ) ) {
-                        table.setOnCommitValue( transaction, OnCommit.DELETE_ROWS );
-                    } else if ( OnCommit.PRESERVE_ROWS.name().equals( value ) ) {
-                        table.setOnCommitValue( transaction, OnCommit.PRESERVE_ROWS );
-                    } else {
-                        errorMsg = I18n.bind( TableCommandsI18n.invalidOnCommitPropertyValue, ON_COMMIT_VALUE );
-                    }
-
-                    break;
-                case QUERY_EXPRESSION:
-                    table.setQueryExpression( transaction, value );
-                    break;
-                case SCHEMA_ELEMENT_TYPE:
-                    if ( SchemaElement.SchemaElementType.FOREIGN.name().equals( value ) ) {
-                        table.setSchemaElementType( transaction, SchemaElement.SchemaElementType.FOREIGN );
-                    } else if ( SchemaElement.SchemaElementType.VIRTUAL.name().equals( value ) ) {
-                        table.setSchemaElementType( transaction, SchemaElement.SchemaElementType.VIRTUAL );
-                    } else {
-                        errorMsg = I18n.bind( TableCommandsI18n.invalidSchemaElementTypePropertyValue, value );
-                    }
-
-                    break;
-                case TEMPORARY_TABLE_TYPE:
-                    if ( Table.TemporaryType.GLOBAL.name().equals( value ) ) {
-                        table.setTemporaryTableType( transaction, Table.TemporaryType.GLOBAL );
-                    } else if ( Table.TemporaryType.LOCAL.name().equals( value ) ) {
-                        table.setTemporaryTableType( transaction, Table.TemporaryType.LOCAL );
-                    } else {
-                        errorMsg = I18n.bind( TableCommandsI18n.invalidTemporaryTableTypePropertyValue, value );
-                    }
-
-                    break;
-                default:
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Table.class.getSimpleName() );
-                    break;
+            if ( DESCRIPTION.equals( name ) ) {
+                table.setDescription( transaction, value );
+            } else if ( CARDINALITY.equals( name ) ) {
+                try {
+                    final int cardinality = Integer.parseInt( value );
+                    table.setCardinality( transaction, cardinality );
+                } catch ( final NumberFormatException e ) {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidIntegerPropertyValue, CARDINALITY );
+                }
+            } else if ( MATERIALIZED.equals( name ) ) {
+                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                    table.setMaterialized( transaction, Boolean.parseBoolean( value ) );
+                } else {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, MATERIALIZED );
+                }
+            } else if ( MATERIALIZED_TABLE.equals( name ) ) {
+                table.setMaterializedTable( transaction, value );
+            } else if ( NAME_IN_SOURCE.equals( name ) ) {
+                table.setNameInSource( transaction, value );
+            } else if ( UPDATABLE.equals( name ) ) {
+                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                    table.setUpdatable( transaction, Boolean.parseBoolean( value ) );
+                } else {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, UPDATABLE );
+                }
+            } else if ( UUID.equals( name ) ) {
+                table.setUuid( transaction, value );
+            } else if ( ON_COMMIT_VALUE.equals( name ) ) {
+                if ( OnCommit.DELETE_ROWS.name().equals( value ) ) {
+                    table.setOnCommitValue( transaction, OnCommit.DELETE_ROWS );
+                } else if ( OnCommit.PRESERVE_ROWS.name().equals( value ) ) {
+                    table.setOnCommitValue( transaction, OnCommit.PRESERVE_ROWS );
+                } else {
+                    errorMsg = I18n.bind( TableCommandsI18n.invalidOnCommitPropertyValue, ON_COMMIT_VALUE );
+                }
+            } else if ( QUERY_EXPRESSION.equals( name ) ) {
+                table.setQueryExpression( transaction, value );
+            } else if ( SCHEMA_ELEMENT_TYPE.equals( name ) ) {
+                if ( SchemaElement.SchemaElementType.FOREIGN.name().equals( value ) ) {
+                    table.setSchemaElementType( transaction, SchemaElement.SchemaElementType.FOREIGN );
+                } else if ( SchemaElement.SchemaElementType.VIRTUAL.name().equals( value ) ) {
+                    table.setSchemaElementType( transaction, SchemaElement.SchemaElementType.VIRTUAL );
+                } else {
+                    errorMsg = I18n.bind( TableCommandsI18n.invalidSchemaElementTypePropertyValue, value );
+                }
+            } else if ( TEMPORARY_TABLE_TYPE.equals( name ) ) {
+                if ( Table.TemporaryType.GLOBAL.name().equals( value ) ) {
+                    table.setTemporaryTableType( transaction, Table.TemporaryType.GLOBAL );
+                } else if ( Table.TemporaryType.LOCAL.name().equals( value ) ) {
+                    table.setTemporaryTableType( transaction, Table.TemporaryType.LOCAL );
+                } else {
+                    errorMsg = I18n.bind( TableCommandsI18n.invalidTemporaryTableTypePropertyValue, value );
+                }
+            } else {
+                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Table.class.getSimpleName() );
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {

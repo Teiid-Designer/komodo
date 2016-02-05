@@ -16,10 +16,8 @@
 package org.komodo.shell.commands;
 
 import static org.junit.Assert.assertEquals;
-
 import java.util.LinkedList;
 import java.util.List;
-
 import org.junit.Test;
 import org.komodo.shell.AbstractCommandTest;
 import org.komodo.shell.api.CommandResult;
@@ -68,7 +66,7 @@ public class SetGlobalPropertyCommandTest extends AbstractCommandTest {
     @Test
     public void testTabCompleter()throws Exception{
 
-        List<String> defaultValues = new LinkedList<>(WorkspaceStatus.GLOBAL_PROPS.keySet());
+        List<String> defaultValues = new LinkedList<String>(WorkspaceStatus.GLOBAL_PROPS.keySet());
         assertTabCompletion("set-global ", defaultValues);
 
         defaultValues.clear();

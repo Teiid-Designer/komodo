@@ -9,7 +9,6 @@ package org.komodo.shell;
 
 import java.util.HashSet;
 import java.util.Set;
-
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandProvider;
 import org.komodo.shell.api.WorkspaceStatus;
@@ -86,7 +85,7 @@ public final class BuiltInShellCommandProvider implements ShellCommandProvider {
      */
     @Override
     public Set< Class< ? extends ShellCommand > > provideCommands() {
-        final Set< Class< ? extends ShellCommand > > result = new HashSet< >();
+        final Set< Class< ? extends ShellCommand > > result = new HashSet< Class< ? extends ShellCommand > >();
 
         result.add( AddChildCommand.class );
         result.add( AddDescriptorCommand.class );

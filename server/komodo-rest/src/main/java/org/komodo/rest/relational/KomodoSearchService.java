@@ -250,7 +250,7 @@ public final class KomodoSearchService extends KomodoService {
             List<KomodoObject> searchObjects = os.searchObjects(uow);
 
             // Convert the results into rest objects for the response
-            List<RestBasicEntity> entities = new ArrayList<>();
+            List<RestBasicEntity> entities = new ArrayList<RestBasicEntity>();
             for (KomodoObject kObject : searchObjects) {
                 RestBasicEntity entity = entityFactory.create(kObject, uriInfo.getBaseUri(), uow);
                 if (entity != null) // if kType in UNKNOWN then the entity is not created
@@ -354,7 +354,7 @@ public final class KomodoSearchService extends KomodoService {
             List<KomodoObject> searchObjects = os.searchObjects(uow);
 
             // Convert the results into rest objects for the response
-            List<RestBasicEntity> entities = new ArrayList<>();
+            List<RestBasicEntity> entities = new ArrayList<RestBasicEntity>();
             for (KomodoObject kObject : searchObjects) {
                 RestBasicEntity entity = entityFactory.create(kObject, uriInfo.getBaseUri(), uow);
                 if (entity != null) // if kType in UNKNOWN then the entity is not created

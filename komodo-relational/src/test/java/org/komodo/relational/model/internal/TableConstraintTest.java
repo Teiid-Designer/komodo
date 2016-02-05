@@ -19,7 +19,7 @@ import org.komodo.relational.model.Column;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.model.TableConstraint;
 import org.komodo.spi.KException;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class TableConstraintTest extends RelationalModelTest {

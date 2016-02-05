@@ -22,9 +22,9 @@ import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlConstants.TeiidNonReservedWord;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlConstants.TeiidReservedWord;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlConstants.TeiidNonReservedWord;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlConstants.TeiidReservedWord;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon.CreateProcedure;
 
 /**
  * Represents a relational model procedure parameter.
@@ -111,7 +111,7 @@ public interface Parameter extends OptionContainer, RelationalObject {
      * An empty array of parameters.
      */
     Parameter[] NO_PARAMETERS = new Parameter[0];
-    
+
     /**
      * {@inheritDoc}
      *

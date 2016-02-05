@@ -10,7 +10,6 @@ package org.komodo.relational.model.internal;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalModelFactory;
@@ -26,7 +25,7 @@ import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.ArgCheck;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon.CreateProcedure;
 
 /**
  * An implementation of a stored procedure.
@@ -58,7 +57,7 @@ public final class StoredProcedureImpl extends AbstractProcedureImpl implements 
          */
         static Map< String, String > defaultValues() {
             final StandardOption[] options = values();
-            final Map< String, String > result = new HashMap< >();
+            final Map< String, String > result = new HashMap< String, String >();
 
             for ( final StandardOption option : options ) {
                 result.put( option.name(), option.defaultValue );
@@ -171,7 +170,7 @@ public final class StoredProcedureImpl extends AbstractProcedureImpl implements 
             final Map< String, String > superOptions = super.getStandardOptions();
             final Map< String, String > options = StandardOption.defaultValues();
 
-            final Map< String, String > combined = new HashMap< >( superOptions.size() + options.size() );
+            final Map< String, String > combined = new HashMap< String, String >( superOptions.size() + options.size() );
             combined.putAll( superOptions );
             combined.putAll( options );
 
@@ -190,7 +189,7 @@ public final class StoredProcedureImpl extends AbstractProcedureImpl implements 
     public KomodoType getTypeIdentifier( final UnitOfWork transaction ) {
         return StoredProcedure.IDENTIFIER;
     }
-    
+
     /**
      * {@inheritDoc}
      *

@@ -33,9 +33,9 @@ import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyDescriptor;
-import org.modeshape.sequencer.ddl.StandardDdlLexicon;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
+import org.teiid.modeshape.sequencer.ddl.StandardDdlLexicon;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon.CreateProcedure;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class ParameterImplTest extends RelationalModelTest {
@@ -220,7 +220,7 @@ public final class ParameterImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveParentProcedureAfterConstruction() throws Exception {
-        assertThat( ( AbstractProcedure )this.parameter.getParent( getTransaction() ), is( this.procedure ) );
+        assertThat( this.parameter.getParent( getTransaction() ), is( this.procedure ) );
     }
 
     @Test( expected = UnsupportedOperationException.class )

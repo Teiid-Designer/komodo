@@ -122,7 +122,7 @@ public class LocalRepository extends RepositoryImpl {
         }
     }
 
-    private WeakHashMap< Session, UnitOfWork > sessions = new WeakHashMap<>();
+    private WeakHashMap< Session, UnitOfWork > sessions = new WeakHashMap< Session, UnitOfWork >();
 
     private State state = State.NOT_REACHABLE;
 

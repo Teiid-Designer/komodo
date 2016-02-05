@@ -45,7 +45,7 @@ public class KomodoStatusObject implements KRestEntity {
 
     private String title;
 
-    private Map<String, String> attributes = new LinkedHashMap<>();
+    private Map<String, String> attributes = new LinkedHashMap<String, String>();
 
     /**
      * Default constructor for deserialization

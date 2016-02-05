@@ -52,17 +52,13 @@ public final class UnsetTranslatorPropertyCommand extends TranslatorShellCommand
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            switch ( name ) {
-                case DESCRIPTION:
-                    translator.setDescription( transaction, null );
-                    break;
-                // TYPE is mandatory and does not have a default so it can't be unset
-                // case TYPE:
-                //     translator.setType( transaction, null );
-                //     break;
-                default:
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Translator.class.getSimpleName() );
-                    break;
+            if ( DESCRIPTION.equals( name ) ) {
+                translator.setDescription( transaction, null );
+            // TYPE is mandatory and does not have a default so it can't be unset
+            // } else if ( TYPE.equals( name ) ) {
+            //     translator.setType( transaction, null );
+            } else {
+                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Translator.class.getSimpleName() );
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {
@@ -129,7 +125,7 @@ public final class UnsetTranslatorPropertyCommand extends TranslatorShellCommand
 
         if ( args.isEmpty() ) {
             // TYPE cannot be unset
-            final List< String > props = new ArrayList< >( ALL_PROPS );
+            final List< String > props = new ArrayList< String >( ALL_PROPS );
             props.remove( TYPE );
 
             if ( lastArgument == null ) {

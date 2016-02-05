@@ -28,7 +28,7 @@ public class ExcludeQNamesFilter implements Filter {
      */
     public ExcludeQNamesFilter( final String... namesToExclude ) {
         ArgCheck.isNotEmpty( namesToExclude, "qnames" ); //$NON-NLS-1$
-        this.qnames = new ArrayList<>( namesToExclude.length );
+        this.qnames = new ArrayList< String >( namesToExclude.length );
 
         for ( final String name : namesToExclude ) {
             this.qnames.add( name );

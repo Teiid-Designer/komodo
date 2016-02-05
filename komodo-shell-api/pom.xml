@@ -9,7 +9,7 @@
 	<artifactId>komodo-shell-api</artifactId>
 	<name>Komodo Shell API</name>
 	<description>The API for the shell</description>
-
+<!--
 	<build>
 		<plugins>
 			<plugin>
@@ -22,7 +22,7 @@
 			</plugin>
 		</plugins>
 	</build>
-
+-->
 	<dependencies>
 		<dependency>
 			<groupId>org.komodo</groupId>
