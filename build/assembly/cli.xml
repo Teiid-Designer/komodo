@@ -22,6 +22,43 @@
 			</includes>
 			<fileMode>755</fileMode>
 		</fileSet>
+        <fileSet>
+            <directory>${project.basedir}/../komodo-relational/target/</directory>
+            <outputDirectory>/vdbbuilder/</outputDirectory>
+            <includes>
+                <include>*.jar</include>
+            </includes>
+            <excludes>
+                <exclude>*sources.jar</exclude>
+                <exclude>*tests.jar</exclude>
+            </excludes>
+            <fileMode>755</fileMode>
+        </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/../komodo-relational-commands/target/</directory>
+            <outputDirectory>/vdbbuilder/</outputDirectory>
+            <includes>
+                <include>*.jar</include>
+            </includes>
+            <excludes>
+                <exclude>*sources.jar</exclude>
+                <exclude>*tests.jar</exclude>
+                <exclude>*with-dependencies.jar</exclude>
+            </excludes>
+            <fileMode>755</fileMode>
+        </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/../komodo-importer/target/</directory>
+            <outputDirectory>/vdbbuilder/</outputDirectory>
+            <includes>
+                <include>*.jar</include>
+            </includes>
+            <excludes>
+                <exclude>*sources.jar</exclude>
+                <exclude>*tests.jar</exclude>
+            </excludes>
+            <fileMode>755</fileMode>
+        </fileSet>
 	</fileSets>
 
 	<dependencySets>
@@ -31,6 +68,9 @@
 			<includes>
 				<include>org.komodo:*</include>
 			</includes>
+            <excludes>
+                <exclude>org.komodo:vdbbuilder.build*</exclude>
+           </excludes>
 		</dependencySet>
 		<dependencySet>
 			<scope>runtime</scope>
