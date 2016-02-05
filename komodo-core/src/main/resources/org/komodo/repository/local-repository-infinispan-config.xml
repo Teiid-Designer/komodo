@@ -1,23 +1,23 @@
 <infinispan xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="urn:infinispan:config:5.2 http://www.infinispan.org/schemas/infinispan-config-5.2.xsd"
-    xmlns="urn:infinispan:config:5.2">
+    xsi:schemaLocation="urn:infinispan:config:7.2 http://www.infinispan.org/schemas/infinispan-config-7.2.xsd"
+    xmlns="urn:infinispan:config:7.2">
 
-    <namedCache name="Komodo Cache">
-        <transaction
-                transactionManagerLookupClass="org.infinispan.transaction.lookup.GenericTransactionManagerLookup"
-                transactionMode="TRANSACTIONAL"
-                lockingMode="PESSIMISTIC"/>
+    <cache-container default-cache="Komodo Cache">
+        <local-cache name="Komodo Cache">
+            <transaction
+                transaction-manager-lookup="org.infinispan.transaction.lookup.GenericTransactionManagerLookup"
+                mode="NON_XA"
+                locking="PESSIMISTIC"/>
 
-        <loaders passivation="false" shared="true" preload="true">
-            <loader class="org.infinispan.loaders.leveldb.LevelDBCacheStore"
-                fetchPersistentState="false" ignoreModifications="false"
-                purgeOnStartup="false">
-                <properties>
-                    <property name="location" value="${komodo.dataDir}/db/data" />
-                    <property name="expiredLocation" value="${komodo.dataDir}/db/expired" />
-                </properties>
-            </loader>
-        </loaders>
-    </namedCache>
+            <persistence passivation="false">
+                <leveldb-store xmlns="urn:infinispan:config:store:leveldb:7.2"
+                    purge="false"
+                    path="${komodo.dataDir}/db/data">
+                    <expiration path="${komodo.dataDir}/db/expired"/>
+                    <implementation type="JAVA"/>
+                </leveldb-store>
+            </persistence>
+        </local-cache>
+    </cache-container>
 
 </infinispan>

@@ -25,12 +25,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
 import org.junit.Test;
 import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
@@ -1381,18 +1385,23 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
 //        SELECT [jcr:path], [mode:localName]
 //        FROM [nt:unstructured] AS nt
-//        WHERE (CONTAINS(nt.*, 'view') OR LOWER(NAME(nt)) LIKE '%view%')
+//        WHERE (CONTAINS(nt.*, 'view')
 
         ObjectSearcher os = new ObjectSearcher(_repo);
         String ALIAS = "nt";
         os.addFromType(JcrConstants.NT_UNSTRUCTURED, ALIAS);
-        String whereSql = "(CONTAINS(nt.*, '*view*') OR LOWER(NAME(nt)) LIKE '%view%')";
+        String whereSql = "(CONTAINS(nt.*, '*view*'))";
         os.setCustomWhereClause(whereSql);
 
         List<KomodoObject> results = os.searchObjects(getTransaction());
+        List<String> paths = new ArrayList<String>(results.size());
         for (KomodoObject ko : results)
-            System.out.println(ko.getAbsolutePath());
+            paths.add(ko.getAbsolutePath());
+        Collections.sort(paths);
 
-        assertEquals(23, results.size());
+        for (String path : paths)
+            System.out.println(path);
+
+        assertEquals(22, results.size());
     }
 }
