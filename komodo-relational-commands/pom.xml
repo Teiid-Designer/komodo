@@ -63,7 +63,9 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<execute></execute>
+										<!-- Seems to cause GC failure in Eclipse so disabled for the moment -->
+										<!--<execute></execute>-->
+										<ignore></ignore>
 									</action>
 								</pluginExecution>
 							</pluginExecutions>

@@ -17,35 +17,76 @@
 		"default" : "defaultWorkspace",
 		"allowCreation" : true
 	},
-	"query" : {
-        "enabled" : true,
-        "textExtracting": {
-            "threadPool" : "test",
-            "extractors" : {
-                "tikaExtractor":{
-                    "name" : "General content-based extractor",
-                    "classname" : "tika",
-                }
-            }
+    "indexProviders" : {
+        "local" : {
+            "classname" : "org.modeshape.jcr.index.local.LocalIndexProvider",
+            "directory" : "${komodo.dataDir}/indexes"
+        }
+    },
+    "indexes" : {
+        "nodesByLocalName" : {
+            "kind" : "value",
+            "provider" : "local",
+            "synchronous" : true,
+            "nodeType" : "nt:unstructured",
+            "columns" : "mode:localName(STRING)",
+            "workspaces" : "*"
         },
-        "indexStorage" : {
-            "type" : "filesystem",
-            "location" : "${komodo.dataDir}/indexes",
-            "lockingStrategy" : "native",
-            "fileSystemAccessType" : "auto"
+        "nodesByPath" : {
+            "kind" : "value",
+            "provider" : "local",
+            "synchronous" : true,
+            "nodeType" : "nt:unstructured",
+            "columns" : "jcr:path(PATH)",
+            "workspaces" : "*"
         },
-        "indexing" : {
-            "threadPool" : "modeshape-workers",
-            "analyzer" : "org.apache.lucene.analysis.standard.StandardAnalyzer",
-            "similarity" : "org.apache.lucene.search.DefaultSimilarity",
-            "batchSize" : -1,
-            "indexFormat" : "LUCENE_35",
-            "readerStrategy" : "shared",
-            "mode" : "sync",
-            "backend" : {
-                "type" : "lucene",
-            },
-            "hibernate.search.custom.overridden.property" : "value",
+        "nodesByType" : {
+            "kind" : "Nodetype",
+            "provider" : "local",
+            "synchronous" : true,
+            "nodeType" : "nt:unstructured",
+            "workspaces" : "*",
+            "columns" : "mode:localName(STRING)"
+        },
+        "vdbsByVersion" : {
+            "kind" : "value",
+            "provider" : "local",
+            "synchronous" : true,
+            "nodeType" : "vdb:virtualDatabase",
+            "workspaces" : "*",
+            "columns" : "vdb:version(LONG)"
+        },
+        "kSchemaByRendition" : {
+            "kind" : "value",
+            "provider" : "local",
+            "synchronous" : true,
+            "nodeType" : "tko:schema",
+            "workspaces" : "*",
+            "columns" : "tko:rendition(STRING)"
+        },
+        "ddlTableStmtByQuery" : {
+            "kind" : "value",
+            "provider" : "local",
+            "synchronous" : true,
+            "nodeType" : "teiidddl:createTable",
+            "workspaces" : "*",
+            "columns" : "teiidddl:queryExpression(STRING)"
+        },
+        "ddlViewStmtByQuery" : {
+            "kind" : "value",
+            "provider" : "local",
+            "synchronous" : true,
+            "nodeType" : "teiidddl:createView",
+            "workspaces" : "*",
+            "columns" : "teiidddl:queryExpression(STRING)"
+        },
+        "ddlProcStmtByQuery" : {
+            "kind" : "value",
+            "provider" : "local",
+            "synchronous" : true,
+            "nodeType" : "teiidddl:createProcedure",
+            "workspaces" : "*",
+            "columns" : "teiidddl:statement(STRING)"
         }
     },
 	"sequencing" : {
