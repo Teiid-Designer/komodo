@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.komodo</groupId>
 		<artifactId>komodo</artifactId>
-		<version>0.0.4-SNAPSHOT</version>
+		<version>0.0.4</version>
 	</parent>
 	<artifactId>komodo-utils-modeshape-logger</artifactId>
 	<name>Komodo Logger</name>
