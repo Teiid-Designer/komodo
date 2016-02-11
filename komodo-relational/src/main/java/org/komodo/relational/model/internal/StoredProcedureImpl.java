@@ -10,7 +10,6 @@ package org.komodo.relational.model.internal;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalModelFactory;
@@ -26,7 +25,7 @@ import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.ArgCheck;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon.CreateProcedure;
 
 /**
  * An implementation of a stored procedure.
@@ -190,7 +189,7 @@ public final class StoredProcedureImpl extends AbstractProcedureImpl implements 
     public KomodoType getTypeIdentifier( final UnitOfWork transaction ) {
         return StoredProcedure.IDENTIFIER;
     }
-    
+
     /**
      * {@inheritDoc}
      *

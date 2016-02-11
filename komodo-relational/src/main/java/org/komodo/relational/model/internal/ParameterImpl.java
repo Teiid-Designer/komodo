@@ -24,8 +24,8 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
-import org.modeshape.sequencer.ddl.StandardDdlLexicon;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
+import org.teiid.modeshape.sequencer.ddl.StandardDdlLexicon;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon.CreateProcedure;
 
 /**
  * An implementation of a relational model procedure parameter.
@@ -257,7 +257,7 @@ public final class ParameterImpl extends RelationalChildRestrictedObject impleme
     public KomodoType getTypeIdentifier( final UnitOfWork uow ) {
         return Parameter.IDENTIFIER;
     }
-    
+
     /**
      * {@inheritDoc}
      *

@@ -21,7 +21,7 @@ import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
-import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
+import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 /**
  * Represents a VDB translator.
@@ -47,7 +47,7 @@ public interface Translator extends RelationalObject {
      * An empty array of translators.
      */
     Translator[] NO_TRANSLATORS = new Translator[0];
-    
+
     /**
      * {@inheritDoc}
      *

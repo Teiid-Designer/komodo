@@ -18,7 +18,7 @@ import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.ArgCheck;
-import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
+import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 /**
  * An implementation of a VDB permission mask.
@@ -58,14 +58,14 @@ public final class MaskImpl extends RelationalChildRestrictedObject implements M
 
     /**
     * {@inheritDoc}
-    * 
+    *
     * @see org.komodo.relational.internal.RelationalObjectImpl#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
     */
     @Override
     public Permission getParent(final UnitOfWork transaction) throws KException {
     	ArgCheck.isNotNull(transaction, "transaction"); //$NON-NLS-1$
     	ArgCheck.isTrue((transaction.getState() == State.NOT_STARTED), "transaction state must be NOT_STARTED"); //$NON-NLS-1$
-     
+
     	final KomodoObject grouping = super.getParent(transaction);
     	final Permission result = Permission.RESOLVER.resolve(transaction, grouping.getParent(transaction));
     	return result;

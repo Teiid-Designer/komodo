@@ -33,7 +33,7 @@ import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.TeiidVdb;
 import org.komodo.utils.StringUtils;
 import org.komodo.utils.i18n.I18n;
-import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
+import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 /**
  * A shell command to deploy a workspace VDB to the connected server.
@@ -112,7 +112,7 @@ public final class ServerDeployVdbCommand extends ServerShellCommand {
                     }
                 }
             }
-            
+
             // Get VDB content
             String vdbXml = vdbToDeploy.export(getTransaction(), null);
             if (vdbXml == null || vdbXml.isEmpty()) {
@@ -132,14 +132,14 @@ public final class ServerDeployVdbCommand extends ServerShellCommand {
 
         return result;
     }
-    
+
     /*
      * Gets the set of unique source jndi names used by the VDB
      */
     private Set<String> getPhysicalModelJndis(Vdb theVdb) throws Exception {
         // The set of Physical Modl Jndis
         HashSet<String> physicalModelJndis = new HashSet<String>();
-        
+
         Model[] models = theVdb.getModels(getTransaction());
         for(Model model : models) {
             Model.Type modelType = model.getModelType(getTransaction());
@@ -153,10 +153,10 @@ public final class ServerDeployVdbCommand extends ServerShellCommand {
                 }
             }
         }
-        
+
         return physicalModelJndis;
     }
-    
+
     /**
      * {@inheritDoc}
      *

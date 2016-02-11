@@ -9,7 +9,6 @@ package org.komodo.relational;
 
 import java.util.Arrays;
 import java.util.List;
-
 import org.komodo.relational.internal.TypeResolverRegistry;
 import org.komodo.shell.DefaultLabelProvider;
 import org.komodo.shell.ShellI18n;
@@ -18,7 +17,7 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.KLog;
 import org.komodo.utils.i18n.I18n;
-import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
+import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 /**
  * A label provider for relational objects.

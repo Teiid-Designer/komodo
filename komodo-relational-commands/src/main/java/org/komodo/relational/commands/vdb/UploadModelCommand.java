@@ -23,8 +23,8 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.Repository;
 import org.komodo.utils.StringUtils;
 import org.komodo.utils.i18n.I18n;
-import org.modeshape.sequencer.ddl.StandardDdlLexicon;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlParser;
+import org.teiid.modeshape.sequencer.ddl.StandardDdlLexicon;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlParser;
 
 /**
  * Loads a {@link Model MODEL} from a local file.

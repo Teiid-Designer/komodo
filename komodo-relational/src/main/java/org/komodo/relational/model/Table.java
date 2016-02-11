@@ -21,7 +21,7 @@ import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateTable;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon.CreateTable;
 
 /**
  * Represents a relational model table.
@@ -138,7 +138,7 @@ public interface Table extends OptionContainer, RelationalObject, SchemaElement 
      * An empty array of tables.
      */
     Table[] NO_TABLES = new Table[0];
-    
+
     /**
      * {@inheritDoc}
      *

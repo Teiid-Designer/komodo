@@ -57,7 +57,8 @@
 
 	<properties>
 		<rootDir>${project.basedir}</rootDir>
-		<modeshape.version>4.4.0.Final</modeshape.version>
+		<modeshape.version>4.5.0.Final</modeshape.version>
+		<teiid.modeshape.version>0.0.1-SNAPSHOT</teiid.modeshape.version>
 		<jcr.version>2.0</jcr.version>
 		<infinispan.version>7.2.3.Final</infinispan.version>
 		<javax.servlet.version>3.1.0</javax.servlet.version>
@@ -117,16 +118,6 @@
 			</dependency>
 			<dependency>
 				<groupId>org.modeshape</groupId>
-				<artifactId>modeshape-sequencer-ddl</artifactId>
-				<version>${modeshape.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.modeshape</groupId>
-				<artifactId>modeshape-sequencer-teiid</artifactId>
-				<version>${modeshape.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.modeshape</groupId>
 				<artifactId>modeshape-schematic</artifactId>
 				<version>${modeshape.version}</version>
 			</dependency>
@@ -139,6 +130,17 @@
 				<groupId>org.modeshape</groupId>
 				<artifactId>modeshape-extractor-tika</artifactId>
 				<version>${modeshape.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.jboss.teiid.modeshape</groupId>
+				<artifactId>teiid-modeshape-sequencer-vdb</artifactId>
+				<version>${teiid.modeshape.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.teiid.modeshape</groupId>
+				<artifactId>teiid-modeshape-sequencer-ddl</artifactId>
+				<version>${teiid.modeshape.version}</version>
 			</dependency>
 
 			<dependency>
@@ -208,14 +210,6 @@
 		</dependency>
 		<dependency>
 		<groupId>org.modeshape</groupId>
-		<artifactId>modeshape-sequencer-ddl</artifactId>
-		</dependency>
-		<dependency>
-		<groupId>org.modeshape</groupId>
-		<artifactId>modeshape-sequencer-teiid</artifactId>
-		</dependency>
-		<dependency>
-		<groupId>org.modeshape</groupId>
 		<artifactId>modeshape-schematic</artifactId>
 		</dependency>
 		<dependency>
@@ -225,6 +219,14 @@
 		<dependency>
 		<groupId>org.modeshape</groupId>
 		<artifactId>modeshape-extractor-tika</artifactId>
+		</dependency>
+		<dependency>
+            <groupId>org.jboss.teiid.modeshape</groupId>
+            <artifactId>teiid-modeshape-sequencer-ddl</artifactId>
+		</dependency>
+		<dependency>
+            <groupId>org.jboss.teiid.modeshape</groupId>
+            <artifactId>teiid-modeshape-sequencer-vdb</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>javax.jcr</groupId>

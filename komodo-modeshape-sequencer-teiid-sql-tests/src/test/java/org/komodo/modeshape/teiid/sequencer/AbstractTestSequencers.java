@@ -37,8 +37,8 @@ import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Select;
 import org.komodo.repository.KSequencerController.SequencerType;
 import org.komodo.spi.query.sql.lang.JoinType;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.modeshape.sequencer.ddl.StandardDdlLexicon;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
+import org.teiid.modeshape.sequencer.ddl.StandardDdlLexicon;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon;
 
 /**
  *
@@ -55,14 +55,14 @@ public abstract class AbstractTestSequencers extends AbstractTSqlSequencerTest {
 
     @Test(timeout = 5000000)
     public void testBasicDDLStatement() throws Exception {
-        String ddl =  "CREATE VIEW Tweet AS select * FROM twitterview.getTweets;";        
+        String ddl =  "CREATE VIEW Tweet AS select * FROM twitterview.getTweets;";
         Node fileNode = prepareSequence(ddl, SequencerType.DDL);
 
         //
         // Sequencing completed, now verify
         //
 
-        // DDL Sequencer creates the 'Tweet' node 
+        // DDL Sequencer creates the 'Tweet' node
         Node tweetNode = fileNode.getNode("Tweet");
         assertNotNull(tweetNode);
 
@@ -96,19 +96,19 @@ public abstract class AbstractTestSequencers extends AbstractTSqlSequencerTest {
 
 //        ddl.append("CREATE FOREIGN SCHEMA TWITTER (connection-jndi-name=\"java:/twitterDS\":translator-name=\"rest\") ")
         ddl.append("CREATE VIRTUAL PROCEDURE getTweets(query varchar) RETURNS (created_on varchar(25), from_user varchar(25), to_user varchar(25), ")
-             .append("profile_image_url varchar(25), source varchar(25), text varchar(140)) AS ") 
+             .append("profile_image_url varchar(25), source varchar(25), text varchar(140)) AS ")
                      .append("select tweet.* from ")
                      .append("(call twitter.invokeHTTP(action => 'GET', endpoint =>querystring(\'',query as \"q\"))) w,  ")
                              .append("XMLTABLE('results' passing JSONTOXML('myxml', w.result) columns ")
                              .append("created_on string PATH 'created_at', ")
                              .append("from_user string PATH 'from_user', ")
                              .append("to_user string PATH 'to_user', ")
-                             .append("profile_image_url string PATH 'profile_image_url', ") 
+                             .append("profile_image_url string PATH 'profile_image_url', ")
                              .append("source string PATH 'source', ")
                              .append("text string PATH 'text') tweet; ")
              .append("CREATE VIEW Tweet AS select * FROM twitterview.getTweets; ")
 //             .append("CREATE FOREIGN SCHEMA PARTSSUPPLIER (connection-jndi-name=\"parts-oracle\":translator-name=\"jdbc\") ")
-             .append("CREATE FOREIGN TABLE PARTSSUPPLIER.PART (id integer PRIMARY KEY,  name   varchar(25), color varchar(25),  weight integer); ") 
+             .append("CREATE FOREIGN TABLE PARTSSUPPLIER.PART (id integer PRIMARY KEY,  name   varchar(25), color varchar(25),  weight integer); ")
 //             .append("CREATE VIRTUAL SCHEMA PARTS_VIEWS ")
              .append("CREATE VIEW PARTS_VIEWS.PARTS ( ")
                  .append("PART_ID integer PRIMARY KEY, ")

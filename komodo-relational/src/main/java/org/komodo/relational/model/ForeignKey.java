@@ -20,7 +20,7 @@ import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.Constraint;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon.Constraint;
 
 /**
  * Represents a relational model foreign key.
@@ -46,7 +46,7 @@ public interface ForeignKey extends TableConstraint {
      * An empty collection of foreign key constraints.
      */
     ForeignKey[] NO_FOREIGN_KEYS = new ForeignKey[0];
-    
+
     /**
      * {@inheritDoc}
      *

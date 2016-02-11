@@ -23,7 +23,7 @@ import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateTable;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon.CreateTable;
 
 /**
  * Represents a relational model column.
@@ -131,7 +131,7 @@ public interface Column extends OptionContainer, RelationalObject {
      * An empty array of columns.
      */
     Column[] NO_COLUMNS = new Column[0];
-    
+
     /**
      * {@inheritDoc}
      *
@@ -139,7 +139,7 @@ public interface Column extends OptionContainer, RelationalObject {
      */
     @Override
     Table getParent( final UnitOfWork transaction ) throws KException;
-    
+
     /**
      * The resolver of a {@link Column}.
      */
