@@ -25,12 +25,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.jcr.Node;
-
 import org.junit.Ignore;
 import org.junit.Test;
 import org.komodo.modeshape.teiid.parser.TeiidSQLConstants;
@@ -63,7 +60,7 @@ public class TestDdlNodeVisitor extends AbstractSequencerTest {
         String ddlOptions = ddlLine.substring(ddlLine.indexOf(TeiidSQLConstants.Reserved.OPTIONS));
         String visOptions = visLine.substring(visLine.indexOf(TeiidSQLConstants.Reserved.OPTIONS));
 
-        String optionsPattern = "OPTIONS \\(([\"]?[a-zA-Z0-9_:]+[\"]? [']?[a-zA-Z0-9 ]+[']?(, )?)+\\)[;|,]?";
+        String optionsPattern = "OPTIONS \\(([\"[a-zA-Z0-9_:]+\"\\.]*\"[a-zA-Z0-9_:]+\" [']?[a-zA-Z0-9\\. ]+[']?(, )?)+\\)[;|,]?";
         assertTrue("Test DDL Options do not match expected pattern: " + NEW_LINE + ddlOptions, ddlOptions.matches(optionsPattern));
         assertTrue("Visitor Options do not match expected pattern: " + NEW_LINE + visOptions, visOptions.matches(optionsPattern));
 
@@ -145,14 +142,14 @@ public class TestDdlNodeVisitor extends AbstractSequencerTest {
                 TAB + "e2 string(10)," + NEW_LINE +
                 TAB + "e3 date NOT NULL," + NEW_LINE +
                 TAB + "e4 bigdecimal(12,3)," + NEW_LINE +
-                TAB + "e5 integer AUTO_INCREMENT OPTIONS (UUID 'uuid', NAMEINSOURCE 'nis', SELECTABLE FALSE)," + NEW_LINE +
+                TAB + "e5 integer AUTO_INCREMENT OPTIONS (\"UUID\" 'uuid', \"NAMEINSOURCE\" 'nis', \"SELECTABLE\" 'FALSE')," + NEW_LINE +
                 TAB + "e6 string DEFAULT 'hello'," + NEW_LINE +
                 TAB + "PRIMARY KEY(e1)," + NEW_LINE +
                 TAB + "UNIQUE(e2)," + NEW_LINE +
                 TAB + "UNIQUE(e3)," + NEW_LINE +
                 TAB + "INDEX(e5)," + NEW_LINE +
                 TAB + "INDEX(e6)" + NEW_LINE +
-                ") OPTIONS (ANNOTATION 'Test Table', CARDINALITY '12', FOO 'BAR', UPDATABLE 'true', UUID 'uuid2');";
+                ") OPTIONS (\"ANNOTATION\" 'Test Table', \"CARDINALITY\" '12', \"FOO\" 'BAR', \"UPDATABLE\" 'true', \"UUID\" 'uuid2');";
 
         helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "G1");
     }
@@ -177,7 +174,7 @@ public class TestDdlNodeVisitor extends AbstractSequencerTest {
                 TAB + "e3 date," + NEW_LINE +
                 TAB + "ACCESSPATTERN(e1)," + NEW_LINE +
                 TAB + "ACCESSPATTERN(e2, e3)," + NEW_LINE +
-                TAB + "UNIQUE(e1) OPTIONS (x 'true')" + NEW_LINE +
+                TAB + "UNIQUE(e1) OPTIONS (\"x\" 'true')" + NEW_LINE +
                 ");";
         helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "G1");
     }
@@ -229,7 +226,7 @@ public class TestDdlNodeVisitor extends AbstractSequencerTest {
                 TAB + "g2e1 integer," + NEW_LINE +
                 TAB + "g2e2 string," + NEW_LINE +
                 TAB + "PRIMARY KEY(g2e1, g2e2)," + NEW_LINE +
-                TAB + "FOREIGN KEY(g2e1, g2e2) REFERENCES G1 OPTIONS (NAMEINSOURCE 'g1Relationship')" + NEW_LINE +
+                TAB + "FOREIGN KEY(g2e1, g2e2) REFERENCES G1 OPTIONS (\"NAMEINSOURCE\" 'g1Relationship')" + NEW_LINE +
                 ");";
         helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "G1", SEQUENCE_DDL_PATH + "G2");
     }
@@ -252,7 +249,7 @@ public class TestDdlNodeVisitor extends AbstractSequencerTest {
         String ddl = "CREATE VIEW G1 (" + NEW_LINE +
                 TAB + "e1 integer," + NEW_LINE +
                 TAB + "e2 varchar" + NEW_LINE +
-                ") OPTIONS (CARDINALITY '1234567954432')" + NEW_LINE +
+                ") OPTIONS (\"CARDINALITY\" '1234567954432')" + NEW_LINE +
                 "AS" + NEW_LINE +
                 "SELECT e1, e2 FROM foo.bar;";
         helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "G1\\/tsql:query");
@@ -278,35 +275,35 @@ public class TestDdlNodeVisitor extends AbstractSequencerTest {
     @Test(timeout = 5000000)
     public void testSourceProcedure() throws Exception {
         String ddl = "CREATE FOREIGN PROCEDURE myProc(OUT p1 boolean, IN p2 varchar, INOUT p3 bigdecimal) RETURNS TABLE (r1 string, r2 bigdecimal)" + NEW_LINE +
-                "OPTIONS (UUID 'uuid', ANNOTATION 'desc', NAMEINSOURCE 'nis', UPDATECOUNT '2', RANDOM 'any')";
+                "OPTIONS (\"UUID\" 'uuid', \"ANNOTATION\" 'desc', \"NAMEINSOURCE\" 'nis', \"UPDATECOUNT\" '2', \"RANDOM\" 'any')";
         helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "myProc");
     }
 
     @Test(timeout = 5000000)
     public void testSourceProcedureNoReturn() throws Exception {
-        String ddl = "CREATE FOREIGN PROCEDURE saveFile(IN filePath string, IN file object OPTIONS (ANNOTATION 'The contents to save.  Can be one of CLOB, BLOB, or XML'))" + NEW_LINE +
-                "OPTIONS (ANNOTATION 'Saves the given value to the given path.  Any existing file will be overriden.')";
+        String ddl = "CREATE FOREIGN PROCEDURE saveFile(IN filePath string, IN file object OPTIONS (\"ANNOTATION\" 'The contents to save.  Can be one of CLOB, BLOB, or XML'))" + NEW_LINE +
+                "OPTIONS (\"ANNOTATION\" 'Saves the given value to the given path.  Any existing file will be overriden.')";
         helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "saveFile");
     }
 
     @Test(timeout = 5000000)
     public void testSourceProcedureIntegerReturn() throws Exception {
         String ddl = "CREATE FOREIGN PROCEDURE SourceProc(IN filePath string, IN file object) RETURNS integer" + NEW_LINE +
-                "OPTIONS (ANNOTATION 'hello world')";
+                "OPTIONS (\"ANNOTATION\" 'hello world')";
         helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "SourceProc");
     }
-    
+
     @Test( timeout = 5000000 )
     public void testPushdownFunctionNoArgs() throws Exception {
         String ddl = "CREATE FOREIGN FUNCTION SourceFunc() RETURNS integer" + NEW_LINE +
-                "OPTIONS (UUID 'hello world');";
+                "OPTIONS (\"UUID\" 'hello world');";
         helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "SourceFunc");
     }
 
     @Test( timeout = 5000000 )
     public void testNonPushdownFunction() throws Exception {
         String ddl = "CREATE VIRTUAL FUNCTION SourceFunc(p1 integer, p2 varchar) RETURNS integer" + NEW_LINE +
-                "OPTIONS (JAVA_CLASS 'foo', JAVA_METHOD 'bar');";
+                "OPTIONS (\"JAVA_CLASS\" 'foo', \"JAVA_METHOD\" 'bar');";
         helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "SourceFunc");
     }
 
@@ -357,6 +354,14 @@ public class TestDdlNodeVisitor extends AbstractSequencerTest {
     public void testArrayTypes() throws Exception {
         String ddl = "CREATE FOREIGN PROCEDURE myProc(OUT p1 boolean, IN p2 string, INOUT p3 bigdecimal) RETURNS TABLE (r1 string(100)[], r2 bigdecimal[][])";
         helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "myProc");
+    }
+
+    @Test(timeout = 5000000)
+    public void testOptions() throws Exception {
+        String ddl = "CREATE FOREIGN TABLE G1 (" + NEW_LINE +
+                TAB + "e1 integer" + NEW_LINE +
+                ") OPTIONS (\"foo\".\"bar\" 'Test Table', \"foo\" '12', \"FOO\" 'BAR', \"a\".\"b\".\"c\".\"d\" 'true');";
+        helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "G1");
     }
 
 }
