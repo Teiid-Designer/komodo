@@ -40,6 +40,7 @@ import org.komodo.modeshape.teiid.TeiidSqlNodeVisitor;
 import org.komodo.modeshape.teiid.parser.TeiidSQLConstants;
 import org.komodo.modeshape.teiid.parser.TeiidSQLConstants.NonReserved;
 import org.komodo.modeshape.teiid.parser.TeiidSQLConstants.Reserved;
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.ddl.TeiidDDLConstants;
 import org.komodo.spi.metadata.MetadataNamespaces;
 import org.komodo.spi.runtime.version.TeiidVersion;
@@ -335,13 +336,13 @@ public class DdlNodeVisitor extends AbstractNodeVisitor
         return StringUtils.replaceAll(str, tick, tick + tick);
     }
 
-    private String escapeSinglePart(String token) {
+    protected String escapeSinglePart(String token) {
         if (TeiidSQLConstants.isReservedWord(getVersion(), token)) {
             return TeiidSQLConstants.Tokens.ID_ESCAPE_CHAR + token + TeiidSQLConstants.Tokens.ID_ESCAPE_CHAR;
         }
         boolean escape = true;
         char start = token.charAt(0);
-        if (HASH.equals(Character.toString(start)) || AMPERSAND.equals(Character.toString(start)) || StringUtils.isLetter(start)) {
+        if (HASH.equals(Character.toString(start)) || AT.equals(Character.toString(start)) || StringUtils.isLetter(start)) {
             escape = false;
             for (int i = 1; !escape && i < token.length(); i++) {
                 char c = token.charAt(i);
@@ -502,14 +503,35 @@ public class DdlNodeVisitor extends AbstractNodeVisitor
             //
         }
 
-        append(escapeSinglePart(key)).append(SPACE);
-        if (FALSE.equals(value) || TRUE.equals(value)) {
-            append(value);
-            return;
-        }
+        append(escapeOptionKey(key)).append(SPACE);
 
         // Default to a string value which should be placed in quotes
         append(QUOTE_MARK + value + QUOTE_MARK);
+    }
+
+    protected String escapeOptionKey(String key) {
+        StringBuilder result = new StringBuilder();
+
+        if (key.length()>1 &&  key.charAt(0) == StringConstants.SPEECH_MARK.charAt(0)
+                && key.charAt(key.length() - 1) == StringConstants.SPEECH_MARK.charAt(0)) {
+            result.append(StringConstants.SPEECH_MARK)
+                  .append(escapeStringValue(key.substring(1, key.length() - 1), StringConstants.SPEECH_MARK))
+                  .append(StringConstants.SPEECH_MARK);
+            return result.toString();
+        }
+
+        String[] segmentsFromDots = key.split("\\."); //$NON-NLS-1$
+        for (String segment : segmentsFromDots) {
+            if (segment.length() == 0) {
+                continue;
+            }
+            result.append(TeiidSQLConstants.Tokens.ID_ESCAPE_CHAR)
+                  .append(escapeStringValue(segment, StringConstants.SPEECH_MARK))
+                  .append(TeiidSQLConstants.Tokens.ID_ESCAPE_CHAR).append(DOT_CHAR);
+        }
+
+        result.setLength(result.length() - 1);
+        return result.toString();
     }
 
     private void statementOptions(Node node, String prefix) throws RepositoryException {
