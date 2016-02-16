@@ -10,7 +10,6 @@ package org.komodo.relational.model.internal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-
 import org.komodo.core.KomodoLexicon;
 import org.komodo.modeshape.visitor.DdlNodeVisitor;
 import org.komodo.relational.ExcludeQNamesFilter;
@@ -42,11 +41,11 @@ import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateTable;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.SchemaElement;
-import org.modeshape.sequencer.teiid.lexicon.CoreLexicon;
-import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon.CreateProcedure;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon.CreateTable;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon.SchemaElement;
+import org.teiid.modeshape.sequencer.vdb.lexicon.CoreLexicon;
+import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 /**
  * An implementation of a relational model.
@@ -522,7 +521,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
 
         return result.toArray( new View[ result.size() ] );
     }
-    
+
     /**
      * {@inheritDoc}
      *

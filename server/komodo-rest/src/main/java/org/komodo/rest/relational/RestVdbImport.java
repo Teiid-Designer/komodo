@@ -9,7 +9,6 @@ package org.komodo.rest.relational;
 
 import java.net.URI;
 import java.util.Properties;
-
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.VdbImport;
 import org.komodo.rest.KomodoService;
@@ -20,7 +19,7 @@ import org.komodo.rest.relational.KomodoRestUriBuilder.SettingNames;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.ArgCheck;
-import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
+import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 /**
  * A VDB import that can be used by GSON to build a JSON document representation.

@@ -45,9 +45,9 @@ import org.komodo.spi.query.sql.SQLConstants;
 import org.komodo.utils.KLog;
 import org.modeshape.jcr.api.JcrConstants;
 import org.modeshape.jcr.api.Session;
-import org.modeshape.sequencer.ddl.StandardDdlLexicon;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
-import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
+import org.teiid.modeshape.sequencer.ddl.StandardDdlLexicon;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon;
+import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 
 /**

@@ -22,9 +22,9 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.ArgCheck;
 import org.modeshape.jcr.JcrLexicon;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.Constraint;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateTable;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon.Constraint;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon.CreateTable;
 
 /**
  * A base implementation of a relational model table constraint.

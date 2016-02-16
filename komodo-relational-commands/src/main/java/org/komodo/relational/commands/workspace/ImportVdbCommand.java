@@ -28,7 +28,7 @@ import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.i18n.I18n;
-import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
+import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 /**
  * A shell command to import a VDB

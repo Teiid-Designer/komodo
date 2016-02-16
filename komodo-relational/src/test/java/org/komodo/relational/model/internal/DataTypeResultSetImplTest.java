@@ -28,8 +28,8 @@ import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
-import org.modeshape.sequencer.ddl.StandardDdlLexicon;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
+import org.teiid.modeshape.sequencer.ddl.StandardDdlLexicon;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon.CreateProcedure;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class DataTypeResultSetImplTest extends RelationalModelTest {

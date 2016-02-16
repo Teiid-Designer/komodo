@@ -17,7 +17,7 @@ import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.ArgCheck;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.Constraint;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon.Constraint;
 
 /**
  * An implementation of a relational model index.
@@ -74,7 +74,7 @@ public final class IndexImpl extends TableConstraintImpl implements Index {
     public int getTypeId() {
         return TYPE_ID;
     }
-    
+
     /**
      * {@inheritDoc}
      *

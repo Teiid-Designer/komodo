@@ -18,7 +18,7 @@ import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.test.utils.AbstractLocalRepositoryTest;
-import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
+import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public class RelationalModelTest extends AbstractLocalRepositoryTest {
@@ -79,7 +79,7 @@ public class RelationalModelTest extends AbstractLocalRepositoryTest {
         assertThat( vdb.getOriginalFilePath( getTransaction() ), is( originalFilePath ) );
         return vdb;
     }
-    
+
     protected Teiid createTeiid() throws Exception {
         return createTeiid( getDefaultTeiidName() );
     }

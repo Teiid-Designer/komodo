@@ -33,9 +33,9 @@ import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateTable;
-import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon.CreateProcedure;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon.CreateTable;
+import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class ModelImplTest extends RelationalModelTest {

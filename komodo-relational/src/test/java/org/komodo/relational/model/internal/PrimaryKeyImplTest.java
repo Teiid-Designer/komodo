@@ -25,8 +25,8 @@ import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.modeshape.jcr.JcrLexicon;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.Constraint;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon.Constraint;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class PrimaryKeyImplTest extends RelationalModelTest {

@@ -27,7 +27,7 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.StringUtils;
 import org.komodo.utils.i18n.I18n;
-import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
+import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 /**
  * A shell command to export a Vdb from Workspace context.

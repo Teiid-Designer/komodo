@@ -20,7 +20,7 @@ import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon.CreateProcedure;
 
 /**
  * Represents a tabular result set.
@@ -36,7 +36,7 @@ public interface TabularResultSet extends ProcedureResultSet {
      * The type identifier.
      */
     int TYPE_ID = TabularResultSet.class.hashCode();
-    
+
     /**
      * {@inheritDoc}
      *

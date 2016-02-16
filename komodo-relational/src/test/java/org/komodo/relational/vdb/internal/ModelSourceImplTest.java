@@ -24,7 +24,7 @@ import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
-import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
+import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class ModelSourceImplTest extends RelationalModelTest {

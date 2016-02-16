@@ -9,7 +9,6 @@ package org.komodo.relational.model.internal;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalModelFactory;
@@ -24,7 +23,7 @@ import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.ArgCheck;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon.CreateProcedure;
 
 /**
  * An implementation of a relational model procedure tabular result set.
@@ -107,7 +106,7 @@ public final class TabularResultSetImpl extends RelationalObjectImpl implements 
     public KomodoType getTypeIdentifier( final UnitOfWork uow ) {
         return TabularResultSet.IDENTIFIER;
     }
-    
+
     /**
      * {@inheritDoc}
      *

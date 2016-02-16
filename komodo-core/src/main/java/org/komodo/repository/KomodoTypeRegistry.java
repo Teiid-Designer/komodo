@@ -24,7 +24,6 @@ package org.komodo.repository;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
 import org.komodo.core.KomodoLexicon;
 import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.spi.constants.StringConstants;
@@ -32,9 +31,9 @@ import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.utils.KeyInValueHashMap;
 import org.komodo.spi.utils.KeyInValueHashMap.KeyFromValueAdapter;
 import org.komodo.utils.ArgCheck;
-import org.modeshape.sequencer.ddl.StandardDdlLexicon;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
-import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
+import org.teiid.modeshape.sequencer.ddl.StandardDdlLexicon;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon;
+import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 /**
  *

@@ -17,7 +17,7 @@ import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.ArgCheck;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon.CreateProcedure;
 
 /**
  * An implementation of a virtual procedure.
@@ -59,7 +59,7 @@ public final class VirtualProcedureImpl extends AbstractProcedureImpl implements
     public KomodoType getTypeIdentifier( final UnitOfWork transaction ) {
         return VirtualProcedure.IDENTIFIER;
     }
-    
+
     /**
      * {@inheritDoc}
      *
