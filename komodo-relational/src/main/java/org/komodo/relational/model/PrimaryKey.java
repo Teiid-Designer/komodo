@@ -19,7 +19,7 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.Constraint;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon.Constraint;
 
 /**
  * Represents a relational model primary key.
@@ -40,7 +40,7 @@ public interface PrimaryKey extends TableConstraint {
      * The constraint type for a primary key. Value is {@value} .
      */
     ConstraintType CONSTRAINT_TYPE = ConstraintType.PRIMARY_KEY;
-    
+
     /**
      * {@inheritDoc}
      *

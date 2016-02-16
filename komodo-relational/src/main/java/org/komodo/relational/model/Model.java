@@ -24,7 +24,7 @@ import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
-import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
+import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 /**
  * Represents a relational model.
@@ -50,7 +50,7 @@ public interface Model extends Exportable, RelationalObject {
      * Identifier of this object
      */
     KomodoType IDENTIFIER = KomodoType.MODEL;
-    
+
     /**
      * {@inheritDoc}
      *

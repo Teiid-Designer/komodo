@@ -21,7 +21,7 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.ArgCheck;
 import org.modeshape.jcr.JcrLexicon;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.Constraint;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon.Constraint;
 
 /**
  * An implementation of a relational model foreign key.
@@ -162,7 +162,7 @@ public final class ForeignKeyImpl extends TableConstraintImpl implements Foreign
     public int getTypeId() {
         return TYPE_ID;
     }
-    
+
     /**
      * {@inheritDoc}
      *

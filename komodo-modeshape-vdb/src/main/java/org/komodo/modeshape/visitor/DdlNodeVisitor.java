@@ -50,8 +50,8 @@ import org.komodo.spi.type.DataTypeManager.DataTypeName;
 import org.komodo.spi.utils.KeyInValueHashMap;
 import org.komodo.utils.StringUtils;
 import org.modeshape.jcr.JcrLexicon;
-import org.modeshape.sequencer.ddl.StandardDdlLexicon;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
+import org.teiid.modeshape.sequencer.ddl.StandardDdlLexicon;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon;
 
 /**
  * Visitor that will walk a ddl node tree and convert it to

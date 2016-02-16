@@ -22,7 +22,7 @@ import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.ArgCheck;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon.CreateProcedure;
 
 /**
  * An implementation of a pushdown function.
@@ -114,7 +114,7 @@ public final class PushdownFunctionImpl extends FunctionImpl implements Pushdown
     public KomodoType getTypeIdentifier( final UnitOfWork uow ) {
         return PushdownFunction.IDENTIFIER;
     }
-    
+
     /**
      * {@inheritDoc}
      *

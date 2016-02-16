@@ -21,7 +21,7 @@ import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
-import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
+import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 /**
  * Represents a referenced VDB.
@@ -47,7 +47,7 @@ public interface VdbImport extends RelationalObject {
      * An empty array of VDB imports.
      */
     VdbImport[] NO_IMPORTS = new VdbImport[0];
-    
+
     /**
      * {@inheritDoc}
      *

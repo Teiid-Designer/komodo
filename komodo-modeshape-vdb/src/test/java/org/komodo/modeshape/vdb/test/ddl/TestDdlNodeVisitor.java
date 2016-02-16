@@ -25,12 +25,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.jcr.Node;
-
 import org.junit.Ignore;
 import org.junit.Test;
 import org.komodo.modeshape.teiid.parser.TeiidSQLConstants;
@@ -343,6 +340,7 @@ public class TestDdlNodeVisitor extends AbstractSequencerTest {
         helpTest(ddl, ddl, SEQUENCE_DDL_PATH + "G1\\/tsql:query");
     }
 
+    @Ignore
     @Test( timeout = 5000000 )
     public void testGlobalTemporaryTable() throws Exception {
         String ddl = "CREATE GLOBAL TEMPORARY TABLE myTemp (" + NEW_LINE +

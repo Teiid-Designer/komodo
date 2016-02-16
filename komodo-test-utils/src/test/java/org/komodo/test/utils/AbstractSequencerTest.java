@@ -29,7 +29,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.modeshape.jcr.api.JcrConstants.JCR_MIXIN_TYPES;
 import static org.modeshape.jcr.api.JcrConstants.JCR_PRIMARY_TYPE;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -41,7 +40,6 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.Property;
@@ -54,7 +52,6 @@ import javax.jcr.observation.EventIterator;
 import javax.jcr.observation.EventListener;
 import javax.jcr.observation.EventListenerIterator;
 import javax.jcr.observation.ObservationManager;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -67,9 +64,9 @@ import org.modeshape.jcr.JcrLexicon;
 import org.modeshape.jcr.api.JcrConstants;
 import org.modeshape.jcr.api.observation.Event;
 import org.modeshape.jcr.api.observation.Event.Sequencing;
-import org.modeshape.sequencer.ddl.StandardDdlLexicon;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon;
-import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
+import org.teiid.modeshape.sequencer.ddl.StandardDdlLexicon;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon;
+import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 /**
  * Class which serves as base for various sequencer unit tests. In addition to this, it uses the sequencing events fired by
  * ModeShape's {@link javax.jcr.observation.ObservationManager} to perform various assertions and therefore, acts as a test for
@@ -193,7 +190,7 @@ public abstract class AbstractSequencerTest extends MultiUseAbstractTest impleme
 
     /**
      * Retrieves a sequenced node using 5 seconds as maximum wait time.
-     * 
+     *
      * @param parentNode an existing {@link Node}
      * @param relativePath the path under the parent node at which the sequenced node is expected to appear (note that this must
      *        be the path to the "new" node, always.
@@ -211,7 +208,7 @@ public abstract class AbstractSequencerTest extends MultiUseAbstractTest impleme
      * The sequenced node "appears" when the {@link SequencingListener} is notified of the sequencing process. The thread which
      * calls this method either returns immediately if the node has already been sequenced, or waits a number of seconds for it to
      * become available.
-     * 
+     *
      * @param parentNode an existing {@link Node}
      * @param relativePath the path under the parent node at which the sequenced node is expected to appear (note that this must
      *        be the path to the "new" node, always.
@@ -234,7 +231,7 @@ public abstract class AbstractSequencerTest extends MultiUseAbstractTest impleme
 
     /**
      * Retrieves a new node under the given path, as a result of sequecing, or returns null if the given timeout occurs.
-     * 
+     *
      * @param expectedPath
      * @param waitTimeSeconds
      * @return the output node
@@ -293,7 +290,7 @@ public abstract class AbstractSequencerTest extends MultiUseAbstractTest impleme
     protected void verifyMixinType( Node node, String expectedValue ) throws RepositoryException {
         verifyProperty(node, JCR_MIXIN_TYPES, expectedValue);
     }
-    
+
     protected void verifyMixinTypes( Node node, String... expectedValues ) throws RepositoryException {
         Value[] values = node.getProperty(JCR_MIXIN_TYPES).getValues();
         Set<String> valuesSet = new TreeSet<String>();

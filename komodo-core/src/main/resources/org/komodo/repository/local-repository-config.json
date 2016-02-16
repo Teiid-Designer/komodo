@@ -107,7 +107,7 @@
         "threadPool" : "modeshape-workers",
         "sequencers" : {
             "VDB Dynamic Sequencer" : {
-				"classname" : "org.modeshape.sequencer.teiid.VdbDynamicSequencer"
+				"classname" : "org.teiid.modeshape.sequencer.vdb.VdbDynamicSequencer"
 			},
             "DDL Sequencer" : {
                 "classname" : "org.komodo.modeshape.lib.sequencer.KDdlSequencer"

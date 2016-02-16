@@ -20,8 +20,7 @@ import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.CreateProcedure;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlLexicon.SchemaElement;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon.CreateProcedure;
 
 /**
  * Represents a user-defined function (CREATE VIRTUAL FUNCTION).
@@ -42,7 +41,7 @@ public interface UserDefinedFunction extends Function {
      * The type identifier.
      */
     int TYPE_ID = UserDefinedFunction.class.hashCode();
-    
+
     /**
      * {@inheritDoc}
      *
@@ -114,7 +113,7 @@ public interface UserDefinedFunction extends Function {
                    && ObjectImpl.validatePropertyValue( transaction,
                                                         kobject.getRepository(),
                                                         kobject,
-                                                        SchemaElement.TYPE,
+                                                        org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon.SchemaElement.TYPE,
                                                         SchemaElementType.VIRTUAL.name() );
         }
 

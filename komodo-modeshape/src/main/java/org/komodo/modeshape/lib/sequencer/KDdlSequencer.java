@@ -3,17 +3,17 @@
  * See the COPYRIGHT.txt file distributed with this work for information
  * regarding copyright ownership.  Some portions may be licensed
  * to Red Hat, Inc. under one or more contributor license agreements.
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
@@ -36,26 +36,26 @@ import javax.jcr.Session;
 import org.modeshape.common.text.ParsingException;
 import org.modeshape.common.util.IoUtil;
 import org.modeshape.jcr.api.nodetype.NodeTypeManager;
-import org.modeshape.sequencer.ddl.DdlParser;
-import org.modeshape.sequencer.ddl.DdlSequencer;
-import org.modeshape.sequencer.ddl.StandardDdlLexicon;
-import org.modeshape.sequencer.ddl.dialect.teiid.TeiidDdlParser;
-import org.modeshape.sequencer.ddl.node.AstNode;
-import org.modeshape.sequencer.ddl.node.AstNodeFactory;
+import org.teiid.modeshape.sequencer.ddl.DdlParser;
+import org.teiid.modeshape.sequencer.ddl.StandardDdlLexicon;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlParser;
+import org.teiid.modeshape.sequencer.ddl.TeiidDdlSequencer;
+import org.teiid.modeshape.sequencer.ddl.node.AstNode;
+import org.teiid.modeshape.sequencer.ddl.node.AstNodeFactory;
 
 /**
  * Subclass of {@link DdlSequencer} that only allows the
  * Teiid DDL dialect, avoiding confusion with other ddl
  * parsers.
  */
-public class KDdlSequencer extends DdlSequencer {
+public class KDdlSequencer extends TeiidDdlSequencer {
 
     private final DdlParser teiidParser = new TeiidDdlParser();
 
     @Override
     public void initialize( NamespaceRegistry registry, NodeTypeManager nodeTypeManager ) throws RepositoryException, IOException {
-        registerNodeTypes(DdlSequencer.class.getResourceAsStream("StandardDdl.cnd"), nodeTypeManager, true); //$NON-NLS-1$
-        registerNodeTypes(DdlSequencer.class.getResourceAsStream("dialect/teiid/TeiidDdl.cnd"), nodeTypeManager, true); //$NON-NLS-1$
+        registerNodeTypes(TeiidDdlSequencer.class.getResourceAsStream("StandardDdl.cnd"), nodeTypeManager, true); //$NON-NLS-1$
+        registerNodeTypes(TeiidDdlSequencer.class.getResourceAsStream("TeiidDdl.cnd"), nodeTypeManager, true); //$NON-NLS-1$
     }
 
     @Override
