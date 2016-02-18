@@ -671,8 +671,11 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
         os.addWherePathClause(null, "nt", "/tko:komodo/%");
         searchObjects = os.searchObjects(getTransaction());
 
-        // Returns all 3 objects under root
-        assertEquals(3, searchObjects.size());
+        // /tko:komodo/tko:workspace
+        // /tko:komodo/tko:library
+        // /tko:komodo/tko:environment
+        // /tko:komodo/tko:environment/tko:validation
+        assertEquals(4, searchObjects.size());
     }
 
     @Test

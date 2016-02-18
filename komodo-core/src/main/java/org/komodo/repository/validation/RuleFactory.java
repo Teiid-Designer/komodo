@@ -288,7 +288,7 @@ public final class RuleFactory {
                                               Rule.RuleType.PATTERN,
                                               nodeType,
                                               nodePropRestrictionMap,
-                                              Collections.EMPTY_MAP,
+                                              Collections.emptyMap(),
                                               severity,
                                               descriptions,
                                               messages );
@@ -359,7 +359,7 @@ public final class RuleFactory {
                                               Rule.RuleType.PATTERN,
                                               nodeType,
                                               nodePropRestrictionMap,
-                                              Collections.EMPTY_MAP,
+                                              Collections.emptyMap(),
                                               severity,
                                               descriptions,
                                               messages );
@@ -445,7 +445,7 @@ public final class RuleFactory {
                                               Rule.RuleType.RELATIONSHIP,
                                               nodeType,
                                               nodePropRestrictionMap,
-                                              Collections.EMPTY_MAP,
+                                              Collections.emptyMap(),
                                               severity,
                                               descriptions,
                                               messages );
@@ -530,7 +530,7 @@ public final class RuleFactory {
                                               Rule.RuleType.NUMBER,
                                               nodeType,
                                               nodePropRestrictionMap,
-                                              Collections.EMPTY_MAP,
+                                              Collections.emptyMap(),
                                               severity,
                                               descriptions,
                                               messages );
@@ -654,9 +654,9 @@ public final class RuleFactory {
         rule.setProperty( uow, KomodoLexicon.Rule.NODE_TYPE, ruleNodeType );
         rule.setProperty( uow, KomodoLexicon.Rule.VALIDATION_TYPE, validationType.name() );
         rule.setProperty( uow, KomodoLexicon.Rule.SEVERITY, severity );
-        
+
         // Add optional property restrictions
-        { 
+        {
             // Add grouping node if necessary
             if(!nodePropertyRestrictions.isEmpty() || !childPropertyRestrictions.isEmpty()) {
                 final KomodoObject propRestrictionsNode = rule.addChild( uow,

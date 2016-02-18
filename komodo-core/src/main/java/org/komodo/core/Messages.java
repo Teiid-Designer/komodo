@@ -97,6 +97,18 @@ public class Messages implements StringConstants {
     }
 
     @SuppressWarnings( "javadoc" )
+    public enum ValidationManagerImpl {
+
+        ValidationRulesProviderError,
+        ValidationRulesProviderNullStream;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    @SuppressWarnings( "javadoc" )
     public enum ProblemRule {
 
         Rule_Not_Found_Rule_Id,
@@ -114,7 +126,7 @@ public class Messages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     @SuppressWarnings( "javadoc" )
     public enum Search {
 

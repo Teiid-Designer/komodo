@@ -10,10 +10,14 @@ package org.komodo.repository.validation;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.ServiceLoader;
+import org.komodo.core.Messages;
 import org.komodo.spi.KException;
 import org.komodo.spi.outcome.Outcome;
 import org.komodo.spi.repository.KomodoObject;
@@ -23,6 +27,7 @@ import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.spi.repository.ValidationManager;
 import org.komodo.spi.repository.validation.Result;
 import org.komodo.spi.repository.validation.Rule;
+import org.komodo.spi.repository.validation.ValidationRulesProvider;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.KLog;
 
@@ -32,25 +37,46 @@ import org.komodo.utils.KLog;
 public class ValidationManagerImpl implements ValidationManager {
 
     private static final KLog LOGGER = KLog.getLogger();
-    
+
     private final Repository repo;
     private final String RULES_SCHEMA_FILE = "komodoValidation.xsd"; //$NON-NLS-1$
     private File rulesSchemaFile;
     private boolean defaultRulesExist = false;
+    private KomodoObject validationAreaRoot;
 
     /**
-     * Constructs an environment store delegate.
-     *
      * @param repo
-     *        the repository this is a delegate for (cannot be <code>null</code>)
+     *        the repository where the validation rules are stored (cannot be <code>null</code>)
      */
-    public ValidationManagerImpl( final Repository repo ) {
+    private ValidationManagerImpl( final Repository repo ) {
         ArgCheck.isNotNull( repo, "repo" ); //$NON-NLS-1$
-        
+
         this.repo = repo;
         initRulesXsd();
     }
-    
+
+    /**
+     * @param uow
+     *        the transaction (cannot be <code>null</code> and must have a state of
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED}
+     * @param repo
+     *        the repository where the validation rules are stored (cannot be <code>null</code>)
+     */
+    public ValidationManagerImpl( final UnitOfWork uow,
+                                  final Repository repo ) {
+        this( repo );
+
+        ArgCheck.isNotNull( uow, "uow" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( uow.getState() == State.NOT_STARTED ), "transaction state must be NOT_STARTED" ); //$NON-NLS-1$
+
+        try {
+            clearValidationRules( uow );
+            loadRules( uow );
+        } catch ( final Exception e ) {
+            LOGGER.error("ValidationManagerImpl - error clearing and loading validation rules", e); //$NON-NLS-1$
+        }
+    }
+
     private void initRulesXsd() {
         InputStream schemaStream = getClass().getClassLoader().getResourceAsStream(RULES_SCHEMA_FILE);
         try {
@@ -60,6 +86,74 @@ public class ValidationManagerImpl implements ValidationManager {
             LOGGER.error("ValidationManagerImpl - error processing Validation Rules schema : ", ex); //$NON-NLS-1$
         }
         rulesSchemaFile.deleteOnExit();
+    }
+
+    private void loadRules( final UnitOfWork uow ) throws Exception {
+        final RuleParser parser = new RuleParser( this.rulesSchemaFile, this.repo, uow );
+        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+
+        for ( final ValidationRulesProvider provider : ServiceLoader.load( ValidationRulesProvider.class, classLoader ) ) {
+            if ( !Modifier.isAbstract( provider.getClass().getModifiers() ) ) {
+                try ( final InputStream rulesStream = provider.provideRules() ) {
+                    if (rulesStream == null) {
+                        LOGGER.error( Messages.getString( Messages.ValidationManagerImpl.ValidationRulesProviderNullStream,
+                                                          provider.getClass().getName() ) );
+
+                        continue;
+                    }
+
+                    final File rulesFile = File.createTempFile( provider.getClass().getName(), ".xml" ); //$NON-NLS-1$
+                    Files.copy( rulesStream, rulesFile.toPath(), StandardCopyOption.REPLACE_EXISTING );
+                    rulesFile.deleteOnExit();
+
+                    final Rule[] rules = parser.parse( rulesFile );
+                    LOGGER.debug( "ValidationManagerImpl: imported {0} rules from rule provider \"{1}\"", //$NON-NLS-1$
+                                  rules.length,
+                                  provider.getClass().getName() );
+
+                    // log parsing errors
+                    final Collection< String > fatalErrors = parser.getFatalErrors();
+
+                    // log errors
+                    if ( ( fatalErrors != null ) && !fatalErrors.isEmpty() ) {
+                        for ( final String msg : fatalErrors ) {
+                            LOGGER.error( msg );
+                        }
+                    }
+
+                    final Collection< String > errors = parser.getErrors();
+
+                    if ( ( errors != null ) && !errors.isEmpty() ) {
+                        for ( final String msg : errors ) {
+                            LOGGER.error( msg );
+                        }
+                    }
+
+                    // log warnings and infos only if in debug
+                    if ( LOGGER.isDebugEnabled() ) {
+                        final Collection< String > warnings = parser.getWarnings();
+
+                        if ( ( warnings != null ) && !warnings.isEmpty() ) {
+                            for ( final String msg : warnings ) {
+                                LOGGER.warn( msg );
+                            }
+                        }
+
+                        final Collection< String > infos = parser.getInfos();
+
+                        if ( ( infos != null ) && !infos.isEmpty() ) {
+                            for ( final String msg : infos ) {
+                                LOGGER.info( msg );
+                            }
+                        }
+                    }
+                } catch ( final KException ex ) {
+                    LOGGER.error( Messages.getString( Messages.ValidationManagerImpl.ValidationRulesProviderError,
+                                                      provider.getClass().getName() ),
+                                  ex );
+                }
+            }
+        }
     }
 
     /**
@@ -93,25 +187,33 @@ public class ValidationManagerImpl implements ValidationManager {
     @Override
     public void importRules(final UnitOfWork uow, final File rulesXmlFile, boolean overwriteExisting) throws KException {
         ArgCheck.isNotNull( rulesXmlFile, "rulesXmlFile" ); //$NON-NLS-1$
-        
+
         // If rules exist, no need to reload - unless overwriting
         if(defaultRulesExist && !overwriteExisting) return;
 
         try {
             RuleParser parser = new RuleParser(rulesSchemaFile, this.repo, uow);
-            
+
             // If overwriting existing rules, then clear them first
             if(overwriteExisting) {
                 clearValidationRules(uow);
             }
-            
+
             // Successful parsing adds rules to the repo
             parser.parse(rulesXmlFile);
         } catch ( final Exception e ) {
             throw new KException( e );
         }
     }
-    
+
+    private KomodoObject getValidationAreaRoot( final UnitOfWork uow ) throws KException {
+        if ( this.validationAreaRoot == null ) {
+            this.validationAreaRoot = RuleFactory.getValidationDefaultAreaNode( uow, this.repo );
+        }
+
+        return this.validationAreaRoot;
+    }
+
     protected void clearValidationRules(final UnitOfWork uow) throws Exception {
         KomodoObject defaultValidationArea = RuleFactory.getValidationDefaultAreaNode(uow, this.repo);
         KomodoObject[] rules = defaultValidationArea.getChildren(uow);
@@ -119,7 +221,7 @@ public class ValidationManagerImpl implements ValidationManager {
             rule.remove(uow);
         }
     }
-    
+
     /**
      * {@inheritDoc}
      *
@@ -131,7 +233,7 @@ public class ValidationManagerImpl implements ValidationManager {
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         final List< Rule > result = new ArrayList<>();
-        KomodoObject defaultValidationArea = RuleFactory.getValidationDefaultAreaNode(transaction, this.repo);
+        KomodoObject defaultValidationArea = getValidationAreaRoot(transaction);
 
         // Collect all available Rules
         for ( final KomodoObject kobject : defaultValidationArea.getChildren( transaction ) ) {
@@ -160,7 +262,7 @@ public class ValidationManagerImpl implements ValidationManager {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        KomodoObject defaultValidationArea = RuleFactory.getValidationDefaultAreaNode(transaction, this.repo);
+        KomodoObject defaultValidationArea = getValidationAreaRoot(transaction);
 
         // Check all available Rules for a match.
         if(defaultValidationArea.hasChild(transaction, ruleId)) {
@@ -176,7 +278,8 @@ public class ValidationManagerImpl implements ValidationManager {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.spi.repository.ValidationManager#isApplicable(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String, org.komodo.spi.repository.KomodoObject)
+     * @see org.komodo.spi.repository.ValidationManager#isApplicable(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String, org.komodo.spi.repository.KomodoObject)
      */
     @Override
     public boolean isApplicable(UnitOfWork uow,
@@ -198,7 +301,7 @@ public class ValidationManagerImpl implements ValidationManager {
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         final List< Rule > result = new ArrayList<>();
-        KomodoObject defaultValidationArea = RuleFactory.getValidationDefaultAreaNode(transaction, this.repo);
+        KomodoObject defaultValidationArea = getValidationAreaRoot(transaction);
 
         // Check all available Rules - determine if they are applicable for the supplied object.
         for ( final KomodoObject kobject : defaultValidationArea.getChildren( transaction ) ) {
@@ -211,7 +314,7 @@ public class ValidationManagerImpl implements ValidationManager {
                 }
             }
         }
-        
+
         if ( result.isEmpty() ) {
             return Rule.NO_RULES;
         }
@@ -255,26 +358,26 @@ public class ValidationManagerImpl implements ValidationManager {
     @Override
     public Result[] evaluate(final UnitOfWork transaction, KomodoObject kObject, boolean full ) throws KException {
         List<Result> allResults = new ArrayList<Result>();
-        
+
         // Evaluate against all rules that are valid for this object.
         Rule[] rules = getRules(transaction, kObject);
-        
+
         for(Rule rule : rules) {
             Result result = rule.evaluate(transaction, kObject);
             allResults.add(result);
         }
-        
+
         // If doing full validation, also validate all children recursively
-        if(full) { 
+        if(full) {
             KomodoObject[] kids = kObject.getChildren(transaction);
             for(KomodoObject kid : kids) {
                 Result[] kidResults = evaluate(transaction, kid, full);
                 for(Result kidResult : kidResults) {
                     allResults.add(kidResult);
                 }
-                
+
             }
-            
+
         }
         return allResults.toArray(new Result[ allResults.size() ]);
     }
@@ -298,5 +401,5 @@ public class ValidationManagerImpl implements ValidationManager {
         }
         return results;
     }
-    
+
 }

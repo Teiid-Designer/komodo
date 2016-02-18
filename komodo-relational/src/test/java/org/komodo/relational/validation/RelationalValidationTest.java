@@ -50,7 +50,6 @@ public class RelationalValidationTest extends AbstractLocalRepositoryTest {
     protected static final String VDB_PATH = "/vdb/path/vdb.vdb";
     protected static final String ENTRY_PATH = "/vdb/entryPath";
 
-
     protected List<String> getRuleNames( final Rule[] rules ) throws Exception {
         List<String> ruleNames = new ArrayList<String>();
         for(Rule rule : rules) {
@@ -58,7 +57,7 @@ public class RelationalValidationTest extends AbstractLocalRepositoryTest {
         }
         return ruleNames;
     }
-    
+
     protected Vdb createVdb( final String vdbName ) throws Exception {
         final WorkspaceManager mgr = WorkspaceManager.getInstance( _repo );
         final Vdb vdb = mgr.createVdb( getTransaction(), null, vdbName, VDB_PATH );
