@@ -37,18 +37,18 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
     private static String RULES_FILE_CHILD_TYPE_MUST_NOT_EXIST_RULE = "childTypeMustNotExistRule.xml";
     private static String RULES_FILE_CHILD_PROP_MUST_EXIST_RULE = "childPropMustExistRule.xml";
     private static String RULES_FILE_CHILD_PROP_MUST_NOT_EXIST_RULE = "childPropMustNotExistRule.xml";
-    
+
     private static String VDB_NAME = "vdbname";
     private static String VDB_TYPE = "vdb:virtualDatabase";
     private static String DATA_ROLE_NAME = "rolename";
     private static String DATA_ROLE_TYPE = "vdb:dataRole";
     private static String MODEL_TYPE = "vdb:declarativeModel";
-    
+
     private static ValidationManager _validationMgr;
 
     @BeforeClass
     public static void oneTimeSetup() throws Exception {
-        _validationMgr = new ValidationManagerImpl( _repo );
+        _validationMgr = _repo.getValidationManager();
     }
 
     @Test( expected = IllegalArgumentException.class )
@@ -134,7 +134,7 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         final List< String > errors = _validationMgr.validateRules( testFile );
         assertThat( errors.isEmpty(), is( true ) );
     }
-    
+
     @Test
     public void shouldVerifyImportedNodeNameRuleEvaluationSuccess() throws Exception {
         // Create a KomodoObject with the required property
@@ -146,13 +146,13 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         final File testFile = new File( testFilePath );
         final List< String > errors = _validationMgr.validateRules( testFile );
         assertThat( errors.size(), is( 0 ) );
-        
+
         // Load the rule
         _validationMgr.importRules( testFile, getTransaction(), true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
-        
+
         // Evaluate the KomodoObject using the imported rule
         final Result result = aRule.evaluate( getTransaction(), kobject );
         assertThat( result.isOK(), is( true ) );
@@ -171,13 +171,13 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         final File testFile = new File( testFilePath );
         final List< String > errors = _validationMgr.validateRules( testFile );
         assertThat( errors.size(), is( 0 ) );
-        
+
         // Load rules
         _validationMgr.importRules( testFile, getTransaction(), true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
-        
+
         // Evaluate kobject using the loaded rule
         final Result result = aRule.evaluate( getTransaction(), kobject );
         assertThat( result.isOK(), is( false ) );
@@ -198,13 +198,13 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         final File testFile = new File( testFilePath );
         final List< String > errors = _validationMgr.validateRules( testFile );
         assertThat( errors.size(), is( 0 ) );
-        
+
         // Load the rule
         _validationMgr.importRules( testFile, getTransaction(), true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
-        
+
         // Evaluate the KomodoObject using the imported rule
         final Result result = aRule.evaluate( getTransaction(), kobject );
         assertThat( result.isOK(), is( true ) );
@@ -223,13 +223,13 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         final File testFile = new File( testFilePath );
         final List< String > errors = _validationMgr.validateRules( testFile );
         assertThat( errors.size(), is( 0 ) );
-        
+
         // Load rules
         _validationMgr.importRules( testFile, getTransaction(), true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
-        
+
         // Evaluate kobject using the loaded rule
         final Result result = aRule.evaluate( getTransaction(), kobject );
         assertThat( result.isOK(), is( false ) );
@@ -250,13 +250,13 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         final File testFile = new File( testFilePath );
         final List< String > errors = _validationMgr.validateRules( testFile );
         assertThat( errors.size(), is( 0 ) );
-        
+
         // Load the rule
         _validationMgr.importRules( testFile, getTransaction(), true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
-        
+
         // Evaluate the KomodoObject using the imported rule
         final Result result = aRule.evaluate( getTransaction(), kobject );
         assertThat( result.isOK(), is( true ) );
@@ -276,13 +276,13 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         final File testFile = new File( testFilePath );
         final List< String > errors = _validationMgr.validateRules( testFile );
         assertThat( errors.size(), is( 0 ) );
-        
+
         // Load rules
         _validationMgr.importRules( testFile, getTransaction(), true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
-        
+
         // Evaluate kobject using the loaded rule
         final Result result = aRule.evaluate( getTransaction(), kobject );
         assertThat( result.isOK(), is( false ) );
@@ -303,13 +303,13 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         final File testFile = new File( testFilePath );
         final List< String > errors = _validationMgr.validateRules( testFile );
         assertThat( errors.size(), is( 0 ) );
-        
+
         // Load the rule
         _validationMgr.importRules( testFile, getTransaction(), true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
-        
+
         // Evaluate the KomodoObject using the imported rule
         final Result result = aRule.evaluate( getTransaction(), kobject );
         assertThat( result.isOK(), is( true ) );
@@ -329,13 +329,13 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         final File testFile = new File( testFilePath );
         final List< String > errors = _validationMgr.validateRules( testFile );
         assertThat( errors.size(), is( 0 ) );
-        
+
         // Load rules
         _validationMgr.importRules( testFile, getTransaction(), true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
-        
+
         // Evaluate kobject using the loaded rule
         final Result result = aRule.evaluate( getTransaction(), kobject );
         assertThat( result.isOK(), is( false ) );
@@ -360,13 +360,13 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         final File testFile = new File( testFilePath );
         final List< String > errors = _validationMgr.validateRules( testFile );
         assertThat( errors.size(), is( 0 ) );
-        
+
         // Load the rule
         _validationMgr.importRules( testFile, getTransaction(), true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
-        
+
         // Evaluate the KomodoObject using the imported rule
         final Result result = aRule.evaluate( getTransaction(), kobject );
         assertThat( result.isOK(), is( true ) );
@@ -385,13 +385,13 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         final File testFile = new File( testFilePath );
         final List< String > errors = _validationMgr.validateRules( testFile );
         assertThat( errors.size(), is( 0 ) );
-        
+
         // Load rules
         _validationMgr.importRules( testFile, getTransaction(), true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
-        
+
         // Evaluate kobject using the loaded rule
         final Result result = aRule.evaluate( getTransaction(), kobject );
         assertThat( result.isOK(), is( false ) );
@@ -399,7 +399,7 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         assertThat( result.getRuleId(), is( aRule.getName( getTransaction() ) ) );
         assertThat( result.getMessage(), is( "A VDB must have between 1 and 5 child models." ));
     }
-    
+
     @Test
     public void shouldVerifyImportedChildCountRuleEvaluationSuccess() throws Exception {
         // setup KomodoObject
@@ -416,13 +416,13 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         final File testFile = new File( testFilePath );
         final List< String > errors = _validationMgr.validateRules( testFile );
         assertThat( errors.size(), is( 0 ) );
-        
+
         // Load the rule
         _validationMgr.importRules( testFile, getTransaction(), true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
-        
+
         // Evaluate the KomodoObject using the imported rule
         final Result result = aRule.evaluate( getTransaction(), kobject );
         assertThat( result.isOK(), is( true ) );
@@ -441,13 +441,13 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         final File testFile = new File( testFilePath );
         final List< String > errors = _validationMgr.validateRules( testFile );
         assertThat( errors.size(), is( 0 ) );
-        
+
         // Load rules
         _validationMgr.importRules( testFile, getTransaction(), true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
-        
+
         // Evaluate kobject using the loaded rule
         final Result result = aRule.evaluate( getTransaction(), kobject );
         assertThat( result.isOK(), is( false ) );
@@ -455,7 +455,7 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         assertThat( result.getRuleId(), is( aRule.getName( getTransaction() ) ) );
         assertThat( result.getMessage(), is( "A VDB must have between 1 and 5 child models." ));
     }
-    
+
     @Test
     public void shouldVerifyImportedSameNameSiblingRuleEvaluationSuccess() throws Exception {
         // setup KomodoObject
@@ -472,13 +472,13 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         final File testFile = new File( testFilePath );
         final List< String > errors = _validationMgr.validateRules( testFile );
         assertThat( errors.size(), is( 0 ) );
-        
+
         // Load the rule
         _validationMgr.importRules( testFile, getTransaction(), true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
-        
+
         // Evaluate the KomodoObject using the imported rule
         final Result result = aRule.evaluate( getTransaction(), kobject );
         assertThat( result.isOK(), is( true ) );
@@ -501,13 +501,13 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         final File testFile = new File( testFilePath );
         final List< String > errors = _validationMgr.validateRules( testFile );
         assertThat( errors.size(), is( 0 ) );
-        
+
         // Load rules
         _validationMgr.importRules( testFile, getTransaction(), true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
-        
+
         // Evaluate kobject using the loaded rule
         final Result result = aRule.evaluate( getTransaction(), kobject );
         assertThat( result.isOK(), is( false ) );
@@ -515,7 +515,7 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         assertThat( result.getRuleId(), is( aRule.getName( getTransaction() ) ) );
         assertThat( result.getMessage(), is( "A VDB model must have a unique name." ));
     }
-    
+
     @Test
     public void shouldVerifyImportedRelationshipRuleChildTypesExistEvaluationSuccess() throws Exception {
         // create a VDB with one dataRole and one permission
@@ -530,13 +530,13 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         final File testFile = new File( testFilePath );
         final List< String > errors = _validationMgr.validateRules( testFile );
         assertThat( errors.size(), is( 0 ) );
-        
+
         // Load the rule
         _validationMgr.importRules( testFile, getTransaction(), true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
-        
+
         // Evaluate the KomodoObject using the imported rule
         final Result result = aRule.evaluate( getTransaction(), kobject );
         assertThat( result.isOK(), is( true ) );
@@ -557,13 +557,13 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         final File testFile = new File( testFilePath );
         final List< String > errors = _validationMgr.validateRules( testFile );
         assertThat( errors.size(), is( 0 ) );
-        
+
         // Load the rule
         _validationMgr.importRules( testFile, getTransaction(), true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
-        
+
         // Evaluate the KomodoObject using the imported rule
         final Result result = aRule.evaluate( getTransaction(), kobject );
         assertThat( result.isOK(), is( false ) );
@@ -585,13 +585,13 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         final File testFile = new File( testFilePath );
         final List< String > errors = _validationMgr.validateRules( testFile );
         assertThat( errors.size(), is( 0 ) );
-        
+
         // Load the rule
         _validationMgr.importRules( testFile, getTransaction(), true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
-        
+
         // Evaluate the KomodoObject using the imported rule
         final Result result = aRule.evaluate( getTransaction(), kobject );
         assertThat( result.isOK(), is( true ) );
@@ -613,13 +613,13 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         final File testFile = new File( testFilePath );
         final List< String > errors = _validationMgr.validateRules( testFile );
         assertThat( errors.size(), is( 0 ) );
-        
+
         // Load the rule
         _validationMgr.importRules( testFile, getTransaction(), true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
-        
+
         // Evaluate the KomodoObject using the imported rule
         final Result result = aRule.evaluate( getTransaction(), kobject );
         assertThat( result.isOK(), is( false ) );
@@ -627,7 +627,7 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         assertThat( result.getRuleId(), is( aRule.getName( getTransaction() ) ) );
         assertThat( result.getMessage(), is( "The VDB dataRole must NOT have a child permission." ));
     }
-    
+
     @Test
     public void shouldVerifyImportedRelationshipRulePropsExistEvaluationSuccess() throws Exception {
         // create a VDB with one dataRole and one permission
@@ -642,13 +642,13 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         final File testFile = new File( testFilePath );
         final List< String > errors = _validationMgr.validateRules( testFile );
         assertThat( errors.size(), is( 0 ) );
-        
+
         // Load the rule
         _validationMgr.importRules( testFile, getTransaction(), true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
-        
+
         // Evaluate the KomodoObject using the imported rule
         final Result result = aRule.evaluate( getTransaction(), kobject );
         assertThat( result.isOK(), is( true ) );
@@ -670,13 +670,13 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         final File testFile = new File( testFilePath );
         final List< String > errors = _validationMgr.validateRules( testFile );
         assertThat( errors.size(), is( 0 ) );
-        
+
         // Load the rule
         _validationMgr.importRules( testFile, getTransaction(), true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
-        
+
         // Evaluate the KomodoObject using the imported rule
         final Result result = aRule.evaluate( getTransaction(), kobject );
         assertThat( result.isOK(), is( false ) );
@@ -699,13 +699,13 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         final File testFile = new File( testFilePath );
         final List< String > errors = _validationMgr.validateRules( testFile );
         assertThat( errors.size(), is( 0 ) );
-        
+
         // Load the rule
         _validationMgr.importRules( testFile, getTransaction(), true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
-        
+
         // Evaluate the KomodoObject using the imported rule
         final Result result = aRule.evaluate( getTransaction(), kobject );
         assertThat( result.isOK(), is( true ) );
@@ -727,13 +727,13 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         final File testFile = new File( testFilePath );
         final List< String > errors = _validationMgr.validateRules( testFile );
         assertThat( errors.size(), is( 0 ) );
-        
+
         // Load the rule
         _validationMgr.importRules( testFile, getTransaction(), true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
-        
+
         // Evaluate the KomodoObject using the imported rule
         final Result result = aRule.evaluate( getTransaction(), kobject );
         assertThat( result.isOK(), is( false ) );
@@ -741,5 +741,5 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         assertThat( result.getRuleId(), is( aRule.getName( getTransaction() ) ) );
         assertThat( result.getMessage(), is( "The VDB dataRole must NOT have a 'myProp' property" ));
     }
-    
+
 }

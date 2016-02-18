@@ -387,8 +387,10 @@ public interface Repository {
 
     /**
      * @return the validation manager (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
      */
-    ValidationManager getValidationManager();
+    ValidationManager getValidationManager() throws KException;
 
     /**
      * @param transaction

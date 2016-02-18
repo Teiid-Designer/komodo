@@ -323,12 +323,19 @@
  - tko:alias (string)
 
 /*
+ * Where Paranthesis clause
+ */
+[tko:whereParanthesisClause] > tko:whereClause
+ + * (tko:whereClause) copy sns
+
+/*
  * Where Compare clause
  */
 [tko:whereCompareClause] > tko:whereClause
  - tko:property (string) mandatory
  - tko:compareOperator (string) mandatory < '=', '!=', '<', '<=', '>', '>=', 'LIKE', 'NOT LIKE'
  - tko:value (string) mandatory
+ - tko:caseInsensitive (boolean) = 'false' mandatory
 
 /*
  * Where Contains clause

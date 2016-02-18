@@ -95,12 +95,14 @@ public class Messages implements StringConstants {
             return getEnumName(this) + DOT + name();
         }
     }
-    
+
     @SuppressWarnings( "javadoc" )
     public enum ValidationManagerImpl {
 
         RuleId_Not_Found,
-        Object_NodeType_Or_Props_Not_Compatible_With_Rule;
+        Object_NodeType_Or_Props_Not_Compatible_With_Rule,
+        ValidationRulesProviderError,
+        ValidationRulesProviderNullStream;
 
         @Override
         public String toString() {

@@ -52,7 +52,6 @@ import org.komodo.shell.api.KomodoShell;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandFactory;
 import org.komodo.shell.api.ShellCommandProvider;
-import org.komodo.shell.api.ValidationRulesProvider;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.api.WorkspaceStatusEventHandler;
 import org.komodo.shell.util.KomodoObjectUtils;
@@ -980,21 +979,6 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
                     provider.setWorkspaceStatus(this);
                     LOGGER.debug( "WorkspaceStatusImpl: adding LabelProvider \"{0}\"", provider.getClass().getName() ); //$NON-NLS-1$
                     this.alternateLabelProviders.add( provider );
-                }
-            }
-            // Rule Providers
-            for ( final ValidationRulesProvider provider : ServiceLoader.load( ValidationRulesProvider.class, classLoader ) ) {
-                if ( !Modifier.isAbstract( provider.getClass().getModifiers() ) ) {
-                    boolean loaded = false;
-                    try {
-                        provider.importRules(getEngine().getDefaultRepository(), uow, true);
-                        loaded = true;
-                    } catch (KException ex) {
-                        LOGGER.debug( "WorkspaceStatusImpl: error adding RulesProvider \"{0}\"", provider.getClass().getName() ); //$NON-NLS-1$
-                    }
-                    if(loaded) {
-                        LOGGER.debug( "WorkspaceStatusImpl: imported rules from RulesProvider \"{0}\"", provider.getClass().getName() ); //$NON-NLS-1$
-                    }
                 }
             }
         }
