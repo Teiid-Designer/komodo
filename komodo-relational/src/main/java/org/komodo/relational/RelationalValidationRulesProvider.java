@@ -10,7 +10,6 @@ package org.komodo.relational;
 import java.io.InputStream;
 import org.komodo.spi.repository.validation.ValidationRulesProvider;
 
-
 /**
  * A validation rules provider for relational objects.
  */

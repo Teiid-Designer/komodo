@@ -99,10 +99,27 @@ public class Messages implements StringConstants {
     @SuppressWarnings( "javadoc" )
     public enum ValidationManagerImpl {
 
-        RuleId_Not_Found,
-        Object_NodeType_Or_Props_Not_Compatible_With_Rule,
         ValidationRulesProviderError,
         ValidationRulesProviderNullStream;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum ProblemRule {
+
+        Rule_Not_Found_Rule_Id,
+        Rule_Not_Found_Rule_Description,
+        Rule_Not_Found_Rule_Result_Message,
+        Rule_Not_Enabled_Rule_Id,
+        Rule_Not_Enabled_Rule_Description,
+        Rule_Not_Enabled_Rule_Result_Message,
+        Rule_Not_Applicable_Rule_Id,
+        Rule_Not_Applicable_Rule_Description,
+        Rule_Not_Applicable_Rule_Result_Message;
 
         @Override
         public String toString() {

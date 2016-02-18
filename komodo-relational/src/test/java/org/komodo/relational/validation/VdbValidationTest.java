@@ -8,6 +8,7 @@
 package org.komodo.relational.validation;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.junit.Assert.assertThat;
 import org.junit.Test;
 import org.komodo.relational.model.AccessPattern;
@@ -61,6 +62,10 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Rule[] rules = _repo.getValidationManager().getRules(getTransaction(),vdb);
         assertThat( rules.length, is( 4 ) );
+        assertThat( getRuleNames( rules ), hasItems( "default.vdb.nodeName",
+                                                     "default.vdb.name.propertyValue",
+                                                     "default.vdb.version.propertyValue",
+                                                     "default.vdb.connectionType.propertyValue" ) );
     }
 
     @Test
@@ -70,6 +75,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Rule[] rules = _repo.getValidationManager().getRules(getTransaction(),dataRole);
         assertThat( rules.length, is( 1 ) );
+        assertThat( getRuleNames( rules ), hasItems( "default.dataRole.nodeName" ) );
     }
 
     @Test
@@ -80,6 +86,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Rule[] rules = _repo.getValidationManager().getRules(getTransaction(),permission);
         assertThat( rules.length, is( 1 ) );
+        assertThat( getRuleNames( rules ), hasItems( "default.permission.nodeName" ) );
     }
 
     @Test
@@ -91,6 +98,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Rule[] rules = _repo.getValidationManager().getRules(getTransaction(),mask);
         assertThat( rules.length, is( 1 ) );
+        assertThat( getRuleNames( rules ), hasItems( "default.mask.nodeName" ) );
     }
 
     @Test
@@ -102,6 +110,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Rule[] rules = _repo.getValidationManager().getRules(getTransaction(),condition);
         assertThat( rules.length, is( 1 ) );
+        assertThat( getRuleNames( rules ), hasItems( "default.condition.nodeName" ) );
     }
 
     @Test
@@ -111,6 +120,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Rule[] rules = _repo.getValidationManager().getRules(getTransaction(),translator);
         assertThat( rules.length, is( 1 ) );
+        assertThat( getRuleNames( rules ), hasItems( "default.translator.nodeName" ) );
     }
 
     @Test
@@ -120,6 +130,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Rule[] rules = _repo.getValidationManager().getRules(getTransaction(),entry);
         assertThat( rules.length, is( 1 ) );
+        assertThat( getRuleNames( rules ), hasItems( "default.entry.nodeName" ) );
     }
 
     @Test
@@ -129,6 +140,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Rule[] rules = _repo.getValidationManager().getRules(getTransaction(),vdbImport);
         assertThat( rules.length, is( 1 ) );
+        assertThat( getRuleNames( rules ), hasItems( "default.importVdb.nodeName" ) );
     }
 
     @Test
@@ -138,6 +150,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Rule[] rules = _repo.getValidationManager().getRules(getTransaction(),model);
         assertThat( rules.length, is( 1 ) );
+        assertThat( getRuleNames( rules ), hasItems( "default.declarativeModel.nodeName" ) );
     }
 
     @Test
@@ -148,6 +161,10 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Rule[] rules = _repo.getValidationManager().getRules(getTransaction(),table);
         assertThat( rules.length, is( 4 ) );
+        assertThat( getRuleNames( rules ), hasItems( "default.table.nodeName",
+                                                     "default.table.column.childSNSValidation",
+                                                     "default.table.column.childCount",
+                                                     "default.table.nameInSource.propertyValue" ) );
     }
 
     @Test
@@ -158,6 +175,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Rule[] rules = _repo.getValidationManager().getRules(getTransaction(),view);
         assertThat( rules.length, is( 3 ) );
+        assertThat( getRuleNames( rules ), hasItems( "default.view.nodeName",
+                                                     "default.view.column.childSNSValidation",
+                                                     "default.view.column.childCount" ) );
     }
 
     @Test
@@ -168,6 +188,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Rule[] rules = _repo.getValidationManager().getRules(getTransaction(),modelSource);
         assertThat( rules.length, is( 1 ) );
+        assertThat( getRuleNames( rules ), hasItems( "default.modelSource.nodeName" ) );
     }
 
     @Test
@@ -178,6 +199,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Rule[] rules = _repo.getValidationManager().getRules(getTransaction(),pf);
         assertThat( rules.length, is( 1 ) );
+        assertThat( getRuleNames( rules ), hasItems( "default.pushdownFunction.nodeName" ) );
     }
 
     @Test
@@ -188,6 +210,11 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Rule[] rules = _repo.getValidationManager().getRules(getTransaction(),udf);
         assertThat( rules.length, is( 5 ) );
+        assertThat( getRuleNames( rules ), hasItems( "default.userDefinedFunction.nodeName",
+                                                     "default.userDefinedFunction.returnParameterCount",
+                                                     "default.userDefinedFunction.category.propertyValue",
+                                                     "default.userDefinedFunction.javaClass.propertyValue",
+                                                     "default.userDefinedFunction.javaMethod.propertyValue" ) );
     }
 
     @Test
@@ -198,6 +225,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Rule[] rules = _repo.getValidationManager().getRules(getTransaction(),vp);
         assertThat( rules.length, is( 1 ) );
+        assertThat( getRuleNames( rules ), hasItems( "default.virtualProcedure.nodeName" ) );
     }
 
     @Test
@@ -208,6 +236,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Rule[] rules = _repo.getValidationManager().getRules(getTransaction(),sp);
         assertThat( rules.length, is( 1 ) );
+        assertThat( getRuleNames( rules ), hasItems( "default.storedProcedure.nodeName" ) );
     }
 
     @Test
@@ -219,6 +248,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Rule[] rules = _repo.getValidationManager().getRules(getTransaction(),ap);
         assertThat( rules.length, is( 1 ) );
+        assertThat( getRuleNames( rules ), hasItems( "default.accessPattern.nodeName" ) );
     }
 
     @Test
@@ -230,6 +260,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Rule[] rules = _repo.getValidationManager().getRules(getTransaction(),index);
         assertThat( rules.length, is( 1 ) );
+        assertThat( getRuleNames( rules ), hasItems( "default.index.nodeName" ) );
     }
 
     @Test
@@ -241,6 +272,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Rule[] rules = _repo.getValidationManager().getRules(getTransaction(),pk);
         assertThat( rules.length, is( 1 ) );
+        assertThat( getRuleNames( rules ), hasItems( "default.primaryKey.nodeName" ) );
     }
 
     @Test
@@ -253,6 +285,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Rule[] rules = _repo.getValidationManager().getRules(getTransaction(),fk);
         assertThat( rules.length, is( 1 ) );
+        assertThat( getRuleNames( rules ), hasItems( "default.foreignKey.nodeName" ) );
     }
 
     @Test
@@ -264,6 +297,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Rule[] rules = _repo.getValidationManager().getRules(getTransaction(),uc);
         assertThat( rules.length, is( 1 ) );
+        assertThat( getRuleNames( rules ), hasItems( "default.uniqueConstraint.nodeName" ) );
     }
 
     @Test
@@ -275,6 +309,8 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Rule[] rules = _repo.getValidationManager().getRules(getTransaction(),col);
         assertThat( rules.length, is( 2 ) );
+        assertThat( getRuleNames( rules ), hasItems( "default.column.nodeName",
+                                                     "default.column.datatype.propertyValue" ) );
     }
 
     @Test
@@ -287,6 +323,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Rule[] rules = _repo.getValidationManager().getRules(getTransaction(),col);
         assertThat( rules.length, is( 3 ) );
+        assertThat( getRuleNames( rules ), hasItems( "default.column.nodeName",
+                                                     "default.column.datatype.propertyValue",
+                                                     "default.column.stringDatatype.lengthPropertyValue" ) );
     }
 
     @Test
@@ -299,6 +338,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Rule[] rules = _repo.getValidationManager().getRules(getTransaction(),col);
         assertThat( rules.length, is( 3 ) );
+        assertThat( getRuleNames( rules ), hasItems( "default.column.nodeName",
+                                                     "default.column.datatype.propertyValue",
+                                                     "default.column.numericDatatype.precisionPropertyValue" ) );
     }
 
     @Test
@@ -310,6 +352,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Rule[] rules = _repo.getValidationManager().getRules(getTransaction(),param);
         assertThat( rules.length, is( 1 ) );
+        assertThat( getRuleNames( rules ), hasItems( "default.parameter.nodeName" ) );
     }
 
     @Test
@@ -321,6 +364,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Rule[] rules = _repo.getValidationManager().getRules(getTransaction(),rs);
         assertThat( rules.length, is( 1 ) );
+        assertThat( getRuleNames( rules ), hasItems( "default.dataTypeResultSet.nodeName" ) );
     }
 
     @Test
@@ -332,6 +376,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Rule[] rules = _repo.getValidationManager().getRules(getTransaction(),rs);
         assertThat( rules.length, is( 1 ) );
+        assertThat( getRuleNames( rules ), hasItems( "default.tabularResultSet.nodeName" ) );
     }
 
     @Test
@@ -344,24 +389,26 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Rule[] rules = _repo.getValidationManager().getRules(getTransaction(),rsCol);
         assertThat( rules.length, is( 1 ) );
+        assertThat( getRuleNames( rules ), hasItems( "default.resultSetColumn.nodeName" ) );
     }
 
     @Test
     public void shouldTestGetVdbNodeNameRuleById() throws Exception {
-        final Rule rule = _repo.getValidationManager().getRule("default.vdb.nodeName", getTransaction());
+        final Rule rule = _repo.getValidationManager().getRule(getTransaction(), "default.vdb.nodeName");
         assertThat( rule.getName(getTransaction()), is( "default.vdb.nodeName" ) );
     }
 
     @Test
     public void shouldTestGetVdbConnectionTypePropertyRuleById() throws Exception {
-        final Rule rule = _repo.getValidationManager().getRule("default.vdb.connectionType.propertyValue", getTransaction());
+        final Rule rule = _repo.getValidationManager().getRule(getTransaction(), "default.vdb.connectionType.propertyValue");
         assertThat( rule.getName(getTransaction()), is( "default.vdb.connectionType.propertyValue" ) );
     }
 
     @Test
     public void shouldTestGetRuleByIdFailure() throws Exception {
-        final Rule rule = _repo.getValidationManager().getRule("default.vdb.connectionType.badOne", getTransaction());
-        assertThat( (rule==null), is( true ) );
+        final Rule rule = _repo.getValidationManager().getRule(getTransaction(), "default.vdb.connectionType.badOne");
+        assertThat( rule.getName(getTransaction()), is( "default.ruleNotFound" ));
+        assertThat( rule.getDescription(getTransaction()), is( "Rule \"default.vdb.connectionType.badOne\" was not found." ));
     }
 
     // ==============================================================================================
@@ -374,6 +421,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), vdb, "default.vdb.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.vdb.nodeName" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -383,9 +431,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), vdb, "default.vdb.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.vdb.nodeName" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The VDB name must match the specified pattern."));
     }
 
     @Test
@@ -395,6 +443,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), vdb, "default.vdb.name.propertyValue");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.vdb.name.propertyValue" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -405,9 +454,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), vdb, "default.vdb.name.propertyValue");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.vdb.name.propertyValue" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The VDB 'vdb:name' property is required and must match the specified pattern."));
     }
 
     @Test
@@ -417,6 +466,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), vdb, "default.vdb.version.propertyValue");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.vdb.version.propertyValue" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -427,6 +477,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), vdb, "default.vdb.connectionType.propertyValue");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.vdb.connectionType.propertyValue" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -436,9 +487,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), vdb, "default.vdb.connectionType.propertyValue");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.vdb.connectionType.propertyValue" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The VDB 'vdb:connectionType' property is required and must match the specified pattern."));
     }
 
     // ==============================================================================================
@@ -452,6 +503,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), dataRole, "default.dataRole.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.dataRole.nodeName" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -462,9 +514,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), dataRole, "default.dataRole.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.dataRole.nodeName" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The DataRole name must match the specified pattern."));
     }
 
     // ==============================================================================================
@@ -479,6 +531,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), permission, "default.permission.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.permission.nodeName" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -490,9 +543,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), permission, "default.permission.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.permission.nodeName" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The Permission name must match the specified pattern."));
     }
 
     // ==============================================================================================
@@ -508,6 +561,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), mask, "default.mask.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.mask.nodeName" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -520,9 +574,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), mask, "default.mask.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.mask.nodeName" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The Mask name must match the specified pattern."));
     }
 
     // ==============================================================================================
@@ -538,6 +592,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), condition, "default.condition.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.condition.nodeName" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -550,9 +605,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), condition, "default.condition.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.condition.nodeName" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The Condition name must match the specified pattern."));
     }
 
     // ==============================================================================================
@@ -566,6 +621,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), translator, "default.translator.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.translator.nodeName" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -576,9 +632,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), translator, "default.translator.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.translator.nodeName" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The Translator name must match the specified pattern."));
     }
 
     // ==============================================================================================
@@ -592,6 +648,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), entry, "default.entry.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.entry.nodeName" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -602,9 +659,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), entry, "default.entry.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.entry.nodeName" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The Entry name must match the specified pattern."));
     }
 
     // ==============================================================================================
@@ -618,6 +675,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), vdbImport, "default.importVdb.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.importVdb.nodeName" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -628,9 +686,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), vdbImport, "default.importVdb.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.importVdb.nodeName" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The VdbImport name must match the specified pattern."));
     }
 
     // ==============================================================================================
@@ -644,6 +702,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), model, "default.declarativeModel.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.declarativeModel.nodeName" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -654,9 +713,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), model, "default.declarativeModel.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.declarativeModel.nodeName" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The Model name must match the specified pattern."));
     }
 
     // ==============================================================================================
@@ -671,6 +730,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), table, "default.table.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.table.nodeName" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -682,9 +742,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), table, "default.table.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.table.nodeName" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The Table name must match the specified pattern."));
     }
 
     @Test
@@ -696,6 +756,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), table, "default.table.column.childCount");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.table.column.childCount" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -707,9 +768,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), table, "default.table.column.childCount");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.table.column.childCount" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "A Table must have at least one column."));
     }
 
     @Test
@@ -722,6 +783,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), table, "default.table.column.childSNSValidation");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.table.column.childSNSValidation" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -735,9 +797,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), table, "default.table.column.childSNSValidation");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.table.column.childSNSValidation" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "A Table column must have a unique name."));
     }
 
     @Test
@@ -749,6 +811,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), table, "default.table.nameInSource.propertyValue");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.table.nameInSource.propertyValue" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -760,9 +823,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), table, "default.table.nameInSource.propertyValue");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.table.nameInSource.propertyValue" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.WARNING));
-        assertThat( results[0].getMessage(), is( "The Table 'NAMEINSOURCE' property is required and must match the specified pattern."));
     }
 
     @Test
@@ -777,6 +840,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), table, "default.materializedTable.column.propertyValue");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.materializedTable.column.propertyValue" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -792,9 +856,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), table, "default.materializedTable.column.propertyValue");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.materializedTable.column.propertyValue" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "A Materialized table cannot have columns of type 'object'"));
     }
 
 
@@ -811,6 +875,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), view, "default.view.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.view.nodeName" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -822,9 +887,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), view, "default.view.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.view.nodeName" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The View name must match the specified pattern."));
     }
 
     @Test
@@ -836,6 +901,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), view, "default.view.column.childCount");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.view.column.childCount" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -847,9 +913,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), view, "default.view.column.childCount");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.view.column.childCount" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "A View must have at least one column."));
     }
 
     @Test
@@ -862,6 +928,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), view, "default.view.column.childSNSValidation");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.view.column.childSNSValidation" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -875,9 +942,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), view, "default.view.column.childSNSValidation");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.view.column.childSNSValidation" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "A View column must have a unique name."));
     }
 
     // ==============================================================================================
@@ -892,6 +959,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), modelSource, "default.modelSource.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.modelSource.nodeName" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -903,9 +971,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), modelSource, "default.modelSource.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.modelSource.nodeName" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The ModelSource name must match the specified pattern."));
     }
 
     // ==============================================================================================
@@ -920,6 +988,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), pf, "default.pushdownFunction.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.pushdownFunction.nodeName" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -931,9 +1000,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), pf, "default.pushdownFunction.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.pushdownFunction.nodeName" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The PushdownFunction name must match the specified pattern."));
     }
 
     // ==============================================================================================
@@ -948,6 +1017,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), udf, "default.userDefinedFunction.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.userDefinedFunction.nodeName" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -959,9 +1029,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), udf, "default.userDefinedFunction.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.userDefinedFunction.nodeName" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The UserDefinedFunction name must match the specified pattern."));
     }
 
     @Test
@@ -973,6 +1043,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), udf, "default.userDefinedFunction.category.propertyValue");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.userDefinedFunction.category.propertyValue" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -984,9 +1055,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), udf, "default.userDefinedFunction.category.propertyValue");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.userDefinedFunction.category.propertyValue" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The UserDefinedFunction 'CATEGORY' property is required and must match the specified pattern."));
     }
 
     @Test
@@ -998,6 +1069,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), udf, "default.userDefinedFunction.javaClass.propertyValue");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.userDefinedFunction.javaClass.propertyValue" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -1009,9 +1081,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), udf, "default.userDefinedFunction.javaClass.propertyValue");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.userDefinedFunction.javaClass.propertyValue" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The UserDefinedFunction 'JAVA_CLASS' property is required and must match the specified pattern."));
     }
 
     @Test
@@ -1023,6 +1095,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), udf, "default.userDefinedFunction.javaMethod.propertyValue");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.userDefinedFunction.javaMethod.propertyValue" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -1034,9 +1107,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), udf, "default.userDefinedFunction.javaMethod.propertyValue");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.userDefinedFunction.javaMethod.propertyValue" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The UserDefinedFunction 'JAVA_METHOD' property is required and must match the specified pattern."));
     }
 
     @Test
@@ -1049,6 +1122,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), udf, "default.userDefinedFunction.returnParameterCount");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.userDefinedFunction.returnParameterCount" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -1060,9 +1134,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), udf, "default.userDefinedFunction.returnParameterCount");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.userDefinedFunction.returnParameterCount" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "A UserDefinedFunction must have one return parameter."));
     }
 
     @Test
@@ -1075,9 +1149,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), udf, "default.userDefinedFunction.returnParameterCount");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.userDefinedFunction.returnParameterCount" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "A UserDefinedFunction must have one return parameter."));
     }
 
     // ==============================================================================================
@@ -1092,6 +1166,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), vp, "default.virtualProcedure.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.virtualProcedure.nodeName" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -1103,9 +1178,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), vp, "default.virtualProcedure.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.virtualProcedure.nodeName" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The VirtualProcedure name must match the specified pattern."));
     }
 
     // ==============================================================================================
@@ -1120,6 +1195,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), sp, "default.storedProcedure.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.storedProcedure.nodeName" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -1131,9 +1207,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), sp, "default.storedProcedure.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.storedProcedure.nodeName" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The StoredProcedure name must match the specified pattern."));
     }
 
     // ==============================================================================================
@@ -1149,6 +1225,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), ap, "default.accessPattern.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.accessPattern.nodeName" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -1161,9 +1238,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), ap, "default.accessPattern.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.accessPattern.nodeName" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The AccessPattern name must match the specified pattern."));
     }
 
     // ==============================================================================================
@@ -1179,6 +1256,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), index, "default.index.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.index.nodeName" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -1191,9 +1269,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), index, "default.index.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.index.nodeName" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The Index name must match the specified pattern."));
     }
 
     // ==============================================================================================
@@ -1209,6 +1287,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), pk, "default.primaryKey.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.primaryKey.nodeName" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -1221,9 +1300,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), pk, "default.primaryKey.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.primaryKey.nodeName" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The PrimaryKey name must match the specified pattern."));
     }
 
     // ==============================================================================================
@@ -1240,6 +1319,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), fk, "default.foreignKey.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.foreignKey.nodeName" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -1253,9 +1333,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), fk, "default.foreignKey.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.foreignKey.nodeName" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The ForeignKey name must match the specified pattern."));
     }
 
     // ==============================================================================================
@@ -1271,6 +1351,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), uc, "default.uniqueConstraint.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.uniqueConstraint.nodeName" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -1283,9 +1364,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), uc, "default.uniqueConstraint.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.uniqueConstraint.nodeName" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The UniqueConstraint name must match the specified pattern."));
     }
 
     // ==============================================================================================
@@ -1301,6 +1382,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), col, "default.column.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.column.nodeName" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -1313,9 +1395,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), col, "default.column.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.column.nodeName" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The Column name must match the specified pattern."));
     }
 
     @Test
@@ -1328,6 +1410,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), col, "default.column.datatype.propertyValue");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.column.datatype.propertyValue" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -1340,9 +1423,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), col, "default.column.datatype.propertyValue");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.column.datatype.propertyValue" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The Column 'ddl:datatypeName' property is required and must match the specified pattern."));
     }
 
     @Test
@@ -1356,6 +1439,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), col, "default.column.stringDatatype.lengthPropertyValue");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.column.stringDatatype.lengthPropertyValue" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -1369,9 +1453,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), col, "default.column.stringDatatype.lengthPropertyValue");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.column.stringDatatype.lengthPropertyValue" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The length property of a string Column is required and must be 1 or greater."));
     }
 
     @Test
@@ -1385,9 +1469,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), col, "default.column.stringDatatype.lengthPropertyValue");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.column.stringDatatype.lengthPropertyValue" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The length property of a string Column is required and must be 1 or greater."));
     }
 
     @Test
@@ -1401,6 +1485,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), col, "default.column.numericDatatype.precisionPropertyValue");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.column.numericDatatype.precisionPropertyValue" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -1414,9 +1499,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), col, "default.column.numericDatatype.precisionPropertyValue");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.column.numericDatatype.precisionPropertyValue" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The precision property of a numeric Column is required and must be 1 or greater."));
     }
 
     @Test
@@ -1430,9 +1515,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), col, "default.column.numericDatatype.precisionPropertyValue");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.column.numericDatatype.precisionPropertyValue" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The precision property of a numeric Column is required and must be 1 or greater."));
     }
 
     // ==============================================================================================
@@ -1448,6 +1533,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), param, "default.parameter.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.parameter.nodeName" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -1460,9 +1546,9 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), param, "default.parameter.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.parameter.nodeName" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The Parameter name must match the specified pattern."));
     }
 
     // ==============================================================================================
@@ -1478,6 +1564,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), rs, "default.dataTypeResultSet.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.dataTypeResultSet.nodeName" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -1494,6 +1581,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), rs, "default.tabularResultSet.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.tabularResultSet.nodeName" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -1511,6 +1599,7 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), rsCol, "default.resultSetColumn.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.resultSetColumn.nodeName" ) );
         assertThat( results[0].isOK(), is( true ));
     }
 
@@ -1524,8 +1613,8 @@ public final class VdbValidationTest extends RelationalValidationTest {
 
         final Result[] results = _repo.getValidationManager().evaluate(getTransaction(), rsCol, "default.resultSetColumn.nodeName");
         assertThat( results.length, is( 1 ) );
+        assertThat( results[0].getRuleId(), is( "default.resultSetColumn.nodeName" ) );
         assertThat( results[0].isOK(), is( false ));
         assertThat( results[0].getLevel(), is( Level.ERROR));
-        assertThat( results[0].getMessage(), is( "The ResultSetColumn name must match the specified pattern."));
     }
 }

@@ -13,6 +13,7 @@ import java.io.File;
 import java.util.List;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.komodo.spi.outcome.Outcome;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.ValidationManager;
 import org.komodo.spi.repository.validation.Result;
@@ -148,7 +149,7 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         assertThat( errors.size(), is( 0 ) );
 
         // Load the rule
-        _validationMgr.importRules( testFile, getTransaction(), true );
+        _validationMgr.importRules( getTransaction(), testFile, true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
@@ -173,7 +174,7 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         assertThat( errors.size(), is( 0 ) );
 
         // Load rules
-        _validationMgr.importRules( testFile, getTransaction(), true );
+        _validationMgr.importRules( getTransaction(), testFile, true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
@@ -184,6 +185,36 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
         assertThat( result.getRuleId(), is( aRule.getName( getTransaction() ) ) );
         assertThat( result.getMessage(), is( "The VDB name does not match the specified pattern." ));
+    }
+    
+    @Test
+    public void shouldVerifyImportedNodeNameRuleEvaluationNotEnabled() throws Exception {
+        // Create a KomodoObject without the required property
+        final KomodoObject kobject = _repo.add( getTransaction(), null, "1"+VDB_NAME, VDB_TYPE );
+        commit();
+
+        // Validate rules file
+        String testFilePath = getClass().getClassLoader().getResource(RULES_FILE_NODE_NAME_RULE).getFile();
+        final File testFile = new File( testFilePath );
+        final List< String > errors = _validationMgr.validateRules( testFile );
+        assertThat( errors.size(), is( 0 ) );
+        
+        // Load rules
+        _validationMgr.importRules( getTransaction(), testFile, true );
+        final Rule[] rules = _validationMgr.getAllRules(getTransaction());
+        assertThat( rules.length, is( 1 ) );
+        Rule aRule = rules[0];
+        
+        // disable the rule
+        aRule.setEnabled(getTransaction(), false);
+        
+        // Evaluate kobject using the disabled rule
+        final Result result = aRule.evaluate( getTransaction(), kobject );
+        assertThat( result.isOK(), is( false ) );
+        assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
+        assertThat( result.getRuleId(), is( aRule.getName( getTransaction() ) ) );
+        assertThat( result.getLevel(), is( Outcome.Level.INFO) );
+        assertThat( result.getMessage(), is( "Rule \"vdb.name\" is disabled." ));
     }
 
     @Test
@@ -200,7 +231,7 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         assertThat( errors.size(), is( 0 ) );
 
         // Load the rule
-        _validationMgr.importRules( testFile, getTransaction(), true );
+        _validationMgr.importRules( getTransaction(), testFile, true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
@@ -225,7 +256,7 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         assertThat( errors.size(), is( 0 ) );
 
         // Load rules
-        _validationMgr.importRules( testFile, getTransaction(), true );
+        _validationMgr.importRules( getTransaction(), testFile, true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
@@ -252,7 +283,7 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         assertThat( errors.size(), is( 0 ) );
 
         // Load the rule
-        _validationMgr.importRules( testFile, getTransaction(), true );
+        _validationMgr.importRules( getTransaction(), testFile, true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
@@ -278,7 +309,7 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         assertThat( errors.size(), is( 0 ) );
 
         // Load rules
-        _validationMgr.importRules( testFile, getTransaction(), true );
+        _validationMgr.importRules( getTransaction(), testFile, true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
@@ -305,7 +336,7 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         assertThat( errors.size(), is( 0 ) );
 
         // Load the rule
-        _validationMgr.importRules( testFile, getTransaction(), true );
+        _validationMgr.importRules( getTransaction(), testFile, true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
@@ -331,7 +362,7 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         assertThat( errors.size(), is( 0 ) );
 
         // Load rules
-        _validationMgr.importRules( testFile, getTransaction(), true );
+        _validationMgr.importRules( getTransaction(), testFile, true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
@@ -362,7 +393,7 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         assertThat( errors.size(), is( 0 ) );
 
         // Load the rule
-        _validationMgr.importRules( testFile, getTransaction(), true );
+        _validationMgr.importRules( getTransaction(), testFile, true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
@@ -387,7 +418,7 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         assertThat( errors.size(), is( 0 ) );
 
         // Load rules
-        _validationMgr.importRules( testFile, getTransaction(), true );
+        _validationMgr.importRules( getTransaction(), testFile, true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
@@ -418,7 +449,7 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         assertThat( errors.size(), is( 0 ) );
 
         // Load the rule
-        _validationMgr.importRules( testFile, getTransaction(), true );
+        _validationMgr.importRules( getTransaction(), testFile, true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
@@ -443,7 +474,7 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         assertThat( errors.size(), is( 0 ) );
 
         // Load rules
-        _validationMgr.importRules( testFile, getTransaction(), true );
+        _validationMgr.importRules( getTransaction(), testFile, true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
@@ -474,7 +505,7 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         assertThat( errors.size(), is( 0 ) );
 
         // Load the rule
-        _validationMgr.importRules( testFile, getTransaction(), true );
+        _validationMgr.importRules( getTransaction(), testFile, true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
@@ -503,7 +534,7 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         assertThat( errors.size(), is( 0 ) );
 
         // Load rules
-        _validationMgr.importRules( testFile, getTransaction(), true );
+        _validationMgr.importRules( getTransaction(), testFile, true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
@@ -532,7 +563,7 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         assertThat( errors.size(), is( 0 ) );
 
         // Load the rule
-        _validationMgr.importRules( testFile, getTransaction(), true );
+        _validationMgr.importRules( getTransaction(), testFile, true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
@@ -559,7 +590,7 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         assertThat( errors.size(), is( 0 ) );
 
         // Load the rule
-        _validationMgr.importRules( testFile, getTransaction(), true );
+        _validationMgr.importRules( getTransaction(), testFile, true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
@@ -587,7 +618,7 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         assertThat( errors.size(), is( 0 ) );
 
         // Load the rule
-        _validationMgr.importRules( testFile, getTransaction(), true );
+        _validationMgr.importRules( getTransaction(), testFile, true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
@@ -615,7 +646,7 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         assertThat( errors.size(), is( 0 ) );
 
         // Load the rule
-        _validationMgr.importRules( testFile, getTransaction(), true );
+        _validationMgr.importRules( getTransaction(), testFile, true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
@@ -644,7 +675,7 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         assertThat( errors.size(), is( 0 ) );
 
         // Load the rule
-        _validationMgr.importRules( testFile, getTransaction(), true );
+        _validationMgr.importRules( getTransaction(), testFile, true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
@@ -672,7 +703,7 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         assertThat( errors.size(), is( 0 ) );
 
         // Load the rule
-        _validationMgr.importRules( testFile, getTransaction(), true );
+        _validationMgr.importRules( getTransaction(), testFile, true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
@@ -701,7 +732,7 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         assertThat( errors.size(), is( 0 ) );
 
         // Load the rule
-        _validationMgr.importRules( testFile, getTransaction(), true );
+        _validationMgr.importRules( getTransaction(), testFile, true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
@@ -729,7 +760,7 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         assertThat( errors.size(), is( 0 ) );
 
         // Load the rule
-        _validationMgr.importRules( testFile, getTransaction(), true );
+        _validationMgr.importRules( getTransaction(), testFile, true );
         final Rule[] rules = _validationMgr.getAllRules(getTransaction());
         assertThat( rules.length, is( 1 ) );
         Rule aRule = rules[0];
