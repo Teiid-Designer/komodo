@@ -30,14 +30,14 @@ public interface ValidationManager {
     List< String > validateRules( final File rulesXmlFile ) throws KException;
 
     /**
+     * @param uow the transaction
      * @param rulesXmlFile
      *        the file whose rule definitions are being imported (cannot be <code>null</code>)
-     * @param uow the transaction
      * @param overwriteExisting 'true' will replace all existing rules.
      * @throws KException
      *         if an error occurs
      */
-    void importRules( final File rulesXmlFile, final UnitOfWork uow, boolean overwriteExisting ) throws KException;
+    void importRules( final UnitOfWork uow, final File rulesXmlFile, boolean overwriteExisting ) throws KException;
     
     /**
      * Gets all of the current rules
@@ -58,40 +58,40 @@ public interface ValidationManager {
 
     /**
      * Get the rule with the specified RuleId
-     * @param ruleId the Rule ID
      * @param uow the transaction
+     * @param ruleId the Rule ID
      * @return the rule or <code>null</code> if not found
      * @throws KException if an error occurs
      */
-    Rule getRule( final String ruleId, final UnitOfWork uow ) throws KException;
+    Rule getRule( final UnitOfWork uow, final String ruleId ) throws KException;
 
     /**
-     * Determine if the specified RuleId is valid for the supplied KomodoObject
-     * @param ruleId the Rule ID
+     * Determine if the specified RuleId is applicable for the supplied KomodoObject
      * @param uow the transaction
+     * @param ruleId the Rule ID
      * @param kObj the Komodo Object
      * @return <code>true</code> if the rule is applicable, <code>false</code> if not.
      * @throws KException if an error occurs
      */
-    boolean ruleValid( final String ruleId, final UnitOfWork uow, final KomodoObject kObj ) throws KException;
+    boolean isApplicable( final UnitOfWork uow, final String ruleId, final KomodoObject kObj ) throws KException;
 
     /**
      * Set the Rule enablement
-     * @param ruleId the Rule ID
-     * @param isEnabled <code>true</code> to enable Rule, <code>false</code> to disable.
      * @param uow the transaction
+     * @param isEnabled <code>true</code> to enable Rule, <code>false</code> to disable.
+     * @param ruleId the Rule IDs
      * @throws KException if an error occurs
      */
-    void setRuleEnabled(final String ruleId, final boolean isEnabled, final UnitOfWork uow ) throws KException; 
+    void setRuleEnabled(final UnitOfWork uow, final boolean isEnabled, final String... ruleId ) throws KException; 
 
     /**
      * Set the Rule severity
-     * @param ruleId the Rule ID
-     * @param severity the rule severity
      * @param uow the transaction
+     * @param severity the rule severity
+     * @param ruleId the Rule IDs
      * @throws KException if an error occurs
      */
-    void setRuleSeverity(final String ruleId, final Outcome.Level severity, final UnitOfWork uow ) throws KException; 
+    void setRuleSeverity(final UnitOfWork uow, final Outcome.Level severity, final String... ruleId ) throws KException; 
     
     /**
      * Evaluate the supplied object using all applicable rules for the object.

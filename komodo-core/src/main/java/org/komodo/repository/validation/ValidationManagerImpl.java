@@ -14,7 +14,6 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
-import org.komodo.core.Messages;
 import org.komodo.spi.KException;
 import org.komodo.spi.outcome.Outcome;
 import org.komodo.spi.repository.KomodoObject;
@@ -86,11 +85,13 @@ public class ValidationManagerImpl implements ValidationManager {
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.komodo.spi.repository.ValidationManager#importRules(java.io.File)
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.ValidationManager#importRules(org.komodo.spi.repository.Repository.UnitOfWork, java.io.File, boolean)
      */
     @Override
-    public void importRules(final File rulesXmlFile, final UnitOfWork uow, boolean overwriteExisting) throws KException {
+    public void importRules(final UnitOfWork uow, final File rulesXmlFile, boolean overwriteExisting) throws KException {
         ArgCheck.isNotNull( rulesXmlFile, "rulesXmlFile" ); //$NON-NLS-1$
         
         // If rules exist, no need to reload - unless overwriting
@@ -111,7 +112,7 @@ public class ValidationManagerImpl implements ValidationManager {
         }
     }
     
-    private void clearValidationRules(final UnitOfWork uow) throws Exception {
+    protected void clearValidationRules(final UnitOfWork uow) throws Exception {
         KomodoObject defaultValidationArea = RuleFactory.getValidationDefaultAreaNode(uow, this.repo);
         KomodoObject[] rules = defaultValidationArea.getChildren(uow);
         for(KomodoObject rule : rules) {
@@ -119,7 +120,9 @@ public class ValidationManagerImpl implements ValidationManager {
         }
     }
     
-    /* (non-Javadoc)
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.spi.repository.ValidationManager#getAllRules(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
@@ -133,7 +136,11 @@ public class ValidationManagerImpl implements ValidationManager {
         // Collect all available Rules
         for ( final KomodoObject kobject : defaultValidationArea.getChildren( transaction ) ) {
             final Rule rule = new RuleImpl( transaction, this.repo, kobject.getAbsolutePath() );
-            result.add( rule );
+            if(rule.isEnabled(transaction)) {
+                result.add( rule );
+            } else {
+                result.add( new ProblemRule(rule.getName(transaction),ProblemRule.Type.NOT_ENABLED) );
+            }
         }
 
         if ( result.isEmpty() ) {
@@ -143,39 +150,45 @@ public class ValidationManagerImpl implements ValidationManager {
         return result.toArray( new Rule[ result.size() ] );
     }
 
-    /* (non-Javadoc)
-     * @see org.komodo.spi.repository.ValidationManager#getRule(java.lang.String,org.komodo.spi.repository.Repository.UnitOfWork)
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.ValidationManager#getRule(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
      */
     @Override
-    public Rule getRule( String ruleId, final UnitOfWork transaction ) throws KException {
+    public Rule getRule( final UnitOfWork transaction, String ruleId ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
         KomodoObject defaultValidationArea = RuleFactory.getValidationDefaultAreaNode(transaction, this.repo);
 
         // Check all available Rules for a match.
-        for ( final KomodoObject ruleObj : defaultValidationArea.getChildren( transaction ) ) {
-            if(ruleObj.getName(transaction).equals(ruleId)) {
+        if(defaultValidationArea.hasChild(transaction, ruleId)) {
+            KomodoObject ruleObj = defaultValidationArea.getChild(transaction, ruleId);
+            if(ruleObj!=null) {
                 return new RuleImpl( transaction, this.repo, ruleObj.getAbsolutePath() );
             }
         }
 
-        return null;
+        return new ProblemRule(ruleId, ProblemRule.Type.NOT_FOUND);
     }
 
-    /* (non-Javadoc)
-     * @see org.komodo.spi.repository.ValidationManager#ruleValid(java.lang.String, org.komodo.spi.repository.Repository.UnitOfWork, org.komodo.spi.repository.KomodoObject)
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.ValidationManager#isApplicable(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String, org.komodo.spi.repository.KomodoObject)
      */
     @Override
-    public boolean ruleValid(String ruleId,
-                             UnitOfWork uow,
-                             KomodoObject kObj) throws KException {
-        
-        Rule rule = getRule(ruleId,uow);
-        return rule.isApplicable(uow, kObj);
+    public boolean isApplicable(UnitOfWork uow,
+                                String ruleId,
+                                KomodoObject kObj) throws KException {
+
+        return getRule(uow,ruleId).isApplicable(uow, kObj);
     }
 
-    /* (non-Javadoc)
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.spi.repository.ValidationManager#getRules(org.komodo.spi.repository.Repository.UnitOfWork, org.komodo.spi.repository.KomodoObject)
      */
     @Override
@@ -191,7 +204,11 @@ public class ValidationManagerImpl implements ValidationManager {
         for ( final KomodoObject kobject : defaultValidationArea.getChildren( transaction ) ) {
             final Rule rule = new RuleImpl( transaction, this.repo, kobject.getAbsolutePath() );
             if(rule.isApplicable(transaction, kObj)) {
-                result.add( rule );
+                if(rule.isEnabled(transaction)) {
+                    result.add( rule );
+                } else {
+                    result.add(new ProblemRule(rule.getName(transaction),ProblemRule.Type.NOT_ENABLED));
+                }
             }
         }
         
@@ -202,30 +219,38 @@ public class ValidationManagerImpl implements ValidationManager {
         return result.toArray( new Rule[ result.size() ] );
     }
 
-    /* (non-Javadoc)
-     * @see org.komodo.spi.repository.ValidationManager#setRuleEnabled(java.lang.String, boolean,org.komodo.spi.repository.Repository.UnitOfWork)
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.ValidationManager#setRuleEnabled(org.komodo.spi.repository.Repository.UnitOfWork, boolean, String...)
      */
     @Override
-    public void setRuleEnabled(String ruleId,
+    public void setRuleEnabled(final UnitOfWork transaction,
                                boolean isEnabled,
-                               final UnitOfWork transaction ) throws KException {
-        Rule theRule = getRule(ruleId,transaction);
-        if(theRule!=null) theRule.setEnabled(transaction, isEnabled);
+                               String... ruleIds ) throws KException {
+        for(String ruleId : ruleIds) {
+            getRule(transaction,ruleId).setEnabled(transaction, isEnabled);
+        }
     }
 
-    /* (non-Javadoc)
-     * @see org.komodo.spi.repository.ValidationManager#setRuleSeverity(java.lang.String, java.lang.String, org.komodo.spi.repository.Repository.UnitOfWork)
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.ValidationManager#setRuleSeverity(org.komodo.spi.repository.Repository.UnitOfWork, org.komodo.spi.outcome.Outcome.Level, String...)
      */
     @Override
-    public void setRuleSeverity(String ruleId,
+    public void setRuleSeverity(final UnitOfWork transaction,
                                 Outcome.Level severity,
-                                final UnitOfWork transaction ) throws KException {
-        Rule theRule = getRule(ruleId,transaction);
-        if(theRule!=null) theRule.setSeverity(transaction, severity);
+                                String... ruleIds ) throws KException {
+        for(String ruleId : ruleIds) {
+            getRule(transaction,ruleId).setSeverity(transaction, severity);
+        }
     }
 
-    /* (non-Javadoc)
-     * @see org.komodo.spi.repository.ValidationManager#evaluate(org.komodo.spi.repository.Repository.UnitOfWork, org.komodo.spi.repository.KomodoObject, java.lang.boolean)
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.ValidationManager#evaluate(org.komodo.spi.repository.Repository.UnitOfWork, org.komodo.spi.repository.KomodoObject, boolean)
      */
     @Override
     public Result[] evaluate(final UnitOfWork transaction, KomodoObject kObject, boolean full ) throws KException {
@@ -254,28 +279,20 @@ public class ValidationManagerImpl implements ValidationManager {
         return allResults.toArray(new Result[ allResults.size() ]);
     }
 
-    /* (non-Javadoc)
-     * @see org.komodo.spi.repository.ValidationManager#evaluate(org.komodo.spi.repository.Repository.UnitOfWork, org.komodo.spi.repository.KomodoObject, java.lang.String)
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.ValidationManager#evaluate(org.komodo.spi.repository.Repository.UnitOfWork, org.komodo.spi.repository.KomodoObject, java.lang.String...)
      */
     @Override
     public Result[] evaluate(final UnitOfWork transaction,
                              final KomodoObject kObject,
                              final String... ruleIds) throws KException {
 
-
         final Result[] results = new Result[ruleIds.length];
         int i = 0;
         for(String ruleId : ruleIds) {
-            Rule rule = getRule(ruleId,transaction);
-            
-            // Verify Rule with id found
-            if(rule==null) throw new KException(Messages.getString(Messages.ValidationManagerImpl.RuleId_Not_Found,ruleId)); 
-            // Verify Rule applies for this kObject
-            if(!rule.isApplicable(transaction, kObject)) {
-                throw new KException(Messages.getString(Messages.ValidationManagerImpl.Object_NodeType_Or_Props_Not_Compatible_With_Rule,kObject.getName(transaction),ruleId));
-            }
-
-            // Evaluate kObject against the rule
+            Rule rule = getRule(transaction,ruleId);
             Result result = rule.evaluate(transaction, kObject);
             results[i++] = result;
         }

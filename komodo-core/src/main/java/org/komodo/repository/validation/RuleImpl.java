@@ -143,7 +143,7 @@ public class RuleImpl extends ObjectImpl implements Rule {
         ArgCheck.isNotNull( kobject, "kobject" ); //$NON-NLS-1$
 
         if ( !isEnabled( transaction ) ) {
-            throw new KException( Messages.getString( Messages.Validation.ATTEMPT_TO_EVALUATE_DISABLED_RULE, getAbsolutePath() ) );
+            return new ProblemRule(getName(transaction),ProblemRule.Type.NOT_ENABLED).evaluate(transaction, kobject);
         }
 
         try {

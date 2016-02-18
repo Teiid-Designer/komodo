@@ -46,7 +46,7 @@ public class RelationalValidationRulesProvider extends AbstractValidationRulesPr
         tempRulesFile.deleteOnExit();
 
         repo.getValidationManager().validateRules(tempRulesFile);
-        repo.getValidationManager().importRules(tempRulesFile, uow, overwriteExisting);
+        repo.getValidationManager().importRules(uow, tempRulesFile, overwriteExisting);
     }
 
 }

@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.komodo.spi.KException;
 import org.komodo.spi.outcome.Outcome;
 import org.komodo.spi.outcome.Outcome.Level;
 import org.komodo.spi.repository.KomodoObject;
@@ -349,7 +348,7 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
         assertThat( result.getMessage().contains(RULE_DESCRIPTION), is( true ) );
     }
     
-    @Test( expected = KException.class )
+    @Test
     public void shouldVerifyDisabledRulesCannotBeEvaluated() throws Exception {
         final String ruleNodeType = "nt:unstructured";
         final String propName = "sledge";
@@ -380,7 +379,13 @@ public final class RuleFactoryTest extends AbstractLocalRepositoryTest {
         rule.setEnabled( getTransaction(), false );
 
         // test
-        rule.evaluate( getTransaction(), kobject );
+        Result result = rule.evaluate( getTransaction(), kobject );
+        
+        assertThat( result.isOK(), is( false ) );
+        assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
+        assertThat( result.getRuleId(), is( rule.getName( getTransaction() ) ) );
+        assertThat( result.getLevel(), is(Outcome.Level.INFO));
+        assertThat( result.getMessage().contains("\""+RULE_NAME+"\" is disabled."), is( true ) );
     }
 
     @Test

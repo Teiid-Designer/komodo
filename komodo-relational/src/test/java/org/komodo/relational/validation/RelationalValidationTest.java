@@ -9,6 +9,8 @@ package org.komodo.relational.validation;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+import java.util.ArrayList;
+import java.util.List;
 import org.komodo.relational.model.AccessPattern;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.DataTypeResultSet;
@@ -38,8 +40,9 @@ import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.VdbImport;
 import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.spi.repository.validation.Rule;
 import org.komodo.test.utils.AbstractLocalRepositoryTest;
-import org.modeshape.sequencer.teiid.lexicon.VdbLexicon;
+import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public class RelationalValidationTest extends AbstractLocalRepositoryTest {
@@ -48,6 +51,14 @@ public class RelationalValidationTest extends AbstractLocalRepositoryTest {
     protected static final String ENTRY_PATH = "/vdb/entryPath";
 
 
+    protected List<String> getRuleNames( final Rule[] rules ) throws Exception {
+        List<String> ruleNames = new ArrayList<String>();
+        for(Rule rule : rules) {
+            ruleNames.add( rule.getName( getTransaction() ) );
+        }
+        return ruleNames;
+    }
+    
     protected Vdb createVdb( final String vdbName ) throws Exception {
         final WorkspaceManager mgr = WorkspaceManager.getInstance( _repo );
         final Vdb vdb = mgr.createVdb( getTransaction(), null, vdbName, VDB_PATH );
