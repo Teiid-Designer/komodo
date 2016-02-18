@@ -81,13 +81,15 @@
         <childValidation jcrName="vdb:graceland">
             <message locale="en">Validation rules for child node type 'vdb:b' of the 'vdb:a' node type.
             </message>
-            <requiredValidation id="vdb.presley.graceland.required">
-                <description locale="en">A VDB must have a graceland.</description>
-            </requiredValidation>
+            <childCountValidation id="vdb.a.b.childCount1">
+                <description locale="en">A VDB must have between 10 and 20.</description>
+                <minValue inclusive="true">10</minValue>
+            </childCountValidation>
             <!-- Error 9: cannot have 2 of the same rule -->
-            <requiredValidation id="vdb.presley.graceland.requiredDuplicate">
-                <description locale="ab">A VDB must have a graceland.</description>
-            </requiredValidation>
+            <childCountValidation id="vdb.a.b.childCount2">
+                <description locale="en">A VDB must have between 10 and 20.</description>
+                <minValue inclusive="true">10</minValue>
+            </childCountValidation>
         </childValidation>
     </nodeValidation>
 

@@ -91,6 +91,10 @@ public final class VdbCommandsI18n extends I18n {
     public static String uploadModelHelp;
     public static String uploadModelUsage;
 
+    public static String validateVdbExamples;
+    public static String validateVdbHelp;
+    public static String validateVdbUsage;
+
     public static String dataRoleAdded;
     public static String dataRoleDeleted;
     public static String dataRolesHeader;
@@ -136,7 +140,12 @@ public final class VdbCommandsI18n extends I18n {
     public static String translatorAdded;
     public static String translatorDeleted;
     public static String translatorsHeader;
-
+    public static String validationError;
+    public static String validationSuccess;
+    public static String vdbExported;
+    public static String vdbValidationErrorsHeader;
+    public static String vdbValidationSuccessMsg;
+    public static String vdbValidationWarningsHeader;
 
     static {
         final VdbCommandsI18n i18n = new VdbCommandsI18n();

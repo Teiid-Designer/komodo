@@ -405,7 +405,7 @@ public interface WorkspaceStatus extends StringConstants {
 
     /**
      * Get the label provider for specified object
-     * @param KomodoObject to be processed by label provider
+     * @param kobject to be processed by label provider
      * @return the current label provider (never <code>null</code>)
      */
     KomodoObjectLabelProvider getObjectLabelProvider(KomodoObject kobject);

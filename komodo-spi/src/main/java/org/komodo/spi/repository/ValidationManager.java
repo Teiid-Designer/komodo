@@ -10,312 +10,15 @@ package org.komodo.spi.repository;
 import java.io.File;
 import java.util.List;
 import org.komodo.spi.KException;
+import org.komodo.spi.outcome.Outcome;
 import org.komodo.spi.repository.Repository.UnitOfWork;
-import org.komodo.spi.repository.Repository.UnitOfWork.State;
+import org.komodo.spi.repository.validation.Result;
 import org.komodo.spi.repository.validation.Rule;
-import org.komodo.spi.utils.LocalizedMessage;
 
 /**
- * Stores Komodo environment settings and preferences.
+ * Validation Manager interface
  */
 public interface ValidationManager {
-
-    /**
-     * The error message and description list elements must be 2 element arrays with the first element being the locale and the
-     * second element being the translated text.
-     *
-     * @param transaction
-     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @param name
-     *        the unique rule name (cannot be empty)
-     * @param nodeType
-     *        the node type name this rule is validating (cannot be empty)
-     * @param propertyName
-     *        the name of the property that is required (cannot be empty)
-     * @param descriptions
-     *        the localized descriptions (cannot be <code>null</code>, include empty elements, or be empty)
-     * @param messages
-     *        the localized error messages (cannot be <code>null</code>, include empty elements, or be empty)
-     * @return the new rule (never <code>null</code>)
-     * @throws KException
-     *         if an error occurs
-     */
-    Rule addPropertyRequiredRule( final UnitOfWork transaction,
-                                  final String name,
-                                  final String nodeType,
-                                  final String propertyName,
-                                  final List< LocalizedMessage > descriptions,
-                                  final List< LocalizedMessage > messages ) throws KException;
-
-    /**
-     * The error message and description list elements must be 2 element arrays with the first element being the locale and the
-     * second element being the translated text.
-     *
-     * @param transaction
-     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @param name
-     *        the unique rule name (cannot be empty)
-     * @param nodeType
-     *        the node type name this rule is validating (cannot be empty)
-     * @param childType
-     *        the name of the child type that must have at least one child (cannot be empty)
-     * @param descriptions
-     *        the localized descriptions (cannot be <code>null</code>, include empty elements, or be empty)
-     * @param messages
-     *        the localized error messages (cannot be <code>null</code>, include empty elements, or be empty)
-     * @return the new rule (never <code>null</code>)
-     * @throws KException
-     *         if an error occurs
-     */
-    Rule addChildTypeRequiredRule( final UnitOfWork transaction,
-                                   final String name,
-                                   final String nodeType,
-                                   final String childType,
-                                   final List< LocalizedMessage > descriptions,
-                                   final List< LocalizedMessage > messages ) throws KException;
-
-    /**
-     * The error message and description list elements must be 2 element arrays with the first element being the locale and the
-     * second element being the translated text.
-     *
-     * @param transaction
-     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @param name
-     *        the unique rule name (cannot be empty)
-     * @param nodeType
-     *        the node type name this rule is validating (cannot be empty)
-     * @param propertyName
-     *        the name of the property whose value is being validated (cannot be empty)
-     * @param pattern
-     *        the regular expression that the property value must match (cannot be empty)
-     * @param descriptions
-     *        the localized descriptions (cannot be <code>null</code>, include empty elements, or be empty)
-     * @param messages
-     *        the localized error messages (cannot be <code>null</code>, include empty elements, or be empty)
-     * @return the new rule (never <code>null</code>)
-     * @throws KException
-     *         if an error occurs
-     */
-    Rule addPropertyPatternRule( final UnitOfWork transaction,
-                                 final String name,
-                                 final String nodeType,
-                                 final String propertyName,
-                                 final String pattern,
-                                 final List< LocalizedMessage > descriptions,
-                                 final List< LocalizedMessage > messages ) throws KException;
-
-    /**
-     * The error message and description list elements must be 2 element arrays with the first element being the locale and the
-     * second element being the translated text.
-     *
-     * @param transaction
-     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @param name
-     *        the unique rule name (cannot be empty)
-     * @param nodeType
-     *        the node type name this rule is validating (cannot be empty)
-     * @param pattern
-     *        the regular expression that the child node name must match (cannot be empty)
-     * @param descriptions
-     *        the localized descriptions (cannot be <code>null</code>, include empty elements, or be empty)
-     * @param messages
-     *        the localized error messages (cannot be <code>null</code>, include empty elements, or be empty)
-     * @return the new rule (never <code>null</code>)
-     * @throws KException
-     *         if an error occurs
-     */
-    Rule addNodeNameRule( final UnitOfWork transaction,
-                          final String name,
-                          final String nodeType,
-                          final String pattern,
-                          final List< LocalizedMessage > descriptions,
-                          final List< LocalizedMessage > messages ) throws KException;
-
-    /**
-     * The error message and description list elements must be 2 element arrays with the first element being the locale and the
-     * second element being the translated text.
-     *
-     * @param transaction
-     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @param name
-     *        the unique rule name (cannot be empty)
-     * @param nodeType
-     *        the node type name this rule is validating (cannot be empty)
-     * @param propertyName
-     *        the name of the property whose value range is being validated (cannot be empty)
-     * @param minValue
-     *        the minimum allowed value (cannot be <code>null</code>)
-     * @param minInclusive
-     *        <code>true</code> if the property value can equal the minimum value
-     * @param maxValue
-     *        the maximum allowed value (cannot be <code>null</code>)
-     * @param maxInclusive
-     *        <code>true</code> if the property value can equal the maximum value
-     * @param descriptions
-     *        the localized descriptions (cannot be <code>null</code>, include empty elements, or be empty)
-     * @param messages
-     *        the localized error messages (cannot be <code>null</code>, include empty elements, or be empty)
-     * @return the new rule (never <code>null</code>)
-     * @throws KException
-     *         if an error occurs
-     */
-    Rule addPropertyValueNumberValidationRule( final UnitOfWork transaction,
-                                               final String name,
-                                               final String nodeType,
-                                               final String propertyName,
-                                               final Number minValue,
-                                               final boolean minInclusive,
-                                               final Number maxValue,
-                                               final boolean maxInclusive,
-                                               final List< LocalizedMessage > descriptions,
-                                               final List< LocalizedMessage > messages ) throws KException;
-
-    /**
-     * The error message and description list elements must be 2 element arrays with the first element being the locale and the
-     * second element being the translated text.
-     *
-     * @param transaction
-     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @param name
-     *        the unique rule name (cannot be empty)
-     * @param nodeType
-     *        the node type name this rule is validating (cannot be empty)
-     * @param childType
-     *        the name of the child type whose child count range is being validated (cannot be empty)
-     * @param minValue
-     *        the minimum allowed number of children with the specified type (cannot be <code>null</code>)
-     * @param minInclusive
-     *        <code>true</code> if the number of children can equal the minimum value
-     * @param maxValue
-     *        the maximum allowed number of children with the specified type (cannot be <code>null</code>)
-     * @param maxInclusive
-     *        <code>true</code> if the number of children can equal the maximum value
-     * @param descriptions
-     *        the localized descriptions (cannot be <code>null</code>, include empty elements, or be empty)
-     * @param messages
-     *        the localized error messages (cannot be <code>null</code>, include empty elements, or be empty)
-     * @return the new rule (never <code>null</code>)
-     * @throws KException
-     *         if an error occurs
-     */
-    Rule addChildCountValidationRule( final UnitOfWork transaction,
-                                      final String name,
-                                      final String nodeType,
-                                      final String childType,
-                                      final Number minValue,
-                                      final boolean minInclusive,
-                                      final Number maxValue,
-                                      final boolean maxInclusive,
-                                      final List< LocalizedMessage > descriptions,
-                                      final List< LocalizedMessage > messages ) throws KException;
-
-    /**
-     * The error message and description list elements must be 2 element arrays with the first element being the locale and the
-     * second element being the translated text.
-     *
-     * @param transaction
-     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @param name
-     *        the unique rule name (cannot be empty)
-     * @param nodeType
-     *        the node type name this rule is validating (cannot be empty)
-     * @param matchType
-     *        <code>true</code> if only children of the same type can't have the same name
-     * @param descriptions
-     *        the localized descriptions (cannot be <code>null</code>, include empty elements, or be empty)
-     * @param messages
-     *        the localized error messages (cannot be <code>null</code>, include empty elements, or be empty)
-     * @return the new rule (never <code>null</code>)
-     * @throws KException
-     *         if an error occurs
-     */
-    Rule addSameNameSiblingValidationRule( final UnitOfWork transaction,
-                                           final String name,
-                                           final String nodeType,
-                                           final boolean matchType,
-                                           final List< LocalizedMessage > descriptions,
-                                           final List< LocalizedMessage > messages ) throws KException;
-
-    /**
-     * The error message and description list elements must be 2 element arrays with the first element being the locale and the
-     * second element being the translated text.
-     *
-     * @param transaction
-     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @param name
-     *        the unique rule name (cannot be empty)
-     * @param nodeType
-     *        the node type name this rule is validating (cannot be empty)
-     * @param propertyName
-     *        the property whose relationships are being validated (cannot be empty)
-     * @param propsThatMustExist
-     *        a list of properties that must exist (can be <code>null</code> or empty)
-     * @param propsThatMustNotExist
-     *        a list of properties that must NOT exist (can be <code>null</code> or empty)
-     * @param childTypesThatMustExist
-     *        a list of node types that at least one child must have (can be <code>null</code> or empty)
-     * @param childTypesThatMustNotExist
-     *        a list of node types that no child must have (can be <code>null</code> or empty)
-     * @param descriptions
-     *        the localized descriptions (cannot be <code>null</code>, include empty elements, or be empty)
-     * @param messages
-     *        the localized error messages (cannot be <code>null</code>, include empty elements, or be empty)
-     * @return the new rule (never <code>null</code>)
-     * @throws KException
-     *         if an error occurs
-     */
-    Rule addPropertyRelationshipValidationRule( final UnitOfWork transaction,
-                                                final String name,
-                                                final String nodeType,
-                                                final String propertyName,
-                                                final List< String > propsThatMustExist,
-                                                final List< String > propsThatMustNotExist,
-                                                final List< String > childTypesThatMustExist,
-                                                final List< String > childTypesThatMustNotExist,
-                                                final List< LocalizedMessage > descriptions,
-                                                final List< LocalizedMessage > messages ) throws KException;
-
-    /**
-     * The error message and description list elements must be 2 element arrays with the first element being the locale and the
-     * second element being the translated text.
-     *
-     * @param transaction
-     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @param name
-     *        the unique rule name (cannot be empty)
-     * @param nodeType
-     *        the node type name this rule is validating (cannot be empty)
-     * @param childType
-     *        the node type whose relationships are being validated (cannot be empty)
-     * @param propsThatMustExist
-     *        a list of properties that must exist if a child with the specified type exists (can be <code>null</code> or empty)
-     * @param propsThatMustNotExist
-     *        a list of properties that must NOT exist if a child with the specified type exists (can be <code>null</code> or
-     *        empty)
-     * @param childTypesThatMustExist
-     *        a list of node types that at least one child must have if a child with the specified type exists (can be
-     *        <code>null</code> or empty)
-     * @param childTypesThatMustNotExist
-     *        a list of node types that no child must have if a child with the specified type exists (can be <code>null</code> or
-     *        empty)
-     * @param descriptions
-     *        the localized descriptions (cannot be <code>null</code>, include empty elements, or be empty)
-     * @param messages
-     *        the localized error messages (cannot be <code>null</code>, include empty elements, or be empty)
-     * @return the new rule (never <code>null</code>)
-     * @throws KException
-     *         if an error occurs
-     */
-    Rule addChildRelationshipValidationRule( final UnitOfWork transaction,
-                                             final String name,
-                                             final String nodeType,
-                                             final String childType,
-                                             final List< String > propsThatMustExist,
-                                             final List< String > propsThatMustNotExist,
-                                             final List< String > childTypesThatMustExist,
-                                             final List< String > childTypesThatMustNotExist,
-                                             final List< LocalizedMessage > descriptions,
-                                             final List< LocalizedMessage > messages ) throws KException;
 
     /**
      * @param rulesXmlFile
@@ -325,5 +28,89 @@ public interface ValidationManager {
      *         if an error occurs
      */
     List< String > validateRules( final File rulesXmlFile ) throws KException;
+
+    /**
+     * @param uow the transaction
+     * @param rulesXmlFile
+     *        the file whose rule definitions are being imported (cannot be <code>null</code>)
+     * @param overwriteExisting 'true' will replace all existing rules.
+     * @throws KException
+     *         if an error occurs
+     */
+    void importRules( final UnitOfWork uow, final File rulesXmlFile, boolean overwriteExisting ) throws KException;
+    
+    /**
+     * Gets all of the current rules
+     * @param uow the transaction
+     * @return all rules (never <code>null</code> but can be empty)
+     * @throws KException if an error occurs
+     */
+    Rule[] getAllRules( final UnitOfWork uow ) throws KException;
+
+    /**
+     * Gets the Rules that are valid for the supplied KomodoObject
+     * @param uow the transaction
+     * @param kObj the KomodoObject
+     * @return applicable rules (never <code>null</code> but can be empty)
+     * @throws KException if an error occurs
+     */
+    Rule[] getRules( final UnitOfWork uow, final KomodoObject kObj ) throws KException;
+
+    /**
+     * Get the rule with the specified RuleId
+     * @param uow the transaction
+     * @param ruleId the Rule ID
+     * @return the rule or <code>null</code> if not found
+     * @throws KException if an error occurs
+     */
+    Rule getRule( final UnitOfWork uow, final String ruleId ) throws KException;
+
+    /**
+     * Determine if the specified RuleId is applicable for the supplied KomodoObject
+     * @param uow the transaction
+     * @param ruleId the Rule ID
+     * @param kObj the Komodo Object
+     * @return <code>true</code> if the rule is applicable, <code>false</code> if not.
+     * @throws KException if an error occurs
+     */
+    boolean isApplicable( final UnitOfWork uow, final String ruleId, final KomodoObject kObj ) throws KException;
+
+    /**
+     * Set the Rule enablement
+     * @param uow the transaction
+     * @param isEnabled <code>true</code> to enable Rule, <code>false</code> to disable.
+     * @param ruleId the Rule IDs
+     * @throws KException if an error occurs
+     */
+    void setRuleEnabled(final UnitOfWork uow, final boolean isEnabled, final String... ruleId ) throws KException; 
+
+    /**
+     * Set the Rule severity
+     * @param uow the transaction
+     * @param severity the rule severity
+     * @param ruleId the Rule IDs
+     * @throws KException if an error occurs
+     */
+    void setRuleSeverity(final UnitOfWork uow, final Outcome.Level severity, final String... ruleId ) throws KException; 
+    
+    /**
+     * Evaluate the supplied object using all applicable rules for the object.
+     * @param uow the transaction
+     * @param kObject the object to validate
+     * @param full <code>true</code> will validate the node and all of its ancestors.  <code>false</code> only validates the supplied node.
+     * @return the results from all rule validations (never <code>null</code> but can be empty)
+     * @throws KException if an error occurs
+     */
+    Result[] evaluate( final UnitOfWork uow, final KomodoObject kObject, boolean full  ) throws KException;
+
+    /**
+     * Evaluate the supplied object using the specified rules (if the rule is applicable for the object).
+     * @param uow the transaction
+     * @param kObject the kObj
+     * @param ruleId the rule IDs
+     * @return the results of the evaluation (never <code>null</code> but can be empty)
+     * @throws KException if an error occurs
+     */
+    Result[] evaluate( final UnitOfWork uow, final KomodoObject kObject, final String... ruleId ) throws KException;
 
 }

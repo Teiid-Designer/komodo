@@ -2,7 +2,6 @@ package org.komodo.shell.commands;
 
 import java.util.LinkedList;
 import java.util.List;
-
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.ShellI18n;
@@ -13,7 +12,7 @@ import org.komodo.utils.StringUtils;
 import org.komodo.utils.i18n.I18n;
 
 /**
- * A {@link ShellCommand command} that can reset global workspace properties
+ * A {@link BuiltInShellCommand command} that can reset global workspace properties
  * <p>
  * Usage:
  * <p>

@@ -62,6 +62,8 @@ public class VdbCommandProvider implements ShellCommandProvider {
 
         result.add( UploadModelCommand.class );
 
+        result.add( ValidateVdbCommand.class );
+
         return result;
     }
 

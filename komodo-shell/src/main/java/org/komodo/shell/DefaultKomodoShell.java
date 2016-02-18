@@ -400,7 +400,7 @@ public class DefaultKomodoShell implements KomodoShell {
 
     private void startKEngine() throws KException, InterruptedException {
         final Repository defaultRepo = kEngine.getDefaultRepository();
-
+        
         // Latch for awaiting the start of the default repository
         final CountDownLatch updateLatch = new CountDownLatch( 1 );
 
@@ -538,7 +538,6 @@ public class DefaultKomodoShell implements KomodoShell {
     public String getShellPropertiesFile() {
         return PROPERTIES_FILE_NAME;
     }
-    
     
     /**
      * Method that reads version info from properties file

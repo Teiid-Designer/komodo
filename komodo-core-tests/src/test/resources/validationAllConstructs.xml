@@ -19,19 +19,17 @@
             <pattern>[a-z]*</pattern>
         </nameValidation>
 
-        <propertyValidation jcrName="vdb:connectionType">
+        <propertyValidation jcrName="vdb:connectionType" required="true">
             <message locale="en">Validates a VDB's connection type.</message>
-            <requiredValidation id="vdb.connectionType.required">
+            <valueValidation id="vdb.connectionType.required" severity="ERROR">
                 <description locale="en">The VDB connection type is required.</description>
-            </requiredValidation>
+                <pattern>^[1-9]\d*$</pattern>
+            </valueValidation>
         </propertyValidation>
     </nodeValidation>
 
-    <propertyValidation jcrName="ddl:statementOption">
+    <propertyValidation jcrName="ddl:statementOption" required="true">
         <message locale="en">Validates the property 'ddl:statementOption' of any node type.</message>
-        <requiredValidation id="ddl:statementOption.required">
-            <description locale="en">The DDL statement option is required.</description>
-        </requiredValidation>
         <valueValidation id="ddl:statementOption.value">
             <description locale="en">The DDL statement option value must be between 1 and 64 characters..</description>
             <pattern>[a-zA-Z\-]{0,64}\.[a-zA-Z\-]{0,64}</pattern>
@@ -68,12 +66,9 @@
 
     <nodeValidation jcrName="vdb:dataRole">
         <message locale="en">Validation rules for the 'vdb:dataRole' node type.</message>
-        <childValidation jcrName="vdb:permission">
+        <childValidation jcrName="vdb:permission" required="true">
             <message locale="en">Validation rules for child node type 'vdb:permissions' of the 'vdb:dataRole' node type.
             </message>
-            <requiredValidation id="vdb.permission.required">
-                <description locale="en">A VDB permission is required.</description>
-            </requiredValidation>
             <sameNameSiblingValidation id="vdb.permission.sns">
                 <description locale="en">A VDB permission must have a unique name.</description>
             </sameNameSiblingValidation>
@@ -147,6 +142,7 @@
             </message>
             <relationshipValidation id="vdb.relationshipRule.childIsAbsent">
                 <description locale="en">The VDB must not have a foo.</description>
+                <description locale="es">Different locale description</description>
                 <message key="RELATIONSHIP_RULE_ABSENT_CHILD_FOUND" locale="en">The is an overridden error message</message>
                 <childAbsent>vdb:foo</childAbsent>
             </relationshipValidation>
