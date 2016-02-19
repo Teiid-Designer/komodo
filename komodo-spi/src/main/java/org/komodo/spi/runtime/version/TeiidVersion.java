@@ -21,6 +21,8 @@
  ************************************************************************************/
 package org.komodo.spi.runtime.version;
 
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
+
 /**
  * Parent marker interface for teiid instance version information
  */
@@ -205,6 +207,16 @@ public interface TeiidVersion {
     boolean isGreaterThan(TeiidVersion otherVersion);
 
     /**
+     *
+     * @see #isGreaterThan(TeiidVersion)
+     *
+     * @param otherVersion
+     *
+     * @return true if this version is greater. False otherwise.
+     */
+    boolean isGreaterThan(Version otherVersion);
+
+    /**
      * Is this version less than the given version
      *
      * Wildcards will cause the result to return false since either
@@ -218,6 +230,15 @@ public interface TeiidVersion {
     boolean isLessThan(TeiidVersion otherVersion);
 
     /**
+     * @see #isLessThan(TeiidVersion)
+     *
+     * @param otherVersion
+     *
+     * @return true if this version is less. False otherwise.
+     */
+    boolean isLessThan(Version otherVersion);
+
+    /**
      * Convenience that delegates to {@link #compareTo(TeiidVersion)}
      * and {@link #isGreaterThan(TeiidVersion)}.
      *
@@ -226,6 +247,16 @@ public interface TeiidVersion {
      * @return this is greater than or equal to otherVersion
      */
     boolean isGreaterThanOrEqualTo(TeiidVersion otherVersion);
+
+   /**
+    *
+    * @see #isGreaterThanOrEqualTo(TeiidVersion)
+    *
+    * @param otherVersion
+    *
+    * @return this is greater than or equal to otherVersion
+    */
+    boolean isGreaterThanOrEqualTo(Version otherVersion);
 
     /**
      * Convenience that delegates to {@link #compareTo(TeiidVersion)}
@@ -236,4 +267,13 @@ public interface TeiidVersion {
      * @return this is less than or equal to otherVersion
      */
     boolean isLessThanOrEqualTo(TeiidVersion otherVersion);
+
+    /**
+     * @see #isLessThanOrEqualTo(TeiidVersion)
+     *
+     * @param otherVersion
+     *
+     * @return this is less than or equal to otherVersion
+     */
+    boolean isLessThanOrEqualTo(Version otherVersion);
 }
