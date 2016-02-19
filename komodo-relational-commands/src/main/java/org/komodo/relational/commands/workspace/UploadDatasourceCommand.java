@@ -20,6 +20,7 @@ import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.utils.KLog;
 import org.komodo.utils.StringUtils;
 import org.komodo.utils.i18n.I18n;
 
@@ -78,8 +79,14 @@ public final class UploadDatasourceCommand extends WorkspaceShellCommand {
             File dsXmlFile = new File(fileName);
             // Validates XML file is error-free.
             String[] dsNames = datasourceValidationParser.parse(getTransaction(), dsXmlFile);
-            List<String> errors = datasourceValidationParser.getErrors();
-            if(errors.size()>0) {
+            // Collect fatalErrors and Errors
+            List<String> parseErrors = datasourceValidationParser.getFatalErrors();
+            if(parseErrors.isEmpty()) {
+                parseErrors.addAll(datasourceValidationParser.getErrors());
+            }
+            // If any error encountered, log first one and return.
+            if( !parseErrors.isEmpty() ) {
+                KLog.getLogger().error( "Datasource file parsing error encountered : ", parseErrors.get(0) ); //$NON-NLS-1$
                 return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.datasourceParserErrors, fileName ), null );
             }
 
@@ -94,6 +101,17 @@ public final class UploadDatasourceCommand extends WorkspaceShellCommand {
             // Datasource parser creates the sources
             DatasourceParser datasourceParser = new DatasourceParser( getRepository(), overwrite );
             datasourceParser.parse(getTransaction(), dsXmlFile);
+            
+            // Check again for parse errors
+            parseErrors = datasourceValidationParser.getFatalErrors();
+            if(parseErrors.isEmpty()) {
+                parseErrors.addAll(datasourceValidationParser.getErrors());
+            }
+            // If any error encountered, log first one and return.
+            if( !parseErrors.isEmpty() ) {
+                KLog.getLogger().error( "Datasource file parsing error encountered : ", parseErrors.get(0) ); //$NON-NLS-1$
+                return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.datasourceParserErrors, fileName ), null );
+            }
 
             return new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.datasourcesUploaded ) );
         } catch ( final Exception e ) {

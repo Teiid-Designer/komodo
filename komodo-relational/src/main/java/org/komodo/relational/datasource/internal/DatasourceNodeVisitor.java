@@ -75,6 +75,14 @@ public class DatasourceNodeVisitor implements StringConstants {
 	        dataSource(uow, this.dataSource);
 		} catch (Exception e) {
 		    throw new KException(e);
+		} finally {
+		    if(this.writer!=null) {
+		        try {
+                    this.writer.close();
+                } catch (XMLStreamException ex) {
+                    throw new KException(ex);
+                }
+		    }
 		}
     }
     

@@ -224,15 +224,17 @@ public class DatasourceParser {
                 try {
                     existingSource = repo.komodoWorkspace(uow).getChildrenOfType(uow, KomodoLexicon.DataSource.NODE_TYPE, datasourceName);
                 } catch (KException ex1) {
+                    error(new SAXParseException(ex1.getMessage(), null));
                     LOGGER.error("DatasourceParser - error fetching Datasource : ", ex1); //$NON-NLS-1$
                 }
                 
                 Datasource theDatasource = null;
                 if(existingSource!=null && existingSource.length>0) {
                     if(replaceExisting) {
-                        deleteDatasource(existingSource[0]);
-                        theDatasource = createDatasource();
-                        if(theDatasource!=null) dataSources.add(theDatasource);
+                        if(deleteDatasource(existingSource[0])) {
+                            theDatasource = createDatasource();
+                            if(theDatasource!=null) dataSources.add(theDatasource);
+                        }
                     }
                 } else {
                     theDatasource = createDatasource();
@@ -253,12 +255,15 @@ public class DatasourceParser {
             super.endElement(uri, localName, qName);
         }
 
-        private void deleteDatasource(KomodoObject source) {
+        private boolean deleteDatasource(KomodoObject source) {
             try {
                 WorkspaceManager.getInstance( repo ).delete(uow, source);
             } catch (KException ex) {
+                error(new SAXParseException(ex.getMessage(), null));
                 LOGGER.error("DatasourceParser - error deleting existing Datasource : ", ex); //$NON-NLS-1$
+                return false;
             }
+            return true;
         }
         
         private Datasource createDatasource() {
@@ -276,6 +281,7 @@ public class DatasourceParser {
                 // Set remaining properties
                 setDatasourceProperties(uow, theDatasource, this.propertyMap);
             } catch (KException ex) {
+                error(new SAXParseException(ex.getMessage(), null));
                 LOGGER.error("DatasourceParser - error creating Datasource : ", ex); //$NON-NLS-1$
             }
             return theDatasource;
