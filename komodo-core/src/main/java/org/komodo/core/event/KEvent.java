@@ -73,7 +73,7 @@ public class KEvent<T> {
      * @param repository added
      * @return repository added event
      */
-    public static KEvent repositoryAddedEvent(Repository repository) {
+    public static KEvent<Repository> repositoryAddedEvent(Repository repository) {
         return new KEvent<Repository>(repository, Type.REPOSITORY_ADDED);
     }
 
@@ -81,21 +81,21 @@ public class KEvent<T> {
      * @param repository removed
      * @return repository removed event
      */
-    public static KEvent repositoryRemovedEvent(Repository repository) {
+    public static KEvent<Repository> repositoryRemovedEvent(Repository repository) {
         return new KEvent<Repository>(repository, Type.REPOSITORY_REMOVED);
     }
 
     /**
      * @return engine started event
      */
-    public static KEvent engineStartedEvent() {
+    public static KEvent<KEngine> engineStartedEvent() {
         return new KEvent<KEngine>(KEngine.getInstance(), Type.ENGINE_STARTED);
     }
 
     /**
      * @return engine shutdown event
      */
-    public static KEvent engineShutdownEvent() {
+    public static KEvent<KEngine> engineShutdownEvent() {
         return new KEvent<KEngine>(KEngine.getInstance(), Type.REPOSITORY_ADDED);
     }
 }
