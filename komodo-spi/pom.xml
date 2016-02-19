@@ -3,8 +3,10 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.komodo</groupId>
-		<artifactId>komodo</artifactId>
+		<!-- Depend on parent to avoid dragging in modeshape dependencies -->
+		<artifactId>komodo-parent</artifactId>
 		<version>0.0.4-SNAPSHOT</version>
+    <relativePath>../komodo-parent</relativePath>
 	</parent>
 	<artifactId>komodo-spi</artifactId>
 	<name>Komodo SPI</name>

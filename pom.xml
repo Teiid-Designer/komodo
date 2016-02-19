@@ -57,19 +57,17 @@
 
 	<properties>
 		<rootDir>${project.basedir}</rootDir>
-		<modeshape.version>4.5.0.Final</modeshape.version>
-		<teiid.modeshape.version>0.0.1-SNAPSHOT</teiid.modeshape.version>
-		<jcr.version>2.0</jcr.version>
-		<infinispan.version>7.2.3.Final</infinispan.version>
-		<javax.servlet.version>3.1.0</javax.servlet.version>
-		<javax.jacc.version>1.0.0.Final</javax.jacc.version>
-		<joda.time.version>2.7</joda.time.version>
-		<mapdb.version>1.0.6</mapdb.version>
-		<tika.version>1.8</tika.version>
-		<apache.commons.compress.version>1.9</apache.commons.compress.version>
-		<log4j.version>1.2.16</log4j.version>
-		<slf4j.log4j.version>1.7.2</slf4j.log4j.version>
-		<xnio.version>3.2.0.Final</xnio.version>
+		<version.teiid.modeshape>0.0.1-SNAPSHOT</version.teiid.modeshape>
+		<version.infinispan>7.2.3.Final</version.infinispan>
+		<version.javax.servlet>3.1.0</version.javax.servlet>
+		<version.javax.jacc>1.0.0.Final</version.javax.jacc>
+		<version.joda.time>2.7</version.joda.time>
+		<version.mapdb>1.0.6</version.mapdb>
+		<version.tika>1.8</version.tika>
+		<version.apache.commons.compress>1.9</version.apache.commons.compress>
+		<version.log4j>1.2.16</version.log4j>
+		<version.slf4j.log4j>1.7.2</version.slf4j.log4j>
+		<version.xnio>3.2.0.Final</version.xnio>
 	</properties>
 
 	<profiles>
@@ -109,92 +107,81 @@
 			<dependency>
 				<groupId>org.modeshape</groupId>
 				<artifactId>modeshape-common</artifactId>
-				<version>${modeshape.version}</version>
+				<version>${version.modeshape}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.modeshape</groupId>
 				<artifactId>modeshape-jcr</artifactId>
-				<version>${modeshape.version}</version>
+				<version>${version.modeshape}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.modeshape</groupId>
 				<artifactId>modeshape-schematic</artifactId>
-				<version>${modeshape.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.modeshape</groupId>
-				<artifactId>modeshape-jcr-api</artifactId>
-				<version>${modeshape.version}</version>
+				<version>${version.modeshape}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.modeshape</groupId>
 				<artifactId>modeshape-extractor-tika</artifactId>
-				<version>${modeshape.version}</version>
+				<version>${version.modeshape}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.jboss.teiid.modeshape</groupId>
 				<artifactId>teiid-modeshape-sequencer-vdb</artifactId>
-				<version>${teiid.modeshape.version}</version>
+				<version>${version.teiid.modeshape}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jboss.teiid.modeshape</groupId>
 				<artifactId>teiid-modeshape-sequencer-ddl</artifactId>
-				<version>${teiid.modeshape.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>javax.jcr</groupId>
-				<artifactId>jcr</artifactId>
-				<version>${jcr.version}</version>
+				<version>${version.teiid.modeshape}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.infinispan</groupId>
 				<artifactId>infinispan-commons</artifactId>
-				<version>${infinispan.version}</version>
+				<version>${version.infinispan}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.infinispan</groupId>
 				<artifactId>infinispan-core</artifactId>
-				<version>${infinispan.version}</version>
+				<version>${version.infinispan}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.infinispan</groupId>
 				<artifactId>infinispan-cachestore-leveldb</artifactId>
-				<version>${infinispan.version}</version>
+				<version>${version.infinispan}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.apache.tika</groupId>
 				<artifactId>tika-parsers</artifactId>
-				<version>${tika.version}</version>
+				<version>${version.tika}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.apache.tika</groupId>
 				<artifactId>tika-core</artifactId>
-				<version>${tika.version}</version>
+				<version>${version.tika}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-compress</artifactId>
-				<version>${apache.commons.compress.version}</version>
+				<version>${version.apache.commons.compress}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.jboss.xnio</groupId>
 				<artifactId>xnio-api</artifactId>
-				<version>${xnio.version}</version>
+				<version>${version.xnio}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.jboss.xnio</groupId>
 				<artifactId>xnio-nio</artifactId>
-				<version>${xnio.version}</version>
+				<version>${version.xnio}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
