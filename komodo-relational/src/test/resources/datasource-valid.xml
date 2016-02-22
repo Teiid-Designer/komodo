@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dataSourceSet>
+    <dataSource name="mySource" jdbc="false">
+        <property name="prop2">prop2Value</property>
+        <property name="preview">true</property>
+        <property name="profileName">dsProfileName</property>
+        <property name="prop1">prop1Value</property>
+        <property name="jndiName">java:/jndiName</property>
+        <property name="driverName">dsDriver</property>
+        <property name="className">dsClassname</property>
+    </dataSource>
+</dataSourceSet>

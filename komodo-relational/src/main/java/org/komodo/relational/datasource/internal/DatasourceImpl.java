@@ -28,6 +28,7 @@ import org.komodo.relational.ExcludeQNamesFilter;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.internal.RelationalChildRestrictedObject;
 import org.komodo.spi.KException;
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.PropertyValueType;
@@ -310,6 +311,58 @@ public class DatasourceImpl extends RelationalChildRestrictedObject implements D
         return propDefn;
     }
 
+    /* (non-Javadoc)
+     * @see org.komodo.spi.repository.Exportable#export(org.komodo.spi.repository.Repository.UnitOfWork, java.util.Properties)
+     */
+    @Override
+    public String export(UnitOfWork transaction,
+                         Properties exportProperties) throws KException {
+
+        // Get the XML result
+        DatasourceNodeVisitor visitor = new DatasourceNodeVisitor(transaction, this, exportProperties);
+        String xmlResult = visitor.getXml();
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("DataSourceImpl#export: transaction = {0}, xml = {1}", //$NON-NLS-1$
+                         transaction.getName(),
+                         xmlResult);
+        }
+        
+        return xmlResult;
+    }
+    
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.repository.ObjectImpl#setProperty(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String,
+     *      java.lang.Object[])
+     */
+    @Override
+    public void setProperty( final UnitOfWork transaction,
+                             final String propertyName,
+                             final Object... values ) throws KException {
+        
+        int nsPrefixLength = (KomodoLexicon.Namespace.PREFIX+StringConstants.COLON).length();
+        
+        if( propertyName.equals(KomodoLexicon.DataSource.CLASS_NAME.substring(nsPrefixLength)) ) {
+            setClassName(transaction, (String)values[0]);
+        } else if ( propertyName.equals(KomodoLexicon.DataSource.DRIVER_NAME.substring(nsPrefixLength)) ) {
+            setDriverName(transaction, (String)values[0]);
+        } else if ( propertyName.equals(KomodoLexicon.DataSource.JNDI_NAME.substring(nsPrefixLength)) ) {
+            setJndiName(transaction, (String)values[0]);
+        } else if ( propertyName.equals(KomodoLexicon.DataSource.PREVIEW.substring(nsPrefixLength)) ) {
+            boolean isPreview = false;
+            if( (String)values[0] != null ) {
+                isPreview = Boolean.parseBoolean((String)values[0]);
+            }
+            setPreview(transaction, isPreview);
+        } else if ( propertyName.equals(KomodoLexicon.DataSource.PROFILE_NAME.substring(nsPrefixLength)) ) {
+            setProfileName(transaction, (String)values[0]);
+        } else {
+            super.setProperty(transaction, propertyName, values);
+        }
+    }
+    
     @Override
     public boolean addListener( ExecutionConfigurationListener listener ) {
         return false;

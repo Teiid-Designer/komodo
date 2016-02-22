@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    elementFormDefault="qualified"
+    attributeFormDefault="unqualified">
+
+    <!-- -->
+    <!-- A set of dataSource definitions. -->
+    <!-- -->
+    <xs:element name="dataSourceSet">
+        <xs:annotation>
+            <xs:documentation>A set of Komodo Data Sources</xs:documentation>
+        </xs:annotation>
+
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element
+                    name="dataSource"
+                    type="dataSourceType"
+                    minOccurs="1"
+                    maxOccurs="unbounded">
+                    <xs:annotation>
+                        <xs:documentation>One or more Komodo Data Sources which make up the set.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+        
+        <!-- Make sure the DataSource name attribute is unique across all sources -->
+        <xs:unique name="nameKey">
+            <xs:selector xpath=".//dataSource" />
+            <xs:field xpath="@name" />
+        </xs:unique>
+    </xs:element>
+    
+    <!-- -->
+    <!-- A base type for a data source. -->
+    <!-- -->
+    <xs:complexType name="dataSourceType">
+        <xs:sequence>
+            <xs:element
+                name="property"
+                type="propertyType"
+                minOccurs="0"
+                maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>One or more properties for the validation.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+
+        <xs:attribute
+            name="name"
+            type="xs:string"
+            use="required">
+            <xs:annotation>
+                <xs:documentation>The data source name.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+
+        <xs:attribute
+            name="jdbc"
+            type="xs:boolean"
+            use="required">
+            <xs:annotation>
+                <xs:documentation>The jdbc indicator (true:jdbc source, false:resource adapter)
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        
+    </xs:complexType>
+    
+    <!-- -->
+    <!-- A non-empty property with the name attribute of the property. -->
+    <!-- -->
+    <xs:complexType name="propertyType">
+        <xs:annotation>
+            <xs:documentation>A property with name attribute.</xs:documentation>
+        </xs:annotation>
+
+        <xs:simpleContent>
+            <xs:extension base="nonEmptyStringType">
+                <xs:attribute
+                    name="name"
+                    type="xs:string"
+                    use="required">
+                    <xs:annotation>
+                        <xs:documentation>The property name.</xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+    
+    <!-- -->
+    <!-- A non-empty string. -->
+    <!-- -->
+    <xs:simpleType name="nonEmptyStringType">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1" />
+        </xs:restriction>
+    </xs:simpleType>
+
+</xs:schema>
