@@ -55,6 +55,46 @@ public final class DatasourceParserTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldValidateSingleDatasourceXmlWithNoErrors() throws Exception {
+        String testFilePath = getClass().getClassLoader().getResource("datasource-valid.xml").getFile();
+        final File testFile = new File(testFilePath);
+
+        final String[] dataSourceNames = datasourceParser.validate(getTransaction(), testFile);
+        final List<String> errors = datasourceParser.getErrors();
+        assertThat( errors.size(), is( 0 ) );
+        assertThat( dataSourceNames.length, is( 1 ) );
+        assertThat( dataSourceNames[0], is( "mySource" ) );
+    }
+    
+    @Test
+    public void shouldValidateMultipleDatasourceXmlWithNoErrors() throws Exception {
+        String testFilePath = getClass().getClassLoader().getResource("datasource-multipleValid.xml").getFile();
+        final File testFile = new File(testFilePath);
+
+        final String[] dataSourceNames = datasourceParser.validate(getTransaction(), testFile);
+        final List<String> errors = datasourceParser.getErrors();
+        assertThat( errors.size(), is( 0 ) );
+        assertThat( dataSourceNames.length, is( 3 ) );
+        
+        assertThat( dataSourceNames[0], is( "mySource1" ) );
+        assertThat( dataSourceNames[1], is( "mySource2" ) );
+        assertThat( dataSourceNames[2], is( "mySource3" ) );
+    }
+    
+    @Test
+    public void shouldValidateDashboardDSXmlWithNoErrors() throws Exception {
+        String testFilePath = getClass().getClassLoader().getResource("datasource-validDashboardDS.xml").getFile();
+        final File testFile = new File(testFilePath);
+
+        final String[] dataSourceNames = datasourceParser.validate(getTransaction(), testFile);
+        final List<String> errors = datasourceParser.getErrors();
+        assertThat( errors.size(), is( 0 ) );
+        assertThat( dataSourceNames.length, is( 1 ) );
+        
+        assertThat( dataSourceNames[0], is( "DashboardDS" ) );
+    }
+    
+    @Test
     public void shouldParseSingleDatasourceXmlWithNoErrors() throws Exception {
         String testFilePath = getClass().getClassLoader().getResource("datasource-valid.xml").getFile();
         final File testFile = new File(testFilePath);

@@ -26,7 +26,6 @@ import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.spi.KException;
-import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -153,9 +152,25 @@ public class DatasourceParser {
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotNull( datasourceFile, "datasourceFile" ); //$NON-NLS-1$
         
-        this.handler = new Handler(transaction);
+        this.handler = new Handler(transaction,true);
         this.parser.parse(datasourceFile, handler);
         return this.handler.getDatasources();
+    }
+    
+    /**
+     * @param transaction the transaction (cannot be <code>null</code>)
+     * @param datasourceFile the data sources file (cannot be <code>null</code>)
+     * @return the Data sources (never <code>null</code>)
+     * @throws Exception if the definition file is <code>null</code> or if there is a problem parsing the file
+     */
+    public String[] validate( final UnitOfWork transaction, final File datasourceFile ) throws Exception {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( datasourceFile, "datasourceFile" ); //$NON-NLS-1$
+        
+        this.handler = new Handler(transaction,false);
+        this.parser.parse(datasourceFile, handler);
+        return this.handler.getDatasourceNames();
     }
 
     /**
@@ -169,6 +184,7 @@ public class DatasourceParser {
         private final List<String> warnings;
         
         private final Collection<Datasource> dataSources;
+        private final Collection<String> dataSourceNames;
         private final Map<String,String> propertyMap;
 
         private StringBuilder propertyValue = new StringBuilder();
@@ -178,8 +194,9 @@ public class DatasourceParser {
         private String propertyName;
         private String jdbc;
         private UnitOfWork uow;
+        private boolean createRepoSources = false;
 
-        public Handler( final UnitOfWork uow ) {
+        public Handler( final UnitOfWork uow, boolean createRepoSources ) {
             this.elements = new Stack<String>();
             this.fatals = new ArrayList<String>();
             this.errors = new ArrayList<String>();
@@ -187,7 +204,9 @@ public class DatasourceParser {
             this.warnings = new ArrayList<String>();
             this.dataSources = new ArrayList<Datasource>();
             this.propertyMap = new HashMap<String, String>();
+            this.dataSourceNames = new ArrayList<String>();
             this.uow = uow;
+            this.createRepoSources = createRepoSources;
         }
 
         /**
@@ -219,28 +238,31 @@ public class DatasourceParser {
                                 String qName ) throws SAXException {
 
             if(Datasource.XML_ELEM_DATASOURCE.equals(localName)) {
-                // Determine if source with same name already exists
-                KomodoObject[] existingSource = null;
-                try {
-                    existingSource = repo.komodoWorkspace(uow).getChildrenOfType(uow, KomodoLexicon.DataSource.NODE_TYPE, datasourceName);
-                } catch (KException ex1) {
-                    error(new SAXParseException(ex1.getMessage(), null));
-                    LOGGER.error("DatasourceParser - error fetching Datasource : ", ex1); //$NON-NLS-1$
+                if(createRepoSources) {
+                    // Determine if source with same name already exists
+                    KomodoObject[] existingSource = null;
+                    try {
+                        existingSource = repo.komodoWorkspace(uow).getChildrenOfType(uow, KomodoLexicon.DataSource.NODE_TYPE, datasourceName);
+                    } catch (KException ex1) {
+                        error(new SAXParseException(ex1.getMessage(), null));
+                        LOGGER.error("DatasourceParser - error fetching Datasource : ", ex1); //$NON-NLS-1$
+                    }
+
+                    Datasource theDatasource = null;
+                    if(existingSource!=null && existingSource.length>0) {
+                        if(replaceExisting) {
+                            if(deleteDatasource(existingSource[0])) {
+                                theDatasource = createDatasource();
+                                if(theDatasource!=null) dataSources.add(theDatasource);
+                            }
+                        }
+                    } else {
+                        theDatasource = createDatasource();
+                        if(theDatasource!=null) dataSources.add(theDatasource);
+                    }
                 }
                 
-                Datasource theDatasource = null;
-                if(existingSource!=null && existingSource.length>0) {
-                    if(replaceExisting) {
-                        if(deleteDatasource(existingSource[0])) {
-                            theDatasource = createDatasource();
-                            if(theDatasource!=null) dataSources.add(theDatasource);
-                        }
-                    }
-                } else {
-                    theDatasource = createDatasource();
-                    if(theDatasource!=null) dataSources.add(theDatasource);
-                }
-                                
+                if(datasourceName!=null) dataSourceNames.add(datasourceName);
                 this.datasourceName = null;
                 this.jdbc = null;
                 this.propertyMap.clear();
@@ -279,38 +301,15 @@ public class DatasourceParser {
                 theDatasource.setJdbc(uow, isJdbc);
                 
                 // Set remaining properties
-                setDatasourceProperties(uow, theDatasource, this.propertyMap);
+                for(String propName : this.propertyMap.keySet()) {
+                    String propValue = this.propertyMap.get(propName);
+                    theDatasource.setProperty(uow, propName, propValue);
+                }
             } catch (KException ex) {
                 error(new SAXParseException(ex.getMessage(), null));
                 LOGGER.error("DatasourceParser - error creating Datasource : ", ex); //$NON-NLS-1$
             }
             return theDatasource;
-        }
-        
-        // Sets the Datasource properties using the provided map
-        private void setDatasourceProperties( final UnitOfWork transaction, final Datasource datasource, final Map<String,String> propMap ) throws KException {
-            int nsPrefixLength = (KomodoLexicon.Namespace.PREFIX+StringConstants.COLON).length();
-            
-            for(String propName : propMap.keySet()) {
-                String propValue = propMap.get(propName);
-                if( propName.equals(KomodoLexicon.DataSource.CLASS_NAME.substring(nsPrefixLength)) ) {
-                    datasource.setClassName(transaction, propValue);
-                } else if ( propName.equals(KomodoLexicon.DataSource.DRIVER_NAME.substring(nsPrefixLength)) ) {
-                    datasource.setDriverName(transaction, propValue);
-                } else if ( propName.equals(KomodoLexicon.DataSource.JNDI_NAME.substring(nsPrefixLength)) ) {
-                    datasource.setJndiName(transaction, propValue);
-                } else if ( propName.equals(KomodoLexicon.DataSource.PREVIEW.substring(nsPrefixLength)) ) {
-                    boolean isPreview = false;
-                    if( propValue != null ) {
-                        isPreview = Boolean.parseBoolean(propValue);
-                    }
-                    datasource.setPreview(transaction, isPreview);
-                } else if ( propName.equals(KomodoLexicon.DataSource.PROFILE_NAME.substring(nsPrefixLength)) ) {
-                    datasource.setProfileName(transaction, propValue);
-                } else {
-                    datasource.setProperty(transaction, propName, propValue);
-                }
-            }
         }
         
         /**
@@ -389,6 +388,13 @@ public class DatasourceParser {
             return dataSources.toArray( new Datasource[ dataSources.size() ] );
         }
 
+        /**
+         * @return the Datasource Names (never <code>null</code> but can be empty)
+         */
+        String[] getDatasourceNames() {
+            return dataSourceNames.toArray( new String[ dataSourceNames.size() ] );
+        }
+        
         /**
          * {@inheritDoc}
          * 

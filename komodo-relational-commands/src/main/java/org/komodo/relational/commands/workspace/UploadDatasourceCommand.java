@@ -15,7 +15,6 @@ import java.util.List;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.datasource.internal.DatasourceParser;
-import org.komodo.relational.datasource.internal.DatasourceValidationParser;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.api.CommandResult;
@@ -74,15 +73,15 @@ public final class UploadDatasourceCommand extends WorkspaceShellCommand {
             }
 
             // Parser validates xml file and obtains dsNames
-            DatasourceValidationParser datasourceValidationParser = new DatasourceValidationParser( );
+            DatasourceParser datasourceParser = new DatasourceParser( getRepository(), overwrite );
             
             File dsXmlFile = new File(fileName);
-            // Validates XML file is error-free.
-            String[] dsNames = datasourceValidationParser.parse(getTransaction(), dsXmlFile);
+            // Validate the data source XML file and get names
+            String[] dsNames = datasourceParser.validate(getTransaction(), dsXmlFile);
             // Collect fatalErrors and Errors
-            List<String> parseErrors = datasourceValidationParser.getFatalErrors();
+            List<String> parseErrors = datasourceParser.getFatalErrors();
             if(parseErrors.isEmpty()) {
-                parseErrors.addAll(datasourceValidationParser.getErrors());
+                parseErrors.addAll(datasourceParser.getErrors());
             }
             // If any error encountered, log first one and return.
             if( !parseErrors.isEmpty() ) {
@@ -90,7 +89,7 @@ public final class UploadDatasourceCommand extends WorkspaceShellCommand {
                 return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.datasourceParserErrors, fileName ), null );
             }
 
-            // make sure we can overwrite if any datasources that already exist
+            // If any data sources already exist, overwrite must be specified.
             for( String dsName : dsNames ) {
                 boolean hasSource = getWorkspaceManager().hasChild(getTransaction(), dsName, KomodoLexicon.DataSource.NODE_TYPE);
                 if ( hasSource && !overwrite ) {
@@ -98,14 +97,13 @@ public final class UploadDatasourceCommand extends WorkspaceShellCommand {
                 }
             }
 
-            // Datasource parser creates the sources
-            DatasourceParser datasourceParser = new DatasourceParser( getRepository(), overwrite );
+            // Parse creates the sources in the repo.
             datasourceParser.parse(getTransaction(), dsXmlFile);
             
             // Check again for parse errors
-            parseErrors = datasourceValidationParser.getFatalErrors();
+            parseErrors = datasourceParser.getFatalErrors();
             if(parseErrors.isEmpty()) {
-                parseErrors.addAll(datasourceValidationParser.getErrors());
+                parseErrors.addAll(datasourceParser.getErrors());
             }
             // If any error encountered, log first one and return.
             if( !parseErrors.isEmpty() ) {
