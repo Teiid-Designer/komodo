@@ -195,6 +195,8 @@ import org.komodo.relational.commands.workspace.WorkspaceUnsetPropertyCommandTes
     FindCommandTest.class,
     SetCustomPropertyCommandTest.class,
     UnsetCustomPropertyCommandTest.class,
+    SetCustomOptionCommandTest.class,
+    UnsetCustomOptionCommandTest.class,
     RelationalAddChildCommandTest.class,
     RelationalCommandsI18nTest.class,
     RelationalDeleteChildCommandTest.class,
