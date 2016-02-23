@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:tko="http://www.teiid.org/komodo/1.0">
-	<tko:komodo>
+	<tko:komodo jcr:primaryType="tko:komodo">
 		<tko:workspace jcr:primaryType="tko:workspace" />
 		<tko:library jcr:primaryType="tko:library" />
 		<tko:environment jcr:primaryType="tko:environment">
