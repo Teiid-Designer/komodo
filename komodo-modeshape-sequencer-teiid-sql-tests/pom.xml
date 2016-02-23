@@ -36,7 +36,7 @@
 
 		<dependency>
 			<groupId>org.komodo</groupId>
-			<artifactId>komodo-teiid-client</artifactId>
+			<artifactId>komodo-modeshape-sequencer-teiid-sql</artifactId>
 		</dependency>
 
 		<dependency>

@@ -24,7 +24,6 @@ package org.komodo.teiid;
 import java.util.Set;
 import org.komodo.spi.annotation.AnnotationUtils;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.komodo.spi.type.BinaryType;
 import org.komodo.spi.type.DataTypeManager;
 import org.teiid.core.util.ArgCheck;
 
@@ -154,53 +153,5 @@ public class DataTypeManagerImpl implements DataTypeManager {
     @Override
     public <T> T transformValue(Object value, Class<?> typeClass) throws Exception {
         return (T) org.teiid.core.types.DataTypeManager.transformValue(value, typeClass);
-    }
-
-    @Override
-    public Integer getDataTypeLimit(String dataTypeName) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public int getDataTypeLimit(DataTypeName dataTypeName) {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    @Override
-    public String getDataTypeValidChars(String dataTypeName) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public BinaryType createBinaryType(byte[] bytes) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public boolean isDecimalAsDouble() {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public DataTypeName getCountType() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public DataTypeName getSumReturnType(DataTypeName sumArgType) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public DataTypeName getAverageReturnType(DataTypeName avgArgType) {
-        // TODO Auto-generated method stub
-        return null;
     }
 }

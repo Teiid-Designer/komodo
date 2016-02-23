@@ -2,6 +2,7 @@
 /* JavaCCOptions:MULTI=true,NODE_USES_PARSER=true,VISITOR=true,TRACK_TOKENS=false,NODE_PREFIX=,NODE_EXTENDS=,NODE_FACTORY=TeiidNodeFactory,SUPPORT_CLASS_VISIBILITY_PUBLIC=true */
 package org.teiid.query.sql.lang;
 
+import org.komodo.spi.query.JoinTypeTypes;
 import org.komodo.spi.query.sql.lang.JoinType;
 import org.teiid.query.parser.TCLanguageVisitorImpl;
 import org.teiid.query.parser.TeiidClientParser;
@@ -11,7 +12,7 @@ import org.teiid.query.parser.TeiidClientParser;
  */
 public class JoinTypeImpl extends SimpleNode implements JoinType<TCLanguageVisitorImpl>{
 
-    private Types kind = Types.JOIN_CROSS;
+    private JoinTypeTypes kind = JoinTypeTypes.JOIN_CROSS;
 
     /**
      * @param p
@@ -24,14 +25,14 @@ public class JoinTypeImpl extends SimpleNode implements JoinType<TCLanguageVisit
     /**
      * @return the kind
      */
-    public Types getKind() {
+    public JoinTypeTypes getKind() {
         return kind;
     }
 
     /**
      * @param kind the kind to set
      */
-    public void setKind(Types kind) {
+    public void setKind(JoinTypeTypes kind) {
         this.kind = kind;
     }
 

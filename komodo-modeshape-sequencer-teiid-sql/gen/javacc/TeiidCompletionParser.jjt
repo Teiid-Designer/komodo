@@ -65,23 +65,19 @@ package org.komodo.modeshape.teiid.parser.completion;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.regex.Matcher;
-import org.komodo.modeshape.teiid.parser.AbstractTeiidSeqParser;
+import org.komodo.modeshape.teiid.parser.AbstractTeiidParser;
 import org.komodo.modeshape.teiid.parser.ParseInfo;
-import org.komodo.modeshape.teiid.sql.lang.CommandImpl;
-import org.komodo.modeshape.teiid.sql.lang.CriteriaImpl;
-import org.komodo.modeshape.teiid.sql.proc.StatementImpl;
-import org.komodo.modeshape.teiid.sql.symbol.BaseExpression;
+import org.komodo.spi.lexicon.TeiidSqlConstants;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.modeshape.teiid.Messages;
 import org.komodo.utils.StringUtils;
-import org.komodo.modeshape.teiid.parser.TeiidSQLConstants;
 import org.komodo.modeshape.teiid.parser.bnf.BNF;
 
 @ SuppressWarnings({"nls", "unused", "javadoc"})
-public class TeiidCompletionParser extends AbstractTeiidSeqParser {
+public class TeiidCompletionParser extends AbstractTeiidParser {
 
 	private Set <String> expectedTokens = new HashSet<String>();
 
@@ -1365,7 +1361,7 @@ void id() :
 /*
  * Top-Level function so includes try catch
  */
-CommandImpl command(ParseInfo info) :
+void command(ParseInfo info) :
 {
 	ppSet(bnf.command());
 }
@@ -1399,16 +1395,12 @@ CommandImpl command(ParseInfo info) :
 	}
 	catch (ParseException ex)
 	{}
-
-	{
-		return null;
-	}
 }
 
 /*
  * Top-Level function so includes try catch
  */
-CommandImpl designerCommand(ParseInfo info) :
+void designerCommand(ParseInfo info) :
 {
 	ppSet(bnf.designerCommand());
 }
@@ -1442,10 +1434,6 @@ CommandImpl designerCommand(ParseInfo info) :
 	}
 	catch (ParseException ex)
 	{}
-
-	{
-		return null;
-	}
 }
 
 void createTrigger(ParseInfo info) :
@@ -1628,7 +1616,7 @@ void alter(ParseInfo info) :
 //	{}
 }
 
-CommandImpl forEachRowTriggerAction(ParseInfo info) :
+void forEachRowTriggerAction(ParseInfo info) :
 {
 	ppAppend(bnf.forEachRowTriggerAction(0));
 }
@@ -1678,10 +1666,6 @@ CommandImpl forEachRowTriggerAction(ParseInfo info) :
 //	}
 //	catch (ParseException ex)
 //	{}
-
-	{
-		return null;
-	}
 }
 
 void userCommand(ParseInfo info) :
@@ -1821,7 +1805,7 @@ void exception(ParseInfo info) :
 //	{}
 }
 
-StatementImpl statement(ParseInfo info) :
+void statement(ParseInfo info) :
 {
 	ppAppend(bnf.statement(0));
 }
@@ -1862,10 +1846,6 @@ StatementImpl statement(ParseInfo info) :
 //	}
 //	catch (ParseException ex)
 //	{}
-
-	{
-		return null;
-	}
 }
 
 void delimitedStatement(ParseInfo info) :
@@ -2345,7 +2325,7 @@ void createProcedure(ParseInfo info) :
 /*
  * Top-Level function so includes try catch
  */
-CommandImpl procedureBodyCommand(ParseInfo info) :
+void procedureBodyCommand(ParseInfo info) :
 {}
 {
 	try
@@ -2375,10 +2355,6 @@ CommandImpl procedureBodyCommand(ParseInfo info) :
 	}
 	catch (ParseException ex)
 	{}
-
-	{
-		return null;
-	}
 }
 
 void dynamicCommand(ParseInfo info) :
@@ -3299,7 +3275,7 @@ void selectSymbol(ParseInfo info) :
 //	{}
 }
 
-BaseExpression selectExpression(ParseInfo info) :
+void selectExpression(ParseInfo info) :
 {}
 {
 //	try
@@ -3324,10 +3300,6 @@ BaseExpression selectExpression(ParseInfo info) :
 //	}
 //	catch (ParseException ex)
 //	{}
-
-	{
-		return null;
-	}
 }
 
 void derivedColumn(ParseInfo info) :
@@ -4882,7 +4854,7 @@ void where(ParseInfo info) :
 //	{}
 }
 
-CriteriaImpl criteria(ParseInfo info) :
+void criteria(ParseInfo info) :
 {}
 {
 //	try
@@ -4891,10 +4863,6 @@ CriteriaImpl criteria(ParseInfo info) :
 //	}
 //	catch (ParseException ex)
 //	{}
-
-	{
-		return null;
-	}
 }
 
 void compoundCritOr(ParseInfo info) :
@@ -5738,7 +5706,7 @@ void option(ParseInfo info) :
 //	{}
 }
 
-BaseExpression expression(ParseInfo info) :
+void expression(ParseInfo info) :
 {}
 {
 //	try
@@ -5747,10 +5715,6 @@ BaseExpression expression(ParseInfo info) :
 //	}
 //	catch (ParseException ex)
 //	{}
-
-	{
-		return null;
-	}
 }
 
 void commonValueExpression(ParseInfo info) :

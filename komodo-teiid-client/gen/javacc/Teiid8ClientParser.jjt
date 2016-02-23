@@ -71,7 +71,7 @@ import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.spi.query.sql.lang.MatchCriteria.MatchMode;
-import org.komodo.spi.query.sql.lang.JoinType;
+import org.komodo.spi.query.JoinTypeTypes;
 import org.teiid.runtime.client.Messages;
 import org.teiid.language.SortSpecification.NullOrdering;
 import org.teiid.metadata.AbstractMetadataRecord;
@@ -2657,7 +2657,7 @@ JoinPredicateImpl crossJoin(ParseInfo info) :
 	FromClauseImpl clause = null;
 }
 {
-	(	(<CROSS> {result.setJoinType(joinType(JoinType.Types.JOIN_CROSS));}|<UNION> {result.setJoinType(joinType(JoinType.Types.JOIN_UNION));})
+	(	(<CROSS> {result.setJoinType(joinType(JoinTypeTypes.JOIN_CROSS));}|<UNION> {result.setJoinType(joinType(JoinTypeTypes.JOIN_UNION));})
     	<JOIN> 
 		clause = tablePrimary(info) {result.setRightClause(clause);}
 	)
@@ -2678,9 +2678,9 @@ JoinPredicateImpl qualifiedJoin(ParseInfo info) :
 	CriteriaImpl onCriteria = null;
 }
 {
-	(	[	(<RIGHT> {result.setJoinType(joinType(JoinType.Types.JOIN_RIGHT_OUTER));} [<OUTER>])
-    		| (<LEFT> {result.setJoinType(joinType(JoinType.Types.JOIN_LEFT_OUTER));} [<OUTER>])
-    		|  (<FULL> {result.setJoinType(joinType(JoinType.Types.JOIN_FULL_OUTER));} [<OUTER>])
+	(	[	(<RIGHT> {result.setJoinType(joinType(JoinTypeTypes.JOIN_RIGHT_OUTER));} [<OUTER>])
+    		| (<LEFT> {result.setJoinType(joinType(JoinTypeTypes.JOIN_LEFT_OUTER));} [<OUTER>])
+    		|  (<FULL> {result.setJoinType(joinType(JoinTypeTypes.JOIN_FULL_OUTER));} [<OUTER>])
     		| <INNER>
 		]
 		<JOIN>
@@ -2702,7 +2702,7 @@ JoinPredicateImpl joinPredicate() #JoinPredicateImpl :
     }
 }
 
-JoinTypeImpl joinType(JoinType.Types kind) #JoinTypeImpl :
+JoinTypeImpl joinType(JoinTypeTypes kind) #JoinTypeImpl :
 {
 }
 {

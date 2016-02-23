@@ -35,12 +35,13 @@ import javax.jcr.PropertyType;
 import javax.jcr.RepositoryException;
 import javax.jcr.Value;
 import javax.jcr.nodetype.NodeType;
+import org.komodo.osgi.PluginService;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.query.TeiidService;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.DataTypeManager;
-import org.teiid.runtime.client.admin.factory.TCExecutionAdminFactory;
 
 /**
  *
@@ -85,10 +86,10 @@ public abstract class AbstractNodeVisitor implements ItemVisitor {
     /**
      * @return data type manager service
      */
-    public DataTypeManager getDataTypeManager() {
+    public DataTypeManager getDataTypeManager() throws Exception {
         if (dataTypeManager == null) {
-            TCExecutionAdminFactory factory = new TCExecutionAdminFactory();
-            return factory.getDataTypeManagerService(getVersion());
+            TeiidService teiidService = PluginService.getInstance().getTeiidService(getVersion());
+            dataTypeManager = teiidService.getDataTypeManager();
         }
 
         return dataTypeManager;

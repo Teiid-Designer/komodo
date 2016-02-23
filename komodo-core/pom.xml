@@ -10,6 +10,10 @@
 	<name>Komodo Core</name>
 	<description>Komodo Core</description>
 
+	<properties>
+		<version.xerces>2.9.1</version.xerces>
+	</properties>
+
 	<build>
 		<plugins>
 			<plugin>
@@ -64,5 +68,21 @@
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<!-- For rule validation -->
+		<dependency>
+  			<groupId>xerces</groupId>
+  			<artifactId>xercesImpl</artifactId>
+		</dependency>
 	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>xerces</groupId>
+				<artifactId>xercesImpl</artifactId>
+				<version>${version.xerces}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 </project>

@@ -480,8 +480,8 @@ public interface QueryFactory<E extends Expression,
      * 
      * @return instance of {@link JoinType}
      */
-    JoinType getJoinType(JoinType.Types joinType);
-    
+    JoinType getJoinType(JoinTypeTypes joinType);
+
     /**
      * Create a join predicate
      * 

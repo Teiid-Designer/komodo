@@ -23,6 +23,7 @@ package org.teiid.runtime.client.query;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.komodo.spi.query.JoinTypeTypes;
 import org.komodo.spi.query.QueryFactory;
 import org.komodo.spi.query.metadata.MetadataID;
 import org.komodo.spi.query.metadata.QueryNode;
@@ -497,7 +498,7 @@ public class SyntaxFactory implements QueryFactory <BaseExpression,
     }
 
     @Override
-    public JoinType getJoinType(JoinType.Types joinType) {
+    public JoinType getJoinType(JoinTypeTypes joinType) {
         JoinTypeImpl join = create(ASTNodes.JOIN_TYPE);
         join.setKind(joinType);
         return join;

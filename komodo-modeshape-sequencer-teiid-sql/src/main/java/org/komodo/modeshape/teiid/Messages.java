@@ -42,6 +42,11 @@ public class Messages {
     public enum TeiidSqlSequencer {
         ErrorSequencingContent,
         ErrorParsingContent;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
     }
 
     @SuppressWarnings( "javadoc" )

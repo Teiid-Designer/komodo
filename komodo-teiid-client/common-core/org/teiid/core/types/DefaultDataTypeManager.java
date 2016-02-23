@@ -110,13 +110,13 @@ public class DefaultDataTypeManager implements DataTypeManager {
 
         LONG ("long", DataTypeName.LONG, Long.class, 19, "0123456789-", DataTypeAliases.BIGINT), //$NON-NLS-1$ //$NON-NLS-2$
 
-        BIG_INTEGER ("biginteger", DataTypeName.BIG_INTEGER, BigInteger.class, 30, "0123456789-"), //$NON-NLS-1$ //$NON-NLS-2$
+        BIG_INTEGER ("biginteger", DataTypeName.BIGINTEGER, BigInteger.class, 30, "0123456789-"), //$NON-NLS-1$ //$NON-NLS-2$
 
         FLOAT ("float", DataTypeName.FLOAT, Float.class, 30, "0123456789-+.eE", DataTypeAliases.REAL), //$NON-NLS-1$ //$NON-NLS-2$
 
         DOUBLE ("double", DataTypeName.DOUBLE, Double.class, 30, "0123456789-+.eE"), //$NON-NLS-1$ //$NON-NLS-2$
 
-        BIG_DECIMAL ("bigdecimal", DataTypeName.BIG_DECIMAL, BigDecimal.class, 30, "0123456789-.eE", DataTypeAliases.DECIMAL), //$NON-NLS-1$ //$NON-NLS-2$
+        BIG_DECIMAL ("bigdecimal", DataTypeName.BIGDECIMAL, BigDecimal.class, 30, "0123456789-.eE", DataTypeAliases.DECIMAL), //$NON-NLS-1$ //$NON-NLS-2$
 
         DATE ("date", DataTypeName.DATE, Date.class), //$NON-NLS-1$
 
@@ -1027,8 +1027,7 @@ public class DefaultDataTypeManager implements DataTypeManager {
 
         return transformValue(value, value.getClass(), getDataType(targetClass));
     }
-    
-    @Override
+
     public boolean isDecimalAsDouble() {
         return PropertiesUtils.getBooleanProperty(System.getProperties(), "org.teiid.decimalAsDouble", false); //$NON-NLS-1$
     }
@@ -1078,26 +1077,23 @@ public class DefaultDataTypeManager implements DataTypeManager {
         return value; // "object type"
     }
 
-    @Override
     public BinaryType createBinaryType(byte[] bytes) {
         return new BinaryTypeImpl(bytes);
     }
 
-    @Override
     public DataTypeName getCountType() {
         return DefaultDataTypes.INTEGER.getDataTypeName();
     }
 
-    @Override
     public DataTypeName getSumReturnType(DataTypeName sumArgType) {
         if (sumArgType == null || DataTypeName.NULL.equals(sumArgType))
             return null;
 
         switch (sumArgType) {
-            case BIG_DECIMAL:
-                return DataTypeName.BIG_DECIMAL;
-            case BIG_INTEGER:
-                return DataTypeName.BIG_INTEGER;
+            case BIGDECIMAL:
+                return DataTypeName.BIGDECIMAL;
+            case BIGINTEGER:
+                return DataTypeName.BIGINTEGER;
             case DOUBLE:
             case FLOAT:
                 return DataTypeName.DOUBLE;
@@ -1111,7 +1107,6 @@ public class DefaultDataTypeManager implements DataTypeManager {
         }
     }
 
-    @Override
     public DataTypeName getAverageReturnType(DataTypeName avgArgType) {
         if (avgArgType == null)
             return null;
@@ -1124,10 +1119,10 @@ public class DefaultDataTypeManager implements DataTypeManager {
                 if(isDecimalAsDouble())
                     return DataTypeName.DOUBLE;
                 else
-                    return DataTypeName.BIG_DECIMAL;
-            case BIG_INTEGER:
-            case BIG_DECIMAL:
-                return DataTypeName.BIG_DECIMAL;
+                    return DataTypeName.BIGDECIMAL;
+            case BIGINTEGER:
+            case BIGDECIMAL:
+                return DataTypeName.BIGDECIMAL;
             case FLOAT:
             case DOUBLE:
                 return DataTypeName.DOUBLE;

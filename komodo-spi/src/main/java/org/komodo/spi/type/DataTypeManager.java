@@ -26,10 +26,10 @@ public interface DataTypeManager {
         CHAR,                           CHAR_ARRAY,
         INTEGER,                      INTEGER_ARRAY,
         LONG,                           LONG_ARRAY,
-        BIG_INTEGER,              BIG_INTEGER_ARRAY,
+        BIGINTEGER,              BIGINTEGER_ARRAY,
         FLOAT,                          FLOAT_ARRAY,
         DOUBLE,                       DOUBLE_ARRAY,
-        BIG_DECIMAL,              BIG_DECIMAL_ARRAY,
+        BIGDECIMAL,              BIGDECIMAL_ARRAY,
         DATE,                            DATE_ARRAY,
         TIME,                            TIME_ARRAY,
         TIMESTAMP,                 TIMESTAMP_ARRAY,
@@ -226,31 +226,8 @@ public interface DataTypeManager {
     String getDefaultDataType(DataTypeName dataTypeName);
     
     /**
-     * Get the length of the data type
-     *
-     * @param dataTypeName
-     *
-     * @return integer indicating data type limit
-     */
-    Integer getDataTypeLimit(String dataTypeName);
 
     /**
-     * Get the length of the data type
-     *
-     * @param dataTypeName
-     *
-     * @return integer indicating data type limit
-     */
-    int getDataTypeLimit(DataTypeName dataTypeName);
-
-    /**
-     * Get the valid characters of the data type
-     * 
-     * @param dataTypeName
-     * 
-     * @return string of valid characters or null if all characters are valid
-     */
-    String getDataTypeValidChars(String dataTypeName);
     
     /**
      * Get the default data class represented by the 
@@ -296,12 +273,6 @@ public interface DataTypeManager {
     boolean isTransformable(String sourceTypeName, String targetTypeName);
 
     /**
-     * @param bytes
-     *
-     * @return Wrapped binary type of the given bytes
-     */
-    BinaryType createBinaryType(byte[] bytes);
-
     /**
      * Transform the given value into the given data type
      *
@@ -321,32 +292,6 @@ public interface DataTypeManager {
      * @throws Exception
      */
     <T> T transformValue(Object value, Class<?> typeClass) throws Exception;
-
-    /**
-     * @return whether decimals are treated as doubles
-     */
-    boolean isDecimalAsDouble();
-
-    /**
-     * @return the data type name for the count type
-     */
-    DataTypeName getCountType();
-
-    /**
-     * For the given argument type, find the sum function's return type
-     *
-     * @param sumArgType
-     * @return sum return type or null if argument is not an appropriate type for sum expressions
-     */
-    DataTypeName getSumReturnType(DataTypeName sumArgType);
-
-    /**
-     * For the given argument type, find the average function's return type
-     *
-     * @param avgArgType
-     * @return average return type or null if argument is not an appropriate type for avg expressions
-     */
-    DataTypeName getAverageReturnType(DataTypeName avgArgType);
 
     /**
      * @param type

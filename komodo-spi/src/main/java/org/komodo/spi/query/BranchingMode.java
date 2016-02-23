@@ -19,26 +19,39 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  */
-package org.komodo.spi.lexicon;
-
-import org.komodo.spi.lexicon.TeiidSqlLexicon;
+package org.komodo.spi.query;
 
 /**
- * Wrapping interface for passing parameters into {@link TeiidSqlLexicon#redirect}
+ * Modes of branching
  */
-public interface TeiidSqlContext {
+public enum BranchingMode {
+    /**
+     * Teiid specific - only allowed to target loops
+     */
+    BREAK,
+    /**
+     * Teiid specific - only allowed to target loops
+     */
+    CONTINUE,
+    /**
+     * ANSI - allowed to leave any block 
+     */
+    LEAVE;
 
     /**
-     * @param key
-     * @return object indexed against given key
+     * @param name
+     * @return BranchingMode for given name
      */
-    Object get(String key);
+    public static BranchingMode findBranchingMode(String name) {
+        if (name == null)
+            return null;
 
-    /**
-     * Adds an object to the context with the given key
-     *
-     * @param key
-     * @param obj
-     */
-    void add(String key, Object obj);
+        name = name.toUpperCase();
+        for (BranchingMode mode : values()) {
+            if (mode.name().equals(name))
+                return mode;
+        }
+
+        return null;
+    }
 }

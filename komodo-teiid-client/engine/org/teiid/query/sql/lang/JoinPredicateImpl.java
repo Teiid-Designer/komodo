@@ -5,12 +5,11 @@ package org.teiid.query.sql.lang;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
+import org.komodo.spi.query.JoinTypeTypes;
 import org.komodo.spi.query.sql.lang.JoinPredicate;
-import org.komodo.spi.query.sql.lang.JoinType.Types;
 import org.teiid.query.parser.TCLanguageVisitorImpl;
-import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.parser.TeiidClientParser;
+import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.sql.symbol.GroupSymbolImpl;
 
 /**
@@ -34,7 +33,7 @@ public class JoinPredicateImpl extends FromClauseImpl
     public JoinPredicateImpl(TeiidClientParser p, int id) {
         super(p, id);
         joinType = p.createASTNode(ASTNodes.JOIN_TYPE);
-        joinType.setKind(Types.JOIN_INNER);
+        joinType.setKind(JoinTypeTypes.JOIN_INNER);
     }
 
     /**

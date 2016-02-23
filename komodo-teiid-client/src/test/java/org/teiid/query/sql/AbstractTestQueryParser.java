@@ -32,7 +32,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.junit.Test;
-import org.komodo.spi.query.sql.lang.JoinType.Types;
+import org.komodo.spi.query.JoinTypeTypes;
 import org.komodo.spi.query.sql.lang.SPParameter.ParameterInfo;
 import org.komodo.spi.query.sql.lang.SetQuery;
 import org.komodo.spi.query.sql.symbol.AggregateSymbol;
@@ -217,7 +217,7 @@ public abstract class AbstractTestQueryParser extends AbstractTest<CommandImpl> 
         List<CriteriaImpl> crits = new ArrayList<CriteriaImpl>();
         crits.add(jcrit);
 
-        JoinPredicateImpl jp = getFactory().newJoinPredicate(g1, g2, Types.JOIN_INNER, crits);
+        JoinPredicateImpl jp = getFactory().newJoinPredicate(g1, g2, JoinTypeTypes.JOIN_INNER, crits);
 
         FromImpl from = getFactory().newFrom();
         from.addClause(jp);
@@ -235,7 +235,7 @@ public abstract class AbstractTestQueryParser extends AbstractTest<CommandImpl> 
         UnaryFromClauseImpl g1 = getFactory().newUnaryFromClause("g1");
         UnaryFromClauseImpl g2 = getFactory().newUnaryFromClause("g2");
 
-        JoinPredicateImpl jp = getFactory().newJoinPredicate(g1, g2, Types.JOIN_CROSS);
+        JoinPredicateImpl jp = getFactory().newJoinPredicate(g1, g2, JoinTypeTypes.JOIN_CROSS);
         FromImpl from = getFactory().newFrom();
         from.addClause(jp);
 
@@ -252,7 +252,7 @@ public abstract class AbstractTestQueryParser extends AbstractTest<CommandImpl> 
         UnaryFromClauseImpl g1 = getFactory().newUnaryFromClause("g1");
         UnaryFromClauseImpl g2 = getFactory().newUnaryFromClause("g2");
 
-        JoinPredicateImpl jp = getFactory().newJoinPredicate(g1, g2, Types.JOIN_CROSS);
+        JoinPredicateImpl jp = getFactory().newJoinPredicate(g1, g2, JoinTypeTypes.JOIN_CROSS);
         FromImpl from = getFactory().newFrom();
         from.addClause(jp);
 
@@ -272,9 +272,9 @@ public abstract class AbstractTestQueryParser extends AbstractTest<CommandImpl> 
         UnaryFromClauseImpl g1 = getFactory().newUnaryFromClause("g1");
         UnaryFromClauseImpl g2 = getFactory().newUnaryFromClause("g2");
 
-        JoinPredicateImpl jp = getFactory().newJoinPredicate(g1, g2, Types.JOIN_CROSS);
+        JoinPredicateImpl jp = getFactory().newJoinPredicate(g1, g2, JoinTypeTypes.JOIN_CROSS);
         UnaryFromClauseImpl g3 = getFactory().newUnaryFromClause("g3");
-        JoinPredicateImpl jp2 = getFactory().newJoinPredicate(jp, g3, Types.JOIN_CROSS);
+        JoinPredicateImpl jp2 = getFactory().newJoinPredicate(jp, g3, JoinTypeTypes.JOIN_CROSS);
         FromImpl from = getFactory().newFrom();
         from.addClause(jp2);
 
@@ -291,11 +291,11 @@ public abstract class AbstractTestQueryParser extends AbstractTest<CommandImpl> 
         UnaryFromClauseImpl g1 = getFactory().newUnaryFromClause("g1");
         UnaryFromClauseImpl g2 = getFactory().newUnaryFromClause("g2");
 
-        JoinPredicateImpl jp = getFactory().newJoinPredicate(g1, g2, Types.JOIN_CROSS);
+        JoinPredicateImpl jp = getFactory().newJoinPredicate(g1, g2, JoinTypeTypes.JOIN_CROSS);
         UnaryFromClauseImpl g3 = getFactory().newUnaryFromClause("g3");
         UnaryFromClauseImpl g4 = getFactory().newUnaryFromClause("g4");
-        JoinPredicateImpl jp2 = getFactory().newJoinPredicate(g3, g4, Types.JOIN_CROSS);
-        JoinPredicateImpl jp3 = getFactory().newJoinPredicate(jp, jp2, Types.JOIN_CROSS);
+        JoinPredicateImpl jp2 = getFactory().newJoinPredicate(g3, g4, JoinTypeTypes.JOIN_CROSS);
+        JoinPredicateImpl jp3 = getFactory().newJoinPredicate(jp, jp2, JoinTypeTypes.JOIN_CROSS);
         FromImpl from = getFactory().newFrom();
         from.addClause(jp3);
 
@@ -315,8 +315,8 @@ public abstract class AbstractTestQueryParser extends AbstractTest<CommandImpl> 
         UnaryFromClauseImpl g2 = getFactory().newUnaryFromClause("g2");
         UnaryFromClauseImpl g3 = getFactory().newUnaryFromClause("g3");
 
-        JoinPredicateImpl jp = getFactory().newJoinPredicate(g2, g3, Types.JOIN_CROSS);
-        JoinPredicateImpl jp2 = getFactory().newJoinPredicate(g1, jp, Types.JOIN_CROSS);
+        JoinPredicateImpl jp = getFactory().newJoinPredicate(g2, g3, JoinTypeTypes.JOIN_CROSS);
+        JoinPredicateImpl jp2 = getFactory().newJoinPredicate(g1, jp, JoinTypeTypes.JOIN_CROSS);
         FromImpl from = getFactory().newFrom();
         from.addClause(jp2);
 
@@ -334,8 +334,8 @@ public abstract class AbstractTestQueryParser extends AbstractTest<CommandImpl> 
         UnaryFromClauseImpl g2 = getFactory().newUnaryFromClause("g2");
         UnaryFromClauseImpl g3 = getFactory().newUnaryFromClause("g3");
 
-        JoinPredicateImpl jp = getFactory().newJoinPredicate(g2, g3, Types.JOIN_CROSS);
-        JoinPredicateImpl jp2 = getFactory().newJoinPredicate(g1, jp, Types.JOIN_CROSS);
+        JoinPredicateImpl jp = getFactory().newJoinPredicate(g2, g3, JoinTypeTypes.JOIN_CROSS);
+        JoinPredicateImpl jp2 = getFactory().newJoinPredicate(g1, jp, JoinTypeTypes.JOIN_CROSS);
         FromImpl from = getFactory().newFrom();
         from.addClause(jp2);
         UnaryFromClauseImpl g4 = getFactory().newUnaryFromClause("g4");
@@ -360,9 +360,9 @@ public abstract class AbstractTestQueryParser extends AbstractTest<CommandImpl> 
         UnaryFromClauseImpl g5 = getFactory().newUnaryFromClause("g5");
         UnaryFromClauseImpl g6 = getFactory().newUnaryFromClause("g6");
 
-        JoinPredicateImpl jp = getFactory().newJoinPredicate(g2, g3, Types.JOIN_CROSS);
-        JoinPredicateImpl jp2 = getFactory().newJoinPredicate(g1, jp, Types.JOIN_CROSS);
-        JoinPredicateImpl jp3 = getFactory().newJoinPredicate(g5, g6, Types.JOIN_CROSS);
+        JoinPredicateImpl jp = getFactory().newJoinPredicate(g2, g3, JoinTypeTypes.JOIN_CROSS);
+        JoinPredicateImpl jp2 = getFactory().newJoinPredicate(g1, jp, JoinTypeTypes.JOIN_CROSS);
+        JoinPredicateImpl jp3 = getFactory().newJoinPredicate(g5, g6, JoinTypeTypes.JOIN_CROSS);
         FromImpl from = getFactory().newFrom();
         from.addClause(jp2);
         from.addClause(g4);
@@ -388,7 +388,7 @@ public abstract class AbstractTestQueryParser extends AbstractTest<CommandImpl> 
 
         ArrayList<CriteriaImpl> crits = new ArrayList<CriteriaImpl>();
         crits.add(jcrit);
-        JoinPredicateImpl jp = getFactory().newJoinPredicate(g2, g3, Types.JOIN_INNER, crits);
+        JoinPredicateImpl jp = getFactory().newJoinPredicate(g2, g3, JoinTypeTypes.JOIN_INNER, crits);
         FromImpl from = getFactory().newFrom();
         from.addClause(g1);
         from.addClause(jp);
@@ -409,7 +409,7 @@ public abstract class AbstractTestQueryParser extends AbstractTest<CommandImpl> 
         CompareCriteriaImpl jcrit = getFactory().newCompareCriteria("myG.x", Operator.EQ, "myH.x");
         ArrayList<CriteriaImpl> crits = new ArrayList<CriteriaImpl>();
         crits.add(jcrit);
-        JoinPredicateImpl jp = getFactory().newJoinPredicate(g, h, Types.JOIN_RIGHT_OUTER, crits);
+        JoinPredicateImpl jp = getFactory().newJoinPredicate(g, h, JoinTypeTypes.JOIN_RIGHT_OUTER, crits);
         FromImpl from = getFactory().newFrom();
         from.addClause(jp);
 
@@ -434,7 +434,7 @@ public abstract class AbstractTestQueryParser extends AbstractTest<CommandImpl> 
         CompareCriteriaImpl jcrit = getFactory().newCompareCriteria("myG.x", Operator.EQ, "myH.x");
         ArrayList<CriteriaImpl> crits = new ArrayList<CriteriaImpl>();
         crits.add(jcrit);
-        JoinPredicateImpl jp = getFactory().newJoinPredicate(g, h, Types.JOIN_RIGHT_OUTER, crits);
+        JoinPredicateImpl jp = getFactory().newJoinPredicate(g, h, JoinTypeTypes.JOIN_RIGHT_OUTER, crits);
         FromImpl from = getFactory().newFrom();
         from.addClause(jp);
 
@@ -459,7 +459,7 @@ public abstract class AbstractTestQueryParser extends AbstractTest<CommandImpl> 
         CompareCriteriaImpl jcrit = getFactory().newCompareCriteria("myG.x", Operator.EQ, "myH.x");
         ArrayList<CriteriaImpl> crits = new ArrayList<CriteriaImpl>();
         crits.add(jcrit);
-        JoinPredicateImpl jp = getFactory().newJoinPredicate(g, h, Types.JOIN_LEFT_OUTER, crits);
+        JoinPredicateImpl jp = getFactory().newJoinPredicate(g, h, JoinTypeTypes.JOIN_LEFT_OUTER, crits);
         FromImpl from = getFactory().newFrom();
         from.addClause(jp);
 
@@ -484,7 +484,7 @@ public abstract class AbstractTestQueryParser extends AbstractTest<CommandImpl> 
         CompareCriteriaImpl jcrit = getFactory().newCompareCriteria("myG.x", Operator.EQ, "myH.x");
         ArrayList<CriteriaImpl> crits = new ArrayList<CriteriaImpl>();
         crits.add(jcrit);
-        JoinPredicateImpl jp = getFactory().newJoinPredicate(g, h, Types.JOIN_LEFT_OUTER, crits);
+        JoinPredicateImpl jp = getFactory().newJoinPredicate(g, h, JoinTypeTypes.JOIN_LEFT_OUTER, crits);
         FromImpl from = getFactory().newFrom();
         from.addClause(jp);
 
@@ -509,7 +509,7 @@ public abstract class AbstractTestQueryParser extends AbstractTest<CommandImpl> 
         CompareCriteriaImpl jcrit = getFactory().newCompareCriteria("myG.x", Operator.EQ, "myH.x");
         ArrayList<CriteriaImpl> crits = new ArrayList<CriteriaImpl>();
         crits.add(jcrit);
-        JoinPredicateImpl jp = getFactory().newJoinPredicate(g, h, Types.JOIN_FULL_OUTER, crits);
+        JoinPredicateImpl jp = getFactory().newJoinPredicate(g, h, JoinTypeTypes.JOIN_FULL_OUTER, crits);
         FromImpl from = getFactory().newFrom();
         from.addClause(jp);
 
@@ -534,7 +534,7 @@ public abstract class AbstractTestQueryParser extends AbstractTest<CommandImpl> 
         CompareCriteriaImpl jcrit = getFactory().newCompareCriteria("g.x", Operator.EQ, "h.x");
         ArrayList<CriteriaImpl> crits = new ArrayList<CriteriaImpl>();
         crits.add(jcrit);
-        JoinPredicateImpl jp = getFactory().newJoinPredicate(g, h, Types.JOIN_FULL_OUTER, crits);
+        JoinPredicateImpl jp = getFactory().newJoinPredicate(g, h, JoinTypeTypes.JOIN_FULL_OUTER, crits);
         FromImpl from = getFactory().newFrom();
         from.addClause(jp);
 
@@ -2559,7 +2559,7 @@ public abstract class AbstractTestQueryParser extends AbstractTest<CommandImpl> 
         CompareCriteriaImpl join = getFactory().newCompareCriteria(getFactory().newElementSymbol("m.g1.a"), Operator.EQ, getFactory().newElementSymbol("y.c"));
         List crits = new ArrayList();
         crits.add(join);
-        JoinPredicateImpl jp = getFactory().newJoinPredicate(ufc, sfc, Types.JOIN_INNER, crits);
+        JoinPredicateImpl jp = getFactory().newJoinPredicate(ufc, sfc, JoinTypeTypes.JOIN_INNER, crits);
         FromImpl from2 = getFactory().newFrom();
         from2.addClause(jp);
 
@@ -3204,8 +3204,8 @@ public abstract class AbstractTestQueryParser extends AbstractTest<CommandImpl> 
         List jcrits2 = new ArrayList();
         jcrits2.add(getFactory().newCompareCriteria(e3, Operator.EQ, e4));
 
-        JoinPredicateImpl jp1 = getFactory().newJoinPredicate(getFactory().newUnaryFromClause(g1), getFactory().newUnaryFromClause(g2), Types.JOIN_INNER, jcrits1);
-        JoinPredicateImpl jp2 = getFactory().newJoinPredicate(jp1, getFactory().newUnaryFromClause(g3), Types.JOIN_INNER, jcrits2);
+        JoinPredicateImpl jp1 = getFactory().newJoinPredicate(getFactory().newUnaryFromClause(g1), getFactory().newUnaryFromClause(g2), JoinTypeTypes.JOIN_INNER, jcrits1);
+        JoinPredicateImpl jp2 = getFactory().newJoinPredicate(jp1, getFactory().newUnaryFromClause(g3), JoinTypeTypes.JOIN_INNER, jcrits2);
 
         from.addClause(jp2);
         query.setFrom(from);
@@ -3244,9 +3244,9 @@ public abstract class AbstractTestQueryParser extends AbstractTest<CommandImpl> 
         List jcrits3 = new ArrayList();
         jcrits3.add(getFactory().newCompareCriteria(e1, Operator.EQ, e4));
 
-        JoinPredicateImpl jp1 = getFactory().newJoinPredicate(g2, g3, Types.JOIN_RIGHT_OUTER, jcrits2);
-        JoinPredicateImpl jp2 = getFactory().newJoinPredicate(g1, jp1, Types.JOIN_INNER, jcrits1);
-        JoinPredicateImpl jp3 = getFactory().newJoinPredicate(jp2, g4, Types.JOIN_INNER, jcrits3);
+        JoinPredicateImpl jp1 = getFactory().newJoinPredicate(g2, g3, JoinTypeTypes.JOIN_RIGHT_OUTER, jcrits2);
+        JoinPredicateImpl jp2 = getFactory().newJoinPredicate(g1, jp1, JoinTypeTypes.JOIN_INNER, jcrits1);
+        JoinPredicateImpl jp3 = getFactory().newJoinPredicate(jp2, g4, JoinTypeTypes.JOIN_INNER, jcrits3);
 
         from.addClause(jp3);
         query.setFrom(from);
@@ -3282,9 +3282,9 @@ public abstract class AbstractTestQueryParser extends AbstractTest<CommandImpl> 
         List jcrits2 = new ArrayList();
         jcrits2.add(getFactory().newCompareCriteria(e1, Operator.EQ, e4));
 
-        JoinPredicateImpl jp1 = getFactory().newJoinPredicate(g2, g3, Types.JOIN_RIGHT_OUTER, jcrits1);
-        JoinPredicateImpl jp2 = getFactory().newJoinPredicate(jp1, g4, Types.JOIN_CROSS);
-        JoinPredicateImpl jp3 = getFactory().newJoinPredicate(g1, jp2, Types.JOIN_INNER, jcrits2);
+        JoinPredicateImpl jp1 = getFactory().newJoinPredicate(g2, g3, JoinTypeTypes.JOIN_RIGHT_OUTER, jcrits1);
+        JoinPredicateImpl jp2 = getFactory().newJoinPredicate(jp1, g4, JoinTypeTypes.JOIN_CROSS);
+        JoinPredicateImpl jp3 = getFactory().newJoinPredicate(g1, jp2, JoinTypeTypes.JOIN_INNER, jcrits2);
 
         from.addClause(jp3);
         query.setFrom(from);
@@ -3784,7 +3784,7 @@ public abstract class AbstractTestQueryParser extends AbstractTest<CommandImpl> 
         CompoundCriteriaImpl cc1 = getFactory().newCompoundCriteria(CompoundCriteriaImpl.AND, c1, predCrit);
         JoinPredicateImpl jp = getFactory().newJoinPredicate(getFactory().newUnaryFromClause(getFactory().newGroupSymbol("m.g1")),
                                             getFactory().newUnaryFromClause(getFactory().newGroupSymbol("m.g2")),
-                                            Types.JOIN_INNER,
+                                            JoinTypeTypes.JOIN_INNER,
                                             Collections.singletonList(cc1));
         f.addClause(jp);
 
@@ -4162,7 +4162,7 @@ public abstract class AbstractTestQueryParser extends AbstractTest<CommandImpl> 
         FromClauseImpl f2 = getFactory().newUnaryFromClause(getFactory().newGroupSymbol("B"));
         JoinPredicateImpl jp = getFactory().newJoinPredicate(f1,
                                             f2,
-                                            Types.JOIN_LEFT_OUTER,
+                                            JoinTypeTypes.JOIN_LEFT_OUTER,
                                             Arrays.asList(new CriteriaImpl[] {compareCriteria}));
         from.addClause(jp);
 
@@ -4194,7 +4194,7 @@ public abstract class AbstractTestQueryParser extends AbstractTest<CommandImpl> 
         FromImpl from = getFactory().newFrom();
         from.addClause(getFactory().newJoinPredicate(getFactory().newUnaryFromClause(getFactory().newGroupSymbol("pm1.g1")),
                                         getFactory().newUnaryFromClause(getFactory().newGroupSymbol("pm1.g2")),
-                                        Types.JOIN_UNION));
+                                        JoinTypeTypes.JOIN_UNION));
 
         CriteriaImpl crit = getFactory().newCompareCriteria(getFactory().newElementSymbol("g1.e1"), Operator.EQ, getFactory().newConstant(new Integer(1)));
 

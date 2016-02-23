@@ -36,47 +36,46 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-
+import org.komodo.spi.query.JoinTypeTypes;
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.query.metadata.QueryMetadataInterface.SupportConstants;
 import org.komodo.spi.query.metadata.StoredProcedureInfo;
-import org.komodo.spi.query.sql.lang.JoinType.Types;
-import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.api.exception.query.QueryResolverException;
 import org.teiid.api.exception.query.UnresolvedSymbolDescription;
 import org.teiid.core.types.DefaultDataTypeManager;
 import org.teiid.core.types.DefaultDataTypeManager.DefaultDataTypes;
 import org.teiid.core.util.StringUtil;
 import org.teiid.metadata.ForeignKey;
-import org.teiid.query.function.TCFunctionDescriptor;
 import org.teiid.query.function.DefaultFunctionLibrary;
+import org.teiid.query.function.TCFunctionDescriptor;
 import org.teiid.query.metadata.GroupInfo;
 import org.teiid.query.metadata.TempMetadataAdapter;
 import org.teiid.query.metadata.TempMetadataID;
 import org.teiid.query.metadata.TempMetadataStore;
-import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
 import org.teiid.query.parser.TeiidClientParser;
+import org.teiid.query.parser.TeiidNodeFactory.ASTNodes;
+import org.teiid.query.sql.lang.BaseLanguageObject;
+import org.teiid.query.sql.lang.BaseSubqueryContainer;
 import org.teiid.query.sql.lang.CommandImpl;
 import org.teiid.query.sql.lang.CompareCriteriaImpl;
 import org.teiid.query.sql.lang.CriteriaImpl;
 import org.teiid.query.sql.lang.FromClauseImpl;
 import org.teiid.query.sql.lang.JoinPredicateImpl;
 import org.teiid.query.sql.lang.JoinTypeImpl;
-import org.teiid.query.sql.lang.BaseLanguageObject;
 import org.teiid.query.sql.lang.LimitImpl;
 import org.teiid.query.sql.lang.OrderByImpl;
-import org.teiid.query.sql.lang.QueryImpl;
 import org.teiid.query.sql.lang.QueryCommandImpl;
+import org.teiid.query.sql.lang.QueryImpl;
 import org.teiid.query.sql.lang.SetQueryImpl;
-import org.teiid.query.sql.lang.BaseSubqueryContainer;
 import org.teiid.query.sql.lang.UnaryFromClauseImpl;
 import org.teiid.query.sql.symbol.AliasSymbolImpl;
+import org.teiid.query.sql.symbol.BaseExpression;
 import org.teiid.query.sql.symbol.CaseExpressionImpl;
 import org.teiid.query.sql.symbol.ConstantImpl;
 import org.teiid.query.sql.symbol.DerivedColumnImpl;
 import org.teiid.query.sql.symbol.ElementSymbolImpl;
-import org.teiid.query.sql.symbol.BaseExpression;
 import org.teiid.query.sql.symbol.ExpressionSymbolImpl;
 import org.teiid.query.sql.symbol.FunctionImpl;
 import org.teiid.query.sql.symbol.GroupSymbolImpl;
@@ -1126,7 +1125,7 @@ public class ResolverUtil {
 		if (clause instanceof JoinPredicateImpl) {
 			JoinPredicateImpl jp = (JoinPredicateImpl)clause;
 			JoinTypeImpl joinType = jp.getJoinType();
-			if (joinType.getKind().equals(Types.JOIN_CROSS) || joinType.getKind().equals(Types.JOIN_FULL_OUTER)) {
+			if (joinType.getKind().equals(JoinTypeTypes.JOIN_CROSS) || joinType.getKind().equals(JoinTypeTypes.JOIN_FULL_OUTER)) {
 				return;
 			}
 			HashSet<GroupSymbolImpl> leftPk = new HashSet<GroupSymbolImpl>();
@@ -1148,10 +1147,10 @@ public class ResolverUtil {
 			separateCriteria(leftGroups, rightGroups, leftExpressions, rightExpressions, jp.getJoinCriteria(), new LinkedList<CriteriaImpl>());
 		    
 			HashMap<List<GroupSymbolImpl>, List<HashSet<Object>>> crits = createGroupMap(leftExpressions, rightExpressions);
-			if (!leftPk.isEmpty() && (joinType.getKind().equals(Types.JOIN_INNER) || joinType.getKind().equals(Types.JOIN_LEFT_OUTER))) {
+			if (!leftPk.isEmpty() && (joinType.getKind().equals(JoinTypeTypes.JOIN_INNER) || joinType.getKind().equals(JoinTypeTypes.JOIN_LEFT_OUTER))) {
 				findKeyPreserved(keyPreservingGroups, leftPk, crits, true, metadata, rightPk);
 			} 
-			if (!rightPk.isEmpty() && (joinType.getKind().equals(Types.JOIN_INNER) || joinType.getKind().equals(Types.JOIN_RIGHT_OUTER))) {
+			if (!rightPk.isEmpty() && (joinType.getKind().equals(JoinTypeTypes.JOIN_INNER) || joinType.getKind().equals(JoinTypeTypes.JOIN_RIGHT_OUTER))) {
 				findKeyPreserved(keyPreservingGroups, rightPk, crits, false, metadata, leftPk);
 			}
 		}

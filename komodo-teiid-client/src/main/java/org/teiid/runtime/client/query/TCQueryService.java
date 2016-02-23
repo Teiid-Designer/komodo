@@ -146,12 +146,10 @@ public class TCQueryService implements QueryService {
         return JDBCSQLTypeInfo.getTypeName(jdbcType);
     }
 
-    @Override
     public FunctionLibrary createFunctionLibrary() {
         return new DefaultFunctionLibrary(teiidVersion, systemFunctionManager.getSystemFunctions(), new FunctionTree[0]);
     }
 
-    @Override
     public FunctionLibrary createFunctionLibrary(List<FunctionMethodDescriptor> functionMethodDescriptors) {
 
         // Dynamically return a function library for each call rather than cache it here.
@@ -194,7 +192,6 @@ public class TCQueryService implements QueryService {
                                    functionTrees.values().toArray(new FunctionTree[0]));
     }
 
-    @Override
     public QueryFactory createQueryFactory() {
         if (factory == null)
             factory = new SyntaxFactory(((TCQueryParser)getQueryParser()).getTeiidParser());
@@ -202,13 +199,11 @@ public class TCQueryService implements QueryService {
         return factory;
     }
 
-    @Override
     public MappingDocumentFactory getMappingDocumentFactory() {
         getQueryParser();
         return new MappingDocumentFactoryImpl(queryParser.getTeiidParser());
     }
 
-    @Override
     public String getSymbolName(Expression expression) {
         if (expression instanceof Symbol) {
             return ((Symbol)expression).getName();
@@ -226,7 +221,6 @@ public class TCQueryService implements QueryService {
         return name;
     }
 
-    @Override
     public String getSymbolShortName(Expression expression) {
         if (expression instanceof Symbol) {
             return ((Symbol)expression).getShortName();
@@ -234,67 +228,54 @@ public class TCQueryService implements QueryService {
         return "expr"; //$NON-NLS-1$
     }
 
-    @Override
     public SQLStringVisitorImpl getSQLStringVisitor() {
         return new SQLStringVisitorImpl(teiidVersion);
     }
 
-    @Override
     public SQLStringVisitor getCallbackSQLStringVisitor(SQLStringVisitorCallback visitorCallback) {
         return new CallbackSQLStringVisitor(teiidVersion, visitorCallback);
     }
 
-    @Override
     public GroupCollectorVisitor getGroupCollectorVisitor(boolean removeDuplicates) {
         return new GroupCollectorVisitorImpl(teiidVersion, removeDuplicates);
     }
 
-    @Override
     public GroupsUsedByElementsVisitor getGroupsUsedByElementsVisitor() {
         return new GroupsUsedByElementsVisitorImpl();
     }
 
-    @Override
     public ElementCollectorVisitor getElementCollectorVisitor(boolean removeDuplicates) {
         return new ElementCollectorVisitorImpl(teiidVersion, removeDuplicates);
     }
 
-    @Override
     public CommandCollectorVisitor getCommandCollectorVisitor() {
         return new CommandCollectorVisitorImpl(teiidVersion);
     }
 
-    @Override
     public FunctionCollectorVisitor getFunctionCollectorVisitor(boolean removeDuplicates) {
         return new FunctionCollectorVisitorImpl(teiidVersion, removeDuplicates);
     }
 
-    @Override
     public PredicateCollectorVisitor getPredicateCollectorVisitor() {
         return new PredicateCollectorVisitorImpl(teiidVersion);
     }
 
-    @Override
     public ReferenceCollectorVisitor getReferenceCollectorVisitor() {
         return new ReferenceCollectorVisitorImpl(teiidVersion);
     }
 
-    @Override
     public ValueIteratorProviderCollectorVisitor getValueIteratorProviderCollectorVisitor() {
         return new ValueIteratorProviderCollectorVisitorImpl(teiidVersion);
     }
 
-    @Override
     public ResolverVisitor getResolverVisitor() {
         return new ResolverVisitorImpl(teiidVersion);
     }
 
-    @Override
     public Validator getValidator() {
         return new DefaultValidator();
     }
 
-    @Override
     public UpdateValidator getUpdateValidator(QueryMetadataInterface metadata, TransformUpdateType tInsertType, TransformUpdateType tUpdateType, TransformUpdateType tDeleteType) {
 
         UpdateType insertType = UpdateType.valueOf(tInsertType.name());
@@ -304,17 +285,14 @@ public class TCQueryService implements QueryService {
         return new DefaultUpdateValidator(metadata, insertType, updateType, deleteType);
     }
 
-    @Override
     public void resolveGroup(GroupSymbol groupSymbol, QueryMetadataInterface metadata) throws Exception {
         ResolverUtil.resolveGroup((GroupSymbolImpl)groupSymbol, metadata);
     }
 
-    @Override
     public void fullyQualifyElements(Command command) {
         ResolverUtil.fullyQualifyElements((CommandImpl)command);
     }
 
-    @Override
     public QueryResolver getQueryResolver() {
         getQueryParser();
         return new TCQueryResolver((TCQueryParser)getQueryParser());

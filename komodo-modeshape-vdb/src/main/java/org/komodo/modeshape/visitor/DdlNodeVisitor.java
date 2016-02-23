@@ -39,10 +39,10 @@ import javax.jcr.nodetype.NodeType;
 
 import org.komodo.modeshape.AbstractNodeVisitor;
 import org.komodo.modeshape.teiid.TeiidSqlNodeVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidSQLConstants;
-import org.komodo.modeshape.teiid.parser.TeiidSQLConstants.NonReserved;
-import org.komodo.modeshape.teiid.parser.TeiidSQLConstants.Reserved;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.lexicon.TeiidSqlConstants;
+import org.komodo.spi.lexicon.TeiidSqlConstants.NonReserved;
+import org.komodo.spi.lexicon.TeiidSqlConstants.Reserved;
 import org.komodo.spi.ddl.TeiidDDLConstants;
 import org.komodo.spi.metadata.MetadataNamespaces;
 import org.komodo.spi.runtime.version.TeiidVersion;
@@ -216,8 +216,12 @@ public class DdlNodeVisitor extends AbstractNodeVisitor
         /**
          * @return data type name
          */
-        public DataTypeName getDataTypeName() {
-            return getDataTypeManager().getDataTypeName(dataTypeId);
+        public DataTypeName getDataTypeName() throws RepositoryException {
+            try {
+                return getDataTypeManager().getDataTypeName(dataTypeId);
+            } catch (Exception ex) {
+                throw new RepositoryException(ex);
+            }
         }
 
         /**
@@ -300,7 +304,7 @@ public class DdlNodeVisitor extends AbstractNodeVisitor
             lengthDataTypes.add(DataTypeName.XML);
             lengthDataTypes.add(DataTypeName.STRING);
             lengthDataTypes.add(DataTypeName.VARBINARY);
-            lengthDataTypes.add(DataTypeName.BIG_INTEGER);
+            lengthDataTypes.add(DataTypeName.BIGINTEGER);
         }
 
         return lengthDataTypes;
@@ -309,7 +313,7 @@ public class DdlNodeVisitor extends AbstractNodeVisitor
     private Set<DataTypeName> getPrecsionDataTypes() {
         if (precisionDataTypes == null) {
             precisionDataTypes = new HashSet<DataTypeName>();
-            precisionDataTypes.add(DataTypeName.BIG_DECIMAL);
+            precisionDataTypes.add(DataTypeName.BIGDECIMAL);
         }
 
         return precisionDataTypes;
@@ -337,8 +341,8 @@ public class DdlNodeVisitor extends AbstractNodeVisitor
     }
 
     protected String escapeSinglePart(String token) {
-        if (TeiidSQLConstants.isReservedWord(getVersion(), token)) {
-            return TeiidSQLConstants.Tokens.ID_ESCAPE_CHAR + token + TeiidSQLConstants.Tokens.ID_ESCAPE_CHAR;
+        if (TeiidSqlConstants.isReservedWord(getVersion(), token)) {
+            return TeiidSqlConstants.Tokens.ID_ESCAPE_CHAR + token + TeiidSqlConstants.Tokens.ID_ESCAPE_CHAR;
         }
         boolean escape = true;
         char start = token.charAt(0);
@@ -350,7 +354,7 @@ public class DdlNodeVisitor extends AbstractNodeVisitor
             }
         }
         if (escape) {
-            return TeiidSQLConstants.Tokens.ID_ESCAPE_CHAR + escapeStringValue(token, SPEECH_MARK) + TeiidSQLConstants.Tokens.ID_ESCAPE_CHAR;
+            return TeiidSqlConstants.Tokens.ID_ESCAPE_CHAR + escapeStringValue(token, SPEECH_MARK) + TeiidSqlConstants.Tokens.ID_ESCAPE_CHAR;
         }
         return token;
     }
@@ -525,9 +529,9 @@ public class DdlNodeVisitor extends AbstractNodeVisitor
 			if (segment.length() == 0) {
 				continue;
 			}
-			result.append(TeiidSQLConstants.Tokens.ID_ESCAPE_CHAR)
+			result.append(TeiidSqlConstants.Tokens.ID_ESCAPE_CHAR)
 				  .append(escapeStringValue(segment, StringConstants.SPEECH_MARK))
-				  .append(TeiidSQLConstants.Tokens.ID_ESCAPE_CHAR).append(DOT_CHAR);
+				  .append(TeiidSqlConstants.Tokens.ID_ESCAPE_CHAR).append(DOT_CHAR);
 		}
 
 		result.setLength(result.length() - 1);

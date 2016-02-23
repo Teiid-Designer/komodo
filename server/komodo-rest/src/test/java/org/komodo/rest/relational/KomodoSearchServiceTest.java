@@ -170,7 +170,7 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
         final String entity = this.response.readEntity(String.class);
         // System.out.println("Response:\n" + entity);
         RestBasicEntity[] entities = KomodoJsonMarshaller.unmarshallArray(entity, RestBasicEntity[].class);
-        assertEquals(94, entities.length);
+        assertEquals(110, entities.length);
     }
 
     @Test
@@ -507,7 +507,7 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
         final String entity = this.response.readEntity(String.class);
         // System.out.println("Response:\n" + entity);
         RestBasicEntity[] entities = KomodoJsonMarshaller.unmarshallArray(entity, RestBasicEntity[].class);
-        assertEquals(94, entities.length);
+        assertEquals(110, entities.length);
     }
 
     @Test

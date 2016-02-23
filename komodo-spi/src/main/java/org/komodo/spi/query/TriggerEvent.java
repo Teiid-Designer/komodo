@@ -19,26 +19,37 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  */
-package org.komodo.spi.lexicon;
-
-import org.komodo.spi.lexicon.TeiidSqlLexicon;
+package org.komodo.spi.query;
 
 /**
- * Wrapping interface for passing parameters into {@link TeiidSqlLexicon#redirect}
+ * TriggerEvent Types
  */
-public interface TeiidSqlContext {
+public enum TriggerEvent {
+    /**
+     * Insert event 
+     */
+    INSERT,
 
     /**
-     * @param key
-     * @return object indexed against given key
+     * Update event
      */
-    Object get(String key);
+    UPDATE,
 
     /**
-     * Adds an object to the context with the given key
-     *
-     * @param key
-     * @param obj
+     * Delete event
      */
-    void add(String key, Object obj);
+    DELETE;
+
+    public static TriggerEvent findTriggerEvent(String name) {
+        if (name == null)
+            return null;
+
+        name = name.toUpperCase();
+        for (TriggerEvent event : TriggerEvent.values()) {
+            if (event.name().equals(name))
+                return event;
+        }
+
+        return null;
+    }
 }

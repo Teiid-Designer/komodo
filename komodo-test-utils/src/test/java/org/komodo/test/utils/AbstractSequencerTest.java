@@ -27,6 +27,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.modeshape.jcr.api.JcrConstants.JCR_MIXIN_TYPES;
 import static org.modeshape.jcr.api.JcrConstants.JCR_PRIMARY_TYPE;
 import java.util.ArrayList;
@@ -181,7 +182,12 @@ public abstract class AbstractSequencerTest extends MultiUseAbstractTest impleme
         session.save();
 
         assertTrue(listener.await(TIME_TO_WAIT, TimeUnit.MINUTES));
-        assertFalse(listener.exceptionOccurred());
+        
+        boolean exceptionOccurred = listener.exceptionOccurred();
+        if (exceptionOccurred) {
+            listener.exception().printStackTrace();
+            fail("Exception occurred while running the Teiid Sql Sequencer");
+        }
 
         traverse(node);
 

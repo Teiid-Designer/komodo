@@ -33,10 +33,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import org.komodo.spi.query.JoinTypeTypes;
 import org.komodo.spi.query.metadata.QueryMetadataInterface;
 import org.komodo.spi.query.metadata.QueryMetadataInterface.SupportConstants;
 import org.komodo.spi.query.metadata.StoredProcedureInfo;
-import org.komodo.spi.query.sql.lang.JoinType.Types;
 import org.komodo.spi.query.sql.lang.SPParameter;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.teiid.api.exception.query.QueryResolverException;
@@ -665,7 +665,7 @@ public class SimpleQueryResolver extends CommandResolver {
 		private void checkImplicit(FromClauseImpl clause) {
 			if (clause instanceof JoinPredicateImpl) {
 				JoinPredicateImpl jp = (JoinPredicateImpl)clause;
-				if (Types.JOIN_FULL_OUTER.equals(jp.getJoinType().getKind()) || Types.JOIN_RIGHT_OUTER.equals(jp.getJoinType().getKind())) {
+				if (JoinTypeTypes.JOIN_FULL_OUTER.equals(jp.getJoinType().getKind()) || JoinTypeTypes.JOIN_RIGHT_OUTER.equals(jp.getJoinType().getKind())) {
 					allowImplicit = false;
 					return;
 				}

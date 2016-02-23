@@ -24,7 +24,7 @@ package org.teiid.query.sql;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import org.komodo.spi.query.sql.lang.JoinType.Types;
+import org.komodo.spi.query.JoinTypeTypes;
 import org.komodo.spi.query.sql.lang.SPParameter;
 import org.komodo.spi.query.sql.lang.SetQuery.Operation;
 import org.teiid.core.types.DefaultDataTypeManager;
@@ -155,7 +155,7 @@ public abstract class AbstractTestFactory {
         return newUnaryFromClause(newGroupSymbol(groupSymbolProps));
     }
 
-    public JoinPredicateImpl newJoinPredicate(FromClauseImpl leftClause, FromClauseImpl rightClause, JoinTypeImpl.Types joinTypeTypes) {
+    public JoinPredicateImpl newJoinPredicate(FromClauseImpl leftClause, FromClauseImpl rightClause, JoinTypeTypes joinTypeTypes) {
         JoinTypeImpl joinType = newNode(ASTNodes.JOIN_TYPE);
         joinType.setKind(joinTypeTypes);
         JoinPredicateImpl jp = newNode(ASTNodes.JOIN_PREDICATE);
@@ -166,7 +166,7 @@ public abstract class AbstractTestFactory {
         return jp;
     }
 
-    public JoinPredicateImpl newJoinPredicate(FromClauseImpl leftClause, FromClauseImpl rightClause, JoinTypeImpl.Types joinTypeTypes, List<? extends CriteriaImpl> crits) {
+    public JoinPredicateImpl newJoinPredicate(FromClauseImpl leftClause, FromClauseImpl rightClause, JoinTypeTypes joinTypeTypes, List<? extends CriteriaImpl> crits) {
         JoinPredicateImpl jp = newJoinPredicate(leftClause, rightClause, joinTypeTypes);
         jp.setJoinCriteria((List<CriteriaImpl>)crits);
         return jp;
@@ -714,7 +714,7 @@ public abstract class AbstractTestFactory {
         return array;
     }
 
-    public JoinTypeImpl newJoinType(Types joinKind) {
+    public JoinTypeImpl newJoinType(JoinTypeTypes joinKind) {
         JoinTypeImpl joinType = newNode(ASTNodes.JOIN_TYPE);
         joinType.setKind(joinKind);
         return joinType;

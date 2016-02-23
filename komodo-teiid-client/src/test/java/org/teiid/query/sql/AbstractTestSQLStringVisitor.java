@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.Test;
-import org.komodo.spi.query.sql.lang.JoinType.Types;
+import org.komodo.spi.query.JoinTypeTypes;
 import org.komodo.spi.query.sql.lang.OrderBy;
 import org.komodo.spi.query.sql.lang.SPParameter;
 import org.komodo.spi.query.sql.lang.SetQuery.Operation;
@@ -400,7 +400,7 @@ public abstract class AbstractTestSQLStringVisitor extends AbstractTest<CommandI
         from.addClause(getFactory().newUnaryFromClause(getFactory().newGroupSymbol("m.g1")));
         from.addClause(getFactory().newJoinPredicate(getFactory().newUnaryFromClause(getFactory().newGroupSymbol("m.g2")),
                                                      getFactory().newUnaryFromClause(getFactory().newGroupSymbol("m.g3")),
-                                                     Types.JOIN_CROSS));
+                                                     JoinTypeTypes.JOIN_CROSS));
 
         helpTest(from, "FROM m.g1, m.g2 CROSS JOIN m.g3");
     }
@@ -474,7 +474,7 @@ public abstract class AbstractTestSQLStringVisitor extends AbstractTest<CommandI
     public void testJoinPredicate1() {
         JoinPredicateImpl jp = getFactory().newJoinPredicate(getFactory().newUnaryFromClause(getFactory().newGroupSymbol("m.g2")),
                                                          getFactory().newUnaryFromClause(getFactory().newGroupSymbol("m.g3")),
-                                                         Types.JOIN_CROSS);
+                                                         JoinTypeTypes.JOIN_CROSS);
 
         helpTest(jp, "m.g2 CROSS JOIN m.g3");
     }
@@ -483,7 +483,7 @@ public abstract class AbstractTestSQLStringVisitor extends AbstractTest<CommandI
     public void testOptionalJoinPredicate1() {
         JoinPredicateImpl jp = getFactory().newJoinPredicate(getFactory().newUnaryFromClause(getFactory().newGroupSymbol("m.g2")),
                                                          getFactory().newUnaryFromClause(getFactory().newGroupSymbol("m.g3")),
-                                                         Types.JOIN_CROSS);
+                                                         JoinTypeTypes.JOIN_CROSS);
         jp.setOptional(true);
         helpTest(jp, "/*+ optional */ (m.g2 CROSS JOIN m.g3)");
     }
@@ -494,7 +494,7 @@ public abstract class AbstractTestSQLStringVisitor extends AbstractTest<CommandI
         crits.add(getFactory().newCompareCriteria(getFactory().newElementSymbol("m.g2.e1"), Operator.EQ, getFactory().newElementSymbol("m.g3.e1")));
         JoinPredicateImpl jp = getFactory().newJoinPredicate(getFactory().newUnaryFromClause(getFactory().newGroupSymbol("m.g2")),
                                                          getFactory().newUnaryFromClause(getFactory().newGroupSymbol("m.g3")),
-                                                         Types.JOIN_INNER,
+                                                         JoinTypeTypes.JOIN_INNER,
                                                          crits);
 
         helpTest(jp, "m.g2 INNER JOIN m.g3 ON m.g2.e1 = m.g3.e1");
@@ -507,7 +507,7 @@ public abstract class AbstractTestSQLStringVisitor extends AbstractTest<CommandI
         crits.add(getFactory().newCompareCriteria(getFactory().newElementSymbol("m.g2.e2"), Operator.EQ, getFactory().newElementSymbol("m.g3.e2")));
         JoinPredicateImpl jp = getFactory().newJoinPredicate(getFactory().newUnaryFromClause(getFactory().newGroupSymbol("m.g2")),
                                                          getFactory().newUnaryFromClause(getFactory().newGroupSymbol("m.g3")),
-                                                         Types.JOIN_INNER,
+                                                         JoinTypeTypes.JOIN_INNER,
                                                          crits);
 
         helpTest(jp, "m.g2 INNER JOIN m.g3 ON m.g2.e1 = m.g3.e1 AND m.g2.e2 = m.g3.e2");
@@ -519,12 +519,12 @@ public abstract class AbstractTestSQLStringVisitor extends AbstractTest<CommandI
         crits.add(getFactory().newCompareCriteria(getFactory().newElementSymbol("m.g2.e1"), Operator.EQ, getFactory().newElementSymbol("m.g3.e1")));
         JoinPredicateImpl jp = getFactory().newJoinPredicate(getFactory().newUnaryFromClause(getFactory().newGroupSymbol("m.g2")),
                                                          getFactory().newUnaryFromClause(getFactory().newGroupSymbol("m.g3")),
-                                                         Types.JOIN_INNER,
+                                                         JoinTypeTypes.JOIN_INNER,
                                                          crits);
 
         JoinPredicateImpl jp2 = getFactory().newJoinPredicate(jp,
                                                           getFactory().newUnaryFromClause(getFactory().newGroupSymbol("m.g1")),
-                                                          Types.JOIN_CROSS);
+                                                          JoinTypeTypes.JOIN_CROSS);
 
         helpTest(jp2, "(m.g2 INNER JOIN m.g3 ON m.g2.e1 = m.g3.e1) CROSS JOIN m.g1");
     }
@@ -535,7 +535,7 @@ public abstract class AbstractTestSQLStringVisitor extends AbstractTest<CommandI
         crits.add(getFactory().newNotCriteria(getFactory().newCompareCriteria(getFactory().newElementSymbol("m.g2.e1"), Operator.EQ, getFactory().newElementSymbol("m.g3.e1"))));
         JoinPredicateImpl jp = getFactory().newJoinPredicate(getFactory().newUnaryFromClause(getFactory().newGroupSymbol("m.g2")),
                                                          getFactory().newUnaryFromClause(getFactory().newGroupSymbol("m.g3")),
-                                                         Types.JOIN_INNER,
+                                                         JoinTypeTypes.JOIN_INNER,
                                                          crits);
 
         helpTest(jp, "m.g2 INNER JOIN m.g3 ON NOT (m.g2.e1 = m.g3.e1)");
@@ -543,27 +543,27 @@ public abstract class AbstractTestSQLStringVisitor extends AbstractTest<CommandI
 
     @Test
     public void testJoinType1() {
-        helpTest(getFactory().newJoinType(Types.JOIN_CROSS), "CROSS JOIN");
+        helpTest(getFactory().newJoinType(JoinTypeTypes.JOIN_CROSS), "CROSS JOIN");
     }
 
     @Test
     public void testJoinType2() {
-        helpTest(getFactory().newJoinType(Types.JOIN_INNER), "INNER JOIN");
+        helpTest(getFactory().newJoinType(JoinTypeTypes.JOIN_INNER), "INNER JOIN");
     }
 
     @Test
     public void testJoinType3() {
-        helpTest(getFactory().newJoinType(Types.JOIN_RIGHT_OUTER), "RIGHT OUTER JOIN");
+        helpTest(getFactory().newJoinType(JoinTypeTypes.JOIN_RIGHT_OUTER), "RIGHT OUTER JOIN");
     }
 
     @Test
     public void testJoinType4() {
-        helpTest(getFactory().newJoinType(Types.JOIN_LEFT_OUTER), "LEFT OUTER JOIN");
+        helpTest(getFactory().newJoinType(JoinTypeTypes.JOIN_LEFT_OUTER), "LEFT OUTER JOIN");
     }
 
     @Test
     public void testJoinType5() {
-        helpTest(getFactory().newJoinType(Types.JOIN_FULL_OUTER), "FULL OUTER JOIN");
+        helpTest(getFactory().newJoinType(JoinTypeTypes.JOIN_FULL_OUTER), "FULL OUTER JOIN");
     }
 
     @Test

@@ -67,5 +67,4 @@ public interface TeiidService extends StringConstants {
      * @throws Exception 
      */
     void convert(String sql, Object parent) throws Exception;
-
 }
