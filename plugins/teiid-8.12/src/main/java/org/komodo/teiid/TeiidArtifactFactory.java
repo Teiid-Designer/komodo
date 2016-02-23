@@ -29,7 +29,6 @@ import org.komodo.spi.runtime.TeiidDataSource;
 import org.komodo.spi.runtime.TeiidPropertyDefinition;
 import org.komodo.spi.runtime.TeiidTranslator;
 import org.komodo.spi.runtime.TeiidVdb;
-import org.komodo.spi.uuid.WorkspaceUUIDService;
 import org.teiid.adminapi.PropertyDefinition;
 import org.teiid.adminapi.Translator;
 import org.teiid.adminapi.VDB;
@@ -43,14 +42,7 @@ public class TeiidArtifactFactory {
 
     public TeiidDataSource createDataSource(String name, Properties dataSource) {
 
-        TeiidDataSource teiidDataSource = new TeiidDataSourceImpl(name, name, "<unknown>"); //$NON-NLS-1$
-
-        if (name.startsWith(PREVIEW_PREFIX)) {
-            java.util.UUID workspaceUuid = WorkspaceUUIDService.getInstance().getUUID();
-            if (name.length() > workspaceUuid.toString().length() + 8) {
-                teiidDataSource.setPreview(true);
-            }
-        }
+        TeiidDataSource teiidDataSource = new TeiidDataSourceImpl(name, dataSource); //$NON-NLS-1$
 
         return teiidDataSource;
     }

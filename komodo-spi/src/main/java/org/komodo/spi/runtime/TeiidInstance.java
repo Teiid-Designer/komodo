@@ -43,6 +43,16 @@ public interface TeiidInstance extends ExecutionAdmin, HostProvider {
      * The data source driver property name.  Value is {@value} .
      */
     String DATASOURCE_DRIVERNAME = "driver-name";  //$NON-NLS-1$
+
+    /**
+     * The connection url property name. Value is {@value}.
+     */
+    String DATASOURCE_CONNECTION_URL = "connection-url"; //$NON-NLS-1$
+
+    /**
+     * The display name property.
+     */
+    String DATASOURCE_DISPLAYNAME = "display-name"; //$NON-NLS-1$
     
     /**
      * @return the version information of this instance

@@ -318,6 +318,9 @@ public class TeiidInstanceImpl implements TeiidInstance, StringConstants {
 
     @Override
     public void notifyRefresh() {
+        if (getEventManager() == null)
+            return;
+
         getEventManager().notifyListeners(ExecutionConfigurationEvent.createTeiidRefreshEvent(this));
     }
 
@@ -497,7 +500,11 @@ public class TeiidInstanceImpl implements TeiidInstance, StringConstants {
     @Override
     public TeiidDataSource getDataSource(String name) throws Exception {
         connect();
-        return factory.createDataSource(name, admin.getDataSource(name));
+        Properties dataSource = admin.getDataSource(name);
+        if (dataSource == null)
+            return null;
+
+        return factory.createDataSource(name, dataSource);
     }
 
     @Override
@@ -660,6 +667,7 @@ public class TeiidInstanceImpl implements TeiidInstance, StringConstants {
             }
         }
 
+        properties.setProperty(TeiidInstance.DATASOURCE_DISPLAYNAME, displayName);
         this.admin.createDataSource(dsName, typeName, properties);
 
         // Check that local name list contains new dsName
@@ -747,7 +755,11 @@ public class TeiidInstanceImpl implements TeiidInstance, StringConstants {
     @Override
     public TeiidVdb getVdb(String name) throws Exception {
         connect();
-        return factory.createVdb(admin.getVDB(name, 1));
+        VDB vdb = admin.getVDB(name, 1);
+        if (vdb == null)
+            return null;
+
+        return factory.createVdb(vdb);
     }
 
     @Override

@@ -25,7 +25,6 @@ import java.util.Set;
 import org.komodo.spi.annotation.AnnotationUtils;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.DataTypeManager;
-import org.teiid.core.util.ArgCheck;
 
 public class DataTypeManagerImpl implements DataTypeManager {
 
@@ -59,18 +58,6 @@ public class DataTypeManagerImpl implements DataTypeManager {
             return DataSourceTypes.UNKNOWN.id();
 
         return AnnotationUtils.getUpdatedName(dataSourceType, dataSourceType.id(), getVersion());
-    }
-
-    @Override
-    public String getDefaultDataType(DataTypeName dataTypeName) {
-        ArgCheck.isNotNull(dataTypeName);
-
-        String dataTypeId = org.teiid.core.types.DataTypeManager.getDataTypeName(dataTypeName.getDeclaringClass());
-
-        if (dataTypeName.isArrayType())
-            return dataTypeId + ARRAY_SUFFIX;
-
-        return dataTypeId;
     }
 
     @Override
@@ -120,6 +107,9 @@ public class DataTypeManagerImpl implements DataTypeManager {
 
     @Override
     public Class<?> getDefaultDataClass(DataTypeName dataTypeName) {
+        if (dataTypeName == null)
+            return getDataTypeClass(null);
+
         return getDataTypeClass(dataTypeName.name());
     }
 

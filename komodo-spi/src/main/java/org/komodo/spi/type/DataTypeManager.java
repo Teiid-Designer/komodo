@@ -94,6 +94,10 @@ public interface DataTypeManager {
 
             return null;
         }
+
+        public String getId() {
+            return name().toLowerCase();
+        }
     }
 
     public enum DataTypeAliases {
@@ -213,21 +217,6 @@ public interface DataTypeManager {
      * @return Set of data type names (String)
      */
     Set<String> getAllDataTypeNames();
-    
-    /**
-     * Get the default data type represented by the 
-     * given {@link DataTypeName} enumerator
-     * 
-     * @param dataTypeName
-     * 
-     * @return name of data type or will throw a runtime exception
-     *                if there is no data type.
-     */
-    String getDefaultDataType(DataTypeName dataTypeName);
-    
-    /**
-
-    /**
     
     /**
      * Get the default data class represented by the 

@@ -61,7 +61,7 @@ public class TeiidVdbImpl implements TeiidVdb, Comparable<TeiidVdbImpl> {
 
     private Collection<String> modelNames = new ArrayList<>();
 
-    private Properties properties;
+    private Properties properties = new Properties();
 
     private String vdbExport;
 

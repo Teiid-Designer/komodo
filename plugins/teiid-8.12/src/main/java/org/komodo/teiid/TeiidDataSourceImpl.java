@@ -23,36 +23,22 @@ package org.komodo.teiid;
 
 import java.util.Properties;
 import org.komodo.spi.runtime.TeiidDataSource;
+import org.komodo.spi.runtime.TeiidInstance;
 import org.teiid.core.util.ArgCheck;
 
 public class TeiidDataSourceImpl implements Comparable<TeiidDataSourceImpl>, TeiidDataSource {
 
-    private final String displayName;
-    private final String dataSourceName;
-    private final String dataSourceType;
-    private final Properties properties;
+    private final String name;
+    private final Properties properties = new Properties();
 
-    private String connectionProfileName;
+    public TeiidDataSourceImpl(String name, Properties properties) {
+        ArgCheck.isNotEmpty(name, "name"); //$NON-NLS-1$
+        ArgCheck.isNotEmpty(properties, "properties"); //$NON-NLS-1$
 
-    private boolean isPreview = false;
-
-    public TeiidDataSourceImpl(String displayName,
-                               String dataSourceName,
-                               String dataSourceType) {
-        this(displayName, dataSourceName, dataSourceType, new Properties());
-    }
-
-    public TeiidDataSourceImpl(String displayName,
-                               String dataSourceName,
-                               String dataSourceType,
-                               Properties properties) {
-        ArgCheck.isNotEmpty(dataSourceName, "dataSourceName"); //$NON-NLS-1$
-        ArgCheck.isNotEmpty(dataSourceType, "dataSourceType"); //$NON-NLS-1$
-
-        this.displayName = displayName;
-        this.dataSourceName = dataSourceName;
-        this.dataSourceType = dataSourceType;
-        this.properties = properties;
+        this.name = name;
+        for (String propName : properties.stringPropertyNames()) {
+            this.properties.setProperty(propName, properties.getProperty(propName));
+        }
     }
 
     /**
@@ -62,7 +48,6 @@ public class TeiidDataSourceImpl implements Comparable<TeiidDataSourceImpl>, Tei
      */
     @Override
     public int compareTo(TeiidDataSourceImpl dataSource) {
-        ArgCheck.isNotNull(dataSource, "dataSource"); //$NON-NLS-1$
         return getName().compareTo(dataSource.getName());
     }
 
@@ -87,26 +72,13 @@ public class TeiidDataSourceImpl implements Comparable<TeiidDataSourceImpl>, Tei
     }
 
     @Override
-    public String getDisplayName() {
-        if (this.connectionProfileName != null) {
-            return this.displayName + ":" + this.connectionProfileName; //$NON-NLS-1$
-        }
-        return this.displayName;
-    }
-
-    @Override
     public String getName() {
-        return this.dataSourceName;
+        return this.name;
     }
 
-    /**
-     * Returns the data source type name
-     * 
-     * @return the type
-     */
     @Override
-    public String getType() {
-        return this.dataSourceType;
+    public String getDisplayName() {
+        return getPropertyValue(TeiidInstance.DATASOURCE_DISPLAYNAME);
     }
 
     @Override
@@ -119,30 +91,14 @@ public class TeiidDataSourceImpl implements Comparable<TeiidDataSourceImpl>, Tei
         return this.properties.getProperty(name);
     }
 
-    @Override
-    public void setProfileName(String name) {
-        this.connectionProfileName = name;
-    }
-
-    @Override
-    public String getProfileName() {
-        return this.connectionProfileName;
-    }
-
     /**
-     * @return isPreview
+     * Returns the data source type name
+     * 
+     * @return the type
      */
     @Override
-    public boolean isPreview() {
-        return isPreview;
-    }
-
-    /**
-     * @param isPreview Sets isPreview to the specified value.
-     */
-    @Override
-    public void setPreview(boolean isPreview) {
-        this.isPreview = isPreview;
+    public String getType() {
+        return getPropertyValue(TeiidInstance.DATASOURCE_DRIVERNAME);
     }
 
     /**
