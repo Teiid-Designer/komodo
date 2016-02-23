@@ -138,6 +138,26 @@ public class TestUtilities implements StringConstants {
      */
     public static final String PARTS_VDB_NAME = "MyPartsVDB_Dynamic";
 
+    /**
+     * Sample vdb file name
+     */
+    public static final String SAMPLE_VDB_FILE = "sample-vdb.xml";
+
+    /**
+     * Sample vdb
+     */
+    public static final String SAMPLE_VDB_NAME = "sample";
+
+    /**
+     * Roles vdb file name
+     */
+    public static final String ROLES_VDB_FILE = "roles-vdb.xml";
+
+    /**
+     * Roles vdb
+     */
+    public static final String ROLES_VDB_NAME = "z";
+
     public static String convertPackageToDirPath(Package pkg) {
         return pkg.getName().replaceAll(DOUBLE_BACK_SLASH + DOT, FORWARD_SLASH);
     }
@@ -1033,6 +1053,26 @@ public class TestUtilities implements StringConstants {
         return getResourceAsStream(TestUtilities.class,
                                    RESOURCES_DIRECTORY,
                                    PARTS_VDB_FILE);
+    }
+
+    /**
+     * @return input stream of sample xml
+     * @throws Exception if error occurs
+     */
+    public static InputStream sampleExample() throws Exception {
+        return getResourceAsStream(TestUtilities.class,
+                                   RESOURCES_DIRECTORY,
+                                   SAMPLE_VDB_FILE);
+    }
+
+    /**
+     * @return input stream of roles xml
+     * @throws Exception if error occurs
+     */
+    public static InputStream rolesExample() throws Exception {
+        return getResourceAsStream(TestUtilities.class,
+                                   RESOURCES_DIRECTORY,
+                                   ROLES_VDB_FILE);
     }
 
     /**
