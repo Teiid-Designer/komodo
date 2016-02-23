@@ -640,6 +640,11 @@ public interface KomodoLexicon extends StringConstants {
     public interface Teiid extends WorkspaceItem {
 
         /**
+         * The version property. Value is {@value} .
+         */
+        String VERSION = Namespace.PREFIX + COLON + "version"; //$NON-NLS-1$
+
+        /**
          * The name of the administrator port property. Value is {@value} .
          */
         String ADMIN_PORT = Namespace.PREFIX + COLON + "adminPort"; //$NON-NLS-1$

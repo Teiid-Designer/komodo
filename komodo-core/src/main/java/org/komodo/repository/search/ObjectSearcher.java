@@ -37,7 +37,8 @@ import java.util.regex.Pattern;
 import org.komodo.core.KomodoLexicon.Search;
 import org.komodo.core.Messages;
 import org.komodo.spi.KException;
-import org.komodo.spi.query.sql.SQLConstants;
+import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.query.LogicalOperator;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
@@ -48,11 +49,12 @@ import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
 import org.modeshape.jcr.ModeShapeLexicon;
 import org.modeshape.jcr.api.JcrConstants;
+import org.komodo.spi.lexicon.TeiidSqlConstants;
 
 /**
  * Finder class for searching a repository
  */
-public class ObjectSearcher implements SQLConstants {
+public class ObjectSearcher implements TeiidSqlConstants.Reserved, StringConstants {
 
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss"); //$NON-NLS-1$
 

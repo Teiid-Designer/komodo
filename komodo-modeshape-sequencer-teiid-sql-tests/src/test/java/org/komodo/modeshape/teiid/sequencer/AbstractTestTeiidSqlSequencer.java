@@ -79,9 +79,8 @@ import org.komodo.spi.lexicon.TeiidSqlLexicon.XMLAttributes;
 import org.komodo.spi.lexicon.TeiidSqlLexicon.XMLElement;
 import org.komodo.spi.query.CriteriaOperator;
 import org.komodo.spi.query.JoinTypeTypes;
+import org.komodo.spi.query.Operation;
 import org.komodo.spi.query.TeiidService;
-import org.komodo.spi.query.sql.lang.JoinType;
-import org.komodo.spi.query.sql.lang.SetQuery.Operation;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.DataTypeManager.DataTypeName;
 

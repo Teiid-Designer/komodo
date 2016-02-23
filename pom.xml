@@ -28,7 +28,6 @@
         <module>komodo-utils-logger</module>
         <module>komodo-utils</module>
         <module>plugins</module>
-        <module>komodo-teiid-client</module>
         <module>komodo-modeshape-sequencer-teiid-sql</module>
         <module>komodo-core</module>
 

@@ -40,8 +40,8 @@ import org.komodo.core.KomodoLexicon;
 import org.komodo.core.Messages;
 import org.komodo.repository.KSequencerController;
 import org.komodo.repository.KSequencerListener;
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.lexicon.TeiidSqlLexicon;
-import org.komodo.spi.query.sql.SQLConstants;
 import org.komodo.utils.KLog;
 import org.modeshape.jcr.api.JcrConstants;
 import org.modeshape.jcr.api.Session;
@@ -54,7 +54,7 @@ import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
  * Sequencers class responsible for executing all the sequencers in
  * consecutive, synchronous order.
  */
-public class KSequencers implements SQLConstants, EventListener, KSequencerController {
+public class KSequencers implements StringConstants, EventListener, KSequencerController {
 
     private final WorkspaceIdentifier identifier;
 

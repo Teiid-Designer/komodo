@@ -35,6 +35,7 @@ import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.spi.runtime.TeiidInstance;
+import org.komodo.spi.runtime.version.TeiidVersion;
 
 /**
  * A model of a teiid instance
@@ -141,6 +142,22 @@ public interface Teiid extends RelationalObject {
      * @throws KException
      */
     String getId(UnitOfWork uow) throws KException;
+
+    /**
+     * @param uow
+     *         the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @return the teiid version
+     * @throws KException
+     */
+    TeiidVersion getVersion(UnitOfWork uow) throws KException;
+
+    /**
+     * @param uow
+     *         the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param the teiid version
+     * @throws KException
+     */
+    void setVersion(UnitOfWork uow, TeiidVersion version) throws KException;
 
     /**
      * @param uow

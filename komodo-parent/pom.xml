@@ -374,11 +374,6 @@
 			</dependency>
 			<dependency>
 				<groupId>org.komodo</groupId>
-				<artifactId>komodo-teiid-client</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.komodo</groupId>
 				<artifactId>komodo-core</artifactId>
 				<version>${project.version}</version>
 			</dependency>

@@ -3003,6 +3003,15 @@ public class TeiidSqlLexicon implements StringConstants {
 		boolean IS_ABSTRACT = true;
 
 		/**
+		 * Tokens and Constants
+		 */
+
+		/**
+		 * Character used to delimit name components in a symbol
+		 */
+		String SEPARATOR = DOT; 
+
+		/**
 		 * NAME Property
 		 */
 		String NAME_PROP_NAME = Namespace.PREFIX + COLON + "name";

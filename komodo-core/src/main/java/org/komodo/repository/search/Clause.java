@@ -27,7 +27,8 @@ import java.util.Map;
 import org.komodo.core.KomodoLexicon.Search;
 import org.komodo.core.KomodoLexicon.Search.WhereClause;
 import org.komodo.spi.KException;
-import org.komodo.spi.query.sql.SQLConstants;
+import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.query.LogicalOperator;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
@@ -37,7 +38,7 @@ import org.komodo.utils.StringUtils;
 /**
  * Abstract Clause implementation
  */
-public abstract class Clause implements SQLConstants {
+public abstract class Clause implements StringConstants {
 
     /**
      * Alias property

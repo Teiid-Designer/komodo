@@ -46,16 +46,17 @@ import org.komodo.spi.lexicon.TeiidSqlConstants.Reserved;
 import org.komodo.spi.lexicon.TeiidSqlConstants.Tokens;
 import org.komodo.spi.lexicon.TeiidSqlLexicon;
 import org.komodo.spi.lexicon.TeiidSqlLexicon.*;
+import org.komodo.spi.query.AggregateFunctions;
 import org.komodo.spi.query.BranchingMode;
 import org.komodo.spi.query.CriteriaOperator;
+import org.komodo.spi.query.DisplayMode;
 import org.komodo.spi.query.JoinTypeTypes;
+import org.komodo.spi.query.LogicalOperator;
+import org.komodo.spi.query.MatchMode;
 import org.komodo.spi.query.PredicateQuantifier;
 import org.komodo.spi.query.TriggerEvent;
-import org.komodo.spi.query.sql.lang.MatchCriteria.MatchMode;
-import org.komodo.spi.query.sql.lang.SPParameter.ParameterInfo;
-import org.komodo.spi.query.sql.lang.SetQuery.Operation;
-import org.komodo.spi.query.sql.symbol.AggregateSymbol.Type;
-import org.komodo.spi.query.sql.symbol.ElementSymbol.DisplayMode;
+import org.komodo.spi.query.Operation;
+import org.komodo.spi.query.ParameterInfo;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.DataTypeManager.DataTypeName;
@@ -544,7 +545,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor implements StringCo
         String[] pathParts = name.split("\\."); //$NON-NLS-1$
         for (int i = 0; i < pathParts.length; i++) {
             if (i > 0) {
-                append(org.komodo.spi.query.sql.symbol.Symbol.SEPARATOR);
+                append(Symbol.SEPARATOR);
             }
 
             append(escapeSinglePart(pathParts[i]));
@@ -552,7 +553,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor implements StringCo
     }
 
     protected String shortName(String name) {
-        int index = name.lastIndexOf(org.komodo.spi.query.sql.symbol.Symbol.SEPARATOR);
+        int index = name.lastIndexOf(Symbol.SEPARATOR);
         if(index >= 0) {
             return name.substring(index + 1);
         }
@@ -1131,9 +1132,9 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor implements StringCo
         // Get operator string
         long operator = propertyLong(node, CompoundCriteria.OPERATOR_PROP_NAME);
         String operatorStr = EMPTY_STRING;
-        if (operator == org.komodo.spi.query.sql.lang.CompoundCriteria.AND) {
+        if (operator == LogicalOperator.AND.ordinal()) {
             operatorStr = AND;
-        } else if (operator == org.komodo.spi.query.sql.lang.CompoundCriteria.OR) {
+        } else if (operator == LogicalOperator.OR.ordinal()) {
             operatorStr = OR;
         }
 
@@ -1234,7 +1235,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor implements StringCo
         }
 
         String modeString = propertyString(node,  MatchCriteria.MODE_PROP_NAME);
-        MatchMode mode = org.komodo.spi.query.sql.lang.MatchCriteria.MatchMode.findMatchMode(modeString);
+        MatchMode mode = MatchMode.findMatchMode(modeString);
         switch (mode) {
             case SIMILAR:
                 append(SIMILAR);
@@ -1255,7 +1256,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor implements StringCo
         visit(rightExpression);
 
         String escapeChar = propertyString(node,  MatchCriteria.ESCAPE_CHAR_PROP_NAME);
-        if (! Character.toString(org.komodo.spi.query.sql.lang.MatchCriteria.NULL_ESCAPE_CHAR).equals(escapeChar)) {
+        if (! Character.toString(TeiidSqlConstants.NULL_ESCAPE_CHAR).equals(escapeChar)) {
             append(SPACE);
             append(ESCAPE);
             append(SPACE);
@@ -3124,7 +3125,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor implements StringCo
         boolean distinct = propertyBoolean(node, AggregateSymbol.DISTINCT_PROP_NAME);
 
         String aggFunctionName = propertyString(node, AggregateSymbol.AGGREGATE_FUNCTION_PROP_NAME);
-        Type aggregateFunction = Type.findAggregateFunction(aggFunctionName);
+        AggregateFunctions aggregateFunction = AggregateFunctions.findAggregateFunction(aggFunctionName);
 
         append(name);
         append(OPEN_BRACKET);
@@ -3132,7 +3133,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor implements StringCo
         if (distinct) {
             append(DISTINCT);
             append(SPACE);
-        } else if (aggregateFunction == Type.USER_DEFINED) {
+        } else if (aggregateFunction == AggregateFunctions.USER_DEFINED) {
             append(ALL);
             append(SPACE);
         }
@@ -3141,7 +3142,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor implements StringCo
         if (args.hasNext()) {
             iterate(args);
         } else {
-            if (aggregateFunction == Type.COUNT) {
+            if (aggregateFunction == AggregateFunctions.COUNT) {
                 append(ALL_COLS);
             }
         }

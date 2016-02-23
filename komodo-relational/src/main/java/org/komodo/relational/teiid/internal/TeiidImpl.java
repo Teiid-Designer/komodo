@@ -23,9 +23,11 @@ package org.komodo.relational.teiid.internal;
 
 import org.komodo.core.KEngine;
 import org.komodo.core.KomodoLexicon;
+import org.komodo.osgi.PluginService;
 import org.komodo.relational.internal.RelationalChildRestrictedObject;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.spi.KException;
+import org.komodo.spi.query.TeiidService;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.PropertyValueType;
@@ -41,9 +43,11 @@ import org.komodo.spi.runtime.TeiidAdminInfo;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.TeiidJdbcInfo;
 import org.komodo.spi.runtime.TeiidParent;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.utils.ArgCheck;
 import org.modeshape.jcr.JcrLexicon;
-import org.teiid.runtime.client.instance.TCTeiidInstance;
 
 /**
  * Implementation of teiid instance model
@@ -276,21 +280,19 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
 
         private TeiidInstance teiidInstance;
 
-        /**
-         * Construct the parent and child teiid instance
-         */
-        public TeiidParentImpl() {
-            new TCTeiidInstance(this, jdbcInfo);
-        }
-
         @Override
-        public TeiidInstance getTeiidInstance() {
+        public TeiidInstance getTeiidInstance(TeiidVersion teiidVersion) {
+            if (teiidInstance == null) {
+                try {
+                    TeiidService teiidService = PluginService.getInstance().getTeiidService(teiidVersion);
+                    teiidInstance = teiidService.getTeiidInstance(this, teiidVersion, jdbcInfo);
+                } catch (Exception ex) {
+                    KEngine.getInstance().getErrorHandler().error(ex);
+                    return null;
+                }
+            }
+
             return teiidInstance;
-        }
-
-        @Override
-        public void setTeiidInstance( TeiidInstance teiidInstance ) {
-            this.teiidInstance = teiidInstance;
         }
 
         @Override
@@ -393,7 +395,40 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
     @Override
     public TeiidInstance getTeiidInstance(UnitOfWork uow) {
         this.transaction = uow;
-        return teiidParent.getTeiidInstance();
+        TeiidVersion version = null;
+        try {
+            version = getVersion(uow);
+        } catch (KException ex) {
+            KEngine.getInstance().getErrorHandler().error(ex);
+            version = TeiidVersionProvider.getInstance().getTeiidVersion();
+        }
+
+        return teiidParent.getTeiidInstance(version);
+    }
+
+    /**
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @return value of teiid host property
+     * @throws KException
+     *         if error occurs
+     */
+    @Override
+    public TeiidVersion getVersion( UnitOfWork uow ) throws KException {
+        String version = getObjectProperty(uow, PropertyValueType.STRING, "getVersion", KomodoLexicon.Teiid.VERSION); //$NON-NLS-1$
+        return version != null ? new DefaultTeiidVersion(version) : TeiidVersionProvider.getInstance().getTeiidVersion();
+    }
+
+    /**
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * param host the host name
+     * @throws KException
+     *         if error occurs
+     */
+    @Override
+    public void setVersion(UnitOfWork uow, TeiidVersion version) throws KException {
+        setObjectProperty(uow, "setVersion", KomodoLexicon.Teiid.VERSION, version.toString()); //$NON-NLS-1$
     }
 
     /**

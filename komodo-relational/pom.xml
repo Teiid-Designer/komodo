@@ -36,12 +36,12 @@
 
 		<dependency>
 			<groupId>org.komodo</groupId>
-			<artifactId>komodo-core</artifactId>
+			<artifactId>komodo-plugin-service</artifactId>
 		</dependency>
 
 		<dependency>
 			<groupId>org.komodo</groupId>
-			<artifactId>komodo-teiid-client</artifactId>
+			<artifactId>komodo-core</artifactId>
 		</dependency>
 
 		<dependency>

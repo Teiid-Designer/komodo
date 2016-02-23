@@ -21,8 +21,10 @@
  */
 package org.komodo.repository.search;
 
+import org.komodo.spi.lexicon.TeiidSqlConstants;
 import org.komodo.core.KomodoLexicon.Search;
 import org.komodo.spi.KException;
+import org.komodo.spi.query.LogicalOperator;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -33,7 +35,7 @@ import org.komodo.utils.StringUtils;
 /**
  * A Path Clause
  */
-public class PathClause extends Clause {
+public class PathClause extends Clause implements TeiidSqlConstants.Reserved {
 
     private final static String PATH = "path"; //$NON-NLS-1$
 

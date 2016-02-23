@@ -22,6 +22,9 @@
 package org.komodo.osgi.teiid;
 
 import org.komodo.spi.query.TeiidService;
+import org.komodo.spi.runtime.TeiidInstance;
+import org.komodo.spi.runtime.TeiidJdbcInfo;
+import org.komodo.spi.runtime.TeiidParent;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.DataTypeManager;
 import org.osgi.framework.Bundle;
@@ -78,4 +81,11 @@ public class TeiidProxyService implements TeiidService {
         delegate.convert(sql, parent);
     }
 
+    @Override
+    public TeiidInstance getTeiidInstance(TeiidParent teiidParent,
+                                          TeiidVersion teiidVersion,
+                                          TeiidJdbcInfo jdbcInfo) throws Exception {
+        load();
+        return delegate.getTeiidInstance(teiidParent, teiidVersion, jdbcInfo);
+    }
 }

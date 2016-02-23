@@ -21,9 +21,10 @@
  */
 package org.komodo.repository.search;
 
-
+import org.komodo.spi.lexicon.TeiidSqlConstants;
 import org.komodo.core.KomodoLexicon.Search;
 import org.komodo.spi.KException;
+import org.komodo.spi.query.LogicalOperator;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -35,7 +36,7 @@ import org.modeshape.jcr.api.JcrConstants;
 /**
  * A Parent Path Clause
  */
-public class ParentPathClause extends PathClause {
+public class ParentPathClause extends PathClause implements TeiidSqlConstants.Reserved {
 
     private boolean childrenOnly = false;
 

@@ -21,6 +21,7 @@
  ************************************************************************************/
 package org.komodo.spi.runtime;
 
+import org.komodo.spi.runtime.version.TeiidVersion;
 
 /**
  * The parent teiid instance of a Teiid instance
@@ -45,14 +46,7 @@ public interface TeiidParent extends HostProvider {
     /**
      * @return the child teiid instance of this parent
      */
-    TeiidInstance getTeiidInstance();
-
-    /**
-     * Sets the child teiid instance of this parent
-     *
-     * @param teiidInstance
-     */
-    void setTeiidInstance(TeiidInstance teiidInstance);
+    TeiidInstance getTeiidInstance(TeiidVersion teiidVersion);
 
     /**
      * @return port

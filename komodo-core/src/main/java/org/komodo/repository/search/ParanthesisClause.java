@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.komodo.core.KomodoLexicon.Search;
 import org.komodo.spi.KException;
+import org.komodo.spi.query.LogicalOperator;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;

@@ -23,6 +23,9 @@ package org.komodo.teiid;
 
 import javax.jcr.Node;
 import org.komodo.spi.query.TeiidService;
+import org.komodo.spi.runtime.TeiidInstance;
+import org.komodo.spi.runtime.TeiidJdbcInfo;
+import org.komodo.spi.runtime.TeiidParent;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.DataTypeManager;
@@ -75,6 +78,11 @@ public class TeiidServiceImpl implements TeiidService {
         command.acceptVisitor(generator);
         if (generator.errorOccurred())
             throw generator.getError();
+    }
+
+    @Override
+    public TeiidInstance getTeiidInstance(TeiidParent teiidParent, TeiidVersion teiidVersion, TeiidJdbcInfo jdbcInfo) throws Exception {
+        return new TeiidInstanceImpl(teiidParent, teiidVersion, jdbcInfo);
     }
     
 }

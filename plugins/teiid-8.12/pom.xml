@@ -51,6 +51,11 @@
 				<version>${version.teiid}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.jboss.teiid</groupId>
+				<artifactId>teiid-client</artifactId>
+				<version>${version.teiid}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>org.osgi.core</artifactId>
 				<version>${version.apache.felix}</version>
@@ -99,6 +104,10 @@
 			<groupId>org.jboss.teiid</groupId>
 			<artifactId>teiid-admin</artifactId>
 		</dependency>
+		<dependency>
+				<groupId>org.jboss.teiid</groupId>
+				<artifactId>teiid-client</artifactId>
+			</dependency>
 
 		<dependency>
 			<groupId>org.apache.felix</groupId>

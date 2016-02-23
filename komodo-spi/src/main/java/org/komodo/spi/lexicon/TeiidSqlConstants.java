@@ -33,6 +33,10 @@ import org.komodo.spi.runtime.version.TeiidVersion;
 
 public abstract class TeiidSqlConstants {
 
+    /** The null escape character */
+    public static final char NULL_ESCAPE_CHAR = 0;
+
+
         public interface Tokens extends StringConstants {
             String ALL_COLS = STAR;
             String EQ = "="; //$NON-NLS-1$

@@ -22,6 +22,9 @@
 package org.komodo.spi.query;
 
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.runtime.TeiidInstance;
+import org.komodo.spi.runtime.TeiidJdbcInfo;
+import org.komodo.spi.runtime.TeiidParent;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.DataTypeManager;
 
@@ -67,4 +70,15 @@ public interface TeiidService extends StringConstants {
      * @throws Exception 
      */
     void convert(String sql, Object parent) throws Exception;
+
+    /**
+     * Get the runtime teiid client instance
+     *
+     * @param teiidParent
+     * @param teiidVersion 
+     * @param jdbcInfo
+     * @return an instance model of the teiid client
+     * @throws Exception 
+     */
+    TeiidInstance getTeiidInstance(TeiidParent teiidParent, TeiidVersion teiidVersion, TeiidJdbcInfo jdbcInfo) throws Exception;
 }
