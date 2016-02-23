@@ -22,12 +22,12 @@
 
 package org.komodo.modeshape.teiid.sql.proc;
 
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.SQLanguageVisitorImpl;
 import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.sql.lang.CommandImpl;
 import org.komodo.modeshape.teiid.sql.lang.Labeled;
 import org.komodo.modeshape.teiid.sql.lang.BaseSubqueryContainer;
+import org.komodo.spi.lexicon.TeiidSqlLexicon;
 import org.komodo.spi.query.sql.proc.LoopStatement;
 
 /**

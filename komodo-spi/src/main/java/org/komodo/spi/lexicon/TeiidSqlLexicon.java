@@ -20,11 +20,10 @@
  * 02110-1301 USA.
  */
 
-package org.komodo.modeshape.teiid.cnd;
+package org.komodo.spi.lexicon;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 
@@ -110,6 +109,41 @@ public class TeiidSqlLexicon implements StringConstants {
 
 		String ID = Namespace.PREFIX + COLON + "predicateCriteria";
 
+	}
+
+	/**
+	 * tsql:isDistinctCriteria
+	 */
+	public interface IsDistinctCriteria extends PredicateCriteria {
+	
+	    String ID = Namespace.PREFIX + COLON + "isDistinctCriteria";
+	
+	    /**
+	     * NEGATED Property
+	     */
+	    String NEGATED_PROP_NAME = Namespace.PREFIX + COLON + "negated";
+	
+	    Class<?> NEGATED_PROP_TYPE =  Boolean.class;
+	
+	    boolean NEGATED_PROP_MULTIPLE = false;
+	
+	    /**
+	     * LEFT_ROW_VALUE Reference
+	     */
+	    String LEFT_ROW_VALUE_REF_NAME = Namespace.PREFIX + COLON + "leftRowValue";
+	
+	    Class<?> LEFT_ROW_VALUE_REF_TYPE =  GroupSymbol.class;
+	
+	    boolean LEFT_ROW_VALUE_REF_MULTIPLE = false;
+	
+	    /**
+	     * RIGHT_ROW_VALUE Reference
+	     */
+	    String RIGHT_ROW_VALUE_REF_NAME = Namespace.PREFIX + COLON + "leftRowValue";
+	
+	    Class<?> RIGHT_ROW_VALUE_REF_TYPE =  GroupSymbol.class;
+
+	    boolean RIGHT_ROW_VALUE_REF_MULTIPLE = false;
 	}
 
 	/**
@@ -605,6 +639,14 @@ public class TeiidSqlLexicon implements StringConstants {
 
 		boolean SOURCE_HINT_REF_MULTIPLE = false;
 
+		/**
+		 * CACHE_HINT Reference
+		 */
+		String CACHE_HINT_REF_NAME = Namespace.PREFIX + COLON + "cacheHint";
+
+		Class<?> CACHE_HINT_REF_TYPE =  CacheHint.class;
+
+		boolean CACHE_HINT_REF_MULTIPLE = false;
 	}
 
 	/**
@@ -1689,6 +1731,11 @@ public class TeiidSqlLexicon implements StringConstants {
 		boolean IS_ABSTRACT = false;
 
 		/**
+		 * Tokens and Constants
+		 */
+		String NON_STRICT = "NON_STRICT";
+
+		/**
 		 * IMPLICIT Property
 		 */
 		String IMPLICIT_PROP_NAME = Namespace.PREFIX + COLON + "implicit";
@@ -1909,6 +1956,14 @@ public class TeiidSqlLexicon implements StringConstants {
 
 		boolean POSITION_PROP_MULTIPLE = false;
 
+		/**
+		 * HEADER Property
+		 */
+		String HEADER_PROP_NAME = Namespace.PREFIX + COLON + "header";
+
+		Class<?> HEADER_PROP_TYPE =  String.class;
+
+		boolean HEADER_PROP_MULTIPLE = false;
 	}
 
 	/**
@@ -2235,6 +2290,79 @@ public class TeiidSqlLexicon implements StringConstants {
 
 	}
 
+    /**
+      * tsql:cacheHint
+      */
+    public interface CacheHint extends LanguageObject {
+
+        String ID = Namespace.PREFIX + COLON + "cacheHint";
+
+        boolean IS_ABSTRACT = false;
+
+        /**
+         * MIN_ROWS Property
+         */
+        String MIN_ROWS_PROP_NAME = Namespace.PREFIX + COLON + "minRows";
+
+        Class<?> MIN_ROWS_PROP_TYPE = Long.class;
+
+        boolean MIN_ROWS_PROP_MULTIPLE = false;
+
+        /**
+         * UPDATEABLE Property
+         */
+        String UPDATEABLE_PROP_NAME = Namespace.PREFIX + COLON + "updateable";
+
+        Class<?> UPDATEABLE_PROP_TYPE = Boolean.class;
+
+        boolean UPDATEABLE_PROP_MULTIPLE = false;
+
+        /**
+         * TTL Property
+         */
+        String TTL_PROP_NAME = Namespace.PREFIX + COLON + "ttl";
+
+        Class<?> TTL_PROP_TYPE = String.class;
+
+        boolean TTL_PROP_MULTIPLE = false;
+
+        /**
+         * SCOPE Property
+         */
+        String SCOPE_PROP_NAME = Namespace.PREFIX + COLON + "scope";
+
+        Class<?> SCOPE_PROP_TYPE = String.class;
+
+        boolean SCOPE_PROP_MULTIPLE = false;
+
+        /**
+         * INVALIDATION Property
+         */
+        String INVALIDATION_PROP_NAME = Namespace.PREFIX + COLON + "invalidation";
+
+        Class<?> INVALIDATION_PROP_TYPE = String.class;
+
+        boolean INVALIDATION_PROP_MULTIPLE = false;
+
+        /**
+         * PREFERS_MEMORY Property
+         */
+        String PREFERS_MEMORY_PROP_NAME = Namespace.PREFIX + COLON + "prefersMemory";
+
+        Class<?> PREFERS_MEMORY_PROP_TYPE = Boolean.class;
+
+        boolean PREFERS_MEMORY_PROP_MULTIPLE = false;
+
+        /**
+         * READ_ALL Property
+         */
+        String READ_ALL_PROP_NAME = Namespace.PREFIX + COLON + "readAll";
+
+        Class<?> READ_ALL_PROP_TYPE = Boolean.class;
+
+        boolean READ_ALL_PROP_MULTIPLE = false;
+    }
+
 	/**
 	 * tsql:sourceHint
 	 */
@@ -2319,6 +2447,13 @@ public class TeiidSqlLexicon implements StringConstants {
 		String ID = Namespace.PREFIX + COLON + "subqueryHint";
 
 		boolean IS_ABSTRACT = false;
+
+        /**
+         * Tokens and Constants
+         */
+        String DJ = "DJ";
+
+        String MJ = "MJ";
 
 		/**
 		 * NO_UNNEST Property
@@ -3485,6 +3620,25 @@ public class TeiidSqlLexicon implements StringConstants {
 
 	}
 
+    /**
+     * tsql:xmlCast
+     */
+    public interface XMLCast extends Expression {
+
+        String ID = Namespace.PREFIX + COLON + "xmlCast";
+
+        boolean IS_ABSTRACT = false;
+
+        /**
+         * EXPRESSION Property
+         */
+        String EXPRESSION_PROP_NAME = Namespace.PREFIX + COLON + "expression";
+
+        Class<?> EXPRESSION_PROP_TYPE = Expression.class;
+
+        boolean EXPRESSION_PROP_MULTIPLE = false;
+    }
+
 	/**
 	 * tsql:xmlElement
 	 */
@@ -3532,6 +3686,25 @@ public class TeiidSqlLexicon implements StringConstants {
 
 	}
 
+    /**
+     * tsql:xmlExists
+     */
+    public interface XMLExists extends Criteria {
+
+        String ID = Namespace.PREFIX + COLON + "xmlExists";
+
+        boolean IS_ABSTRACT = false;
+
+        /**
+         * XML_QUERY Reference
+         */
+        String XML_QUERY_REF_NAME = Namespace.PREFIX + COLON + "xmlQuery";
+
+        Class<?> XML_QUERY_REF_TYPE = XMLQuery.class;
+
+        boolean XML_QUERY_REF_MULTIPLE = false;
+    }
+
 	/**
 	 * tsql:xmlForest
 	 */
@@ -3569,6 +3742,11 @@ public class TeiidSqlLexicon implements StringConstants {
 		String ID = Namespace.PREFIX + COLON + "xmlNamespaces";
 
 		boolean IS_ABSTRACT = false;
+
+		/**
+		 * Tokens and Constants
+		 */
+		String NO_DEFAULT = "NO DEFAULT";
 
 		/**
 		 * NAMESPACE_ITEMS Reference
@@ -3940,7 +4118,11 @@ public class TeiidSqlLexicon implements StringConstants {
 
 		XML_ATTRIBUTES (XMLAttributes.ID, XMLAttributes.class),
 
+		XML_CAST (XMLCast.ID, XMLCast.class),
+
 		XML_ELEMENT (XMLElement.ID, XMLElement.class),
+
+		XML_EXISTS (XMLExists.ID, XMLExists.class),
 
 		XML_FOREST (XMLForest.ID, XMLForest.class),
 
@@ -3950,8 +4132,11 @@ public class TeiidSqlLexicon implements StringConstants {
 
 		XML_QUERY (XMLQuery.ID, XMLQuery.class),
 
-		XML_SERIALIZE (XMLSerialize.ID, XMLSerialize.class);
+		XML_SERIALIZE (XMLSerialize.ID, XMLSerialize.class),
 
+	    CACHE_HINT (CacheHint.ID, CacheHint.class),
+
+	    IS_DISTINCT_CRITERIA(IsDistinctCriteria.ID, IsDistinctCriteria.class);
 
 		private String id;
 
@@ -4093,7 +4278,7 @@ public class TeiidSqlLexicon implements StringConstants {
 		astIndex.put(XMLSerialize.class.getSimpleName(), LexTokens.XML_SERIALIZE);
 	}
 
-	public static String getTypeId(Class<? extends ASTNode> astNodeClass) {
+	public static String getTypeId(Class<?> astNodeClass) {
 		String name = astNodeClass.getSimpleName();
 		if (! name.startsWith("Base")) {
 			name = name.replaceAll("Impl", EMPTY_STRING);

@@ -19,24 +19,17 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  */
-package org.komodo.modeshape.teiid.cnd;
+package org.komodo.osgi;
 
-/**
- * Wrapping interface for passing parameters into {@link TeiidSqlLexicon#redirect}
- */
-public interface TeiidSqlContext {
+import static org.junit.Assert.*;
+import org.junit.Test;
 
-    /**
-     * @param key
-     * @return object indexed against given key
-     */
-    Object get(String key);
+public class TestVersionProvider {
 
-    /**
-     * Adds an object to the context with the given key
-     *
-     * @param key
-     * @param obj
-     */
-    void add(String key, Object obj);
+    @Test
+    public void testVersionProvider() {
+        VersionProvider provider = VersionProvider.getInstance();
+        assertNotNull(provider.getJcrVersion());
+        assertNotNull(provider.getModeshapeVersion());
+    }
 }

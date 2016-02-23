@@ -21,8 +21,8 @@
  ************************************************************************************/
 package org.komodo.modeshape.teiid.sql.lang;
 
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
+import org.komodo.spi.lexicon.TeiidSqlLexicon;
 
 /**
  *

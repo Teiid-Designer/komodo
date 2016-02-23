@@ -25,12 +25,12 @@ package org.komodo.modeshape.teiid.sql.lang;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.parser.SQLanguageVisitorImpl;
 import org.komodo.modeshape.teiid.sql.symbol.ElementSymbolImpl;
 import org.komodo.modeshape.teiid.sql.symbol.BaseExpression;
 import org.komodo.modeshape.teiid.sql.symbol.GroupSymbolImpl;
+import org.komodo.spi.lexicon.TeiidSqlLexicon;
 import org.komodo.spi.query.sql.lang.DynamicCommand;
 
 /**

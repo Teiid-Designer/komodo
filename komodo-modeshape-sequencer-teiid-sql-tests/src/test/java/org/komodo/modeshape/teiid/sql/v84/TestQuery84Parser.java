@@ -25,8 +25,6 @@ import java.util.Arrays;
 import org.junit.Test;
 import org.komodo.modeshape.teiid.sql.lang.CompareCriteriaImpl;
 import org.komodo.modeshape.teiid.sql.lang.CriteriaImpl;
-import org.komodo.modeshape.teiid.sql.lang.CriteriaOperator;
-import org.komodo.modeshape.teiid.sql.lang.CriteriaOperator.Operator;
 import org.komodo.modeshape.teiid.sql.lang.FromImpl;
 import org.komodo.modeshape.teiid.sql.lang.QueryImpl;
 import org.komodo.modeshape.teiid.sql.lang.SelectImpl;
@@ -41,6 +39,8 @@ import org.komodo.modeshape.teiid.sql.symbol.ElementSymbolImpl;
 import org.komodo.modeshape.teiid.sql.symbol.BaseExpression;
 import org.komodo.modeshape.teiid.sql.symbol.GroupSymbolImpl;
 import org.komodo.modeshape.teiid.sql.v8.TestQuery8Parser;
+import org.komodo.spi.query.CriteriaOperator;
+import org.komodo.spi.query.CriteriaOperator.Operator;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 

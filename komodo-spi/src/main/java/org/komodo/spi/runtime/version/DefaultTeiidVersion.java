@@ -84,7 +84,47 @@ public class DefaultTeiidVersion implements TeiidVersion {
         /**
          * Teiid 8.7
          */
-        TEIID_8_7(VersionID.TEIID_8_7);
+        TEIID_8_7(VersionID.TEIID_8_7),
+
+        /**
+         * Teiid 8.8
+         */
+        TEIID_8_8(VersionID.TEIID_8_8),
+
+        /**
+         * Teiid 8.9
+         */
+        TEIID_8_9(VersionID.TEIID_8_9),
+
+        /**
+         * Teiid 8.10
+         */
+        TEIID_8_10(VersionID.TEIID_8_10),
+
+        /**
+         * Teiid 8.11
+         */
+        TEIID_8_11(VersionID.TEIID_8_11),
+
+        /**
+         * Teiid 8.11.5
+         */
+        TEIID_8_11_5(VersionID.TEIID_8_11_5),
+
+        /**
+         * Teiid 8.12
+         */
+        TEIID_8_12(VersionID.TEIID_8_12),
+
+        /**
+         * Teiid 8.12.4
+         */
+        TEIID_8_12_4(VersionID.TEIID_8_12_4),
+
+        /**
+         * Teiid 8.13
+         */
+        TEIID_8_13(VersionID.TEIID_8_13);
 
         private final TeiidVersion version;
 

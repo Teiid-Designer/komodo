@@ -28,8 +28,6 @@ import org.komodo.modeshape.teiid.parser.TeiidNodeFactory.ASTNodes;
 import org.komodo.modeshape.teiid.sql.AbstractTestQueryParser;
 import org.komodo.modeshape.teiid.sql.lang.CompareCriteriaImpl;
 import org.komodo.modeshape.teiid.sql.lang.CriteriaImpl;
-import org.komodo.modeshape.teiid.sql.lang.CriteriaOperator;
-import org.komodo.modeshape.teiid.sql.lang.CriteriaOperator.Operator;
 import org.komodo.modeshape.teiid.sql.lang.FromImpl;
 import org.komodo.modeshape.teiid.sql.lang.MatchCriteriaImpl;
 import org.komodo.modeshape.teiid.sql.lang.QueryImpl;
@@ -50,6 +48,8 @@ import org.komodo.modeshape.teiid.sql.symbol.FunctionImpl;
 import org.komodo.modeshape.teiid.sql.symbol.GroupSymbolImpl;
 import org.komodo.modeshape.teiid.sql.symbol.JSONObjectImpl;
 import org.komodo.modeshape.teiid.sql.symbol.XMLSerializeImpl;
+import org.komodo.spi.query.CriteriaOperator;
+import org.komodo.spi.query.CriteriaOperator.Operator;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 

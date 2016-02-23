@@ -22,10 +22,11 @@
 package org.komodo.modeshape.teiid.sql.lang;
 
 import org.komodo.modeshape.teiid.Messages;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
-import org.komodo.modeshape.teiid.sql.lang.CriteriaOperator.Operator;
 import org.komodo.modeshape.teiid.sql.symbol.BaseExpression;
+import org.komodo.spi.lexicon.TeiidSqlLexicon;
+import org.komodo.spi.query.CriteriaOperator;
+import org.komodo.spi.query.CriteriaOperator.Operator;
 
 /**
  *

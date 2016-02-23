@@ -10,6 +10,11 @@ import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 public interface DataTypeManager {
 
     /**
+     * The suffix designating an array
+     */
+    String ARRAY_SUFFIX = "[]"; //$NON-NLS-1$
+
+    /**
      * Enumerator of data type names supported by the
      * teiid DataTypeManager
      */
@@ -306,6 +311,16 @@ public interface DataTypeManager {
      * @throws Exception
      */
     <T> T transformValue(Object value, DataTypeName dataTypeName) throws Exception;
+
+    /**
+     * Transform the given value into the given class type
+     *
+     * @param value
+     * @param dataTypeName
+     * @return transformed value
+     * @throws Exception
+     */
+    <T> T transformValue(Object value, Class<?> typeClass) throws Exception;
 
     /**
      * @return whether decimals are treated as doubles

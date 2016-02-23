@@ -757,7 +757,6 @@ public class DefaultDataTypeManager implements DataTypeManager {
         return dataTypeNames;
     }
 
-    @Override
     public Integer getDataTypeLimit(String dataType) {
         ArgCheck.isNotNull(dataType);
 
@@ -770,7 +769,6 @@ public class DefaultDataTypeManager implements DataTypeManager {
         return -1;
     }
 
-    @Override
     public int getDataTypeLimit(DataTypeName dataTypeName) {
         ArgCheck.isNotNull(dataTypeName);
         ArgCheck.isTrue(AnnotationUtils.isApplicable(dataTypeName, teiidVersion),
@@ -782,7 +780,6 @@ public class DefaultDataTypeManager implements DataTypeManager {
         return dataType.getLimit();
     }
 
-    @Override
     public String getDataTypeValidChars(String dataType) {
         ArgCheck.isNotNull(dataType);
         
@@ -1014,7 +1011,8 @@ public class DefaultDataTypeManager implements DataTypeManager {
         return result;
     }
 
-    public <T> T transformValue(Object value, Class<T> targetClass) throws Exception {
+    @Override
+    public <T> T transformValue(Object value, Class<?> targetClass) throws Exception {
         if (value == null) {
             return (T)value;
         }

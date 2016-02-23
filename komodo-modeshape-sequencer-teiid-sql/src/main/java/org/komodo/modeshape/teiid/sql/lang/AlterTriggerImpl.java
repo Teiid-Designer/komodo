@@ -22,11 +22,11 @@
 
 package org.komodo.modeshape.teiid.sql.lang;
 
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.SQLanguageVisitorImpl;
 import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.sql.proc.TriggerActionImpl;
 import org.komodo.modeshape.teiid.sql.symbol.BaseExpression;
+import org.komodo.spi.lexicon.TeiidSqlLexicon;
 import org.komodo.spi.query.sql.lang.AlterTrigger;
 
 /**

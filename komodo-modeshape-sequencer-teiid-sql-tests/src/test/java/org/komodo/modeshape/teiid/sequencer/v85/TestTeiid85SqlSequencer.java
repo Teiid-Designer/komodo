@@ -23,12 +23,12 @@ package org.komodo.modeshape.teiid.sequencer.v85;
 
 import javax.jcr.Node;
 import org.junit.Test;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.From;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.GroupBy;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Query;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Select;
 import org.komodo.modeshape.teiid.sequencer.v84.TestTeiid84SqlSequencer;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
+import org.komodo.spi.lexicon.TeiidSqlLexicon.From;
+import org.komodo.spi.lexicon.TeiidSqlLexicon.GroupBy;
+import org.komodo.spi.lexicon.TeiidSqlLexicon.Query;
+import org.komodo.spi.lexicon.TeiidSqlLexicon.Select;
 import org.komodo.spi.runtime.version.TeiidVersion;
 
 /**

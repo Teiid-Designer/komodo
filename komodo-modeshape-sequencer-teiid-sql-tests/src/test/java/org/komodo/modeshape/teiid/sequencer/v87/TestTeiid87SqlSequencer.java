@@ -23,14 +23,14 @@ package org.komodo.modeshape.teiid.sequencer.v87;
 
 import javax.jcr.Node;
 import org.junit.Test;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Block;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.CommandStatement;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.CreateProcedureCommand;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.SPParameter;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.StoredProcedure;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.SubqueryContainer;
 import org.komodo.modeshape.teiid.sequencer.v86.TestTeiid86SqlSequencer;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
+import org.komodo.spi.lexicon.TeiidSqlLexicon.Block;
+import org.komodo.spi.lexicon.TeiidSqlLexicon.CommandStatement;
+import org.komodo.spi.lexicon.TeiidSqlLexicon.CreateProcedureCommand;
+import org.komodo.spi.lexicon.TeiidSqlLexicon.SPParameter;
+import org.komodo.spi.lexicon.TeiidSqlLexicon.StoredProcedure;
+import org.komodo.spi.lexicon.TeiidSqlLexicon.SubqueryContainer;
 import org.komodo.spi.runtime.version.TeiidVersion;
 
 /**

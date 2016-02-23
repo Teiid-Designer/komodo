@@ -23,11 +23,11 @@
 package org.komodo.modeshape.teiid.sql.symbol;
 
 import java.util.List;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.modeshape.teiid.parser.SQLanguageVisitorImpl;
 import org.komodo.modeshape.teiid.parser.TeiidSeqParser;
 import org.komodo.modeshape.teiid.sql.lang.ASTNode;
 import org.komodo.modeshape.teiid.sql.lang.CriteriaImpl;
+import org.komodo.spi.lexicon.TeiidSqlLexicon;
 import org.komodo.spi.query.sql.symbol.SearchedCaseExpression;
 import org.komodo.spi.type.DataTypeManager.DataTypeName;
 

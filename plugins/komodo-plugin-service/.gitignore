@@ -1,0 +1,5 @@
+felix-cache
+target/
+src/main/resources/bundles/index.xml
+src/main/resources/bundles/*.jar
+

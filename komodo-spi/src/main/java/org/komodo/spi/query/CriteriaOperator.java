@@ -19,7 +19,7 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 * 02110-1301 USA.
  ************************************************************************************/
-package org.komodo.modeshape.teiid.sql.lang;
+package org.komodo.spi.query;
 
 import java.util.ArrayList;
 import java.util.Arrays;
