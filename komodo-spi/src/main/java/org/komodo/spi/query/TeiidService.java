@@ -67,9 +67,10 @@ public interface TeiidService extends StringConstants {
      *
      * @param sql
      * @param parent
+     *                  Expected to be of type javax.jcr.Node but set to Object to avoid interface having the dependency
      * @throws Exception 
      */
-    void convert(String sql, Object parent) throws Exception;
+    void nodeConvert(String sql, Object parent) throws Exception;
 
     /**
      * Get the runtime teiid client instance

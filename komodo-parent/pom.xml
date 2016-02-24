@@ -358,6 +358,11 @@
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.komodo.plugins</groupId>
+				<artifactId>komodo-plugin-teiid-framework</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.komodo</groupId>
 				<artifactId>komodo-plugin-service</artifactId>
 				<version>${project.version}</version>

@@ -76,9 +76,9 @@ public class TeiidProxyService implements TeiidService {
     }
 
     @Override
-    public void convert(String sql, Object parent) throws Exception {
+    public void nodeConvert(String sql, Object parent) throws Exception {
         load();
-        delegate.convert(sql, parent);
+        delegate.nodeConvert(sql, parent);
     }
 
     @Override

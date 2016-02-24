@@ -263,6 +263,6 @@ public class TestPluginService implements StringConstants {
         // imported by the bundle
         // Calling convert with a null sql parameter should return the method without an exception
         Node node = Mockito.mock(Node.class);
-        teiidService.convert(null, node);
+        teiidService.nodeConvert(null, node);
     }
 }

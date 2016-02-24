@@ -74,7 +74,7 @@ public class TeiidSqlSequencer extends Sequencer {
             String sql = IoUtil.read(stream);
             PluginService pluginService = PluginService.getInstance();
             TeiidService teiidService = pluginService.getTeiidService(getTeiidVersion());
-            teiidService.convert(sql, outputNode);
+            teiidService.nodeConvert(sql, outputNode);
         } catch (ParsingException e) {
             LOGGER.error(Messages.getString(Messages.TeiidSqlSequencer.ErrorParsingContent), e, e.getLocalizedMessage());
             throw e;

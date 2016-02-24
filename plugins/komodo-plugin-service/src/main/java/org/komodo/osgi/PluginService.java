@@ -52,6 +52,7 @@ import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.DataTypeManager;
 import org.komodo.spi.uuid.WorkspaceUUIDService;
+import org.komodo.teiid.framework.AbstractDataTypeManager;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.KEnvironment;
 import org.modeshape.jcr.api.Session;
@@ -133,6 +134,7 @@ public class PluginService implements StringConstants {
         pkgs.append(TeiidSqlLexicon.class.getPackage().getName()).append(COMMA);
         pkgs.append(Outcome.class.getPackage().getName()).append(COMMA);
         pkgs.append(WorkspaceUUIDService.class.getPackage().getName()).append(COMMA);
+        pkgs.append(AbstractDataTypeManager.class.getPackage().getName()).append(COMMA);
 
         //
         // 3rd party dependencies in the bundles get wired up with a version requirement

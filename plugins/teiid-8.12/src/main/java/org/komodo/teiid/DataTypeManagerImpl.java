@@ -22,47 +22,19 @@
 package org.komodo.teiid;
 
 import java.util.Set;
-import org.komodo.spi.annotation.AnnotationUtils;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.komodo.spi.type.DataTypeManager;
+import org.komodo.teiid.framework.AbstractDataTypeManager;
+import org.teiid.core.types.DataTypeManager;
 
-public class DataTypeManagerImpl implements DataTypeManager {
-
-    private final TeiidVersion version;
+public class DataTypeManagerImpl extends AbstractDataTypeManager {
 
     public DataTypeManagerImpl(TeiidVersion version) {
-        this.version = version;
-    }
-
-    private boolean isArrayType(String name) {
-        return name.endsWith(ARRAY_SUFFIX);
-    }
-
-    private String getComponentType(String name) {
-        return name.substring(0, name.lastIndexOf(ARRAY_SUFFIX));
-    }
-
-    /**
-     * @return teiid version
-     */
-    public TeiidVersion getVersion() {
-        return version;
-    }
-
-    @Override
-    public String getDataSourceType(DataSourceTypes dataSourceType) {
-        if (dataSourceType == null)
-            return DataSourceTypes.UNKNOWN.id();
-
-        if (! AnnotationUtils.isApplicable(dataSourceType, getVersion()))
-            return DataSourceTypes.UNKNOWN.id();
-
-        return AnnotationUtils.getUpdatedName(dataSourceType, dataSourceType.id(), getVersion());
+        super(version);
     }
 
     @Override
     public Class<?> getDataTypeClass(String name) {
-        return org.teiid.core.types.DataTypeManager.getDataTypeClass(name);
+        return DataTypeManager.getDataTypeClass(name);
     }
 
     @Override
@@ -71,8 +43,8 @@ public class DataTypeManagerImpl implements DataTypeManager {
             return DataTypeName.NULL;
 
         // Should eliminate any aliases
-        Class<?> dataTypeClass = org.teiid.core.types.DataTypeManager.getDataTypeClass(dataTypeId);
-        dataTypeId = org.teiid.core.types.DataTypeManager.getDataTypeName(dataTypeClass);
+        Class<?> dataTypeClass = DataTypeManager.getDataTypeClass(dataTypeId);
+        dataTypeId = DataTypeManager.getDataTypeName(dataTypeClass);
 
         boolean isArray = isArrayType(dataTypeId);
 
@@ -91,7 +63,7 @@ public class DataTypeManagerImpl implements DataTypeManager {
 
     @Override
     public String getDataTypeName(Class<?> typeClass) {
-        return org.teiid.core.types.DataTypeManager.getDataTypeName(typeClass);
+        return DataTypeManager.getDataTypeName(typeClass);
     }
 
     @Override
@@ -102,7 +74,7 @@ public class DataTypeManagerImpl implements DataTypeManager {
 
     @Override
     public Set<String> getAllDataTypeNames() {
-        return org.teiid.core.types.DataTypeManager.getAllDataTypeNames();
+        return DataTypeManager.getAllDataTypeNames();
     }
 
     @Override
@@ -115,33 +87,27 @@ public class DataTypeManagerImpl implements DataTypeManager {
 
     @Override
     public boolean isExplicitConversion(String sourceTypeName, String targetTypeName) {
-        return org.teiid.core.types.DataTypeManager.isExplicitConversion(sourceTypeName, targetTypeName);
+        return DataTypeManager.isExplicitConversion(sourceTypeName, targetTypeName);
     }
 
     @Override
     public boolean isImplicitConversion(String sourceTypeName, String targetTypeName) {
-        return org.teiid.core.types.DataTypeManager.isImplicitConversion(sourceTypeName, targetTypeName);
+        return DataTypeManager.isImplicitConversion(sourceTypeName, targetTypeName);
     }
 
     @Override
     public boolean isTransformable(String sourceTypeName, String targetTypeName) {
-        return org.teiid.core.types.DataTypeManager.isTransformable(sourceTypeName, targetTypeName);
+        return DataTypeManager.isTransformable(sourceTypeName, targetTypeName);
     }
 
     @Override
     public boolean isLOB(Class<?> type) {
-        return org.teiid.core.types.DataTypeManager.isLOB(type);
-    }
-
-    @Override
-    public <T> T transformValue(Object value, DataTypeName dataTypeName) throws Exception {
-        Class<DataTypeName> typeClass = dataTypeName.getDeclaringClass();
-        return transformValue(value, typeClass);
+        return DataTypeManager.isLOB(type);
     }
 
     @SuppressWarnings( "unchecked" )
     @Override
     public <T> T transformValue(Object value, Class<?> typeClass) throws Exception {
-        return (T) org.teiid.core.types.DataTypeManager.transformValue(value, typeClass);
+        return (T) DataTypeManager.transformValue(value, typeClass);
     }
 }

@@ -25,6 +25,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import org.komodo.spi.runtime.TeiidTranslator;
+import org.komodo.teiid.framework.Messages;
 import org.teiid.adminapi.AdminObject;
 import org.teiid.adminapi.Translator;
 import org.teiid.core.util.ArgCheck;

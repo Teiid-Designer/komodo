@@ -22,14 +22,7 @@
 package org.komodo.teiid;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
@@ -37,252 +30,41 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
-import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.outcome.Outcome;
 import org.komodo.spi.outcome.OutcomeFactory;
-import org.komodo.spi.runtime.EventManager;
 import org.komodo.spi.runtime.ExecutionConfigurationEvent;
-import org.komodo.spi.runtime.HostProvider;
-import org.komodo.spi.runtime.TeiidAdminInfo;
 import org.komodo.spi.runtime.TeiidConnectionInfo;
 import org.komodo.spi.runtime.TeiidDataSource;
-import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.TeiidJdbcInfo;
 import org.komodo.spi.runtime.TeiidParent;
 import org.komodo.spi.runtime.TeiidPropertyDefinition;
 import org.komodo.spi.runtime.TeiidTranslator;
 import org.komodo.spi.runtime.TeiidVdb;
 import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.teiid.framework.AbstractTeiidInstance;
+import org.komodo.teiid.framework.Messages;
 import org.teiid.adminapi.Admin;
 import org.teiid.adminapi.PropertyDefinition;
 import org.teiid.adminapi.Translator;
 import org.teiid.adminapi.VDB;
 import org.teiid.adminapi.jboss.AdminFactory;
-import org.teiid.core.util.ArgCheck;
 import org.teiid.jdbc.TeiidDriver;
 
-public class TeiidInstanceImpl implements TeiidInstance, StringConstants {
-
-    private static final String TEST_VDB = EMPTY_STRING + "<vdb name=\"ping\" version=\"1\">" + //$NON-NLS-1$
-                                           "<model visible=\"true\" name=\"Foo\" type=\"PHYSICAL\" path=\"/dummy/Foo\">" + //$NON-NLS-1$
-                                           "<source name=\"s\" translator-name=\"loopback\"/>" + //$NON-NLS-1$
-                                           "<metadata type=\"DDL\"><![CDATA[CREATE FOREIGN TABLE G1 (e1 string, e2 integer);]]> </metadata>" //$NON-NLS-1$
-                                           + "</model>" + "</vdb>";
-
-    private TeiidParent parent;
-
-    private TeiidAdminInfo adminInfo;
-
-    private TeiidJdbcInfo jdbcInfo;
-
-    private TeiidVersion version;
+public class TeiidInstanceImpl extends AbstractTeiidInstance {
 
     private Admin admin;
 
-    private String connectionError;
-
     private TeiidArtifactFactory factory = new TeiidArtifactFactory();
 
-    private class TeiidAdminInfoImpl implements TeiidAdminInfo {
-
-        @Override
-        public HostProvider getHostProvider() {
-            return parent;
-        }
-
-        @Override
-        public String getUsername() {
-            return parent.getUsername();
-        }
-
-        @Override
-        public String getPassword() {
-            return parent.getPassword();
-        }
-
-        @Override
-        public int getPort() {
-            return parent.getPort();
-        }
-
-        @Override
-        public boolean isSecure() {
-            return parent.isSecure();
-        }
-
-        @Override
-        public ConnectivityType getType() {
-            return ConnectivityType.ADMIN;
-        }
-
-        /**
-         * mm<s>://host:port
-         */
-        @Override
-        public String getUrl() {
-            StringBuilder sb = new StringBuilder();
-            sb.append(isSecure() ? MMS : MM);
-            sb.append(getHostProvider().getHost());
-            sb.append(':');
-            sb.append(getPort());
-
-            return sb.toString();
-        }
-
-        @Override
-        public void setHostProvider(HostProvider hostProvider) {
-            // Not required since all data depends on parent
-        }
-
-        @Override
-        public void setPassword(String password) {
-            // Not required since all data depends on parent
-        }
-
-        @Override
-        public void setPort(int port) {
-            // Not required since all data depends on parent
-        }
-
-        @Override
-        public void setSecure(boolean secure) {
-            // Not required since all data depends on parent
-        }
-
-        @Override
-        public void setUsername(String username) {
-            // Not required since all data depends on parent
-        }
-    }
-
-    /**
-         * Construct instance
-         *
-         * @param parent
-         * @param teiidVersion
-         * @param jdbcInfo
-         */
     public TeiidInstanceImpl(TeiidParent parent, final TeiidVersion teiidVersion, TeiidJdbcInfo jdbcInfo) {
-        ArgCheck.isNotNull(parent);
-        ArgCheck.isNotNull(jdbcInfo);
-        ArgCheck.isNotNull(parent);
-
-        this.parent = parent;
-        this.version = teiidVersion;
-        this.adminInfo = new TeiidAdminInfoImpl();
-        this.jdbcInfo = jdbcInfo;
-    }
-
-    /**
-     * Append the vdb file extension to the vdb name 
-     * if not already appended.
-     * 
-     * @param vdbName
-     * @return
-     */
-    private String appendVdbExtension(String vdbName) {
-        if (vdbName.endsWith(TeiidVdb.VDB_EXTENSION))
-            return vdbName;
-
-        return vdbName + TeiidVdb.VDB_DOT_EXTENSION;
-    }
-
-    /**
-     * Append the suffix for dynamic VDB to the vdb name if not already appended.
-     * 
-     * @param vdbName
-     * @return
-     */
-    private String appendDynamicVdbSuffix(String vdbName) {
-        if (vdbName.endsWith(TeiidVdb.DYNAMIC_VDB_SUFFIX))
-            return vdbName;
-
-        return vdbName + TeiidVdb.DYNAMIC_VDB_SUFFIX;
+        super(parent, teiidVersion, jdbcInfo);
     }
 
     @Override
-    public TeiidParent getParent() {
-        return parent;
-    }
-
-    @Override
-    public TeiidAdminInfo getTeiidAdminInfo() {
-        return adminInfo;
-    }
-
-    @Override
-    public TeiidJdbcInfo getTeiidJdbcInfo() {
-        return jdbcInfo;
-    }
-
-    @Override
-    public String getParentName() {
-        return parent.getName();
-    }
-
-    @Override
-    public TeiidVersion getVersion() {
-        return version;
-    }
-
-    @Override
-    public boolean isParentConnected() {
-        Socket socket = null;
-        Reader in = null;
-        InetSocketAddress endPoint = new InetSocketAddress(parent.getHost(), parent.getPort());
-
-        if (endPoint.isUnresolved()) {
-            return false;
-        }
-
-        try {
-            socket = new Socket();
-            socket.connect(endPoint, 1024);
-
-            /*
-             * This may not seem necessary since a socket connection
-             * should be enough. However, TEIIDDES-1971 has shown
-             * that without actually using the socket, 'Connection reset
-             * by peer' messages with be reported in the server log.
-             */
-            InputStream socketReader = socket.getInputStream();
-
-            final char[] buffer = new char[100];
-            in = new InputStreamReader(socketReader);
-            int rsz = in.read(buffer, 0, buffer.length);
-            if (rsz == -1) {
-                return false;
-            }
-
-            StringBuffer output = new StringBuffer();
-            for (int i = 0; i < buffer.length; ++i) {
-                if (Character.isLetterOrDigit(buffer[i])) {
-                    output.append(buffer[i]);
-                }
-            }
-
-            return true;
-        } catch (Exception ex) {
-            return false;
-        } finally {
-            try {
-                if (in != null)
-                    in.close();
-
-                if (socket != null && socket.isConnected()) {
-                    socket.close();
-                    socket = null;
-                }
-            } catch (Exception ex2) {
-                /*
-                 * Unlikely event that socket did not close correctly.
-                 * Do nothing
-                 */
-            }
-        }
+    protected boolean isCoherent() {
+        return admin != null;
     }
 
     /**
@@ -290,38 +72,10 @@ public class TeiidInstanceImpl implements TeiidInstance, StringConstants {
      */
     @Override
     public boolean isConnected() {
-        if (!isParentConnected() || this.admin == null) {
+        if (!isParentConnected() || !isCoherent()) {
             return false;
         }
         return ping(ConnectivityType.ADMIN).isOK();
-    }
-
-    @Override
-    public EventManager getEventManager() {
-        return parent.getEventManager();
-    }
-
-    @Override
-    public String getHost() {
-        return parent.getHost();
-    }
-
-    @Override
-    public String getId() {
-        return getUrl() + HYPHEN + getParent().getId();
-    }
-
-    @Override
-    public String getUrl() {
-        return getTeiidAdminInfo().getUrl();
-    }
-
-    @Override
-    public void notifyRefresh() {
-        if (getEventManager() == null)
-            return;
-
-        getEventManager().notifyListeners(ExecutionConfigurationEvent.createTeiidRefreshEvent(this));
     }
 
     @Override
@@ -376,39 +130,13 @@ public class TeiidInstanceImpl implements TeiidInstance, StringConstants {
     }
 
     @Override
-    public void reconnect() {
-        try {
-            // Call disconnect() first to clear out Server & admin caches
-            getEventManager().permitListeners(false);
-            try {
-                disconnect();
-            } catch (Exception ex) {
-                throw ex;
-            } finally {
-                getEventManager().permitListeners(true);
-            }
-
-            if (isParentConnected()) {
-                // Refresh is implied in the getting of the admin object since it will
-                // automatically load and refresh.
-                connect();
-            } else {
-                throw new Exception(Messages.getString(Messages.TeiidInstance.parentNotStartedMessage));
-            }
-
-            setConnectionError(null);
-        } catch (Exception e) {
-            String msg = Messages.getString(Messages.TeiidInstance.reconnectErrorMsg, this) + "\n" + e.getLocalizedMessage(); //$NONNLS1$
-            setConnectionError(msg);
-        }
-    }
-
-    private Outcome pingAdmin() throws Exception {
+    protected Outcome pingAdmin() throws Exception {
         admin.getSessions();
         return OutcomeFactory.getInstance().createOK();
     }
 
-    private Outcome pingJdbc() {
+    @Override
+    protected Outcome pingJdbc() {
         String host = getHost();
         TeiidJdbcInfo teiidJdbcInfo = getTeiidJdbcInfo();
 
@@ -445,44 +173,6 @@ public class TeiidInstanceImpl implements TeiidInstance, StringConstants {
         }
 
         return OutcomeFactory.getInstance().createOK();
-    }
-
-    @Override
-    public Outcome ping(ConnectivityType connectivityType) {
-        try {
-            boolean testCausesConnect = false;
-
-            if (admin == null) {
-                connect();
-                testCausesConnect = true;
-            }
-
-            Outcome outcome = null;
-
-            String msg = Messages.getString(Messages.ExecutionAdmin.cannotConnectToServer, getTeiidAdminInfo().getUsername());
-            if (this.admin == null)
-                throw new Exception(msg);
-
-            switch (connectivityType) {
-                case JDBC:
-                    outcome = pingJdbc();
-                case ADMIN:
-                default:
-                    outcome = pingAdmin();
-            }
-
-            // Only disconnect if this test ping caused
-            // the connect
-            if (testCausesConnect) {
-                disconnect();
-            }
-
-            return outcome;
-
-        } catch (Exception ex) {
-            String msg = Messages.getString(Messages.ExecutionAdmin.cannotConnectToServer, getUrl());
-            return OutcomeFactory.getInstance().createError(msg, ex);
-        }
     }
 
     @Override
@@ -524,196 +214,14 @@ public class TeiidInstanceImpl implements TeiidInstance, StringConstants {
     }
 
     @Override
+    protected void createDataSource(String deploymentName, String templateName, Properties properties) throws Exception {
+        admin.createDataSource(deploymentName, templateName, properties);
+    }
+
+    @Override
     public Set<String> getDataSourceTypeNames() throws Exception {
         connect();
         return admin.getDataSourceTemplateNames();
-    }
-
-    /**
-     * Look for an installed driver that has the driverClass which matches the supplied driverClass name.
-     * 
-     * @param requestDriverClass the driver class to match
-     * @return the name of the matching driver, null if not found
-     */
-    private String getDSMatchForDriverClass(String requestDriverClass) throws Exception {
-        if (requestDriverClass == null)
-            return null;
-
-        if (!isParentConnected())
-            return null;
-
-        // TODO currently unsupported and needs work to consider how to reimplement
-        // The Admin interface does not provide access to the internal connection. The original
-        // runtime-client and an extra public method that interrogated the jboss parent server
-        // for all drivers installed. Such a method is not part of the teiid API.
-        // Could be implement by fetching the connection object using reflection
-
-//        try {
-//            Collection<DataSourceDriver> dataSourceDrivers = admin.getDataSourceDrivers();
-//            for (DataSourceDriver driver : dataSourceDrivers) {
-//                String driverClassName = driver.getClassName();
-//                String driverName = driver.getName();
-//
-//                if (requestDriverClass.equalsIgnoreCase(driverClassName))
-//                    return driverName;
-//            }
-//
-//        } catch (Exception ex) {
-//            // Failed to get mapping
-//            KLog.getLogger().error(Messages.getString(Messages.ExecutionAdmin.failedToGetDriverMappings, requestDriverClass), ex);
-//        }
-
-        return null;
-    }
-
-    /*
-     * Deploy all jars in the supplied jarList
-     * @param admin the Admin instance
-     * @param jarList the colonseparated list of jar path locations
-     */
-    private void deployJars(Admin admin, String jarList) throws Exception {
-        // Path Entries are colon separated
-        String[] jarPathStrs = jarList.split("[:]");  //$NONNLS1$
-
-        // Attempt to deploy each jar
-        for(String jarPathStr: jarPathStrs) {
-            File theFile = new File(jarPathStr);
-            if(! theFile.exists())
-                // The file was not found
-                throw new Exception(Messages.getString(Messages.ExecutionAdmin.jarDeploymentJarNotFound, theFile.getPath()));
-
-            if(! theFile.canRead())
-                throw new Exception(Messages.getString(Messages.ExecutionAdmin.jarDeploymentJarNotReadable, theFile.getPath()));
-
-            String fileName = theFile.getName();
-            InputStream iStream = null;
-            try {
-                iStream = new FileInputStream(theFile);
-            } catch (FileNotFoundException ex) {
-                continue;
-            }
-
-            try {
-                admin.deploy(fileName, iStream);
-            } catch (Exception ex) {
-                // Jar deployment failed
-                throw new Exception(Messages.getString(Messages.ExecutionAdmin.jarDeploymentFailed, theFile.getPath()), ex);
-            }
-        }
-    }
-
-    @Override
-    public TeiidDataSource getOrCreateDataSource(String displayName,
-                                                 String dsName,
-                                                 String typeName,
-                                                 Properties properties) throws Exception {
-        ArgCheck.isNotEmpty(displayName, "displayName"); //$NONNLS1$
-        ArgCheck.isNotEmpty(dsName, "dsName"); //$NONNLS1$
-        ArgCheck.isNotEmpty(typeName, "typeName"); //$NONNLS1$
-        ArgCheck.isNotEmpty(properties, "properties"); //$NONNLS1$
-
-        for (Entry<Object, Object> entry : properties.entrySet()) {
-            Object value = entry.getValue();
-            String errorMsg = "No value for the connection property '" + entry.getKey() + "'"; //$NONNLS1$ //$NONNLS2$
-            ArgCheck.isNotNull(value, errorMsg);
-            ArgCheck.isNotEmpty(value.toString(), errorMsg);
-        }
-
-        connect();
-
-        // Check if exists, return false
-        if (dataSourceExists(dsName)) {
-            TeiidDataSource tds = getDataSource(dsName);
-            if (tds != null) {
-                return tds;
-            }
-        }
-
-        // For JDBC types, find the matching installed driver.  This is done currently by matching
-        // the profile driver classname to the installed driver classname
-        String connProfileDriverClass = properties.getProperty("driverclass"); //$NONNLS1$
-        if ("connectorjdbc".equals(typeName)) { //$NONNLS1$
-            // List of driver jars on the connection profile
-            String jarList = properties.getProperty("jarList"); //$NONNLS1$
-
-            // Get first driver name with the driver class that matches the connection profile
-            String dsNameMatch = getDSMatchForDriverClass(connProfileDriverClass);
-
-            // If a matching datasource was found, set typename
-            if (dsNameMatch != null) {
-                typeName = dsNameMatch;
-            // No matching datasource, attempt to deploy the driver if jarList is populated.
-            } else if (jarList != null && jarList.trim().length() > 0) {
-                // Try to deploy the jars
-                deployJars(this.admin, jarList);
-
-                // Retry the name match after deployment.
-                dsNameMatch = getDSMatchForDriverClass(connProfileDriverClass);
-                if (dsNameMatch != null) {
-                    typeName = dsNameMatch;
-                }
-            }
-        }
-        // Verify the "typeName" exists.
-        if (!getDataSourceTypeNames().contains(typeName)) {
-            if ("connectorjdbc".equals(typeName)) { //$NONNLS1$
-                throw new Exception(Messages.getString(Messages.ExecutionAdmin.jdbcSourceForClassNameNotFound,
-                                                       connProfileDriverClass,
-                                                       getUrl()));
-            } else {
-                throw new Exception(Messages.getString(Messages.ExecutionAdmin.dataSourceTypeDoesNotExist,
-                                                       typeName,
-                                                       getUrl()));
-            }
-        }
-
-        properties.setProperty(TeiidInstance.DATASOURCE_DISPLAYNAME, displayName);
-        this.admin.createDataSource(dsName, typeName, properties);
-
-        // Check that local name list contains new dsName
-        TeiidDataSource tds = getDataSource(dsName);
-        if (tds != null) {
-            this.getEventManager().notifyListeners(ExecutionConfigurationEvent.createAddDataSourceEvent(tds));
-            return tds;
-        }
-
-        // We shouldn't get here if data source was created
-        throw new Exception(
-                                          Messages.getString(Messages.ExecutionAdmin.errorCreatingDataSource, dsName, typeName));
-    }
-
-    private String getVdbDataSourceConnectionUrl(String vdbName) {
-        String host = this.adminInfo.getHostProvider().getHost();
-        int port = this.adminInfo.getPort();
-        return "jdbc:teiid:" + vdbName + "@mm://" + host + ':' + port; //$NONNLS1$ //$NONNLS2$
-    }
-
-    @Override
-    public Outcome createVdbDataSource(String vdbName,
-                                       String displayName,
-                                       String jndiName) {
-        Properties props = new Properties();
-        String username = this.jdbcInfo.getUsername();
-        String password = this.jdbcInfo.getPassword();
-        if (username != null) {
-            props.put("username", username); //$NONNLS1$
-        }
-        if (password != null) {
-            props.put("password", password); //$NONNLS1$
-        }
-
-        props.put("driverclass", "org.teiid.jdbc.TeiidDriver"); //$NONNLS1$ //$NONNLS2$
-        props.put("connectionurl", getVdbDataSourceConnectionUrl(vdbName)); //$NONNLS1$
-
-        try {
-            connect();
-            getOrCreateDataSource(displayName, jndiName, "connectorjdbc", props); //$NONNLS1$
-        } catch (Exception ex) {
-            String msg = "Error creating data source for VDB " + vdbName; //$NONNLS1$
-            return OutcomeFactory.getInstance().createError(msg, ex);
-        }
-
-        return OutcomeFactory.getInstance().createOK();
     }
 
     @Override
@@ -763,70 +271,6 @@ public class TeiidInstanceImpl implements TeiidInstance, StringConstants {
     }
 
     @Override
-    public boolean hasVdb(String name) throws Exception {
-        connect();
-        return admin.getVDB(name, 1) != null;
-    }
-
-    @Override
-    public boolean isVdbActive(String vdbName) throws Exception {
-        connect();
-        if (!hasVdb(vdbName))
-            return false;
-
-        return getVdb(vdbName).isActive();
-    }
-
-    @Override
-    public boolean isVdbLoading(String vdbName) throws Exception {
-        connect();
-        if (!hasVdb(vdbName))
-            return false;
-
-        return getVdb(vdbName).isLoading();
-    }
-
-    @Override
-    public boolean hasVdbFailed(String vdbName) throws Exception {
-        connect();
-        if (!hasVdb(vdbName))
-            return false;
-
-        return getVdb(vdbName).hasFailed();
-    }
-
-    @Override
-    public boolean wasVdbRemoved(String vdbName) throws Exception {
-        connect();
-        if (!hasVdb(vdbName))
-            return false;
-
-        return getVdb(vdbName).wasRemoved();
-    }
-
-    @Override
-    public List<String> retrieveVdbValidityErrors(String vdbName) throws Exception {
-        connect();
-        if (!hasVdb(vdbName))
-            return Collections.emptyList();
-
-        return getVdb(vdbName).getValidityErrors();
-    }
-
-    @Override
-    public void undeployVdb(String vdbName) throws Exception {
-        connect();
-        TeiidVdb vdb = getVdb(vdbName);
-        if (vdb != null) {
-            admin.undeploy(appendVdbExtension(vdbName));
-        }
-        vdb = getVdb(vdbName);
-
-        if (vdb != null)
-            this.getEventManager().notifyListeners(ExecutionConfigurationEvent.createUnDeployVDBEvent(vdb.getName()));
-    }
-
-    @Override
     public String getAdminDriverPath() throws Exception {
         connect();
         return Admin.class.getProtectionDomain().getCodeSource().getLocation().getFile();
@@ -839,73 +283,19 @@ public class TeiidInstanceImpl implements TeiidInstance, StringConstants {
     }
 
     @Override
-    public void deployDynamicVdb(String deploymentName,
-                                 InputStream inStream) throws Exception {
-        connect();
-
-        ArgCheck.isNotNull(deploymentName, "deploymentName"); //$NONNLS1$
-        ArgCheck.isNotNull(inStream, "inStream"); //$NONNLS1$
-
-        admin.deploy(deploymentName, inStream);
-
-        // Give a 0.5 sec pause for the VDB to finish loading metadata.
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            // ignore
-        }
+    protected void deploy(String name, InputStream stream) throws Exception {
+        admin.deploy(name, stream);
     }
 
     @Override
-    public void undeployDynamicVdb(String vdbName) throws Exception {
-        connect();
-        TeiidVdb vdb = getVdb(vdbName);
-        if (vdb != null) {
-            admin.undeploy(appendDynamicVdbSuffix(vdbName));
-        }
-        vdb = getVdb(vdbName);
-
-        if (vdb != null)
-            this.getEventManager().notifyListeners(ExecutionConfigurationEvent.createUnDeployVDBEvent(vdb.getName()));
+    protected void undeploy(String name) throws Exception {
+        admin.undeploy(name);
     }
 
     @Override
-    public void deployDriver(File driverFile) throws Exception {
-        connect();
-        if (!driverFile.exists())
-            throw new Exception(Messages.getString(Messages.ExecutionAdmin.jarDeploymentJarNotFound, driverFile.getPath()));
-
-        if (!driverFile.canRead())
-            throw new Exception(Messages.getString(Messages.ExecutionAdmin.jarDeploymentJarNotReadable, driverFile.getPath()));
-
-        String fileName = driverFile.getName();
-        InputStream iStream = null;
-        try {
-            iStream = new FileInputStream(driverFile);
-        } catch (FileNotFoundException ex) {
-            throw ex;
-        }
-
-        try {
-            admin.deploy(fileName, iStream);
-        } catch (Exception ex) {
-            // Jar deployment failed
-            throw ex;
-        }
-    }
-
-    @Override
-    public String getSchema(String vdbName,
-                            int vdbVersion,
-                            String modelName) throws Exception {
+    public String getSchema(String vdbName, int vdbVersion, String modelName) throws Exception {
         connect();
         return admin.getSchema(vdbName, vdbVersion, modelName, null, null);
-    }
-
-    @Override
-    public Properties getDataSourceProperties(String name) throws Exception {
-        connect();
-        return getDataSource(name).getProperties();
     }
 
     @Override
@@ -928,29 +318,4 @@ public class TeiidInstanceImpl implements TeiidInstance, StringConstants {
 
         return teiidPropDefs;
     }
-
-    @Override
-    public String getConnectionError() {
-        return this.connectionError;
-    }
-
-    private void setConnectionError(String connectionError) {
-        this.connectionError = connectionError;
-    }
-
-    @Override
-    public void update(TeiidInstance otherInstance) {
-        ArgCheck.isNotNull(otherInstance);
-
-        disconnect();
-        connectionError = null;
-
-        TeiidJdbcInfo otherJdbcInfo = otherInstance.getTeiidJdbcInfo();
-        jdbcInfo.setHostProvider(otherJdbcInfo.getHostProvider());
-        jdbcInfo.setPassword(otherJdbcInfo.getPassword());
-        jdbcInfo.setUsername(otherJdbcInfo.getUsername());
-        jdbcInfo.setPort(otherJdbcInfo.getPort());
-        jdbcInfo.setSecure(otherJdbcInfo.isSecure());
-    }
-
 }

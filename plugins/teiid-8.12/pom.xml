@@ -18,6 +18,7 @@
 		<version.aesh>0.33.12.redhat-1</version.aesh>
 		<imported.packages>
 			org.komodo.spi.*,
+			org.komodo.teiid.framework,
 			javax.jcr,
 			org.modeshape.jcr.api
 		</imported.packages>
@@ -110,6 +111,11 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.komodo.plugins</groupId>
+			<artifactId>komodo-plugin-teiid-framework</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
 			<groupId>javax.jcr</groupId>
 			<artifactId>jcr</artifactId>
 			<scope>provided</scope>
@@ -190,11 +196,23 @@
 			<resource>
 				<directory>${project.basedir}/src/main/resources</directory>
 			</resource>
-			<!-- Provides a location for any extra objects to be included in the final jar -->
+			<resource>
+				<directory>${project.basedir}/src/test/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+			<!-- Provides a location for any extra objects to be included in the final 
+				jar -->
 			<resource>
 				<directory>${project.basedir}/extra</directory>
 			</resource>
 		</resources>
+
+		<testResources>
+			<testResource>
+				<directory>${project.basedir}/src/test/resources</directory>
+				<filtering>true</filtering>
+			</testResource>
+		</testResources>
 
 		<!-- Usual compiling ensuring the java version is 1.8 -->
 		<plugins>
@@ -229,6 +247,45 @@
 									<outputDirectory>
 										${project.build.directory}/aesh
 									</outputDirectory>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+					</execution>
+					<execution>
+						<id>unpack-for-teiid-testing</id>
+						<phase>process-sources</phase>
+						<goals>
+							<goal>unpack</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>org.jboss.as</groupId>
+									<artifactId>jboss-as-dist</artifactId>
+									<version>${version.org.jboss.as}</version>
+									<type>zip</type>
+									<overWrite>false</overWrite>
+									<outputDirectory>${project.basedir}/lib/jbossas/</outputDirectory>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+					</execution>
+					<execution>
+						<id>unpack-teiid</id>
+						<phase>process-sources</phase>
+						<goals>
+							<goal>unpack</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>org.jboss.teiid</groupId>
+									<artifactId>teiid</artifactId>
+									<version>${version.teiid}</version>
+									<classifier>jboss-dist</classifier>
+									<type>zip</type>
+									<overWrite>true</overWrite>
+									<outputDirectory>${project.basedir}/lib/jbossas/${version.jbossas.test}</outputDirectory>
 								</artifactItem>
 							</artifactItems>
 						</configuration>
@@ -302,51 +359,6 @@
 						</manifestEntries>
 					</archive>
 				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>unpack-for-teiid-testing</id>
-						<phase>process-sources</phase>
-						<goals>
-							<goal>unpack</goal>
-						</goals>
-						<configuration>
-							<artifactItems>
-								<artifactItem>
-									<groupId>org.jboss.as</groupId>
-									<artifactId>jboss-as-dist</artifactId>
-									<version>${version.org.jboss.as}</version>
-									<type>zip</type>
-									<overWrite>false</overWrite>
-									<outputDirectory>${project.basedir}/lib/jbossas/</outputDirectory>
-								</artifactItem>
-							</artifactItems>
-						</configuration>
-					</execution>
-					<execution>
-						<id>unpack-teiid</id>
-						<phase>process-sources</phase>
-						<goals>
-							<goal>unpack</goal>
-						</goals>
-						<configuration>
-							<artifactItems>
-								<artifactItem>
-									<groupId>org.jboss.teiid</groupId>
-									<artifactId>teiid</artifactId>
-									<version>${version.teiid}</version>
-									<classifier>jboss-dist</classifier>
-									<type>zip</type>
-									<overWrite>true</overWrite>
-									<outputDirectory>${project.basedir}/lib/jbossas/${version.jbossas.test}</outputDirectory>
-								</artifactItem>
-							</artifactItems>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

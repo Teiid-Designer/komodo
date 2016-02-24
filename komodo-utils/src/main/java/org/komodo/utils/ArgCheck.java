@@ -22,6 +22,7 @@
 package org.komodo.utils;
 
 import java.util.Collection;
+import java.util.Map;
 
 
 /**
@@ -150,7 +151,7 @@ public class ArgCheck {
      * @param value Value
      * @throws IllegalArgumentException If value is null
      */
-    public static final void isInstanceOf(Class theClass, Object value) {
+    public static final void isInstanceOf(Class<?> theClass, Object value) {
         isInstanceOf(theClass, value, null);
     }
 
@@ -162,7 +163,7 @@ public class ArgCheck {
      * @param message Exception message if check fails
      * @throws IllegalArgumentException If value is null
      */
-    public static final void isInstanceOf(Class theClass, Object value, String message) {
+    public static final void isInstanceOf(Class<?> theClass, Object value, String message) {
         isNotNull(value);
         if (!theClass.isInstance(value)) {
             final String msg = message != null ? message : Messages.getString(Messages.ArgCheck.isInstanceOf,
@@ -202,31 +203,28 @@ public class ArgCheck {
         }
     }
 
-    //
-//    /**
-//     * Check that the properties is not empty
-//     *
-//     * @param properties
-//     * @throws IllegalArgumentException If properties is null or empty
-//     */
-//    public static final void isNotEmpty(Properties properties) {
-//        isNotEmpty(properties, null);
-//    }
-//
-//    /**
-//     * Check that the properties is not empty
-//     *
-//     * @param properties
-//     * @param message Exception message if check fails
-//     * @throws IllegalArgumentException If properties is null or empty
-//     */
-//    public static final void isNotEmpty(Properties properties, String message) {
-//        isNotNull(properties);
-//        if (properties.isEmpty()) {
-//            final String msg = message != null ? message : Messages.getString(Messages.ArgCheck.isPropertiesNotEmpty);
-//            throw new IllegalArgumentException(msg);
-//        }
-//    }
+    /**
+     * Check that the map is not empty
+     * @param map Map 
+     * @throws IllegalArgumentException If map is null or empty
+     */
+    public static final void isNotEmpty(Map<?, ?> map) {
+        isNotEmpty(map,null);
+    }
+
+    /**
+     * Check that the map is not empty
+     * @param map Map 
+     * @param message Exception message if check fails
+     * @throws IllegalArgumentException If map is null or empty
+     */
+    public static final void isNotEmpty(Map<?, ?> map, String message) {
+        isNotNull(map);
+        if(map.isEmpty()) {
+            final String msg = message != null ? message : Messages.getString(Messages.ArgCheck.isMapNotEmpty);
+            throw new IllegalArgumentException(msg);
+        }
+    }
 
     /**
      * Check that the string is not empty

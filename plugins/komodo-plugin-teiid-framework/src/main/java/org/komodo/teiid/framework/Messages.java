@@ -19,7 +19,7 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 * 021101301 USA.
  ************************************************************************************/
-package org.komodo.teiid;
+package org.komodo.teiid.framework;
 
 import java.text.MessageFormat;
 import java.util.MissingResourceException;
@@ -338,6 +338,15 @@ public class Messages {
         procedureServiceTextInvokeHttpTableSqlTemplate,
         procedureServiceXmlGetTextFilesTableSqlTemplate,
         procedureServiceXmlInvokeHttpTableSqlTemplate;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT +  name();
+        }
+    }
+
+    public enum TeiidService {
+        NotAJcrNode;
 
         @Override
         public String toString() {
