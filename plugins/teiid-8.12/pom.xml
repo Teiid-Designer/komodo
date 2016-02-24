@@ -91,14 +91,6 @@
 				<artifactId>jboss-as-arquillian-container-managed</artifactId>
 				<version>${version.arquillian-container}</version>
 			</dependency>
-
-			<dependency>
-				<groupId>org.komodo</groupId>
-				<artifactId>komodo-utils</artifactId>
-				<version>${project.version}</version>
-				<type>test-jar</type>
-				<scope>test</scope>
-			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -186,6 +178,12 @@
 		<dependency>
 			<groupId>org.komodo</groupId>
 			<artifactId>komodo-utils</artifactId>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.komodo.plugins</groupId>
+			<artifactId>komodo-plugin-teiid-framework</artifactId>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
