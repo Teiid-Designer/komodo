@@ -18,12 +18,6 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>org.komodo.plugins.teiid</groupId>
-				<artifactId>teiid-8.12</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-
-			<dependency>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>org.apache.felix.framework</artifactId>
 				<version>${version.apache.felix.framework}</version>
@@ -64,6 +58,11 @@
 			<artifactId>org.apache.felix.fileinstall</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.komodo.plugins.teiid</groupId>
+			<artifactId>teiid-8.11</artifactId>
+			<scope>provided</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.komodo.plugins.teiid</groupId>
 			<artifactId>teiid-8.12</artifactId>

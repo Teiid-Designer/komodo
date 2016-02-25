@@ -67,7 +67,6 @@ public class TeiidArtifactFactory {
             av.add(value.toString());
         teiidPropDef.setAllowedValues(av);
 
-        teiidPropDef.setCategory(propDef.getCategory());
         teiidPropDef.setDefaultValue(propDef.getDefaultValue());
         teiidPropDef.setDescription(propDef.getDescription());
         teiidPropDef.setDisplayName(propDef.getDisplayName());

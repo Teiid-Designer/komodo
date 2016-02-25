@@ -211,7 +211,6 @@ public class TestPluginService implements StringConstants {
     }
 
     @Test
-    @Ignore
     public void testFindTeiidBundlesAndStartStopStartDifferentOne() throws Exception {
         assertEquals(Bundle.ACTIVE, service.getState());
 

@@ -56,7 +56,6 @@ import org.teiid.query.sql.lang.FromClause;
 import org.teiid.query.sql.lang.GroupBy;
 import org.teiid.query.sql.lang.Insert;
 import org.teiid.query.sql.lang.Into;
-import org.teiid.query.sql.lang.IsDistinctCriteria;
 import org.teiid.query.sql.lang.IsNullCriteria;
 import org.teiid.query.sql.lang.JoinPredicate;
 import org.teiid.query.sql.lang.JoinType;
@@ -224,7 +223,7 @@ public class NodeGenerator extends AbstractNodeGenerator<LanguageObject>implemen
 
         private void visitFromClause(Node node, FromClause obj) throws Exception {
             setProperty(node, TeiidSqlLexicon.FromClause.OPTIONAL_PROP_NAME, obj.isOptional());
-            setProperty(node, TeiidSqlLexicon.FromClause.MAKE_IND_PROP_NAME, obj.getMakeInd());
+            setProperty(node, TeiidSqlLexicon.FromClause.MAKE_IND_PROP_NAME, obj.isMakeInd());
             setProperty(node, TeiidSqlLexicon.FromClause.NO_UNNEST_PROP_NAME, obj.isNoUnnest());
             setProperty(node, TeiidSqlLexicon.FromClause.MAKE_NOT_DEP_PROP_NAME, obj.isMakeNotDep());
             setProperty(node, TeiidSqlLexicon.FromClause.PRESERVE_PROP_NAME, obj.isPreserve());
@@ -234,7 +233,7 @@ public class NodeGenerator extends AbstractNodeGenerator<LanguageObject>implemen
                 Context context = localContext(node, TeiidSqlLexicon.FromClause.MAKE_DEPENDENCY_REF_NAME);
                 Node makeDepNode = create(makeDep);
                 setProperty(makeDepNode, TeiidSqlLexicon.MakeDep.MAX_PROP_NAME, makeDep.getMax());
-                setProperty(makeDepNode, TeiidSqlLexicon.MakeDep.JOIN_PROP_NAME, makeDep.getJoin());
+                setProperty(makeDepNode, TeiidSqlLexicon.MakeDep.JOIN_PROP_NAME, makeDep.isJoin());
                 context.reset();
             }
         }
@@ -576,7 +575,7 @@ public class NodeGenerator extends AbstractNodeGenerator<LanguageObject>implemen
                     Context context = localContext(node, TeiidSqlLexicon.Option.DEPENDENT_GROUP_OPTIONS_REF_NAME);
                     for (MakeDep makeDep : makeDeps) {
                         Node makeDepNode = create(makeDep);
-                        setProperty(makeDepNode, TeiidSqlLexicon.MakeDep.JOIN_PROP_NAME, makeDep.getJoin());
+                        setProperty(makeDepNode, TeiidSqlLexicon.MakeDep.JOIN_PROP_NAME, makeDep.isJoin());
                         setProperty(makeDepNode, TeiidSqlLexicon.MakeDep.MAX_PROP_NAME, makeDep.getMax());
                     }
                     context.reset();
@@ -1903,24 +1902,6 @@ public class NodeGenerator extends AbstractNodeGenerator<LanguageObject>implemen
                 setProperty(node, TeiidSqlLexicon.Expression.TYPE_CLASS_PROP_NAME, obj.getType());
 
                 visitObject(node, TeiidSqlLexicon.XMLCast.EXPRESSION_PROP_NAME, obj.getExpression());
-
-            } catch (Exception ex) {
-                setError(ex);
-            }
-        }
-
-        @Override
-        public void visit(IsDistinctCriteria obj) {
-            if (errorOccurred())
-                return;
-
-            try {
-                Node node = transform(obj);
-
-                setProperty(node, TeiidSqlLexicon.IsDistinctCriteria.NEGATED_PROP_NAME, obj.isNegated());
-
-                visitObject(node, TeiidSqlLexicon.IsDistinctCriteria.LEFT_ROW_VALUE_REF_NAME, obj.getLeftRowValue());
-                visitObject(node, TeiidSqlLexicon.IsDistinctCriteria.RIGHT_ROW_VALUE_REF_NAME, obj.getRightRowValue());
 
             } catch (Exception ex) {
                 setError(ex);
