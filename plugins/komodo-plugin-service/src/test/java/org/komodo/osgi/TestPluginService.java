@@ -38,7 +38,6 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.query.TeiidService;
@@ -75,7 +74,7 @@ public class TestPluginService implements StringConstants {
         XPath xpath = xpathFactory.newXPath();
 
         // XPath expression to find all the teiid jar filenames
-        XPathExpression expr = xpath.compile("/teiid/filename/text()");
+        XPathExpression expr = xpath.compile(PluginService.INDEX_TEIID_PATH);
 
         //evaluate expression result on XML document
         NodeList nodes = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);

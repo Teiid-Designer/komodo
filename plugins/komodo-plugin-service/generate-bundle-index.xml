@@ -7,9 +7,12 @@
 
 		<delete file="${index.file}" quiet="true" failonerror="false"/>
 
+		<echo file="${index.file}" append="true">&lt;teiids&gt;${line.separator}</echo>
+
 		<ac:for param="file" xmlns:ac="antlib:net.sf.antcontrib">
 			<fileset dir="${bundles.dir}" includes="*.jar" />
 			<sequential>
+				<ac:var name="file.name" unset="true"/>
 				<echo message="The file: @{file} ${index.file}"></echo>
 				<basename property="file.name" file="@{file}"/>
 
@@ -20,6 +23,9 @@
 				</echoxml>
 			</sequential>
 		</ac:for>
+
+		<echo file="${index.file}" append="true">&lt;/teiids&gt;</echo>
+
 	</target>
 
 </project>

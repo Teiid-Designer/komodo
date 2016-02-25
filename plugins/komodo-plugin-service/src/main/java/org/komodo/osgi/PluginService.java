@@ -66,6 +66,8 @@ import org.w3c.dom.NodeList;
 
 public class PluginService implements StringConstants {
 
+    public static final String INDEX_TEIID_PATH = "/teiids/teiid/filename/text()";
+
     private static final String VERSION_PREFIX = ";version=";
 
     private static final String INDEX_FILENAME = "index.xml";
@@ -252,7 +254,7 @@ public class PluginService implements StringConstants {
             XPath xpath = xpathFactory.newXPath();
 
             // XPath expression to find all the teiid jar filenames
-            XPathExpression expr = xpath.compile("/teiid/filename/text()");
+            XPathExpression expr = xpath.compile(INDEX_TEIID_PATH);
 
             //evaluate expression result on XML document
             NodeList nodes = (NodeList)expr.evaluate(doc, XPathConstants.NODESET);
