@@ -8,7 +8,6 @@
 function show_help {
         echo "Usage: $0 [-v] [-h]"
         echo "-v - teiid version"
-        echo "-q - skip integration test execution"
   exit 1
 }
 
@@ -34,11 +33,10 @@ echo "Script directory = $SCRIPT_DIR"
 #
 # Determine the command line options
 #
-while getopts "v:m:h" opt;
+while getopts "v:h" opt;
 do
         case $opt in
         v) VERSION=$OPTARG ;;
-        m) MAJMIN=$OPTARG ;;
         h) show_help ;;
         *) show_help ;;
         esac
@@ -49,36 +47,5 @@ if [ -z "$VERSION" ]; then
   exit 1
 fi
 
-#
-# Check version is Major.Minor.Micro
-#
-DOTS=`echo "$VERSION" | grep -o "\." | grep -c "\."`
-if [[ $DOTS -lt 2 ]]; then
-  echo "Error: Please use a full version, ie. X.Y.Z"
-  exit 1
-fi
-
-if [ -z "$MAJMIN" ]; then
-  MAJMIN=`echo $VERSION | awk -F  "." '{print $1"."$2}'`
-fi
-
-echo "Full version: $VERSION"
-echo "Major/Minor version: $MAJMIN"
-
-#
-# Copy the template
-#
-cp -rf teiid-template "teiid-$MAJMIN"
-
-#
-# Update the pom to the new version
-#
-sed -i "s/{FULL_VERSION_TO_REPLACE}/$VERSION/g" "teiid-$MAJMIN"/pom.xml
-sed -i "s/{MAJMIN_VERSION_TO_REPLACE}/$MAJMIN/g" "teiid-$MAJMIN"/pom.xml
-
-#
-# Try building it
-#
-cd "teiid-$MAJMIN"
-mvn clean install
+mvn verify -D required-teiid-version=$VERSION
 
