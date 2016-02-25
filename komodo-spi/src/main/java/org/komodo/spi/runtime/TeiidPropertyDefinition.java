@@ -24,6 +24,7 @@ package org.komodo.spi.runtime;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * Implementation independent version of the Teiid class PropertyDefinition
@@ -31,6 +32,27 @@ import java.util.Map;
  *
  */
 public class TeiidPropertyDefinition {
+
+    public enum RestartType {
+        NONE,
+
+        SERVICE,
+
+        PROCESS,
+
+        ALL_PROCESSES,
+
+        CLUSTER;
+
+        public static RestartType findRestartType(String name) {
+            for (RestartType restartType : values()) {
+                if (restartType.equals(name))
+                    return restartType;
+            }
+
+            return null;
+        }
+    } 
 
     private final static String NAME = "name"; //$NON-NLS-1$
     
@@ -59,10 +81,16 @@ public class TeiidPropertyDefinition {
      */
     private final static String OWNER = "owner"; //$NON-NLS-1$
 
-    private Map<String, Object> properties = new HashMap<String, Object>();
-    
+    private final static String CATEGORY = "category"; //$NON-NLS-1$
+
+    private static final String REQUIRES_RESTART = "requiresRestart";
+
+    private Map<String, Object> fieldProperties = new HashMap<String, Object>();
+
+    private Properties properties = new Properties();
+
     private <V> V getProperty(String key, Class<V> klazz) {
-        Object value = properties.get(key);
+        Object value = fieldProperties.get(key);
         
         if (value == null && Boolean.class.equals(klazz))
             value = Boolean.FALSE;
@@ -73,7 +101,7 @@ public class TeiidPropertyDefinition {
     }
     
     private void setProperty(String key, Object value) {
-        properties.put(key, value);
+        fieldProperties.put(key, value);
     }
     
     /**
@@ -244,5 +272,43 @@ public class TeiidPropertyDefinition {
      */
     public void setOwner(String owner) {
         setProperty(OWNER, owner);
+    }
+
+    public String getCategory() {
+        return getProperty(CATEGORY, String.class);
+    }
+    
+    public void setCategory(String category) {
+        setProperty(CATEGORY, category);
+    }
+
+    public Properties getProperties() {
+        Properties props = new Properties();
+        props.putAll(this.properties);
+        return props;
+    }
+
+    public void addProperty(String key, String value) {
+        this.properties.put(key, value);
+    }
+
+    public void setProperties(Properties props) {
+        this.properties.clear();
+        if (props != null && !props.isEmpty()) {
+            for (String key:props.stringPropertyNames()) {
+                addProperty(key, props.getProperty(key));
+            }
+        }
+    }
+
+    public RestartType getRequiresRestart() {
+        return getProperty(REQUIRES_RESTART, RestartType.class);
+    }
+
+    /** 
+     * @param requiresRestart The value of requiresRestart to set.
+     */
+    public void setRequiresRestart(RestartType requiresRestart) {
+        setProperty(REQUIRES_RESTART, requiresRestart);
     }
 }

@@ -18,7 +18,7 @@
         "default" : "komodoLocalWorkspace",
         "allowCreation" : true,
         "initialContent" : {
-            "*" : "initialContent.xml"
+            "*" : "org/komodo/repository/initialContent.xml"
         }
     },
     "query" : {

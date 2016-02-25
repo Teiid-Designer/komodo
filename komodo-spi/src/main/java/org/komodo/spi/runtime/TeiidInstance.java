@@ -43,12 +43,22 @@ public interface TeiidInstance extends ExecutionAdmin, HostProvider {
      * The data source driver property name.  Value is {@value} .
      */
     String DATASOURCE_DRIVERNAME = "driver-name";  //$NON-NLS-1$
+
+    /**
+     * The connection url property name. Value is {@value}.
+     */
+    String DATASOURCE_CONNECTION_URL = "connection-url"; //$NON-NLS-1$
+
+    /**
+     * The display name property.
+     */
+    String DATASOURCE_DISPLAYNAME = "display-name"; //$NON-NLS-1$
     
     /**
      * @return the version information of this instance
      * @throws Exception 
      */
-    TeiidVersion getVersion() throws Exception;
+    TeiidVersion getVersion();
 
     /**
      * Disconnect then connect to this instance. This is preferable to 
@@ -66,13 +76,6 @@ public interface TeiidInstance extends ExecutionAdmin, HostProvider {
      * @return TeiidJdbcInfo
      */
     TeiidJdbcInfo getTeiidJdbcInfo();
-    
-    /**
-     * An appropriate name for this Teiid Instance
-     * 
-     * @return {@link #getCustomLabel()} if available otherwise {@link #getUrl()}
-     */
-    String getDisplayName();
     
     /**
      * @return object managing notifications for this instance
@@ -116,22 +119,12 @@ public interface TeiidInstance extends ExecutionAdmin, HostProvider {
      * Notify clients of a refresh
      */
     void notifyRefresh();
-
-    /**
-     * @return the custom label or <code>null</code> if not being used
-     */
-    String getCustomLabel();
     
     /**
      * @return the connection error message if the connection to the instance failed
      */
     String getConnectionError();
-    
-    /**
-     * @param customLabel the new custom label or <code>null</code> or empty if the custom label is not being used
-     */
-    void setCustomLabel(String customLabel);
-    
+
     /**
      * Construct a vdb data source
      * 

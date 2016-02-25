@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<validationRuleSet
+    xmlns:val="http://www.jboss.org/tools/komodo/validation/2015"
+    xmlns:ddl="http://www.modeshape.org/ddl/1.0"
+    xmlns:vdb="http://www.metamatrix.com/metamodels/VirtualDatabase"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.jboss.org/tools/komodo/validation/2015 http://www.jboss.org/tools/komodo/validation/2015/komodoValidation.xsd"
+    xmlns="http://www.jboss.org/tools/komodo/validation/2015">
+
+    <description locale="en">This is the relational model validation file.</description>
+
+    <nodeValidation jcrName="vdb:virtualDatabase">
+        <message locale="en">Validation rules for the 'vdb:virtualDatabase' node type.</message>
+
+        <propertyValidation jcrName="vdb:connectionType" required="true">
+            <message locale="en">Rules that validate the property 'vdb:connectionType' of the 'vdb:virtualDatabase' node type.</message>
+            <valueValidation id="default.vdb.connectionType.propertyValue" severity="ERROR">
+                <description locale="en">The VDB 'vdb:connectionType' property must match the specified pattern.</description>
+                <pattern>^[a-zA-Z]+[a-zA-Z0-9]*$</pattern>
+            </valueValidation>
+        </propertyValidation>
+
+    </nodeValidation>
+    
+</validationRuleSet>

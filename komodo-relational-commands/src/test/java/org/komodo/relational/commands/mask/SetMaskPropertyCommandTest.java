@@ -75,7 +75,7 @@ public final class SetMaskPropertyCommandTest extends AbstractCommandTest {
 
     	assertTabCompletion("set-property OODE", candidates);
 
-    	candidates.add(SetMaskPropertyCommand.ORDER);
+    	candidates.add(MaskShellCommand.ORDER);
     	assertTabCompletion("set-property or", candidates);
     	assertTabCompletion("set-property OR", candidates);
     }

@@ -29,6 +29,8 @@ import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
@@ -37,8 +39,6 @@ import org.komodo.importer.ImportOptions;
 import org.komodo.importer.ImportOptions.ExistingNodeOptions;
 import org.komodo.importer.ImportOptions.OptionKeys;
 import org.komodo.importer.Messages;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Symbol;
 import org.komodo.relational.AbstractImporterTest;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Model.Type;
@@ -49,6 +49,8 @@ import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.SynchronousCallback;
 import org.komodo.repository.search.ObjectSearcher;
+import org.komodo.spi.lexicon.TeiidSqlLexicon;
+import org.komodo.spi.lexicon.TeiidSqlLexicon.Symbol;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -74,7 +76,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
     private static final String DYNAMIC_CUSTOMER_VDB = "dynamic-customer-vdb.xml";
     private static final String DYNAMIC_CUSTOMER_VDB_NAME = "DynamicCustomer";
 
-    private static final String PARTS_DYNAMIC_VDB = "parts_dynamic-vdb.xml";
+    //private static final String PARTS_DYNAMIC_VDB = "parts_dynamic-vdb.xml";
     private static final String PARTS_DYNAMIC_VDB_NAME = "MyPartsVDB_Dynamic";
     private static final String PARTS_DYNAMIC_PARTSVIEW_DDL = EMPTY_STRING +
                               "CREATE VIEW PartsSummary ( " +
@@ -1381,17 +1383,19 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
 //        SELECT [jcr:path], [mode:localName]
 //        FROM [nt:unstructured] AS nt
-//        WHERE (CONTAINS(nt.*, 'view') OR LOWER(NAME(nt)) LIKE '%view%')
+//        WHERE (CONTAINS(nt.*, 'view')
 
         ObjectSearcher os = new ObjectSearcher(_repo);
         String ALIAS = "nt";
         os.addFromType(JcrConstants.NT_UNSTRUCTURED, ALIAS);
-        String whereSql = "(CONTAINS(nt.*, '*view*') OR LOWER(NAME(nt)) LIKE '%view%')";
+        String whereSql = "(CONTAINS(nt.*, '*view*'))";
         os.setCustomWhereClause(whereSql);
 
         List<KomodoObject> results = os.searchObjects(getTransaction());
+        List<String> paths = new ArrayList<String>(results.size());
         for (KomodoObject ko : results)
-            System.out.println(ko.getAbsolutePath());
+            paths.add(ko.getAbsolutePath());
+        Collections.sort(paths);
 
         assertEquals(23, results.size());
     }

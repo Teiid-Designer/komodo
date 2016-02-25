@@ -74,6 +74,60 @@ public class Messages implements StringConstants {
     }
 
     @SuppressWarnings( "javadoc" )
+    public enum RuleParser {
+
+        Rules_Schema_File_Not_Found,
+        Found_Unparsed_Entity_Declaration;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum RuleValidationParser {
+
+        Rules_Schema_File_Not_Found;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum ValidationManagerImpl {
+
+        ValidationRulesProviderError,
+        ValidationRulesProviderNullStream;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    @SuppressWarnings( "javadoc" )
+    public enum ProblemRule {
+
+        Rule_Not_Found_Rule_Id,
+        Rule_Not_Found_Rule_Description,
+        Rule_Not_Found_Rule_Result_Message,
+        Rule_Not_Enabled_Rule_Id,
+        Rule_Not_Enabled_Rule_Description,
+        Rule_Not_Enabled_Rule_Result_Message,
+        Rule_Not_Applicable_Rule_Id,
+        Rule_Not_Applicable_Rule_Description,
+        Rule_Not_Applicable_Rule_Result_Message;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
+    @SuppressWarnings( "javadoc" )
     public enum Search {
 
         No_Saved_Search;

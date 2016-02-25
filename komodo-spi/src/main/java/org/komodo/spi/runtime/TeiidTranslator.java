@@ -21,7 +21,6 @@
  ************************************************************************************/
 package org.komodo.spi.runtime;
 
-import java.util.Collection;
 import java.util.Properties;
 
 /**
@@ -29,15 +28,6 @@ import java.util.Properties;
  *
  */
 public interface TeiidTranslator {
-	
-	enum TranslatorPropertyType{IMPORT, OVERRIDE, EXTENSION_METADATA}
-
-    /**
-     * Obtains all the names of the properties whose values are invalid.
-     * 
-     * @return the names of the properties with invalid values (never <code>null</code> but can be empty)
-     */
-    Collection<String> findInvalidProperties(TranslatorPropertyType propType);
 
     /**
      * @return name of this translator
@@ -45,14 +35,9 @@ public interface TeiidTranslator {
     String getName();
 
     /**
-     * @return the properties of this translator
+     * @return description of this translator
      */
-    Properties getProperties();
-
-    /**
-     * @return the value of the given property
-     */
-    String getPropertyValue(String name, TranslatorPropertyType type);
+    String getDescription();
 
     /**
      * @return type
@@ -60,32 +45,9 @@ public interface TeiidTranslator {
     String getType();
 
     /**
-     * @return the execution teiidInstance (never <code>null</code>)
+     * @return the properties of this translator
      */
-    TeiidInstance getTeiidInstance();
-
-    /**
-     * @return the string version of the default value for each property (empty string if no default)
-     */
-    Properties getDefaultPropertyValues();
-
-    /**
-     * @param name the property name
-     * @param value the proposed new value
-     * @return null if the property exists and the proposed value is valid or an error message
-     *
-     */
-    String isValidPropertyValue(String name, String value, TranslatorPropertyType type);
-
-    /**
-     * Sets a connector property.
-     * 
-     * @param name the property name (never <code>null</code>)
-     * @param value the new property value
-     * @throws Exception if there is a problem changing the property
-     *
-     */
-    void setPropertyValue(String name, String value, TranslatorPropertyType type) throws Exception;
+    Properties getProperties();
 
     /**
      * @param changedProperties the list of properties that are being changed (never <code>null</code> or empty)
@@ -93,28 +55,4 @@ public interface TeiidTranslator {
      *
      */
     void setProperties(Properties changedProperties) throws Exception;
-
-    /**
-     * @param name the name of the <code>TeiidPropertyDefinition</code> being requested (never <code>null</code> or empty)
-     * @return the property definition or <code>null</code> if not found
-     */
-    TeiidPropertyDefinition getPropertyDefinition( String name , TranslatorPropertyType type);
-    
-    /**
-     * @return an immutable collection of property definitions (never <code>null</code>);
-     *
-     */
-    Collection<TeiidPropertyDefinition> getPropertyDefinitions();
-    
-    /**
-     * @return an immutable collection of import property definitions (never <code>null</code>);
-     *
-     */
-    Collection<TeiidPropertyDefinition> getImportPropertyDefinitions();
-    
-    /**
-     * @return an immutable collection of import property definitions (never <code>null</code>);
-     *
-     */
-    Collection<TeiidPropertyDefinition> getExtensionPropertyDefinitions();
 }

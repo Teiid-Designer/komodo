@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.komodo</groupId>
+		<artifactId>komodo-parent</artifactId>
+		<version>0.0.4</version>
+		<relativePath>../komodo-parent/pom.xml</relativePath>
+	</parent>
+
+	<artifactId>komodo-plugins</artifactId>
+	<packaging>pom</packaging>
+	<name>Komodo Dynamic Plugins</name>
+	<description>Bundles that can be loaded into Komodo using its OSGI extension framework</description>
+
+	<modules>
+		<module>komodo-plugin-teiid-framework</module>
+		<module>teiid-8.11</module>
+		<module>teiid-8.12</module>
+		<module>komodo-plugin-service</module>
+	</modules>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.komodo.plugins.teiid</groupId>
+				<artifactId>teiid-8.11</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.komodo.plugins.teiid</groupId>
+				<artifactId>teiid-8.12</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.komodo</groupId>
+				<artifactId>komodo-utils</artifactId>
+				<version>${project.version}</version>
+				<type>test-jar</type>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.komodo.plugins</groupId>
+				<artifactId>komodo-plugin-teiid-framework</artifactId>
+				<version>${project.version}</version>
+				<type>test-jar</type>
+				<scope>test</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+</project>

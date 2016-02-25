@@ -3,24 +3,12 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.komodo</groupId>
-		<artifactId>komodo</artifactId>
+		<!-- Depend on parent to avoid dragging in modeshape dependencies -->
+		<artifactId>komodo-parent</artifactId>
 		<version>0.0.4</version>
+    <relativePath>../komodo-parent</relativePath>
 	</parent>
 	<artifactId>komodo-spi</artifactId>
 	<name>Komodo SPI</name>
 	<description>System Interfaces for Komodo modules</description>
-<!--
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
--->
 </project>

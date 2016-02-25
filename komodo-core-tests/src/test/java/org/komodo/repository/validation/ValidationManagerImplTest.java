@@ -9,39 +9,47 @@ package org.komodo.repository.validation;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-
 import java.io.File;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.komodo.spi.KException;
-import org.komodo.spi.outcome.Outcome.Level;
+import org.komodo.spi.outcome.Outcome;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.ValidationManager;
 import org.komodo.spi.repository.validation.Result;
 import org.komodo.spi.repository.validation.Rule;
-import org.komodo.spi.repository.validation.Rule.MessageKey;
-import org.komodo.spi.utils.LocalizedMessage;
 import org.komodo.test.utils.AbstractLocalRepositoryTest;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest {
 
-    private static List< LocalizedMessage > _description;
-    private static List< LocalizedMessage > _message;
+    private static String RULES_FILE_VERIFY_ERRORS = "verifyValidationErrors.xml";
+    private static String RULES_FILE_VERIFY_UNIQUENESS_CHECKS = "verifyUniquenessChecks.xml";
+    private static String RULES_FILE_ALL_CONSTRUCTS = "validationAllConstructs.xml";
+    private static String RULES_FILE_RELATIONAL_RULES = "relationalValidationRulesDefault.xml";
+    private static String RULES_FILE_NODE_NAME_RULE = "nodeNameRule.xml";
+    private static String RULES_FILE_PROP_REQUIRED_RULE = "propRequiredRule.xml";
+    private static String RULES_FILE_PROP_VALUE_RULE = "propValueRule.xml";
+    private static String RULES_FILE_PROP_VALUE_RANGE_RULE = "propValueRangeRule.xml";
+    private static String RULES_FILE_CHILD_REQUIRED_RULE = "childRequiredRule.xml";
+    private static String RULES_FILE_CHILD_COUNT_RULE = "childCountRule.xml";
+    private static String RULES_FILE_SNS_RULE = "sameNameSiblingRule.xml";
+    private static String RULES_FILE_CHILD_TYPE_MUST_EXIST_RULE = "childTypeMustExistRule.xml";
+    private static String RULES_FILE_CHILD_TYPE_MUST_NOT_EXIST_RULE = "childTypeMustNotExistRule.xml";
+    private static String RULES_FILE_CHILD_PROP_MUST_EXIST_RULE = "childPropMustExistRule.xml";
+    private static String RULES_FILE_CHILD_PROP_MUST_NOT_EXIST_RULE = "childPropMustNotExistRule.xml";
+
+    private static String VDB_NAME = "vdbname";
+    private static String VDB_TYPE = "vdb:virtualDatabase";
+    private static String DATA_ROLE_NAME = "rolename";
+    private static String DATA_ROLE_TYPE = "vdb:dataRole";
+    private static String MODEL_TYPE = "vdb:declarativeModel";
+
     private static ValidationManager _validationMgr;
 
     @BeforeClass
     public static void oneTimeSetup() throws Exception {
-        _validationMgr = new ValidationManagerImpl( _repo );
-        _description = Collections.singletonList( new LocalizedMessage( MessageKey.DESCRIPTION.name(),
-                                                                        "en",
-                                                                        "This is a rule description" ) );
-        _message = Collections.singletonList( new LocalizedMessage( "myrule.msg", "en", "This is a rule error message" ) );
+        _validationMgr = _repo.getValidationManager();
     }
 
     @Test( expected = IllegalArgumentException.class )
@@ -51,8 +59,8 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
 
     @Test
     public void shouldFindErrorsInXmlWithErrors() throws Exception {
-        final int numErrors = 12;
-        String testFilePath = getClass().getClassLoader().getResource("verifyValidationErrors.xml").getFile();
+        final int numErrors = 11;
+        String testFilePath = getClass().getClassLoader().getResource(RULES_FILE_VERIFY_ERRORS).getFile();
         final File testFile = new File(testFilePath);
         final List< String > errors = _validationMgr.validateRules( testFile );
         assertThat( errors.size(), is( numErrors ) );
@@ -65,22 +73,21 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         assertThat( errors.get( 3 ).contains( "Element 'minValue' must have no element [children], and the value must be valid" ),
                     is( true ) );
         assertThat( errors.get( 4 ).contains( "Invalid content was found starting with element 'minValue'" ), is( true ) );
-        assertThat( errors.get( 5 ).contains( "The content of element 'propertyValidation' is not complete" ), is( true ) );
-        assertThat( errors.get( 6 ).contains( "Invalid content was found starting with element 'valueValidation'" ), is( true ) );
-        assertThat( errors.get( 7 ).contains( "The content of element 'nodeValidation' is not complete" ), is( true ) );
-        assertThat( errors.get( 8 ).contains( "Invalid content was found starting with element 'requiredValidation'" ), is( true ) );
-        assertThat( errors.get( 9 ).contains( "The content of element 'valueRangeValidation' is not complete" ), is( true ) );
-        assertThat( errors.get( 10 ).contains( "Value 'BAD_KEY' is not facet-valid with respect to enumeration" ), is( true ) );
-        assertThat( errors.get( 11 ).contains( "The value 'BAD_KEY' of attribute 'key' on element 'message' is not valid with respect to its type, 'messageKeyType'" ),
+        //assertThat( errors.get( 5 ).contains( "The content of element 'propertyValidation' is not complete" ), is( true ) );
+        assertThat( errors.get( 5 ).contains( "Invalid content was found starting with element 'valueValidation'" ), is( true ) );
+        assertThat( errors.get( 6 ).contains( "The content of element 'nodeValidation' is not complete" ), is( true ) );
+        assertThat( errors.get( 7 ).contains( "Invalid content was found starting with element 'childCountValidation'" ), is( true ) );
+        assertThat( errors.get( 8 ).contains( "The content of element 'valueRangeValidation' is not complete" ), is( true ) );
+        assertThat( errors.get( 9 ).contains( "Value 'BAD_KEY' is not facet-valid with respect to enumeration" ), is( true ) );
+        assertThat( errors.get( 10 ).contains( "The value 'BAD_KEY' of attribute 'key' on element 'message' is not valid with respect to its type, 'messageKeyType'" ),
                     is( true ) );
     }
 
     @Test
-    @Ignore("Needs to be fixed")
     public void shouldFindErrorsInXmlWithUniquenessProblems() throws Exception {
         final int numErrors = 16;
-        String testFilePath = getClass().getClassLoader().getResource("verifyUniquenessChecks.xml").getFile();
-        final File testFile = new File(testFilePath);
+        String testFilePath = getClass().getClassLoader().getResource(RULES_FILE_VERIFY_UNIQUENESS_CHECKS).getFile();
+        final File testFile = new File( testFilePath );
         final List< String > errors = _validationMgr.validateRules( testFile );
         assertThat( errors.size(), is( numErrors ) );
 
@@ -89,650 +96,681 @@ public final class ValidationManagerImplTest extends AbstractLocalRepositoryTest
         assertThat( errors.get( 1 ).contains( "Duplicate unique value [es]" ), is( true ) );
         assertThat( errors.get( 2 ).contains( "Duplicate unique value [nz]" ), is( true ) );
         assertThat( errors.get( 3 ).contains( "Duplicate unique value [vdb:connectionType]" ), is( true ) );
-        assertThat( errors.get( 4 ).contains( "Duplicate unique value [ca]" ), is( true ) );
-        assertThat( errors.get( 5 ).contains( "Duplicate unique value [ddl:statementOption]" ), is( true ) );
-        assertThat( errors.get( 6 ).contains( "Duplicate unique value [vdb:virtualDatabase]" ), is( true ) );
+        assertThat( errors.get( 4 ).contains( "Duplicate unique value [vdb:dataRole] declared for identity constraint \"childValidationJcrNameKey\" of element \"nodeValidation\""), is( true ) );
+        assertThat( errors.get( 5 ).contains( "Duplicate unique value [ca]" ), is( true ) );
+        assertThat( errors.get( 6 ).contains( "Duplicate unique value [ddl:statementOption]" ), is( true ) );
+        // Duplicate nodeValidation types now allowed - added optional property Restrictions
+        //assertThat( errors.get( 7 ).contains( "Duplicate unique value [vdb:virtualDatabase]" ), is( true ) );
         assertThat( errors.get( 7 ).contains( "Duplicate unique value [ddl:statementOption.value]" ), is( true ) );
-        assertThat( errors.get( 8 ).contains( "Duplicate unique value [ab] declared for identity constraint of element \"propertyValidation\"" ),
+        assertThat( errors.get( 8 ).contains( "Duplicate unique value [ab] declared for identity constraint \"propertyValueRuleDescriptionLocaleKey\" of element \"propertyValidation\"" ),
                     is( true ) );
-        assertThat( errors.get( 9 ).contains( "Duplicate unique value [cd] declared for identity constraint of element \"propertyValidation\"" ),
+        assertThat( errors.get( 9 ).contains( "Duplicate unique value [cd] declared for identity constraint \"propertyValueRuleDescriptionLocaleKey\" of element \"propertyValidation\"" ),
                     is( true ) );
-        assertThat( errors.get( 10 ).contains( "Duplicate unique value [ef] declared for identity constraint of element \"propertyValidation\"" ),
+        assertThat( errors.get( 10 ).contains( "Duplicate unique value [ef] declared for identity constraint \"propertyRelationshipRuleDescriptionLocaleKey\" of element \"propertyValidation\"" ),
                     is( true ) );
-        assertThat( errors.get( 11 ).contains( "Duplicate unique value [gh] declared for identity constraint of element \"propertyValidation\"" ),
+        assertThat( errors.get( 11 ).contains( "Duplicate unique value [gh] declared for identity constraint \"propertyValueRangeRuleDescriptionLocaleKey\" of element \"propertyValidation\"" ),
                     is( true ) );
-        assertThat( errors.get( 12 ).contains( "Duplicate unique value [REQUIRED_PROPERTY_NOT_FOUND,ij] declared for identity constraint of element \"propertyValidation\"" ),
+        assertThat( errors.get( 12 ).contains( "Duplicate unique value [REQUIRED_PROPERTY_NOT_FOUND,ij] declared for identity constraint \"propertyValueRangeRuleMessageLocaleKey\" of element \"propertyValidation\"" ),
                     is( true ) );
-        assertThat( errors.get( 13 ).contains( "Duplicate unique value [PATTERN_RULE_INVALID_PROPERTY_VALUE,kl] declared for identity constraint of element \"propertyValidation\"" ),
+        assertThat( errors.get( 13 ).contains( "Duplicate unique value [PATTERN_RULE_INVALID_PROPERTY_VALUE,kl] declared for identity constraint \"propertyValueRuleMessageLocaleKey\" of element \"propertyValidation\"" ),
                     is( true ) );
-        assertThat( errors.get( 14 ).contains( "Duplicate unique value [PROPERTY_RULE_REQUIRED_PROPERTY_NOT_FOUND,mn] declared for identity constraint of element \"propertyValidation\"" ),
+        assertThat( errors.get( 14 ).contains( "Duplicate unique value [PROPERTY_RULE_REQUIRED_PROPERTY_NOT_FOUND,mn] declared for identity constraint \"propertyRelationshipRuleMessageLocaleKey\" of element \"propertyValidation\"" ),
                     is( true ) );
-        assertThat( errors.get( 15 ).contains( "Duplicate unique value [PROPERTY_RULE_VALUE_ABOVE_MAX_VALUE,op] declared for identity constraint of element \"propertyValidation\"" ),
+        assertThat( errors.get( 15 ).contains( "Duplicate unique value [PROPERTY_RULE_VALUE_ABOVE_MAX_VALUE,op] declared for identity constraint \"propertyValueRangeRuleMessageLocaleKey\" of element \"propertyValidation\"" ),
                     is( true ) );
     }
 
     @Test
     public void shouldParseXmlWithNoErrors() throws Exception {
-    	String testFilePath = getClass().getClassLoader().getResource("validationAllConstructs.xml").getFile();
-        final File testFile = new File(testFilePath);
+        String testFilePath = getClass().getClassLoader().getResource(RULES_FILE_ALL_CONSTRUCTS).getFile();
+        final File testFile = new File( testFilePath );
         final List< String > errors = _validationMgr.validateRules( testFile );
         assertThat( errors.isEmpty(), is( true ) );
     }
 
     @Test
-    public void shouldVerifyChildCountRuleFailsWhenCountEqualsMaxButMaxNotInclusive() throws Exception {
-        final String childType = "nt:unstructured";
+    public void shouldParseValidationRulesXmlWithNoErrors() throws Exception {
+        String testFilePath = getClass().getClassLoader().getResource(RULES_FILE_RELATIONAL_RULES).getFile();
+        final File testFile = new File( testFilePath );
+        final List< String > errors = _validationMgr.validateRules( testFile );
+        assertThat( errors.isEmpty(), is( true ) );
+    }
 
-        // create rule in repo
-        final Number minValue = 1;
-        final Number maxValue = 3;
-        final Rule rule = _validationMgr.addChildCountValidationRule( getTransaction(),
-                                                                      "propRule",
-                                                                      "nt:unstructured",
-                                                                      childType,
-                                                                      minValue,
-                                                                      true,
-                                                                      maxValue,
-                                                                      false,
-                                                                      _description,
-                                                                      _message );
+    @Test
+    public void shouldVerifyImportedNodeNameRuleEvaluationSuccess() throws Exception {
+        // Create a KomodoObject with the required property
+        final KomodoObject kobject = _repo.add( getTransaction(), null, VDB_NAME, VDB_TYPE );
+        commit();
 
+        // Validate the rule file
+        String testFilePath = getClass().getClassLoader().getResource(RULES_FILE_NODE_NAME_RULE).getFile();
+        final File testFile = new File( testFilePath );
+        final List< String > errors = _validationMgr.validateRules( testFile );
+        assertThat( errors.size(), is( 0 ) );
+
+        // Load the rule
+        _validationMgr.importRules( getTransaction(), testFile, true );
+        final Rule[] rules = _validationMgr.getAllRules(getTransaction());
+        assertThat( rules.length, is( 1 ) );
+        Rule aRule = rules[0];
+
+        // Evaluate the KomodoObject using the imported rule
+        final Result result = aRule.evaluate( getTransaction(), kobject );
+        assertThat( result.isOK(), is( true ) );
+        assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
+        assertThat( result.getRuleId(), is( aRule.getName( getTransaction() ) ) );
+    }
+
+    @Test
+    public void shouldVerifyImportedNodeNameRuleEvaluationFailure() throws Exception {
+        // Create a KomodoObject without the required property
+        final KomodoObject kobject = _repo.add( getTransaction(), null, "1"+VDB_NAME, VDB_TYPE );
+        commit();
+
+        // Validate rules file
+        String testFilePath = getClass().getClassLoader().getResource(RULES_FILE_NODE_NAME_RULE).getFile();
+        final File testFile = new File( testFilePath );
+        final List< String > errors = _validationMgr.validateRules( testFile );
+        assertThat( errors.size(), is( 0 ) );
+
+        // Load rules
+        _validationMgr.importRules( getTransaction(), testFile, true );
+        final Rule[] rules = _validationMgr.getAllRules(getTransaction());
+        assertThat( rules.length, is( 1 ) );
+        Rule aRule = rules[0];
+
+        // Evaluate kobject using the loaded rule
+        final Result result = aRule.evaluate( getTransaction(), kobject );
+        assertThat( result.isOK(), is( false ) );
+        assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
+        assertThat( result.getRuleId(), is( aRule.getName( getTransaction() ) ) );
+        assertThat( result.getMessage(), is( "The VDB name does not match the specified pattern." ));
+    }
+    
+    @Test
+    public void shouldVerifyImportedNodeNameRuleEvaluationNotEnabled() throws Exception {
+        // Create a KomodoObject without the required property
+        final KomodoObject kobject = _repo.add( getTransaction(), null, "1"+VDB_NAME, VDB_TYPE );
+        commit();
+
+        // Validate rules file
+        String testFilePath = getClass().getClassLoader().getResource(RULES_FILE_NODE_NAME_RULE).getFile();
+        final File testFile = new File( testFilePath );
+        final List< String > errors = _validationMgr.validateRules( testFile );
+        assertThat( errors.size(), is( 0 ) );
+        
+        // Load rules
+        _validationMgr.importRules( getTransaction(), testFile, true );
+        final Rule[] rules = _validationMgr.getAllRules(getTransaction());
+        assertThat( rules.length, is( 1 ) );
+        Rule aRule = rules[0];
+        
+        // disable the rule
+        aRule.setEnabled(getTransaction(), false);
+        
+        // Evaluate kobject using the disabled rule
+        final Result result = aRule.evaluate( getTransaction(), kobject );
+        assertThat( result.isOK(), is( false ) );
+        assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
+        assertThat( result.getRuleId(), is( aRule.getName( getTransaction() ) ) );
+        assertThat( result.getLevel(), is( Outcome.Level.INFO) );
+        assertThat( result.getMessage(), is( "Rule \"vdb.name\" is disabled." ));
+    }
+
+    @Test
+    public void shouldVerifyImportedPropRequiredRuleEvaluationSuccess() throws Exception {
+        // Create a KomodoObject with the required property
+        final KomodoObject kobject = _repo.add( getTransaction(), null, VDB_NAME, VDB_TYPE );
+        kobject.setProperty( getTransaction(), "vdb:connectionType", "propValue" );
+        commit();
+
+        // Validate the rule file
+        String testFilePath = getClass().getClassLoader().getResource(RULES_FILE_PROP_REQUIRED_RULE).getFile();
+        final File testFile = new File( testFilePath );
+        final List< String > errors = _validationMgr.validateRules( testFile );
+        assertThat( errors.size(), is( 0 ) );
+
+        // Load the rule
+        _validationMgr.importRules( getTransaction(), testFile, true );
+        final Rule[] rules = _validationMgr.getAllRules(getTransaction());
+        assertThat( rules.length, is( 1 ) );
+        Rule aRule = rules[0];
+
+        // Evaluate the KomodoObject using the imported rule
+        final Result result = aRule.evaluate( getTransaction(), kobject );
+        assertThat( result.isOK(), is( true ) );
+        assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
+        assertThat( result.getRuleId(), is( aRule.getName( getTransaction() ) ) );
+    }
+
+    @Test
+    public void shouldVerifyImportedPropRequiredRuleEvaluationFailure() throws Exception {
+        // Create a KomodoObject without the required property
+        final KomodoObject kobject = _repo.add( getTransaction(), null, VDB_NAME, VDB_TYPE );
+        commit();
+
+        // Validate rules file
+        String testFilePath = getClass().getClassLoader().getResource(RULES_FILE_PROP_REQUIRED_RULE).getFile();
+        final File testFile = new File( testFilePath );
+        final List< String > errors = _validationMgr.validateRules( testFile );
+        assertThat( errors.size(), is( 0 ) );
+
+        // Load rules
+        _validationMgr.importRules( getTransaction(), testFile, true );
+        final Rule[] rules = _validationMgr.getAllRules(getTransaction());
+        assertThat( rules.length, is( 1 ) );
+        Rule aRule = rules[0];
+
+        // Evaluate kobject using the loaded rule
+        final Result result = aRule.evaluate( getTransaction(), kobject );
+        assertThat( result.isOK(), is( false ) );
+        assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
+        assertThat( result.getRuleId(), is( aRule.getName( getTransaction() ) ) );
+        assertThat( result.getMessage(), is( "The VDB 'vdb:connectionType' property must match the specified pattern." ));
+    }
+
+    @Test
+    public void shouldVerifyImportedPropValueRuleEvaluationSuccess() throws Exception {
+        // Create a KomodoObject with the required property
+        final KomodoObject kobject = _repo.add( getTransaction(), null, VDB_NAME, VDB_TYPE );
+        kobject.setProperty( getTransaction(), "vdb:version", "2" );
+        commit();
+
+        // Validate the rule file
+        String testFilePath = getClass().getClassLoader().getResource(RULES_FILE_PROP_VALUE_RULE).getFile();
+        final File testFile = new File( testFilePath );
+        final List< String > errors = _validationMgr.validateRules( testFile );
+        assertThat( errors.size(), is( 0 ) );
+
+        // Load the rule
+        _validationMgr.importRules( getTransaction(), testFile, true );
+        final Rule[] rules = _validationMgr.getAllRules(getTransaction());
+        assertThat( rules.length, is( 1 ) );
+        Rule aRule = rules[0];
+
+        // Evaluate the KomodoObject using the imported rule
+        final Result result = aRule.evaluate( getTransaction(), kobject );
+        assertThat( result.isOK(), is( true ) );
+        assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
+        assertThat( result.getRuleId(), is( aRule.getName( getTransaction() ) ) );
+    }
+
+    @Test
+    public void shouldVerifyImportedPropValueRuleEvaluationFailure() throws Exception {
+        // Create a KomodoObject without the required property
+        final KomodoObject kobject = _repo.add( getTransaction(), null, VDB_NAME, VDB_TYPE );
+        kobject.setProperty( getTransaction(), "vdb:version", "0" );
+        commit();
+
+        // Validate rules file
+        String testFilePath = getClass().getClassLoader().getResource(RULES_FILE_PROP_VALUE_RULE).getFile();
+        final File testFile = new File( testFilePath );
+        final List< String > errors = _validationMgr.validateRules( testFile );
+        assertThat( errors.size(), is( 0 ) );
+
+        // Load rules
+        _validationMgr.importRules( getTransaction(), testFile, true );
+        final Rule[] rules = _validationMgr.getAllRules(getTransaction());
+        assertThat( rules.length, is( 1 ) );
+        Rule aRule = rules[0];
+
+        // Evaluate kobject using the loaded rule
+        final Result result = aRule.evaluate( getTransaction(), kobject );
+        assertThat( result.isOK(), is( false ) );
+        assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
+        assertThat( result.getRuleId(), is( aRule.getName( getTransaction() ) ) );
+        assertThat( result.getMessage(), is( "The value of property 'vdb:version' is invalid." ));
+    }
+
+    @Test
+    public void shouldVerifyImportedPropValueRangeRuleEvaluationSuccess() throws Exception {
+        // Create a KomodoObject with the required property
+        final KomodoObject kobject = _repo.add( getTransaction(), null, VDB_NAME, VDB_TYPE );
+        kobject.setProperty( getTransaction(), "vdb:version", "2" );
+        commit();
+
+        // Validate the rule file
+        String testFilePath = getClass().getClassLoader().getResource(RULES_FILE_PROP_VALUE_RANGE_RULE).getFile();
+        final File testFile = new File( testFilePath );
+        final List< String > errors = _validationMgr.validateRules( testFile );
+        assertThat( errors.size(), is( 0 ) );
+
+        // Load the rule
+        _validationMgr.importRules( getTransaction(), testFile, true );
+        final Rule[] rules = _validationMgr.getAllRules(getTransaction());
+        assertThat( rules.length, is( 1 ) );
+        Rule aRule = rules[0];
+
+        // Evaluate the KomodoObject using the imported rule
+        final Result result = aRule.evaluate( getTransaction(), kobject );
+        assertThat( result.isOK(), is( true ) );
+        assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
+        assertThat( result.getRuleId(), is( aRule.getName( getTransaction() ) ) );
+    }
+
+    @Test
+    public void shouldVerifyImportedPropValueRangeRuleEvaluationFailure() throws Exception {
+        // Create a KomodoObject without the required property
+        final KomodoObject kobject = _repo.add( getTransaction(), null, VDB_NAME, VDB_TYPE );
+        kobject.setProperty( getTransaction(), "vdb:version", "6" );
+        commit();
+
+        // Validate rules file
+        String testFilePath = getClass().getClassLoader().getResource(RULES_FILE_PROP_VALUE_RANGE_RULE).getFile();
+        final File testFile = new File( testFilePath );
+        final List< String > errors = _validationMgr.validateRules( testFile );
+        assertThat( errors.size(), is( 0 ) );
+
+        // Load rules
+        _validationMgr.importRules( getTransaction(), testFile, true );
+        final Rule[] rules = _validationMgr.getAllRules(getTransaction());
+        assertThat( rules.length, is( 1 ) );
+        Rule aRule = rules[0];
+
+        // Evaluate kobject using the loaded rule
+        final Result result = aRule.evaluate( getTransaction(), kobject );
+        assertThat( result.isOK(), is( false ) );
+        assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
+        assertThat( result.getRuleId(), is( aRule.getName( getTransaction() ) ) );
+        assertThat( result.getMessage(), is( "The VDB version must be between 1 and 5." ));
+    }
+
+    @Test
+    public void shouldVerifyImportedChildRequiredEvaluationSuccess() throws Exception {
         // setup KomodoObject
-        final KomodoObject kobject = _repo.add( getTransaction(), null, "kobject", null );
-
-        for ( int i = -1; i < maxValue.intValue(); ++i ) {
-            kobject.addChild( getTransaction(), ( "child" + i ), null );
+        final KomodoObject kobject = _repo.add( getTransaction(), null, VDB_NAME, VDB_TYPE );
+        // Add five models
+        for ( int i = 0; i < 5; ++i ) {
+            kobject.addChild( getTransaction(), ( "child" + i ), MODEL_TYPE );
         }
 
         commit();
 
-        // test
-        final Result result = rule.evaluate( getTransaction(), kobject );
-        assertThat( result.getLevel(), is( Level.ERROR ) );
+        // Validate the rule file
+        String testFilePath = getClass().getClassLoader().getResource(RULES_FILE_CHILD_REQUIRED_RULE).getFile();
+        final File testFile = new File( testFilePath );
+        final List< String > errors = _validationMgr.validateRules( testFile );
+        assertThat( errors.size(), is( 0 ) );
+
+        // Load the rule
+        _validationMgr.importRules( getTransaction(), testFile, true );
+        final Rule[] rules = _validationMgr.getAllRules(getTransaction());
+        assertThat( rules.length, is( 1 ) );
+        Rule aRule = rules[0];
+
+        // Evaluate the KomodoObject using the imported rule
+        final Result result = aRule.evaluate( getTransaction(), kobject );
+        assertThat( result.isOK(), is( true ) );
         assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
-        assertThat( result.getRuleId(), is( rule.getName( getTransaction() ) ) );
+        assertThat( result.getRuleId(), is( aRule.getName( getTransaction() ) ) );
     }
 
     @Test
-    public void shouldVerifyChildCountRuleFailsWhenCountEqualsMinButMinNotInclusive() throws Exception {
-        final String childType = "nt:unstructured";
+    public void shouldVerifyImportedChildRequiredEvaluationFailure() throws Exception {
+        // Create a KomodoObject without the required property
+        final KomodoObject kobject = _repo.add( getTransaction(), null, VDB_NAME, VDB_TYPE );
+        commit();
 
-        // create rule in repo
-        final Number minValue = 1;
-        final Number maxValue = 3;
-        final Rule rule = _validationMgr.addChildCountValidationRule( getTransaction(),
-                                                                      "propRule",
-                                                                      "nt:unstructured",
-                                                                      childType,
-                                                                      minValue,
-                                                                      false,
-                                                                      maxValue,
-                                                                      true,
-                                                                      _description,
-                                                                      _message );
+        // Validate rules file
+        String testFilePath = getClass().getClassLoader().getResource(RULES_FILE_CHILD_REQUIRED_RULE).getFile();
+        final File testFile = new File( testFilePath );
+        final List< String > errors = _validationMgr.validateRules( testFile );
+        assertThat( errors.size(), is( 0 ) );
 
+        // Load rules
+        _validationMgr.importRules( getTransaction(), testFile, true );
+        final Rule[] rules = _validationMgr.getAllRules(getTransaction());
+        assertThat( rules.length, is( 1 ) );
+        Rule aRule = rules[0];
+
+        // Evaluate kobject using the loaded rule
+        final Result result = aRule.evaluate( getTransaction(), kobject );
+        assertThat( result.isOK(), is( false ) );
+        assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
+        assertThat( result.getRuleId(), is( aRule.getName( getTransaction() ) ) );
+        assertThat( result.getMessage(), is( "A VDB must have between 1 and 5 child models." ));
+    }
+
+    @Test
+    public void shouldVerifyImportedChildCountRuleEvaluationSuccess() throws Exception {
         // setup KomodoObject
-        final KomodoObject kobject = _repo.add( getTransaction(), null, "kobject", null );
-
-        for ( int i = 0; i < minValue.intValue(); ++i ) {
-            kobject.addChild( getTransaction(), ( "child" + i ), null );
+        final KomodoObject kobject = _repo.add( getTransaction(), null, VDB_NAME, VDB_TYPE );
+        // Add five models
+        for ( int i = 0; i < 5; ++i ) {
+            kobject.addChild( getTransaction(), ( "child" + i ), MODEL_TYPE );
         }
 
         commit();
 
-        // test
-        final Result result = rule.evaluate( getTransaction(), kobject );
-        assertThat( result.getLevel(), is( Level.ERROR ) );
+        // Validate the rule file
+        String testFilePath = getClass().getClassLoader().getResource(RULES_FILE_CHILD_COUNT_RULE).getFile();
+        final File testFile = new File( testFilePath );
+        final List< String > errors = _validationMgr.validateRules( testFile );
+        assertThat( errors.size(), is( 0 ) );
+
+        // Load the rule
+        _validationMgr.importRules( getTransaction(), testFile, true );
+        final Rule[] rules = _validationMgr.getAllRules(getTransaction());
+        assertThat( rules.length, is( 1 ) );
+        Rule aRule = rules[0];
+
+        // Evaluate the KomodoObject using the imported rule
+        final Result result = aRule.evaluate( getTransaction(), kobject );
+        assertThat( result.isOK(), is( true ) );
         assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
-        assertThat( result.getRuleId(), is( rule.getName( getTransaction() ) ) );
+        assertThat( result.getRuleId(), is( aRule.getName( getTransaction() ) ) );
     }
 
     @Test
-    public void shouldVerifyChildCountRuleFailsWhenCountIsNotWithinRange() throws Exception {
-        final String childType = "nt:unstructured";
+    public void shouldVerifyImportedChildCountRuleEvaluationFailure() throws Exception {
+        // Create a KomodoObject without the required property
+        final KomodoObject kobject = _repo.add( getTransaction(), null, VDB_NAME, VDB_TYPE );
+        commit();
 
-        // create rule in repo
-        final Number minValue = 1;
-        final Number maxValue = 3;
-        final Rule rule = _validationMgr.addChildCountValidationRule( getTransaction(),
-                                                                      "propRule",
-                                                                      "nt:unstructured",
-                                                                      childType,
-                                                                      minValue,
-                                                                      true,
-                                                                      maxValue,
-                                                                      true,
-                                                                      _description,
-                                                                      _message );
+        // Validate rules file
+        String testFilePath = getClass().getClassLoader().getResource(RULES_FILE_CHILD_COUNT_RULE).getFile();
+        final File testFile = new File( testFilePath );
+        final List< String > errors = _validationMgr.validateRules( testFile );
+        assertThat( errors.size(), is( 0 ) );
 
+        // Load rules
+        _validationMgr.importRules( getTransaction(), testFile, true );
+        final Rule[] rules = _validationMgr.getAllRules(getTransaction());
+        assertThat( rules.length, is( 1 ) );
+        Rule aRule = rules[0];
+
+        // Evaluate kobject using the loaded rule
+        final Result result = aRule.evaluate( getTransaction(), kobject );
+        assertThat( result.isOK(), is( false ) );
+        assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
+        assertThat( result.getRuleId(), is( aRule.getName( getTransaction() ) ) );
+        assertThat( result.getMessage(), is( "A VDB must have between 1 and 5 child models." ));
+    }
+
+    @Test
+    public void shouldVerifyImportedSameNameSiblingRuleEvaluationSuccess() throws Exception {
         // setup KomodoObject
-        final KomodoObject kobject = _repo.add( getTransaction(), null, "kobject", null );
-
-        for ( int i = -1; i < ( maxValue.intValue() + 1 ); ++i ) {
-            kobject.addChild( getTransaction(), ( "child" + i ), null );
+        final KomodoObject kobject = _repo.add( getTransaction(), null, VDB_NAME, VDB_TYPE );
+        // Add five models with different names
+        for ( int i = 0; i < 5; ++i ) {
+            kobject.addChild( getTransaction(), ( "child" + i ), MODEL_TYPE );
         }
 
         commit();
 
-        // test
-        final Result result = rule.evaluate( getTransaction(), kobject );
-        assertThat( result.getLevel(), is( Level.ERROR ) );
+        // Validate the rule file
+        String testFilePath = getClass().getClassLoader().getResource(RULES_FILE_SNS_RULE).getFile();
+        final File testFile = new File( testFilePath );
+        final List< String > errors = _validationMgr.validateRules( testFile );
+        assertThat( errors.size(), is( 0 ) );
+
+        // Load the rule
+        _validationMgr.importRules( getTransaction(), testFile, true );
+        final Rule[] rules = _validationMgr.getAllRules(getTransaction());
+        assertThat( rules.length, is( 1 ) );
+        Rule aRule = rules[0];
+
+        // Evaluate the KomodoObject using the imported rule
+        final Result result = aRule.evaluate( getTransaction(), kobject );
+        assertThat( result.isOK(), is( true ) );
         assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
-        assertThat( result.getRuleId(), is( rule.getName( getTransaction() ) ) );
+        assertThat( result.getRuleId(), is( aRule.getName( getTransaction() ) ) );
     }
 
     @Test
-    public void shouldVerifyChildCountRulePassesWhenCountWithinRange() throws Exception {
-        final String childType = "nt:unstructured";
-
-        // create rule in repo
-        final Number minValue = 1;
-        final Number maxValue = 3;
-        final Rule rule = _validationMgr.addChildCountValidationRule( getTransaction(),
-                                                                      "propRule",
-                                                                      "nt:unstructured",
-                                                                      childType,
-                                                                      minValue,
-                                                                      true,
-                                                                      maxValue,
-                                                                      true,
-                                                                      _description,
-                                                                      _message );
-
-        // setup KomodoObject
-        final KomodoObject kobject = _repo.add( getTransaction(), null, "kobject", null );
-
-        for ( int i = 0; i < maxValue.intValue(); ++i ) {
-            kobject.addChild( getTransaction(), ( "child" + i ), null );
+    public void shouldVerifyImportedSameNameSiblingRuleEvaluationFailure() throws Exception {
+        // Create a KomodoObject without the required property
+        final KomodoObject kobject = _repo.add( getTransaction(), null, VDB_NAME, VDB_TYPE );
+        // Add 2 models with same name
+        for ( int i = 0; i < 2; ++i ) {
+            kobject.addChild( getTransaction(), ( "child" ), MODEL_TYPE );
         }
+        commit();
+
+        // Validate rules file
+        String testFilePath = getClass().getClassLoader().getResource(RULES_FILE_SNS_RULE).getFile();
+        final File testFile = new File( testFilePath );
+        final List< String > errors = _validationMgr.validateRules( testFile );
+        assertThat( errors.size(), is( 0 ) );
+
+        // Load rules
+        _validationMgr.importRules( getTransaction(), testFile, true );
+        final Rule[] rules = _validationMgr.getAllRules(getTransaction());
+        assertThat( rules.length, is( 1 ) );
+        Rule aRule = rules[0];
+
+        // Evaluate kobject using the loaded rule
+        final Result result = aRule.evaluate( getTransaction(), kobject );
+        assertThat( result.isOK(), is( false ) );
+        assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
+        assertThat( result.getRuleId(), is( aRule.getName( getTransaction() ) ) );
+        assertThat( result.getMessage(), is( "A VDB model must have a unique name." ));
+    }
+
+    @Test
+    public void shouldVerifyImportedRelationshipRuleChildTypesExistEvaluationSuccess() throws Exception {
+        // create a VDB with one dataRole and one permission
+        final KomodoObject kobject = _repo.add( getTransaction(), null, VDB_NAME, VDB_TYPE );
+        final KomodoObject roleObj= kobject.addChild( getTransaction(), DATA_ROLE_NAME, DATA_ROLE_TYPE);
+        roleObj.addChild( getTransaction(), "thePermission", "vdb:permission");
 
         commit();
 
-        // test
-        final Result result = rule.evaluate( getTransaction(), kobject );
+        // Validate the rule file
+        String testFilePath = getClass().getClassLoader().getResource(RULES_FILE_CHILD_TYPE_MUST_EXIST_RULE).getFile();
+        final File testFile = new File( testFilePath );
+        final List< String > errors = _validationMgr.validateRules( testFile );
+        assertThat( errors.size(), is( 0 ) );
+
+        // Load the rule
+        _validationMgr.importRules( getTransaction(), testFile, true );
+        final Rule[] rules = _validationMgr.getAllRules(getTransaction());
+        assertThat( rules.length, is( 1 ) );
+        Rule aRule = rules[0];
+
+        // Evaluate the KomodoObject using the imported rule
+        final Result result = aRule.evaluate( getTransaction(), kobject );
         assertThat( result.isOK(), is( true ) );
         assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
-        assertThat( result.getRuleId(), is( rule.getName( getTransaction() ) ) );
-    }
-
-    @Test( expected = KException.class )
-    public void shouldVerifyDisabledRulesCannotBeEvaluated() throws Exception {
-        final String propName = "sledge";
-
-        // create rule in repo
-        final Rule rule = _validationMgr.addPropertyRequiredRule( getTransaction(),
-                                                                  "propRule",
-                                                                  "nt:unstructured",
-                                                                  propName,
-                                                                  _description,
-                                                                  _message );
-
-        // setup KomodoObject
-        final KomodoObject kobject = _repo.add( getTransaction(), null, "kobject", null );
-        commit();
-
-        // disable rule
-        rule.setEnabled( getTransaction(), false );
-
-        // test
-        rule.evaluate( getTransaction(), kobject );
+        assertThat( result.getRuleId(), is( aRule.getName( getTransaction() ) ) );
     }
 
     @Test
-    public void shouldVerifyNodeNameRuleFailsWhenNameDoesNotMatchesPattern() throws Exception {
-        // create rule in repo
-        final String pattern = "[A-Z]{3}";
-        final Rule rule = _validationMgr.addNodeNameRule( getTransaction(),
-                                                          "propRule",
-                                                          "nt:unstructured",
-                                                          pattern,
-                                                          _description,
-                                                          _message );
+    public void shouldVerifyImportedRelationshipRuleChildTypesExistEvaluationFailure() throws Exception {
+        // create a VDB with one dataRole and no permission
+        final KomodoObject kobject = _repo.add( getTransaction(), null, VDB_NAME, VDB_TYPE );
+        kobject.addChild( getTransaction(), DATA_ROLE_NAME, DATA_ROLE_TYPE);
 
-        // setup KomodoObject
-        final KomodoObject kobject = _repo.add( getTransaction(), null, "ABc", null );
         commit();
 
-        // test
-        final Result result = rule.evaluate( getTransaction(), kobject );
-        assertThat( result.getLevel(), is( Level.ERROR ) );
+        // Validate the rule file
+        String testFilePath = getClass().getClassLoader().getResource(RULES_FILE_CHILD_TYPE_MUST_EXIST_RULE).getFile();
+        final File testFile = new File( testFilePath );
+        final List< String > errors = _validationMgr.validateRules( testFile );
+        assertThat( errors.size(), is( 0 ) );
+
+        // Load the rule
+        _validationMgr.importRules( getTransaction(), testFile, true );
+        final Rule[] rules = _validationMgr.getAllRules(getTransaction());
+        assertThat( rules.length, is( 1 ) );
+        Rule aRule = rules[0];
+
+        // Evaluate the KomodoObject using the imported rule
+        final Result result = aRule.evaluate( getTransaction(), kobject );
+        assertThat( result.isOK(), is( false ) );
         assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
-        assertThat( result.getRuleId(), is( rule.getName( getTransaction() ) ) );
+        assertThat( result.getRuleId(), is( aRule.getName( getTransaction() ) ) );
+        assertThat( result.getMessage(), is( "The VDB dataRole must have a child permission." ));
     }
 
     @Test
-    public void shouldVerifyNodeNameRulePassesWhenNameMatchesPattern() throws Exception {
-        // create rule in repo
-        final String pattern = "[A-Z]{3}";
-        final Rule rule = _validationMgr.addNodeNameRule( getTransaction(),
-                                                          "propRule",
-                                                          "nt:unstructured",
-                                                          pattern,
-                                                          _description,
-                                                          _message );
+    public void shouldVerifyImportedRelationshipRuleChildTypesAbsentEvaluationSuccess() throws Exception {
+        // create a VDB with one dataRole and no permission
+        final KomodoObject kobject = _repo.add( getTransaction(), null, VDB_NAME, VDB_TYPE );
+        kobject.addChild( getTransaction(), DATA_ROLE_NAME, DATA_ROLE_TYPE);
 
-        // setup KomodoObject
-        final KomodoObject kobject = _repo.add( getTransaction(), null, "ABC", null );
         commit();
 
-        // test
-        final Result result = rule.evaluate( getTransaction(), kobject );
+        // Validate the rule file
+        String testFilePath = getClass().getClassLoader().getResource(RULES_FILE_CHILD_TYPE_MUST_NOT_EXIST_RULE).getFile();
+        final File testFile = new File( testFilePath );
+        final List< String > errors = _validationMgr.validateRules( testFile );
+        assertThat( errors.size(), is( 0 ) );
+
+        // Load the rule
+        _validationMgr.importRules( getTransaction(), testFile, true );
+        final Rule[] rules = _validationMgr.getAllRules(getTransaction());
+        assertThat( rules.length, is( 1 ) );
+        Rule aRule = rules[0];
+
+        // Evaluate the KomodoObject using the imported rule
+        final Result result = aRule.evaluate( getTransaction(), kobject );
         assertThat( result.isOK(), is( true ) );
         assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
-        assertThat( result.getRuleId(), is( rule.getName( getTransaction() ) ) );
+        assertThat( result.getRuleId(), is( aRule.getName( getTransaction() ) ) );
     }
 
     @Test
-    public void shouldVerifyPropertyRangeRuleFailsWhenValueEqualsMaxButMaxNotInclusive() throws Exception {
-        final String propName = "sledge";
+    public void shouldVerifyImportedRelationshipRuleChildTypesAbsentEvaluationFailure() throws Exception {
+        // create a VDB with one dataRole and one permission
+        final KomodoObject kobject = _repo.add( getTransaction(), null, VDB_NAME, VDB_TYPE );
+        final KomodoObject roleObj = kobject.addChild( getTransaction(), DATA_ROLE_NAME, DATA_ROLE_TYPE);
+        roleObj.addChild( getTransaction(), "thePermission", "vdb:permission");
 
-        // create rule in repo
-        final Number minValue = 5;
-        final Number maxValue = 10;
-        final Rule rule = _validationMgr.addPropertyValueNumberValidationRule( getTransaction(),
-                                                                               "propRule",
-                                                                               "nt:unstructured",
-                                                                               propName,
-                                                                               minValue,
-                                                                               true,
-                                                                               maxValue,
-                                                                               false,
-                                                                               _description,
-                                                                               _message );
-
-        // setup KomodoObject
-        final KomodoObject kobject = _repo.add( getTransaction(), null, "kobject", null );
-        kobject.setProperty( getTransaction(), propName, maxValue );
         commit();
 
-        // test
-        final Result result = rule.evaluate( getTransaction(), kobject );
-        assertThat( result.getLevel(), is( Level.ERROR ) );
+        // Validate the rule file
+        String testFilePath = getClass().getClassLoader().getResource(RULES_FILE_CHILD_TYPE_MUST_NOT_EXIST_RULE).getFile();
+        final File testFile = new File( testFilePath );
+        final List< String > errors = _validationMgr.validateRules( testFile );
+        assertThat( errors.size(), is( 0 ) );
+
+        // Load the rule
+        _validationMgr.importRules( getTransaction(), testFile, true );
+        final Rule[] rules = _validationMgr.getAllRules(getTransaction());
+        assertThat( rules.length, is( 1 ) );
+        Rule aRule = rules[0];
+
+        // Evaluate the KomodoObject using the imported rule
+        final Result result = aRule.evaluate( getTransaction(), kobject );
+        assertThat( result.isOK(), is( false ) );
         assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
-        assertThat( result.getRuleId(), is( rule.getName( getTransaction() ) ) );
+        assertThat( result.getRuleId(), is( aRule.getName( getTransaction() ) ) );
+        assertThat( result.getMessage(), is( "The VDB dataRole must NOT have a child permission." ));
     }
 
     @Test
-    public void shouldVerifyPropertyRangeRuleFailsWhenValueEqualsMinButMinNotInclusive() throws Exception {
-        final String propName = "sledge";
+    public void shouldVerifyImportedRelationshipRulePropsExistEvaluationSuccess() throws Exception {
+        // create a VDB with one dataRole and one permission
+        final KomodoObject kobject = _repo.add( getTransaction(), null, VDB_NAME, VDB_TYPE );
+        final KomodoObject roleObj= kobject.addChild( getTransaction(), DATA_ROLE_NAME, DATA_ROLE_TYPE);
+        roleObj.setProperty( getTransaction(), "myProp", "test" );
 
-        // create rule in repo
-        final Number minValue = 5;
-        final Number maxValue = 10;
-        final Rule rule = _validationMgr.addPropertyValueNumberValidationRule( getTransaction(),
-                                                                               "propRule",
-                                                                               "nt:unstructured",
-                                                                               propName,
-                                                                               minValue,
-                                                                               false,
-                                                                               maxValue,
-                                                                               true,
-                                                                               _description,
-                                                                               _message );
-
-        // setup KomodoObject
-        final KomodoObject kobject = _repo.add( getTransaction(), null, "kobject", null );
-        kobject.setProperty( getTransaction(), propName, minValue );
         commit();
 
-        // test
-        final Result result = rule.evaluate( getTransaction(), kobject );
-        assertThat( result.getLevel(), is( Level.ERROR ) );
-        assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
-        assertThat( result.getRuleId(), is( rule.getName( getTransaction() ) ) );
-    }
+        // Validate the rule file
+        String testFilePath = getClass().getClassLoader().getResource(RULES_FILE_CHILD_PROP_MUST_EXIST_RULE).getFile();
+        final File testFile = new File( testFilePath );
+        final List< String > errors = _validationMgr.validateRules( testFile );
+        assertThat( errors.size(), is( 0 ) );
 
-    @Test
-    public void shouldVerifyPropertyRangeRulePassesWhenValueWithinRange() throws Exception {
-        final String propName = "sledge";
+        // Load the rule
+        _validationMgr.importRules( getTransaction(), testFile, true );
+        final Rule[] rules = _validationMgr.getAllRules(getTransaction());
+        assertThat( rules.length, is( 1 ) );
+        Rule aRule = rules[0];
 
-        // create rule in repo
-        final Number minValue = 5;
-        final Number maxValue = 10;
-        final Rule rule = _validationMgr.addPropertyValueNumberValidationRule( getTransaction(),
-                                                                               "propRule",
-                                                                               "nt:unstructured",
-                                                                               propName,
-                                                                               minValue,
-                                                                               true,
-                                                                               maxValue,
-                                                                               true,
-                                                                               _description,
-                                                                               _message );
-
-        // setup KomodoObject
-        final KomodoObject kobject = _repo.add( getTransaction(), null, "kobject", null );
-        kobject.setProperty( getTransaction(), propName, 8 );
-        commit();
-
-        // test
-        final Result result = rule.evaluate( getTransaction(), kobject );
+        // Evaluate the KomodoObject using the imported rule
+        final Result result = aRule.evaluate( getTransaction(), kobject );
         assertThat( result.isOK(), is( true ) );
         assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
-        assertThat( result.getRuleId(), is( rule.getName( getTransaction() ) ) );
+        assertThat( result.getRuleId(), is( aRule.getName( getTransaction() ) ) );
     }
 
     @Test
-    public void shouldVerifyPropertyRelationshipRuleFailsWhenChildDoesNotExist() throws Exception {
-        final String propName = "sledge";
-        final String[] propsExists = new String[] { "tko:text", "tko:type" };
-        final String[] propsAbsent = new String[] { "tko:jcrName", "tko:ruleType" };
-        final String[] childExists = new String[] { "tko:schemas", "tko:dataSources" };
-        final String[] childAbsent = new String[] { "tko:vdbModels", "tko:vdbEntries" };
+    public void shouldVerifyImportedRelationshipRulePropsExistEvaluationFailure() throws Exception {
+        // create a VDB with one dataRole with property that doesnt match
+        final KomodoObject kobject = _repo.add( getTransaction(), null, VDB_NAME, VDB_TYPE );
+        final KomodoObject roleObj= kobject.addChild( getTransaction(), DATA_ROLE_NAME, DATA_ROLE_TYPE);
+        roleObj.setProperty( getTransaction(), "myProp2", "test" );
 
-        // create rule in repo
-        final Rule rule = _validationMgr.addPropertyRelationshipValidationRule( getTransaction(),
-                                                                                "propRule",
-                                                                                "nt:unstructured",
-                                                                                propName,
-                                                                                Arrays.asList( propsExists ),
-                                                                                Arrays.asList( propsAbsent ),
-                                                                                Arrays.asList( childExists ),
-                                                                                Arrays.asList( childAbsent ),
-                                                                                _description,
-                                                                                _message );
-
-        // setup KomodoObject
-        final KomodoObject kobject = _repo.add( getTransaction(), null, "kobject", null );
-        kobject.setProperty( getTransaction(), propName, "elvis" );
-        kobject.setProperty( getTransaction(), propsExists[0], "foo" );
-        kobject.setProperty( getTransaction(), propsExists[1], "foo" );
-        kobject.addChild( getTransaction(), "larry", childExists[0] );
         commit();
 
-        // test
-        final Result result = rule.evaluate( getTransaction(), kobject );
-        assertThat( result.getLevel(), is( Level.ERROR ) );
+        // Validate the rule file
+        String testFilePath = getClass().getClassLoader().getResource(RULES_FILE_CHILD_PROP_MUST_EXIST_RULE).getFile();
+        final File testFile = new File( testFilePath );
+        final List< String > errors = _validationMgr.validateRules( testFile );
+        assertThat( errors.size(), is( 0 ) );
+
+        // Load the rule
+        _validationMgr.importRules( getTransaction(), testFile, true );
+        final Rule[] rules = _validationMgr.getAllRules(getTransaction());
+        assertThat( rules.length, is( 1 ) );
+        Rule aRule = rules[0];
+
+        // Evaluate the KomodoObject using the imported rule
+        final Result result = aRule.evaluate( getTransaction(), kobject );
+        assertThat( result.isOK(), is( false ) );
         assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
-        assertThat( result.getRuleId(), is( rule.getName( getTransaction() ) ) );
+        assertThat( result.getRuleId(), is( aRule.getName( getTransaction() ) ) );
+        assertThat( result.getMessage(), is( "The VDB dataRole must have a 'myProp' property" ));
     }
 
     @Test
-    public void shouldVerifyPropertyRelationshipRuleFailsWhenChildShouldNotExist() throws Exception {
-        final String propName = "sledge";
-        final String[] propsExists = new String[] { "tko:text", "tko:type" };
-        final String[] propsAbsent = new String[] { "tko:jcrName", "tko:ruleType" };
-        final String[] childExists = new String[] { "tko:schemas" };
-        final String[] childAbsent = new String[] { "tko:vdbModels", "tko:vdbEntries", "tko:dataSources" };
+    public void shouldVerifyImportedRelationshipRulePropsAbsentEvaluationSuccess() throws Exception {
+        // create a VDB with one dataRole and one permission
+        final KomodoObject kobject = _repo.add( getTransaction(), null, VDB_NAME, VDB_TYPE );
+        final KomodoObject roleObj= kobject.addChild( getTransaction(), DATA_ROLE_NAME, DATA_ROLE_TYPE);
+        roleObj.setProperty( getTransaction(), "myProp2", "test" );
 
-        // create rule in repo
-        final Rule rule = _validationMgr.addPropertyRelationshipValidationRule( getTransaction(),
-                                                                                "propRule",
-                                                                                "nt:unstructured",
-                                                                                propName,
-                                                                                Arrays.asList( propsExists ),
-                                                                                Arrays.asList( propsAbsent ),
-                                                                                Arrays.asList( childExists ),
-                                                                                Arrays.asList( childAbsent ),
-                                                                                _description,
-                                                                                _message );
-
-        // setup KomodoObject
-        final KomodoObject kobject = _repo.add( getTransaction(), null, "kobject", null );
-        kobject.setProperty( getTransaction(), propName, "elvis" );
-        kobject.setProperty( getTransaction(), propsExists[0], "foo" );
-        kobject.setProperty( getTransaction(), propsExists[1], "bar" );
-        kobject.addChild( getTransaction(), "larry", childExists[0] );
-        kobject.addChild( getTransaction(), "bird", childAbsent[2] );
         commit();
 
-        // test
-        final Result result = rule.evaluate( getTransaction(), kobject );
-        assertThat( result.getLevel(), is( Level.ERROR ) );
-        assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
-        assertThat( result.getRuleId(), is( rule.getName( getTransaction() ) ) );
-    }
+        // Validate the rule file
+        String testFilePath = getClass().getClassLoader().getResource(RULES_FILE_CHILD_PROP_MUST_NOT_EXIST_RULE).getFile();
+        final File testFile = new File( testFilePath );
+        final List< String > errors = _validationMgr.validateRules( testFile );
+        assertThat( errors.size(), is( 0 ) );
 
-    @Test
-    public void shouldVerifyPropertyRelationshipRuleFailsWhenPropertyDoesNotExist() throws Exception {
-        final String propName = "sledge";
-        final String[] propsExists = new String[] { "tko:text", "tko:type" };
-        final String[] propsAbsent = new String[] { "tko:jcrName", "tko:ruleType" };
-        final String[] childExists = new String[] { "tko:schemas", "tko:dataSources" };
-        final String[] childAbsent = new String[] { "tko:vdbModels", "tko:vdbEntries" };
+        // Load the rule
+        _validationMgr.importRules( getTransaction(), testFile, true );
+        final Rule[] rules = _validationMgr.getAllRules(getTransaction());
+        assertThat( rules.length, is( 1 ) );
+        Rule aRule = rules[0];
 
-        // create rule in repo
-        final Rule rule = _validationMgr.addPropertyRelationshipValidationRule( getTransaction(),
-                                                                                "propRule",
-                                                                                "nt:unstructured",
-                                                                                propName,
-                                                                                Arrays.asList( propsExists ),
-                                                                                Arrays.asList( propsAbsent ),
-                                                                                Arrays.asList( childExists ),
-                                                                                Arrays.asList( childAbsent ),
-                                                                                _description,
-                                                                                _message );
-
-        // setup KomodoObject
-        final KomodoObject kobject = _repo.add( getTransaction(), null, "kobject", null );
-        kobject.setProperty( getTransaction(), propName, "elvis" );
-        kobject.setProperty( getTransaction(), propsExists[0], "foo" );
-        kobject.addChild( getTransaction(), "larry", childExists[0] );
-        kobject.addChild( getTransaction(), "bird", childExists[1] );
-        commit();
-
-        // test
-        final Result result = rule.evaluate( getTransaction(), kobject );
-        assertThat( result.getLevel(), is( Level.ERROR ) );
-        assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
-        assertThat( result.getRuleId(), is( rule.getName( getTransaction() ) ) );
-    }
-
-    @Test
-    public void shouldVerifyPropertyRelationshipRuleFailsWhenPropertyShouldNotExist() throws Exception {
-        final String propName = "sledge";
-        final String[] propsExists = new String[] { "tko:text" };
-        final String[] propsAbsent = new String[] { "tko:jcrName", "tko:ruleType", "tko:type" };
-        final String[] childExists = new String[] { "tko:schemas", "tko:dataSources" };
-        final String[] childAbsent = new String[] { "tko:vdbModels", "tko:vdbEntries" };
-
-        // create rule in repo
-        final Rule rule = _validationMgr.addPropertyRelationshipValidationRule( getTransaction(),
-                                                                                "propRule",
-                                                                                "nt:unstructured",
-                                                                                propName,
-                                                                                Arrays.asList( propsExists ),
-                                                                                Arrays.asList( propsAbsent ),
-                                                                                Arrays.asList( childExists ),
-                                                                                Arrays.asList( childAbsent ),
-                                                                                _description,
-                                                                                _message );
-
-        // setup KomodoObject
-        final KomodoObject kobject = _repo.add( getTransaction(), null, "kobject", null );
-        kobject.setProperty( getTransaction(), propName, "elvis" );
-        kobject.setProperty( getTransaction(), propsExists[0], "foo" );
-        kobject.setProperty( getTransaction(), propsAbsent[2], "bar" );
-        kobject.addChild( getTransaction(), "larry", childExists[0] );
-        kobject.addChild( getTransaction(), "bird", childExists[1] );
-        commit();
-
-        // test
-        final Result result = rule.evaluate( getTransaction(), kobject );
-        assertThat( result.getLevel(), is( Level.ERROR ) );
-        assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
-        assertThat( result.getRuleId(), is( rule.getName( getTransaction() ) ) );
-    }
-
-    @Test
-    public void shouldVerifyPropertyRelationshipRulePasses() throws Exception {
-        final String propName = "sledge";
-        final String[] propsExists = new String[] { "tko:text", "tko:type" };
-        final String[] propsAbsent = new String[] { "tko:jcrName", "tko:ruleType" };
-        final String[] childExists = new String[] { "tko:schemas", "tko:dataSources" };
-        final String[] childAbsent = new String[] { "tko:vdbModels", "tko:vdbEntries" };
-
-        // create rule in repo
-        final Rule rule = _validationMgr.addPropertyRelationshipValidationRule( getTransaction(),
-                                                                                "propRule",
-                                                                                "nt:unstructured",
-                                                                                propName,
-                                                                                Arrays.asList( propsExists ),
-                                                                                Arrays.asList( propsAbsent ),
-                                                                                Arrays.asList( childExists ),
-                                                                                Arrays.asList( childAbsent ),
-                                                                                _description,
-                                                                                _message );
-
-        // setup KomodoObject
-        final KomodoObject kobject = _repo.add( getTransaction(), null, "kobject", null );
-        kobject.setProperty( getTransaction(), propName, "elvis" );
-        kobject.setProperty( getTransaction(), propsExists[0], "foo" );
-        kobject.setProperty( getTransaction(), propsExists[1], "bar" );
-        kobject.addChild( getTransaction(), "larry", childExists[0] );
-        kobject.addChild( getTransaction(), "bird", childExists[1] );
-        commit();
-
-        // test
-        final Result result = rule.evaluate( getTransaction(), kobject );
+        // Evaluate the KomodoObject using the imported rule
+        final Result result = aRule.evaluate( getTransaction(), kobject );
         assertThat( result.isOK(), is( true ) );
         assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
-        assertThat( result.getRuleId(), is( rule.getName( getTransaction() ) ) );
+        assertThat( result.getRuleId(), is( aRule.getName( getTransaction() ) ) );
     }
 
     @Test
-    public void shouldVerifyPropertyValueRuleFailsWhenValueDoesNotMatchPattern() throws Exception {
-        final String propName = "sledge";
+    public void shouldVerifyImportedRelationshipRulePropsAbsentEvaluationFailure() throws Exception {
+        // create a VDB with one dataRole with 'myProp' property
+        final KomodoObject kobject = _repo.add( getTransaction(), null, VDB_NAME, VDB_TYPE );
+        final KomodoObject roleObj= kobject.addChild( getTransaction(), DATA_ROLE_NAME, DATA_ROLE_TYPE);
+        roleObj.setProperty( getTransaction(), "myProp", "test" );
 
-        // create rule in repo
-        final String pattern = "[0-9]{3}-[0-9]{2}-[0-9]{4}";
-        final Rule rule = _validationMgr.addPropertyPatternRule( getTransaction(),
-                                                                 "propRule",
-                                                                 "nt:unstructured",
-                                                                 propName,
-                                                                 pattern,
-                                                                 _description,
-                                                                 _message );
-
-        // setup KomodoObject
-        final KomodoObject kobject = _repo.add( getTransaction(), null, "kobject", null );
-        kobject.setProperty( getTransaction(), propName, "elvis" );
         commit();
 
-        // test
-        final Result result = rule.evaluate( getTransaction(), kobject );
-        assertThat( result.getLevel(), is( Level.ERROR ) );
+        // Validate the rule file
+        String testFilePath = getClass().getClassLoader().getResource(RULES_FILE_CHILD_PROP_MUST_NOT_EXIST_RULE).getFile();
+        final File testFile = new File( testFilePath );
+        final List< String > errors = _validationMgr.validateRules( testFile );
+        assertThat( errors.size(), is( 0 ) );
+
+        // Load the rule
+        _validationMgr.importRules( getTransaction(), testFile, true );
+        final Rule[] rules = _validationMgr.getAllRules(getTransaction());
+        assertThat( rules.length, is( 1 ) );
+        Rule aRule = rules[0];
+
+        // Evaluate the KomodoObject using the imported rule
+        final Result result = aRule.evaluate( getTransaction(), kobject );
+        assertThat( result.isOK(), is( false ) );
         assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
-        assertThat( result.getRuleId(), is( rule.getName( getTransaction() ) ) );
-    }
-
-    @Test
-    public void shouldVerifyPropertyValueRulePassesWhenValueMatchesPattern() throws Exception {
-        final String propName = "sledge";
-
-        // create rule in repo
-        final String pattern = "[0-9]{3}-[0-9]{2}-[0-9]{4}";
-        final Rule rule = _validationMgr.addPropertyPatternRule( getTransaction(),
-                                                                 "propRule",
-                                                                 "nt:unstructured",
-                                                                 propName,
-                                                                 pattern,
-                                                                 _description,
-                                                                 _message );
-
-        // setup KomodoObject
-        final KomodoObject kobject = _repo.add( getTransaction(), null, "kobject", null );
-        kobject.setProperty( getTransaction(), propName, "123-45-6789" );
-        commit();
-
-        // test
-        final Result result = rule.evaluate( getTransaction(), kobject );
-        assertThat( result.isOK(), is( true ) );
-        assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
-        assertThat( result.getRuleId(), is( rule.getName( getTransaction() ) ) );
-    }
-
-    @Test
-    public void shouldVerifyRequiredRuleFailsWhenChildNodeDoesNotExist() throws Exception {
-        final String childType = "nt:file";
-
-        // create rule in repo
-        final Rule rule = _validationMgr.addChildTypeRequiredRule( getTransaction(),
-                                                                   "childRule",
-                                                                   "nt:unstructured",
-                                                                   childType,
-                                                                   _description,
-                                                                   _message );
-        // setup KomodoObject
-        final KomodoObject kobject = _repo.add( getTransaction(), null, "kobject", null );
-        kobject.addChild( getTransaction(), "blah", "nt:unstructured" ); // not the required child type
-        commit();
-
-        // test
-        final Result result = rule.evaluate( getTransaction(), kobject );
-        assertThat( result.getLevel(), is( Level.ERROR ) );
-        assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
-        assertThat( result.getRuleId(), is( rule.getName( getTransaction() ) ) );
-    }
-
-    @Test
-    public void shouldVerifyRequiredRuleFailsWhenPropertyDoesNotExist() throws Exception {
-        final String propName = "sledge";
-
-        // create rule in repo
-        final Rule rule = _validationMgr.addPropertyRequiredRule( getTransaction(),
-                                                                  "propRule",
-                                                                  "nt:unstructured",
-                                                                  propName,
-                                                                  _description,
-                                                                  _message );
-
-        // setup KomodoObject
-        final KomodoObject kobject = _repo.add( getTransaction(), null, "kobject", null );
-        commit();
-
-        // test
-        final Result result = rule.evaluate( getTransaction(), kobject );
-        assertThat( result.getLevel(), is( Level.ERROR ) );
-        assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
-        assertThat( result.getRuleId(), is( rule.getName( getTransaction() ) ) );
-    }
-
-    @Test
-    public void shouldVerifyRequiredRulePassesWhenChildNodeExists() throws Exception {
-        final String childType = "nt:unstructured";
-
-        // create rule in repo
-        final Rule rule = _validationMgr.addChildTypeRequiredRule( getTransaction(),
-                                                                   "childRule",
-                                                                   "nt:unstructured",
-                                                                   childType,
-                                                                   _description,
-                                                                   _message );
-        // setup KomodoObject
-        final KomodoObject kobject = _repo.add( getTransaction(), null, "kobject", null );
-        kobject.addChild( getTransaction(), "blah", childType );
-        commit();
-
-        // test
-        final Result result = rule.evaluate( getTransaction(), kobject );
-        assertThat( result.isOK(), is( true ) );
-        assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
-        assertThat( result.getRuleId(), is( rule.getName( getTransaction() ) ) );
-    }
-
-    @Test
-    public void shouldVerifyRequiredRulePassesWhenPropertyExists() throws Exception {
-        final String propName = "sledge";
-
-        // create rule in repo
-        final Rule rule = _validationMgr.addPropertyRequiredRule( getTransaction(),
-                                                                  "propRule",
-                                                                  "nt:unstructured",
-                                                                  propName,
-                                                                  _description,
-                                                                  _message );
-
-        // setup KomodoObject
-        final KomodoObject kobject = _repo.add( getTransaction(), null, "kobject", null );
-        kobject.setProperty( getTransaction(), propName, "hammer" );
-        commit();
-
-        // test
-        final Result result = rule.evaluate( getTransaction(), kobject );
-        assertThat( result.isOK(), is( true ) );
-        assertThat( result.getPath(), is( kobject.getAbsolutePath() ) );
-        assertThat( result.getRuleId(), is( rule.getName( getTransaction() ) ) );
+        assertThat( result.getRuleId(), is( aRule.getName( getTransaction() ) ) );
+        assertThat( result.getMessage(), is( "The VDB dataRole must NOT have a 'myProp' property" ));
     }
 
 }

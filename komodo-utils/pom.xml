@@ -9,20 +9,7 @@
 	<artifactId>komodo-utils</artifactId>
 	<name>Komodo Utils</name>
 	<description>Miscellaneous utilities</description>
-<!--
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
--->
+
 	<dependencies>
 		<dependency>
 			<groupId>org.komodo</groupId>

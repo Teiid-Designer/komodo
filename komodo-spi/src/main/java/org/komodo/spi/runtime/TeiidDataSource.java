@@ -68,26 +68,5 @@ public interface TeiidDataSource {
      */
     String getPropertyValue(String name);
 
-    /**
-     * Set the profile name
-     * 
-     * @param name
-     */
-    void setProfileName(String name);
-
-    /**
-     * @return profile name
-     */
-    String getProfileName();
-
-    /**
-     * @return isPreview
-     */
-    boolean isPreview();
-
-    /**
-     * @param isPreview Sets isPreview to the specified value.
-     */
-    void setPreview(boolean isPreview);
 
 }

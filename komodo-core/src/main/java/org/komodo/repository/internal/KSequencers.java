@@ -38,10 +38,10 @@ import javax.jcr.observation.EventListener;
 import javax.jcr.observation.ObservationManager;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.core.Messages;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.repository.KSequencerController;
 import org.komodo.repository.KSequencerListener;
-import org.komodo.spi.query.sql.SQLConstants;
+import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.lexicon.TeiidSqlLexicon;
 import org.komodo.utils.KLog;
 import org.modeshape.jcr.api.JcrConstants;
 import org.modeshape.jcr.api.Session;
@@ -54,7 +54,7 @@ import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
  * Sequencers class responsible for executing all the sequencers in
  * consecutive, synchronous order.
  */
-public class KSequencers implements SQLConstants, EventListener, KSequencerController {
+public class KSequencers implements StringConstants, EventListener, KSequencerController {
 
     private final WorkspaceIdentifier identifier;
 
@@ -237,9 +237,9 @@ public class KSequencers implements SQLConstants, EventListener, KSequencerContr
 
                     session = ModeshapeUtils.createSession(getIdentifier());
                     KLog.getLogger().debug("KSequencers.preSequenceClean: session = {0}", session.hashCode()); //$NON-NLS-1$
-                    Iterator<Node> childIter = outputNode.getNodes();
+                    NodeIterator childIter = outputNode.getNodes();
                     while(childIter.hasNext()) {
-                        Node child = childIter.next();
+                        Node child = childIter.nextNode();
                         if (! ModeshapeUtils.hasTypeNamespace(child, VdbLexicon.Namespace.PREFIX))
                             continue;
 
@@ -513,9 +513,15 @@ public class KSequencers implements SQLConstants, EventListener, KSequencerContr
                     KLog.getLogger().debug(buffer.toString());
                 }
             }
-        } catch (Exception ex) {
+        } catch (Throwable t) {
             sequencingActive = false;
             runningSequencers.clear();
+            Exception ex;
+            if (t instanceof Exception)
+                ex = (Exception) t;
+            else
+                ex = new Exception(t);
+
             notifySequencerError(eventUserData, ex);
             return;
         }

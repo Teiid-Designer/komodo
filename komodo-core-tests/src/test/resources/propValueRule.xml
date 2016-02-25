@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<validationRuleSet
+    xmlns:val="http://www.jboss.org/tools/komodo/validation/2015"
+    xmlns:ddl="http://www.modeshape.org/ddl/1.0"
+    xmlns:vdb="http://www.metamatrix.com/metamodels/VirtualDatabase"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.jboss.org/tools/komodo/validation/2015 http://www.jboss.org/tools/komodo/validation/2015/komodoValidation.xsd"
+    xmlns="http://www.jboss.org/tools/komodo/validation/2015">
+
+    <description locale="en">This is the relational model validation file.</description>
+
+    <nodeValidation jcrName="vdb:virtualDatabase">
+        <message locale="en">Validation rules for the 'vdb:virtualDatabase' node type.</message>
+
+        <propertyValidation jcrName="vdb:version">
+            <message locale="en">Rules that validate the property 'vdb:version' of the 'vdb:virtualDatabase' node type.</message>
+            <valueValidation id="vdb:version.value">
+                <description locale="en">The value of property 'vdb:version' is invalid.</description>
+                <pattern>^[1-9]\d*$</pattern>
+            </valueValidation>
+        </propertyValidation>
+
+    </nodeValidation>
+    
+</validationRuleSet>

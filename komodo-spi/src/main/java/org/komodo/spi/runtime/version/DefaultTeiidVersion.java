@@ -39,7 +39,7 @@ public class DefaultTeiidVersion implements TeiidVersion {
         /**
          * The default preferred teiid instance
          */
-        DEFAULT_TEIID_VERSION(VersionID.TEIID_8_6),
+        DEFAULT_TEIID_VERSION(VersionID.TEIID_8_12_4),
 
         /**
          * Teiid 7.7
@@ -84,7 +84,47 @@ public class DefaultTeiidVersion implements TeiidVersion {
         /**
          * Teiid 8.7
          */
-        TEIID_8_7(VersionID.TEIID_8_7);
+        TEIID_8_7(VersionID.TEIID_8_7),
+
+        /**
+         * Teiid 8.8
+         */
+        TEIID_8_8(VersionID.TEIID_8_8),
+
+        /**
+         * Teiid 8.9
+         */
+        TEIID_8_9(VersionID.TEIID_8_9),
+
+        /**
+         * Teiid 8.10
+         */
+        TEIID_8_10(VersionID.TEIID_8_10),
+
+        /**
+         * Teiid 8.11
+         */
+        TEIID_8_11(VersionID.TEIID_8_11),
+
+        /**
+         * Teiid 8.11.5
+         */
+        TEIID_8_11_5(VersionID.TEIID_8_11_5),
+
+        /**
+         * Teiid 8.12
+         */
+        TEIID_8_12(VersionID.TEIID_8_12),
+
+        /**
+         * Teiid 8.12.4
+         */
+        TEIID_8_12_4(VersionID.TEIID_8_12_4),
+
+        /**
+         * Teiid 8.13
+         */
+        TEIID_8_13(VersionID.TEIID_8_13);
 
         private final TeiidVersion version;
 
@@ -144,13 +184,13 @@ public class DefaultTeiidVersion implements TeiidVersion {
         if (tokens.length >= 3) {
             majorVersion = tokens[0];
             minorVersion = tokens[1];
-            if(tokens[2]!=null) {
-            	int dashIndex = tokens[2].indexOf('-');
-            	if(dashIndex!=-1 && tokens[2].length()>0) {
-            		microVersion = tokens[2].substring(0,dashIndex);
-            	} else {
+            if (tokens[2] != null) {
+                int dashIndex = tokens[2].indexOf('-');
+                if (dashIndex != -1 && tokens[2].length() > 0) {
+                    microVersion = tokens[2].substring(0, dashIndex);
+                } else {
                     microVersion = tokens[2];
-            	}
+                }
             }
         }
         else if(tokens.length == 2) {
@@ -271,22 +311,27 @@ public class DefaultTeiidVersion implements TeiidVersion {
 
     @Override
     public boolean isGreaterThan(TeiidVersion otherVersion) {
-        TeiidVersion myMaxVersion = getMaximumVersion();
-        TeiidVersion otherMinVersion = otherVersion.getMinimumVersion();
+        TeiidVersion myMinVersion = getMinimumVersion();
+        TeiidVersion otherMaxVersion = otherVersion.getMaximumVersion();
 
-        int majCompResult = myMaxVersion.getMajor().compareTo(otherMinVersion.getMajor());
+        int majCompResult = isOtherNumberGreaterThan(myMinVersion.getMajor(), otherMaxVersion.getMajor());
         if (majCompResult > 0)
             return true;
         
-        int minCompResult = myMaxVersion.getMinor().compareTo(otherMinVersion.getMinor());
+        int minCompResult = isOtherNumberGreaterThan(myMinVersion.getMinor(), otherMaxVersion.getMinor());
         if (majCompResult == 0 && minCompResult > 0)
             return true;
 
-        int micCompResult = myMaxVersion.getMicro().compareTo(otherMinVersion.getMicro());
+        int micCompResult = isOtherNumberGreaterThan(myMinVersion.getMicro(), otherMaxVersion.getMicro());
         if (majCompResult == 0 && minCompResult == 0 && micCompResult > 0)
             return true;
-            
+
         return false;
+    }
+
+    @Override
+    public boolean isGreaterThan(Version otherVersion) {
+        return isGreaterThan(otherVersion.get());
     }
 
     @Override
@@ -294,19 +339,52 @@ public class DefaultTeiidVersion implements TeiidVersion {
         TeiidVersion myMaxVersion = getMaximumVersion();
         TeiidVersion otherMinVersion = otherVersion.getMinimumVersion();
 
-        int majCompResult = myMaxVersion.getMajor().compareTo(otherMinVersion.getMajor());
+        int majCompResult;
+        try {
+            int myMax = Integer.parseInt(myMaxVersion.getMajor());
+            int otherMin = Integer.parseInt(otherMinVersion.getMajor());
+            majCompResult = Integer.valueOf(myMax).compareTo(Integer.valueOf(otherMin));
+
+        } catch (NumberFormatException ex) {
+            // One or other is a string so compare lexographically
+            majCompResult = myMaxVersion.getMajor().compareTo(otherMinVersion.getMajor());
+        }
+
         if (majCompResult < 0)
             return true;
 
-        int minCompResult = myMaxVersion.getMinor().compareTo(otherMinVersion.getMinor());
+        int minCompResult;
+        try {
+            int myMax = Integer.parseInt(myMaxVersion.getMinor());
+            int otherMin = Integer.parseInt(otherMinVersion.getMinor());
+            minCompResult = Integer.valueOf(myMax).compareTo(Integer.valueOf(otherMin));
+        } catch (NumberFormatException ex) {
+            // One or other is a string so compare lexographically
+            minCompResult = myMaxVersion.getMinor().compareTo(otherMinVersion.getMinor());
+        }
+
         if (majCompResult == 0 && minCompResult < 0)
             return true;
 
-        int micCompResult = myMaxVersion.getMicro().compareTo(otherMinVersion.getMicro());
+        int micCompResult;
+        try {
+            int myMax = Integer.parseInt(myMaxVersion.getMicro());
+            int otherMin = Integer.parseInt(otherMinVersion.getMicro());
+            micCompResult = Integer.valueOf(myMax).compareTo(Integer.valueOf(otherMin));
+        } catch (NumberFormatException ex) {
+            // One or other is a string so compare lexographically
+            micCompResult = myMaxVersion.getMicro().compareTo(otherMinVersion.getMicro());
+        }
+
         if (majCompResult == 0 && minCompResult == 0 && micCompResult < 0)
             return true;
             
         return false;
+    }
+
+    @Override
+    public boolean isLessThan(Version otherVersion) {
+        return isLessThan(otherVersion.get());
     }
 
     @Override
@@ -315,7 +393,40 @@ public class DefaultTeiidVersion implements TeiidVersion {
     }
 
     @Override
+    public boolean isGreaterThanOrEqualTo(Version otherVersion) {
+        return isGreaterThanOrEqualTo(otherVersion.get());
+    }
+
+    @Override
     public boolean isLessThanOrEqualTo(TeiidVersion otherVersion) {
         return this.compareTo(otherVersion) || this.isLessThan(otherVersion);
+    }
+
+    @Override
+    public boolean isLessThanOrEqualTo(Version otherVersion) {
+        return isLessThan(otherVersion.get());
+    }
+
+    private int isOtherNumberGreaterThan(String myNumber, String otherNumber) {
+        int myValue = -1;
+        int otherValue = -1;
+
+        try {
+            myValue = Integer.parseInt(myNumber);
+        } catch (NumberFormatException e) {
+            myValue = -1;
+        }
+
+        try {
+            otherValue = Integer.parseInt(otherNumber);
+        } catch (NumberFormatException e) {
+            otherValue = -1;
+        }
+
+        if (myValue < 0 || otherValue < 0) {
+            return myNumber.compareTo(otherNumber);
+        } else {
+            return myValue - otherValue;
+        }
     }
 }

@@ -29,18 +29,20 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.jcr.Node;
 import javax.jcr.Property;
 import javax.jcr.RepositoryException;
 import javax.jcr.Value;
 import javax.jcr.ValueFormatException;
 import javax.jcr.nodetype.NodeType;
+
 import org.komodo.modeshape.AbstractNodeVisitor;
 import org.komodo.modeshape.teiid.TeiidSqlNodeVisitor;
-import org.komodo.modeshape.teiid.parser.TeiidSQLConstants;
-import org.komodo.modeshape.teiid.parser.TeiidSQLConstants.NonReserved;
-import org.komodo.modeshape.teiid.parser.TeiidSQLConstants.Reserved;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.lexicon.TeiidSqlConstants;
+import org.komodo.spi.lexicon.TeiidSqlConstants.NonReserved;
+import org.komodo.spi.lexicon.TeiidSqlConstants.Reserved;
 import org.komodo.spi.ddl.TeiidDDLConstants;
 import org.komodo.spi.metadata.MetadataNamespaces;
 import org.komodo.spi.runtime.version.TeiidVersion;
@@ -100,8 +102,6 @@ public class DdlNodeVisitor extends AbstractNodeVisitor
     private enum MixinTypeName {
 
         CREATE_TABLE(TeiidDdlLexicon.CreateTable.TABLE_STATEMENT),
-
-        CREATE_GLOBAL_TEMP_TABLE(TeiidDdlLexicon.CreateTable.GLOBAL_TEMP_TABLE_STATEMENT),
 
         CREATE_VIEW(TeiidDdlLexicon.CreateTable.VIEW_STATEMENT),
 
@@ -216,8 +216,12 @@ public class DdlNodeVisitor extends AbstractNodeVisitor
         /**
          * @return data type name
          */
-        public DataTypeName getDataTypeName() {
-            return getDataTypeManager().getDataTypeName(dataTypeId);
+        public DataTypeName getDataTypeName() throws RepositoryException {
+            try {
+                return getDataTypeManager().getDataTypeName(dataTypeId);
+            } catch (Exception ex) {
+                throw new RepositoryException(ex);
+            }
         }
 
         /**
@@ -300,7 +304,7 @@ public class DdlNodeVisitor extends AbstractNodeVisitor
             lengthDataTypes.add(DataTypeName.XML);
             lengthDataTypes.add(DataTypeName.STRING);
             lengthDataTypes.add(DataTypeName.VARBINARY);
-            lengthDataTypes.add(DataTypeName.BIG_INTEGER);
+            lengthDataTypes.add(DataTypeName.BIGINTEGER);
         }
 
         return lengthDataTypes;
@@ -309,7 +313,7 @@ public class DdlNodeVisitor extends AbstractNodeVisitor
     private Set<DataTypeName> getPrecsionDataTypes() {
         if (precisionDataTypes == null) {
             precisionDataTypes = new HashSet<DataTypeName>();
-            precisionDataTypes.add(DataTypeName.BIG_DECIMAL);
+            precisionDataTypes.add(DataTypeName.BIGDECIMAL);
         }
 
         return precisionDataTypes;
@@ -337,8 +341,8 @@ public class DdlNodeVisitor extends AbstractNodeVisitor
     }
 
     protected String escapeSinglePart(String token) {
-        if (TeiidSQLConstants.isReservedWord(getVersion(), token)) {
-            return TeiidSQLConstants.Tokens.ID_ESCAPE_CHAR + token + TeiidSQLConstants.Tokens.ID_ESCAPE_CHAR;
+        if (TeiidSqlConstants.isReservedWord(getVersion(), token)) {
+            return TeiidSqlConstants.Tokens.ID_ESCAPE_CHAR + token + TeiidSqlConstants.Tokens.ID_ESCAPE_CHAR;
         }
         boolean escape = true;
         char start = token.charAt(0);
@@ -350,7 +354,7 @@ public class DdlNodeVisitor extends AbstractNodeVisitor
             }
         }
         if (escape) {
-            return TeiidSQLConstants.Tokens.ID_ESCAPE_CHAR + escapeStringValue(token, SPEECH_MARK) + TeiidSQLConstants.Tokens.ID_ESCAPE_CHAR;
+            return TeiidSqlConstants.Tokens.ID_ESCAPE_CHAR + escapeStringValue(token, SPEECH_MARK) + TeiidSqlConstants.Tokens.ID_ESCAPE_CHAR;
         }
         return token;
     }
@@ -509,30 +513,30 @@ public class DdlNodeVisitor extends AbstractNodeVisitor
         append(QUOTE_MARK + value + QUOTE_MARK);
     }
 
-    protected String escapeOptionKey(String key) {
-        StringBuilder result = new StringBuilder();
+	protected String escapeOptionKey(String key) {
+		StringBuilder result = new StringBuilder();
 
-        if (key.length()>1 &&  key.charAt(0) == StringConstants.SPEECH_MARK.charAt(0)
-                && key.charAt(key.length() - 1) == StringConstants.SPEECH_MARK.charAt(0)) {
-            result.append(StringConstants.SPEECH_MARK)
-                  .append(escapeStringValue(key.substring(1, key.length() - 1), StringConstants.SPEECH_MARK))
-                  .append(StringConstants.SPEECH_MARK);
-            return result.toString();
-        }
+		if (key.length()>1 &&  key.charAt(0) == StringConstants.SPEECH_MARK.charAt(0)
+				&& key.charAt(key.length() - 1) == StringConstants.SPEECH_MARK.charAt(0)) {
+			result.append(StringConstants.SPEECH_MARK)
+				  .append(escapeStringValue(key.substring(1, key.length() - 1), StringConstants.SPEECH_MARK))
+			      .append(StringConstants.SPEECH_MARK);
+			return result.toString();
+		}
 
-        String[] segmentsFromDots = key.split("\\."); //$NON-NLS-1$
-        for (String segment : segmentsFromDots) {
-            if (segment.length() == 0) {
-                continue;
-            }
-            result.append(TeiidSQLConstants.Tokens.ID_ESCAPE_CHAR)
-                  .append(escapeStringValue(segment, StringConstants.SPEECH_MARK))
-                  .append(TeiidSQLConstants.Tokens.ID_ESCAPE_CHAR).append(DOT_CHAR);
-        }
+		String[] segmentsFromDots = key.split("\\.");
+		for (String segment : segmentsFromDots) {
+			if (segment.length() == 0) {
+				continue;
+			}
+			result.append(TeiidSqlConstants.Tokens.ID_ESCAPE_CHAR)
+				  .append(escapeStringValue(segment, StringConstants.SPEECH_MARK))
+				  .append(TeiidSqlConstants.Tokens.ID_ESCAPE_CHAR).append(DOT_CHAR);
+		}
 
-        result.setLength(result.length() - 1);
-        return result.toString();
-    }
+		result.setLength(result.length() - 1);
+		return result.toString();
+	}
 
     private void statementOptions(Node node, String prefix) throws RepositoryException {
         Collection<Node> options = getChildren(node, StandardDdlLexicon.TYPE_STATEMENT_OPTION);
@@ -748,8 +752,7 @@ public class DdlNodeVisitor extends AbstractNodeVisitor
         if (! includeTables)
             return;
 
-        if (!hasMixinType(table, TeiidDdlLexicon.CreateTable.TABLE_STATEMENT) &&
-             !hasMixinType(table, TeiidDdlLexicon.CreateTable.GLOBAL_TEMP_TABLE_STATEMENT))
+        if (!hasMixinType(table, TeiidDdlLexicon.CreateTable.TABLE_STATEMENT))
             return;
 
         append(NEW_LINE);
@@ -960,7 +963,6 @@ public class DdlNodeVisitor extends AbstractNodeVisitor
         try {
             switch (typeName) {
                 case CREATE_TABLE:
-                case CREATE_GLOBAL_TEMP_TABLE:
                     table(node);
                     append(NEW_LINE);
                     break;

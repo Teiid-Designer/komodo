@@ -30,6 +30,7 @@ import org.komodo.relational.datasource.internal.DatasourceImpl;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.Exportable;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
@@ -40,8 +41,29 @@ import org.komodo.spi.runtime.TeiidInstance;
 /**
  * A model of a datasource instance
  */
-public interface Datasource extends RelationalObject {
+public interface Datasource extends Exportable, RelationalObject {
 
+    /**
+     * XML tag for jdbc attribute
+     */
+    public static String XML_ATTR_JDBC = "jdbc"; //$NON-NLS-1$
+    /**
+     * XML tag for name attribute
+     */
+    public static String XML_ATTR_NAME = "name"; //$NON-NLS-1$
+    /**
+     * XML tag for property element
+     */
+    public static String XML_ELEM_PROPERTY = "property"; //$NON-NLS-1$
+    /**
+     * XML tag for dataSource element
+     */
+    public static String XML_ELEM_DATASOURCE = "dataSource"; //$NON-NLS-1$
+    /**
+     * XML tag for dataSourceSet element
+     */
+    public static String XML_ELEM_DATASOURCE_SET = "dataSourceSet"; //$NON-NLS-1$
+    
     /**
      * The type identifier.
      */

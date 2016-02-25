@@ -177,7 +177,9 @@ import org.komodo.relational.commands.workspace.DeleteDatasourceCommandTest;
 import org.komodo.relational.commands.workspace.DeleteSchemaCommandTest;
 import org.komodo.relational.commands.workspace.DeleteTeiidCommandTest;
 import org.komodo.relational.commands.workspace.DeleteVdbCommandTest;
+import org.komodo.relational.commands.workspace.ExportDatasourceCommandTest;
 import org.komodo.relational.commands.workspace.ExportVdbCommandTest;
+import org.komodo.relational.commands.workspace.UploadDatasourceCommandTest;
 import org.komodo.relational.commands.workspace.UploadVdbCommandTest;
 import org.komodo.relational.commands.workspace.WorkspaceCommandsI18nTest;
 import org.komodo.relational.commands.workspace.WorkspaceSetPropertyCommandTest;
@@ -193,6 +195,8 @@ import org.komodo.relational.commands.workspace.WorkspaceUnsetPropertyCommandTes
     FindCommandTest.class,
     SetCustomPropertyCommandTest.class,
     UnsetCustomPropertyCommandTest.class,
+    SetCustomOptionCommandTest.class,
+    UnsetCustomOptionCommandTest.class,
     RelationalAddChildCommandTest.class,
     RelationalCommandsI18nTest.class,
     RelationalDeleteChildCommandTest.class,
@@ -213,6 +217,8 @@ import org.komodo.relational.commands.workspace.WorkspaceUnsetPropertyCommandTes
 //    ImportVdbCommandTest.class,
     UploadVdbCommandTest.class,
     ExportVdbCommandTest.class,
+    UploadDatasourceCommandTest.class,
+    ExportDatasourceCommandTest.class,
     WorkspaceCommandsI18nTest.class,
     WorkspaceSetPropertyCommandTest.class,
     WorkspaceUnsetPropertyCommandTest.class,

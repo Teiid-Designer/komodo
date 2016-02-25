@@ -31,7 +31,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import javax.resource.spi.IllegalStateException;
 import javax.xml.parsers.SAXParserFactory;
 import org.komodo.rest.json.JsonConstants;
 import org.komodo.spi.repository.KomodoType;

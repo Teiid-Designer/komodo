@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.jboss.integration-platform</groupId>
 		<artifactId>jboss-integration-platform-parent</artifactId>
-		<version>6.0.0.CR30</version>
+		<version>6.0.1.Final</version>
 	</parent>
 
 	<modelVersion>4.0.0</modelVersion>
@@ -102,7 +102,9 @@
 
 	<properties>
 
-		<version.ip-bom>6.0.0.CR30</version.ip-bom>
+		<version.ip-bom>6.0.1.Final</version.ip-bom>
+		<version.modeshape>3.8.4.GA</version.modeshape>
+		<version.javax.jcr>2.0</version.javax.jcr>
 
 		<!-- Instruct the build to use only UTF-8 encoding for source code -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -329,6 +331,18 @@
 				<scope>import</scope>
 			</dependency>
 
+			<dependency>
+				<groupId>javax.jcr</groupId>
+				<artifactId>jcr</artifactId>
+				<version>${version.javax.jcr}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.modeshape</groupId>
+				<artifactId>modeshape-jcr-api</artifactId>
+				<version>${version.modeshape}</version>
+			</dependency>
+
 			<!-- komodo-shell-api komodo-shell komodo-importer komodo-relational komodo-relational-commands 
 				komodo-server-rest -->
 
@@ -344,6 +358,16 @@
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.komodo.plugins</groupId>
+				<artifactId>komodo-plugin-teiid-framework</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.komodo</groupId>
+				<artifactId>komodo-plugin-service</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.komodo</groupId>
 				<artifactId>komodo-utils-modeshape-logger</artifactId>
 				<version>${project.version}</version>
@@ -351,11 +375,6 @@
 			<dependency>
 				<groupId>org.komodo</groupId>
 				<artifactId>komodo-utils</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.komodo</groupId>
-				<artifactId>komodo-teiid-client</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -409,6 +428,13 @@
 				<version>${project.version}</version>
 			</dependency>
 
+			<dependency>
+				<groupId>org.komodo</groupId>
+				<artifactId>komodo-utils</artifactId>
+				<version>${project.version}</version>
+				<type>test-jar</type>
+				<scope>test</scope>
+			</dependency>
 			<dependency>
 				<groupId>org.komodo</groupId>
 				<artifactId>komodo-test-utils</artifactId>
@@ -483,4 +509,5 @@
 
 		</dependencies>
 	</dependencyManagement>
+
 </project>

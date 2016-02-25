@@ -196,6 +196,13 @@
 
 		<dependency>
 			<groupId>org.komodo</groupId>
+			<artifactId>komodo-utils</artifactId>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.komodo</groupId>
 			<artifactId>komodo-test-utils</artifactId>
 			<type>test-jar</type>
 			<scope>test</scope>
@@ -220,15 +227,7 @@
 		<finalName>${rest-context}</finalName>
 
 		<plugins>
-<!--			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
-				</configuration>
-			</plugin>
--->			<plugin>
+			<plugin>
 				<artifactId>maven-war-plugin</artifactId>
 				<configuration>
 					<warName>${rest-context}</warName>

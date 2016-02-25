@@ -9,20 +9,7 @@
 	<artifactId>komodo-utils-modeshape-logger</artifactId>
 	<name>Komodo Logger</name>
 	<description>Komodo Logger Modeshape Implementation</description>
-<!--
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
--->
+
 	<dependencies>
 		<dependency>
 			<groupId>org.komodo</groupId>

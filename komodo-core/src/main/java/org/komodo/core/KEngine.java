@@ -36,13 +36,12 @@ import org.komodo.repository.LocalRepository;
 import org.komodo.spi.KErrorHandler;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.constants.SystemConstants;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.RepositoryClient;
 import org.komodo.spi.repository.RepositoryClientEvent;
 import org.komodo.utils.ArgCheck;
+import org.komodo.utils.KEnvironment;
 import org.komodo.utils.KLog;
-import org.komodo.utils.StringUtils;
 
 /**
  * The Komodo engine. It is responsible for persisting and retriever user session data and Teiid artifacts.
@@ -74,11 +73,7 @@ public final class KEngine implements RepositoryClient, StringConstants {
     private KomodoErrorHandler errorHandler = new KomodoErrorHandler();
 
     private KEngine() {
-        // Initialize default data directory system property if necessary
-        if ( StringUtils.isBlank( System.getProperty( SystemConstants.ENGINE_DATA_DIR ) ) ) {
-            final String defaultValue = ( System.getProperty( "user.home", "/" ) + "/.komodo" ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-            System.setProperty( SystemConstants.ENGINE_DATA_DIR, defaultValue );
-        }
+        KEnvironment.checkDataDirProperty();
 
         // Initialise the logging system
         try {
@@ -188,7 +183,7 @@ public final class KEngine implements RepositoryClient, StringConstants {
         return Collections.unmodifiableSet(allRepositories);
     }
 
-    private void notifyListeners(final KEvent event) {
+    private <T> void notifyListeners(final KEvent<T> event) {
         ArgCheck.isNotNull(event);
 
         for (final KListener listener : this.listeners) {
@@ -267,10 +262,10 @@ public final class KEngine implements RepositoryClient, StringConstants {
      * @throws Exception if shutdown fails
      */
     public void shutdownAndWait() throws Exception {
-        Callable shutdownTask = new Callable() {
+        Callable<Boolean> shutdownTask = new Callable<Boolean>() {
 
             @Override
-            public Object call() throws Exception {
+            public Boolean call() throws Exception {
                 shutdown();
 
                 boolean shutdown = false;
@@ -299,7 +294,7 @@ public final class KEngine implements RepositoryClient, StringConstants {
         };
 
         ExecutorService executor = Executors.newSingleThreadExecutor();
-        Future<String> future = executor.submit(shutdownTask);
+        Future<Boolean> future = executor.submit(shutdownTask);
 
         KLog.getLogger().info("Starting shutdown procedure ..."); //$NON-NLS-1$
 

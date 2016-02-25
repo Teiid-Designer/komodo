@@ -36,122 +36,27 @@ import javax.jcr.Session;
 import javax.jcr.Value;
 import javax.jcr.nodetype.NodeType;
 import org.komodo.modeshape.AbstractNodeVisitor;
-import org.komodo.modeshape.teiid.cnd.*;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.AbstractCompareCriteria;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.AbstractSetCriteria;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.AggregateSymbol;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.AliasSymbol;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Alter;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.AlterTrigger;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.ArraySymbol;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.ArrayTable;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.AssignmentStatement;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.BetweenCriteria;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Block;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.BranchingStatement;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.CaseExpression;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Command;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.CommandStatement;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.CompareCriteria;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.CompoundCriteria;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Constant;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.CreateProcedureCommand;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.DeclareStatement;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Delete;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.DerivedColumn;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.DynamicCommand;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.ElementSymbol;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.ExceptionExpression;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.ExistsCriteria;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Expression;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.ExpressionCriteria;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.ExpressionStatement;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.ExpressionSymbol;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.From;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.FromClause;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Function;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.GroupBy;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.GroupSymbol;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.IfStatement;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Insert;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Into;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.IsNullCriteria;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.JSONObject;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.JoinPredicate;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.JoinType;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Labeled;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.LexTokens;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Limit;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.LoopStatement;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.MakeDep;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.MatchCriteria;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.MultipleElementSymbol;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.NamespaceItem;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.NotCriteria;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.ObjectColumn;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.ObjectTable;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Option;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.OrderBy;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.OrderByItem;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.ProjectedColumn;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Query;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.QueryCommand;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.QueryString;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.RaiseStatement;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Reference;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.SPParameter;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Select;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.SetClause;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.SetClauseList;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.SetCriteria;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.SetQuery;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.SourceHint;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.SpecificHint;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.StoredProcedure;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.SubqueryCompareCriteria;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.SubqueryContainer;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.SubqueryFromClause;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.SubqueryHint;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.SubquerySetCriteria;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Symbol;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.TableFunctionReference;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.TargetedCommand;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.TeiidSqlCallback;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.TextColumn;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.TextLine;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.TextTable;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.TriggerAction;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.UnaryFromClause;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Update;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.WhileStatement;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.WindowFunction;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.WindowSpecification;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.WithQueryCommand;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.XMLAttributes;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.XMLColumn;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.XMLElement;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.XMLForest;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.XMLNamespaces;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.XMLParse;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.XMLQuery;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.XMLSerialize;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.XMLTable;
 import org.komodo.modeshape.teiid.language.SortSpecification;
 import org.komodo.modeshape.teiid.language.SortSpecification.NullOrdering;
-import org.komodo.modeshape.teiid.parser.TeiidSQLConstants;
-import org.komodo.modeshape.teiid.parser.TeiidSQLConstants.NonReserved;
-import org.komodo.modeshape.teiid.parser.TeiidSQLConstants.Reserved;
-import org.komodo.modeshape.teiid.parser.TeiidSQLConstants.Tokens;
-import org.komodo.modeshape.teiid.sql.lang.CriteriaOperator;
-import org.komodo.modeshape.teiid.sql.lang.SubqueryCompareCriteriaImpl.PredicateQuantifier;
-import org.komodo.modeshape.teiid.sql.lang.TriggerEvent;
-import org.komodo.modeshape.teiid.sql.proc.BranchingStatementImpl.BranchingMode;
-import org.komodo.spi.query.sql.lang.JoinType.Types;
-import org.komodo.spi.query.sql.lang.MatchCriteria.MatchMode;
-import org.komodo.spi.query.sql.lang.SPParameter.ParameterInfo;
-import org.komodo.spi.query.sql.lang.SetQuery.Operation;
-import org.komodo.spi.query.sql.symbol.AggregateSymbol.Type;
-import org.komodo.spi.query.sql.symbol.ElementSymbol.DisplayMode;
+import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.lexicon.TeiidSqlConstants;
+import org.komodo.spi.lexicon.TeiidSqlContext;
+import org.komodo.spi.lexicon.TeiidSqlConstants.NonReserved;
+import org.komodo.spi.lexicon.TeiidSqlConstants.Reserved;
+import org.komodo.spi.lexicon.TeiidSqlConstants.Tokens;
+import org.komodo.spi.lexicon.TeiidSqlLexicon;
+import org.komodo.spi.lexicon.TeiidSqlLexicon.*;
+import org.komodo.spi.query.AggregateFunctions;
+import org.komodo.spi.query.BranchingMode;
+import org.komodo.spi.query.CriteriaOperator;
+import org.komodo.spi.query.DisplayMode;
+import org.komodo.spi.query.JoinTypeTypes;
+import org.komodo.spi.query.LogicalOperator;
+import org.komodo.spi.query.MatchMode;
+import org.komodo.spi.query.PredicateQuantifier;
+import org.komodo.spi.query.TriggerEvent;
+import org.komodo.spi.query.Operation;
+import org.komodo.spi.query.ParameterInfo;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.DataTypeManager.DataTypeName;
@@ -163,8 +68,8 @@ import org.modeshape.jcr.JcrSession;
 /**
  *
  */
-public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
-    implements TeiidSqlCallback, Reserved, NonReserved, Tokens {
+public class TeiidSqlNodeVisitor extends AbstractNodeVisitor implements StringConstants,
+    NonReserved, Reserved, Tokens {
 
     protected static final String UNDEFINED = "<undefined>"; //$NON-NLS-1$
 
@@ -188,7 +93,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
             this.node = node;
         }
 
-        @Override
+    
         public Object get(String key) {
             if (NODE_KEY.equals(key))
                 return node;
@@ -196,7 +101,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
             return index.get(key);
         }
 
-        @Override
+    
         public void add(String key, Object obj) {
             index.put(key, obj);
         }
@@ -217,7 +122,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         super(teiidVersion);
     }
 
-    @Override
+
     protected String undefined() {
         return UNDEFINED;
     }
@@ -271,12 +176,12 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         append(name.toUpperCase());
     }
 
-    protected void appendToken(Node node) throws RepositoryException {
+    protected void appendToken(Node node) throws Exception {
         String name = node.getName();
         appendToken(name);
     }
 
-    protected Node reference(Node node, String refName) throws RepositoryException {
+    protected Node reference(Node node, String refName) throws Exception {
         if (node == null || refName == null)
             return null;
 
@@ -288,7 +193,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return node.getNode(refName);
     }
 
-    protected int size(Node node, String refName)  throws RepositoryException {
+    protected int size(Node node, String refName)  throws Exception {
         if (node == null || refName == null)
             return 0;
 
@@ -306,7 +211,8 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return size;
     }
 
-    protected Iterator<Node> references(Node node, String refName) throws RepositoryException {
+    @SuppressWarnings( "unchecked" )
+    protected Iterator<Node> references(Node node, String refName) throws Exception {
         if (node == null || refName == null)
             return null;
 
@@ -318,7 +224,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return node.getNodes(refName);
     }
 
-    protected void iterate(Iterator<Node> nodes) throws RepositoryException {
+    protected void iterate(Iterator<Node> nodes) throws Exception {
         for (int i = 0; nodes.hasNext(); ++i) {
             if (i > 0)
                 append(COMMA + SPACE);
@@ -328,7 +234,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         }
     }
 
-    protected void iterate(Node node, String refName) throws RepositoryException {
+    protected void iterate(Node node, String refName) throws Exception {
         Iterator<Node> nodes = references(node, refName);
         for (int i = 0; nodes.hasNext(); ++i) {
             if (i > 0)
@@ -339,7 +245,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         }
     }
 
-    protected boolean propertyBoolean(Node node, String propName) throws RepositoryException {
+    protected boolean propertyBoolean(Node node, String propName) throws Exception {
         Property property = property(node, propName);
         if (property == null)
             return false;
@@ -348,7 +254,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return value;
     }
 
-    protected String propertyString(Node node, String propName) throws RepositoryException {
+    protected String propertyString(Node node, String propName) throws Exception {
         Property property = property(node, propName);
         if (property == null)
             return null;
@@ -357,7 +263,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return value;
     }
 
-    protected long propertyLong(Node node, String propName) throws RepositoryException {
+    protected long propertyLong(Node node, String propName) throws Exception {
         Property property = property(node, propName);
         if (property == null)
             return -1L;
@@ -366,6 +272,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return value;
     }
 
+    @SuppressWarnings( "unchecked" )
     protected <T> T propertyValue(Value value, DataTypeName dataTypeName) throws RepositoryException {
         Object valueObject = null;
 
@@ -384,7 +291,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
                 valueObject = value.getDouble();
                 break;
             case DECIMAL:
-            case BIG_DECIMAL:
+            case BIGDECIMAL:
                 valueObject = value.getDecimal();
                 break;
             case LONG:
@@ -395,7 +302,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
             case SHORT:
             case TINYINT:
             case SMALLINT:
-            case BIG_INTEGER:
+            case BIGINTEGER:
                 valueObject = value.getLong();
                 break;
             case BOOLEAN:
@@ -466,7 +373,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return nodeType.getName().startsWith(TeiidSqlLexicon.Namespace.PREFIX + COLON);
     }
 
-    protected boolean instanceOf(Node node, LexTokens superTypeToken) throws RepositoryException {
+    protected boolean instanceOf(Node node, LexTokens superTypeToken) throws Exception {
         if (node == null)
             return false;
 
@@ -509,7 +416,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return tsqlMixinType;
     }
 
-    protected void addWithClause(Node node) throws RepositoryException {
+    protected void addWithClause(Node node) throws Exception {
         Iterator<Node> withNodes = references(node, QueryCommand.WITH_REF_NAME);
         if (! withNodes.hasNext())
             return;
@@ -520,7 +427,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         beginClause(0);
     }
 
-    protected boolean hasHint(Node node) throws RepositoryException {
+    protected boolean hasHint(Node node) throws Exception {
         boolean optional = propertyBoolean(node, FromClause.OPTIONAL_PROP_NAME);
         boolean makeInd = propertyBoolean(node, FromClause.MAKE_IND_PROP_NAME);
         boolean makeNotDep = propertyBoolean(node, FromClause.MAKE_NOT_DEP_PROP_NAME);
@@ -531,7 +438,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return optional || makeInd || makeNotDep || noUnnest || preserve || (makeDep != null);
     }
 
-    protected boolean isMakeDepSimple(Node makeDep) throws RepositoryException {
+    protected boolean isMakeDepSimple(Node makeDep) throws Exception {
         if (makeDep == null)
             return false;
 
@@ -541,7 +448,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return !hasMax && !join;
     }
     
-    protected void addHintComment(Node node) throws RepositoryException {
+    protected void addHintComment(Node node) throws Exception {
 
         boolean optional = propertyBoolean(node, FromClause.OPTIONAL_PROP_NAME);
         boolean makeInd = propertyBoolean(node, FromClause.MAKE_IND_PROP_NAME);
@@ -589,7 +496,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         }
     }
 
-    protected void addMakeDep(Node node) throws RepositoryException {
+    protected void addMakeDep(Node node) throws Exception {
         if (isLessThanTeiidVersion(Version.TEIID_8_5))
             return;
 
@@ -613,7 +520,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
     }
 
     protected String escapeSinglePart(String token) {
-        if (TeiidSQLConstants.isReservedWord(getVersion(), token)) {
+        if (TeiidSqlConstants.isReservedWord(getVersion(), token)) {
             return ID_ESCAPE_CHAR + token + ID_ESCAPE_CHAR;
         }
 
@@ -638,7 +545,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         String[] pathParts = name.split("\\."); //$NON-NLS-1$
         for (int i = 0; i < pathParts.length; i++) {
             if (i > 0) {
-                append(org.komodo.spi.query.sql.symbol.Symbol.SEPARATOR);
+                append(Symbol.SEPARATOR);
             }
 
             append(escapeSinglePart(pathParts[i]));
@@ -646,7 +553,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
     }
 
     protected String shortName(String name) {
-        int index = name.lastIndexOf(org.komodo.spi.query.sql.symbol.Symbol.SEPARATOR);
+        int index = name.lastIndexOf(Symbol.SEPARATOR);
         if(index >= 0) {
             return name.substring(index + 1);
         }
@@ -654,29 +561,28 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return name;
     }
 
-    protected String outputName(Node node) throws RepositoryException {
+    protected String outputName(Node node) throws Exception {
         String name = propertyString(node,  Symbol.NAME_PROP_NAME);
         String outputName = propertyString(node,  Symbol.OUTPUT_NAME_PROP_NAME);
         return outputName == null ? name : outputName;
     }
 
-    protected void appendNested(Node node) throws RepositoryException {
+    protected void appendNested(Node node) throws Exception {
         boolean useParens = instanceOf(node, LexTokens.CRITERIA);
         if (useParens) {
-            append(LPAREN);
+            append(OPEN_BRACKET);
         }
 
         visit(node);
 
         if (useParens) {
-            append(RPAREN);
+            append(CLOSE_BRACKET);
         }
     }
 
-    protected void appendLiteral(Class<?> type, boolean multiValued, Object value) {
+    protected void appendLiteral(Class<?> type, boolean multiValued, Object value) throws Exception {
         Class<?> booleanClass = getDataTypeManager().getDefaultDataClass(DataTypeName.BOOLEAN);
-        
-        
+
         String[] constantParts = null;
         if (multiValued) {
             constantParts = new String[] {QUESTION_MARK}; 
@@ -691,7 +597,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
 
             if (isTeiid87OrGreater() && value instanceof java.sql.Array) {
                 java.sql.Array av = (java.sql.Array) value; 
-                append(LPAREN);
+                append(OPEN_BRACKET);
 
                 try {
                     Object[] values = (Object[])av.getArray();
@@ -710,7 +616,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
                     append(ERROR);
                 }
 
-                append(RPAREN);
+                append(CLOSE_BRACKET);
                 return;
             }
 
@@ -745,7 +651,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         }
     }
 
-    protected void appendLabel(Node node) throws RepositoryException {
+    protected void appendLabel(Node node) throws Exception {
         String label = propertyString(node, Labeled.LABEL_PROP_NAME);
         if (label != null) {
             appendDisplayName(label);
@@ -755,7 +661,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         }
     }
 
-    protected void appendStatements(Node node, String refName) throws RepositoryException {
+    protected void appendStatements(Node node, String refName) throws Exception {
         Iterator<Node> statements = references(node, refName);
         while (statements.hasNext()) {
             // Add each statement
@@ -764,7 +670,6 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         }
     }
 
-    @Override
     public void visit(Property property) {
         // Not required
     }
@@ -781,9 +686,288 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
             return;
         }
 
-        LexTokens lexEnum = LexTokens.findClass(tsqlMixinType.getName());
+        LexTokens LexEnum = LexTokens.findClass(tsqlMixinType.getName());
         try {
-            TeiidSqlLexicon.redirect(lexEnum, this, context);
+            switch(LexEnum) {
+                case CRITERIA:
+                    criteria(context);
+                    break;
+                case COMPARE_CRITERIA:
+                    compareCriteria(context);
+                    break;
+                case SUBQUERY_COMPARE_CRITERIA:
+                    subqueryCompareCriteria(context);
+                    break;
+                case SET_CRITERIA:
+                    setCriteria(context);
+                    break;
+                case SUBQUERY_SET_CRITERIA:
+                    subquerySetCriteria(context);
+                    break;
+                case BETWEEN_CRITERIA:
+                    betweenCriteria(context);
+                    break;
+                case COMPOUND_CRITERIA:
+                    compoundCriteria(context);
+                    break;
+                case EXISTS_CRITERIA:
+                    existsCriteria(context);
+                    break;
+                case EXPRESSION_CRITERIA:
+                    expressionCriteria(context);
+                    break;
+                case IS_NULL_CRITERIA:
+                    isNullCriteria(context);
+                    break;
+                case MATCH_CRITERIA:
+                    matchCriteria(context);
+                    break;
+                case NOT_CRITERIA:
+                    notCriteria(context);
+                    break;
+                case ALTER_PROCEDURE:
+                    alterProcedure(context);
+                    break;
+                case ALTER_TRIGGER:
+                    alterTrigger(context);
+                    break;
+                case ALTER_VIEW:
+                    alterView(context);
+                    break;
+                case DELETE:
+                    delete(context);
+                    break;
+                case INSERT:
+                    insert(context);
+                    break;
+                case STORED_PROCEDURE:
+                    storedProcedure(context);
+                    break;
+                case UPDATE:
+                    update(context);
+                    break;
+                case DYNAMIC_COMMAND:
+                    dynamicCommand(context);
+                    break;
+                case QUERY:
+                    query(context);
+                    break;
+                case SET_QUERY:
+                    setQuery(context);
+                    break;
+                case CREATE_PROCEDURE_COMMAND:
+                    createProcedureCommand(context);
+                    break;
+                case TRIGGER_ACTION:
+                    triggerAction(context);
+                    break;
+                case ARRAY_TABLE:
+                    arrayTable(context);
+                    break;
+                case OBJECT_TABLE:
+                    objectTable(context);
+                    break;
+                case TEXT_TABLE:
+                    textTable(context);
+                    break;
+                case XML_TABLE:
+                    xmlTable(context);
+                    break;
+                case JOIN_PREDICATE:
+                    joinPredicate(context);
+                    break;
+                case SUBQUERY_FROM_CLAUSE:
+                    subqueryFromClause(context);
+                    break;
+                case UNARY_FROM_CLAUSE:
+                    unaryFromClause(context);
+                    break;
+                case FROM:
+                    from(context);
+                    break;
+                case GROUP_BY:
+                    groupBy(context);
+                    break;
+                case INTO:
+                    into(context);
+                    break;
+                case JOIN_TYPE:
+                    joinType(context);
+                    break;
+                case LIMIT:
+                    limit(context);
+                    break;
+                case MAKE_DEP:
+                    makeDep(context);
+                    break;
+                case NAMESPACE_ITEM:
+                    namespaceItem(context);
+                    break;
+                case NULL_NODE:
+                    nullNode(context);
+                    break;
+                case PROJECTED_COLUMN:
+                    projectedColumn(context);
+                    break;
+                case OBJECT_COLUMN:
+                    objectColumn(context);
+                    break;
+                case TEXT_COLUMN:
+                    textColumn(context);
+                    break;
+                case XML_COLUMN:
+                    xmlColumn(context);
+                    break;
+                case OPTION:
+                    option(context);
+                    break;
+                case ORDER_BY:
+                    orderBy(context);
+                    break;
+                case ORDER_BY_ITEM:
+                    orderByItem(context);
+                    break;
+                case SP_PARAMETER:
+                    spParameter(context);
+                    break;
+                case SELECT:
+                    select(context);
+                    break;
+                case SET_CLAUSE:
+                    setClause(context);
+                    break;
+                case SET_CLAUSE_LIST:
+                    setClauseList(context);
+                    break;
+                case SOURCE_HINT:
+                    sourceHint(context);
+                    break;
+                case SPECIFIC_HINT:
+                    specificHint(context);
+                    break;
+                case SUBQUERY_HINT:
+                    subqueryHint(context);
+                    break;
+                case WITH_QUERY_COMMAND:
+                    withQueryCommand(context);
+                    break;
+                case ASSIGNMENT_STATEMENT:
+                    assignmentStatement(context);
+                    break;
+                case DECLARE_STATEMENT:
+                    declareStatement(context);
+                    break;
+                case RETURN_STATEMENT:
+                    returnStatement(context);
+                    break;
+                case BLOCK:
+                    block(context);
+                    break;
+                case BRANCHING_STATEMENT:
+                    branchingStatement(context);
+                    break;
+                case COMMAND_STATEMENT:
+                    commandStatement(context);
+                    break;
+                case IF_STATEMENT:
+                    ifStatement(context);
+                    break;
+                case LOOP_STATEMENT:
+                    loopStatement(context);
+                    break;
+                case RAISE_STATEMENT:
+                    raiseStatement(context);
+                    break;
+                case WHILE_STATEMENT:
+                    whileStatement(context);
+                    break;
+                case EXCEPTION_EXPRESSION:
+                    exceptionExpression(context);
+                    break;
+                case FUNCTION:
+                    function(context);
+                    break;
+                case AGGREGATE_SYMBOL:
+                    aggregateSymbol(context);
+                    break;
+                case ALIAS_SYMBOL:
+                    aliasSymbol(context);
+                    break;
+                case ELEMENT_SYMBOL:
+                    elementSymbol(context);
+                    break;
+                case EXPRESSION_SYMBOL:
+                    expressionSymbol(context);
+                    break;
+                case GROUP_SYMBOL:
+                    groupSymbol(context);
+                    break;
+                case ARRAY_SYMBOL:
+                    arraySymbol(context);
+                    break;
+                case CASE_EXPRESSION:
+                    caseExpression(context);
+                    break;
+                case CONSTANT:
+                    constant(context);
+                    break;
+                case DERIVED_COLUMN:
+                    derivedColumn(context);
+                    break;
+                case JSON_OBJECT:
+                    jsonObject(context);
+                    break;
+                case MULTIPLE_ELEMENT_SYMBOL:
+                    multipleElementSymbol(context);
+                    break;
+                case QUERY_STRING:
+                    queryString(context);
+                    break;
+                case REFERENCE:
+                    reference(context);
+                    break;
+                case SCALAR_SUBQUERY:
+                    scalarSubquery(context);
+                    break;
+                case SEARCHED_CASE_EXPRESSION:
+                    searchedCaseExpression(context);
+                    break;
+                case TEXT_LINE:
+                    textLine(context);
+                    break;
+                case WINDOW_FUNCTION:
+                    windowFunction(context);
+                    break;
+                case WINDOW_SPECIFICATION:
+                    windowSpecification(context);
+                    break;
+                case XML_ATTRIBUTES:
+                    xmlAttributes(context);
+                    break;
+                case XML_ELEMENT:
+                    xmlElement(context);
+                    break;
+                case XML_FOREST:
+                    xmlForest(context);
+                    break;
+                case XML_NAMESPACES:
+                    xmlNamespaces(context);
+                    break;
+                case XML_PARSE:
+                    xmlParse(context);
+                    break;
+                case XML_QUERY:
+                    xmlQuery(context);
+                    break;
+                case XML_SERIALIZE:
+                    xmlSerialize(context);
+                    break;
+                case CACHE_HINT:
+                    cacheHint(context);
+                    break;
+                default:
+                    throw new UnsupportedOperationException();
+            }
         } catch (RepositoryException ex) {
             throw ex;
         } catch (Exception ex) {
@@ -796,15 +980,13 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         visit(node, new TeiidSqlNodeContext(node));
     }
 
-    @Override
     public Object nullNode(TeiidSqlContext context) throws Exception {
         append(undefined());
 
         return null;
     }
 
-    @Override
-    public Object criteria(TeiidSqlContext context) throws RepositoryException {
+    public Object criteria(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
         String keyword = (String) context.get(KEYWORD_KEY);
         if (keyword != null) {
@@ -817,8 +999,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object compareCriteria(TeiidSqlContext context) throws RepositoryException {
+    public Object compareCriteria(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         Node leftExp = reference(node, AbstractCompareCriteria.LEFT_EXPRESSION_REF_NAME);
@@ -836,8 +1017,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object subqueryCompareCriteria(TeiidSqlContext context) throws RepositoryException {
+    public Object subqueryCompareCriteria(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         Node leftExp = reference(node, AbstractCompareCriteria.LEFT_EXPRESSION_REF_NAME);
@@ -864,8 +1044,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object setCriteria(TeiidSqlContext context) throws RepositoryException {
+    public Object setCriteria(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         Node expression = reference(node, AbstractSetCriteria.EXPRESSION_REF_NAME);
@@ -890,8 +1069,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object subquerySetCriteria(TeiidSqlContext context) throws RepositoryException {
+    public Object subquerySetCriteria(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         Node expression = reference(node, AbstractSetCriteria.EXPRESSION_REF_NAME);
@@ -919,8 +1097,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object betweenCriteria(TeiidSqlContext context) throws RepositoryException {
+    public Object betweenCriteria(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         Node expression = reference(node, BetweenCriteria.EXPRESSION_REF_NAME);
@@ -949,16 +1126,15 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object compoundCriteria(TeiidSqlContext context) throws RepositoryException {
+    public Object compoundCriteria(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         // Get operator string
         long operator = propertyLong(node, CompoundCriteria.OPERATOR_PROP_NAME);
         String operatorStr = EMPTY_STRING;
-        if (operator == org.komodo.spi.query.sql.lang.CompoundCriteria.AND) {
+        if (operator == LogicalOperator.AND.ordinal()) {
             operatorStr = AND;
-        } else if (operator == org.komodo.spi.query.sql.lang.CompoundCriteria.OR) {
+        } else if (operator == LogicalOperator.OR.ordinal()) {
             operatorStr = OR;
         }
 
@@ -984,17 +1160,16 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
 
                 // Add criteria
                 Node crit = criteria.next();
-                append(LPAREN);
+                append(OPEN_BRACKET);
                 visit(crit);
-                append(RPAREN);
+                append(CLOSE_BRACKET);
             }
         }
 
         return null;
     }
 
-    @Override
-    public Object existsCriteria(TeiidSqlContext context) throws RepositoryException {
+    public Object existsCriteria(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         boolean negated = propertyBoolean(node,  ExistsCriteria.NEGATED_PROP_NAME);
@@ -1016,8 +1191,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object expressionCriteria(TeiidSqlContext context) throws RepositoryException {
+    public Object expressionCriteria(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
         
         Node expression = reference(node, ExpressionCriteria.EXPRESSION_REF_NAME);
@@ -1026,8 +1200,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object isNullCriteria(TeiidSqlContext context) throws RepositoryException {
+    public Object isNullCriteria(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         Node expression = reference(node, IsNullCriteria.EXPRESSION_REF_NAME);
@@ -1048,8 +1221,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object matchCriteria(TeiidSqlContext context) throws RepositoryException {
+    public Object matchCriteria(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         Node leftExpression = reference(node, MatchCriteria.LEFT_EXPRESSION_REF_NAME);
@@ -1063,7 +1235,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         }
 
         String modeString = propertyString(node,  MatchCriteria.MODE_PROP_NAME);
-        MatchMode mode = org.komodo.spi.query.sql.lang.MatchCriteria.MatchMode.findMatchMode(modeString);
+        MatchMode mode = MatchMode.findMatchMode(modeString);
         switch (mode) {
             case SIMILAR:
                 append(SIMILAR);
@@ -1084,7 +1256,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         visit(rightExpression);
 
         String escapeChar = propertyString(node,  MatchCriteria.ESCAPE_CHAR_PROP_NAME);
-        if (! Character.toString(org.komodo.spi.query.sql.lang.MatchCriteria.NULL_ESCAPE_CHAR).equals(escapeChar)) {
+        if (! Character.toString(TeiidSqlConstants.NULL_ESCAPE_CHAR).equals(escapeChar)) {
             append(SPACE);
             append(ESCAPE);
             append(SPACE);
@@ -1094,8 +1266,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object notCriteria(TeiidSqlContext context) throws RepositoryException {
+    public Object notCriteria(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         append(NOT);
@@ -1109,8 +1280,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object alterProcedure(TeiidSqlContext context) throws RepositoryException {
+    public Object alterProcedure(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         append(ALTER);
@@ -1133,8 +1303,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object alterTrigger(TeiidSqlContext context) throws RepositoryException {
+    public Object alterTrigger(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         boolean create = propertyBoolean(node, AlterTrigger.CREATE_PROP_NAME);
@@ -1179,8 +1348,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object alterView(TeiidSqlContext context) throws RepositoryException {
+    public Object alterView(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         append(ALTER);
@@ -1201,8 +1369,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object delete(TeiidSqlContext context) throws RepositoryException {
+    public Object delete(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         append(DELETE);
@@ -1240,8 +1407,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object insert(TeiidSqlContext context) throws RepositoryException {
+    public Object insert(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         boolean merge = propertyBoolean(node, Insert.MERGE_PROP_NAME);
@@ -1309,8 +1475,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object storedProcedure(TeiidSqlContext context) throws RepositoryException {
+    public Object storedProcedure(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         boolean calledWithReturn = propertyBoolean(node, StoredProcedure.CALLED_WITH_RETURN_PROP_NAME);
@@ -1379,13 +1544,13 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
 
             boolean addParens = displayNamedParams && instanceOf(expression, LexTokens.COMPARE_CRITERIA);
             if (addParens) {
-                append(LPAREN);
+                append(OPEN_BRACKET);
             }
 
             visit(expression);
 
             if (addParens) {
-                append(RPAREN);
+                append(CLOSE_BRACKET);
             }
         }
 
@@ -1401,8 +1566,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object update(TeiidSqlContext context) throws RepositoryException {
+    public Object update(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         append(UPDATE);
@@ -1445,8 +1609,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object dynamicCommand(TeiidSqlContext context) throws RepositoryException {
+    public Object dynamicCommand(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         append(EXECUTE);
@@ -1514,8 +1677,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object query(TeiidSqlContext context) throws RepositoryException {
+    public Object query(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
         addWithClause(node);
         appendToken(Select.ID);
@@ -1589,7 +1751,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    protected void appendSetQuery(Node parent, Node queryCommand, boolean right) throws RepositoryException {
+    protected void appendSetQuery(Node parent, Node queryCommand, boolean right) throws Exception {
         
         Node limit = reference(queryCommand, QueryCommand.LIMIT_REF_NAME);
         Node orderBy = reference(queryCommand, QueryCommand.ORDER_BY_REF_NAME);
@@ -1609,16 +1771,15 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
             (right && 
                 ((isSetQuery && 
                     (parentIsAll && !(cmdIsAll) || parentOp.equals(cmdOp) ))))) {
-            append(LPAREN);
+            append(OPEN_BRACKET);
             visit(queryCommand);
-            append(RPAREN);
+            append(CLOSE_BRACKET);
         } else {
             visit(queryCommand);
         }
     }
 
-    @Override
-    public Object setQuery(TeiidSqlContext context) throws RepositoryException {
+    public Object setQuery(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         addWithClause(node);
@@ -1666,8 +1827,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object createProcedureCommand(TeiidSqlContext context) throws RepositoryException {
+    public Object createProcedureCommand(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         if (isLessThanTeiidVersion(Version.TEIID_8_4)) {
@@ -1685,8 +1845,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object triggerAction(TeiidSqlContext context) throws RepositoryException {
+    public Object triggerAction(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         append(FOR);
@@ -1702,8 +1861,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object arrayTable(TeiidSqlContext context) throws RepositoryException {
+    public Object arrayTable(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         addHintComment(node);
@@ -1731,8 +1889,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object objectTable(TeiidSqlContext context) throws RepositoryException {
+    public Object objectTable(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         addHintComment(node);
@@ -1782,8 +1939,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object textTable(TeiidSqlContext context) throws RepositoryException {
+    public Object textTable(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         addHintComment(node);
@@ -1877,8 +2033,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object xmlTable(TeiidSqlContext context) throws RepositoryException {
+    public Object xmlTable(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         addHintComment(node);
@@ -1931,8 +2086,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object joinPredicate(TeiidSqlContext context) throws RepositoryException {
+    public Object joinPredicate(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         addHintComment(node);
@@ -2003,8 +2157,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object subqueryFromClause(TeiidSqlContext context) throws RepositoryException {
+    public Object subqueryFromClause(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         addHintComment(node);
@@ -2030,8 +2183,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object unaryFromClause(TeiidSqlContext context) throws RepositoryException {
+    public Object unaryFromClause(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         addHintComment(node);
@@ -2042,8 +2194,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object from(TeiidSqlContext context) throws RepositoryException {
+    public Object from(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
         appendToken(node);
         beginClause(1);
@@ -2053,8 +2204,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object groupBy(TeiidSqlContext context) throws RepositoryException {
+    public Object groupBy(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         append(GROUP);
@@ -2065,20 +2215,19 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         boolean rollup = propertyBoolean(node, GroupBy.ROLLUP_PROP_NAME);
         if (isTeiidVersionOrGreater(Version.TEIID_8_5) && rollup) {
             append(ROLLUP);
-            append(LPAREN);
+            append(OPEN_BRACKET);
         }
 
         iterate(node, GroupBy.SYMBOLS_REF_NAME);
 
         if (isTeiidVersionOrGreater(Version.TEIID_8_5) && rollup) {
-            append(RPAREN);
+            append(CLOSE_BRACKET);
         }
 
         return null;
     }
 
-    @Override
-    public Object into(TeiidSqlContext context) throws RepositoryException {
+    public Object into(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
         appendToken(node);
         append(SPACE);
@@ -2088,27 +2237,25 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object joinType(TeiidSqlContext context) throws RepositoryException {
+    public Object joinType(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         String kindName = propertyString(node, JoinType.KIND_PROP_NAME);
-        Types kind = Types.findType(kindName);
+        JoinTypeTypes kind = JoinTypeTypes.findType(kindName);
 
         append(kind.toPrintStatement());
 
         return null;
     }
 
-    @Override
-    public Object limit(TeiidSqlContext context) throws RepositoryException {
+    public Object limit(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         boolean strict = propertyBoolean(node, Limit.STRICT_PROP_NAME);
         if (!strict) {
             append(BEGIN_HINT);
             append(SPACE);
-            append(NON_STRICT);
+            append(Limit.NON_STRICT);
             append(SPACE);
             append(END_HINT);
             append(SPACE);
@@ -2138,8 +2285,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object namespaceItem(TeiidSqlContext context) throws RepositoryException {
+    public Object namespaceItem(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         String prefix = propertyString(node, NamespaceItem.PREFIX_PROP_NAME);
@@ -2147,7 +2293,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
 
         if (prefix == null) {
             if (uri == null) {
-                append(NO_DEFAULT);
+                append(XMLNamespaces.NO_DEFAULT);
             } else {
                 append(DEFAULT + SPACE);
                 appendLiteral(String.class, false, uri);
@@ -2161,8 +2307,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object projectedColumn(TeiidSqlContext context) throws RepositoryException {
+    public Object projectedColumn(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         String name = propertyString(node, ProjectedColumn.NAME_PROP_NAME);
@@ -2176,8 +2321,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object objectColumn(TeiidSqlContext context) throws RepositoryException {
+    public Object objectColumn(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         String name = propertyString(node, ProjectedColumn.NAME_PROP_NAME);
@@ -2203,8 +2347,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object textColumn(TeiidSqlContext context) throws RepositoryException {
+    public Object textColumn(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         String name = propertyString(node, ProjectedColumn.NAME_PROP_NAME);
@@ -2255,8 +2398,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object xmlColumn(TeiidSqlContext context) throws RepositoryException {
+    public Object xmlColumn(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
         
         String name = propertyString(node, ProjectedColumn.NAME_PROP_NAME);
@@ -2294,7 +2436,6 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
     public Object makeDep(TeiidSqlContext context) throws Exception {
         if (isLessThanTeiidVersion(Version.TEIID_8_5))
             return null;
@@ -2306,7 +2447,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
 
         boolean parens = false;
         if (hasMax || join) {
-            append(LPAREN);
+            append(OPEN_BRACKET);
             parens = true;
         }
 
@@ -2337,14 +2478,13 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         }
 
         if (parens) {
-            append(RPAREN);
+            append(CLOSE_BRACKET);
         }
 
         return null;
     }
 
-    @Override
-    public Object option(TeiidSqlContext context) throws RepositoryException {
+    public Object option(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         append(OPTION);
@@ -2407,8 +2547,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object orderBy(TeiidSqlContext context) throws RepositoryException {
+    public Object orderBy(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         append(ORDER);
@@ -2421,8 +2560,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object orderByItem(TeiidSqlContext context) throws RepositoryException {
+    public Object orderByItem(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         Node ses = reference(node, OrderByItem.SYMBOL_REF_NAME);
@@ -2450,13 +2588,11 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
     public Object spParameter(TeiidSqlContext context) {
         return null;
     }
 
-    @Override
-    public Object select(TeiidSqlContext context) throws RepositoryException {
+    public Object select(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         boolean distinct = propertyBoolean(node, Select.DISTINCT_PROP_NAME);
@@ -2472,8 +2608,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object setClause(TeiidSqlContext context) throws RepositoryException {
+    public Object setClause(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         Node symbol = reference(node, SetClause.SYMBOL_REF_NAME);
@@ -2488,8 +2623,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object setClauseList(TeiidSqlContext context) throws RepositoryException {
+    public Object setClauseList(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
         iterate(node, SetClauseList.SET_CLAUSES_REF_NAME);
 
@@ -2504,8 +2638,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         append(SPACE);
     }
 
-    @Override
-    public Object sourceHint(TeiidSqlContext context) throws RepositoryException {
+    public Object sourceHint(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         append(SPACE);
@@ -2535,8 +2668,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object specificHint(TeiidSqlContext context) throws RepositoryException {
+    public Object specificHint(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         boolean useAliases = propertyBoolean(node, SpecificHint.USE_ALIASES_PROP_NAME);
@@ -2554,8 +2686,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object subqueryHint(TeiidSqlContext context) throws RepositoryException {
+    public Object subqueryHint(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         boolean noUnnest = propertyBoolean(node, SubqueryHint.NO_UNNEST_PROP_NAME);
@@ -2573,14 +2704,14 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
             append(SPACE);
             append(BEGIN_HINT);
             append(SPACE);
-            append(DJ);
+            append(SubqueryHint.DJ);
             append(SPACE);
             append(END_HINT);
         } else if (mergeJoin) {
             append(SPACE);
             append(BEGIN_HINT);
             append(SPACE);
-            append(MJ);
+            append(SubqueryHint.MJ);
             append(SPACE);
             append(END_HINT);
         }
@@ -2588,8 +2719,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object withQueryCommand(TeiidSqlContext context) throws RepositoryException {
+    public Object withQueryCommand(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         Node groupSymbol = reference(node, WithQueryCommand.GROUP_SYMBOL_REF_NAME);
@@ -2599,7 +2729,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
 
         Iterator<Node> columns = references(node, WithQueryCommand.COLUMNS_REF_NAME);
         if (columns != null && columns.hasNext()) {
-            append(LPAREN);
+            append(OPEN_BRACKET);
 
             for(int i = 0; columns.hasNext(); ++i) {
                 if (i > 0)
@@ -2612,13 +2742,13 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
                 visit(column, ccontext);
             }
 
-            append(RPAREN);
+            append(CLOSE_BRACKET);
             append(SPACE);
         }
 
         append(AS);
         append(SPACE);
-        append(LPAREN);
+        append(OPEN_BRACKET);
 
         Node command = reference(node, SubqueryContainer.COMMAND_REF_NAME);
         if (isTeiidVersionOrGreater(Version.TEIID_8_5) && command == null) {
@@ -2627,26 +2757,28 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
             visit(command);
         }
 
-        append(RPAREN);
+        append(CLOSE_BRACKET);
 
         return null;
     }
 
-    private void createAssignment(Node node) throws RepositoryException {
+    private void createAssignment(Node node) throws Exception {
         Node variable = reference(node, AssignmentStatement.VARIABLE_REF_NAME);
         visit(variable);
 
-        Node expression = reference(node, ExpressionStatement.EXPRESSION_REF_NAME);
-        if (expression != null) {
+        Node value = reference(node, AssignmentStatement.VALUE_REF_NAME);
+        if (value == null)
+            value = reference(node, ExpressionStatement.EXPRESSION_REF_NAME);
+
+        if (value != null) {
             append(SPACE + EQUALS + SPACE);
-            visit(expression);
+            visit(value);
         }
 
         append(SEMI_COLON);
     }
 
-    @Override
-    public Object assignmentStatement(TeiidSqlContext context) throws RepositoryException {
+    public Object assignmentStatement(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         createAssignment(node);
@@ -2654,8 +2786,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object declareStatement(TeiidSqlContext context) throws RepositoryException {
+    public Object declareStatement(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         append(DECLARE);
@@ -2669,8 +2800,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object returnStatement(TeiidSqlContext context) throws RepositoryException {
+    public Object returnStatement(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         append(RETURN);
@@ -2686,8 +2816,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object block(TeiidSqlContext context) throws RepositoryException {
+    public Object block(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         appendLabel(node);
@@ -2720,8 +2849,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object branchingStatement(TeiidSqlContext context) throws RepositoryException {
+    public Object branchingStatement(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         String modeName = propertyString(node, BranchingStatement.MODE_PROP_NAME);
@@ -2740,8 +2868,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object commandStatement(TeiidSqlContext context) throws RepositoryException {
+    public Object commandStatement(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         Node command = reference(node, SubqueryContainer.COMMAND_REF_NAME);
@@ -2760,8 +2887,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object ifStatement(TeiidSqlContext context) throws RepositoryException {
+    public Object ifStatement(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         append(IF);
@@ -2787,8 +2913,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object loopStatement(TeiidSqlContext context) throws RepositoryException {
+    public Object loopStatement(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         appendLabel(node);
@@ -2815,8 +2940,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object raiseStatement(TeiidSqlContext context) throws RepositoryException {
+    public Object raiseStatement(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         append(RAISE);
@@ -2835,8 +2959,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object whileStatement(TeiidSqlContext context) throws RepositoryException {
+    public Object whileStatement(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         appendLabel(node);
@@ -2853,8 +2976,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object exceptionExpression(TeiidSqlContext context) throws RepositoryException {
+    public Object exceptionExpression(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         append(SQLEXCEPTION);
@@ -2890,8 +3012,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object function(TeiidSqlContext context) throws RepositoryException {
+    public Object function(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         String name = propertyString(node, Function.NAME_PROP_NAME);
@@ -2972,7 +3093,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
 
         } else if (name.equalsIgnoreCase(TRIM)) {
             append(name);
-            append(LPAREN);
+            append(OPEN_BRACKET);
 
             Property valueProp = args.next().getProperty(Constant.VALUE_PROP_NAME);
             String value = toString(valueProp);
@@ -2997,15 +3118,14 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object aggregateSymbol(TeiidSqlContext context) throws RepositoryException {
+    public Object aggregateSymbol(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         String name = propertyString(node, AggregateSymbol.NAME_PROP_NAME);
         boolean distinct = propertyBoolean(node, AggregateSymbol.DISTINCT_PROP_NAME);
 
         String aggFunctionName = propertyString(node, AggregateSymbol.AGGREGATE_FUNCTION_PROP_NAME);
-        Type aggregateFunction = Type.findAggregateFunction(aggFunctionName);
+        AggregateFunctions aggregateFunction = AggregateFunctions.findAggregateFunction(aggFunctionName);
 
         append(name);
         append(OPEN_BRACKET);
@@ -3013,7 +3133,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         if (distinct) {
             append(DISTINCT);
             append(SPACE);
-        } else if (aggregateFunction == Type.USER_DEFINED) {
+        } else if (aggregateFunction == AggregateFunctions.USER_DEFINED) {
             append(ALL);
             append(SPACE);
         }
@@ -3022,7 +3142,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         if (args.hasNext()) {
             iterate(args);
         } else {
-            if (aggregateFunction == Type.COUNT) {
+            if (aggregateFunction == AggregateFunctions.COUNT) {
                 append(ALL_COLS);
             }
         }
@@ -3039,18 +3159,17 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         if (condition != null) {
             append(SPACE);
             append(FILTER);
-            append(LPAREN);
+            append(OPEN_BRACKET);
             append(WHERE);
             append(SPACE);
             visit(condition);
-            append(RPAREN);
+            append(CLOSE_BRACKET);
         }
 
         return null;
     }
 
-    @Override
-    public Object aliasSymbol(TeiidSqlContext context) throws RepositoryException {
+    public Object aliasSymbol(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         Node symbol = reference(node, AliasSymbol.SYMBOL_REF_NAME);
@@ -3064,8 +3183,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object elementSymbol(TeiidSqlContext context) throws RepositoryException {
+    public Object elementSymbol(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         boolean shortNameOnly = context.get(SHORT_NAME_ONLY_KEY) != null ? (Boolean) context.get(SHORT_NAME_ONLY_KEY) : false;
@@ -3089,19 +3207,17 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object expressionSymbol(TeiidSqlContext context) throws RepositoryException {
+    public Object expressionSymbol(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
         Node expression = reference(node, ExpressionSymbol.EXPRESSION_REF_NAME);
         visit(expression);
         return null;
     }
 
-    @Override
-    public Object groupSymbol(TeiidSqlContext context) throws RepositoryException {
+    public Object groupSymbol(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
         String alias = null;
-        String name = propertyString(node, org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Symbol.NAME_PROP_NAME);
+        String name = propertyString(node, org.komodo.spi.lexicon.TeiidSqlLexicon.Symbol.NAME_PROP_NAME);
         String defn = propertyString(node, GroupSymbol.DEFINITION_PROP_NAME);
         
         if (defn != null) {
@@ -3121,13 +3237,12 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object arraySymbol(TeiidSqlContext context) throws RepositoryException {
+    public Object arraySymbol(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         boolean implicit = propertyBoolean(node, ArraySymbol.IMPLICIT_PROP_NAME);
         if (!implicit) {
-            append(LPAREN);
+            append(OPEN_BRACKET);
         }
 
         iterate(node, ArraySymbol.EXPRESSIONS_REF_NAME);
@@ -3137,14 +3252,13 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
                 append(COMMA);
             }
 
-            append(RPAREN);
+            append(CLOSE_BRACKET);
         }
 
         return null;
     }
 
-    @Override
-    public Object caseExpression(TeiidSqlContext context) throws RepositoryException {
+    public Object caseExpression(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         append(CASE);
@@ -3179,8 +3293,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object constant(TeiidSqlContext context) throws RepositoryException {
+    public Object constant(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         String typeName = propertyString(node, Expression.TYPE_CLASS_PROP_NAME);
@@ -3194,8 +3307,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object derivedColumn(TeiidSqlContext context) throws RepositoryException {
+    public Object derivedColumn(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         Node expression = reference(node, DerivedColumn.EXPRESSION_REF_NAME);
@@ -3212,8 +3324,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object jsonObject(TeiidSqlContext context) throws RepositoryException {
+    public Object jsonObject(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         append(JSONOBJECT);
@@ -3224,8 +3335,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object multipleElementSymbol(TeiidSqlContext context) throws RepositoryException {
+    public Object multipleElementSymbol(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         Node groupNode = reference(node, MultipleElementSymbol.GROUP_REF_NAME);
@@ -3240,8 +3350,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object queryString(TeiidSqlContext context) throws RepositoryException {
+    public Object queryString(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         append(QUERYSTRING);
@@ -3262,8 +3371,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object reference(TeiidSqlContext context) throws RepositoryException {
+    public Object reference(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         Node expression = reference(node, Reference.EXPRESSION_REF_NAME);
@@ -3277,8 +3385,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object scalarSubquery(TeiidSqlContext context) throws RepositoryException {
+    public Object scalarSubquery(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         // operator and beginning of list
@@ -3290,8 +3397,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object searchedCaseExpression(TeiidSqlContext context) throws RepositoryException {
+    public Object searchedCaseExpression(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         append(CASE);
@@ -3324,8 +3430,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object textLine(TeiidSqlContext context) throws RepositoryException {
+    public Object textLine(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         append(FOR);
@@ -3365,8 +3470,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object windowFunction(TeiidSqlContext context) throws RepositoryException {
+    public Object windowFunction(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         Node windowFunction = reference(node, WindowFunction.FUNCTION_REF_NAME);
@@ -3382,11 +3486,10 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object windowSpecification(TeiidSqlContext context) throws RepositoryException {
+    public Object windowSpecification(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
-        append(LPAREN);
+        append(OPEN_BRACKET);
         boolean needsSpace = false;
         
         Iterator<Node> partitions = references(node, WindowSpecification.PARTITION_REF_NAME);
@@ -3408,13 +3511,12 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
             visit(orderBy);
         }
 
-        append(RPAREN);
+        append(CLOSE_BRACKET);
 
         return null;
     }
 
-    @Override
-    public Object xmlAttributes(TeiidSqlContext context) throws RepositoryException {
+    public Object xmlAttributes(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         append(XMLATTRIBUTES);
@@ -3425,8 +3527,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object xmlElement(TeiidSqlContext context) throws RepositoryException {
+    public Object xmlElement(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         append(XMLELEMENT);
@@ -3459,8 +3560,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object xmlForest(TeiidSqlContext context) throws RepositoryException {
+    public Object xmlForest(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         append(XMLFOREST);
@@ -3479,8 +3579,7 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object xmlNamespaces(TeiidSqlContext context) throws RepositoryException {
+    public Object xmlNamespaces(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         append(XMLNAMESPACES);
@@ -3493,12 +3592,11 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object xmlParse(TeiidSqlContext context) throws RepositoryException {
+    public Object xmlParse(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         append(XMLPARSE);
-        append(LPAREN);
+        append(OPEN_BRACKET);
 
         boolean document = propertyBoolean(node, XMLParse.DOCUMENT_PROP_NAME);
         if (document) {
@@ -3518,13 +3616,12 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
             append(WELLFORMED);
         }
 
-        append(RPAREN);
+        append(CLOSE_BRACKET);
 
         return null;
     }
 
-    @Override
-    public Object xmlQuery(TeiidSqlContext context) throws RepositoryException {
+    public Object xmlQuery(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         append(XMLQUERY);
@@ -3569,12 +3666,11 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
         return null;
     }
 
-    @Override
-    public Object xmlSerialize(TeiidSqlContext context) throws RepositoryException {
+    public Object xmlSerialize(TeiidSqlContext context) throws Exception {
         Node node = (Node) context.get(NODE_KEY);
 
         append(XMLSERIALIZE);
-        append(LPAREN);
+        append(OPEN_BRACKET);
         
         if (node.hasProperty(XMLSerialize.DOCUMENT_PROP_NAME)) {
             boolean document = propertyBoolean(node,  XMLSerialize.DOCUMENT_PROP_NAME);
@@ -3627,7 +3723,80 @@ public class TeiidSqlNodeVisitor extends AbstractNodeVisitor
             append(XMLDECLARATION);
         }
 
-        append(RPAREN);
+        append(CLOSE_BRACKET);
+
+        return null;
+    }
+
+    public Object cacheHint(TeiidSqlContext context) throws Exception {
+        Node node = (Node) context.get(NODE_KEY);
+
+        append(BEGIN_HINT);
+        append(SPACE);
+        append("cache");
+
+        boolean addParens = false;
+        boolean prefersMemory = propertyBoolean(node,  CacheHint.PREFERS_MEMORY_PROP_NAME);
+        if (prefersMemory) {
+            append(OPEN_BRACKET);
+            addParens = true;
+            append("pref_mem");
+        }
+
+        String ttl = propertyString(node, CacheHint.TTL_PROP_NAME);
+        if (ttl != null) {
+            if (!addParens) {
+                append(OPEN_BRACKET);
+                addParens = true;
+            } else {
+                append(SPACE);
+            }
+            append("ttl:");
+            append(ttl);
+        }
+
+        boolean updateable = propertyBoolean(node,  CacheHint.UPDATEABLE_PROP_NAME);
+        if (updateable) {
+            if (!addParens) {
+                append(OPEN_BRACKET);
+                addParens = true;
+            } else {
+                append(SPACE);
+            }
+            append("updatable");
+        }
+
+        String scope = propertyString(node, CacheHint.SCOPE_PROP_NAME);
+        if (scope != null) {
+            if (!addParens) {
+                append(OPEN_BRACKET);
+                addParens = true;
+            } else {
+                append(SPACE);
+            }     
+            append("scope:");
+            append(scope);            
+        }
+
+        Long minRows = propertyLong(node, CacheHint.MIN_ROWS_PROP_NAME);
+        if (minRows != null) {
+            if (!addParens) {
+                append(OPEN_BRACKET);
+                addParens = true;
+            } else {
+                append(SPACE);
+            }     
+            append("min:");
+            append(minRows.toString());
+        }
+
+        if (addParens) {
+            append(CLOSE_BRACKET);
+        }
+
+        append(SPACE);
+        append(END_HINT);
+        beginClause(0);
 
         return null;
     }

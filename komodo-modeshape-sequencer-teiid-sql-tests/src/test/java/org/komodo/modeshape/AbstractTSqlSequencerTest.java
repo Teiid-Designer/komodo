@@ -25,30 +25,27 @@ package org.komodo.modeshape;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-
 import javax.jcr.Node;
 import javax.jcr.Property;
 import javax.jcr.RepositoryException;
 import javax.jcr.Value;
-
 import org.komodo.modeshape.teiid.TeiidSqlNodeVisitor;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.AliasSymbol;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Constant;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.ElementSymbol;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.ExpressionSymbol;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.GroupSymbol;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.JoinPredicate;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.JoinType;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.Symbol;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon.UnaryFromClause;
-import org.komodo.spi.query.sql.lang.JoinType.Types;
+import org.komodo.spi.lexicon.TeiidSqlLexicon;
+import org.komodo.spi.lexicon.TeiidSqlLexicon.AliasSymbol;
+import org.komodo.spi.lexicon.TeiidSqlLexicon.Constant;
+import org.komodo.spi.lexicon.TeiidSqlLexicon.ElementSymbol;
+import org.komodo.spi.lexicon.TeiidSqlLexicon.ExpressionSymbol;
+import org.komodo.spi.lexicon.TeiidSqlLexicon.GroupSymbol;
+import org.komodo.spi.lexicon.TeiidSqlLexicon.JoinPredicate;
+import org.komodo.spi.lexicon.TeiidSqlLexicon.JoinType;
+import org.komodo.spi.lexicon.TeiidSqlLexicon.Symbol;
+import org.komodo.spi.lexicon.TeiidSqlLexicon.UnaryFromClause;
+import org.komodo.spi.query.JoinTypeTypes;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.spi.type.DataTypeManager;
 import org.komodo.test.utils.AbstractSequencerTest;
-import org.teiid.runtime.client.admin.factory.TCExecutionAdminFactory;
 /**
  * Class which serves as base for various sequencer unit tests. In addition to this, it uses the sequencing events fired by
  * ModeShape's {@link javax.jcr.observation.ObservationManager} to perform various assertions and therefore, acts as a test for
@@ -70,13 +67,11 @@ public abstract class AbstractTSqlSequencerTest extends AbstractSequencerTest {
         return "test-repository-config.json";
     }
 
-    protected DataTypeManager getDataTypeService() {
-        TCExecutionAdminFactory factory = new TCExecutionAdminFactory();
-        return factory.getDataTypeManagerService(getTeiidVersion()); 
-    }
-
     protected void verifyVersionType(Node node) throws RepositoryException {
-        verifyProperty(node, TeiidSqlLexicon.LanguageObject.TEIID_VERSION_PROP_NAME, getTeiidVersion().toString());
+        Property property = node.getProperty(TeiidSqlLexicon.LanguageObject.TEIID_VERSION_PROP_NAME);
+        Value value = property.getValue();
+        DefaultTeiidVersion version = new DefaultTeiidVersion(value.getString());
+        assertEquals(getTeiidVersion(), version);
     }
     
     @Override
@@ -106,7 +101,7 @@ public abstract class AbstractTSqlSequencerTest extends AbstractSequencerTest {
         return builder.toString();
     }
 
-    protected void verifyJoin(Node joinPredicate, Types joinType) throws Exception {
+    protected void verifyJoin(Node joinPredicate, JoinTypeTypes joinType) throws Exception {
         Node joinNode = verify(joinPredicate, JoinPredicate.JOIN_TYPE_REF_NAME, JoinType.ID);
         verifyProperty(joinNode, TeiidSqlLexicon.JoinType.KIND_PROP_NAME, joinType.name());
     }

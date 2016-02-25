@@ -70,7 +70,7 @@ import org.komodo.utils.i18n.I18n;
 import org.modeshape.common.collection.Collections;
 
 /**
- * Test implementation of WorkspaceStatus
+ * Implementation of WorkspaceStatus
  */
 public class WorkspaceStatusImpl implements WorkspaceStatus {
 
@@ -159,8 +159,8 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         this.defaultLabelProvider.setRepository( repo );
         this.defaultLabelProvider.setWorkspaceStatus( this );
 
-        // Discover any other label providers
-        discoverLabelProviders();
+        // Discover other label providers and rule providers
+        discoverProviders();
         setLabelProvider(this.currentContext);
     }
 
@@ -942,7 +942,8 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         return Boolean.parseBoolean( this.wsProperties.getProperty( AUTO_COMMIT ) );
     }
 
-    private void discoverLabelProviders( ) {
+    // Discovers Label Providers and ValidationRule Providers
+    private void discoverProviders( ) {
         final List< ClassLoader > commandClassloaders = new ArrayList< ClassLoader >();
         commandClassloaders.add( Thread.currentThread().getContextClassLoader() );
 
@@ -979,8 +980,10 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
             }
         }
 
+        // Discover the additional LabelProviders and Validation Rule Providers
         // iterate through the ClassLoaders and use the Java ServiceLoader mechanism to load the providers
         for ( final ClassLoader classLoader : commandClassloaders ) {
+            // Label Providers
             for ( final KomodoObjectLabelProvider provider : ServiceLoader.load( KomodoObjectLabelProvider.class, classLoader ) ) {
                 if ( !Modifier.isAbstract( provider.getClass().getModifiers() ) ) {
                     provider.setRepository(getEngine().getDefaultRepository());
@@ -990,7 +993,6 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
                 }
             }
         }
-
         LOGGER.debug( "WorkspaceStatusImpl: found \"{0}\" LabelProviders", alternateLabelProviders.size() ); //$NON-NLS-1$
     }
 

@@ -106,41 +106,4 @@ public class FailedTeiidDataSource implements TeiidDataSource {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
-	/* (non-Javadoc)
-	 * @see org.teiid.designer.runtime.spi.ITeiidDataSource#setProfileName(java.lang.String)
-	 */
-	@Override
-	public void setProfileName(String name) {
-		// TODO Auto-generated method stub
-
-	}
-
-	/* (non-Javadoc)
-	 * @see org.teiid.designer.runtime.spi.ITeiidDataSource#getProfileName()
-	 */
-	@Override
-	public String getProfileName() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.teiid.designer.runtime.spi.ITeiidDataSource#isPreview()
-	 */
-	@Override
-	public boolean isPreview() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.teiid.designer.runtime.spi.ITeiidDataSource#setPreview(boolean)
-	 */
-	@Override
-	public void setPreview(boolean isPreview) {
-		// TODO Auto-generated method stub
-
-	}
-
 }

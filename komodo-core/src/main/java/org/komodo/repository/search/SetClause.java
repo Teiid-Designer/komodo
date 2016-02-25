@@ -21,11 +21,13 @@
  */
 package org.komodo.repository.search;
 
+import org.komodo.spi.lexicon.TeiidSqlConstants;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import org.komodo.core.KomodoLexicon.Search;
 import org.komodo.spi.KException;
+import org.komodo.spi.query.LogicalOperator;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository;
@@ -39,7 +41,7 @@ import org.komodo.utils.StringUtils;
  *
  * alias.property IN (value1, value2, value3)
  */
-public class SetClause extends Clause implements PropertyClause {
+public class SetClause extends Clause implements PropertyClause, TeiidSqlConstants.Reserved {
 
     private final Set<String> values = new LinkedHashSet<String>();
 

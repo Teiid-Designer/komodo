@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.PropertyIterator;
@@ -879,9 +880,26 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
      * @see org.komodo.spi.repository.Repository#getValidationManager()
      */
     @Override
-    public ValidationManager getValidationManager() {
-        if (this.validationMgr == null) {
-            this.validationMgr = new ValidationManagerImpl( this );
+    public ValidationManager getValidationManager() throws KException {
+        if ( this.validationMgr == null ) {
+            // the ValidationManager loads validation rules when it is constructed so we need a transaction to save those rules
+            final SynchronousCallback callback = new SynchronousCallback();
+            final UnitOfWork transaction = createTransaction( "getValidationManager", false, callback ); //$NON-NLS-1$
+            this.validationMgr = new ValidationManagerImpl( transaction, this );
+            transaction.commit();
+
+            try {
+                // wait for transaction to commit before returning
+                if ( !callback.await( 30, TimeUnit.SECONDS ) ) {
+                    throw new KException( Messages.getString( Messages.Komodo.ERROR_CONSTRUCTING_VALIDATION_MANAGER ) );
+                }
+            } catch ( final Exception e ) {
+                if ( !( e instanceof KException ) ) {
+                    throw new KException( e );
+                }
+
+                throw ( KException )e;
+            }
         }
 
         return this.validationMgr;

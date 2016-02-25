@@ -21,6 +21,8 @@
  ************************************************************************************/
 package org.komodo.spi.runtime.version;
 
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
+
 /**
  * Parent marker interface for teiid instance version information
  */
@@ -106,7 +108,23 @@ public interface TeiidVersion {
 
         TEIID_8_6(EIGHT + DOT + SIX + DOT + ZERO),
 
-        TEIID_8_7(EIGHT + DOT + SEVEN + DOT + ZERO);
+        TEIID_8_7(EIGHT + DOT + SEVEN + DOT + ZERO),
+
+        TEIID_8_8(EIGHT + DOT + EIGHT + DOT + ZERO),
+
+        TEIID_8_9(EIGHT + DOT + NINE + DOT + ZERO),
+
+        TEIID_8_10(EIGHT + DOT + ONE + ZERO + DOT + ZERO),
+
+        TEIID_8_11(EIGHT + DOT + ONE + ONE + DOT + ZERO),
+
+        TEIID_8_11_5(EIGHT + DOT + ONE + ONE + DOT + FIVE),
+
+        TEIID_8_12(EIGHT + DOT + ONE + TWO + DOT + ZERO),
+
+        TEIID_8_12_4(EIGHT + DOT + ONE + TWO + DOT + FOUR),
+
+        TEIID_8_13(EIGHT + DOT + ONE + THREE + DOT + ZERO);
 
         private final String id;
 
@@ -189,6 +207,16 @@ public interface TeiidVersion {
     boolean isGreaterThan(TeiidVersion otherVersion);
 
     /**
+     *
+     * @see #isGreaterThan(TeiidVersion)
+     *
+     * @param otherVersion
+     *
+     * @return true if this version is greater. False otherwise.
+     */
+    boolean isGreaterThan(Version otherVersion);
+
+    /**
      * Is this version less than the given version
      *
      * Wildcards will cause the result to return false since either
@@ -202,6 +230,15 @@ public interface TeiidVersion {
     boolean isLessThan(TeiidVersion otherVersion);
 
     /**
+     * @see #isLessThan(TeiidVersion)
+     *
+     * @param otherVersion
+     *
+     * @return true if this version is less. False otherwise.
+     */
+    boolean isLessThan(Version otherVersion);
+
+    /**
      * Convenience that delegates to {@link #compareTo(TeiidVersion)}
      * and {@link #isGreaterThan(TeiidVersion)}.
      *
@@ -210,6 +247,16 @@ public interface TeiidVersion {
      * @return this is greater than or equal to otherVersion
      */
     boolean isGreaterThanOrEqualTo(TeiidVersion otherVersion);
+
+   /**
+    *
+    * @see #isGreaterThanOrEqualTo(TeiidVersion)
+    *
+    * @param otherVersion
+    *
+    * @return this is greater than or equal to otherVersion
+    */
+    boolean isGreaterThanOrEqualTo(Version otherVersion);
 
     /**
      * Convenience that delegates to {@link #compareTo(TeiidVersion)}
@@ -220,4 +267,13 @@ public interface TeiidVersion {
      * @return this is less than or equal to otherVersion
      */
     boolean isLessThanOrEqualTo(TeiidVersion otherVersion);
+
+    /**
+     * @see #isLessThanOrEqualTo(TeiidVersion)
+     *
+     * @param otherVersion
+     *
+     * @return this is less than or equal to otherVersion
+     */
+    boolean isLessThanOrEqualTo(Version otherVersion);
 }

@@ -97,7 +97,7 @@ public abstract class AbstractCommandTest extends org.komodo.shell.AbstractComma
         _shellDataDirectory = SHELL_DATA_DIRECTORY;
         System.setProperty( SystemConstants.VDB_BUILDER_DATA_DIR, _shellDataDirectory.toString() );
     }
-
+    
     @Before
     public void startInWorkspace() throws Exception {
         final String[] commands = { "workspace" };

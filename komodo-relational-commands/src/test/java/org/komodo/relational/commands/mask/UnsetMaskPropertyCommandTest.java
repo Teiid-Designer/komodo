@@ -76,7 +76,7 @@ public final class UnsetMaskPropertyCommandTest extends AbstractCommandTest {
 
     	assertTabCompletion("unset-property OODE", candidates);
 
-    	candidates.add(SetMaskPropertyCommand.ORDER);
+    	candidates.add(MaskShellCommand.ORDER);
     	assertTabCompletion("unset-property or", candidates);
     	assertTabCompletion("unset-property OR", candidates);
     }

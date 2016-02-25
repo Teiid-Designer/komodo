@@ -9,20 +9,7 @@
 	<artifactId>komodo-core-tests</artifactId>
 	<name>Komodo Core Tests</name>
 	<description>Tests for Komodo Core that would otherwise cause cyclic dependencies</description>
-<!--
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
--->
+
 	<dependencies>
 		<dependency>
 			<groupId>org.komodo</groupId>
@@ -37,6 +24,12 @@
 		<dependency>
 			<groupId>org.komodo</groupId>
 			<artifactId>komodo-modeshape-sequencer-teiid-sql</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.komodo</groupId>
+			<artifactId>komodo-utils</artifactId>
+			<type>test-jar</type>
 		</dependency>
 
 		<dependency>

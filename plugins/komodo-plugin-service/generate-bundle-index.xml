@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<!-- Iterates over the bundle directory and lists each built bundle in the index file -->
+<project name="generate-resources" default="generate">
+
+	<target name="generate">
+
+		<delete file="${index.file}" quiet="true" failonerror="false"/>
+
+		<echo file="${index.file}" append="true">&lt;teiids&gt;${line.separator}</echo>
+
+		<ac:for param="file" xmlns:ac="antlib:net.sf.antcontrib">
+			<fileset dir="${bundles.dir}" includes="*.jar" />
+			<sequential>
+				<ac:var name="file.name" unset="true"/>
+				<echo message="The file: @{file} ${index.file}"></echo>
+				<basename property="file.name" file="@{file}"/>
+
+				<echoxml file="${index.file}" append="true">
+					<teiid>
+						<filename>${file.name}</filename>
+					</teiid>
+				</echoxml>
+			</sequential>
+		</ac:for>
+
+		<echo file="${index.file}" append="true">&lt;/teiids&gt;</echo>
+
+	</target>
+
+</project>

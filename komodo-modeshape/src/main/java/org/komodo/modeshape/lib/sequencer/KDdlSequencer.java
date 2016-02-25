@@ -24,6 +24,8 @@ package org.komodo.modeshape.lib.sequencer;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
+import java.util.List;
 import javax.jcr.Binary;
 import javax.jcr.NamespaceRegistry;
 import javax.jcr.Node;
@@ -34,6 +36,7 @@ import javax.jcr.Session;
 import org.modeshape.common.text.ParsingException;
 import org.modeshape.common.util.IoUtil;
 import org.modeshape.jcr.api.nodetype.NodeTypeManager;
+import org.teiid.modeshape.sequencer.ddl.DdlParser;
 import org.teiid.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.teiid.modeshape.sequencer.ddl.TeiidDdlParser;
 import org.teiid.modeshape.sequencer.ddl.TeiidDdlSequencer;
@@ -45,7 +48,24 @@ import org.teiid.modeshape.sequencer.ddl.node.AstNodeFactory;
  */
 public class KDdlSequencer extends TeiidDdlSequencer {
 
-    private final TeiidDdlParser teiidParser = new TeiidDdlParser();
+    private final DdlParser teiidParser = new TeiidDdlParser();
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.teiid.modeshape.sequencer.ddl.TeiidDdlSequencer#initialize(javax.jcr.NamespaceRegistry,
+     *      org.modeshape.jcr.api.nodetype.NodeTypeManager)
+     */
+    @Override
+    public void initialize( NamespaceRegistry registry, NodeTypeManager nodeTypeManager ) throws RepositoryException, IOException {
+        registerNodeTypes(TeiidDdlSequencer.class.getResourceAsStream("StandardDdl.cnd"), nodeTypeManager, true); //$NON-NLS-1$
+        registerNodeTypes(TeiidDdlSequencer.class.getResourceAsStream("TeiidDdl.cnd"), nodeTypeManager, true); //$NON-NLS-1$
+    }
+
+    @Override
+    protected List<DdlParser> getParserList() {
+        return Collections.singletonList(teiidParser);
+    }
 
     @Override
     public boolean execute(Property inputProperty, Node outputNode, Context context) throws Exception {
@@ -98,19 +118,6 @@ public class KDdlSequencer extends TeiidDdlSequencer {
 
         session.removeItem(ddlStmtsNode.getPath());
         return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.teiid.modeshape.sequencer.ddl.TeiidDdlSequencer#initialize(javax.jcr.NamespaceRegistry,
-     *      org.modeshape.jcr.api.nodetype.NodeTypeManager)
-     */
-    @Override
-    public void initialize( final NamespaceRegistry registry,
-                            final NodeTypeManager nodeTypeManager ) throws RepositoryException, IOException {
-        registerNodeTypes( TeiidDdlSequencer.class.getResourceAsStream( "StandardDdl.cnd" ), nodeTypeManager, true ); //$NON-NLS-1$
-        registerNodeTypes( TeiidDdlSequencer.class.getResourceAsStream( "TeiidDdl.cnd" ), nodeTypeManager, true ); //$NON-NLS-1$
     }
 
 }

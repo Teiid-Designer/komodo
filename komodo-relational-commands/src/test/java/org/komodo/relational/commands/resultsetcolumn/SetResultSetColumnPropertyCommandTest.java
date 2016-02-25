@@ -88,7 +88,7 @@ public final class SetResultSetColumnPropertyCommandTest extends AbstractCommand
     	final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
-    	candidates.add(SetResultSetColumnPropertyCommand.NAME_IN_SOURCE);
+    	candidates.add(ResultSetColumnShellCommand.NAME_IN_SOURCE);
     	assertTabCompletion("set-property NA", candidates);
     	assertTabCompletion("set-property na", candidates);
     }

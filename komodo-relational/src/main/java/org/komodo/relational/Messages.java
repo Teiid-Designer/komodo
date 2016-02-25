@@ -250,6 +250,23 @@ public class Messages implements StringConstants {
         }
 
     }
+    
+    /**
+     * Messages relating to the datasource parser.
+     */
+    public enum DatasourceParser {
+
+        /**
+         * An error message indicating the Datasource schema file could not be found.
+         */
+        SCHEMA_FILE_NOT_FOUND;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+
+    }
 
     /**
      * @param enumValue the value

@@ -13,7 +13,7 @@ import org.komodo.utils.StringUtils;
 import org.komodo.utils.i18n.I18n;
 
 /**
- * A {@link ShellCommand command} that can reset global workspace properties
+ * A {@link BuiltInShellCommand command} that can reset global workspace properties
  * <p>
  * Usage:
  * <p>

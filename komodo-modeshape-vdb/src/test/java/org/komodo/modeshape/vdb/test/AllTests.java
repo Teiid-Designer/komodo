@@ -30,9 +30,9 @@ import org.komodo.modeshape.visitor.TestDdlNodeVisitorIdentifiers;
 
 @SuppressWarnings( "javadoc" )
 @RunWith( Suite.class )
-@Suite.SuiteClasses( { TestVdbExport.class,
-                       TestDdlNodeVisitor.class,
-                       TestDdlNodeVisitorIdentifiers.class } )
+@Suite.SuiteClasses( {
+                                        TestVdbExport.class, TestDdlNodeVisitor.class, TestDdlNodeVisitorIdentifiers.class
+                                    } )
 public class AllTests {
     // nothing to do
 }

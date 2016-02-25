@@ -10,18 +10,20 @@ package org.komodo.relational.datasource.internal;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import java.util.Arrays;
+import java.util.Properties;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalObject.Filter;
 import org.komodo.relational.datasource.Datasource;
+import org.komodo.spi.constants.ExportConstants;
 import org.komodo.spi.repository.KomodoType;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class DatasourceImplTest extends RelationalModelTest {
 
-    private static final String DS_NAME = "source";
+    private static final String DS_NAME = "mySource";
 
     protected Datasource datasource;
 
@@ -121,6 +123,42 @@ public final class DatasourceImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveCorrectTypeIdentifier() throws Exception {
         assertThat(this.datasource.getTypeIdentifier( getTransaction() ), is(KomodoType.DATASOURCE));
+    }
+    
+    @Test
+    public void shouldExport() throws Exception {
+        this.datasource.setJdbc(getTransaction(), false);
+        this.datasource.setPreview(getTransaction(), true);
+        this.datasource.setProfileName( getTransaction(), "dsProfileName" );
+        this.datasource.setJndiName(getTransaction(), "java:/jndiName");
+        this.datasource.setDriverName(getTransaction(), "dsDriver");
+        this.datasource.setClassName(getTransaction(), "dsClassname");
+        this.datasource.setProperty(getTransaction(), "prop1", "prop1Value");
+        this.datasource.setProperty(getTransaction(), "prop2", "prop2Value");
+
+        String xmlString = this.datasource.export(getTransaction(), new Properties());
+        
+        assertThat( xmlString.contains(DS_NAME), is( true ) );
+        assertThat( xmlString.contains("\t"), is( false ) );
+    }
+
+    @Test
+    public void shouldExportTabbed() throws Exception {
+        this.datasource.setJdbc(getTransaction(), false);
+        this.datasource.setPreview(getTransaction(), true);
+        this.datasource.setProfileName( getTransaction(), "dsProfileName" );
+        this.datasource.setJndiName(getTransaction(), "java:/jndiName");
+        this.datasource.setDriverName(getTransaction(), "dsDriver");
+        this.datasource.setClassName(getTransaction(), "dsClassname");
+        this.datasource.setProperty(getTransaction(), "prop1", "prop1Value");
+        this.datasource.setProperty(getTransaction(), "prop2", "prop2Value");
+
+        Properties exportProps = new Properties();
+        exportProps.put( ExportConstants.USE_TABS_PROP_KEY, true );
+        String xmlString = this.datasource.export(getTransaction(), exportProps);
+        
+        assertThat( xmlString.contains(DS_NAME), is( true ) );
+        assertThat( xmlString.contains("\t"), is( true ) );
     }
 
 }

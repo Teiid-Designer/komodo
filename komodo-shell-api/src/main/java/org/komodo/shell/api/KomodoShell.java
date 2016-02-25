@@ -60,7 +60,7 @@ public interface KomodoShell extends StringConstants {
      * @return the global shell properties file
      */
     String getShellPropertiesFile();
-
+    
     /**
      * Must be called before the shell is running.
      *

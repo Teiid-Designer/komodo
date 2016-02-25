@@ -40,6 +40,7 @@ import org.infinispan.schematic.document.Editor;
 import org.infinispan.util.FileLookupFactory;
 import org.infinispan.util.StringPropertyReplacer;
 import org.komodo.core.KEngine;
+import org.komodo.core.KomodoLexicon.Environment;
 import org.komodo.core.KomodoLexicon.Komodo;
 import org.komodo.repository.KSequencerController;
 import org.komodo.repository.KSequencerListener;
@@ -575,7 +576,7 @@ public class ModeshapeEngineThread extends Thread implements StringConstants {
                         }
                     }
 
-                    { // remove all children of environment
+                    { // remove all children of environment except the validation rules which are loaded at startup
                         assert child.hasNode( Komodo.ENVIRONMENT );
 
                         final Node env = child.getNode( Komodo.ENVIRONMENT );
@@ -583,6 +584,12 @@ public class ModeshapeEngineThread extends Thread implements StringConstants {
 
                         while ( itr.hasNext() ) {
                             final Node kid = itr.nextNode();
+
+                            // don't delete validation rules
+                            if (Environment.VALIDATION.equals( kid.getName() )) {
+                                continue;
+                            }
+
                             LOGGER.debug( "ModeShapeEngineThread.clear: deleting node = {0}", kid.getPath() ); //$NON-NLS-1$
                             kid.remove();
                         }

@@ -10,6 +10,11 @@ import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 public interface DataTypeManager {
 
     /**
+     * The suffix designating an array
+     */
+    String ARRAY_SUFFIX = "[]"; //$NON-NLS-1$
+
+    /**
      * Enumerator of data type names supported by the
      * teiid DataTypeManager
      */
@@ -21,10 +26,10 @@ public interface DataTypeManager {
         CHAR,                           CHAR_ARRAY,
         INTEGER,                      INTEGER_ARRAY,
         LONG,                           LONG_ARRAY,
-        BIG_INTEGER,              BIG_INTEGER_ARRAY,
+        BIGINTEGER,              BIGINTEGER_ARRAY,
         FLOAT,                          FLOAT_ARRAY,
         DOUBLE,                       DOUBLE_ARRAY,
-        BIG_DECIMAL,              BIG_DECIMAL_ARRAY,
+        BIGDECIMAL,              BIGDECIMAL_ARRAY,
         DATE,                            DATE_ARRAY,
         TIME,                            TIME_ARRAY,
         TIMESTAMP,                 TIMESTAMP_ARRAY,
@@ -88,6 +93,10 @@ public interface DataTypeManager {
             }
 
             return null;
+        }
+
+        public String getId() {
+            return name().toLowerCase();
         }
     }
 
@@ -210,44 +219,6 @@ public interface DataTypeManager {
     Set<String> getAllDataTypeNames();
     
     /**
-     * Get the default data type represented by the 
-     * given {@link DataTypeName} enumerator
-     * 
-     * @param dataTypeName
-     * 
-     * @return name of data type or will throw a runtime exception
-     *                if there is no data type.
-     */
-    String getDefaultDataType(DataTypeName dataTypeName);
-    
-    /**
-     * Get the length of the data type
-     *
-     * @param dataTypeName
-     *
-     * @return integer indicating data type limit
-     */
-    Integer getDataTypeLimit(String dataTypeName);
-
-    /**
-     * Get the length of the data type
-     *
-     * @param dataTypeName
-     *
-     * @return integer indicating data type limit
-     */
-    int getDataTypeLimit(DataTypeName dataTypeName);
-
-    /**
-     * Get the valid characters of the data type
-     * 
-     * @param dataTypeName
-     * 
-     * @return string of valid characters or null if all characters are valid
-     */
-    String getDataTypeValidChars(String dataTypeName);
-    
-    /**
      * Get the default data class represented by the 
      * given {@link DataTypeName} enumerator
      * 
@@ -291,12 +262,6 @@ public interface DataTypeManager {
     boolean isTransformable(String sourceTypeName, String targetTypeName);
 
     /**
-     * @param bytes
-     *
-     * @return Wrapped binary type of the given bytes
-     */
-    BinaryType createBinaryType(byte[] bytes);
-
     /**
      * Transform the given value into the given data type
      *
@@ -308,30 +273,14 @@ public interface DataTypeManager {
     <T> T transformValue(Object value, DataTypeName dataTypeName) throws Exception;
 
     /**
-     * @return whether decimals are treated as doubles
-     */
-    boolean isDecimalAsDouble();
-
-    /**
-     * @return the data type name for the count type
-     */
-    DataTypeName getCountType();
-
-    /**
-     * For the given argument type, find the sum function's return type
+     * Transform the given value into the given class type
      *
-     * @param sumArgType
-     * @return sum return type or null if argument is not an appropriate type for sum expressions
+     * @param value
+     * @param dataTypeName
+     * @return transformed value
+     * @throws Exception
      */
-    DataTypeName getSumReturnType(DataTypeName sumArgType);
-
-    /**
-     * For the given argument type, find the average function's return type
-     *
-     * @param avgArgType
-     * @return average return type or null if argument is not an appropriate type for avg expressions
-     */
-    DataTypeName getAverageReturnType(DataTypeName avgArgType);
+    <T> T transformValue(Object value, Class<?> typeClass) throws Exception;
 
     /**
      * @param type

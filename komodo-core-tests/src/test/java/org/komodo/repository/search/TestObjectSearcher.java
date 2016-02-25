@@ -31,10 +31,11 @@ import org.junit.Test;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.core.KomodoLexicon.Search;
 import org.komodo.core.KomodoLexicon.Search.WhereClause;
-import org.komodo.modeshape.teiid.cnd.TeiidSqlLexicon;
 import org.komodo.repository.RepositoryImpl;
 import org.komodo.repository.RepositoryTools;
 import org.komodo.spi.KException;
+import org.komodo.spi.lexicon.TeiidSqlLexicon;
+import org.komodo.spi.query.LogicalOperator;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository.KeywordCriteria;
@@ -671,8 +672,11 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
         os.addWherePathClause(null, "nt", "/tko:komodo/%");
         searchObjects = os.searchObjects(getTransaction());
 
-        // Returns all 3 objects under root
-        assertEquals(3, searchObjects.size());
+        // /tko:komodo/tko:workspace
+        // /tko:komodo/tko:library
+        // /tko:komodo/tko:environment
+        // /tko:komodo/tko:environment/tko:validation
+        assertEquals(4, searchObjects.size());
     }
 
     @Test

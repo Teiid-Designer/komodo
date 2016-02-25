@@ -16,7 +16,10 @@
     ],
     "workspaces" : {
         "default" : "defaultWorkspace",
-        "allowCreation" : true
+        "allowCreation" : true,
+        "initialContent" : {
+            "*" : "org/komodo/repository/initialContent.xml"
+        }
     },
     "query" : {
         "enabled" : true,
