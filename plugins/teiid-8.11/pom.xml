@@ -16,11 +16,25 @@
 		<version.teiid>8.11.5</version.teiid>
 		<version.apache.felix>1.0.0</version.apache.felix>
 		<version.aesh>0.33.12.redhat-1</version.aesh>
+
+		<!-- Only import the javax package in jre not any from 3rd-party libs -->
 		<imported.packages>
 			org.komodo.spi.*,
 			org.komodo.teiid.framework,
 			javax.jcr,
-			org.modeshape.jcr.api
+			org.modeshape.jcr.api,
+			!javax.binding,
+			!javax.persistence,
+			!javax.resource*,
+			!javax.security.auth.message*,
+			!javax.security.jacc,
+			!javax.servlet*,
+			!javax.transaction*,
+			!javax.xml.bind,
+			!javax.xml.ws,
+			javax.*,
+			sun.*
+			com.sun.*
 		</imported.packages>
 
 		<!-- The actual maven version of jboss to be downloaded -->
@@ -28,10 +42,6 @@
 
 		<!-- The version of jboss when its unpacked -->
 		<version.jbossas.test>jboss-eap-6.4</version.jbossas.test>
-
-		<version.arquillian>1.1.9.Final</version.arquillian>
-		<version.arquillian-container>7.5.5.Final-redhat-3</version.arquillian-container>
-		<version.org.jboss.spec.jboss-javaee-6.0>1.0.0.Final</version.org.jboss.spec.jboss-javaee-6.0>
 	</properties>
 
 	<dependencyManagement>
