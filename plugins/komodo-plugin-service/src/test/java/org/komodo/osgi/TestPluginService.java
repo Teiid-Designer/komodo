@@ -30,14 +30,6 @@ import java.net.URL;
 import java.util.List;
 import java.util.Set;
 import javax.jcr.Node;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathFactory;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.query.TeiidService;
@@ -46,64 +38,16 @@ import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.mockito.Mockito;
 import org.osgi.framework.Bundle;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
 
-public class TestPluginService implements StringConstants {
-
-    /**
-     * The prefix of all teiid service bundles
-     */
-    private static final String TEIID_BUNDLE_PREFIX = "org.komodo.plugins.teiid" + DOT;
+public class TestPluginService extends AbstractTestPluginService implements StringConstants {
 
     private static final String TEST_BUNDLES_DIR = "testBundles";
 
     private static final String HELLO_PATH = TEST_BUNDLES_DIR + File.separator + "hello-1.0.jar";
 
-    private PluginService service;
-
-    private int bundleCount() throws Exception {
-        URL idxUrl = getClass().getClassLoader().getResource(PluginService.INDEX);
-
-        DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
-        Document doc = docBuilder.parse(idxUrl.openStream());
-
-        // Use XPath to locate the teiid jar filenames
-        XPathFactory xpathFactory = XPathFactory.newInstance();
-        XPath xpath = xpathFactory.newXPath();
-
-        // XPath expression to find all the teiid jar filenames
-        XPathExpression expr = xpath.compile(PluginService.INDEX_TEIID_PATH);
-
-        //evaluate expression result on XML document
-        NodeList nodes = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
-        assertTrue(nodes.getLength() > 0);
-
-        return nodes.getLength();
-    }
-
-    private void installTestBundle() throws Exception {
+    protected void installTestBundle() throws Exception {
         URL helloBundleUrl = getClass().getClassLoader().getResource(HELLO_PATH);
         service.installBundle(helloBundleUrl);
-    }
-
-    @Before
-    public void setup() throws Exception {
-        bundleCount();
-
-        if (service == null)
-            service = PluginService.getInstance();
-
-        service.start();
-    }
-
-    @After
-    public void teardown() throws Exception {
-        if (service == null)
-            return;
-
-        service.shutdown();
     }
 
     @Test

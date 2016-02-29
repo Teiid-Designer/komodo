@@ -33,9 +33,39 @@ import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.Set;
+import javax.activation.MimeType;
+import javax.crypto.Cipher;
+import javax.crypto.spec.PSource;
 import javax.jcr.Node;
+import javax.management.JMException;
+import javax.management.remote.JMXConnector;
+import javax.naming.Binding;
+import javax.naming.directory.SearchControls;
+import javax.naming.ldap.LdapName;
+import javax.net.SocketFactory;
+import javax.net.ssl.SSLContext;
+import javax.script.ScriptEngineManager;
+import javax.security.auth.SubjectDomainCombiner;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.login.LoginContext;
+import javax.security.auth.spi.LoginModule;
+import javax.security.auth.x500.X500Principal;
+import javax.security.sasl.Sasl;
+import javax.sql.RowSet;
+import javax.sql.rowset.serial.SerialArray;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.events.Namespace;
+import javax.xml.stream.util.StreamReaderDelegate;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.dom.DOMLocator;
+import javax.xml.transform.sax.SAXTransformerFactory;
+import javax.xml.transform.stax.StAXSource;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.SchemaFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
@@ -124,19 +154,112 @@ public class PluginService implements StringConstants {
         start();
     }
 
+    private String pkg(Class<?> klazz) {
+        return klazz.getPackage().getName();
+    }
+
     private StringBuffer exportPackages() {
         StringBuffer pkgs = new StringBuffer();
 
-        pkgs.append(StringConstants.class.getPackage().getName()).append(COMMA);
-        pkgs.append(TeiidService.class.getPackage().getName()).append(COMMA);
-        pkgs.append(TeiidInstance.class.getPackage().getName()).append(COMMA);
-        pkgs.append(TeiidVersion.class.getPackage().getName()).append(COMMA);
-        pkgs.append(DataTypeManager.class.getPackage().getName()).append(COMMA);
-        pkgs.append(AnnotationUtils.class.getPackage().getName()).append(COMMA);
-        pkgs.append(TeiidSqlLexicon.class.getPackage().getName()).append(COMMA);
-        pkgs.append(Outcome.class.getPackage().getName()).append(COMMA);
-        pkgs.append(WorkspaceUUIDService.class.getPackage().getName()).append(COMMA);
-        pkgs.append(AbstractDataTypeManager.class.getPackage().getName()).append(COMMA);
+        Class<?>[] classes = new Class<?>[] {
+            // org.komodo.spi.constants
+            StringConstants.class,
+            // org.komodo.spi.query
+            TeiidService.class,
+            // org.komodo.spi.runtime
+            TeiidInstance.class,
+            // org.komodo.spi.runtime.version
+            TeiidVersion.class,
+            // org.komodo.spi.type
+            DataTypeManager.class,
+            // org.komodo.spi.annotation
+            AnnotationUtils.class,
+            // org.komodo.spi.lexicon
+            TeiidSqlLexicon.class,
+            // org.komodo.spi.outcome
+            Outcome.class,
+            // org.komodo.spi.uuid
+            WorkspaceUUIDService.class,
+
+            /**
+             * plugin teiid framework
+             */
+            // org.komodo.teiid.framework
+            AbstractDataTypeManager.class,
+
+            /**
+             * The javax libraries are not exported by default in osgi
+             * so need to specify the packages needed by teiid
+             */
+            // javax.activation
+            MimeType.class,
+            // javax.crypto
+            Cipher.class,
+            // javax.crypto.spec
+            PSource.class,
+            // javax.management
+            JMException.class,
+            // javax.management.remote
+            JMXConnector.class,
+            // javax.naming
+            Binding.class,
+            // javax.naming.directory
+            SearchControls.class,
+            // javax.naming.ldap
+            LdapName.class,
+            // javax.net
+            SocketFactory.class,
+            // javax.net.ssl
+            SSLContext.class,
+            // javax.script
+            ScriptEngineManager.class,
+            // javax.security.auth
+            SubjectDomainCombiner.class,
+            // javax.security.auth.callback
+            CallbackHandler.class,
+            // javax.security.auth.login
+            LoginContext.class,
+            // javax.security.auth.spi
+            LoginModule.class,
+            // javax.security.auth.x500
+            X500Principal.class,
+            // javax.security.sasl
+            Sasl.class,
+            // javax.sql
+            RowSet.class,
+            // javax.sql.rowset.serial
+            SerialArray.class,
+            // javax.xml.datatype
+            DatatypeFactory.class,
+            // javax.xml.namespace
+            QName.class,
+            // javax.xml.parsers
+            DocumentBuilder.class,
+            // javax.xml.stream
+            XMLStreamWriter.class,
+            // javax.xml.stream.events
+            Namespace.class,
+            // javax.xml.stream.util
+            StreamReaderDelegate.class,
+            // javax.xml.transform
+            Transformer.class,
+            // javax.xml.transform.dom
+            DOMLocator.class,
+            // javax.xml.transform.sax
+            SAXTransformerFactory.class,
+            // javax.xml.transform.stax
+            StAXSource.class,
+            // javax.xml.transform.stream
+            StreamSource.class,
+            // javax.xml.validation
+            SchemaFactory.class,
+            // javax.xml.xpath
+            XPath.class
+        };
+
+        for (Class<?> klazz : classes) {
+            pkgs.append(pkg(klazz)).append(COMMA);
+        }
 
         //
         // 3rd party dependencies in the bundles get wired up with a version requirement
