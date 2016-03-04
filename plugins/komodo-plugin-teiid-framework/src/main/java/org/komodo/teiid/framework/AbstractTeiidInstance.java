@@ -29,6 +29,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
@@ -36,6 +37,7 @@ import java.util.Properties;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.outcome.Outcome;
 import org.komodo.spi.outcome.OutcomeFactory;
+import org.komodo.spi.runtime.DataSourceDriver;
 import org.komodo.spi.runtime.EventManager;
 import org.komodo.spi.runtime.ExecutionConfigurationEvent;
 import org.komodo.spi.runtime.HostProvider;
@@ -47,6 +49,7 @@ import org.komodo.spi.runtime.TeiidParent;
 import org.komodo.spi.runtime.TeiidVdb;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.utils.ArgCheck;
+import org.komodo.utils.KLog;
 
 public abstract class AbstractTeiidInstance implements TeiidInstance, StringConstants {
 
@@ -378,6 +381,8 @@ public abstract class AbstractTeiidInstance implements TeiidInstance, StringCons
         return getDataSource(name).getProperties();
     }
 
+    public abstract Collection<DataSourceDriver> getDataSourceDrivers() throws Exception;
+
     /**
      * Look for an installed driver that has the driverClass which matches the supplied driverClass name.
      * 
@@ -391,26 +396,20 @@ public abstract class AbstractTeiidInstance implements TeiidInstance, StringCons
         if (!isParentConnected())
             return null;
 
-        // TODO currently unsupported and needs work to consider how to reimplement
-        // The Admin interface does not provide access to the internal connection. The original
-        // runtime-client and an extra public method that interrogated the jboss parent server
-        // for all drivers installed. Such a method is not part of the teiid API.
-        // Could be implement by fetching the connection object using reflection
+        try {
+            Collection<DataSourceDriver> dataSourceDrivers = getDataSourceDrivers();
+            for (DataSourceDriver driver : dataSourceDrivers) {
+                String driverClassName = driver.getClassName();
+                String driverName = driver.getName();
 
-        //        try {
-        //            Collection<DataSourceDriver> dataSourceDrivers = admin.getDataSourceDrivers();
-        //            for (DataSourceDriver driver : dataSourceDrivers) {
-        //                String driverClassName = driver.getClassName();
-        //                String driverName = driver.getName();
-        //
-        //                if (requestDriverClass.equalsIgnoreCase(driverClassName))
-        //                    return driverName;
-        //            }
-        //
-        //        } catch (Exception ex) {
-        //            // Failed to get mapping
-        //            KLog.getLogger().error(Messages.getString(Messages.ExecutionAdmin.failedToGetDriverMappings, requestDriverClass), ex);
-        //        }
+                if (requestDriverClass.equalsIgnoreCase(driverClassName))
+                    return driverName;
+            }
+
+        } catch (Exception ex) {
+            // Failed to get mapping
+            KLog.getLogger().error(Messages.getString(Messages.ExecutionAdmin.failedToGetDriverMappings, requestDriverClass), ex);
+        }
 
         return null;
     }

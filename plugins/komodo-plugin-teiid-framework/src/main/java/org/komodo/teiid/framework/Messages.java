@@ -40,7 +40,10 @@ public class Messages {
     public enum TeiidInstance {
         versionFailure,
         parentNotStartedMessage,
-        reconnectErrorMsg;
+        reconnectErrorMsg,
+        noSuchField,
+        buildOperationFailure,
+        requestDriverFailure;
 
         @Override
         public String toString() {

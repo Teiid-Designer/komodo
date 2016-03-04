@@ -34,6 +34,7 @@ import java.util.Properties;
 import java.util.Set;
 import org.komodo.spi.outcome.Outcome;
 import org.komodo.spi.outcome.OutcomeFactory;
+import org.komodo.spi.runtime.DataSourceDriver;
 import org.komodo.spi.runtime.ExecutionConfigurationEvent;
 import org.komodo.spi.runtime.TeiidConnectionInfo;
 import org.komodo.spi.runtime.TeiidDataSource;
@@ -56,7 +57,9 @@ public class TeiidInstanceImpl extends AbstractTeiidInstance {
 
     private Admin admin;
 
-    private TeiidArtifactFactory factory = new TeiidArtifactFactory();
+    private final TeiidArtifactFactory factory = new TeiidArtifactFactory();
+
+    private final JbossExtensions ext = new JbossExtensions();
 
     public TeiidInstanceImpl(TeiidParent parent, final TeiidVersion teiidVersion, TeiidJdbcInfo jdbcInfo) {
         super(parent, teiidVersion, jdbcInfo);
@@ -195,6 +198,11 @@ public class TeiidInstanceImpl extends AbstractTeiidInstance {
             return null;
 
         return factory.createDataSource(name, dataSource);
+    }
+
+    @Override
+    public Collection<DataSourceDriver> getDataSourceDrivers() throws Exception {
+        return ext.getDataSourceDrivers(admin);
     }
 
     @Override

@@ -39,6 +39,7 @@
 
 		<!-- The actual maven version of jboss to be downloaded -->
 		<version.org.jboss.as>7.5.0.Final-redhat-15</version.org.jboss.as>
+		<version.org.jboss.dmr>1.2.1.Final-redhat-1</version.org.jboss.dmr>
 
 		<!-- The version of jboss when its unpacked -->
 		<version.jbossas.test>jboss-eap-6.4</version.jbossas.test>
@@ -76,6 +77,22 @@
 				<artifactId>teiid-client</artifactId>
 				<version>${version.teiid}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.jboss</groupId>
+				<artifactId>jboss-dmr</artifactId>
+				<version>${version.org.jboss.dmr}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.as</groupId>
+				<artifactId>jboss-as-cli</artifactId>
+				<version>${version.org.jboss.as}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.as</groupId>
+				<artifactId>jboss-as-controller-client</artifactId>
+				<version>${version.org.jboss.as}</version>
+			</dependency>
+
 			<dependency>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>org.osgi.core</artifactId>
@@ -151,6 +168,18 @@
 		<dependency>
 			<groupId>org.jboss.teiid</groupId>
 			<artifactId>teiid-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss</groupId>
+			<artifactId>jboss-dmr</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.as</groupId>
+			<artifactId>jboss-as-cli</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.as</groupId>
+			<artifactId>jboss-as-controller-client</artifactId>
 		</dependency>
 
 		<dependency>

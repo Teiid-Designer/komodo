@@ -22,17 +22,69 @@
 package org.komodo.spi.runtime;
 
 /**
- *
+ * Metadata for a driver available on the server
  */
-public interface DataSourceDriver {
+public class DataSourceDriver {
+
+    private final String name;
+
+    private final String className;
 
     /**
-     * @return the name of this driver
+     * Default constructor
      */
-    String getName();
+    public DataSourceDriver(String name, String className) {
+        this.name = name;
+        this.className = className;
+    }
 
     /**
-     * @return the class name of this driver
+     * @return driver name
      */
-    String getClassName();
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * @return class name
+     */
+    public String getClassName() {
+        return className;
+    }
+
+    @Override
+    public String toString() {
+        return "DataSourceDriver [name=" + this.name + ", className=" + this.className + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((this.className == null) ? 0 : this.className.hashCode());
+        result = prime * result + ((this.name == null) ? 0 : this.name.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        DataSourceDriver other = (DataSourceDriver)obj;
+        if (this.className == null) {
+            if (other.className != null)
+                return false;
+        } else if (!this.className.equals(other.className))
+            return false;
+        if (this.name == null) {
+            if (other.name != null)
+                return false;
+        } else if (!this.name.equals(other.name))
+            return false;
+        return true;
+    }
 }
