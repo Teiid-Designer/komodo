@@ -5,7 +5,7 @@
 *
 * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
 */
-package org.komodo.rest.relational;
+package org.komodo.rest.service;
 
 import static org.komodo.rest.relational.RelationalMessages.Error.SEARCH_SERVICE_DELETE_SEARCH_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.SEARCH_SERVICE_GET_SEARCH_ERROR;
@@ -34,7 +34,6 @@ import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.KomodoTypeRegistry;
 import org.komodo.repository.KomodoTypeRegistry.TypeIdentifier;
-import org.komodo.repository.search.CompareClause;
 import org.komodo.repository.search.ComparisonOperator;
 import org.komodo.repository.search.ContainsClause;
 import org.komodo.repository.search.ObjectSearcher;
@@ -42,6 +41,10 @@ import org.komodo.rest.KomodoRestException;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.KomodoService;
 import org.komodo.rest.RestBasicEntity;
+import org.komodo.rest.relational.KomodoSavedSearcher;
+import org.komodo.rest.relational.KomodoSearcherAttributes;
+import org.komodo.rest.relational.KomodoStatusObject;
+import org.komodo.rest.relational.RelationalMessages;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;

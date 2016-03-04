@@ -5,7 +5,7 @@
 *
 * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
 */
-package org.komodo.rest.relational;
+package org.komodo.rest.service;
 
 import static org.komodo.rest.Messages.General.GET_OPERATION_NAME;
 import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_CONDITIONS_ERROR;
@@ -57,6 +57,16 @@ import org.komodo.rest.KomodoService;
 import org.komodo.rest.Messages;
 import org.komodo.rest.RestBasicEntity;
 import org.komodo.rest.RestBasicEntity.ResourceNotFound;
+import org.komodo.rest.relational.KomodoProperties;
+import org.komodo.rest.relational.RestVdb;
+import org.komodo.rest.relational.RestVdbCondition;
+import org.komodo.rest.relational.RestVdbDataRole;
+import org.komodo.rest.relational.RestVdbImport;
+import org.komodo.rest.relational.RestVdbMask;
+import org.komodo.rest.relational.RestVdbModel;
+import org.komodo.rest.relational.RestVdbModelSource;
+import org.komodo.rest.relational.RestVdbPermission;
+import org.komodo.rest.relational.RestVdbTranslator;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;

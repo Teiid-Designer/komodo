@@ -5,7 +5,7 @@
 *
 * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
 */
-package org.komodo.rest.relational;
+package org.komodo.rest.service;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
@@ -29,8 +29,19 @@ import org.komodo.relational.model.Model.Type;
 import org.komodo.rest.RestBasicEntity;
 import org.komodo.rest.RestLink;
 import org.komodo.rest.RestLink.LinkType;
+import org.komodo.rest.relational.AbstractKomodoServiceTest;
+import org.komodo.rest.relational.RestVdb;
+import org.komodo.rest.relational.RestVdbCondition;
+import org.komodo.rest.relational.RestVdbDataRole;
+import org.komodo.rest.relational.RestVdbImport;
+import org.komodo.rest.relational.RestVdbMask;
+import org.komodo.rest.relational.RestVdbModel;
+import org.komodo.rest.relational.RestVdbModelSource;
+import org.komodo.rest.relational.RestVdbPermission;
+import org.komodo.rest.relational.RestVdbTranslator;
 import org.komodo.rest.relational.KomodoRestUriBuilder.SettingNames;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
+import org.komodo.rest.service.KomodoVdbService;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.test.utils.TestUtilities;
 

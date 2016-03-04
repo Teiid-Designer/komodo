@@ -5,7 +5,7 @@
 *
 * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
 */
-package org.komodo.rest;
+package org.komodo.rest.service;
 
 import static org.komodo.rest.relational.RelationalMessages.Error.SCHEMA_SERVICE_GET_SCHEMA_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_VDBS_ERROR;
@@ -36,6 +36,8 @@ import org.komodo.relational.importer.vdb.VdbImporter;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.SynchronousCallback;
+import org.komodo.rest.KomodoRestException;
+import org.komodo.rest.KomodoService;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.relational.KomodoStatusObject;
 import org.komodo.rest.relational.RelationalMessages;
@@ -143,7 +145,7 @@ public final class KomodoUtilService extends KomodoService {
      * @param sampleName
      * @return the sample content for the given sample name
      */
-    static InputStream getVdbSample(String sampleName) {
+    public static InputStream getVdbSample(String sampleName) {
         String sampleFilePath = "sample" + File.separator + sampleName; //$NON-NLS-1$
         InputStream fileStream = KomodoUtilService.class.getResourceAsStream(sampleFilePath);
         if (fileStream == null)

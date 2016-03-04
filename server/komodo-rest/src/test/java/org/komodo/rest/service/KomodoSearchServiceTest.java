@@ -5,7 +5,7 @@
 *
 * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
 */
-package org.komodo.rest.relational;
+package org.komodo.rest.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -19,6 +19,13 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import org.junit.Test;
 import org.komodo.rest.RestBasicEntity;
+import org.komodo.rest.relational.AbstractKomodoServiceTest;
+import org.komodo.rest.relational.KomodoProperties;
+import org.komodo.rest.relational.KomodoSavedSearcher;
+import org.komodo.rest.relational.KomodoSearcherAttributes;
+import org.komodo.rest.relational.RestEntityFactory;
+import org.komodo.rest.relational.RestVdb;
+import org.komodo.rest.relational.RestVdbModel;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;

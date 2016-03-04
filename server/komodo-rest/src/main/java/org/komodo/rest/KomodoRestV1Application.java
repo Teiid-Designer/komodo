@@ -35,8 +35,9 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.SynchronousCallback;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.json.JsonConstants;
-import org.komodo.rest.relational.KomodoSearchService;
-import org.komodo.rest.relational.KomodoVdbService;
+import org.komodo.rest.service.KomodoSearchService;
+import org.komodo.rest.service.KomodoUtilService;
+import org.komodo.rest.service.KomodoVdbService;
 import org.komodo.rest.swagger.RestPropertyConverter;
 import org.komodo.rest.swagger.RestVdbConditionConverter;
 import org.komodo.rest.swagger.RestVdbConverter;
@@ -389,7 +390,7 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
 
     @Override
     public Set<Class<?>> getClasses() {
-        Set<Class<?>> resources = new HashSet();
+        Set<Class<?>> resources = new HashSet<Class<?>>();
 
         // Enable swagger support
         resources.add(io.swagger.jaxrs.listing.ApiListingResource.class);

@@ -5,7 +5,7 @@
 *
 * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
 */
-package org.komodo.rest;
+package org.komodo.rest.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -34,7 +34,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 import org.komodo.core.KEngine;
+import org.komodo.rest.KomodoRestV1Application;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
+import org.komodo.rest.KomodoService;
 import org.komodo.rest.relational.KomodoRestUriBuilder;
 import org.komodo.rest.relational.KomodoStatusObject;
 import org.komodo.rest.relational.RelationalMessages;
