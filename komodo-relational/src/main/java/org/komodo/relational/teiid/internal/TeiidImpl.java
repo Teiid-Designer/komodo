@@ -285,7 +285,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
             if (teiidInstance == null) {
                 try {
                     TeiidService teiidService = PluginService.getInstance().getTeiidService(teiidVersion);
-                    teiidInstance = teiidService.getTeiidInstance(this, teiidVersion, jdbcInfo);
+                    teiidInstance = teiidService.getTeiidInstance(this, jdbcInfo);
                 } catch (Exception ex) {
                     KEngine.getInstance().getErrorHandler().error(ex);
                     return null;

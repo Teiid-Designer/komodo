@@ -91,7 +91,7 @@ public class TestPluginServiceTeiidInstances extends AbstractTestPluginService {
             TeiidService teiidService = service.getTeiidService(version);
             assertNotNull(teiidService);
 
-            TeiidInstance teiidInstance = teiidService.getTeiidInstance(parent, version, jdbcInfo); 
+            TeiidInstance teiidInstance = teiidService.getTeiidInstance(parent, jdbcInfo); 
             teiidInstance.connect();
             assertTrue(teiidInstance.isConnected());
 

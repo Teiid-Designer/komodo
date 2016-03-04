@@ -207,4 +207,13 @@ public class TestPluginService extends AbstractTestPluginService implements Stri
         Node node = Mockito.mock(Node.class);
         teiidService.nodeConvert(null, node);
     }
+
+    @Test
+    public void testGetDefaultTeiidInstance() throws Exception {
+        assertEquals(Bundle.ACTIVE, service.getState());
+
+        TeiidVersion version = Version.DEFAULT_TEIID_VERSION.get();
+        TeiidService teiidService = service.getTeiidService(version);
+        assertNotNull(teiidService);
+    }
 }
