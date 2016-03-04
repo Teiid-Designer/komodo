@@ -55,6 +55,7 @@ public class RestEntityFactory implements V1Constants {
      * @return the rest object for the given kObject
      * @throws KException if error occurs
      */
+    @SuppressWarnings( "unchecked" )
     public <T extends RestBasicEntity> T create(KomodoObject kObject, URI baseUri,
                                                                  UnitOfWork uow, KomodoProperties properties) throws KException {
         WorkspaceManager wsMgr = WorkspaceManager.getInstance(kObject.getRepository());
