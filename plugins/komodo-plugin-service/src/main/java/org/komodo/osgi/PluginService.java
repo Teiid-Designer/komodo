@@ -79,6 +79,7 @@ import org.komodo.spi.outcome.Outcome;
 import org.komodo.spi.query.TeiidService;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.DataTypeManager;
 import org.komodo.spi.uuid.WorkspaceUUIDService;
@@ -515,7 +516,10 @@ public class PluginService implements StringConstants {
         bundle.stop();
     }
 
-    public TeiidService getTeiidService() {
+    /**
+     * @return the current teiid service or null if none fetched
+     */
+    public TeiidService getCurrentTeiidService() {
         return teiidService;
     }
 
@@ -533,7 +537,7 @@ public class PluginService implements StringConstants {
             // should null the teiidService field
             stopBundle(parentBundleName);
 
-            if (getTeiidService() != null)
+            if (getCurrentTeiidService() != null)
                 throw new Exception(Messages.getString(Messages.PluginService.TeiidServiceBundleFailedToStop, parentBundleName));
         }
 
@@ -550,6 +554,14 @@ public class PluginService implements StringConstants {
         startBundle(symbolicName);
 
         return this.teiidService;
+    }
+
+    /**
+     * @return the teiid service for the default teiid version ({@link Version#DEFAULT_TEIID_VERSION})
+     * @throws Exception
+     */
+    public TeiidService getDefaultTeiidService() throws Exception {
+        return getTeiidService(Version.DEFAULT_TEIID_VERSION.get());
     }
 
     void setTeiidService(TeiidService teiidService) {

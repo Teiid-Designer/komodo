@@ -57,7 +57,7 @@ public class PluginServiceTracker extends BundleTracker<TeiidService> {
         if (teiidService == null)
             return;
 
-        if (! teiidService.equals(service.getTeiidService()))
+        if (! teiidService.equals(service.getCurrentTeiidService()))
             return;
 
         service.setTeiidService(null);

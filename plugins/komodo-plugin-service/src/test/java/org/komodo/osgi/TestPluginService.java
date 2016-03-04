@@ -190,7 +190,7 @@ public class TestPluginService extends AbstractTestPluginService implements Stri
         teiidService.getVersion();
 
         service.stopBundle(bundleId);
-        assertNull(service.getTeiidService());
+        assertNull(service.getCurrentTeiidService());
     }
 
     @Test
@@ -213,7 +213,8 @@ public class TestPluginService extends AbstractTestPluginService implements Stri
         assertEquals(Bundle.ACTIVE, service.getState());
 
         TeiidVersion version = Version.DEFAULT_TEIID_VERSION.get();
-        TeiidService teiidService = service.getTeiidService(version);
+        TeiidService teiidService = service.getDefaultTeiidService();
         assertNotNull(teiidService);
+        assertEquals(version, teiidService.getVersion());
     }
 }
