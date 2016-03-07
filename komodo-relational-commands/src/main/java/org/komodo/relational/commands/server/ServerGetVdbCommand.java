@@ -110,9 +110,6 @@ public final class ServerGetVdbCommand extends ServerShellCommand {
             if(vdb == null) {
                 return new CommandResultImpl( false, I18n.bind(ServerCommandsI18n.serverVdbNotFound, vdbName), null );
             }
-            if(!vdb.isXmlDeployment()) {
-                return new CommandResultImpl( false, I18n.bind(ServerCommandsI18n.canOnlyCopyDynamicVDBs, vdbName), null );
-            }
 
             // Export the vdb content into a string
             String vdbStr = vdb.export();

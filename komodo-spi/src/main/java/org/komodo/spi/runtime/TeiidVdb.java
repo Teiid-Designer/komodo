@@ -66,11 +66,6 @@ public interface TeiidVdb {
     boolean isPreviewVdb();
 
     /**
-     * @return <code>true</code> if this is an xml deployment
-     */
-    boolean isXmlDeployment();
-    
-    /**
      * @return <code>true</code> if this VDB is active
      */
     boolean isActive();

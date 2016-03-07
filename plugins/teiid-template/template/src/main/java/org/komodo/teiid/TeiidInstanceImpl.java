@@ -50,6 +50,7 @@ import org.teiid.adminapi.Admin;
 import org.teiid.adminapi.PropertyDefinition;
 import org.teiid.adminapi.Translator;
 import org.teiid.adminapi.VDB;
+import org.teiid.adminapi.impl.VDBMetaData;
 import org.teiid.adminapi.jboss.AdminFactory;
 import org.teiid.jdbc.TeiidDriver;
 
@@ -253,6 +254,16 @@ public class TeiidInstanceImpl extends AbstractTeiidInstance {
         return teiidTranslators;
     }
 
+    private boolean isDynamic(VDB vdb) {
+        if (vdb == null)
+            return false;
+
+        if (! (vdb instanceof VDBMetaData))
+            return false;
+
+        return ((VDBMetaData) vdb).isXmlDeployment();
+    }
+    
     @Override
     public Collection<TeiidVdb> getVdbs() throws Exception {
         connect();
@@ -262,6 +273,9 @@ public class TeiidInstanceImpl extends AbstractTeiidInstance {
 
         List<TeiidVdb> teiidVdbs = new ArrayList<>();
         for (VDB vdb : vdbs) {
+            if (! isDynamic(vdb))
+                continue;
+
             teiidVdbs.add(factory.createVdb(vdb));
         }
 
@@ -273,6 +287,9 @@ public class TeiidInstanceImpl extends AbstractTeiidInstance {
         connect();
         VDB vdb = admin.getVDB(name, 1);
         if (vdb == null)
+            return null;
+
+        if (! isDynamic(vdb))
             return null;
 
         return factory.createVdb(vdb);

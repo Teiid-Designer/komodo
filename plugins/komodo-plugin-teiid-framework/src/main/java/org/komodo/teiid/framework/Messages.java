@@ -94,7 +94,7 @@ public class Messages {
 
     @SuppressWarnings( "javadoc" )
     public enum TeiidVdb {
-        canOnlyExportDynamicVdbs;
+        onlySupportingDynamicVdbs;
 
         @Override
         public String toString() {

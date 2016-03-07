@@ -78,10 +78,8 @@ public final class ServerUndeployVdbCommand extends ServerShellCommand {
 
                 if(vdb==null) {
                     return new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.serverVdbNotFound, vdbName ), null );
-                } else if(vdb.isXmlDeployment()) {
-                    teiidInstance.undeployDynamicVdb(vdb.getName());
                 } else {
-                    teiidInstance.undeployVdb(vdb.getName());
+                    teiidInstance.undeployDynamicVdb(vdb.getName());
                 }
             } catch (Exception ex) {
                 result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.connectionErrorWillDisconnect ), ex );

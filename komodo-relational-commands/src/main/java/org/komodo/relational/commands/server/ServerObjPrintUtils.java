@@ -63,7 +63,7 @@ public class ServerObjPrintUtils implements StringConstants {
             // ------------
             // VDB Type
             // ------------
-            String vdbType = vdb.isXmlDeployment() ? "Dynamic" : "Archive"; //$NON-NLS-1$ //$NON-NLS-2$
+            String vdbType = "Dynamic"; // Komodo only supports dynamic vdbs and ignores archive
             PrintUtils.print(writer, indent, "Type: "+vdbType); //$NON-NLS-1$
 
             // ------------
