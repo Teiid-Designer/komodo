@@ -27,6 +27,7 @@ import static org.komodo.rest.Messages.Error.KOMODO_ENGINE_SHUTDOWN_ERROR;
 import static org.komodo.rest.Messages.Error.KOMODO_ENGINE_SHUTDOWN_TIMEOUT;
 import static org.komodo.rest.Messages.Error.KOMODO_ENGINE_STARTUP_ERROR;
 import static org.komodo.rest.Messages.Error.KOMODO_ENGINE_STARTUP_TIMEOUT;
+import java.io.File;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashSet;
@@ -92,6 +93,16 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
          * Version of the application
          */
         String APP_VERSION = "0.0.3"; //$NON-NLS-1$
+
+        /**
+         * The komodo engine's data directory system property
+         */
+        String KOMODO_DATA_DIR = "komodo.dataDir";
+
+        /**
+         * Jboss server base directory
+         */
+        String JBOSS_SERVER_BASE_DIR = "jboss.server.base.dir";
 
         /**
          * Location for the log file passed to {@link KLog} logger
@@ -292,7 +303,17 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
     public KomodoRestV1Application() throws ServerErrorException {
         try {
             // Set the log path to something relative to the deployment location of this application
-            KLog.getLogger().setLogPath(V1Constants.LOG_FILE_PATH);
+            // Try to use the base directory in jboss. If not in jboss this would probably be empty so
+            // otherwise use "." relative to the working directory
+            String baseDir = System.getProperty(V1Constants.JBOSS_SERVER_BASE_DIR, DOT) + File.separator;
+
+            // Set the komodo data directory prior to starting the engine
+            String komodoDataDir = System.getProperty(V1Constants.KOMODO_DATA_DIR);
+            if (komodoDataDir == null)
+                System.setProperty(V1Constants.KOMODO_DATA_DIR, baseDir + "data");
+
+            // Set the log file path
+            KLog.getLogger().setLogPath(baseDir + V1Constants.LOG_FILE_PATH);
 
             // Ensure server logging level is reduced to something sane!
             KLog.getLogger().setLevel(Level.INFO);
