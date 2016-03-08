@@ -62,8 +62,7 @@ public final class ServerDeployDatasourceCommand extends ServerShellCommand {
             }
 
             // Make sure datasource object exists in repo
-            final KomodoObject datasourceObj = getWorkspaceManager().getChild(getTransaction(), sourceName, KomodoLexicon.DataSource.NODE_TYPE);
-            if(datasourceObj==null) {
+            if(!getWorkspaceManager().hasChild(getTransaction(), sourceName, KomodoLexicon.DataSource.NODE_TYPE)) {
                 return new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.workspaceDatasourceNotFound, sourceName ), null );
             }
 
@@ -74,6 +73,7 @@ public final class ServerDeployDatasourceCommand extends ServerShellCommand {
             }
 
             final TeiidInstance teiidInstance = getWorkspaceTeiidInstance();
+            final KomodoObject datasourceObj = getWorkspaceManager().getChild(getTransaction(), sourceName, KomodoLexicon.DataSource.NODE_TYPE);
             final Datasource sourceToDeploy = Datasource.RESOLVER.resolve(getTransaction(), datasourceObj);
 
             // Make sure that the sourceType is OK for the connected server.
@@ -86,23 +86,29 @@ public final class ServerDeployDatasourceCommand extends ServerShellCommand {
             }
             
             // Determine if the server already has a deployed Datasource with this name
-            boolean serverHasDatasource = teiidInstance.dataSourceExists(sourceName);
-            if(serverHasDatasource && !overwrite) {
-                return new CommandResultImpl( false,
-                                              I18n.bind( ServerCommandsI18n.datasourceDeploymentOverwriteDisabled,
-                                                         sourceName ),
-                                              null );
+            try {
+                boolean serverHasDatasource = teiidInstance.dataSourceExists(sourceName);
+                if(serverHasDatasource && !overwrite) {
+                    return new CommandResultImpl( false,
+                                                  I18n.bind( ServerCommandsI18n.datasourceDeploymentOverwriteDisabled,
+                                                             sourceName ),
+                                                  null );
+                }
+                
+                // Get the properties necessary for deployment to server
+                Properties sourceProps = sourceToDeploy.getPropertiesForServerDeployment(getTransaction(), teiidInstance);
+                
+                // If overwriting, delete the existing source first
+                if(serverHasDatasource) {
+                    teiidInstance.deleteDataSource(sourceName);
+                }
+                // Create the source
+                teiidInstance.getOrCreateDataSource(sourceName, sourceName, sourceType, sourceProps);
+            } catch (Exception ex) {
+                result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.connectionErrorWillDisconnect ), ex );
+                ServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
+                return result;
             }
-            
-            // Get the properties necessary for deployment to server
-            Properties sourceProps = sourceToDeploy.getPropertiesForServerDeployment(getTransaction(), teiidInstance);
-            
-            // If overwriting, delete the existing source first
-            if(serverHasDatasource) {
-                teiidInstance.deleteDataSource(sourceName);
-            }
-            // Create the source
-            teiidInstance.getOrCreateDataSource(sourceName, sourceName, sourceType, sourceProps);
 
             print( MESSAGE_INDENT, I18n.bind(ServerCommandsI18n.datasourceDeployFinished) );
             result = CommandResult.SUCCESS;

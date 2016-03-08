@@ -13,13 +13,11 @@ import java.util.List;
 import java.util.Properties;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.datasource.Datasource;
-import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.runtime.TeiidDataSource;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.utils.i18n.I18n;
@@ -52,9 +50,7 @@ public final class ServerGetDatasourceCommand extends ServerShellCommand {
             String datasourceName = requiredArgument( 0, I18n.bind( ServerCommandsI18n.missingDatasourceName ) );
 
             // Make sure no datasource currently in workspace with this name
-            final WorkspaceManager mgr = getWorkspaceManager();
-            KomodoObject[] repoDS = mgr.getChildrenOfType(getTransaction(), KomodoLexicon.DataSource.NODE_TYPE, datasourceName);
-            if(repoDS.length!=0) {
+            if(getWorkspaceManager().hasChild(getTransaction(), datasourceName, KomodoLexicon.DataSource.NODE_TYPE)) {
                 return new CommandResultImpl( false, I18n.bind(ServerCommandsI18n.repoDatasourceWithNameExists, datasourceName), null );
             }
             
@@ -65,13 +61,26 @@ public final class ServerGetDatasourceCommand extends ServerShellCommand {
             }
 
             // Get the Data Source from the server
-            TeiidDataSource serverDS = getWorkspaceTeiidInstance().getDataSource(datasourceName);
+            TeiidDataSource serverDS = null;
+            try {
+                // Check the data source name to make sure its valid
+                List< String > existingSourceNames = ServerUtils.getDatasourceNames(getWorkspaceTeiidInstance());
+                if(!existingSourceNames.contains(datasourceName)) {
+                    return new CommandResultImpl(false, I18n.bind( ServerCommandsI18n.serverDatasourceNotFound, datasourceName ), null);
+                }
+                // Get the data source
+                serverDS = getWorkspaceTeiidInstance().getDataSource(datasourceName);
+            } catch (Exception ex) {
+                result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.connectionErrorWillDisconnect ), ex );
+                ServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
+                return result;
+            }
             if(serverDS == null) {
                 return new CommandResultImpl( false, I18n.bind(ServerCommandsI18n.serverDatasourceNotFound, datasourceName), null );
             }
 
             // Create the Data Source and set properties
-            Datasource newDatasource = mgr.createDatasource( getTransaction(), null, datasourceName );
+            Datasource newDatasource = getWorkspaceManager().createDatasource( getTransaction(), null, datasourceName );
             setRepoDatasourceProperties(newDatasource, serverDS.getProperties());
             
             print( MESSAGE_INDENT, I18n.bind(ServerCommandsI18n.datasourceCopyToRepoFinished) );
@@ -144,19 +153,25 @@ public final class ServerGetDatasourceCommand extends ServerShellCommand {
                               final List< CharSequence > candidates ) throws Exception {
         final Arguments args = getArguments();
 
-        List<String> existingDatasourceNames = ServerUtils.getDatasourceNames(getWorkspaceTeiidInstance());
-        Collections.sort(existingDatasourceNames);
+        try {
+            List<String> existingDatasourceNames = ServerUtils.getDatasourceNames(getWorkspaceTeiidInstance());
+            Collections.sort(existingDatasourceNames);
 
-        if ( args.isEmpty() ) {
-            if ( lastArgument == null ) {
-                candidates.addAll( existingDatasourceNames );
-            } else {
-                for ( final String item : existingDatasourceNames ) {
-                    if ( item.startsWith( lastArgument ) ) {
-                        candidates.add( item );
+            if ( args.isEmpty() ) {
+                if ( lastArgument == null ) {
+                    candidates.addAll( existingDatasourceNames );
+                } else {
+                    for ( final String item : existingDatasourceNames ) {
+                        if ( item.startsWith( lastArgument ) ) {
+                            candidates.add( item );
+                        }
                     }
                 }
             }
+        } catch (Exception ex) {
+            print( );
+            print( MESSAGE_INDENT, I18n.bind(ServerCommandsI18n.connectionErrorWillDisconnect) );
+            ServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
         }
 
         return TabCompletionModifier.AUTO;

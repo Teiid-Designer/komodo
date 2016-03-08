@@ -84,15 +84,15 @@
  * A Teiid server known by the workspace. Node name can be user-defined.
  */
 [tko:teiid] > nt:unstructured, tko:workspaceItem
-  - tko:host (string)
-  - tko:adminPort (long)
-  - tko:adminUser (string)
+  - tko:host (string) = 'localhost'
+  - tko:adminPort (long) = 9999
+  - tko:adminUser (string) = 'admin'
   - tko:adminPswd (string) // encrypted
-  - tko:adminSecure (boolean)
-  - tko:jdbcPort (long)
-  - tko:jdbcUser (string)
+  - tko:adminSecure (boolean) = 'true'
+  - tko:jdbcPort (long) = 31000
+  - tko:jdbcUser (string) = 'user'
   - tko:jdbcPswd (string) // encrypted
-  - tko:jdbcSecure (boolean)
+  - tko:jdbcSecure (boolean) = false
   - tko:lastPingTime (long)
   - tko:connected (boolean)
 
@@ -211,6 +211,7 @@
  */
 [tko:environment] > nt:unstructured
   + tko:validation (nt:unstructured)
+  + tko:servers (nt:unstructured)
 
 /*
  * A grouping node for localized messages.

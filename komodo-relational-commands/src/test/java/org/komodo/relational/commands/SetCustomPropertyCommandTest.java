@@ -16,7 +16,9 @@
 package org.komodo.relational.commands;
 
 import static org.junit.Assert.assertEquals;
+import org.junit.Before;
 import org.junit.Test;
+import org.komodo.relational.commands.server.ServerManager;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.api.CommandResult;
@@ -28,6 +30,11 @@ import org.komodo.spi.repository.Property;
 @SuppressWarnings( { "javadoc", "nls" } )
 public class SetCustomPropertyCommandTest extends AbstractCommandTest {
 
+    @Before
+    public void init() throws Exception {
+        wsStatus.setProvidedGlobalProperty( ServerManager.SERVER_CONNECT_ON_STARTUP, Boolean.FALSE.toString(), Boolean.class.getName() );    
+    }
+    
     @Test
     public void testCustomProperty1() throws Exception {
         final String[] commands = { "create-vdb testVdb vdbPath",

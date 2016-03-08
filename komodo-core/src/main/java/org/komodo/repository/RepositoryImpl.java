@@ -29,6 +29,7 @@ import javax.jcr.query.QueryManager;
 import javax.jcr.query.QueryResult;
 import org.komodo.core.KEngine;
 import org.komodo.core.KomodoLexicon;
+import org.komodo.core.KomodoLexicon.Environment;
 import org.komodo.core.KomodoLexicon.Komodo;
 import org.komodo.core.KomodoLexicon.LibraryComponent;
 import org.komodo.core.KomodoLexicon.Search;
@@ -426,6 +427,16 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
      * The root path of the Komodo repository workspace searches area
      */
     public static final String SEARCHES_ROOT = WORKSPACE_ROOT + FORWARD_SLASH + Search.GROUP_NODE;
+
+    /**
+     * The root path of the Komodo repository environment validation rules area
+     */
+    public static final String VALIDATION_ROOT = ENV_ROOT + FORWARD_SLASH + Environment.VALIDATION;
+
+    /**
+     * The root path of the Komodo repository environment servers area
+     */
+    public static final String SERVERS_ROOT = ENV_ROOT + FORWARD_SLASH + Environment.SERVERS;
 
     protected static final KLog LOGGER = KLog.getLogger();
 

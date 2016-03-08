@@ -68,6 +68,7 @@ import org.komodo.relational.workspace.WorkspaceManagerTest;
     PushdownFunctionImplTest.class,
     RelationalObjectImplTest.class,
     ResultSetColumnImplTest.class,
+    SchemaImplTest.class,
     StatementOptionImplTest.class,
     StoredProcedureImplTest.class,
     TableConstraintTest.class,

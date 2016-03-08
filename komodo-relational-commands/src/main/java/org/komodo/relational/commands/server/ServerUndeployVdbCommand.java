@@ -52,20 +52,27 @@ public final class ServerUndeployVdbCommand extends ServerShellCommand {
                 return validationResult;
             }
 
-            // Undeploy the VDB
-            TeiidInstance teiidInstance = getWorkspaceTeiidInstance();
-            TeiidVdb vdb = teiidInstance.getVdb(vdbName);
+            try {
+                // Check the vdb name to make sure its valid
+                List< String > existingVdbNames = ServerUtils.getVdbNames(getWorkspaceTeiidInstance());
+                if(!existingVdbNames.contains(vdbName)) {
+                    return new CommandResultImpl(false, I18n.bind( ServerCommandsI18n.serverVdbNotFound, vdbName ), null);
+                }
+                // Undeploy the VDB
+                TeiidInstance teiidInstance = getWorkspaceTeiidInstance();
+                TeiidVdb vdb = teiidInstance.getVdb(vdbName);
 
-            // VDB found - undeploy it
-            if(vdb!=null) {
-                if(vdb.isXmlDeployment()) {
+                if(vdb==null) {
+                    return new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.serverVdbNotFound, vdbName ), null );
+                } else if(vdb.isXmlDeployment()) {
                     teiidInstance.undeployDynamicVdb(vdb.getName());
                 } else {
                     teiidInstance.undeployVdb(vdb.getName());
                 }
-            // VDB not found - error
-            } else {
-                return new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.serverVdbNotFound, vdbName ), null );
+            } catch (Exception ex) {
+                result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.connectionErrorWillDisconnect ), ex );
+                ServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
+                return result;
             }
 
             print( MESSAGE_INDENT, I18n.bind(ServerCommandsI18n.vdbUnDeployFinished) );
@@ -128,19 +135,25 @@ public final class ServerUndeployVdbCommand extends ServerShellCommand {
                               final List< CharSequence > candidates ) throws Exception {
         final Arguments args = getArguments();
 
-        List<String> existingVdbNames = ServerUtils.getVdbNames(getWorkspaceTeiidInstance());
-        Collections.sort(existingVdbNames);
+        try {
+            List<String> existingVdbNames = ServerUtils.getVdbNames(getWorkspaceTeiidInstance());
+            Collections.sort(existingVdbNames);
 
-        if ( args.isEmpty() ) {
-            if ( lastArgument == null ) {
-                candidates.addAll( existingVdbNames );
-            } else {
-                for ( final String item : existingVdbNames ) {
-                    if ( item.startsWith( lastArgument ) ) {
-                        candidates.add( item );
+            if ( args.isEmpty() ) {
+                if ( lastArgument == null ) {
+                    candidates.addAll( existingVdbNames );
+                } else {
+                    for ( final String item : existingVdbNames ) {
+                        if ( item.startsWith( lastArgument ) ) {
+                            candidates.add( item );
+                        }
                     }
                 }
             }
+        } catch (Exception ex) {
+            print( );
+            print( MESSAGE_INDENT, I18n.bind(ServerCommandsI18n.connectionErrorWillDisconnect) );
+            ServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
         }
         return TabCompletionModifier.AUTO;
     }

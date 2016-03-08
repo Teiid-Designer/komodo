@@ -56,7 +56,20 @@ public final class ServerDatasourceTypeCommand extends ServerShellCommand {
                 return validationResult;
             }
 
-            Collection<TeiidPropertyDefinition> propDefns = getWorkspaceTeiidInstance().getTemplatePropertyDefns(sourceTypeName);
+            Collection<TeiidPropertyDefinition> propDefns = null;
+            try {
+                // Check the data source type names to make sure its valid
+                Set< String > typeNames = getWorkspaceTeiidInstance().getDataSourceTypeNames();
+                if(!typeNames.contains(sourceTypeName)) {
+                    return new CommandResultImpl(false, I18n.bind( ServerCommandsI18n.serverDatasourceTypeNotFound, sourceTypeName ), null);
+                }
+                // Get the source type properties
+                propDefns = getWorkspaceTeiidInstance().getTemplatePropertyDefns(sourceTypeName);
+            } catch (Exception ex) {
+                result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.connectionErrorWillDisconnect ), ex );
+                ServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
+                return result;
+            }
             if(propDefns==null) {
                 return new CommandResultImpl( false,
                                               I18n.bind( ServerCommandsI18n.serverDatasourceTypeNotFound, sourceTypeName ),
@@ -143,21 +156,27 @@ public final class ServerDatasourceTypeCommand extends ServerShellCommand {
                               final List< CharSequence > candidates ) throws Exception {
         final Arguments args = getArguments();
 
-        Teiid teiid = getWorkspaceServer();
-        Set< String > types = teiid.getTeiidInstance( getTransaction() ).getDataSourceTypeNames();
-        List< String > existingTypes = new ArrayList< String >(types);
-        Collections.sort(existingTypes);
+        try {
+            Teiid teiid = getWorkspaceServer();
+            Set< String > types = teiid.getTeiidInstance( getTransaction() ).getDataSourceTypeNames();
+            List< String > existingTypes = new ArrayList< String >(types);
+            Collections.sort(existingTypes);
 
-        if ( args.isEmpty() ) {
-            if ( lastArgument == null ) {
-                candidates.addAll( existingTypes );
-            } else {
-                for ( final String item : existingTypes ) {
-                    if ( item.startsWith( lastArgument ) ) {
-                        candidates.add( item );
+            if ( args.isEmpty() ) {
+                if ( lastArgument == null ) {
+                    candidates.addAll( existingTypes );
+                } else {
+                    for ( final String item : existingTypes ) {
+                        if ( item.startsWith( lastArgument ) ) {
+                            candidates.add( item );
+                        }
                     }
                 }
             }
+        } catch (Exception ex) {
+            print( );
+            print( MESSAGE_INDENT, I18n.bind(ServerCommandsI18n.connectionErrorWillDisconnect) );
+            ServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
         }
         return TabCompletionModifier.AUTO;
     }

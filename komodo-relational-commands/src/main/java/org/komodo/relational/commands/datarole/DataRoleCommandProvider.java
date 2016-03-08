@@ -68,10 +68,12 @@ public class DataRoleCommandProvider implements ShellCommandProvider {
     }
 
     /**
-     * @throws KException the exception
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommandProvider#getStatusMessage(org.komodo.shell.api.WorkspaceStatus)
      */
     @Override
-    public String getStatusMessage ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
+    public String getStatusMessage( final WorkspaceStatus wsStatus ) {
         return null;
     }
 

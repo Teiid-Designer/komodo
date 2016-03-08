@@ -91,38 +91,45 @@ public final class ServerDeployVdbCommand extends ServerShellCommand {
             TeiidInstance teiidInstance = getWorkspaceTeiidInstance();
 
             // Determine if the server already has a deployed VDB with this name and version
-            boolean serverHasVdb = serverHasVdb( teiidInstance,
-                                                 vdbToDeploy.getName( getTransaction() ),
-                                                 vdbToDeploy.getVersion( getTransaction() ) );
-            if(serverHasVdb && !overwrite) {
-                return new CommandResultImpl( false,
-                                              I18n.bind( ServerCommandsI18n.vdbDeploymentOverwriteDisabled,
-                                                         vdbName,
-                                                         vdbToDeploy.getVersion( getTransaction() ) ),
-                                              null );
-            }
+            boolean serverHasVdb;
+            try {
+                serverHasVdb = serverHasVdb( teiidInstance,
+                                             vdbToDeploy.getName( getTransaction() ),
+                                             vdbToDeploy.getVersion( getTransaction() ) );
+                if(serverHasVdb && !overwrite) {
+                    return new CommandResultImpl( false,
+                                                  I18n.bind( ServerCommandsI18n.vdbDeploymentOverwriteDisabled,
+                                                             vdbName,
+                                                             vdbToDeploy.getVersion( getTransaction() ) ),
+                                                             null );
+                }
 
-            // All VDB source model jndis must exist on the connected server
-            Set<String> sourceJndiNames = getPhysicalModelJndis(vdbToDeploy);
-            if(!sourceJndiNames.isEmpty()) {
-                List<String> serverJndiNames = ServerUtils.getDatasourceJndiNames(teiidInstance);
-                for(String sourceJndiName : sourceJndiNames) {
-                    if(!serverJndiNames.contains(sourceJndiName)) {
-                        return new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.vdbDeployFailedMissingSourceJndi, sourceJndiName ), null);
+                // All VDB source model jndis must exist on the connected server
+                Set<String> sourceJndiNames = getPhysicalModelJndis(vdbToDeploy);
+                if(!sourceJndiNames.isEmpty()) {
+                    List<String> serverJndiNames = ServerUtils.getDatasourceJndiNames(teiidInstance);
+                    for(String sourceJndiName : sourceJndiNames) {
+                        if(!serverJndiNames.contains(sourceJndiName)) {
+                            return new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.vdbDeployFailedMissingSourceJndi, sourceJndiName ), null);
+                        }
                     }
                 }
-            }
 
-            // Get VDB content
-            String vdbXml = vdbToDeploy.export(getTransaction(), null);
-            if (vdbXml == null || vdbXml.isEmpty()) {
-                return new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.vdbExportFailed ), null);
-            }
+                // Get VDB content
+                String vdbXml = vdbToDeploy.export(getTransaction(), null);
+                if (vdbXml == null || vdbXml.isEmpty()) {
+                    return new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.vdbExportFailed ), null);
+                }
 
-            String vdbToDeployName = vdbToDeploy.getName(getTransaction());
-            String vdbDeploymentName = vdbToDeployName + VDB_DEPLOYMENT_SUFFIX;
-            InputStream stream = new ByteArrayInputStream(vdbXml.getBytes());
-            teiidInstance.deployDynamicVdb(vdbDeploymentName, stream);
+                String vdbToDeployName = vdbToDeploy.getName(getTransaction());
+                String vdbDeploymentName = vdbToDeployName + VDB_DEPLOYMENT_SUFFIX;
+                InputStream stream = new ByteArrayInputStream(vdbXml.getBytes());
+                teiidInstance.deployDynamicVdb(vdbDeploymentName, stream);
+            } catch (Exception ex) {
+                result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.connectionErrorWillDisconnect ), ex );
+                ServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
+                return result;
+            }
 
             print( MESSAGE_INDENT, I18n.bind(ServerCommandsI18n.vdbDeployFinished) );
             result = CommandResult.SUCCESS;

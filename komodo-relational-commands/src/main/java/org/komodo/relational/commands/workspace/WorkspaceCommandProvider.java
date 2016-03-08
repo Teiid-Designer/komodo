@@ -40,11 +40,9 @@ public class WorkspaceCommandProvider implements ShellCommandProvider {
 
         result.add( CreateDatasourceCommand.class );
         result.add( CreateSchemaCommand.class );
-        result.add( CreateTeiidCommand.class );
         result.add( CreateVdbCommand.class );
         result.add( DeleteDatasourceCommand.class );
         result.add( DeleteSchemaCommand.class );
-        result.add( DeleteTeiidCommand.class );
         result.add( DeleteVdbCommand.class );
         result.add( ImportVdbCommand.class );
         result.add( UploadVdbCommand.class );
@@ -74,10 +72,12 @@ public class WorkspaceCommandProvider implements ShellCommandProvider {
     }
 
     /**
-     * @throws KException the exception
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommandProvider#getStatusMessage(org.komodo.shell.api.WorkspaceStatus)
      */
     @Override
-    public String getStatusMessage ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException {
+    public String getStatusMessage( final WorkspaceStatus wsStatus ) {
         return null;
     }
 

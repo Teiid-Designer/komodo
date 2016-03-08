@@ -81,7 +81,7 @@ public class SetRecordCommand extends BuiltInShellCommand {
 
             // Set WorkspaceStatus
             WorkspaceStatus wsStatus = getWorkspaceStatus();
-            String recordingFileStr = getWorkspaceStatus().getGlobalProperties().getProperty(WorkspaceStatus.RECORDING_FILE_KEY);
+            String recordingFileStr = getWorkspaceStatus().getGlobalProperties(false).getProperty(WorkspaceStatus.RECORDING_FILE_KEY);
             if(onOffArg.equalsIgnoreCase(ON)) {
                 wsStatus.setRecordingStatus(true);
 
@@ -179,7 +179,7 @@ public class SetRecordCommand extends BuiltInShellCommand {
                 recordingWriter.write(message+StringConstants.NEW_LINE);
                 recordingWriter.flush();
             } catch (IOException ex) {
-                String filePath = wsStatus.getGlobalProperties().getProperty(WorkspaceStatus.RECORDING_FILE_KEY);
+                String filePath = wsStatus.getGlobalProperties(false).getProperty(WorkspaceStatus.RECORDING_FILE_KEY);
                 print(MESSAGE_INDENT, I18n.bind(ShellI18n.recordingFileOutputError, filePath));
             }
         // Print error message if the recording file was not defined

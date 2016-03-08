@@ -6,10 +6,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Iterator;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.komodo.relational.commands.server.ServerManager;
 import org.komodo.repository.RepositoryImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.spi.constants.SystemConstants;
@@ -92,11 +94,24 @@ public abstract class AbstractCommandTest extends org.komodo.shell.AbstractComma
     }
     
     @Before
-    public void startInWorkspace() throws Exception {
+    @Override
+    public void beforeEach() throws Exception {
+        // Default - do not attempt to connect to server on startup
+        globalProperties.put("SERVER_CONNECT_ON_STARTUP", "false|java.lang.Boolean");
+        
+        super.beforeEach();
+        
+        // Startup in the workspace context
         final String[] commands = { "workspace" };
         final CommandResult result = execute( commands );
         assertCommandResultOk( result );
         assertContextIs( RepositoryImpl.WORKSPACE_ROOT );
     }
+    
+    @After
+    public void clearServer() {
+        // Make sure the server is cleared between tests
+        ServerManager.reset();
+    }    
 
 }

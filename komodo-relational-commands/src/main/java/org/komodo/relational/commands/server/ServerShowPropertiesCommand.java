@@ -19,41 +19,31 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  ************************************************************************************/
-package org.komodo.shell.commands;
+package org.komodo.relational.commands.server;
 
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
-import java.util.Properties;
-import org.komodo.shell.BuiltInShellCommand;
+import org.komodo.relational.teiid.Teiid;
 import org.komodo.shell.CommandResultImpl;
-import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.CommandResult;
-import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.PrintUtils;
 import org.komodo.utils.i18n.I18n;
 
 /**
- * A {@link ShellCommand command} that displays the global workspace properties.
- * <p>
- * Usage:
- * <p>
- * <code>&nbsp;&nbsp;
- * show-global
- * </code>
+ * A ServerShellCommand that displays the properties of the default server.
  */
-public class ShowGlobalCommand extends BuiltInShellCommand {
+public class ServerShowPropertiesCommand extends ServerShellCommand {
 
     /**
      * The command name.
      */
-    public static final String NAME = "show-global"; //$NON-NLS-1$
+    public static final String NAME = "server-show-properties"; //$NON-NLS-1$
 
     /**
      * @param wsStatus
      *        the workspace status (cannot be <code>null</code>)
      */
-    public ShowGlobalCommand( final WorkspaceStatus wsStatus ) {
-        super( wsStatus, NAME );
+    public ServerShowPropertiesCommand( final WorkspaceStatus wsStatus ) {
+        super( NAME, wsStatus );
     }
 
     /**
@@ -73,26 +63,17 @@ public class ShowGlobalCommand extends BuiltInShellCommand {
      */
     @Override
     protected CommandResult doExecute() {
-        try {
-            // Gets all global properties(except hidden).
-            final Properties globalProperties = getWorkspaceStatus().getGlobalProperties(false);
+        WorkspaceStatus wsStatus = getWorkspaceStatus();
+
+		try {
+            final Teiid teiid = getWorkspaceServer();
             
-            // Add the provided global properties
-            globalProperties.putAll(getWorkspaceStatus().getProvidedGlobalProperties());
-
-            // Print properties header
-            final String globalPropsHeader = I18n.bind( ShellI18n.globalPropertiesHeader );
-            print( MESSAGE_INDENT, globalPropsHeader );
-
-            // Print the properties
-            String nameTitle = I18n.bind( ShellI18n.propertyNameHeader );
-            String valueTitle = I18n.bind( ShellI18n.propertyValueHeader );
-            PrintUtils.printProperties( getWriter(), globalProperties, nameTitle, valueTitle );
-
-            return CommandResult.SUCCESS;
-        } catch ( final Exception e ) {
+		    // Print properties for the context
+		    PrintUtils.printProperties(wsStatus,getWriter(),wsStatus.isShowingHiddenProperties(),wsStatus.isShowingPropertyNamePrefixes(),teiid);
+		    return CommandResult.SUCCESS;
+		} catch (Exception e) {
             return new CommandResultImpl( e );
-        }
+		}
     }
 
     /**
@@ -108,31 +89,31 @@ public class ShowGlobalCommand extends BuiltInShellCommand {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpDescription(int)
+     * @see org.komodo.relational.commands.server.ServerShellCommand#printHelpDescription(int)
      */
     @Override
     protected void printHelpDescription( final int indent ) {
-        print( indent, I18n.bind( ShellI18n.showGlobalHelp, getName() ) );
+        print( indent, I18n.bind( ServerCommandsI18n.serverShowPropertiesHelp, getName() ) );
     }
 
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpExamples(int)
+     * @see org.komodo.relational.commands.server.ServerShellCommand#printHelpExamples(int)
      */
     @Override
     protected void printHelpExamples( final int indent ) {
-        print( indent, I18n.bind( ShellI18n.showGlobalExamples ) );
+        print( indent, I18n.bind( ServerCommandsI18n.serverShowPropertiesExamples ) );
     }
 
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.commands.datarole.DataRoleShellCommand#printHelpUsage(int)
+     * @see org.komodo.relational.commands.server.ServerShellCommand#printHelpUsage(int)
      */
     @Override
     protected void printHelpUsage( final int indent ) {
-        print( indent, I18n.bind( ShellI18n.showGlobalUsage ) );
+        print( indent, I18n.bind( ServerCommandsI18n.serverShowPropertiesUsage ) );
     }
 
 }

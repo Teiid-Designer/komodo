@@ -32,15 +32,10 @@ import org.komodo.spi.runtime.TeiidVdb;
 public final class ServerDisconnectCommandTest extends AbstractServerCommandTest {
 
     @Test
-    public void shouldNotBeAvailableForServerNotSet() throws Exception {
-        this.assertCommandsNotAvailable(ServerDisconnectCommand.NAME);
-    }
-    
-    @Test
     @Ignore
     public void shouldNotBeAvailableForServerNotConnected() throws Exception {
         // Initialize a disconnected server
-        initServer("myTeiid", true, false, 
+        initServer("myTeiid", false, 
                    new TeiidVdb[]{VDB1}, new TeiidDataSource[]{DS1}, 
                    new TeiidTranslator[]{TRANSLATOR1}, new String[]{DS_TYPE1});
         
@@ -59,7 +54,7 @@ public final class ServerDisconnectCommandTest extends AbstractServerCommandTest
         assertCommandResultOk(result);
 
         // Initialize a mock server (not connected) with no artifacts
-        initServer("myTeiid", true, false, null, null, null, null);
+        initServer("myTeiid", false, null, null, null, null);
         
         // Results in 'command not found' - not enabled if server is not connected
         ShellCommand command = wsStatus.getCommand("server-disconnect");
@@ -81,7 +76,7 @@ public final class ServerDisconnectCommandTest extends AbstractServerCommandTest
         assertCommandResultOk(result);
 
         // Initialize a mock server (connected) with no artifacts
-        initServer("myTeiid", true, true, null, null, null, null);
+        initServer("myTeiid", true, null, null, null, null);
         
         // Disconnect the connected server
         ShellCommand command = wsStatus.getCommand("server-disconnect");

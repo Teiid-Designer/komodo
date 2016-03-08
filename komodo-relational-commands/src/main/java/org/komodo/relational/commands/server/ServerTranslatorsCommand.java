@@ -52,12 +52,16 @@ public final class ServerTranslatorsCommand extends ServerShellCommand {
             print( MESSAGE_INDENT, title );
 
             List< String > translatorNames = ServerUtils.getTranslatorNames(getWorkspaceTeiidInstance());
-            Collections.sort(translatorNames);
-            
-            PrintUtils.printMultiLineItemList( MESSAGE_INDENT, getWriter(), translatorNames, 4, null );
+            if(translatorNames.isEmpty()) {
+                print( MESSAGE_INDENT, I18n.bind( ServerCommandsI18n.noTranslatorsMsg ) );
+            } else {
+                Collections.sort(translatorNames);
+                PrintUtils.printMultiLineItemList( MESSAGE_INDENT, getWriter(), translatorNames, 4, null );
+            }
             result = CommandResult.SUCCESS;
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( e );
+            result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.connectionErrorWillDisconnect ), e );
+            ServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
         }
 
         return result;

@@ -11,7 +11,6 @@ import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.utils.i18n.I18n;
 
 /**
@@ -36,21 +35,14 @@ public final class ServerConnectCommand extends ServerShellCommand {
      */
     @Override
     protected CommandResult doExecute() {
-        if ( !hasWorkspaceServer() ) {
-            return new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.noTeiidDefined ), null );
-        }
-
         CommandResult result = null;
 
         try {
             final String serverName = getWorkspaceServerName();
             print( CompletionConstants.MESSAGE_INDENT, I18n.bind( ServerCommandsI18n.attemptingToConnect, serverName ) );
 
-            TeiidInstance teiidInstance = getWorkspaceTeiidInstance();
-
             try {
-                teiidInstance.connect();
-                boolean connected = teiidInstance.isConnected();
+                boolean connected = connectWorkspaceServer();
                 String connectStatus = connected ? I18n.bind( ServerCommandsI18n.connected )
                                                  : I18n.bind( ServerCommandsI18n.notConnected );
 
@@ -61,10 +53,10 @@ public final class ServerConnectCommand extends ServerShellCommand {
                                                            serverName,
                                                            connectStatus ) );
             } catch ( Exception ex ) {
-                result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.connectionError, ex.getLocalizedMessage() ), ex );
+                result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.connectionError ), ex );
             }
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.connectionError, e.getLocalizedMessage() ), e );
+            result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.connectionError ), e );
         }
 
         return result;
@@ -87,7 +79,7 @@ public final class ServerConnectCommand extends ServerShellCommand {
      */
     @Override
     public final boolean isValidForCurrentContext() {
-        return hasWorkspaceServer();
+        return !hasConnectedWorkspaceServer();
     }
 
     /**

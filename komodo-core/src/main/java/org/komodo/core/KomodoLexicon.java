@@ -94,6 +94,11 @@ public interface KomodoLexicon extends StringConstants {
          */
         String VALIDATION = Namespace.PREFIX + COLON + "validation"; //$NON-NLS-1$
 
+        /**
+         * The name of the Komodo environment servers child node. Value is {@value} .
+         */
+        String SERVERS = Namespace.PREFIX + COLON + "servers"; //$NON-NLS-1$
+
     }
 
     /**

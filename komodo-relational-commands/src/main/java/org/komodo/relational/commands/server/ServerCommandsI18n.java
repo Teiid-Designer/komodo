@@ -55,9 +55,9 @@ public final class ServerCommandsI18n extends I18n {
     public static String serverGetVdbHelp;
     public static String serverGetVdbUsage;
 
-    public static String serverSetExamples;
-    public static String serverSetHelp;
-    public static String serverSetUsage;
+    public static String serverShowPropertiesExamples;
+    public static String serverShowPropertiesHelp;
+    public static String serverShowPropertiesUsage;
 
     public static String serverTranslatorExamples;
     public static String serverTranslatorHelp;
@@ -83,13 +83,22 @@ public final class ServerCommandsI18n extends I18n {
     public static String serverVdbsHelp;
     public static String serverVdbsUsage;
 
+    public static String setServerPropertyExamples;
+    public static String setServerPropertyHelp;
+    public static String setServerPropertyUsage;
+
+    public static String unsetServerPropertyExamples;
+    public static String unsetServerPropertyHelp;
+    public static String unsetServerPropertyUsage;
+
     public static String attemptingToConnect;
     public static String attemptingToDisconnect;
     public static String canOnlyCopyDynamicVDBs;
     public static String commandCategory;
     public static String connected;
     public static String connectionError;
-    public static String currentTeiid;
+    public static String connectionErrorWillDisconnect;
+    public static String currentServer;
     public static String datasourceCopyToRepoFinished;
     public static String datasourceDeployFinished;
     public static String datasourceDeploymentOverwriteDisabled;
@@ -99,6 +108,7 @@ public final class ServerCommandsI18n extends I18n {
     public static String datasourceTypePropertiesHeader;
     public static String datasourceUnDeployFinished;
     public static String disconnectSuccessMsg;
+    public static String errorConnectingToServerOnStartup;
     public static String infoMessageDatasource;
     public static String infoMessageDatasources;
     public static String infoMessageDatasourceType;
@@ -110,20 +120,20 @@ public final class ServerCommandsI18n extends I18n {
     public static String missingVdbName;
     public static String missingDatasourceName;
     public static String missingDatasourceTypeName;
-    public static String missingServerNameArg;
-    public static String missingServerNewNameArg;
     public static String missingTranslatorName;
     public static String notConnected;
     public static String noServerToDisconnectMsg;
-    public static String noTeiidDefined;
+    public static String noDatasourcesMsg;
+    public static String noDatasourceTypesMsg;
+    public static String noTranslatorsMsg;
+    public static String noVdbsMsg;
     public static String overwriteArgInvalid;
     public static String repoDatasourceWithNameExists;
     public static String repoVdbWithNameExists;
     public static String serverDatasourceNotFound;
     public static String serverDatasourceTypeNotFound;
-    public static String serverDoesNotExist;
+    public static String serverDisconnectError;
     public static String serverNotConnected;
-    public static String serverSetSuccess;
     public static String serverStatusText;
     public static String serverTranslatorNotFound;
     public static String serverVdbNotFound;
