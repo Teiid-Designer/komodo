@@ -84,7 +84,6 @@ import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.DataTypeManager;
 import org.komodo.spi.uuid.WorkspaceUUIDService;
 import org.komodo.teiid.framework.AbstractDataTypeManager;
-import org.komodo.utils.ArgCheck;
 import org.komodo.utils.KEnvironment;
 import org.modeshape.jcr.api.Session;
 import org.osgi.framework.Bundle;
@@ -293,7 +292,14 @@ public class PluginService implements StringConstants {
         dir.mkdirs();
     }
 
+    private boolean isActive() {
+        return getState() == Bundle.ACTIVE;
+    }
+
     private Bundle findBundleBySymbolicName(String symbolicName) throws Exception {
+        if (!isActive())
+            throw new Exception(Messages.getString(Messages.PluginService.ServiceNotStarted));
+ 
         Bundle[] bundles = framework.getBundleContext().getBundles();
         if (bundles == null || bundles.length == 0)
             return null;
@@ -334,9 +340,6 @@ public class PluginService implements StringConstants {
      * @return the state of this service
      */
     public int getState() {
-        if (framework == null)
-            return Bundle.UNINSTALLED;
-
         return framework.getState();
     }
 
@@ -346,7 +349,8 @@ public class PluginService implements StringConstants {
      * @throws Exception
      */
     public void start() throws Exception {
-        ArgCheck.isNotNull(framework);
+        if (isActive())
+            return;
 
         if (getState() == Bundle.ACTIVE)
             return;
@@ -401,7 +405,7 @@ public class PluginService implements StringConstants {
      * @throws Exception
      */
     public void shutdown() throws Exception {
-        if (framework == null)
+        if (!isActive())
             return;
 
         if (getState() <= Bundle.INSTALLED)
@@ -422,6 +426,9 @@ public class PluginService implements StringConstants {
      * @throws Exception
      */
     public void installBundle(URL bundleUrl) throws Exception {
+        if (!isActive())
+            throw new Exception(Messages.getString(Messages.PluginService.ServiceNotStarted));
+
         if (bundleUrl == null)
             return; // nothing to do
 
@@ -453,7 +460,10 @@ public class PluginService implements StringConstants {
     /**
      * @return a list of all bundles currently installed
      */
-    public List<String> installedBundles() {
+    public List<String> installedBundles() throws Exception {
+        if (!isActive())
+            throw new Exception(Messages.getString(Messages.PluginService.ServiceNotStarted));
+
         Bundle[] bundles = framework.getBundleContext().getBundles();
         if (bundles == null || bundles.length == 0)
             return Collections.emptyList();
