@@ -38,11 +38,5 @@
 			<groupId>org.komodo</groupId>
 			<artifactId>komodo-core</artifactId>
 		</dependency>
-
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
 	</dependencies>
 </project>
