@@ -37,8 +37,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.komodo.spi.runtime.DataSourceDriver;
 import org.komodo.spi.runtime.EventManager;
-import org.komodo.spi.runtime.ExecutionConfigurationEvent;
-import org.komodo.spi.runtime.ExecutionConfigurationListener;
 import org.komodo.spi.runtime.HostProvider;
 import org.komodo.spi.runtime.TeiidAdminInfo;
 import org.komodo.spi.runtime.TeiidDataSource;
@@ -48,31 +46,9 @@ import org.komodo.spi.runtime.TeiidParent;
 import org.komodo.spi.runtime.TeiidVdb;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.test.utils.TestUtilities;
+import org.komodo.test.utils.DummyEventManager;
 
 public abstract class AbstractTestTeiidInstance {
-
-    protected class DummyEventManager implements EventManager {
-
-        @Override
-        public boolean addListener(ExecutionConfigurationListener listener) {
-            return true;
-        }
-
-        @Override
-        public void permitListeners(boolean enable) {
-            // Do Nothing
-        }
-
-        @Override
-        public void notifyListeners(ExecutionConfigurationEvent event) {
-            // Do Nothing
-        }
-
-        @Override
-        public boolean removeListener(ExecutionConfigurationListener listener) {
-            return true;
-        }
-    }
 
     private TeiidInstance teiidInstance;
 
