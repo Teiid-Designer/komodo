@@ -68,6 +68,13 @@
 			<artifactId>teiid-8.12</artifactId>
 			<scope>provided</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>org.komodo</groupId>
+			<artifactId>komodo-utils</artifactId>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>

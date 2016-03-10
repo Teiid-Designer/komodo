@@ -25,7 +25,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import java.util.Set;
+import java.util.Collection;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,7 +38,9 @@ import org.komodo.spi.runtime.TeiidAdminInfo;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.TeiidJdbcInfo;
 import org.komodo.spi.runtime.TeiidParent;
+import org.komodo.spi.runtime.TeiidVdb;
 import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.test.utils.TestUtilities;
 
 @RunWith(Arquillian.class)
 public class TestPluginServiceTeiidInstances extends AbstractTestPluginService {
@@ -84,7 +86,7 @@ public class TestPluginServiceTeiidInstances extends AbstractTestPluginService {
         when(jdbcInfo.getPort()).thenReturn(TeiidJdbcInfo.DEFAULT_PORT);
         when(jdbcInfo.isSecure()).thenReturn(true);
 
-        Set<TeiidVersion> versions = PluginService.getInstance().getSupportedTeiidVersions();
+        Collection<TeiidVersion> versions = PluginService.getInstance().getSupportedTeiidVersions();
         assertTrue(versions.size() > 0);
 
         for (TeiidVersion version : versions) {
@@ -94,6 +96,15 @@ public class TestPluginServiceTeiidInstances extends AbstractTestPluginService {
             TeiidInstance teiidInstance = teiidService.getTeiidInstance(parent, jdbcInfo); 
             teiidInstance.connect();
             assertTrue(teiidInstance.isConnected());
+
+            teiidInstance.deployDynamicVdb(TestUtilities.SAMPLE_VDB_FILE, TestUtilities.sampleExample());
+            Thread.sleep(2000);
+
+            Collection<TeiidVdb> vdbs = teiidInstance.getVdbs();
+            assertTrue(vdbs.size() ==1);
+
+            teiidInstance.undeployDynamicVdb(TestUtilities.SAMPLE_VDB_FILE);
+            Thread.sleep(2000);
 
             teiidInstance.disconnect();
         }

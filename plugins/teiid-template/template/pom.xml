@@ -32,7 +32,6 @@
 			!javax.servlet*,
 			!javax.transaction*,
 			!javax.xml.bind,
-			!javax.xml.stream*,
 			!javax.xml.ws,
 			javax.*,
 			sun.*

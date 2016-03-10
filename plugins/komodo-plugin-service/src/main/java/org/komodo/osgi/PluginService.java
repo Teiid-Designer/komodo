@@ -58,8 +58,8 @@ import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLStreamWriter;
-import javax.xml.stream.events.Namespace;
-import javax.xml.stream.util.StreamReaderDelegate;
+import javax.xml.stream.events.XMLEvent;
+import javax.xml.stream.util.XMLEventConsumer;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.dom.DOMLocator;
 import javax.xml.transform.sax.SAXTransformerFactory;
@@ -159,6 +159,7 @@ public class PluginService implements StringConstants {
     }
 
     private StringBuffer exportPackages() {
+        VersionProvider provider = VersionProvider.getInstance();
         StringBuffer pkgs = new StringBuffer();
 
         Class<?>[] classes = new Class<?>[] {
@@ -235,12 +236,6 @@ public class PluginService implements StringConstants {
             QName.class,
             // javax.xml.parsers
             DocumentBuilder.class,
-            // javax.xml.stream
-            XMLStreamWriter.class,
-            // javax.xml.stream.events
-            Namespace.class,
-            // javax.xml.stream.util
-            StreamReaderDelegate.class,
             // javax.xml.transform
             Transformer.class,
             // javax.xml.transform.dom
@@ -262,10 +257,31 @@ public class PluginService implements StringConstants {
         }
 
         //
+        // javax.xml.stream classes need a requirement version
+        // even though they are being provided by the jre
+        //
+        Class<?>[] streamClasses = new Class<?>[] {
+            // javax.xml.stream
+            XMLStreamWriter.class,
+            // javax.xml.stream.events
+            XMLEvent.class,
+            // javax.xml.stream.util
+            XMLEventConsumer.class
+        };
+
+        for (Class<?> klazz : streamClasses) {
+            pkgs.append(pkg(klazz))
+                    .append(VERSION_PREFIX)
+                    .append(SPEECH_MARK)
+                    .append(provider.getJavaxXmlStreamVersion())
+                    .append(SPEECH_MARK)
+                    .append(COMMA);
+        }
+
+        //
         // 3rd party dependencies in the bundles get wired up with a version requirement
         // so need to provide the version pragma with these packages to match
         //
-        VersionProvider provider = VersionProvider.getInstance();
         pkgs.append(Session.class.getPackage().getName())
                 .append(VERSION_PREFIX)
                 .append(SPEECH_MARK)
