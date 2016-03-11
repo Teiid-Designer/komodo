@@ -103,6 +103,7 @@ public final class ServerCommandsI18n extends I18n {
     public static String datasourceDeployFinished;
     public static String datasourceDeploymentOverwriteDisabled;
     public static String datasourceDeploymentTypeNotFound;
+    public static String datasourceOverwriteNotEnabled;
     public static String datasourceTypeDefaultValueLabel;
     public static String datasourceTypeNameLabel;
     public static String datasourceTypePropertiesHeader;
@@ -142,10 +143,11 @@ public final class ServerCommandsI18n extends I18n {
     public static String vdbDeployFailedMissingSourceJndi;
     public static String vdbDeployFinished;
     public static String vdbDeploymentOverwriteDisabled;
+    public static String vdbCopyToRepoFinished;
+    public static String vdbOverwriteNotEnabled;
+    public static String vdbUnDeployFinished;
     public static String workspaceDatasourceNotFound;
     public static String workspaceVdbNotFound;
-    public static String vdbCopyToRepoFinished;
-    public static String vdbUnDeployFinished;
 
     static {
         final ServerCommandsI18n i18n = new ServerCommandsI18n();
