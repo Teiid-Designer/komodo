@@ -112,6 +112,11 @@
 			<artifactId>komodo-relational</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.komodo</groupId>
+			<artifactId>komodo-ui</artifactId>
+		</dependency>
+
 		<!-- Allows test classes in other modules to extend the classes in this module -->
 		<dependency>
 			<groupId>org.komodo</groupId>

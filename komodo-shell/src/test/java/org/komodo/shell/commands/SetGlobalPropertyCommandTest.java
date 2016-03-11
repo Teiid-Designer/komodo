@@ -50,7 +50,7 @@ public class SetGlobalPropertyCommandTest extends AbstractCommandTest {
         assertCommandResultOk( result );
 
         // Check Context and property value
-        assertEquals("/", wsStatus.getCurrentContextDisplayPath());
+        assertEquals("/", wsStatus.getCurrentContextDisplayPath(null));
         assertEquals("true", wsStatus.getGlobalProperties(false).getProperty(WorkspaceStatus.SHOW_TYPE_IN_PROMPT_KEY));
     }
 
@@ -61,7 +61,7 @@ public class SetGlobalPropertyCommandTest extends AbstractCommandTest {
         assertCommandResultOk( result );
 
         // Check Context and property value
-        assertEquals("/", wsStatus.getCurrentContextDisplayPath());
+        assertEquals("/", wsStatus.getCurrentContextDisplayPath(null));
         assertEquals("/aRecordingFile.txt", wsStatus.getGlobalProperties(false).getProperty(WorkspaceStatus.RECORDING_FILE_KEY));
     }
 

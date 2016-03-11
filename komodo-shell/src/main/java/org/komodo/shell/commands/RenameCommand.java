@@ -57,7 +57,7 @@ public class RenameCommand extends BuiltInShellCommand {
             if ( renamingChild ) {
                 if ( !context.hasChild( getTransaction(), name ) ) {
                     return new CommandResultImpl( false, I18n.bind( ShellI18n.childDoesNotExistToRename,
-                                                                    getWorkspaceStatus().getDisplayPath( context ),
+                                                                    getWorkspaceStatus().getDisplayPath( context, null ),
                                                                     name ),
                                                   null );
                 }

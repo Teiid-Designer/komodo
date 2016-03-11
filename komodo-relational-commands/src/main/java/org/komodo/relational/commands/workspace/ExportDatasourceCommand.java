@@ -19,13 +19,13 @@ import org.komodo.relational.datasource.Datasource;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
-import org.komodo.shell.api.KomodoObjectLabelProvider;
 import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.ExportConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.ui.DefaultLabelProvider;
 import org.komodo.utils.StringUtils;
 import org.komodo.utils.i18n.I18n;
 
@@ -167,8 +167,7 @@ public final class ExportDatasourceCommand extends RelationalShellCommand {
 
     private boolean isWorkspaceContext() {
         final String path = getContext().getAbsolutePath();
-        return ( KomodoObjectLabelProvider.WORKSPACE_PATH.equals( path )
-                 || KomodoObjectLabelProvider.WORKSPACE_SLASH_PATH.equals( path ) );
+        return ( DefaultLabelProvider.WORKSPACE_PATH.equals( path ) || DefaultLabelProvider.WORKSPACE_SLASH_PATH.equals( path ) );
     }
 
     /**

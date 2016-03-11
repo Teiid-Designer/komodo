@@ -89,7 +89,7 @@ public final class ShowVirtualProceduresCommand extends ModelShellCommand {
                         print( indent,
                                I18n.bind( WorkspaceCommandsI18n.printRelationalObject,
                                                     virtProc.getName( getTransaction() ),
-                                                    getWorkspaceStatus().getTypeDisplay(virtProc) ) );
+                                                    getWorkspaceStatus().getTypeDisplay(virtProc, null) ) );
                     }
                 }
             }

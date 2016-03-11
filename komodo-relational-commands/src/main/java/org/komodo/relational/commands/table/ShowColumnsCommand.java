@@ -65,7 +65,7 @@ public final class ShowColumnsCommand extends TableShellCommand {
                     print( indent,
                            I18n.bind( WorkspaceCommandsI18n.printRelationalObject,
                                                 column.getName( getTransaction() ),
-                                                getWorkspaceStatus().getTypeDisplay(column) ) );
+                                                getWorkspaceStatus().getTypeDisplay(column, null) ) );
                 }
             }
 

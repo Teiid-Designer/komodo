@@ -100,13 +100,13 @@ public final class ImportCommand extends ModelShellCommand {
                     KomodoObject[] children = tempSchema.getChildren(getTransaction());
                     for(KomodoObject child : children) {
                         RenameCommand renameCommand = new RenameCommand(getWorkspaceStatus());
-                        String oldFullName = wsStatus.getDisplayPath(child);
-                        String contextName = wsStatus.getDisplayPath(getContext());
+                        String oldFullName = wsStatus.getDisplayPath(child, null);
+                        String contextName = wsStatus.getDisplayPath(getContext(), null);
                         renameCommand.setArguments(new Arguments( oldFullName + StringConstants.SPACE + contextName + StringConstants.FORWARD_SLASH + child.getName(getTransaction()) ));
                         renameCommand.execute();
                     }
                     // Clean up the temp schema
-                    deleteSchema(wsStatus.getDisplayPath(tempSchema));
+                    deleteSchema(wsStatus.getDisplayPath(tempSchema, null));
 
                     return new CommandResultImpl( true, I18n.bind( ModelCommandsI18n.ddlImportSuccessMsg, fileName ), null );
                 // Problem with the import.  Fail and delete all the parents children
@@ -114,13 +114,13 @@ public final class ImportCommand extends ModelShellCommand {
                     print(CompletionConstants.MESSAGE_INDENT, I18n.bind(ModelCommandsI18n.importFailedMsg, fileName));
                     print(CompletionConstants.MESSAGE_INDENT, importMessages.errorMessagesToString());
 
-                    deleteSchema(wsStatus.getDisplayPath(tempSchema));
+                    deleteSchema(wsStatus.getDisplayPath(tempSchema, null));
                 }
             } else {
                 print(CompletionConstants.MESSAGE_INDENT, I18n.bind(ModelCommandsI18n.importFailedMsg, fileName));
                 print(CompletionConstants.MESSAGE_INDENT, importMessages.errorMessagesToString());
 
-                deleteSchema(wsStatus.getDisplayPath(tempSchema));
+                deleteSchema(wsStatus.getDisplayPath(tempSchema, null));
             }
 
             return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.inputFileError, fileName ), null );
@@ -214,7 +214,7 @@ public final class ImportCommand extends ModelShellCommand {
             }
 
             // Cd back into the original Context
-            String path = getWorkspaceStatus().getDisplayPath(origContext);
+            String path = getWorkspaceStatus().getDisplayPath(origContext, null);
             cdCommand.setArguments(new Arguments(path));
             cdCommand.execute();
         } catch (Exception e) {

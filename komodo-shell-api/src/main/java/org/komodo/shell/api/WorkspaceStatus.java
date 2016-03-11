@@ -34,6 +34,8 @@ import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.ui.KomodoObjectLabelProvider;
+import org.komodo.spi.utils.TextFormat;
 
 /**
  * WorkspaceStatus interface.
@@ -264,17 +266,23 @@ public interface WorkspaceStatus extends StringConstants {
     KomodoObject getContextForDisplayPath(String displayPath);
 
     /**
-     * Get the display path for the supplied context
-     * @param kObj the context
-     * @return the display path
+     * @param kObj
+     *        the context (cannot be <code>null</code>)
+     * @param format
+     *        the text format or <code>null</code> if no formatting is desired
+     * @return the display path (never <code>null</code> or empty)
      */
-    String getDisplayPath(KomodoObject kObj);
+    String getDisplayPath( final KomodoObject kObj,
+                           final TextFormat format );
 
     /**
      * Get the display path for the current workspace context
+     *
+     * @param format
+     *        the text format or <code>null</code> if no formatting is desired
      * @return the display path
      */
-    String getCurrentContextDisplayPath();
+    String getCurrentContextDisplayPath( final TextFormat format );
 
     /**
      * Close the recording output file if open
@@ -422,12 +430,16 @@ public interface WorkspaceStatus extends StringConstants {
     KomodoObjectLabelProvider getObjectLabelProvider(KomodoObject kobject);
 
     /**
-     * Get the object type string for display
-     * @param kObj the KomodoObject
-     * @return the type display string
-     * @throws KException the exception
+     * @param kObj
+     *        the KomodoObject
+     * @param format
+     *        the text format or <code>null</code> if no formatting is desired
+     * @return the type display string or <code>null</code> if unable to provide
+     * @throws KException
+     *         the exception
      */
-    String getTypeDisplay ( final KomodoObject kObj ) throws KException;
+    String getTypeDisplay ( final KomodoObject kObj,
+                            final TextFormat format ) throws KException;
 
     /**
      * Get status messages from providers that should be displayed

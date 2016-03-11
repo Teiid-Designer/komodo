@@ -56,7 +56,8 @@ public final class RenameCommandTest extends AbstractCommandTest {
 
     @Test( expected = AssertionError.class )
     public void shouldNotRenameEnvironmentRoot() throws Exception {
-        final String reservedPath = this.wsStatus.getCurrentContextLabelProvider().getDisplayPath( RepositoryImpl.ENV_ROOT );
+        final String reservedPath = this.wsStatus.getCurrentContextLabelProvider()
+                                                 .getDisplayPath( getTransaction(), RepositoryImpl.ENV_ROOT, null );
         final String[] commands = { ( "cd " + reservedPath ),
                                     "rename blah" };
         execute( commands );
@@ -99,7 +100,8 @@ public final class RenameCommandTest extends AbstractCommandTest {
 
     @Test( expected = AssertionError.class )
     public void shouldNotRenameLibraryRoot() throws Exception {
-        final String reservedPath = this.wsStatus.getCurrentContextLabelProvider().getDisplayPath( RepositoryImpl.LIBRARY_ROOT );
+        final String reservedPath = this.wsStatus.getCurrentContextLabelProvider()
+                                                 .getDisplayPath( getTransaction(), RepositoryImpl.LIBRARY_ROOT, null );
         final String[] commands = { ( "cd " + reservedPath ),
                                     "rename blah" };
         execute( commands );
@@ -108,7 +110,7 @@ public final class RenameCommandTest extends AbstractCommandTest {
     @Test( expected = AssertionError.class )
     public void shouldNotRenameWorkspaceRoot() throws Exception {
         final String reservedPath = this.wsStatus.getCurrentContextLabelProvider()
-                                                 .getDisplayPath( RepositoryImpl.WORKSPACE_ROOT );
+                                                 .getDisplayPath( getTransaction(), RepositoryImpl.WORKSPACE_ROOT, null );
         final String[] commands = { ( "cd " + reservedPath ),
                                     "rename blah" };
         execute( commands );

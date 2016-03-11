@@ -64,7 +64,7 @@ public final class ShowViewsCommand extends ModelShellCommand {
                     print( indent,
                            I18n.bind( WorkspaceCommandsI18n.printRelationalObject,
                                                 view.getName( getTransaction() ),
-                                                getWorkspaceStatus().getTypeDisplay(view) ) );
+                                                getWorkspaceStatus().getTypeDisplay(view, null) ) );
                 }
             }
 

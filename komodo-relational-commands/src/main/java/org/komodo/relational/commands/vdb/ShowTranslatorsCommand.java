@@ -65,7 +65,7 @@ public final class ShowTranslatorsCommand extends VdbShellCommand {
                     print( indent,
                            I18n.bind( WorkspaceCommandsI18n.printRelationalObject,
                                       translator.getName( getTransaction() ),
-                                      getWorkspaceStatus().getTypeDisplay(translator) ) );
+                                      getWorkspaceStatus().getTypeDisplay(translator, null) ) );
                 }
             }
 

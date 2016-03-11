@@ -87,7 +87,7 @@ public final class ShowStoredProceduresCommand extends ModelShellCommand {
                         print( indent,
                                I18n.bind( WorkspaceCommandsI18n.printRelationalObject,
                                                     storedProc.getName( getTransaction() ),
-                                                    getWorkspaceStatus().getTypeDisplay(storedProc)) );
+                                                    getWorkspaceStatus().getTypeDisplay(storedProc, null)) );
                     }
                 }
             }

@@ -38,7 +38,7 @@ public class ResetGlobalPropertyCommandTest extends AbstractCommandTest {
 	    execute( commands );
 	}
 
-	
+
     @Test( expected = AssertionError.class )
     public void shouldFailBadGlobalProperty( ) throws Exception {
         final String[] commands = { "reset-global invalidProp" };
@@ -48,14 +48,14 @@ public class ResetGlobalPropertyCommandTest extends AbstractCommandTest {
     @Test
     public void shouldResetShowTypeInPrompt() throws Exception {
     	String propertyName=WorkspaceStatus.SHOW_TYPE_IN_PROMPT_KEY;
-  
+
     	wsStatus.setGlobalProperty(propertyName, negateBooleanValue(propertyName));
         final String[] commands = { "reset-global "+propertyName};
         final CommandResult result = execute( commands );
         assertCommandResultOk( result );
 
         // Check Context and property value
-        assertEquals("/", wsStatus.getCurrentContextDisplayPath());
+        assertEquals("/", wsStatus.getCurrentContextDisplayPath( null ));
         assertEquals(WorkspaceStatus.GLOBAL_PROPS.get(propertyName), wsStatus.getGlobalProperties(false).getProperty(propertyName));
     }
 
@@ -73,7 +73,7 @@ public class ResetGlobalPropertyCommandTest extends AbstractCommandTest {
         assertCommandResultOk( result );
 
         // Check Context and properties value
-        assertEquals("/", wsStatus.getCurrentContextDisplayPath());
+        assertEquals("/", wsStatus.getCurrentContextDisplayPath( null ));
         assertEquals(WorkspaceStatus.GLOBAL_PROPS.get(firstPropName), wsStatus.getGlobalProperties(false).getProperty(firstPropName));
         assertEquals(WorkspaceStatus.GLOBAL_PROPS.get(secondPropName), wsStatus.getGlobalProperties(false).getProperty(secondPropName));
     }

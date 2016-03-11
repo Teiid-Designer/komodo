@@ -65,7 +65,7 @@ public final class ShowDataRolesCommand extends VdbShellCommand {
                     print( indent,
                            I18n.bind( WorkspaceCommandsI18n.printRelationalObject,
                                       role.getName( getTransaction() ),
-                                      getWorkspaceStatus().getTypeDisplay(role) ) );
+                                      getWorkspaceStatus().getTypeDisplay(role, null) ) );
                 }
             }
 

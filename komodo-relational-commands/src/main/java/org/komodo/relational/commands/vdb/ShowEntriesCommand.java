@@ -64,7 +64,7 @@ public final class ShowEntriesCommand extends VdbShellCommand {
                     print( indent,
                            I18n.bind( WorkspaceCommandsI18n.printRelationalObject,
                                       entry.getName( getTransaction() ),
-                                      getWorkspaceStatus().getTypeDisplay(entry) ) );
+                                      getWorkspaceStatus().getTypeDisplay(entry, null) ) );
                 }
             }
 
