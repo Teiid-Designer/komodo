@@ -39,6 +39,10 @@ public final class ServerCommandsI18n extends I18n {
     public static String serverDeployDatasourceHelp;
     public static String serverDeployDatasourceUsage;
 
+    public static String serverDeployDriverExamples;
+    public static String serverDeployDriverHelp;
+    public static String serverDeployDriverUsage;
+
     public static String serverDeployVdbExamples;
     public static String serverDeployVdbHelp;
     public static String serverDeployVdbUsage;
@@ -109,6 +113,8 @@ public final class ServerCommandsI18n extends I18n {
     public static String datasourceTypePropertiesHeader;
     public static String datasourceUnDeployFinished;
     public static String disconnectSuccessMsg;
+    public static String driverDeployErrorServerHasMatch;
+    public static String driverDeployFinished;
     public static String errorConnectingToServerOnStartup;
     public static String infoMessageDatasource;
     public static String infoMessageDatasources;
@@ -121,6 +127,8 @@ public final class ServerCommandsI18n extends I18n {
     public static String missingVdbName;
     public static String missingDatasourceName;
     public static String missingDatasourceTypeName;
+    public static String missingDriverNameForDeployment;
+    public static String missingInputDriverFilePath;
     public static String missingTranslatorName;
     public static String notConnected;
     public static String noServerToDisconnectMsg;

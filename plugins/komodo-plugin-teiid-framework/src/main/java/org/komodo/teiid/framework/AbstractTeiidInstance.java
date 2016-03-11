@@ -591,15 +591,16 @@ public abstract class AbstractTeiidInstance implements TeiidInstance, StringCons
     }
 
     @Override
-    public void deployDriver(File driverFile) throws Exception {
+    public void deployDriver(String driverName, File driverFile) throws Exception {
         connect();
+        ArgCheck.isNotNull(driverName, "driverName"); //$NON-NLS-1$
+        
         if (!driverFile.exists())
             throw new Exception(Messages.getString(Messages.ExecutionAdmin.jarDeploymentJarNotFound, driverFile.getPath()));
 
         if (!driverFile.canRead())
             throw new Exception(Messages.getString(Messages.ExecutionAdmin.jarDeploymentJarNotReadable, driverFile.getPath()));
 
-        String fileName = driverFile.getName();
         InputStream iStream = null;
         try {
             iStream = new FileInputStream(driverFile);
@@ -608,7 +609,7 @@ public abstract class AbstractTeiidInstance implements TeiidInstance, StringCons
         }
 
         try {
-            deploy(fileName, iStream);
+            deploy(driverName, iStream);
         } catch (Exception ex) {
             // Jar deployment failed
             throw ex;

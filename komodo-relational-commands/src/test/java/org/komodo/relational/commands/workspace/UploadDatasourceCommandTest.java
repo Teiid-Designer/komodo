@@ -32,8 +32,29 @@ public final class UploadDatasourceCommandTest extends AbstractCommandTest {
     																						.getResource("dashboardDS.xml").getFile();
 
     @Test
-    public void shouldUploadDatasource1() throws Exception {
+    public void shouldUploadDatasource() throws Exception {
         final String[] commands = { "upload-datasource " + UPLOAD_SOURCE };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk(result);
+
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        Datasource[] sources = wkspMgr.findDatasources(getTransaction());
+
+        assertEquals(1, sources.length);
+        assertEquals("DashboardDS", sources[0].getName(getTransaction()));
+    }
+    
+    @Test( expected = AssertionError.class )
+    public void shouldNotUploadDatasourceIfExists() throws Exception {
+        final String[] commands = { "create-datasource DashboardDS ",
+                                    "upload-datasource " + UPLOAD_SOURCE };
+        execute( commands );
+    }
+    
+    @Test
+    public void shouldUploadDatasourceIfExistsWithOverwrite() throws Exception {
+        final String[] commands = { "create-datasource DashboardDS ",
+                                    "upload-datasource " + UPLOAD_SOURCE + " -o" };
         final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
