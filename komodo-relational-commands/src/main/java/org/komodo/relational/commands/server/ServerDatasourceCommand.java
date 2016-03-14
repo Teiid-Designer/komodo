@@ -51,7 +51,20 @@ public final class ServerDatasourceCommand extends ServerShellCommand {
                 return validationResult;
             }
 
-            TeiidDataSource source = getWorkspaceTeiidInstance().getDataSource(sourceName);
+            TeiidDataSource source = null;
+            try {
+                // Check the data source name to make sure its valid
+                List< String > existingSourceNames = ServerUtils.getDatasourceNames(getWorkspaceTeiidInstance());
+                if(!existingSourceNames.contains(sourceName)) {
+                    return new CommandResultImpl(false, I18n.bind( ServerCommandsI18n.serverDatasourceNotFound, sourceName ), null);
+                }
+                // Get the data source
+                source = getWorkspaceTeiidInstance().getDataSource(sourceName);
+            } catch (Exception ex) {
+                result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.connectionErrorWillDisconnect ), ex );
+                ServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
+                return result;
+            }
             if(source==null) {
                 return new CommandResultImpl(false, I18n.bind( ServerCommandsI18n.serverDatasourceNotFound, sourceName ), null);
             }
@@ -121,19 +134,25 @@ public final class ServerDatasourceCommand extends ServerShellCommand {
                               final List< CharSequence > candidates ) throws Exception {
         final Arguments args = getArguments();
 
-        List<String> existingSourceNames = ServerUtils.getDatasourceNames(getWorkspaceTeiidInstance());
-        Collections.sort(existingSourceNames);
+        try {
+            List<String> existingSourceNames = ServerUtils.getDatasourceNames(getWorkspaceTeiidInstance());
+            Collections.sort(existingSourceNames);
 
-        if ( args.isEmpty() ) {
-            if ( lastArgument == null ) {
-                candidates.addAll( existingSourceNames );
-            } else {
-                for ( final String item : existingSourceNames ) {
-                    if ( item.startsWith( lastArgument ) ) {
-                        candidates.add( item );
+            if ( args.isEmpty() ) {
+                if ( lastArgument == null ) {
+                    candidates.addAll( existingSourceNames );
+                } else {
+                    for ( final String item : existingSourceNames ) {
+                        if ( item.startsWith( lastArgument ) ) {
+                            candidates.add( item );
+                        }
                     }
                 }
             }
+        } catch (Exception ex) {
+            print( );
+            print( MESSAGE_INDENT, I18n.bind(ServerCommandsI18n.connectionErrorWillDisconnect) );
+            ServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
         }
         return TabCompletionModifier.AUTO;
     }

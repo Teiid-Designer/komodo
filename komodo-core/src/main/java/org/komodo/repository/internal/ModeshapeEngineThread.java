@@ -586,7 +586,7 @@ public class ModeshapeEngineThread extends Thread implements StringConstants {
                             final Node kid = itr.nextNode();
 
                             // don't delete validation rules
-                            if (Environment.VALIDATION.equals( kid.getName() )) {
+                            if (Environment.VALIDATION.equals( kid.getName() ) || Environment.SERVERS.equals( kid.getName() )) {
                                 continue;
                             }
 

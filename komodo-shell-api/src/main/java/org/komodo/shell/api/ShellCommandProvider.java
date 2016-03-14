@@ -52,11 +52,10 @@ public interface ShellCommandProvider {
 
     /**
      * Get status message for the provided KomodoObject
-     * @param uow the transaction
-     * @param kObj the KomodoObject
+     * @param wsStatus the WorkspaceStatus
      * @return the status message
      * @throws KException the exception
      */
-    public String getStatusMessage ( final Repository.UnitOfWork uow, final KomodoObject kObj ) throws KException;
+    public String getStatusMessage ( final WorkspaceStatus wsStatus ) throws KException;
 
 }

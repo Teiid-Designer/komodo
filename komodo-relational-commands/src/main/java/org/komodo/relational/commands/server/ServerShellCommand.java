@@ -7,24 +7,36 @@
  */
 package org.komodo.relational.commands.server;
 
-import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+import java.util.Arrays;
+import java.util.List;
 import org.komodo.relational.commands.RelationalShellCommand;
 import org.komodo.relational.teiid.Teiid;
-import org.komodo.relational.vdb.Vdb;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.KomodoObjectLabelProvider;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.KException;
-import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.runtime.TeiidInstance;
+import org.komodo.utils.KLog;
 import org.komodo.utils.i18n.I18n;
 
 /**
- * A base class for @{link {@link Vdb VDB}-related shell commands.
+ * A base class for @{link {@link Teiid server}-related shell commands.
  */
 abstract class ServerShellCommand extends RelationalShellCommand {
 
+    protected static final String ADMIN_PORT = "adminPort"; //$NON-NLS-1$
+    protected static final String ADMIN_PSWD = "adminPswd"; //$NON-NLS-1$
+    protected static final String ADMIN_USER = "adminUser"; //$NON-NLS-1$
+    protected static final String ADMIN_SECURE = "adminSecure"; //$NON-NLS-1$
+    protected static final String JDBC_PORT = "jdbcPort"; //$NON-NLS-1$
+    protected static final String JDBC_PSWD = "jdbcPswd"; //$NON-NLS-1$
+    protected static final String JDBC_USER = "jdbcUser"; //$NON-NLS-1$
+    protected static final String JDBC_SECURE = "jdbcSecure"; //$NON-NLS-1$
+    protected static final String HOST = "host"; //$NON-NLS-1$
+
+    protected static final List< String > ALL_PROPS = Arrays.asList( new String[] { ADMIN_PORT, ADMIN_PSWD, ADMIN_USER, ADMIN_SECURE,
+                                                                                    JDBC_PORT, JDBC_PSWD, JDBC_USER, JDBC_SECURE, HOST } );
     protected ServerShellCommand( final String name,
                                   final WorkspaceStatus status ) {
         super( status, name );
@@ -47,28 +59,12 @@ abstract class ServerShellCommand extends RelationalShellCommand {
     /**
      * Validates the existence of a connected server.
      * @return the result
-     * @throws KException the exception
      */
-    protected CommandResult validateHasConnectedWorkspaceServer() throws KException {
-        if(!hasWorkspaceServer()) {
-            return new CommandResultImpl(false, I18n.bind(ServerCommandsI18n.noTeiidDefined), null );
-        }
-
-        Teiid teiid = getWorkspaceServer();
-        if(!isConnected(teiid)) {
+    protected CommandResult validateHasConnectedWorkspaceServer() {
+        if( !hasConnectedWorkspaceServer() ) {
             return new CommandResultImpl(false, I18n.bind(ServerCommandsI18n.serverNotConnected), null );
         }
         return CommandResult.SUCCESS;
-    }
-
-    protected boolean hasWorkspaceServer() {
-        KomodoObject kObj = null;
-        try {
-            kObj = getWorkspaceServer();
-        } catch (KException ex) {
-            // exception just return false
-        }
-        return kObj!=null;
     }
 
     /**
@@ -82,44 +78,33 @@ abstract class ServerShellCommand extends RelationalShellCommand {
     }
 
     protected String getWorkspaceServerName() throws KException {
-        KomodoObject server = getWorkspaceServer();
-        if(server!=null) {
-            return server.getName(getTransaction());
-        }
-        return null;
+        return ServerManager.getInstance(getWorkspaceStatus()).getDefaultServer( ).getName( getTransaction() );
     }
 
     protected Teiid getWorkspaceServer() throws KException {
-        KomodoObject kObj = getWorkspaceStatus().getStateObjects().get(ServerCommandProvider.SERVER_DEFAULT_KEY);
-        if(kObj!=null && Teiid.RESOLVER.resolvable(getTransaction(), kObj)) {
-            return (Teiid)kObj;
-        }
-        return null;
+        return ServerManager.getInstance(getWorkspaceStatus()).getDefaultServer( );
     }
 
     protected TeiidInstance getWorkspaceTeiidInstance() throws KException {
-        Teiid wsTeiid = getWorkspaceServer();
-        return (wsTeiid!=null) ? wsTeiid.getTeiidInstance(getTransaction()) : null;
+        return ServerManager.getInstance(getWorkspaceStatus()).getDefaultTeiidInstance( );
     }
 
-    protected boolean isConnected( final Teiid teiid ) {
-        if (teiid == null) {
-            return false;
-        }
+    protected boolean connectWorkspaceServer() throws Exception {
+        return ServerManager.getInstance(getWorkspaceStatus()).connectDefaultServer( );
+    }
 
-        TeiidInstance teiidInstance = teiid.getTeiidInstance(getTransaction());
-        return teiidInstance.isConnected();
+    protected boolean disconnectWorkspaceServer() throws Exception {
+        return ServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer( );
     }
 
     protected boolean hasConnectedWorkspaceServer( ) {
-        Teiid teiid = null;
+        boolean isConnected = false;
         try {
-            teiid = getWorkspaceServer();
-        } catch (Exception ex) {
-            print( MESSAGE_INDENT, ex.getLocalizedMessage() );
+            isConnected = ServerManager.getInstance(getWorkspaceStatus()).isDefaultServerConnected( );
+        } catch ( KException e ) {
+            KLog.getLogger().error( "Error attempting to check default server connection status: " + e.getLocalizedMessage() ); //$NON-NLS-1$
         }
-
-        return isConnected(teiid);
+        return isConnected;
     }
 
 }

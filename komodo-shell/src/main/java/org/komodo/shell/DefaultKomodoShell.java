@@ -22,7 +22,6 @@
 package org.komodo.shell;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -147,7 +146,6 @@ public class DefaultKomodoShell implements KomodoShell {
     private final KomodoShellParent parent;
     private final KEngine kEngine;
     private final InputStream inStream;
-    private final PrintStream outStream;
     private final Writer outputWriter;
 
     /**
@@ -169,7 +167,6 @@ public class DefaultKomodoShell implements KomodoShell {
         this.parent = parent;
         this.kEngine = kEngine;
         this.inStream = inStream;
-        this.outStream = outStream;
         this.outputWriter = new OutputStreamWriter( outStream );
 
         StringBuffer sb = new StringBuffer();
@@ -257,26 +254,6 @@ public class DefaultKomodoShell implements KomodoShell {
         startKEngine();
 
         wsStatus = new WorkspaceStatusImpl( this );
-
-        // load shell properties if they exist
-        final String dataDir = getShellDataLocation();
-        final File startupPropertiesFile = new File( dataDir, PROPERTIES_FILE_NAME );
-
-        if ( startupPropertiesFile.exists() && startupPropertiesFile.isFile() && startupPropertiesFile.canRead() ) {
-            final Properties props = new Properties();
-
-            try {
-                props.load( new FileInputStream( startupPropertiesFile ) );
-            } catch ( final Exception e ) {
-                this.outStream.println( this.msgIndentStr
-                                        + I18n.bind( ShellI18n.errorLoadingProperties,
-                                                     startupPropertiesFile.getAbsolutePath(),
-                                                     e.getMessage() ) );
-            }
-
-            this.wsStatus.setGlobalProperties( props );
-            this.wsStatus.setProvidedProperties( props );
-        }
 
         reader = ShellCommandReaderFactory.createCommandReader( args, wsStatus );
         reader.open();
@@ -467,9 +444,16 @@ public class DefaultKomodoShell implements KomodoShell {
                 Files.createFile( propFile );
             }
 
-            Properties allProps = this.wsStatus.getGlobalProperties();
-            Properties providedProps = this.wsStatus.getProvidedProperties();
-            allProps.putAll(providedProps);
+            Properties allProps = this.wsStatus.getGlobalProperties(true);
+            Properties providedProps = this.wsStatus.getProvidedGlobalProperties();
+            // For provided types, adds the expected type before output
+            Properties providedWithTypes = new Properties();
+            for(String pName : providedProps.stringPropertyNames()) {
+                String pVal = providedProps.getProperty(pName);
+                String valType = this.wsStatus.getProvidedGlobalPropertyTypes().get(pName);
+                providedWithTypes.put(pName, pVal+'|'+valType);
+            }
+            allProps.putAll(providedWithTypes);
             allProps.store( new FileOutputStream( propFile.toString() ), null );
             this.wsStatus.closeRecordingWriter();
 
@@ -520,7 +504,7 @@ public class DefaultKomodoShell implements KomodoShell {
                 recordingWriter.write( command.toString() + StringConstants.NEW_LINE );
                 recordingWriter.flush();
             } catch ( IOException ex ) {
-                String filePath = wsStatus.getGlobalProperties().getProperty( WorkspaceStatus.RECORDING_FILE_KEY );
+                String filePath = wsStatus.getGlobalProperties(false).getProperty( WorkspaceStatus.RECORDING_FILE_KEY );
                 PrintUtils.print( recordingWriter, 0, I18n.bind( ShellI18n.recordingFileOutputError, filePath ) );
             }
             // Print error message if the recording file was not defined

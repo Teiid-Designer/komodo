@@ -15,13 +15,13 @@
  */
 package org.komodo.relational.commands.server;
 
+import java.util.Arrays;
+import java.util.Collection;
+import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.ShellCommand;
-import org.komodo.spi.runtime.TeiidDataSource;
-import org.komodo.spi.runtime.TeiidTranslator;
-import org.komodo.spi.runtime.TeiidVdb;
 
 /**
  * Test Class to test {@link ServerConnectCommand}.
@@ -30,28 +30,18 @@ import org.komodo.spi.runtime.TeiidVdb;
 public final class ServerConnectCommandTest extends AbstractServerCommandTest {
 
     @Test
-    public void shouldNotBeAvailableForServerNotDefined() throws Exception {
-        this.assertCommandsNotAvailable(ServerConnectCommand.NAME);
+    public void shouldBeAvailable() throws Exception {
+        final Collection< String > available = Arrays.asList( this.wsStatus.getAvailableCommandNames() );
+        if ( !available.contains( ServerConnectCommand.NAME ) ) {
+            Assert.fail( "Command " + name + " should be available" );
+        }
     }
     
     @Test
     @Ignore
     public void shouldConnect() throws Exception {
-        final String[] commands = {
-            "set-auto-commit false",
-            "create-teiid myTeiid",
-            "commit",
-            "set-server myTeiid" };
-        CommandResult result = execute( commands );
-        assertCommandResultOk(result);
-
-        // Initialize a disconnected server
-        initServer("myTeiid", true, false, 
-                   new TeiidVdb[]{VDB1}, new TeiidDataSource[]{DS1}, 
-                   new TeiidTranslator[]{TRANSLATOR1}, new String[]{DS_TYPE1});
-        
         ShellCommand command = wsStatus.getCommand("server-connect");
-        result = command.execute();
+        CommandResult result = command.execute();
         assertCommandResultOk(result);
     }
 

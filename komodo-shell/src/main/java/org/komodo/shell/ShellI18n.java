@@ -194,7 +194,9 @@ public final class ShellI18n extends I18n {
     public static String invalidCommandForContext;
     public static String invalidExitArg;
     public static String invalidGlobalProperty;
+    public static String invalidGlobalPropertyCannotReset;
     public static String invalidGlobalPropertyName;
+    public static String invalidNumericGlobalPropertyValue;
     public static String invalidPropName;
     public static String invalidPropValue;
     public static String invalidStartupArgs;

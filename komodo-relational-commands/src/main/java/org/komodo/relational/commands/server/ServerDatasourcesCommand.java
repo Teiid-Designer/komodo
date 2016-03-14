@@ -51,13 +51,17 @@ public final class ServerDatasourcesCommand extends ServerShellCommand {
             final String title = I18n.bind( ServerCommandsI18n.infoMessageDatasources, getWorkspaceServerName() );
             print( MESSAGE_INDENT, title );
 
-            List<String> sourceNames = ServerUtils.getDatasourceDisplayNames(getWorkspaceTeiidInstance());
-            Collections.sort(sourceNames);
-            
-            PrintUtils.printMultiLineItemList( MESSAGE_INDENT, getWriter(), sourceNames, 4, null );
+            List<String> sourceNames = ServerUtils.getDatasourceNames(getWorkspaceTeiidInstance());
+            if(sourceNames.isEmpty()) {
+                print( MESSAGE_INDENT, I18n.bind( ServerCommandsI18n.noDatasourcesMsg ) );
+            } else {
+                Collections.sort(sourceNames);
+                PrintUtils.printMultiLineItemList( MESSAGE_INDENT, getWriter(), sourceNames, 4, null );
+            }
             result = CommandResult.SUCCESS;
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( e );
+            result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.connectionErrorWillDisconnect ), e );
+            ServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
         }
 
         return result;

@@ -43,6 +43,7 @@ import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
+
 import org.komodo.core.KEngine;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.repository.RepositoryImpl;
@@ -103,12 +104,11 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     private ShellCommandFactory commandFactory;
     private Set<ShellCommand> currentContextCommands = new HashSet<ShellCommand>();
 
-    private Map<String,KomodoObject> stateObjects = new HashMap<String,KomodoObject>();
-
     private KomodoObjectLabelProvider currentContextLabelProvider;
     private KomodoObjectLabelProvider defaultLabelProvider;
     private KomodoObjectLabelProvider lastUsedLabelProvider;
     private Collection<KomodoObjectLabelProvider> alternateLabelProviders = new ArrayList<>();
+    private Map<String,String> providedGlobalPropertyTypes = new HashMap<String,String>();
 
     /**
      * Constructor
@@ -131,6 +131,29 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
                                 final KomodoShell shell) throws Exception {
         this.shell = shell;
         init(transaction);
+
+        // Load properties from file and initialize workspace
+        initProperties(loadStartupProperties());
+    }
+
+    /**
+     * @param transaction
+     *        the transaction to use initially in the shell (can be <code>null</code> if one should be created)
+     * @param shell
+     *        parent shell
+     * @param globalProperties
+     *        the global properties
+     * @throws Exception
+     *         error on initialisation failure
+     */
+    public WorkspaceStatusImpl( final UnitOfWork transaction,
+                                final KomodoShell shell,
+                                final Properties globalProperties) throws Exception {
+        this.shell = shell;
+        init(transaction);
+
+        // Init global properties using supplied props
+        initProperties(globalProperties);
     }
 
     private void init( final UnitOfWork transaction ) throws Exception {
@@ -152,20 +175,51 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         this.rootContext = new ObjectImpl( repo, RepositoryImpl.KOMODO_ROOT, 0 );
         this.currentContext = this.rootContext;
 
-        // initialize the global properties
-        initGlobalProperties();
-
         this.defaultLabelProvider = new DefaultLabelProvider();
         this.defaultLabelProvider.setRepository( repo );
         this.defaultLabelProvider.setWorkspaceStatus( this );
 
-        // Discover other label providers and rule providers
+        // Discover other providers
         discoverProviders();
         setLabelProvider(this.currentContext);
     }
 
-    private void initGlobalProperties() throws KException {
-        resetGlobalProperties();
+    private void initProperties( final Properties startupProperties ) throws Exception {
+        // Re-init wsProperties with global defaults, then overlay with provided properties
+        Properties newProperties = new Properties();
+        newProperties.putAll(GLOBAL_PROPS);
+        newProperties.putAll(startupProperties);
+
+        // Set global and provided globals on workspace status
+        for(String propName : newProperties.stringPropertyNames()) {
+            if(isGlobalProperty(propName)) {
+                setGlobalProperty(propName, newProperties.getProperty(propName));
+            } else {
+                String propVal = newProperties.getProperty(propName);
+                String[] parts = propVal.split("\\|");  //$NON-NLS-1$
+                int nParts = parts.length;
+                propVal = parts[0];
+                String propType = null;
+                if(nParts>1) {
+                    propType = parts[1];
+                }
+                setProvidedGlobalProperty(propName, propVal, propType!=null ? propType : "java.lang.String"); //$NON-NLS-1$
+            }
+        }
+
+        // Let the providers init provided states using provided workspace properties
+        initProvidedStates( );
+
+        // Update available commands
+        updateAvailableCommands();
+    }
+
+    /**
+     * Loads the startup properties file
+     * @return the properties
+     */
+    private Properties loadStartupProperties() {
+        final Properties props = new Properties();
 
         // load shell properties if they exist
         final String dataDir = this.shell.getShellDataLocation();
@@ -173,7 +227,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
 
         if ( startupPropertiesFile.exists() && startupPropertiesFile.isFile() && startupPropertiesFile.canRead() ) {
             try ( final FileInputStream fis = new FileInputStream( startupPropertiesFile ) ) {
-                this.wsProperties.load( fis );
+                props.load( fis );
             } catch ( final Exception e ) {
                 String msg = I18n.bind( ShellI18n.errorLoadingProperties,
                                         startupPropertiesFile.getAbsolutePath(),
@@ -181,15 +235,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
                 PrintUtils.print(getOutputWriter(), CompletionConstants.MESSAGE_INDENT, msg);
             }
         }
-
-        // Init the recording output file if it is defined
-        String recordingFile = this.wsProperties.getProperty(RECORDING_FILE_KEY);
-        if(!StringUtils.isBlank(recordingFile)) {
-            setRecordingWriter(recordingFile);
-        }
-
-        // Let the providers init any provided states
-        initProvidedStates(this.wsProperties);
+        return props;
     }
 
     private void createTransaction(final String source ) throws Exception {
@@ -588,7 +634,67 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         return null; // name and value are valid
     }
 
-    private void resetGlobalProperties() {
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.WorkspaceStatus#validateProvidedGlobalPropertyValue(java.lang.String, java.lang.String)
+     */
+    @Override
+    public String validateProvidedGlobalPropertyValue(String propertyName,
+                                                      String proposedValue) {
+        ArgCheck.isNotEmpty( propertyName, "propertyName" ); //$NON-NLS-1$
+
+        if ( !isProvidedGlobalProperty( propertyName.toUpperCase() ) ) {
+            return I18n.bind( ShellI18n.invalidGlobalPropertyName, propertyName );
+        }
+
+        // empty value means they want to remove or reset to default value
+        if ( StringUtils.isEmpty( proposedValue ) ) {
+            return null; // name and value are valid
+        }
+
+        try {
+            Class<?> clazz = Class.forName(this.providedGlobalPropertyTypes.get(propertyName));
+            if( Boolean.class == clazz) {
+                if ( Boolean.parseBoolean( proposedValue ) || "false".equalsIgnoreCase( ( proposedValue ) ) ) { //$NON-NLS-1$
+                    return null;
+                } else {
+                    return I18n.bind( ShellI18n.invalidBooleanGlobalPropertyValue, proposedValue, propertyName.toUpperCase() );
+                }
+            } else if( Integer.class == clazz ) {
+                Integer.parseInt( proposedValue );
+                return null;
+            } else if( Short.class == clazz ) {
+                Short.parseShort( proposedValue );
+                return null;
+            } else if( Long.class == clazz ) {
+                Long.parseLong( proposedValue );
+                return null;
+            } else if( Float.class == clazz ) {
+                Float.parseFloat( proposedValue );
+                return null;
+            } else if( Double.class == clazz ) {
+                Double.parseDouble( proposedValue );
+                return null;
+            } else if( Byte.class == clazz ) {
+                Byte.parseByte( proposedValue );
+                return null;
+            }
+        } catch (Exception e) {
+            return I18n.bind( ShellI18n.invalidNumericGlobalPropertyValue, proposedValue, propertyName.toUpperCase() );
+        }
+
+        return null; // name and value are valid
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.WorkspaceStatus#resetGlobalProperties( )
+     */
+    @Override
+    public void resetGlobalProperties() {
+        this.wsProperties.clear();
         for ( final Entry< String, String > entry : GLOBAL_PROPS.entrySet() ) {
             setGlobalProperty( entry.getKey(), entry.getValue() );
         }
@@ -604,21 +710,53 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
                                    final String value ) {
         ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
 
-        if ( !HIDDEN_PROPS.contains( name ) && WorkspaceStatus.GLOBAL_PROPS.containsKey( name.toUpperCase() ) ) {
+        if ( HIDDEN_PROPS.contains( name ) || WorkspaceStatus.GLOBAL_PROPS.containsKey( name.toUpperCase() ) ) {
             // if empty value reset to default value
             if ( StringUtils.isEmpty( value ) ) {
                 this.wsProperties.setProperty( name, GLOBAL_PROPS.get( name ) );
             } else {
                 // validate new value
-                if ( StringUtils.isEmpty( validateGlobalPropertyValue( name, value ) ) ) {
+                if ( StringUtils.isEmpty( validateGlobalPropertyValue( name, value ) )  || HIDDEN_PROPS.contains( name ) ) {
                     this.wsProperties.setProperty( name.toUpperCase(), value );
                 } else {
                     // reset to default value if value is invalid
                     this.wsProperties.setProperty( name, GLOBAL_PROPS.get( name ) );
                 }
             }
+
             if(name.toUpperCase().equals(WorkspaceStatus.RECORDING_FILE_KEY)) {
                 setRecordingWriter(value);
+            }
+
+            if(name.toUpperCase().equals(SAVED_CONTEXT_PATH)) {
+                // set current context to saved context if necessary
+                String savedPath = value;
+
+                if ( StringUtils.isBlank( savedPath ) ) {
+                    savedPath = KomodoObjectLabelProvider.WORKSPACE_PATH;
+                }
+
+                try {
+                    final Repository repo = getEngine().getDefaultRepository();
+                    KomodoObject context = new ObjectImpl( repo, savedPath, 0 );
+
+                    // make sure object still exists
+                    try {
+                        context.getName( getTransaction() );
+                    } catch ( final Exception e ) {
+                        context = null;
+                    }
+
+                    // saved path no longer exists so set context to workspace root
+                    if ( context == null ) {
+                        context = getRootContext();
+                    }
+
+                    setCurrentContext( context );
+                } catch (Exception ex) {
+                    // TODO Auto-generated catch block
+                    ex.printStackTrace();
+                }
             }
         }
     }
@@ -636,58 +774,26 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
             for ( final String name : props.stringPropertyNames() ) {
                 setGlobalProperty( name, props.getProperty( name ) );
             }
-
-            // set current context to saved context if necessary
-            String savedPath = props.getProperty( SAVED_CONTEXT_PATH );
-
-            if ( StringUtils.isBlank( savedPath ) ) {
-                savedPath = KomodoObjectLabelProvider.WORKSPACE_PATH;
-            }
-
-            final Repository repo = getEngine().getDefaultRepository();
-            KomodoObject context = new ObjectImpl( repo, savedPath, 0 );
-
-            // make sure object still exists
-            try {
-                context.getName( getTransaction() );
-            } catch ( final Exception e ) {
-                context = null;
-            }
-
-            // saved path no longer exists so set context to workspace root
-            if ( context == null ) {
-                context = getRootContext();
-            }
-
-            setCurrentContext( context );
         }
     }
 
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.shell.api.WorkspaceStatus#setProvidedProperties(java.util.Properties)
+     * @see org.komodo.shell.api.WorkspaceStatus#setProvidedGlobalProperty(java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
-    public void setProvidedProperties( final Properties props ) throws Exception {
-        if ( ( props != null ) && !props.isEmpty() ) {
-            for ( final String name : props.stringPropertyNames() ) {
-                setProvidedProperty( name, props.getProperty( name ) );
-            }
-        }
-    }
-
-    /* (non-Javadoc)
-     * @see org.komodo.shell.api.WorkspaceStatus#setStateProperty(java.lang.String, java.lang.String)
-     */
-    @Override
-    public void setProvidedProperty(String name,
-                                    String value) {
+    public void setProvidedGlobalProperty(String name,
+                                          String value,
+                                          String valueType) {
         ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( name, "valueType" ); //$NON-NLS-1$
         if ( StringUtils.isEmpty( value ) ) {
             this.wsProperties.remove(name);
+            this.providedGlobalPropertyTypes.remove(name);
         } else {
             this.wsProperties.setProperty( name, value );
+            this.providedGlobalPropertyTypes.put( name, valueType );
         }
     }
 
@@ -735,15 +841,18 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.shell.api.WorkspaceStatus#getGlobalProperties()
+     * @see org.komodo.shell.api.WorkspaceStatus#getGlobalProperties(boolean)
      */
     @Override
-    public Properties getGlobalProperties() {
+    public Properties getGlobalProperties(boolean includeHidden) {
         final Properties copy = new Properties(); // just provide a copy
 
         for ( final String propName : this.wsProperties.stringPropertyNames() ) {
-            // Includes the defined global properties and hidden properties
-            if ( HIDDEN_PROPS.contains( propName ) || WorkspaceStatus.GLOBAL_PROPS.containsKey( propName.toUpperCase() ) ) {
+            // Includes the defined global properties and hidden properties (depending on includeHidden arg)
+            if ( WorkspaceStatus.GLOBAL_PROPS.containsKey( propName.toUpperCase() ) ) {
+                copy.setProperty( propName, this.wsProperties.getProperty( propName ) );
+            }
+            if ( includeHidden && HIDDEN_PROPS.contains( propName ) ) {
                 copy.setProperty( propName, this.wsProperties.getProperty( propName ) );
             }
         }
@@ -752,10 +861,10 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     }
 
     /* (non-Javadoc)
-     * @see org.komodo.shell.api.WorkspaceStatus#getProvidedProperties()
+     * @see org.komodo.shell.api.WorkspaceStatus#getProvidedGlobalProperties()
      */
     @Override
-    public Properties getProvidedProperties() {
+    public Properties getProvidedGlobalProperties() {
         final Properties copy = new Properties(); // just provide a copy
 
         for ( final String propName : this.wsProperties.stringPropertyNames() ) {
@@ -765,6 +874,14 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         }
 
         return copy;
+    }
+
+    /* (non-Javadoc)
+     * @see org.komodo.shell.api.WorkspaceStatus#getProvidedGlobalPropertyTypes()
+     */
+    @Override
+    public Map<String, String> getProvidedGlobalPropertyTypes() {
+        return this.providedGlobalPropertyTypes;
     }
 
     /**
@@ -791,39 +908,6 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
 
         // command can't be found
         return this.getCommandFactory().createCommandNotFound(commandName);
-    }
-
-    /* (non-Javadoc)
-     * @see org.komodo.shell.api.WorkspaceStatus#getStateObjects()
-     */
-    @Override
-    public Map<String, KomodoObject> getStateObjects() {
-        return this.stateObjects;
-    }
-
-    /* (non-Javadoc)
-     * @see org.komodo.shell.api.WorkspaceStatus#setStateObject(java.lang.String, org.komodo.spi.repository.KomodoObject)
-     */
-    @Override
-    public void setStateObject(String key,
-                               KomodoObject stateObj) throws KException {
-        String stateObjName = null;
-        if(stateObj!=null) {
-            this.stateObjects.put(key, stateObj);
-            stateObjName = stateObj.getName(getTransaction());
-        } else {
-            this.stateObjects.remove(key);
-        }
-        setProvidedProperty(key,stateObjName);
-    }
-
-    /* (non-Javadoc)
-     * @see org.komodo.shell.api.WorkspaceStatus#removeStateObject(java.lang.String)
-     */
-    @Override
-    public void removeStateObject(String key) {
-        this.stateObjects.remove(key);
-        setProvidedProperty(key,null);
     }
 
     /**
@@ -882,13 +966,13 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
 	}
 
     @Override
-    public List<String> getProvidedStatusMessages( final KomodoObject kObj ) {
+    public List<String> getProvidedStatusMessages( ) {
         List<String> allMessages = new ArrayList<String>();
         if(!this.commandFactory.getCommandProviders().isEmpty()) {
             for(ShellCommandProvider provider : this.commandFactory.getCommandProviders()) {
                 String statusMessage = null;
                 try {
-                    statusMessage = provider.getStatusMessage(getTransaction(), kObj);
+                    statusMessage = provider.getStatusMessage(this);
                 } catch (KException ex) {
                     // just set message null
                 }
@@ -901,7 +985,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     }
 
     @Override
-    public void initProvidedStates( final Properties globalProps ) throws KException {
+    public void initProvidedStates( ) throws KException {
         if(!this.commandFactory.getCommandProviders().isEmpty()) {
             for(ShellCommandProvider provider : this.commandFactory.getCommandProviders()) {
                 provider.initWorkspaceState(this);
@@ -931,7 +1015,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         return Boolean.parseBoolean( this.wsProperties.getProperty( AUTO_COMMIT ) );
     }
 
-    // Discovers Label Providers and ValidationRule Providers
+    // Discovers Providers
     private void discoverProviders( ) {
         final List< ClassLoader > commandClassloaders = new ArrayList< >();
         commandClassloaders.add( Thread.currentThread().getContextClassLoader() );
@@ -1191,6 +1275,31 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         }
 
         return sb.toString();
+    }
+
+    /* (non-Javadoc)
+     * @see org.komodo.shell.api.WorkspaceStatus#isGlobalProperty(java.lang.String)
+     */
+    @Override
+    public boolean isGlobalProperty(String propertyName) {
+        if ( HIDDEN_PROPS.contains( propertyName.toUpperCase() ) || WorkspaceStatus.GLOBAL_PROPS.containsKey( propertyName.toUpperCase() ) ) {
+            return true;
+        }
+        return false;
+    }
+
+    /* (non-Javadoc)
+     * @see org.komodo.shell.api.WorkspaceStatus#isProvidedGlobalProperty(java.lang.String)
+     */
+    @Override
+    public boolean isProvidedGlobalProperty(String propertyName) {
+        Set<String> providedPropNames = getProvidedGlobalProperties().stringPropertyNames();
+        for(String providedPropName : providedPropNames) {
+            if(providedPropName.equalsIgnoreCase(propertyName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

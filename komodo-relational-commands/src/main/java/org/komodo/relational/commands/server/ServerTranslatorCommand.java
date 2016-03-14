@@ -51,7 +51,20 @@ public final class ServerTranslatorCommand extends ServerShellCommand {
                 return validationResult;
             }
 
-            TeiidTranslator translator = getWorkspaceTeiidInstance().getTranslator(translatorName);
+            TeiidTranslator translator = null;
+            try {
+                // Check the translator name to make sure its valid
+                List< String > existingTranslatorNames = ServerUtils.getTranslatorNames(getWorkspaceTeiidInstance());
+                if(!existingTranslatorNames.contains(translatorName.toLowerCase())) {
+                    return new CommandResultImpl(false, I18n.bind( ServerCommandsI18n.serverTranslatorNotFound, translatorName ), null);
+                }
+                // Get the translator
+                translator = getWorkspaceTeiidInstance().getTranslator(translatorName);
+            } catch (Exception ex) {
+                result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.connectionErrorWillDisconnect ), ex );
+                ServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
+                return result;
+            }
             if(translator==null) {
                 return new CommandResultImpl(false, I18n.bind( ServerCommandsI18n.serverTranslatorNotFound, translatorName ), null);
             }
@@ -121,19 +134,25 @@ public final class ServerTranslatorCommand extends ServerShellCommand {
                               final List< CharSequence > candidates ) throws Exception {
         final Arguments args = getArguments();
 
-        List< String > existingTranslatorNames = ServerUtils.getTranslatorNames(getWorkspaceTeiidInstance());
-        Collections.sort(existingTranslatorNames);
+        try {
+            List< String > existingTranslatorNames = ServerUtils.getTranslatorNames(getWorkspaceTeiidInstance());
+            Collections.sort(existingTranslatorNames);
 
-        if ( args.isEmpty() ) {
-            if ( lastArgument == null ) {
-                candidates.addAll( existingTranslatorNames );
-            } else {
-                for ( final String item : existingTranslatorNames ) {
-                    if ( item.startsWith( lastArgument ) ) {
-                        candidates.add( item );
+            if ( args.isEmpty() ) {
+                if ( lastArgument == null ) {
+                    candidates.addAll( existingTranslatorNames );
+                } else {
+                    for ( final String item : existingTranslatorNames ) {
+                        if ( item.startsWith( lastArgument ) ) {
+                            candidates.add( item );
+                        }
                     }
                 }
             }
+        } catch (Exception ex) {
+            print( );
+            print( MESSAGE_INDENT, I18n.bind(ServerCommandsI18n.connectionErrorWillDisconnect) );
+            ServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
         }
         return TabCompletionModifier.AUTO;
     }

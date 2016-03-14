@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-
 import org.komodo.core.KEngine;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
@@ -144,33 +143,32 @@ public interface WorkspaceStatus extends StringConstants {
                             final String propValue );
 
     /**
-     * Sets provided workspace properties on startup
-     *
-     * @param props
-     *        the properties (can be <code>null</code> or null to remove)
-     * @throws Exception
-     *         if an error occurs
-     */
-    void setProvidedProperties( final Properties props ) throws Exception;
-
-    /**
-     * Sets the specified provided property value in workspace properties.
+     * Sets the specified provided global property value in workspace properties.
      *
      * @param propKey
      *        the property key (cannot be empty)
      * @param propValue
      *        the property value (can be empty when changing to the default value)
+     * @param valueClassName
+     *        the value className for property type (cannot be empty)
      */
-    void setProvidedProperty( final String propKey,
-                              final String propValue );
+    void setProvidedGlobalProperty( final String propKey,
+                                    final String propValue,
+                                    final String valueClassName);
 
     /**
      * Gets a copy of the provided workspace properties.  This returns only the properties that are provided.
      *
      * @return the provided workspace properties (never <code>null</code> or empty)
-     * @see #setProvidedProperty(String, String)
      */
-    Properties getProvidedProperties();
+    Properties getProvidedGlobalProperties();
+    
+    /**
+     * Gets provided property types
+     *
+     * @return the provided property types (never <code>null</code>)
+     */
+    Map<String,String> getProvidedGlobalPropertyTypes();
 
     /**
      * Sets global workspace properties on startup
@@ -183,13 +181,36 @@ public interface WorkspaceStatus extends StringConstants {
     void setGlobalProperties( final Properties props ) throws Exception;
 
     /**
+     * Resets global workspace properties on startup
+     *
+     * @throws Exception
+     *         if an error occurs
+     */
+    void resetGlobalProperties( ) throws Exception;
+
+    /**
      * Gets a copy of the global workspace properties.  This includes the defined global properties and defined hidden properties.
      *
+     * @param includeHidden <code>true</code> to include hidden global properties
      * @return the global workspace properties (never <code>null</code> or empty)
      * @see #setGlobalProperty(String, String)
      */
-    Properties getGlobalProperties();
+    Properties getGlobalProperties(boolean includeHidden);
 
+    /**
+     * Determines if the supplied property is a known global property
+     * @param propertyName the property name
+     * @return <code>true</code> if the property is a global property.
+     */
+    boolean isGlobalProperty( final String propertyName );
+    
+    /**
+     * Determines if the supplied property is a provided global property
+     * @param propertyName the property name
+     * @return <code>true</code> if the property is a provided global property.
+     */
+    boolean isProvidedGlobalProperty( final String propertyName );
+    
     /**
      * @param propertyName the name of the property being checked (cannot be empty)
      * @return <code>true</code> if a known boolean property
@@ -205,6 +226,16 @@ public interface WorkspaceStatus extends StringConstants {
      */
     String validateGlobalPropertyValue( final String propertyName,
                                         final String proposedValue );
+
+    /**
+     * @param propertyName
+     *        the name of the provided global property being checked (cannot be empty)
+     * @param proposedValue
+     *        the proposed value (can be empty if removing or resetting to the default value)
+     * @return an error message or <code>null</code> if name and proposed value are valid
+     */
+    String validateProvidedGlobalPropertyValue( final String propertyName,
+                                                final String proposedValue );
 
 	/**
 	 * Get the workspace context
@@ -369,26 +400,6 @@ public interface WorkspaceStatus extends StringConstants {
     KomodoShell getShell();
 
     /**
-     * Get Additional generic workspace state objects
-     * @return the map of state objects
-     */
-    Map<String,KomodoObject> getStateObjects();
-
-    /**
-     * Set a generic workspace state object
-     * @param key the state key
-     * @param stateObj the state object
-     * @throws KException the exception
-     */
-    void setStateObject(String key, KomodoObject stateObj) throws KException;
-
-    /**
-     * Remove a generic workspace state object
-     * @param key the state key
-     */
-    void removeStateObject(String key);
-
-    /**
      * Resolve a KomodoObject into a concrete class if available
      * @param <T> the specific {@link KomodoObject} type being resolved
      * @param kObj the KomodoObject
@@ -420,17 +431,15 @@ public interface WorkspaceStatus extends StringConstants {
 
     /**
      * Get status messages from providers that should be displayed
-     * @param kObj the KomodoObject
      * @return the status messages
      */
-    List<String> getProvidedStatusMessages( final KomodoObject kObj );
+    List<String> getProvidedStatusMessages( );
 
     /**
-     * Initialize any workspace state from providers
-     * @param globalProps the workspace global properties
+     * Initialize any provided workspace states from the workspace provided properties
      * @throws KException the exception
      */
-    public void initProvidedStates( final Properties globalProps ) throws KException;
+    public void initProvidedStates( ) throws KException;
 
     /**
      * @return <code>true</code> if the current transaction should be committed after each command execution or rolled back if

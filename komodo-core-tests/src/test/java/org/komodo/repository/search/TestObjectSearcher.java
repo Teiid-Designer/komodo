@@ -675,8 +675,9 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
         // /tko:komodo/tko:workspace
         // /tko:komodo/tko:library
         // /tko:komodo/tko:environment
+        // /tko:komodo/tko:environment/tko:servers
         // /tko:komodo/tko:environment/tko:validation
-        assertEquals(4, searchObjects.size());
+        assertEquals(5, searchObjects.size());
     }
 
     @Test

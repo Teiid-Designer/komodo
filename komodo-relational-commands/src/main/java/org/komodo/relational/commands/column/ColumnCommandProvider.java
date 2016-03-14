@@ -60,8 +60,13 @@ public class ColumnCommandProvider implements ShellCommandProvider {
         return null;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.ShellCommandProvider#getStatusMessage(org.komodo.shell.api.WorkspaceStatus)
+     */
     @Override
-    public String getStatusMessage ( final Repository.UnitOfWork uow, final KomodoObject kObj ) {
+    public String getStatusMessage( final WorkspaceStatus wsStatus ) {
         return null;
     }
 

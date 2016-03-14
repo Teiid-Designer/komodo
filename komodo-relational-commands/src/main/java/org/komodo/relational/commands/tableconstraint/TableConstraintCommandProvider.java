@@ -37,12 +37,10 @@ public class TableConstraintCommandProvider implements ShellCommandProvider {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.shell.api.ShellCommandProvider#getStatusMessage(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      org.komodo.spi.repository.KomodoObject)
+     * @see org.komodo.shell.api.ShellCommandProvider#getStatusMessage(org.komodo.shell.api.WorkspaceStatus)
      */
     @Override
-    public String getStatusMessage( final UnitOfWork uow,
-                                    final KomodoObject kObj ) {
+    public String getStatusMessage( final WorkspaceStatus wsStatus ) {
         return null;
     }
 

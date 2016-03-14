@@ -15,8 +15,6 @@ import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
-import org.komodo.spi.runtime.TeiidDataSource;
-import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.utils.i18n.I18n;
 
 /**
@@ -53,15 +51,18 @@ public final class ServerUndeployDatasourceCommand extends ServerShellCommand {
             }
 
             // Undeploy the VDB
-            TeiidInstance teiidInstance = getWorkspaceTeiidInstance();
-            TeiidDataSource dataSource = teiidInstance.getDataSource(sourceName);
-
-            // DataSource found - undeploy it
-            if(dataSource!=null) {
-                teiidInstance.deleteDataSource(dataSource.getName());
-            // DataSource not found - error
-            } else {
-                return new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.serverDatasourceNotFound, sourceName ), null );
+            try {
+                // Check the data source name to make sure its valid
+                List< String > existingSourceNames = ServerUtils.getDatasourceNames(getWorkspaceTeiidInstance());
+                if(!existingSourceNames.contains(sourceName)) {
+                    return new CommandResultImpl(false, I18n.bind( ServerCommandsI18n.serverDatasourceNotFound, sourceName ), null);
+                }
+                // DataSource found - undeploy it
+                getWorkspaceTeiidInstance().deleteDataSource(sourceName);
+            } catch (Exception ex) {
+                result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.connectionErrorWillDisconnect ), ex );
+                ServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
+                return result;
             }
 
             print( MESSAGE_INDENT, I18n.bind(ServerCommandsI18n.datasourceUnDeployFinished) );
@@ -124,19 +125,25 @@ public final class ServerUndeployDatasourceCommand extends ServerShellCommand {
                               final List< CharSequence > candidates ) throws Exception {
         final Arguments args = getArguments();
 
-        List<String> existingDatasourceNames = ServerUtils.getDatasourceNames(getWorkspaceTeiidInstance());
-        Collections.sort(existingDatasourceNames);
-        
-        if ( args.isEmpty() ) {
-            if ( lastArgument == null ) {
-                candidates.addAll( existingDatasourceNames );
-            } else {
-                for ( final String item : existingDatasourceNames ) {
-                    if ( item.startsWith( lastArgument ) ) {
-                        candidates.add( item );
+        try {
+            List<String> existingDatasourceNames = ServerUtils.getDatasourceNames(getWorkspaceTeiidInstance());
+            Collections.sort(existingDatasourceNames);
+            
+            if ( args.isEmpty() ) {
+                if ( lastArgument == null ) {
+                    candidates.addAll( existingDatasourceNames );
+                } else {
+                    for ( final String item : existingDatasourceNames ) {
+                        if ( item.startsWith( lastArgument ) ) {
+                            candidates.add( item );
+                        }
                     }
                 }
             }
+        } catch (Exception ex) {
+            print( );
+            print( MESSAGE_INDENT, I18n.bind(ServerCommandsI18n.connectionErrorWillDisconnect) );
+            ServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
         }
 
         return TabCompletionModifier.AUTO;

@@ -60,7 +60,10 @@ public class ObjectImpl implements KomodoObject, StringConstants {
     public static final Collection< String > RESERVED_PATHS = Arrays.asList( new String[] { RepositoryImpl.KOMODO_ROOT,
                                                                                             RepositoryImpl.WORKSPACE_ROOT,
                                                                                             RepositoryImpl.LIBRARY_ROOT,
-                                                                                            RepositoryImpl.ENV_ROOT } );
+                                                                                            RepositoryImpl.ENV_ROOT,
+                                                                                            RepositoryImpl.SEARCHES_ROOT,
+                                                                                            RepositoryImpl.VALIDATION_ROOT,
+                                                                                            RepositoryImpl.SERVERS_ROOT } );
 
     protected static Descriptor[] getAllDescriptors( final UnitOfWork transaction,
                                                      final KomodoObject kobject ) throws KException {

@@ -13,18 +13,16 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
-import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.commands.workspace.UploadVdbCommand;
-import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.runtime.TeiidVdb;
 import org.komodo.utils.i18n.I18n;
+import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 /**
  * A shell command to get a server VDB and copy into the workspace
@@ -57,9 +55,7 @@ public final class ServerGetVdbCommand extends ServerShellCommand {
             String vdbName = requiredArgument( 0, I18n.bind( ServerCommandsI18n.missingVdbName ) );
 
             // Make sure no VDB currently in workspace with this name
-            final WorkspaceManager mgr = getWorkspaceManager();
-            KomodoObject[] repoDS = mgr.getChildrenOfType(getTransaction(), KomodoLexicon.Vdb.NODE_TYPE, vdbName);
-            if(repoDS.length!=0) {
+            if(getWorkspaceManager().hasChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE)) {
                 return new CommandResultImpl( false, I18n.bind(ServerCommandsI18n.repoVdbWithNameExists, vdbName), null );
             }
             
@@ -70,7 +66,20 @@ public final class ServerGetVdbCommand extends ServerShellCommand {
             }
 
             // Get the VDB - make sure its a dynamic VDB
-            TeiidVdb vdb = getWorkspaceTeiidInstance().getVdb(vdbName);
+            TeiidVdb vdb = null;
+            try {
+                // Check the vdb name to make sure its valid
+                List< String > existingVdbNames = ServerUtils.getVdbNames(getWorkspaceTeiidInstance());
+                if(!existingVdbNames.contains(vdbName)) {
+                    return new CommandResultImpl(false, I18n.bind( ServerCommandsI18n.serverVdbNotFound, vdbName ), null);
+                }
+                // Get the vdb
+                vdb = getWorkspaceTeiidInstance().getVdb(vdbName);
+            } catch (Exception ex) {
+                result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.connectionErrorWillDisconnect ), ex );
+                ServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
+                return result;
+            }
             if(vdb == null) {
                 return new CommandResultImpl( false, I18n.bind(ServerCommandsI18n.serverVdbNotFound, vdbName), null );
             }
@@ -162,20 +171,27 @@ public final class ServerGetVdbCommand extends ServerShellCommand {
                               final List< CharSequence > candidates ) throws Exception {
         final Arguments args = getArguments();
 
-        List<String> existingVdbNames = ServerUtils.getVdbNames(getWorkspaceTeiidInstance());
-        Collections.sort(existingVdbNames);
+        try {
+            List<String> existingVdbNames = ServerUtils.getVdbNames(getWorkspaceTeiidInstance());
+            Collections.sort(existingVdbNames);
 
-        if ( args.isEmpty() ) {
-            if ( lastArgument == null ) {
-                candidates.addAll( existingVdbNames );
-            } else {
-                for ( final String item : existingVdbNames ) {
-                    if ( item.startsWith( lastArgument ) ) {
-                        candidates.add( item );
+            if ( args.isEmpty() ) {
+                if ( lastArgument == null ) {
+                    candidates.addAll( existingVdbNames );
+                } else {
+                    for ( final String item : existingVdbNames ) {
+                        if ( item.startsWith( lastArgument ) ) {
+                            candidates.add( item );
+                        }
                     }
                 }
             }
+        } catch (Exception ex) {
+            print( );
+            print( MESSAGE_INDENT, I18n.bind(ServerCommandsI18n.connectionErrorWillDisconnect) );
+            ServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
         }
+
         return TabCompletionModifier.AUTO;
     }
 

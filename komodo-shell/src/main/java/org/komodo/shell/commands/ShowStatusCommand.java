@@ -22,7 +22,6 @@
 package org.komodo.shell.commands;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
-import java.util.Collection;
 import java.util.List;
 import org.komodo.shell.BuiltInShellCommand;
 import org.komodo.shell.CommandResultImpl;
@@ -141,13 +140,10 @@ public class ShowStatusCommand extends BuiltInShellCommand {
         final String path = wsStatus.getDisplayPath(currentContext);
         print(MESSAGE_INDENT, I18n.bind(ShellI18n.currentContext, path));
 
-        // Get additional provided statuses for state objects
-        Collection<KomodoObject> stateObjs = wsStatus.getStateObjects().values();
-        for(KomodoObject stateObj : stateObjs) {
-            List<String> stateObjectStatusList = wsStatus.getProvidedStatusMessages(stateObj);
-            for(String status : stateObjectStatusList) {
-                print(MESSAGE_INDENT, status);
-            }
+        // Get additional provided status messages
+        List<String> stateObjectStatusList = wsStatus.getProvidedStatusMessages();
+        for(String status : stateObjectStatusList) {
+            print(MESSAGE_INDENT, status);
         }
 	}
 

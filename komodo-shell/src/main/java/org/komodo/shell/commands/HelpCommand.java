@@ -80,6 +80,7 @@ public class HelpCommand extends BuiltInShellCommand {
     protected CommandResult doExecute() {
         try {
     		String commandName = optionalArgument(0);
+    		getWorkspaceStatus().updateAvailableCommands();
     		if (commandName == null) {
     			printHelpAll();
     		} else {

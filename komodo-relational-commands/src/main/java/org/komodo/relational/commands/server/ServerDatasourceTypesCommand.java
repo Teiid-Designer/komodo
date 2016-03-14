@@ -55,13 +55,17 @@ public final class ServerDatasourceTypesCommand extends ServerShellCommand {
             print( MESSAGE_INDENT, title );
 
             Set< String > types = getWorkspaceTeiidInstance().getDataSourceTypeNames();
-            List< String > objNames = new ArrayList< String >(types);
-            Collections.sort(objNames);
-            
-            PrintUtils.printMultiLineItemList( MESSAGE_INDENT, getWriter(), objNames, 4, null );
+            if(types.isEmpty()) {
+                print( MESSAGE_INDENT, I18n.bind( ServerCommandsI18n.noDatasourceTypesMsg ) );
+            } else {
+                List< String > objNames = new ArrayList< String >(types);
+                Collections.sort(objNames);
+                PrintUtils.printMultiLineItemList( MESSAGE_INDENT, getWriter(), objNames, 4, null );
+            }
             result = CommandResult.SUCCESS;
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( e );
+            result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.connectionErrorWillDisconnect ), e );
+            ServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
         }
 
         return result;

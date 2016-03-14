@@ -3,6 +3,9 @@
     <tko:komodo jcr:primaryType="tko:komodo">
         <tko:workspace jcr:primaryType="tko:workspace" />
         <tko:library jcr:primaryType="tko:library" />
-        <tko:environment jcr:primaryType="tko:environment" />
+        <tko:environment jcr:primaryType="tko:environment">
+            <tko:validation jcr:primaryType="nt:unstructured" />
+            <tko:servers jcr:primaryType="nt:unstructured" />
+        </tko:environment>
     </tko:komodo>
 </jcr:root>

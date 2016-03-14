@@ -52,12 +52,16 @@ public final class ServerVdbsCommand extends ServerShellCommand {
             print( MESSAGE_INDENT, title );
 
             List< String > vdbNames = ServerUtils.getVdbNames(getWorkspaceTeiidInstance());
-            Collections.sort(vdbNames);
-            
-            PrintUtils.printMultiLineItemList( MESSAGE_INDENT, getWriter(), vdbNames, 4, null );
+            if(vdbNames.isEmpty()) {
+                print( MESSAGE_INDENT, I18n.bind( ServerCommandsI18n.noVdbsMsg ) );
+            } else {
+                Collections.sort(vdbNames);
+                PrintUtils.printMultiLineItemList( MESSAGE_INDENT, getWriter(), vdbNames, 4, null );
+            }
             result = CommandResult.SUCCESS;
         } catch ( final Exception e ) {
-            result = new CommandResultImpl( e );
+            result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.connectionErrorWillDisconnect ), e );
+            ServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
         }
 
         return result;
