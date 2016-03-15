@@ -369,6 +369,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.komodo</groupId>
+				<artifactId>komodo-ui</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.komodo</groupId>
 				<artifactId>komodo-utils-modeshape-logger</artifactId>
 				<version>${project.version}</version>
 			</dependency>

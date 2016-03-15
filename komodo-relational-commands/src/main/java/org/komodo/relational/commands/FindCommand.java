@@ -20,11 +20,11 @@ import org.komodo.repository.KomodoTypeRegistry;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
-import org.komodo.shell.api.KomodoObjectLabelProvider;
 import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.ui.KomodoObjectLabelProvider;
 import org.komodo.utils.StringUtils;
 import org.komodo.utils.i18n.I18n;
 
@@ -167,7 +167,7 @@ public final class FindCommand extends RelationalShellCommand {
         final String[] result = new String[ searchResults.length ];
         int i = 0;
         for ( final String absolutePath : searchResults ) {
-            result[i] = labelProvider.getDisplayPath( absolutePath );
+            result[i] = labelProvider.getDisplayPath( wsStatus.getTransaction(), absolutePath, null );
             ++i;
         }
 

@@ -22,13 +22,13 @@ import java.util.Properties;
 import java.util.TreeMap;
 
 import org.komodo.shell.ShellI18n;
-import org.komodo.shell.api.KomodoObjectLabelProvider;
 import org.komodo.shell.api.ShellApiI18n;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.PropertyDescriptor;
+import org.komodo.spi.ui.KomodoObjectLabelProvider;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.KLog;
 import org.komodo.utils.StringUtils;
@@ -222,8 +222,8 @@ public class PrintUtils implements StringConstants {
         }
 
         if ( props.isEmpty() ) {
-            final String path = wsStatus.getDisplayPath(context);
-            final String noPropsMsg = I18n.bind( ShellI18n.noPropertiesMsg, wsStatus.getTypeDisplay(context), path );
+            final String path = wsStatus.getDisplayPath(context, null);
+            final String noPropsMsg = I18n.bind( ShellI18n.noPropertiesMsg, wsStatus.getTypeDisplay(context, null), path );
             print( writer, MESSAGE_INDENT, noPropsMsg );
             return;
         }
@@ -271,8 +271,8 @@ public class PrintUtils implements StringConstants {
         }
 
         // Print properties header
-        final String objType = wsStatus.getTypeDisplay(context); // current object type
-        final String path = wsStatus.getDisplayPath(context);
+        final String objType = wsStatus.getTypeDisplay(context, null); // current object type
+        final String path = wsStatus.getDisplayPath(context, null);
         final String propListHeader = I18n.bind( ShellI18n.propertiesHeader, objType, path );
         print( writer, MESSAGE_INDENT, propListHeader );
 
@@ -346,8 +346,8 @@ public class PrintUtils implements StringConstants {
         final String format = PrintUtils.getFormat( maxNameWidth, maxValueWidth, maxDefaultValueWidth );
 
         // Print property header
-        final String path = wsStatus.getDisplayPath(context);
-        String propListHeader = I18n.bind( ShellI18n.propertyHeader, wsStatus.getTypeDisplay(context), path );
+        final String path = wsStatus.getDisplayPath(context, null);
+        String propListHeader = I18n.bind( ShellI18n.propertyHeader, wsStatus.getTypeDisplay(context, null), path );
         print( writer, MESSAGE_INDENT, propListHeader );
         print( writer,
                MESSAGE_INDENT,
@@ -383,8 +383,8 @@ public class PrintUtils implements StringConstants {
         List<KomodoObject> childList = Arrays.asList(children);
 
         if ( childList.isEmpty() ) {
-            final String path = wsStatus.getDisplayPath(context);
-            String noChildrenMsg = I18n.bind( ShellI18n.noChildrenMsg, wsStatus.getTypeDisplay(context), path );
+            final String path = wsStatus.getDisplayPath(context, null);
+            String noChildrenMsg = I18n.bind( ShellI18n.noChildrenMsg, wsStatus.getTypeDisplay(context, null), path );
             print(writer, MESSAGE_INDENT, noChildrenMsg );
             return;
         }
@@ -395,13 +395,13 @@ public class PrintUtils implements StringConstants {
         // loop through children getting name, type, and finding widest child name
         for ( int i = 0, size = childList.size(); i < size; ++i ) {
         	KomodoObjectLabelProvider labelProvider=wsStatus.getObjectLabelProvider(childList.get( i ));
-            final String name = labelProvider.getDisplayName( childList.get( i ) );
+            final String name = labelProvider.getDisplayName( wsStatus.getTransaction(), childList.get( i ), null );
 
             if ( maxNameWidth < name.length() ) {
                 maxNameWidth = name.length();
             }
 
-            final String type = labelProvider.getTypeDisplay(wsStatus.getTransaction(),childList.get(i));
+            final String type = labelProvider.getTypeDisplay(wsStatus.getTransaction(),childList.get(i), null);
 
             if ( maxTypeWidth < type.length() ) {
                 maxTypeWidth = type.length();
@@ -422,12 +422,12 @@ public class PrintUtils implements StringConstants {
                 try {
                 	KomodoObjectLabelProvider thisLabelProvider=wsStatus.getObjectLabelProvider(thisContext);
                 	KomodoObjectLabelProvider thatLabelProvider=wsStatus.getObjectLabelProvider(thatContext);
-                    final String thisType = wsStatus.getTypeDisplay(thisContext);
-                    int result = thisType.compareTo( wsStatus.getTypeDisplay(thatContext) );
+                    final String thisType = wsStatus.getTypeDisplay(thisContext, null);
+                    int result = thisType.compareTo( wsStatus.getTypeDisplay(thatContext, null) );
 
                     if ( result == 0 ) {
-                        final String thisName = thisLabelProvider.getDisplayName( thisContext );
-                        final String thatName = thatLabelProvider.getDisplayName( thatContext );
+                        final String thisName = thisLabelProvider.getDisplayName( wsStatus.getTransaction(), thisContext, null );
+                        final String thatName = thatLabelProvider.getDisplayName( wsStatus.getTransaction(), thatContext, null );
                         return thisName.compareTo( thatName );
                     }
 
@@ -442,8 +442,8 @@ public class PrintUtils implements StringConstants {
         Collections.sort( childList, sorter );
 
         // Print children header
-        final String path = wsStatus.getDisplayPath(context);
-        final String childrenHeader = I18n.bind( ShellI18n.childrenHeader, wsStatus.getTypeDisplay(context), path );
+        final String path = wsStatus.getDisplayPath(context, null);
+        final String childrenHeader = I18n.bind( ShellI18n.childrenHeader, wsStatus.getTypeDisplay(context, null), path );
         print( writer, MESSAGE_INDENT, childrenHeader );
 
         final String format = PrintUtils.getFormat( maxNameWidth, maxTypeWidth );
@@ -454,8 +454,8 @@ public class PrintUtils implements StringConstants {
         // Print each child
         for ( final KomodoObject childContext : childList ) {
         	KomodoObjectLabelProvider labelProvider=wsStatus.getObjectLabelProvider(childContext);
-            final String childName = labelProvider.getDisplayName( childContext );
-            final String childType = labelProvider.getTypeDisplay(wsStatus.getTransaction(),childContext);
+            final String childName = labelProvider.getDisplayName( wsStatus.getTransaction(), childContext, null );
+            final String childType = labelProvider.getTypeDisplay(wsStatus.getTransaction(),childContext, null);
             print( writer, MESSAGE_INDENT, String.format( format, childName, childType ) );
         }
     }

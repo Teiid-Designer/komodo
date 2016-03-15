@@ -54,7 +54,7 @@ public final class AddReferenceColumnCommand extends ForeignKeyShellCommand {
             // get reference of the column at the specified path
             Column column = null;
             { // see if valid column
-                String repoPath = getWorkspaceStatus().getCurrentContextLabelProvider().getPath( columnPath );
+                String repoPath = getWorkspaceStatus().getCurrentContextLabelProvider().getPath( getTransaction(), columnPath );
 
                 if ( StringUtils.isBlank( repoPath ) ) {
                     repoPath = columnPath;
@@ -85,7 +85,9 @@ public final class AddReferenceColumnCommand extends ForeignKeyShellCommand {
                     result = new CommandResultImpl( false,
                                                     I18n.bind( ForeignKeyCommandsI18n.invalidColumn,
                                                                getWorkspaceStatus().getCurrentContextLabelProvider()
-                                                                                   .getDisplayPath( column.getAbsolutePath() ),
+                                                                                   .getDisplayPath( getTransaction(),
+                                                                                                    column.getAbsolutePath(),
+                                                                                                    null ),
                                                                foreignKey.getName( getTransaction() ) ),
                                                     null );
                 } else {
@@ -162,7 +164,8 @@ public final class AddReferenceColumnCommand extends ForeignKeyShellCommand {
 
             final Table parent = getForeignKey().getTable( uow );
             final String parentPath = parent.getAbsolutePath();
-            final String parentDisplayPath = getWorkspaceStatus().getCurrentContextLabelProvider().getDisplayPath( parentPath );
+            final String parentDisplayPath = getWorkspaceStatus().getCurrentContextLabelProvider()
+                                                                 .getDisplayPath( getTransaction(), parentPath, null );
 
             // only add columns NOT found in the parent table
             for ( final String displayPath : allDisplayPaths ) {

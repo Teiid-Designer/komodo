@@ -68,7 +68,7 @@ public final class ShowPermissionsCommand extends DataRoleShellCommand {
                     print( indent,
                            I18n.bind( WorkspaceCommandsI18n.printRelationalObject,
                                                 permission.getName( getTransaction() ),
-                                                getWorkspaceStatus().getTypeDisplay(permission)
+                                                getWorkspaceStatus().getTypeDisplay(permission, null)
  ) );
                 }
             }

@@ -16,10 +16,10 @@ import org.komodo.relational.model.TableConstraint;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.api.CommandResult;
-import org.komodo.shell.api.KomodoObjectLabelProvider;
 import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.ui.KomodoObjectLabelProvider;
 import org.komodo.utils.StringUtils;
 import org.komodo.utils.i18n.I18n;
 
@@ -138,7 +138,7 @@ public final class DeleteConstraintColumnCommand extends TableConstraintShellCom
      */
     @Override
     public TabCompletionModifier tabCompletion( final String lastArgument,
-                              final List< CharSequence > candidates ) throws Exception {
+                                                final List< CharSequence > candidates ) throws Exception {
         if ( getArguments().isEmpty() ) {
             final TableConstraint constraint = getTableConstraint();
             final Column[] refCols = constraint.getColumns( getTransaction() );
@@ -153,7 +153,7 @@ public final class DeleteConstraintColumnCommand extends TableConstraintShellCom
             if(refCols.length!=0){
 				KomodoObjectLabelProvider provider = getWorkspaceStatus().getObjectLabelProvider(refCols[0]);
 				for (final Column column : refCols) {
-					final String displayPath = provider.getDisplayPath(column);
+					final String displayPath = provider.getDisplayPath(getTransaction(), column, null);
 					final String absolutePath = column.getAbsolutePath();
 
 					if (noLastArg || displayPath.startsWith(lastArgument) || absolutePath.startsWith(lastArgument)) {

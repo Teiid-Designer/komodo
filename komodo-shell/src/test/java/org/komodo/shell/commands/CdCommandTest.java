@@ -52,7 +52,7 @@ public class CdCommandTest extends AbstractCommandTest {
         assertCommandResultOk( result );
 
     	// Check WorkspaceContext
-        String contextPath = wsStatus.getCurrentContextDisplayPath();
+        String contextPath = wsStatus.getCurrentContextDisplayPath(null);
         assertEquals("/", contextPath);
     }
 
@@ -62,7 +62,7 @@ public class CdCommandTest extends AbstractCommandTest {
         final CommandResult result = execute( commands );
         assertCommandResultOk( result );
 
-        String contextPath = wsStatus.getCurrentContextDisplayPath();
+        String contextPath = wsStatus.getCurrentContextDisplayPath(null);
         assertEquals("/workspace", contextPath);
     }
 
@@ -72,16 +72,16 @@ public class CdCommandTest extends AbstractCommandTest {
         final CommandResult result = execute( commands );
         assertCommandResultOk( result );
 
-        String contextPath = wsStatus.getCurrentContextDisplayPath();
+        String contextPath = wsStatus.getCurrentContextDisplayPath(null);
         assertEquals("/workspace", contextPath);
     }
-    
+
     @Test
     public void testTabCompleter()throws Exception{
     	ArrayList<CharSequence> candidates=new ArrayList<>();
        	setup("commandFiles","addChildren.cmd");
        	assertTabCompletion("cd invalid", candidates);
-       	    
+
     	candidates.add("myChild1/");
     	candidates.add("myChild2/");
     	assertTabCompletion("cd myCh", candidates);

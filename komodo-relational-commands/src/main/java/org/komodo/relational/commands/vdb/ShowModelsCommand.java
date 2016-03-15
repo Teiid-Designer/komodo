@@ -64,7 +64,7 @@ public final class ShowModelsCommand extends VdbShellCommand {
                     print( indent,
                            I18n.bind( WorkspaceCommandsI18n.printRelationalObject,
                                       model.getName( getTransaction() ),
-                                      getWorkspaceStatus().getTypeDisplay(model) ) );
+                                      getWorkspaceStatus().getTypeDisplay(model, null) ) );
                 }
             }
 

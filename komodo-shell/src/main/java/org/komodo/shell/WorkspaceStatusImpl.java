@@ -21,6 +21,8 @@
  ************************************************************************************/
 package org.komodo.shell;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
@@ -48,7 +50,6 @@ import org.komodo.core.KEngine;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.repository.RepositoryImpl;
 import org.komodo.repository.SynchronousCallback;
-import org.komodo.shell.api.KomodoObjectLabelProvider;
 import org.komodo.shell.api.KomodoShell;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandFactory;
@@ -63,6 +64,10 @@ import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.spi.repository.Repository.UnitOfWorkListener;
+import org.komodo.spi.ui.KomodoObjectLabelProvider;
+import org.komodo.spi.utils.PropertyProvider;
+import org.komodo.spi.utils.TextFormat;
+import org.komodo.ui.DefaultLabelProvider;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.FileUtils;
 import org.komodo.utils.KLog;
@@ -73,7 +78,7 @@ import org.modeshape.common.collection.Collections;
 /**
  * Implementation of WorkspaceStatus
  */
-public class WorkspaceStatusImpl implements WorkspaceStatus {
+public class WorkspaceStatusImpl implements PropertyProvider, WorkspaceStatus {
 
     private static final KLog LOGGER = KLog.getLogger();
     /**
@@ -109,6 +114,8 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
     private KomodoObjectLabelProvider lastUsedLabelProvider;
     private Collection<KomodoObjectLabelProvider> alternateLabelProviders = new ArrayList<>();
     private Map<String,String> providedGlobalPropertyTypes = new HashMap<String,String>();
+
+    private final Set< PropertyChangeListener > propListeners = new HashSet<>();
 
     /**
      * Constructor
@@ -177,7 +184,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
 
         this.defaultLabelProvider = new DefaultLabelProvider();
         this.defaultLabelProvider.setRepository( repo );
-        this.defaultLabelProvider.setWorkspaceStatus( this );
+        this.defaultLabelProvider.setPropertyProvider( this );
 
         // Discover other providers
         discoverProviders();
@@ -467,14 +474,30 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         return this.currentContext;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.WorkspaceStatus#getCurrentContextDisplayPath(org.komodo.spi.utils.TextFormat)
+     */
     @Override
-    public String getCurrentContextDisplayPath() {
-        return getCurrentContextLabelProvider().getDisplayPath(this.currentContext);
+    public String getCurrentContextDisplayPath( final TextFormat format ) {
+        return getCurrentContextLabelProvider().getDisplayPath( this.uow,
+                                                                this.currentContext,
+                                                                ( ( format == null ) ? new TextFormat() : format ) );
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.WorkspaceStatus#getDisplayPath(org.komodo.spi.repository.KomodoObject,
+     *      org.komodo.spi.utils.TextFormat)
+     */
     @Override
-    public String getDisplayPath(KomodoObject context) {
-        return getCurrentContextLabelProvider().getDisplayPath(context);
+    public String getDisplayPath( final KomodoObject kobject,
+                                  final TextFormat format ) {
+        return getCurrentContextLabelProvider().getDisplayPath( this.uow,
+                                                                kobject,
+                                                                ( ( format == null ) ? new TextFormat() : format ) );
     }
 
     @Override
@@ -715,6 +738,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
             if ( StringUtils.isEmpty( value ) ) {
                 this.wsProperties.setProperty( name, GLOBAL_PROPS.get( name ) );
             } else {
+
                 // validate new value
                 if ( StringUtils.isEmpty( validateGlobalPropertyValue( name, value ) )  || HIDDEN_PROPS.contains( name ) ) {
                     this.wsProperties.setProperty( name.toUpperCase(), value );
@@ -733,7 +757,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
                 String savedPath = value;
 
                 if ( StringUtils.isBlank( savedPath ) ) {
-                    savedPath = KomodoObjectLabelProvider.WORKSPACE_PATH;
+                    savedPath = DefaultLabelProvider.WORKSPACE_PATH;
                 }
 
                 try {
@@ -860,6 +884,85 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         return copy;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.utils.PropertyProvider#addPropertyChangeListener(java.beans.PropertyChangeListener)
+     */
+    @Override
+    public boolean addPropertyChangeListener( final PropertyChangeListener listener ) {
+        if ( listener == null ) {
+            return false;
+        }
+
+        return this.propListeners.add( listener );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.utils.PropertyProvider#getProperty(java.lang.String)
+     */
+    @Override
+    public Object getProperty( final String propertyName ) {
+        if ( StringUtils.isBlank( propertyName ) ) {
+            return null;
+        }
+
+        if ( KomodoObjectLabelProvider.Settings.SHOW_PROP_NAME_PREFIX.equals( propertyName ) ) {
+            return isShowingPropertyNamePrefixes();
+        }
+
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.utils.PropertyProvider#hasProperty(java.lang.String)
+     */
+    @Override
+    public boolean hasProperty( final String propertyName ) {
+        if ( StringUtils.isBlank( propertyName )) {
+            return false;
+        }
+
+        return KomodoObjectLabelProvider.Settings.SHOW_PROP_NAME_PREFIX.equals( propertyName );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
+     */
+    @Override
+    public void propertyChange( final PropertyChangeEvent pce ) {
+        if ( !this.propListeners.isEmpty() ) {
+            for ( final PropertyChangeListener l : this.propListeners ) {
+                try {
+                    l.propertyChange( pce );
+                } catch ( final Exception e ) {
+                    LOGGER.error( "WorkspaceStatusImpl: property change listener \"{0}\" error", e, pce.getClass() ); //$NON-NLS-1$
+                    // keep notifying the other listeners
+                }
+            }
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.utils.PropertyProvider#removePropertyChangeListener(java.beans.PropertyChangeListener)
+     */
+    @Override
+    public boolean removePropertyChangeListener( final PropertyChangeListener listener ) {
+        if ( listener == null ) {
+            return false;
+        }
+
+        return this.propListeners.remove( listener );
+    }
+
     /* (non-Javadoc)
      * @see org.komodo.shell.api.WorkspaceStatus#getProvidedGlobalProperties()
      */
@@ -927,16 +1030,18 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
 	 */
 	@Override
 	public KomodoObjectLabelProvider getObjectLabelProvider(KomodoObject kobject) {
+	    final TextFormat format = new TextFormat();
+
 		if (lastUsedLabelProvider != null &&
 		    !lastUsedLabelProvider.getClass().getName().equals(DefaultLabelProvider.class.getName()) &&
-		    lastUsedLabelProvider.getTypeDisplay(uow, kobject) != null ) {
+		    lastUsedLabelProvider.getTypeDisplay(uow, kobject, format) != null ) {
 			return lastUsedLabelProvider;
 		}
 		// If an alternate provider yields a type for this KomodoObject, it is used.  Otherwise, the defaultProvider is used.
     	 KomodoObjectLabelProvider resultLabelProvider = null;
          if(!this.alternateLabelProviders.isEmpty()) {
              for(KomodoObjectLabelProvider altProvider : this.alternateLabelProviders) {
-                 if( !StringUtils.isEmpty(altProvider.getTypeDisplay(getTransaction(),kobject)) ) {
+                 if( !StringUtils.isEmpty(altProvider.getTypeDisplay(this.uow, kobject, format)) ) {
                      resultLabelProvider = altProvider;
                      break;
                  }
@@ -954,16 +1059,24 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
         this.currentContextLabelProvider = getObjectLabelProvider(context);
     }
 
+	/**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.shell.api.WorkspaceStatus#getTypeDisplay(org.komodo.spi.repository.KomodoObject,
+     *      org.komodo.spi.utils.TextFormat)
+     */
 	@Override
-	public String getTypeDisplay(final KomodoObject kObj) {
-		String type=currentContextLabelProvider.getTypeDisplay(getTransaction(), kObj);
-		if(type!=null){
-			return type;
-		}else{
-			return  defaultLabelProvider.getTypeDisplay(getTransaction(), kObj);
-		}
+    public String getTypeDisplay( final KomodoObject kObj,
+                                  final TextFormat format ) {
+        final TextFormat displayFormat = ( ( format == null ) ? new TextFormat() : format );
+        final String type = this.currentContextLabelProvider.getTypeDisplay( this.uow, kObj, displayFormat );
 
-	}
+        if ( type != null ) {
+            return type;
+        }
+
+        return this.defaultLabelProvider.getTypeDisplay( this.uow, kObj, displayFormat );
+    }
 
     @Override
     public List<String> getProvidedStatusMessages( ) {
@@ -1060,7 +1173,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
             for ( final KomodoObjectLabelProvider provider : ServiceLoader.load( KomodoObjectLabelProvider.class, classLoader ) ) {
                 if ( !Modifier.isAbstract( provider.getClass().getModifiers() ) ) {
                     provider.setRepository(getEngine().getDefaultRepository());
-                    provider.setWorkspaceStatus(this);
+                    provider.setPropertyProvider( this );
                     LOGGER.debug( "WorkspaceStatusImpl: adding LabelProvider \"{0}\"", provider.getClass().getName() ); //$NON-NLS-1$
                     this.alternateLabelProviders.add( provider );
                 }
@@ -1209,7 +1322,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
             if(KomodoObjectUtils.isRoot(getCurrentContext())) {
                 entireDisplayPath = FORWARD_SLASH+displayPath;
             } else {
-                entireDisplayPath = getCurrentContextDisplayPath()+FORWARD_SLASH+displayPath;
+                entireDisplayPath = getCurrentContextDisplayPath( null )+FORWARD_SLASH+displayPath;
             }
         }
 
@@ -1219,7 +1332,7 @@ public class WorkspaceStatusImpl implements WorkspaceStatus {
             return getRootContext();
         }
 
-        String repoPath = getCurrentContextLabelProvider().getPath(entireDisplayPath);
+        String repoPath = getCurrentContextLabelProvider().getPath( this.uow, entireDisplayPath );
         if(repoPath==null) return null;
 
         KomodoObject resultObject = null;

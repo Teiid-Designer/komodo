@@ -225,8 +225,6 @@ public final class ShellI18n extends I18n {
     public static String onOffArgInvalid;
     public static String playFailure;
     public static String primaryTypeSet;
-    public static String prompt;
-    public static String promptWithType;
     public static String propertiesHeader;
     public static String propertyDefaultValueHeader;
     public static String propertyHeader;

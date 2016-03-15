@@ -67,7 +67,7 @@ public final class ShowMasksCommand extends PermissionShellCommand {
                     print( indent,
                            I18n.bind( WorkspaceCommandsI18n.printRelationalObject,
                                                 mask.getName( getTransaction() ),
-                                                getWorkspaceStatus().getTypeDisplay(mask)) );
+                                                getWorkspaceStatus().getTypeDisplay(mask, null)) );
                 }
             }
 

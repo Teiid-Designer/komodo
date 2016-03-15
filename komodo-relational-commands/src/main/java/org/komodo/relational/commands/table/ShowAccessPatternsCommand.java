@@ -66,7 +66,7 @@ public final class ShowAccessPatternsCommand extends TableShellCommand {
                     print( indent,
                            I18n.bind( WorkspaceCommandsI18n.printRelationalObject,
                                                 accessPattern.getName( getTransaction() ),
-                                                getWorkspaceStatus().getTypeDisplay(accessPattern) ) );
+                                                getWorkspaceStatus().getTypeDisplay(accessPattern, null) ) );
                 }
             }
 

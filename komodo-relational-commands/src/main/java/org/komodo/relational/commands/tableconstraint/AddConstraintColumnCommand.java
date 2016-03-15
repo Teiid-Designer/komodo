@@ -16,11 +16,11 @@ import org.komodo.relational.model.TableConstraint;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.api.CommandResult;
-import org.komodo.shell.api.KomodoObjectLabelProvider;
 import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
+import org.komodo.spi.ui.KomodoObjectLabelProvider;
 import org.komodo.utils.StringUtils;
 import org.komodo.utils.i18n.I18n;
 
@@ -87,11 +87,11 @@ public final class AddConstraintColumnCommand extends TableConstraintShellComman
                     constraint.addColumn( getTransaction(), column );
                     result = new CommandResultImpl( I18n.bind( TableConstraintCommandsI18n.columnRefAdded,
                                                                columnPath,
-                                                               getWorkspaceStatus().getCurrentContextDisplayPath() ) );
+                                                               getWorkspaceStatus().getCurrentContextDisplayPath( null ) ) );
                 } else {
                     result = new CommandResultImpl( false,
                                                     I18n.bind( TableConstraintCommandsI18n.invalidColumn,
-                                                                getWorkspaceStatus().getDisplayPath( column ),
+                                                                getWorkspaceStatus().getDisplayPath( column, null ),
                                                                 constraint.getName( getTransaction() ) ),
                                                     null );
                 }
@@ -166,7 +166,7 @@ public final class AddConstraintColumnCommand extends TableConstraintShellComman
 
             for ( final Column column : Arrays.asList( columns ) ) {
                 final String absolutePath = column.getAbsolutePath();
-                final String displayPath = labelProvider.getDisplayPath( column );
+                final String displayPath = labelProvider.getDisplayPath( getTransaction(), column, null );
 
                 if ( StringUtils.isBlank( lastArgument )
                      || absolutePath.startsWith( lastArgument )

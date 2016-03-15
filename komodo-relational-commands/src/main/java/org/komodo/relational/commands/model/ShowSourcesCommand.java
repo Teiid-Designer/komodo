@@ -65,7 +65,7 @@ public final class ShowSourcesCommand extends ModelShellCommand {
                     print( indent,
                            I18n.bind( WorkspaceCommandsI18n.printRelationalObject,
                                                 source.getName( getTransaction() ),
-                                                getWorkspaceStatus().getTypeDisplay(source) ) );
+                                                getWorkspaceStatus().getTypeDisplay(source, null) ) );
                 }
             }
 

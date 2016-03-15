@@ -5,7 +5,7 @@
 *
 * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
 */
-package org.komodo.shell;
+package org.komodo.ui;
 
 import static org.komodo.spi.constants.StringConstants.COLON;
 import static org.komodo.spi.constants.StringConstants.EMPTY_STRING;
@@ -14,14 +14,19 @@ import static org.komodo.spi.constants.StringConstants.FORWARD_SLASH;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.komodo.core.KomodoLexicon;
+import org.komodo.repository.Messages;
 import org.komodo.repository.ObjectImpl;
-import org.komodo.shell.api.KomodoObjectLabelProvider;
-import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.repository.RepositoryImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
+import org.komodo.spi.ui.KomodoObjectLabelProvider;
+import org.komodo.spi.utils.PropertyProvider;
+import org.komodo.spi.utils.TextFormat;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.KLog;
 import org.komodo.utils.i18n.I18n;
@@ -32,6 +37,86 @@ import org.komodo.utils.i18n.I18n;
  */
 public class DefaultLabelProvider implements KomodoObjectLabelProvider {
 
+    /**
+     * The Komodo root repository absolute path. Value is {@value}.
+     */
+    public static final String ROOT_PATH = RepositoryImpl.KOMODO_ROOT;
+
+    /**
+     * The Komodo root repository absolute path with a slash suffix. Value is {@value}.
+     */
+    public static final String ROOT_SLASH_PATH = ( ROOT_PATH + FORWARD_SLASH );
+
+    /**
+     * The Komodo root display name. Value is {@value}.
+     */
+    public static final String ROOT_DISPLAY_NAME = FORWARD_SLASH;
+
+    /**
+     * The Komodo root display path. Value is {@value}.
+     */
+    public static final String ROOT_DISPLAY_PATH = FORWARD_SLASH;
+
+    /**
+     * The Komodo environment area absolute path. Value is {@value}.
+     */
+    public static final String ENV_PATH = RepositoryImpl.ENV_ROOT;
+
+    /**
+     * The Komodo environment area absolute path with a slash suffix. Value is {@value}.
+     */
+    public static final String ENV_SLASH_PATH = ( ENV_PATH + FORWARD_SLASH );
+
+    /**
+     * The Komodo library area absolute path. Value is {@value}.
+     */
+    public static final String LIB_PATH = RepositoryImpl.LIBRARY_ROOT;
+
+    /**
+     * The Komodo library area absolute path with a slash suffix. Value is {@value}.
+     */
+    public static final String LIB_SLASH_PATH = ( LIB_PATH + FORWARD_SLASH );
+
+    /**
+     * The Komodo workspace area absolute path. Value is {@value}.
+     */
+    public static final String WORKSPACE_PATH = RepositoryImpl.WORKSPACE_ROOT;
+
+    /**
+     * The Komodo workspace area absolute path with a slash suffix. Value is {@value}.
+     */
+    public static final String WORKSPACE_SLASH_PATH = ( WORKSPACE_PATH + FORWARD_SLASH );
+
+    /**
+     * The Komodo environment area display name. Value is {@value}.
+     */
+    public static final String ENV_DISPLAY_NAME = KomodoLexicon.Environment.UNQUALIFIED_NAME;
+
+    /**
+     * The Komodo environment area display path. Value is {@value}.
+     */
+    public static final String ENV_DISPLAY_PATH = ( ROOT_DISPLAY_PATH + ENV_DISPLAY_NAME );
+
+    /**
+     * The Komodo library area display name. Value is {@value}.
+     */
+    public static final String LIB_DISPLAY_NAME = KomodoLexicon.Library.UNQUALIFIED_NAME;
+
+    /**
+     * The Komodo library area display path. Value is {@value}.
+     */
+    public static final String LIB_DISPLAY_PATH = ( ROOT_DISPLAY_PATH + LIB_DISPLAY_NAME );
+
+    /**
+     * The Komodo workspace area display name. Value is {@value}.
+     */
+    public static final String WORKSPACE_DISPLAY_NAME = KomodoLexicon.Workspace.UNQUALIFIED_NAME;
+
+    /**
+     * The Komodo workspace area display path. Value is {@value}.
+     */
+    public static final String WORKSPACE_DISPLAY_PATH = ( ROOT_DISPLAY_PATH + WORKSPACE_DISPLAY_NAME );
+
 	private static List<String> GROUPING_NODES=new ArrayList<String>(); //default label provider has currently no grouping nodes
     protected static final String TKO_PREFIX = "tko:"; //$NON-NLS-1$
 
@@ -40,7 +125,7 @@ public class DefaultLabelProvider implements KomodoObjectLabelProvider {
      *        the object being tested (cannot be <code>null</code>)
      * @return <code>true</code> if the type should be shown to the user
      */
-    protected static boolean shouldShowType( final KomodoObject kobject ) {
+    public static boolean shouldShowType( final KomodoObject kobject ) {
         ArgCheck.isNotNull( kobject, "kobject" ); //$NON-NLS-1$
         final String path = kobject.getAbsolutePath();
         return ( !ROOT_PATH.equals( path )
@@ -49,17 +134,21 @@ public class DefaultLabelProvider implements KomodoObjectLabelProvider {
                  && !WORKSPACE_PATH.equals( path ) );
     }
 
-
+    protected PropertyProvider propertyProvider;
     protected Repository repository;
-    protected WorkspaceStatus status;
 
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.shell.api.KomodoObjectLabelProvider#getDisplayName(org.komodo.spi.repository.KomodoObject)
+     * @see org.komodo.spi.ui.KomodoObjectLabelProvider#getDisplayName(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      org.komodo.spi.repository.KomodoObject, org.komodo.spi.utils.TextFormat)
      */
     @Override
-    public String getDisplayName( final KomodoObject kobject ) {
+    public String getDisplayName( final UnitOfWork transaction,
+                                  final KomodoObject kobject,
+                                  final TextFormat format ) {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state must be NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotNull( kobject, "kobject" ); //$NON-NLS-1$
 
         final String path = kobject.getAbsolutePath();
@@ -73,16 +162,17 @@ public class DefaultLabelProvider implements KomodoObjectLabelProvider {
 
         String lastSegment = null;
         try {
-			lastSegment = kobject.getName(status.getTransaction());
+			lastSegment = kobject.getName( transaction );
 		} catch (KException ex) {
-			KLog.getLogger().error( I18n.bind( ShellI18n.internalError) , ex );
+            KLog.getLogger()
+                .error( I18n.bind( Messages.getString( Messages.Komodo.UNABLE_TO_OBTAIN_NAME, kobject.getAbsolutePath() ) ), ex );
 		}
 
         if(lastSegment == null || skippedPathSegmentNames().contains( lastSegment )) {
             return null;
         }
 
-        if ( this.status.isShowingPropertyNamePrefixes() ) {
+        if ( isShowingPropertyNamePrefixes() ) {
             final int index = lastSegment.indexOf( COLON );
 
             if ( index == -1 ) {
@@ -98,21 +188,32 @@ public class DefaultLabelProvider implements KomodoObjectLabelProvider {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.shell.api.KomodoObjectLabelProvider#getDisplayPath(org.komodo.spi.repository.KomodoObject)
+     * @see org.komodo.spi.ui.KomodoObjectLabelProvider#getDisplayPath(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      org.komodo.spi.repository.KomodoObject, org.komodo.spi.utils.TextFormat)
      */
     @Override
-    public String getDisplayPath( final KomodoObject kobject ) {
+    public String getDisplayPath( final UnitOfWork transaction,
+                                  final KomodoObject kobject,
+                                  final TextFormat format ) {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state must be NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotNull( kobject, "kobject" ); //$NON-NLS-1$
-        return getDisplayPath( kobject.getAbsolutePath() );
+
+        return getDisplayPath( transaction, kobject.getAbsolutePath(), format );
     }
 
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.shell.api.KomodoObjectLabelProvider#getDisplayPath(java.lang.String)
+     * @see org.komodo.spi.ui.KomodoObjectLabelProvider#getDisplayPath(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String, org.komodo.spi.utils.TextFormat)
      */
     @Override
-    public String getDisplayPath( final String repositoryAbsolutePath ) {
+    public String getDisplayPath( final UnitOfWork transaction,
+                                  final String repositoryAbsolutePath,
+                                  final TextFormat format ) {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state must be NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( repositoryAbsolutePath, "repositoryAbsolutePath" ); //$NON-NLS-1$
 
         if ( !repositoryAbsolutePath.startsWith( ROOT_PATH ) ) {
@@ -175,7 +276,7 @@ public class DefaultLabelProvider implements KomodoObjectLabelProvider {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.shell.api.KomodoObjectLabelProvider#getId()
+     * @see org.komodo.spi.ui.KomodoObjectLabelProvider#getId()
      */
     @Override
     public String getId() {
@@ -185,10 +286,14 @@ public class DefaultLabelProvider implements KomodoObjectLabelProvider {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.shell.api.KomodoObjectLabelProvider#getPath(java.lang.String)
+     * @see org.komodo.spi.ui.KomodoObjectLabelProvider#getPath(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String)
      */
     @Override
-    public String getPath( final String displayPath ) {
+    public String getPath( final UnitOfWork transaction,
+                           final String displayPath ) {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state must be NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( displayPath, "displayPath" ); //$NON-NLS-1$
 
         if ( !displayPath.startsWith( ROOT_DISPLAY_PATH ) ) {
@@ -211,10 +316,10 @@ public class DefaultLabelProvider implements KomodoObjectLabelProvider {
                 }
                 // Process '..' in display path
                 if (StringConstants.DOT_DOT.equals(segment)) {
-                    KomodoObject theParent = parent.getParent(this.status.getTransaction());
+                    KomodoObject theParent = parent.getParent( transaction );
                     if(theParent!=null) {
-                        if(skippedPathSegmentNames().contains(theParent.getName(this.status.getTransaction()))) {
-                            parent = theParent.getParent(this.status.getTransaction());
+                        if(skippedPathSegmentNames().contains(theParent.getName( transaction ))) {
+                            parent = theParent.getParent( transaction );
                         } else {
                             parent = theParent;
                         }
@@ -222,9 +327,9 @@ public class DefaultLabelProvider implements KomodoObjectLabelProvider {
                     }
                 }
 
-                if ( this.status.isShowingPropertyNamePrefixes() ) {
-                    if ( parent.hasChild( this.status.getTransaction(), segment ) ) {
-                        kobject = parent.getChild( this.status.getTransaction(), segment );
+                if ( isShowingPropertyNamePrefixes() ) {
+                    if ( parent.hasChild( transaction, segment ) ) {
+                        kobject = parent.getChild( transaction, segment );
                         parent = kobject;
                     } else {
                         return null; // no child with that name
@@ -232,8 +337,8 @@ public class DefaultLabelProvider implements KomodoObjectLabelProvider {
                 } else {
                     // loop through children and take first one with local name match.  skip grouping nodes
                     boolean childFound = false;
-                    for ( final KomodoObject kid : parent.getChildren( this.status.getTransaction() ) ) {
-                        final String name = kid.getName( this.status.getTransaction() );
+                    for ( final KomodoObject kid : parent.getChildren( transaction ) ) {
+                        final String name = kid.getName( transaction );
                         final int index = name.indexOf( StringConstants.COLON );
 
                         if ( index == -1 ) {
@@ -244,7 +349,7 @@ public class DefaultLabelProvider implements KomodoObjectLabelProvider {
                                 break;
                             }
                         } else if (skippedPathSegmentNames().contains( name )) {
-                            KomodoObject[] children = kid.getChildren(this.status.getTransaction(), segment);
+                            KomodoObject[] children = kid.getChildren( transaction, segment );
                             if(children.length>0) {
                                 kobject = children[0];
                                 parent = kobject;
@@ -275,9 +380,27 @@ public class DefaultLabelProvider implements KomodoObjectLabelProvider {
     }
 
     /**
+     * @return <code>true</code> if the property name prefixes should be shown
+     */
+    protected boolean isShowingPropertyNamePrefixes() {
+        final Object value = this.propertyProvider.getProperty( KomodoObjectLabelProvider.Settings.SHOW_PROP_NAME_PREFIX );
+        return ( ( value == null ) ? true : new Boolean( value.toString() ) );
+    }
+
+    /**
      * {@inheritDoc}
      *
-     * @see org.komodo.shell.api.KomodoObjectLabelProvider#setRepository(org.komodo.spi.repository.Repository)
+     * @see org.komodo.spi.ui.KomodoObjectLabelProvider#setPropertyProvider(org.komodo.spi.utils.PropertyProvider)
+     */
+    @Override
+    public void setPropertyProvider( final PropertyProvider newPropertyProvider ) {
+        this.propertyProvider = newPropertyProvider;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.ui.KomodoObjectLabelProvider#setRepository(org.komodo.spi.repository.Repository)
      */
     @Override
     public void setRepository( final Repository repository ) {
@@ -288,18 +411,7 @@ public class DefaultLabelProvider implements KomodoObjectLabelProvider {
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.shell.api.KomodoObjectLabelProvider#setWorkspaceStatus(org.komodo.shell.api.WorkspaceStatus)
-     */
-    @Override
-    public void setWorkspaceStatus( final WorkspaceStatus status ) {
-        assert( status != null );
-        this.status = status;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see  org.komodo.shell.api.KomodoObjectLabelProvider#skippedPathSegmentNames()
+     * @see  org.komodo.spi.ui.KomodoObjectLabelProvider#skippedPathSegmentNames()
      */
 	@Override
 	public List<String> skippedPathSegmentNames(){
@@ -307,15 +419,21 @@ public class DefaultLabelProvider implements KomodoObjectLabelProvider {
 	}
 
 	/**
-	 * {@inheritDoc}
-	 *
-	 * @see org.komodo.shell.api.KomodoObjectLabelProvider#getTypeDisplay(org.komodo.spi.repository.Repository.UnitOfWork,
-	 *      org.komodo.spi.repository.KomodoObject)
-	 */
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.ui.KomodoObjectLabelProvider#getTypeDisplay(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      org.komodo.spi.repository.KomodoObject, org.komodo.spi.utils.TextFormat)
+     */
 	@Override
-	public String getTypeDisplay(UnitOfWork uow, KomodoObject kobject) {
+	public String getTypeDisplay( final UnitOfWork transaction,
+	                              final KomodoObject kobject,
+	                              final TextFormat format ) {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state must be NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( kobject, "kobject" ); //$NON-NLS-1$
 
-		String areaObjectName=getNameForAreaObject(kobject.getAbsolutePath());
+        String areaObjectName=getNameForAreaObject(kobject.getAbsolutePath());
+
 		if(areaObjectName != null){
 			return areaObjectName;
 		}

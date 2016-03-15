@@ -24,7 +24,11 @@ package org.komodo.shell;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.komodo.shell.api.Arguments;
@@ -34,7 +38,8 @@ import org.komodo.shell.api.ShellCommandFactory;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.KomodoObjectUtils;
 import org.komodo.spi.repository.KomodoObject;
-import org.komodo.utils.i18n.I18n;
+import org.komodo.spi.utils.TextFormat;
+import org.komodo.ui.DefaultLabelProvider;
 
 /**
  * Abstract class for all shell command readers.
@@ -202,17 +207,47 @@ public abstract class AbstractShellCommandReader implements ShellCommandReader {
 	    return false;
 	}
 
-    protected String getPrompt() throws Exception {
-        // see if full path should be displayed
+    protected List< Entry< TextFormat, String > > getPrompt() throws Exception {
         final KomodoObject kobject = this.wsStatus.getCurrentContext();
-        final String path = KomodoObjectUtils.getDisplayName( this.wsStatus, kobject );
+        final List< Entry< TextFormat, String > > result = new ArrayList<>(2);
 
-        // see if type should be displayed
-        if ( this.wsStatus.isShowingTypeInPrompt() && DefaultLabelProvider.shouldShowType( kobject ) ) {
-            return I18n.bind( ShellI18n.promptWithType, path, this.wsStatus.getTypeDisplay( kobject ) );
+        { // add opening bracket
+            final TextFormat format = new TextFormat();
+            result.add( new AbstractMap.SimpleEntry< TextFormat, String >( format, "[" ) ); //$NON-NLS-1$
         }
 
-        return I18n.bind( ShellI18n.prompt, path );
+        { // add object path
+            final TextFormat format = new TextFormat();
+            final String path = KomodoObjectUtils.getDisplayName( this.wsStatus, kobject, format );
+            result.add( new AbstractMap.SimpleEntry< TextFormat, String >( format, path ) );
+        }
+
+        { // add object type if necessary
+            if ( this.wsStatus.isShowingTypeInPrompt() && DefaultLabelProvider.shouldShowType( kobject ) ) {
+                { // add opening paren
+                    final TextFormat format = new TextFormat();
+                    result.add( new AbstractMap.SimpleEntry< TextFormat, String >( format, " (" ) ); //$NON-NLS-1$
+                }
+
+                { // add type
+                    final TextFormat format = new TextFormat();
+                    final String type = this.wsStatus.getTypeDisplay( kobject, format );
+                    result.add( new AbstractMap.SimpleEntry< TextFormat, String >( format, type ) );
+                }
+
+                { // add closing paren
+                    final TextFormat format = new TextFormat();
+                    result.add( new AbstractMap.SimpleEntry< TextFormat, String >( format, ")" ) ); //$NON-NLS-1$
+                }
+            }
+        }
+
+        { // add closing bracket
+            final TextFormat format = new TextFormat();
+            result.add( new AbstractMap.SimpleEntry< TextFormat, String >( format, "]" ) ); //$NON-NLS-1$
+        }
+
+        return result;
     }
 
     class NoOpCommand extends BuiltInShellCommand {

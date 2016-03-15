@@ -36,6 +36,7 @@
         <module>komodo-modeshape-sequencer-teiid-sql-tests</module>
         <module>komodo-core-tests</module>
 
+        <module>komodo-ui</module>
         <module>komodo-modeshape-vdb</module>
         <module>komodo-shell-api</module>
         <module>komodo-shell</module>
