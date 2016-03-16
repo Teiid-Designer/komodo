@@ -54,6 +54,7 @@ public class ServerCommandProvider implements ShellCommandProvider {
         result.add( ServerDatasourcesCommand.class );
         result.add( ServerDatasourceTypesCommand.class );
         result.add( ServerDeployDatasourceCommand.class );
+        result.add( ServerDeployDriverCommand.class );
         result.add( ServerDeployVdbCommand.class );
         result.add( ServerUndeployDatasourceCommand.class );
         result.add( ServerUndeployVdbCommand.class );

@@ -32,7 +32,7 @@ public final class UploadVdbCommandTest extends AbstractCommandTest {
     																						.getResource("AzureService-vdb.xml").getFile();
 
     @Test
-    public void shouldUploadVdb1() throws Exception {
+    public void shouldUploadVdb() throws Exception {
         final String[] commands = { "upload-vdb myVdb " + UPLOAD_VDB };
         final CommandResult result = execute( commands );
         assertCommandResultOk(result);
@@ -44,4 +44,25 @@ public final class UploadVdbCommandTest extends AbstractCommandTest {
         assertEquals("myVdb", vdbs[0].getName(getTransaction()));
     }
 
+    @Test( expected = AssertionError.class )
+    public void shouldNotUploadVdbIfExists() throws Exception {
+        final String[] commands = { "create-vdb myVdb vdbPath ",
+                                    "upload-vdb myVdb " + UPLOAD_VDB };
+        execute( commands );
+    }
+    
+    @Test
+    public void shouldUploadVdbIfExistsWithOverwrite() throws Exception {
+        final String[] commands = { "create-vdb myVdb vdbPath ",
+                                    "upload-vdb myVdb " + UPLOAD_VDB + " -o" };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk(result);
+
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        Vdb[] vdbs = wkspMgr.findVdbs(getTransaction());
+
+        assertEquals(1, vdbs.length);
+        assertEquals("myVdb", vdbs[0].getName(getTransaction()));
+    }
+    
 }

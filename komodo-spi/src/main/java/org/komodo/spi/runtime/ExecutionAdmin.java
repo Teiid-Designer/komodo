@@ -260,11 +260,12 @@ public interface ExecutionAdmin {
      /**
       * Deploys a driver (jar or rar) to the related Teiid Instance
       * 
+      * @param driverName the deployment name to use for the driver
       * @param driverFile the file to deploy
       * 
       * @throws Exception if deployment fails
       */
-     void deployDriver(File driverFile) throws Exception;
+     void deployDriver(String driverName, File driverFile) throws Exception;
 
      /**
       * Get Model Schema DDL from the VDB
