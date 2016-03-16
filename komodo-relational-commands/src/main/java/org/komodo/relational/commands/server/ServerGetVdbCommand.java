@@ -11,9 +11,11 @@ import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.komodo.relational.commands.workspace.UploadVdbCommand;
+import org.komodo.relational.commands.workspace.WorkspaceCommandsI18n;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
@@ -21,6 +23,7 @@ import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.runtime.TeiidVdb;
+import org.komodo.utils.StringUtils;
 import org.komodo.utils.i18n.I18n;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
@@ -33,6 +36,8 @@ public final class ServerGetVdbCommand extends ServerShellCommand {
 
     private static final String TEMPFILE_PREFIX = "Vdb-"; //$NON-NLS-1$
     private static final String TEMPFILE_SUFFIX = ".xml"; //$NON-NLS-1$
+
+    private static final List< String > VALID_OVERWRITE_ARGS = Arrays.asList( new String[] { "-o", "--overwrite" } ); //$NON-NLS-1$ //$NON-NLS-2$;
 
     /**
      * @param status
@@ -54,9 +59,17 @@ public final class ServerGetVdbCommand extends ServerShellCommand {
         try {
             String vdbName = requiredArgument( 0, I18n.bind( ServerCommandsI18n.missingVdbName ) );
 
-            // Make sure no VDB currently in workspace with this name
-            if(getWorkspaceManager().hasChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE)) {
-                return new CommandResultImpl( false, I18n.bind(ServerCommandsI18n.repoVdbWithNameExists, vdbName), null );
+            final String overwriteArg = optionalArgument( 1, null );
+            final boolean overwrite = !StringUtils.isBlank( overwriteArg );
+            // make sure overwrite arg is valid
+            if ( overwrite && !VALID_OVERWRITE_ARGS.contains( overwriteArg ) ) {
+                return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.overwriteArgInvalid, overwriteArg ), null );
+            }
+
+            // If VDB with same name is in workspace, make sure we can overwrite
+            boolean hasVdb = getWorkspaceManager().hasChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+            if ( hasVdb && !overwrite ) {
+                return new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.vdbOverwriteNotEnabled, vdbName ), null );
             }
             
             // Validates that a server is connected
@@ -96,7 +109,7 @@ public final class ServerGetVdbCommand extends ServerShellCommand {
 
             // Upload the VdbFile
             UploadVdbCommand uploadVdbCommand = new UploadVdbCommand(getWorkspaceStatus());
-            uploadVdbCommand.setArguments(new Arguments( vdbName + StringConstants.SPACE + tempFile.getAbsolutePath() ));
+            uploadVdbCommand.setArguments(new Arguments( vdbName + StringConstants.SPACE + tempFile.getAbsolutePath() + " -o"));  //$NON-NLS-1$
             CommandResult uploadResult = uploadVdbCommand.execute();
             if(!uploadResult.isOk()) {
                 return uploadResult;
@@ -118,7 +131,7 @@ public final class ServerGetVdbCommand extends ServerShellCommand {
      */
     @Override
     protected int getMaxArgCount() {
-        return 1;
+        return 2;
     }
 
     /**

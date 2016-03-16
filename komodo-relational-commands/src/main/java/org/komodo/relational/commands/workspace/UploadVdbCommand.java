@@ -86,6 +86,11 @@ public final class UploadVdbCommand extends WorkspaceShellCommand {
                 return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.vdbOverwriteDisabled, fileName, vdbName ), null );
             }
 
+            // If overwriting, delete existing vdb first
+            if(hasVdb) {
+                final KomodoObject vdbToDelete = getWorkspaceManager().getChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+                getWorkspaceManager().delete(getTransaction(), vdbToDelete);
+            }
             // create VDB
             final Vdb vdb = getWorkspaceManager().createVdb( uow, null, vdbName, fileName );
             final KomodoObject fileNode = vdb.addChild( uow, JcrLexicon.CONTENT.getString(), null );

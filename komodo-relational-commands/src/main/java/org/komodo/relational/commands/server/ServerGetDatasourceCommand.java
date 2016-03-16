@@ -8,18 +8,22 @@
 package org.komodo.relational.commands.server;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import org.komodo.core.KomodoLexicon;
+import org.komodo.relational.commands.workspace.WorkspaceCommandsI18n;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.TabCompletionModifier;
 import org.komodo.shell.api.WorkspaceStatus;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.runtime.TeiidDataSource;
 import org.komodo.spi.runtime.TeiidInstance;
+import org.komodo.utils.StringUtils;
 import org.komodo.utils.i18n.I18n;
 
 /**
@@ -28,6 +32,8 @@ import org.komodo.utils.i18n.I18n;
 public final class ServerGetDatasourceCommand extends ServerShellCommand {
 
     static final String NAME = "server-get-datasource"; //$NON-NLS-1$
+
+    private static final List< String > VALID_OVERWRITE_ARGS = Arrays.asList( new String[] { "-o", "--overwrite" } ); //$NON-NLS-1$ //$NON-NLS-2$;
 
     /**
      * @param status
@@ -49,9 +55,17 @@ public final class ServerGetDatasourceCommand extends ServerShellCommand {
         try {
             String datasourceName = requiredArgument( 0, I18n.bind( ServerCommandsI18n.missingDatasourceName ) );
 
-            // Make sure no datasource currently in workspace with this name
-            if(getWorkspaceManager().hasChild(getTransaction(), datasourceName, KomodoLexicon.DataSource.NODE_TYPE)) {
-                return new CommandResultImpl( false, I18n.bind(ServerCommandsI18n.repoDatasourceWithNameExists, datasourceName), null );
+            final String overwriteArg = optionalArgument( 1, null );
+            final boolean overwrite = !StringUtils.isBlank( overwriteArg );
+            // make sure overwrite arg is valid
+            if ( overwrite && !VALID_OVERWRITE_ARGS.contains( overwriteArg ) ) {
+                return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.overwriteArgInvalid, overwriteArg ), null );
+            }
+            
+            // If datasource with same name is in workspace, make sure we can overwrite
+            boolean hasDS = getWorkspaceManager().hasChild(getTransaction(), datasourceName, KomodoLexicon.DataSource.NODE_TYPE);
+            if( hasDS && !overwrite ) {
+                return new CommandResultImpl( false, I18n.bind(ServerCommandsI18n.datasourceOverwriteNotEnabled, datasourceName), null );
             }
             
             // Validates that a server is connected
@@ -79,6 +93,11 @@ public final class ServerGetDatasourceCommand extends ServerShellCommand {
                 return new CommandResultImpl( false, I18n.bind(ServerCommandsI18n.serverDatasourceNotFound, datasourceName), null );
             }
 
+            // If overwriting, delete existing first
+            if(hasDS) {
+                final KomodoObject datasourceToDelete = getWorkspaceManager().getChild(getTransaction(), datasourceName, KomodoLexicon.DataSource.NODE_TYPE);
+                getWorkspaceManager().delete(getTransaction(), datasourceToDelete);
+            }
             // Create the Data Source and set properties
             Datasource newDatasource = getWorkspaceManager().createDatasource( getTransaction(), null, datasourceName );
             setRepoDatasourceProperties(newDatasource, serverDS.getProperties());
@@ -99,7 +118,7 @@ public final class ServerGetDatasourceCommand extends ServerShellCommand {
      */
     @Override
     protected int getMaxArgCount() {
-        return 1;
+        return 2;
     }
 
     /**
