@@ -81,10 +81,11 @@
   + * (tko:teiid) copy
 
 /*
- * A Teiid server known by the workspace. Node name can be user-defined.
+ * An abstract node implementation of a Teiid server's connection properties
  */
-[tko:teiid] > nt:unstructured, tko:workspaceItem
+ [tko:teiidArchetype] > nt:unstructured abstract
   - tko:host (string) = 'localhost'
+  - tko:version (string)
   - tko:adminPort (long) = 9999
   - tko:adminUser (string) = 'admin'
   - tko:adminPswd (string) // encrypted
@@ -93,8 +94,27 @@
   - tko:jdbcUser (string) = 'user'
   - tko:jdbcPswd (string) // encrypted
   - tko:jdbcSecure (boolean) = false
+
+/*
+ * A Teiid server known by the workspace. Node name can be user-defined.
+ */
+[tko:teiid] > tko:teiidArchetype, tko:workspaceItem
   - tko:lastPingTime (long)
   - tko:connected (boolean)
+
+/*
+ * The Komodo teiid cache keeps track of live Teiid server content
+ */
+[tko:teiidCache] > nt:unstructured
+  + * (tko:cachedTeiid) copy
+
+/*
+ * A model caching the state of a live teiid server
+ */
+[tko:cachedTeiid] > tko:teiidArchetype
+ + * (vdb:virtualDatabase) copy
+ + * (vdb:translator) copy
+ + * (tko:dataSource) copy
 
 /*
  * The data source grouping node used by both the workspace and the library. Child nodes are data source definitions.

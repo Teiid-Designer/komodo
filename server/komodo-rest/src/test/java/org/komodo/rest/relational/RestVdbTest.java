@@ -24,12 +24,18 @@ package org.komodo.rest.relational;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import java.io.File;
 import java.net.URI;
+import java.util.Collection;
 import javax.ws.rs.core.UriBuilder;
 import org.junit.Before;
 import org.junit.Test;
+import org.komodo.relational.teiid.CachedTeiid;
 import org.komodo.relational.vdb.Vdb;
+import org.komodo.rest.KomodoRestV1Application.V1Constants;
+import org.komodo.rest.RestLink;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyDescriptor;
@@ -39,7 +45,8 @@ import org.mockito.Mockito;
 @SuppressWarnings( {"javadoc", "nls"} )
 public final class RestVdbTest {
 
-    private static final URI BASE_URI = UriBuilder.fromUri("http://localhost:8081/v1/workspace/").build();
+    private static final URI BASE_URI = UriBuilder.fromUri("http://localhost:8081/v1/").build();
+    private static final URI BASE_TEIID_URI = UriBuilder.fromUri("http://localhost:8081/v1/teiid").build();
     private static final String WORKSPACE_DATA_PATH = "/workspace";
     private static final String VDB_NAME = "MyVdb";
     private static final String VDB_DATA_PATH = "/workspace/vdbs/vdb1";
@@ -94,6 +101,11 @@ public final class RestVdbTest {
         this.vdb.setConnectionType(CONNECTION_TYPE);
         this.vdb.setPreview(false);
         this.vdb.setVersion(VERSION);
+    }
+
+    @Test
+    public void shouldHaveBaseUri() {
+        assertEquals(BASE_URI, this.vdb.getBaseUri());
     }
 
     @Test
@@ -168,4 +180,48 @@ public final class RestVdbTest {
         assertEquals(this.vdb.getOriginalFilePath(), newPath);
     }
 
+    @SuppressWarnings( "incomplete-switch" )
+    @Test
+    public void shouldReturnACachedTeiidRestVdb() throws Exception {
+
+        String parentDataPath = "/tko:komodo/tko:workspace/tko:teiidCache/localhost/";
+        UnitOfWork transaction = Mockito.mock(UnitOfWork.class);
+
+        CachedTeiid cachedTeiid = Mockito.mock(CachedTeiid.class);
+        Mockito.when(cachedTeiid.getName(transaction)).thenReturn("localhost");
+        Mockito.when(cachedTeiid.getAbsolutePath()).thenReturn(parentDataPath);
+        Mockito.when(cachedTeiid.getTypeIdentifier(transaction)).thenReturn(KomodoType.CACHED_TEIID);
+
+        Vdb theVdb = Mockito.mock(Vdb.class);
+        Mockito.when(theVdb.getName(transaction)).thenReturn(VDB_NAME);
+        Mockito.when(theVdb.getAbsolutePath()).thenReturn(parentDataPath + File.separator + VDB_NAME);
+        Mockito.when(theVdb.getTypeIdentifier(transaction)).thenReturn(kType);
+        Mockito.when(theVdb.hasChildren(transaction)).thenReturn(true);
+        Mockito.when(theVdb.getPropertyNames(transaction)).thenReturn(new String[0]);
+        Mockito.when(theVdb.getPropertyDescriptors(transaction)).thenReturn(new PropertyDescriptor[0]);
+        Mockito.when(theVdb.getParent(transaction)).thenReturn(cachedTeiid);
+
+        RestVdb restVdb = new RestVdb(BASE_URI, theVdb, false, transaction);
+        assertEquals(BASE_URI, restVdb.getBaseUri());
+        assertEquals(parentDataPath + File.separator + VDB_NAME, restVdb.getDataPath());
+        Collection<RestLink> links = restVdb.getLinks();
+        assertNotNull(links);
+        for (RestLink link :  links) {
+            switch (link.getRel()) {
+                case SELF:
+                    assertEquals(BASE_TEIID_URI + File.separator +
+                                             cachedTeiid.getName(transaction) + File.separator +
+                                             V1Constants.VDBS_SEGMENT + File.separator +
+                                             VDB_NAME,
+                                             link.getHref().toString());
+                    break;
+                case PARENT:
+                    assertEquals(BASE_TEIID_URI + File.separator +
+                                             cachedTeiid.getName(transaction) + File.separator +
+                                             V1Constants.VDBS_SEGMENT,
+                                             link.getHref().toString());
+                    break;
+            }
+        }
+    }
 }

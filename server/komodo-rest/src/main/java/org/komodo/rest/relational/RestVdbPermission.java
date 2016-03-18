@@ -153,6 +153,7 @@ public final class RestVdbPermission extends RestBasicEntity {
         String vdbName = vdb.getName(uow);
 
         Properties settings = getUriBuilder().createSettings(SettingNames.VDB_NAME, vdbName);
+        settings.put(SettingNames.VDB_PARENT_PATH, getUriBuilder().generateVdbParentUri(vdb, uow));
         getUriBuilder().addSetting(settings, SettingNames.DATA_ROLE_ID, dataRoleName);
         getUriBuilder().addSetting(settings, SettingNames.PERMISSION_ID, getId());
 

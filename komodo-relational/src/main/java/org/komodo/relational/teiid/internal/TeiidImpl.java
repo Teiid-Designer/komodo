@@ -21,13 +21,27 @@
  */
 package org.komodo.relational.teiid.internal;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map.Entry;
+import java.util.Properties;
 import org.komodo.core.KEngine;
-import org.komodo.core.KomodoLexicon;
+import org.komodo.core.KomodoLexicon.TeiidArchetype;
 import org.komodo.osgi.PluginService;
+import org.komodo.relational.Messages;
+import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.internal.RelationalChildRestrictedObject;
+import org.komodo.relational.teiid.CachedTeiid;
 import org.komodo.relational.teiid.Teiid;
+import org.komodo.relational.vdb.Vdb;
+import org.komodo.relational.vdb.internal.TranslatorImpl;
+import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.spi.KException;
 import org.komodo.spi.query.TeiidService;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.PropertyValueType;
@@ -40,14 +54,19 @@ import org.komodo.spi.runtime.ExecutionConfigurationEvent;
 import org.komodo.spi.runtime.ExecutionConfigurationListener;
 import org.komodo.spi.runtime.HostProvider;
 import org.komodo.spi.runtime.TeiidAdminInfo;
+import org.komodo.spi.runtime.TeiidDataSource;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.TeiidJdbcInfo;
 import org.komodo.spi.runtime.TeiidParent;
+import org.komodo.spi.runtime.TeiidTranslator;
+import org.komodo.spi.runtime.TeiidVdb;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.utils.ArgCheck;
+import org.komodo.utils.StringUtils;
 import org.modeshape.jcr.JcrLexicon;
+import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 /**
  * Implementation of teiid instance model
@@ -415,7 +434,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
      */
     @Override
     public TeiidVersion getVersion( UnitOfWork uow ) throws KException {
-        String version = getObjectProperty(uow, PropertyValueType.STRING, "getVersion", KomodoLexicon.Teiid.VERSION); //$NON-NLS-1$
+        String version = getObjectProperty(uow, PropertyValueType.STRING, "getVersion", TeiidArchetype.VERSION); //$NON-NLS-1$
         return version != null ? new DefaultTeiidVersion(version) : TeiidVersionProvider.getInstance().getTeiidVersion();
     }
 
@@ -428,7 +447,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
      */
     @Override
     public void setVersion(UnitOfWork uow, TeiidVersion version) throws KException {
-        setObjectProperty(uow, "setVersion", KomodoLexicon.Teiid.VERSION, version.toString()); //$NON-NLS-1$
+        setObjectProperty(uow, "setVersion", TeiidArchetype.VERSION, version.toString()); //$NON-NLS-1$
     }
 
     /**
@@ -457,7 +476,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
      */
     @Override
     public String getHost( UnitOfWork uow ) throws KException {
-        String host = getObjectProperty(uow, PropertyValueType.STRING, "getHost", KomodoLexicon.Teiid.HOST); //$NON-NLS-1$
+        String host = getObjectProperty(uow, PropertyValueType.STRING, "getHost", TeiidArchetype.HOST); //$NON-NLS-1$
         return host != null ? host : HostProvider.DEFAULT_HOST;
     }
 
@@ -470,7 +489,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
      */
     @Override
     public void setHost(UnitOfWork uow, String host) throws KException {
-        setObjectProperty(uow, "setHost", KomodoLexicon.Teiid.HOST, host); //$NON-NLS-1$
+        setObjectProperty(uow, "setHost", TeiidArchetype.HOST, host); //$NON-NLS-1$
     }
 
     /**
@@ -482,7 +501,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
      */
     @Override
     public int getAdminPort( UnitOfWork uow ) throws KException {
-        Long port = getObjectProperty(uow, PropertyValueType.LONG, "getAdminPort", KomodoLexicon.Teiid.ADMIN_PORT); //$NON-NLS-1$
+        Long port = getObjectProperty(uow, PropertyValueType.LONG, "getAdminPort", TeiidArchetype.ADMIN_PORT); //$NON-NLS-1$
         return port != null ? port.intValue() : TeiidAdminInfo.DEFAULT_PORT;
     }
 
@@ -497,7 +516,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
     @Override
     public void setAdminPort( UnitOfWork uow,
                               int port ) throws KException {
-        setObjectProperty(uow, "setAdminPort", KomodoLexicon.Teiid.ADMIN_PORT, port); //$NON-NLS-1$
+        setObjectProperty(uow, "setAdminPort", TeiidArchetype.ADMIN_PORT, port); //$NON-NLS-1$
     }
 
     /**
@@ -509,7 +528,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
      */
     @Override
     public String getAdminUser( UnitOfWork uow ) throws KException {
-        String user = getObjectProperty(uow, PropertyValueType.STRING, "getAdminUser", KomodoLexicon.Teiid.ADMIN_USER); //$NON-NLS-1$
+        String user = getObjectProperty(uow, PropertyValueType.STRING, "getAdminUser", TeiidArchetype.ADMIN_USER); //$NON-NLS-1$
         return user != null ? user : TeiidAdminInfo.DEFAULT_ADMIN_USERNAME;
     }
 
@@ -524,7 +543,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
     @Override
     public void setAdminUser( UnitOfWork uow,
                               String userName ) throws KException {
-        setObjectProperty(uow, "setAdminUser", KomodoLexicon.Teiid.ADMIN_USER, userName); //$NON-NLS-1$
+        setObjectProperty(uow, "setAdminUser", TeiidArchetype.ADMIN_USER, userName); //$NON-NLS-1$
     }
 
     /**
@@ -536,7 +555,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
      */
     @Override
     public String getAdminPassword( UnitOfWork uow ) throws KException {
-        String password = getObjectProperty(uow, PropertyValueType.STRING, "getAdminPassword", KomodoLexicon.Teiid.ADMIN_PSWD); //$NON-NLS-1$
+        String password = getObjectProperty(uow, PropertyValueType.STRING, "getAdminPassword", TeiidArchetype.ADMIN_PSWD); //$NON-NLS-1$
         return password != null ? password : TeiidAdminInfo.DEFAULT_ADMIN_PASSWORD;
     }
 
@@ -551,7 +570,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
     @Override
     public void setAdminPassword( UnitOfWork uow,
                                   String password ) throws KException {
-        setObjectProperty(uow, "setAdminPassword", KomodoLexicon.Teiid.ADMIN_PSWD, password); //$NON-NLS-1$
+        setObjectProperty(uow, "setAdminPassword", TeiidArchetype.ADMIN_PSWD, password); //$NON-NLS-1$
     }
 
     /**
@@ -573,7 +592,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
      */
     @Override
     public boolean isAdminSecure( UnitOfWork uow ) throws KException {
-        Boolean secure = getObjectProperty(uow, PropertyValueType.BOOLEAN, "isSecure", KomodoLexicon.Teiid.ADMIN_SECURE); //$NON-NLS-1$
+        Boolean secure = getObjectProperty(uow, PropertyValueType.BOOLEAN, "isSecure", TeiidArchetype.ADMIN_SECURE); //$NON-NLS-1$
         return secure != null ? secure : TeiidAdminInfo.DEFAULT_SECURE;
     }
 
@@ -588,7 +607,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
     @Override
     public void setAdminSecure( UnitOfWork uow,
                                 boolean secure ) throws KException {
-        setObjectProperty(uow, "setAdminSecure", KomodoLexicon.Teiid.ADMIN_SECURE, secure); //$NON-NLS-1$
+        setObjectProperty(uow, "setAdminSecure", TeiidArchetype.ADMIN_SECURE, secure); //$NON-NLS-1$
     }
 
     /**
@@ -598,8 +617,9 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
      * @throws KException
      *         if error occurs
      */
-    private int getJdbcPort( UnitOfWork uow ) throws KException {
-        Long port = getObjectProperty(uow, PropertyValueType.LONG, "getPort", KomodoLexicon.Teiid.JDBC_PORT); //$NON-NLS-1$
+    @Override
+    public int getJdbcPort( UnitOfWork uow ) throws KException {
+        Long port = getObjectProperty(uow, PropertyValueType.LONG, "getPort", TeiidArchetype.JDBC_PORT); //$NON-NLS-1$
         return port != null ? port.intValue() : TeiidJdbcInfo.DEFAULT_PORT;
     }
 
@@ -614,7 +634,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
     @Override
     public void setJdbcPort( UnitOfWork uow,
                              int port ) throws KException {
-        setObjectProperty(uow, "setPort", KomodoLexicon.Teiid.JDBC_PORT, port); //$NON-NLS-1$
+        setObjectProperty(uow, "setPort", TeiidArchetype.JDBC_PORT, port); //$NON-NLS-1$
     }
 
     /**
@@ -624,8 +644,9 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
      * @throws KException
      *         if error occurs
      */
-    private String getJdbcUsername( UnitOfWork uow ) throws KException {
-        String user = getObjectProperty(uow, PropertyValueType.STRING, "getUsername", KomodoLexicon.Teiid.JDBC_USER); //$NON-NLS-1$
+    @Override
+    public String getJdbcUsername( UnitOfWork uow ) throws KException {
+        String user = getObjectProperty(uow, PropertyValueType.STRING, "getUsername", TeiidArchetype.JDBC_USER); //$NON-NLS-1$
         return user != null ? user : TeiidJdbcInfo.DEFAULT_JDBC_USERNAME;
     }
 
@@ -640,7 +661,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
     @Override
     public void setJdbcUsername( UnitOfWork uow,
                                  String userName ) throws KException {
-        setObjectProperty(uow, "setUsername", KomodoLexicon.Teiid.JDBC_USER, userName); //$NON-NLS-1$
+        setObjectProperty(uow, "setUsername", TeiidArchetype.JDBC_USER, userName); //$NON-NLS-1$
     }
 
     /**
@@ -652,7 +673,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
      */
     @Override
     public String getJdbcPassword( UnitOfWork uow ) throws KException {
-        String password = getObjectProperty(uow, PropertyValueType.STRING, "getPassword", KomodoLexicon.Teiid.JDBC_PSWD); //$NON-NLS-1$
+        String password = getObjectProperty(uow, PropertyValueType.STRING, "getPassword", TeiidArchetype.JDBC_PSWD); //$NON-NLS-1$
         return password != null ? password : TeiidJdbcInfo.DEFAULT_JDBC_PASSWORD;
     }
 
@@ -667,7 +688,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
     @Override
     public void setJdbcPassword( UnitOfWork uow,
                                  String password ) throws KException {
-        setObjectProperty(uow, "setPassword", KomodoLexicon.Teiid.JDBC_PSWD, password); //$NON-NLS-1$
+        setObjectProperty(uow, "setPassword", TeiidArchetype.JDBC_PSWD, password); //$NON-NLS-1$
     }
 
     /**
@@ -679,7 +700,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
      */
     @Override
     public boolean isJdbcSecure( UnitOfWork uow ) throws KException {
-        Boolean secure = getObjectProperty(uow, PropertyValueType.BOOLEAN, "isSecure", KomodoLexicon.Teiid.JDBC_SECURE); //$NON-NLS-1$
+        Boolean secure = getObjectProperty(uow, PropertyValueType.BOOLEAN, "isSecure", TeiidArchetype.JDBC_SECURE); //$NON-NLS-1$
         return secure != null ? secure : TeiidJdbcInfo.DEFAULT_SECURE;
     }
 
@@ -694,7 +715,108 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
     @Override
     public void setJdbcSecure( UnitOfWork uow,
                                boolean secure ) throws KException {
-        setObjectProperty(uow, "setSecure", KomodoLexicon.Teiid.JDBC_SECURE, secure); //$NON-NLS-1$
+        setObjectProperty(uow, "setSecure", TeiidArchetype.JDBC_SECURE, secure); //$NON-NLS-1$
+    }
+
+    @Override
+    public boolean isConnected(UnitOfWork uow) {
+        TeiidInstance teiidInstance = getTeiidInstance(uow);
+        return teiidInstance.isConnected();
+    }
+
+    @Override
+    public CachedTeiid importContent(UnitOfWork transaction) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+
+        WorkspaceManager mgr = WorkspaceManager.getInstance(getRepository());
+        CachedTeiid cachedTeiid = mgr.createCachedTeiid(transaction, this);
+
+        TeiidInstance teiidInstance = getTeiidInstance(transaction);
+        if (teiidInstance == null) {
+            throw new KException(Messages.getString(Messages.Relational.TEIID_INSTANCE_ERROR));
+        }
+
+        try {
+            teiidInstance.connect();
+            if (! teiidInstance.isConnected()) {
+                throw new KException(Messages.getString(Messages.Relational.TEIID_INSTANCE_CONNECTION_ERROR));
+            }
+
+            Collection<TeiidVdb> instVdbs = teiidInstance.getVdbs();
+            if (instVdbs == null)
+                instVdbs = Collections.emptyList();
+
+            Collection<TeiidDataSource> instDataSrcs = teiidInstance.getDataSources();
+            if (instDataSrcs == null)
+                instDataSrcs = Collections.emptyList();
+
+            Collection<TeiidTranslator> instTranslators = teiidInstance.getTranslators();
+            if (instTranslators == null)
+                instTranslators = Collections.emptyList();
+
+            //
+            // Process the vdbs
+            //
+            for (TeiidVdb teiidVdb : instVdbs) {
+                if (teiidVdb == null)
+                    continue;
+
+                // Export the vdb content into a string
+                String content = teiidVdb.export();
+                if (content == null)
+                    continue;
+
+                if (StringUtils.isEmpty(content))
+                    continue;
+
+                String vdbName = teiidVdb.getName();
+
+                // Output the content to a temp file
+                File tempFile = File.createTempFile(VDB_PREFIX, XML_SUFFIX);
+                Files.write(Paths.get(tempFile.getPath()), content.getBytes());
+
+                Vdb vdb = mgr.createVdb(transaction, cachedTeiid, vdbName, tempFile.getAbsolutePath());
+                KomodoObject fileNode = vdb.addChild(transaction, JcrLexicon.CONTENT.getString(), null);
+                fileNode.setProperty(transaction, JcrLexicon.DATA.getString(), content);
+            }
+
+            for (TeiidDataSource teiidDataSrc : instDataSrcs) {
+                if (teiidDataSrc == null)
+                    continue;
+
+                Datasource dataSrc = mgr.createDatasource(transaction, cachedTeiid, teiidDataSrc.getName());
+                dataSrc.setDriverName(transaction, teiidDataSrc.getType());
+                dataSrc.setJndiName(transaction, teiidDataSrc.getJndiName());
+
+                for (Entry<Object, Object> property : teiidDataSrc.getProperties().entrySet()) {
+                    dataSrc.setProperty(transaction, property.getKey().toString(), property.getValue());
+                }
+            }
+
+            for (TeiidTranslator teiidTranslator : instTranslators) {
+                if (teiidTranslator == null)
+                    continue;
+
+                KomodoObject kObject = cachedTeiid.addChild(transaction,
+                                                                                                                  teiidTranslator.getName(),
+                                                                                                                  VdbLexicon.Translator.TRANSLATOR);
+                TranslatorImpl translator = new TranslatorImpl(transaction,
+                                                                                                       getRepository(),
+                                                                                                       kObject.getAbsolutePath());
+                translator.setDescription(transaction, teiidTranslator.getDescription());
+                String type = teiidTranslator.getType() != null ? teiidTranslator.getType() : teiidTranslator.getName();
+                translator.setType(transaction, type);
+                Properties props = teiidTranslator.getProperties();
+                for (Entry<Object, Object> entry : props.entrySet()) {
+                    translator.setProperty(transaction, entry.getKey().toString(), entry.getValue());
+                }
+            }
+
+        } catch (Exception ex) {
+            throw new KException(ex);
+        }
+
+        return cachedTeiid;
     }
 
     @Override

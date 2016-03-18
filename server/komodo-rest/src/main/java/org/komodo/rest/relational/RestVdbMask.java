@@ -90,6 +90,7 @@ public final class RestVdbMask extends RestBasicEntity {
         String vdbName = vdb.getName(uow);
 
         Properties settings = getUriBuilder().createSettings(SettingNames.VDB_NAME, vdbName);
+        settings.put(SettingNames.VDB_PARENT_PATH, getUriBuilder().generateVdbParentUri(vdb, uow));
         getUriBuilder().addSetting(settings, SettingNames.DATA_ROLE_ID, dataRoleName);
         getUriBuilder().addSetting(settings, SettingNames.PERMISSION_ID, permName);
         getUriBuilder().addSetting(settings, SettingNames.PERMISSION_CHILD_TYPE, LinkType.MASKS.uriName());

@@ -243,7 +243,27 @@ public final class RelationalMessages {
         /**
          * The search service cannot parse the request body
          */
-        SEARCH_SERVICE_REQUEST_PARSING_ERROR;
+        SEARCH_SERVICE_REQUEST_PARSING_ERROR,
+
+        /**
+         * The teiid service cannot parse the request body
+         */
+        TEIID_SERVICE_REQUEST_PARSING_ERROR,
+
+        /**
+         * The teiid service requires all credentials to contain a value
+         */
+        TEIID_SERVICE_EMPTY_CREDENTIAL_ERROR,
+
+        /**
+         * An error indicating a teiid credentials failure
+         */
+        TEIID_SERVICE_SET_CREDENTIALS_ERROR,
+
+        /**
+         * An error when getting vdbs
+         */
+        TEIID_SERVICE_GET_VDBS_ERROR;
 
         /**
          * {@inheritDoc}

@@ -14,13 +14,14 @@
 	<packaging>war</packaging>
 
 	<properties>
-		<gson.version>2.2.4</gson.version>
-		<resteasy.version>3.0.11.Final</resteasy.version>
-		<guava.version>16.0.1</guava.version>
-		<swagger.version>1.5.0</swagger.version>
-		<jaxrs.version>2.13</jaxrs.version>
-		<xsom.version>20130531</xsom.version>
-		<relaxngDatatype.version>20020414</relaxngDatatype.version>
+		<version.gson>2.2.4</version.gson>
+		<version.resteasy>3.0.11.Final</version.resteasy>
+		<version.guava>16.0.1</version.guava>
+		<version.swagger>1.5.0</version.swagger>
+		<version.jaxrs>2.13</version.jaxrs>
+		<version.xsom>20130531</version.xsom>
+		<version.relaxngDatatype>20020414</version.relaxngDatatype>
+
 		<webapp-dir>${project.artifactId}-${project.version}</webapp-dir>
 		<webapp-outdir>${basedir}/target/${webapp-dir}</webapp-outdir>
 
@@ -34,49 +35,49 @@
 			<dependency>
 				<groupId>com.sun.xsom</groupId>
 				<artifactId>xsom</artifactId>
-				<version>${xsom.version}</version>
+				<version>${version.xsom}</version>
 			</dependency>
 			<dependency>
 				<groupId>relaxngDatatype</groupId>
 				<artifactId>relaxngDatatype</artifactId>
-				<version>${relaxngDatatype.version}</version>
+				<version>${version.relaxngDatatype}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.code.gson</groupId>
 				<artifactId>gson</artifactId>
-				<version>${gson.version}</version>
+				<version>${version.gson}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
-				<version>${guava.version}</version>
+				<version>${version.guava}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jboss.resteasy</groupId>
 				<artifactId>resteasy-bom</artifactId>
-				<version>${resteasy.version}</version>
+				<version>${version.resteasy}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
 			<dependency>
 				<groupId>io.swagger</groupId>
 				<artifactId>swagger-annotations</artifactId>
-				<version>${swagger.version}</version>
+				<version>${version.swagger}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.swagger</groupId>
 				<artifactId>swagger-core</artifactId>
-				<version>${swagger.version}</version>
+				<version>${version.swagger}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.swagger</groupId>
 				<artifactId>swagger-models</artifactId>
-				<version>${swagger.version}</version>
+				<version>${version.swagger}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.swagger</groupId>
 				<artifactId>swagger-jaxrs</artifactId>
-				<version>${swagger.version}</version>
+				<version>${version.swagger}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -218,6 +219,61 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
+
+			<!-- Adds integration test directories to resources -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<executions>
+					<!-- Add integration-test source directory to our build -->
+					<execution>
+						<id>add-integration-test-sources</id>
+						<phase>generate-test-sources</phase>
+						<goals>
+							<goal>add-test-source</goal>
+						</goals>
+						<configuration>
+							<!-- Configures the source directory of our integration tests -->
+							<sources>
+								<source>src/integration-test/java</source>
+							</sources>
+						</configuration>
+					</execution>
+					<!-- Add integration-test resource directory to our build -->
+					<execution>
+						<id>add-integration-test-resources</id>
+						<phase>generate-test-resources</phase>
+						<goals>
+							<goal>add-test-resource</goal>
+						</goals>
+						<configuration>
+							<!-- Configures the resource directory of our integration tests -->
+							<resources>
+								<resource>
+									<filtering>true</filtering>
+									<directory>src/integration-test/resources</directory>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Overrides test configuration to exclude any tests starting IT -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<!-- Skips unit tests if the value of skip.unit.tests property is true -->
+					<skipTests>${skip.unit.tests}</skipTests>
+					<!-- Excludes integration tests when unit tests are run -->
+					<excludes>
+						<exclude>**/IT*.java</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+
+			<!-- Creates the war for deployment -->
 			<plugin>
 				<artifactId>maven-war-plugin</artifactId>
 				<configuration>
@@ -247,7 +303,133 @@
 					</webResources>
 				</configuration>
 			</plugin>
+
+			<!-- Downloads jboss as and teiid for integration testing -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>unpack-for-teiid-testing</id>
+						<phase>process-sources</phase>
+						<goals>
+							<goal>unpack</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>org.jboss.as</groupId>
+									<artifactId>jboss-as-dist</artifactId>
+									<version>${version.org.jboss.as}</version>
+									<type>zip</type>
+									<overWrite>false</overWrite>
+									<outputDirectory>${project.basedir}/lib/jbossas/</outputDirectory>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+					</execution>
+					<execution>
+						<id>unpack-teiid</id>
+						<phase>process-sources</phase>
+						<goals>
+							<goal>unpack</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>org.jboss.teiid</groupId>
+									<artifactId>teiid</artifactId>
+									<version>${version.teiid.default}</version>
+									<classifier>jboss-dist</classifier>
+									<type>zip</type>
+									<overWrite>true</overWrite>
+									<outputDirectory>${project.basedir}/lib/jbossas/${version.jbossas.test}</outputDirectory>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Downloads resteasy jaxrs from resteasy for use in integration tests -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>download-resteasy</id>
+						<phase>process-sources</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<property name="version.resteasy" value="${version.resteasy}" />
+								<property name="destination.resteasy" value="${project.build.directory}/resteasy"/>
+								<property name="destination.jboss.modules" value="${project.basedir}/lib/jbossas/${version.jbossas.test}/modules/system/layers/base"/>								
+								<ant antfile="${project.basedir}/install-resteasy.xml" target="install" />
+							</target>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Executes the integration tests -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<executions>
+					<!-- Invokes both the integration-test and the verify goals -->
+					<execution>
+						<id>integration-tests</id>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+						<configuration>
+							<!-- Skips integration tests  -->
+							<skipTests>${skip.integration.tests}</skipTests>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
+
+		<pluginManagement>
+			<plugins>
+				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.apache.maven.plugins
+										</groupId>
+										<artifactId>
+											maven-antrun-plugin
+										</artifactId>
+										<versionRange>
+											[1.8,)
+										</versionRange>
+										<goals>
+											<goal>run</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
 
 	<profiles>
@@ -331,7 +513,7 @@
 					<dependency>
 						<groupId>org.glassfish.jersey.bundles</groupId>
 						<artifactId>jaxrs-ri</artifactId>
-						<version>${jaxrs.version}</version>
+						<version>${version.jaxrs}</version>
 					</dependency>
 				</dependencies>
 			</dependencyManagement>

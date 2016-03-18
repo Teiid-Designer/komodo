@@ -252,7 +252,8 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         loadVdbs();
 
         // get
-        URI uri = _uriBuilder.generateVdbChildGroupUri(TestUtilities.PORTFOLIO_VDB_NAME, LinkType.MODELS);
+        URI vdbBaseUri = _uriBuilder.generateVdbsUri();
+        URI uri = _uriBuilder.generateVdbChildGroupUri(vdbBaseUri, TestUtilities.PORTFOLIO_VDB_NAME, LinkType.MODELS);
         this.response = request(uri).get();
         final String entity = this.response.readEntity(String.class);
         assertThat(entity, is(notNullValue()));
@@ -412,7 +413,8 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         loadVdbs();
 
         // get
-        URI uri = _uriBuilder.generateVdbChildGroupUri(TestUtilities.TWEET_EXAMPLE_VDB_NAME, LinkType.TRANSLATORS);
+        URI vdbBaseUri = _uriBuilder.generateVdbsUri();
+        URI uri = _uriBuilder.generateVdbChildGroupUri(vdbBaseUri, TestUtilities.TWEET_EXAMPLE_VDB_NAME, LinkType.TRANSLATORS);
         this.response = request(uri).get();
         final String entity = this.response.readEntity(String.class);
         assertThat(entity, is(notNullValue()));
@@ -438,7 +440,8 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         loadVdbs();
 
         // get
-        URI uri = _uriBuilder.generateVdbChildGroupUri(TestUtilities.PORTFOLIO_VDB_NAME, LinkType.TRANSLATORS);
+        URI vdbBaseUri = _uriBuilder.generateVdbsUri();
+        URI uri = _uriBuilder.generateVdbChildGroupUri(vdbBaseUri, TestUtilities.PORTFOLIO_VDB_NAME, LinkType.TRANSLATORS);
         this.response = request(uri).get();
         final String entity = this.response.readEntity(String.class);
         assertThat(entity, is(notNullValue()));
@@ -480,7 +483,8 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         loadVdbs();
 
         // get
-        URI uri = _uriBuilder.generateVdbChildGroupUri(TestUtilities.ALL_ELEMENTS_EXAMPLE_VDB_NAME, LinkType.IMPORTS);
+        URI vdbBaseUri = _uriBuilder.generateVdbsUri();
+        URI uri = _uriBuilder.generateVdbChildGroupUri(vdbBaseUri, TestUtilities.ALL_ELEMENTS_EXAMPLE_VDB_NAME, LinkType.IMPORTS);
         this.response = request(uri).get();
         final String entity = this.response.readEntity(String.class);
         assertThat(entity, is(notNullValue()));
@@ -507,7 +511,8 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         loadVdbs();
 
         // get
-        URI uri = _uriBuilder.generateVdbChildGroupUri(TestUtilities.PORTFOLIO_VDB_NAME, LinkType.IMPORTS);
+        URI vdbBaseUri = _uriBuilder.generateVdbsUri();
+        URI uri = _uriBuilder.generateVdbChildGroupUri(vdbBaseUri, TestUtilities.PORTFOLIO_VDB_NAME, LinkType.IMPORTS);
         this.response = request(uri).get();
         final String entity = this.response.readEntity(String.class);
         assertThat(entity, is(notNullValue()));
@@ -550,7 +555,8 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         loadVdbs();
 
         // get
-        URI uri = _uriBuilder.generateVdbChildGroupUri(TestUtilities.ALL_ELEMENTS_EXAMPLE_VDB_NAME, LinkType.DATA_ROLES);
+        URI vdbBaseUri = _uriBuilder.generateVdbsUri();
+        URI uri = _uriBuilder.generateVdbChildGroupUri(vdbBaseUri, TestUtilities.ALL_ELEMENTS_EXAMPLE_VDB_NAME, LinkType.DATA_ROLES);
         this.response = request(uri).get();
         final String entity = this.response.readEntity(String.class);
         assertThat(entity, is(notNullValue()));
@@ -582,7 +588,8 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         loadVdbs();
 
         // get
-        URI uri = _uriBuilder.generateVdbChildGroupUri(TestUtilities.PORTFOLIO_VDB_NAME, LinkType.DATA_ROLES);
+        URI vdbBaseUri = _uriBuilder.generateVdbsUri();
+        URI uri = _uriBuilder.generateVdbChildGroupUri(vdbBaseUri, TestUtilities.PORTFOLIO_VDB_NAME, LinkType.DATA_ROLES);
         this.response = request(uri).get();
         final String entity = this.response.readEntity(String.class);
         assertThat(entity, is(notNullValue()));

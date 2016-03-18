@@ -30,6 +30,8 @@ import org.komodo.rest.json.RestPropertySerializer;
 import org.komodo.rest.relational.KomodoSavedSearcher;
 import org.komodo.rest.relational.KomodoSearcherAttributes;
 import org.komodo.rest.relational.KomodoStatusObject;
+import org.komodo.rest.relational.KomodoTeiidAttributes;
+import org.komodo.rest.relational.RestTeiid;
 import org.komodo.rest.relational.RestVdb;
 import org.komodo.rest.relational.RestVdbCondition;
 import org.komodo.rest.relational.RestVdbDataRole;
@@ -63,6 +65,7 @@ public final class KomodoJsonMarshaller {
                                                   .registerTypeAdapter(KomodoStatusObject.class, new StatusObjectSerializer())
                                                   .registerTypeAdapter(KomodoSavedSearcher.class, new SavedSearcherSerializer())
                                                   .registerTypeAdapter(KomodoSearcherAttributes.class, new SearcherAttributesSerializer())
+                                                  .registerTypeAdapter(KomodoTeiidAttributes.class, new TeiidAttributesSerializer())
                                                   .registerTypeAdapter( RestProperty.class, new RestPropertySerializer() )
                                                   .registerTypeAdapter( RestVdb.class, new VdbSerializer() )
                                                   .registerTypeAdapter( RestVdbModel.class, new VdbModelSerializer() )
@@ -73,7 +76,8 @@ public final class KomodoJsonMarshaller {
                                                   .registerTypeAdapter( RestVdbCondition.class, new VdbConditionSerializer() )
                                                   .registerTypeAdapter( RestVdbMask.class, new VdbMaskSerializer() )
                                                   .registerTypeAdapter( RestVdbTranslator.class, new VdbTranslatorSerializer() )
-                                                  .registerTypeAdapter( RestBasicEntity.class, new BasicEntitySerializer<RestBasicEntity>() );
+                                                  .registerTypeAdapter( RestBasicEntity.class, new BasicEntitySerializer<RestBasicEntity>() )
+                                                  .registerTypeAdapter( RestTeiid.class, new TeiidSerializer() );
         BUILDER = temp.create();
         PRETTY_BUILDER = temp.setPrettyPrinting().create();
     }

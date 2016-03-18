@@ -21,6 +21,9 @@
  */
 package org.komodo.utils;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Iterator;
 import java.util.List;
 import org.komodo.spi.constants.StringConstants;
@@ -88,7 +91,7 @@ public final class StringUtils implements StringConstants {
      * @param delimiter Delimiter to put between string pieces
      * @return One merged string
      */
-    public static String join( List strings,
+    public static String join( List<?> strings,
                                String delimiter ) {
         if (strings == null || delimiter == null) {
             return null;
@@ -105,7 +108,7 @@ public final class StringUtils implements StringConstants {
         // put the piece and a delimiter after it. An iterator is used to walk the list.
         int most = strings.size() - 1;
         if (strings.size() > 1) {
-            Iterator iter = strings.iterator();
+            Iterator<?> iter = strings.iterator();
             for (int i = 0; i < most; i++) {
                 str.append(iter.next());
                 str.append(delimiter);
@@ -1390,6 +1393,32 @@ public final class StringUtils implements StringConstants {
         }
 
         return buffer.toString();
+    }
+
+    /**
+     * @param srcStream the src input stream
+     * @return string representation of source stream.
+     *
+     * Note: Close the source stream on completion
+     *
+     * @throws IOException
+     */
+    public static String inputStreamToString(InputStream srcStream) throws IOException {
+        if (srcStream == null)
+            return EMPTY_STRING;
+
+        try {
+            ByteArrayOutputStream result = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = srcStream.read(buffer)) != -1) {
+                result.write(buffer, 0, length);
+            }
+            return result.toString("UTF-8");
+        } finally {
+            if (srcStream != null)
+                srcStream.close();
+        }
     }
 
     /**

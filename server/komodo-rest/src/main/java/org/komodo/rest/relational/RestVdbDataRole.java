@@ -166,6 +166,7 @@ public final class RestVdbDataRole extends RestBasicEntity {
         String vdbName = vdb.getName(uow);
 
         Properties settings = getUriBuilder().createSettings(SettingNames.VDB_NAME, vdbName);
+        settings.put(SettingNames.VDB_PARENT_PATH, getUriBuilder().generateVdbParentUri(vdb, uow));
         getUriBuilder().addSetting(settings, SettingNames.DATA_ROLE_ID, getId());
 
         addLink(new RestLink(LinkType.SELF, getUriBuilder().buildVdbDataRoleUri(LinkType.SELF, settings)));

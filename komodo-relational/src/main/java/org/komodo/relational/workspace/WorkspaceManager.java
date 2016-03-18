@@ -38,6 +38,7 @@ import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Schema;
 import org.komodo.relational.model.internal.ModelImpl;
 import org.komodo.relational.model.internal.SchemaImpl;
+import org.komodo.relational.teiid.CachedTeiid;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.teiid.internal.TeiidImpl;
 import org.komodo.relational.vdb.Vdb;
@@ -262,6 +263,19 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
         final String path = ( ( parent == null ) ? getRepository().komodoWorkspace( uow ).getAbsolutePath()
                                                 : parent.getAbsolutePath() );
         return RelationalModelFactory.createTeiid( uow, getRepository(), path, id );
+    }
+
+    /**
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param srcTeiid the source teiid model
+     * @return the teiid object (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    public CachedTeiid createCachedTeiid( final UnitOfWork uow, final Teiid srcTeiid) throws KException {
+        return RelationalModelFactory.createCachedTeiid( uow, getRepository(), srcTeiid);
     }
 
     /**

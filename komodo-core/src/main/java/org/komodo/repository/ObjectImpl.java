@@ -24,6 +24,7 @@ package org.komodo.repository;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.jcr.Node;
@@ -1079,12 +1080,10 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         descriptors.addAll(Arrays.asList(getDescriptors(transaction)));
 
         KomodoTypeRegistry registry  = KomodoTypeRegistry.getInstance();
-        Set<TypeIdentifier> identifiers = null;
+        Set<TypeIdentifier> identifiers = new HashSet<>();
         for (Descriptor descriptor : descriptors) {
             String name = descriptor.getName();
-            identifiers = registry.getIdentifiers(name);
-            if (! identifiers.isEmpty())
-                break;
+            identifiers.addAll(registry.getIdentifiers(name));
         }
 
         KomodoType result = KomodoType.UNKNOWN;
@@ -1265,7 +1264,6 @@ public class ObjectImpl implements KomodoObject, StringConstants {
      * @see org.komodo.spi.repository.KomodoObject#hasRawChild(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String,
      *      java.lang.String)
      */
-    @SuppressWarnings( "unused" )
     @Override
     public final boolean hasRawChild( final UnitOfWork transaction,
                                       final String name,

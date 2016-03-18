@@ -103,6 +103,8 @@ public final class RestVdb extends RestBasicEntity {
         }
 
         Properties settings = getUriBuilder().createSettings(SettingNames.VDB_NAME, getId());
+        URI parentUri = getUriBuilder().generateVdbParentUri(vdb, uow);
+        settings.put(SettingNames.VDB_PARENT_PATH, parentUri);
 
         addLink(new RestLink(LinkType.SELF, getUriBuilder().buildVdbUri(LinkType.SELF, settings)));
         addLink(new RestLink(LinkType.PARENT, getUriBuilder().buildVdbUri(LinkType.PARENT, settings)));

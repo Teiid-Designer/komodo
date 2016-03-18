@@ -51,6 +51,7 @@ import org.komodo.repository.SynchronousCallback;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.json.JsonConstants;
 import org.komodo.rest.service.KomodoSearchService;
+import org.komodo.rest.service.KomodoTeiidService;
 import org.komodo.rest.service.KomodoUtilService;
 import org.komodo.rest.service.KomodoVdbService;
 import org.komodo.rest.swagger.RestPropertyConverter;
@@ -124,6 +125,11 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
          * The name of the URI path segment for the utility service.
          */
         String SERVICE_SEGMENT = "service"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for the teiid service.
+         */
+        String TEIID_SEGMENT = "teiid"; //$NON-NLS-1$
 
         /**
          * The name of the URI path segment for the Komodo schema.
@@ -281,10 +287,19 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         String SAVED_SEARCHES_SEGMENT = "savedSearches"; //$NON-NLS-1$
 
         /**
+         * The name of the URI vdb name parameter
+         */
+        String VDB_NAME_PARAMETER = "name"; //$NON-NLS-1$
+
+        /**
          * The vdb export xml property
          */
         String VDB_EXPORT_XML_PROPERTY = "vdb-export-xml"; //$NON-NLS-1$
 
+        /**
+         * The teiid credentials property for modifying the usernames and passwords
+         */
+        String TEIID_CREDENTIALS = "credentials";
     }
 
     private static final int TIMEOUT = 1;
@@ -329,6 +344,7 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         objs.add( new KomodoUtilService( this.kengine ) );
         objs.add( new KomodoVdbService( this.kengine ) );
         objs.add( new KomodoSearchService( this.kengine ));
+        objs.add( new KomodoTeiidService( this.kengine ));
         this.singletons = Collections.unmodifiableSet( objs );
 
         initSwaggerConfiguration();

@@ -654,9 +654,9 @@ public interface KomodoLexicon extends StringConstants {
     }
 
     /**
-     * The JCR names associated with Teiid servers.
+     * Abstract model of a Teiid connection properties
      */
-    public interface Teiid extends WorkspaceItem {
+    public interface TeiidArchetype {
 
         /**
          * The version property. Value is {@value} .
@@ -689,11 +689,6 @@ public interface KomodoLexicon extends StringConstants {
         String CONNECTED = Namespace.PREFIX + COLON + "connected"; //$NON-NLS-1$
 
         /**
-         * The name and node type name of the Komodo workspace's Teiid server grouping node. Value is {@value} .
-         */
-        String GROUP_NODE = Namespace.PREFIX + COLON + "teiids"; //$NON-NLS-1$
-
-        /**
          * The name of the host URL property. Value is {@value} .
          */
         String HOST = Namespace.PREFIX + COLON + "host"; //$NON-NLS-1$
@@ -714,20 +709,48 @@ public interface KomodoLexicon extends StringConstants {
         String JDBC_USER = Namespace.PREFIX + COLON + "jdbcUser"; //$NON-NLS-1$
 
         /**
-         * The name of the last ping time property. Value is {@value} .
-         */
-        String LAST_PING_TIME = Namespace.PREFIX + COLON + "lastPingTime"; //$NON-NLS-1$
-
-        /**
          * The jdbc connection is encrypted. Value is {@value} .
          */
         String JDBC_SECURE = Namespace.PREFIX + COLON + "jdbcSecure"; //$NON-NLS-1$
+    }
+
+    /**
+     * The JCR names associated with Teiid servers.
+     */
+    public interface Teiid extends TeiidArchetype, WorkspaceItem {
+
+        /**
+         * The name and node type name of the Komodo workspace's Teiid server grouping node. Value is {@value} .
+         */
+        String GROUP_NODE = Namespace.PREFIX + COLON + "teiids"; //$NON-NLS-1$
+
+        /**
+         * The name of the last ping time property. Value is {@value} .
+         */
+        String LAST_PING_TIME = Namespace.PREFIX + COLON + "lastPingTime"; //$NON-NLS-1$
 
         /**
          * The name of the Teiid node type. Value is {@value} .
          */
         String NODE_TYPE = Namespace.PREFIX + COLON + "teiid"; //$NON-NLS-1$
 
+    }
+
+    /**
+     * The JCR names associated with the teiid cache, ie. those object that
+     * cache the representation of the contents of a live server
+     */
+    public interface CachedTeiid extends TeiidArchetype {
+
+        /**
+         * The name and node type name of the Komodo CachedTeiids grouping node. Value is {@value}.
+         */
+        String GROUP_NODE = Namespace.PREFIX + COLON + "teiidCache"; //$NON-NLS-1$
+
+        /**
+         * The name of the Cached Teiid node type. Value is {@value} .
+         */
+        String NODE_TYPE = Namespace.PREFIX + COLON + "cachedTeiid"; //$NON-NLS-1$
     }
 
     /**

@@ -242,7 +242,17 @@ public class Messages implements StringConstants {
         /**
          * Indicates a table type other than a table or view was found.
          */
-        UNEXPECTED_TABLE_TYPE;
+        UNEXPECTED_TABLE_TYPE,
+
+        /**
+         * An error indicating a teiid instance could not be generated
+         */
+        TEIID_INSTANCE_ERROR,
+
+        /**
+         * An error indicating a teiid instance could not connect
+         */
+        TEIID_INSTANCE_CONNECTION_ERROR;
 
         @Override
         public String toString() {
