@@ -41,6 +41,7 @@ import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import org.jboss.resteasy.plugins.interceptors.CorsFilter;
 import org.komodo.core.KEngine;
 import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
@@ -346,9 +347,26 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         objs.add( new KomodoVdbService( this.kengine ) );
         objs.add( new KomodoSearchService( this.kengine ));
         objs.add( new KomodoTeiidService( this.kengine ));
+
+        CorsFilter corsFilter = initCorsFilter();
+        objs.add(corsFilter);
+
         this.singletons = Collections.unmodifiableSet( objs );
 
         initSwaggerConfiguration();
+    }
+
+    private CorsFilter initCorsFilter() {
+        CorsFilter corsFilter = new CorsFilter();
+        corsFilter.getAllowedOrigins().add("*");
+        String allowHeaders = "Content-Type, X-Requested-With, accept, Origin," +
+                                                "Access-Control-Request-Method," +
+                                                "Access-Control-Request-Headers, Authorization";
+        corsFilter.setAllowedHeaders(allowHeaders);
+        corsFilter.setAllowCredentials(true);
+        corsFilter.setAllowedMethods("GET, POST, PUT, DELETE, OPTIONS, HEAD");
+        corsFilter.setCorsMaxAge(1209600);
+        return corsFilter;
     }
 
     @SuppressWarnings( "nls" )
@@ -447,9 +465,6 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         // Enable swagger support
         resources.add(io.swagger.jaxrs.listing.ApiListingResource.class);
         resources.add(io.swagger.jaxrs.listing.SwaggerSerializers.class);
-
-        // Enable cross origin support
-        resources.add(CORSFilter.class);
 
         return resources;
     }
