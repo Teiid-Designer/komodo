@@ -65,6 +65,10 @@ public class TestDataTypeManager {
             assertEquals(DataTypeName.STRING, manager.getDataTypeName("STRING"));
             assertEquals(DataTypeName.STRING_ARRAY, manager.getDataTypeName("String[]"));
 
+            assertEquals(DataTypeName.BIGDECIMAL, manager.getDataTypeName("bigdecimal"));
+            assertEquals(DataTypeName.BIGDECIMAL, manager.getDataTypeName("BIG_DECIMAL"));
+            assertEquals(DataTypeName.BIGDECIMAL_ARRAY, manager.getDataTypeName("BIG_DECIMAL[]"));
+
             assertEquals(DataTypeName.OBJECT, manager.getDataTypeName("NoSuchObject"));
         }
     }
