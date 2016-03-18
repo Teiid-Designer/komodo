@@ -673,8 +673,8 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
         assertEquals(MediaType.APPLICATION_JSON_TYPE, this.response.getMediaType());
         final String entity = this.response.readEntity(String.class);
         // System.out.println("Response:\n" + entity);
-        assertEquals("An error occurred whilst searching the workspace: " +
-                            "'Search requires the parameter valueParam but has not been provided a value'", entity);
+        assertTrue(entity.startsWith("An error occurred whilst searching the workspace: " +
+                            "'Search requires the parameter valueParam but has not been provided a value"));
 
     }
 

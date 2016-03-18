@@ -42,6 +42,7 @@ import org.komodo.spi.repository.RepositoryClientEvent;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.KEnvironment;
 import org.komodo.utils.KLog;
+import org.komodo.utils.StringUtils;
 
 /**
  * The Komodo engine. It is responsible for persisting and retriever user session data and Teiid artifacts.
@@ -328,7 +329,8 @@ public final class KEngine implements RepositoryClient, StringConstants {
 
         } catch (final Exception e) {
             this.state = State.ERROR;
-            throw new KException(Messages.getString(Messages.KEngine.Startup_Failure), e);
+            String stackTrace = StringUtils.exceptionToString(e);
+            throw new KException(Messages.getString(Messages.KEngine.Startup_Failure) + NEW_LINE + stackTrace, e);
         }
     }
 

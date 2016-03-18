@@ -71,6 +71,7 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.RepositoryClientEvent;
 import org.komodo.spi.repository.RepositoryObserver;
 import org.komodo.utils.KLog;
+import org.komodo.utils.StringUtils;
 import io.swagger.converter.ModelConverters;
 import io.swagger.jaxrs.config.BeanConfig;
 
@@ -465,13 +466,13 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
             kengine.start();
             started = this.latch.await( TIMEOUT, UNIT );
         } catch ( final Exception e ) {
-            e.printStackTrace();
-            throw new ServerErrorException( Messages.getString( KOMODO_ENGINE_STARTUP_ERROR, e ), Status.INTERNAL_SERVER_ERROR );
+            String stackTrace = StringUtils.exceptionToString(e);
+            throw new ServerErrorException( Messages.getString( KOMODO_ENGINE_STARTUP_ERROR, e ) + NEW_LINE + stackTrace, Status.INTERNAL_SERVER_ERROR );
         }
 
         if ( !started ) {
             throw new ServerErrorException( Messages.getString( KOMODO_ENGINE_STARTUP_TIMEOUT, TIMEOUT, UNIT ),
-                                            Status.REQUEST_TIMEOUT );
+                                            Status.INTERNAL_SERVER_ERROR );
         }
 
         return kengine;

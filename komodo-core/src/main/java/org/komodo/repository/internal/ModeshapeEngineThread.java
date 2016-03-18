@@ -214,6 +214,8 @@ public class ModeshapeEngineThread extends Thread implements StringConstants {
 
     private volatile boolean stop = false;
 
+    private volatile Exception error = null;
+
     private final WorkspaceIdentifier identifier;
 
     private final Repository.Id repoId;
@@ -344,6 +346,13 @@ public class ModeshapeEngineThread extends Thread implements StringConstants {
     public boolean isRunning() {
         return ModeshapeUtils.isEngineRunning(msEngine) &&
                     ModeshapeUtils.isRepositoryRunning(identifier.getRepository());
+    }
+
+    /**
+     * @return any error that may have occurred when the run method threw an error
+     */
+    public Exception getError() {
+        return this.error;
     }
 
     private synchronized void rollbackSession( final Request request ) {
@@ -656,6 +665,7 @@ public class ModeshapeEngineThread extends Thread implements StringConstants {
 
             } catch (final Exception e) {
                 stop = true;
+                error = e;
                 KEngine.getInstance().getErrorHandler().error(Messages.getString(Messages.LocalRepository.General_Exception), e);
             }
         }
