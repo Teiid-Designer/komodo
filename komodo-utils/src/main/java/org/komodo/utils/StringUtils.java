@@ -24,6 +24,8 @@ package org.komodo.utils;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Iterator;
 import java.util.List;
 import org.komodo.spi.constants.StringConstants;
@@ -1419,6 +1421,17 @@ public final class StringUtils implements StringConstants {
             if (srcStream != null)
                 srcStream.close();
         }
+    }
+
+    /**
+     * @param throwable
+     * @return The stack trace of the given throwable as a string
+     */
+    public static String exceptionToString(Throwable throwable) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        throwable.printStackTrace(pw);
+        return sw.toString();
     }
 
     /**

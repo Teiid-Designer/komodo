@@ -38,6 +38,7 @@ import org.komodo.spi.KException;
 import org.komodo.spi.repository.RepositoryClientEvent;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.KLog;
+import org.komodo.utils.StringUtils;
 
 /**
  * A repository installed on the local machine, using the modeshape engine and repository.
@@ -427,8 +428,16 @@ public class LocalRepository extends RepositoryImpl {
     private void createEngineThread() {
         if (engineThread != null && engineThread.isAlive()) return;
 
-        if (engineThread != null && !engineThread.isAlive()) throw new RuntimeException(
-                                                                                        Messages.getString(Messages.LocalRepository.EngineThread_Died));
+        if (engineThread != null && !engineThread.isAlive()) {
+            String msg = Messages.getString(Messages.LocalRepository.EngineThread_Died);
+
+            Exception error = engineThread.getError();
+                if (error != null) {
+                    String stackTrace = StringUtils.exceptionToString(error);
+                    msg = msg + NEW_LINE + stackTrace;
+                }
+            throw new RuntimeException(msg);
+        }
 
         engineThread = new ModeshapeEngineThread(getId());
         engineThread.start();

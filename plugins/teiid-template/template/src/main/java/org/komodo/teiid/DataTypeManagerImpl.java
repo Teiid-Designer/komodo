@@ -23,6 +23,7 @@ package org.komodo.teiid;
 
 import java.util.Set;
 import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.type.DataTypeManager.DataTypeName;
 import org.komodo.teiid.framework.AbstractDataTypeManager;
 import org.teiid.core.types.DataTypeManager;
 
@@ -42,8 +43,10 @@ public class DataTypeManagerImpl extends AbstractDataTypeManager {
         if (dataTypeId == null)
             return DataTypeName.NULL;
 
+        dataTypeId = DataTypeName.correctBigUnderscores(dataTypeId);
+
         // Should eliminate any aliases
-        Class<?> dataTypeClass = DataTypeManager.getDataTypeClass(dataTypeId);
+        Class<?> dataTypeClass = getDataTypeClass(dataTypeId);
         dataTypeId = DataTypeManager.getDataTypeName(dataTypeClass);
 
         boolean isArray = isArrayType(dataTypeId);

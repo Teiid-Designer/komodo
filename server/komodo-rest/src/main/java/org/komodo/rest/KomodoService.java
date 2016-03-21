@@ -24,6 +24,8 @@ package org.komodo.rest;
 import static org.komodo.rest.Messages.Error.COMMIT_TIMEOUT;
 import static org.komodo.rest.Messages.Error.RESOURCE_NOT_FOUND;
 import static org.komodo.rest.Messages.General.GET_OPERATION_NAME;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import javax.ws.rs.ServerErrorException;
@@ -47,6 +49,7 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.KLog;
+import org.komodo.utils.StringUtils;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 /**
@@ -58,6 +61,8 @@ public abstract class KomodoService implements V1Constants {
 
     private static final int TIMEOUT = 30;
     private static final TimeUnit UNIT = TimeUnit.SECONDS;
+
+    private static final String HTML_NEW_LINE = "<br/>";
 
     /**
      * Query parameter keys used by the service methods.
@@ -148,10 +153,16 @@ public abstract class KomodoService implements V1Constants {
                                                                        RelationalMessages.Error errorType, Object... errorMsgInputs) {
         String errorMsg = ex.getLocalizedMessage() != null ? ex.getLocalizedMessage() : ex.getClass().getSimpleName();
 
+        StringBuffer buf = new StringBuffer(errorMsg).append(HTML_NEW_LINE);
+        String stackTrace = StringUtils.exceptionToString(ex);
+        // Allow sensible formatting in a browser by replacing newline characters
+        stackTrace = stackTrace.replaceAll(NEW_LINE, HTML_NEW_LINE);
+        buf.append(stackTrace).append(HTML_NEW_LINE);
+
         if (errorMsgInputs == null || errorMsgInputs.length == 0)
-            errorMsg = RelationalMessages.getString(errorType, errorMsg);
+            errorMsg = RelationalMessages.getString(errorType, buf.toString());
         else
-            errorMsg = RelationalMessages.getString(errorType, errorMsgInputs, errorMsg);
+            errorMsg = RelationalMessages.getString(errorType, errorMsgInputs, buf.toString());
 
         Object responseEntity = createErrorResponse(mediaTypes, errorMsg);
         return Response.status(Status.FORBIDDEN).entity(responseEntity).build();

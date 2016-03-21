@@ -2,12 +2,13 @@ package org.komodo.spi.type;
 
 import java.util.Set;
 import org.komodo.spi.annotation.Updated;
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 
 /**
  *
  */
-public interface DataTypeManager {
+public interface DataTypeManager extends StringConstants {
 
     /**
      * The suffix designating an array
@@ -86,7 +87,9 @@ public interface DataTypeManager {
             if (name == null)
                 return DataTypeName.NULL;
 
+            name = correctBigUnderscores(name);
             name = name.toUpperCase();
+
             for (DataTypeName dtn : values()) {
                 if (dtn.name().equals(name))
                     return dtn;
@@ -97,6 +100,18 @@ public interface DataTypeManager {
 
         public String getId() {
             return name().toLowerCase();
+        }
+
+        public static String correctBigUnderscores(String name) {
+            if (name == null)
+                return null;
+
+            //
+            // At some point, its possible that existing data types have been
+            // stored using underscores for BIG_DECIMAL and BIG_INTEGER.
+            // These will no longer be found so need to mitigate.
+            //
+            return name.toLowerCase().replace("big_", "big");
         }
     }
 

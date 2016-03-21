@@ -42,8 +42,10 @@ public class DataTypeManagerImpl extends AbstractDataTypeManager {
         if (dataTypeId == null)
             return DataTypeName.NULL;
 
+        dataTypeId = DataTypeName.correctBigUnderscores(dataTypeId);
+
         // Should eliminate any aliases
-        Class<?> dataTypeClass = DataTypeManager.getDataTypeClass(dataTypeId);
+        Class<?> dataTypeClass = getDataTypeClass(dataTypeId);
         dataTypeId = DataTypeManager.getDataTypeName(dataTypeClass);
 
         boolean isArray = isArrayType(dataTypeId);
