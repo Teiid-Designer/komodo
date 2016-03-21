@@ -57,6 +57,20 @@ public interface TeiidDataSource {
     String getType();
 
     /**
+     * Returns the data source jndi name
+     *
+     * @return the jndi name
+     */
+    String getJndiName();
+
+    /**
+     * Returns the data source connection url
+     *
+     * @return the connection url
+     */
+    String getConnectionUrl();
+
+    /**
      * @return properties of data source
      */
     Properties getProperties();
@@ -67,6 +81,5 @@ public interface TeiidDataSource {
      * @return value of named property
      */
     String getPropertyValue(String name);
-
 
 }

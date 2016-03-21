@@ -36,8 +36,6 @@ public abstract class AbstractServerCommandTest extends AbstractCommandTest {
         when(VDB2.getName()).thenReturn("VDB2");
         when(VDB1.getVersion()).thenReturn(1);
         when(VDB2.getVersion()).thenReturn(2);
-        when(VDB1.isXmlDeployment()).thenReturn(true);
-        when(VDB2.isXmlDeployment()).thenReturn(true);
         when(VDB1.isActive()).thenReturn(true);
         when(VDB2.isActive()).thenReturn(false);
         when(VDB1.getModelNames()).thenReturn(Arrays.asList(new String[]{"Model1","Model2"}));

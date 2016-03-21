@@ -76,10 +76,9 @@ public interface TeiidService extends StringConstants {
      * Get the runtime teiid client instance
      *
      * @param teiidParent
-     * @param teiidVersion 
      * @param jdbcInfo
      * @return an instance model of the teiid client
      * @throws Exception 
      */
-    TeiidInstance getTeiidInstance(TeiidParent teiidParent, TeiidVersion teiidVersion, TeiidJdbcInfo jdbcInfo) throws Exception;
+    TeiidInstance getTeiidInstance(TeiidParent teiidParent, TeiidJdbcInfo jdbcInfo) throws Exception;
 }

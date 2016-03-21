@@ -1,10 +1,24 @@
 /*
-* JBoss, Home of Professional Open Source.
-*
-* See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
-*
-* See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
-*/
+ * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
+ */
 package org.komodo.rest;
 
 import static org.komodo.rest.Messages.Error.KOMODO_ENGINE_CLEAR_ERROR;
@@ -13,6 +27,7 @@ import static org.komodo.rest.Messages.Error.KOMODO_ENGINE_SHUTDOWN_ERROR;
 import static org.komodo.rest.Messages.Error.KOMODO_ENGINE_SHUTDOWN_TIMEOUT;
 import static org.komodo.rest.Messages.Error.KOMODO_ENGINE_STARTUP_ERROR;
 import static org.komodo.rest.Messages.Error.KOMODO_ENGINE_STARTUP_TIMEOUT;
+import java.io.File;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashSet;
@@ -35,8 +50,10 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.SynchronousCallback;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.json.JsonConstants;
-import org.komodo.rest.relational.KomodoSearchService;
-import org.komodo.rest.relational.KomodoVdbService;
+import org.komodo.rest.service.KomodoSearchService;
+import org.komodo.rest.service.KomodoTeiidService;
+import org.komodo.rest.service.KomodoUtilService;
+import org.komodo.rest.service.KomodoVdbService;
 import org.komodo.rest.swagger.RestPropertyConverter;
 import org.komodo.rest.swagger.RestVdbConditionConverter;
 import org.komodo.rest.swagger.RestVdbConverter;
@@ -79,6 +96,16 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         String APP_VERSION = "0.0.3"; //$NON-NLS-1$
 
         /**
+         * The komodo engine's data directory system property
+         */
+        String KOMODO_DATA_DIR = "komodo.dataDir";
+
+        /**
+         * Jboss server base directory
+         */
+        String JBOSS_SERVER_BASE_DIR = "jboss.server.base.dir";
+
+        /**
          * Location for the log file passed to {@link KLog} logger
          */
         String LOG_FILE_PATH = "log/vdb-builder.log"; //$NON-NLS-1$
@@ -98,6 +125,11 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
          * The name of the URI path segment for the utility service.
          */
         String SERVICE_SEGMENT = "service"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for the teiid service.
+         */
+        String TEIID_SEGMENT = "teiid"; //$NON-NLS-1$
 
         /**
          * The name of the URI path segment for the Komodo schema.
@@ -255,10 +287,19 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         String SAVED_SEARCHES_SEGMENT = "savedSearches"; //$NON-NLS-1$
 
         /**
+         * The name of the URI vdb name parameter
+         */
+        String VDB_NAME_PARAMETER = "name"; //$NON-NLS-1$
+
+        /**
          * The vdb export xml property
          */
         String VDB_EXPORT_XML_PROPERTY = "vdb-export-xml"; //$NON-NLS-1$
 
+        /**
+         * The teiid credentials property for modifying the usernames and passwords
+         */
+        String TEIID_CREDENTIALS = "credentials";
     }
 
     private static final int TIMEOUT = 1;
@@ -277,7 +318,17 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
     public KomodoRestV1Application() throws ServerErrorException {
         try {
             // Set the log path to something relative to the deployment location of this application
-            KLog.getLogger().setLogPath(V1Constants.LOG_FILE_PATH);
+            // Try to use the base directory in jboss. If not in jboss this would probably be empty so
+            // otherwise use "." relative to the working directory
+            String baseDir = System.getProperty(V1Constants.JBOSS_SERVER_BASE_DIR, DOT) + File.separator;
+
+            // Set the komodo data directory prior to starting the engine
+            String komodoDataDir = System.getProperty(V1Constants.KOMODO_DATA_DIR);
+            if (komodoDataDir == null)
+                System.setProperty(V1Constants.KOMODO_DATA_DIR, baseDir + "data");
+
+            // Set the log file path
+            KLog.getLogger().setLogPath(baseDir + V1Constants.LOG_FILE_PATH);
 
             // Ensure server logging level is reduced to something sane!
             KLog.getLogger().setLevel(Level.INFO);
@@ -293,6 +344,7 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         objs.add( new KomodoUtilService( this.kengine ) );
         objs.add( new KomodoVdbService( this.kengine ) );
         objs.add( new KomodoSearchService( this.kengine ));
+        objs.add( new KomodoTeiidService( this.kengine ));
         this.singletons = Collections.unmodifiableSet( objs );
 
         initSwaggerConfiguration();
@@ -389,7 +441,7 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
 
     @Override
     public Set<Class<?>> getClasses() {
-        Set<Class<?>> resources = new HashSet();
+        Set<Class<?>> resources = new HashSet<Class<?>>();
 
         // Enable swagger support
         resources.add(io.swagger.jaxrs.listing.ApiListingResource.class);

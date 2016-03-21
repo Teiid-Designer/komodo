@@ -1,9 +1,23 @@
 /*
  * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
  *
- * See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  */
 package org.komodo.relational;
 
@@ -51,7 +65,9 @@ import org.komodo.relational.model.internal.UniqueConstraintImpl;
 import org.komodo.relational.model.internal.UserDefinedFunctionImpl;
 import org.komodo.relational.model.internal.ViewImpl;
 import org.komodo.relational.model.internal.VirtualProcedureImpl;
+import org.komodo.relational.teiid.CachedTeiid;
 import org.komodo.relational.teiid.Teiid;
+import org.komodo.relational.teiid.internal.CachedTeiidImpl;
 import org.komodo.relational.teiid.internal.TeiidImpl;
 import org.komodo.relational.vdb.Condition;
 import org.komodo.relational.vdb.DataRole;
@@ -864,6 +880,44 @@ public final class RelationalModelFactory {
 
         final KomodoObject kobject = repository.add( transaction, parentPath, id, KomodoLexicon.Teiid.NODE_TYPE );
         final Teiid result = new TeiidImpl( transaction, repository, kobject.getAbsolutePath() );
+        return result;
+    }
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param repository
+     *        the repository where the model object will be created (cannot be <code>null</code>)
+     * @param srcTeiid
+     *        the source teiid model used for this caching teiid object (cannot be <code>null</code>)
+     * @return the cached Teiid model object (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    public static CachedTeiid createCachedTeiid( final UnitOfWork transaction,
+                                     final Repository repository,
+                                     final Teiid srcTeiid ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( srcTeiid, "srcTeiid" ); //$NON-NLS-1$
+
+        KomodoObject teiidCache = repository.komodoTeiidCache( transaction );
+        final String parentPath = teiidCache.getAbsolutePath();
+        final String id = srcTeiid.getName(transaction);
+
+        //
+        // Remove the existing version since its most likely out-of-date
+        //
+        if (teiidCache.hasChild(transaction, id))
+            teiidCache.removeChild(transaction, id);
+
+        final KomodoObject kobject = repository.add( transaction, parentPath, id, KomodoLexicon.CachedTeiid.NODE_TYPE );
+
+        //
+        // Populates the node with the source teiid's properties
+        //
+        final CachedTeiid result = new CachedTeiidImpl( transaction, srcTeiid, kobject.getAbsolutePath() );
         return result;
     }
 

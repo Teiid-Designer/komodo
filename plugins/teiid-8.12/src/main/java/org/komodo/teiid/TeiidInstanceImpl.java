@@ -34,6 +34,7 @@ import java.util.Properties;
 import java.util.Set;
 import org.komodo.spi.outcome.Outcome;
 import org.komodo.spi.outcome.OutcomeFactory;
+import org.komodo.spi.runtime.DataSourceDriver;
 import org.komodo.spi.runtime.ExecutionConfigurationEvent;
 import org.komodo.spi.runtime.TeiidConnectionInfo;
 import org.komodo.spi.runtime.TeiidDataSource;
@@ -49,6 +50,7 @@ import org.teiid.adminapi.Admin;
 import org.teiid.adminapi.PropertyDefinition;
 import org.teiid.adminapi.Translator;
 import org.teiid.adminapi.VDB;
+import org.teiid.adminapi.impl.VDBMetaData;
 import org.teiid.adminapi.jboss.AdminFactory;
 import org.teiid.jdbc.TeiidDriver;
 
@@ -56,7 +58,9 @@ public class TeiidInstanceImpl extends AbstractTeiidInstance {
 
     private Admin admin;
 
-    private TeiidArtifactFactory factory = new TeiidArtifactFactory();
+    private final TeiidArtifactFactory factory = new TeiidArtifactFactory();
+
+    private final JbossExtensions ext = new JbossExtensions();
 
     public TeiidInstanceImpl(TeiidParent parent, final TeiidVersion teiidVersion, TeiidJdbcInfo jdbcInfo) {
         super(parent, teiidVersion, jdbcInfo);
@@ -198,6 +202,11 @@ public class TeiidInstanceImpl extends AbstractTeiidInstance {
     }
 
     @Override
+    public Collection<DataSourceDriver> getDataSourceDrivers() throws Exception {
+        return ext.getDataSourceDrivers(admin);
+    }
+
+    @Override
     public Collection<TeiidDataSource> getDataSources() throws Exception {
         connect();
         Collection<String> dsNames = admin.getDataSourceNames();
@@ -245,6 +254,16 @@ public class TeiidInstanceImpl extends AbstractTeiidInstance {
         return teiidTranslators;
     }
 
+    private boolean isDynamic(VDB vdb) {
+        if (vdb == null)
+            return false;
+
+        if (! (vdb instanceof VDBMetaData))
+            return false;
+
+        return ((VDBMetaData) vdb).isXmlDeployment();
+    }
+
     @Override
     public Collection<TeiidVdb> getVdbs() throws Exception {
         connect();
@@ -254,6 +273,9 @@ public class TeiidInstanceImpl extends AbstractTeiidInstance {
 
         List<TeiidVdb> teiidVdbs = new ArrayList<>();
         for (VDB vdb : vdbs) {
+            if (! isDynamic(vdb))
+                continue;
+
             teiidVdbs.add(factory.createVdb(vdb));
         }
 
@@ -265,6 +287,9 @@ public class TeiidInstanceImpl extends AbstractTeiidInstance {
         connect();
         VDB vdb = admin.getVDB(name, 1);
         if (vdb == null)
+            return null;
+
+        if (! isDynamic(vdb))
             return null;
 
         return factory.createVdb(vdb);

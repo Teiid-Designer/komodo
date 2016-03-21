@@ -358,5 +358,15 @@ public interface StringConstants {
    * RegExp pattern for determining a property's prefix and name
    */
   String PREFIX_PATTERN = "([a-zA-Z]+):(.*)"; //$NON-NLS-1$
+
+  /**
+   * Vdb Prefix
+   */
+  String VDB_PREFIX = "Vdb-"; //$NON-NLS-1$
+
+  /**
+   * XML Suffix
+   */
+  String XML_SUFFIX = DOT + XML;
 }
 

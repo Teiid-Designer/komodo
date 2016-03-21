@@ -54,6 +54,7 @@ public class KomodoProperties extends HashMap<String, Object> {
      * @param defaultValue the default value if no property has been set
      * @return the value of the property or the default value
      */
+    @SuppressWarnings( "unchecked" )
     public <T> T getProperty(String key, T defaultValue) {
         if (! this.containsKey(key))
             return defaultValue;

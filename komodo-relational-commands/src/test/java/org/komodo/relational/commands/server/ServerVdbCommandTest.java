@@ -59,8 +59,6 @@ public final class ServerVdbCommandTest extends AbstractServerCommandTest {
         assertThat( output, output.contains( VDB1.getName() ), is( true ) );
         String isActiveStr = VDB1.isActive() ? "ACTIVE" : "INACTIVE";
         assertThat( output, output.contains( isActiveStr ), is( true ) );
-        String dynamicStr = VDB1.isXmlDeployment() ? "Dynamic" : "Archive";
-        assertThat( output, output.contains( dynamicStr ), is( true ) );
         assertThat( output, output.contains( VDB1.getModelNames().toArray()[0].toString() ), is( true ) );
     }
 

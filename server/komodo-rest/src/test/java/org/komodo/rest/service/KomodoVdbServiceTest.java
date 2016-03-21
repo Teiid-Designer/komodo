@@ -1,11 +1,25 @@
 /*
-* JBoss, Home of Professional Open Source.
-*
-* See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
-*
-* See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
-*/
-package org.komodo.rest.relational;
+ * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
+ */
+package org.komodo.rest.service;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
@@ -29,8 +43,19 @@ import org.komodo.relational.model.Model.Type;
 import org.komodo.rest.RestBasicEntity;
 import org.komodo.rest.RestLink;
 import org.komodo.rest.RestLink.LinkType;
+import org.komodo.rest.relational.AbstractKomodoServiceTest;
+import org.komodo.rest.relational.RestVdb;
+import org.komodo.rest.relational.RestVdbCondition;
+import org.komodo.rest.relational.RestVdbDataRole;
+import org.komodo.rest.relational.RestVdbImport;
+import org.komodo.rest.relational.RestVdbMask;
+import org.komodo.rest.relational.RestVdbModel;
+import org.komodo.rest.relational.RestVdbModelSource;
+import org.komodo.rest.relational.RestVdbPermission;
+import org.komodo.rest.relational.RestVdbTranslator;
 import org.komodo.rest.relational.KomodoRestUriBuilder.SettingNames;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
+import org.komodo.rest.service.KomodoVdbService;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.test.utils.TestUtilities;
 
@@ -227,7 +252,8 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         loadVdbs();
 
         // get
-        URI uri = _uriBuilder.generateVdbChildGroupUri(TestUtilities.PORTFOLIO_VDB_NAME, LinkType.MODELS);
+        URI vdbBaseUri = _uriBuilder.generateVdbsUri();
+        URI uri = _uriBuilder.generateVdbChildGroupUri(vdbBaseUri, TestUtilities.PORTFOLIO_VDB_NAME, LinkType.MODELS);
         this.response = request(uri).get();
         final String entity = this.response.readEntity(String.class);
         assertThat(entity, is(notNullValue()));
@@ -387,7 +413,8 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         loadVdbs();
 
         // get
-        URI uri = _uriBuilder.generateVdbChildGroupUri(TestUtilities.TWEET_EXAMPLE_VDB_NAME, LinkType.TRANSLATORS);
+        URI vdbBaseUri = _uriBuilder.generateVdbsUri();
+        URI uri = _uriBuilder.generateVdbChildGroupUri(vdbBaseUri, TestUtilities.TWEET_EXAMPLE_VDB_NAME, LinkType.TRANSLATORS);
         this.response = request(uri).get();
         final String entity = this.response.readEntity(String.class);
         assertThat(entity, is(notNullValue()));
@@ -413,7 +440,8 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         loadVdbs();
 
         // get
-        URI uri = _uriBuilder.generateVdbChildGroupUri(TestUtilities.PORTFOLIO_VDB_NAME, LinkType.TRANSLATORS);
+        URI vdbBaseUri = _uriBuilder.generateVdbsUri();
+        URI uri = _uriBuilder.generateVdbChildGroupUri(vdbBaseUri, TestUtilities.PORTFOLIO_VDB_NAME, LinkType.TRANSLATORS);
         this.response = request(uri).get();
         final String entity = this.response.readEntity(String.class);
         assertThat(entity, is(notNullValue()));
@@ -455,7 +483,8 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         loadVdbs();
 
         // get
-        URI uri = _uriBuilder.generateVdbChildGroupUri(TestUtilities.ALL_ELEMENTS_EXAMPLE_VDB_NAME, LinkType.IMPORTS);
+        URI vdbBaseUri = _uriBuilder.generateVdbsUri();
+        URI uri = _uriBuilder.generateVdbChildGroupUri(vdbBaseUri, TestUtilities.ALL_ELEMENTS_EXAMPLE_VDB_NAME, LinkType.IMPORTS);
         this.response = request(uri).get();
         final String entity = this.response.readEntity(String.class);
         assertThat(entity, is(notNullValue()));
@@ -482,7 +511,8 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         loadVdbs();
 
         // get
-        URI uri = _uriBuilder.generateVdbChildGroupUri(TestUtilities.PORTFOLIO_VDB_NAME, LinkType.IMPORTS);
+        URI vdbBaseUri = _uriBuilder.generateVdbsUri();
+        URI uri = _uriBuilder.generateVdbChildGroupUri(vdbBaseUri, TestUtilities.PORTFOLIO_VDB_NAME, LinkType.IMPORTS);
         this.response = request(uri).get();
         final String entity = this.response.readEntity(String.class);
         assertThat(entity, is(notNullValue()));
@@ -525,7 +555,8 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         loadVdbs();
 
         // get
-        URI uri = _uriBuilder.generateVdbChildGroupUri(TestUtilities.ALL_ELEMENTS_EXAMPLE_VDB_NAME, LinkType.DATA_ROLES);
+        URI vdbBaseUri = _uriBuilder.generateVdbsUri();
+        URI uri = _uriBuilder.generateVdbChildGroupUri(vdbBaseUri, TestUtilities.ALL_ELEMENTS_EXAMPLE_VDB_NAME, LinkType.DATA_ROLES);
         this.response = request(uri).get();
         final String entity = this.response.readEntity(String.class);
         assertThat(entity, is(notNullValue()));
@@ -557,7 +588,8 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         loadVdbs();
 
         // get
-        URI uri = _uriBuilder.generateVdbChildGroupUri(TestUtilities.PORTFOLIO_VDB_NAME, LinkType.DATA_ROLES);
+        URI vdbBaseUri = _uriBuilder.generateVdbsUri();
+        URI uri = _uriBuilder.generateVdbChildGroupUri(vdbBaseUri, TestUtilities.PORTFOLIO_VDB_NAME, LinkType.DATA_ROLES);
         this.response = request(uri).get();
         final String entity = this.response.readEntity(String.class);
         assertThat(entity, is(notNullValue()));

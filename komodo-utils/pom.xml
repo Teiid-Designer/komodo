@@ -32,10 +32,5 @@
 			<groupId>org.komodo</groupId>
 			<artifactId>komodo-spi</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
 	</dependencies>
 </project>

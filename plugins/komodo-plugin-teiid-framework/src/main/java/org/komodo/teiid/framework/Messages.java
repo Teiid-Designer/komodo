@@ -40,7 +40,10 @@ public class Messages {
     public enum TeiidInstance {
         versionFailure,
         parentNotStartedMessage,
-        reconnectErrorMsg;
+        reconnectErrorMsg,
+        noSuchField,
+        buildOperationFailure,
+        requestDriverFailure;
 
         @Override
         public String toString() {
@@ -91,7 +94,7 @@ public class Messages {
 
     @SuppressWarnings( "javadoc" )
     public enum TeiidVdb {
-        canOnlyExportDynamicVdbs;
+        onlySupportingDynamicVdbs;
 
         @Override
         public String toString() {

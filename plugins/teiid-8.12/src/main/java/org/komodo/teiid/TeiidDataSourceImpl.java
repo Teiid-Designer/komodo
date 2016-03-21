@@ -102,6 +102,26 @@ public class TeiidDataSourceImpl implements Comparable<TeiidDataSourceImpl>, Tei
     }
 
     /**
+     * Returns the data source jndi name
+     * 
+     * @return the jndi name
+     */
+    @Override
+    public String getJndiName() {
+        return getPropertyValue(TeiidInstance.DATASOURCE_JNDINAME);
+    }
+
+    /**
+     * Returns the data source connection url
+     * 
+     * @return the connection url
+     */
+    @Override
+    public String getConnectionUrl() {
+        return getPropertyValue(TeiidInstance.DATASOURCE_CONNECTION_URL);
+    }
+
+    /**
      * {@inheritDoc}
      * 
      * @see java.lang.Object#hashCode()

@@ -190,7 +190,7 @@ public class TestPluginService extends AbstractTestPluginService implements Stri
         teiidService.getVersion();
 
         service.stopBundle(bundleId);
-        assertNull(service.getTeiidService());
+        assertNull(service.getCurrentTeiidService());
     }
 
     @Test
@@ -206,5 +206,15 @@ public class TestPluginService extends AbstractTestPluginService implements Stri
         // Calling convert with a null sql parameter should return the method without an exception
         Node node = Mockito.mock(Node.class);
         teiidService.nodeConvert(null, node);
+    }
+
+    @Test
+    public void testGetDefaultTeiidInstance() throws Exception {
+        assertEquals(Bundle.ACTIVE, service.getState());
+
+        TeiidVersion version = Version.DEFAULT_TEIID_VERSION.get();
+        TeiidService teiidService = service.getDefaultTeiidService();
+        assertNotNull(teiidService);
+        assertEquals(version, teiidService.getVersion());
     }
 }

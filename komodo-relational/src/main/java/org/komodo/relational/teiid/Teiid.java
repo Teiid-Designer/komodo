@@ -40,7 +40,7 @@ import org.komodo.spi.runtime.version.TeiidVersion;
 /**
  * A model of a teiid instance
  */
-public interface Teiid extends RelationalObject {
+public interface Teiid extends RelationalObject, TeiidArchetype {
 
     /**
      * The type identifier.
@@ -162,26 +162,10 @@ public interface Teiid extends RelationalObject {
     /**
      * @param uow
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @return value of teiid host property
-     * @throws KException if error occurs
-     */
-    String getHost(UnitOfWork uow) throws KException;
-
-    /**
-     * @param uow
-     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param host the host name
      * @throws KException if error occurs
      */
     void setHost(UnitOfWork uow, String host) throws KException;
-
-    /**
-     * @param uow
-     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @return value of teiid admin port property
-     * @throws KException if error occurs
-     */
-    int getAdminPort(UnitOfWork uow) throws KException;
 
     /**
      * @param uow
@@ -194,14 +178,6 @@ public interface Teiid extends RelationalObject {
     /**
      * @param uow
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @return value of teiid admin user property
-     * @throws KException if error occurs
-     */
-    String getAdminUser(UnitOfWork uow) throws KException;
-
-    /**
-     * @param uow
-     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param userName
      * @throws KException if error occurs
      */
@@ -210,26 +186,10 @@ public interface Teiid extends RelationalObject {
     /**
      * @param uow
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @return value of teiid admin password property
-     * @throws KException if error occurs
-     */
-    String getAdminPassword(UnitOfWork uow) throws KException;
-
-    /**
-     * @param uow
-     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param password
      * @throws KException if error occurs
      */
     void setAdminPassword(UnitOfWork uow, String password) throws KException;
-
-    /**
-     * @param uow
-     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @return value of teiid secure property
-     * @throws KException if error occurs
-     */
-    boolean isAdminSecure(UnitOfWork uow) throws KException;
 
     /**
      * @param uow
@@ -258,26 +218,10 @@ public interface Teiid extends RelationalObject {
     /**
      * @param uow
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @return value of teiid jdbc password property
-     * @throws KException if error occurs
-     */
-    String getJdbcPassword(UnitOfWork uow) throws KException;
-
-    /**
-     * @param uow
-     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param password
      * @throws KException if error occurs
      */
     void setJdbcPassword(UnitOfWork uow, String password) throws KException;
-
-    /**
-     * @param uow
-     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @return value of teiid secure property
-     * @throws KException if error occurs
-     */
-    boolean isJdbcSecure(UnitOfWork uow) throws KException;
 
     /**
      * @param uow
@@ -287,4 +231,17 @@ public interface Teiid extends RelationalObject {
      */
     void setJdbcSecure(UnitOfWork uow, boolean secure) throws KException;
 
+    /**
+     * @param uow
+     * @return whether this teiid model is currently connected to the teiid instance
+     */
+    boolean isConnected(UnitOfWork uow);
+
+    /**
+     * Import the teiid content into the teiid cache
+     * @return the cached teiid node
+     *
+     * @throws KException
+     */
+    CachedTeiid importContent(UnitOfWork uow) throws KException;
 }

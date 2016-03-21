@@ -48,6 +48,11 @@ public enum KomodoType {
     TEIID,
 
     /**
+     * Cached Teiid
+     */
+    CACHED_TEIID,
+
+    /**
      * Vdb
      */
     VDB("vdb"), //$NON-NLS-1$

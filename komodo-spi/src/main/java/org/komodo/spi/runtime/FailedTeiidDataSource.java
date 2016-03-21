@@ -106,4 +106,10 @@ public class FailedTeiidDataSource implements TeiidDataSource {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+    @Override
+    public String getConnectionUrl() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

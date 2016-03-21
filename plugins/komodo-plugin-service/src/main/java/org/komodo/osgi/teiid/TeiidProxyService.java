@@ -82,10 +82,8 @@ public class TeiidProxyService implements TeiidService {
     }
 
     @Override
-    public TeiidInstance getTeiidInstance(TeiidParent teiidParent,
-                                          TeiidVersion teiidVersion,
-                                          TeiidJdbcInfo jdbcInfo) throws Exception {
+    public TeiidInstance getTeiidInstance(TeiidParent teiidParent, TeiidJdbcInfo jdbcInfo) throws Exception {
         load();
-        return delegate.getTeiidInstance(teiidParent, teiidVersion, jdbcInfo);
+        return delegate.getTeiidInstance(teiidParent, jdbcInfo);
     }
 }

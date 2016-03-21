@@ -23,6 +23,7 @@ package org.komodo.rest.relational;
 
 import java.net.URI;
 import org.komodo.relational.model.Model;
+import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.vdb.Condition;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Mask;
@@ -55,6 +56,7 @@ public class RestEntityFactory implements V1Constants {
      * @return the rest object for the given kObject
      * @throws KException if error occurs
      */
+    @SuppressWarnings( "unchecked" )
     public <T extends RestBasicEntity> T create(KomodoObject kObject, URI baseUri,
                                                                  UnitOfWork uow, KomodoProperties properties) throws KException {
         WorkspaceManager wsMgr = WorkspaceManager.getInstance(kObject.getRepository());
@@ -89,6 +91,9 @@ public class RestEntityFactory implements V1Constants {
             case VDB_TRANSLATOR:
                 Translator translator = wsMgr.resolve(uow, kObject, Translator.class);
                 return (T) new RestVdbTranslator(baseUri, translator, uow);
+            case TEIID:
+                Teiid teiid = wsMgr.resolve(uow, kObject, Teiid.class);
+                return (T) new RestTeiid(baseUri, teiid, uow);
             case UNKNOWN:
                 return null;
             default:

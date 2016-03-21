@@ -58,8 +58,8 @@ import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLStreamWriter;
-import javax.xml.stream.events.Namespace;
-import javax.xml.stream.util.StreamReaderDelegate;
+import javax.xml.stream.events.XMLEvent;
+import javax.xml.stream.util.XMLEventConsumer;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.dom.DOMLocator;
 import javax.xml.transform.sax.SAXTransformerFactory;
@@ -79,11 +79,11 @@ import org.komodo.spi.outcome.Outcome;
 import org.komodo.spi.query.TeiidService;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
+import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.DataTypeManager;
 import org.komodo.spi.uuid.WorkspaceUUIDService;
 import org.komodo.teiid.framework.AbstractDataTypeManager;
-import org.komodo.utils.ArgCheck;
 import org.komodo.utils.KEnvironment;
 import org.modeshape.jcr.api.Session;
 import org.osgi.framework.Bundle;
@@ -159,6 +159,7 @@ public class PluginService implements StringConstants {
     }
 
     private StringBuffer exportPackages() {
+        VersionProvider provider = VersionProvider.getInstance();
         StringBuffer pkgs = new StringBuffer();
 
         Class<?>[] classes = new Class<?>[] {
@@ -235,12 +236,6 @@ public class PluginService implements StringConstants {
             QName.class,
             // javax.xml.parsers
             DocumentBuilder.class,
-            // javax.xml.stream
-            XMLStreamWriter.class,
-            // javax.xml.stream.events
-            Namespace.class,
-            // javax.xml.stream.util
-            StreamReaderDelegate.class,
             // javax.xml.transform
             Transformer.class,
             // javax.xml.transform.dom
@@ -262,10 +257,31 @@ public class PluginService implements StringConstants {
         }
 
         //
+        // javax.xml.stream classes need a requirement version
+        // even though they are being provided by the jre
+        //
+        Class<?>[] streamClasses = new Class<?>[] {
+            // javax.xml.stream
+            XMLStreamWriter.class,
+            // javax.xml.stream.events
+            XMLEvent.class,
+            // javax.xml.stream.util
+            XMLEventConsumer.class
+        };
+
+        for (Class<?> klazz : streamClasses) {
+            pkgs.append(pkg(klazz))
+                    .append(VERSION_PREFIX)
+                    .append(SPEECH_MARK)
+                    .append(provider.getJavaxXmlStreamVersion())
+                    .append(SPEECH_MARK)
+                    .append(COMMA);
+        }
+
+        //
         // 3rd party dependencies in the bundles get wired up with a version requirement
         // so need to provide the version pragma with these packages to match
         //
-        VersionProvider provider = VersionProvider.getInstance();
         pkgs.append(Session.class.getPackage().getName())
                 .append(VERSION_PREFIX)
                 .append(SPEECH_MARK)
@@ -292,7 +308,14 @@ public class PluginService implements StringConstants {
         dir.mkdirs();
     }
 
+    private boolean isActive() {
+        return getState() == Bundle.ACTIVE;
+    }
+
     private Bundle findBundleBySymbolicName(String symbolicName) throws Exception {
+        if (!isActive())
+            throw new Exception(Messages.getString(Messages.PluginService.ServiceNotStarted));
+ 
         Bundle[] bundles = framework.getBundleContext().getBundles();
         if (bundles == null || bundles.length == 0)
             return null;
@@ -333,9 +356,6 @@ public class PluginService implements StringConstants {
      * @return the state of this service
      */
     public int getState() {
-        if (framework == null)
-            return Bundle.UNINSTALLED;
-
         return framework.getState();
     }
 
@@ -345,7 +365,8 @@ public class PluginService implements StringConstants {
      * @throws Exception
      */
     public void start() throws Exception {
-        ArgCheck.isNotNull(framework);
+        if (isActive())
+            return;
 
         if (getState() == Bundle.ACTIVE)
             return;
@@ -400,7 +421,7 @@ public class PluginService implements StringConstants {
      * @throws Exception
      */
     public void shutdown() throws Exception {
-        if (framework == null)
+        if (!isActive())
             return;
 
         if (getState() <= Bundle.INSTALLED)
@@ -421,6 +442,9 @@ public class PluginService implements StringConstants {
      * @throws Exception
      */
     public void installBundle(URL bundleUrl) throws Exception {
+        if (!isActive())
+            throw new Exception(Messages.getString(Messages.PluginService.ServiceNotStarted));
+
         if (bundleUrl == null)
             return; // nothing to do
 
@@ -452,7 +476,10 @@ public class PluginService implements StringConstants {
     /**
      * @return a list of all bundles currently installed
      */
-    public List<String> installedBundles() {
+    public List<String> installedBundles() throws Exception {
+        if (!isActive())
+            throw new Exception(Messages.getString(Messages.PluginService.ServiceNotStarted));
+
         Bundle[] bundles = framework.getBundleContext().getBundles();
         if (bundles == null || bundles.length == 0)
             return Collections.emptyList();
@@ -515,7 +542,10 @@ public class PluginService implements StringConstants {
         bundle.stop();
     }
 
-    public TeiidService getTeiidService() {
+    /**
+     * @return the current teiid service or null if none fetched
+     */
+    public TeiidService getCurrentTeiidService() {
         return teiidService;
     }
 
@@ -533,7 +563,7 @@ public class PluginService implements StringConstants {
             // should null the teiidService field
             stopBundle(parentBundleName);
 
-            if (getTeiidService() != null)
+            if (getCurrentTeiidService() != null)
                 throw new Exception(Messages.getString(Messages.PluginService.TeiidServiceBundleFailedToStop, parentBundleName));
         }
 
@@ -550,6 +580,14 @@ public class PluginService implements StringConstants {
         startBundle(symbolicName);
 
         return this.teiidService;
+    }
+
+    /**
+     * @return the teiid service for the default teiid version ({@link Version#DEFAULT_TEIID_VERSION})
+     * @throws Exception
+     */
+    public TeiidService getDefaultTeiidService() throws Exception {
+        return getTeiidService(Version.DEFAULT_TEIID_VERSION.get());
     }
 
     void setTeiidService(TeiidService teiidService) {

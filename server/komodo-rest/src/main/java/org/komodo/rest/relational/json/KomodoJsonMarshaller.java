@@ -1,10 +1,24 @@
 /*
-* JBoss, Home of Professional Open Source.
-*
-* See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
-*
-* See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
-*/
+ * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
+ */
 package org.komodo.rest.relational.json;
 
 import org.komodo.rest.KRestEntity;
@@ -16,6 +30,8 @@ import org.komodo.rest.json.RestPropertySerializer;
 import org.komodo.rest.relational.KomodoSavedSearcher;
 import org.komodo.rest.relational.KomodoSearcherAttributes;
 import org.komodo.rest.relational.KomodoStatusObject;
+import org.komodo.rest.relational.KomodoTeiidAttributes;
+import org.komodo.rest.relational.RestTeiid;
 import org.komodo.rest.relational.RestVdb;
 import org.komodo.rest.relational.RestVdbCondition;
 import org.komodo.rest.relational.RestVdbDataRole;
@@ -49,6 +65,7 @@ public final class KomodoJsonMarshaller {
                                                   .registerTypeAdapter(KomodoStatusObject.class, new StatusObjectSerializer())
                                                   .registerTypeAdapter(KomodoSavedSearcher.class, new SavedSearcherSerializer())
                                                   .registerTypeAdapter(KomodoSearcherAttributes.class, new SearcherAttributesSerializer())
+                                                  .registerTypeAdapter(KomodoTeiidAttributes.class, new TeiidAttributesSerializer())
                                                   .registerTypeAdapter( RestProperty.class, new RestPropertySerializer() )
                                                   .registerTypeAdapter( RestVdb.class, new VdbSerializer() )
                                                   .registerTypeAdapter( RestVdbModel.class, new VdbModelSerializer() )
@@ -59,7 +76,8 @@ public final class KomodoJsonMarshaller {
                                                   .registerTypeAdapter( RestVdbCondition.class, new VdbConditionSerializer() )
                                                   .registerTypeAdapter( RestVdbMask.class, new VdbMaskSerializer() )
                                                   .registerTypeAdapter( RestVdbTranslator.class, new VdbTranslatorSerializer() )
-                                                  .registerTypeAdapter( RestBasicEntity.class, new BasicEntitySerializer() );
+                                                  .registerTypeAdapter( RestBasicEntity.class, new BasicEntitySerializer<RestBasicEntity>() )
+                                                  .registerTypeAdapter( RestTeiid.class, new TeiidSerializer() );
         BUILDER = temp.create();
         PRETTY_BUILDER = temp.setPrettyPrinting().create();
     }

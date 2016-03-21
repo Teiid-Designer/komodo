@@ -21,6 +21,7 @@
  ************************************************************************************/
 package org.komodo.spi.runtime;
 
+import java.util.Collection;
 import org.komodo.spi.outcome.Outcome;
 import org.komodo.spi.runtime.version.TeiidVersion;
 /**
@@ -143,4 +144,9 @@ public interface TeiidInstance extends ExecutionAdmin, HostProvider {
      */
     void update(TeiidInstance otherInstance);
 
+    /**
+     * @return the collection of data source drivers resident on the server
+     * @throws Exception
+     */
+    Collection<DataSourceDriver> getDataSourceDrivers() throws Exception;
 }

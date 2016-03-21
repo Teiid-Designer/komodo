@@ -13,13 +13,6 @@
 	<properties>
 		<version.apache.felix.framework>5.4.0</version.apache.felix.framework>
 		<version.apache.felix.fileinstall>3.5.2</version.apache.felix.fileinstall>
-
-		<!-- ### This is purely used for setting up an arbitrary test server. ### -->
-		<!-- The actual maven version of jboss to be downloaded -->
-		<version.teiid>8.12.4</version.teiid>
-		<version.org.jboss.as>7.5.0.Final-redhat-15</version.org.jboss.as>
-		<!-- The version of jboss when its unpacked -->
-		<version.jbossas.test>jboss-eap-6.4</version.jbossas.test>
 	</properties>
 
 	<dependencyManagement>
@@ -77,31 +70,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-core</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.jboss.spec</groupId>
-			<artifactId>jboss-javaee-6.0</artifactId>
-			<type>pom</type>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.arquillian.junit</groupId>
-			<artifactId>arquillian-junit-container</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.as</groupId>
-			<artifactId>jboss-as-arquillian-container-managed</artifactId>
+			<groupId>org.komodo</groupId>
+			<artifactId>komodo-utils</artifactId>
+			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -113,6 +84,13 @@
 				<filtering>true</filtering>
 			</resource>
 		</resources>
+
+		<testResources>
+			<testResource>
+				<directory>src/test/resources</directory>
+				<filtering>true</filtering>
+			</testResource>
+		</testResources>
 
 		<!-- Usual compiling ensuring the java version is 1.8 -->
 		<plugins>
@@ -217,7 +195,7 @@
 								<artifactItem>
 									<groupId>org.jboss.teiid</groupId>
 									<artifactId>teiid</artifactId>
-									<version>${version.teiid}</version>
+									<version>${version.teiid.default}</version>
 									<classifier>jboss-dist</classifier>
 									<type>zip</type>
 									<overWrite>true</overWrite>

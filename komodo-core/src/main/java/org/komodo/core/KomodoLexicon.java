@@ -1,10 +1,24 @@
 /*
  * JBoss, Home of Professional Open Source.
-*
-* See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
-*
-* See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
-*/
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
+ */
 package org.komodo.core;
 
 import org.komodo.spi.constants.StringConstants;
@@ -640,9 +654,9 @@ public interface KomodoLexicon extends StringConstants {
     }
 
     /**
-     * The JCR names associated with Teiid servers.
+     * Abstract model of a Teiid connection properties
      */
-    public interface Teiid extends WorkspaceItem {
+    public interface TeiidArchetype {
 
         /**
          * The version property. Value is {@value} .
@@ -675,11 +689,6 @@ public interface KomodoLexicon extends StringConstants {
         String CONNECTED = Namespace.PREFIX + COLON + "connected"; //$NON-NLS-1$
 
         /**
-         * The name and node type name of the Komodo workspace's Teiid server grouping node. Value is {@value} .
-         */
-        String GROUP_NODE = Namespace.PREFIX + COLON + "teiids"; //$NON-NLS-1$
-
-        /**
          * The name of the host URL property. Value is {@value} .
          */
         String HOST = Namespace.PREFIX + COLON + "host"; //$NON-NLS-1$
@@ -700,20 +709,48 @@ public interface KomodoLexicon extends StringConstants {
         String JDBC_USER = Namespace.PREFIX + COLON + "jdbcUser"; //$NON-NLS-1$
 
         /**
-         * The name of the last ping time property. Value is {@value} .
-         */
-        String LAST_PING_TIME = Namespace.PREFIX + COLON + "lastPingTime"; //$NON-NLS-1$
-
-        /**
          * The jdbc connection is encrypted. Value is {@value} .
          */
         String JDBC_SECURE = Namespace.PREFIX + COLON + "jdbcSecure"; //$NON-NLS-1$
+    }
+
+    /**
+     * The JCR names associated with Teiid servers.
+     */
+    public interface Teiid extends TeiidArchetype, WorkspaceItem {
+
+        /**
+         * The name and node type name of the Komodo workspace's Teiid server grouping node. Value is {@value} .
+         */
+        String GROUP_NODE = Namespace.PREFIX + COLON + "teiids"; //$NON-NLS-1$
+
+        /**
+         * The name of the last ping time property. Value is {@value} .
+         */
+        String LAST_PING_TIME = Namespace.PREFIX + COLON + "lastPingTime"; //$NON-NLS-1$
 
         /**
          * The name of the Teiid node type. Value is {@value} .
          */
         String NODE_TYPE = Namespace.PREFIX + COLON + "teiid"; //$NON-NLS-1$
 
+    }
+
+    /**
+     * The JCR names associated with the teiid cache, ie. those object that
+     * cache the representation of the contents of a live server
+     */
+    public interface CachedTeiid extends TeiidArchetype {
+
+        /**
+         * The name and node type name of the Komodo CachedTeiids grouping node. Value is {@value}.
+         */
+        String GROUP_NODE = Namespace.PREFIX + COLON + "teiidCache"; //$NON-NLS-1$
+
+        /**
+         * The name of the Cached Teiid node type. Value is {@value} .
+         */
+        String NODE_TYPE = Namespace.PREFIX + COLON + "cachedTeiid"; //$NON-NLS-1$
     }
 
     /**

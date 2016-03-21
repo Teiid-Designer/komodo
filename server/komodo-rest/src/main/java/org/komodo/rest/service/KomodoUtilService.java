@@ -1,11 +1,25 @@
 /*
-* JBoss, Home of Professional Open Source.
-*
-* See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
-*
-* See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
-*/
-package org.komodo.rest;
+ * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
+ */
+package org.komodo.rest.service;
 
 import static org.komodo.rest.relational.RelationalMessages.Error.SCHEMA_SERVICE_GET_SCHEMA_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_VDBS_ERROR;
@@ -36,6 +50,8 @@ import org.komodo.relational.importer.vdb.VdbImporter;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.SynchronousCallback;
+import org.komodo.rest.KomodoRestException;
+import org.komodo.rest.KomodoService;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.relational.KomodoStatusObject;
 import org.komodo.rest.relational.RelationalMessages;
@@ -143,7 +159,7 @@ public final class KomodoUtilService extends KomodoService {
      * @param sampleName
      * @return the sample content for the given sample name
      */
-    static InputStream getVdbSample(String sampleName) {
+    public static InputStream getVdbSample(String sampleName) {
         String sampleFilePath = "sample" + File.separator + sampleName; //$NON-NLS-1$
         InputStream fileStream = KomodoUtilService.class.getResourceAsStream(sampleFilePath);
         if (fileStream == null)

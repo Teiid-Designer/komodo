@@ -21,12 +21,6 @@
 		<module>komodo-plugin-service</module>
 	</modules>
 
-	<properties>
-		<version.org.jboss.spec.jboss-javaee-6.0>1.0.0.Final</version.org.jboss.spec.jboss-javaee-6.0>
-		<version.arquillian>1.1.9.Final</version.arquillian>
-		<version.arquillian-container>7.5.5.Final-redhat-3</version.arquillian-container>
-	</properties>
-
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -56,24 +50,6 @@
 				<scope>test</scope>
 			</dependency>
 
-			<dependency>
-				<groupId>org.jboss.spec</groupId>
-				<artifactId>jboss-javaee-6.0</artifactId>
-				<version>${version.org.jboss.spec.jboss-javaee-6.0}</version>
-				<type>pom</type>
-			</dependency>
-			<dependency>
-				<groupId>org.jboss.arquillian</groupId>
-				<artifactId>arquillian-bom</artifactId>
-				<version>${version.arquillian}</version>
-				<scope>import</scope>
-				<type>pom</type>
-			</dependency>
-			<dependency>
-				<groupId>org.jboss.as</groupId>
-				<artifactId>jboss-as-arquillian-container-managed</artifactId>
-				<version>${version.arquillian-container}</version>
-			</dependency>
 		</dependencies>
 	</dependencyManagement>
 

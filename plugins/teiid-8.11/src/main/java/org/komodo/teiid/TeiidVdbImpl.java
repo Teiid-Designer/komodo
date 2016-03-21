@@ -48,8 +48,6 @@ public class TeiidVdbImpl implements TeiidVdb, Comparable<TeiidVdbImpl> {
 
     private final boolean isPreview;
 
-    private final boolean isXml;
-
     private final String deploymentName;
 
     private boolean isActive = false;
@@ -69,9 +67,15 @@ public class TeiidVdbImpl implements TeiidVdb, Comparable<TeiidVdbImpl> {
     public TeiidVdbImpl(VDB vdb) throws Exception {
         ArgCheck.isNotNull(vdb, "vdb"); //$NON-NLS-1$
 
+        if (! (vdb instanceof VDBMetaData))
+            throw new Exception(Messages.getString(Messages.TeiidVdb.onlySupportingDynamicVdbs));
+
+        VDBMetaData vdbMeta = (VDBMetaData)vdb;
+        if (! vdbMeta.isXmlDeployment())
+            throw new Exception(Messages.getString(Messages.TeiidVdb.onlySupportingDynamicVdbs));
+
         name = vdb.getName();
         version = vdb.getVersion();
-        isXml = vdb instanceof VDBMetaData ? ((VDBMetaData)vdb).isXmlDeployment() : false;
         isPreview = Boolean.parseBoolean(vdb.getProperties().getProperty(PREVIEW));
         deploymentName = vdb.getProperties().getProperty(DEPLOYMENT_NAME);
 
@@ -92,17 +96,9 @@ public class TeiidVdbImpl implements TeiidVdb, Comparable<TeiidVdbImpl> {
             properties.setProperty(name, vdb.getPropertyValue(name));
         }
 
-        if (vdb instanceof VDBMetaData) {
-            VDBMetaData vdbMeta = (VDBMetaData)vdb;
-            if (vdbMeta.isXmlDeployment()) {
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
-                VDBMetadataParser.marshell((VDBMetaData)vdb, out);
-
-                vdbExport = new String(out.toByteArray());
-            } else {
-                throw new Exception(Messages.getString(Messages.TeiidVdb.canOnlyExportDynamicVdbs));
-            }
-        }
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        VDBMetadataParser.marshell((VDBMetaData)vdb, out);
+        vdbExport = new String(out.toByteArray());
     }
 
     /* (non-Javadoc)
@@ -170,14 +166,6 @@ public class TeiidVdbImpl implements TeiidVdb, Comparable<TeiidVdbImpl> {
     @Override
     public boolean isPreviewVdb() {
         return isPreview;
-    }
-
-    /* (non-Javadoc)
-     * @see org.teiid.designer.runtime.impl.ITeiidVdb#isXmlDeployment()
-     */
-    @Override
-    public boolean isXmlDeployment() {
-        return isXml;
     }
 
     @Override

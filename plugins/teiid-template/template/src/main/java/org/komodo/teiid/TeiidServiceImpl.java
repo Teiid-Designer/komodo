@@ -26,7 +26,6 @@ import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.TeiidJdbcInfo;
 import org.komodo.spi.runtime.TeiidParent;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
-import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.DataTypeManager;
 import org.komodo.teiid.framework.AbstractTeiidService;
 import org.komodo.teiid.framework.Messages;
@@ -68,7 +67,7 @@ public class TeiidServiceImpl extends AbstractTeiidService {
     }
 
     @Override
-    public TeiidInstance getTeiidInstance(TeiidParent teiidParent, TeiidVersion teiidVersion, TeiidJdbcInfo jdbcInfo) throws Exception {
-        return new TeiidInstanceImpl(teiidParent, teiidVersion, jdbcInfo);
+    public TeiidInstance getTeiidInstance(TeiidParent teiidParent, TeiidJdbcInfo jdbcInfo) throws Exception {
+        return new TeiidInstanceImpl(teiidParent, getVersion(), jdbcInfo);
     }
 }

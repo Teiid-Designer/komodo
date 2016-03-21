@@ -1,14 +1,29 @@
 /*
-* JBoss, Home of Professional Open Source.
-*
-* See the LEGAL.txt file distributed with this work for information regarding copyright ownership and licensing.
-*
-* See the AUTHORS.txt file distributed with this work for a full listing of individual contributors.
-*/
+ * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
+ */
 package org.komodo.rest;
 
 import static org.komodo.rest.Messages.Error.COMMIT_TIMEOUT;
 import static org.komodo.rest.Messages.Error.RESOURCE_NOT_FOUND;
+import static org.komodo.rest.Messages.General.GET_OPERATION_NAME;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import javax.ws.rs.ServerErrorException;
@@ -129,7 +144,7 @@ public abstract class KomodoService implements V1Constants {
         return responseEntity;
     }
 
-    protected Response createErrorResponse(List<MediaType> mediaTypes, Exception ex,
+    protected Response createErrorResponse(List<MediaType> mediaTypes, Throwable ex,
                                                                        RelationalMessages.Error errorType, Object... errorMsgInputs) {
         String errorMsg = ex.getLocalizedMessage() != null ? ex.getLocalizedMessage() : ex.getClass().getSimpleName();
 
@@ -318,5 +333,44 @@ public abstract class KomodoService implements V1Constants {
 
         LOGGER.debug( "VDB '{0}' was found", vdbName ); //$NON-NLS-1$
         return vdb;
+    }
+
+    protected String uri(String... segments) {
+        StringBuffer buffer = new StringBuffer();
+        for (int i = 0; i < segments.length; ++i) {
+            buffer.append(segments[i]);
+            if (i < (segments.length - 1))
+                buffer.append(FORWARD_SLASH);
+        }
+
+        return buffer.toString();
+    }
+
+    protected Response commitNoVdbFound(UnitOfWork uow, List<MediaType> mediaTypes, String vdbName) throws Exception {
+        LOGGER.debug( "VDB '{0}' was not found", vdbName ); //$NON-NLS-1$
+        return commit( uow, mediaTypes, new ResourceNotFound( vdbName, Messages.getString( GET_OPERATION_NAME ) ) );
+    }
+
+    protected Response commitNoModelFound(UnitOfWork uow, List<MediaType> mediaTypes, String modelName, String vdbName) throws Exception {
+        return commit(uow, mediaTypes,
+                      new ResourceNotFound(uri(vdbName, MODELS_SEGMENT, modelName),
+                                           Messages.getString( GET_OPERATION_NAME)));
+    }
+
+    protected Response commitNoDataRoleFound(UnitOfWork uow, List<MediaType> mediaTypes, String dataRoleId, String vdbName) throws Exception {
+        LOGGER.debug("No data role '{0}' found for vdb '{1}'", dataRoleId, vdbName); //$NON-NLS-1$
+        return commit(uow, mediaTypes, new ResourceNotFound(
+                                                     uri(vdbName, DATA_ROLES_SEGMENT, dataRoleId),
+                                                     Messages.getString( GET_OPERATION_NAME)));
+    }
+
+    protected Response commitNoPermissionFound(UnitOfWork uow, List<MediaType> mediaTypes, String permissionId, String dataRoleId, String vdbName) throws Exception {
+        LOGGER.debug("No permission '{0}' for data role '{1}' found for vdb '{2}'", //$NON-NLS-1$
+                                                                     permissionId, dataRoleId, vdbName);
+        return commit(uow, mediaTypes, new ResourceNotFound(
+                                                     uri(vdbName, DATA_ROLES_SEGMENT,
+                                                          dataRoleId, PERMISSIONS_SEGMENT,
+                                                          permissionId),
+                                                     Messages.getString( GET_OPERATION_NAME)));
     }
 }

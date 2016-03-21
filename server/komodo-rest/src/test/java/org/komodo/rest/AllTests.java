@@ -25,8 +25,6 @@ package org.komodo.rest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.komodo.rest.json.LinkSerializerTest;
-import org.komodo.rest.relational.KomodoSearchServiceTest;
-import org.komodo.rest.relational.KomodoVdbServiceTest;
 import org.komodo.rest.relational.RestVdbDataRoleTest;
 import org.komodo.rest.relational.RestVdbImportTest;
 import org.komodo.rest.relational.RestVdbPermissionTest;
@@ -37,6 +35,9 @@ import org.komodo.rest.relational.json.VdbImportSerializerTest;
 import org.komodo.rest.relational.json.VdbPermissionSerializerTest;
 import org.komodo.rest.relational.json.VdbSerializerTest;
 import org.komodo.rest.relational.json.VdbTranslatorSerializerTest;
+import org.komodo.rest.service.KomodoSearchServiceTest;
+import org.komodo.rest.service.KomodoUtilServiceTest;
+import org.komodo.rest.service.KomodoVdbServiceTest;
 
 @SuppressWarnings( "javadoc" )
 @RunWith( Suite.class )

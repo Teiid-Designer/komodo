@@ -37,6 +37,8 @@ public final class VersionProvider {
 
     private static final String JAVAX_JCR_VERSION_PROPERTY = "javaxJcrVersion";
 
+    private static final String JAVAX_XML_STREAM_VERSION_PROPERTY = "javaxXmlStream";
+
     private static final String VERSIONS_PROPERTIES_FILENAME = "dependency-versions";
 
     private static final VersionProvider instance = new VersionProvider();
@@ -49,12 +51,15 @@ public final class VersionProvider {
 
     private String modeshapeVersion;
 
+    private String javaxXmlStreamVersion;
+
     private VersionProvider() {
         ResourceBundle rb;
         try {
             rb = ResourceBundle.getBundle(VERSIONS_PROPERTIES_FILENAME);
             jcrVersion = rb.getString(JAVAX_JCR_VERSION_PROPERTY);
             modeshapeVersion = rb.getString(MODESHAPE_VERSION_PROPERTY);
+            javaxXmlStreamVersion = rb.getString(JAVAX_XML_STREAM_VERSION_PROPERTY);
         } catch (MissingResourceException e) {
             KLog.getLogger().error("Resource bundle '" + VERSIONS_PROPERTIES_FILENAME + "' was not found while reading version properties.");
         }
@@ -66,5 +71,9 @@ public final class VersionProvider {
 
     public String getModeshapeVersion() {
         return modeshapeVersion;
+    }
+
+    public String getJavaxXmlStreamVersion() {
+        return javaxXmlStreamVersion;
     }
 }
