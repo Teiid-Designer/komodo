@@ -11,7 +11,7 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.komodo.relational.commands.server.ServerManager;
+import org.komodo.relational.commands.server.WkspStatusServerManager;
 import org.komodo.repository.RepositoryImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.spi.constants.SystemConstants;
@@ -109,9 +109,9 @@ public abstract class AbstractCommandTest extends org.komodo.shell.AbstractComma
     }
     
     @After
-    public void clearServer() {
+    public void clearServer() throws Exception {
         // Make sure the server is cleared between tests
-        ServerManager.reset();
+        WkspStatusServerManager.reset();
     }    
 
 }

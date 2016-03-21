@@ -141,7 +141,7 @@ public final class ServerDeployVdbCommand extends ServerShellCommand {
                 teiidInstance.deployDynamicVdb(vdbDeploymentName, stream);
             } catch (Exception ex) {
                 result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.connectionErrorWillDisconnect ), ex );
-                ServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
+                WkspStatusServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
                 return result;
             }
 

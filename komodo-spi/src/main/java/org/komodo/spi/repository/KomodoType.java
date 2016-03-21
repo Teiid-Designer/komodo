@@ -208,6 +208,11 @@ public enum KomodoType {
     WORKSPACE,
 
     /**
+     * Server manager type
+     */
+    SERVER_MANAGER,
+
+    /**
      * Unknown Type
      */
     UNKNOWN;

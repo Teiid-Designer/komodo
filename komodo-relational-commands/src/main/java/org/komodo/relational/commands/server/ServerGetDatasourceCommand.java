@@ -100,7 +100,7 @@ public final class ServerGetDatasourceCommand extends ServerShellCommand {
                 serverDS = getWorkspaceTeiidInstance().getDataSource(datasourceName);
             } catch (Exception ex) {
                 result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.connectionErrorWillDisconnect ), ex );
-                ServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
+                WkspStatusServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
                 return result;
             }
             if(serverDS == null) {
@@ -204,7 +204,7 @@ public final class ServerGetDatasourceCommand extends ServerShellCommand {
         } catch (Exception ex) {
             print( );
             print( MESSAGE_INDENT, I18n.bind(ServerCommandsI18n.connectionErrorWillDisconnect) );
-            ServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
+            WkspStatusServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
         }
 
         return TabCompletionModifier.AUTO;

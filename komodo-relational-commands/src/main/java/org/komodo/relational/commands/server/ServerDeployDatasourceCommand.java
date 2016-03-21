@@ -120,7 +120,7 @@ public final class ServerDeployDatasourceCommand extends ServerShellCommand {
                 teiidInstance.getOrCreateDataSource(sourceName, sourceName, sourceType, sourceProps);
             } catch (Exception ex) {
                 result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.connectionErrorWillDisconnect ), ex );
-                ServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
+                WkspStatusServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
                 return result;
             }
 

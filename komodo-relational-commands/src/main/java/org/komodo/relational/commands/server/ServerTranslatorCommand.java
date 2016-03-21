@@ -76,7 +76,7 @@ public final class ServerTranslatorCommand extends ServerShellCommand {
                 translator = getWorkspaceTeiidInstance().getTranslator(translatorName);
             } catch (Exception ex) {
                 result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.connectionErrorWillDisconnect ), ex );
-                ServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
+                WkspStatusServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
                 return result;
             }
             if(translator==null) {
@@ -166,7 +166,7 @@ public final class ServerTranslatorCommand extends ServerShellCommand {
         } catch (Exception ex) {
             print( );
             print( MESSAGE_INDENT, I18n.bind(ServerCommandsI18n.connectionErrorWillDisconnect) );
-            ServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
+            WkspStatusServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
         }
         return TabCompletionModifier.AUTO;
     }

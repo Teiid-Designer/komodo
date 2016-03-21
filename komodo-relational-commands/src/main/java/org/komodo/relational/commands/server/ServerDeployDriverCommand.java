@@ -74,7 +74,7 @@ public final class ServerDeployDriverCommand extends ServerShellCommand {
                 
             } catch (Exception ex) {
                 result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.connectionErrorWillDisconnect ), ex );
-                ServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
+                WkspStatusServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
                 return result;
             }
 

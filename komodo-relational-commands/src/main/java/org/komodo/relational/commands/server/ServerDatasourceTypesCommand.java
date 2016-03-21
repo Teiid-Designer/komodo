@@ -31,6 +31,7 @@ import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.shell.util.PrintUtils;
+import org.komodo.spi.KException;
 import org.komodo.utils.i18n.I18n;
 
 /**
@@ -79,7 +80,11 @@ public final class ServerDatasourceTypesCommand extends ServerShellCommand {
             result = CommandResult.SUCCESS;
         } catch ( final Exception e ) {
             result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.connectionErrorWillDisconnect ), e );
-            ServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
+            try {
+                disconnectWorkspaceServer();
+            } catch (KException kex) {
+                // Do nothing
+            }
         }
 
         return result;
