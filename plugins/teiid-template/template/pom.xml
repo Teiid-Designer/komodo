@@ -364,6 +364,19 @@
 					</execution>
 				</executions>
 			</plugin>
+
+			<!-- On clean, remove the jbossas testing directory -->
+			<plugin>
+				<artifactId>maven-clean-plugin</artifactId>
+				<configuration>
+					<filesets>
+						<fileset>
+							<directory>${project.basedir}/lib/jbossas</directory>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+					</filesets>
+				</configuration>
+			</plugin>
 		</plugins>
 
 		<pluginManagement>

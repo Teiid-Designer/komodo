@@ -118,6 +118,7 @@
 					</nonFilteredFileExtensions>
 				</configuration>
 			</plugin>
+
 			<plugin>
 				<artifactId>maven-enforcer-plugin</artifactId>
 				<executions>
@@ -207,7 +208,8 @@
 				</executions>
 			</plugin>
 
-			<!-- Generate the bundle index file that lists all the bundle currently being built -->
+			<!-- Generate the bundle index file that lists all the bundle currently 
+				being built -->
 			<plugin>
 				<artifactId>maven-antrun-plugin</artifactId>
 				<executions>
@@ -220,8 +222,10 @@
 						<configuration>
 							<tasks>
 								<property name="compile_classpath" refid="maven.compile.classpath" />
-								<property name="bundles.dir" value="${project.basedir}/src/main/resources/bundles" />
-								<property name="index.file" value="${project.basedir}/src/main/resources/bundles/index.xml" />
+								<property name="bundles.dir"
+									value="${project.basedir}/src/main/resources/bundles" />
+								<property name="index.file"
+									value="${project.basedir}/src/main/resources/bundles/index.xml" />
 								<ant antfile="${project.basedir}/generate-bundle-index.xml"
 									target="generate" />
 							</tasks>
@@ -241,6 +245,19 @@
 						</exclusions>
 					</dependency>
 				</dependencies>
+			</plugin>
+
+			<!-- On clean, remove the jbossas testing directory -->
+			<plugin>
+				<artifactId>maven-clean-plugin</artifactId>
+				<configuration>
+					<filesets>
+						<fileset>
+							<directory>${project.basedir}/lib/jbossas</directory>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+					</filesets>
+				</configuration>
 			</plugin>
 		</plugins>
 

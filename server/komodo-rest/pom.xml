@@ -365,9 +365,11 @@
 						<configuration>
 							<target>
 								<property name="version.resteasy" value="${version.resteasy}" />
-								<property name="destination.resteasy" value="${project.build.directory}/resteasy"/>
-								<property name="destination.jboss.modules" value="${project.basedir}/lib/jbossas/${version.jbossas.test}/modules/system/layers/base"/>								
-								<ant antfile="${project.basedir}/install-resteasy.xml" target="install" />
+								<property name="destination.resteasy" value="${project.build.directory}/resteasy" />
+								<property name="destination.jboss.modules"
+									value="${project.basedir}/lib/jbossas/${version.jbossas.test}/modules/system/layers/base" />
+								<ant antfile="${project.basedir}/install-resteasy.xml"
+									target="install" />
 							</target>
 						</configuration>
 					</execution>
@@ -387,17 +389,31 @@
 							<goal>verify</goal>
 						</goals>
 						<configuration>
-							<!-- Skips integration tests  -->
+							<!-- Skips integration tests -->
 							<skipTests>${skip.integration.tests}</skipTests>
 						</configuration>
 					</execution>
 				</executions>
 			</plugin>
+
+			<!-- On clean, remove the jbossas testing directory -->
+			<plugin>
+				<artifactId>maven-clean-plugin</artifactId>
+				<configuration>
+					<filesets>
+						<fileset>
+							<directory>${project.basedir}/lib/jbossas</directory>
+							<followSymlinks>false</followSymlinks>
+						</fileset>
+					</filesets>
+				</configuration>
+			</plugin>
 		</plugins>
 
 		<pluginManagement>
 			<plugins>
-				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself. -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
 					<artifactId>lifecycle-mapping</artifactId>
