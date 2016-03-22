@@ -24,8 +24,6 @@ package org.komodo.rest;
 import static org.komodo.rest.Messages.Error.COMMIT_TIMEOUT;
 import static org.komodo.rest.Messages.Error.RESOURCE_NOT_FOUND;
 import static org.komodo.rest.Messages.General.GET_OPERATION_NAME;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import javax.ws.rs.ServerErrorException;

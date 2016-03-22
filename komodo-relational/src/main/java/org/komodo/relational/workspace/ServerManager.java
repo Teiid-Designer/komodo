@@ -26,6 +26,7 @@ import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.RelationalObject;
+import org.komodo.relational.teiid.CachedTeiid;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.repository.RepositoryImpl;
@@ -289,5 +290,17 @@ public class ServerManager extends ObjectImpl implements RelationalObject {
         Teiid wsTeiid = getDefaultServer(transaction);
         return wsTeiid.getTeiidInstance(transaction);
     }
+
+    /**
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param srcTeiid the source teiid model
+     * @return the teiid object (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    public CachedTeiid createCachedTeiid( final UnitOfWork uow, final Teiid srcTeiid) throws KException {
+        return RelationalModelFactory.createCachedTeiid( uow, getRepository(), srcTeiid);
     }
 }

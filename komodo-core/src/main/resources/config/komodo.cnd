@@ -232,6 +232,7 @@
 [tko:environment] > nt:unstructured
   + tko:validation (nt:unstructured)
   + tko:servers (nt:unstructured)
+  + tko:teiidCache (tko:teiidCache)
 
 /*
  * A grouping node for localized messages.

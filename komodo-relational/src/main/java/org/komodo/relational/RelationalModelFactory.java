@@ -903,7 +903,6 @@ public final class RelationalModelFactory {
         ArgCheck.isNotNull( srcTeiid, "srcTeiid" ); //$NON-NLS-1$
 
         KomodoObject teiidCache = repository.komodoTeiidCache( transaction );
-        final String parentPath = teiidCache.getAbsolutePath();
         final String id = srcTeiid.getName(transaction);
 
         //
@@ -912,7 +911,7 @@ public final class RelationalModelFactory {
         if (teiidCache.hasChild(transaction, id))
             teiidCache.removeChild(transaction, id);
 
-        final KomodoObject kobject = repository.add( transaction, parentPath, id, KomodoLexicon.CachedTeiid.NODE_TYPE );
+        final KomodoObject kobject = teiidCache.addChild(transaction, id, KomodoLexicon.CachedTeiid.NODE_TYPE );
 
         //
         // Populates the node with the source teiid's properties

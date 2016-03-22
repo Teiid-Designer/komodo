@@ -113,6 +113,10 @@ public interface KomodoLexicon extends StringConstants {
          */
         String SERVERS = Namespace.PREFIX + COLON + "servers"; //$NON-NLS-1$
 
+        /**
+         * The name and node type name of the Komodo Teiid Cache. Value is {@value}.
+         */
+        String TEIID_CACHE = Namespace.PREFIX + COLON + "teiidCache"; //$NON-NLS-1$
     }
 
     /**
@@ -741,11 +745,6 @@ public interface KomodoLexicon extends StringConstants {
      * cache the representation of the contents of a live server
      */
     public interface CachedTeiid extends TeiidArchetype {
-
-        /**
-         * The name and node type name of the Komodo CachedTeiids grouping node. Value is {@value}.
-         */
-        String GROUP_NODE = Namespace.PREFIX + COLON + "teiidCache"; //$NON-NLS-1$
 
         /**
          * The name of the Cached Teiid node type. Value is {@value} .

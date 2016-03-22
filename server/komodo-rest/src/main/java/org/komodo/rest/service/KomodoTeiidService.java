@@ -38,11 +38,12 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 import org.komodo.core.KEngine;
-import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.teiid.CachedTeiid;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.vdb.Vdb;
+import org.komodo.relational.workspace.ServerManager;
 import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.repository.RepositoryTools;
 import org.komodo.rest.KomodoRestException;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.KomodoService;
@@ -55,13 +56,9 @@ import org.komodo.rest.relational.RestVdb;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
-import org.komodo.spi.runtime.TeiidAdminInfo;
-import org.komodo.spi.runtime.TeiidInstance;
-import org.komodo.spi.runtime.TeiidJdbcInfo;
-import org.komodo.spi.runtime.version.TeiidVersionProvider;
+import org.komodo.utils.KLog;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -85,29 +82,9 @@ public class KomodoTeiidService extends KomodoService {
         super(engine);
     }
 
-    private Teiid findOrCreateTeiidModel(UnitOfWork uow) throws KException {
-        KomodoObject parent = repo.komodoWorkspace(uow);
-        if (parent.hasChild(uow, TeiidInstance.DEFAULT_HOST, KomodoLexicon.Teiid.NODE_TYPE)) {
-            KomodoObject localTeiidInst = parent.getChild(uow, TeiidInstance.DEFAULT_HOST, KomodoLexicon.Teiid.NODE_TYPE);
-            return wsMgr.resolve(uow, localTeiidInst, Teiid.class);
-        } else {
-            KomodoObject localTeiidInst = wsMgr.createTeiid(uow, parent, TeiidInstance.DEFAULT_HOST);
-            Teiid teiidNode = wsMgr.resolve(uow, localTeiidInst, Teiid.class);
-            teiidNode.setHost(uow, TeiidInstance.DEFAULT_HOST);
-            teiidNode.setVersion(uow, TeiidVersionProvider.getInstance().getTeiidVersion());
-
-            teiidNode.setAdminUser(uow, TeiidAdminInfo.DEFAULT_ADMIN_USERNAME);
-            teiidNode.setAdminPassword(uow, TeiidAdminInfo.DEFAULT_ADMIN_PASSWORD);
-            teiidNode.setAdminPort(uow, TeiidAdminInfo.DEFAULT_PORT);
-            teiidNode.setAdminSecure(uow, false);
-
-            teiidNode.setJdbcUsername(uow, TeiidJdbcInfo.DEFAULT_JDBC_USERNAME);
-            teiidNode.setJdbcPassword(uow, TeiidJdbcInfo.DEFAULT_JDBC_PASSWORD);
-            teiidNode.setJdbcPort(uow, TeiidJdbcInfo.DEFAULT_PORT);
-            teiidNode.setJdbcSecure(uow, false);
-
-            return teiidNode;
-        }
+    private Teiid getDefaultTeiid(UnitOfWork uow) throws KException {
+        ServerManager serverManager = ServerManager.getInstance(repo);
+        return serverManager.getDefaultServer(uow);
     }
 
     private Response checkTeiidAttributes(String adminUser, String adminPasswd,
@@ -135,9 +112,14 @@ public class KomodoTeiidService extends KomodoService {
     public Response setCredentials(final @Context HttpHeaders headers,
                                    final @Context UriInfo uriInfo,
                                    final String credentialAttributes) throws KomodoRestException {
+
+        KLog.getLogger().error("XXXXX HELLO!!");
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
             return notAcceptableMediaTypesBuilder().build();
+
+        KLog.getLogger().error("XXXXX HELLO2!!");
 
         KomodoTeiidAttributes teiidAttrs;
         try {
@@ -147,23 +129,28 @@ public class KomodoTeiidService extends KomodoService {
                                                                                         teiidAttrs.getJdbcUser(),
                                                                                         teiidAttrs.getJdbcPasswd(),
                                                                                         mediaTypes);
+
+            KLog.getLogger().error("XXXXX HELLO3!!");
+
             if (response.getStatus() != Status.OK.getStatusCode())
                 return response;
 
+            KLog.getLogger().error("XXXXX HELLO4!!");
         } catch (Exception ex) {
-            String errorMessage = RelationalMessages.getString(
-                                                               RelationalMessages.Error.TEIID_SERVICE_REQUEST_PARSING_ERROR, ex.getMessage());
-
-            Object responseEntity = createErrorResponse(mediaTypes, errorMessage);
-            return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+            return createErrorResponse(mediaTypes, ex, RelationalMessages.Error.TEIID_SERVICE_REQUEST_PARSING_ERROR);
         }
 
         UnitOfWork uow = null;
 
+        String traversal = null;
         try {
             uow = createTransaction("teiidSetCredentials", true); //$NON-NLS-1$
 
-            Teiid teiidNode = findOrCreateTeiidModel(uow);
+            Teiid teiidNode = getDefaultTeiid(uow);
+
+            traversal = RepositoryTools.traverse(uow, teiidNode);
+            KLog.getLogger().error("XXXX" + traversal);
+
             teiidNode.setAdminUser(uow, teiidAttrs.getAdminUser());
             teiidNode.setAdminPassword(uow, teiidAttrs.getAdminPasswd());
             teiidNode.setJdbcUsername(uow, teiidAttrs.getJdbcUser());
@@ -211,7 +198,7 @@ public class KomodoTeiidService extends KomodoService {
 
         try {
             uow = createTransaction("getVdbs", true); //$NON-NLS-1$
-            Teiid teiid = findOrCreateTeiidModel(uow);
+            Teiid teiid = getDefaultTeiid(uow);
             CachedTeiid cachedTeiid = teiid.importContent(uow);
 
             // find VDBs
@@ -276,7 +263,7 @@ public class KomodoTeiidService extends KomodoService {
 
         try {
             uow = createTransaction( "getVdb", true ); //$NON-NLS-1$
-            Teiid teiid = findOrCreateTeiidModel(uow);
+            Teiid teiid = getDefaultTeiid(uow);
             CachedTeiid cachedTeiid = teiid.importContent(uow);
 
             // find VDB

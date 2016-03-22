@@ -49,6 +49,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.komodo.osgi.PluginService;
+import org.komodo.relational.workspace.ServerManager;
+import org.komodo.repository.RepositoryImpl;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.RestLink;
 import org.komodo.rest.relational.KomodoRestUriBuilder;
@@ -75,6 +77,10 @@ import org.komodo.test.utils.TestUtilities;
 public final class IT_KomodoTeiidServiceTest implements StringConstants {
 
     private static final String TEST_PORT = "8080";
+
+    private static final String TEIID_DATA_PATH = RepositoryImpl.SERVERS_ROOT + FORWARD_SLASH + ServerManager.DEFAULT_SERVER_NAME;
+
+    private static final String CACHED_TEIID_DATA_PATH = RepositoryImpl.TEIID_CACHE_ROOT + FORWARD_SLASH + ServerManager.DEFAULT_SERVER_NAME;
 
     private static Path _kengineDataDir;
 
@@ -173,14 +179,14 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         teiidAttrs.setJdbcPasswd(TeiidJdbcInfo.DEFAULT_JDBC_PASSWORD);
 
         this.response = request(uri).post(Entity.json(teiidAttrs));
-        assertEquals(200, this.response.getStatus());
         final String entity = this.response.readEntity(String.class);
-//        System.out.println("Response:\n" + entity);
+        System.out.println("Response:\n" + entity);
+        assertEquals(200, this.response.getStatus());
 
         RestTeiid rt = KomodoJsonMarshaller.unmarshall(entity, RestTeiid.class);
         assertNotNull(TeiidInstance.DEFAULT_HOST, rt.getId());
         assertEquals(_uriBuilder.baseUri() + FORWARD_SLASH, rt.getBaseUri().toString());
-        assertEquals("/tko:komodo/tko:workspace/localhost", rt.getDataPath());
+        assertEquals(TEIID_DATA_PATH, rt.getDataPath());
         assertEquals(KomodoType.TEIID, rt.getkType());
         assertFalse(rt.hasChildren());
 
@@ -205,9 +211,9 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
                                           .build();
 
         this.response = request(uri).get();
-        final String entity = this.response.readEntity(String.class);
+        final String entity = this.response.readEntity(String.class);;
+        System.out.println("Response:\n" + entity);
         assertEquals(200, this.response.getStatus());
-//        System.out.println("Response:\n" + entity);
 
         RestVdb[] vdbs = KomodoJsonMarshaller.unmarshallArray(entity, RestVdb[].class);
         assertTrue(vdbs.length == 1);
@@ -216,7 +222,7 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         String vdbName = TestUtilities.SAMPLE_VDB_NAME;
         assertNotNull(vdbName, vdb.getId());
         assertEquals(_uriBuilder.baseUri() + FORWARD_SLASH, vdb.getBaseUri().toString());
-        assertEquals("/tko:komodo/tko:workspace/tko:teiidCache/localhost/sample", vdb.getDataPath());
+        assertEquals(CACHED_TEIID_DATA_PATH + FORWARD_SLASH + "sample", vdb.getDataPath());
         assertEquals(KomodoType.VDB, vdb.getkType());
         assertFalse(vdb.hasChildren());
         assertEquals(vdbName, vdb.getName());
@@ -226,7 +232,7 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
                 case SELF:
                     assertEquals(BASE_URI + File.separator +
                                              V1Constants.TEIID_SEGMENT + File.separator +
-                                             "localhost" + File.separator +
+                                             ServerManager.DEFAULT_SERVER_NAME + File.separator +
                                              V1Constants.VDBS_SEGMENT + File.separator +
                                              vdbName,
                                              link.getHref().toString());
@@ -234,7 +240,7 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
                 case PARENT:
                     assertEquals(BASE_URI + File.separator +
                                              V1Constants.TEIID_SEGMENT + File.separator +
-                                             "localhost" + File.separator +
+                                             ServerManager.DEFAULT_SERVER_NAME + File.separator +
                                              V1Constants.VDBS_SEGMENT,
                                              link.getHref().toString());
             }
@@ -253,8 +259,8 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         this.response = request(uri).get();
 
         final String entity = this.response.readEntity(String.class);
+        System.out.println("Response:\n" + entity);
         assertEquals(200, this.response.getStatus());
-//        System.out.println("Response:\n" + entity);
 
         RestVdb vdb = KomodoJsonMarshaller.unmarshall(entity, RestVdb.class);
         assertNotNull(vdb);
@@ -262,7 +268,7 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         String vdbName = TestUtilities.SAMPLE_VDB_NAME;
         assertNotNull(vdbName, vdb.getId());
         assertEquals(_uriBuilder.baseUri() + FORWARD_SLASH, vdb.getBaseUri().toString());
-        assertEquals("/tko:komodo/tko:workspace/tko:teiidCache/localhost/sample", vdb.getDataPath());
+        assertEquals(CACHED_TEIID_DATA_PATH + FORWARD_SLASH + "sample", vdb.getDataPath());
         assertEquals(KomodoType.VDB, vdb.getkType());
         assertFalse(vdb.hasChildren());
         assertEquals(vdbName, vdb.getName());
@@ -272,7 +278,7 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
                 case SELF:
                     assertEquals(BASE_URI + File.separator +
                                              V1Constants.TEIID_SEGMENT + File.separator +
-                                             "localhost" + File.separator +
+                                             ServerManager.DEFAULT_SERVER_NAME + File.separator +
                                              V1Constants.VDBS_SEGMENT + File.separator +
                                              vdbName,
                                              link.getHref().toString());
@@ -280,7 +286,7 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
                 case PARENT:
                     assertEquals(BASE_URI + File.separator +
                                              V1Constants.TEIID_SEGMENT + File.separator +
-                                             "localhost" + File.separator +
+                                             ServerManager.DEFAULT_SERVER_NAME + File.separator +
                                              V1Constants.VDBS_SEGMENT,
                                              link.getHref().toString());
             }

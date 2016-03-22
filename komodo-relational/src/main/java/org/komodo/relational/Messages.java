@@ -252,7 +252,12 @@ public class Messages implements StringConstants {
         /**
          * An error indicating a teiid instance could not connect
          */
-        TEIID_INSTANCE_CONNECTION_ERROR;
+        TEIID_INSTANCE_CONNECTION_ERROR,
+
+        /**
+         * An error indicating server manager failed to create the default teiid server model
+         */
+        SERVER_MANAGER_DEFAULT_TEIID_ERROR;
 
         @Override
         public String toString() {

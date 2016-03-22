@@ -29,16 +29,19 @@ import java.util.Collections;
 import java.util.Map.Entry;
 import java.util.Properties;
 import org.komodo.core.KEngine;
+import org.komodo.core.KomodoLexicon;
 import org.komodo.core.KomodoLexicon.TeiidArchetype;
 import org.komodo.osgi.PluginService;
 import org.komodo.relational.Messages;
 import org.komodo.relational.datasource.Datasource;
+import org.komodo.relational.datasource.internal.DatasourceImpl;
 import org.komodo.relational.internal.RelationalChildRestrictedObject;
 import org.komodo.relational.teiid.CachedTeiid;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.internal.TranslatorImpl;
-import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.relational.vdb.internal.VdbImpl;
+import org.komodo.relational.workspace.ServerManager;
 import org.komodo.spi.KException;
 import org.komodo.spi.query.TeiidService;
 import org.komodo.spi.repository.KomodoObject;
@@ -728,7 +731,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
     public CachedTeiid importContent(UnitOfWork transaction) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
 
-        WorkspaceManager mgr = WorkspaceManager.getInstance(getRepository());
+        ServerManager mgr = ServerManager.getInstance(getRepository());
         CachedTeiid cachedTeiid = mgr.createCachedTeiid(transaction, this);
 
         TeiidInstance teiidInstance = getTeiidInstance(transaction);
@@ -775,7 +778,11 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
                 File tempFile = File.createTempFile(VDB_PREFIX, XML_SUFFIX);
                 Files.write(Paths.get(tempFile.getPath()), content.getBytes());
 
-                Vdb vdb = mgr.createVdb(transaction, cachedTeiid, vdbName, tempFile.getAbsolutePath());
+                KomodoObject kobject = cachedTeiid.addChild(transaction, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+                Vdb vdb = new VdbImpl( transaction, getRepository(), kobject.getAbsolutePath());
+                vdb.setOriginalFilePath(transaction, tempFile.getAbsolutePath());
+                vdb.setVdbName( transaction, vdbName );
+
                 KomodoObject fileNode = vdb.addChild(transaction, JcrLexicon.CONTENT.getString(), null);
                 fileNode.setProperty(transaction, JcrLexicon.DATA.getString(), content);
             }
@@ -784,7 +791,9 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
                 if (teiidDataSrc == null)
                     continue;
 
-                Datasource dataSrc = mgr.createDatasource(transaction, cachedTeiid, teiidDataSrc.getName());
+                KomodoObject kobject = cachedTeiid.addChild( transaction, teiidDataSrc.getName(), KomodoLexicon.DataSource.NODE_TYPE );
+                Datasource dataSrc = new DatasourceImpl( transaction, getRepository(), kobject.getAbsolutePath() );
+
                 dataSrc.setDriverName(transaction, teiidDataSrc.getType());
                 dataSrc.setJndiName(transaction, teiidDataSrc.getJndiName());
 
