@@ -307,15 +307,13 @@ public class DefaultKomodoShell implements KomodoShell {
                             PrintUtils.print( getOutputWriter(), CompletionConstants.MESSAGE_INDENT, errorMsg );
                         }
 
-                        // rollback
-                        if ( result.isPersistable() ) {
+                        // rollback (dont rollback for Exit - user must specify)
+                        if ( result.isPersistable() && !ExitCommand.NAME.equals( command.getName() ) ) {
                             this.wsStatus.rollback( command.getClass().getSimpleName() );
                         }
 
                         // shutdown if necessary
-                        if ( this.reader.isBatch()
-                             || ( ExitCommand.NAME.equals( command.getName() )
-                                  && ( !( result.getError() instanceof InvalidCommandArgumentException ) ) ) ) {
+                        if ( this.reader.isBatch() ) {
                             done = true;
 
                             if ( !this.shutdown ) {

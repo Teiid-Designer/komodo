@@ -5,7 +5,9 @@
         <tko:library jcr:primaryType="tko:library" />
         <tko:environment jcr:primaryType="tko:environment">
             <tko:validation jcr:primaryType="nt:unstructured" />
-            <tko:servers jcr:primaryType="nt:unstructured" />
+            <tko:servers jcr:primaryType="nt:unstructured">
+                <DefaultServer jcr:primaryType="tko:teiid" />
+            </tko:servers>
         </tko:environment>
     </tko:komodo>
 </jcr:root>
