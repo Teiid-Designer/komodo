@@ -8,6 +8,7 @@
 package org.komodo.shell.util;
 
 import static org.komodo.shell.CompletionConstants.MESSAGE_INDENT;
+
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.TreeMap;
+
 import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.ShellApiI18n;
 import org.komodo.shell.api.WorkspaceStatus;
@@ -26,6 +28,7 @@ import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.PropertyDescriptor;
+import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.ui.KomodoObjectLabelProvider;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.KLog;
@@ -40,6 +43,7 @@ public class PrintUtils implements StringConstants {
     private static final int DEFAULT_WIDTH = 25;
     private static final int MAX_PROPERTY_VALUE_WIDTH = 100;  // Limit on the value column width
     private static final int MAX_DEFAULT_VALUE_WIDTH = ( MAX_PROPERTY_VALUE_WIDTH / 3 );
+    private static final String ENCRYPTED_VALUE = "**********"; //$NON-NLS-1$
 
     /**
      * Print the message to the writer.  A newLine is added after the message.
@@ -228,6 +232,7 @@ public class PrintUtils implements StringConstants {
 
         // key is the property name, value is a 2 element string array holding the current value and the default value
         final Map< String, String[] > sorted = new TreeMap< String, String[] >();
+        final UnitOfWork uow = wsStatus.getTransaction();
 
         int maxNameWidth = DEFAULT_WIDTH;
         int maxValueWidth = DEFAULT_WIDTH;
@@ -236,7 +241,8 @@ public class PrintUtils implements StringConstants {
         for ( int i = 0, size = props.size(); i < size; ++i ) {
             String name = props.get( i );
             String value = null;
-            final String defaultValue = getPropertyDefaultValue( wsStatus, context, name );
+            String defaultValue = getPropertyDefaultValue( wsStatus, context, name );
+            boolean maskEncryptedValue = true;
 
             if ( showHiddenProps ) {
                 value = KomodoObjectUtils.getUnfilteredPropertyValue(wsStatus, context, name );
@@ -245,6 +251,23 @@ public class PrintUtils implements StringConstants {
 
                 if ( StringUtils.isBlank( value ) ) {
                     value = I18n.bind( ShellI18n.noPropertyValue );
+                    maskEncryptedValue = false;
+                }
+            }
+
+            { // don't display value if encrypted
+                if ( context.hasProperty( uow, name ) ) {
+                    final boolean encrypted = context.getPropertyDescriptor( uow, name ).isEncrypted();
+
+                    if ( encrypted ) {
+                        if ( maskEncryptedValue ) {
+                            value = ENCRYPTED_VALUE;
+                        }
+
+                        if ( !StringUtils.isBlank( defaultValue ) ) {
+                            defaultValue = ENCRYPTED_VALUE;
+                        }
+                    }
                 }
             }
 
@@ -317,15 +340,35 @@ public class PrintUtils implements StringConstants {
      */
     public static void printProperty( final WorkspaceStatus wsStatus, final Writer writer, KomodoObject context, String name ) throws Exception {
         String propertyName = KomodoObjectUtils.attachPrefix( wsStatus, context, name );
+        boolean maskEncryptedValue = true;
 
         // Get the value for the supplied property
         String propValue = KomodoObjectUtils.getPropertyValue(wsStatus, context, propertyName );
 
         // default value
-        final String defaultValue = getPropertyDefaultValue( wsStatus, context, name );
+        String defaultValue = getPropertyDefaultValue( wsStatus, context, name );
 
         if ( StringUtils.isBlank( propValue ) ) {
             propValue = I18n.bind( ShellI18n.noPropertyValue );
+            maskEncryptedValue = false;
+        }
+
+        { // don't display value if encrypted
+            final UnitOfWork uow = wsStatus.getTransaction();
+
+            if ( context.hasProperty( uow, name ) ) {
+                final boolean encrypted = context.getPropertyDescriptor( uow, name ).isEncrypted();
+
+                if ( encrypted ) {
+                    if ( maskEncryptedValue ) {
+                        propValue = ENCRYPTED_VALUE;
+                    }
+
+                    if ( !StringUtils.isBlank( defaultValue ) ) {
+                        defaultValue = ENCRYPTED_VALUE;
+                    }
+                }
+            }
         }
 
         if ( !wsStatus.isShowingPropertyNamePrefixes() ) {

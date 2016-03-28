@@ -133,6 +133,11 @@ public interface PropertyDescriptor {
     Type getType();
 
     /**
+     * @return <code>true</code> if this property contains sensitive data
+     */
+    boolean isEncrypted();
+
+    /**
      * @return <code>true</code> if property is required
      */
     boolean isMandatory();
