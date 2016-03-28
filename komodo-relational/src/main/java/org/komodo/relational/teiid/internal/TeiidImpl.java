@@ -26,10 +26,13 @@ import org.komodo.core.KomodoLexicon;
 import org.komodo.osgi.PluginService;
 import org.komodo.relational.internal.RelationalChildRestrictedObject;
 import org.komodo.relational.teiid.Teiid;
+import org.komodo.repository.EncryptedPropertyDescriptor;
+import org.komodo.repository.RepositoryImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.query.TeiidService;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
+import org.komodo.spi.repository.PropertyDescriptor;
 import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -47,6 +50,7 @@ import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.utils.ArgCheck;
+import org.komodo.utils.StringUtils;
 import org.modeshape.jcr.JcrLexicon;
 
 /**
@@ -537,7 +541,13 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
     @Override
     public String getAdminPassword( UnitOfWork uow ) throws KException {
         String password = getObjectProperty(uow, PropertyValueType.STRING, "getAdminPassword", KomodoLexicon.Teiid.ADMIN_PSWD); //$NON-NLS-1$
-        return password != null ? password : TeiidAdminInfo.DEFAULT_ADMIN_PASSWORD;
+
+        if ( StringUtils.isBlank( password ) ) {
+            return TeiidAdminInfo.DEFAULT_ADMIN_PASSWORD;
+        }
+
+        final String decrypted = ( ( RepositoryImpl )getRepository() ).decrypt( uow, KomodoLexicon.Teiid.ADMIN_PSWD, password );
+        return decrypted;
     }
 
     /**
@@ -551,7 +561,14 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
     @Override
     public void setAdminPassword( UnitOfWork uow,
                                   String password ) throws KException {
-        setObjectProperty(uow, "setAdminPassword", KomodoLexicon.Teiid.ADMIN_PSWD, password); //$NON-NLS-1$
+        String newPassword = password;
+
+        // encrypt
+        if ( !StringUtils.isBlank( password ) ) {
+            newPassword = ( ( RepositoryImpl )getRepository() ).encrypt( uow, KomodoLexicon.Teiid.ADMIN_PSWD, password );
+        }
+
+        setObjectProperty(uow, "setAdminPassword", KomodoLexicon.Teiid.ADMIN_PSWD, newPassword); //$NON-NLS-1$
     }
 
     /**
@@ -653,7 +670,13 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
     @Override
     public String getJdbcPassword( UnitOfWork uow ) throws KException {
         String password = getObjectProperty(uow, PropertyValueType.STRING, "getPassword", KomodoLexicon.Teiid.JDBC_PSWD); //$NON-NLS-1$
-        return password != null ? password : TeiidJdbcInfo.DEFAULT_JDBC_PASSWORD;
+
+        if ( StringUtils.isBlank( password ) ) {
+            return TeiidJdbcInfo.DEFAULT_JDBC_PASSWORD;
+        }
+
+        final String decrypted = ( ( RepositoryImpl )getRepository() ).decrypt( uow, KomodoLexicon.Teiid.JDBC_PSWD, password );
+        return decrypted;
     }
 
     /**
@@ -667,7 +690,14 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
     @Override
     public void setJdbcPassword( UnitOfWork uow,
                                  String password ) throws KException {
-        setObjectProperty(uow, "setPassword", KomodoLexicon.Teiid.JDBC_PSWD, password); //$NON-NLS-1$
+        String newPassword = password;
+
+        // encrypt
+        if ( !StringUtils.isBlank( password ) ) {
+            newPassword = ( ( RepositoryImpl )getRepository() ).encrypt( uow, KomodoLexicon.Teiid.JDBC_PSWD, password );
+        }
+
+        setObjectProperty(uow, "setAdminPassword", KomodoLexicon.Teiid.JDBC_PSWD, newPassword); //$NON-NLS-1$
     }
 
     /**
@@ -717,6 +747,50 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
     @Override
     public boolean removeListener( ExecutionConfigurationListener listener ) {
         return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#getPropertyDescriptor(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String)
+     */
+    @Override
+    public PropertyDescriptor getPropertyDescriptor( final UnitOfWork transaction,
+                                                     final String propName ) throws KException {
+        final PropertyDescriptor pd = super.getPropertyDescriptor( transaction, propName );
+
+        if ( pd == null ) {
+            return null;
+        }
+
+        if ( KomodoLexicon.Teiid.JDBC_PSWD.equals( propName ) || KomodoLexicon.Teiid.ADMIN_PSWD.equals( propName ) ) {
+            return new EncryptedPropertyDescriptor( pd );
+        }
+
+        return pd;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#getPropertyDescriptors(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public PropertyDescriptor[] getPropertyDescriptors( final UnitOfWork transaction ) throws KException {
+        final PropertyDescriptor[] descriptors = super.getPropertyDescriptors( transaction );
+        final PropertyDescriptor[] result = new PropertyDescriptor[ descriptors.length ];
+
+        for ( int i = 0; i < descriptors.length; ++i ) {
+            if ( KomodoLexicon.Teiid.JDBC_PSWD.equals( descriptors[ i ].getName() )
+                 || KomodoLexicon.Teiid.ADMIN_PSWD.equals( descriptors[ i ].getName() ) ) {
+                result[ i ] = new EncryptedPropertyDescriptor( descriptors[ i ] );
+            } else {
+                result[ i ] = descriptors[ i ];
+            }
+        }
+
+        return result;
     }
 
 }

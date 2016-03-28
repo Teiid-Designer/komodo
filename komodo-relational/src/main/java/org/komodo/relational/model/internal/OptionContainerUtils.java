@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalModelFactory;
@@ -85,6 +86,16 @@ public final class OptionContainerUtils {
         @Override
         public Type getType() {
             return Type.STRING;
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see org.komodo.spi.repository.PropertyDescriptor#isEncrypted()
+         */
+        @Override
+        public boolean isEncrypted() {
+            return false;
         }
 
         /**

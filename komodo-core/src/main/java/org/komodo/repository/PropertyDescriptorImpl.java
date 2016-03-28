@@ -10,6 +10,7 @@ package org.komodo.repository;
 import javax.jcr.PropertyType;
 import javax.jcr.Value;
 import javax.jcr.nodetype.PropertyDefinition;
+
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
@@ -177,6 +178,16 @@ public class PropertyDescriptorImpl implements PropertyDescriptor {
     @Override
     public Type getType() {
         return this.type;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.PropertyDescriptor#isEncrypted()
+     */
+    @Override
+    public boolean isEncrypted() {
+        return false;
     }
 
     /**

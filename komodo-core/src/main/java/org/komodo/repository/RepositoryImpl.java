@@ -8,6 +8,7 @@
 package org.komodo.repository;
 
 import static org.komodo.repository.Messages.Komodo.ERROR_REPO_HAS_CHANGES;
+
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -17,6 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
 import javax.jcr.Node;
 import javax.jcr.NodeIterator;
 import javax.jcr.PropertyIterator;
@@ -27,6 +29,7 @@ import javax.jcr.ValueFactory;
 import javax.jcr.query.Query;
 import javax.jcr.query.QueryManager;
 import javax.jcr.query.QueryResult;
+
 import org.komodo.core.KEngine;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.core.KomodoLexicon.Environment;
@@ -49,6 +52,8 @@ import org.komodo.spi.repository.RepositoryObserver;
 import org.komodo.spi.repository.ValidationManager;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.KLog;
+import org.komodo.utils.StringUtils;
+import org.modeshape.common.util.Base64;
 import org.modeshape.jcr.JcrSession;
 import org.modeshape.jcr.api.JcrConstants;
 import org.modeshape.jcr.api.JcrTools;
@@ -396,6 +401,66 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
 
             return ((JcrSession) session).decode(encoded);
         }
+    }
+
+    private static class Cryptor {
+
+        private static final byte[] KEY = "org.komodo.repository.RepositoryImpl:encryption_key".getBytes(); //$NON-NLS-1$
+
+        static String decrypt( final UnitOfWork transaction,
+                               final String propertyName,
+                               final String encrypted ) throws KException {
+            assert( transaction != null );
+            assert( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED );
+            assert( ( propertyName != null ) && !propertyName.isEmpty() );
+
+            if ( StringUtils.isBlank( encrypted ) ) {
+                return encrypted;
+            }
+
+            try {
+                final String decrypted = new String( xor( Base64.decode( encrypted.getBytes() ) ) );
+
+                // remove salt
+                final String result = decrypted.substring( 0, decrypted.lastIndexOf( propertyName ) );
+                return result;
+            } catch ( final Exception e ) {
+                throw new KException( e );
+            }
+        }
+
+        static String encrypt( final UnitOfWork transaction,
+                               final String propertyName,
+                               final String plainText ) {
+            assert( transaction != null );
+            assert( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED );
+            assert( ( propertyName != null ) && !propertyName.isEmpty() );
+
+            if ( StringUtils.isBlank( plainText ) ) {
+                return plainText;
+            }
+
+            final String salt = ( plainText + propertyName ); // create salt
+            final String encrypted = Base64.encodeBytes( xor( salt.getBytes() ) );
+            return encrypted;
+        }
+
+        private static byte[] xor( final byte[] input ) {
+            final byte[] output = new byte[ input.length ];
+            int spos = 0;
+
+            for ( int pos = 0; pos < input.length; ++pos ) {
+                output[ pos ] = ( byte )( input[ pos ] ^ KEY[ spos ] );
+                spos += 1;
+
+                if ( spos >= KEY.length ) {
+                    spos = 0;
+                }
+            }
+
+            return output;
+        }
+
     }
 
     /**
@@ -760,6 +825,49 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
 
             throw new KException(e);
         }
+    }
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> and must have a state of
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param propertyName
+     *        the name of the property whose value is being decrypted (cannot be empty)
+     * @param encrypted
+     *        the value being decrypted (can be empty)
+     * @return the decoded value (never empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    public String decrypt( final UnitOfWork transaction,
+                           final String propertyName,
+                           final String encrypted ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
+                         "transaction state must be NOT_STARTED but was " + transaction.getState() ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( propertyName, "propertyName" ); //$NON-NLS-1$
+        return Cryptor.decrypt( transaction, propertyName, encrypted );
+    }
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> and must have a state of
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param propertyName
+     *        the name of the property whose value is being encrypted (cannot be empty)
+     * @param plainText the value being encrypted (can be empty)
+     * @return the encrypted value (never empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    public String encrypt( final UnitOfWork transaction,
+                           final String propertyName,
+                           final String plainText ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
+                         "transaction state must be NOT_STARTED but was " + transaction.getState() ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( propertyName, "propertyName" ); //$NON-NLS-1$
+        return Cryptor.encrypt( transaction, propertyName, plainText );
     }
 
     private String getAbsoluteLibraryPath( final String path ) {
