@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 import org.komodo.relational.teiid.Teiid;
+import org.komodo.relational.workspace.ServerManager;
 import org.komodo.shell.api.ShellCommand;
 import org.komodo.shell.api.ShellCommandProvider;
 import org.komodo.shell.api.WorkspaceStatus;
@@ -107,10 +108,10 @@ public class ServerCommandProvider implements ShellCommandProvider {
      */
     @Override
     public String getStatusMessage( final WorkspaceStatus wsStatus ) throws KException {
-        TeiidInstance teiidInstance = ServerManager.getInstance(wsStatus).getDefaultTeiidInstance(); 
+        TeiidInstance teiidInstance = WkspStatusServerManager.getInstance(wsStatus).getDefaultTeiidInstance(); 
         String teiidUrl = teiidInstance.getUrl();
         
-        boolean isConnected = ServerManager.getInstance(wsStatus).isDefaultServerConnected();
+        boolean isConnected = WkspStatusServerManager.getInstance(wsStatus).isDefaultServerConnected();
         String teiidConnected = isConnected ? I18n.bind( ServerCommandsI18n.connected )
                                             : I18n.bind( ServerCommandsI18n.notConnected );
         
@@ -136,7 +137,7 @@ public class ServerCommandProvider implements ShellCommandProvider {
         boolean connectOnStartup = Boolean.parseBoolean( wsStatus.getProvidedGlobalProperties().getProperty( ServerManager.SERVER_CONNECT_ON_STARTUP ) );
         if(connectOnStartup) {
             try {
-                ServerManager.getInstance( wsStatus ).connectDefaultServer( );
+                WkspStatusServerManager.getInstance( wsStatus ).connectDefaultServer( );
             } catch (Exception ex) {
                 KLog.getLogger().error(I18n.bind(ServerCommandsI18n.errorConnectingToServerOnStartup));
             }

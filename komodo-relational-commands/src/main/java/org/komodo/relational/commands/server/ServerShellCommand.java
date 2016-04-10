@@ -93,29 +93,29 @@ abstract class ServerShellCommand extends RelationalShellCommand {
     }
 
     protected String getWorkspaceServerName() throws KException {
-        return ServerManager.getInstance(getWorkspaceStatus()).getDefaultServer( ).getName( getTransaction() );
+        return WkspStatusServerManager.getInstance(getWorkspaceStatus()).getDefaultServer( ).getName( getTransaction() );
     }
 
     protected Teiid getWorkspaceServer() throws KException {
-        return ServerManager.getInstance(getWorkspaceStatus()).getDefaultServer( );
+        return WkspStatusServerManager.getInstance(getWorkspaceStatus()).getDefaultServer( );
     }
 
     protected TeiidInstance getWorkspaceTeiidInstance() throws KException {
-        return ServerManager.getInstance(getWorkspaceStatus()).getDefaultTeiidInstance( );
+        return WkspStatusServerManager.getInstance(getWorkspaceStatus()).getDefaultTeiidInstance( );
     }
 
-    protected boolean connectWorkspaceServer() throws Exception {
-        return ServerManager.getInstance(getWorkspaceStatus()).connectDefaultServer( );
+    protected boolean connectWorkspaceServer() throws KException {
+        return WkspStatusServerManager.getInstance(getWorkspaceStatus()).connectDefaultServer( );
     }
 
-    protected boolean disconnectWorkspaceServer() throws Exception {
-        return ServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer( );
+    protected boolean disconnectWorkspaceServer() throws KException {
+        return WkspStatusServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer( );
     }
 
     protected boolean hasConnectedWorkspaceServer( ) {
         boolean isConnected = false;
         try {
-            isConnected = ServerManager.getInstance(getWorkspaceStatus()).isDefaultServerConnected( );
+            isConnected = WkspStatusServerManager.getInstance(getWorkspaceStatus()).isDefaultServerConnected( );
         } catch ( KException e ) {
             KLog.getLogger().error( "Error attempting to check default server connection status: " + e.getLocalizedMessage() ); //$NON-NLS-1$
         }

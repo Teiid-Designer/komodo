@@ -44,7 +44,6 @@ import javax.jcr.query.QueryResult;
 import org.komodo.core.KEngine;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.core.KomodoLexicon.Environment;
-import org.komodo.core.KomodoLexicon.CachedTeiid;
 import org.komodo.core.KomodoLexicon.Komodo;
 import org.komodo.core.KomodoLexicon.LibraryComponent;
 import org.komodo.core.KomodoLexicon.Search;
@@ -456,7 +455,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
     /**
      * The root path of the Komodo repository teiid cache area.
      */
-    public static final String TEIID_CACHE_ROOT = WORKSPACE_ROOT + FORWARD_SLASH + CachedTeiid.GROUP_NODE;
+    public static final String TEIID_CACHE_ROOT = ENV_ROOT + FORWARD_SLASH + Environment.TEIID_CACHE;
 
     protected static final KLog LOGGER = KLog.getLogger();
 
@@ -1323,11 +1322,22 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
     }
 
     @Override
+    public KomodoObject komodoServersNode(UnitOfWork transaction) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
+        "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        komodoEnvironment(transaction);
+        return create(transaction, SERVERS_ROOT, null);
+    }
+
+    @Override
     public KomodoObject komodoTeiidCache(final UnitOfWork transaction) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
         "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        komodoWorkspace( transaction );
-        return create(transaction, TEIID_CACHE_ROOT, KomodoLexicon.CachedTeiid.GROUP_NODE);
+
+        komodoEnvironment(transaction);
+        return create(transaction, TEIID_CACHE_ROOT, Environment.TEIID_CACHE);
     }
 }

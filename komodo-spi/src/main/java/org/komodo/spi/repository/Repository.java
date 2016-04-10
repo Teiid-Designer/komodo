@@ -568,4 +568,15 @@ public interface Repository {
      * @throws KException if an error occurs
      */
     KomodoObject komodoTeiidCache(final UnitOfWork transaction) throws KException;
+
+    /**
+    *
+    * @param transaction
+    *        the transaction (cannot be <code>null</code> or have a state that is not
+    *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+    *
+    * @return the komodo servers node
+    * @throws KException if an error occurs
+    */
+    KomodoObject komodoServersNode(UnitOfWork transaction) throws KException;
 }
