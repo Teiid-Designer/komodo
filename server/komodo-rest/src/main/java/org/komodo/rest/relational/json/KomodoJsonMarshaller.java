@@ -32,6 +32,7 @@ import org.komodo.rest.relational.KomodoSearcherAttributes;
 import org.komodo.rest.relational.KomodoStatusObject;
 import org.komodo.rest.relational.KomodoTeiidAttributes;
 import org.komodo.rest.relational.RestTeiid;
+import org.komodo.rest.relational.RestTeiidStatus;
 import org.komodo.rest.relational.RestVdb;
 import org.komodo.rest.relational.RestVdbCondition;
 import org.komodo.rest.relational.RestVdbDataRole;
@@ -77,7 +78,8 @@ public final class KomodoJsonMarshaller {
                                                   .registerTypeAdapter( RestVdbMask.class, new VdbMaskSerializer() )
                                                   .registerTypeAdapter( RestVdbTranslator.class, new VdbTranslatorSerializer() )
                                                   .registerTypeAdapter( RestBasicEntity.class, new BasicEntitySerializer<RestBasicEntity>() )
-                                                  .registerTypeAdapter( RestTeiid.class, new TeiidSerializer() );
+                                                  .registerTypeAdapter( RestTeiid.class, new TeiidSerializer() )
+                                                  .registerTypeAdapter( RestTeiidStatus.class, new TeiidStatusSerializer() );
         BUILDER = temp.create();
         PRETTY_BUILDER = temp.setPrettyPrinting().create();
     }

@@ -246,6 +246,11 @@ public final class RelationalMessages {
         SEARCH_SERVICE_REQUEST_PARSING_ERROR,
 
         /**
+         * An error indicating a teiid status error
+         */
+        TEIID_SERVICE_STATUS_ERROR,
+
+        /**
          * The teiid service cannot parse the request body
          */
         TEIID_SERVICE_REQUEST_PARSING_ERROR,

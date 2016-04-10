@@ -302,6 +302,11 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
          * The teiid credentials property for modifying the usernames and passwords
          */
         String TEIID_CREDENTIALS = "credentials";
+
+        /**
+         * The teiid status path segment
+         */
+        String STATUS_SEGMENT = "status";
     }
 
     private static final int TIMEOUT = 1;

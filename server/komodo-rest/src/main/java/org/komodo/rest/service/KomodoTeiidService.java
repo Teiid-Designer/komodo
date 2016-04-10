@@ -43,22 +43,21 @@ import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.ServerManager;
 import org.komodo.relational.workspace.WorkspaceManager;
-import org.komodo.repository.RepositoryTools;
 import org.komodo.rest.KomodoRestException;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.KomodoService;
 import org.komodo.rest.RestBasicEntity;
 import org.komodo.rest.relational.KomodoProperties;
-import org.komodo.rest.relational.KomodoStatusObject;
 import org.komodo.rest.relational.KomodoTeiidAttributes;
 import org.komodo.rest.relational.RelationalMessages;
+import org.komodo.rest.relational.RestTeiid;
+import org.komodo.rest.relational.RestTeiidStatus;
 import org.komodo.rest.relational.RestVdb;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
-import org.komodo.utils.KLog;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -100,12 +99,56 @@ public class KomodoTeiidService extends KomodoService {
         return Response.ok().build();
     }
 
+    /**
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @return a JSON document representing all the VDBs in the Komodo workspace (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is a problem constructing the VDBs JSON document
+     */
+    @GET
+    @Path(V1Constants.STATUS_SEGMENT)
+    @Produces( MediaType.APPLICATION_JSON )
+    @ApiOperation(value = "Display the status of the teiid instance",
+                            response = RestTeiidStatus.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response status(final @Context HttpHeaders headers,
+                                                   final @Context UriInfo uriInfo) throws KomodoRestException {
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        UnitOfWork uow = null;
+
+        try {
+            uow = createTransaction("getTeiidStatus", true); //$NON-NLS-1$
+            Teiid teiid = getDefaultTeiid(uow);
+            RestTeiidStatus status = new RestTeiidStatus(uriInfo.getBaseUri(), teiid, uow);
+
+            // create response
+            return commit(uow, mediaTypes, status);
+
+        } catch (Throwable e) {
+            if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
+                uow.rollback();
+            }
+
+            if ( e instanceof KomodoRestException ) {
+                throw ( KomodoRestException )e;
+            }
+
+            return createErrorResponse(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_STATUS_ERROR);
+        }
+    }
+
     @SuppressWarnings( "nls" )
     @POST
     @Path(V1Constants.TEIID_CREDENTIALS)
     @Produces( MediaType.APPLICATION_JSON )
     @ApiOperation(value = "Modify the credentials of the teiid server",
-                             response = KomodoStatusObject.class)
+                             response = RestTeiid.class)
     @ApiResponses(value = {
         @ApiResponse(code = 403, message = "An error has occurred.")
     })
@@ -113,13 +156,9 @@ public class KomodoTeiidService extends KomodoService {
                                    final @Context UriInfo uriInfo,
                                    final String credentialAttributes) throws KomodoRestException {
 
-        KLog.getLogger().error("XXXXX HELLO!!");
-
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
             return notAcceptableMediaTypesBuilder().build();
-
-        KLog.getLogger().error("XXXXX HELLO2!!");
 
         KomodoTeiidAttributes teiidAttrs;
         try {
@@ -130,26 +169,19 @@ public class KomodoTeiidService extends KomodoService {
                                                                                         teiidAttrs.getJdbcPasswd(),
                                                                                         mediaTypes);
 
-            KLog.getLogger().error("XXXXX HELLO3!!");
-
             if (response.getStatus() != Status.OK.getStatusCode())
                 return response;
 
-            KLog.getLogger().error("XXXXX HELLO4!!");
         } catch (Exception ex) {
             return createErrorResponse(mediaTypes, ex, RelationalMessages.Error.TEIID_SERVICE_REQUEST_PARSING_ERROR);
         }
 
         UnitOfWork uow = null;
 
-        String traversal = null;
         try {
             uow = createTransaction("teiidSetCredentials", true); //$NON-NLS-1$
 
             Teiid teiidNode = getDefaultTeiid(uow);
-
-            traversal = RepositoryTools.traverse(uow, teiidNode);
-            KLog.getLogger().error("XXXX" + traversal);
 
             teiidNode.setAdminUser(uow, teiidAttrs.getAdminUser());
             teiidNode.setAdminPassword(uow, teiidAttrs.getAdminPasswd());

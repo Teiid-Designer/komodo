@@ -56,6 +56,7 @@ import org.komodo.rest.RestLink;
 import org.komodo.rest.relational.KomodoRestUriBuilder;
 import org.komodo.rest.relational.KomodoTeiidAttributes;
 import org.komodo.rest.relational.RestTeiid;
+import org.komodo.rest.relational.RestTeiidStatus;
 import org.komodo.rest.relational.RestVdb;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.spi.constants.StringConstants;
@@ -200,6 +201,33 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         assertEquals(TeiidJdbcInfo.DEFAULT_JDBC_USERNAME, rt.getJdbcUser());
         assertEquals(TeiidJdbcInfo.DEFAULT_JDBC_PASSWORD, rt.getJdbcPassword());
         assertEquals(TeiidJdbcInfo.DEFAULT_PORT, rt.getJdbcPort());
+    }
+
+    @Test
+    public void shouldGetTeiidStatus() throws Exception {
+        URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
+                                          .path(V1Constants.TEIID_SEGMENT)
+                                          .path(V1Constants.STATUS_SEGMENT)
+                                          .build();
+
+        this.response = request(uri).get();
+        final String entity = this.response.readEntity(String.class);
+
+        System.out.println("Response:\n" + entity);
+        assertEquals(200, this.response.getStatus());
+
+        RestTeiidStatus status = KomodoJsonMarshaller.unmarshall(entity, RestTeiidStatus.class);
+        assertNotNull(status);
+
+        assertEquals("DefaultServer", status.getId());
+        assertEquals("localhost", status.getHost());
+        assertEquals("8.12.4", status.getVersion());
+        assertTrue(status.isTeiidInstanceAvailable());
+        assertTrue(status.isConnected());
+        assertEquals(1, status.getDataSourceSize());
+        assertEquals(3, status.getDataSourceDriverSize());
+        assertEquals(54, status.getTranslatorSize());
+        assertEquals(1, status.getVdbSize());
     }
 
     @SuppressWarnings( "incomplete-switch" )
