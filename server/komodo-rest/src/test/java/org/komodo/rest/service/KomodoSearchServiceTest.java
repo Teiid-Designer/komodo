@@ -47,11 +47,30 @@ import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 @SuppressWarnings( {"javadoc", "nls"} )
 public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
 
     private final static String PORTFOLIO_DATA_PATH = "/tko:komodo/tko:workspace/Portfolio";
+
+    @Test
+    public void shouldFailNoParameters() throws Exception {
+        // get
+        KomodoProperties properties = new KomodoProperties();
+        URI uri = _uriBuilder.generateSearchUri(properties);
+
+        this.response = request(uri).accept(MediaType.APPLICATION_JSON).get();
+        final String entity = this.response.readEntity(String.class);
+        System.out.println("Response:\n" + entity);
+
+        JsonElement jelement = new JsonParser().parse(entity);
+        assertNotNull(jelement);
+        JsonObject  jobject = jelement.getAsJsonObject();
+        assertEquals("\"The search service requires at least one parameter\"", jobject.get("error").toString());
+    }
 
     @Test
     public void shouldSearchForAnythingContainingView() throws Exception {

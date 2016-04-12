@@ -24,6 +24,7 @@ package org.komodo.rest;
 import static org.komodo.rest.Messages.Error.COMMIT_TIMEOUT;
 import static org.komodo.rest.Messages.Error.RESOURCE_NOT_FOUND;
 import static org.komodo.rest.Messages.General.GET_OPERATION_NAME;
+import java.io.StringWriter;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import javax.ws.rs.ServerErrorException;
@@ -33,6 +34,10 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.Variant;
 import javax.ws.rs.core.Variant.VariantListBuilder;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.Marshaller;
+import javax.xml.namespace.QName;
 import org.komodo.core.KEngine;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
@@ -49,6 +54,7 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.KLog;
 import org.komodo.utils.StringUtils;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
+import com.google.gson.Gson;
 
 /**
  * A Komodo service implementation.
@@ -86,6 +92,19 @@ public abstract class KomodoService implements V1Constants {
          * The Komodo Type required.
          */
         String KTYPE = "ktype"; //$NON-NLS-1$
+    }
+
+    private class ErrorResponse {
+        private final String error;
+
+        public ErrorResponse(String error) {
+            this.error = error;
+        }
+
+        @SuppressWarnings( "unused" )
+        public String getError() {
+            return error;
+        }
     }
 
     protected final Repository repo;
@@ -137,11 +156,29 @@ public abstract class KomodoService implements V1Constants {
     protected Object createErrorResponse(List<MediaType> acceptableMediaTypes, String errorMessage) {
         Object responseEntity = null;
 
-        if (acceptableMediaTypes.contains(MediaType.APPLICATION_JSON_TYPE))
-            responseEntity = OPEN_BRACE + "\"Error\": \"" + errorMessage + "\"" + CLOSE_BRACE; //$NON-NLS-1$ //$NON-NLS-2$
-        else if (acceptableMediaTypes.contains(MediaType.APPLICATION_XML_TYPE))
-            responseEntity = "<error message=\"" + errorMessage + "\"></error>"; //$NON-NLS-1$ //$NON-NLS-2$
-        else
+        if (acceptableMediaTypes.contains(MediaType.APPLICATION_JSON_TYPE)) {
+            Gson gson = new Gson();
+            responseEntity = gson.toJson(new ErrorResponse(errorMessage));
+        } else if (acceptableMediaTypes.contains(MediaType.APPLICATION_XML_TYPE)) {
+            ErrorResponse errResponse = new ErrorResponse(errorMessage);
+
+            JAXBElement<ErrorResponse> xmlErrResponse = new JAXBElement<ErrorResponse>(
+                                                                                        new QName("error"),
+                                                                                        ErrorResponse.class,
+                                                                                        errResponse);
+
+            try {
+                JAXBContext context = JAXBContext.newInstance(ErrorResponse.class);
+                StringWriter writer = new StringWriter();
+                Marshaller m = context.createMarshaller();
+                m.marshal(xmlErrResponse, writer);
+
+                responseEntity = writer.toString();
+            } catch (Exception ex) {
+                // String failed to marshall - return as plain text
+                responseEntity = errorMessage;
+            }
+        } else
             responseEntity = errorMessage;
 
         return responseEntity;
