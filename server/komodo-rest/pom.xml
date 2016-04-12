@@ -314,6 +314,8 @@
 							<goal>unpack</goal>
 						</goals>
 						<configuration>
+							<!-- Not required if skipping integration tests -->
+							<skip>${integration.skipTests}</skip>
 							<artifactItems>
 								<artifactItem>
 									<groupId>org.jboss.as</groupId>
@@ -333,6 +335,8 @@
 							<goal>unpack</goal>
 						</goals>
 						<configuration>
+							<!-- Not required if skipping integration tests -->
+							<skip>${integration.skipTests}</skip>
 							<artifactItems>
 								<artifactItem>
 									<groupId>org.jboss.teiid</groupId>
@@ -361,6 +365,8 @@
 							<goal>run</goal>
 						</goals>
 						<configuration>
+							<!-- Not required if skipping integration tests -->
+							<skip>${integration.skipTests}</skip>
 							<target>
 								<property name="version.resteasy" value="${version.resteasy}" />
 								<property name="destination.resteasy" value="${project.build.directory}/resteasy" />
