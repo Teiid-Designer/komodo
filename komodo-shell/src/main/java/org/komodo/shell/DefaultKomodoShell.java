@@ -276,7 +276,7 @@ public class DefaultKomodoShell implements KomodoShell {
                 command = reader.read();
                 if ( command == null ) {
                     done = true;
-                    shutdown();
+                    exit();
                 } else {
                     // execute
                     final CommandResult result = command.execute();
