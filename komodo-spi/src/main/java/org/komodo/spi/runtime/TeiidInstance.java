@@ -31,6 +31,11 @@ import org.komodo.spi.runtime.version.TeiidVersion;
 public interface TeiidInstance extends ExecutionAdmin, HostProvider {
 
     /**
+     * Object used for synchronization locking on teiid instance implementations
+     */
+    Object TEIID_INSTANCE_LOCK = new Object();
+
+    /**
      * The data source jndi property name.  Value is {@value} .
      */
     String DATASOURCE_JNDINAME = "jndi-name";  //$NON-NLS-1$

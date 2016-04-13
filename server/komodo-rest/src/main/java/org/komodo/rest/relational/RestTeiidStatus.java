@@ -118,36 +118,38 @@ public final class RestTeiidStatus extends RestTeiid {
     public RestTeiidStatus(URI baseUri, Teiid teiid, UnitOfWork uow) throws KException {
         super(baseUri, teiid, uow);
 
-        TeiidInstance teiidInstance = teiid.getTeiidInstance(uow);
-        setTeiidInstanceAvailable(teiidInstance != null);
+        synchronized (TeiidInstance.TEIID_INSTANCE_LOCK) {
+            TeiidInstance teiidInstance = teiid.getTeiidInstance(uow);
+            setTeiidInstanceAvailable(teiidInstance != null);
 
-        if(teiidInstance == null)
-            return;
+            if (teiidInstance == null)
+                return;
 
-        try {
-            teiidInstance.connect();
+            try {
+                teiidInstance.connect();
 
-            setConnectionUrl(teiidInstance.getUrl());
-            setConnected(teiidInstance.isConnected());
-            setConnectionError(teiidInstance.getConnectionError());
+                setConnectionUrl(teiidInstance.getUrl());
+                setConnected(teiidInstance.isConnected());
+                setConnectionError(teiidInstance.getConnectionError());
 
-            Collection<TeiidDataSource> dataSources = teiidInstance.getDataSources();
-            setDataSourceSize(dataSources.size());
-            setDataSourcesNames(dataSources);
+                Collection<TeiidDataSource> dataSources = teiidInstance.getDataSources();
+                setDataSourceSize(dataSources.size());
+                setDataSourcesNames(dataSources);
 
-            Collection<DataSourceDriver> dataSourceDrivers = teiidInstance.getDataSourceDrivers();
-            setDataSourceDriverSize(dataSourceDrivers.size());
-            setDataSourceDriverNames(dataSourceDrivers);
+                Collection<DataSourceDriver> dataSourceDrivers = teiidInstance.getDataSourceDrivers();
+                setDataSourceDriverSize(dataSourceDrivers.size());
+                setDataSourceDriverNames(dataSourceDrivers);
 
-            Collection<TeiidTranslator> translators = teiidInstance.getTranslators();
-            setTranslatorSize(translators.size());
-            setTranslatorNames(translators);
+                Collection<TeiidTranslator> translators = teiidInstance.getTranslators();
+                setTranslatorSize(translators.size());
+                setTranslatorNames(translators);
 
-            Collection<TeiidVdb> vdbs = teiidInstance.getVdbs();
-            setVdbSize(vdbs.size());
-            setVdbNames(vdbs);
-        } catch (Exception ex) {
-            throw new KException(ex);
+                Collection<TeiidVdb> vdbs = teiidInstance.getVdbs();
+                setVdbSize(vdbs.size());
+                setVdbNames(vdbs);
+            } catch (Exception ex) {
+                throw new KException(ex);
+            }
         }
     }
 

@@ -88,38 +88,40 @@ public class TeiidInstanceImpl extends AbstractTeiidInstance {
             throw new Exception(Messages.getString(Messages.TeiidInstance.parentNotStartedMessage, getHost()));
         }
 
-        if (this.admin == null) {
-            try {
-                /*
-                 * By the time this has been called the teiid version should be correct
-                 * for the given host and the host should be up, otherwise admin will
-                 * end up back as null anyway.
-                 */
-                char[] passwordArray = null;
-                if (getTeiidAdminInfo().getPassword() != null) {
-                    passwordArray = getTeiidAdminInfo().getPassword().toCharArray();
+        synchronized(TEIID_INSTANCE_LOCK) {
+            if (this.admin == null) {
+                try {
+                    /*
+                     * By the time this has been called the teiid version should be correct
+                     * for the given host and the host should be up, otherwise admin will
+                     * end up back as null anyway.
+                     */
+                    char[] passwordArray = null;
+                    if (getTeiidAdminInfo().getPassword() != null) {
+                        passwordArray = getTeiidAdminInfo().getPassword().toCharArray();
+                    }
+
+                    /*
+                     * Avoid the refresh listener being fired prematurely by the admin client.
+                     * Want to fire the refresh ourselves using {#notifyRefresh} at the end
+                     * of this function.
+                     */
+                    getEventManager().permitListeners(false);
+
+                    this.admin = AdminFactory.getInstance().createAdmin(getHost(),
+                                                                        getTeiidAdminInfo().getPort(),
+                                                                        getTeiidAdminInfo().getUsername(),
+                                                                        passwordArray);
+
+                } catch (Exception ex) {
+                    throw ex;
+                } finally {
+                    getEventManager().permitListeners(true);
                 }
 
-                /*
-                 * Avoid the refresh listener being fired prematurely by the admin client.
-                 * Want to fire the refresh ourselves using {#notifyRefresh} at the end
-                 * of this function.
-                 */
-                getEventManager().permitListeners(false);
-
-                this.admin = AdminFactory.getInstance().createAdmin(getHost(),
-                                                                    getTeiidAdminInfo().getPort(),
-                                                                    getTeiidAdminInfo().getUsername(),
-                                                                    passwordArray);
-
-            } catch (Exception ex) {
-                throw ex;
-            } finally {
-                getEventManager().permitListeners(true);
+                getEventManager().notifyListeners(ExecutionConfigurationEvent.createTeiidConnectedEvent(this));
+                notifyRefresh();
             }
-
-            getEventManager().notifyListeners(ExecutionConfigurationEvent.createTeiidConnectedEvent(this));
-            notifyRefresh();
         }
     }
 

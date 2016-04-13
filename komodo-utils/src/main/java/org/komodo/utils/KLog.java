@@ -62,7 +62,7 @@ public class KLog implements KLogger {
     }
 
     @Override
-    public void setLogPath(String logPath) throws Exception {
+    public synchronized void setLogPath(String logPath) throws Exception {
         kLogger.setLogPath(logPath);
     }
 
@@ -70,7 +70,7 @@ public class KLog implements KLogger {
      * @see org.komodo.spi.logging.KLogger#setLevel(java.util.logging.Level)
      */
     @Override
-    public void setLevel(Level level) throws Exception {
+    public synchronized void setLevel(Level level) throws Exception {
         kLogger.setLevel(level);
     }
 
@@ -78,7 +78,7 @@ public class KLog implements KLogger {
      * @see org.komodo.spi.logging.KLogger#info(java.lang.String, java.lang.Object[])
      */
     @Override
-    public void info(String message, Object... args) {
+    public synchronized void info(String message, Object... args) {
         kLogger.info(message, args);
     }
 
@@ -86,7 +86,7 @@ public class KLog implements KLogger {
      * @see org.komodo.spi.logging.KLogger#info(java.lang.String, java.lang.Throwable, java.lang.Object[])
      */
     @Override
-    public void info(String message, Throwable throwable, Object... args) {
+    public synchronized void info(String message, Throwable throwable, Object... args) {
         kLogger.info(message, throwable, args);
     }
 
@@ -104,7 +104,7 @@ public class KLog implements KLogger {
      * @see org.komodo.spi.logging.KLogger#warn(java.lang.String, java.lang.Object[])
      */
     @Override
-    public void warn(String message, Object... args) {
+    public synchronized void warn(String message, Object... args) {
         kLogger.warn(message, args);
     }
 
@@ -112,7 +112,7 @@ public class KLog implements KLogger {
      * @see org.komodo.spi.logging.KLogger#warn(java.lang.String, java.lang.Throwable, java.lang.Object[])
      */
     @Override
-    public void warn(String message, Throwable throwable, Object... args) {
+    public synchronized void warn(String message, Throwable throwable, Object... args) {
         kLogger.warn(message, throwable, args);
     }
 
@@ -130,7 +130,7 @@ public class KLog implements KLogger {
      * @see org.komodo.spi.logging.KLogger#error(java.lang.String, java.lang.Object[])
      */
     @Override
-    public void error(String message, Object... args) {
+    public synchronized void error(String message, Object... args) {
         kLogger.error(message, args);
     }
 
@@ -138,7 +138,7 @@ public class KLog implements KLogger {
      * @see org.komodo.spi.logging.KLogger#error(java.lang.String, java.lang.Throwable, java.lang.Object[])
      */
     @Override
-    public void error(String message, Throwable throwable, Object... args) {
+    public synchronized void error(String message, Throwable throwable, Object... args) {
         kLogger.error(message, throwable, args);
     }
 
@@ -156,7 +156,7 @@ public class KLog implements KLogger {
      * @see org.komodo.spi.logging.KLogger#debug(java.lang.String, java.lang.Object[])
      */
     @Override
-    public void debug(String message, Object... args) {
+    public synchronized void debug(String message, Object... args) {
         kLogger.debug(message, args);
     }
 
@@ -164,7 +164,7 @@ public class KLog implements KLogger {
      * @see org.komodo.spi.logging.KLogger#debug(java.lang.String, java.lang.Throwable, java.lang.Object[])
      */
     @Override
-    public void debug(String message, Throwable throwable, Object... args) {
+    public synchronized void debug(String message, Throwable throwable, Object... args) {
         kLogger.debug(message, throwable, args);
     }
 
@@ -182,7 +182,7 @@ public class KLog implements KLogger {
      * @see org.komodo.spi.logging.KLogger#trace(java.lang.String, java.lang.Object[])
      */
     @Override
-    public void trace(String message, Object... args) {
+    public synchronized void trace(String message, Object... args) {
         kLogger.trace(message, args);
     }
 
@@ -190,7 +190,7 @@ public class KLog implements KLogger {
      * @see org.komodo.spi.logging.KLogger#trace(java.lang.String, java.lang.Throwable, java.lang.Object[])
      */
     @Override
-    public void trace(String message, Throwable throwable, Object... args) {
+    public synchronized void trace(String message, Throwable throwable, Object... args) {
         kLogger.trace(message, throwable, args);
     }
 

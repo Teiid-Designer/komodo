@@ -32,6 +32,8 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileAttribute;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -319,5 +321,51 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
                                              link.getHref().toString());
             }
         }
+    }
+
+    @Test
+    public void shouldGetTeiidStatusMultiQueries() throws Exception {
+        URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
+                                          .path(V1Constants.TEIID_SEGMENT)
+                                          .path(V1Constants.STATUS_SEGMENT)
+                                          .build();
+
+        int iterations = 3;
+        final CountDownLatch latch = new CountDownLatch(iterations);
+
+        for (int i = 0; i < iterations; ++i) {
+            Runnable runnable = new Runnable() {
+
+                @Override
+                public void run() {
+                    Client client = ClientBuilder.newClient();
+                    Response response = client.target(uri.toString()).request().get();
+                    Thread.yield();
+
+                    String entity = response.readEntity(String.class);
+                    System.out.println("Response:\n" + entity);
+                    assertEquals(200, response.getStatus());
+                    RestTeiidStatus status = KomodoJsonMarshaller.unmarshall(entity, RestTeiidStatus.class);
+                    assertNotNull(status);
+
+                    assertEquals("DefaultServer", status.getId());
+                    assertEquals("localhost", status.getHost());
+                    assertEquals("8.12.4", status.getVersion());
+                    assertTrue(status.isTeiidInstanceAvailable());
+                    assertTrue(status.isConnected());
+                    assertEquals(1, status.getDataSourceSize());
+                    assertEquals(3, status.getDataSourceDriverSize());
+                    assertEquals(54, status.getTranslatorSize());
+                    assertEquals(1, status.getVdbSize());
+
+                    latch.countDown();
+                }
+            };
+
+            Thread thread = new Thread(runnable);
+            thread.start();
+        }
+
+        assertTrue(latch.await(3, TimeUnit.MINUTES));
     }
 }

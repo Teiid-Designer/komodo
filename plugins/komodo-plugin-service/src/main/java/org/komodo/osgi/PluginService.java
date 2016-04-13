@@ -110,11 +110,27 @@ public class PluginService implements StringConstants {
         KEnvironment.checkDataDirProperty();
     }
 
+    private static final Object lock = new Object();
+
     private static PluginService instance;
 
+    //
+    // Double check synchronization to protect felix bundle cache
+    // from attempts to start it multiple times from concurrent threads
+    //
     public static PluginService getInstance() throws Exception {
-        if (instance == null)
-            instance = new PluginService();
+        PluginService service = instance;
+        if (service == null) {
+            synchronized (lock) {
+                // While we were waiting for the lock, another
+                // thread may have instantiated the object.
+                service = instance;
+                if (service == null) {
+                    service = new PluginService();
+                    instance = service;
+                }
+            }
+        }
 
         return instance;
     }
@@ -549,7 +565,7 @@ public class PluginService implements StringConstants {
         return teiidService;
     }
 
-    public TeiidService getTeiidService(TeiidVersion version) throws Exception {
+    public synchronized TeiidService getTeiidService(TeiidVersion version) throws Exception {
         if (teiidService != null) {
             if (teiidService.getVersion().equals(version))
                 return teiidService;

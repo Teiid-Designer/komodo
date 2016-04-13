@@ -46,7 +46,7 @@ public class TeiidProxyService implements TeiidService {
         this.bundleContext = bundleContext;
     }
 
-    private void load() throws Exception {
+    private synchronized void load() throws Exception {
         if (delegate != null)
             return;
 
@@ -84,6 +84,17 @@ public class TeiidProxyService implements TeiidService {
     @Override
     public TeiidInstance getTeiidInstance(TeiidParent teiidParent, TeiidJdbcInfo jdbcInfo) throws Exception {
         load();
-        return delegate.getTeiidInstance(teiidParent, jdbcInfo);
+
+        //
+        // Ensure that 1 teiid instance at a time is fetched from
+        // all delegates since teiid admin initialization is not thread-safe
+        //
+        // For example, 2 threads accessing vdb-builder hosted on jboss
+        // can deadlock it since jboss' logging system is not thread-safe and
+        // teiid uses the latter a lot for recording its progress
+        //
+        synchronized(TeiidProxyService.class) {
+            return delegate.getTeiidInstance(teiidParent, jdbcInfo);
+        }
     }
 }
