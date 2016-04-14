@@ -82,9 +82,23 @@ public class KomodoTeiidService extends KomodoService {
         super(engine);
     }
 
-    private Teiid getDefaultTeiid(UnitOfWork uow) throws KException {
+    private synchronized Teiid getDefaultTeiid() throws KException {
         ServerManager serverManager = ServerManager.getInstance(repo);
-        return serverManager.getDefaultServer(uow);
+        UnitOfWork uow = null;
+
+        try {
+            uow = createTransaction("getTeiidStatus", false); //$NON-NLS-1$
+            Teiid teiid = serverManager.getDefaultServer(uow);
+            uow.commit();
+
+            return teiid;
+        } catch (KException ex) {
+            KEngine.getInstance().getErrorHandler().error(ex);
+            if (uow != null)
+                uow.rollback();
+
+            throw ex;
+        }
     }
 
     private Response checkTeiidAttributes(String adminUser, String adminPasswd,
@@ -124,8 +138,9 @@ public class KomodoTeiidService extends KomodoService {
         UnitOfWork uow = null;
 
         try {
+            Teiid teiid = getDefaultTeiid();
+
             uow = createTransaction("getTeiidStatus", true); //$NON-NLS-1$
-            Teiid teiid = getDefaultTeiid(uow);
             RestTeiidStatus status = new RestTeiidStatus(uriInfo.getBaseUri(), teiid, uow);
 
             // create response
@@ -227,9 +242,9 @@ public class KomodoTeiidService extends KomodoService {
         UnitOfWork uow = null;
 
         try {
-            uow = createTransaction("teiidSetCredentials", true); //$NON-NLS-1$
+            Teiid teiidNode = getDefaultTeiid();
 
-            Teiid teiidNode = getDefaultTeiid(uow);
+            uow = createTransaction("teiidSetCredentials", true); //$NON-NLS-1$
 
             teiidNode.setAdminUser(uow, teiidAttrs.getAdminUser());
             teiidNode.setAdminPassword(uow, teiidAttrs.getAdminPasswd());
@@ -277,8 +292,9 @@ public class KomodoTeiidService extends KomodoService {
         UnitOfWork uow = null;
 
         try {
+            Teiid teiid = getDefaultTeiid();
+
             uow = createTransaction("getVdbs", true); //$NON-NLS-1$
-            Teiid teiid = getDefaultTeiid(uow);
             CachedTeiid cachedTeiid = teiid.importContent(uow);
 
             // find VDBs
@@ -339,11 +355,12 @@ public class KomodoTeiidService extends KomodoService {
                             final @PathParam( "vdbName" ) String vdbName) throws KomodoRestException {
 
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        
         UnitOfWork uow = null;
-
         try {
+            Teiid teiid = getDefaultTeiid();
+
             uow = createTransaction( "getVdb", true ); //$NON-NLS-1$
-            Teiid teiid = getDefaultTeiid(uow);
             CachedTeiid cachedTeiid = teiid.importContent(uow);
 
             // find VDB

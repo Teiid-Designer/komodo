@@ -21,12 +21,16 @@
  */
 package org.komodo.osgi;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import java.util.Collection;
+import java.util.concurrent.TimeUnit;
 import org.jboss.arquillian.junit.Arquillian;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.komodo.spi.query.TeiidService;
@@ -44,24 +48,33 @@ import org.komodo.test.utils.TestUtilities;
 @RunWith(Arquillian.class)
 public class TestPluginServiceTeiidInstances extends AbstractTestPluginService {
 
-    @Test
-    public void testTeiidInstanceConnection() throws Exception {
-        EventManager eventMgr = new DummyEventManager();
+    private EventManager eventMgr = new DummyEventManager();
 
-        TeiidParent parent = mock(TeiidParent.class);
+    private TeiidParent parent;
+
+    private TeiidJdbcInfo jdbcInfo;
+
+    @Before
+    public void setup() throws Exception {
+        super.setup();
+
+        parent = mock(TeiidParent.class);
         when(parent.getHost()).thenReturn(HostProvider.DEFAULT_HOST);
         when(parent.getUsername()).thenReturn(TeiidAdminInfo.DEFAULT_ADMIN_USERNAME);
         when(parent.getPassword()).thenReturn(TeiidAdminInfo.DEFAULT_ADMIN_PASSWORD);
         when(parent.getPort()).thenReturn(TeiidAdminInfo.DEFAULT_PORT);
         when(parent.getEventManager()).thenReturn(eventMgr);
 
-        TeiidJdbcInfo jdbcInfo = mock(TeiidJdbcInfo.class);
+        jdbcInfo = mock(TeiidJdbcInfo.class);
         when(jdbcInfo.getHostProvider()).thenReturn(parent);
         when(jdbcInfo.getUsername()).thenReturn(TeiidJdbcInfo.DEFAULT_JDBC_USERNAME);
         when(jdbcInfo.getPassword()).thenReturn(TeiidJdbcInfo.DEFAULT_JDBC_PASSWORD);
         when(jdbcInfo.getPort()).thenReturn(TeiidJdbcInfo.DEFAULT_PORT);
         when(jdbcInfo.isSecure()).thenReturn(true);
+    }
 
+    @Test
+    public void testTeiidInstanceConnection() throws Exception {        
         Collection<TeiidVersion> versions = PluginService.getInstance().getSupportedTeiidVersions();
         assertTrue(versions.size() > 0);
 
@@ -84,5 +97,48 @@ public class TestPluginServiceTeiidInstances extends AbstractTestPluginService {
 
             teiidInstance.disconnect();
         }
+    }
+
+    @Test
+    public void testTeiidInstanceCaching() throws Exception {
+        service.shutdown();
+
+        service.setCacheExpirationValue(20);
+        service.setCacheExpirationUnits(TimeUnit.SECONDS);
+
+        service.start();
+
+        Collection<TeiidVersion> versions = PluginService.getInstance().getSupportedTeiidVersions();
+        assertTrue(versions.size() > 0);
+
+        TeiidVersion version = versions.iterator().next();
+
+        TeiidService teiidService = service.getTeiidService(version);
+        assertNotNull(teiidService);
+
+        TeiidInstance teiidInstance = teiidService.getTeiidInstance(parent, jdbcInfo);
+        int idHashCode = System.identityHashCode(teiidInstance);
+
+        teiidInstance.connect();
+        assertTrue(teiidInstance.isConnected());
+
+        //
+        // Immediately get the instance again and confirm its the same instance
+        //
+        teiidInstance = teiidService.getTeiidInstance(parent, jdbcInfo);
+        assertEquals(idHashCode, System.identityHashCode(teiidInstance));
+        assertTrue(teiidInstance.isConnected());
+
+        //
+        // Wait for the cache to expire
+        //
+        Thread.sleep(20000);
+
+        //
+        // Request a teiid instance with the same configuration and confirm
+        // its a different instance since the other has already expired
+        //
+        teiidInstance = teiidService.getTeiidInstance(parent, jdbcInfo);
+        assertNotEquals(idHashCode, System.identityHashCode(teiidInstance));
     }
 }

@@ -47,7 +47,8 @@ public class PluginServiceTracker extends BundleTracker<TeiidService> {
         // Get the class of the extension.
         String className = dict.get(TeiidService.CLASS_PROPERTY);
         TeiidProxyService proxy = new TeiidProxyService(className, 
-                                                                                                bundle.getBundleId(), bundle.getBundleContext());
+                                                                                                bundle.getBundleId(), bundle.getBundleContext(),
+                                                                                                service.getCacheExpirationValue(), service.getCacheExpirationUnits());
         service.setTeiidService(proxy);
         return proxy;
     }

@@ -25,8 +25,8 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import java.io.InputStream;
@@ -34,12 +34,15 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Properties;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.core.KomodoLexicon;
+import org.komodo.osgi.PluginService;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.teiid.CachedTeiid;
 import org.komodo.relational.teiid.Teiid;
+import org.komodo.spi.query.TeiidService;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.runtime.HostProvider;
@@ -50,6 +53,7 @@ import org.komodo.spi.runtime.TeiidJdbcInfo;
 import org.komodo.spi.runtime.TeiidParent;
 import org.komodo.spi.runtime.TeiidTranslator;
 import org.komodo.spi.runtime.TeiidVdb;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.test.utils.TestUtilities;
 import org.komodo.utils.StringUtils;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
@@ -61,9 +65,49 @@ public final class TeiidImplTest extends RelationalModelTest {
 
     protected Teiid teiid;
 
+    private TeiidVersion version;
+
+    private TeiidService unmockedTeiidService;
+
+    private PluginService setPluginServiceTeiidService(TeiidService teiidService) throws Exception, NoSuchFieldException, IllegalAccessException {
+        PluginService service = PluginService.getInstance();
+        unmockedTeiidService = service.getCurrentTeiidService();
+
+        Field teiidServiceField = service.getClass().getDeclaredField("teiidService");
+        assertNotNull(teiidServiceField);
+        teiidServiceField.setAccessible(true);
+        teiidServiceField.set(service, teiidService);
+        return service;
+    }
+
+    private TeiidInstance mockTeiidInstance() throws Exception {
+        TeiidInstance teiidInstance = mock(TeiidInstance.class);
+        when(teiidInstance.getVersion()).thenReturn(version);
+        when(teiidInstance.isConnected()).thenReturn(true);
+
+        TeiidService teiidService = mock(TeiidService.class);
+        when(teiidService.getVersion()).thenReturn(version);
+        when(teiidService.getTeiidInstance(any(TeiidParent.class), any(TeiidJdbcInfo.class)))
+                    .thenReturn(teiidInstance);
+
+        PluginService service = setPluginServiceTeiidService(teiidService);
+
+        assertEquals(teiidService, service.getCurrentTeiidService());
+        assertEquals(teiidService, service.getTeiidService(version));
+
+        return teiidInstance;
+    }
+
     @Before
     public void init() throws Exception {
         this.teiid = createTeiid( TEIID_NAME );
+        this.version = teiid.getVersion(getTransaction());
+        this.unmockedTeiidService = PluginService.getInstance().getTeiidService(version);
+    }
+
+    @After
+    public void teardown() throws Exception {
+        setPluginServiceTeiidService(unmockedTeiidService);
     }
 
     @Test
@@ -176,24 +220,6 @@ public final class TeiidImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveDefaultJdbcSecureAfterConstruction() throws Exception {
         assertThat( this.teiid.isJdbcSecure( getTransaction() ), is( TeiidJdbcInfo.DEFAULT_SECURE ) );
-    }
-
-    private TeiidInstance mockTeiidInstance() throws Exception {
-        TeiidInstance teiidInstance = mock(TeiidInstance.class);
-        when(teiidInstance.isConnected()).thenReturn(true);
-
-        Field parentField = this.teiid.getClass().getDeclaredField("teiidParent");
-        assertNotNull(parentField);
-        parentField.setAccessible(true);
-        Object teiidParent = parentField.get(this.teiid);
-        assertTrue(teiidParent instanceof TeiidParent);
-
-        Field teiidInstField = teiidParent.getClass().getDeclaredField("teiidInstance");
-        assertNotNull(teiidInstField);
-        teiidInstField.setAccessible(true);
-        teiidInstField.set(teiidParent, teiidInstance);
-
-        return teiidInstance;
     }
 
     @Test

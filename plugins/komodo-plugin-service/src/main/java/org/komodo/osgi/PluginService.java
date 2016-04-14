@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import javax.activation.MimeType;
 import javax.crypto.Cipher;
 import javax.crypto.spec.PSource;
@@ -146,6 +147,10 @@ public class PluginService implements StringConstants {
     private TeiidService teiidService;
 
     private Map<TeiidVersion, String> bundleIndex = new HashMap<>();
+
+    private int cacheExpirationValue = 10;
+
+    private TimeUnit cacheExpirationUnits = TimeUnit.MINUTES;
 
     private PluginService() throws Exception {
         createDirectory(pluginServiceDir);
@@ -443,6 +448,11 @@ public class PluginService implements StringConstants {
         if (getState() <= Bundle.INSTALLED)
             return;
 
+        if (teiidService != null) {
+            teiidService.dispose();
+            teiidService = null;
+        }
+
         this.tracker.close();
 
         framework.stop();
@@ -571,8 +581,11 @@ public class PluginService implements StringConstants {
                 return teiidService;
 
             //
-            // teiid service is not the appropriate version so stop its parent bundle
+            // teiid service is not the appropriate version so
+            // - dispose it
+            // - stop its parent bundle
             //
+            teiidService.dispose();
             String parentBundleName = teiidService.getParentBundle();
 
             // Once the bundle has stopped, the PluginServiceTracker
@@ -608,5 +621,27 @@ public class PluginService implements StringConstants {
 
     void setTeiidService(TeiidService teiidService) {
         this.teiidService = teiidService;
+    }
+
+    public int getCacheExpirationValue() {
+        return cacheExpirationValue;
+    }
+
+    public void setCacheExpirationValue(int value) throws Exception {
+        if (isActive())
+            throw new Exception(Messages.getString(Messages.PluginService.CannotModifyCache));
+
+        cacheExpirationValue = value;
+    }
+
+    public TimeUnit getCacheExpirationUnits() {
+        return cacheExpirationUnits;
+    }
+
+    public void setCacheExpirationUnits(TimeUnit units) throws Exception {
+        if (isActive())
+            throw new Exception(Messages.getString(Messages.PluginService.CannotModifyCache));
+
+        cacheExpirationUnits = units;
     }
 }
