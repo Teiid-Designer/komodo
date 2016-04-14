@@ -52,6 +52,7 @@ import org.komodo.rest.relational.KomodoTeiidAttributes;
 import org.komodo.rest.relational.RelationalMessages;
 import org.komodo.rest.relational.RestTeiid;
 import org.komodo.rest.relational.RestTeiidStatus;
+import org.komodo.rest.relational.RestTeiidVdbStatus;
 import org.komodo.rest.relational.RestVdb;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.spi.KException;
@@ -104,7 +105,7 @@ public class KomodoTeiidService extends KomodoService {
      *        the request headers (never <code>null</code>)
      * @param uriInfo
      *        the request URI information (never <code>null</code>)
-     * @return a JSON document representing all the VDBs in the Komodo workspace (never <code>null</code>)
+     * @return a JSON document representing the status of the local teiid server (never <code>null</code>)
      * @throws KomodoRestException
      *         if there is a problem constructing the VDBs JSON document
      */
@@ -140,6 +141,53 @@ public class KomodoTeiidService extends KomodoService {
             }
 
             return createErrorResponse(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_STATUS_ERROR);
+        }
+    }
+
+    /**
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @return a JSON document the status of the VDBs in the local teiid server (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is a problem constructing the VDBs JSON document
+     */
+    @GET
+    @Path(V1Constants.STATUS_SEGMENT + StringConstants.FORWARD_SLASH + 
+                  V1Constants.VDBS_SEGMENT)
+    @Produces( MediaType.APPLICATION_JSON )
+    @ApiOperation(value = "Display the status of the vdbs of the teiid instance",
+                            response = RestTeiidVdbStatus.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response vdbs(final @Context HttpHeaders headers,
+                                             final @Context UriInfo uriInfo) throws KomodoRestException {
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        UnitOfWork uow = null;
+        Teiid teiid = null;
+
+        try {
+            teiid = getDefaultTeiid();
+
+            uow = createTransaction("getTeiidVdbs", true); //$NON-NLS-1$
+            RestTeiidVdbStatus status = new RestTeiidVdbStatus(uriInfo.getBaseUri(), teiid, uow);
+
+            // create response
+            return commit(uow, mediaTypes, status);
+
+        } catch (Throwable e) {
+            if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
+                uow.rollback();
+            }
+
+            if ( e instanceof KomodoRestException ) {
+                throw ( KomodoRestException )e;
+            }
+
+            return createErrorResponse(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_VDBS_STATUS_ERROR);
         }
     }
 

@@ -122,17 +122,26 @@ public class RestBasicEntity implements KRestEntity {
 
     /**
      * @param baseUri the base uri of the REST request
+     * @throws KException if error occurs
+     */
+    public RestBasicEntity(URI baseUri) throws KException {
+        ArgCheck.isNotNull(baseUri, "baseUri"); //$NON-NLS-1$
+        setBaseUri(baseUri);
+    }
+
+    /**
+     * @param baseUri the base uri of the REST request
      * @param kObject the kObject
      * @param uow the transaction
      * @throws KException if error occurs
      */
     public RestBasicEntity(URI baseUri, KomodoObject kObject, UnitOfWork uow) throws KException {
-        ArgCheck.isNotNull(baseUri, "baseUri"); //$NON-NLS-1$
+        this(baseUri);
+
         ArgCheck.isNotNull(kObject, "kObject"); //$NON-NLS-1$
         ArgCheck.isNotNull(uow, "uow"); //$NON-NLS-1$
 
         setId(kObject.getName(uow));
-        setBaseUri(baseUri);
         setDataPath(kObject.getAbsolutePath());
         setkType(kObject.getTypeIdentifier(uow));
         setHasChildren(kObject.hasChildren(uow));
@@ -331,6 +340,17 @@ public class RestBasicEntity implements KRestEntity {
             this.links = new LinkedHashMap<>();
 
         this.links.put(newLink.getRel(), newLink);
+    }
+
+    /**
+     * Removes the link of given type
+     * @param type of link to remove
+     */
+    public final void removeLink(LinkType type) {
+        if (this.links == null || this.links == RestLink.NO_LINKS)
+            return;
+
+        this.links.remove(type);
     }
 
     /**

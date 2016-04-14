@@ -3,17 +3,17 @@
  * See the COPYRIGHT.txt file distributed with this work for information
  * regarding copyright ownership.  Some portions may be licensed
  * to Red Hat, Inc. under one or more contributor license agreements.
- *
+ * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- *
+ * 
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
@@ -24,22 +24,24 @@ package org.komodo.rest.relational.json;
 import static org.komodo.rest.Messages.Error.INCOMPLETE_JSON;
 import static org.komodo.rest.relational.json.KomodoJsonMarshaller.BUILDER;
 import java.io.IOException;
-import java.util.Map;
+import java.util.Arrays;
 import org.komodo.rest.Messages;
-import org.komodo.rest.RestBasicEntity;
+import org.komodo.rest.relational.RestTeiidVdbStatus;
+import org.komodo.rest.relational.RestTeiidVdbStatusVdb;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 
-/**
- * A GSON serializer/deserializer for {@link RestBasicEntity}s.
- * @param <T> the specific type of {@link RestBasicEntity}
- */
-public class BasicEntitySerializer<T extends RestBasicEntity> extends AbstractEntitySerializer<T> {
+public class TeiidVdbStatusSerializer extends BasicEntitySerializer<RestTeiidVdbStatus> {
 
-    @SuppressWarnings( "unchecked" )
-    protected T createEntity() {
-        return (T) new RestBasicEntity();
+    @Override
+    protected boolean isComplete(final RestTeiidVdbStatus status) {
+        return status.getBaseUri() != null;
+    }
+
+    @Override
+    protected RestTeiidVdbStatus createEntity() {
+        return new RestTeiidVdbStatus();
     }
 
     /**
@@ -48,17 +50,18 @@ public class BasicEntitySerializer<T extends RestBasicEntity> extends AbstractEn
      * @see org.komodo.rest.relational.json.AbstractEntitySerializer#read(com.google.gson.stream.JsonReader)
      */
     @Override
-    public T read(final JsonReader in) throws IOException {
-        final T entity = createEntity();
+    public RestTeiidVdbStatus read(final JsonReader in) throws IOException {
+        final RestTeiidVdbStatus entity = createEntity();
 
         beginRead(in);
 
         while (in.hasNext()) {
             final String name = in.nextName();
 
-            if (PROPERTIES.equals(name))
-                readProperties(in, entity);
-            else if (LINKS.equals(name))
+            if (RestTeiidVdbStatus.VDBS_LABEL.equals(name)) {
+                final RestTeiidVdbStatusVdb[] vdbStatuses = BUILDER.fromJson(in, RestTeiidVdbStatusVdb[].class );
+                entity.setVdbProperties(Arrays.asList(vdbStatuses));
+            } else if (LINKS.equals(name))
                 readLinks(in, entity);
             else {
                 JsonToken token = in.peek();
@@ -94,37 +97,8 @@ public class BasicEntitySerializer<T extends RestBasicEntity> extends AbstractEn
         return entity;
     }
 
-    protected void writeTuples(final JsonWriter out, final T entity) throws IOException {
-        for (Map.Entry<String, Object>entry : entity.getTuples().entrySet()) {
-            out.name(entry.getKey());
-            Object value = entry.getValue();
-            if (value == null)
-                out.nullValue();
-            else if (value instanceof Boolean)
-                out.value((Boolean) value);
-            else if (value instanceof Integer)
-                out.value((Integer) value);
-            else if (value instanceof Boolean)
-                out.value((Boolean) value);
-            else if (value instanceof String[]) {
-                out.beginArray();
-                for (String val: (String[]) value) {
-                    out.value(val);
-                }
-                out.endArray();
-            } else
-                out.value(value.toString());
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.rest.relational.json.AbstractEntitySerializer#write(com.google.gson.stream.JsonWriter,
-     *      org.komodo.rest.RestBasicEntity)
-     */
     @Override
-    public void write(final JsonWriter out, final T entity) throws IOException {
+    public void write(JsonWriter out, RestTeiidVdbStatus entity) throws IOException {
         if (!isComplete(entity)) {
             throw new IOException(Messages.getString(INCOMPLETE_JSON, getClass().getSimpleName()));
         }
@@ -133,7 +107,8 @@ public class BasicEntitySerializer<T extends RestBasicEntity> extends AbstractEn
 
         writeTuples(out, entity);
 
-        writeProperties(out, entity);
+        out.name(RestTeiidVdbStatus.VDBS_LABEL);
+        BUILDER.toJson( entity.getVdbProperties().toArray(new RestTeiidVdbStatusVdb[0]), RestTeiidVdbStatusVdb[].class, out );
 
         writeLinks(out, entity);
 

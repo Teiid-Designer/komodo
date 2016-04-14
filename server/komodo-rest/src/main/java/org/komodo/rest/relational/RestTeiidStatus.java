@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.komodo.relational.teiid.Teiid;
+import org.komodo.rest.RestLink;
+import org.komodo.rest.RestLink.LinkType;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.runtime.DataSourceDriver;
@@ -108,15 +110,18 @@ public final class RestTeiidStatus extends RestTeiid {
 
     /**
      * Constructor for use when serializing.
-     * @param baseUri the base uri of the vdb
-     * @param vdb the vdb
-     * @param exportXml whether xml should be exported
+     * @param baseUri the base uri
+     * @param teiid the teiid object
      * @param uow the transaction
      *
      * @throws KException if error occurs
      */
     public RestTeiidStatus(URI baseUri, Teiid teiid, UnitOfWork uow) throws KException {
         super(baseUri, teiid, uow);
+
+        addLink(new RestLink(LinkType.SELF, getUriBuilder().generateTeiidStatusUri()));
+        addLink(new RestLink(LinkType.PARENT, getUriBuilder().generateCachedTeiidUri(teiid.getId(uow))));
+        removeLink(LinkType.CHILDREN);
 
         synchronized (TeiidInstance.TEIID_INSTANCE_LOCK) {
             TeiidInstance teiidInstance = teiid.getTeiidInstance(uow);

@@ -57,8 +57,8 @@ public final class VdbTranslatorSerializerTest extends AbstractSerializerTest {
 
     private static final String JSON = EMPTY_STRING +
     OPEN_BRACE + NEW_LINE +
-    "  \"" + ID + "\": \"" + NAME + "\"," + NEW_LINE +
     "  \"" + BASE_URI + "\": \"" + MY_BASE_URI + "\"," + NEW_LINE +
+    "  \"" + ID + "\": \"" + NAME + "\"," + NEW_LINE +
     "  \"" + DATA_PATH + "\": \"" + TR_DATA_PATH + "\"," + NEW_LINE +
     "  \"" + KTYPE + "\": \"" + KomodoType.VDB_TRANSLATOR.getType() + "\"," + NEW_LINE +
     "  \"" + HAS_CHILDREN + "\": false," + NEW_LINE +

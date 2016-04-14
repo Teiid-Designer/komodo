@@ -268,7 +268,12 @@ public final class RelationalMessages {
         /**
          * An error when getting vdbs
          */
-        TEIID_SERVICE_GET_VDBS_ERROR;
+        TEIID_SERVICE_GET_VDBS_ERROR,
+
+        /**
+         * An error indicating a teiid vdb status error
+         */
+        TEIID_SERVICE_VDBS_STATUS_ERROR;
 
         /**
          * {@inheritDoc}

@@ -32,6 +32,7 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileAttribute;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import javax.ws.rs.client.Client;
@@ -59,6 +60,8 @@ import org.komodo.rest.relational.KomodoRestUriBuilder;
 import org.komodo.rest.relational.KomodoTeiidAttributes;
 import org.komodo.rest.relational.RestTeiid;
 import org.komodo.rest.relational.RestTeiidStatus;
+import org.komodo.rest.relational.RestTeiidVdbStatus;
+import org.komodo.rest.relational.RestTeiidVdbStatusVdb;
 import org.komodo.rest.relational.RestVdb;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.spi.constants.StringConstants;
@@ -230,6 +233,38 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         assertEquals(3, status.getDataSourceDriverSize());
         assertEquals(54, status.getTranslatorSize());
         assertEquals(1, status.getVdbSize());
+    }
+
+    @Test
+    public void shouldGetTeiidVdbStatus() throws Exception {
+        URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
+                                          .path(V1Constants.TEIID_SEGMENT)
+                                          .path(V1Constants.STATUS_SEGMENT)
+                                          .path(V1Constants.VDBS_SEGMENT)
+                                          .build();
+
+        this.response = request(uri).get();
+        final String entity = this.response.readEntity(String.class);
+
+        System.out.println("Response:\n" + entity);
+        assertEquals(200, this.response.getStatus());
+
+        RestTeiidVdbStatus status = KomodoJsonMarshaller.unmarshall(entity, RestTeiidVdbStatus.class);
+        assertNotNull(status);
+
+        List<RestTeiidVdbStatusVdb> vdbProperties = status.getVdbProperties();
+        assertEquals(1, vdbProperties.size());
+
+        RestTeiidVdbStatusVdb vdb = vdbProperties.get(0);
+        assertNotNull(vdb);
+        
+        assertEquals("sample", vdb.getName());
+        assertEquals("sample-vdb.xml", vdb.getDeployedName());
+        assertEquals(1, vdb.getVersion());
+        assertTrue(vdb.isActive());
+        assertFalse(vdb.isLoading());
+        assertFalse(vdb.isFailed());
+        assertEquals(0, vdb.getErrors().size());
     }
 
     @SuppressWarnings( "incomplete-switch" )
