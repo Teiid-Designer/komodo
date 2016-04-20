@@ -470,6 +470,27 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
     }
 
     /**
+     * @return the URI to use when requesting the teiid cache  (never <code>null</code>)
+     */
+    public URI generateTeiidStatusUri() {
+        return UriBuilder.fromUri(this.baseUri)
+                                     .path(TEIID_SEGMENT)
+                                     .path(STATUS_SEGMENT)
+                                     .build();
+    }
+
+    /**
+     * @return the URI to use when requesting the teiid cache  (never <code>null</code>)
+     */
+    public URI generateTeiidVdbStatusUri() {
+        return UriBuilder.fromUri(this.baseUri)
+                                     .path(TEIID_SEGMENT)
+                                     .path(STATUS_SEGMENT)
+                                     .path(VDBS_SEGMENT)
+                                     .build();
+    }
+
+    /**
      * @return the URI to use when requesting a specific cached teiid  (never <code>null</code>)
      */
     public URI generateCachedTeiidUri(String teiidId) {

@@ -70,4 +70,9 @@ public class TeiidServiceImpl extends AbstractTeiidService {
     public TeiidInstance getTeiidInstance(TeiidParent teiidParent, TeiidJdbcInfo jdbcInfo) throws Exception {
         return new TeiidInstanceImpl(teiidParent, getVersion(), jdbcInfo);
     }
+
+    @Override
+    public void dispose() {
+        // Nothing required
+    }
 }

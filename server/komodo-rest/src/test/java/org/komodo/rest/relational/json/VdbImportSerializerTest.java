@@ -42,8 +42,8 @@ public final class VdbImportSerializerTest extends AbstractSerializerTest {
     private static final int VERSION = 2;
     private static final String JSON = EMPTY_STRING +
         OPEN_BRACE + NEW_LINE +
-        "  \"" + ID + "\": \"" + NAME + "\"," + NEW_LINE +
         "  \"" + BASE_URI + "\": \"" + MY_BASE_URI + "\"," + NEW_LINE +
+        "  \"" + ID + "\": \"" + NAME + "\"," + NEW_LINE +
         "  \"" + DATA_PATH + "\": \"" + IMP_DATA_PATH + "\"," + NEW_LINE +
         "  \"" + KTYPE + "\": \"" + KomodoType.VDB_IMPORT.getType() + "\"," + NEW_LINE +
         "  \"" + HAS_CHILDREN + "\": false," + NEW_LINE +

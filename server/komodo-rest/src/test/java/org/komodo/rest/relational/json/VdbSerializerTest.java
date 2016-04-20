@@ -42,8 +42,8 @@ public final class VdbSerializerTest extends AbstractSerializerTest  {
     private static final int VERSION = 1;
 
     private static final String JSON = OPEN_BRACE + NEW_LINE +
-        "  \"keng__id\": \"" + VDB_NAME + "\"," + NEW_LINE +
         "  \"" + BASE_URI + "\": \"" + MY_BASE_URI + "\"," + NEW_LINE +
+        "  \"keng__id\": \"" + VDB_NAME + "\"," + NEW_LINE +
         "  \"keng__dataPath\": \"" + VDB_DATA_PATH + "\"," + NEW_LINE +
         "  \"keng__kType\": \"Vdb\"," + NEW_LINE +
         "  \"keng__hasChildren\": true," + NEW_LINE +

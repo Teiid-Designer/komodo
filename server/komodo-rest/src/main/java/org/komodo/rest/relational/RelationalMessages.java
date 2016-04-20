@@ -246,6 +246,11 @@ public final class RelationalMessages {
         SEARCH_SERVICE_REQUEST_PARSING_ERROR,
 
         /**
+         * An error indicating a teiid status error
+         */
+        TEIID_SERVICE_STATUS_ERROR,
+
+        /**
          * The teiid service cannot parse the request body
          */
         TEIID_SERVICE_REQUEST_PARSING_ERROR,
@@ -263,7 +268,12 @@ public final class RelationalMessages {
         /**
          * An error when getting vdbs
          */
-        TEIID_SERVICE_GET_VDBS_ERROR;
+        TEIID_SERVICE_GET_VDBS_ERROR,
+
+        /**
+         * An error indicating a teiid vdb status error
+         */
+        TEIID_SERVICE_VDBS_STATUS_ERROR;
 
         /**
          * {@inheritDoc}

@@ -43,7 +43,8 @@ public class Messages implements StringConstants {
         BundleNotFound,
         BundleFragmentStartError,
         TeiidServiceBundleFailedToStop,
-        ServiceNotStarted;
+        ServiceNotStarted,
+        CannotModifyCache;
 
         @Override
         public String toString() {

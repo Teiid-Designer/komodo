@@ -53,8 +53,8 @@ public final class VdbPermissionSerializerTest extends AbstractSerializerTest {
 
     private static final String JSON = EMPTY_STRING +
     OPEN_BRACE + NEW_LINE +
-    "  \"" + ID + "\": \"" + NAME + "\"," + NEW_LINE +
     "  \"" + BASE_URI + "\": \"" + MY_BASE_URI + "\"," + NEW_LINE +
+    "  \"" + ID + "\": \"" + NAME + "\"," + NEW_LINE +
     "  \"" + DATA_PATH + "\": \"" + PERM_DATA_PATH + "\"," + NEW_LINE +
     "  \"" + KTYPE + "\": \"" + KomodoType.VDB_PERMISSION.getType() + "\"," + NEW_LINE +
     "  \"" + HAS_CHILDREN + "\": true," + NEW_LINE +

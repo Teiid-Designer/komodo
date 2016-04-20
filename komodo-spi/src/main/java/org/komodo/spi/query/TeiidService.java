@@ -81,4 +81,9 @@ public interface TeiidService extends StringConstants {
      * @throws Exception 
      */
     TeiidInstance getTeiidInstance(TeiidParent teiidParent, TeiidJdbcInfo jdbcInfo) throws Exception;
+
+    /**
+     * Dispose of this service
+     */
+    void dispose();
 }

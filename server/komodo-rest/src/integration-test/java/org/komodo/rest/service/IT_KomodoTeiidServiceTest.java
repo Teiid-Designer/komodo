@@ -32,6 +32,9 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileAttribute;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -56,6 +59,9 @@ import org.komodo.rest.RestLink;
 import org.komodo.rest.relational.KomodoRestUriBuilder;
 import org.komodo.rest.relational.KomodoTeiidAttributes;
 import org.komodo.rest.relational.RestTeiid;
+import org.komodo.rest.relational.RestTeiidStatus;
+import org.komodo.rest.relational.RestTeiidVdbStatus;
+import org.komodo.rest.relational.RestTeiidVdbStatusVdb;
 import org.komodo.rest.relational.RestVdb;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.spi.constants.StringConstants;
@@ -202,6 +208,65 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         assertEquals(TeiidJdbcInfo.DEFAULT_PORT, rt.getJdbcPort());
     }
 
+    @Test
+    public void shouldGetTeiidStatus() throws Exception {
+        URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
+                                          .path(V1Constants.TEIID_SEGMENT)
+                                          .path(V1Constants.STATUS_SEGMENT)
+                                          .build();
+
+        this.response = request(uri).get();
+        final String entity = this.response.readEntity(String.class);
+
+        System.out.println("Response:\n" + entity);
+        assertEquals(200, this.response.getStatus());
+
+        RestTeiidStatus status = KomodoJsonMarshaller.unmarshall(entity, RestTeiidStatus.class);
+        assertNotNull(status);
+
+        assertEquals("DefaultServer", status.getId());
+        assertEquals("localhost", status.getHost());
+        assertEquals("8.12.4", status.getVersion());
+        assertTrue(status.isTeiidInstanceAvailable());
+        assertTrue(status.isConnected());
+        assertEquals(1, status.getDataSourceSize());
+        assertEquals(3, status.getDataSourceDriverSize());
+        assertEquals(54, status.getTranslatorSize());
+        assertEquals(1, status.getVdbSize());
+    }
+
+    @Test
+    public void shouldGetTeiidVdbStatus() throws Exception {
+        URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
+                                          .path(V1Constants.TEIID_SEGMENT)
+                                          .path(V1Constants.STATUS_SEGMENT)
+                                          .path(V1Constants.VDBS_SEGMENT)
+                                          .build();
+
+        this.response = request(uri).get();
+        final String entity = this.response.readEntity(String.class);
+
+        System.out.println("Response:\n" + entity);
+        assertEquals(200, this.response.getStatus());
+
+        RestTeiidVdbStatus status = KomodoJsonMarshaller.unmarshall(entity, RestTeiidVdbStatus.class);
+        assertNotNull(status);
+
+        List<RestTeiidVdbStatusVdb> vdbProperties = status.getVdbProperties();
+        assertEquals(1, vdbProperties.size());
+
+        RestTeiidVdbStatusVdb vdb = vdbProperties.get(0);
+        assertNotNull(vdb);
+        
+        assertEquals("sample", vdb.getName());
+        assertEquals("sample-vdb.xml", vdb.getDeployedName());
+        assertEquals(1, vdb.getVersion());
+        assertTrue(vdb.isActive());
+        assertFalse(vdb.isLoading());
+        assertFalse(vdb.isFailed());
+        assertEquals(0, vdb.getErrors().size());
+    }
+
     @SuppressWarnings( "incomplete-switch" )
     @Test
     public void shouldGetVdbs() throws Exception {
@@ -291,5 +356,51 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
                                              link.getHref().toString());
             }
         }
+    }
+
+    @Test
+    public void shouldGetTeiidStatusMultiQueries() throws Exception {
+        URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
+                                          .path(V1Constants.TEIID_SEGMENT)
+                                          .path(V1Constants.STATUS_SEGMENT)
+                                          .build();
+
+        int iterations = 3;
+        final CountDownLatch latch = new CountDownLatch(iterations);
+
+        for (int i = 0; i < iterations; ++i) {
+            Runnable runnable = new Runnable() {
+
+                @Override
+                public void run() {
+                    Client client = ClientBuilder.newClient();
+                    Response response = client.target(uri.toString()).request().get();
+                    Thread.yield();
+
+                    String entity = response.readEntity(String.class);
+                    System.out.println("Response:\n" + entity);
+                    assertEquals(200, response.getStatus());
+                    RestTeiidStatus status = KomodoJsonMarshaller.unmarshall(entity, RestTeiidStatus.class);
+                    assertNotNull(status);
+
+                    assertEquals("DefaultServer", status.getId());
+                    assertEquals("localhost", status.getHost());
+                    assertEquals("8.12.4", status.getVersion());
+                    assertTrue(status.isTeiidInstanceAvailable());
+                    assertTrue(status.isConnected());
+                    assertEquals(1, status.getDataSourceSize());
+                    assertEquals(3, status.getDataSourceDriverSize());
+                    assertEquals(54, status.getTranslatorSize());
+                    assertEquals(1, status.getVdbSize());
+
+                    latch.countDown();
+                }
+            };
+
+            Thread thread = new Thread(runnable);
+            thread.start();
+        }
+
+        assertTrue(latch.await(3, TimeUnit.MINUTES));
     }
 }

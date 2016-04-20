@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import javax.activation.MimeType;
 import javax.crypto.Cipher;
 import javax.crypto.spec.PSource;
@@ -110,11 +111,27 @@ public class PluginService implements StringConstants {
         KEnvironment.checkDataDirProperty();
     }
 
+    private static final Object lock = new Object();
+
     private static PluginService instance;
 
+    //
+    // Double check synchronization to protect felix bundle cache
+    // from attempts to start it multiple times from concurrent threads
+    //
     public static PluginService getInstance() throws Exception {
-        if (instance == null)
-            instance = new PluginService();
+        PluginService service = instance;
+        if (service == null) {
+            synchronized (lock) {
+                // While we were waiting for the lock, another
+                // thread may have instantiated the object.
+                service = instance;
+                if (service == null) {
+                    service = new PluginService();
+                    instance = service;
+                }
+            }
+        }
 
         return instance;
     }
@@ -130,6 +147,10 @@ public class PluginService implements StringConstants {
     private TeiidService teiidService;
 
     private Map<TeiidVersion, String> bundleIndex = new HashMap<>();
+
+    private int cacheExpirationValue = 10;
+
+    private TimeUnit cacheExpirationUnits = TimeUnit.MINUTES;
 
     private PluginService() throws Exception {
         createDirectory(pluginServiceDir);
@@ -427,6 +448,11 @@ public class PluginService implements StringConstants {
         if (getState() <= Bundle.INSTALLED)
             return;
 
+        if (teiidService != null) {
+            teiidService.dispose();
+            teiidService = null;
+        }
+
         this.tracker.close();
 
         framework.stop();
@@ -549,14 +575,17 @@ public class PluginService implements StringConstants {
         return teiidService;
     }
 
-    public TeiidService getTeiidService(TeiidVersion version) throws Exception {
+    public synchronized TeiidService getTeiidService(TeiidVersion version) throws Exception {
         if (teiidService != null) {
             if (teiidService.getVersion().equals(version))
                 return teiidService;
 
             //
-            // teiid service is not the appropriate version so stop its parent bundle
+            // teiid service is not the appropriate version so
+            // - dispose it
+            // - stop its parent bundle
             //
+            teiidService.dispose();
             String parentBundleName = teiidService.getParentBundle();
 
             // Once the bundle has stopped, the PluginServiceTracker
@@ -592,5 +621,27 @@ public class PluginService implements StringConstants {
 
     void setTeiidService(TeiidService teiidService) {
         this.teiidService = teiidService;
+    }
+
+    public int getCacheExpirationValue() {
+        return cacheExpirationValue;
+    }
+
+    public void setCacheExpirationValue(int value) throws Exception {
+        if (isActive())
+            throw new Exception(Messages.getString(Messages.PluginService.CannotModifyCache));
+
+        cacheExpirationValue = value;
+    }
+
+    public TimeUnit getCacheExpirationUnits() {
+        return cacheExpirationUnits;
+    }
+
+    public void setCacheExpirationUnits(TimeUnit units) throws Exception {
+        if (isActive())
+            throw new Exception(Messages.getString(Messages.PluginService.CannotModifyCache));
+
+        cacheExpirationUnits = units;
     }
 }

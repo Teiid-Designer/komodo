@@ -28,12 +28,14 @@ import org.komodo.rest.KomodoService;
 import org.komodo.rest.RestBasicEntity;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.runtime.TeiidAdminInfo;
+import org.komodo.spi.runtime.TeiidJdbcInfo;
 import org.komodo.spi.runtime.version.TeiidVersion;
 
 /**
- * A VDB that can be used by GSON to build a JSON document representation.
+ * A Teiid object that can be used by GSON to build a JSON document representation.
  */
-public final class RestTeiid extends RestBasicEntity {
+public class RestTeiid extends RestBasicEntity {
 
     /**
      * Label used to describe teiid version
@@ -142,7 +144,7 @@ public final class RestTeiid extends RestBasicEntity {
 
     public int getAdminPort() {
         Object adminPort = tuples.get(ADMIN_PORT_LABEL);
-        return adminPort != null ? Integer.parseInt(adminPort.toString()) : null;
+        return adminPort != null ? Integer.parseInt(adminPort.toString()) : TeiidAdminInfo.DEFAULT_PORT;
     }
 
     public void setAdminPort(int adminPort) {
@@ -169,7 +171,7 @@ public final class RestTeiid extends RestBasicEntity {
 
     public boolean isAdminSecure() {
         Object adminSecure = tuples.get(ADMIN_SECURE_LABEL);
-        return adminSecure != null ? Boolean.parseBoolean(adminSecure.toString()) : null;
+        return adminSecure != null ? Boolean.parseBoolean(adminSecure.toString()) : false;
     }
 
     public void setAdminSecure(boolean adminSecure) {
@@ -178,7 +180,7 @@ public final class RestTeiid extends RestBasicEntity {
 
     public int getJdbcPort() {
         Object jdbcPort = tuples.get(JDBC_PORT_LABEL);
-        return jdbcPort != null ? Integer.parseInt(jdbcPort.toString()) : null;
+        return jdbcPort != null ? Integer.parseInt(jdbcPort.toString()) : TeiidJdbcInfo.DEFAULT_PORT;
     }
 
     public void setJdbcPort(int jdbcPort) {
@@ -205,7 +207,7 @@ public final class RestTeiid extends RestBasicEntity {
 
     public boolean isJdbcSecure() {
         Object jdbcSecure = tuples.get(JDBC_SECURE_LABEL);
-        return jdbcSecure != null ? Boolean.parseBoolean(jdbcSecure.toString()) : null;
+        return jdbcSecure != null ? Boolean.parseBoolean(jdbcSecure.toString()) : false;
     }
 
     public void setJdbcSecure(boolean jdbcSecure) {
