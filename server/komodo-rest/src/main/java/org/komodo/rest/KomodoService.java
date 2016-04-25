@@ -51,6 +51,7 @@ import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWorkListener;
 import org.komodo.utils.KLog;
 import org.komodo.utils.StringUtils;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
@@ -153,7 +154,7 @@ public abstract class KomodoService implements V1Constants {
         return value;
     }
 
-    protected Object createErrorResponse(List<MediaType> acceptableMediaTypes, String errorMessage) {
+    protected Object createErrorResponseEntity(List<MediaType> acceptableMediaTypes, String errorMessage) {
         Object responseEntity = null;
 
         if (acceptableMediaTypes.contains(MediaType.APPLICATION_JSON_TYPE)) {
@@ -199,7 +200,7 @@ public abstract class KomodoService implements V1Constants {
         else
             errorMsg = RelationalMessages.getString(errorType, errorMsgInputs, buf.toString());
 
-        Object responseEntity = createErrorResponse(mediaTypes, errorMsg);
+        Object responseEntity = createErrorResponseEntity(mediaTypes, errorMsg);
         return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
     }
 
@@ -239,7 +240,7 @@ public abstract class KomodoService implements V1Constants {
         if ( !callback.await( timeout, unit ) ) {
             // callback timeout occurred
             String errorMessage = Messages.getString( COMMIT_TIMEOUT, transaction.getName(), timeout, unit );
-            Object responseEntity = createErrorResponse(acceptableMediaTypes, errorMessage);
+            Object responseEntity = createErrorResponseEntity(acceptableMediaTypes, errorMessage);
             return Response.status( Status.GATEWAY_TIMEOUT )
                            .entity(responseEntity)
                            .build();
@@ -249,7 +250,7 @@ public abstract class KomodoService implements V1Constants {
 
         if ( error != null ) {
             // callback was called because of an error condition
-            Object responseEntity = createErrorResponse(acceptableMediaTypes, error.getLocalizedMessage());
+            Object responseEntity = createErrorResponseEntity(acceptableMediaTypes, error.getLocalizedMessage());
             return Response.status( Status.INTERNAL_SERVER_ERROR )
                 .entity(responseEntity)
                 .build();
@@ -268,7 +269,7 @@ public abstract class KomodoService implements V1Constants {
             String notFoundMsg = Messages.getString( RESOURCE_NOT_FOUND,
                                                      resourceNotFound.getResourceName(),
                                                      resourceNotFound.getOperationName() );
-            Object responseEntity = createErrorResponse(acceptableMediaTypes, notFoundMsg);
+            Object responseEntity = createErrorResponseEntity(acceptableMediaTypes, notFoundMsg);
             builder = Response.status( Status.NOT_FOUND ).entity(responseEntity);
 
         } else {
@@ -299,7 +300,7 @@ public abstract class KomodoService implements V1Constants {
         if ( ! callback.await( timeout, unit ) ) {
             // callback timeout occurred
             String errorMessage = Messages.getString( COMMIT_TIMEOUT, transaction.getName(), timeout, unit );
-            Object responseEntity = createErrorResponse(acceptableMediaTypes, errorMessage);
+            Object responseEntity = createErrorResponseEntity(acceptableMediaTypes, errorMessage);
             return Response.status( Status.GATEWAY_TIMEOUT )
                            .type( MediaType.TEXT_PLAIN )
                            .entity(responseEntity)
@@ -310,7 +311,7 @@ public abstract class KomodoService implements V1Constants {
 
         if ( error != null ) {
          // callback was called because of an error condition
-            Object responseEntity = createErrorResponse(acceptableMediaTypes, error.getLocalizedMessage());
+            Object responseEntity = createErrorResponseEntity(acceptableMediaTypes, error.getLocalizedMessage());
             return Response.status( Status.INTERNAL_SERVER_ERROR )
                            .entity(responseEntity)
                            .build();
@@ -336,7 +337,7 @@ public abstract class KomodoService implements V1Constants {
             String notFoundMessage = Messages.getString( RESOURCE_NOT_FOUND,
                                                          resourceNotFound.getResourceName(),
                                                          resourceNotFound.getOperationName() );
-            Object responseEntity = createErrorResponse(acceptableMediaTypes, notFoundMessage);
+            Object responseEntity = createErrorResponseEntity(acceptableMediaTypes, notFoundMessage);
             builder = Response.status( Status.NOT_FOUND ).entity(responseEntity);
         } else {
 
@@ -348,6 +349,25 @@ public abstract class KomodoService implements V1Constants {
         }
 
         return builder.build();
+    }
+
+    /**
+     * @param name
+     *        the name of the transaction (cannot be empty)
+     * @param rollbackOnly
+     *        <code>true</code> if transaction must be rolled back
+     * @param callback the callback to fire when the transaction is committed
+     * @return the new transaction (never <code>null</code>)
+     * @throws KException
+     *         if there is an error creating the transaction
+     */
+    protected UnitOfWork createTransaction( final String name,
+                                            final boolean rollbackOnly, final UnitOfWorkListener callback) throws KException {
+        final UnitOfWork result = this.repo.createTransaction( ( getClass().getSimpleName() + COLON + name + COLON
+                                                                 + System.currentTimeMillis() ),
+                                                               rollbackOnly, callback );
+        LOGGER.debug( "createTransaction:created '{0}', rollbackOnly = '{1}'", result.getName(), result.isRollbackOnly() ); //$NON-NLS-1$
+        return result;
     }
 
     /**

@@ -23,19 +23,32 @@ package org.komodo.relational.teiid.internal;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import java.io.File;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.RelationalModelTest;
+import org.komodo.relational.model.Model;
 import org.komodo.relational.teiid.CachedTeiid;
 import org.komodo.relational.teiid.Teiid;
+import org.komodo.relational.vdb.Vdb;
+import org.komodo.relational.vdb.internal.VdbImpl;
+import org.komodo.repository.RepositoryTools;
 import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.runtime.HostProvider;
 import org.komodo.spi.runtime.TeiidAdminInfo;
 import org.komodo.spi.runtime.TeiidJdbcInfo;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersionProvider;
+import org.komodo.test.utils.TestUtilities;
+import org.komodo.utils.StringUtils;
+import org.modeshape.jcr.JcrLexicon;
+import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class CachedTeiidImplTest extends RelationalModelTest {
@@ -108,5 +121,33 @@ public final class CachedTeiidImplTest extends RelationalModelTest {
 
         teiids = teiidCache.getChildrenOfType(getTransaction(), KomodoLexicon.CachedTeiid.NODE_TYPE);
         assertEquals(1, teiids.length); // Should only be 1 since if it exists it deletes it.
+    }
+
+    @Test
+    public void shouldSequencerVdb() throws Exception {
+        CachedTeiid cachedTeiid = RelationalModelFactory.createCachedTeiid(getTransaction(), _repo, this.teiid);
+        assertNotNull(cachedTeiid);
+
+        String vdbName = TestUtilities.PORTFOLIO_VDB_NAME;
+        InputStream stream = TestUtilities.portfolioExample();
+        String content = StringUtils.inputStreamToString(stream);
+
+        File tempFile = File.createTempFile(VDB_PREFIX, XML_SUFFIX);
+        tempFile.deleteOnExit();
+        Files.write(Paths.get(tempFile.getPath()), content.getBytes());
+
+        UnitOfWork transaction = getTransaction();
+        KomodoObject kobject = cachedTeiid.addChild(transaction, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        Vdb vdb = new VdbImpl( transaction, _repo, kobject.getAbsolutePath());
+        vdb.setOriginalFilePath(transaction, tempFile.getAbsolutePath());
+        vdb.setVdbName( transaction, vdbName );
+
+        KomodoObject fileNode = vdb.addChild(transaction, JcrLexicon.CONTENT.getString(), null);
+        fileNode.setProperty(transaction, JcrLexicon.DATA.getString(), content);
+
+        commit();
+
+        Model[] models = vdb.getModels(getTransaction());
+        assertEquals(5, models.length);
     }
 }
