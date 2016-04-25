@@ -176,7 +176,7 @@ public final class RelationalMessages {
         VDB_SAMPLE_CONTENT_SUCCESS,
 
         /**
-         * An error indicating the transaction timeout while awaiting the import of a sample vdb
+         * An error indicating the transaction timeout while awaiting the import of a vdb
          */
         VDB_SAMPLE_IMPORT_TIMEOUT,
 
@@ -273,7 +273,12 @@ public final class RelationalMessages {
         /**
          * An error indicating a teiid vdb status error
          */
-        TEIID_SERVICE_VDBS_STATUS_ERROR;
+        TEIID_SERVICE_VDBS_STATUS_ERROR,
+
+        /**
+         * An error indicating a timeout occurred whilst conducting an import
+         */
+        TEIID_SERVICE_IMPORT_TIMEOUT;
 
         /**
          * {@inheritDoc}

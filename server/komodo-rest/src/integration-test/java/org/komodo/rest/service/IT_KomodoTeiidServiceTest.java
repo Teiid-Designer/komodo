@@ -289,7 +289,7 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         assertEquals(_uriBuilder.baseUri() + FORWARD_SLASH, vdb.getBaseUri().toString());
         assertEquals(CACHED_TEIID_DATA_PATH + FORWARD_SLASH + "sample", vdb.getDataPath());
         assertEquals(KomodoType.VDB, vdb.getkType());
-        assertFalse(vdb.hasChildren());
+        assertTrue(vdb.hasChildren());
         assertEquals(vdbName, vdb.getName());
 
         for(RestLink link : vdb.getLinks()) {
@@ -335,7 +335,7 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         assertEquals(_uriBuilder.baseUri() + FORWARD_SLASH, vdb.getBaseUri().toString());
         assertEquals(CACHED_TEIID_DATA_PATH + FORWARD_SLASH + "sample", vdb.getDataPath());
         assertEquals(KomodoType.VDB, vdb.getkType());
-        assertFalse(vdb.hasChildren());
+        assertTrue(vdb.hasChildren());
         assertEquals(vdbName, vdb.getName());
 
         for(RestLink link : vdb.getLinks()) {

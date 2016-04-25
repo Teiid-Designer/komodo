@@ -202,7 +202,7 @@ public final class KomodoUtilService extends KomodoService {
             UnitOfWork uow = null;
             try {
                 SynchronousCallback callback = new SynchronousCallback();
-                uow = repo.createTransaction("Import vdb " + sampleName, false, callback); //$NON-NLS-1$
+                uow = createTransaction("Import vdb " + sampleName, false, callback); //$NON-NLS-1$
 
                 String msg = null;
 
@@ -311,7 +311,7 @@ public final class KomodoUtilService extends KomodoService {
             if (komodoType == null) {
                 String msg = RelationalMessages.getString(
                                                           RelationalMessages.Error.SCHEMA_SERVICE_GET_SCHEMA_UNKNOWN_KTYPE, ktype );
-                Object response = createErrorResponse(mediaTypes, msg);
+                Object response = createErrorResponseEntity(mediaTypes, msg);
                 return Response.status(Status.NOT_FOUND).entity(response).build();
             }
 
@@ -319,7 +319,7 @@ public final class KomodoUtilService extends KomodoService {
             if (EMPTY_STRING.equals(schema)) {
                 String msg = RelationalMessages.getString(
                                                           RelationalMessages.Error.SCHEMA_SERVICE_GET_SCHEMA_NOT_FOUND, ktype );
-                Object response = createErrorResponse(mediaTypes, msg);
+                Object response = createErrorResponseEntity(mediaTypes, msg);
                 return Response.status(Status.NOT_FOUND).entity(response).build();
             }
 

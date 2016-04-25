@@ -177,7 +177,7 @@ public final class KomodoSearchService extends KomodoService {
             String errorMessage = RelationalMessages.getString(
                                                                RelationalMessages.Error.SEARCH_SERVICE_NO_PARAMETERS_ERROR);
 
-            Object responseEntity = createErrorResponse(mediaTypes, errorMessage);
+            Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
             return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
         }
 
@@ -186,7 +186,7 @@ public final class KomodoSearchService extends KomodoService {
             String errorMessage = RelationalMessages.getString(
                                                                RelationalMessages.Error.SEARCH_SERVICE_PARENT_ANCESTOR_EXCLUSIVE_ERROR);
 
-            Object responseEntity = createErrorResponse(mediaTypes, errorMessage);
+            Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
             return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
         }
 
@@ -347,7 +347,7 @@ public final class KomodoSearchService extends KomodoService {
             String errorMessage = RelationalMessages.getString(
                                                                RelationalMessages.Error.SEARCH_SERVICE_REQUEST_PARSING_ERROR, ex.getMessage());
 
-            Object responseEntity = createErrorResponse(mediaTypes, errorMessage);
+            Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
             return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
         }
 

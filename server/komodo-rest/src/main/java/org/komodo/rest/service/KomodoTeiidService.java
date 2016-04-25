@@ -24,6 +24,7 @@ package org.komodo.rest.service;
 import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_VDB_ERROR;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -43,6 +44,7 @@ import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.ServerManager;
 import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.repository.SynchronousCallback;
 import org.komodo.rest.KomodoRestException;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.KomodoService;
@@ -107,7 +109,7 @@ public class KomodoTeiidService extends KomodoService {
         if (adminUser == null || adminPasswd == null || jdbcUser == null || jdbcPasswd == null) {
             String errorMessage = RelationalMessages.getString(RelationalMessages.Error.TEIID_SERVICE_EMPTY_CREDENTIAL_ERROR);
 
-            Object responseEntity = createErrorResponse(mediaTypes, errorMessage);
+            Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
             return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
         }
 
@@ -294,10 +296,14 @@ public class KomodoTeiidService extends KomodoService {
         try {
             Teiid teiid = getDefaultTeiid();
 
-            uow = createTransaction("getVdbs", true); //$NON-NLS-1$
+            uow = createTransaction("import-teiid-content", false); //$NON-NLS-1$
             CachedTeiid cachedTeiid = teiid.importContent(uow);
 
+            // Commit the transaction to allow the sequencers to run
+            uow.commit();
+
             // find VDBs
+            uow = createTransaction("getVdbs", true); //$NON-NLS-1$
             Vdb[] vdbs = cachedTeiid.getVdbs(uow);
             LOGGER.debug("getVdbs:found '{0}' VDBs", vdbs.length); //$NON-NLS-1$
 
@@ -360,10 +366,22 @@ public class KomodoTeiidService extends KomodoService {
         try {
             Teiid teiid = getDefaultTeiid();
 
-            uow = createTransaction( "getVdb", true ); //$NON-NLS-1$
+            SynchronousCallback callback = new SynchronousCallback();
+            uow = createTransaction("import-teiid-content", false, callback); //$NON-NLS-1$
             CachedTeiid cachedTeiid = teiid.importContent(uow);
 
+            // Commit the transaction to allow the sequencers to run
+            uow.commit();
+
+            if (! callback.await(3, TimeUnit.MINUTES)) {
+                Object responseEntity = createErrorResponseEntity(mediaTypes,
+                                                                          RelationalMessages.getString(
+                                                                                                       RelationalMessages.Error.VDB_SAMPLE_IMPORT_TIMEOUT));
+                return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+            }
+
             // find VDB
+            uow = createTransaction("getVdb-" + vdbName, true); //$NON-NLS-1$
             Vdb vdb = cachedTeiid.getVdb(uow, vdbName);
             if (vdb == null)
                 return commitNoVdbFound(uow, mediaTypes, vdbName);
