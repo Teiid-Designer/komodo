@@ -78,7 +78,7 @@ public final class RestVdbModel extends RestBasicEntity {
      * @throws KException if error occurs
      */
     public RestVdbModel(URI baseUri, Model model, UnitOfWork uow) throws KException {
-        super(baseUri, model, uow);
+        super(baseUri, model, uow, false);
 
         setDescription(model.getDescription(uow));
         setModelType(model.getModelType(uow));
@@ -99,12 +99,13 @@ public final class RestVdbModel extends RestBasicEntity {
         String vdbName = vdb.getName(uow);
 
         Properties settings = getUriBuilder().createSettings(SettingNames.VDB_NAME, vdbName);
-        settings.put(SettingNames.VDB_PARENT_PATH, getUriBuilder().generateVdbParentUri(vdb, uow));
+        getUriBuilder().addSetting(settings, SettingNames.VDB_PARENT_PATH, getUriBuilder().vdbParentUri(vdb, uow));
         getUriBuilder().addSetting(settings, SettingNames.MODEL_NAME, getId());
 
-        addLink(new RestLink(LinkType.SELF, getUriBuilder().buildVdbModelUri(LinkType.SELF, settings)));
-        addLink(new RestLink(LinkType.PARENT, getUriBuilder().buildVdbModelUri(LinkType.PARENT, settings)));
-        addLink(new RestLink(LinkType.SOURCES, getUriBuilder().buildVdbModelUri(LinkType.SOURCES, settings)));
+        addLink(new RestLink(LinkType.SELF, getUriBuilder().vdbModelUri(LinkType.SELF, settings)));
+        addLink(new RestLink(LinkType.PARENT, getUriBuilder().vdbModelUri(LinkType.PARENT, settings)));
+        createChildLink();
+        addLink(new RestLink(LinkType.SOURCES, getUriBuilder().vdbModelUri(LinkType.SOURCES, settings)));
     }
 
     /**

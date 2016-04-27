@@ -64,8 +64,8 @@ public class RestTeiidVdbStatus extends RestBasicEntity {
     public RestTeiidVdbStatus(URI baseUri, Teiid teiid, UnitOfWork uow) throws KException {
         super(baseUri);
 
-        addLink(new RestLink(LinkType.SELF, getUriBuilder().generateTeiidVdbStatusUri()));
-        addLink(new RestLink(LinkType.PARENT, getUriBuilder().generateTeiidStatusUri()));
+        addLink(new RestLink(LinkType.SELF, getUriBuilder().teiidVdbStatusUri()));
+        addLink(new RestLink(LinkType.PARENT, getUriBuilder().teiidStatusUri()));
 
         synchronized (TeiidInstance.TEIID_INSTANCE_LOCK) {
             TeiidInstance teiidInstance = teiid.getTeiidInstance(uow);

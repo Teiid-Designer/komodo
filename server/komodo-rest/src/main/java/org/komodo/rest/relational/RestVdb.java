@@ -85,7 +85,7 @@ public final class RestVdb extends RestBasicEntity {
      * @throws KException if error occurs
      */
     public RestVdb(URI baseUri, Vdb vdb, boolean exportXml, UnitOfWork uow) throws KException {
-        super(baseUri, vdb, uow);
+        super(baseUri, vdb, uow, false);
 
         setName(vdb.getName(uow));
         setDescription(vdb.getDescription(uow));
@@ -103,15 +103,16 @@ public final class RestVdb extends RestBasicEntity {
         }
 
         Properties settings = getUriBuilder().createSettings(SettingNames.VDB_NAME, getId());
-        URI parentUri = getUriBuilder().generateVdbParentUri(vdb, uow);
-        settings.put(SettingNames.VDB_PARENT_PATH, parentUri);
+        URI parentUri = getUriBuilder().vdbParentUri(vdb, uow);
+        getUriBuilder().addSetting(settings, SettingNames.VDB_PARENT_PATH, parentUri);
 
-        addLink(new RestLink(LinkType.SELF, getUriBuilder().buildVdbUri(LinkType.SELF, settings)));
-        addLink(new RestLink(LinkType.PARENT, getUriBuilder().buildVdbUri(LinkType.PARENT, settings)));
-        addLink(new RestLink(LinkType.IMPORTS, getUriBuilder().buildVdbUri(LinkType.IMPORTS, settings)));
-        addLink(new RestLink(LinkType.MODELS, getUriBuilder().buildVdbUri(LinkType.MODELS, settings)));
-        addLink(new RestLink(LinkType.TRANSLATORS, getUriBuilder().buildVdbUri(LinkType.TRANSLATORS, settings)));
-        addLink(new RestLink(LinkType.DATA_ROLES, getUriBuilder().buildVdbUri(LinkType.DATA_ROLES, settings)));
+        addLink(new RestLink(LinkType.SELF, getUriBuilder().vdbUri(LinkType.SELF, settings)));
+        addLink(new RestLink(LinkType.PARENT, getUriBuilder().vdbUri(LinkType.PARENT, settings)));
+        createChildLink();
+        addLink(new RestLink(LinkType.IMPORTS, getUriBuilder().vdbUri(LinkType.IMPORTS, settings)));
+        addLink(new RestLink(LinkType.MODELS, getUriBuilder().vdbUri(LinkType.MODELS, settings)));
+        addLink(new RestLink(LinkType.TRANSLATORS, getUriBuilder().vdbUri(LinkType.TRANSLATORS, settings)));
+        addLink(new RestLink(LinkType.DATA_ROLES, getUriBuilder().vdbUri(LinkType.DATA_ROLES, settings)));
     }
 
     /**

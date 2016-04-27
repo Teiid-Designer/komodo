@@ -148,7 +148,7 @@ public final class RestVdbDataRole extends RestBasicEntity {
      * @throws KException if error occurs
      */
     public RestVdbDataRole(URI baseUri, DataRole dataRole, UnitOfWork uow) throws KException {
-        super(baseUri, dataRole, uow);
+        super(baseUri, dataRole, uow, false);
 
         setName(dataRole.getName(uow));
         setDescription(dataRole.getDescription(uow));
@@ -166,12 +166,13 @@ public final class RestVdbDataRole extends RestBasicEntity {
         String vdbName = vdb.getName(uow);
 
         Properties settings = getUriBuilder().createSettings(SettingNames.VDB_NAME, vdbName);
-        settings.put(SettingNames.VDB_PARENT_PATH, getUriBuilder().generateVdbParentUri(vdb, uow));
+        getUriBuilder().addSetting(settings, SettingNames.VDB_PARENT_PATH, getUriBuilder().vdbParentUri(vdb, uow));
         getUriBuilder().addSetting(settings, SettingNames.DATA_ROLE_ID, getId());
 
-        addLink(new RestLink(LinkType.SELF, getUriBuilder().buildVdbDataRoleUri(LinkType.SELF, settings)));
-        addLink(new RestLink(LinkType.PARENT, getUriBuilder().buildVdbDataRoleUri(LinkType.PARENT, settings)));
-        addLink(new RestLink(LinkType.PERMISSIONS, getUriBuilder().buildVdbDataRoleUri(LinkType.PERMISSIONS, settings)));
+        addLink(new RestLink(LinkType.SELF, getUriBuilder().vdbDataRoleUri(LinkType.SELF, settings)));
+        addLink(new RestLink(LinkType.PARENT, getUriBuilder().vdbDataRoleUri(LinkType.PARENT, settings)));
+        createChildLink();
+        addLink(new RestLink(LinkType.PERMISSIONS, getUriBuilder().vdbDataRoleUri(LinkType.PERMISSIONS, settings)));
     }
 
     /**

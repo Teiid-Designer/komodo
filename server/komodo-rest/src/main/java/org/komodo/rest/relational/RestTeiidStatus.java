@@ -119,8 +119,8 @@ public final class RestTeiidStatus extends RestTeiid {
     public RestTeiidStatus(URI baseUri, Teiid teiid, UnitOfWork uow) throws KException {
         super(baseUri, teiid, uow);
 
-        addLink(new RestLink(LinkType.SELF, getUriBuilder().generateTeiidStatusUri()));
-        addLink(new RestLink(LinkType.PARENT, getUriBuilder().generateCachedTeiidUri(teiid.getId(uow))));
+        addLink(new RestLink(LinkType.SELF, getUriBuilder().teiidStatusUri()));
+        addLink(new RestLink(LinkType.PARENT, getUriBuilder().cachedTeiidUri(teiid.getId(uow))));
         removeLink(LinkType.CHILDREN);
 
         synchronized (TeiidInstance.TEIID_INSTANCE_LOCK) {

@@ -37,7 +37,6 @@ import org.komodo.relational.teiid.CachedTeiid;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.internal.VdbImpl;
-import org.komodo.repository.RepositoryTools;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.runtime.HostProvider;

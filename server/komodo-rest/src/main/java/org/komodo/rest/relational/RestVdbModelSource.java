@@ -67,7 +67,7 @@ public final class RestVdbModelSource extends RestBasicEntity {
      * @throws KException if error occurs
      */
     public RestVdbModelSource(URI baseUri, ModelSource source, UnitOfWork uow) throws KException {
-        super(baseUri, source, uow);
+        super(baseUri, source, uow, false);
 
         setJndiName(source.getJndiName(uow));
         String translatorName = source.getTranslatorName(uow);
@@ -82,17 +82,19 @@ public final class RestVdbModelSource extends RestBasicEntity {
         String vdbName = vdb.getName(uow);
 
         Properties settings = getUriBuilder().createSettings(SettingNames.VDB_NAME, vdbName);
-        settings.put(SettingNames.VDB_PARENT_PATH, getUriBuilder().generateVdbParentUri(vdb, uow));
+        getUriBuilder().addSetting(settings, SettingNames.VDB_PARENT_PATH, getUriBuilder().vdbParentUri(vdb, uow));
         getUriBuilder().addSetting(settings, SettingNames.MODEL_NAME, modelName);
+        getUriBuilder().addSetting(settings, SettingNames.TRANSLATOR_NAME, translatorName);
         getUriBuilder().addSetting(settings, SettingNames.SOURCE_NAME, getId());
 
-        addLink(new RestLink(LinkType.SELF, getUriBuilder().buildVdbModelSourceUri(LinkType.SELF, settings)));
-        addLink(new RestLink(LinkType.PARENT, getUriBuilder().buildVdbModelSourceUri(LinkType.PARENT, settings)));
+        addLink(new RestLink(LinkType.SELF, getUriBuilder().vdbModelSourceUri(LinkType.SELF, settings)));
+        addLink(new RestLink(LinkType.PARENT, getUriBuilder().vdbModelSourceUri(LinkType.PARENT, settings)));
+        createChildLink();
 
         Translator[] translators = vdb.getTranslators(uow, translatorName);
         if (translators != null && translators.length == 1) {
             getUriBuilder().addSetting(settings, SettingNames.TRANSLATOR_NAME, translatorName);
-            addLink(new RestLink(LinkType.REFERENCE, getUriBuilder().buildVdbModelSourceUri(LinkType.REFERENCE, settings)));
+            addLink(new RestLink(LinkType.REFERENCE, getUriBuilder().vdbModelSourceUri(LinkType.REFERENCE, settings)));
         }
     }
 

@@ -72,7 +72,7 @@ public final class RestVdbCondition extends RestBasicEntity {
      * @throws KException if error occurs
      */
     public RestVdbCondition(URI baseUri, Condition condition, UnitOfWork uow) throws KException {
-        super(baseUri, condition, uow);
+        super(baseUri, condition, uow, false);
 
         setName(condition.getName(uow));
         setConstraint(condition.isConstraint(uow));
@@ -90,7 +90,7 @@ public final class RestVdbCondition extends RestBasicEntity {
         String vdbName = vdb.getName(uow);
 
         Properties settings = getUriBuilder().createSettings(SettingNames.VDB_NAME, vdbName);
-        settings.put(SettingNames.VDB_PARENT_PATH, getUriBuilder().generateVdbParentUri(vdb, uow));
+        getUriBuilder().addSetting(settings, SettingNames.VDB_PARENT_PATH, getUriBuilder().vdbParentUri(vdb, uow));
 
         getUriBuilder().addSetting(settings, SettingNames.DATA_ROLE_ID, dataRoleName);
         getUriBuilder().addSetting(settings, SettingNames.PERMISSION_ID, permName);
@@ -98,9 +98,10 @@ public final class RestVdbCondition extends RestBasicEntity {
         getUriBuilder().addSetting(settings, SettingNames.PERMISSION_CHILD_ID, getId());
 
         addLink(new RestLink(LinkType.SELF, getUriBuilder()
-                             .buildVdbPermissionChildUri(LinkType.SELF, settings)));
+                             .vdbPermissionChildUri(LinkType.SELF, settings)));
         addLink(new RestLink(LinkType.PARENT, getUriBuilder()
-                             .buildVdbPermissionChildUri(LinkType.PARENT, settings)));
+                             .vdbPermissionChildUri(LinkType.PARENT, settings)));
+        createChildLink();
     }
 
     /**

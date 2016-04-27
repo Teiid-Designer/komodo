@@ -25,6 +25,7 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import org.junit.Before;
@@ -90,7 +91,8 @@ public final class TranslatorImplTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveParentVdb() throws Exception {
-        assertThat( this.translator.getParent( getTransaction() ), is( instanceOf( Vdb.class ) ) );
+        KomodoObject parent = this.translator.getParent(getTransaction());
+        assertEquals(KomodoType.VDB, parent.getTypeIdentifier(getTransaction()));
     }
 
     @Test
