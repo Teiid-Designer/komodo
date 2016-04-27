@@ -64,6 +64,7 @@ public class TestPluginServiceTeiidInstances extends AbstractTestPluginService {
         when(parent.getPassword()).thenReturn(TeiidAdminInfo.DEFAULT_ADMIN_PASSWORD);
         when(parent.getPort()).thenReturn(TeiidAdminInfo.DEFAULT_PORT);
         when(parent.getEventManager()).thenReturn(eventMgr);
+        when(parent.isSound()).thenReturn(true);
 
         jdbcInfo = mock(TeiidJdbcInfo.class);
         when(jdbcInfo.getHostProvider()).thenReturn(parent);

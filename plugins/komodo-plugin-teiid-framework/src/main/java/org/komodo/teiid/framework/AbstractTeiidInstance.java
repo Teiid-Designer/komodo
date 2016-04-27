@@ -151,6 +151,20 @@ public abstract class AbstractTeiidInstance implements TeiidInstance, StringCons
         this.jdbcInfo = jdbcInfo;
     }
 
+    @Override
+    public boolean isSound() {
+        if (getParent() == null)
+            return false;
+
+        if (getTeiidAdminInfo() == null)
+            return false;
+
+        if (getTeiidJdbcInfo() == null)
+            return false;
+
+        return getParent().isSound();
+    }
+
     /**
      * Append the vdb file extension to the vdb name 
      * if not already appended.

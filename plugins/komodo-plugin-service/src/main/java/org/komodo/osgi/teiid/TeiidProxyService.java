@@ -134,7 +134,13 @@ public class TeiidProxyService implements TeiidService {
                                                       teiidParent.getHost(), buf.toString());
             }
 
-            TeiidInstance instance = instanceCache.getIfPresent(buf.toString());
+            String key = buf.toString();
+            TeiidInstance instance = instanceCache.getIfPresent(key);
+            if (instance != null && ! instance.isSound()) {
+                instanceCache.invalidate(buf.toString());
+                instance = null;
+            }
+
             if (instance == null) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Teiid Instance with id {0} not found in cache({1}). Creating new one.",

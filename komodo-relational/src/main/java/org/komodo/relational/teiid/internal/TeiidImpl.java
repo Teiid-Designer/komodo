@@ -928,6 +928,22 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
     }
 
     @Override
+    public boolean isSound() {
+        try {
+            if (getRepository() == null)
+                return false;
+
+            if (! Repository.State.REACHABLE.equals(getRepository().getState()))
+                return false;
+
+            KomodoObject kObject = getRepository().getFromWorkspace(getOrCreateTransaction(), this.getAbsolutePath());
+            return kObject != null;
+        } catch (KException ex) {
+            return false;
+        }
+    }
+
+    @Override
     public String getHost() {
         UnitOfWork uow = null;
         try {

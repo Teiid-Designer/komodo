@@ -271,6 +271,9 @@ public class ServerManager extends ObjectImpl implements RelationalObject {
      */
     public boolean isDefaultServerConnected(UnitOfWork transaction) throws KException {
         TeiidInstance teiidInstance = getDefaultTeiidInstance(transaction);
+        if (teiidInstance == null)
+            throw new KException("Failed to acquire the default teiid instance");
+
         return teiidInstance.isConnected();
     }
 
