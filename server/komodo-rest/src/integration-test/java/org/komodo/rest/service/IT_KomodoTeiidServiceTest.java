@@ -63,6 +63,7 @@ import org.komodo.rest.relational.RestTeiidStatus;
 import org.komodo.rest.relational.RestTeiidVdbStatus;
 import org.komodo.rest.relational.RestTeiidVdbStatusVdb;
 import org.komodo.rest.relational.RestVdb;
+import org.komodo.rest.relational.RestVdbTranslator;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.constants.SystemConstants;
@@ -402,5 +403,26 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         }
 
         assertTrue(latch.await(3, TimeUnit.MINUTES));
+    }
+
+    @Test
+    public void shouldGetTranslators() throws Exception {
+        URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
+                                          .path(V1Constants.TEIID_SEGMENT)
+                                          .path(V1Constants.TRANSLATORS_SEGMENT)
+                                          .build();
+
+        this.response = request(uri).get();
+        final String entity = this.response.readEntity(String.class);;
+        System.out.println("Response:\n" + entity);
+        assertEquals(200, this.response.getStatus());
+
+        RestVdbTranslator[] translators = KomodoJsonMarshaller.unmarshallArray(entity, RestVdbTranslator[].class);
+        assertTrue(translators.length > 0);
+
+        for (RestVdbTranslator translator : translators) {
+            assertNotNull(translator.getId());
+            assertEquals(3, translator.getLinks().size());
+        }
     }
 }

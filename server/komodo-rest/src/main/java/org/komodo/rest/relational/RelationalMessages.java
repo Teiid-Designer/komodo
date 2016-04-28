@@ -278,7 +278,12 @@ public final class RelationalMessages {
         /**
          * An error indicating a timeout occurred whilst conducting an import
          */
-        TEIID_SERVICE_IMPORT_TIMEOUT;
+        TEIID_SERVICE_IMPORT_TIMEOUT,
+
+        /**
+         * An error indicating an error occurred whilst fetching the teiid translators
+         */
+        TEIID_SERVICE_GET_TRANSLATORS_ERROR;
 
         /**
          * {@inheritDoc}

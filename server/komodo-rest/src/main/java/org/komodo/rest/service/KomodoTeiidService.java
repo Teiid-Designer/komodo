@@ -41,6 +41,7 @@ import javax.ws.rs.core.UriInfo;
 import org.komodo.core.KEngine;
 import org.komodo.relational.teiid.CachedTeiid;
 import org.komodo.relational.teiid.Teiid;
+import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.ServerManager;
 import org.komodo.relational.workspace.WorkspaceManager;
@@ -56,6 +57,7 @@ import org.komodo.rest.relational.RestTeiid;
 import org.komodo.rest.relational.RestTeiidStatus;
 import org.komodo.rest.relational.RestTeiidVdbStatus;
 import org.komodo.rest.relational.RestVdb;
+import org.komodo.rest.relational.RestVdbTranslator;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
@@ -274,7 +276,7 @@ public class KomodoTeiidService extends KomodoService {
      *        the request headers (never <code>null</code>)
      * @param uriInfo
      *        the request URI information (never <code>null</code>)
-     * @return a JSON document representing all the VDBs in the Komodo workspace (never <code>null</code>)
+     * @return a JSON document representing all the VDBs deployed to teiid (never <code>null</code>)
      * @throws KomodoRestException
      *         if there is a problem constructing the VDBs JSON document
      */
@@ -304,6 +306,7 @@ public class KomodoTeiidService extends KomodoService {
 
             // find VDBs
             uow = createTransaction("getVdbs", true); //$NON-NLS-1$
+
             Vdb[] vdbs = cachedTeiid.getVdbs(uow);
             LOGGER.debug("getVdbs:found '{0}' VDBs", vdbs.length); //$NON-NLS-1$
 
@@ -402,6 +405,70 @@ public class KomodoTeiidService extends KomodoService {
             }
 
             return createErrorResponse(mediaTypes, e, VDB_SERVICE_GET_VDB_ERROR, vdbName);
+        }
+    }
+
+    /**
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @return a JSON document representing all the translators deployed to teiid (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is a problem constructing the VDBs JSON document
+     */
+    @GET
+    @Path(V1Constants.TRANSLATORS_SEGMENT)
+    @Produces( MediaType.APPLICATION_JSON )
+    @Consumes ( { MediaType.APPLICATION_JSON } )
+    @ApiOperation(value = "Display the collection of translators",
+                            response = RestVdbTranslator[].class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response getTranslators(final @Context HttpHeaders headers,
+                                                   final @Context UriInfo uriInfo) throws KomodoRestException {
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        UnitOfWork uow = null;
+
+        try {
+            Teiid teiid = getDefaultTeiid();
+
+            uow = createTransaction("import-teiid-content", false); //$NON-NLS-1$
+            CachedTeiid cachedTeiid = teiid.importContent(uow);
+
+            // Commit the transaction to allow the sequencers to run
+            uow.commit();
+
+            // find translators
+            uow = createTransaction("getTranslators", true); //$NON-NLS-1$
+
+            Translator[] translators = cachedTeiid.getTranslators(uow);
+            LOGGER.debug("getTranslators:found '{0}' Translators", translators.length); //$NON-NLS-1$
+
+            final List<RestVdbTranslator> entities = new ArrayList<>();
+
+            KomodoProperties properties = new KomodoProperties();
+            for (final Translator translator : translators) {
+                RestVdbTranslator entity = entityFactory.create(translator, uriInfo.getBaseUri(), uow, properties);
+                entities.add(entity);
+                LOGGER.debug("getTranslators:Translator '{0}' entity was constructed", translator.getName(uow)); //$NON-NLS-1$
+            }
+
+            // create response
+            return commit(uow, mediaTypes, entities);
+
+        } catch (Throwable e) {
+            if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
+                uow.rollback();
+            }
+
+            if ( e instanceof KomodoRestException ) {
+                throw ( KomodoRestException )e;
+            }
+
+            return createErrorResponse(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_GET_TRANSLATORS_ERROR);
         }
     }
 }
