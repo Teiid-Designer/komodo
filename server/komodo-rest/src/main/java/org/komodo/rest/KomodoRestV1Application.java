@@ -307,6 +307,16 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
          * The teiid status path segment
          */
         String STATUS_SEGMENT = "status";
+
+        /**
+         * The name of the URI path segment for the collection of data sources
+         */
+        String DATA_SOURCES_SEGMENT = "DataSources"; //$NON-NLS-1$
+
+        /**
+         * Placeholder added to an URI to allow a specific data source id
+         */
+        String DATA_SOURCE_PLACEHOLDER = "{dataSourceName}"; //$NON-NLS-1$
     }
 
     private static final int TIMEOUT = 1;

@@ -23,7 +23,10 @@ package org.komodo.relational.teiid.internal;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.komodo.core.KomodoLexicon;
 import org.komodo.core.KomodoLexicon.TeiidArchetype;
+import org.komodo.relational.datasource.Datasource;
+import org.komodo.relational.datasource.internal.DatasourceImpl;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.teiid.CachedTeiid;
 import org.komodo.relational.teiid.Teiid;
@@ -437,5 +440,23 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
         }
 
         return result.toArray(new Translator[result.size()]);
+    }
+
+    @Override
+    public Datasource[] getDataSources(final UnitOfWork transaction, final String... namePatterns) throws KException {
+        ArgCheck.isNotNull(transaction, "transaction"); //$NON-NLS-1$
+        ArgCheck.isTrue((transaction.getState() == State.NOT_STARTED), "transaction state is not NOT_STARTED"); //$NON-NLS-1$
+
+        final List<Datasource> result = new ArrayList<Datasource>();
+        for (final KomodoObject kobject : super.getChildrenOfType(transaction, KomodoLexicon.DataSource.NODE_TYPE, namePatterns)) {
+            Datasource dataSource = new DatasourceImpl(transaction, getRepository(), kobject.getAbsolutePath());
+            result.add(dataSource);
+        }
+
+        if (result.isEmpty()) {
+            return new Datasource[0];
+        }
+
+        return result.toArray(new Datasource[result.size()]);
     }
 }

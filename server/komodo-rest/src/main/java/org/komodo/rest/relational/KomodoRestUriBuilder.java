@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Properties;
 import javax.ws.rs.core.UriBuilder;
 import org.komodo.core.KomodoLexicon;
+import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.rest.KomodoRestV1Application;
@@ -80,6 +81,11 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
          * Name of the translator
          */
         TRANSLATOR_NAME,
+
+        /**
+         * Name of the data source
+         */
+        DATA_SOURCE_NAME,
 
         /**
          * Name of the import
@@ -442,7 +448,7 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
     }
 
     /**
-     * @param vdb
+     * @param translator
      * @param uow
      * @return the uri of the parent of the given translator
      * @throws KException
@@ -633,6 +639,51 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
                 break;
             case PARENT:
                 result = myPermUri;
+                break;
+            default:
+                throw new RuntimeException("LinkType " + linkType + " not handled"); //$NON-NLS-1$ //$NON-NLS-2$
+        }
+
+        assert(result != null);
+        return result;
+    }
+
+    /**
+     * @param data source
+     * @param uow
+     * @return the uri of the parent of the given data source
+     * @throws KException
+     */
+    public URI dataSourceParentUri(Datasource dataSource, UnitOfWork uow) throws KException {
+        KomodoObject parent = dataSource.getParent(uow);
+        if (isCachedTeiid(uow, parent)) {
+            return cachedTeiidUri(parent.getName(uow));
+        }
+
+        throw new KException("Data source has an invalid parent");
+    }
+
+    /**
+     * @param linkType
+     * @param settings
+     * @return data source URIs for the given link type and settings
+     */
+    public URI dataSourceUri(LinkType linkType, Properties settings) {
+        ArgCheck.isNotNull(linkType, "linkType"); //$NON-NLS-1$
+        ArgCheck.isNotNull(settings, "settings"); //$NON-NLS-1$)
+
+        URI result = null;
+        URI parentUri = parentUri(settings);
+
+        switch (linkType) {
+            case SELF:
+                String name = setting(settings, SettingNames.DATA_SOURCE_NAME);
+                result = UriBuilder.fromUri(parentUri)
+                                                .path(DATA_SOURCES_SEGMENT)
+                                                .path(name).build();
+                break;
+            case PARENT:
+                result = parentUri;
                 break;
             default:
                 throw new RuntimeException("LinkType " + linkType + " not handled"); //$NON-NLS-1$ //$NON-NLS-2$

@@ -875,7 +875,12 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
                 dataSrc.setJndiName(transaction, teiidDataSrc.getJndiName());
 
                 for (Entry<Object, Object> property : teiidDataSrc.getProperties().entrySet()) {
-                    dataSrc.setProperty(transaction, property.getKey().toString(), property.getValue());
+                    String key = property.getKey().toString();
+                    if (TeiidInstance.DATASOURCE_DRIVERNAME.equals(key) ||
+                            TeiidInstance.DATASOURCE_JNDINAME.equals(key))
+                        continue; // Already set as explicit fields
+
+                    dataSrc.setProperty(transaction, key, property.getValue());
                 }
             }
 

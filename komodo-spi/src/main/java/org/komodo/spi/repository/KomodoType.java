@@ -35,7 +35,7 @@ public enum KomodoType {
     /**
      * Datasource
      */
-    DATASOURCE,
+    DATASOURCE("datasource"),
 
     /**
      * Schema
