@@ -154,4 +154,9 @@ public interface TeiidInstance extends ExecutionAdmin, HostProvider {
      * @throws Exception
      */
     Collection<DataSourceDriver> getDataSourceDrivers() throws Exception;
+
+    /**
+     * @return whether this teiid instance is still valid to be used
+     */
+    boolean isSound();
 }

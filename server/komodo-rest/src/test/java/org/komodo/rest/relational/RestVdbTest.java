@@ -26,21 +26,25 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.when;
 import java.io.File;
 import java.net.URI;
 import java.util.Collection;
 import javax.ws.rs.core.UriBuilder;
 import org.junit.Before;
 import org.junit.Test;
+import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.teiid.CachedTeiid;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.RestLink;
+import org.komodo.spi.repository.Descriptor;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyDescriptor;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.mockito.Mockito;
+import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 @SuppressWarnings( {"javadoc", "nls"} )
 public final class RestVdbTest {
@@ -85,7 +89,11 @@ public final class RestVdbTest {
         KomodoObject workspace = Mockito.mock(KomodoObject.class);
         Mockito.when(workspace.getAbsolutePath()).thenReturn(WORKSPACE_DATA_PATH);
 
+        Descriptor vdbType = Mockito.mock(Descriptor.class);
+        when(vdbType.getName()).thenReturn(VdbLexicon.Vdb.VIRTUAL_DATABASE);
+
         Vdb theVdb = Mockito.mock(Vdb.class);
+        Mockito.when(theVdb.getPrimaryType(transaction)).thenReturn(vdbType);
         Mockito.when(theVdb.getName(transaction)).thenReturn(VDB_NAME);
         Mockito.when(theVdb.getAbsolutePath()).thenReturn(VDB_DATA_PATH);
         Mockito.when(theVdb.getTypeIdentifier(transaction)).thenReturn(kType);
@@ -187,10 +195,14 @@ public final class RestVdbTest {
         String parentDataPath = "/tko:komodo/tko:workspace/tko:teiidCache/localhost/";
         UnitOfWork transaction = Mockito.mock(UnitOfWork.class);
 
+        Descriptor teiidType = Mockito.mock(Descriptor.class);
+        when(teiidType.getName()).thenReturn(KomodoLexicon.CachedTeiid.NODE_TYPE);
+
         CachedTeiid cachedTeiid = Mockito.mock(CachedTeiid.class);
         Mockito.when(cachedTeiid.getName(transaction)).thenReturn("localhost");
         Mockito.when(cachedTeiid.getAbsolutePath()).thenReturn(parentDataPath);
         Mockito.when(cachedTeiid.getTypeIdentifier(transaction)).thenReturn(KomodoType.CACHED_TEIID);
+        Mockito.when(cachedTeiid.getPrimaryType(transaction)).thenReturn(teiidType);
 
         Vdb theVdb = Mockito.mock(Vdb.class);
         Mockito.when(theVdb.getName(transaction)).thenReturn(VDB_NAME);

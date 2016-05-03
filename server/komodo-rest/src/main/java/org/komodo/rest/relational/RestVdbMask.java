@@ -72,7 +72,7 @@ public final class RestVdbMask extends RestBasicEntity {
      * @throws KException if error occurs
      */
     public RestVdbMask(URI baseUri, Mask mask, UnitOfWork uow) throws KException {
-        super(baseUri, mask, uow);
+        super(baseUri, mask, uow, false);
 
         setName(mask.getName(uow));
         setOrder(mask.getOrder(uow));
@@ -90,16 +90,17 @@ public final class RestVdbMask extends RestBasicEntity {
         String vdbName = vdb.getName(uow);
 
         Properties settings = getUriBuilder().createSettings(SettingNames.VDB_NAME, vdbName);
-        settings.put(SettingNames.VDB_PARENT_PATH, getUriBuilder().generateVdbParentUri(vdb, uow));
+        getUriBuilder().addSetting(settings, SettingNames.VDB_PARENT_PATH, getUriBuilder().vdbParentUri(vdb, uow));
         getUriBuilder().addSetting(settings, SettingNames.DATA_ROLE_ID, dataRoleName);
         getUriBuilder().addSetting(settings, SettingNames.PERMISSION_ID, permName);
         getUriBuilder().addSetting(settings, SettingNames.PERMISSION_CHILD_TYPE, LinkType.MASKS.uriName());
         getUriBuilder().addSetting(settings, SettingNames.PERMISSION_CHILD_ID, getId());
 
         addLink(new RestLink(LinkType.SELF, getUriBuilder()
-                             .buildVdbPermissionChildUri(LinkType.SELF, settings)));
+                             .vdbPermissionChildUri(LinkType.SELF, settings)));
         addLink(new RestLink(LinkType.PARENT, getUriBuilder()
-                             .buildVdbPermissionChildUri(LinkType.PARENT, settings)));
+                             .vdbPermissionChildUri(LinkType.PARENT, settings)));
+        createChildLink();
     }
 
     /**

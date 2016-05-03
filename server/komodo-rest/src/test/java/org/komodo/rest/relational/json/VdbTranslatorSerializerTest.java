@@ -25,6 +25,7 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import org.jboss.resteasy.util.Encode;
@@ -32,11 +33,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
+import org.komodo.repository.DescriptorImpl;
 import org.komodo.rest.RestProperty;
 import org.komodo.rest.relational.RestVdbTranslator;
+import org.komodo.spi.repository.Descriptor;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyDescriptor;
 import org.mockito.Mockito;
+import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class VdbTranslatorSerializerTest extends AbstractSerializerTest {
@@ -98,7 +102,9 @@ public final class VdbTranslatorSerializerTest extends AbstractSerializerTest {
 
     @Before
     public void init() throws Exception {
+        Descriptor vdbType = new DescriptorImpl(repository, VdbLexicon.Vdb.VIRTUAL_DATABASE);
         Vdb theVdb = mockObject(Vdb.class, VDB_NAME, VDB_DATA_PATH, KomodoType.VDB, true);
+        when(theVdb.getPrimaryType(transaction)).thenReturn(vdbType);
 
         Translator theTranslator = mockObject(Translator.class,
                                                       NAME,
@@ -106,6 +112,9 @@ public final class VdbTranslatorSerializerTest extends AbstractSerializerTest {
                                                       KomodoType.VDB_TRANSLATOR,
                                                       false);
 
+        //
+        // translator implementation ignores the translators grouping node when calling getParent
+        //
         Mockito.when(theTranslator.getParent(transaction)).thenReturn(theVdb);
         Mockito.when(theTranslator.getPropertyNames(transaction)).thenReturn(PROPS_KEYS);
         Mockito.when(theTranslator.getPropertyDescriptors(transaction)).thenReturn(new PropertyDescriptor[0]);

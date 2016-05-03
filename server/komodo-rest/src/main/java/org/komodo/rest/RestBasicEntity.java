@@ -133,9 +133,10 @@ public class RestBasicEntity implements KRestEntity {
      * @param baseUri the base uri of the REST request
      * @param kObject the kObject
      * @param uow the transaction
+     * @param createCommonLinks should the self and parent links be created
      * @throws KException if error occurs
      */
-    public RestBasicEntity(URI baseUri, KomodoObject kObject, UnitOfWork uow) throws KException {
+    protected RestBasicEntity(URI baseUri, KomodoObject kObject, UnitOfWork uow, boolean createCommonLinks) throws KException {
         this(baseUri);
 
         ArgCheck.isNotNull(kObject, "kObject"); //$NON-NLS-1$
@@ -146,18 +147,36 @@ public class RestBasicEntity implements KRestEntity {
         setkType(kObject.getTypeIdentifier(uow));
         setHasChildren(kObject.hasChildren(uow));
 
-        KomodoProperties properties = new KomodoProperties();
-        properties.addProperty(SEARCH_PATH_PARAMETER, getDataPath());
-        addLink(new RestLink(LinkType.SELF, getUriBuilder().generateSearchUri(properties)));
+        if (createCommonLinks) {
+            KomodoProperties properties = new KomodoProperties();
+            properties.addProperty(SEARCH_PATH_PARAMETER, getDataPath());
+            addLink(new RestLink(LinkType.SELF, getUriBuilder().searchUri(properties)));
 
-        KomodoObject parent = kObject.getParent(uow);
-        properties = new KomodoProperties();
-        properties.addProperty(SEARCH_PATH_PARAMETER, parent.getAbsolutePath());
-        addLink(new RestLink(LinkType.PARENT, getUriBuilder().generateSearchUri(properties)));
+            KomodoObject parent = kObject.getParent(uow);
+            ArgCheck.isNotNull(parent);
+            properties = new KomodoProperties();
+            properties.addProperty(SEARCH_PATH_PARAMETER, parent.getAbsolutePath());
+            addLink(new RestLink(LinkType.PARENT, getUriBuilder().searchUri(properties)));
 
+            createChildLink();
+        }
+    }
+
+    protected void createChildLink() {
+        KomodoProperties properties;
         properties = new KomodoProperties();
         properties.addProperty(SEARCH_PARENT_PARAMETER, getDataPath());
-        addLink(new RestLink(LinkType.CHILDREN, getUriBuilder().generateSearchUri(properties)));
+        addLink(new RestLink(LinkType.CHILDREN, getUriBuilder().searchUri(properties)));
+    }
+
+    /**
+     * @param baseUri the base uri of the REST request
+     * @param kObject the kObject
+     * @param uow the transaction
+     * @throws KException if error occurs
+     */
+    public RestBasicEntity(URI baseUri, KomodoObject kObject, UnitOfWork uow) throws KException {
+        this(baseUri, kObject, uow, true);
     }
 
     /**

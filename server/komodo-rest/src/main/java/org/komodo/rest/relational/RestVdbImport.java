@@ -86,7 +86,7 @@ public final class RestVdbImport extends RestBasicEntity {
      * @throws KException if error occurs
      */
     public RestVdbImport(URI baseUri, VdbImport vdbImport, UnitOfWork uow) throws KException {
-        super(baseUri, vdbImport, uow);
+        super(baseUri, vdbImport, uow, false);
 
         setName(vdbImport.getName(uow));
         setVersion(vdbImport.getVersion(uow));
@@ -97,11 +97,12 @@ public final class RestVdbImport extends RestBasicEntity {
         String vdbName = vdb.getName(uow);
 
         Properties settings = getUriBuilder().createSettings(SettingNames.VDB_NAME, vdbName);
-        settings.put(SettingNames.VDB_PARENT_PATH, getUriBuilder().generateVdbParentUri(vdb, uow));
+        getUriBuilder().addSetting(settings, SettingNames.VDB_PARENT_PATH, getUriBuilder().vdbParentUri(vdb, uow));
         getUriBuilder().addSetting(settings, SettingNames.IMPORT_NAME, getId());
 
-        addLink(new RestLink(LinkType.SELF, getUriBuilder().buildVdbImportUri(LinkType.SELF, settings)));
-        addLink(new RestLink(LinkType.PARENT, getUriBuilder().buildVdbImportUri(LinkType.PARENT, settings)));
+        addLink(new RestLink(LinkType.SELF, getUriBuilder().vdbImportUri(LinkType.SELF, settings)));
+        addLink(new RestLink(LinkType.PARENT, getUriBuilder().vdbImportUri(LinkType.PARENT, settings)));
+        createChildLink();
     }
 
     /**

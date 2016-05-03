@@ -60,7 +60,7 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
     public void shouldFailNoParameters() throws Exception {
         // get
         KomodoProperties properties = new KomodoProperties();
-        URI uri = _uriBuilder.generateSearchUri(properties);
+        URI uri = _uriBuilder.searchUri(properties);
 
         this.response = request(uri).accept(MediaType.APPLICATION_JSON).get();
         final String entity = this.response.readEntity(String.class);
@@ -79,7 +79,7 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
         // get
         KomodoProperties properties = new KomodoProperties();
         properties.addProperty(SEARCH_CONTAINS_PARAMETER, "view");
-        URI uri = _uriBuilder.generateSearchUri(properties);
+        URI uri = _uriBuilder.searchUri(properties);
 
         this.response = request(uri).get();
         final String entity = this.response.readEntity(String.class);
@@ -106,7 +106,7 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
         KomodoProperties properties = new KomodoProperties();
         properties.addProperty(SEARCH_TYPE_PARAMETER, VdbLexicon.Vdb.DECLARATIVE_MODEL);
         properties.addProperty(SEARCH_CONTAINS_PARAMETER, "view");
-        URI uri = _uriBuilder.generateSearchUri(properties);
+        URI uri = _uriBuilder.searchUri(properties);
 
         this.response = request(uri).get();
         final String entity = this.response.readEntity(String.class);
@@ -134,7 +134,7 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
         properties.addProperty(SEARCH_TYPE_PARAMETER, VdbLexicon.Vdb.DECLARATIVE_MODEL);
         properties.addProperty(SEARCH_PARENT_PARAMETER, PORTFOLIO_DATA_PATH);
         properties.addProperty(SEARCH_CONTAINS_PARAMETER, "view");
-        URI uri = _uriBuilder.generateSearchUri(properties);
+        URI uri = _uriBuilder.searchUri(properties);
 
         this.response = request(uri).get();
         final String entity = this.response.readEntity(String.class);
@@ -161,7 +161,7 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
         // get
         KomodoProperties properties = new KomodoProperties();
         properties.addProperty(SEARCH_PATH_PARAMETER, PORTFOLIO_DATA_PATH);
-        URI uri = _uriBuilder.generateSearchUri(properties);
+        URI uri = _uriBuilder.searchUri(properties);
 
         this.response = request(uri).get();
         final String entity = this.response.readEntity(String.class);
@@ -183,7 +183,7 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
         // get
         KomodoProperties properties = new KomodoProperties();
         properties.addProperty(SEARCH_PARENT_PARAMETER, PORTFOLIO_DATA_PATH);
-        URI uri = _uriBuilder.generateSearchUri(properties);
+        URI uri = _uriBuilder.searchUri(properties);
 
         this.response = request(uri).get();
         final String entity = this.response.readEntity(String.class);
@@ -204,7 +204,7 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
         // get
         KomodoProperties properties = new KomodoProperties();
         properties.addProperty(SEARCH_ANCESTOR_PARAMETER, PORTFOLIO_DATA_PATH);
-        URI uri = _uriBuilder.generateSearchUri(properties);
+        URI uri = _uriBuilder.searchUri(properties);
 
         this.response = request(uri).get();
         final String entity = this.response.readEntity(String.class);
@@ -220,7 +220,7 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
         // get
         KomodoProperties properties = new KomodoProperties();
         properties.addProperty(SEARCH_TYPE_PARAMETER, TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
-        URI uri = _uriBuilder.generateSearchUri(properties);
+        URI uri = _uriBuilder.searchUri(properties);
 
         this.response = request(uri).get();
         final String entity = this.response.readEntity(String.class);
@@ -241,7 +241,7 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
         // get
         KomodoProperties properties = new KomodoProperties();
         properties.addProperty(SEARCH_TYPE_PARAMETER, KomodoType.COLUMN.getType());
-        URI uri = _uriBuilder.generateSearchUri(properties);
+        URI uri = _uriBuilder.searchUri(properties);
 
         this.response = request(uri).get();
         final String entity = this.response.readEntity(String.class);
@@ -263,7 +263,7 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
         KomodoProperties properties = new KomodoProperties();
         properties.addProperty(SEARCH_TYPE_PARAMETER, KomodoType.COLUMN.getType());
         properties.addProperty(SEARCH_OBJECT_NAME_PARAMETER, "%ID%");
-        URI uri = _uriBuilder.generateSearchUri(properties);
+        URI uri = _uriBuilder.searchUri(properties);
 
         this.response = request(uri).get();
         final String entity = this.response.readEntity(String.class);
@@ -287,7 +287,7 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
         // get
         KomodoProperties properties = new KomodoProperties();
         properties.addProperty(SEARCH_SAVED_NAME_PARAMETER, searchNames.get(0));
-        URI uri = _uriBuilder.generateSearchUri(properties);
+        URI uri = _uriBuilder.searchUri(properties);
 
         this.response = request(uri).get();
         final String entity = this.response.readEntity(String.class);
@@ -309,7 +309,7 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
 
         // get
         KomodoProperties properties = new KomodoProperties();
-        URI uri = _uriBuilder.generateSavedSearchCollectionUri(properties);
+        URI uri = _uriBuilder.savedSearchCollectionUri(properties);
 
         this.response = request(uri).get();
         final String entity = this.response.readEntity(String.class);
@@ -327,7 +327,7 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
         loadVdbs();
 
         // post
-        URI uri = _uriBuilder.generateSavedSearchCollectionUri(new KomodoProperties());
+        URI uri = _uriBuilder.savedSearchCollectionUri(new KomodoProperties());
 
         KomodoSearcherAttributes searchAttr = new KomodoSearcherAttributes();
         String searchName = "Vdbs Search";
@@ -352,7 +352,7 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
         loadVdbs();
 
         // post
-        URI uri = _uriBuilder.generateSavedSearchCollectionUri(new KomodoProperties());
+        URI uri = _uriBuilder.savedSearchCollectionUri(new KomodoProperties());
 
         KomodoSearcherAttributes searchAttr = new KomodoSearcherAttributes();
         String searchName = "Vdbs Search";
@@ -378,7 +378,7 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
         List<String> searchNames = loadSampleSearches();
 
         // delete
-        URI uri = _uriBuilder.generateSavedSearchCollectionUri(new KomodoProperties());
+        URI uri = _uriBuilder.savedSearchCollectionUri(new KomodoProperties());
         String searchName = searchNames.get(0);
         uri = UriBuilder.fromUri(uri).path(searchName).build();
 
@@ -403,7 +403,7 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
 
         // post
         KomodoProperties properties = new KomodoProperties();
-        URI uri = _uriBuilder.generateSearchUri(properties);
+        URI uri = _uriBuilder.searchUri(properties);
 
         KomodoSearcherAttributes searchAttr = new KomodoSearcherAttributes();
         searchAttr.setContains("view");
@@ -431,7 +431,7 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
 
         // post
         KomodoProperties properties = new KomodoProperties();
-        URI uri = _uriBuilder.generateSearchUri(properties);
+        URI uri = _uriBuilder.searchUri(properties);
 
         KomodoSearcherAttributes searchAttr = new KomodoSearcherAttributes();
         searchAttr.setType(VdbLexicon.Vdb.DECLARATIVE_MODEL);
@@ -460,7 +460,7 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
 
         // post
         KomodoProperties properties = new KomodoProperties();
-        URI uri = _uriBuilder.generateSearchUri(properties);
+        URI uri = _uriBuilder.searchUri(properties);
 
         KomodoSearcherAttributes searchAttr = new KomodoSearcherAttributes();
         searchAttr.setType(VdbLexicon.Vdb.DECLARATIVE_MODEL);
@@ -491,7 +491,7 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
 
         // post
         KomodoProperties properties = new KomodoProperties();
-        URI uri = _uriBuilder.generateSearchUri(properties);
+        URI uri = _uriBuilder.searchUri(properties);
 
         KomodoSearcherAttributes searchAttr = new KomodoSearcherAttributes();
         searchAttr.setPath(PORTFOLIO_DATA_PATH);
@@ -515,7 +515,7 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
 
         // post
         KomodoProperties properties = new KomodoProperties();
-        URI uri = _uriBuilder.generateSearchUri(properties);
+        URI uri = _uriBuilder.searchUri(properties);
 
         KomodoSearcherAttributes searchAttr = new KomodoSearcherAttributes();
         searchAttr.setParent(PORTFOLIO_DATA_PATH);
@@ -538,7 +538,7 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
 
         // post
         KomodoProperties properties = new KomodoProperties();
-        URI uri = _uriBuilder.generateSearchUri(properties);
+        URI uri = _uriBuilder.searchUri(properties);
 
         KomodoSearcherAttributes searchAttr = new KomodoSearcherAttributes();
         searchAttr.setAncestor(PORTFOLIO_DATA_PATH);
@@ -556,7 +556,7 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
 
         // post
         KomodoProperties properties = new KomodoProperties();
-        URI uri = _uriBuilder.generateSearchUri(properties);
+        URI uri = _uriBuilder.searchUri(properties);
 
         KomodoSearcherAttributes searchAttr = new KomodoSearcherAttributes();
         searchAttr.setType(TeiidDdlLexicon.CreateTable.TABLE_ELEMENT);
@@ -579,7 +579,7 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
 
         // post
         KomodoProperties properties = new KomodoProperties();
-        URI uri = _uriBuilder.generateSearchUri(properties);
+        URI uri = _uriBuilder.searchUri(properties);
 
         KomodoSearcherAttributes searchAttr = new KomodoSearcherAttributes();
         searchAttr.setType(KomodoType.COLUMN.getType());
@@ -602,7 +602,7 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
 
         // post
         KomodoProperties properties = new KomodoProperties();
-        URI uri = _uriBuilder.generateSearchUri(properties);
+        URI uri = _uriBuilder.searchUri(properties);
 
         KomodoSearcherAttributes searchAttr = new KomodoSearcherAttributes();
         searchAttr.setType(KomodoType.COLUMN.getType());
@@ -629,7 +629,7 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
 
         // post
         KomodoProperties properties = new KomodoProperties();
-        URI uri = _uriBuilder.generateSearchUri(properties);
+        URI uri = _uriBuilder.searchUri(properties);
 
         KomodoSearcherAttributes searchAttr = new KomodoSearcherAttributes();
         searchAttr.setSearchName(searchNames.get(0));
@@ -654,7 +654,7 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
 
         // post
         KomodoProperties properties = new KomodoProperties();
-        URI uri = _uriBuilder.generateSearchUri(properties);
+        URI uri = _uriBuilder.searchUri(properties);
 
         KomodoSearcherAttributes searchAttr = new KomodoSearcherAttributes();
         searchAttr.setSearchName(searchNames.get(2));
@@ -682,7 +682,7 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
 
         // post
         KomodoProperties properties = new KomodoProperties();
-        URI uri = _uriBuilder.generateSearchUri(properties);
+        URI uri = _uriBuilder.searchUri(properties);
 
         KomodoSearcherAttributes searchAttr = new KomodoSearcherAttributes();
         searchAttr.setSearchName(searchNames.get(2));
@@ -704,7 +704,7 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
 
         // post
         KomodoProperties properties = new KomodoProperties();
-        URI uri = _uriBuilder.generateSearchUri(properties);
+        URI uri = _uriBuilder.searchUri(properties);
 
         KomodoSearcherAttributes searchAttr = new KomodoSearcherAttributes();
         searchAttr.setSearchName(searchNames.get(3));

@@ -21,8 +21,6 @@
  */
 package org.komodo.relational.vdb;
 
-import org.komodo.relational.Messages;
-import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalObject;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.TypeResolver;
@@ -38,7 +36,7 @@ import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 /**
- * Represents a VDB translator.
+ * Represents a Translator that is either part of a VDB or a Teiid instance.
  */
 public interface Translator extends RelationalObject {
 
@@ -63,15 +61,6 @@ public interface Translator extends RelationalObject {
     Translator[] NO_TRANSLATORS = new Translator[0];
 
     /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.spi.repository.KNode#getParent(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    Vdb getParent( final UnitOfWork transaction ) throws KException;
-
-
-    /**
      * The resolver of a {@link Translator}.
      */
     public static final TypeResolver< Translator > RESOLVER = new TypeResolver< Translator >() {
@@ -93,14 +82,10 @@ public interface Translator extends RelationalObject {
             final String transType = transTypeValue == null ? null : transTypeValue.toString();
             final AdapterFactory adapter = new AdapterFactory( );
             final Vdb parentVdb = adapter.adapt( transaction, parent, Vdb.class );
-
-            if ( parentVdb == null ) {
-                throw new KException( Messages.getString( Relational.INVALID_PARENT_TYPE,
-                                                          parent.getAbsolutePath(),
-                                                          Translator.class.getSimpleName() ) );
-            }
-
-            return parentVdb.addTranslator( transaction, id, transType );
+            if (parentVdb != null)
+                return parentVdb.addTranslator( transaction, id, transType );
+            else
+                return new TranslatorImpl(transaction, repository, id);
         }
 
         /**

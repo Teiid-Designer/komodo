@@ -25,7 +25,9 @@ import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.RelationalObject;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.TypeResolver;
+import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.teiid.internal.CachedTeiidImpl;
+import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
@@ -141,4 +143,26 @@ public interface CachedTeiid extends RelationalObject, TeiidArchetype {
      *         if an error occurs
      */
     Vdb getVdb(final UnitOfWork transaction, String name) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param namePatterns
+     *        optional name patterns (can be <code>null</code> or empty but cannot have <code>null</code> or empty elements)
+     * @return the translators found on this teiid server (never <code>null</code> but can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    Translator[] getTranslators(UnitOfWork uow, final String... namePatterns ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param namePatterns
+     *        optional name patterns (can be <code>null</code> or empty but cannot have <code>null</code> or empty elements)
+     * @return the data sources found on this teiid server (never <code>null</code> but can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    Datasource[] getDataSources(UnitOfWork uow, final String... namePatterns ) throws KException;
 }

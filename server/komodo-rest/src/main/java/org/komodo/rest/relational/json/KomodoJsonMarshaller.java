@@ -21,6 +21,8 @@
  */
 package org.komodo.rest.relational.json;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.komodo.rest.KRestEntity;
 import org.komodo.rest.RestBasicEntity;
 import org.komodo.rest.RestLink;
@@ -44,10 +46,24 @@ import org.komodo.rest.relational.RestVdbModel;
 import org.komodo.rest.relational.RestVdbModelSource;
 import org.komodo.rest.relational.RestVdbPermission;
 import org.komodo.rest.relational.RestVdbTranslator;
+import org.komodo.rest.relational.datasource.DSSPropertyPairProperty;
+import org.komodo.rest.relational.datasource.DataSourceSchema;
+import org.komodo.rest.relational.datasource.DataSourceSchemaProperty;
+import org.komodo.rest.relational.datasource.RestDataSource;
+import org.komodo.rest.relational.json.datasource.DSSSerializer;
+import org.komodo.rest.relational.json.datasource.DSSPropertyListSerializer;
+import org.komodo.rest.relational.json.datasource.DSSPropertyPairPropertySerializer;
+import org.komodo.rest.relational.json.datasource.DSSPropertySerializer;
+import org.komodo.rest.relational.json.datasource.DataSourceSerializer;
+import org.komodo.rest.schema.json.TeiidXsdReader;
+import org.komodo.spi.repository.KomodoType;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.KLog;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 /**
  * A JSON serializer and deserializer for {@link RestBasicEntity Komodo REST objects}.
@@ -59,9 +75,9 @@ public final class KomodoJsonMarshaller {
     /**
      * The shared JSON serialier/deserializer for {@link RestBasicEntity} objects.
      */
-    protected static final Gson BUILDER;
+    public static final Gson BUILDER;
 
-    protected static final Gson PRETTY_BUILDER;
+    public static final Gson PRETTY_BUILDER;
 
     static {
         final GsonBuilder temp = new GsonBuilder().registerTypeAdapter( RestLink.class, new LinkSerializer() )
@@ -79,13 +95,72 @@ public final class KomodoJsonMarshaller {
                                                   .registerTypeAdapter( RestVdbCondition.class, new VdbConditionSerializer() )
                                                   .registerTypeAdapter( RestVdbMask.class, new VdbMaskSerializer() )
                                                   .registerTypeAdapter( RestVdbTranslator.class, new VdbTranslatorSerializer() )
+                                                  .registerTypeAdapter( RestDataSource.class, new DataSourceSerializer() )
                                                   .registerTypeAdapter( RestBasicEntity.class, new BasicEntitySerializer<RestBasicEntity>() )
                                                   .registerTypeAdapter( RestTeiid.class, new TeiidSerializer() )
                                                   .registerTypeAdapter( RestTeiidStatus.class, new TeiidStatusSerializer() )
                                                   .registerTypeAdapter( RestTeiidVdbStatus.class, new TeiidVdbStatusSerializer() )
-                                                  .registerTypeAdapter( RestTeiidVdbStatusVdb.class, new TeiidVdbStatusVdbSerializer());
+                                                  .registerTypeAdapter( RestTeiidVdbStatusVdb.class, new TeiidVdbStatusVdbSerializer())
+                                                  .registerTypeAdapter( DataSourceSchema.class, new DSSSerializer())
+                                                  .registerTypeAdapter( DSSPropertyListSerializer.class, new DSSPropertyListSerializer())
+                                                  .registerTypeAdapter( DSSPropertyPairProperty.class, new DSSPropertyPairPropertySerializer())
+                                                  .registerTypeAdapter( DataSourceSchemaProperty.class, new DSSPropertySerializer());
         BUILDER = temp.create();
         PRETTY_BUILDER = temp.setPrettyPrinting().create();
+    }
+
+    /**
+     * Cached teiid element schema. Unlikely to ever change
+     * and this reduces the work required.
+     */
+    private static Map<Object, String> teiidElementSchemaCache = new HashMap<>();
+
+    public static String teiidElementSchema(KomodoType kType) throws Exception {
+        String schema;
+
+        //
+        // Check the cache first
+        //
+        Object key = kType;
+        if (kType == null)
+            key = Void.class;
+
+        schema = teiidElementSchemaCache.get(key);
+        if (schema != null)
+            return schema;
+
+        //
+        // Not in cache so create
+        //
+        TeiidXsdReader reader = new TeiidXsdReader();
+
+        if (kType == null) {
+            schema = reader.read();
+
+            JsonParser parser = new JsonParser();
+            JsonElement shellElement = parser.parse(schema);
+            JsonObject shell = shellElement.getAsJsonObject();
+            JsonElement schema1Element = shell.get("schema-1");
+            JsonObject schema1 = schema1Element.getAsJsonObject();
+
+            DataSourceSchema dsSchema = new DataSourceSchema();
+            schema1.add(DataSourceSchema.NAME_LABEL, BUILDER.toJsonTree(dsSchema));
+
+            schema = PRETTY_BUILDER.toJson(shell);
+
+        } else if (KomodoType.DATASOURCE.equals(kType)) {
+            // Data sources do not have a mandated schema set out in the vdb-deployer.xsd
+            // so need to construct our own. At this point should be pretty simple
+
+            DataSourceSchema dsSchema = new DataSourceSchema();
+            schema = marshall(dsSchema);
+
+        } else {
+            schema = reader.schemaByKType(kType);
+        }
+
+        teiidElementSchemaCache.put(key, schema);
+        return schema;
     }
 
     /**

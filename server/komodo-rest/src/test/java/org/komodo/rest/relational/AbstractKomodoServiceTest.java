@@ -24,10 +24,14 @@ package org.komodo.rest.relational;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.URI;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttribute;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -90,6 +94,24 @@ public abstract class AbstractKomodoServiceTest implements V1Constants {
         Field instanceField = KEngine.class.getDeclaredField("_instance");
         instanceField.setAccessible(true);
         instanceField.set(KEngine.class, null);
+
+        //
+        // Remove the temp repository
+        //
+        Files.walkFileTree(_kengineDataDir, new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                Files.delete(file);
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                Files.delete(dir);
+                return FileVisitResult.CONTINUE;
+            }
+        });
+        Files.deleteIfExists(_kengineDataDir);
     }
 
     @BeforeClass

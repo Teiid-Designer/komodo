@@ -168,12 +168,12 @@ public final class KomodoUtilServiceTest extends AbstractKomodoServiceTest {
         assertTrue(response.hasEntity());
 
         final String entity = response.readEntity(String.class);
-        //System.out.println("Response from uri " + uri + ":\n" + entity);
+        System.out.println("Response from uri " + uri + ":\n" + entity);
 
         InputStream schemaStream = getClass().getResourceAsStream("teiid-schema.json");
         String expected = TestUtilities.toString(schemaStream);
 
-        assertEquals(expected, entity);
+        assertEquals(expected.trim(), entity);
     }
 
     @Test
@@ -196,6 +196,7 @@ public final class KomodoUtilServiceTest extends AbstractKomodoServiceTest {
 
         assertFalse(entity.contains("\"schema-1\" : {"));
         assertFalse(entity.contains("\"keng__id\" : \"vdb\""));
+        assertFalse(entity.contains("\"keng__id\": \"datasource\""));
         assertFalse(entity.contains("\"keng__id\" : \"importVdb\""));
         assertTrue(entity.contains("\"keng__id\" : \"model\""));
         assertFalse(entity.contains("\"keng__id\" : \"source\""));
@@ -220,6 +221,7 @@ public final class KomodoUtilServiceTest extends AbstractKomodoServiceTest {
 
         assertFalse(entity.contains("\"schema-1\" : {"));
         assertFalse(entity.contains("\"keng__id\" : \"vdb\""));
+        assertFalse(entity.contains("\"keng__id\": \"datasource\""));
         assertFalse(entity.contains("\"keng__id\" : \"importVdb\""));
         assertFalse(entity.contains("\"keng__id\" : \"model\""));
         assertFalse(entity.contains("\"keng__id\" : \"source\""));
@@ -244,6 +246,7 @@ public final class KomodoUtilServiceTest extends AbstractKomodoServiceTest {
 
         assertFalse(entity.contains("\"schema-1\" : {"));
         assertFalse(entity.contains("\"keng__id\" : \"vdb\""));
+        assertFalse(entity.contains("\"keng__id\": \"datasource\""));
         assertFalse(entity.contains("\"keng__id\" : \"importVdb\""));
         assertFalse(entity.contains("\"keng__id\" : \"model\""));
         assertFalse(entity.contains("\"keng__id\" : \"source\""));
@@ -254,6 +257,31 @@ public final class KomodoUtilServiceTest extends AbstractKomodoServiceTest {
         assertFalse(entity.contains("\"keng__id\" : \"permission\""));
         assertFalse(entity.contains("\"keng__id\" : \"condition\""));
         assertTrue(entity.contains("\"keng__id\" : \"mask\""));
+        assertFalse(entity.contains("\"keng__id\" : \"entry\""));
+
+        // Get data source
+        uri = baseBuilder.clone().
+                                   queryParam(KomodoService.QueryParamKeys.KTYPE, KomodoType.DATASOURCE)
+                                   .build();
+        this.response = request(uri).get();
+        assertTrue(response.hasEntity());
+
+        entity = response.readEntity(String.class);
+//        System.out.println("Response from uri " + uri + ":\n" + entity);
+
+        assertFalse(entity.contains("\"schema-1\" : {"));
+        assertFalse(entity.contains("\"keng__id\" : \"vdb\""));
+        assertTrue(entity.contains("\"keng__id\": \"datasource\""));
+        assertFalse(entity.contains("\"keng__id\" : \"importVdb\""));
+        assertFalse(entity.contains("\"keng__id\" : \"model\""));
+        assertFalse(entity.contains("\"keng__id\" : \"source\""));
+        assertFalse(entity.contains("\"keng__id\" : \"metadata\""));
+        assertFalse(entity.contains("\"keng__id\" : \"validationError\""));
+        assertFalse(entity.contains("\"keng__id\" : \"translator\""));
+        assertFalse(entity.contains("\"keng__id\" : \"dataRole\""));
+        assertFalse(entity.contains("\"keng__id\" : \"permission\""));
+        assertFalse(entity.contains("\"keng__id\" : \"condition\""));
+        assertFalse(entity.contains("\"keng__id\" : \"mask\""));
         assertFalse(entity.contains("\"keng__id\" : \"entry\""));
     }
 }

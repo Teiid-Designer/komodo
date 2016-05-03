@@ -51,12 +51,11 @@ import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.SynchronousCallback;
 import org.komodo.rest.KomodoRestException;
-import org.komodo.rest.KomodoService;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
+import org.komodo.rest.KomodoService;
 import org.komodo.rest.relational.KomodoStatusObject;
 import org.komodo.rest.relational.RelationalMessages;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
-import org.komodo.rest.schema.json.TeiidXsdReader;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.Id;
@@ -283,7 +282,7 @@ public final class KomodoUtilService extends KomodoService {
     public Response getSchema( final @Context HttpHeaders headers,
                              final @Context UriInfo uriInfo,
                              @ApiParam(value = "Type of schema element to be returned",
-                                                allowableValues = "Vdb, VdbImport, " +
+                                                allowableValues = "Vdb, VdbImport, DataSource," +
                                                                              "VdbTranslator, Model, " +
                                                                              "VdbModelSource, VdbDataRole, " +
                                                                              "VdbPermission, VdbCondition, VdbMask",
@@ -296,14 +295,13 @@ public final class KomodoUtilService extends KomodoService {
             return notAcceptableMediaTypesBuilder().build();
 
         try {
-            TeiidXsdReader reader = new TeiidXsdReader();
-            String schema = null;
 
+            String schema = null;
             if (ktype == null) {
                 //
                 // Request to return whole of schema
                 //
-                schema = reader.read();
+                schema = KomodoJsonMarshaller.teiidElementSchema(null);
                 return Response.ok().entity(schema).build();
             }
 
@@ -313,14 +311,14 @@ public final class KomodoUtilService extends KomodoService {
                                                           RelationalMessages.Error.SCHEMA_SERVICE_GET_SCHEMA_UNKNOWN_KTYPE, ktype );
                 Object response = createErrorResponseEntity(mediaTypes, msg);
                 return Response.status(Status.NOT_FOUND).entity(response).build();
-            }
-
-            schema = reader.schemaByKType(komodoType);
-            if (EMPTY_STRING.equals(schema)) {
-                String msg = RelationalMessages.getString(
+            } else {
+                schema = KomodoJsonMarshaller.teiidElementSchema(komodoType);
+                if (EMPTY_STRING.equals(schema)) {
+                    String msg = RelationalMessages.getString(
                                                           RelationalMessages.Error.SCHEMA_SERVICE_GET_SCHEMA_NOT_FOUND, ktype );
-                Object response = createErrorResponseEntity(mediaTypes, msg);
-                return Response.status(Status.NOT_FOUND).entity(response).build();
+                    Object response = createErrorResponseEntity(mediaTypes, msg);
+                    return Response.status(Status.NOT_FOUND).entity(response).build();
+                }
             }
 
             return Response.ok().entity(schema).build();
