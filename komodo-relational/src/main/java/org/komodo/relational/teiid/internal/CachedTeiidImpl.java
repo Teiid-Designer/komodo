@@ -98,6 +98,8 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
         this.setJdbcPassword(transaction, srcTeiid.getJdbcPassword(transaction));
         this.setJdbcPort(transaction, srcTeiid.getJdbcPort(transaction));
         this.setJdbcSecure(transaction, srcTeiid.isJdbcSecure(transaction));
+
+        this.setTimestamp(transaction, System.currentTimeMillis());
     }
 
     @Override
@@ -127,6 +129,26 @@ public class CachedTeiidImpl extends RelationalObjectImpl implements CachedTeiid
      */
     protected void setVersion(UnitOfWork uow, TeiidVersion version) throws KException {
         setObjectProperty(uow, "setVersion", TeiidArchetype.VERSION, version.toString()); //$NON-NLS-1$
+    }
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @return value of teiid timestamp property (never empty)
+     * @throws KException
+     *         if error occurs
+     */
+    @Override
+    public Long getTimestamp(UnitOfWork uow) throws KException {
+        ArgCheck.isNotNull( uow, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( uow.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        Long timestamp = getObjectProperty(uow, PropertyValueType.LONG, "getTimestamp", KomodoLexicon.CachedTeiid.TIMESTAMP); //$NON-NLS-1$
+        return timestamp != null ? timestamp : System.currentTimeMillis();
+    }
+
+    protected void setTimestamp(UnitOfWork uow, long timestamp) throws KException {
+        setObjectProperty(uow, "setTimestamp", KomodoLexicon.CachedTeiid.TIMESTAMP, timestamp);
     }
 
     /**

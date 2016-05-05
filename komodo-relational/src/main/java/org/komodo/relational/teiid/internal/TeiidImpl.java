@@ -808,6 +808,30 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
+        KomodoObject teiidCache = getRepository().komodoTeiidCache(transaction);
+
+        long expireThreshold = CachedTeiid.DEFAULT_TEIID_CACHE_THRESHOLD;
+        Property expProp = teiidCache.getProperty(transaction, KomodoLexicon.TeiidCache.EXPIRATION_THRESHOLD);
+        if (expProp == null)
+            teiidCache.setProperty(transaction, KomodoLexicon.TeiidCache.EXPIRATION_THRESHOLD, expireThreshold);
+        else
+            expireThreshold = expProp.getLongValue(transaction);
+
+        final String id = getName(transaction);
+        if (teiidCache.hasChild(transaction, id)) {
+            KomodoObject child = teiidCache.getChild(transaction, id);
+            CachedTeiidImpl currCTeiid = new CachedTeiidImpl(transaction, getRepository(), child.getAbsolutePath());
+            Long timestamp = currCTeiid.getTimestamp(transaction);
+            Long current = System.currentTimeMillis();
+
+            // Expiration time of 10 mins has elapsed or not
+            if ((timestamp + expireThreshold) > current)
+                return currCTeiid;
+        }
+
+        //
+        // Either cache teiid does not exist or should be overwritten
+        //
         ServerManager mgr = ServerManager.getInstance(getRepository());
         CachedTeiid cachedTeiid = mgr.createCachedTeiid(transaction, this);
 

@@ -43,6 +43,11 @@ import org.komodo.spi.repository.Repository.UnitOfWork.State;
 public interface CachedTeiid extends RelationalObject, TeiidArchetype {
 
     /**
+     * The default expiration time of all cached teiid objects in the teiid cache
+     */
+    int DEFAULT_TEIID_CACHE_THRESHOLD = 10 * 60 * 1000;
+
+    /**
      * The type identifier.
      */
     int TYPE_ID = CachedTeiid.class.hashCode();
@@ -165,4 +170,11 @@ public interface CachedTeiid extends RelationalObject, TeiidArchetype {
      *         if an error occurs
      */
     Datasource[] getDataSources(UnitOfWork uow, final String... namePatterns ) throws KException;
+
+    /**
+     * @param uow
+     * @return the timestamp when the cached teiid was created
+     * @throws KException 
+     */
+    Long getTimestamp(UnitOfWork uow) throws KException;
 }

@@ -658,6 +658,22 @@ public interface KomodoLexicon extends StringConstants {
     }
 
     /**
+     * The JCR names associated with the Komodo teiid cache node type.
+     */
+    public interface TeiidCache {
+        /**
+         * The name of the Teiid Cache node type. Value is {@value} .
+         */
+        String NODE_TYPE = Namespace.PREFIX + COLON + "teiidCache"; //$NON-NLS-1$
+
+        /**
+         * The threshold in milliseconds of how long a cached teiid should remain
+         * before a new request overwrites it
+         */
+        String EXPIRATION_THRESHOLD = Namespace.PREFIX + COLON + "expirationThreshold"; //$NON-NLS-1$
+    }
+
+    /**
      * Abstract model of a Teiid connection properties
      */
     public interface TeiidArchetype {
@@ -750,6 +766,11 @@ public interface KomodoLexicon extends StringConstants {
          * The name of the Cached Teiid node type. Value is {@value} .
          */
         String NODE_TYPE = Namespace.PREFIX + COLON + "cachedTeiid"; //$NON-NLS-1$
+
+        /**
+         * The timestamp of when the cached teiid was created
+         */
+        String TIMESTAMP = Namespace.PREFIX + COLON + "timestamp"; //$NON-NLS-1$
     }
 
     /**

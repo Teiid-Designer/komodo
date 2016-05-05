@@ -107,6 +107,7 @@
  */
 [tko:teiidCache] > nt:unstructured
   + * (tko:cachedTeiid) copy
+  - tko:expirationThreshold (long) = 600000
 
 /*
  * A model caching the state of a live teiid server
@@ -115,6 +116,7 @@
  + * (vdb:virtualDatabase) copy
  + * (vdb:translator) copy
  + * (tko:dataSource) copy
+ - tko:timestamp (long)
 
 /*
  * The data source grouping node used by both the workspace and the library. Child nodes are data source definitions.
