@@ -19,7 +19,7 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 * 021101301 USA.
  ************************************************************************************/
-package org.komodo.teiid.framework;
+package org.komodo.plugin.framework.teiid;
 
 import java.text.MessageFormat;
 import java.util.MissingResourceException;

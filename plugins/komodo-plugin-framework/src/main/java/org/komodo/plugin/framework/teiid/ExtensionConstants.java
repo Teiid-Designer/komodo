@@ -19,29 +19,36 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  */
-package org.komodo.teiid.framework;
+package org.komodo.plugin.framework.teiid;
 
-import org.komodo.spi.query.TeiidService;
-import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.constants.StringConstants;
 
-public abstract class AbstractTeiidService implements TeiidService {
+public interface ExtensionConstants extends StringConstants {
 
-    private final String parentBundle;
+    String TRANSLATOR = "translator";
 
-    private final TeiidVersion version;
+    String DEPLOYMENT = "deployment";
 
-    public AbstractTeiidService(String parentBundle, TeiidVersion version) {
-        this.parentBundle = parentBundle;
-        this.version = version;
-    }
+    String DRIVER_CLASS_NAME = "driver-class-name";
 
-    @Override
-    public String getParentBundle() {
-        return parentBundle;
-    }
+    String DRIVER_NAME = "driver-name";
 
-    @Override
-    public TeiidVersion getVersion() {
-        return version;
-    }
+    String INSTALLED_DRIVERS_LIST = "installed-drivers-list";
+
+    String DATA_SOURCES = "datasources";
+
+    String RESULT = "result";
+
+    String SUBSYSTEM = "subsystem";
+
+    String PROFILE = "profile";
+
+    String CHILD_TYPE = "child-type";
+
+    String READ_CHILDREN_NAMES = "read-children-names";
+
+    String CONNECTION_FIELD = "connection";
+
+    String DOMAIN_MODE_FIELD = "domainMode";
+
 }

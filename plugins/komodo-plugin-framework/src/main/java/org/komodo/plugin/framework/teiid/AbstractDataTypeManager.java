@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  */
-package org.komodo.teiid.framework;
+package org.komodo.plugin.framework.teiid;
 
 import org.komodo.spi.annotation.AnnotationUtils;
 import org.komodo.spi.runtime.version.TeiidVersion;

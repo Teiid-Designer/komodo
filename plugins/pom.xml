@@ -15,7 +15,7 @@
 	<description>Bundles that can be loaded into Komodo using its OSGI extension framework</description>
 
 	<modules>
-		<module>komodo-plugin-teiid-framework</module>
+		<module>komodo-plugin-framework</module>
 		<module>teiid-8.11</module>
 		<module>teiid-8.12</module>
 		<module>komodo-plugin-service</module>
@@ -44,7 +44,7 @@
 
 			<dependency>
 				<groupId>org.komodo.plugins</groupId>
-				<artifactId>komodo-plugin-teiid-framework</artifactId>
+				<artifactId>komodo-plugin-framework</artifactId>
 				<version>${project.version}</version>
 				<type>test-jar</type>
 				<scope>test</scope>

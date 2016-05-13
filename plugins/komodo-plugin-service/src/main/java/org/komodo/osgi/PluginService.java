@@ -72,6 +72,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 import org.komodo.osgi.teiid.UnsupportedTeiidException;
+import org.komodo.plugin.framework.teiid.AbstractDataTypeManager;
 import org.komodo.spi.annotation.AnnotationUtils;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.constants.SystemConstants;
@@ -84,7 +85,6 @@ import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.DataTypeManager;
 import org.komodo.spi.uuid.WorkspaceUUIDService;
-import org.komodo.teiid.framework.AbstractDataTypeManager;
 import org.komodo.utils.KEnvironment;
 import org.modeshape.jcr.api.Session;
 import org.osgi.framework.Bundle;
@@ -204,9 +204,9 @@ public class PluginService implements StringConstants {
             WorkspaceUUIDService.class,
 
             /**
-             * plugin teiid framework
+             * plugin framework
              */
-            // org.komodo.teiid.framework
+            // org.komodo.plugin.framework.teiid
             AbstractDataTypeManager.class,
 
             /**

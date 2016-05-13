@@ -22,13 +22,13 @@
 package org.komodo.teiid;
 
 import javax.jcr.Node;
+import org.komodo.plugin.framework.teiid.AbstractTeiidService;
+import org.komodo.plugin.framework.teiid.Messages;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.TeiidJdbcInfo;
 import org.komodo.spi.runtime.TeiidParent;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.type.DataTypeManager;
-import org.komodo.teiid.framework.AbstractTeiidService;
-import org.komodo.teiid.framework.Messages;
 import org.teiid.core.util.ApplicationInfo;
 import org.teiid.query.parser.QueryParser;
 import org.teiid.query.sql.lang.Command;

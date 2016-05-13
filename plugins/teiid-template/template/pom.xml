@@ -112,7 +112,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.komodo.plugins</groupId>
-			<artifactId>komodo-plugin-teiid-framework</artifactId>
+			<artifactId>komodo-plugin-framework</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -177,7 +177,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.komodo.plugins</groupId>
-			<artifactId>komodo-plugin-teiid-framework</artifactId>
+			<artifactId>komodo-plugin-framework</artifactId>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
