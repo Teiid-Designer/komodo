@@ -7,7 +7,7 @@
 
 		<delete file="${index.file}" quiet="true" failonerror="false"/>
 
-		<echo file="${index.file}" append="true">&lt;teiids&gt;${line.separator}</echo>
+		<echo file="${index.file}" append="true">&lt;bundles&gt;${line.separator}</echo>
 
 		<ac:for param="file" xmlns:ac="antlib:net.sf.antcontrib">
 			<fileset dir="${bundles.dir}" includes="*.jar" />
@@ -17,14 +17,14 @@
 				<basename property="file.name" file="@{file}"/>
 
 				<echoxml file="${index.file}" append="true">
-					<teiid>
+					<bundle>
 						<filename>${file.name}</filename>
-					</teiid>
+					</bundle>
 				</echoxml>
 			</sequential>
 		</ac:for>
 
-		<echo file="${index.file}" append="true">&lt;/teiids&gt;</echo>
+		<echo file="${index.file}" append="true">&lt;/bundles&gt;</echo>
 
 	</target>
 

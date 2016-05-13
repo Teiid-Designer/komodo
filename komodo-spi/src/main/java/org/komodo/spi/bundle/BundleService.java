@@ -19,23 +19,20 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  */
-package org.komodo.plugin.framework.teiid;
+package org.komodo.spi.bundle;
 
-import org.komodo.plugin.framework.AbstractBundleService;
-import org.komodo.spi.query.TeiidService;
-import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.constants.StringConstants;
 
-public abstract class AbstractTeiidService extends AbstractBundleService implements TeiidService {
+public interface BundleService extends StringConstants {
 
-    private final TeiidVersion version;
+    /**
+     * @return the symbolic name of this service's parent bundle
+     */
+    String getParentBundle();
 
-    public AbstractTeiidService(String parentBundle, TeiidVersion version) {
-        super(parentBundle);
-        this.version = version;
-    }
+    /**
+     * Dispose of this service
+     */
+    void dispose();
 
-    @Override
-    public TeiidVersion getVersion() {
-        return version;
-    }
 }

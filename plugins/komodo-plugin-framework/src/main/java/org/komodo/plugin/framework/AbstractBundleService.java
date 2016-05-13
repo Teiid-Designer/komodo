@@ -19,23 +19,18 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  */
-package org.komodo.plugin.framework.teiid;
+package org.komodo.plugin.framework;
 
-import org.komodo.plugin.framework.AbstractBundleService;
-import org.komodo.spi.query.TeiidService;
-import org.komodo.spi.runtime.version.TeiidVersion;
+public class AbstractBundleService {
 
-public abstract class AbstractTeiidService extends AbstractBundleService implements TeiidService {
+    protected final String parentBundle;
 
-    private final TeiidVersion version;
-
-    public AbstractTeiidService(String parentBundle, TeiidVersion version) {
-        super(parentBundle);
-        this.version = version;
+    public AbstractBundleService(String parentBundle) {
+        this.parentBundle = parentBundle;
     }
 
-    @Override
-    public TeiidVersion getVersion() {
-        return version;
+    public String getParentBundle() {
+        return parentBundle;
     }
+
 }

@@ -14,29 +14,8 @@
 
 	<properties>
 		<version.teiid>%TEIID_VERSION%</version.teiid>
-		<version.apache.felix>1.0.0</version.apache.felix>
 		<version.aesh>0.33.12.redhat-1</version.aesh>
 		<version.org.jboss.dmr>1.2.1.Final-redhat-1</version.org.jboss.dmr>
-
-		<!-- Only import the javax package in jre not any from 3rd-party libs -->
-		<imported.packages>
-			org.komodo.spi.*,
-			org.komodo.teiid.framework,
-			javax.jcr,
-			org.modeshape.jcr.api,
-			!javax.binding,
-			!javax.persistence,
-			!javax.resource*,
-			!javax.security.auth.message*,
-			!javax.security.jacc,
-			!javax.servlet*,
-			!javax.transaction*,
-			!javax.xml.bind,
-			!javax.xml.ws,
-			javax.*,
-			sun.*
-			com.sun.*
-		</imported.packages>
 
 		<!-- The actual maven version of jboss to be downloaded -->
 		<version.org.jboss.as>7.5.0.Final-redhat-15</version.org.jboss.as>
