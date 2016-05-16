@@ -71,6 +71,7 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
+import org.komodo.osgi.storage.StorageServiceProvider;
 import org.komodo.osgi.teiid.TeiidServiceProvider;
 import org.komodo.plugin.framework.AbstractBundleService;
 import org.komodo.plugin.framework.teiid.AbstractDataTypeManager;
@@ -80,9 +81,12 @@ import org.komodo.spi.constants.SystemConstants;
 import org.komodo.spi.lexicon.TeiidSqlLexicon;
 import org.komodo.spi.outcome.Outcome;
 import org.komodo.spi.query.TeiidService;
+import org.komodo.spi.repository.Exportable;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.storage.StorageConnector;
+import org.komodo.spi.storage.StorageService;
 import org.komodo.spi.type.DataTypeManager;
 import org.komodo.spi.uuid.WorkspaceUUIDService;
 import org.komodo.utils.KEnvironment;
@@ -144,6 +148,7 @@ public class PluginService implements StringConstants {
 
     private TeiidServiceProvider teiidServiceProvider;
 
+    private StorageServiceProvider storageServiceProvider;
 
     private int cacheExpirationValue = 10;
 
@@ -199,6 +204,10 @@ public class PluginService implements StringConstants {
             Outcome.class,
             // org.komodo.spi.uuid
             WorkspaceUUIDService.class,
+            // org.komodo.spi.storage
+            StorageConnector.class,
+            // org.komodo.spi.repository
+            Exportable.class,
 
             /**
              * plugin framework
@@ -384,6 +393,10 @@ public class PluginService implements StringConstants {
         framework.start();
 
         this.teiidServiceProvider = new TeiidServiceProvider(this);
+        this.teiidServiceProvider.open();
+
+        this.storageServiceProvider = new StorageServiceProvider(this);
+        this.storageServiceProvider.open();
 
         installBundles();
     }
@@ -439,6 +452,8 @@ public class PluginService implements StringConstants {
         if (teiidServiceProvider != null)
             teiidServiceProvider.dispose();
 
+        if (storageServiceProvider != null)
+            storageServiceProvider.dispose();
 
         framework.stop();
 
@@ -470,6 +485,11 @@ public class PluginService implements StringConstants {
             String key = keys.nextElement();
             if (TeiidService.VERSION_PROPERTY.equals(key)) {
                 teiidServiceProvider.register(headers.get(key), bundle.getSymbolicName());
+                break;
+            }
+
+            if (StorageService.STORAGE_ID_PROPERTY.equals(key)) {
+                storageServiceProvider.register(headers.get(key), bundle.getSymbolicName());
                 break;
             }
         }
@@ -584,6 +604,26 @@ public class PluginService implements StringConstants {
         return getTeiidService(Version.DEFAULT_TEIID_VERSION.get());
     }
 
+    /**
+     * @return the set of supported storage services
+     */
+    public Set<String> getSupportedStorageTypes() throws Exception {
+        if (!isActive())
+            throw new Exception(Messages.getString(Messages.PluginService.ServiceNotStarted));
+
+        return storageServiceProvider.getSupportedStorageTypes();
+    }
+
+    /**
+     * @param storageType
+     * @return the storage service for the given storage type
+     * @throws Exception
+     */
+    public synchronized StorageService getStorageService(String storageType) throws Exception {
+        if (!isActive())
+            throw new Exception(Messages.getString(Messages.PluginService.ServiceNotStarted));
+
+        return storageServiceProvider.getStorageService(storageType);
     }
 
     public int getCacheExpirationValue() {

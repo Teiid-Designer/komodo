@@ -38,11 +38,13 @@
 		</imported.packages>
 
 	</properties>
+
 	<modules>
 		<module>komodo-plugin-framework</module>
 		<module>teiid-8.11</module>
 		<module>teiid-8.12</module>
 		<module>komodo-plugin-service</module>
+		<module>storage-git</module>
 	</modules>
 
 	<dependencyManagement>
@@ -62,6 +64,11 @@
 			<dependency>
 				<groupId>org.komodo.plugins.teiid</groupId>
 				<artifactId>teiid-8.12</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.komodo.plugins.storage</groupId>
+				<artifactId>storage-git</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 

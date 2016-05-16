@@ -15,6 +15,7 @@
 		<version.apache.felix.fileinstall>3.5.2</version.apache.felix.fileinstall>
 		<includePluginGroupIds>
 			org.komodo.plugins.teiid,
+			org.komodo.plugins.storage
 		</includePluginGroupIds>
 	</properties>
 
@@ -74,6 +75,12 @@
 		<dependency>
 			<groupId>org.komodo.plugins.teiid</groupId>
 			<artifactId>teiid-8.12</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.komodo.plugins.storage</groupId>
+			<artifactId>storage-git</artifactId>
 			<scope>provided</scope>
 		</dependency>
 

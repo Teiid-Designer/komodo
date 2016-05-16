@@ -39,8 +39,6 @@ public abstract class AbstractServiceProvider<S extends BundleService, K> extend
     public AbstractServiceProvider(PluginService pluginService) {
         super(pluginService.getContext(), Bundle.ACTIVE | Bundle.STOPPING, null);
         this.pluginService = pluginService;
-        // Open this as a tracker
-        open();
     }
 
     public PluginService getPluginService() {

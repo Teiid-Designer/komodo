@@ -28,6 +28,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.net.URL;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 import javax.jcr.Node;
 import org.junit.Test;
@@ -36,6 +37,8 @@ import org.komodo.spi.query.TeiidService;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion.Version;
 import org.komodo.spi.runtime.version.TeiidVersion;
+import org.komodo.spi.storage.StorageConnector;
+import org.komodo.spi.storage.StorageService;
 import org.mockito.Mockito;
 import org.osgi.framework.Bundle;
 
@@ -216,5 +219,20 @@ public class TestPluginService extends AbstractTestPluginService implements Stri
         TeiidService teiidService = service.getDefaultTeiidService();
         assertNotNull(teiidService);
         assertEquals(version, teiidService.getVersion());
+    }
+
+    @Test
+    public void testGetGitStorageConnector()  throws Exception {
+        assertEquals(Bundle.ACTIVE, service.getState());
+
+        String storageType = "git";
+        Set<String> storageTypes = service.getSupportedStorageTypes();
+        assertTrue(storageTypes.contains(storageType));
+
+        StorageService storageService = service.getStorageService(storageType);
+        assertNotNull(storageService);
+
+        StorageConnector connector = storageService.getConnector(new Properties());
+        assertNotNull(connector);
     }
 }
