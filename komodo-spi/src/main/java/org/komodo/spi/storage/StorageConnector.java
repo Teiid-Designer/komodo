@@ -21,11 +21,11 @@
  */
 package org.komodo.spi.storage;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-import java.util.TreeMap;
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Exportable;
+import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
  * A storage connector is a client to a certain type of storage.
@@ -33,12 +33,12 @@ import org.komodo.spi.repository.Exportable;
  * repositories, allowing writes to the storage and retrieval of
  * inidividual artifacts
  */
-public interface StorageConnector {
+public interface StorageConnector extends StringConstants {
 
     /**
      * @return the id of the connector
      */
-    public StorageConnectorId getId();
+    StorageConnectorId getId();
 
     /**
      * Write the {@link Exportable} to the storage according to the
@@ -46,31 +46,33 @@ public interface StorageConnector {
      *
      * @param artifact
      * @param parameters
+     * @throws Exception 
      */
-    public void write(Exportable artifact, Properties parameters);
-
-    /**
-     * @param artifact
-     * @return Return the stream of the given artifact from the storage
-     *                  location. If cannot be found or does not exist then returns <code>null</code>.
-     * @throws if IO error occurs
-     */
-    public InputStream synchronize(Exportable artifact) throws IOException;
+    void write(Exportable artifact, UnitOfWork transaction, Properties parameters) throws Exception;
 
     /**
      * Refreshes the connection and any cached files from the storage location
+     * @return true if refresh was successful, false otherwise
+     * @throws Exception 
      */
-    public void refresh();
+    boolean refresh() throws Exception;
 
     /**
-     * @return true if the storage can is browsable. For example, a
-     * git repository is browsable while a JDBC database is not.
+     * @param location
+     * @return input stream to the file located at the given location
+     * @throws Exception
      */
-    public boolean canBrowse();
+    InputStream read(String location) throws Exception;
 
     /**
      * @return the walked tree-structure of the storage location.
      * Note. if the storage is not browseable then this will return <code>null</code>.
+     * @throws Exception 
      */
-    public TreeMap<String, String> browse();
+    StorageTree<String> browse() throws Exception;
+
+    /**
+     * Dispose of this connector
+     */
+    void dispose();
 }

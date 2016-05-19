@@ -89,6 +89,7 @@ import org.komodo.spi.storage.StorageConnector;
 import org.komodo.spi.storage.StorageService;
 import org.komodo.spi.type.DataTypeManager;
 import org.komodo.spi.uuid.WorkspaceUUIDService;
+import org.komodo.utils.ArgCheck;
 import org.komodo.utils.KEnvironment;
 import org.modeshape.jcr.api.Session;
 import org.osgi.framework.Bundle;
@@ -216,6 +217,12 @@ public class PluginService implements StringConstants {
             AbstractBundleService.class,
             // org.komodo.plugin.framework.teiid
             AbstractDataTypeManager.class,
+
+            /**
+             * utils
+             */
+            // org.komodo.utils
+            ArgCheck.class,
 
             /**
              * The javax libraries are not exported by default in osgi

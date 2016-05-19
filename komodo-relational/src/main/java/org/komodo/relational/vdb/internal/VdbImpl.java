@@ -226,6 +226,11 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
             }
         }
 
+        @Override
+        public String getName(UnitOfWork transaction) throws KException {
+            return getVdbName(transaction);
+        }
+
         /**
          * {@inheritDoc}
          *

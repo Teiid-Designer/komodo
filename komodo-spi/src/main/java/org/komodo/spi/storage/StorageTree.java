@@ -19,34 +19,22 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  */
-package org.komodo.storage.git;
+package org.komodo.spi.storage;
 
-import java.util.Properties;
-import org.komodo.plugin.framework.AbstractBundleService;
-import org.komodo.spi.storage.StorageConnector;
-import org.komodo.spi.storage.StorageService;
+/**
+ * Tree describing a hierarchy or collection of file names
+ */
+public class StorageTree<T> extends StorageParent<T> {
 
-public class StorageServiceImpl extends AbstractBundleService implements StorageService {
-
-    public static final String STORAGE_ID = "git";
-
-    public StorageServiceImpl(String parentBundle) {
-        super(parentBundle);
+    /**
+     * Default constructor
+     */
+    public StorageTree() {
+        super(null);
     }
 
     @Override
-    public String getStorageId() {
-        return STORAGE_ID;
+    public String getPath() {
+        return FORWARD_SLASH;
     }
-
-    @Override
-    public StorageConnector getConnector(Properties parameters) throws Exception {
-        return new GitStorageConnector(parameters);
-    }
-
-    @Override
-    public void dispose() {
-        // Nothing required
-    }
-
 }

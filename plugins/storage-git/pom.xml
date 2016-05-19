@@ -12,16 +12,31 @@
 	<description>Storage connector for accessing a git repository</description>
 	<packaging>bundle</packaging>
 
+	<properties>
+		<version.jgit>[4.3.0,4.4.0)</version.jgit>
+	</properties>
+
 	<dependencyManagement>
 		<dependencies>
+			<dependency>
+				<groupId>org.eclipse.jgit</groupId>
+				<artifactId>org.eclipse.jgit</artifactId>
+				<version>${version.jgit}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
 	<dependencies>
-		<!-- These will be imported by the bundle at runtime so only required for development -->
+		<!-- These will be imported by the bundle at runtime so only required for 
+			development -->
 		<dependency>
 			<groupId>org.komodo</groupId>
 			<artifactId>komodo-spi</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.komodo</groupId>
+			<artifactId>komodo-utils</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -47,6 +62,11 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.eclipse.jgit</groupId>
+			<artifactId>org.eclipse.jgit</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>org.komodo</groupId>
 			<artifactId>komodo-utils</artifactId>
 			<type>test-jar</type>
@@ -55,27 +75,6 @@
 	</dependencies>
 
 	<build>
-		<resources>
-			<resource>
-				<directory>${project.basedir}/src/main/resources</directory>
-			</resource>
-			<resource>
-				<directory>${project.basedir}/src/test/resources</directory>
-				<filtering>true</filtering>
-			</resource>
-			<!-- Provides a location for any extra objects to be included in the final 
-				jar -->
-			<resource>
-				<directory>${project.basedir}/extra</directory>
-			</resource>
-		</resources>
-
-		<testResources>
-			<testResource>
-				<directory>${project.basedir}/src/test/resources</directory>
-				<filtering>true</filtering>
-			</testResource>
-		</testResources>
 
 		<!-- Usual compiling ensuring the java version is 1.8 -->
 		<plugins>
