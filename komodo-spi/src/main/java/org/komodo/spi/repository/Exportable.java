@@ -34,6 +34,15 @@ public interface Exportable {
     /**
      * @param transaction
      *        the transaction (can be <code>null</code> if update should be automatically committed)
+     * @return the name of this exportable
+     * @throws KException
+     *         if an error occurs
+     */
+    String getName(UnitOfWork transaction) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @param properties (can be <code>null</code> or empty)
      * @return a text representation of the current object state (never empty)
      * @throws KException

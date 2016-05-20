@@ -7,7 +7,7 @@
 		<version>0.0.4-SNAPSHOT</version>
 	</parent>
 	<groupId>org.komodo.plugins</groupId>
-	<artifactId>komodo-plugin-teiid-framework</artifactId>
+	<artifactId>komodo-plugin-framework</artifactId>
 	<name>Teiid Framework</name>
 	<description>Provides standard classes and interfaces for the teiid modules to utilise</description>
 

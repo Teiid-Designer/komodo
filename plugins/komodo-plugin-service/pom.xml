@@ -13,6 +13,10 @@
 	<properties>
 		<version.apache.felix.framework>5.4.0</version.apache.felix.framework>
 		<version.apache.felix.fileinstall>3.5.2</version.apache.felix.fileinstall>
+		<includePluginGroupIds>
+			org.komodo.plugins.teiid,
+			org.komodo.plugins.storage
+		</includePluginGroupIds>
 	</properties>
 
 	<dependencyManagement>
@@ -41,7 +45,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.komodo.plugins</groupId>
-			<artifactId>komodo-plugin-teiid-framework</artifactId>
+			<artifactId>komodo-plugin-framework</artifactId>
 		</dependency>
 
 		<dependency>
@@ -71,6 +75,12 @@
 		<dependency>
 			<groupId>org.komodo.plugins.teiid</groupId>
 			<artifactId>teiid-8.12</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.komodo.plugins.storage</groupId>
+			<artifactId>storage-git</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
@@ -163,7 +173,7 @@
 							<goal>copy-dependencies</goal>
 						</goals>
 						<configuration>
-							<includeGroupIds>org.komodo.plugins.teiid</includeGroupIds>
+							<includeGroupIds>${includePluginGroupIds}</includeGroupIds>
 							<outputDirectory>${project.basedir}/src/main/resources/bundles</outputDirectory>
 							<stripVersion>true</stripVersion>
 							<overWriteReleases>false</overWriteReleases>

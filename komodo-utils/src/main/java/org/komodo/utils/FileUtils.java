@@ -22,15 +22,19 @@
 
 package org.komodo.utils;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.util.ArrayList;
-
 import org.komodo.spi.constants.StringConstants;
 
 /**
@@ -583,108 +587,108 @@ public class FileUtils implements StringConstants {
 //            throw new KomodoCoreRuntimeException(Messages.getString(Messages.FileUtils.Unable_to_delete_file_in, dirPath));
 //        }
 //    }
-//
-//    /**
-//     * Write an InputStream to a file.
-//     * @param is 
-//     * @param f 
-//     * @throws IOException 
-//     */
-//    public static void write(final InputStream is, final File f) throws IOException {
-//        write(is, f, DEFAULT_BUFFER_SIZE);
-//    }
-//
-//    /**
-//     * Write an InputStream to a file.
-//     * @param is 
-//     * @param f 
-//     * @param bufferSize 
-//     * @throws IOException 
-//     */
-//    public static void write(final InputStream is, final File f, final int bufferSize) throws IOException {
-//        f.delete();
-//        final File parentDir = f.getParentFile();
-//        if (parentDir != null) parentDir.mkdirs();
-//
-//        FileOutputStream fio = null;
-//        BufferedOutputStream bos = null;
-//        try {
-//            fio = new FileOutputStream(f);
-//            bos = new BufferedOutputStream(fio);
-//            if (bufferSize > 0) {
-//                final byte[] buff = new byte[bufferSize];
-//                int bytesRead;
-//
-//                // Simple read/write loop.
-//                while (-1 != (bytesRead = is.read(buff, 0, buff.length)))
-//                    bos.write(buff, 0, bytesRead);
-//            }
-//            bos.flush();
-//        } finally {
-//            if (bos != null) bos.close();
-//            if (fio != null) fio.close();
-//        }
-//    }
-//
-//    /**
-//     * Write an InputStream to a file.
-//     * @param is 
-//     * @param fileName 
-//     * @throws IOException 
-//     */
-//    public static void write(final InputStream is, final String fileName) throws IOException {
-//        final File f = new File(fileName);
-//        write(is, f);
-//    }
-//
-//    /**
-//     *  Write a byte array to a file.
-//     * @param data 
-//     * @param fileName 
-//     * @throws IOException 
-//     */
-//    public static void write(byte[] data, String fileName) throws IOException {
-//        ByteArrayInputStream bais = null;
-//        InputStream is = null;
-//        try {
-//            bais = new ByteArrayInputStream(data);
-//            is = new BufferedInputStream(bais);
-//
-//            write(is, fileName);
-//        } finally {
-//            if (is != null) {
-//                is.close();
-//            }
-//            if (bais != null) {
-//                bais.close();
-//            }
-//        }
-//    }
-//    
-//    /**
-//     *  Write a byte array to a file.
-//     * @param data 
-//     * @param file 
-//     * @throws IOException 
-//     */
-//     public static void write(byte[] data, File file) throws IOException {
-//         ByteArrayInputStream bais = null;
-//         InputStream is = null;
-//         try {
-//             bais = new ByteArrayInputStream(data);
-//             is = new BufferedInputStream(bais);
-//    
-//             write(is, file);  
-//         } finally {
-//             if (is != null) {
-//                 is.close();
-//             }
-//             if (bais != null) {
-//                 bais.close();
-//             }
-//         }
-//     }
-//
+
+    /**
+     * Write an InputStream to a file.
+     * @param is 
+     * @param f 
+     * @throws IOException 
+     */
+    public static void write(final InputStream is, final File f) throws IOException {
+        write(is, f, DEFAULT_BUFFER_SIZE);
+    }
+
+    /**
+     * Write an InputStream to a file.
+     * @param is 
+     * @param f 
+     * @param bufferSize 
+     * @throws IOException 
+     */
+    public static void write(final InputStream is, final File f, final int bufferSize) throws IOException {
+        f.delete();
+        final File parentDir = f.getParentFile();
+        if (parentDir != null) parentDir.mkdirs();
+
+        FileOutputStream fio = null;
+        BufferedOutputStream bos = null;
+        try {
+            fio = new FileOutputStream(f);
+            bos = new BufferedOutputStream(fio);
+            if (bufferSize > 0) {
+                final byte[] buff = new byte[bufferSize];
+                int bytesRead;
+
+                // Simple read/write loop.
+                while (-1 != (bytesRead = is.read(buff, 0, buff.length)))
+                    bos.write(buff, 0, bytesRead);
+            }
+            bos.flush();
+        } finally {
+            if (bos != null) bos.close();
+            if (fio != null) fio.close();
+        }
+    }
+
+    /**
+     * Write an InputStream to a file.
+     * @param is 
+     * @param fileName 
+     * @throws IOException 
+     */
+    public static void write(final InputStream is, final String fileName) throws IOException {
+        final File f = new File(fileName);
+        write(is, f);
+    }
+
+    /**
+     *  Write a byte array to a file.
+     * @param data 
+     * @param fileName 
+     * @throws IOException 
+     */
+    public static void write(byte[] data, String fileName) throws IOException {
+        ByteArrayInputStream bais = null;
+        InputStream is = null;
+        try {
+            bais = new ByteArrayInputStream(data);
+            is = new BufferedInputStream(bais);
+
+            write(is, fileName);
+        } finally {
+            if (is != null) {
+                is.close();
+            }
+            if (bais != null) {
+                bais.close();
+            }
+        }
+    }
+    
+    /**
+     *  Write a byte array to a file.
+     * @param data 
+     * @param file 
+     * @throws IOException 
+     */
+     public static void write(byte[] data, File file) throws IOException {
+         ByteArrayInputStream bais = null;
+         InputStream is = null;
+         try {
+             bais = new ByteArrayInputStream(data);
+             is = new BufferedInputStream(bais);
+    
+             write(is, file);  
+         } finally {
+             if (is != null) {
+                 is.close();
+             }
+             if (bais != null) {
+                 bais.close();
+             }
+         }
+     }
+
     private FileUtils() {
     }
 }

@@ -14,15 +14,48 @@
 	<name>Komodo Dynamic Plugins</name>
 	<description>Bundles that can be loaded into Komodo using its OSGI extension framework</description>
 
+	<properties>
+		<version.apache.felix>1.0.0</version.apache.felix>
+		<!-- Only import the javax package in jre not any from 3rd-party libs -->
+		<imported.packages>
+			org.komodo.spi.*,
+			org.komodo.plugin.framework,
+			org.komodo.plugin.framework.teiid,
+			javax.jcr,
+			org.modeshape.jcr.api,
+			!javax.binding,
+			!javax.persistence,
+			!javax.resource*,
+			!javax.security.auth.message*,
+			!javax.security.jacc,
+			!javax.servlet*,
+			!javax.transaction*,
+			!javax.xml.bind,
+			!javax.xml.ws,
+			javax.*,
+			sun.*
+			com.sun.*
+		</imported.packages>
+
+	</properties>
+
 	<modules>
-		<module>komodo-plugin-teiid-framework</module>
+		<module>komodo-plugin-framework</module>
 		<module>teiid-8.11</module>
 		<module>teiid-8.12</module>
 		<module>komodo-plugin-service</module>
+		<module>storage-git</module>
 	</modules>
 
 	<dependencyManagement>
 		<dependencies>
+			<dependency>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>org.osgi.core</artifactId>
+				<version>${version.apache.felix}</version>
+				<scope>provided</scope>
+			</dependency>
+
 			<dependency>
 				<groupId>org.komodo.plugins.teiid</groupId>
 				<artifactId>teiid-8.11</artifactId>
@@ -31,6 +64,11 @@
 			<dependency>
 				<groupId>org.komodo.plugins.teiid</groupId>
 				<artifactId>teiid-8.12</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.komodo.plugins.storage</groupId>
+				<artifactId>storage-git</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
@@ -44,7 +82,7 @@
 
 			<dependency>
 				<groupId>org.komodo.plugins</groupId>
-				<artifactId>komodo-plugin-teiid-framework</artifactId>
+				<artifactId>komodo-plugin-framework</artifactId>
 				<version>${project.version}</version>
 				<type>test-jar</type>
 				<scope>test</scope>

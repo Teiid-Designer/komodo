@@ -19,29 +19,22 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  */
-package org.komodo.teiid.framework;
+package org.komodo.spi.storage;
 
-import org.komodo.spi.query.TeiidService;
-import org.komodo.spi.runtime.version.TeiidVersion;
+/**
+ * Tree describing a hierarchy or collection of file names
+ */
+public class StorageTree<T> extends StorageParent<T> {
 
-public abstract class AbstractTeiidService implements TeiidService {
-
-    private final String parentBundle;
-
-    private final TeiidVersion version;
-
-    public AbstractTeiidService(String parentBundle, TeiidVersion version) {
-        this.parentBundle = parentBundle;
-        this.version = version;
+    /**
+     * Default constructor
+     */
+    public StorageTree() {
+        super(null);
     }
 
     @Override
-    public String getParentBundle() {
-        return parentBundle;
-    }
-
-    @Override
-    public TeiidVersion getVersion() {
-        return version;
+    public String getPath() {
+        return FORWARD_SLASH;
     }
 }

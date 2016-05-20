@@ -19,36 +19,18 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  */
-package org.komodo.teiid.framework;
+package org.komodo.plugin.framework;
 
-import org.komodo.spi.constants.StringConstants;
+public class AbstractBundleService {
 
-public interface ExtensionConstants extends StringConstants {
+    protected final String parentBundle;
 
-    String TRANSLATOR = "translator";
+    public AbstractBundleService(String parentBundle) {
+        this.parentBundle = parentBundle;
+    }
 
-    String DEPLOYMENT = "deployment";
-
-    String DRIVER_CLASS_NAME = "driver-class-name";
-
-    String DRIVER_NAME = "driver-name";
-
-    String INSTALLED_DRIVERS_LIST = "installed-drivers-list";
-
-    String DATA_SOURCES = "datasources";
-
-    String RESULT = "result";
-
-    String SUBSYSTEM = "subsystem";
-
-    String PROFILE = "profile";
-
-    String CHILD_TYPE = "child-type";
-
-    String READ_CHILDREN_NAMES = "read-children-names";
-
-    String CONNECTION_FIELD = "connection";
-
-    String DOMAIN_MODE_FIELD = "domainMode";
+    public String getParentBundle() {
+        return parentBundle;
+    }
 
 }
