@@ -26,7 +26,6 @@ import javax.jcr.Node;
 import org.junit.Test;
 import org.komodo.modeshape.AbstractTSqlSequencerTest;
 import org.komodo.modeshape.teiid.language.SortSpecification.NullOrdering;
-import org.komodo.osgi.PluginService;
 import org.komodo.repository.KSequencerController.SequencerType;
 import org.komodo.spi.lexicon.TeiidSqlLexicon.AbstractCompareCriteria;
 import org.komodo.spi.lexicon.TeiidSqlLexicon.AbstractSetCriteria;
@@ -80,7 +79,6 @@ import org.komodo.spi.lexicon.TeiidSqlLexicon.XMLElement;
 import org.komodo.spi.query.CriteriaOperator;
 import org.komodo.spi.query.JoinTypeTypes;
 import org.komodo.spi.query.Operation;
-import org.komodo.spi.query.TeiidService;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.DataTypeManager.DataTypeName;
 
