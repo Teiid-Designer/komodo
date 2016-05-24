@@ -26,7 +26,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.komodo.relational.TypeResolver;
+import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.datasource.Datasource;
+import org.komodo.relational.folder.Folder;
 import org.komodo.relational.model.AccessPattern;
 import org.komodo.relational.model.Column;
 import org.komodo.relational.model.DataTypeResultSet;
@@ -98,9 +100,13 @@ public class TypeResolverRegistry {
 
         index(KomodoType.COLUMN, Column.RESOLVER);
 
+        index(KomodoType.DATASERVICE, Dataservice.RESOLVER);
+
         index(KomodoType.DATASOURCE, Datasource.RESOLVER);
 
         index(KomodoType.DATA_TYPE_RESULT_SET, DataTypeResultSet.RESOLVER);
+
+        index(KomodoType.FOLDER, Folder.RESOLVER);
 
         index(KomodoType.FOREIGN_KEY, ForeignKey.RESOLVER);
 

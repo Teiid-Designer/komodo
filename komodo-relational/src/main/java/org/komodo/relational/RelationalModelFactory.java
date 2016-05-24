@@ -22,8 +22,12 @@
 package org.komodo.relational;
 
 import org.komodo.core.KomodoLexicon;
+import org.komodo.relational.dataservice.Dataservice;
+import org.komodo.relational.dataservice.internal.DataserviceImpl;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.datasource.internal.DatasourceImpl;
+import org.komodo.relational.folder.Folder;
+import org.komodo.relational.folder.internal.FolderImpl;
 import org.komodo.relational.model.AbstractProcedure;
 import org.komodo.relational.model.AccessPattern;
 import org.komodo.relational.model.Column;
@@ -249,6 +253,43 @@ public final class RelationalModelFactory {
      *        the repository where the model object will be created (cannot be <code>null</code>)
      * @param parentWorkspacePath
      *        the parent path (can be empty)
+     * @param serviceName
+     *        the name of the dataservice fragment to create (cannot be empty)
+     * @return the Dataservice model object (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    public static Dataservice createDataservice( final UnitOfWork transaction,
+                                                 final Repository repository,
+                                                 final String parentWorkspacePath,
+                                                 final String serviceName ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( serviceName, "serviceName" ); //$NON-NLS-1$
+
+        // make sure path is in the library
+        String parentPath = parentWorkspacePath;
+        final String workspacePath = repository.komodoWorkspace( transaction ).getAbsolutePath();
+
+        if ( StringUtils.isBlank( parentWorkspacePath ) ) {
+            parentPath = workspacePath;
+        } else if ( !parentPath.startsWith( workspacePath ) ) {
+            parentPath = ( workspacePath + parentPath );
+        }
+        
+        final KomodoObject kobject = repository.add( transaction, parentPath, serviceName, KomodoLexicon.DataService.NODE_TYPE );
+        final Dataservice result = new DataserviceImpl( transaction, repository, kobject.getAbsolutePath() );
+        return result;
+    }
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param repository
+     *        the repository where the model object will be created (cannot be <code>null</code>)
+     * @param parentWorkspacePath
+     *        the parent path (can be empty)
      * @param sourceName
      *        the name of the datasource fragment to create (cannot be empty)
      * @return the Datasource model object (never <code>null</code>)
@@ -346,6 +387,43 @@ public final class RelationalModelFactory {
         } catch (final Exception e) {
             throw handleError( e );
         }
+    }
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param repository
+     *        the repository where the model object will be created (cannot be <code>null</code>)
+     * @param parentWorkspacePath
+     *        the parent path (can be empty)
+     * @param folderName
+     *        the name of the folder to create (cannot be empty)
+     * @return the Folder object (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    public static Folder createFolder( final UnitOfWork transaction,
+                                       final Repository repository,
+                                       final String parentWorkspacePath,
+                                       final String folderName ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( folderName, "folderName" ); //$NON-NLS-1$
+
+        // make sure path is in the workspace
+        String parentPath = parentWorkspacePath;
+        final String workspacePath = repository.komodoWorkspace( transaction ).getAbsolutePath();
+
+        if ( StringUtils.isBlank( parentWorkspacePath ) ) {
+            parentPath = workspacePath;
+        } else if ( !parentPath.startsWith( workspacePath ) ) {
+            parentPath = ( workspacePath + parentPath );
+        }
+        
+        final KomodoObject kobject = repository.add( transaction, parentPath, folderName, KomodoLexicon.Folder.NODE_TYPE );
+        final Folder result = new FolderImpl( transaction, repository, kobject.getAbsolutePath() );
+        return result;
     }
 
     /**
@@ -854,7 +932,7 @@ public final class RelationalModelFactory {
      * @param parentWorkspacePath
      *        the parent path (can be empty)
      * @param id
-     *        the name of the schema fragment to create (cannot be empty)
+     *        the name of the teiid object to create (cannot be empty)
      * @return the Teiid model object (never <code>null</code>)
      * @throws KException
      *         if an error occurs

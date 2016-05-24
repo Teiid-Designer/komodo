@@ -33,9 +33,19 @@ import org.komodo.spi.constants.StringConstants;
 public enum KomodoType {
 
     /**
+     * Dataservice
+     */
+    DATASERVICE("dataservice"), //$NON-NLS-1$
+
+    /**
      * Datasource
      */
-    DATASOURCE("datasource"),
+    DATASOURCE("datasource"), //$NON-NLS-1$
+
+    /**
+     * Folder
+     */
+    FOLDER,
 
     /**
      * Schema

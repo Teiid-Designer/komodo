@@ -30,8 +30,10 @@ import org.komodo.relational.RelationalObject;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.RelationalProperty;
 import org.komodo.relational.TypeResolver;
+import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.datasource.internal.DatasourceImpl;
+import org.komodo.relational.folder.Folder;
 import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.internal.TypeResolverRegistry;
 import org.komodo.relational.model.Model;
@@ -69,7 +71,8 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
      * The allowed child types.
      */
     private static final KomodoType[] CHILD_TYPES = new KomodoType[] { Datasource.IDENTIFIER, Vdb.IDENTIFIER,
-                                                                       Schema.IDENTIFIER, Teiid.IDENTIFIER };
+                                                                       Schema.IDENTIFIER, Teiid.IDENTIFIER, 
+                                                                       Dataservice.IDENTIFIER, Folder.IDENTIFIER };
 
     /**
      * The type identifier.
@@ -209,6 +212,26 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
      *        the transaction (cannot be <code>null</code> or have a state that is not
      *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @param parent
+     *        the parent of the dataservice object being created (can be <code>null</code>)
+     * @param serviceName
+     *        the name of the dataservice to create (cannot be empty)
+     * @return the Dataservice object (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    public Dataservice createDataservice( final UnitOfWork uow,
+                                        final KomodoObject parent,
+                                        final String serviceName ) throws KException {
+        final String path = ( ( parent == null ) ? getRepository().komodoWorkspace( uow ).getAbsolutePath()
+                                                 : parent.getAbsolutePath() );
+         return RelationalModelFactory.createDataservice( uow, getRepository(), path, serviceName );
+    }
+
+    /**
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param parent
      *        the parent of the datasource object being created (can be <code>null</code>)
      * @param sourceName
      *        the name of the datasource to create (cannot be empty)
@@ -222,6 +245,26 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
         final String path = ( ( parent == null ) ? getRepository().komodoWorkspace( uow ).getAbsolutePath()
                                                  : parent.getAbsolutePath() );
          return RelationalModelFactory.createDatasource( uow, getRepository(), path, sourceName );
+    }
+
+    /**
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param parent
+     *        the parent of the folder object being created (can be <code>null</code>)
+     * @param folderName
+     *        the name of the folder to create (cannot be empty)
+     * @return the Folder object (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    public Folder createFolder( final UnitOfWork uow,
+                                final KomodoObject parent,
+                                final String folderName ) throws KException {
+        final String path = ( ( parent == null ) ? getRepository().komodoWorkspace( uow ).getAbsolutePath()
+            : parent.getAbsolutePath() );
+        return RelationalModelFactory.createFolder( uow, getRepository(), path, folderName );
     }
 
     /**
