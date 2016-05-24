@@ -44,6 +44,7 @@
 		<module>teiid-8.11</module>
 		<module>teiid-8.12</module>
 		<module>komodo-plugin-service</module>
+		<module>storage-file</module>
 		<module>storage-git</module>
 	</modules>
 
@@ -64,6 +65,11 @@
 			<dependency>
 				<groupId>org.komodo.plugins.teiid</groupId>
 				<artifactId>teiid-8.12</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.komodo.plugins.storage</groupId>
+				<artifactId>storage-file</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

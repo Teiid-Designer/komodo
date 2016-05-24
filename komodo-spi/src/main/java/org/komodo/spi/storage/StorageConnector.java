@@ -36,6 +36,11 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 public interface StorageConnector extends StringConstants {
 
     /**
+     * The destination of a file
+     */
+    String FILE_DEST_PROPERTY = "file-dest-property";
+
+    /**
      * @return the id of the connector
      */
     StorageConnectorId getId();

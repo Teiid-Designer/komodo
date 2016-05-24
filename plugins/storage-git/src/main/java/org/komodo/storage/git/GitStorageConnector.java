@@ -65,11 +65,6 @@ public class GitStorageConnector implements StorageConnector {
      */
     public static final String REPO_BRANCH_PROPERTY = "repo-branch-property";
 
-    /**
-     * The destination to locate a file for committing
-     */
-    public static final String FILE_DEST_PROPERTY = "file-dest-property";
-
     private final Properties parameters;
 
     private final StorageConnectorId id;
