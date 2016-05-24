@@ -43,6 +43,23 @@ public interface KomodoLexicon extends StringConstants {
     }
 
     /**
+     * The JCR names associated with a data service node type.
+     */
+    public interface DataService extends LibraryComponent, WorkspaceItem {
+
+        /**
+         * The node type name of a data service. Value is {@value} .
+         */
+        String NODE_TYPE = Namespace.PREFIX + COLON + "dataService"; //$NON-NLS-1$
+
+        /**
+         * The name and node type name of the data services grouping node. Value is {@value} .
+         */
+        String GROUP_NODE = Namespace.PREFIX + COLON + "dataServices"; //$NON-NLS-1$
+
+    }
+
+    /**
      * The JCR names associated with a data source node type.
      */
     public interface DataSource extends LibraryComponent, WorkspaceItem {
@@ -117,6 +134,18 @@ public interface KomodoLexicon extends StringConstants {
          * The name and node type name of the Komodo Teiid Cache. Value is {@value}.
          */
         String TEIID_CACHE = Namespace.PREFIX + COLON + "teiidCache"; //$NON-NLS-1$
+    }
+
+    /**
+     * The JCR names associated with a folder node type.
+     */
+    public interface Folder extends LibraryComponent, WorkspaceItem {
+
+        /**
+         * The node type name of a folder. Value is {@value} .
+         */
+        String NODE_TYPE = Namespace.PREFIX + COLON + "folder"; //$NON-NLS-1$
+
     }
 
     /**

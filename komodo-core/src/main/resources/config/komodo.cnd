@@ -55,7 +55,7 @@
 
 /*
  * The Komodo workspace keeps track of the Teiid servers, Komodo repositories, Teiid 
- * data sources, and other resources created and being worked on by the user.
+ * data sources, dataservices, folders and other resources created and being worked on by the user.
  */
 [tko:workspace] > nt:unstructured
 
@@ -149,6 +149,16 @@
   + tko:dataSources (tko:dataSources) copy
 
 /*
+ * A folder
+ */
+[tko:folder] > nt:unstructured
+  + * (tko:folder) copy
+  + * (tko:vdb) copy
+  + * (tko:dataSource) copy
+  + * (tko:dataService) copy
+  + * (tko:schema) copy
+
+/*
  * The schemas/models grouping node used by the library. Child nodes represent Teiid DDL.
  */
 [tko:schemas] > nt:unstructured
@@ -172,6 +182,18 @@
  */
 [tko:vdb] > vdb:virtualDatabase, tko:libraryComponent
 
+/*
+ * The data service grouping node used by the workspace. Child nodes are data services.
+ */
+[tko:dataServices] > nt:unstructured
+  + * (tko:dataService) copy
+
+/*
+ * A data service known by the workspace.
+ */
+[tko:dataService] > tko:vdb
+  + * (tko:vdb) copy
+ 
 /*
  * The VDB imports grouping node used by the library. Child nodes represent Import VDB definitions.
  */

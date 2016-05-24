@@ -34,7 +34,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalProperty;
+import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.datasource.Datasource;
+import org.komodo.relational.folder.Folder;
 import org.komodo.relational.model.AccessPattern;
 import org.komodo.relational.model.DataTypeResultSet;
 import org.komodo.relational.model.ForeignKey;
@@ -87,6 +89,27 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
     public void uncacheWorkspaceManager() {
         WorkspaceManager.uncacheInstance(_repo);
         wsMgr = null;
+    }
+
+    @Test
+    public void shouldCreateDatasource() throws Exception {
+        final Datasource datasource = this.wsMgr.createDatasource( getTransaction(), null, "ds" );
+        assertThat( datasource, is( notNullValue() ) );
+        assertThat( _repo.getFromWorkspace( getTransaction(), datasource.getAbsolutePath() ), is( ( KomodoObject )datasource ) );
+    }
+
+    @Test
+    public void shouldCreateDataservice() throws Exception {
+        final Dataservice dataservice = this.wsMgr.createDataservice( getTransaction(), null, "service" );
+        assertThat( dataservice, is( notNullValue() ) );
+        assertThat( _repo.getFromWorkspace( getTransaction(), dataservice.getAbsolutePath() ), is( ( KomodoObject )dataservice ) );
+    }
+
+    @Test
+    public void shouldCreateFolder() throws Exception {
+        final Folder folder = this.wsMgr.createFolder( getTransaction(), null, "model" );
+        assertThat( folder, is( notNullValue() ) );
+        assertThat( _repo.getFromWorkspace( getTransaction(), folder.getAbsolutePath() ), is( ( KomodoObject )folder ) );
     }
 
     @Test
@@ -255,8 +278,8 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
 
     @Test
     public void shouldHaveCorrectChildTypes() {
-        assertThat( Arrays.asList( this.wsMgr.getChildTypes() ), hasItems( Datasource.IDENTIFIER, Vdb.IDENTIFIER, Schema.IDENTIFIER, Teiid.IDENTIFIER ) );
-        assertThat( this.wsMgr.getChildTypes().length, is( 4 ) );
+        assertThat( Arrays.asList( this.wsMgr.getChildTypes() ), hasItems( Folder.IDENTIFIER, Datasource.IDENTIFIER, Dataservice.IDENTIFIER, Vdb.IDENTIFIER, Schema.IDENTIFIER, Teiid.IDENTIFIER ) );
+        assertThat( this.wsMgr.getChildTypes().length, is( 6 ) );
     }
 
     @Test( expected = Exception.class )
@@ -365,6 +388,13 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldResolveDataservice() throws Exception {
+        final Dataservice service = this.wsMgr.createDataservice(getTransaction(), null, "service");
+        final KomodoObject kobject = new ObjectImpl(_repo, service.getAbsolutePath(), service.getIndex());
+        assertThat(this.wsMgr.resolve(getTransaction(), kobject, Dataservice.class), is(instanceOf(Dataservice.class)));
+    }
+
+    @Test
     public void shouldResolveDataTypeResultSet() throws Exception {
         final Model model = createModel();
         final StoredProcedure procedure = model.addStoredProcedure(getTransaction(), "procedure");
@@ -379,6 +409,13 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
         final Entry entry = vdb.addEntry(getTransaction(), "entry", "path");
         final KomodoObject kobject = new ObjectImpl(_repo, entry.getAbsolutePath(), entry.getIndex());
         assertThat(this.wsMgr.resolve(getTransaction(), kobject, Entry.class), is(instanceOf(Entry.class)));
+    }
+
+    @Test
+    public void shouldResolveFolder() throws Exception {
+        final Folder folder = this.wsMgr.createFolder(getTransaction(), null, "folder");
+        final KomodoObject kobject = new ObjectImpl(_repo, folder.getAbsolutePath(), folder.getIndex());
+        assertThat(this.wsMgr.resolve(getTransaction(), kobject, Folder.class), is(instanceOf(Folder.class)));
     }
 
     @Test
@@ -455,6 +492,13 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
         final Function function = model.addPushdownFunction(getTransaction(), "function");
         final KomodoObject kobject = new ObjectImpl(_repo, function.getAbsolutePath(), function.getIndex());
         assertThat(this.wsMgr.resolve(getTransaction(), kobject, PushdownFunction.class), is(instanceOf(PushdownFunction.class)));
+    }
+
+    @Test
+    public void shouldResolveSchema() throws Exception {
+        final Schema schema = createSchema();
+        final KomodoObject kobject = new ObjectImpl(_repo, schema.getAbsolutePath(), schema.getIndex());
+        assertThat(this.wsMgr.resolve(getTransaction(), kobject, Schema.class), is(instanceOf(Schema.class)));
     }
 
     @Test
@@ -709,6 +753,21 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
                 }
                 case RESULT_SET_COLUMN: {
                     // see separate test
+                    break;
+                }
+                case FOLDER: {
+                    KomodoObject result = wsMgr.create(getTransaction(), workspace, "test" + id, type);
+                    assertNotNull(result);
+                    break;
+                }
+                case DATASOURCE: {
+                    KomodoObject result = wsMgr.create(getTransaction(), workspace, "test" + id, type);
+                    assertNotNull(result);
+                    break;
+                }
+                case DATASERVICE: {
+                    KomodoObject result = wsMgr.create(getTransaction(), workspace, "test" + id, type);
+                    assertNotNull(result);
                     break;
                 }
                 case SCHEMA: {

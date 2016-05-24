@@ -65,13 +65,13 @@ import org.xml.sax.InputSource;
 /**
  * An implementation of a virtual database manifest.
  */
-public final class VdbImpl extends RelationalObjectImpl implements Vdb {
+public class VdbImpl extends RelationalObjectImpl implements Vdb {
 
     /**
      * The allowed child types.
      */
-    private static final KomodoType[] CHILD_TYPES = new KomodoType[] { DataRole.IDENTIFIER, Entry.IDENTIFIER, Model.IDENTIFIER,
-                                                                      Translator.IDENTIFIER, VdbImport.IDENTIFIER };
+    protected static final KomodoType[] CHILD_TYPES = new KomodoType[] { DataRole.IDENTIFIER, Entry.IDENTIFIER, Model.IDENTIFIER,
+                                                                         Translator.IDENTIFIER, VdbImport.IDENTIFIER };
 
 	/**
 	 * Include the special properties into the primary type descriptor.
@@ -540,7 +540,7 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
         } else if ( VdbLexicon.Translator.TRANSLATOR.equals( type ) ) {
             result = getTranslators( transaction, namePatterns );
         } else {
-            result = KomodoObject.EMPTY_ARRAY;
+            result = super.getChildrenOfType(transaction, type, namePatterns);
         }
 
         return result;

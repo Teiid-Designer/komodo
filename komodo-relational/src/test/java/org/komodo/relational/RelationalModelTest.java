@@ -24,8 +24,11 @@ package org.komodo.relational;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import org.komodo.core.KomodoLexicon;
+import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.datasource.Datasource;
+import org.komodo.relational.folder.Folder;
 import org.komodo.relational.model.Model;
+import org.komodo.relational.model.Schema;
 import org.komodo.relational.model.Table;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.vdb.Vdb;
@@ -94,6 +97,24 @@ public class RelationalModelTest extends AbstractLocalRepositoryTest {
         return vdb;
     }
 
+    protected Schema createSchema() throws Exception {
+        return createSchema( getDefaultSchemaName() );
+    }
+
+    protected Schema createSchema( final String schemaName ) throws Exception {
+        return createSchema( schemaName, null );
+    }
+
+    protected Schema createSchema( final String schemaName,
+                                   final KomodoObject parent ) throws Exception {
+        final WorkspaceManager mgr = WorkspaceManager.getInstance( _repo );
+        final Schema schema = mgr.createSchema( getTransaction(), parent, schemaName );
+
+        assertThat( schema.getPrimaryType( getTransaction() ).getName(), is( KomodoLexicon.Schema.NODE_TYPE ) );
+        assertThat( schema.getName( getTransaction() ), is( schemaName ) );
+        return schema;
+    }
+
     protected Teiid createTeiid() throws Exception {
         return createTeiid( getDefaultTeiidName() );
     }
@@ -112,8 +133,26 @@ public class RelationalModelTest extends AbstractLocalRepositoryTest {
         return teiid;
     }
 
+    protected Dataservice createDataservice() throws Exception {
+        return createDataservice( getDefaultDataserviceName() );
+    }
+
+    protected Dataservice createDataservice( final String serviceName ) throws Exception {
+        return createDataservice( serviceName, null );
+    }
+
+    protected Dataservice createDataservice( final String serviceName,
+                                             final KomodoObject parent ) throws Exception {
+        final WorkspaceManager mgr = WorkspaceManager.getInstance( _repo );
+        final Dataservice ds = mgr.createDataservice( getTransaction(), parent, serviceName );
+
+        assertThat( ds.getPrimaryType( getTransaction() ).getName(), is( KomodoLexicon.DataService.NODE_TYPE ) );
+        assertThat( ds.getName( getTransaction() ), is( serviceName ) );
+        return ds;
+    }
+
     protected Datasource createDatasource() throws Exception {
-        return createDatasource( getDefaultTeiidName() );
+        return createDatasource( getDefaultDatasourceName() );
     }
 
     protected Datasource createDatasource( final String dsName ) throws Exception {
@@ -121,13 +160,31 @@ public class RelationalModelTest extends AbstractLocalRepositoryTest {
     }
 
     protected Datasource createDatasource( final String dsName,
-                                      final KomodoObject parent ) throws Exception {
+                                           final KomodoObject parent ) throws Exception {
         final WorkspaceManager mgr = WorkspaceManager.getInstance( _repo );
         final Datasource ds = mgr.createDatasource( getTransaction(), parent, dsName );
 
         assertThat( ds.getPrimaryType( getTransaction() ).getName(), is( KomodoLexicon.DataSource.NODE_TYPE ) );
         assertThat( ds.getName( getTransaction() ), is( dsName ) );
         return ds;
+    }
+
+    protected Folder createFolder() throws Exception {
+        return createFolder( getDefaultFolderName() );
+    }
+
+    protected Folder createFolder( final String folderName ) throws Exception {
+        return createFolder( folderName, null );
+    }
+
+    protected Folder createFolder( final String folderName,
+                                             final KomodoObject parent ) throws Exception {
+        final WorkspaceManager mgr = WorkspaceManager.getInstance( _repo );
+        final Folder folder = mgr.createFolder( getTransaction(), parent, folderName );
+
+        assertThat( folder.getPrimaryType( getTransaction() ).getName(), is( KomodoLexicon.Folder.NODE_TYPE ) );
+        assertThat( folder.getName( getTransaction() ), is( folderName ) );
+        return folder;
     }
 
     protected String getDefaultModelName() {
@@ -142,12 +199,24 @@ public class RelationalModelTest extends AbstractLocalRepositoryTest {
         return ( this.name.getMethodName() + "-Vdb" );
     }
 
+    protected String getDefaultSchemaName() {
+        return ( this.name.getMethodName() + "-Schema" );
+    }
+
     protected String getDefaultTeiidName() {
         return ( this.name.getMethodName() + "-Teiid" );
     }
 
+    protected String getDefaultDataserviceName() {
+        return ( this.name.getMethodName() + "-Dataservice" );
+    }
+
     protected String getDefaultDatasourceName() {
         return ( this.name.getMethodName() + "-Datasource" );
+    }
+
+    protected String getDefaultFolderName() {
+        return ( this.name.getMethodName() + "-Folder" );
     }
 
 }
