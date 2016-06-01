@@ -832,4 +832,9 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
             throw handleError(e);
         }
     }
+
+    @Override
+    public String getExportableType() throws KException {
+        return DDL;
+    }
 }
