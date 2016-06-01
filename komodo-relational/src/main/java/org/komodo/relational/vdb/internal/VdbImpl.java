@@ -226,6 +226,11 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
             }
         }
 
+        @Override
+        public String getName(UnitOfWork transaction) throws KException {
+            return getVdbName(transaction);
+        }
+
         /**
          * {@inheritDoc}
          *
@@ -236,6 +241,10 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
             return this.xml;
         }
 
+        @Override
+        public String getExportableType() throws KException {
+            return XML;
+        }
     }
 
     /**
@@ -1245,4 +1254,8 @@ public final class VdbImpl extends RelationalObjectImpl implements Vdb {
         setObjectProperty(uow, "setVersion", VdbLexicon.Vdb.VERSION, newVersion); //$NON-NLS-1$
     }
 
+    @Override
+    public String getExportableType() throws KException {
+        return XML;
+    }
 }

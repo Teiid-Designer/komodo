@@ -330,7 +330,12 @@ public class DatasourceImpl extends RelationalChildRestrictedObject implements D
         
         return xmlResult;
     }
-    
+
+    @Override
+    public String getExportableType() throws KException {
+        return XML;
+    }
+
     /**
      * {@inheritDoc}
      *

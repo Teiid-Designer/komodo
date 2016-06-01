@@ -23,6 +23,7 @@ package org.komodo.test.utils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -1349,5 +1350,28 @@ public class TestUtilities implements StringConstants {
         }
 
         return buf.toString();
+    }
+
+    /**
+     * @param prefix
+     * @param suffix
+     * @return a temporary file that is deleted on exit
+     * @throws IOException
+     */
+    public static File createTempFile(String prefix, String suffix) throws IOException {
+        File tempFile = File.createTempFile(prefix, suffix);
+        tempFile.deleteOnExit();
+        return tempFile;
+    }
+
+    /**
+     * Compare the contents of 2 files
+     *
+     * @param original
+     * @param fileToCompare
+     * @throws IOException
+     */
+    public static void compareFileContents(File original, File fileToCompare) throws IOException {
+        assertTrue(org.apache.commons.io.FileUtils.contentEquals(original, fileToCompare));
     }
 }

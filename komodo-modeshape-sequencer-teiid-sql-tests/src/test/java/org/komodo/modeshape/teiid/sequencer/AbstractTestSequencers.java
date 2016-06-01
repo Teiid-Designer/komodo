@@ -195,6 +195,7 @@ public abstract class AbstractTestSequencers extends AbstractTSqlSequencerTest {
         verifyUnaryFromClauseGroup(fromClause, JoinPredicate.LEFT_CLAUSE_REF_NAME, "C");
     }
 
+    @SuppressWarnings( "unused" )
     private interface MaterializedOptions {
 
         /**

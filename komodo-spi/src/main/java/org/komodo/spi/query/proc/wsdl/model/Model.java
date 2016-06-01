@@ -35,7 +35,7 @@ public interface Model {
      */
     Service[] getServices();
 
-    Map getNamespaces();
+    Map<Object, Object> getNamespaces();
 
     Service getService( String name );
 

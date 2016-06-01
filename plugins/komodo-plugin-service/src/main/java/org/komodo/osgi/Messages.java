@@ -55,7 +55,8 @@ public class Messages implements StringConstants {
     @SuppressWarnings( "javadoc" )
     public enum Error {
 
-        UnsupportedTeiid;
+        UnsupportedTeiid,
+        UnsupportedStorageType;
 
         @Override
         public String toString() {

@@ -88,7 +88,7 @@ public interface RuleConstants {
     /**
      * Compares {@link Locale}s based on display language.
      */
-    Comparator LOCALE_COMPARATOR = new Comparator<Locale>() {
+    Comparator<Locale> LOCALE_COMPARATOR = new Comparator<Locale>() {
 
         /**
          * @param thisLocale the first locale to be compared

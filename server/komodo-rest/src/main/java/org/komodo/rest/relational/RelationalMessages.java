@@ -283,7 +283,37 @@ public final class RelationalMessages {
         /**
          * An error indicating an error occurred whilst fetching the teiid translators
          */
-        TEIID_SERVICE_GET_TRANSLATORS_ERROR;
+        TEIID_SERVICE_GET_TRANSLATORS_ERROR,
+
+        /**
+         * The importexport service lacks at least one storage attribute
+         */
+        IMPORT_EXPORT_SERVICE_NO_PARAMETERS_ERROR,
+
+        /**
+         * the importexport service encountered an unsupported storage type
+         */
+        IMPORT_EXPORT_SERVICE_UNSUPPORTED_TYPE_ERROR,
+
+        /**
+         * The import export service cannot parse the request body
+         */
+        IMPORT_EXPORT_SERVICE_REQUEST_PARSING_ERROR,
+
+        /**
+         * The import export service cannot find the artifact to be exported
+         */
+        IMPORT_EXPORT_SERVICE_NO_ARTIFACT_ERROR,
+
+        /**
+         * The import export service is trying to export an artifact that is not exportable
+         */
+        IMPORT_EXPORT_SERVICE_ARTIFACT_NOT_EXPORTABLE_ERROR,
+
+        /**
+         * An import export service error
+         */
+        IMPORT_EXPORT_SERVICE_EXPORT_ERROR;
 
         /**
          * {@inheritDoc}

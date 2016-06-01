@@ -14,28 +14,7 @@
 
 	<properties>
 		<version.teiid>8.11.5</version.teiid>
-		<version.apache.felix>1.0.0</version.apache.felix>
 		<version.aesh>0.33.12.redhat-1</version.aesh>
-
-		<!-- Only import the javax package in jre not any from 3rd-party libs -->
-		<imported.packages>
-			org.komodo.spi.*,
-			org.komodo.teiid.framework,
-			javax.jcr,
-			org.modeshape.jcr.api,
-			!javax.binding,
-			!javax.persistence,
-			!javax.resource*,
-			!javax.security.auth.message*,
-			!javax.security.jacc,
-			!javax.servlet*,
-			!javax.transaction*,
-			!javax.xml.bind,
-			!javax.xml.ws,
-			javax.*,
-			sun.*
-			com.sun.*
-		</imported.packages>
 
 		<!-- The actual maven version of jboss to be downloaded -->
 		<version.org.jboss.dmr>1.2.1.Final-redhat-1</version.org.jboss.dmr>
@@ -88,13 +67,6 @@
 				<artifactId>jboss-as-controller-client</artifactId>
 				<version>${version.org.jboss.as}</version>
 			</dependency>
-
-			<dependency>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>org.osgi.core</artifactId>
-				<version>${version.apache.felix}</version>
-				<scope>provided</scope>
-			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -108,7 +80,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.komodo.plugins</groupId>
-			<artifactId>komodo-plugin-teiid-framework</artifactId>
+			<artifactId>komodo-plugin-framework</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -173,7 +145,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.komodo.plugins</groupId>
-			<artifactId>komodo-plugin-teiid-framework</artifactId>
+			<artifactId>komodo-plugin-framework</artifactId>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>

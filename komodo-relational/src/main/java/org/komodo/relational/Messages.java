@@ -257,7 +257,12 @@ public class Messages implements StringConstants {
         /**
          * An error indicating server manager failed to create the default teiid server model
          */
-        SERVER_MANAGER_DEFAULT_TEIID_ERROR;
+        SERVER_MANAGER_DEFAULT_TEIID_ERROR,
+
+        /**
+         * An error indicating there is no storage plugin for the given storage type
+         */
+        EXPORT_STORAGE_TYPE_INVALID;
 
         @Override
         public String toString() {

@@ -36,6 +36,6 @@ public interface KListener {
      * Exceptions should not be thrown by the listener.
      * @param event the event being processed (never <code>null</code>)
      */
-    void process(final KEvent event);
+    void process(final KEvent<?> event);
 
 }

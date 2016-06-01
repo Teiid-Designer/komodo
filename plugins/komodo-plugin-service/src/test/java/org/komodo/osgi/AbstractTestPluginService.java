@@ -56,7 +56,7 @@ public abstract class AbstractTestPluginService implements StringConstants {
         XPath xpath = xpathFactory.newXPath();
 
         // XPath expression to find all the teiid jar filenames
-        XPathExpression expr = xpath.compile(PluginService.INDEX_TEIID_PATH);
+        XPathExpression expr = xpath.compile(PluginService.INDEX_BUNDLE_PATH);
 
         //evaluate expression result on XML document
         NodeList nodes = (NodeList)expr.evaluate(doc, XPathConstants.NODESET);

@@ -3,7 +3,7 @@
   <mirrors>
     <mirror>
       <id>jboss-developer-repository-group</id>
-      <mirrorOf>*,!jboss-deprecated,!redhat-techpreview-all-repository,!jboss-earlyaccess,!modeshape-in-project</mirrorOf>
+      <mirrorOf>*,!jboss-deprecated,!redhat-techpreview-all-repository,!jboss-earlyaccess,!modeshape-in-project,!eclipse</mirrorOf>
       <name>JBoss.org Developer Repository Group</name>
       <url>https://repository.jboss.org/nexus/content/groups/developer/</url>
     </mirror>
@@ -174,6 +174,24 @@
         </repository>
       </repositories>
     </profile> 
+    <profile>
+      <id>eclipse</id>
+      <repositories>
+        <repository>
+          <id>eclipse</id>
+          <name>Eclipse Repository</name>
+          <url>https://repo.eclipse.org/content/groups/releases</url>
+          <layout>default</layout>
+          <releases>
+            <enabled>true</enabled>
+            <updatePolicy>always</updatePolicy>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </repository>
+      </repositories>
+    </profile>
     </profiles>
   <activeProfiles>
     <activeProfile>jboss-nexus</activeProfile>
@@ -182,5 +200,6 @@
     <activeProfile>jboss-public-repository</activeProfile>
     <activeProfile>jboss-developer-repository</activeProfile>
     <activeProfile>jboss-earlyaccess</activeProfile>
+    <activeProfile>eclipse</activeProfile>
   </activeProfiles>
 </settings>

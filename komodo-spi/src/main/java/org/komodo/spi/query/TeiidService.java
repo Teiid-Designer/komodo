@@ -21,14 +21,14 @@
  */
 package org.komodo.spi.query;
 
-import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.bundle.BundleService;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.TeiidJdbcInfo;
 import org.komodo.spi.runtime.TeiidParent;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.DataTypeManager;
 
-public interface TeiidService extends StringConstants {
+public interface TeiidService extends BundleService {
 
     /**
      * The prefix of all teiid service bundles
@@ -58,11 +58,6 @@ public interface TeiidService extends StringConstants {
     DataTypeManager getDataTypeManager() throws Exception;
 
     /**
-     * @return the symbolic name of this service's parent bundle
-     */
-    String getParentBundle();
-
-    /**
      * Convert the sql into a tree beneath parent
      *
      * @param sql
@@ -81,9 +76,4 @@ public interface TeiidService extends StringConstants {
      * @throws Exception 
      */
     TeiidInstance getTeiidInstance(TeiidParent teiidParent, TeiidJdbcInfo jdbcInfo) throws Exception;
-
-    /**
-     * Dispose of this service
-     */
-    void dispose();
 }

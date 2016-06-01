@@ -33,8 +33,8 @@ import org.jboss.as.cli.operation.impl.DefaultOperationRequestBuilder;
 import org.jboss.as.controller.client.ModelControllerClient;
 import org.jboss.dmr.ModelNode;
 import org.komodo.spi.runtime.DataSourceDriver;
-import org.komodo.teiid.framework.ExtensionConstants;
-import org.komodo.teiid.framework.Messages;
+import org.komodo.plugin.framework.teiid.ExtensionConstants;
+import org.komodo.plugin.framework.teiid.Messages;
 import org.teiid.adminapi.Admin;
 import org.teiid.adminapi.jboss.MetadataMapper;
 

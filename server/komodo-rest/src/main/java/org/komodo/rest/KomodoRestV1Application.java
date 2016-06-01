@@ -51,6 +51,7 @@ import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.SynchronousCallback;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.json.JsonConstants;
+import org.komodo.rest.service.KomodoImportExportService;
 import org.komodo.rest.service.KomodoSearchService;
 import org.komodo.rest.service.KomodoTeiidService;
 import org.komodo.rest.service.KomodoUtilService;
@@ -317,6 +318,16 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
          * Placeholder added to an URI to allow a specific data source id
          */
         String DATA_SOURCE_PLACEHOLDER = "{dataSourceName}"; //$NON-NLS-1$
+
+        /**
+         * The name of the resource used for importing and exporting artifacts
+         */
+        String IMPORT_EXPORT_SEGMENT = "importexport";
+
+        /**
+         * The export operation of the import export service
+         */
+        String EXPORT = "export";
     }
 
     private static final int TIMEOUT = 1;
@@ -362,6 +373,7 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         objs.add( new KomodoVdbService( this.kengine ) );
         objs.add( new KomodoSearchService( this.kengine ));
         objs.add( new KomodoTeiidService( this.kengine ));
+        objs.add( new KomodoImportExportService( this.kengine ));
 
         CorsFilter corsFilter = initCorsFilter();
         objs.add(corsFilter);

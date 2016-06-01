@@ -127,4 +127,8 @@ public class SchemaImpl extends RelationalObjectImpl implements Schema {
         setObjectProperty( uow, "setRendition", KomodoLexicon.Schema.RENDITION, rendition ); //$NON-NLS-1$
     }
 
+    @Override
+    public String getExportableType() throws KException {
+        return DDL;
+    }
 }

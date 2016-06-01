@@ -32,7 +32,7 @@ import org.komodo.spi.query.JoinTypeTypes;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.DataTypeManager;
 import org.komodo.spi.type.DataTypeManager.DataTypeName;
-import org.komodo.teiid.framework.AbstractNodeGenerator;
+import org.komodo.plugin.framework.teiid.AbstractNodeGenerator;
 import org.teiid.language.Like.MatchMode;
 import org.teiid.language.SortSpecification.NullOrdering;
 import org.teiid.query.sql.LanguageObject;

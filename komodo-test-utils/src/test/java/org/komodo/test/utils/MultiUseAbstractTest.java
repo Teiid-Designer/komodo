@@ -25,7 +25,6 @@ package org.komodo.test.utils;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;

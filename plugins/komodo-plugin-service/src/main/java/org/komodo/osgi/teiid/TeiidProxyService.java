@@ -22,6 +22,7 @@
 package org.komodo.osgi.teiid;
 
 import java.util.concurrent.TimeUnit;
+import org.komodo.osgi.AbstractProxyService;
 import org.komodo.spi.query.TeiidService;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.TeiidJdbcInfo;
@@ -29,89 +30,39 @@ import org.komodo.spi.runtime.TeiidParent;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.type.DataTypeManager;
 import org.komodo.utils.KLog;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.RemovalListener;
-import com.google.common.cache.RemovalNotification;
 
-public class TeiidProxyService implements TeiidService {
-
-    private final String className;
-
-    private long bundleId;
-
-    private final BundleContext bundleContext;
-
-    private RemovalListener<String, TeiidInstance> removalListener = new RemovalListener<String, TeiidInstance>() {
-
-        @Override
-        public void onRemoval(RemovalNotification<String, TeiidInstance> notification) {
-            TeiidInstance instance = notification.getValue();
-            if (instance == null)
-                return;
-
-            instance.disconnect();
-        }
-    };
-
-    private final Cache<String, TeiidInstance> instanceCache;
-
-    private TeiidService delegate;
+public class TeiidProxyService extends AbstractProxyService<TeiidService, TeiidInstance>
+    implements TeiidService {
 
     public TeiidProxyService(String className, long bundleId,
                                                  BundleContext bundleContext,
                                                  int cacheExpiryValue, TimeUnit cacheExpiryUnits) {
-        this.className = className;
-        this.bundleId = bundleId;
-        this.bundleContext = bundleContext;
-        this.instanceCache = CacheBuilder.newBuilder()
-                                                                      .concurrencyLevel(4)
-                                                                      .expireAfterWrite(cacheExpiryValue, cacheExpiryUnits)
-                                                                      .softValues()
-                                                                      .removalListener(removalListener)
-                                                                      .build();
+        super(className, bundleId, bundleContext, cacheExpiryValue, cacheExpiryUnits);
     }
 
-    private synchronized void load() throws Exception {
-        if (delegate != null)
-            return;
-
-        // Get the bundle.
-        Bundle bundle = bundleContext.getBundle(bundleId);
-        // Load the class and instantiate it.
-        Class<?> clazz = bundle.loadClass(className);
-        delegate = (TeiidService) clazz.getConstructor(String.class).newInstance(bundle.getSymbolicName());
+    @Override
+    protected void onInstanceRemoval(TeiidInstance instance) {
+        instance.disconnect();
     }
 
     @Override
     public TeiidVersion getVersion() throws Exception {
-        load();
-        return delegate.getVersion();
-    }
-
-    @Override
-    public String getParentBundle() {
-        Bundle bundle = bundleContext.getBundle(bundleId);
-        return bundle.getSymbolicName();
+        return getDelegate().getVersion();
     }
 
     @Override
     public DataTypeManager getDataTypeManager() throws Exception {
-        load();
-        return delegate.getDataTypeManager();
+        return getDelegate().getDataTypeManager();
     }
 
     @Override
     public void nodeConvert(String sql, Object parent) throws Exception {
-        load();
-        delegate.nodeConvert(sql, parent);
+        getDelegate().nodeConvert(sql, parent);
     }
 
     @Override
     public TeiidInstance getTeiidInstance(TeiidParent teiidParent, TeiidJdbcInfo jdbcInfo) throws Exception {
-        load();
 
         //
         // Ensure that 1 teiid instance at a time is fetched from
@@ -135,31 +86,23 @@ public class TeiidProxyService implements TeiidService {
             }
 
             String key = buf.toString();
-            TeiidInstance instance = instanceCache.getIfPresent(key);
+            TeiidInstance instance = retrieve(key);
             if (instance != null && ! instance.isSound()) {
-                instanceCache.invalidate(buf.toString());
+                invalidate(key);
                 instance = null;
             }
 
             if (instance == null) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Teiid Instance with id {0} not found in cache({1}). Creating new one.",
-                                                          buf.toString(), instanceCache.size());
+                                                          key, cacheSize());
                 }
 
-                instance = delegate.getTeiidInstance(teiidParent, jdbcInfo);
-                instanceCache.put(buf.toString(), instance);
+                instance = getDelegate().getTeiidInstance(teiidParent, jdbcInfo);
+                cache(key, instance);
             }
 
             return instance;
         }
-    }
-
-    @Override
-    public void dispose() {
-        instanceCache.invalidateAll();
-
-        if (delegate != null)
-            delegate.dispose();
     }
 }

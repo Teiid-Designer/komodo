@@ -57,7 +57,7 @@ public class AdapterFactory {
      * @return the adapted instance or null
      */
     @SuppressWarnings( "unchecked" )
-    public <T extends KomodoObject> T adapt(UnitOfWork transaction, Object object, Class<T> adaptedClass) {
+    public <T> T adapt(UnitOfWork transaction, Object object, Class<T> adaptedClass) {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 

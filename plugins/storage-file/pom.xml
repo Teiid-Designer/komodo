@@ -1,0 +1,122 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.komodo</groupId>
+		<artifactId>komodo-plugins</artifactId>
+		<version>0.0.4-SNAPSHOT</version>
+	</parent>
+	<groupId>org.komodo.plugins.storage</groupId>
+	<artifactId>storage-file</artifactId>
+	<name>Komodo Storage File Connector</name>
+	<description>Storage connector for accessing the filesystem</description>
+	<packaging>bundle</packaging>
+
+	<properties>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+		</dependencies>
+	</dependencyManagement>
+
+	<dependencies>
+		<!-- These will be imported by the bundle at runtime so only required for 
+			development -->
+		<dependency>
+			<groupId>org.komodo</groupId>
+			<artifactId>komodo-spi</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.komodo</groupId>
+			<artifactId>komodo-utils</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.komodo.plugins</groupId>
+			<artifactId>komodo-plugin-framework</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.jcr</groupId>
+			<artifactId>jcr</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.modeshape</groupId>
+			<artifactId>modeshape-jcr-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.osgi.core</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.komodo</groupId>
+			<artifactId>komodo-utils</artifactId>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+
+		<!-- Usual compiling ensuring the java version is 1.8 -->
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+
+			<!-- Bundle plugin responsible for embedding the dependencies in the final 
+				jar and adding the bundle metadata to the manifest. * Excludes komodo-spi 
+				from the build since its imported at runtime * komodo-spi is explicitly labelled 
+				as a requirement of the bundle using Import-Package * Transitive dependencies 
+				are embedded to make the bundle whole * Metadata added for storage connection 
+				extension point -->
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<niceManifest>true</niceManifest>
+					<excludeDependencies>komodo-spi</excludeDependencies>
+					<instructions>
+						<Import-Package>${imported.packages}</Import-Package>
+						<Export-Package>!org.komodo.storage.file</Export-Package>
+						<Private-Package>org.komodo.storage.file</Private-Package>
+						<Embed-Dependency>*;scope=compile|runtime;type=!pom</Embed-Dependency>
+						<Embed-Transitive>true</Embed-Transitive>
+						<Bundle-ClassPath>.,{maven-dependencies}</Bundle-ClassPath>
+						<Storage-Connector-Id>file</Storage-Connector-Id>
+						<Storage-Service-Class>org.komodo.storage.file.StorageServiceImpl</Storage-Service-Class>
+					</instructions>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>default-test</id>
+						<goals>
+							<goal>test</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+		</plugins>
+
+	</build>
+
+</project>
