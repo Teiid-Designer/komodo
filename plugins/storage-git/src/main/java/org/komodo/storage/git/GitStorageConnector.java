@@ -65,11 +65,6 @@ public class GitStorageConnector implements StorageConnector {
      */
     public static final String REPO_BRANCH_PROPERTY = "repo-branch-property";
 
-    /**
-     * The destination to locate a file for committing
-     */
-    public static final String FILE_DEST_PROPERTY = "file-dest-property";
-
     private final Properties parameters;
 
     private final StorageConnectorId id;
@@ -137,8 +132,8 @@ public class GitStorageConnector implements StorageConnector {
      * @param parameters
      * @return the file destination from the given parameters
      */
-    public String getFileDestination(Properties parameters) {
-        return parameters.getProperty(FILE_DEST_PROPERTY);
+    public String getFilePath(Properties parameters) {
+        return parameters.getProperty(FILE_PATH_PROPERTY);
     }
 
     @Override
@@ -161,7 +156,7 @@ public class GitStorageConnector implements StorageConnector {
     @Override
     public void write(Exportable artifact, UnitOfWork transaction, Properties parameters) throws Exception {
         ArgCheck.isNotNull(parameters);
-        String destination = getFileDestination(parameters);
+        String destination = getFilePath(parameters);
         ArgCheck.isNotEmpty(destination);
 
         cloneRepository();

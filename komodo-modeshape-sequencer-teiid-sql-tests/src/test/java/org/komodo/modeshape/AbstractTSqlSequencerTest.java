@@ -44,7 +44,6 @@ import org.komodo.spi.query.JoinTypeTypes;
 import org.komodo.spi.runtime.version.DefaultTeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersion;
 import org.komodo.spi.runtime.version.TeiidVersionProvider;
-import org.komodo.spi.type.DataTypeManager;
 import org.komodo.test.utils.AbstractSequencerTest;
 /**
  * Class which serves as base for various sequencer unit tests. In addition to this, it uses the sequencing events fired by

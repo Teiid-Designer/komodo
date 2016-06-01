@@ -40,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import org.jboss.resteasy.plugins.server.undertow.UndertowJaxrsServer;
@@ -215,8 +216,11 @@ public abstract class AbstractKomodoServiceTest implements V1Constants {
         return searchNames;
     }
 
-    protected Invocation.Builder request(final URI uri) {
-        return this.client.target(uri.toString()).request();
+    protected Invocation.Builder request(final URI uri, MediaType... types) {
+        if (types == null || types.length == 0)
+            return this.client.target(uri.toString()).request();
+
+        return this.client.target(uri.toString()).request(types);
     }
 
     protected void assertPortfolio(RestVdb vdb) {

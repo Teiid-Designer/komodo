@@ -32,6 +32,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -687,6 +688,23 @@ public class FileUtils implements StringConstants {
                  bais.close();
              }
          }
+     }
+
+     /**
+      * @param inStream
+      * @return a string representation of the content of the given stream
+      * @throws IOException
+      */
+     public static String streamToString(InputStream inStream) throws IOException {
+         BufferedReader reader = new BufferedReader(new InputStreamReader(inStream));
+         StringBuilder builder = new StringBuilder();
+         String line;
+         while ((line = reader.readLine()) != null) {
+             builder.append(line);
+             builder.append(NEW_LINE);
+         }
+
+         return builder.toString();
      }
 
     private FileUtils() {

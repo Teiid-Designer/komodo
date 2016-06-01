@@ -80,6 +80,12 @@
 
 		<dependency>
 			<groupId>org.komodo.plugins.storage</groupId>
+			<artifactId>storage-file</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.komodo.plugins.storage</groupId>
 			<artifactId>storage-git</artifactId>
 			<scope>provided</scope>
 		</dependency>

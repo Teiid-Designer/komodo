@@ -35,6 +35,7 @@ import java.util.Set;
  * @param <K> key
  * @param <V> value
  */
+@SuppressWarnings( "unchecked" )
 public class KeyInValueHashMap<K, V> extends AbstractMap<K, V> {
 
     /**
@@ -111,14 +112,14 @@ public class KeyInValueHashMap<K, V> extends AbstractMap<K, V> {
             return true;
         }
 
-        private KeyInValueHashMap getOuterType() {
+        private KeyInValueHashMap<K, V> getOuterType() {
             return KeyInValueHashMap.this;
         }
     }
 
     private Set<Map.Entry<K, V>> entrySet = new HashSet<Map.Entry<K, V>>();
 
-    private KeyFromValueAdapter adapter;
+    private KeyFromValueAdapter<K, V> adapter;
 
     /**
      * Create a new instance

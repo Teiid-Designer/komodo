@@ -31,9 +31,19 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
  * A storage connector is a client to a certain type of storage.
  * Implementations will provide access to instances of their storage
  * repositories, allowing writes to the storage and retrieval of
- * inidividual artifacts
+ * individual artifacts
  */
 public interface StorageConnector extends StringConstants {
+
+    /**
+     * The path where the file should be located
+     */
+    String FILE_PATH_PROPERTY = "file-path-property";
+
+    /**
+     * Should a file be 'downloadable' once stored then this property is populated
+     */
+    String DOWNLOADABLE_PATH_PROPERTY = "downloadable-path-property";
 
     /**
      * @return the id of the connector
@@ -46,7 +56,8 @@ public interface StorageConnector extends StringConstants {
      *
      * @param artifact
      * @param parameters
-     * @throws Exception 
+     *
+     * @throws Exception if error occurs
      */
     void write(Exportable artifact, UnitOfWork transaction, Properties parameters) throws Exception;
 

@@ -569,7 +569,7 @@ public class StringNameValidator {
         }
     }
 
-    class Node implements Comparable {
+    class Node implements Comparable<Object> {
 
         final char content;
         boolean marker;
@@ -619,7 +619,7 @@ public class StringNameValidator {
             }
         }
 
-        TreeMap getChildren() {
+        TreeMap<Character, Node> getChildren() {
             if (this.kids == null) {
                 this.kids = new TreeMap<Character, Node>();
             }

@@ -1,0 +1,175 @@
+/*
+ * JBoss, Home of Professional Open Source.
+ * See the COPYRIGHT.txt file distributed with this work for information
+ * regarding copyright ownership.  Some portions may be licensed
+ * to Red Hat, Inc. under one or more contributor license agreements.
+ * 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
+ */
+package org.komodo.storage.file;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.util.Properties;
+import org.komodo.spi.repository.Exportable;
+import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.storage.StorageConnector;
+import org.komodo.spi.storage.StorageConnectorId;
+import org.komodo.spi.storage.StorageNode;
+import org.komodo.spi.storage.StorageTree;
+import org.komodo.utils.ArgCheck;
+import org.komodo.utils.FileUtils;
+
+public class FileStorageConnector implements StorageConnector {
+
+    /**
+     * The path to the home directory of the location of the files handled by this connector
+     */
+    public static final String FILES_HOME_PATH_PROPERTY = "files-home-path-property";
+
+    /**
+     * Jboss tmp directory property
+     */
+    private static final String JBOSS_SERVER_TMP_DIR = "jboss.server.temp.dir";
+
+    /**
+     * The default java tmp directory
+     */
+    private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
+
+    private final StorageConnectorId id;
+
+    private final Properties parameters;
+
+    public FileStorageConnector(Properties parameters) {
+        ArgCheck.isNotNull(parameters);
+
+        this.parameters = parameters;
+
+        this.id = new StorageConnectorId() {
+
+            @Override
+            public String type() {
+                return StorageServiceImpl.STORAGE_ID;
+            }
+
+            @Override
+            public String location() {
+                return getPath();
+            }
+        };
+    }
+
+    @Override
+    public StorageConnectorId getId() {
+        return id;
+    }
+
+    /**
+     * @return repository path
+     */
+    public String getPath() {
+        String property = parameters.getProperty(FILES_HOME_PATH_PROPERTY);
+        if (property != null)
+            return property;
+
+        // If deployed to a jboss server then try and use it tmp directory
+        property = System.getProperty(JBOSS_SERVER_TMP_DIR);
+        if (property != null)
+            return property;
+
+        // Default to using java tmp dir
+        return System.getProperty(JAVA_IO_TMPDIR);
+    }
+
+    /**
+     * @param parameters
+     * @return the file destination from the given parameters
+     */
+    public String getFilePath(Properties parameters) {
+        return parameters.getProperty(FILE_PATH_PROPERTY);
+    }
+
+    protected void setDownloadable(String path) {
+        parameters.setProperty(DOWNLOADABLE_PATH_PROPERTY, path);
+    }
+
+    @Override
+    public InputStream read(String location) throws Exception {
+        File destFile = new File(getPath(), location);
+        if (destFile.exists())
+            return new FileInputStream(destFile);
+
+        throw new FileNotFoundException();
+    }
+
+    @Override
+    public void write(Exportable artifact, UnitOfWork transaction, Properties parameters) throws Exception {
+        ArgCheck.isNotNull(parameters);
+        String filePath = getFilePath(parameters);
+        ArgCheck.isNotEmpty(filePath);
+
+        File destFile = new File(getPath(), filePath);
+
+        //
+        // Write the file contents
+        //
+        String contents = artifact.export(transaction, parameters);
+        FileUtils.write(contents.getBytes(), destFile);
+
+        setDownloadable(destFile.getAbsolutePath());
+    }
+
+    @Override
+    public boolean refresh() throws Exception {
+        return true; // Not applicable to static filesystem
+    }
+
+    private void walk(StorageNode<String> node, File parent) {
+        File[] list = parent.listFiles();
+
+        if (list == null)
+            return;
+
+        for (File file : list) {
+            StorageNode<String> child = node.addChild(file.getName());
+            if (file.isDirectory())
+                walk(child, file);
+        }
+    }
+
+    @Override
+    public StorageTree<String> browse() throws Exception {
+        File dir = new File(getPath());
+        StorageTree<String> storageTree = new StorageTree<String>();
+
+        if (! dir.isDirectory())
+            return storageTree;
+
+        StorageNode<String> node = storageTree.addChild(dir.getName());
+        walk(node, dir);
+
+        return storageTree;
+    }
+
+    @Override
+    public void dispose() {
+        // Nothing to do
+    }
+
+}
