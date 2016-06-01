@@ -21,6 +21,7 @@
 			org.komodo.spi.*,
 			org.komodo.plugin.framework,
 			org.komodo.plugin.framework.teiid,
+			org.komodo.utils.*,
 			javax.jcr,
 			org.modeshape.jcr.api,
 			!javax.binding,

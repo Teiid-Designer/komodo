@@ -96,7 +96,7 @@
 						<Embed-Dependency>*;scope=compile|runtime;type=!pom</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
 						<Bundle-ClassPath>.,{maven-dependencies}</Bundle-ClassPath>
-						<Storage-Connector-Id>git</Storage-Connector-Id>
+						<Storage-Connector-Id>file</Storage-Connector-Id>
 						<Storage-Service-Class>org.komodo.storage.file.StorageServiceImpl</Storage-Service-Class>
 					</instructions>
 				</configuration>

@@ -22,7 +22,9 @@
 package org.komodo.relational.workspace;
 
 import java.util.List;
+import java.util.Properties;
 import org.komodo.core.KomodoLexicon;
+import org.komodo.osgi.PluginService;
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.RelationalModelFactory;
@@ -46,6 +48,7 @@ import org.komodo.repository.ObjectImpl;
 import org.komodo.repository.RepositoryImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.Exportable;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
@@ -53,6 +56,8 @@ import org.komodo.spi.repository.Repository.Id;
 import org.komodo.spi.repository.Repository.State;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.RepositoryObserver;
+import org.komodo.spi.storage.StorageConnector;
+import org.komodo.spi.storage.StorageService;
 import org.komodo.spi.utils.KeyInValueHashMap;
 import org.komodo.spi.utils.KeyInValueHashMap.KeyFromValueAdapter;
 import org.komodo.utils.ArgCheck;
@@ -662,4 +667,36 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
         }
     }
 
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param artifact the vdb to be exported
+     * @param storageType the type of storage to export to
+     * @param parameters the parameters for the storage, appropriate to the storage type
+     *
+     * @return a path to the downloadable file if appropriate for the defined storage type.
+     *                  Otherwise <code>null</code>
+     * @throws KException if error occurs
+     */
+    public String exportArtifact(final UnitOfWork transaction, final Exportable artifact,
+                                       final String storageType, final Properties parameters) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
+                         "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotNull(artifact, "artifact");
+
+        try {
+            StorageService storageService = PluginService.getInstance().getStorageService(storageType);
+            if (storageService == null)
+                throw new KException(Messages.getString(Relational.EXPORT_STORAGE_TYPE_INVALID, storageType));
+
+            StorageConnector connector = storageService.getConnector(parameters);
+            connector.write(artifact, transaction, parameters);
+            return parameters.getProperty(StorageConnector.DOWNLOADABLE_PATH_PROPERTY);
+
+        } catch (Exception e) {
+            throw handleError(e);
+        }
+    }
 }

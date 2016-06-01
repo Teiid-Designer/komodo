@@ -42,13 +42,22 @@ public class FileStorageConnector implements StorageConnector {
      */
     public static final String FILES_HOME_PATH_PROPERTY = "files-home-path-property";
 
+    /**
+     * Jboss tmp directory property
+     */
+    private static final String JBOSS_SERVER_TMP_DIR = "jboss.server.temp.dir";
+
+    /**
+     * The default java tmp directory
+     */
+    private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
+
     private final StorageConnectorId id;
 
     private final Properties parameters;
 
     public FileStorageConnector(Properties parameters) {
         ArgCheck.isNotNull(parameters);
-        ArgCheck.isNotEmpty(parameters.getProperty(FILES_HOME_PATH_PROPERTY));
 
         this.parameters = parameters;
 
@@ -75,15 +84,29 @@ public class FileStorageConnector implements StorageConnector {
      * @return repository path
      */
     public String getPath() {
-        return parameters.getProperty(FILES_HOME_PATH_PROPERTY);
+        String property = parameters.getProperty(FILES_HOME_PATH_PROPERTY);
+        if (property != null)
+            return property;
+
+        // If deployed to a jboss server then try and use it tmp directory
+        property = System.getProperty(JBOSS_SERVER_TMP_DIR);
+        if (property != null)
+            return property;
+
+        // Default to using java tmp dir
+        return System.getProperty(JAVA_IO_TMPDIR);
     }
 
     /**
      * @param parameters
      * @return the file destination from the given parameters
      */
-    public String getFileDestination(Properties parameters) {
-        return parameters.getProperty(FILE_DEST_PROPERTY);
+    public String getFilePath(Properties parameters) {
+        return parameters.getProperty(FILE_PATH_PROPERTY);
+    }
+
+    protected void setDownloadable(String path) {
+        parameters.setProperty(DOWNLOADABLE_PATH_PROPERTY, path);
     }
 
     @Override
@@ -98,16 +121,18 @@ public class FileStorageConnector implements StorageConnector {
     @Override
     public void write(Exportable artifact, UnitOfWork transaction, Properties parameters) throws Exception {
         ArgCheck.isNotNull(parameters);
-        String destination = getFileDestination(parameters);
-        ArgCheck.isNotEmpty(destination);
+        String filePath = getFilePath(parameters);
+        ArgCheck.isNotEmpty(filePath);
 
-        File destFile = new File(getPath(), destination);
+        File destFile = new File(getPath(), filePath);
 
         //
         // Write the file contents
         //
         String contents = artifact.export(transaction, parameters);
         FileUtils.write(contents.getBytes(), destFile);
+
+        setDownloadable(destFile.getAbsolutePath());
     }
 
     @Override

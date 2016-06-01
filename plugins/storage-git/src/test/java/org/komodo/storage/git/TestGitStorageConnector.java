@@ -248,7 +248,7 @@ public class TestGitStorageConnector implements StringConstants {
         when(transaction.getState()).thenReturn(State.NOT_STARTED);
 
         parameters = new Properties();
-        parameters.setProperty(GitStorageConnector.FILE_DEST_PROPERTY, TEST_VDB_2_XML);
+        parameters.setProperty(GitStorageConnector.FILE_PATH_PROPERTY, TEST_VDB_2_XML);
 
         Exportable artifact = mock(Exportable.class);
         String sampleExample = TestUtilities.streamToString(TestUtilities.sampleExample());

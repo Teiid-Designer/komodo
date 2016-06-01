@@ -29,7 +29,6 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 import org.junit.After;
@@ -60,16 +59,6 @@ public class TestFileStorageConnector implements StringConstants {
     private long timestamp;
 
     private FileStorageConnector connector;
-
-    private File createTempFile(String prefix, String suffix) throws IOException {
-        File tempFile = File.createTempFile(prefix, suffix);
-        tempFile.deleteOnExit();
-        return tempFile;
-    }
-
-    private void compareFileContents(File original, File fileToCompare) throws IOException {
-        assertTrue(org.apache.commons.io.FileUtils.contentEquals(original, fileToCompare));
-    }
 
     @Before
     public void setup() throws Exception {
@@ -136,13 +125,13 @@ public class TestFileStorageConnector implements StringConstants {
         InputStream is = connector.read(TEST_VDB_XML);
         assertNotNull(is);
 
-        File original = createTempFile("tweet-vdb", XML_SUFFIX);
+        File original = TestUtilities.createTempFile("tweet-vdb", XML_SUFFIX);
         FileUtils.write(TestUtilities.tweetExample(), original);
 
-        File fileToCompare = createTempFile("test-vdb1", XML_SUFFIX);
+        File fileToCompare = TestUtilities.createTempFile("test-vdb1", XML_SUFFIX);
         FileUtils.write(is, fileToCompare);
 
-        compareFileContents(original, fileToCompare);
+        TestUtilities.compareFileContents(original, fileToCompare);
     }
 
     @Test
@@ -169,7 +158,7 @@ public class TestFileStorageConnector implements StringConstants {
     }
 
     @Test
-    public void testWriteToRepository() throws Exception {
+    public void testWriteToFile() throws Exception {
         Properties parameters = new Properties();
         parameters.setProperty(FileStorageConnector.FILES_HOME_PATH_PROPERTY, myFileDir.getAbsolutePath());
 
@@ -180,7 +169,7 @@ public class TestFileStorageConnector implements StringConstants {
         when(transaction.getState()).thenReturn(State.NOT_STARTED);
 
         parameters = new Properties();
-        parameters.setProperty(FileStorageConnector.FILE_DEST_PROPERTY, TEST_VDB_2_XML);
+        parameters.setProperty(FileStorageConnector.FILE_PATH_PROPERTY, TEST_VDB_2_XML);
 
         Exportable artifact = mock(Exportable.class);
         String sampleExample = TestUtilities.streamToString(TestUtilities.sampleExample());
@@ -195,9 +184,9 @@ public class TestFileStorageConnector implements StringConstants {
         File writtenFile = new File(myFileDir, TEST_VDB_2_XML);
         assertTrue(writtenFile.exists());
 
-        File cmpFile = createTempFile("sampleExampleFile", XML_SUFFIX);
+        File cmpFile = TestUtilities.createTempFile("sampleExampleFile", XML_SUFFIX);
         FileUtils.write(TestUtilities.sampleExample(), cmpFile);
-        compareFileContents(cmpFile, writtenFile);
+        TestUtilities.compareFileContents(cmpFile, writtenFile);
     }
 
     @Test

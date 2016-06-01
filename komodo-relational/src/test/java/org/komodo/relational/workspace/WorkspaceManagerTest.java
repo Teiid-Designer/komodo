@@ -28,7 +28,12 @@ import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import java.io.File;
 import java.util.Arrays;
+import java.util.Properties;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -67,8 +72,11 @@ import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.VdbImport;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.Exportable;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.test.utils.TestUtilities;
+import org.komodo.utils.FileUtils;
 import org.teiid.modeshape.sequencer.ddl.StandardDdlLexicon;
 import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
@@ -77,6 +85,8 @@ import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 public final class WorkspaceManagerTest extends RelationalModelTest {
 
     private WorkspaceManager wsMgr;
+
+    private File myFileDir;
 
     @Before
     public void obtainWorkspaceManager() throws Exception {
@@ -87,6 +97,9 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
     public void uncacheWorkspaceManager() {
         WorkspaceManager.uncacheInstance(_repo);
         wsMgr = null;
+
+        if (myFileDir != null)
+            FileUtils.removeDirectoryAndChildren(myFileDir);
     }
 
     @Test
@@ -783,4 +796,54 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
         }
     }
 
+    @Test
+    public void shouldExportVdb() throws Exception {
+        String tmpDirPath = System.getProperty("java.io.tmpdir");
+        File tmpDir = new File(tmpDirPath);
+
+        long timestamp = System.currentTimeMillis();
+        myFileDir = new File(tmpDir, "myfile-" + timestamp);
+        assertTrue(myFileDir.mkdir());
+
+        File vdbDestFile = new File(myFileDir, "vdbFile.xml");
+
+        Properties parameters = new Properties();
+        parameters.setProperty("files-home-path-property", myFileDir.getAbsolutePath());
+        parameters.setProperty("file-path-property", vdbDestFile.getName());
+
+        Vdb vdb = mock(Vdb.class);
+        String sampleExample = TestUtilities.streamToString(TestUtilities.sampleExample());
+        when(vdb.export(getTransaction(), parameters)).thenReturn(sampleExample);
+        when(vdb.getName(getTransaction())).thenReturn(TestUtilities.SAMPLE_VDB_FILE);
+
+        wsMgr.exportArtifact(getTransaction(), vdb, "file", parameters);
+
+        File cmpFile = TestUtilities.createTempFile("sampleExampleFile", XML_SUFFIX);
+
+        FileUtils.write(TestUtilities.sampleExample(), cmpFile);
+        TestUtilities.compareFileContents(cmpFile, vdbDestFile);
+    }
+
+    @Test
+    public void shouldImportVdb() throws Exception {
+        String tmpDirPath = System.getProperty("java.io.tmpdir");
+        File tmpDir = new File(tmpDirPath);
+
+        long timestamp = System.currentTimeMillis();
+        myFileDir = new File(tmpDir, "myfile-" + timestamp);
+        assertTrue(myFileDir.mkdir());
+
+        File vdbSrcFile = new File(myFileDir, "vdbFile.xml");
+        String sampleExample = TestUtilities.streamToString(TestUtilities.sampleExample());
+        FileUtils.write(sampleExample.getBytes(), vdbSrcFile);
+        assertTrue(vdbSrcFile.exists());
+
+        Properties parameters = new Properties();
+        parameters.setProperty("files-home-path-property", myFileDir.getAbsolutePath());
+
+        KomodoObject parent = _repo.komodoWorkspace(getTransaction());
+        wsMgr.importVdb(getTransaction(), parent, vdbSrcFile.getName(), "file", parameters);
+
+        assertTrue(parent.hasChild(getTransaction(), TestUtilities.SAMPLE_VDB_NAME));
+    }
 }
