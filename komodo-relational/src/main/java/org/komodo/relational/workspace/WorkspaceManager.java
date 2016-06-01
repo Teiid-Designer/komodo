@@ -626,9 +626,9 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
      * @throws KException
      *         if a resolver could not be found or if an error occurred
      */
-    public < T extends KomodoObject > T resolve( final UnitOfWork transaction,
+    public <T> T resolve( final UnitOfWork transaction,
                                                  final Object object,
-                                                 final Class< T > resolvedClass ) throws KException {
+                                                 final Class<T> resolvedClass ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
                          "transaction state is not NOT_STARTED" ); //$NON-NLS-1$

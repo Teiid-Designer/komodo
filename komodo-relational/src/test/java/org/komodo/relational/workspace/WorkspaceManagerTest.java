@@ -520,6 +520,13 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldResolveExportable() throws Exception {
+        final Vdb vdb = createVdb();
+        final KomodoObject kobject = new ObjectImpl(_repo, vdb.getAbsolutePath(), vdb.getIndex());
+        assertThat(this.wsMgr.resolve(getTransaction(), kobject, Exportable.class), is(instanceOf(Exportable.class)));
+    }
+
+    @Test
     public void shouldResolveVdbImport() throws Exception {
         final Vdb vdb = createVdb();
         final VdbImport vdbImport = vdb.addImport(getTransaction(), "vdbImport");
