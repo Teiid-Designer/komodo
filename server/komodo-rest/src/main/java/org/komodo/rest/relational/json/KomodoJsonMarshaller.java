@@ -48,14 +48,16 @@ import org.komodo.rest.relational.RestVdbModel;
 import org.komodo.rest.relational.RestVdbModelSource;
 import org.komodo.rest.relational.RestVdbPermission;
 import org.komodo.rest.relational.RestVdbTranslator;
+import org.komodo.rest.relational.dataservice.DataServiceSchema;
+import org.komodo.rest.relational.dataservice.RestDataservice;
 import org.komodo.rest.relational.datasource.DSSPropertyPairProperty;
 import org.komodo.rest.relational.datasource.DataSourceSchema;
 import org.komodo.rest.relational.datasource.DataSourceSchemaProperty;
 import org.komodo.rest.relational.datasource.RestDataSource;
-import org.komodo.rest.relational.json.datasource.DSSSerializer;
 import org.komodo.rest.relational.json.datasource.DSSPropertyListSerializer;
 import org.komodo.rest.relational.json.datasource.DSSPropertyPairPropertySerializer;
 import org.komodo.rest.relational.json.datasource.DSSPropertySerializer;
+import org.komodo.rest.relational.json.datasource.DSSSerializer;
 import org.komodo.rest.relational.json.datasource.DataSourceSerializer;
 import org.komodo.rest.schema.json.TeiidXsdReader;
 import org.komodo.spi.repository.KomodoType;
@@ -97,6 +99,7 @@ public final class KomodoJsonMarshaller {
                                                   .registerTypeAdapter( RestVdbCondition.class, new VdbConditionSerializer() )
                                                   .registerTypeAdapter( RestVdbMask.class, new VdbMaskSerializer() )
                                                   .registerTypeAdapter( RestVdbTranslator.class, new VdbTranslatorSerializer() )
+                                                  .registerTypeAdapter( RestDataservice.class, new DataserviceSerializer() )
                                                   .registerTypeAdapter( RestDataSource.class, new DataSourceSerializer() )
                                                   .registerTypeAdapter( RestBasicEntity.class, new BasicEntitySerializer<RestBasicEntity>() )
                                                   .registerTypeAdapter( RestTeiid.class, new TeiidSerializer() )
@@ -158,6 +161,10 @@ public final class KomodoJsonMarshaller {
 
             DataSourceSchema dsSchema = new DataSourceSchema();
             schema = marshall(dsSchema);
+
+        } else if (KomodoType.DATASERVICE.equals(kType)) {
+            DataServiceSchema dataserviceSchema = new DataServiceSchema();
+            schema = marshall(dataserviceSchema);
 
         } else {
             schema = reader.schemaByKType(kType);

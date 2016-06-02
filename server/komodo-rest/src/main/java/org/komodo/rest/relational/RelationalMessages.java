@@ -41,6 +41,26 @@ public final class RelationalMessages {
     public enum Error {
 
         /**
+         * An error indicating a JSON document representing the Dataservices in the workspace could not be retrieved.
+         */
+        DATASERVICE_SERVICE_GET_DATASERVICES_ERROR,
+
+        /**
+         * An error indicating an error occurred trying to obtain the specified Dataservice.
+         */
+        DATASERVICE_SERVICE_GET_DATASERVICE_ERROR,
+
+        /**
+         * An error indicating a request to create a dataservice failed
+         */
+        DATASERVICE_SERVICE_CREATE_DATASERVICE_ERROR,
+
+        /**
+         * An error indicating a request to delete a dataservice failed
+         */
+        DATASERVICE_SERVICE_DELETE_DATASERVICE_ERROR,
+
+        /**
          * An error indicating the VDB descriptor JSON representation could not be created.
          */
         VDB_DESCRIPTOR_BUILDER_ERROR,

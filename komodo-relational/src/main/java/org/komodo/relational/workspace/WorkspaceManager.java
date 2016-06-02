@@ -21,6 +21,7 @@
  */
 package org.komodo.relational.workspace;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import org.komodo.core.KomodoLexicon;
@@ -33,6 +34,7 @@ import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.RelationalProperty;
 import org.komodo.relational.TypeResolver;
 import org.komodo.relational.dataservice.Dataservice;
+import org.komodo.relational.dataservice.internal.DataserviceImpl;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.datasource.internal.DatasourceImpl;
 import org.komodo.relational.folder.Folder;
@@ -417,6 +419,8 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
      *        the parent path whose children recursively will be checked (can be empty if searching from the workspace root)
      * @param namePattern
      *        the regex used to match object names (can be empty if all objects of the given type are being requested)
+     * @param includeSubTypes 
+     *        determines whether sub types are included in the return
      * @return the paths of all the objects under the specified parent path with the specified type (never <code>null</code> but
      *         can be empty)
      * @throws KException
@@ -425,7 +429,8 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
     public String[] findByType( final UnitOfWork transaction,
                                 final String type,
                                 String parentPath,
-                                final String namePattern ) throws KException {
+                                final String namePattern,
+                                boolean includeSubTypes) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
                          "transaction state must be NOT_STARTED and was " + transaction.getState() ); //$NON-NLS-1$
@@ -443,8 +448,17 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
             } else {
                 queryText = String.format( FIND_MATCHING_QUERY_PATTERN, type, parentPath, namePattern );
             }
-
-            final List< KomodoObject > results = getRepository().query( transaction, queryText );
+            
+            final List< KomodoObject > kObjs = getRepository().query( transaction, queryText );
+            List< KomodoObject > results = new ArrayList< KomodoObject > ();
+            for( final KomodoObject kObj : kObjs ) {
+                if(includeSubTypes) {
+                    results.add(kObj);
+                } else if ( type.equals(kObj.getPrimaryType(transaction).getName()) ) {
+                    results.add(kObj);
+                }
+            }
+            
             final int numPaths = results.size();
 
             if ( numPaths == 0 ) {
@@ -475,8 +489,26 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
      *         if an error occurs
      */
     public String[] findByType( final UnitOfWork transaction,
-                                final String type ) throws KException {
-        return findByType( transaction, type, RepositoryImpl.WORKSPACE_ROOT, null );
+                                final String type) throws KException {
+        return findByType( transaction, type, RepositoryImpl.WORKSPACE_ROOT, null, false );
+    }
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> and must have a state of
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param type
+     *        the lexicon node type name of objects being found
+     * @param includeSubTypes 
+     *        determines whether sub types are included in the return
+     * @return the paths of all the objects in the workspace with the specified type (never <code>null</code> but can be empty)
+     * @throws KException
+     *         if an error occurs
+     */
+    public String[] findByType( final UnitOfWork transaction,
+                                final String type,
+                                boolean includeSubTypes) throws KException {
+        return findByType( transaction, type, RepositoryImpl.WORKSPACE_ROOT, null, includeSubTypes );
     }
 
     /**
@@ -533,6 +565,36 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
 
             for (final String path : paths) {
                 result[i++] = new SchemaImpl(transaction, getRepository(), path);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @return all {@link Dataservice}s in the workspace
+     * @throws KException
+     *         if an error occurs
+     */
+    public Dataservice[] findDataservices( UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
+                         "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        final String[] paths = findByType(transaction, KomodoLexicon.DataService.NODE_TYPE);
+        Dataservice[] result = null;
+
+        if (paths.length == 0) {
+            result = Dataservice.NO_DATASERVICES;
+        } else {
+            result = new Dataservice[paths.length];
+            int i = 0;
+
+            for (final String path : paths) {
+                result[i++] = new DataserviceImpl(transaction, getRepository(), path);
             }
         }
 
@@ -612,7 +674,7 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
         ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
                          "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        final String[] paths = findByType(transaction, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        final String[] paths = findByType(transaction, VdbLexicon.Vdb.VIRTUAL_DATABASE, false);
         Vdb[] result = null;
 
         if (paths.length == 0) {

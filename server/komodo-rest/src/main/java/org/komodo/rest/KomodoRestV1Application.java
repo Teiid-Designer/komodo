@@ -45,17 +45,20 @@ import org.jboss.resteasy.plugins.interceptors.CorsFilter;
 import org.komodo.core.KEngine;
 import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
+import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.importer.vdb.VdbImporter;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.SynchronousCallback;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.json.JsonConstants;
+import org.komodo.rest.service.KomodoDataserviceService;
 import org.komodo.rest.service.KomodoImportExportService;
 import org.komodo.rest.service.KomodoSearchService;
 import org.komodo.rest.service.KomodoTeiidService;
 import org.komodo.rest.service.KomodoUtilService;
 import org.komodo.rest.service.KomodoVdbService;
+import org.komodo.rest.swagger.RestDataserviceConverter;
 import org.komodo.rest.swagger.RestPropertyConverter;
 import org.komodo.rest.swagger.RestVdbConditionConverter;
 import org.komodo.rest.swagger.RestVdbConverter;
@@ -101,12 +104,12 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         /**
          * The komodo engine's data directory system property
          */
-        String KOMODO_DATA_DIR = "komodo.dataDir";
+        String KOMODO_DATA_DIR = "komodo.dataDir"; //$NON-NLS-1$
 
         /**
          * Jboss server base directory
          */
-        String JBOSS_SERVER_BASE_DIR = "jboss.server.base.dir";
+        String JBOSS_SERVER_BASE_DIR = "jboss.server.base.dir"; //$NON-NLS-1$
 
         /**
          * Location for the log file passed to {@link KLog} logger
@@ -158,6 +161,16 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
          * Placeholder added to an URI to allow a specific vdb id
          */
         String VDB_PLACEHOLDER = "{vdbName}"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for the collection of DataServices in the Komodo workspace.
+         */
+        String DATA_SERVICES_SEGMENT = "dataservices"; //$NON-NLS-1$
+
+        /**
+         * Placeholder added to an URI to allow a specific data service id
+         */
+        String DATA_SERVICE_PLACEHOLDER = "{dataserviceName}"; //$NON-NLS-1$
 
         /**
          * The name of the URI path segment for the collection of models of a vdb
@@ -302,12 +315,12 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         /**
          * The teiid credentials property for modifying the usernames and passwords
          */
-        String TEIID_CREDENTIALS = "credentials";
+        String TEIID_CREDENTIALS = "credentials"; //$NON-NLS-1$
 
         /**
          * The teiid status path segment
          */
-        String STATUS_SEGMENT = "status";
+        String STATUS_SEGMENT = "status"; //$NON-NLS-1$
 
         /**
          * The name of the URI path segment for the collection of data sources
@@ -322,12 +335,12 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         /**
          * The name of the resource used for importing and exporting artifacts
          */
-        String IMPORT_EXPORT_SEGMENT = "importexport";
+        String IMPORT_EXPORT_SEGMENT = "importexport"; //$NON-NLS-1$
 
         /**
          * The export operation of the import export service
          */
-        String EXPORT = "export";
+        String EXPORT = "export"; //$NON-NLS-1$
     }
 
     private static final int TIMEOUT = 1;
@@ -353,7 +366,7 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
             // Set the komodo data directory prior to starting the engine
             String komodoDataDir = System.getProperty(V1Constants.KOMODO_DATA_DIR);
             if (komodoDataDir == null)
-                System.setProperty(V1Constants.KOMODO_DATA_DIR, baseDir + "data");
+                System.setProperty(V1Constants.KOMODO_DATA_DIR, baseDir + "data"); //$NON-NLS-1$
 
             // Set the log file path
             KLog.getLogger().setLogPath(baseDir + V1Constants.LOG_FILE_PATH);
@@ -370,6 +383,7 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         final Set< Object > objs = new HashSet< >();
         objs.add( new KomodoExceptionMapper() );
         objs.add( new KomodoUtilService( this.kengine ) );
+        objs.add( new KomodoDataserviceService( this.kengine ) );
         objs.add( new KomodoVdbService( this.kengine ) );
         objs.add( new KomodoSearchService( this.kengine ));
         objs.add( new KomodoTeiidService( this.kengine ));
@@ -385,13 +399,13 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
 
     private CorsFilter initCorsFilter() {
         CorsFilter corsFilter = new CorsFilter();
-        corsFilter.getAllowedOrigins().add("*");
-        String allowHeaders = "Content-Type, X-Requested-With, accept, Origin," +
-                                                "Access-Control-Request-Method," +
-                                                "Access-Control-Request-Headers, Authorization";
+        corsFilter.getAllowedOrigins().add("*"); //$NON-NLS-1$
+        String allowHeaders = "Content-Type, X-Requested-With, accept, Origin," + //$NON-NLS-1$
+                                                "Access-Control-Request-Method," + //$NON-NLS-1$
+                                                "Access-Control-Request-Headers, Authorization"; //$NON-NLS-1$
         corsFilter.setAllowedHeaders(allowHeaders);
         corsFilter.setAllowCredentials(true);
-        corsFilter.setAllowedMethods("GET, POST, PUT, DELETE, OPTIONS, HEAD");
+        corsFilter.setAllowedMethods("GET, POST, PUT, DELETE, OPTIONS, HEAD"); //$NON-NLS-1$
         corsFilter.setCorsMaxAge(1209600);
         return corsFilter;
     }
@@ -412,6 +426,7 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         converters.addConverter(new RestVdbModelSourceConverter());
         converters.addConverter(new RestVdbPermissionConverter());
         converters.addConverter(new RestVdbTranslatorConverter());
+        converters.addConverter(new RestDataserviceConverter());
 
         BeanConfig beanConfig = new BeanConfig();
         beanConfig.setTitle("Vdb Builder");
@@ -586,5 +601,39 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         uow.commit();
 
         return vdbs;
+    }
+
+    /**
+     * Create a dataservice in the komodo engine
+     *
+     * @param dataserviceName the service name
+     * @throws Exception if error occurs
+     */
+    public void createDataservice ( String dataserviceName ) throws Exception {
+        Repository repository = this.kengine.getDefaultRepository();
+
+        SynchronousCallback callback = new SynchronousCallback();
+        UnitOfWork uow = repository.createTransaction("Create Dataservice", false, callback); //$NON-NLS-1$
+
+        WorkspaceManager wsMgr = WorkspaceManager.getInstance(repository);
+        wsMgr.createDataservice(uow, null, dataserviceName);
+        
+        uow.commit();
+        callback.await(3, TimeUnit.MINUTES);
+    }
+
+    /**
+     * @return the dataservices directly from the kEngine
+     * @throws Exception if error occurs
+     */
+    public Dataservice[] getDataservices() throws Exception {
+        Repository repository = this.kengine.getDefaultRepository();
+        WorkspaceManager mgr = WorkspaceManager.getInstance(repository);
+
+        UnitOfWork uow = repository.createTransaction("Find dataservices", true, null); //$NON-NLS-1$
+        Dataservice[] services = mgr.findDataservices(uow);
+        uow.commit();
+
+        return services;
     }
 }

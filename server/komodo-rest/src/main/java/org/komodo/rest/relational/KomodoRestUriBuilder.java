@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Properties;
 import javax.ws.rs.core.UriBuilder;
 import org.komodo.core.KomodoLexicon;
+import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
@@ -58,6 +59,11 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
         VDB_PARENT_PATH,
 
         /**
+         * The path of the parent of a dataservice (stored as an URI)
+         */
+        DATA_SERVICE_PARENT_PATH,
+
+        /**
          * Name of the teiid object
          */
         TEIID_NAME,
@@ -66,6 +72,11 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
          * Name of the vdb
          */
         VDB_NAME,
+
+        /**
+         * Name of the data service
+         */
+        DATA_SERVICE_NAME,
 
         /**
          * Name of the model
@@ -171,6 +182,42 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
         return setting(settings, SettingNames.VDB_NAME);
     }
 
+    /**
+     * @param parentUri the uri of the parent
+     * @param dataserviceName the dataservice name
+     * @param target the link type target
+     * @return the URI for child objects of the given dataservice
+     */
+    public URI dataserviceChildGroupUri(URI parentUri, String dataserviceName, LinkType target) {
+        return UriBuilder.fromUri(dataserviceUri(parentUri, dataserviceName))
+                                   .path(target.uriName())
+                                   .build();
+    }
+
+    /**
+     * @param settings
+     * @return the parent of the dataservice rather than the parent of the object
+     */
+    private URI dataserviceParentUri(Properties settings) {
+        Object uriObject = settings.get(SettingNames.DATA_SERVICE_PARENT_PATH.name());
+        ArgCheck.isInstanceOf(URI.class, uriObject);
+        return (URI) uriObject;
+    }
+
+    /**
+     * @param dataservice the dataservice
+     * @param uow the transaction
+     * @return the uri of the parent of the given data service
+     * @throws KException if problem occurs
+     */
+    public URI dataserviceParentUri(Dataservice dataservice, UnitOfWork uow) throws KException {
+        return workspaceDataservicesUri();
+    }
+
+    private String dataserviceName(final Properties settings) {
+        return setting(settings, SettingNames.DATA_SERVICE_NAME);
+    }
+
     private String modelName(final Properties settings) {
         return setting(settings, SettingNames.MODEL_NAME);
     }
@@ -205,6 +252,15 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
      */
     public URI baseUri() {
         return baseUri;
+    }
+
+    /**
+     * @return the URI to use when requesting a collection of Dataservices in the workspace (never <code>null</code>)
+     */
+    public URI workspaceDataservicesUri() {
+        return UriBuilder.fromUri(this.baseUri)
+                                   .path(WORKSPACE_SEGMENT)
+                                   .path(DATA_SERVICES_SEGMENT).build();
     }
 
     /**
@@ -640,6 +696,59 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
             case PARENT:
                 result = myPermUri;
                 break;
+            default:
+                throw new RuntimeException("LinkType " + linkType + " not handled"); //$NON-NLS-1$ //$NON-NLS-2$
+        }
+
+        assert(result != null);
+        return result;
+    }
+
+    /**
+     * @param parentUri the parent URI
+     * @param dataserviceName the dataservice name
+     * @return the URI for the given dataservice
+     */
+    public URI dataserviceUri(final URI parentUri, final String dataserviceName) {
+        return UriBuilder.fromUri(parentUri).path(dataserviceName).build();
+    }
+
+    /**
+     * @param linkType
+     *        the type of URI being created (cannot be <code>null</code>)
+     * @param settings
+     *        configuration settings for this uri
+     * @return the dataservice URI for the specified dataservice (never <code>null</code>)
+     */
+    public URI dataserviceUri(final LinkType linkType, final Properties settings) {
+        ArgCheck.isNotNull(linkType, "linkType"); //$NON-NLS-1$
+        ArgCheck.isNotNull(settings, "settings"); //$NON-NLS-1$
+
+        URI parentUri = dataserviceParentUri(settings);
+        URI result = null;
+
+        switch (linkType) {
+            case SELF:
+            {
+                String dataserviceName = dataserviceName(settings);
+                result = dataserviceUri(parentUri, dataserviceName);
+                break;
+            }
+            case PARENT:
+            {
+                result = parentUri;
+                break;
+            }
+            case IMPORTS:
+            case MODELS:
+            case TRANSLATORS:
+            case DATA_ROLES:
+            case VDBS:
+            {
+                String dataserviceName = dataserviceName(settings);
+                result = dataserviceChildGroupUri(parentUri, dataserviceName, linkType);
+                break;
+            }
             default:
                 throw new RuntimeException("LinkType " + linkType + " not handled"); //$NON-NLS-1$ //$NON-NLS-2$
         }

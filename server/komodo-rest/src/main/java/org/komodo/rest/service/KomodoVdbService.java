@@ -419,7 +419,7 @@ public final class KomodoVdbService extends KomodoService {
                 vdbs = this.wsMgr.findVdbs( uow );
                 LOGGER.debug( "getVdbs:found '{0}' VDBs", vdbs.length ); //$NON-NLS-1$
             } else {
-                final String[] vdbPaths = this.wsMgr.findByType( uow, VdbLexicon.Vdb.VIRTUAL_DATABASE, null, searchPattern );
+                final String[] vdbPaths = this.wsMgr.findByType( uow, VdbLexicon.Vdb.VIRTUAL_DATABASE, null, searchPattern, false );
 
                 if ( vdbPaths.length == 0 ) {
                     vdbs = Vdb.NO_VDBS;

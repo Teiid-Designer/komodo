@@ -25,6 +25,8 @@ package org.komodo.rest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.komodo.rest.json.LinkSerializerTest;
+import org.komodo.rest.relational.RestDataSourceTest;
+import org.komodo.rest.relational.RestDataserviceTest;
 import org.komodo.rest.relational.RestVdbDataRoleTest;
 import org.komodo.rest.relational.RestVdbImportTest;
 import org.komodo.rest.relational.RestVdbPermissionTest;
@@ -35,6 +37,7 @@ import org.komodo.rest.relational.json.VdbImportSerializerTest;
 import org.komodo.rest.relational.json.VdbPermissionSerializerTest;
 import org.komodo.rest.relational.json.VdbSerializerTest;
 import org.komodo.rest.relational.json.VdbTranslatorSerializerTest;
+import org.komodo.rest.service.KomodoDataserviceServiceTest;
 import org.komodo.rest.service.KomodoSearchServiceTest;
 import org.komodo.rest.service.KomodoUtilServiceTest;
 import org.komodo.rest.service.KomodoVdbServiceTest;
@@ -45,6 +48,8 @@ import org.komodo.rest.service.KomodoVdbServiceTest;
         RestLinkTest.class,
         LinkSerializerTest.class,
 
+        RestDataserviceTest.class,
+        RestDataSourceTest.class,
         RestVdbDataRoleTest.class,
         RestVdbImportTest.class,
         RestVdbPermissionTest.class,
@@ -57,9 +62,10 @@ import org.komodo.rest.service.KomodoVdbServiceTest;
         VdbSerializerTest.class,
         VdbTranslatorSerializerTest.class,
 
+        KomodoDataserviceServiceTest.class,
+        KomodoSearchServiceTest.class,
         KomodoUtilServiceTest.class,
-        KomodoVdbServiceTest.class,
-        KomodoSearchServiceTest.class
+        KomodoVdbServiceTest.class
     } )
 public class AllTests {
     // nothing to do

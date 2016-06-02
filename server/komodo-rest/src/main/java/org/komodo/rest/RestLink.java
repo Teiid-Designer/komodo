@@ -65,6 +65,11 @@ public final class RestLink {
         SEARCH,
 
         /**
+         * A link to a VDB resource
+         */
+        VDBS(KomodoType.VDB),
+
+        /**
          * A link to a vdb imports resource
          */
         IMPORTS(KomodoType.VDB_IMPORT),

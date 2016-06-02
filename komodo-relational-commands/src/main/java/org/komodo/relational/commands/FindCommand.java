@@ -164,7 +164,7 @@ public final class FindCommand extends RelationalShellCommand {
                                   final String pattern ) throws Exception {
         final String lexiconType = KomodoTypeRegistry.getInstance().getIdentifier( queryType ).getLexiconType();
         final WorkspaceManager wsMgr = WorkspaceManager.getInstance( wsStatus.getCurrentContext().getRepository() );
-        final String[] searchResults = wsMgr.findByType( wsStatus.getTransaction(), lexiconType, parentPath, pattern );
+        final String[] searchResults = wsMgr.findByType( wsStatus.getTransaction(), lexiconType, parentPath, pattern, false );
 
         if ( searchResults.length == 0 ) {
             return searchResults;
