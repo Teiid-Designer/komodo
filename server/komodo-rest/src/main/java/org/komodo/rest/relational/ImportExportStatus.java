@@ -34,22 +34,22 @@ public class ImportExportStatus implements KRestEntity {
     /**
      * Label for type
      */
-    public static final String TYPE_LABEL = "Type"; //$NON-NLS-1$
+    public static final String TYPE_LABEL = "type"; //$NON-NLS-1$
 
     /**
      * Label for downloadable
      */
-    public static final String DOWNLOADABLE_LABEL = "Downloadable"; //$NON-NLS-1$
+    public static final String DOWNLOADABLE_LABEL = "downloadable"; //$NON-NLS-1$
 
     /**
      * Label for the content
      */
-    public static final String CONTENT_LABEL = "Content"; //$NON-NLS-1$
+    public static final String CONTENT_LABEL = "content"; //$NON-NLS-1$
 
     /**
      * Label for the success flag
      */
-    public static final String SUCCESS_LABEL = "Success"; //$NON-NLS-1$
+    public static final String SUCCESS_LABEL = "success"; //$NON-NLS-1$
 
     private String name;
 

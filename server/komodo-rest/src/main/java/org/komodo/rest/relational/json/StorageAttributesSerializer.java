@@ -28,6 +28,7 @@ import java.lang.reflect.Type;
 import java.util.Map;
 import org.komodo.rest.Messages;
 import org.komodo.rest.relational.KomodoStorageAttributes;
+import org.komodo.spi.repository.DocumentType;
 import com.google.gson.TypeAdapter;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
@@ -66,6 +67,14 @@ public final class StorageAttributesSerializer extends TypeAdapter< KomodoStorag
                         storageAttr.setParameter(parameter.getKey(), parameter.getValue());
                     }
                     break;
+                case KomodoStorageAttributes.CONTENT_LABEL:
+                    storageAttr.setContent(in.nextString());
+                    break;
+                case KomodoStorageAttributes.DOCUMENT_TYPE_LABEL:
+                    String docTypeValue = in.nextString();
+                    DocumentType docType = DocumentType.documentType(docTypeValue);
+                    storageAttr.setDocumentType(docType);
+                    break;
                 default:
                     throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
             }
@@ -92,6 +101,15 @@ public final class StorageAttributesSerializer extends TypeAdapter< KomodoStorag
 
         out.name(KomodoStorageAttributes.ARTIFACT_PATH_LABEL);
         out.value(value.getArtifactPath());
+
+        out.name(KomodoStorageAttributes.CONTENT_LABEL);
+        out.value(value.getContent());
+
+        DocumentType docType = value.getDocumentType();
+        if (docType != null) {
+            out.name(KomodoStorageAttributes.DOCUMENT_TYPE_LABEL);
+            out.value(docType.toString());
+        }
 
         if (! value.getParameters().isEmpty()) {
             out.name(KomodoStorageAttributes.PARAMETERS_LABEL);

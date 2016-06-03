@@ -341,6 +341,11 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
          * The export operation of the import export service
          */
         String EXPORT = "export"; //$NON-NLS-1$
+
+        /**
+         * The import operation of the import export service
+         */
+        String IMPORT = "import";
     }
 
     private static final int TIMEOUT = 1;

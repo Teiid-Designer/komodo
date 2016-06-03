@@ -22,6 +22,7 @@
 package org.komodo.rest.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.io.File;
@@ -38,9 +39,63 @@ import org.komodo.rest.relational.ImportExportStatus;
 import org.komodo.rest.relational.KomodoStorageAttributes;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.spi.repository.DocumentType;
+import org.komodo.spi.repository.KomodoObject;
+import org.komodo.spi.repository.Repository;
+import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.test.utils.TestUtilities;
 import org.komodo.utils.FileUtils;
 
 public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
+
+    @Test
+    public void shouldNotImportVdbBlankPayload() throws Exception {
+        URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
+                                        .path(V1Constants.IMPORT_EXPORT_SEGMENT)
+                                        .path(V1Constants.IMPORT).build();
+
+        KomodoStorageAttributes storageAttr = new KomodoStorageAttributes();
+
+        this.response = request(uri, MediaType.APPLICATION_JSON_TYPE).post(Entity.json(storageAttr));
+        final String entity = this.response.readEntity(String.class);
+
+        assertTrue(entity.contains("The storage type requested from the import export service is unsupported"));
+    }
+
+    @Test
+    public void shouldImportVdb() throws Exception {
+        Repository repository = getRestApp().getDefaultRepository();
+        UnitOfWork uow = repository.createTransaction(
+                                                      getClass().getSimpleName() + COLON + "findVdbInWorkspace" + COLON + System.currentTimeMillis(),
+                                                      false, null);
+
+        KomodoObject workspace = repository.komodoWorkspace(uow);
+
+        URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
+                                        .path(V1Constants.IMPORT_EXPORT_SEGMENT)
+                                        .path(V1Constants.IMPORT).build();
+
+        KomodoStorageAttributes storageAttr = new KomodoStorageAttributes();
+        storageAttr.setStorageType("file");
+        storageAttr.setDocumentType(DocumentType.XML);
+
+        String portfolioCnt = FileUtils.streamToString(TestUtilities.portfolioExample());
+        String content = Base64.getEncoder().encodeToString(portfolioCnt.getBytes());
+        storageAttr.setContent(content);
+
+        assertFalse(workspace.hasChild(uow, TestUtilities.PORTFOLIO_VDB_NAME));
+
+        this.response = request(uri, MediaType.APPLICATION_JSON_TYPE).post(Entity.json(storageAttr));
+        final String entity = this.response.readEntity(String.class);
+
+        ImportExportStatus status = KomodoJsonMarshaller.unmarshall(entity, ImportExportStatus.class);
+        assertNotNull(status);
+
+        assertTrue(status.isSuccess());
+        assertFalse(status.hasDownloadable());
+        assertEquals(XML, status.getType());
+
+        assertTrue(workspace.hasChild(uow, TestUtilities.PORTFOLIO_VDB_NAME));
+    }
 
     @Test
     public void shouldNotExportVdbInvalidArtifactPath() throws Exception {
@@ -82,7 +137,6 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
         this.response = request(uri).post(Entity.json(storageAttr));
         final String entity = this.response.readEntity(String.class);
         assertNotNull(entity);
-        System.out.println(entity);
 
         //
         // Test that the file storage connector really did export the vdb

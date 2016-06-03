@@ -25,7 +25,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.Base64;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import javax.ws.rs.Consumes;
@@ -40,6 +39,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 import org.komodo.core.KEngine;
+import org.komodo.importer.ImportMessages;
 import org.komodo.osgi.PluginService;
 import org.komodo.rest.KomodoRestException;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
@@ -53,6 +53,7 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.spi.storage.StorageConnector;
+import org.komodo.spi.storage.StorageReference;
 import org.komodo.utils.FileUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -70,11 +71,24 @@ public class KomodoImportExportService extends KomodoService {
         super(engine);
     }
 
-    private Response checkStorageAttributes(String storageType, String artifactPath,
-                                                                                Map<String, String> parameters,
-                                                                                List<MediaType> mediaTypes) throws Exception {
-        if (storageType == null && artifactPath == null && parameters == null) {
+    private String encrypt(String content) {
+        if (content == null)
+            return null;
 
+        return Base64.getEncoder().encodeToString(content.getBytes());
+    }
+
+    private String decrypt(String content) {
+        if (content == null)
+            return null;
+
+        return new String(Base64.getDecoder().decode(content));
+    }
+
+    private Response checkStorageAttributes(KomodoStorageAttributes sta,
+                                                                                List<MediaType> mediaTypes) throws Exception {
+        if (sta == null ||
+            (sta.getStorageType() == null && sta.getArtifactPath() == null && sta.getParameters() == null)) {
             String errorMessage = RelationalMessages.getString(
                                                            RelationalMessages.Error.IMPORT_EXPORT_SERVICE_NO_PARAMETERS_ERROR);
 
@@ -83,7 +97,7 @@ public class KomodoImportExportService extends KomodoService {
         }
 
         Set<String> supportedTypes = PluginService.getInstance().getSupportedStorageTypes();
-        if (! supportedTypes.contains(storageType)) {
+        if (! supportedTypes.contains(sta.getStorageType())) {
             String errorMessage = RelationalMessages.getString(
                                                                RelationalMessages.Error.IMPORT_EXPORT_SERVICE_UNSUPPORTED_TYPE_ERROR);
 
@@ -106,7 +120,7 @@ public class KomodoImportExportService extends KomodoService {
      * @return a JSON document including Base64 content of the file 
      *                  (never <code>null</code>)
      * @throws KomodoRestException
-     *         if there is a problem conducting the search
+     *         if there is a problem with the export
      */
     @POST
     @Path(V1Constants.EXPORT)
@@ -130,8 +144,7 @@ public class KomodoImportExportService extends KomodoService {
         KomodoStorageAttributes sta;
         try {
             sta = KomodoJsonMarshaller.unmarshall(storageAttributes, KomodoStorageAttributes.class);
-            Response response = checkStorageAttributes(sta.getStorageType(), sta.getArtifactPath(),
-                                                                                               sta.getParameters(), mediaTypes);
+            Response response = checkStorageAttributes(sta, mediaTypes);
             if (response.getStatus() != Status.OK.getStatusCode())
                 return response;
 
@@ -184,8 +197,8 @@ public class KomodoImportExportService extends KomodoService {
             if (downloadable != null) {
                 try (FileInputStream stream = new FileInputStream(new File(downloadable))) {
                     String content = FileUtils.streamToString(stream);
-                    String base64Content = Base64.getEncoder().encodeToString(content.getBytes());
-                    status.setContent(base64Content);
+                    String encContent = encrypt(content);
+                    status.setContent(encContent);
                 }
             }
 
@@ -201,6 +214,119 @@ public class KomodoImportExportService extends KomodoService {
             return createErrorResponse(mediaTypes, e,
                                        RelationalMessages.Error.IMPORT_EXPORT_SERVICE_EXPORT_ERROR,
                                        sta.getArtifactPath(), sta.getStorageType());
+        }
+    }
+
+    /**
+     * Imports an artifact into the workspace.
+     *
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @param import attributes
+     *        the import attributes JSON representation (cannot be <code>null</code>)
+     * @return a status object indicating success / failure of the import
+     * @throws KomodoRestException
+     *         if there is a problem with the import
+     */
+    @POST
+    @Path(V1Constants.IMPORT)
+    @Produces( MediaType.APPLICATION_JSON )
+    @Consumes ( { MediaType.APPLICATION_JSON } )
+    @ApiOperation(value = "Imports an artifact using parameters provided in the request body",
+                             notes = "Syntax of the json request body is of the form " +
+                                          "{ storageType='file|git|...', documentType='xml|ddl'" +
+                                          "parameters { file-path-property='file.txt', prop2='z', content=\"base64-string\" } }." +
+                                          "If content is populated then the artifact has been transmitted from the client and will " +
+                                          "be converted to a temporary file on the server.",
+                             response = ImportExportStatus.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response importArtifact( final @Context HttpHeaders headers,
+                             final @Context UriInfo uriInfo,
+                             final String storageAttributes) throws KomodoRestException {
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
+            return notAcceptableMediaTypesBuilder().build();
+
+        KomodoStorageAttributes sta;
+        try {
+            sta = KomodoJsonMarshaller.unmarshall(storageAttributes, KomodoStorageAttributes.class);
+            Response response = checkStorageAttributes(sta, mediaTypes);
+            if (response.getStatus() != Status.OK.getStatusCode())
+                return response;
+
+        } catch (Exception ex) {
+            String errorMessage = RelationalMessages.getString(
+                                                               RelationalMessages.Error.IMPORT_EXPORT_SERVICE_REQUEST_PARSING_ERROR, ex.getMessage());
+
+            Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
+            return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+        }
+
+        File cttFile = null;
+        ImportExportStatus status = new ImportExportStatus();
+        UnitOfWork uow = null;
+        try {
+            if (sta.getContent() != null) {
+                //
+                // Content has been provided so need to outline its location
+                // for the storage connector to utilise
+                //
+                String content = decrypt(sta.getContent());
+                String tempDir = FileUtils.tempDirectory();
+                String fileName = content.hashCode() + DOT + "content";
+                cttFile = new File(tempDir, fileName);
+
+                FileUtils.write(content.getBytes(), cttFile);
+
+                // Ensure the new location of the file is conveyed to the storage plugin
+                sta.setParameter(StorageConnector.FILES_HOME_PATH_PROPERTY, tempDir);
+                sta.setParameter(StorageConnector.FILE_PATH_PROPERTY, fileName);
+            }
+
+            Properties parameters = sta.convertParameters();
+            if (! parameters.containsKey(StorageConnector.FILE_PATH_PROPERTY)) {
+                String errorMessage = RelationalMessages.getString(
+                                                                   RelationalMessages.Error.IMPORT_EXPORT_SERVICE_NO_FILE_PATH_ERROR);
+                Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
+                return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+            }
+
+            uow = createTransaction("importToWorkspace", false); //$NON-NLS-1$
+
+            KomodoObject workspace = repo.komodoWorkspace(uow);
+            StorageReference storageRef = new StorageReference(sta.getStorageType(),
+                                                                                   parameters,
+                                                                                   sta.getDocumentType());
+
+            ImportMessages messages = wsMgr.importArtifact(uow, workspace, storageRef);
+            if (messages.hasError())
+                throw new Exception(messages.errorMessagesToString());
+
+            status.setSuccess(true);
+            status.setName(storageRef.getRelativeRef());
+            status.setType(sta.getDocumentType().toString());
+
+            return commit( uow, mediaTypes, status );
+
+        } catch (final Exception e) {
+            if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
+                uow.rollback();
+            }
+
+            return createErrorResponse(mediaTypes, e,
+                                       RelationalMessages.Error.IMPORT_EXPORT_SERVICE_IMPORT_ERROR,
+                                       sta.getStorageType());
+        } finally {
+            //
+            // Clean up the temporary file if applicable
+            //
+            if (cttFile != null)
+                cttFile.delete();
         }
     }
 }

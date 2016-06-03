@@ -331,9 +331,19 @@ public final class RelationalMessages {
         IMPORT_EXPORT_SERVICE_ARTIFACT_NOT_EXPORTABLE_ERROR,
 
         /**
-         * An import export service error
+         * The import export service has not found a relative file path to import from
          */
-        IMPORT_EXPORT_SERVICE_EXPORT_ERROR;
+        IMPORT_EXPORT_SERVICE_NO_FILE_PATH_ERROR,
+
+        /**
+         * An import export service export error
+         */
+        IMPORT_EXPORT_SERVICE_EXPORT_ERROR,
+
+        /**
+         * An import export service import error
+         */
+        IMPORT_EXPORT_SERVICE_IMPORT_ERROR;
 
         /**
          * {@inheritDoc}
