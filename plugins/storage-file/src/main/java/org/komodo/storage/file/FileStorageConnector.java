@@ -106,6 +106,9 @@ public class FileStorageConnector implements StorageConnector {
         String filePath = getFilePath(parameters);
         ArgCheck.isNotEmpty(filePath);
 
+        ArgCheck.isNotNull(artifact, "artifact");
+        ArgCheck.isNotNull(transaction, "transaction");
+
         File destFile = new File(getPath(), filePath);
 
         //

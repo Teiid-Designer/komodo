@@ -125,7 +125,12 @@ public class TeiidServiceProvider extends AbstractServiceProvider<TeiidService, 
         return teiidService;
     }
 
-    protected void setTeiidService(TeiidService teiidService) {
+    /**
+     * Used internally for allocating the teiid service. Only declared public for test purposes.
+     *
+     * @param teiidService
+     */
+    public void setTeiidService(TeiidService teiidService) {
         this.teiidService = teiidService;
     }
 

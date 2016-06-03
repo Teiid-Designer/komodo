@@ -105,11 +105,25 @@ public class TestFileStorageConnector implements StringConstants {
     }
 
     @Test
-    public void testRequiredPathParameter() {
+    public void testRequiredPathParameterRead() {
         try {
             Properties parameters = new Properties();
 
-            new FileStorageConnector(parameters);
+            FileStorageConnector connector = new FileStorageConnector(parameters);
+            connector.read(parameters);
+            fail("Should not allow null path parameter");
+        } catch (Exception ex) {
+            // Expect to fail
+        }
+    }
+
+    @Test
+    public void testRequiredPathParameterWrite() {
+        try {
+            Properties parameters = new Properties();
+
+            FileStorageConnector connector = new FileStorageConnector(parameters);
+            connector.write(null, null, parameters);
             fail("Should not allow null path parameter");
         } catch (Exception ex) {
             // Expect to fail
