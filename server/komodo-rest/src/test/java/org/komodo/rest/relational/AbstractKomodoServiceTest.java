@@ -169,6 +169,12 @@ public abstract class AbstractKomodoServiceTest implements V1Constants {
         Assert.assertEquals(4, _restApp.getVdbs().length);
     }
 
+    protected void createDataservice( String serviceName ) throws Exception {
+        _restApp.createDataservice( serviceName );
+
+        Assert.assertEquals(1, _restApp.getDataservices().length);
+    }
+
     protected List<String> loadSampleSearches() throws Exception {
         List<String> searchNames = new ArrayList<>();
         Repository repository = _restApp.getDefaultRepository();

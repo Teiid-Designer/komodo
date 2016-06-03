@@ -22,6 +22,7 @@
 package org.komodo.rest.relational;
 
 import java.net.URI;
+import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.teiid.Teiid;
@@ -35,8 +36,9 @@ import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.VdbImport;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
-import org.komodo.rest.relational.datasource.RestDataSource;
 import org.komodo.rest.RestBasicEntity;
+import org.komodo.rest.relational.dataservice.RestDataservice;
+import org.komodo.rest.relational.datasource.RestDataSource;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
@@ -99,6 +101,9 @@ public class RestEntityFactory implements V1Constants {
             case DATASOURCE:
                 Datasource dataSource = wsMgr.resolve(uow, kObject, Datasource.class);
                 return (T) new RestDataSource(baseUri, dataSource, uow);
+            case DATASERVICE:
+                Dataservice dataService = wsMgr.resolve(uow, kObject, Dataservice.class);
+                return (T) new RestDataservice(baseUri, dataService, false, uow);
             case UNKNOWN:
                 return null;
             default:

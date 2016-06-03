@@ -188,7 +188,7 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
 
         commit(); // must save before running a query
 
-        assertThat( this.wsMgr.findByType( getTransaction(), VdbLexicon.Vdb.VIRTUAL_DATABASE, StringConstants.EMPTY_STRING, null ).length,
+        assertThat( this.wsMgr.findByType( getTransaction(), VdbLexicon.Vdb.VIRTUAL_DATABASE, StringConstants.EMPTY_STRING, null, false ).length,
                     is( suffix ) );
     }
 
@@ -212,7 +212,7 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
 
         commit(); // must save before running a query
 
-        assertThat( this.wsMgr.findByType( getTransaction(), VdbLexicon.Vdb.VIRTUAL_DATABASE, parent.getAbsolutePath(), null ).length,
+        assertThat( this.wsMgr.findByType( getTransaction(), VdbLexicon.Vdb.VIRTUAL_DATABASE, parent.getAbsolutePath(), null, false ).length,
                     is( expected ) );
     }
 
@@ -232,13 +232,13 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
 
         commit(); // must save before running a query
 
-        assertThat( this.wsMgr.findByType( getTransaction(), VdbLexicon.Vdb.VIRTUAL_DATABASE, null, null ).length, is( 7 ) );
-        assertThat( this.wsMgr.findByType( getTransaction(), VdbLexicon.Vdb.VIRTUAL_DATABASE, null, "*" ).length, is( 7 ) );
-        assertThat( this.wsMgr.findByType( getTransaction(), VdbLexicon.Vdb.VIRTUAL_DATABASE, null, "blah" ).length, is( 1 ) );
-        assertThat( this.wsMgr.findByType( getTransaction(), VdbLexicon.Vdb.VIRTUAL_DATABASE, null, "*e" ).length, is( 2 ) );
-        assertThat( this.wsMgr.findByType( getTransaction(), VdbLexicon.Vdb.VIRTUAL_DATABASE, null, "*o*" ).length, is( 3 ) );
-        assertThat( this.wsMgr.findByType( getTransaction(), VdbLexicon.Vdb.VIRTUAL_DATABASE, null, "pa%l" ).length, is( 1 ) );
-        assertThat( this.wsMgr.findByType( getTransaction(), VdbLexicon.Vdb.VIRTUAL_DATABASE, null, "a*" ).length, is( 0 ) );
+        assertThat( this.wsMgr.findByType( getTransaction(), VdbLexicon.Vdb.VIRTUAL_DATABASE, null, null, false ).length, is( 7 ) );
+        assertThat( this.wsMgr.findByType( getTransaction(), VdbLexicon.Vdb.VIRTUAL_DATABASE, null, "*", false ).length, is( 7 ) );
+        assertThat( this.wsMgr.findByType( getTransaction(), VdbLexicon.Vdb.VIRTUAL_DATABASE, null, "blah", false ).length, is( 1 ) );
+        assertThat( this.wsMgr.findByType( getTransaction(), VdbLexicon.Vdb.VIRTUAL_DATABASE, null, "*e", false ).length, is( 2 ) );
+        assertThat( this.wsMgr.findByType( getTransaction(), VdbLexicon.Vdb.VIRTUAL_DATABASE, null, "*o*", false ).length, is( 3 ) );
+        assertThat( this.wsMgr.findByType( getTransaction(), VdbLexicon.Vdb.VIRTUAL_DATABASE, null, "pa%l", false ).length, is( 1 ) );
+        assertThat( this.wsMgr.findByType( getTransaction(), VdbLexicon.Vdb.VIRTUAL_DATABASE, null, "a*", false ).length, is( 0 ) );
     }
 
     @Test
@@ -290,6 +290,23 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
     }
 
     @Test
+    public void shouldFindVdbsWhenMixedWithDataservices() throws Exception {
+        final String prefix = this.name.getMethodName();
+        int vdbCount = 0;
+
+        // create at root
+        for (int i = 0; i < 5; ++i) {
+            createVdb((prefix + ++vdbCount), (VDB_PATH + i));
+        }
+        
+        createDataservice();
+
+        commit(); // must save before running a query
+
+        assertThat(this.wsMgr.findVdbs(getTransaction()).length, is(vdbCount));
+    }
+
+    @Test
     public void shouldHaveCorrectChildTypes() {
         assertThat( Arrays.asList( this.wsMgr.getChildTypes() ), hasItems( Folder.IDENTIFIER, Datasource.IDENTIFIER, Dataservice.IDENTIFIER, Vdb.IDENTIFIER, Schema.IDENTIFIER, Teiid.IDENTIFIER ) );
         assertThat( this.wsMgr.getChildTypes().length, is( 6 ) );
@@ -302,7 +319,7 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
 
     @Test( expected = Exception.class )
     public void shouldNotAllowEmptyTypeWhenFindingObjects() throws Exception {
-        this.wsMgr.findByType( getTransaction(), StringConstants.EMPTY_STRING, "/my/path", null );
+        this.wsMgr.findByType( getTransaction(), StringConstants.EMPTY_STRING, "/my/path", null, false );
     }
 
     @Test( expected = Exception.class )
@@ -317,7 +334,7 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
 
     @Test( expected = Exception.class )
     public void shouldNotAllowNullTypeWhenFindingObjects() throws Exception {
-        this.wsMgr.findByType( getTransaction(), null, "/my/path", null );
+        this.wsMgr.findByType( getTransaction(), null, "/my/path", null, false );
     }
 
     @Test( expected = Exception.class )
@@ -883,26 +900,26 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
         TestUtilities.compareFileContents(cmpFile, vdbDestFile);
     }
 
-    @Test
-    public void shouldImportVdb() throws Exception {
-        String tmpDirPath = System.getProperty("java.io.tmpdir");
-        File tmpDir = new File(tmpDirPath);
-
-        long timestamp = System.currentTimeMillis();
-        myFileDir = new File(tmpDir, "myfile-" + timestamp);
-        assertTrue(myFileDir.mkdir());
-
-        File vdbSrcFile = new File(myFileDir, "vdbFile.xml");
-        String sampleExample = TestUtilities.streamToString(TestUtilities.sampleExample());
-        FileUtils.write(sampleExample.getBytes(), vdbSrcFile);
-        assertTrue(vdbSrcFile.exists());
-
-        Properties parameters = new Properties();
-        parameters.setProperty("files-home-path-property", myFileDir.getAbsolutePath());
-
-        KomodoObject parent = _repo.komodoWorkspace(getTransaction());
-        wsMgr.importVdb(getTransaction(), parent, vdbSrcFile.getName(), "file", parameters);
-
-        assertTrue(parent.hasChild(getTransaction(), TestUtilities.SAMPLE_VDB_NAME));
-    }
+//    @Test
+//    public void shouldImportVdb() throws Exception {
+//        String tmpDirPath = System.getProperty("java.io.tmpdir");
+//        File tmpDir = new File(tmpDirPath);
+//
+//        long timestamp = System.currentTimeMillis();
+//        myFileDir = new File(tmpDir, "myfile-" + timestamp);
+//        assertTrue(myFileDir.mkdir());
+//
+//        File vdbSrcFile = new File(myFileDir, "vdbFile.xml");
+//        String sampleExample = TestUtilities.streamToString(TestUtilities.sampleExample());
+//        FileUtils.write(sampleExample.getBytes(), vdbSrcFile);
+//        assertTrue(vdbSrcFile.exists());
+//
+//        Properties parameters = new Properties();
+//        parameters.setProperty("files-home-path-property", myFileDir.getAbsolutePath());
+//
+//        KomodoObject parent = _repo.komodoWorkspace(getTransaction());
+//        wsMgr.importVdb(getTransaction(), parent, vdbSrcFile.getName(), "file", parameters);
+//
+//        assertTrue(parent.hasChild(getTransaction(), TestUtilities.SAMPLE_VDB_NAME));
+//    }
 }
