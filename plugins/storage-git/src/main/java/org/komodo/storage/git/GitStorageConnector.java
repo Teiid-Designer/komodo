@@ -74,7 +74,6 @@ public class GitStorageConnector implements StorageConnector {
     public GitStorageConnector(Properties parameters) {
         ArgCheck.isNotNull(parameters);
         ArgCheck.isNotEmpty(parameters.getProperty(REPO_PATH_PROPERTY));
-        ArgCheck.isNotEmpty(parameters.getProperty(REPO_DEST_PROPERTY));
 
         this.parameters = parameters;
 
@@ -125,12 +124,23 @@ public class GitStorageConnector implements StorageConnector {
      * @return the destination of the 'local' clone of the repository
      */
     public String getDestination() {
-        return parameters.getProperty(REPO_DEST_PROPERTY);
+        String localRepoPath = parameters.getProperty(REPO_DEST_PROPERTY);
+        if (localRepoPath != null)
+            return localRepoPath;
+
+        String dirName = System.currentTimeMillis() + HYPHEN;
+        File repoDest = new File(FileUtils.tempDirectory(), dirName);
+        repoDest.mkdir();
+
+        localRepoPath = repoDest.getAbsolutePath();
+        parameters.setProperty(REPO_DEST_PROPERTY, localRepoPath);
+
+        return localRepoPath;
     }
 
     /**
      * @param parameters
-     * @return the file destination from the given parameters
+     * @return the relative file path from the given parameters
      */
     public String getFilePath(Properties parameters) {
         return parameters.getProperty(FILE_PATH_PROPERTY);
@@ -225,10 +235,13 @@ public class GitStorageConnector implements StorageConnector {
     }
 
     @Override
-    public InputStream read(String location) throws Exception {
+    public InputStream read(Properties parameters) throws Exception {
         cloneRepository();
 
-        File destFile = new File(git.getRepository().getWorkTree(), location);
+        String fileRef = getFilePath(parameters);
+        ArgCheck.isNotNull(fileRef, "RelativeFileRef");
+
+        File destFile = new File(git.getRepository().getWorkTree(), fileRef);
         if (destFile.exists())
             return new FileInputStream(destFile);
 

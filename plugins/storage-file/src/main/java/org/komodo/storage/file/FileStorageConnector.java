@@ -78,7 +78,7 @@ public class FileStorageConnector implements StorageConnector {
 
     /**
      * @param parameters
-     * @return the file destination from the given parameters
+     * @return the relative file path from the given parameters
      */
     public String getFilePath(Properties parameters) {
         return parameters.getProperty(FILE_PATH_PROPERTY);
@@ -89,8 +89,11 @@ public class FileStorageConnector implements StorageConnector {
     }
 
     @Override
-    public InputStream read(String location) throws Exception {
-        File destFile = new File(getPath(), location);
+    public InputStream read(Properties parameters) throws Exception {
+        String fileRef = getFilePath(parameters);
+        ArgCheck.isNotNull(fileRef, "RelativeFileRef");
+
+        File destFile = new File(getPath(), fileRef);
         if (destFile.exists())
             return new FileInputStream(destFile);
 

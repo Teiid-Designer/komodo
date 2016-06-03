@@ -262,7 +262,12 @@ public class Messages implements StringConstants {
         /**
          * An error indicating there is no storage plugin for the given storage type
          */
-        EXPORT_STORAGE_TYPE_INVALID;
+        STORAGE_TYPE_INVALID,
+
+        /**
+         * An error indicating there document type of an import is invalid
+         */
+        STORAGE_DOCUMENT_TYPE_INVALID;
 
         @Override
         public String toString() {
