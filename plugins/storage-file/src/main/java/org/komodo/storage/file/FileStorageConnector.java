@@ -37,21 +37,6 @@ import org.komodo.utils.FileUtils;
 
 public class FileStorageConnector implements StorageConnector {
 
-    /**
-     * The path to the home directory of the location of the files handled by this connector
-     */
-    public static final String FILES_HOME_PATH_PROPERTY = "files-home-path-property";
-
-    /**
-     * Jboss tmp directory property
-     */
-    private static final String JBOSS_SERVER_TMP_DIR = "jboss.server.temp.dir";
-
-    /**
-     * The default java tmp directory
-     */
-    private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
-
     private final StorageConnectorId id;
 
     private final Properties parameters;
@@ -84,17 +69,11 @@ public class FileStorageConnector implements StorageConnector {
      * @return repository path
      */
     public String getPath() {
-        String property = parameters.getProperty(FILES_HOME_PATH_PROPERTY);
+        String property = parameters.getProperty(StorageConnector.FILES_HOME_PATH_PROPERTY);
         if (property != null)
             return property;
 
-        // If deployed to a jboss server then try and use it tmp directory
-        property = System.getProperty(JBOSS_SERVER_TMP_DIR);
-        if (property != null)
-            return property;
-
-        // Default to using java tmp dir
-        return System.getProperty(JAVA_IO_TMPDIR);
+        return FileUtils.tempDirectory();
     }
 
     /**

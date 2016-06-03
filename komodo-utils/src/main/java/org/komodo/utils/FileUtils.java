@@ -707,6 +707,16 @@ public class FileUtils implements StringConstants {
          return builder.toString();
      }
 
+     public static String tempDirectory() {
+         // If deployed to a jboss server then try and use its tmp directory
+         String property = System.getProperty(JBOSS_SERVER_TMP_DIR);
+         if (property != null)
+             return property;
+
+         // Default to using java tmp dir
+         return System.getProperty(JAVA_IO_TMPDIR);
+     }
+
     private FileUtils() {
     }
 }
