@@ -48,6 +48,7 @@ import org.komodo.spi.KException;
 import org.komodo.spi.constants.ExportConstants;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Descriptor;
+import org.komodo.spi.repository.DocumentType;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyDescriptor;
@@ -242,8 +243,8 @@ public class VdbImpl extends RelationalObjectImpl implements Vdb {
         }
 
         @Override
-        public String getExportableType() throws KException {
-            return XML;
+        public DocumentType getDocumentType() throws KException {
+            return DocumentType.XML;
         }
     }
 
@@ -1255,7 +1256,7 @@ public class VdbImpl extends RelationalObjectImpl implements Vdb {
     }
 
     @Override
-    public String getExportableType() throws KException {
-        return XML;
+    public DocumentType getDocumentType() throws KException {
+        return DocumentType.XML;
     }
 }

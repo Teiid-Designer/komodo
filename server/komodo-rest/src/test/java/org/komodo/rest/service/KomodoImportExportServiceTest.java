@@ -37,6 +37,7 @@ import org.komodo.rest.relational.AbstractKomodoServiceTest;
 import org.komodo.rest.relational.ImportExportStatus;
 import org.komodo.rest.relational.KomodoStorageAttributes;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
+import org.komodo.spi.repository.DocumentType;
 import org.komodo.utils.FileUtils;
 
 public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {

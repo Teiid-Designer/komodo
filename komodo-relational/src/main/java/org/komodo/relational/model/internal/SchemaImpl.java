@@ -28,6 +28,7 @@ import org.komodo.modeshape.visitor.DdlNodeVisitor;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Schema;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.DocumentType;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.repository.Repository;
@@ -128,7 +129,7 @@ public class SchemaImpl extends RelationalObjectImpl implements Schema {
     }
 
     @Override
-    public String getExportableType() throws KException {
-        return DDL;
+    public DocumentType getDocumentType() throws KException {
+        return DocumentType.DDL;
     }
 }

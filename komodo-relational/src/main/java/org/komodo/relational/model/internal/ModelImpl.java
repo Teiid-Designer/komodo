@@ -45,6 +45,7 @@ import org.komodo.relational.vdb.ModelSource;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.internal.ModelSourceImpl;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.DocumentType;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
@@ -834,7 +835,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
     }
 
     @Override
-    public String getExportableType() throws KException {
-        return DDL;
+    public DocumentType getDocumentType() throws KException {
+        return DocumentType.DDL;
     }
 }

@@ -22,7 +22,6 @@
 package org.komodo.spi.repository;
 
 import java.util.Properties;
-
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
@@ -45,7 +44,7 @@ public interface Exportable {
      * @throws KException
      *         if an error occurs
      */
-    String getExportableType() throws KException;
+    DocumentType getDocumentType() throws KException;
 
     /**
      * @param transaction

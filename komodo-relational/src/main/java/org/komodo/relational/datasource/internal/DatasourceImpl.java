@@ -29,6 +29,7 @@ import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.internal.RelationalChildRestrictedObject;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.DocumentType;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.PropertyValueType;
@@ -332,8 +333,8 @@ public class DatasourceImpl extends RelationalChildRestrictedObject implements D
     }
 
     @Override
-    public String getExportableType() throws KException {
-        return XML;
+    public DocumentType getDocumentType() throws KException {
+        return DocumentType.XML;
     }
 
     /**
