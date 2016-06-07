@@ -59,7 +59,47 @@ public final class RelationalMessages {
          * An error indicating a request to delete a dataservice failed
          */
         DATASERVICE_SERVICE_DELETE_DATASERVICE_ERROR,
+        
+        /**
+         * An error indicating a request to update a dataservice failed
+         */
+        DATASERVICE_SERVICE_UPDATE_DATASERVICE_ERROR,
 
+        /**
+         * An error indicating create attempt was missing a name
+         */
+        DATASERVICE_SERVICE_CREATE_MISSING_NAME,
+ 
+        /**
+         * An error indicating update attempt was missing a name
+         */
+        DATASERVICE_SERVICE_UPDATE_MISSING_NAME,
+        
+        /**
+         * An error indicating that the service does not exist
+         */
+        DATASERVICE_SERVICE_UPDATE_SERVICE_DNE,
+        
+        /**
+         * An error indicating update attempt was missing json arg
+         */
+        DATASERVICE_SERVICE_UPDATE_MISSING_JSON,
+ 
+        /**
+         * An error indicating the Dataservice name is missing from the input JSON document.
+         */
+        DATASERVICE_SERVICE_JSON_MISSING_NAME,
+
+        /**
+         * An error indicating the parameter and JSON dataservice name does not match for a dataservice being created.
+         */
+        DATASERVICE_SERVICE_SERVICE_NAME_ERROR,
+
+        /**
+         * An error indicating create attempt failed because same name already exists
+         */
+        DATASERVICE_SERVICE_CREATE_ALREADY_EXISTS,
+        
         /**
          * An error indicating the VDB descriptor JSON representation could not be created.
          */
