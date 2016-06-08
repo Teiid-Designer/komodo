@@ -37,6 +37,7 @@ import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.RelationalProperty;
 import org.komodo.relational.TypeResolver;
 import org.komodo.relational.dataservice.Dataservice;
+import org.komodo.relational.dataservice.internal.DataserviceConveyor;
 import org.komodo.relational.dataservice.internal.DataserviceImpl;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.datasource.internal.DatasourceImpl;
@@ -821,6 +822,10 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
                     importer.importDdl(transaction, stream, parent, importOptions, importMessages);
                     break;
                 }
+                case ZIP:
+                    DataserviceConveyor conveyor = new DataserviceConveyor(getRepository());
+                    conveyor.dsImport(transaction, stream, parent, importOptions, importMessages);
+                    break;
                 default:
                     throw new KException(Messages.getString(Relational.STORAGE_DOCUMENT_TYPE_INVALID,
                                                             storageRef.getDocumentType()));

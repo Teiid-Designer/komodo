@@ -21,13 +21,10 @@
  */
 package org.komodo.relational.vdb.internal;
 
-import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamWriter;
 import org.komodo.modeshape.visitor.VdbNodeVisitor;
@@ -59,9 +56,9 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.utils.ArgCheck;
+import org.komodo.utils.FileUtils;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
 
 /**
  * An implementation of a virtual database manifest.
@@ -205,26 +202,7 @@ public class VdbImpl extends RelationalObjectImpl implements Vdb {
          */
         @Override
         public Document asDocument() throws KException {
-            String xmlText = this.xml.replaceAll(NEW_LINE, SPACE);
-            xmlText = xmlText.replaceAll(">[\\s]+<", CLOSE_ANGLE_BRACKET + OPEN_ANGLE_BRACKET); //$NON-NLS-1$
-            xmlText = xmlText.replaceAll("[\\s]+", SPACE); //$NON-NLS-1$
-            xmlText = xmlText.replaceAll("CDATA\\[[\\s]+", "CDATA["); //$NON-NLS-1$ //$NON-NLS-2$
-            xmlText = xmlText.replaceAll("; \\]\\]", ";]]"); //$NON-NLS-1$ //$NON-NLS-2$
-
-            final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            dbf.setIgnoringElementContentWhitespace(true);
-            dbf.setIgnoringComments(true);
-
-            try {
-                final DocumentBuilder db = dbf.newDocumentBuilder();
-                final Document doc = db.parse(new InputSource(new StringReader(xmlText)));
-                doc.setXmlStandalone(true);
-                doc.normalizeDocument();
-
-                return doc;
-            } catch (final Exception e) {
-                throw new KException(e);
-            }
+            return FileUtils.createDocument(this.xml);
         }
 
         @Override

@@ -27,6 +27,8 @@ public enum DocumentType {
 
     XML(StringConstants.XML),
 
+    ZIP(StringConstants.ZIP),
+
     DDL(StringConstants.DDL),
 
     UNKNOWN(StringConstants.EMPTY_STRING);

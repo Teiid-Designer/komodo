@@ -320,9 +320,9 @@ public interface StringConstants {
   String JAVA = "java"; //$NON-NLS-1$
 
   /**
-   * DDL File Extension
+   * ZIP File Extension
    */
-  String FILE_DDL = "ddl"; //$NON-NLS-1$
+  String ZIP = "zip"; //$NON-NLS-1$
 
   /**
    * src directory
