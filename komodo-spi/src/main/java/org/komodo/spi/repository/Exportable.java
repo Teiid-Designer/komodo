@@ -50,10 +50,10 @@ public interface Exportable {
      * @param transaction
      *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @param properties (can be <code>null</code> or empty)
-     * @return a text representation of the current object state (never empty)
+     * @return a byte array of the current object state (never empty)
      * @throws KException
      *         if an error occurs
      */
-    String export( final UnitOfWork transaction, Properties properties ) throws KException;
+    byte[] export( final UnitOfWork transaction, Properties properties ) throws KException;
 
 }

@@ -88,9 +88,12 @@ public final class RestVdbModel extends RestBasicEntity {
         addExecutionProperties(uow, model);
 
         Properties properties = new Properties();
-        String ddl = model.export(uow, properties);
-        if (ddl == null)
+        byte[] ddlBytes = model.export(uow, properties);
+        String ddl;
+        if (ddlBytes == null)
             ddl = EMPTY_STRING;
+        else
+            ddl = new String(ddlBytes);
 
         setDdl(ddl);
 

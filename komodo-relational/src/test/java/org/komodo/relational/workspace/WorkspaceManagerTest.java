@@ -892,7 +892,7 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
 
         Vdb vdb = mock(Vdb.class);
         String sampleExample = TestUtilities.streamToString(TestUtilities.sampleExample());
-        when(vdb.export(getTransaction(), parameters)).thenReturn(sampleExample);
+        when(vdb.export(getTransaction(), parameters)).thenReturn(sampleExample.getBytes());
         when(vdb.getName(getTransaction())).thenReturn(TestUtilities.SAMPLE_VDB_FILE);
 
         wsMgr.exportArtifact(getTransaction(), vdb, "file", parameters);

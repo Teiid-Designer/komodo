@@ -97,11 +97,6 @@ public final class RestDataservice extends RestBasicEntity {
 
         addExecutionProperties(uow, dataService);
 
-        if (exportXml) {
-            String xml = dataService.export(uow, new Properties());
-            setXml(xml);
-        }
-
         Properties settings = getUriBuilder().createSettings(SettingNames.DATA_SERVICE_NAME, getId());
         URI parentUri = getUriBuilder().dataserviceParentUri(dataService, uow);
         getUriBuilder().addSetting(settings, SettingNames.DATA_SERVICE_PARENT_PATH, parentUri);

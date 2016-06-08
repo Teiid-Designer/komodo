@@ -98,8 +98,8 @@ public final class RestVdb extends RestBasicEntity {
         addExecutionProperties(uow, vdb);
 
         if (exportXml) {
-            String xml = vdb.export(uow, new Properties());
-            setXml(xml);
+            byte[] xmlBytes = vdb.export(uow, new Properties());
+            setXml(new String(xmlBytes));
         }
 
         Properties settings = getUriBuilder().createSettings(SettingNames.VDB_NAME, getId());

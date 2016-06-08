@@ -114,8 +114,8 @@ public class FileStorageConnector implements StorageConnector {
         //
         // Write the file contents
         //
-        String contents = artifact.export(transaction, parameters);
-        FileUtils.write(contents.getBytes(), destFile);
+        byte[] contents = artifact.export(transaction, parameters);
+        FileUtils.write(contents, destFile);
 
         setDownloadable(destFile.getAbsolutePath());
     }

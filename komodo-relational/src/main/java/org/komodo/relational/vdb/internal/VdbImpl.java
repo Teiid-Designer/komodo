@@ -238,8 +238,8 @@ public class VdbImpl extends RelationalObjectImpl implements Vdb {
          * @see org.komodo.spi.repository.Exportable#export(org.komodo.spi.repository.Repository.UnitOfWork, java.util.Properties)
          */
         @Override
-        public String export( final UnitOfWork transaction, Properties properties) {
-            return this.xml;
+        public byte[] export( final UnitOfWork transaction, Properties properties) {
+            return this.xml == null ? new byte[0] : this.xml.getBytes();
         }
 
         @Override
@@ -349,12 +349,12 @@ public class VdbImpl extends RelationalObjectImpl implements Vdb {
      * @see org.komodo.spi.repository.Exportable#export(org.komodo.spi.repository.Repository.UnitOfWork, java.util.Properties)
      */
     @Override
-    public String export( final UnitOfWork transaction,
+    public byte[] export( final UnitOfWork transaction,
                           final Properties properties ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        final String result = createManifest( transaction, properties ).export( transaction, properties );
+        final byte[] result = createManifest( transaction, properties ).export( transaction, properties );
         return result;
     }
 

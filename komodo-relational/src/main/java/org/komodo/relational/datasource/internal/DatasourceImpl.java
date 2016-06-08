@@ -316,7 +316,7 @@ public class DatasourceImpl extends RelationalChildRestrictedObject implements D
      * @see org.komodo.spi.repository.Exportable#export(org.komodo.spi.repository.Repository.UnitOfWork, java.util.Properties)
      */
     @Override
-    public String export(UnitOfWork transaction,
+    public byte[] export(UnitOfWork transaction,
                          Properties exportProperties) throws KException {
 
         // Get the XML result
@@ -329,7 +329,7 @@ public class DatasourceImpl extends RelationalChildRestrictedObject implements D
                          xmlResult);
         }
         
-        return xmlResult;
+        return xmlResult.getBytes();
     }
 
     @Override

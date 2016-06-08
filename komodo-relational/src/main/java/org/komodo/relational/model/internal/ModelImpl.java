@@ -811,7 +811,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
      * @see org.komodo.spi.repository.Exportable#export(org.komodo.spi.repository.Repository.UnitOfWork, java.util.Properties)
      */
     @Override
-    public String export( final UnitOfWork transaction , Properties exportProperties) throws KException {
+    public byte[] export( final UnitOfWork transaction , Properties exportProperties) throws KException {
         ArgCheck.isNotNull(transaction);
 
         if (LOGGER.isDebugEnabled()) {
@@ -827,7 +827,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
                              result);
             }
 
-            return result;
+            return result.getBytes();
 
         } catch (final Exception e) {
             throw handleError(e);

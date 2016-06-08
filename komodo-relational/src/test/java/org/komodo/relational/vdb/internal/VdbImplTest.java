@@ -213,9 +213,9 @@ public final class VdbImplTest extends RelationalModelTest {
 
     @Test
     public void shouldExportEmptyVdb() throws Exception {
-        final String manifest = this.vdb.export( getTransaction(), new Properties() );
+        byte[] manifest = this.vdb.export( getTransaction(), new Properties() );
         assertThat( manifest, is( notNullValue() ) );
-        assertThat( manifest.isEmpty(), is( false ) );
+        assertThat( manifest.length, is( 0 ) );
     }
 
     @Test
@@ -237,9 +237,9 @@ public final class VdbImplTest extends RelationalModelTest {
         }
 
         // test
-        final String manifest = this.vdb.export( getTransaction(), new Properties() );
+        byte[] manifest = this.vdb.export( getTransaction(), new Properties() );
         assertThat( manifest, is( notNullValue() ) );
-        assertThat( manifest.isEmpty(), is( false ) );
+        assertThat( manifest.length, is( 0 ) );
     }
 
     @Test
@@ -736,7 +736,8 @@ public final class VdbImplTest extends RelationalModelTest {
                     assertThat( ddl, is( expected ) );
 
                     // since the actual export will have the CDATA marker make sure by actually doing an export here
-                    final String export = importedVdb.export( getTransaction(), null );
+                    byte[] exportBytes = importedVdb.export( getTransaction(), null );
+                    String export = new String(exportBytes);
                     assertThat( export.contains( "<![CDATA[" ), is( true ) );
                     assertThat( export.contains( "]]>" ), is( true ) );
                 }

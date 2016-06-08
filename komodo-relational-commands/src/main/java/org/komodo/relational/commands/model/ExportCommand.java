@@ -72,7 +72,8 @@ public final class ExportCommand extends ModelShellCommand {
                 final Model model = getModel();
                 Properties properties = new Properties();
                 properties.put( ExportConstants.USE_TABS_PROP_KEY, true );
-                final String ddl = model.export( uow, properties );
+                byte[] ddlBytes = model.export( uow, properties );
+                final String ddl = new String(ddlBytes);
 
                 // No DDL context to export
                 if(StringUtils.isEmpty(ddl)) {

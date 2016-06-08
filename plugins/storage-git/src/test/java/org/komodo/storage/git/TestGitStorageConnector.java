@@ -241,7 +241,7 @@ public class TestGitStorageConnector implements StringConstants {
 
         Exportable artifact = mock(Exportable.class);
         String sampleExample = TestUtilities.streamToString(TestUtilities.sampleExample());
-        when(artifact.export(transaction, parameters)).thenReturn(sampleExample);
+        when(artifact.export(transaction, parameters)).thenReturn(sampleExample.getBytes());
         when(artifact.getName(transaction)).thenReturn(TestUtilities.SAMPLE_VDB_FILE);
 
         connector.write(artifact, transaction, parameters);

@@ -193,8 +193,8 @@ public class GitStorageConnector implements StorageConnector {
         //
         // Write the file contents
         //
-        String contents = artifact.export(transaction, parameters);
-        FileUtils.write(contents.getBytes(), destFile);
+        byte[] contents = artifact.export(transaction, parameters);
+        FileUtils.write(contents, destFile);
 
         // Stage the file for committing
         git.add().addFilepattern(destination).call();
