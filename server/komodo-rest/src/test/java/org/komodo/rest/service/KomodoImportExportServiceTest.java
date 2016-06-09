@@ -27,11 +27,14 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.Base64;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
+import org.apache.tika.io.IOUtils;
 import org.junit.Test;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.relational.AbstractKomodoServiceTest;
@@ -65,7 +68,7 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
     public void shouldImportVdb() throws Exception {
         Repository repository = getRestApp().getDefaultRepository();
         UnitOfWork uow = repository.createTransaction(
-                                                      getClass().getSimpleName() + COLON + "findVdbInWorkspace" + COLON + System.currentTimeMillis(),
+                                                      getClass().getSimpleName() + COLON + "importVdb" + COLON + System.currentTimeMillis(),
                                                       false, null);
 
         KomodoObject workspace = repository.komodoWorkspace(uow);
@@ -158,9 +161,106 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
         byte[] decBytes = Base64.getDecoder().decode(content);
         String decContent = new String(decBytes);
 
-        try (FileInputStream stream = new FileInputStream(tmpFile)) {
+        FileInputStream stream = null;
+        try {
+            stream = new FileInputStream(tmpFile);
             String tmpFileContent = FileUtils.streamToString(stream);
             assertEquals(tmpFileContent, decContent);
+        } finally {
+            IOUtils.closeQuietly(stream);
         }
+    }
+
+    @Test
+    public void shouldImportDataservice() throws Exception {
+        Repository repository = getRestApp().getDefaultRepository();
+        UnitOfWork uow = repository.createTransaction(
+                                                      getClass().getSimpleName() + COLON + "importDataservice" + COLON + System.currentTimeMillis(),
+                                                      false, null);
+
+        KomodoObject workspace = repository.komodoWorkspace(uow);
+
+        URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
+                                        .path(V1Constants.IMPORT_EXPORT_SEGMENT)
+                                        .path(V1Constants.IMPORT).build();
+
+        KomodoStorageAttributes storageAttr = new KomodoStorageAttributes();
+        storageAttr.setStorageType("file");
+        storageAttr.setDocumentType(DocumentType.ZIP);
+
+        String dsName = "myService";
+        InputStream sampleDsStream = TestUtilities.getResourceAsStream(
+                                                                       KomodoImportExportServiceTest.class,
+                                                                      "dataservice", "sample-ds.zip");
+
+        byte[] sampleBytes = TestUtilities.streamToBytes(sampleDsStream);
+        String content = Base64.getEncoder().encodeToString(sampleBytes);
+        storageAttr.setContent(content);
+
+        assertFalse(workspace.hasChild(uow, dsName));
+
+        this.response = request(uri, MediaType.APPLICATION_JSON_TYPE).post(Entity.json(storageAttr));
+        final String entity = this.response.readEntity(String.class);
+        System.out.println(entity);
+        assertEquals(Response.Status.OK.getStatusCode(), this.response.getStatus());
+
+        ImportExportStatus status = KomodoJsonMarshaller.unmarshall(entity, ImportExportStatus.class);
+        assertNotNull(status);
+
+        assertTrue(status.isSuccess());
+        assertFalse(status.hasDownloadable());
+        assertEquals(ZIP, status.getType());
+
+        assertTrue(workspace.hasChild(uow, dsName));
+        KomodoObject dataservice = workspace.getChild(uow, dsName);
+        assertTrue(dataservice.hasChild(uow, TestUtilities.PORTFOLIO_VDB_NAME));
+    }
+
+    @Test
+    public void shouldExportDataservice() throws Exception {
+        loadVdbs();
+        String dsName = "myDataService";
+
+        getRestApp().createDataservice(dsName, true);
+
+        URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
+                                            .path(V1Constants.IMPORT_EXPORT_SEGMENT)
+                                            .path(V1Constants.EXPORT).build();
+
+        KomodoStorageAttributes storageAttr = new KomodoStorageAttributes();
+        storageAttr.setStorageType("file");
+        storageAttr.setArtifactPath("/tko:komodo/tko:workspace/" + dsName);
+
+        String tmpDirPath = System.getProperty("java.io.tmpdir");
+        storageAttr.setParameter("files-home-path-property", tmpDirPath);
+
+        this.response = request(uri).post(Entity.json(storageAttr));
+        final String entity = this.response.readEntity(String.class);
+        assertNotNull(entity);
+        assertEquals(Response.Status.OK.getStatusCode(), this.response.getStatus());
+
+        //
+        // Test that the file storage connector really did export the data service
+        //
+        File tmpFile = new File(tmpDirPath, dsName);
+        assertTrue(tmpFile.exists());
+        tmpFile.deleteOnExit();
+
+        ImportExportStatus status = KomodoJsonMarshaller.unmarshall(entity, ImportExportStatus.class);
+        assertNotNull(status);
+
+        assertTrue(status.isSuccess());
+        assertTrue(status.hasDownloadable());
+        assertEquals(ZIP, status.getType());
+
+        String content = status.getContent();
+        assertNotNull(content);
+
+        byte[] decBytes = Base64.getDecoder().decode(content);
+
+        File dsZip = File.createTempFile("DSZip", DOT + ZIP);
+        dsZip.deleteOnExit();
+        FileUtils.write(decBytes, dsZip);
+        TestUtilities.testZipFile(dsZip);
     }
 }

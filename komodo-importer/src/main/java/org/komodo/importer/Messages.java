@@ -45,6 +45,7 @@ public class Messages implements StringConstants {
         vdbOnlySupportsVDB,
         nodeExistsReturn,
         nodeExistCreateNew,
+        noNameFailure,
         newNameFailure,
         nodeCreated,
         nodeCreationFailed,

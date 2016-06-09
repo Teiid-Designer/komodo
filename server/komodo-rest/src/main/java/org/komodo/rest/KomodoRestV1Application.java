@@ -45,6 +45,8 @@ import org.jboss.resteasy.plugins.interceptors.CorsFilter;
 import org.komodo.core.KEngine;
 import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
+import org.komodo.importer.ImportOptions.ExistingNodeOptions;
+import org.komodo.importer.ImportOptions.OptionKeys;
 import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.importer.vdb.VdbImporter;
 import org.komodo.relational.vdb.Vdb;
@@ -609,20 +611,35 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
     }
 
     /**
-     * Create a dataservice in the komodo engine
+     * Create a dataservice in the komodo engine (used for mostly test purposes)
      *
      * @param dataserviceName the service name
+     * @param populateWithSamples true if dataservice should be populated with example vdbs
      * @throws Exception if error occurs
      */
-    public void createDataservice ( String dataserviceName ) throws Exception {
+    public void createDataservice(String dataserviceName, boolean populateWithSamples) throws Exception {
         Repository repository = this.kengine.getDefaultRepository();
 
         SynchronousCallback callback = new SynchronousCallback();
         UnitOfWork uow = repository.createTransaction("Create Dataservice", false, callback); //$NON-NLS-1$
 
         WorkspaceManager wsMgr = WorkspaceManager.getInstance(repository);
-        wsMgr.createDataservice(uow, null, dataserviceName);
+        Dataservice dataservice = wsMgr.createDataservice(uow, null, dataserviceName);
+
+        VdbImporter importer = new VdbImporter(repository);
+        ImportMessages importMessages = new ImportMessages();
+        ImportOptions importOptions = new ImportOptions();
+        importOptions.setOption(OptionKeys.HANDLE_EXISTING, ExistingNodeOptions.RETURN);
+
+        InputStream portfolioSample = KomodoUtilService.getVdbSample(KomodoUtilService.SAMPLES[1]);
+        InputStream nwindSample = KomodoUtilService.getVdbSample(KomodoUtilService.SAMPLES[4]);
         
+        importer.importVdb(uow, portfolioSample, dataservice,
+                                               importOptions, importMessages);
+
+        importer.importVdb(uow, nwindSample, dataservice,
+                                               importOptions, importMessages);
+
         uow.commit();
         callback.await(3, TimeUnit.MINUTES);
     }

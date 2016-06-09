@@ -71,18 +71,18 @@ public class KomodoImportExportService extends KomodoService {
         super(engine);
     }
 
-    private String encrypt(String content) {
+    private String encrypt(byte[] content) {
         if (content == null)
             return null;
 
-        return Base64.getEncoder().encodeToString(content.getBytes());
+        return Base64.getEncoder().encodeToString(content);
     }
 
-    private String decrypt(String content) {
+    private byte[] decrypt(String content) {
         if (content == null)
             return null;
 
-        return new String(Base64.getDecoder().decode(content));
+        return Base64.getDecoder().decode(content);
     }
 
     private Response checkStorageAttributes(KomodoStorageAttributes sta,
@@ -195,10 +195,16 @@ public class KomodoImportExportService extends KomodoService {
             status.setDownloadable(downloadable != null);
 
             if (downloadable != null) {
-                try (FileInputStream stream = new FileInputStream(new File(downloadable))) {
-                    String content = FileUtils.streamToString(stream);
+                FileInputStream stream = null;
+                try {
+                    File downloadableFile = new File(downloadable);
+                    stream = new FileInputStream(downloadableFile);
+                    byte content[] = new byte[(int)downloadableFile.length()];
+                    stream.read(content);
                     String encContent = encrypt(content);
                     status.setContent(encContent);
+                } finally {
+                    stream.close();
                 }
             }
 
@@ -276,12 +282,12 @@ public class KomodoImportExportService extends KomodoService {
                 // Content has been provided so need to outline its location
                 // for the storage connector to utilise
                 //
-                String content = decrypt(sta.getContent());
+                byte[] content = decrypt(sta.getContent());
                 String tempDir = FileUtils.tempDirectory();
-                String fileName = content.hashCode() + DOT + "content";
+                String fileName = content.hashCode() + DOT + sta.getDocumentType();
                 cttFile = new File(tempDir, fileName);
 
-                FileUtils.write(content.getBytes(), cttFile);
+                FileUtils.write(content, cttFile);
 
                 // Ensure the new location of the file is conveyed to the storage plugin
                 sta.setParameter(StorageConnector.FILES_HOME_PATH_PROPERTY, tempDir);

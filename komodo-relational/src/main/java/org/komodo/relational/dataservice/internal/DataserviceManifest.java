@@ -74,12 +74,68 @@ class DataserviceManifest implements VdbManifest {
         return DocumentType.XML;
     }
 
+    private static XMLStreamReader createReader(InputStream srcStream) throws Exception {
+        XMLInputFactory factory = XMLInputFactory.newInstance();
+        factory.setProperty(XMLInputFactory.IS_NAMESPACE_AWARE, false);
+        return factory.createXMLStreamReader(srcStream);
+    }
+
+    /**
+     * @param srcStream
+     * @return Finds the data service name and returns it from the xml
+     * @throws KException
+     */
+    public static String extractName(InputStream srcStream) throws KException {
+        XMLStreamReader reader = null;
+        try {
+            reader = createReader(srcStream);
+
+            String elementName = null;
+            while (reader.hasNext()) {
+                switch (reader.getEventType()) {
+                    case XMLStreamReader.START_ELEMENT:
+                        elementName = reader.getLocalName();
+                        break;
+                    case XMLStreamReader.END_ELEMENT:
+                        elementName = null;
+                        break;
+                    case XMLStreamReader.CHARACTERS:
+                        String text = reader.getText();
+
+                        if (elementName == null)
+                            break;
+
+                        if (text.trim().isEmpty())
+                            break;
+
+                        if (JcrConstants.JCR_NAME.equals(elementName))
+                            return text;
+
+                    default:
+                        // Nothing required
+                }
+                reader.next();
+            }
+
+        } catch (Exception ex) {
+            throw new KException(ex);
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (Exception ex) {
+                    // Do Nothing
+                }
+            }
+        }
+
+        return null;
+    }
+
     public void read(UnitOfWork transaction, InputStream srcStream) throws KException {
         XMLStreamReader reader = null;
         try {
-            XMLInputFactory factory = XMLInputFactory.newInstance();
-            factory.setProperty(XMLInputFactory.IS_NAMESPACE_AWARE, false);
-            reader = factory.createXMLStreamReader(srcStream);
+            reader = createReader(srcStream);
 
             String elementName = null;
             while (reader.hasNext()) {

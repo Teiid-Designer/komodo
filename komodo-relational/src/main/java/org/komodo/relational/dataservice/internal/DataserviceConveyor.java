@@ -23,13 +23,14 @@ package org.komodo.relational.dataservice.internal;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Enumeration;
 import java.util.Properties;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
-import org.apache.commons.io.IOUtils;
 import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
 import org.komodo.importer.ImportOptions.ExistingNodeOptions;
@@ -47,6 +48,7 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.ArgCheck;
+import org.komodo.utils.FileUtils;
 
 public class DataserviceConveyor implements StringConstants {
 
@@ -65,20 +67,18 @@ public class DataserviceConveyor implements StringConstants {
         return WorkspaceManager.getInstance(repository);
     }
 
-    protected String determineNewName(UnitOfWork transaction,
-                                      KomodoObject parent, String nodeName) throws KException {
+    protected String determineNewName(UnitOfWork transaction, KomodoObject parent, String nodeName) throws KException {
         for (int i = 0; i < 1000; ++i) {
             String newName = nodeName + UNDERSCORE + i;
-            if (! parent.hasChild(transaction, newName))
+            if (!parent.hasChild(transaction, newName))
                 return newName;
         }
 
         throw new KException(Messages.getString(Messages.IMPORTER.newNameFailure, nodeName));
     }
 
-    protected boolean handleExistingNode(UnitOfWork transaction, KomodoObject parent,
-                                         ImportOptions importOptions, ImportMessages importMessages)
-        throws KException {
+    protected boolean handleExistingNode(UnitOfWork transaction, KomodoObject parent, ImportOptions importOptions,
+                                         ImportMessages importMessages) throws KException {
 
         // dataservice name to create
         String dsName = importOptions.getOption(OptionKeys.NAME).toString();
@@ -110,30 +110,103 @@ public class DataserviceConveyor implements StringConstants {
         return true;
     }
 
-    public void dsImport(UnitOfWork transaction, InputStream srcStream,
-                         KomodoObject parent, ImportOptions importOptions,
+    private String extractDsName(File zFile) throws KException {
+        ZipFile zipFile = null;
+
+        try {
+            zipFile = new ZipFile(zFile);
+            Enumeration<? extends ZipEntry> entries = zipFile.entries();
+            if (!entries.hasMoreElements())
+                return null;
+
+            while (entries.hasMoreElements()) {
+                ZipEntry entry = entries.nextElement();
+                ByteArrayOutputStream bos = null;
+                InputStream zipStream = null;
+
+                try {
+                    String name = entry.getName();
+                    if (! DataserviceManifest.MANIFEST.equals(name)) {
+                        continue;
+                    }
+
+                    bos = new ByteArrayOutputStream();
+                    final byte[] buf = new byte[BUFFER_SIZE];
+                    int length;
+
+                    zipStream = zipFile.getInputStream(entry);
+                    while ((length = zipStream.read(buf, 0, buf.length)) >= 0) {
+                        bos.write(buf, 0, length);
+                    }
+
+                    byte[] content = bos.toByteArray();
+                    ByteArrayInputStream entryStream = new ByteArrayInputStream(content);
+
+                    return DataserviceManifest.extractName(entryStream);
+
+                } finally {
+                    if (bos != null)
+                        bos.close();
+
+                    zipStream.close();
+                }
+            }
+
+        } catch (Exception ex) {
+            throw new KException(ex);
+        } finally {
+            try {
+                if (zipFile != null)
+                    zipFile.close();
+            } catch (IOException e) {
+            }
+        }
+
+        return null;
+    }
+
+    private void overrideName(File zipFile, ImportOptions importOptions) throws Exception {
+        String dsName = extractDsName(zipFile);
+        if (dsName == null)
+            return;
+
+        importOptions.setOption(OptionKeys.NAME, dsName);
+    }
+
+    public void dsImport(UnitOfWork transaction, InputStream srcStream, KomodoObject parent, ImportOptions importOptions,
                          ImportMessages importMessages) throws KException {
         ArgCheck.isNotNull(srcStream, "Source Stream");
 
-        boolean doImport = handleExistingNode(transaction, parent, importOptions, importMessages);
-        if (! doImport) {
-            // Handling existing node advises not to continue
-            return;
-        }
+        long timestamp = System.currentTimeMillis();
+        File zFile = new File(FileUtils.tempDirectory(), timestamp + DOT + ZIP);
+        ZipFile zipFile = null;
 
-        ZipInputStream zipStream = null;
         try {
-            zipStream = new ZipInputStream(srcStream);
-            if (zipStream.available() == 0)
-                return;
+            FileUtils.write(srcStream, zFile);
+            overrideName(zFile, importOptions);
 
             String dsName = importOptions.getOption(OptionKeys.NAME).toString();
+            if (dsName == null)
+                throw new Exception(Messages.getString(Messages.IMPORTER.noNameFailure));
+
+            boolean doImport = handleExistingNode(transaction, parent, importOptions, importMessages);
+            if (!doImport) {
+                // Handling existing node advises not to continue
+                return;
+            }
+
+            zipFile = new ZipFile(zFile);
+            Enumeration<? extends ZipEntry> entries = zipFile.entries();
+            if (!entries.hasMoreElements())
+                return;
+
             WorkspaceManager mgr = getWorkspaceManager();
             Dataservice dataservice = mgr.createDataservice(transaction, parent, dsName);
 
-            ZipEntry entry;
-            while ((entry = zipStream.getNextEntry()) != null) {
+            while (entries.hasMoreElements()) {
+                ZipEntry entry = entries.nextElement();
                 ByteArrayOutputStream bos = null;
+                InputStream zipStream = null;
 
                 try {
                     String name = entry.getName();
@@ -142,6 +215,7 @@ public class DataserviceConveyor implements StringConstants {
                     final byte[] buf = new byte[BUFFER_SIZE];
                     int length;
 
+                    zipStream = zipFile.getInputStream(entry);
                     while ((length = zipStream.read(buf, 0, buf.length)) >= 0) {
                         bos.write(buf, 0, length);
                     }
@@ -166,15 +240,20 @@ public class DataserviceConveyor implements StringConstants {
                     if (bos != null)
                         bos.close();
 
-                    zipStream.closeEntry();
+                    zipStream.close();
                 }
             }
 
         } catch (Exception ex) {
             throw new KException(ex);
         } finally {
-            if (zipStream != null)
-                IOUtils.closeQuietly(zipStream);
+            try {
+                if (zipFile != null)
+                    zipFile.close();
+            } catch (IOException e) {
+            }
+
+            zFile.delete();
         }
     }
 
@@ -238,13 +317,21 @@ public class DataserviceConveyor implements StringConstants {
             if (zipStream != null) {
                 try {
                     zipStream.finish();
-                } catch (IOException e) {}
+                } catch (IOException e) {
+                }
 
-                IOUtils.closeQuietly(zipStream);
+                try {
+                    zipStream.close();
+                } catch (IOException e) {
+                }
             }
 
-            if (bos != null)
-                IOUtils.closeQuietly(bos);
+            if (bos != null) {
+                try {
+                    bos.close();
+                } catch (IOException e) {
+                }
+            }
         }
     }
 }

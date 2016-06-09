@@ -29,15 +29,12 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -46,7 +43,6 @@ import org.junit.Test;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
-import org.komodo.importer.ImportOptions.OptionKeys;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalObject.Filter;
 import org.komodo.relational.dataservice.Dataservice;
@@ -245,20 +241,7 @@ public final class DataserviceImplTest extends RelationalModelTest {
         dsZip.deleteOnExit();
         byte[] dsBytes = this.dataservice.export(getTransaction(), new Properties());
         FileUtils.write(dsBytes, dsZip);
-
-        ZipFile zipfile = null;
-        try {
-            zipfile = new ZipFile(dsZip);
-        } catch (IOException e) {
-            fail("Zip file created is corrupt " + e.getLocalizedMessage());
-        } finally {
-            try {
-                if (zipfile != null) {
-                    zipfile.close();
-                    zipfile = null;
-                }
-            } catch (IOException e) {}
-        }
+        TestUtilities.testZipFile(dsZip);
     }
 
     @Test
@@ -268,8 +251,7 @@ public final class DataserviceImplTest extends RelationalModelTest {
 
         ImportMessages importMessages = new ImportMessages();
         ImportOptions importOptions = new ImportOptions();
-        String serviceName = "dsService";
-        importOptions.setOption(OptionKeys.NAME, serviceName);
+        String serviceName = "myService";
 
         DataserviceConveyor conveyor = new DataserviceConveyor(_repo);
         KomodoObject parent = _repo.komodoWorkspace(getTransaction());
