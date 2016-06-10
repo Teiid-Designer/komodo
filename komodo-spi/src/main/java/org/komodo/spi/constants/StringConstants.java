@@ -320,9 +320,9 @@ public interface StringConstants {
   String JAVA = "java"; //$NON-NLS-1$
 
   /**
-   * DDL File Extension
+   * ZIP File Extension
    */
-  String FILE_DDL = "ddl"; //$NON-NLS-1$
+  String ZIP = "zip"; //$NON-NLS-1$
 
   /**
    * src directory
@@ -368,5 +368,15 @@ public interface StringConstants {
    * XML Suffix
    */
   String XML_SUFFIX = DOT + XML;
+
+  /**
+   * jboss temp directory
+   */
+  String JBOSS_SERVER_TMP_DIR = "jboss.server.temp.dir";
+
+  /**
+   * Java temp directory
+   */
+  String JAVA_IO_TMPDIR = "java.io.tmpdir";
 }
 

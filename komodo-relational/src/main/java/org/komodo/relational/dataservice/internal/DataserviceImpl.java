@@ -29,6 +29,7 @@ import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.internal.VdbImpl;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.DocumentType;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
@@ -74,17 +75,25 @@ public class DataserviceImpl extends VdbImpl implements Dataservice {
         return Dataservice.IDENTIFIER;
     }
 
+    @Override
+    public DataserviceManifest createManifest(UnitOfWork transaction, Properties properties) throws KException {
+        return new DataserviceManifest(transaction, this);
+    }
+
     /* (non-Javadoc)
      * @see org.komodo.spi.repository.Exportable#export(org.komodo.spi.repository.Repository.UnitOfWork, java.util.Properties)
      */
     @Override
-    public String export(UnitOfWork transaction,
-                         Properties exportProperties) throws KException {
-
-        // TODO: implement
-        return null;
+    public byte[] export(UnitOfWork transaction, Properties exportProperties) throws KException {
+        DataserviceConveyor conveyor = new DataserviceConveyor(getRepository());
+        return conveyor.dsExport(transaction, this, exportProperties);
     }
-    
+
+    @Override
+    public DocumentType getDocumentType() throws KException {
+        return DocumentType.ZIP;
+    }
+
     /**
      * {@inheritDoc}
      *

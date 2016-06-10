@@ -116,7 +116,8 @@ public final class ExportVdbCommand extends RelationalShellCommand {
                 final UnitOfWork uow = getTransaction();
                 Properties properties = new Properties();
                 properties.put( ExportConstants.USE_TABS_PROP_KEY, true );
-                final String manifest = vdbToExport.export( uow, properties );
+                byte[] manifestBytes = vdbToExport.export( uow, properties );
+                final String manifest = new String(manifestBytes);
 
                 // Write the file
                 try{

@@ -34,9 +34,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
 
 /**
  * File Utilities
@@ -705,6 +711,45 @@ public class FileUtils implements StringConstants {
          }
 
          return builder.toString();
+     }
+
+     public static String tempDirectory() {
+         // If deployed to a jboss server then try and use its tmp directory
+         String property = System.getProperty(JBOSS_SERVER_TMP_DIR);
+         if (property != null)
+             return property;
+
+         // Default to using java tmp dir
+         return System.getProperty(JAVA_IO_TMPDIR);
+     }
+
+     /**
+      * Parse the given xml string and returns a {@link Document}
+      * @param xml
+      * @return the document consistent with the given xml string
+      * @throws KException
+      */
+     public static Document createDocument(String xml) throws KException {
+         String xmlText = xml.replaceAll(NEW_LINE, SPACE);
+         xmlText = xmlText.replaceAll(">[\\s]+<", CLOSE_ANGLE_BRACKET + OPEN_ANGLE_BRACKET); //$NON-NLS-1$
+         xmlText = xmlText.replaceAll("[\\s]+", SPACE); //$NON-NLS-1$
+         xmlText = xmlText.replaceAll("CDATA\\[[\\s]+", "CDATA["); //$NON-NLS-1$ //$NON-NLS-2$
+         xmlText = xmlText.replaceAll("; \\]\\]", ";]]"); //$NON-NLS-1$ //$NON-NLS-2$
+
+         final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+         dbf.setIgnoringElementContentWhitespace(true);
+         dbf.setIgnoringComments(true);
+
+         try {
+             final DocumentBuilder db = dbf.newDocumentBuilder();
+             final Document doc = db.parse(new InputSource(new StringReader(xmlText)));
+             doc.setXmlStandalone(true);
+             doc.normalizeDocument();
+
+             return doc;
+         } catch (final Exception e) {
+             throw new KException(e);
+         }
      }
 
     private FileUtils() {

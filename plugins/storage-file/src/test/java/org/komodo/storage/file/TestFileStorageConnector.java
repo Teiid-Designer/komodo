@@ -38,6 +38,7 @@ import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Exportable;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
+import org.komodo.spi.storage.StorageConnector;
 import org.komodo.spi.storage.StorageTree;
 import org.komodo.test.utils.TestUtilities;
 import org.komodo.utils.FileUtils;;
@@ -104,11 +105,25 @@ public class TestFileStorageConnector implements StringConstants {
     }
 
     @Test
-    public void testRequiredPathParameter() {
+    public void testRequiredPathParameterRead() {
         try {
             Properties parameters = new Properties();
 
-            new FileStorageConnector(parameters);
+            FileStorageConnector connector = new FileStorageConnector(parameters);
+            connector.read(parameters);
+            fail("Should not allow null path parameter");
+        } catch (Exception ex) {
+            // Expect to fail
+        }
+    }
+
+    @Test
+    public void testRequiredPathParameterWrite() {
+        try {
+            Properties parameters = new Properties();
+
+            FileStorageConnector connector = new FileStorageConnector(parameters);
+            connector.write(null, null, parameters);
             fail("Should not allow null path parameter");
         } catch (Exception ex) {
             // Expect to fail
@@ -118,11 +133,12 @@ public class TestFileStorageConnector implements StringConstants {
     @Test
     public void testReadFile() throws Exception {
         Properties parameters = new Properties();
-        parameters.setProperty(FileStorageConnector.FILES_HOME_PATH_PROPERTY, myFileDir.getAbsolutePath());
+        parameters.setProperty(StorageConnector.FILES_HOME_PATH_PROPERTY, myFileDir.getAbsolutePath());
 
         connector = new FileStorageConnector(parameters);
 
-        InputStream is = connector.read(TEST_VDB_XML);
+        parameters.setProperty(StorageConnector.FILE_PATH_PROPERTY, TEST_VDB_XML);
+        InputStream is = connector.read(parameters);
         assertNotNull(is);
 
         File original = TestUtilities.createTempFile("tweet-vdb", XML_SUFFIX);
@@ -138,7 +154,7 @@ public class TestFileStorageConnector implements StringConstants {
     public void testRequiredFileDestParameter() {
         try {
             Properties parameters = new Properties();
-            parameters.setProperty(FileStorageConnector.FILES_HOME_PATH_PROPERTY, myFileDir.getAbsolutePath());
+            parameters.setProperty(StorageConnector.FILES_HOME_PATH_PROPERTY, myFileDir.getAbsolutePath());
 
             connector = new FileStorageConnector(parameters);
 
@@ -160,7 +176,7 @@ public class TestFileStorageConnector implements StringConstants {
     @Test
     public void testWriteToFile() throws Exception {
         Properties parameters = new Properties();
-        parameters.setProperty(FileStorageConnector.FILES_HOME_PATH_PROPERTY, myFileDir.getAbsolutePath());
+        parameters.setProperty(StorageConnector.FILES_HOME_PATH_PROPERTY, myFileDir.getAbsolutePath());
 
         connector = new FileStorageConnector(parameters);
         connector.refresh();
@@ -173,7 +189,7 @@ public class TestFileStorageConnector implements StringConstants {
 
         Exportable artifact = mock(Exportable.class);
         String sampleExample = TestUtilities.streamToString(TestUtilities.sampleExample());
-        when(artifact.export(transaction, parameters)).thenReturn(sampleExample);
+        when(artifact.export(transaction, parameters)).thenReturn(sampleExample.getBytes());
         when(artifact.getName(transaction)).thenReturn(TestUtilities.SAMPLE_VDB_FILE);
 
         connector.write(artifact, transaction, parameters);
@@ -192,7 +208,7 @@ public class TestFileStorageConnector implements StringConstants {
     @Test
     public void testBrowse() throws Exception {
         Properties parameters = new Properties();
-        parameters.setProperty(FileStorageConnector.FILES_HOME_PATH_PROPERTY, myFileDir.getAbsolutePath());
+        parameters.setProperty(StorageConnector.FILES_HOME_PATH_PROPERTY, myFileDir.getAbsolutePath());
 
         connector = new FileStorageConnector(parameters);
         StorageTree<String> structure = connector.browse();

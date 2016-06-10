@@ -36,6 +36,11 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 public interface StorageConnector extends StringConstants {
 
     /**
+     * The path to the home directory of the location of files. Used by some connectors.
+     */
+    String FILES_HOME_PATH_PROPERTY = "files-home-path-property";
+
+    /**
      * The path where the file should be located
      */
     String FILE_PATH_PROPERTY = "file-path-property";
@@ -69,11 +74,13 @@ public interface StorageConnector extends StringConstants {
     boolean refresh() throws Exception;
 
     /**
-     * @param location
+     * @param parameters the parameters used to find and read the document.
+     *                  In most cases this should at least contain {@link #FILE_PATH_PROPERTY} which
+     *                  points to  relative reference to the file
      * @return input stream to the file located at the given location
      * @throws Exception
      */
-    InputStream read(String location) throws Exception;
+    InputStream read(Properties parameters) throws Exception;
 
     /**
      * @return the walked tree-structure of the storage location.

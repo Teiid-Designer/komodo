@@ -21,13 +21,10 @@
  */
 package org.komodo.relational.vdb.internal;
 
-import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamWriter;
 import org.komodo.modeshape.visitor.VdbNodeVisitor;
@@ -48,6 +45,7 @@ import org.komodo.spi.KException;
 import org.komodo.spi.constants.ExportConstants;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Descriptor;
+import org.komodo.spi.repository.DocumentType;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyDescriptor;
@@ -58,9 +56,9 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.utils.ArgCheck;
+import org.komodo.utils.FileUtils;
 import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
 
 /**
  * An implementation of a virtual database manifest.
@@ -204,26 +202,7 @@ public class VdbImpl extends RelationalObjectImpl implements Vdb {
          */
         @Override
         public Document asDocument() throws KException {
-            String xmlText = this.xml.replaceAll(NEW_LINE, SPACE);
-            xmlText = xmlText.replaceAll(">[\\s]+<", CLOSE_ANGLE_BRACKET + OPEN_ANGLE_BRACKET); //$NON-NLS-1$
-            xmlText = xmlText.replaceAll("[\\s]+", SPACE); //$NON-NLS-1$
-            xmlText = xmlText.replaceAll("CDATA\\[[\\s]+", "CDATA["); //$NON-NLS-1$ //$NON-NLS-2$
-            xmlText = xmlText.replaceAll("; \\]\\]", ";]]"); //$NON-NLS-1$ //$NON-NLS-2$
-
-            final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            dbf.setIgnoringElementContentWhitespace(true);
-            dbf.setIgnoringComments(true);
-
-            try {
-                final DocumentBuilder db = dbf.newDocumentBuilder();
-                final Document doc = db.parse(new InputSource(new StringReader(xmlText)));
-                doc.setXmlStandalone(true);
-                doc.normalizeDocument();
-
-                return doc;
-            } catch (final Exception e) {
-                throw new KException(e);
-            }
+            return FileUtils.createDocument(this.xml);
         }
 
         @Override
@@ -237,13 +216,13 @@ public class VdbImpl extends RelationalObjectImpl implements Vdb {
          * @see org.komodo.spi.repository.Exportable#export(org.komodo.spi.repository.Repository.UnitOfWork, java.util.Properties)
          */
         @Override
-        public String export( final UnitOfWork transaction, Properties properties) {
-            return this.xml;
+        public byte[] export( final UnitOfWork transaction, Properties properties) {
+            return this.xml == null ? new byte[0] : this.xml.getBytes();
         }
 
         @Override
-        public String getExportableType() throws KException {
-            return XML;
+        public DocumentType getDocumentType() throws KException {
+            return DocumentType.XML;
         }
     }
 
@@ -348,12 +327,12 @@ public class VdbImpl extends RelationalObjectImpl implements Vdb {
      * @see org.komodo.spi.repository.Exportable#export(org.komodo.spi.repository.Repository.UnitOfWork, java.util.Properties)
      */
     @Override
-    public String export( final UnitOfWork transaction,
+    public byte[] export( final UnitOfWork transaction,
                           final Properties properties ) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        final String result = createManifest( transaction, properties ).export( transaction, properties );
+        final byte[] result = createManifest( transaction, properties ).export( transaction, properties );
         return result;
     }
 
@@ -1255,7 +1234,7 @@ public class VdbImpl extends RelationalObjectImpl implements Vdb {
     }
 
     @Override
-    public String getExportableType() throws KException {
-        return XML;
+    public DocumentType getDocumentType() throws KException {
+        return DocumentType.XML;
     }
 }

@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.util.zip.ZipFile;
 import javax.jcr.Node;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -1136,16 +1137,48 @@ public class TestUtilities implements StringConstants {
      * @return String representation of stream
      * @throws IOException if error occurs
      */
-    public static String streamToString(InputStream inStream) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inStream));
-        StringBuilder builder = new StringBuilder();
-        String line;
-        while ((line = reader.readLine()) != null) {
-            builder.append(line);
-            builder.append(NEW_LINE);
-        }
+    public static byte[] streamToBytes(InputStream inStream) throws IOException {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        try {
+            int nRead;
+            byte[] data = new byte[16384];
 
-        return builder.toString();
+            while ((nRead = inStream.read(data, 0, data.length)) != -1) {
+                buffer.write(data, 0, nRead);
+            }
+
+            buffer.flush();
+
+            return buffer.toByteArray();
+        } finally {
+            buffer.close();
+            inStream.close();
+        }
+    }
+
+    /**
+     * @param inStream input stream
+     * @return String representation of stream
+     * @throws IOException if error occurs
+     */
+    public static String streamToString(InputStream inStream) throws IOException {
+        InputStreamReader in = new InputStreamReader(inStream);
+        BufferedReader reader = new BufferedReader(in);
+
+        try {
+            StringBuilder builder = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                builder.append(line);
+                builder.append(NEW_LINE);
+            }
+
+            return builder.toString();
+        } finally {
+            reader.close();
+            in.close();
+            inStream.close();
+        }
     }
 
     /**
@@ -1373,5 +1406,26 @@ public class TestUtilities implements StringConstants {
      */
     public static void compareFileContents(File original, File fileToCompare) throws IOException {
         assertTrue(org.apache.commons.io.FileUtils.contentEquals(original, fileToCompare));
+    }
+
+    /**
+     * Tries to open a zip and if an error occurs fails the test
+     *
+     * @param zipFile
+     */
+    public static void testZipFile(File zipFile) {
+        ZipFile zipfile = null;
+        try {
+            zipfile = new ZipFile(zipFile);
+        } catch (IOException e) {
+            fail("Zip file created is corrupt " + e.getLocalizedMessage());
+        } finally {
+            try {
+                if (zipfile != null) {
+                    zipfile.close();
+                    zipfile = null;
+                }
+            } catch (IOException e) {}
+        }
     }
 }

@@ -116,7 +116,8 @@ public class SchemaImplTest extends RelationalModelTest {
 
     @Test
     public void shouldExportEmptyDdl() throws Exception {
-        final String fragment = this.schema.export(getTransaction(), new Properties());
+        byte[] fragmentBytes = this.schema.export(getTransaction(), new Properties());
+        final String fragment = new String(fragmentBytes);
         assertThat(fragment, is(notNullValue()));
         assertThat(fragment.isEmpty(), is(true));
     }
@@ -130,7 +131,8 @@ public class SchemaImplTest extends RelationalModelTest {
 
         traverse( getTransaction(), this.schema.getAbsolutePath() );
 
-        final String fragment = this.schema.export(getTransaction(), new Properties());
+        byte[] fragmentBytes = this.schema.export(getTransaction(), new Properties());
+        final String fragment = new String(fragmentBytes);
         assertThat(fragment, is(notNullValue()));
         assertThat(fragment.isEmpty(), is(true));
     }
@@ -140,7 +142,8 @@ public class SchemaImplTest extends RelationalModelTest {
         setRenditionValueAwaitSequencing(DDL_VIEW);
 
         // test
-        final String fragment = this.schema.export(getTransaction(), new Properties());
+        byte[] fragmentBytes = this.schema.export(getTransaction(), new Properties());
+        final String fragment = new String(fragmentBytes);
         assertThat(fragment, is(notNullValue()));
         assertThat(fragment.isEmpty(), is(false));
         assertEquals(DDL_VIEW, fragment);

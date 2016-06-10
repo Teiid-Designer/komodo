@@ -40,6 +40,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.osgi.PluginService;
+import org.komodo.osgi.teiid.TeiidServiceProvider;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.teiid.CachedTeiid;
 import org.komodo.relational.teiid.Teiid;
@@ -75,10 +76,13 @@ public final class TeiidImplTest extends RelationalModelTest {
         PluginService service = PluginService.getInstance();
         unmockedTeiidService = service.getCurrentTeiidService();
 
-        Field teiidServiceField = service.getClass().getDeclaredField("teiidService");
-        assertNotNull(teiidServiceField);
-        teiidServiceField.setAccessible(true);
-        teiidServiceField.set(service, teiidService);
+        TeiidServiceProvider teiidProvider = new TeiidServiceProvider(service);
+        teiidProvider.setTeiidService(teiidService);
+
+        Field teiidServiceProviderField = service.getClass().getDeclaredField("teiidServiceProvider");
+        assertNotNull(teiidServiceProviderField);
+        teiidServiceProviderField.setAccessible(true);
+        teiidServiceProviderField.set(service, teiidProvider);
         return service;
     }
 

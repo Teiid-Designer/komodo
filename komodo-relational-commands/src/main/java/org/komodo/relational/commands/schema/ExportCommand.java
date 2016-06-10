@@ -72,7 +72,8 @@ public final class ExportCommand extends SchemaShellCommand {
                 final Schema schema = getSchema();
                 Properties properties = new Properties();
                 properties.put( ExportConstants.USE_TABS_PROP_KEY, true );
-                final String ddl = schema.export( uow, properties );
+                byte[] ddlBytes = schema.export( uow, properties );
+                final String ddl = new String(ddlBytes);
 
                 // No DDL context to export
                 if(StringUtils.isEmpty(ddl)) {

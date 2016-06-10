@@ -48,6 +48,7 @@ import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Exportable;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
+import org.komodo.spi.storage.StorageConnector;
 import org.komodo.spi.storage.StorageTree;
 import org.komodo.test.utils.TestUtilities;
 import org.komodo.utils.FileUtils;;
@@ -176,19 +177,6 @@ public class TestGitStorageConnector implements StringConstants {
     }
 
     @Test
-    public void testRequiredDestParameter() {
-        try {
-            Properties parameters = new Properties();
-            parameters.setProperty(GitStorageConnector.REPO_PATH_PROPERTY, myGitDir.getAbsolutePath());
-            
-            new GitStorageConnector(parameters);
-            fail("Should not allow null dest parameter");
-        } catch (Exception ex) {
-            // Expect to fail
-        }
-    }
-
-    @Test
     public void testLocalRepositoryReadFile() throws Exception {
         localTmpDir = new File(tmpDir, "localTmpDir-" + timestamp);
         Properties parameters = new Properties();
@@ -198,7 +186,8 @@ public class TestGitStorageConnector implements StringConstants {
         connector = new GitStorageConnector(parameters);
         connector.refresh();
 
-        InputStream is = connector.read(TEST_VDB_XML);
+        parameters.setProperty(StorageConnector.FILE_PATH_PROPERTY, TEST_VDB_XML);
+        InputStream is = connector.read(parameters);
         assertNotNull(is);
 
         File original = createTempFile("tweet-vdb", XML_SUFFIX);
@@ -252,7 +241,7 @@ public class TestGitStorageConnector implements StringConstants {
 
         Exportable artifact = mock(Exportable.class);
         String sampleExample = TestUtilities.streamToString(TestUtilities.sampleExample());
-        when(artifact.export(transaction, parameters)).thenReturn(sampleExample);
+        when(artifact.export(transaction, parameters)).thenReturn(sampleExample.getBytes());
         when(artifact.getName(transaction)).thenReturn(TestUtilities.SAMPLE_VDB_FILE);
 
         connector.write(artifact, transaction, parameters);

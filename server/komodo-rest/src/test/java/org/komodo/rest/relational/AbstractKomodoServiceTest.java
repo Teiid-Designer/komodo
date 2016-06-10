@@ -170,7 +170,7 @@ public abstract class AbstractKomodoServiceTest implements V1Constants {
     }
 
     protected void createDataservice( String serviceName ) throws Exception {
-        _restApp.createDataservice( serviceName );
+        _restApp.createDataservice(serviceName, false);
 
         Assert.assertEquals(1, _restApp.getDataservices().length);
     }

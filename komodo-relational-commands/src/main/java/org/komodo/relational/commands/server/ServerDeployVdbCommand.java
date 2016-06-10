@@ -130,14 +130,14 @@ public final class ServerDeployVdbCommand extends ServerShellCommand {
                 }
 
                 // Get VDB content
-                String vdbXml = vdbToDeploy.export(getTransaction(), null);
-                if (vdbXml == null || vdbXml.isEmpty()) {
+                byte[] vdbXml = vdbToDeploy.export(getTransaction(), null);
+                if (vdbXml == null || vdbXml.length == 0) {
                     return new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.vdbExportFailed ), null);
                 }
 
                 String vdbToDeployName = vdbToDeploy.getName(getTransaction());
                 String vdbDeploymentName = vdbToDeployName + VDB_DEPLOYMENT_SUFFIX;
-                InputStream stream = new ByteArrayInputStream(vdbXml.getBytes());
+                InputStream stream = new ByteArrayInputStream(vdbXml);
                 teiidInstance.deployDynamicVdb(vdbDeploymentName, stream);
             } catch (Exception ex) {
                 result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.connectionErrorWillDisconnect ), ex );

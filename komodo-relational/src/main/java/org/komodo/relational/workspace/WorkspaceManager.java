@@ -22,9 +22,12 @@
 package org.komodo.relational.workspace;
 
 import java.util.ArrayList;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Properties;
 import org.komodo.core.KomodoLexicon;
+import org.komodo.importer.ImportMessages;
+import org.komodo.importer.ImportOptions;
 import org.komodo.osgi.PluginService;
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
@@ -34,10 +37,13 @@ import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.RelationalProperty;
 import org.komodo.relational.TypeResolver;
 import org.komodo.relational.dataservice.Dataservice;
+import org.komodo.relational.dataservice.internal.DataserviceConveyor;
 import org.komodo.relational.dataservice.internal.DataserviceImpl;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.datasource.internal.DatasourceImpl;
 import org.komodo.relational.folder.Folder;
+import org.komodo.relational.importer.ddl.DdlImporter;
+import org.komodo.relational.importer.vdb.VdbImporter;
 import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.internal.TypeResolverRegistry;
 import org.komodo.relational.model.Model;
@@ -61,6 +67,7 @@ import org.komodo.spi.repository.Repository.State;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.RepositoryObserver;
 import org.komodo.spi.storage.StorageConnector;
+import org.komodo.spi.storage.StorageReference;
 import org.komodo.spi.storage.StorageService;
 import org.komodo.spi.utils.KeyInValueHashMap;
 import org.komodo.spi.utils.KeyInValueHashMap.KeyFromValueAdapter;
@@ -773,6 +780,65 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
     }
 
     /**
+     * 
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param parent the parent of the imported vdb
+     * @param storageRef the reference to the destination within the storage
+     * @param parameters the parameters for the storage, appropriate to the storage type
+     * @throws KException if error occurs
+     */
+    public ImportMessages importArtifact(final UnitOfWork transaction,
+                                      final KomodoObject parent, StorageReference storageRef) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == org.komodo.spi.repository.Repository.UnitOfWork.State.NOT_STARTED ),
+                         "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotNull(parent, "parent");
+        ArgCheck.isNotNull(storageRef, "storageRef");
+
+        try {
+            StorageService storageService = PluginService.getInstance().getStorageService(storageRef.getStorageType());
+            if (storageService == null)
+                throw new KException(Messages.getString(Relational.STORAGE_TYPE_INVALID,
+                                                        storageRef.getStorageType()));
+
+            StorageConnector connector = storageService.getConnector(storageRef.getParameters());
+            InputStream stream = connector.read(storageRef.getParameters());
+
+            ImportOptions importOptions = new ImportOptions();
+            ImportMessages importMessages = new ImportMessages();
+
+            switch (storageRef.getDocumentType()) {
+                case XML:
+                {
+                    VdbImporter importer = new VdbImporter(getRepository());
+                    importer.importVdb(transaction, stream, parent, importOptions, importMessages);
+                    break;
+                }
+                case DDL:
+                {
+                    DdlImporter importer = new DdlImporter(getRepository());
+                    importer.importDdl(transaction, stream, parent, importOptions, importMessages);
+                    break;
+                }
+                case ZIP:
+                    DataserviceConveyor conveyor = new DataserviceConveyor(getRepository());
+                    conveyor.dsImport(transaction, stream, parent, importOptions, importMessages);
+                    break;
+                default:
+                    throw new KException(Messages.getString(Relational.STORAGE_DOCUMENT_TYPE_INVALID,
+                                                            storageRef.getDocumentType()));
+            }
+
+            return importMessages;
+
+        } catch (Exception e) {
+            throw handleError(e);
+        }
+    }
+
+    /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not
      *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
@@ -794,7 +860,7 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
         try {
             StorageService storageService = PluginService.getInstance().getStorageService(storageType);
             if (storageService == null)
-                throw new KException(Messages.getString(Relational.EXPORT_STORAGE_TYPE_INVALID, storageType));
+                throw new KException(Messages.getString(Relational.STORAGE_TYPE_INVALID, storageType));
 
             StorageConnector connector = storageService.getConnector(parameters);
             connector.write(artifact, transaction, parameters);

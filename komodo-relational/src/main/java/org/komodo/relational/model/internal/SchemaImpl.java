@@ -28,6 +28,7 @@ import org.komodo.modeshape.visitor.DdlNodeVisitor;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.model.Schema;
 import org.komodo.spi.KException;
+import org.komodo.spi.repository.DocumentType;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.repository.Repository;
@@ -63,7 +64,7 @@ public class SchemaImpl extends RelationalObjectImpl implements Schema {
      * @see org.komodo.spi.repository.Exportable#export(org.komodo.spi.repository.Repository.UnitOfWork, java.util.Properties)
      */
     @Override
-    public String export( final UnitOfWork transaction,
+    public byte[] export( final UnitOfWork transaction,
                           final Properties properties ) throws KException {
         // Is there a situation where this schema fragment is just Teiid SQL?
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
@@ -77,7 +78,7 @@ public class SchemaImpl extends RelationalObjectImpl implements Schema {
             visitor.visit( schemaNode );
             result.append( visitor.getDdl() );
 
-            return result.toString();
+            return result.toString().getBytes();
         } catch ( final Exception e ) {
             throw handleError( e );
         }
@@ -128,7 +129,7 @@ public class SchemaImpl extends RelationalObjectImpl implements Schema {
     }
 
     @Override
-    public String getExportableType() throws KException {
-        return DDL;
+    public DocumentType getDocumentType() throws KException {
+        return DocumentType.DDL;
     }
 }

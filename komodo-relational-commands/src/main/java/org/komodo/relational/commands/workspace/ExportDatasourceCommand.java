@@ -116,7 +116,8 @@ public final class ExportDatasourceCommand extends RelationalShellCommand {
                 final UnitOfWork uow = getTransaction();
                 Properties properties = new Properties();
                 properties.put( ExportConstants.USE_TABS_PROP_KEY, true );
-                final String sourceXml = datasourceToExport.export( uow, properties );
+                byte[] xmlBytes = datasourceToExport.export( uow, properties );
+                final String sourceXml = new String(xmlBytes);
 
                 // Write the file
                 try{

@@ -232,7 +232,9 @@ public class TestPluginService extends AbstractTestPluginService implements Stri
         StorageService storageService = service.getStorageService(storageType);
         assertNotNull(storageService);
 
-        StorageConnector connector = storageService.getConnector(new Properties());
+        Properties parameters = new Properties();
+        parameters.setProperty("repo-path-property", "http://github.com/test/blob.git");
+        StorageConnector connector = storageService.getConnector(parameters);
         assertNotNull(connector);
     }
 }
