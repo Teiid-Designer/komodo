@@ -28,10 +28,13 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import java.net.URI;
+import java.util.Properties;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
+import org.komodo.rest.RestLink.LinkType;
 import org.komodo.rest.relational.AbstractKomodoServiceTest;
+import org.komodo.rest.relational.KomodoRestUriBuilder.SettingNames;
 import org.komodo.rest.relational.dataservice.RestDataservice;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 
@@ -80,4 +83,23 @@ public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTes
         assertEquals(0, dataservices.length);
     }
     
+    @Test
+    public void shouldGetDataservice() throws Exception {
+        createDataservice(DATASERVICE_NAME);
+
+        // get
+        Properties settings = _uriBuilder.createSettings(SettingNames.DATA_SERVICE_NAME, DATASERVICE_NAME);
+        _uriBuilder.addSetting(settings, SettingNames.DATA_SERVICE_PARENT_PATH, _uriBuilder.workspaceDataservicesUri());
+        this.response = request(_uriBuilder.dataserviceUri(LinkType.SELF, settings)).get();
+        final String entity = this.response.readEntity(String.class);
+        assertThat(entity, is(notNullValue()));
+
+        //System.out.println("Response:\n" + entity);
+
+        RestDataservice dataservice = KomodoJsonMarshaller.unmarshall(entity, RestDataservice.class);
+        assertNotNull(dataservice);
+        
+        assertEquals(dataservice.getId(), DATASERVICE_NAME);
+    }
+   
 }

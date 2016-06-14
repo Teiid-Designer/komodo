@@ -67,6 +67,9 @@ public final class RestDataservice extends RestBasicEntity {
      * Label used to describe original file path
      */
     public static final String VERSION_LABEL = KomodoService.encode(VdbLexicon.Vdb.VERSION);
+    
+    private static final int VERSION_DEFAULT = 1;
+    private static final boolean PREVIEW_DEFAULT = false;
 
     /**
      * Constructor for use when deserializing
@@ -161,7 +164,7 @@ public final class RestDataservice extends RestBasicEntity {
      */
     public boolean isPreview() {
         Object preview = tuples.get(PREVIEW_LABEL);
-        return preview != null ? Boolean.parseBoolean(preview.toString()) : null;
+        return preview != null ? Boolean.parseBoolean(preview.toString()) : PREVIEW_DEFAULT;
     }
 
     /**
@@ -191,7 +194,7 @@ public final class RestDataservice extends RestBasicEntity {
      */
     public int getVersion() {
         Object version = tuples.get(VERSION_LABEL);
-        return version != null ? Integer.parseInt(version.toString()) : null;
+        return version != null ? Integer.parseInt(version.toString()) : VERSION_DEFAULT;
     }
 
     /**

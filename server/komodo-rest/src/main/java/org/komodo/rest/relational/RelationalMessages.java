@@ -56,6 +56,11 @@ public final class RelationalMessages {
         DATASERVICE_SERVICE_CREATE_DATASERVICE_ERROR,
 
         /**
+         * An error indicating a request to clone a dataservice failed
+         */
+        DATASERVICE_SERVICE_CLONE_DATASERVICE_ERROR,
+
+        /**
          * An error indicating a request to delete a dataservice failed
          */
         DATASERVICE_SERVICE_DELETE_DATASERVICE_ERROR,
@@ -70,6 +75,21 @@ public final class RelationalMessages {
          */
         DATASERVICE_SERVICE_CREATE_MISSING_NAME,
  
+        /**
+         * An error indicating clone attempt was missing a name
+         */
+        DATASERVICE_SERVICE_CLONE_MISSING_NAME,
+ 
+        /**
+         * An error indicating clone attempt was missing a new service name
+         */
+        DATASERVICE_SERVICE_CLONE_MISSING_NEW_NAME,
+ 
+        /**
+         * An error indicating the desired new clone name is same as dataservice being cloned
+         */
+        DATASERVICE_SERVICE_CLONE_SAME_NAME_ERROR,
+        
         /**
          * An error indicating update attempt was missing a name
          */
@@ -99,6 +119,11 @@ public final class RelationalMessages {
          * An error indicating create attempt failed because same name already exists
          */
         DATASERVICE_SERVICE_CREATE_ALREADY_EXISTS,
+        
+        /**
+         * An error indicating clone attempt failed because same name already exists
+         */
+        DATASERVICE_SERVICE_CLONE_ALREADY_EXISTS,
         
         /**
          * An error indicating the VDB descriptor JSON representation could not be created.

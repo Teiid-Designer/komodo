@@ -170,14 +170,9 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         String DATA_SERVICES_SEGMENT = "dataservices"; //$NON-NLS-1$
 
         /**
-         * The name of the URI path segment for the collection of DataServices in the Komodo workspace.
+         * The name of the URI path segment for DataService clone in the Komodo workspace.
          */
-        String CREATE_DATA_SERVICE_SEGMENT = "create"; //$NON-NLS-1$
-
-        /**
-         * The name of the URI path segment for the collection of DataServices in the Komodo workspace.
-         */
-        String UPDATE_DATA_SERVICE_SEGMENT = "update"; //$NON-NLS-1$
+        String CLONE_DATA_SERVICE_SEGMENT = "clone"; //$NON-NLS-1$
 
         /**
          * Placeholder added to an URI to allow a specific data service id
@@ -357,7 +352,7 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         /**
          * The import operation of the import export service
          */
-        String IMPORT = "import";
+        String IMPORT = "import"; //$NON-NLS-1$
     }
 
     private static final int TIMEOUT = 1;
