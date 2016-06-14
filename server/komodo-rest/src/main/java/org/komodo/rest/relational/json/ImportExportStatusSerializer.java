@@ -63,6 +63,9 @@ public final class ImportExportStatusSerializer extends TypeAdapter< ImportExpor
                 case ImportExportStatus.CONTENT_LABEL:
                     status.setContent(in.nextString());
                     break;
+                case ImportExportStatus.DOWNLOADABLE_SIZE_LABEL:
+                    status.setDownloadableSize(in.nextLong());
+                    break;
                 default:
                     throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
             }
@@ -98,6 +101,9 @@ public final class ImportExportStatusSerializer extends TypeAdapter< ImportExpor
 
         out.name(ImportExportStatus.CONTENT_LABEL);
         out.value(value.getContent());
+
+        out.name(ImportExportStatus.DOWNLOADABLE_SIZE_LABEL);
+        out.value(value.getDownloadableSize());
 
         out.endObject();
     }

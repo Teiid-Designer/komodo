@@ -42,6 +42,11 @@ public class ImportExportStatus implements KRestEntity {
     public static final String DOWNLOADABLE_LABEL = "downloadable"; //$NON-NLS-1$
 
     /**
+     * Label for the size of the downloadable
+     */
+    public static final String DOWNLOADABLE_SIZE_LABEL = "downloadableSize";
+
+    /**
      * Label for the content
      */
     public static final String CONTENT_LABEL = "content"; //$NON-NLS-1$
@@ -60,6 +65,8 @@ public class ImportExportStatus implements KRestEntity {
     private String content;
 
     private boolean success;
+
+    private long downloadableSize;
 
     @Override
     public boolean supports(MediaType mediaType) {
@@ -127,5 +134,13 @@ public class ImportExportStatus implements KRestEntity {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public long getDownloadableSize() {
+        return this.downloadableSize;
+    }
+
+    public void setDownloadableSize(long length) {
+        this.downloadableSize = length;
     }
 }
