@@ -39,6 +39,8 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Marshaller;
 import javax.xml.namespace.QName;
 import org.komodo.core.KEngine;
+import org.komodo.core.KomodoLexicon;
+import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.SynchronousCallback;
@@ -67,7 +69,7 @@ public abstract class KomodoService implements V1Constants {
     private static final int TIMEOUT = 30;
     private static final TimeUnit UNIT = TimeUnit.SECONDS;
 
-    private static final String HTML_NEW_LINE = "<br/>";
+    private static final String HTML_NEW_LINE = "<br/>"; //$NON-NLS-1$
 
     /**
      * Query parameter keys used by the service methods.
@@ -164,7 +166,7 @@ public abstract class KomodoService implements V1Constants {
             ErrorResponse errResponse = new ErrorResponse(errorMessage);
 
             JAXBElement<ErrorResponse> xmlErrResponse = new JAXBElement<ErrorResponse>(
-                                                                                        new QName("error"),
+                                                                                        new QName("error"), //$NON-NLS-1$
                                                                                         ErrorResponse.class,
                                                                                         errResponse);
 
@@ -195,12 +197,13 @@ public abstract class KomodoService implements V1Constants {
         stackTrace = stackTrace.replaceAll(NEW_LINE, HTML_NEW_LINE);
         buf.append(stackTrace).append(HTML_NEW_LINE);
 
+        String resultMsg = null;
         if (errorMsgInputs == null || errorMsgInputs.length == 0)
-            errorMsg = RelationalMessages.getString(errorType, buf.toString());
+            resultMsg = RelationalMessages.getString(errorType) + buf.toString();
         else
-            errorMsg = RelationalMessages.getString(errorType, errorMsgInputs, buf.toString());
+            resultMsg = RelationalMessages.getString(errorType, errorMsgInputs) + buf.toString();
 
-        Object responseEntity = createErrorResponseEntity(mediaTypes, errorMsg);
+        Object responseEntity = createErrorResponseEntity(mediaTypes, resultMsg);
         return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
     }
 
@@ -401,6 +404,18 @@ public abstract class KomodoService implements V1Constants {
         return vdb;
     }
 
+    protected Dataservice findDataservice(UnitOfWork uow, String dataserviceName) throws KException {
+        if (! this.wsMgr.hasChild( uow, dataserviceName, KomodoLexicon.DataService.NODE_TYPE ) ) {
+            return null;
+        }
+
+        final KomodoObject kobject = this.wsMgr.getChild( uow, dataserviceName, KomodoLexicon.DataService.NODE_TYPE );
+        final Dataservice dataservice = this.wsMgr.resolve( uow, kobject, Dataservice.class );
+
+        LOGGER.debug( "Dataservice '{0}' was found", dataserviceName ); //$NON-NLS-1$
+        return dataservice;
+    }
+
     protected String uri(String... segments) {
         StringBuffer buffer = new StringBuffer();
         for (int i = 0; i < segments.length; ++i) {
@@ -415,6 +430,11 @@ public abstract class KomodoService implements V1Constants {
     protected Response commitNoVdbFound(UnitOfWork uow, List<MediaType> mediaTypes, String vdbName) throws Exception {
         LOGGER.debug( "VDB '{0}' was not found", vdbName ); //$NON-NLS-1$
         return commit( uow, mediaTypes, new ResourceNotFound( vdbName, Messages.getString( GET_OPERATION_NAME ) ) );
+    }
+
+    protected Response commitNoDataserviceFound(UnitOfWork uow, List<MediaType> mediaTypes, String dataserviceName) throws Exception {
+        LOGGER.debug( "Dataservice '{0}' was not found", dataserviceName ); //$NON-NLS-1$
+        return commit( uow, mediaTypes, new ResourceNotFound( dataserviceName, Messages.getString( GET_OPERATION_NAME ) ) );
     }
 
     protected Response commitNoModelFound(UnitOfWork uow, List<MediaType> mediaTypes, String modelName, String vdbName) throws Exception {

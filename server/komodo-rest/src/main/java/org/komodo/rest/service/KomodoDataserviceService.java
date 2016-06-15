@@ -24,6 +24,7 @@ package org.komodo.rest.service;
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_CREATE_DATASERVICE_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_DELETE_DATASERVICE_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_GET_DATASERVICES_ERROR;
+import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_GET_DATASERVICE_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_JSON_MISSING_NAME;
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_SERVICE_NAME_ERROR;
 import static org.komodo.rest.relational.RelationalMessages.Error.DATASERVICE_SERVICE_UPDATE_DATASERVICE_ERROR;
@@ -67,6 +68,7 @@ import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.utils.StringUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
@@ -214,6 +216,60 @@ public final class KomodoDataserviceService extends KomodoService {
     }
     
     /**
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @param dataserviceName
+     *        the id of the Dataservice being retrieved (cannot be empty)
+     * @return the JSON representation of the Dataservice (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is a problem finding the specified workspace Dataservice or constructing the JSON representation
+     */
+    @GET
+    @Path( V1Constants.DATA_SERVICE_PLACEHOLDER )
+    @Produces( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
+    @Consumes ( { MediaType.APPLICATION_JSON } )
+    @ApiOperation(value = "Find dataservice by name", response = RestDataservice.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 404, message = "No Dataservice could be found with name"),
+        @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response getDataservice( final @Context HttpHeaders headers,
+                                    final @Context UriInfo uriInfo,
+                                    @ApiParam(value = "Id of the dataservice to be fetched", required = true)
+                                    final @PathParam( "dataserviceName" ) String dataserviceName) throws KomodoRestException {
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        UnitOfWork uow = null;
+
+        try {
+            uow = createTransaction( "getDataservice", true ); //$NON-NLS-1$
+
+            Dataservice dataservice = findDataservice(uow, dataserviceName);
+            if (dataservice == null)
+                return commitNoDataserviceFound(uow, mediaTypes, dataserviceName);
+
+            KomodoProperties properties = new KomodoProperties();
+            final RestDataservice restDataservice = entityFactory.create(dataservice, uriInfo.getBaseUri(), uow, properties);
+            LOGGER.debug("getVdb:VDB '{0}' entity was constructed", dataservice.getName(uow)); //$NON-NLS-1$
+            return commit( uow, mediaTypes, restDataservice );
+
+        } catch ( final Exception e ) {
+            if ( ( uow != null ) && ( uow.getState() != State.ROLLED_BACK ) ) {
+                uow.rollback();
+            }
+
+            if ( e instanceof KomodoRestException ) {
+                throw ( KomodoRestException )e;
+            }
+
+            return createErrorResponse(mediaTypes, e, DATASERVICE_SERVICE_GET_DATASERVICE_ERROR, dataserviceName);
+        }
+    }
+    
+    /**
      * Create a new DataService in the komodo repository
      * @param headers
      *        the request headers (never <code>null</code>)
@@ -228,7 +284,7 @@ public final class KomodoDataserviceService extends KomodoService {
      *         if there is an error creating the DataService
      */
     @POST
-    @Path( StringConstants.FORWARD_SLASH + V1Constants.CREATE_DATA_SERVICE_SEGMENT + StringConstants.FORWARD_SLASH + V1Constants.DATA_SERVICE_PLACEHOLDER )
+    @Path( StringConstants.FORWARD_SLASH + V1Constants.DATA_SERVICE_PLACEHOLDER )
     @Produces( MediaType.APPLICATION_JSON )
     @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Create a dataservice in the workspace")
@@ -297,7 +353,105 @@ public final class KomodoDataserviceService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            return createErrorResponse(mediaTypes, e, DATASERVICE_SERVICE_CREATE_DATASERVICE_ERROR);
+            return createErrorResponse(mediaTypes, e, DATASERVICE_SERVICE_CREATE_DATASERVICE_ERROR, dataserviceName);
+        }
+    }
+    
+    /**
+     * Clone a DataService in the komodo repository
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @param dataserviceName
+     *        the dataservice name (cannot be empty)
+     * @param newDataserviceName
+     *        the new dataservice name (cannot be empty)
+     * @return a JSON representation of the new dataservice (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is an error creating the DataService
+     */
+    @POST
+    @Path( StringConstants.FORWARD_SLASH + V1Constants.CLONE_DATA_SERVICE_SEGMENT + StringConstants.FORWARD_SLASH + V1Constants.DATA_SERVICE_PLACEHOLDER )
+    @Produces( MediaType.APPLICATION_JSON )
+    @Consumes ( { MediaType.APPLICATION_JSON } )
+    @ApiOperation(value = "Clone a dataservice in the workspace")
+    @ApiResponses(value = {
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response cloneDataservice( final @Context HttpHeaders headers,
+                                       final @Context UriInfo uriInfo,
+                                       final @PathParam( "dataserviceName" ) String dataserviceName,
+                                       final String newDataserviceName) throws KomodoRestException {
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
+            return notAcceptableMediaTypesBuilder().build();
+
+        // Error if the dataservice name is missing
+        if (StringUtils.isBlank( dataserviceName )) {
+            String errorMessage = RelationalMessages.getString(RelationalMessages.Error.DATASERVICE_SERVICE_CLONE_MISSING_NAME);
+
+            Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
+            return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+        }
+
+        // Error if the new dataservice name is missing
+        if ( StringUtils.isBlank( newDataserviceName ) ) {
+            String errorMessage = RelationalMessages.getString(RelationalMessages.Error.DATASERVICE_SERVICE_CLONE_MISSING_NEW_NAME);
+
+            Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
+            return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+        }
+
+        // Error if the name parameter and new name are the same
+        final boolean namesMatch = dataserviceName.equals( newDataserviceName );
+        if ( namesMatch ) {
+            String errorMessage = RelationalMessages.getString(RelationalMessages.Error.DATASERVICE_SERVICE_CLONE_SAME_NAME_ERROR, newDataserviceName);
+
+            Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
+            return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+        }
+
+        UnitOfWork uow = null;
+
+        try {
+            uow = createTransaction( "cloneDataservice", false ); //$NON-NLS-1$
+            
+            // Error if the repo already contains a dataservice with the supplied name.
+            if ( this.wsMgr.hasChild( uow, newDataserviceName ) ) {
+                String errorMessage = RelationalMessages.getString(RelationalMessages.Error.DATASERVICE_SERVICE_CLONE_ALREADY_EXISTS);
+
+                Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
+                return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+            }
+            
+            // create new Dataservice
+            // must be an update
+            final KomodoObject kobject = this.wsMgr.getChild( uow, dataserviceName, KomodoLexicon.DataService.NODE_TYPE );
+            final Dataservice oldDataservice = this.wsMgr.resolve( uow, kobject, Dataservice.class );
+            final RestDataservice oldEntity = entityFactory.create(oldDataservice, uriInfo.getBaseUri(), uow );
+            
+            final Dataservice dataservice = this.wsMgr.createDataservice( uow, null, newDataserviceName);
+
+            setProperties( uow, dataservice, oldEntity );
+
+            // TODO copy the properties
+
+            final RestDataservice entity = entityFactory.create(dataservice, uriInfo.getBaseUri(), uow );
+            final Response response = commit( uow, mediaTypes, entity );
+            return response;
+        } catch (final Exception e) {
+            if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
+                uow.rollback();
+            }
+
+            if (e instanceof KomodoRestException) {
+                throw (KomodoRestException)e;
+            }
+
+            return createErrorResponse(mediaTypes, e, RelationalMessages.Error.DATASERVICE_SERVICE_CLONE_DATASERVICE_ERROR);
         }
     }
     
@@ -316,7 +470,7 @@ public final class KomodoDataserviceService extends KomodoService {
      *         if there is an error updating the VDB
      */
     @PUT
-    @Path( StringConstants.FORWARD_SLASH + V1Constants.UPDATE_DATA_SERVICE_SEGMENT + StringConstants.FORWARD_SLASH + V1Constants.DATA_SERVICE_PLACEHOLDER )
+    @Path( StringConstants.FORWARD_SLASH + V1Constants.DATA_SERVICE_PLACEHOLDER )
     @Produces( MediaType.APPLICATION_JSON )
     @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Update a dataservice in the workspace")
@@ -423,33 +577,43 @@ public final class KomodoDataserviceService extends KomodoService {
                 throw (KomodoRestException)e;
             }
 
-            throw new KomodoRestException( RelationalMessages.getString( DATASERVICE_SERVICE_CREATE_DATASERVICE_ERROR ), e );
+            throw new KomodoRestException( RelationalMessages.getString( DATASERVICE_SERVICE_CREATE_DATASERVICE_ERROR, dataserviceName ), e );
         }
     }
     
     // Sets Dataservice properties using the supplied RestDataservice object
     private void setProperties(final UnitOfWork uow, Dataservice dataService, RestDataservice restDataService) throws KException {
-        // Description
+        //TODO: Complete to include all properties
+        
+        // 'New' = requested RestDataservice properties
         String newDescription = restDataService.getDescription();
-        if ( !StringUtils.isBlank( newDescription ) ) {
-            dataService.setDescription( uow, restDataService.getDescription() );
+        String newConnType = restDataService.getConnectionType();
+        String newFilePath = restDataService.getOriginalFilePath();
+        int newVersion = restDataService.getVersion();
+        
+        // 'Old' = current Dataservice properties
+        String oldDescription = dataService.getDescription(uow);
+        String oldConnType = dataService.getConnectionType(uow);
+        String oldFilePath = dataService.getOriginalFilePath(uow);
+        int oldVersion = dataService.getVersion(uow);
+        
+        // Description
+        if ( !StringUtils.equals(newDescription, oldDescription) ) {
+            dataService.setDescription( uow, newDescription );
         } 
         
         // ConnectionType
-        String newConnType = restDataService.getConnectionType();
-        if( !StringUtils.isBlank(newConnType) && !newConnType.equals(dataService.getConnectionType(uow)) ) {
+        if( !StringUtils.isBlank(newConnType) && !StringUtils.equals(newConnType, oldConnType) ) {
             dataService.setConnectionType(uow, newConnType);
         }
         
         // OriginalFilePath
-        String newFilePath = restDataService.getOriginalFilePath();
-        if( !StringUtils.isBlank(newFilePath) && !newFilePath.equals(dataService.getOriginalFilePath(uow)) ) {
+        if( !StringUtils.equals(newFilePath,oldFilePath) ) {
             dataService.setOriginalFilePath(uow, newFilePath);
         }
         
         // Version
-        int newVersion = restDataService.getVersion();
-        if(newVersion!=dataService.getVersion(uow)) {
+        if( newVersion != oldVersion ) {
             dataService.setVersion(uow, newVersion);
         }
     }
