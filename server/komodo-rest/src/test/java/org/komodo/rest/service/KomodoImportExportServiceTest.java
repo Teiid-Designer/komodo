@@ -30,6 +30,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Base64;
+import java.util.List;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -40,6 +41,8 @@ import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.relational.AbstractKomodoServiceTest;
 import org.komodo.rest.relational.ImportExportStatus;
 import org.komodo.rest.relational.KomodoStorageAttributes;
+import org.komodo.rest.relational.RestStorageType;
+import org.komodo.rest.relational.RestStorageTypeDescriptor;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.spi.repository.DocumentType;
 import org.komodo.spi.repository.KomodoObject;
@@ -262,5 +265,31 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
         dsZip.deleteOnExit();
         FileUtils.write(decBytes, dsZip);
         TestUtilities.testZipFile(dsZip);
+    }
+
+    @Test
+    public void shouldGetStorageTypes() throws Exception {
+        URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
+                                        .path(V1Constants.IMPORT_EXPORT_SEGMENT)
+                                        .path(V1Constants.STORAGE_TYPES).build();
+
+        this.response = request(uri).get();
+        final String entity = this.response.readEntity(String.class);
+        assertNotNull(entity);
+        System.out.println(entity);
+        assertEquals(Response.Status.OK.getStatusCode(), this.response.getStatus());
+
+        RestStorageType[] entities = KomodoJsonMarshaller.unmarshallArray(entity, RestStorageType[].class);
+        assertNotNull(entities);
+        assertEquals(2, entities.length);
+
+        for (RestStorageType type : entities) {
+            List<RestStorageTypeDescriptor> descriptors = type.getDescriptors();
+            assertNotNull(descriptors);
+            assertTrue(descriptors.size() > 0);
+
+            String name = type.getName();
+            assertTrue(name.equals("file") || name.equals("git"));
+        }
     }
 }

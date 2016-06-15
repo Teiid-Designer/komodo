@@ -408,7 +408,12 @@ public final class RelationalMessages {
         /**
          * An import export service import error
          */
-        IMPORT_EXPORT_SERVICE_IMPORT_ERROR;
+        IMPORT_EXPORT_SERVICE_IMPORT_ERROR,
+
+        /**
+         * An import export service storage types retrieval error
+         */
+        IMPORT_EXPORT_SERVICE_STORAGE_TYPES_ERROR;
 
         /**
          * {@inheritDoc}

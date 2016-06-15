@@ -23,11 +23,13 @@ package org.komodo.rest.service;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -47,13 +49,16 @@ import org.komodo.rest.KomodoService;
 import org.komodo.rest.relational.ImportExportStatus;
 import org.komodo.rest.relational.KomodoStorageAttributes;
 import org.komodo.rest.relational.RelationalMessages;
+import org.komodo.rest.relational.RestStorageType;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.spi.repository.Exportable;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.spi.storage.StorageConnector;
+import org.komodo.spi.storage.StorageConnector.Descriptor;
 import org.komodo.spi.storage.StorageReference;
+import org.komodo.spi.storage.StorageService;
 import org.komodo.utils.FileUtils;
 import org.komodo.utils.KLog;
 import io.swagger.annotations.Api;
@@ -346,6 +351,58 @@ public class KomodoImportExportService extends KomodoService {
             //
             if (cttFile != null)
                 cttFile.delete();
+        }
+    }
+
+    /**
+     * Gets the types of storage available for import/export
+     *
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @return the collection of the storage types
+     * @throws KomodoRestException
+     *         if there is a problem with the operation
+     */
+    @GET
+    @Path(V1Constants.STORAGE_TYPES)
+    @Produces( MediaType.APPLICATION_JSON )
+    @Consumes ( { MediaType.APPLICATION_JSON } )
+    @ApiOperation(value = "Returns the collection of available storage types used for import/export",
+                             response = RestStorageType[].class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response storageTypes( final @Context HttpHeaders headers,
+                             final @Context UriInfo uriInfo) throws KomodoRestException {
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
+            return notAcceptableMediaTypesBuilder().build();
+
+        try {
+            PluginService pluginService = PluginService.getInstance();
+            Set<String> storageTypes = pluginService.getSupportedStorageTypes();
+            if (storageTypes == null || storageTypes.isEmpty()) {
+                return Response.noContent().build();
+            }
+
+            List<RestStorageType> restStorageTypes = new ArrayList<>(storageTypes.size());
+            for (String storageType : storageTypes) {
+                StorageService storageService = pluginService.getStorageService(storageType);
+                Set<Descriptor> descriptors = storageService.getDescriptors();
+
+                RestStorageType type = new RestStorageType(storageType, descriptors);
+                restStorageTypes.add(type);
+            }
+
+            UnitOfWork uow = createTransaction("getStorageTypes", true); //$NON-NLS-1$
+            return commit(uow, mediaTypes, restStorageTypes);
+
+        } catch (Exception e) {
+            return createErrorResponse(mediaTypes, e,
+                                       RelationalMessages.Error.IMPORT_EXPORT_SERVICE_STORAGE_TYPES_ERROR);
         }
     }
 }

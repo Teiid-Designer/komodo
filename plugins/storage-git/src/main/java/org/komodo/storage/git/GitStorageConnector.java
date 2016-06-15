@@ -27,7 +27,9 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.RebaseResult;
 import org.eclipse.jgit.api.RebaseResult.Status;
@@ -64,6 +66,34 @@ public class GitStorageConnector implements StorageConnector {
      * The branch to checkout
      */
     public static final String REPO_BRANCH_PROPERTY = "repo-branch-property";
+
+    static final Set<Descriptor> DESCRIPTORS = new HashSet<>();
+
+    static {
+        DESCRIPTORS.add(
+                       new Descriptor(
+                                     REPO_PATH_PROPERTY,
+                                     true,
+                                     "The URL location of the git repository to use as the destination storage."));
+        DESCRIPTORS.add(
+                       new Descriptor(
+                                     REPO_DEST_PROPERTY,
+                                     false,
+                                     "The repository will be cloned to the path specified (on the server) by this property. " +
+                                     "If not specified then a directory will be created beneath the server's temp directory"));
+        DESCRIPTORS.add(
+                       new Descriptor(
+                                     REPO_BRANCH_PROPERTY,
+                                     false,
+                                     "The branch that should be checked out of the repository. If not specified then the " +
+                                     " master branch is assumed."));
+        DESCRIPTORS.add(
+                       new Descriptor(
+                                     StorageConnector.FILE_PATH_PROPERTY,
+                                     true,
+                                     "The relative (to the directory specified by \"repo-dest-property\") path of the file. " +
+                                     "It is enough to specify only the name of the file."));
+    }
 
     private final Properties parameters;
 
@@ -103,6 +133,11 @@ public class GitStorageConnector implements StorageConnector {
     @Override
     public StorageConnectorId getId() {
         return id;
+    }
+
+    @Override
+    public Set<Descriptor> getDescriptors() {
+        return DESCRIPTORS;
     }
 
     /**

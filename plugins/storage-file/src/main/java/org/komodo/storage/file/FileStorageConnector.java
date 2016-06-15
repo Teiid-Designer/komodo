@@ -25,7 +25,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 import org.komodo.spi.repository.Exportable;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.storage.StorageConnector;
@@ -36,6 +38,23 @@ import org.komodo.utils.ArgCheck;
 import org.komodo.utils.FileUtils;
 
 public class FileStorageConnector implements StorageConnector {
+
+    static final Set<Descriptor> DESCRIPTORS = new HashSet<>();
+
+    static {
+        DESCRIPTORS.add(
+                   new Descriptor(
+                                 StorageConnector.FILES_HOME_PATH_PROPERTY,
+                                 false,
+                                 "The directory (on the server) where the files are to be hosted. " +
+                                 "If not specified then the jboss or native java temporary directory is assumed."));
+        DESCRIPTORS.add(
+                   new Descriptor(
+                                 StorageConnector.FILE_PATH_PROPERTY,
+                                 true,
+                                 "The relative (to the directory specified by \"files-home-path-property\") path of the file. " +
+                                 "It is enough to specify only the name of the file."));
+    }
 
     private final StorageConnectorId id;
 
@@ -63,6 +82,11 @@ public class FileStorageConnector implements StorageConnector {
     @Override
     public StorageConnectorId getId() {
         return id;
+    }
+
+    @Override
+    public Set<Descriptor> getDescriptors() {
+        return DESCRIPTORS;
     }
 
     /**

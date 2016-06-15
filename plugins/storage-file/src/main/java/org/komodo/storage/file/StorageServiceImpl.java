@@ -22,9 +22,11 @@
 package org.komodo.storage.file;
 
 import java.util.Properties;
+import java.util.Set;
 import org.komodo.plugin.framework.AbstractBundleService;
 import org.komodo.spi.storage.StorageConnector;
 import org.komodo.spi.storage.StorageService;
+import org.komodo.spi.storage.StorageConnector.Descriptor;
 
 public class StorageServiceImpl extends AbstractBundleService implements StorageService {
 
@@ -37,6 +39,11 @@ public class StorageServiceImpl extends AbstractBundleService implements Storage
     @Override
     public String getStorageId() {
         return STORAGE_ID;
+    }
+
+    @Override
+    public Set<Descriptor> getDescriptors() throws Exception {
+        return FileStorageConnector.DESCRIPTORS;
     }
 
     @Override

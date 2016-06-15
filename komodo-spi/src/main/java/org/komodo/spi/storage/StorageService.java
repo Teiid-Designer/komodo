@@ -22,7 +22,9 @@
 package org.komodo.spi.storage;
 
 import java.util.Properties;
+import java.util.Set;
 import org.komodo.spi.bundle.BundleService;
+import org.komodo.spi.storage.StorageConnector.Descriptor;
 
 public interface StorageService extends BundleService {
 
@@ -46,6 +48,12 @@ public interface StorageService extends BundleService {
      * @throws Exception 
      */
     String getStorageId() throws Exception;
+
+    /**
+     * @return the set of applicable parameters for this storage connector
+     * @throws Exception
+     */
+    Set<Descriptor> getDescriptors() throws Exception;
 
     /**
      * @param parameters

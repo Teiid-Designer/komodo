@@ -23,6 +23,7 @@ package org.komodo.spi.storage;
 
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.Set;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Exportable;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -34,6 +35,36 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
  * individual artifacts
  */
 public interface StorageConnector extends StringConstants {
+
+    /**
+     * Describes a parameter/property applicable to this storage connector
+     */
+    static class Descriptor {
+
+        private String name;
+
+        private boolean required;
+
+        private String description;
+
+        public Descriptor(String name, boolean required, String description) {
+            this.name = name;
+            this.required = required;
+            this.description = description;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public boolean isRequired() {
+            return required;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+    }
 
     /**
      * The path to the home directory of the location of files. Used by some connectors.
@@ -54,6 +85,11 @@ public interface StorageConnector extends StringConstants {
      * @return the id of the connector
      */
     StorageConnectorId getId();
+
+    /**
+     * @return the applicable parameters for this storage connector
+     */
+    Set<Descriptor> getDescriptors();
 
     /**
      * Write the {@link Exportable} to the storage according to the

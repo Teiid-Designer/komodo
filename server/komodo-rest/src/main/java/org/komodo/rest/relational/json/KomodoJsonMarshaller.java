@@ -35,6 +35,8 @@ import org.komodo.rest.relational.KomodoSearcherAttributes;
 import org.komodo.rest.relational.KomodoStatusObject;
 import org.komodo.rest.relational.KomodoStorageAttributes;
 import org.komodo.rest.relational.KomodoTeiidAttributes;
+import org.komodo.rest.relational.RestStorageType;
+import org.komodo.rest.relational.RestStorageTypeDescriptor;
 import org.komodo.rest.relational.RestTeiid;
 import org.komodo.rest.relational.RestTeiidStatus;
 import org.komodo.rest.relational.RestTeiidVdbStatus;
@@ -111,7 +113,9 @@ public final class KomodoJsonMarshaller {
                                                   .registerTypeAdapter( DSSPropertyPairProperty.class, new DSSPropertyPairPropertySerializer())
                                                   .registerTypeAdapter( DataSourceSchemaProperty.class, new DSSPropertySerializer())
                                                   .registerTypeAdapter( KomodoStorageAttributes.class, new StorageAttributesSerializer())
-                                                  .registerTypeAdapter( ImportExportStatus.class, new ImportExportStatusSerializer());
+                                                  .registerTypeAdapter( ImportExportStatus.class, new ImportExportStatusSerializer())
+                                                  .registerTypeAdapter( RestStorageType.class, new StorageTypeSerializer())
+                                                  .registerTypeAdapter( RestStorageTypeDescriptor.class, new StorageTypeDescriptorSerializer());
         BUILDER = temp.create();
         PRETTY_BUILDER = temp.setPrettyPrinting().create();
     }
