@@ -3,7 +3,7 @@
   <mirrors>
     <mirror>
       <id>jboss-developer-repository-group</id>
-      <mirrorOf>*,!jboss-deprecated,!redhat-techpreview-all-repository,!jboss-earlyaccess,!modeshape-in-project,!eclipse</mirrorOf>
+      <mirrorOf>*,!jboss-deprecated,!redhat-techpreview-all-repository,!jboss-earlyaccess,!modeshape-in-project,!jboss-snapshots-repository,!eclipse</mirrorOf>
       <name>JBoss.org Developer Repository Group</name>
       <url>https://repository.jboss.org/nexus/content/groups/developer/</url>
     </mirror>
@@ -175,6 +175,23 @@
       </repositories>
     </profile> 
     <profile>
+      <id>jboss-snapshots-repository</id>
+      <repositories>
+        <repository>
+          <id>jboss-snapshots-repository</id>
+          <name>JBoss Snapshots Repository</name>
+          <url>https://repository.jboss.org/nexus/content/repositories/snapshots/</url>
+          <layout>default</layout>
+          <releases>
+            <enabled>false</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </repository>
+      </repositories>
+    </profile>
+    <profile>
       <id>eclipse</id>
       <repositories>
         <repository>
@@ -200,6 +217,7 @@
     <activeProfile>jboss-public-repository</activeProfile>
     <activeProfile>jboss-developer-repository</activeProfile>
     <activeProfile>jboss-earlyaccess</activeProfile>
+    <activeProfile>jboss-snapshots-repository</activeProfile>
     <activeProfile>eclipse</activeProfile>
   </activeProfiles>
 </settings>
