@@ -199,9 +199,9 @@ public abstract class KomodoService implements V1Constants {
 
         String resultMsg = null;
         if (errorMsgInputs == null || errorMsgInputs.length == 0)
-            resultMsg = RelationalMessages.getString(errorType) + buf.toString();
+            resultMsg = RelationalMessages.getString(errorType, buf.toString());
         else
-            resultMsg = RelationalMessages.getString(errorType, errorMsgInputs) + buf.toString();
+            resultMsg = RelationalMessages.getString(errorType, errorMsgInputs, buf.toString());
 
         Object responseEntity = createErrorResponseEntity(mediaTypes, resultMsg);
         return Response.status(Status.FORBIDDEN).entity(responseEntity).build();

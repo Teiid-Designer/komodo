@@ -710,7 +710,7 @@ public class FileUtils implements StringConstants {
              builder.append(NEW_LINE);
          }
 
-         return builder.toString();
+         return builder.toString().trim();
      }
 
      public static String tempDirectory() {

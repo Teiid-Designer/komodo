@@ -693,8 +693,7 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
         final String entity = this.response.readEntity(String.class);
         // System.out.println("Response:\n" + entity);
         assertTrue(entity.startsWith("An error occurred whilst searching the workspace: " +
-                            "'Search requires the parameter valueParam but has not been provided a value"));
-
+                            "Search requires the parameter valueParam but has not been provided a value"));
     }
 
     @Test
