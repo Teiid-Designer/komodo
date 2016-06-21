@@ -21,9 +21,13 @@
  */
 package org.komodo.teiid;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import java.util.Collection;
 import java.util.Set;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.komodo.osgi.PluginService;
 import org.komodo.spi.query.TeiidService;
@@ -38,14 +42,16 @@ import org.komodo.spi.type.DataTypeManager.DataTypeName;
 @SuppressWarnings( {"javadoc", "nls"} )
 public class TestDataTypeManager {
 
-    protected final Collection<TeiidVersion> versionCache;
+    protected static Collection<TeiidVersion> versionCache;
 
-    /**
-     * @param teiidVersion
-     * @throws Exception 
-     */
-    public TestDataTypeManager() throws Exception {
-        versionCache = PluginService.getInstance().getSupportedTeiidVersions();
+    @BeforeClass
+    public static void setup() throws Exception {
+        PluginService service = PluginService.getInstance();
+
+        // Ensure the service is started
+        service.start();
+
+        versionCache = service.getSupportedTeiidVersions();        
     }
 
     protected DataTypeManager getDataTypeManager(TeiidVersion version) throws Exception {
