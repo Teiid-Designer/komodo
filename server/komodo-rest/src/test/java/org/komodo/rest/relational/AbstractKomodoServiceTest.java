@@ -102,17 +102,30 @@ public abstract class AbstractKomodoServiceTest implements V1Constants {
         Files.walkFileTree(_kengineDataDir, new SimpleFileVisitor<Path>() {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                Files.delete(file);
+                try {
+                    Files.delete(file);
+                } catch (Exception ex) {
+                    file.toFile().deleteOnExit();
+                }
                 return FileVisitResult.CONTINUE;
             }
 
             @Override
             public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                Files.delete(dir);
+                try {
+                    Files.delete(dir);
+                } catch (Exception ex) {
+                    dir.toFile().deleteOnExit();
+                }
                 return FileVisitResult.CONTINUE;
             }
         });
-        Files.deleteIfExists(_kengineDataDir);
+
+        try {
+            Files.deleteIfExists(_kengineDataDir);
+        } catch (Exception ex) {
+            _kengineDataDir.toFile().deleteOnExit();
+        }
     }
 
     @BeforeClass
