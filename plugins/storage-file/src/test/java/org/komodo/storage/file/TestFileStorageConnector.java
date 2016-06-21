@@ -22,7 +22,6 @@ package org.komodo.storage.file;
  */
 
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -214,13 +213,10 @@ public class TestFileStorageConnector implements StringConstants {
         StorageTree<String> structure = connector.browse();
         String tree = structure.printTree();
 
-        String TREE = "" +
-        FORWARD_SLASH + NEW_LINE +
-        FORWARD_SLASH + myFileDir.getName() + NEW_LINE +
-        FORWARD_SLASH + myFileDir.getName() + FORWARD_SLASH + SUB_DIR + NEW_LINE +
-        FORWARD_SLASH + myFileDir.getName() + FORWARD_SLASH + SUB_DIR + FORWARD_SLASH + TEST_VDB_3_XML + NEW_LINE +
-        FORWARD_SLASH + myFileDir.getName() + FORWARD_SLASH + TEST_VDB_XML + NEW_LINE;
-
-        assertEquals(TREE, tree);
+        // Allows the order to be changed but not the content
+        assertTrue(tree.contains(NEW_LINE + FORWARD_SLASH + myFileDir.getName() + NEW_LINE));
+        assertTrue(tree.contains(NEW_LINE + FORWARD_SLASH + myFileDir.getName() + FORWARD_SLASH + SUB_DIR + NEW_LINE));
+        assertTrue(tree.contains(NEW_LINE + FORWARD_SLASH + myFileDir.getName() + FORWARD_SLASH + SUB_DIR + FORWARD_SLASH + TEST_VDB_3_XML + NEW_LINE));
+        assertTrue(tree.contains(NEW_LINE + FORWARD_SLASH + myFileDir.getName() + FORWARD_SLASH + TEST_VDB_XML + NEW_LINE));
     }
 }
