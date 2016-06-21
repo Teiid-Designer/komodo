@@ -268,6 +268,15 @@ public interface ExecutionAdmin {
      void deployDriver(String driverName, File driverFile) throws Exception;
 
      /**
+      * Undeploy the named driver
+      *
+      * @param driver
+      *
+      * @throws Exception if undeployment fails
+      */
+     void undeployDriver(String driver) throws Exception;
+
+     /**
       * Get Model Schema DDL from the VDB
       * 
       * @param vdbName the name of the VDB
