@@ -14,7 +14,7 @@
 
 	<url>http://www.jboss.org/teiiddesigner</url>
 	<packaging>pom</packaging>
-	<description>Tool that allows creating, editing and managing dynamic VDBs for the Teiid server.</description>
+	<description> tool that allows creating, editing and managing dynamic VDBs for the Teiid server.</description>
 	<inceptionYear>2013</inceptionYear>
 
 	<organization>
@@ -524,13 +524,6 @@
 			</dependency>
 
 			<dependency>
-				<groupId>org.jboss.as</groupId>
-				<artifactId>jboss-as-dist</artifactId>
-				<version>${version.org.jboss.as}</version>
-				<type>zip</type>
-			</dependency>
-
-			<dependency>
 				<groupId>org.jboss.spec</groupId>
 				<artifactId>jboss-javaee-6.0</artifactId>
 				<version>${version.org.jboss.spec.jboss-javaee-6.0}</version>
@@ -554,16 +547,6 @@
 	</dependencyManagement>
 
 	<dependencies>
-		<!--  Problematic at the moment why this as-dist seems
-				to be struggling to be fetched from the jboss-access
-				repository. To try and mitigate, download it as soon as the
-		        build starts so that if jenkins fails, then it fails quickly! -->
-		<dependency>
-			<groupId>org.jboss.as</groupId>
-			<artifactId>jboss-as-dist</artifactId>
-			<type>zip</type>
-		</dependency>
-
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
