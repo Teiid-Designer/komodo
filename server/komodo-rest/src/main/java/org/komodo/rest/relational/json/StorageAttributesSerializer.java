@@ -29,7 +29,6 @@ import java.util.Map;
 import org.komodo.rest.Messages;
 import org.komodo.rest.relational.KomodoStorageAttributes;
 import org.komodo.spi.repository.DocumentType;
-import com.google.gson.TypeAdapter;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
@@ -37,7 +36,7 @@ import com.google.gson.stream.JsonWriter;
 /**
  * A GSON serializer/deserializer for {@status KomodoStorageObject}s.
  */
-public final class StorageAttributesSerializer extends TypeAdapter< KomodoStorageAttributes > {
+public final class StorageAttributesSerializer extends AbstractContentSerializer<KomodoStorageAttributes> {
 
     private static final Type STRING_MAP_TYPE = new TypeToken< Map< String, String > >() {/* nothing to do */}.getType();
 
@@ -54,6 +53,9 @@ public final class StorageAttributesSerializer extends TypeAdapter< KomodoStorag
         while ( in.hasNext() ) {
             final String name = in.nextName();
 
+            if (readContent(in, storageAttr, name) != null)
+                continue;
+
             switch ( name ) {
                 case KomodoStorageAttributes.STORAGE_TYPE_LABEL:
                     storageAttr.setStorageType(in.nextString());
@@ -66,9 +68,6 @@ public final class StorageAttributesSerializer extends TypeAdapter< KomodoStorag
                     for (Map.Entry<String, String> parameter : parameters.entrySet()) {
                         storageAttr.setParameter(parameter.getKey(), parameter.getValue());
                     }
-                    break;
-                case KomodoStorageAttributes.CONTENT_LABEL:
-                    storageAttr.setContent(in.nextString());
                     break;
                 case KomodoStorageAttributes.DOCUMENT_TYPE_LABEL:
                     String docTypeValue = in.nextString();
@@ -102,8 +101,7 @@ public final class StorageAttributesSerializer extends TypeAdapter< KomodoStorag
         out.name(KomodoStorageAttributes.ARTIFACT_PATH_LABEL);
         out.value(value.getArtifactPath());
 
-        out.name(KomodoStorageAttributes.CONTENT_LABEL);
-        out.value(value.getContent());
+        writeContent(out, value);
 
         DocumentType docType = value.getDocumentType();
         if (docType != null) {

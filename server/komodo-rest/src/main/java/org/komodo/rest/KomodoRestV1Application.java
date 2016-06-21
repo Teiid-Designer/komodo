@@ -325,6 +325,16 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         String TEIID_CREDENTIALS = "credentials"; //$NON-NLS-1$
 
         /**
+         * The driver property for adding a driver to the teiid server
+         */
+        String TEIID_DRIVER = "driver";
+
+        /**
+         * Placeholder added to an URI to allow a specific teiid driver id
+         */
+        String TEIID_DRIVER_PLACEHOLDER = "{driverName}";
+
+        /**
          * The teiid status path segment
          */
         String STATUS_SEGMENT = "status"; //$NON-NLS-1$

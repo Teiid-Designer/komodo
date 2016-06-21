@@ -35,6 +35,43 @@ import org.komodo.spi.repository.KomodoType;
  */
 public final class RelationalMessages {
 
+    public enum Info {
+        /**
+         * Title for the driver deployment status
+         */
+        DRIVER_DEPLOYMENT_STATUS_TITLE,
+
+        /**
+         * Driver successfully uploaded
+         */
+        DRIVER_SUCCESSFULLY_UPLOADED,
+
+        /**
+         * Driver successfully deployed
+         */
+        DRIVER_SUCCESSFULLY_DEPLOYED,
+
+        /**
+         * Driver undeployment request sent but not yet undeployed
+         */
+        DRIVER_UNDEPLOYMENT_REQUEST_SENT,
+
+        /**
+         * Driver successfully deployed
+         */
+        DRIVER_SUCCESSFULLY_UNDEPLOYED;
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see java.lang.Enum#toString()
+         */
+        @Override
+        public String toString() {
+            return getEnumName( this ) + DOT + name();
+        }
+    }
+
     /**
      * Messages relating to errors.
      */
@@ -369,6 +406,26 @@ public final class RelationalMessages {
          * An error indicating an error occurred whilst fetching the teiid translators
          */
         TEIID_SERVICE_GET_TRANSLATORS_ERROR,
+
+        /**
+         * An error indicating a teiid file attributes object has no parameters
+         */
+        TEIID_SERVICE_FILE_ATTRIB_NO_PARAMETERS,
+
+        /**
+         * An error indicating a teiid file attributes object has no name
+         */
+        TEIID_SERVICE_FILE_ATTRIB_NO_NAME,
+
+        /**
+         * An error indicating a teiid file attributes object has no file
+         */
+        TEIID_SERVICE_FILE_ATTRIB_NO_CONTENT,
+
+        /**
+         * An error indicating a teiid credentials failure
+         */
+        TEIID_SERVICE_DRIVER_ERROR,
 
         /**
          * The importexport service lacks at least one storage attribute

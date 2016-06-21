@@ -25,6 +25,7 @@ import static org.komodo.rest.Messages.Error.COMMIT_TIMEOUT;
 import static org.komodo.rest.Messages.Error.RESOURCE_NOT_FOUND;
 import static org.komodo.rest.Messages.General.GET_OPERATION_NAME;
 import java.io.StringWriter;
+import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import javax.ws.rs.ServerErrorException;
@@ -154,6 +155,28 @@ public abstract class KomodoService implements V1Constants {
 
         value = value.replaceAll(PREFIX_SEPARATOR, COLON);
         return value;
+    }
+
+    /**
+     * @param content
+     * @return a base64 encrypted version of the given content
+     */
+    protected String encrypt(byte[] content) {
+        if (content == null)
+            return null;
+
+        return Base64.getEncoder().encodeToString(content);
+    }
+
+    /**
+     * @param content
+     * @return a decrypted version of the given base64-encrypted content
+     */
+    protected byte[] decrypt(String content) {
+        if (content == null)
+            return null;
+
+        return Base64.getDecoder().decode(content);
     }
 
     protected Object createErrorResponseEntity(List<MediaType> acceptableMediaTypes, String errorMessage) {

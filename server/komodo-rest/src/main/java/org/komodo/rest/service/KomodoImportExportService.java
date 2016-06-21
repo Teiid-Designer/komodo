@@ -24,7 +24,6 @@ package org.komodo.rest.service;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -75,20 +74,6 @@ public class KomodoImportExportService extends KomodoService {
 
     public KomodoImportExportService(KEngine engine) throws ServerErrorException {
         super(engine);
-    }
-
-    private String encrypt(byte[] content) {
-        if (content == null)
-            return null;
-
-        return Base64.getEncoder().encodeToString(content);
-    }
-
-    private byte[] decrypt(String content) {
-        if (content == null)
-            return null;
-
-        return Base64.getDecoder().decode(content);
     }
 
     private Response checkStorageAttributes(KomodoStorageAttributes sta,

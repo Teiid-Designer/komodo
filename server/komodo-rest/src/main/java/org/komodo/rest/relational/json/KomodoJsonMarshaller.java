@@ -30,6 +30,7 @@ import org.komodo.rest.RestProperty;
 import org.komodo.rest.json.LinkSerializer;
 import org.komodo.rest.json.RestPropertySerializer;
 import org.komodo.rest.relational.ImportExportStatus;
+import org.komodo.rest.relational.KomodoFileAttributes;
 import org.komodo.rest.relational.KomodoSavedSearcher;
 import org.komodo.rest.relational.KomodoSearcherAttributes;
 import org.komodo.rest.relational.KomodoStatusObject;
@@ -113,6 +114,7 @@ public final class KomodoJsonMarshaller {
                                                   .registerTypeAdapter( DSSPropertyPairProperty.class, new DSSPropertyPairPropertySerializer())
                                                   .registerTypeAdapter( DataSourceSchemaProperty.class, new DSSPropertySerializer())
                                                   .registerTypeAdapter( KomodoStorageAttributes.class, new StorageAttributesSerializer())
+                                                  .registerTypeAdapter( KomodoFileAttributes.class, new FileAttributesSerializer())
                                                   .registerTypeAdapter( ImportExportStatus.class, new ImportExportStatusSerializer())
                                                   .registerTypeAdapter( RestStorageType.class, new StorageTypeSerializer())
                                                   .registerTypeAdapter( RestStorageTypeDescriptor.class, new StorageTypeDescriptorSerializer());

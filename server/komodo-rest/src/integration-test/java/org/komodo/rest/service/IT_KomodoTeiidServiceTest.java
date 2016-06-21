@@ -28,17 +28,22 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import java.io.File;
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileAttribute;
+import java.util.Base64;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -56,8 +61,11 @@ import org.komodo.relational.workspace.ServerManager;
 import org.komodo.repository.RepositoryImpl;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.RestLink;
+import org.komodo.rest.relational.KomodoFileAttributes;
 import org.komodo.rest.relational.KomodoRestUriBuilder;
+import org.komodo.rest.relational.KomodoStatusObject;
 import org.komodo.rest.relational.KomodoTeiidAttributes;
+import org.komodo.rest.relational.RelationalMessages;
 import org.komodo.rest.relational.RestTeiid;
 import org.komodo.rest.relational.RestTeiidStatus;
 import org.komodo.rest.relational.RestTeiidVdbStatus;
@@ -70,6 +78,7 @@ import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.constants.SystemConstants;
 import org.komodo.spi.query.TeiidService;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.runtime.DataSourceDriver;
 import org.komodo.spi.runtime.EventManager;
 import org.komodo.spi.runtime.HostProvider;
 import org.komodo.spi.runtime.TeiidAdminInfo;
@@ -79,16 +88,21 @@ import org.komodo.spi.runtime.TeiidParent;
 import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.test.utils.DummyEventManager;
 import org.komodo.test.utils.TestUtilities;
+import org.komodo.utils.FileUtils;
 
 @RunWith(Arquillian.class)
 @SuppressWarnings( {"javadoc", "nls"} )
 public final class IT_KomodoTeiidServiceTest implements StringConstants {
+
+    private static final String MYSQL_DRIVER_JAR = "mysql-connector-java-5.1.39-bin.jar";
 
     private static final String TEST_PORT = "8080";
 
     private static final String TEIID_DATA_PATH = RepositoryImpl.SERVERS_ROOT + FORWARD_SLASH + ServerManager.DEFAULT_SERVER_NAME;
 
     private static final String CACHED_TEIID_DATA_PATH = RepositoryImpl.TEIID_CACHE_ROOT + FORWARD_SLASH + ServerManager.DEFAULT_SERVER_NAME;
+
+    private static final String MYSQL_DRIVER = "mysql-connector";
 
     private static Path _kengineDataDir;
 
@@ -123,8 +137,32 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         _uriBuilder = new KomodoRestUriBuilder(BASE_URI);
     }
 
-    private Invocation.Builder request(final URI uri) {
-        return this.client.target(uri.toString()).request();
+    private Invocation.Builder request(final URI uri, MediaType... types) {
+        if (types == null || types.length == 0)
+            return this.client.target(uri.toString()).request();
+
+        return this.client.target(uri.toString()).request(types);
+    }
+
+    private void assertNoMysqlDriver() throws Exception {
+        Collection<DataSourceDriver> drivers = helperInstance.getDataSourceDrivers();
+        for (DataSourceDriver driver : drivers) {
+            assertFalse(driver.getName().startsWith(MYSQL_DRIVER));
+        }
+    }
+
+    private void assertMysqlDriver() throws Exception {
+        boolean found = false;
+        Collection<DataSourceDriver> drivers = helperInstance.getDataSourceDrivers();
+        for (DataSourceDriver driver : drivers) {
+            // Use startswith rather than equals since the
+            // mysql connector gives up 2 drivers rather than just 1
+            if (driver.getName().startsWith(MYSQL_DRIVER)) {
+                found = true;
+                break;
+            }
+        }
+        assertTrue("Cannot find deployed driver", found);
     }
 
     private TeiidInstance getTeiidInstance() throws Exception {
@@ -164,6 +202,13 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
     @After
     public void afterEach() throws Exception {
         helperInstance.undeployDynamicVdb(TestUtilities.SAMPLE_VDB_FILE);
+
+        try {
+            helperInstance.undeployDriver(MYSQL_DRIVER);
+        } catch (Exception ex) {
+            // Ignore errors
+        }
+
         Thread.sleep(2000);
 
         if (helperInstance != null)
@@ -435,7 +480,7 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
                                           .build();
 
         this.response = request(uri).get();
-        final String entity = this.response.readEntity(String.class);;
+        final String entity = this.response.readEntity(String.class);
         System.out.println("Response:\n" + entity);
         assertEquals(200, this.response.getStatus());
 
@@ -446,5 +491,84 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
             assertNotNull(dataSource.getId());
             assertEquals(3, dataSource.getLinks().size());
         }
+    }
+
+    @Test
+    public void shouldDeployDriver() throws Exception {
+        assertNoMysqlDriver();
+
+        URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
+                                            .path(V1Constants.TEIID_SEGMENT)
+                                            .path(V1Constants.TEIID_DRIVER)
+                                            .build();
+
+        KomodoFileAttributes fileAttr = new KomodoFileAttributes();
+        fileAttr.setName(MYSQL_DRIVER);
+
+        InputStream driverStream = TestUtilities.getResourceAsStream(getClass(), EMPTY_STRING, MYSQL_DRIVER_JAR);
+        assertNotNull(driverStream);
+
+        byte[] driverBytes = TestUtilities.streamToBytes(driverStream);
+        String content = Base64.getEncoder().encodeToString(driverBytes);
+        fileAttr.setContent(content);
+
+        this.response = request(uri, MediaType.APPLICATION_JSON_TYPE).post(Entity.json(fileAttr));
+        final String entity = this.response.readEntity(String.class);
+        assertEquals(Response.Status.OK.getStatusCode(), this.response.getStatus());
+
+        KomodoStatusObject status = KomodoJsonMarshaller.unmarshall(entity, KomodoStatusObject.class);
+        assertNotNull(status);
+
+        String title = RelationalMessages.getString(RelationalMessages.Info.DRIVER_DEPLOYMENT_STATUS_TITLE);
+        assertEquals(title, status.getTitle());
+        Map<String, String> attributes = status.getAttributes();
+
+        assertEquals(1, attributes.size());
+
+        String deployMsg = RelationalMessages.getString(RelationalMessages.Info.DRIVER_SUCCESSFULLY_DEPLOYED);
+        assertEquals(deployMsg, attributes.values().iterator().next());
+
+        Thread.sleep(2000);
+
+        assertMysqlDriver();
+    }
+
+    @Test
+    public void shouldUndeployDriver() throws Exception {
+        InputStream driverStream = TestUtilities.getResourceAsStream(getClass(), EMPTY_STRING, MYSQL_DRIVER_JAR);
+        assertNotNull(driverStream);
+        byte[] driverBytes = TestUtilities.streamToBytes(driverStream);
+        File driverFile = File.createTempFile(MYSQL_DRIVER, DOT + JAR);
+        FileUtils.write(driverBytes, driverFile);
+
+        helperInstance.deployDriver(MYSQL_DRIVER, driverFile);
+        Thread.sleep(2000);
+
+        assertMysqlDriver();
+        URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
+                                            .path(V1Constants.TEIID_SEGMENT)
+                                            .path(V1Constants.TEIID_DRIVER)
+                                            .path(MYSQL_DRIVER)
+                                            .build();
+
+        this.response = request(uri, MediaType.APPLICATION_JSON_TYPE).delete();
+        final String entity = this.response.readEntity(String.class);
+        assertEquals(Response.Status.OK.getStatusCode(), this.response.getStatus());
+
+        KomodoStatusObject status = KomodoJsonMarshaller.unmarshall(entity, KomodoStatusObject.class);
+        assertNotNull(status);
+
+        String title = RelationalMessages.getString(RelationalMessages.Info.DRIVER_DEPLOYMENT_STATUS_TITLE);
+        assertEquals(title, status.getTitle());
+        Map<String, String> attributes = status.getAttributes();
+
+        assertEquals(1, attributes.size());
+
+        String deployMsg = RelationalMessages.getString(RelationalMessages.Info.DRIVER_SUCCESSFULLY_UNDEPLOYED);
+        assertEquals(deployMsg, attributes.values().iterator().next());
+
+        Thread.sleep(2000);
+
+        assertNoMysqlDriver();
     }
 }

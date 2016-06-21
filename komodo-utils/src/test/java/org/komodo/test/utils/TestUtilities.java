@@ -1112,7 +1112,12 @@ public class TestUtilities implements StringConstants {
      * @throws Exception if error occurs
      */
     public static InputStream getResourceAsStream(Class<?> klazz, String parentDirectory, String fileName, String suffix) throws Exception {
-        String filePath = parentDirectory + File.separator + fileName + suffix;
+        String filePath;
+        if (parentDirectory == null || parentDirectory.isEmpty())
+            filePath = fileName + suffix;
+        else
+            filePath = parentDirectory + File.separator + fileName + suffix;
+
         InputStream fileStream = klazz.getClassLoader().getResourceAsStream(filePath);
         assertNotNull("File " + filePath + " does not exist", fileStream);
 
