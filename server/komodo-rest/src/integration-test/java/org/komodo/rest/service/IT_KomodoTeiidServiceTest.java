@@ -94,8 +94,6 @@ import org.komodo.utils.FileUtils;
 @SuppressWarnings( {"javadoc", "nls"} )
 public final class IT_KomodoTeiidServiceTest implements StringConstants {
 
-    private static final String MYSQL_DRIVER_JAR = "mysql-connector-java-5.1.39-bin.jar";
-
     private static final String TEST_PORT = "8080";
 
     private static final String TEIID_DATA_PATH = RepositoryImpl.SERVERS_ROOT + FORWARD_SLASH + ServerManager.DEFAULT_SERVER_NAME;
@@ -505,7 +503,7 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         KomodoFileAttributes fileAttr = new KomodoFileAttributes();
         fileAttr.setName(MYSQL_DRIVER);
 
-        InputStream driverStream = TestUtilities.getResourceAsStream(getClass(), EMPTY_STRING, MYSQL_DRIVER_JAR);
+        InputStream driverStream = TestUtilities.mySqlDriver();
         assertNotNull(driverStream);
 
         byte[] driverBytes = TestUtilities.streamToBytes(driverStream);
@@ -535,7 +533,7 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
 
     @Test
     public void shouldUndeployDriver() throws Exception {
-        InputStream driverStream = TestUtilities.getResourceAsStream(getClass(), EMPTY_STRING, MYSQL_DRIVER_JAR);
+        InputStream driverStream = TestUtilities.mySqlDriver();
         assertNotNull(driverStream);
         byte[] driverBytes = TestUtilities.streamToBytes(driverStream);
         File driverFile = File.createTempFile(MYSQL_DRIVER, DOT + JAR);

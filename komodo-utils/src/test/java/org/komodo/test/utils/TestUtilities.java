@@ -160,6 +160,11 @@ public class TestUtilities implements StringConstants {
      */
     public static final String ROLES_VDB_NAME = "z";
 
+    /**
+     * MySql Driver Jar
+     */
+    public static final String MYSQL_DRIVER_FILENAME = "mysql-connector-java-5.1.39-bin.jar";
+
     public static String convertPackageToDirPath(Package pkg) {
         return pkg.getName().replaceAll(DOUBLE_BACK_SLASH + DOT, FORWARD_SLASH);
     }
@@ -1075,6 +1080,16 @@ public class TestUtilities implements StringConstants {
         return getResourceAsStream(TestUtilities.class,
                                    RESOURCES_DIRECTORY,
                                    ROLES_VDB_FILE);
+    }
+
+    /**
+     * @return input stream of mysql driver
+     * @throws Exception
+     */
+    public static InputStream mySqlDriver() throws Exception {
+        return getResourceAsStream(TestUtilities.class,
+                                  RESOURCES_DIRECTORY,
+                                  MYSQL_DRIVER_FILENAME);
     }
 
     /**
