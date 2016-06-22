@@ -333,7 +333,7 @@ public class DatasourceImpl extends RelationalChildRestrictedObject implements D
     }
 
     @Override
-    public DocumentType getDocumentType() throws KException {
+    public DocumentType getDocumentType(UnitOfWork transaction) throws KException {
         return DocumentType.XML;
     }
 

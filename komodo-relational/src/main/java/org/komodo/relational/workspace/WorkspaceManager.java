@@ -58,6 +58,7 @@ import org.komodo.repository.ObjectImpl;
 import org.komodo.repository.RepositoryImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.DocumentType;
 import org.komodo.spi.repository.Exportable;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
@@ -809,24 +810,19 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
             ImportOptions importOptions = new ImportOptions();
             ImportMessages importMessages = new ImportMessages();
 
-            switch (storageRef.getDocumentType()) {
-                case XML:
-                {
-                    VdbImporter importer = new VdbImporter(getRepository());
-                    importer.importVdb(transaction, stream, parent, importOptions, importMessages);
-                    break;
-                }
-                case DDL:
-                {
-                    DdlImporter importer = new DdlImporter(getRepository());
-                    importer.importDdl(transaction, stream, parent, importOptions, importMessages);
-                    break;
-                }
-                case ZIP:
+            if (DocumentType.XML.equals(storageRef.getDocumentType())) {
+                VdbImporter importer = new VdbImporter(getRepository());
+                importer.importVdb(transaction, stream, parent, importOptions, importMessages);
+            }
+            else if (DocumentType.DDL.equals(storageRef.getDocumentType())) {
+                DdlImporter importer = new DdlImporter(getRepository());
+                importer.importDdl(transaction, stream, parent, importOptions, importMessages);
+            }
+            else if (DocumentType.ZIP.equals(storageRef.getDocumentType())) {
                     DataserviceConveyor conveyor = new DataserviceConveyor(getRepository());
                     conveyor.dsImport(transaction, stream, parent, importOptions, importMessages);
-                    break;
-                default:
+            }
+            else {
                     throw new KException(Messages.getString(Relational.STORAGE_DOCUMENT_TYPE_INVALID,
                                                             storageRef.getDocumentType()));
             }

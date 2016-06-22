@@ -129,7 +129,7 @@ public class SchemaImpl extends RelationalObjectImpl implements Schema {
     }
 
     @Override
-    public DocumentType getDocumentType() throws KException {
+    public DocumentType getDocumentType(UnitOfWork transaction) throws KException {
         return DocumentType.DDL;
     }
 }

@@ -290,7 +290,7 @@ public class DataserviceConveyor implements StringConstants {
                     continue;
 
                 String name = exportable.getName(transaction);
-                String ext = exportable.getDocumentType().toString();
+                String ext = exportable.getDocumentType(transaction).toString();
                 byte[] content = exportable.export(transaction, new Properties());
 
                 String entryName = name + DOT + ext;

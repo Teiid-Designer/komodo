@@ -23,19 +23,31 @@ package org.komodo.spi.repository;
 
 import org.komodo.spi.constants.StringConstants;
 
-public enum DocumentType {
+public class DocumentType {
 
-    XML(StringConstants.XML),
+    /**
+     * XML
+     */
+    public static final DocumentType XML = new DocumentType(StringConstants.XML);
 
-    ZIP(StringConstants.ZIP),
+    /**
+     * ZIP
+     */
+    public static final DocumentType ZIP = new DocumentType(StringConstants.ZIP);
 
-    DDL(StringConstants.DDL),
+    /**
+     * DDL
+     */
+    public static final DocumentType DDL = new DocumentType(StringConstants.DDL);
 
-    UNKNOWN(StringConstants.EMPTY_STRING);
+    /**
+     * UNKNOWN
+     */
+    public static final DocumentType UNKNOWN = new DocumentType(StringConstants.EMPTY_STRING);
 
     private String type;
 
-    DocumentType(String type) {
+    public DocumentType(String type) {
         this.type = type;
     }
 
@@ -45,11 +57,6 @@ public enum DocumentType {
     }
 
     public static DocumentType documentType(String docTypeValue) {
-        for (DocumentType docType : values()) {
-            if (docType.toString().equalsIgnoreCase(docTypeValue))
-                return docType;
-        }
-
-        return UNKNOWN;
+        return new DocumentType(docTypeValue);
     }
 }

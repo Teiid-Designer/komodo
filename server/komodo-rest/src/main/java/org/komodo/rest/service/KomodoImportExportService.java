@@ -175,7 +175,7 @@ public class KomodoImportExportService extends KomodoService {
             }
 
             status.setName(artifact.getName(uow));
-            status.setType(artifact.getDocumentType().toString());
+            status.setType(artifact.getDocumentType(uow).toString());
             String downloadable = wsMgr.exportArtifact(uow, artifact, sta.getStorageType(), parameters);
 
             //

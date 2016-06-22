@@ -835,7 +835,7 @@ public final class ModelImpl extends RelationalObjectImpl implements Model {
     }
 
     @Override
-    public DocumentType getDocumentType() throws KException {
+    public DocumentType getDocumentType(UnitOfWork transaction) throws KException {
         return DocumentType.DDL;
     }
 }
