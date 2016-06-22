@@ -43,6 +43,11 @@ public enum KomodoType {
     DATASOURCE("datasource"), //$NON-NLS-1$
 
     /**
+     * Driver
+     */
+    DRIVER("driver"), //$NON-NLS-1$
+
+    /**
      * Folder
      */
     FOLDER,

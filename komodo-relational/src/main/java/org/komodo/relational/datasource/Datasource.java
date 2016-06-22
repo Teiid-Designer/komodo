@@ -163,7 +163,7 @@ public interface Datasource extends Exportable, RelationalObject {
     /**
      * @param uow
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
-     * @return id of this teiid model
+     * @return id of this datasource
      * @throws KException
      */
     String getId(UnitOfWork uow) throws KException;

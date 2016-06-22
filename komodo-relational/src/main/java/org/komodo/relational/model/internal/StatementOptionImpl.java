@@ -21,6 +21,7 @@
  */
 package org.komodo.relational.model.internal;
 
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.util.Calendar;
@@ -61,6 +62,11 @@ public final class StatementOptionImpl extends RelationalChildRestrictedObject i
                                 final Repository repository,
                                 final String workspacePath ) throws KException {
         super( transaction, repository, workspacePath );
+    }
+
+    @Override
+    public InputStream getBinaryValue(UnitOfWork uow) throws KException {
+        throw new UnsupportedOperationException();
     }
 
     /**

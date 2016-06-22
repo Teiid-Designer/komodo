@@ -135,6 +135,8 @@
   - tko:driverName (string)
   - tko:className (string)
 
+[tko:driver] > nt:file, tko:workspaceItem, tko:libraryComponent
+
 /*
  * The Komodo library identifies the Teiid artifacts intended to be reused by multiple VDBs, workspaces, or Komodo repositories.
  */

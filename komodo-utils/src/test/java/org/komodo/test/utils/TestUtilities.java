@@ -34,6 +34,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.util.zip.CRC32;
+import java.util.zip.Checksum;
 import java.util.zip.ZipFile;
 import javax.jcr.Node;
 import javax.xml.parsers.DocumentBuilder;
@@ -1447,5 +1449,15 @@ public class TestUtilities implements StringConstants {
                 }
             } catch (IOException e) {}
         }
+    }
+
+    /**
+     * @param bytes
+     * @return checksum value of the given bytes
+     */
+    public static long checksum(byte[] bytes) {
+        Checksum contentCRC = new CRC32();
+        contentCRC.update(bytes, 0, bytes.length);
+        return contentCRC.getValue();
     }
 }

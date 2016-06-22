@@ -22,6 +22,7 @@
 package org.komodo.core;
 
 import org.komodo.spi.constants.StringConstants;
+import org.modeshape.jcr.JcrLexicon;
 import org.modeshape.jcr.JcrNtLexicon;
 import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon;
 
@@ -56,7 +57,6 @@ public interface KomodoLexicon extends StringConstants {
          * The name and node type name of the data services grouping node. Value is {@value} .
          */
         String GROUP_NODE = Namespace.PREFIX + COLON + "dataServices"; //$NON-NLS-1$
-
     }
 
     /**
@@ -103,6 +103,23 @@ public interface KomodoLexicon extends StringConstants {
          * The name of the profileName property. Value is {@value} .
          */
         String PROFILE_NAME = Namespace.PREFIX + COLON + "profileName"; //$NON-NLS-1$
+    }
+
+    /**
+     * The JCR names associated with a driver node type.
+     */
+    public interface Driver extends LibraryComponent, WorkspaceItem {
+
+        /**
+         * The node type name of a driver. Value is {@value} .
+         */
+        String NODE_TYPE = Namespace.PREFIX + COLON + "driver"; //$NON-NLS-1$
+
+        /**
+         * The name of the Jcr content child node. Value is {@value} .
+         */
+        String CONTENT = JcrLexicon.Namespace.PREFIX + COLON + "content"; //$NON-NLS-1$
+
     }
 
     /**

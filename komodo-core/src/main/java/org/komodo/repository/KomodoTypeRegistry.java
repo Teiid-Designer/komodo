@@ -124,6 +124,8 @@ public class KomodoTypeRegistry implements StringConstants {
 
         index(KomodoType.DATASOURCE, KomodoLexicon.DataSource.NODE_TYPE);
 
+        index(KomodoType.DRIVER, KomodoLexicon.Driver.NODE_TYPE);
+
         index(KomodoType.FOLDER, KomodoLexicon.Folder.NODE_TYPE);
 
         index(KomodoType.FOREIGN_KEY, TeiidDdlLexicon.Constraint.FOREIGN_KEY_CONSTRAINT);

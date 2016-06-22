@@ -26,6 +26,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -594,6 +595,31 @@ public class FileUtils implements StringConstants {
 //            throw new KomodoCoreRuntimeException(Messages.getString(Messages.FileUtils.Unable_to_delete_file_in, dirPath));
 //        }
 //    }
+
+    /**
+     * Write an InputStream to a byte array.
+     * @param is
+     * @throws IOException
+     */
+    public static byte[] write(final InputStream is) throws IOException {
+        ByteArrayOutputStream bos = null;
+        try {
+            bos = new ByteArrayOutputStream();
+            final byte[] buff = new byte[DEFAULT_BUFFER_SIZE];
+            int bytesRead;
+
+            // Simple read/write loop.
+            while (-1 != (bytesRead = is.read(buff, 0, buff.length)))
+                bos.write(buff, 0, bytesRead);
+
+            bos.flush();
+
+            return bos.toByteArray();
+        } finally {
+            if (bos != null)
+                bos.close();
+        }
+    }
 
     /**
      * Write an InputStream to a file.

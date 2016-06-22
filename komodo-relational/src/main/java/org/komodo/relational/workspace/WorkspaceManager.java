@@ -41,6 +41,7 @@ import org.komodo.relational.dataservice.internal.DataserviceConveyor;
 import org.komodo.relational.dataservice.internal.DataserviceImpl;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.datasource.internal.DatasourceImpl;
+import org.komodo.relational.driver.Driver;
 import org.komodo.relational.folder.Folder;
 import org.komodo.relational.importer.ddl.DdlImporter;
 import org.komodo.relational.importer.vdb.VdbImporter;
@@ -260,6 +261,24 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
         final String path = ( ( parent == null ) ? getRepository().komodoWorkspace( uow ).getAbsolutePath()
                                                  : parent.getAbsolutePath() );
          return RelationalModelFactory.createDatasource( uow, getRepository(), path, sourceName );
+    }
+
+    /**
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param parent
+     *        the parent of the driver object being created (can be <code>null</code>)
+     * @param sourceName
+     *        the name of the driver to create (cannot be empty)
+     * @return the Driver object (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    public Driver createDriver(UnitOfWork uow, KomodoObject parent, String driverName) throws KException {
+        final String path = ( ( parent == null ) ? getRepository().komodoWorkspace( uow ).getAbsolutePath()
+            : parent.getAbsolutePath() );
+        return RelationalModelFactory.createDriver( uow, getRepository(), path, driverName );
     }
 
     /**

@@ -26,6 +26,7 @@ import static org.junit.Assert.assertThat;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.datasource.Datasource;
+import org.komodo.relational.driver.Driver;
 import org.komodo.relational.folder.Folder;
 import org.komodo.relational.model.Model;
 import org.komodo.relational.model.Schema;
@@ -167,6 +168,20 @@ public class RelationalModelTest extends AbstractLocalRepositoryTest {
         assertThat( ds.getPrimaryType( getTransaction() ).getName(), is( KomodoLexicon.DataSource.NODE_TYPE ) );
         assertThat( ds.getName( getTransaction() ), is( dsName ) );
         return ds;
+    }
+
+    protected Driver createDriver( final String driverName ) throws Exception {
+        return createDriver( driverName, null );
+    }
+
+    protected Driver createDriver( final String driverName,
+                                           final KomodoObject parent ) throws Exception {
+        final WorkspaceManager mgr = WorkspaceManager.getInstance( _repo );
+        final Driver driver = mgr.createDriver( getTransaction(), parent, driverName );
+
+        assertThat( driver.getPrimaryType( getTransaction() ).getName(), is( KomodoLexicon.Driver.NODE_TYPE ) );
+        assertThat( driver.getName( getTransaction() ), is( driverName ) );
+        return driver;
     }
 
     protected Folder createFolder() throws Exception {
