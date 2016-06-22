@@ -21,6 +21,8 @@
  */
 package org.komodo.relational.commands.tabularresultset;
 
+import org.komodo.relational.commands.RelationalCommandsI18n;
+import org.komodo.relational.model.ResultSetColumn;
 import org.komodo.relational.model.TabularResultSet;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
@@ -55,6 +57,15 @@ public final class AddColumnCommand extends TabularResultSetShellCommand {
             final String columnName = requiredArgument( 0, I18n.bind( TabularResultSetCommandsI18n.missingColumnName ) );
 
             final TabularResultSet resultSet = getTabularResultSet();
+            
+            // Do not allow add if object of type with this name already exists
+            ResultSetColumn[] cols = resultSet.getColumns(getTransaction());
+            for(ResultSetColumn col : cols) {
+                if( columnName.equals( col.getName(getTransaction()) ) ) {
+                    return new CommandResultImpl( false, I18n.bind( RelationalCommandsI18n.cannotAddChildAlreadyExistsError, columnName, ResultSetColumn.class.getSimpleName() ), null );
+                }
+            }
+            
             resultSet.addColumn( getTransaction(), columnName );
 
             result = new CommandResultImpl( I18n.bind( TabularResultSetCommandsI18n.columnAdded, columnName ) );

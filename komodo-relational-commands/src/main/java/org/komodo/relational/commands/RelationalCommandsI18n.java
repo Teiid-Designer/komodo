@@ -48,7 +48,9 @@ public final class RelationalCommandsI18n extends I18n {
     public static String unsetCustomPropertyExamples;
     public static String unsetCustomPropertyHelp;
     public static String unsetCustomPropertyUsage;
-
+    
+    public static String cannotAddChildAlreadyExistsError;
+    public static String cannotCreateChildAlreadyExistsError;
     public static String invalidType;
     public static String missingPropertyNameValue;
     public static String missingOptionNameValue;

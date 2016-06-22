@@ -21,7 +21,9 @@
  */
 package org.komodo.relational.commands.model;
 
+import org.komodo.relational.commands.RelationalCommandsI18n;
 import org.komodo.relational.model.Model;
+import org.komodo.relational.model.Table;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
@@ -55,6 +57,13 @@ public final class AddTableCommand extends ModelShellCommand {
             final String tableName = requiredArgument( 0, I18n.bind( ModelCommandsI18n.missingTableName ) );
 
             final Model model = getModel();
+            
+            // Do not allow add if object of type with this name already exists
+            Table[] tables = model.getTables(getTransaction(), tableName);
+            if(tables.length>0) {
+                return new CommandResultImpl( false, I18n.bind( RelationalCommandsI18n.cannotAddChildAlreadyExistsError, tableName, Table.class.getSimpleName() ), null );
+            }
+            
             model.addTable( getTransaction(), tableName );
 
             result = new CommandResultImpl( I18n.bind( ModelCommandsI18n.tableAdded, tableName ) );

@@ -21,6 +21,8 @@
  */
 package org.komodo.relational.commands.permission;
 
+import org.komodo.relational.commands.RelationalCommandsI18n;
+import org.komodo.relational.vdb.Mask;
 import org.komodo.relational.vdb.Permission;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
@@ -55,6 +57,13 @@ public final class AddMaskCommand extends PermissionShellCommand {
             final String maskName = requiredArgument( 0, I18n.bind( PermissionCommandsI18n.missingMaskName ) );
 
             final Permission permission = getPermission();
+            
+            // Do not allow add if object of type with this name already exists
+            Mask[] existingMasks = permission.getMasks(getTransaction(), maskName);
+            if(existingMasks.length>0) {
+                return new CommandResultImpl( false, I18n.bind( RelationalCommandsI18n.cannotAddChildAlreadyExistsError, maskName, Mask.class.getSimpleName() ), null );
+            }
+            
             permission.addMask( getTransaction(), maskName );
 
             result = new CommandResultImpl( I18n.bind( PermissionCommandsI18n.maskAdded, maskName ) );

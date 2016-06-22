@@ -33,13 +33,15 @@ import org.komodo.shell.api.WorkspaceStatus;
 abstract class DatasourceShellCommand extends RelationalShellCommand {
 
     protected static final String JNDI_NAME = "jndiName"; //$NON-NLS-1$
+    protected static final String DESCRIPTION = "description"; //$NON-NLS-1$
+    protected static final String EXT_LOC = "externalLocation"; //$NON-NLS-1$
     protected static final String DRIVER_NAME = "driverName"; //$NON-NLS-1$
     protected static final String CLASS_NAME = "className"; //$NON-NLS-1$
     protected static final String JDBC = "jdbc"; //$NON-NLS-1$
     protected static final String PREVIEW = "preview"; //$NON-NLS-1$
     protected static final String PROFILE_NAME = "profileName"; //$NON-NLS-1$
 
-    protected static final List< String > ALL_PROPS = Arrays.asList( new String[] { JNDI_NAME, DRIVER_NAME, CLASS_NAME, JDBC, PREVIEW, PROFILE_NAME } );
+    protected static final List< String > ALL_PROPS = Arrays.asList( new String[] { DESCRIPTION, EXT_LOC, JNDI_NAME, DRIVER_NAME, CLASS_NAME, JDBC, PREVIEW, PROFILE_NAME } );
 
     protected DatasourceShellCommand( final String name,
                                   final WorkspaceStatus status ) {

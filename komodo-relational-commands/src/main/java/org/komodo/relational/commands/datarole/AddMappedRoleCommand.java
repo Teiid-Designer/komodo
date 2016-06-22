@@ -21,6 +21,7 @@
  */
 package org.komodo.relational.commands.datarole;
 
+import org.komodo.relational.commands.RelationalCommandsI18n;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
@@ -55,6 +56,13 @@ public final class AddMappedRoleCommand extends DataRoleShellCommand {
             final String mappedRoleName = requiredArgument( 0, I18n.bind( DataRoleCommandsI18n.missingMappedRoleName ) );
 
             final DataRole dataRole = getDataRole();
+            
+            // Do not allow add if object of type with this name already exists
+            String[] mappedRoleNames = dataRole.getMappedRoles(getTransaction(), mappedRoleName);
+            if(mappedRoleNames.length>0) {
+                return new CommandResultImpl( false, I18n.bind( RelationalCommandsI18n.cannotAddChildAlreadyExistsError, mappedRoleName, "MappedRole" ), null ); //$NON-NLS-1$
+            }
+            
             dataRole.addMappedRole( getTransaction(), mappedRoleName );
 
             result = new CommandResultImpl( I18n.bind( DataRoleCommandsI18n.mappedRoleAdded, mappedRoleName ) );

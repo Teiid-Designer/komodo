@@ -21,6 +21,8 @@
  */
 package org.komodo.relational.commands.vdb;
 
+import org.komodo.relational.commands.RelationalCommandsI18n;
+import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
@@ -56,6 +58,13 @@ public class AddTranslatorCommand extends VdbShellCommand {
             final String translatorType = requiredArgument( 1, I18n.bind( VdbCommandsI18n.missingTranslatorType ) );
 
             final Vdb vdb = getVdb();
+            
+            // Do not allow add if object of type with this name already exists
+            Translator[] translators = vdb.getTranslators(getTransaction(), translatorName);
+            if(translators.length>0) {
+                return new CommandResultImpl( false, I18n.bind( RelationalCommandsI18n.cannotAddChildAlreadyExistsError, translatorName, Translator.class.getSimpleName() ), null );
+            }
+            
             vdb.addTranslator( getTransaction(), translatorName, translatorType );
 
             result = new CommandResultImpl( I18n.bind( VdbCommandsI18n.translatorAdded, translatorName ) );

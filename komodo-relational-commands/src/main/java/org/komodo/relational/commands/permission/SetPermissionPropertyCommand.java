@@ -67,66 +67,50 @@ public final class SetPermissionPropertyCommand extends PermissionShellCommand {
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            switch ( name ) {
-                case ALLOW_ALTER:
-                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                        permission.setAllowAlter( transaction, Boolean.parseBoolean( value ) );
-                    } else {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, ALLOW_ALTER );
-                    }
-
-                    break;
-                case ALLOW_CREATE:
-                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                        permission.setAllowAlter( transaction, Boolean.parseBoolean( value ) );
-                    } else {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, ALLOW_CREATE );
-                    }
-
-                    break;
-                case ALLOW_DELETE:
-                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                        permission.setAllowAlter( transaction, Boolean.parseBoolean( value ) );
-                    } else {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, ALLOW_DELETE );
-                    }
-
-                    break;
-                case ALLOW_EXECUTE:
-                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                        permission.setAllowAlter( transaction, Boolean.parseBoolean( value ) );
-                    } else {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, ALLOW_EXECUTE );
-                    }
-
-                    break;
-                case ALLOW_LANGUAGE:
-                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                        permission.setAllowAlter( transaction, Boolean.parseBoolean( value ) );
-                    } else {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, ALLOW_LANGUAGE );
-                    }
-
-                    break;
-                case ALLOW_READ:
-                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                        permission.setAllowAlter( transaction, Boolean.parseBoolean( value ) );
-                    } else {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, ALLOW_READ );
-                    }
-
-                    break;
-                case ALLOW_UPDATE:
-                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                        permission.setAllowAlter( transaction, Boolean.parseBoolean( value ) );
-                    } else {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, ALLOW_UPDATE );
-                    }
-
-                    break;
-                default:
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Permission.class.getSimpleName() );
-                    break;
+            if ( ALLOW_ALTER.equals( name ) ) {
+                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                    permission.setAllowAlter( transaction, Boolean.parseBoolean( value ) );
+                } else {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, ALLOW_ALTER );
+                }
+            } else if ( ALLOW_CREATE.equals( name ) ) {
+                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                    permission.setAllowCreate( transaction, Boolean.parseBoolean( value ) );
+                } else {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, ALLOW_CREATE );
+                }
+            } else if ( ALLOW_DELETE.equals( name ) ) {
+                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                    permission.setAllowDelete( transaction, Boolean.parseBoolean( value ) );
+                } else {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, ALLOW_DELETE );
+                }
+            } else if ( ALLOW_EXECUTE.equals( name ) ) {
+                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                    permission.setAllowExecute( transaction, Boolean.parseBoolean( value ) );
+                } else {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, ALLOW_EXECUTE );
+                }
+            } else if ( ALLOW_LANGUAGE.equals( name ) ) {
+                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                    permission.setAllowLanguage( transaction, Boolean.parseBoolean( value ) );
+                } else {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, ALLOW_LANGUAGE );
+                }
+            } else if ( ALLOW_READ.equals( name ) ) {
+                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                    permission.setAllowRead( transaction, Boolean.parseBoolean( value ) );
+                } else {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, ALLOW_READ );
+                }
+            } else if ( ALLOW_UPDATE.equals( name ) ) {
+                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                    permission.setAllowUpdate( transaction, Boolean.parseBoolean( value ) );
+                } else {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, ALLOW_UPDATE );
+                }
+            } else {
+                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Permission.class.getSimpleName() );
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {

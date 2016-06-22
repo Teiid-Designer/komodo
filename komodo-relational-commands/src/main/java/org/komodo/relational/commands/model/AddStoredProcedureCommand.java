@@ -21,7 +21,9 @@
  */
 package org.komodo.relational.commands.model;
 
+import org.komodo.relational.commands.RelationalCommandsI18n;
 import org.komodo.relational.model.Model;
+import org.komodo.relational.model.Procedure;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
@@ -55,6 +57,13 @@ public final class AddStoredProcedureCommand extends ModelShellCommand {
             final String procName = requiredArgument( 0, I18n.bind( ModelCommandsI18n.missingStoredProcedureName ) );
 
             final Model model = getModel();
+            
+            // Do not allow add if object of type with this name already exists
+            Procedure[] procs = model.getProcedures(getTransaction(), procName);
+            if(procs.length>0) {
+                return new CommandResultImpl( false, I18n.bind( RelationalCommandsI18n.cannotAddChildAlreadyExistsError, procName, Procedure.class.getSimpleName() ), null );
+            }
+            
             model.addStoredProcedure( getTransaction(), procName );
 
             result = new CommandResultImpl( I18n.bind( ModelCommandsI18n.storedProcedureAdded, procName ) );

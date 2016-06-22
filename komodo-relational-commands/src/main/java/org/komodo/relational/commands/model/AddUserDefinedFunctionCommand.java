@@ -21,6 +21,8 @@
  */
 package org.komodo.relational.commands.model;
 
+import org.komodo.relational.commands.RelationalCommandsI18n;
+import org.komodo.relational.model.Function;
 import org.komodo.relational.model.Model;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
@@ -55,6 +57,13 @@ public final class AddUserDefinedFunctionCommand extends ModelShellCommand {
             final String udfName = requiredArgument( 0, I18n.bind( ModelCommandsI18n.missingUserDefinedFunctionName ) );
 
             final Model model = getModel();
+            
+            // Do not allow add if object of type with this name already exists
+            Function[] functions = model.getFunctions(getTransaction(), udfName);
+            if(functions.length>0) {
+                return new CommandResultImpl( false, I18n.bind( RelationalCommandsI18n.cannotAddChildAlreadyExistsError, udfName, Function.class.getSimpleName() ), null );
+            }
+            
             model.addUserDefinedFunction( getTransaction(), udfName );
 
             result = new CommandResultImpl( I18n.bind( ModelCommandsI18n.userDefinedFunctionAdded, udfName ) );

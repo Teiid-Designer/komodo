@@ -169,6 +169,12 @@ public interface ExecutionAdmin extends StringConstants {
      Collection<TeiidVdb> getVdbs() throws Exception;
 
      /**
+      * @return an unmodifiable collection of VDB names deployed on the teiid instance
+      * @throws Exception 
+      */
+     Collection<String> getVdbNames() throws Exception;
+
+     /**
       * @param name 
       * @return the {@link TeiidVdb} with the given name
       * @throws Exception 

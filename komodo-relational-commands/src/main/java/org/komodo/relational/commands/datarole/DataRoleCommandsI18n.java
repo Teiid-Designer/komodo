@@ -40,6 +40,8 @@ public final class DataRoleCommandsI18n extends I18n {
     public static String deleteMappedRoleUsage;
     public static String deleteMappedRoleHelp;
     public static String deleteMappedRoleExamples;
+    public static String deleteMappedRoleNoRolesError;
+    public static String deleteMappedRoleNoMatchingRoleError;
 
     public static String deletePermissionUsage;
     public static String deletePermissionHelp;

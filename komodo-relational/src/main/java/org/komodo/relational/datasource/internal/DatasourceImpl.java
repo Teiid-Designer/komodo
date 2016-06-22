@@ -25,6 +25,8 @@ import java.util.Collection;
 import java.util.Properties;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.ExcludeQNamesFilter;
+import org.komodo.relational.Messages;
+import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.internal.RelationalChildRestrictedObject;
 import org.komodo.spi.KException;
@@ -42,6 +44,7 @@ import org.komodo.spi.runtime.ExecutionConfigurationListener;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.TeiidPropertyDefinition;
 import org.komodo.utils.ArgCheck;
+import org.komodo.utils.StringUtils;
 import org.modeshape.jcr.JcrLexicon;
 
 /**
@@ -114,6 +117,28 @@ public class DatasourceImpl extends RelationalChildRestrictedObject implements D
     public String getJndiName( final UnitOfWork uow ) throws KException {
         return getObjectProperty( uow, PropertyValueType.STRING, "getJndiName", //$NON-NLS-1$
                                   KomodoLexicon.DataSource.JNDI_NAME);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.datasource.Datasource#getDescription(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public String getDescription( final UnitOfWork uow ) throws KException {
+        return getObjectProperty( uow, PropertyValueType.STRING, "getDescription", //$NON-NLS-1$
+                                  KomodoLexicon.LibraryComponent.DESCRIPTION);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.datasource.Datasource#getExternalLocation(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public String getExternalLocation( final UnitOfWork uow ) throws KException {
+        return getObjectProperty( uow, PropertyValueType.STRING, "getExternalLocation", //$NON-NLS-1$
+                                  KomodoLexicon.WorkspaceItem.EXT_LOC);
     }
 
     /**
@@ -203,6 +228,28 @@ public class DatasourceImpl extends RelationalChildRestrictedObject implements D
     /**
      * {@inheritDoc}
      *
+     * @see org.komodo.relational.datasource.Datasource#setDescription(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     */
+    @Override
+    public void setDescription( final UnitOfWork uow,
+                                final String description ) throws KException {
+        setObjectProperty( uow, "setDescription", KomodoLexicon.LibraryComponent.DESCRIPTION, description ); //$NON-NLS-1$
+    }
+    
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.datasource.Datasource#setExternalLocation(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     */
+    @Override
+    public void setExternalLocation( final UnitOfWork uow,
+                                     final String extLoc ) throws KException {
+        setObjectProperty( uow, "setExternalLocation", KomodoLexicon.WorkspaceItem.EXT_LOC, extLoc ); //$NON-NLS-1$
+    }
+    
+    /**
+     * {@inheritDoc}
+     *
      * @see org.komodo.relational.datasource.Datasource#setClassName(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
      */
     @Override
@@ -269,15 +316,27 @@ public class DatasourceImpl extends RelationalChildRestrictedObject implements D
         // Get the Property Defns for this type of source.
         Collection<TeiidPropertyDefinition> templatePropDefns = teiidInstance.getTemplatePropertyDefns(getDriverName(transaction));
 
-        if(isJdbc(transaction)) {
-            String driverName = getDriverName(transaction);
-            sourceProps.setProperty(TeiidInstance.DATASOURCE_DRIVERNAME,driverName);
-            String jndiName = getJndiName(transaction);
-            sourceProps.setProperty(TeiidInstance.DATASOURCE_JNDINAME, jndiName);
-        } else {
-            sourceProps.setProperty(TeiidInstance.DATASOURCE_CLASSNAME, getClassName(transaction));
+        // Datasource driverName and jndiName must be defined.
+        String driverName = getDriverName(transaction);
+        if(StringUtils.isBlank(driverName)) {
+            throw new Exception( Messages.getString( Relational.DATASOURCE_DRIVERNAME_NOT_DEFINED ) );
         }
+        sourceProps.setProperty(TeiidInstance.DATASOURCE_DRIVERNAME,driverName);
+        String jndiName = getJndiName(transaction);
+        if(StringUtils.isBlank(jndiName)) {
+            throw new Exception( Messages.getString( Relational.DATASOURCE_JNDINAME_NOT_DEFINED ) );
+        }
+        sourceProps.setProperty(TeiidInstance.DATASOURCE_JNDINAME, jndiName);
         
+        // Non-jdbc className is needed.
+        if(!isJdbc(transaction)) {
+            String className = getClassName(transaction);
+            if(StringUtils.isBlank(className)) {
+                throw new Exception( Messages.getString( Relational.DATASOURCE_CLASSNAME_NOT_DEFINED ) );
+            }
+            sourceProps.setProperty(TeiidInstance.DATASOURCE_CLASSNAME, className);
+        }
+
         // Iterate the datasource properties.  Compare them against the valid properties for the server source type.
         String[] propNames = getPropertyNames(transaction);
         for(String propName : propNames) {
@@ -287,12 +346,16 @@ public class DatasourceImpl extends RelationalChildRestrictedObject implements D
                 String sourcePropValue = getProperty(transaction, propName).getStringValue(transaction);
                 // Template has no default - set the property
                 if(!hasDefault) {
-                    sourceProps.setProperty(propName, sourcePropValue);
+                    if(sourcePropValue!=null) {
+                        sourceProps.setProperty(propName, sourcePropValue);
+                    }
                     // Template has default - if source property matches it, no need to provide it.
                 } else {
                     String templateDefaultValue = propDefn.getDefaultValue().toString();
                     if(!templateDefaultValue.equals(sourcePropValue)) {
-                        sourceProps.setProperty(propName, sourcePropValue);
+                        if(sourcePropValue!=null) {
+                            sourceProps.setProperty(propName, sourcePropValue);
+                        }
                     }
                 }
             }

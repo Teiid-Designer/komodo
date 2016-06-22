@@ -59,6 +59,21 @@ public class Messages implements StringConstants {
         CONSTRAINT_NOT_FOUND_TO_REMOVE,
 
         /**
+         * An error message indicating the datasource className property was undefined.
+         */
+        DATASOURCE_CLASSNAME_NOT_DEFINED,
+
+        /**
+         * An error message indicating the datasource driverName property was undefined.
+         */
+        DATASOURCE_DRIVERNAME_NOT_DEFINED,
+
+        /**
+         * An error message indicating the datasource jndiName property was undefined.
+         */
+        DATASOURCE_JNDINAME_NOT_DEFINED,
+
+        /**
          * An error message indicating a VDB data role could not be removed because it was not found.
          */
         DATA_ROLE_NOT_FOUND_TO_REMOVE,
