@@ -21,7 +21,9 @@
  */
 package org.komodo.relational.commands.table;
 
+import org.komodo.relational.commands.RelationalCommandsI18n;
 import org.komodo.relational.model.Table;
+import org.komodo.relational.model.UniqueConstraint;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
@@ -55,6 +57,13 @@ public final class AddUniqueConstraintCommand extends TableShellCommand {
             final String ucName = requiredArgument( 0, I18n.bind( TableCommandsI18n.missingUniqueConstraintName ) );
 
             final Table table = getTable();
+            
+            // Do not allow add if object of type with this name already exists
+            UniqueConstraint[] ucs = table.getUniqueConstraints(getTransaction(), ucName);
+            if(ucs.length>0) {
+                return new CommandResultImpl( false, I18n.bind( RelationalCommandsI18n.cannotAddChildAlreadyExistsError, ucName, UniqueConstraint.class.getSimpleName() ), null );
+            }
+            
             table.addUniqueConstraint( getTransaction(), ucName );
 
             result = new CommandResultImpl( I18n.bind( TableCommandsI18n.uniqueConstraintAdded, ucName ) );

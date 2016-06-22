@@ -110,14 +110,25 @@ public final class ServerDeployDatasourceCommand extends ServerShellCommand {
                 }
                 
                 // Get the properties necessary for deployment to server
-                Properties sourceProps = sourceToDeploy.getPropertiesForServerDeployment(getTransaction(), teiidInstance);
-                
-                // If overwriting, delete the existing source first
-                if(serverHasDatasource) {
-                    teiidInstance.deleteDataSource(sourceName);
+                Properties sourceProps = null;
+                try {
+                    sourceToDeploy.getPropertiesForServerDeployment(getTransaction(), teiidInstance);
+                } catch (Exception ex) {
+                    result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.datasourcePropertiesError, ex.getLocalizedMessage() ), null );
+                    return result;
                 }
-                // Create the source
-                teiidInstance.getOrCreateDataSource(sourceName, sourceName, sourceType, sourceProps);
+                
+                try {
+                    // If overwriting, delete the existing source first
+                    if(serverHasDatasource) {
+                        teiidInstance.deleteDataSource(sourceName);
+                    }
+                    // Create the source
+                    teiidInstance.getOrCreateDataSource(sourceName, sourceName, sourceType, sourceProps);
+                } catch (Exception ex) {
+                    result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.datasourceDeploymentError, ex.getLocalizedMessage() ), null );
+                    return result;
+                }
             } catch (Exception ex) {
                 result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.connectionErrorWillDisconnect ), ex );
                 WkspStatusServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();

@@ -75,8 +75,7 @@ public final class ServerVdbCommand extends ServerShellCommand {
                 // Get the vdb
                 vdb = getWorkspaceTeiidInstance().getVdb(vdbName);
             } catch (Exception ex) {
-                result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.connectionErrorWillDisconnect ), ex );
-                WkspStatusServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
+                result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.serverGetVdbError, vdbName, ex.getLocalizedMessage() ), null );
                 return result;
             }
             if(vdb==null) {

@@ -21,7 +21,9 @@
  */
 package org.komodo.relational.commands.model;
 
+import org.komodo.relational.commands.RelationalCommandsI18n;
 import org.komodo.relational.model.Model;
+import org.komodo.relational.model.View;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
@@ -55,6 +57,13 @@ public final class AddViewCommand extends ModelShellCommand {
             final String viewName = requiredArgument( 0, I18n.bind( ModelCommandsI18n.missingViewName ) );
 
             final Model model = getModel();
+            
+            // Do not allow add if object of type with this name already exists
+            View[] views = model.getViews(getTransaction(), viewName);
+            if(views.length>0) {
+                return new CommandResultImpl( false, I18n.bind( RelationalCommandsI18n.cannotAddChildAlreadyExistsError, viewName, View.class.getSimpleName() ), null );
+            }
+            
             model.addView( getTransaction(), viewName );
 
             result = new CommandResultImpl( I18n.bind( ModelCommandsI18n.viewAdded, viewName ) );

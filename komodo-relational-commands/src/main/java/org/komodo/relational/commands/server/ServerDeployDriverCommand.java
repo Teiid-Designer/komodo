@@ -70,7 +70,12 @@ public final class ServerDeployDriverCommand extends ServerShellCommand {
                 
                 File driverFile = new File(fileName);
                 final TeiidInstance teiidInstance = getWorkspaceTeiidInstance();
-                teiidInstance.deployDriver(driverName, driverFile);
+                try {
+                    teiidInstance.deployDriver(driverName, driverFile);
+                } catch (Exception ex) {
+                    result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.driverDeploymentError, ex.getLocalizedMessage() ), null );
+                    return result;
+                }
                 
             } catch (Exception ex) {
                 result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.connectionErrorWillDisconnect ), ex );

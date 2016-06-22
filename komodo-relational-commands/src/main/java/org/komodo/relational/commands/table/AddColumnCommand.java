@@ -21,6 +21,8 @@
  */
 package org.komodo.relational.commands.table;
 
+import org.komodo.relational.commands.RelationalCommandsI18n;
+import org.komodo.relational.model.Column;
 import org.komodo.relational.model.Table;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
@@ -55,6 +57,13 @@ public final class AddColumnCommand extends TableShellCommand {
             final String columnName = requiredArgument( 0, I18n.bind( TableCommandsI18n.missingColumnName ) );
 
             final Table table = getTable();
+            
+            // Do not allow add if object of type with this name already exists
+            Column[] cols = table.getColumns(getTransaction(), columnName);
+            if(cols.length>0) {
+                return new CommandResultImpl( false, I18n.bind( RelationalCommandsI18n.cannotAddChildAlreadyExistsError, columnName, Column.class.getSimpleName() ), null );
+            }
+            
             table.addColumn( getTransaction(), columnName );
 
             result = new CommandResultImpl( I18n.bind( TableCommandsI18n.columnAdded, columnName ) );
