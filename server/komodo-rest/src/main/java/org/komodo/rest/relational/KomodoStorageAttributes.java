@@ -25,12 +25,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import javax.ws.rs.core.MediaType;
-import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
-import org.komodo.rest.KRestEntity;
 import org.komodo.spi.repository.DocumentType;
 
 
@@ -38,7 +35,7 @@ import org.komodo.spi.repository.DocumentType;
  * Object to be serialised by GSON that encapsulates a storage type and parameters object
  */
 @JsonSerialize(include=Inclusion.NON_NULL)
-public class KomodoStorageAttributes implements KRestEntity {
+public class KomodoStorageAttributes extends AbstractKomodoContentAttribute {
 
     /**
      * Label for the storage type
@@ -49,11 +46,6 @@ public class KomodoStorageAttributes implements KRestEntity {
      * Label for the data path
      */
     public static final String ARTIFACT_PATH_LABEL = "dataPath"; //$NON-NLS-1$
-
-    /**
-     * Label for the content
-     */
-    public static final String CONTENT_LABEL = "content"; //$NON-NLS-1$
 
     /**
      * Label for the parameters
@@ -74,9 +66,6 @@ public class KomodoStorageAttributes implements KRestEntity {
     @JsonProperty(PARAMETERS_LABEL)
     private Map<String, String> parameters;
 
-    @JsonProperty(CONTENT_LABEL)
-    private String content;
-
     @JsonProperty(DOCUMENT_TYPE_LABEL)
     private DocumentType documentType;
 
@@ -85,18 +74,6 @@ public class KomodoStorageAttributes implements KRestEntity {
      */
     public KomodoStorageAttributes() {
         // do nothing
-    }
-
-    @Override
-    @JsonIgnore
-    public boolean supports(MediaType mediaType) {
-        return MediaType.APPLICATION_JSON_TYPE.equals(mediaType);
-    }
-
-    @Override
-    @JsonIgnore
-    public Object getXml() {
-        throw new UnsupportedOperationException();
     }
 
     /**
@@ -125,20 +102,6 @@ public class KomodoStorageAttributes implements KRestEntity {
      */
     public void setArtifactPath(String artifactPath) {
         this.artifactPath = artifactPath;
-    }
-
-    /**
-     * @return the content of the artifact
-     */
-    public String getContent() {
-        return content;
-    }
-
-    /**
-     * @param content the content of the artifact
-     */
-    public void setContent(String content) {
-        this.content = content;
     }
 
     /**

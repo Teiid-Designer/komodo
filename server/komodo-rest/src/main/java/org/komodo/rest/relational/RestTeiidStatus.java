@@ -24,6 +24,7 @@ package org.komodo.rest.relational;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.rest.RestLink;
@@ -79,7 +80,7 @@ public final class RestTeiidStatus extends RestTeiid {
     /**
      * Label used to describe the names of the available data source drivers
      */
-    public static final String TEIID_DATA_SOURCE_DRIVER_NAMES_LABEL = "dataSourceDriverNames";
+    public static final String TEIID_DATA_SOURCE_DRIVERS_LABEL = "dataSourceDrivers";
 
     /**
      * Label used to describe number of translators
@@ -100,6 +101,8 @@ public final class RestTeiidStatus extends RestTeiid {
      * Label used to describe the names of the available vdbs
      */
     public static final String TEIID_VDB_NAMES_LABEL = "vdbNames";
+
+    private List<RestDataSourceDriver> sourceDrivers = new ArrayList<>();
 
     /**
      * Constructor for use when deserializing
@@ -143,7 +146,14 @@ public final class RestTeiidStatus extends RestTeiid {
 
                 Collection<DataSourceDriver> dataSourceDrivers = teiidInstance.getDataSourceDrivers();
                 setDataSourceDriverSize(dataSourceDrivers.size());
-                setDataSourceDriverNames(dataSourceDrivers);
+                if (dataSourceDrivers == null || dataSourceDrivers.isEmpty())
+                    this.sourceDrivers = Collections.emptyList();
+                else {
+                    this.sourceDrivers = new ArrayList<>();
+                    for (DataSourceDriver driver : dataSourceDrivers) {
+                        this.sourceDrivers.add(new RestDataSourceDriver(driver));
+                    }
+                }
 
                 Collection<TeiidTranslator> translators = teiidInstance.getTranslators();
                 setTranslatorSize(translators.size());
@@ -225,17 +235,18 @@ public final class RestTeiidStatus extends RestTeiid {
         tuples.put(TEIID_DATA_SOURCE_DRIVER_SIZE_LABEL, size);
     }
 
-    public String[] getDataSourceDriverNames() {
-        Object names = tuples.get(TEIID_DATA_SOURCE_DRIVER_NAMES_LABEL);
-        return names != null ? (String[]) names : EMPTY_ARRAY;
+    public List<RestDataSourceDriver> getDataSourceDrivers() {
+        return this.sourceDrivers;
     }
 
-    protected void setDataSourceDriverNames(Collection<DataSourceDriver> dataSourceDrivers) {
-        List<String> names = new ArrayList<String>(dataSourceDrivers.size());
-        for (DataSourceDriver driver : dataSourceDrivers)
-            names.add(driver.getName());
+    public void setDataSourceDrivers(RestDataSourceDriver[] dataSourceDrivers) {
+        if (dataSourceDrivers == null || dataSourceDrivers.length == 0)
+            this.sourceDrivers = Collections.emptyList();
 
-        tuples.put(TEIID_DATA_SOURCE_DRIVER_NAMES_LABEL, names.toArray(new String[0]));
+        this.sourceDrivers = new ArrayList<>();
+        for (RestDataSourceDriver driver : sourceDrivers) {
+            this.sourceDrivers.add(driver);
+        }
     }
 
     public int getTranslatorSize() {

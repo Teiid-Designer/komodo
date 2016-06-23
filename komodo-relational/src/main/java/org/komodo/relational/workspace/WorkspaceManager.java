@@ -41,6 +41,7 @@ import org.komodo.relational.dataservice.internal.DataserviceConveyor;
 import org.komodo.relational.dataservice.internal.DataserviceImpl;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.datasource.internal.DatasourceImpl;
+import org.komodo.relational.driver.Driver;
 import org.komodo.relational.folder.Folder;
 import org.komodo.relational.importer.ddl.DdlImporter;
 import org.komodo.relational.importer.vdb.VdbImporter;
@@ -58,6 +59,7 @@ import org.komodo.repository.ObjectImpl;
 import org.komodo.repository.RepositoryImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.DocumentType;
 import org.komodo.spi.repository.Exportable;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
@@ -259,6 +261,24 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
         final String path = ( ( parent == null ) ? getRepository().komodoWorkspace( uow ).getAbsolutePath()
                                                  : parent.getAbsolutePath() );
          return RelationalModelFactory.createDatasource( uow, getRepository(), path, sourceName );
+    }
+
+    /**
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param parent
+     *        the parent of the driver object being created (can be <code>null</code>)
+     * @param sourceName
+     *        the name of the driver to create (cannot be empty)
+     * @return the Driver object (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    public Driver createDriver(UnitOfWork uow, KomodoObject parent, String driverName) throws KException {
+        final String path = ( ( parent == null ) ? getRepository().komodoWorkspace( uow ).getAbsolutePath()
+            : parent.getAbsolutePath() );
+        return RelationalModelFactory.createDriver( uow, getRepository(), path, driverName );
     }
 
     /**
@@ -809,24 +829,19 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
             ImportOptions importOptions = new ImportOptions();
             ImportMessages importMessages = new ImportMessages();
 
-            switch (storageRef.getDocumentType()) {
-                case XML:
-                {
-                    VdbImporter importer = new VdbImporter(getRepository());
-                    importer.importVdb(transaction, stream, parent, importOptions, importMessages);
-                    break;
-                }
-                case DDL:
-                {
-                    DdlImporter importer = new DdlImporter(getRepository());
-                    importer.importDdl(transaction, stream, parent, importOptions, importMessages);
-                    break;
-                }
-                case ZIP:
+            if (DocumentType.XML.equals(storageRef.getDocumentType())) {
+                VdbImporter importer = new VdbImporter(getRepository());
+                importer.importVdb(transaction, stream, parent, importOptions, importMessages);
+            }
+            else if (DocumentType.DDL.equals(storageRef.getDocumentType())) {
+                DdlImporter importer = new DdlImporter(getRepository());
+                importer.importDdl(transaction, stream, parent, importOptions, importMessages);
+            }
+            else if (DocumentType.ZIP.equals(storageRef.getDocumentType())) {
                     DataserviceConveyor conveyor = new DataserviceConveyor(getRepository());
                     conveyor.dsImport(transaction, stream, parent, importOptions, importMessages);
-                    break;
-                default:
+            }
+            else {
                     throw new KException(Messages.getString(Relational.STORAGE_DOCUMENT_TYPE_INVALID,
                                                             storageRef.getDocumentType()));
             }

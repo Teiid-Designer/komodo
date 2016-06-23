@@ -22,10 +22,13 @@
 package org.komodo.rest.service;
 
 import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_VDB_ERROR;
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -52,7 +55,9 @@ import org.komodo.rest.KomodoRestException;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.KomodoService;
 import org.komodo.rest.RestBasicEntity;
+import org.komodo.rest.relational.KomodoFileAttributes;
 import org.komodo.rest.relational.KomodoProperties;
+import org.komodo.rest.relational.KomodoStatusObject;
 import org.komodo.rest.relational.KomodoTeiidAttributes;
 import org.komodo.rest.relational.RelationalMessages;
 import org.komodo.rest.relational.RestTeiid;
@@ -66,6 +71,9 @@ import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
+import org.komodo.spi.runtime.DataSourceDriver;
+import org.komodo.spi.runtime.TeiidInstance;
+import org.komodo.utils.FileUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -146,6 +154,35 @@ public class KomodoTeiidService extends KomodoService {
         }
 
         return Response.ok().build();
+    }
+
+    private Response checkFileAttributes(KomodoFileAttributes kfa, List<MediaType> mediaTypes) throws Exception {
+        String errorMessage = null;
+        if (kfa == null || (kfa.getName() == null && kfa.getContent() == null))
+            errorMessage = RelationalMessages.getString(RelationalMessages.Error.TEIID_SERVICE_FILE_ATTRIB_NO_PARAMETERS);
+
+        if (kfa.getName() == null)
+            errorMessage = RelationalMessages.getString(RelationalMessages.Error.TEIID_SERVICE_FILE_ATTRIB_NO_NAME);
+
+        if (kfa.getContent() == null)
+            errorMessage = RelationalMessages.getString(RelationalMessages.Error.TEIID_SERVICE_FILE_ATTRIB_NO_CONTENT);
+
+        if (errorMessage != null) {
+            Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
+            return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+        }
+
+        return Response.ok().build();
+    }
+
+    private boolean hasDataSourceDriver(String driverName, TeiidInstance instance) throws Exception {
+        Collection<DataSourceDriver> drivers = instance.getDataSourceDrivers();
+        for (DataSourceDriver driver : drivers) {
+            if (driver.getName().startsWith(driverName))
+                return true;
+        }
+
+        return false;
     }
 
     /**
@@ -536,6 +573,136 @@ public class KomodoTeiidService extends KomodoService {
             }
 
             return createErrorResponse(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_GET_TRANSLATORS_ERROR);
+        }
+    }
+
+    @SuppressWarnings( "nls" )
+    @POST
+    @Path(V1Constants.TEIID_DRIVER)
+    @Produces( MediaType.APPLICATION_JSON )
+    @ApiOperation(value = "Add a driver to the teiid server")
+    @ApiResponses(value = {
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response addDriver(final @Context HttpHeaders headers,
+                                   final @Context UriInfo uriInfo,
+                                   final String fileAttributes) throws KomodoRestException {
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
+            return notAcceptableMediaTypesBuilder().build();
+
+        KomodoFileAttributes kfa;
+        try {
+            kfa = KomodoJsonMarshaller.unmarshall(fileAttributes, KomodoFileAttributes.class);
+            Response response = checkFileAttributes(kfa, mediaTypes);
+            if (response.getStatus() != Status.OK.getStatusCode())
+                return response;
+
+        } catch (Exception ex) {
+            String errorMessage = RelationalMessages.getString(
+                                                               RelationalMessages.Error.TEIID_SERVICE_REQUEST_PARSING_ERROR, ex.getMessage());
+
+            Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
+            return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+        }
+
+        UnitOfWork uow = null;
+
+        try {
+            Teiid teiidNode = getDefaultTeiid();
+
+            uow = createTransaction("deployTeiidDriver", true); //$NON-NLS-1$
+
+            byte[] content = decrypt(kfa.getContent());
+            String tempDir = FileUtils.tempDirectory();
+            String fileName = content.hashCode() + DOT + kfa.getName();
+            File driverFile = new File(tempDir, fileName);
+
+            FileUtils.write(content, driverFile);
+
+            TeiidInstance teiidInstance = teiidNode.getTeiidInstance(uow);
+            teiidInstance.deployDriver(kfa.getName(), driverFile);
+
+            // Await the deployment to end
+            Thread.sleep(2000);
+
+            String title = RelationalMessages.getString(RelationalMessages.Info.DRIVER_DEPLOYMENT_STATUS_TITLE);
+            KomodoStatusObject status = new KomodoStatusObject(title);
+            if (hasDataSourceDriver(kfa.getName(), teiidInstance))
+                status.addAttribute(kfa.getName(),
+                                    RelationalMessages.getString(RelationalMessages.Info.DRIVER_SUCCESSFULLY_DEPLOYED));
+            else
+                status.addAttribute(kfa.getName(),
+                                    RelationalMessages.getString(RelationalMessages.Info.DRIVER_SUCCESSFULLY_UPLOADED));
+
+           return commit(uow, mediaTypes, status);
+
+        } catch (final Exception e) {
+            if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
+                uow.rollback();
+            }
+
+            if (e instanceof KomodoRestException) {
+                throw (KomodoRestException)e;
+            }
+
+            return createErrorResponse(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_DRIVER_ERROR);
+        }
+    }
+
+    @SuppressWarnings( "nls" )
+    @DELETE
+    @Path(V1Constants.TEIID_DRIVER + StringConstants.FORWARD_SLASH +
+                  V1Constants.TEIID_DRIVER_PLACEHOLDER)
+    @Produces( MediaType.APPLICATION_JSON )
+    @ApiOperation(value = "Removes a driver from the teiid server")
+    @ApiResponses(value = {
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response removeDriver(final @Context HttpHeaders headers,
+                                   final @Context UriInfo uriInfo,
+                                   @ApiParam(value = "Name of the driver to be removed", required = true)
+                                    final @PathParam( "driverName" ) String driverName) throws KomodoRestException {
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
+            return notAcceptableMediaTypesBuilder().build();
+
+        UnitOfWork uow = null;
+
+        try {
+            Teiid teiidNode = getDefaultTeiid();
+
+            uow = createTransaction("unDeployTeiidDriver", true); //$NON-NLS-1$
+
+            TeiidInstance teiidInstance = teiidNode.getTeiidInstance(uow);
+            teiidInstance.undeployDriver(driverName);
+
+            // Await the undeployment to end
+            Thread.sleep(2000);
+
+            String title = RelationalMessages.getString(RelationalMessages.Info.DRIVER_DEPLOYMENT_STATUS_TITLE);
+            KomodoStatusObject status = new KomodoStatusObject(title);
+            if (! hasDataSourceDriver(driverName, teiidInstance))
+                status.addAttribute(driverName,
+                                    RelationalMessages.getString(RelationalMessages.Info.DRIVER_SUCCESSFULLY_UNDEPLOYED));
+            else
+                status.addAttribute(driverName,
+                                    RelationalMessages.getString(RelationalMessages.Info.DRIVER_UNDEPLOYMENT_REQUEST_SENT));
+
+           return commit(uow, mediaTypes, status);
+
+        } catch (final Exception e) {
+            if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
+                uow.rollback();
+            }
+
+            if (e instanceof KomodoRestException) {
+                throw (KomodoRestException)e;
+            }
+
+            return createErrorResponse(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_DRIVER_ERROR);
         }
     }
 }

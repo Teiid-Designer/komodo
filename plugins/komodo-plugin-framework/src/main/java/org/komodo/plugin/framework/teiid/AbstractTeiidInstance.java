@@ -629,6 +629,19 @@ public abstract class AbstractTeiidInstance implements TeiidInstance, StringCons
         }
     }
 
+    @Override
+    public void undeployDriver(String driverName) throws Exception {
+        connect();
+        ArgCheck.isNotNull(driverName, "driverName"); //$NON-NLS-1$
+
+        try {
+            undeploy(driverName);
+        } catch (Exception ex) {
+            // Jar deployment failed
+            throw ex;
+        }
+    }
+
     /*
      * Deploy all jars in the supplied jarList
      *

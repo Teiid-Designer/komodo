@@ -19,44 +19,42 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  */
-package org.komodo.spi.repository;
+package org.komodo.rest.relational;
 
-import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.runtime.DataSourceDriver;
 
-public class DocumentType {
+public class RestDataSourceDriver {
 
-    /**
-     * XML
-     */
-    public static final DocumentType XML = new DocumentType(StringConstants.XML);
+    public static final String NAME_LABEL = "name";
 
-    /**
-     * ZIP
-     */
-    public static final DocumentType ZIP = new DocumentType(StringConstants.ZIP);
+    public static final String CLASS_LABEL = "class";
 
-    /**
-     * DDL
-     */
-    public static final DocumentType DDL = new DocumentType(StringConstants.DDL);
+    private String name;
 
-    /**
-     * UNKNOWN
-     */
-    public static final DocumentType UNKNOWN = new DocumentType(StringConstants.EMPTY_STRING);
+    private String className;
 
-    private String type;
-
-    public DocumentType(String type) {
-        this.type = type;
+    public RestDataSourceDriver() {
+        super();
     }
 
-    @Override
-    public String toString() {
-        return this.type;
+    public RestDataSourceDriver(DataSourceDriver driver) {
+        this.name = driver.getName();
+        this.className = driver.getClassName();
     }
 
-    public static DocumentType documentType(String docTypeValue) {
-        return new DocumentType(docTypeValue);
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getClassName() {
+        return className;
+    }
+
+    public void setClassName(String className) {
+        this.className = className;
     }
 }

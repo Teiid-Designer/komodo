@@ -187,6 +187,20 @@ public class PropertyImpl implements Property {
         ArgCheck.isNotNull(factory, "factory"); //$NON-NLS-1$
         ArgCheck.isNotNull(value, "value"); //$NON-NLS-1$
 
+        if (PropertyType.UNDEFINED == jcrPropType) {
+            return createValue(factory, value);
+        }
+
+        if (PropertyType.BINARY == jcrPropType) {
+            if (value instanceof InputStream) {
+                InputStream stream = (InputStream) value;
+                Binary binary = factory.createBinary(stream);
+                return factory.createValue(binary);
+            }
+
+            throw new Exception("A Binary property value must be in the form of an InputStream");
+        }
+
         if (PropertyType.BOOLEAN == jcrPropType) {
             if (value instanceof Boolean) {
                 return factory.createValue((Boolean)value);
@@ -292,6 +306,32 @@ public class PropertyImpl implements Property {
     @Override
     public String getAbsolutePath() {
         return this.path;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.spi.repository.Property#getBinaryValue(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public InputStream getBinaryValue( final UnitOfWork transaction ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        try {
+            final Binary result = getSession(transaction).getProperty(this.path).getBinary();
+            if (result == null)
+                return null;
+
+            return result.getStream();
+
+        } catch (final Exception e) {
+            if (e instanceof KException) {
+                throw (KException)e;
+            }
+
+            throw new KException(e);
+        }
     }
 
     /**

@@ -40,11 +40,13 @@ public interface Exportable {
     String getName(UnitOfWork transaction) throws KException;
 
     /**
+     * @param transaction
+     *        the transaction (can be <code>null</code> if update should be automatically committed)
      * @return the type of this exportable
      * @throws KException
      *         if an error occurs
      */
-    DocumentType getDocumentType() throws KException;
+    DocumentType getDocumentType(UnitOfWork transaction) throws KException;
 
     /**
      * @param transaction

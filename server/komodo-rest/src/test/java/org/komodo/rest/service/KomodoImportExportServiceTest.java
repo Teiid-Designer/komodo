@@ -162,7 +162,7 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
         assertNotNull(content);
 
         byte[] decBytes = Base64.getDecoder().decode(content);
-        String decContent = new String(decBytes);
+        String decContent = new String(decBytes) + NEW_LINE;
 
         FileInputStream stream = null;
         try {

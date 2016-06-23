@@ -21,40 +21,45 @@
  */
 package org.komodo.rest.relational.json;
 
-import static org.komodo.rest.relational.json.KomodoJsonMarshaller.BUILDER;
 import java.io.IOException;
-import org.komodo.rest.relational.RestDataSourceDriver;
-import org.komodo.rest.relational.RestTeiidStatus;
-import org.komodo.utils.StringUtils;
+import org.komodo.rest.relational.AbstractKomodoContentAttribute;
+import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
-public class TeiidStatusSerializer extends BasicEntitySerializer<RestTeiidStatus> {
+/**
+ * A GSON serializer/deserializer for {@status AbstractKomodoContentAttribute}.
+ */
+public abstract class AbstractContentSerializer<T extends AbstractKomodoContentAttribute> extends TypeAdapter<T> {
 
-    @Override
-    protected boolean isComplete(final RestTeiidStatus teiid) {
-        return super.isComplete(teiid) && !StringUtils.isBlank(teiid.getConnectionUrl());
-    }
-
-    @Override
-    protected RestTeiidStatus createEntity() {
-        return new RestTeiidStatus();
-    }
-
-    @Override
-    protected String readExtension(String name, RestTeiidStatus status, JsonReader in) {
-        if (RestTeiidStatus.TEIID_DATA_SOURCE_DRIVERS_LABEL.equals(name)) {
-            RestDataSourceDriver[] drivers = BUILDER.fromJson(in, RestDataSourceDriver[].class);
-            status.setDataSourceDrivers(drivers);
+    protected String readContent(final JsonReader in, final AbstractKomodoContentAttribute contentAttr, final String name)
+        throws IOException {
+        if (AbstractKomodoContentAttribute.CONTENT_LABEL.equals(name)) {
+            contentAttr.setContent(in.nextString());
             return name;
         }
 
         return null;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see com.google.gson.TypeAdapter#read(com.google.gson.stream.JsonReader)
+     */
     @Override
-    protected void writeExtensions(JsonWriter out, RestTeiidStatus entity) throws IOException {
-        out.name(RestTeiidStatus.TEIID_DATA_SOURCE_DRIVERS_LABEL);
-        BUILDER.toJson(entity.getDataSourceDrivers().toArray(new RestDataSourceDriver[0]), RestDataSourceDriver[].class, out);
+    public abstract T read(final JsonReader in) throws IOException;
+
+    protected void writeContent(final JsonWriter out, final AbstractKomodoContentAttribute value) throws IOException {
+        out.name(AbstractKomodoContentAttribute.CONTENT_LABEL);
+        out.value(value.getContent());
     }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see com.google.gson.TypeAdapter#write(com.google.gson.stream.JsonWriter, java.lang.Object)
+     */
+    @Override
+    public abstract void write(final JsonWriter out, final T value) throws IOException;
 }

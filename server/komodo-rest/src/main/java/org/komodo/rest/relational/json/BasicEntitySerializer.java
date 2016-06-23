@@ -43,6 +43,20 @@ public class BasicEntitySerializer<T extends RestBasicEntity> extends AbstractEn
     }
 
     /**
+     * Sub-classes should implement this to write further data to the json
+     *
+     * @param name
+     * @param entity
+     * @param in
+     *
+     * @throws IOException
+     */
+    protected String readExtension(String name, T entity, JsonReader in) {
+        // Do nothing by default
+        return null;
+    }
+
+    /**
      * {@inheritDoc}
      *
      * @see org.komodo.rest.relational.json.AbstractEntitySerializer#read(com.google.gson.stream.JsonReader)
@@ -55,6 +69,9 @@ public class BasicEntitySerializer<T extends RestBasicEntity> extends AbstractEn
 
         while (in.hasNext()) {
             final String name = in.nextName();
+
+            if (readExtension(name, entity, in) != null)
+                continue;
 
             if (PROPERTIES.equals(name))
                 readProperties(in, entity);
@@ -118,6 +135,17 @@ public class BasicEntitySerializer<T extends RestBasicEntity> extends AbstractEn
     }
 
     /**
+     * Sub-classes should implement this to write further data to the json
+     *
+     * @param out
+     * @param entity
+     * @throws IOException
+     */
+    protected void writeExtensions(final JsonWriter out, final T entity) throws IOException {
+        // Do nothing by default
+    }
+
+    /**
      * {@inheritDoc}
      *
      * @see org.komodo.rest.relational.json.AbstractEntitySerializer#write(com.google.gson.stream.JsonWriter,
@@ -132,6 +160,8 @@ public class BasicEntitySerializer<T extends RestBasicEntity> extends AbstractEn
         beginWrite(out);
 
         writeTuples(out, entity);
+
+        writeExtensions(out, entity);
 
         writeProperties(out, entity);
 

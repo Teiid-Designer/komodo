@@ -21,6 +21,7 @@
  */
 package org.komodo.spi.repository;
 
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.Calendar;
 import org.komodo.spi.KException;
@@ -45,6 +46,15 @@ public interface Property extends KNode {
      *         if the property does not exist or an error occurs
      */
     PropertyValueType getValueType( final UnitOfWork uow ) throws KException;
+
+    /**
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @return the value represented as a <code>binary</code>
+     * @throws KException
+     *         if the property does not exist or an error occurs
+     */
+    InputStream getBinaryValue( final UnitOfWork uow ) throws KException;
 
     /**
      * @param uow

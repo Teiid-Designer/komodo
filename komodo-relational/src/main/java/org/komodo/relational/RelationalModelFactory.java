@@ -26,6 +26,8 @@ import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.dataservice.internal.DataserviceImpl;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.datasource.internal.DatasourceImpl;
+import org.komodo.relational.driver.Driver;
+import org.komodo.relational.driver.internal.DriverImpl;
 import org.komodo.relational.folder.Folder;
 import org.komodo.relational.folder.internal.FolderImpl;
 import org.komodo.relational.model.AbstractProcedure;
@@ -317,6 +319,43 @@ public final class RelationalModelFactory {
 
         final KomodoObject kobject = repository.add( transaction, parentPath, sourceName, KomodoLexicon.DataSource.NODE_TYPE );
         final Datasource result = new DatasourceImpl( transaction, repository, kobject.getAbsolutePath() );
+        return result;
+    }
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param repository
+     *        the repository where the model object will be created (cannot be <code>null</code>)
+     * @param parentWorkspacePath
+     *        the parent path (can be empty)
+     * @param driverName
+     *        the name of the driver to create (cannot be empty)
+     * @return the Driver model object (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    public static Driver createDriver( final UnitOfWork transaction,
+                                               final Repository repository,
+                                               final String parentWorkspacePath,
+                                               final String driverName ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( driverName, "driverName" ); //$NON-NLS-1$
+
+        // make sure path is in the library
+        String parentPath = parentWorkspacePath;
+        final String workspacePath = repository.komodoWorkspace( transaction ).getAbsolutePath();
+
+        if ( StringUtils.isBlank( parentWorkspacePath ) ) {
+            parentPath = workspacePath;
+        } else if ( !parentPath.startsWith( workspacePath ) ) {
+            parentPath = ( workspacePath + parentPath );
+        }
+
+        final KomodoObject kobject = repository.add( transaction, parentPath, driverName, KomodoLexicon.Driver.NODE_TYPE );
+        final Driver result = new DriverImpl( transaction, repository, kobject.getAbsolutePath() );
         return result;
     }
 
@@ -1285,5 +1324,4 @@ public final class RelationalModelFactory {
     private RelationalModelFactory() {
         // nothing to do
     }
-
 }

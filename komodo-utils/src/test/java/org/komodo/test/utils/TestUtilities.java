@@ -34,6 +34,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.util.zip.CRC32;
+import java.util.zip.Checksum;
 import java.util.zip.ZipFile;
 import javax.jcr.Node;
 import javax.xml.parsers.DocumentBuilder;
@@ -159,6 +161,11 @@ public class TestUtilities implements StringConstants {
      * Roles vdb
      */
     public static final String ROLES_VDB_NAME = "z";
+
+    /**
+     * MySql Driver Jar
+     */
+    public static final String MYSQL_DRIVER_FILENAME = "mysql-connector-java-5.1.39-bin.jar";
 
     public static String convertPackageToDirPath(Package pkg) {
         return pkg.getName().replaceAll(DOUBLE_BACK_SLASH + DOT, FORWARD_SLASH);
@@ -1078,6 +1085,16 @@ public class TestUtilities implements StringConstants {
     }
 
     /**
+     * @return input stream of mysql driver
+     * @throws Exception
+     */
+    public static InputStream mySqlDriver() throws Exception {
+        return getResourceAsStream(TestUtilities.class,
+                                  RESOURCES_DIRECTORY,
+                                  MYSQL_DRIVER_FILENAME);
+    }
+
+    /**
      * @param contentFile file to extract contents
      * @return the contents of the given file as a string
      *                Note: an extra \n character will proceed the string
@@ -1112,7 +1129,12 @@ public class TestUtilities implements StringConstants {
      * @throws Exception if error occurs
      */
     public static InputStream getResourceAsStream(Class<?> klazz, String parentDirectory, String fileName, String suffix) throws Exception {
-        String filePath = parentDirectory + File.separator + fileName + suffix;
+        String filePath;
+        if (parentDirectory == null || parentDirectory.isEmpty())
+            filePath = fileName + suffix;
+        else
+            filePath = parentDirectory + File.separator + fileName + suffix;
+
         InputStream fileStream = klazz.getClassLoader().getResourceAsStream(filePath);
         assertNotNull("File " + filePath + " does not exist", fileStream);
 
@@ -1427,5 +1449,15 @@ public class TestUtilities implements StringConstants {
                 }
             } catch (IOException e) {}
         }
+    }
+
+    /**
+     * @param bytes
+     * @return checksum value of the given bytes
+     */
+    public static long checksum(byte[] bytes) {
+        Checksum contentCRC = new CRC32();
+        contentCRC.update(bytes, 0, bytes.length);
+        return contentCRC.getValue();
     }
 }
