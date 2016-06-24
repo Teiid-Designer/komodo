@@ -36,10 +36,7 @@ import org.mockito.Mockito;
 public final class DataserviceSerializerTest extends AbstractSerializerTest  {
 
     private static final String DESCRIPTION = "my description";
-    private static final String ORIGINAL_FILE = "/Users/originalFile";
     private static final KomodoType kType = KomodoType.DATASERVICE;
-    private static final String CONNECTION_TYPE = "BY_VERSION";
-    private static final int VERSION = 1;
 
     private static final String JSON = OPEN_BRACE + NEW_LINE +
         "  \"" + BASE_URI + "\": \"" + MY_BASE_URI + "\"," + NEW_LINE +
@@ -47,12 +44,7 @@ public final class DataserviceSerializerTest extends AbstractSerializerTest  {
         "  \"keng__dataPath\": \"" + DATASERVICE_DATA_PATH + "\"," + NEW_LINE +
         "  \"keng__kType\": \"Dataservice\"," + NEW_LINE +
         "  \"keng__hasChildren\": true," + NEW_LINE +
-        "  \"vdb__name\": \"" + DATASERVICE_NAME + "\"," + NEW_LINE +
-        "  \"vdb__description\": \"my description\"," + NEW_LINE +
-        "  \"vdb__originalFile\": \"/Users/originalFile\"," + NEW_LINE +
-        "  \"vdb__preview\": false," + NEW_LINE +
-        "  \"vdb__connectionType\": \"BY_VERSION\"," + NEW_LINE +
-        "  \"vdb__version\": 1," + NEW_LINE +
+        "  \"tko__description\": \"my description\"," + NEW_LINE +
         "  \"keng___links\": [" + NEW_LINE +
         "    " + OPEN_BRACE + NEW_LINE +
         "      \"rel\": \"self\"," + NEW_LINE +
@@ -65,22 +57,6 @@ public final class DataserviceSerializerTest extends AbstractSerializerTest  {
         "    " + OPEN_BRACE + NEW_LINE +
         "      \"rel\": \"children\"," + NEW_LINE +
         "      \"href\": \"" + BASE_URI_PREFIX + SEARCH + "parent\\u003d" + Encode.encodeQueryParam(DATASERVICE_DATA_PATH) + "\"" + NEW_LINE +
-        "    " + CLOSE_BRACE + COMMA + NEW_LINE +
-        "    " + OPEN_BRACE + NEW_LINE +
-        "      \"rel\": \"imports\"," + NEW_LINE +
-        "      \"href\": \"" + BASE_URI_PREFIX + DATASERVICE_DATA_PATH + "/VdbImports\"" + NEW_LINE +
-        "    " + CLOSE_BRACE + COMMA + NEW_LINE +
-        "    " + OPEN_BRACE + NEW_LINE +
-        "      \"rel\": \"models\"," + NEW_LINE +
-        "      \"href\": \"" + BASE_URI_PREFIX + DATASERVICE_DATA_PATH + "/Models\"" + NEW_LINE +
-        "    " + CLOSE_BRACE + COMMA + NEW_LINE +
-        "    " + OPEN_BRACE + NEW_LINE +
-        "      \"rel\": \"translators\"," + NEW_LINE +
-        "      \"href\": \"" + BASE_URI_PREFIX + DATASERVICE_DATA_PATH + "/VdbTranslators\"" + NEW_LINE +
-        "    " + CLOSE_BRACE + COMMA + NEW_LINE +
-        "    " + OPEN_BRACE + NEW_LINE +
-        "      \"rel\": \"dataRoles\"," + NEW_LINE +
-        "      \"href\": \"" + BASE_URI_PREFIX + DATASERVICE_DATA_PATH + "/VdbDataRoles\"" + NEW_LINE +
         "    " + CLOSE_BRACE + COMMA + NEW_LINE +
         "    " + OPEN_BRACE + NEW_LINE +
         "      \"rel\": \"vdbs\"," + NEW_LINE +
@@ -103,12 +79,7 @@ public final class DataserviceSerializerTest extends AbstractSerializerTest  {
         Mockito.when(theService.getParent(transaction)).thenReturn(workspace);
 
         this.dataservice = new RestDataservice(MY_BASE_URI, theService, false, transaction);
-        this.dataservice.setName(DATASERVICE_NAME);
         this.dataservice.setDescription(DESCRIPTION);
-        this.dataservice.setOriginalFilePath(ORIGINAL_FILE);
-        this.dataservice.setConnectionType(CONNECTION_TYPE);
-        this.dataservice.setPreview(false);
-        this.dataservice.setVersion(VERSION);
     }
 
     @Test
@@ -120,10 +91,9 @@ public final class DataserviceSerializerTest extends AbstractSerializerTest  {
     @Test
     public void shouldImportJson() {
         final RestDataservice descriptor = KomodoJsonMarshaller.unmarshall( JSON, RestDataservice.class );
-        assertEquals(DATASERVICE_NAME, descriptor.getName());
+        assertEquals(DATASERVICE_NAME, descriptor.getId());
         assertEquals(DESCRIPTION, descriptor.getDescription());
-        assertEquals(ORIGINAL_FILE, descriptor.getOriginalFilePath());
-        assertEquals(8, descriptor.getLinks().size());
+        assertEquals(4, descriptor.getLinks().size());
         assertEquals(true, descriptor.getProperties().isEmpty());
     }
 

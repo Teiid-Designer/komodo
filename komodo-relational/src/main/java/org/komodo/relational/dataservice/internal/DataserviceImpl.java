@@ -24,14 +24,19 @@ package org.komodo.relational.dataservice.internal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import org.komodo.core.KomodoLexicon;
+import org.komodo.relational.Messages;
 import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.dataservice.Dataservice;
+import org.komodo.relational.dataservice.DataserviceManifest;
+import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.internal.VdbImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.DocumentType;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
+import org.komodo.spi.repository.PropertyValueType;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
@@ -41,18 +46,12 @@ import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 /**
  * Implementation of Dataservice instance model
  */
-public class DataserviceImpl extends VdbImpl implements Dataservice {
+public class DataserviceImpl extends RelationalObjectImpl implements Dataservice {
 
     /**
      * The allowed child types.
      */
-    private static final KomodoType[] KID_TYPES;
-
-    static {
-        KID_TYPES = new KomodoType[ CHILD_TYPES.length + 1 ];
-        System.arraycopy( CHILD_TYPES, 0, KID_TYPES, 0, CHILD_TYPES.length );
-        KID_TYPES[ CHILD_TYPES.length ] = Vdb.IDENTIFIER;
-    }
+    protected static final KomodoType[] CHILD_TYPES = new KomodoType[] { Vdb.IDENTIFIER };
 
     /**
      * @param uow
@@ -90,7 +89,7 @@ public class DataserviceImpl extends VdbImpl implements Dataservice {
     }
 
     @Override
-    public DocumentType getDocumentType() throws KException {
+    public DocumentType getDocumentType(UnitOfWork uow) throws KException {
         return DocumentType.ZIP;
     }
 
@@ -101,83 +100,9 @@ public class DataserviceImpl extends VdbImpl implements Dataservice {
      */
     @Override
     public KomodoType[] getChildTypes() {
-        return KID_TYPES;
+        return CHILD_TYPES;
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.internal.RelationalObjectImpl#getChildren(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String[])
-     */
-    @Override
-    public KomodoObject[] getChildren( final UnitOfWork transaction,
-                                       final String... namePatterns ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-
-        final Vdb[] vdbs = getVdbs( transaction, namePatterns );
-        final KomodoObject[] superChildren = super.getChildren(transaction, namePatterns);
-
-        final KomodoObject[] result = new KomodoObject[ vdbs.length + superChildren.length ];
-        System.arraycopy( vdbs, 0, result, 0, vdbs.length );
-        System.arraycopy( superChildren, 0, result, vdbs.length, superChildren.length );
-
-        return result;
-    }
-    
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.internal.RelationalObjectImpl#hasChild(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String)
-     */
-    @Override
-    public boolean hasChild( final UnitOfWork transaction,
-                             final String name ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state must be NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
-
-        return ( getVdbs( transaction, name ).length != 0 || super.hasChild(transaction, name) );
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.internal.RelationalObjectImpl#hasChild(org.komodo.spi.repository.Repository.UnitOfWork,
-     *      java.lang.String, java.lang.String)
-     */
-    @Override
-    public boolean hasChild( final UnitOfWork transaction,
-                             final String name,
-                             final String typeName ) throws KException {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state must be NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
-        ArgCheck.isNotEmpty( typeName, "typeName" ); //$NON-NLS-1$
-
-        if ( VdbLexicon.Vdb.VIRTUAL_DATABASE.equals( typeName ) ) {
-            return ( getVdbs( transaction, name ).length != 0 );
-        }
-
-        return super.hasChild(transaction, name, typeName);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.internal.RelationalObjectImpl#hasChildren(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
-    @Override
-    public boolean hasChildren( final UnitOfWork transaction ) throws KException {
-        if ( getVdbs( transaction ).length !=0 ) {
-            return true;
-        }
-        
-        return super.hasChildren(transaction);
-    }
-    
     /**
      * {@inheritDoc}
      *
@@ -187,14 +112,17 @@ public class DataserviceImpl extends VdbImpl implements Dataservice {
     @Override
     public KomodoObject getChild( final UnitOfWork transaction,
                                   final String name ) throws KException {
-        // check data roles
+        // check Vdbs
         KomodoObject[] kids = getVdbs( transaction, name );
 
         if ( kids.length != 0 ) {
             return kids[ 0 ];
         }
-        
-        return super.getChild(transaction, name);
+
+        // child does not exist
+        throw new KException( Messages.getString( org.komodo.repository.Messages.Komodo.CHILD_NOT_FOUND,
+                                                  name,
+                                                  getAbsolutePath() ) );
     }
 
     /**
@@ -219,7 +147,106 @@ public class DataserviceImpl extends VdbImpl implements Dataservice {
             }
         }
 
-        return super.getChild(transaction, name, typeName);
+        // child does not exist
+        throw new KException( Messages.getString( org.komodo.repository.Messages.Komodo.CHILD_NOT_FOUND,
+                                                  name,
+                                                  getAbsolutePath() ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#getChildren(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String[])
+     */
+    @Override
+    public KomodoObject[] getChildren( final UnitOfWork transaction,
+                                       final String... namePatterns ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        final Vdb[] vdbs = getVdbs( transaction, namePatterns );
+
+        final KomodoObject[] result = new KomodoObject[ vdbs.length ];
+        System.arraycopy( vdbs, 0, result, 0, vdbs.length );
+
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#getChildrenOfType(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String, java.lang.String[])
+     */
+    @Override
+    public KomodoObject[] getChildrenOfType( final UnitOfWork transaction,
+                                             final String type,
+                                             final String... namePatterns ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        KomodoObject[] result = null;
+
+        if ( VdbLexicon.Vdb.VIRTUAL_DATABASE.equals( type ) ) {
+            result = getVdbs( transaction, namePatterns );
+        } else {
+            result = super.getChildrenOfType(transaction, type, namePatterns);
+        }
+
+        return result;
+    }
+    
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#hasChild(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String)
+     */
+    @Override
+    public boolean hasChild( final UnitOfWork transaction,
+                             final String name ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state must be NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
+
+        return ( ( getVdbs( transaction, name ).length != 0 ) );
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#hasChild(org.komodo.spi.repository.Repository.UnitOfWork,
+     *      java.lang.String, java.lang.String)
+     */
+    @Override
+    public boolean hasChild( final UnitOfWork transaction,
+                             final String name,
+                             final String typeName ) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state must be NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
+        ArgCheck.isNotEmpty( typeName, "typeName" ); //$NON-NLS-1$
+
+        if ( VdbLexicon.Vdb.VIRTUAL_DATABASE.equals( typeName ) ) {
+            return ( getVdbs( transaction, name ).length != 0 );
+        }
+
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.internal.RelationalObjectImpl#hasChildren(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public boolean hasChildren( final UnitOfWork transaction ) throws KException {
+        if ( super.hasChildren( transaction ) ) {
+            return ( ( getVdbs( transaction ).length != 0 ) );
+        }
+
+        return false;
     }
     
     @Override
@@ -248,5 +275,39 @@ public class DataserviceImpl extends VdbImpl implements Dataservice {
 
         return result.toArray( new Vdb[ result.size() ] );
     }
+
+    /* (non-Javadoc)
+     * @see org.komodo.relational.dataservice.Dataservice#getServiceVdb(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public Vdb getServiceVdb(UnitOfWork uow) throws KException {
+        Vdb[] vdbs = getVdbs(uow, getName(uow));
+        if(vdbs.length==0) {
+            return null;
+        }
+        return vdbs[0];
+    }
+    
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.dataservice.Dataservice#getDescription(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public String getDescription( final UnitOfWork uow ) throws KException {
+        return getObjectProperty(uow, PropertyValueType.STRING, "getDescription", KomodoLexicon.LibraryComponent.DESCRIPTION); //$NON-NLS-1$
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.dataservice.Dataservice#setDescription(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     */
+    @Override
+    public void setDescription( final UnitOfWork uow,
+                                final String newDescription ) throws KException {
+        setObjectProperty(uow, "setDescription", KomodoLexicon.LibraryComponent.DESCRIPTION, newDescription); //$NON-NLS-1$
+    }
+
 
 }

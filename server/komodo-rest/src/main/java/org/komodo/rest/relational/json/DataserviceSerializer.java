@@ -31,7 +31,7 @@ public final class DataserviceSerializer extends BasicEntitySerializer<RestDatas
 
     @Override
     protected boolean isComplete(final RestDataservice dataService) {
-        return super.isComplete(dataService) && !StringUtils.isBlank(dataService.getName());
+        return super.isComplete(dataService) && !StringUtils.isBlank(dataService.getId());
     }
 
     @Override

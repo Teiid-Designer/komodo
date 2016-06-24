@@ -37,6 +37,7 @@ import org.komodo.importer.ImportOptions.ExistingNodeOptions;
 import org.komodo.importer.ImportOptions.OptionKeys;
 import org.komodo.importer.Messages;
 import org.komodo.relational.dataservice.Dataservice;
+import org.komodo.relational.dataservice.DataserviceManifest;
 import org.komodo.relational.importer.ddl.DdlImporter;
 import org.komodo.relational.importer.vdb.VdbImporter;
 import org.komodo.relational.workspace.WorkspaceManager;

@@ -193,7 +193,7 @@
 /*
  * A data service known by the workspace.
  */
-[tko:dataService] > tko:vdb
+[tko:dataService] > nt:unstructured, tko:libraryComponent
   + * (tko:vdb) copy
  
 /*
