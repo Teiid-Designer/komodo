@@ -24,7 +24,9 @@ package org.komodo.rest.relational.dataservice;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ws.rs.core.MediaType;
+import org.komodo.core.KomodoLexicon;
 import org.komodo.rest.KRestEntity;
+import org.komodo.rest.KomodoService;
 import org.komodo.spi.repository.KomodoType;
 
 public class DataServiceSchema implements KRestEntity {
@@ -47,7 +49,7 @@ public class DataServiceSchema implements KRestEntity {
     /**
      * Label for the description
      */
-    public static final String DESCRIPTION_LABEL = "keng__description";
+    public static final String DESCRIPTION_LABEL = KomodoService.encode(KomodoLexicon.LibraryComponent.DESCRIPTION);
 
     /**
      * Label for the properties
@@ -58,7 +60,7 @@ public class DataServiceSchema implements KRestEntity {
 
     private String kType = KomodoType.DATASERVICE.getType();
 
-    private String description = "Describes the configuration for a dataservice";
+    private String description = "A description for the dataservice";
 
     private List<DataServiceSchemaProperty> properties = new ArrayList<DataServiceSchemaProperty>(4);
 

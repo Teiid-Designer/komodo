@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<vdb name="MyService" version="1">
+ 
+    <description>The Dataservice Dynamic VDB</description>
+ 
+    <!--
+      Setting to use connector supplied metadata. Can be "true" or "cached".
+      "true" will obtain metadata once for every launch of Teiid.
+      "cached" will save a file containing the metadata into
+      the deploy/<vdb name>/<vdb version/META-INF directory
+    -->
+    <property name="UseConnectorMetadata" value="true" />
+ 
+</vdb>

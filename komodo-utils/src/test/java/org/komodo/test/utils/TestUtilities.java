@@ -123,6 +123,11 @@ public class TestUtilities implements StringConstants {
                             "CREATE VIEW Tweet AS select * FROM twitterview.getTweets;";
 
     /**
+     * Dataservice vdb
+     */
+    public static final String DATASERVICE_VDB_FILE = "myService-vdb.xml";
+
+    /**
      * Portfolio vdb
      */
     public static final String PORTFOLIO_VDB_FILE = "portfolio-vdb.xml";
@@ -1044,6 +1049,16 @@ public class TestUtilities implements StringConstants {
         return myVdbExample;
     }
 
+    /**
+     * @return input stream of portfolio example xml
+     * @throws Exception if error occurs
+     */
+    public static InputStream dataserviceVdbExample() throws Exception {
+        return getResourceAsStream(TestUtilities.class,
+                                   RESOURCES_DIRECTORY,
+                                   DATASERVICE_VDB_FILE);
+    }
+    
     /**
      * @return input stream of portfolio example xml
      * @throws Exception if error occurs

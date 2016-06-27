@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  */
-package org.komodo.relational.dataservice.internal;
+package org.komodo.relational.dataservice;
 
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -30,7 +30,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import org.komodo.core.KomodoLexicon;
-import org.komodo.relational.dataservice.Dataservice;
+import org.komodo.relational.dataservice.internal.DataserviceImpl;
 import org.komodo.relational.vdb.Vdb.VdbManifest;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.DocumentType;
@@ -41,7 +41,7 @@ import org.komodo.utils.KLog;
 import org.modeshape.jcr.api.JcrConstants;
 import org.w3c.dom.Document;
 
-class DataserviceManifest implements VdbManifest {
+public class DataserviceManifest implements VdbManifest {
 
     public static final String MANIFEST = "META-INF/dataservice.xml";
 
@@ -70,7 +70,7 @@ class DataserviceManifest implements VdbManifest {
     }
 
     @Override
-    public DocumentType getDocumentType() throws KException {
+    public DocumentType getDocumentType(UnitOfWork uow) throws KException {
         return DocumentType.XML;
     }
 

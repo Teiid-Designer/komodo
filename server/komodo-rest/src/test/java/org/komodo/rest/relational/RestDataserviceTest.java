@@ -21,7 +21,6 @@
  */
 package org.komodo.rest.relational;
 
-import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
@@ -49,9 +48,6 @@ public final class RestDataserviceTest {
     private static final String DATASERVICE_DATA_PATH = "/workspace/dataservices/dataservice1";
     private static final KomodoType kType = KomodoType.DATASERVICE;
     private static final String DESCRIPTION = "my description";
-    private static final String ORIGINAL_FILE = "/Users/ElvisIsKing/MyVdb.xml";
-    private static final String CONNECTION_TYPE = "BY_VERSION";
-    private static final int VERSION = 1;
 
     private RestDataservice dataservice;
 
@@ -59,16 +55,11 @@ public final class RestDataserviceTest {
         final RestDataservice copy = new RestDataservice();
 
         copy.setBaseUri(dataservice.getBaseUri());
-        copy.setId(dataservice.getName());
+        copy.setId(dataservice.getId());
+        copy.setDescription(dataservice.getDescription());
         copy.setDataPath(dataservice.getDataPath());
         copy.setkType(dataservice.getkType());
         copy.setHasChildren(dataservice.hasChildren());
-        copy.setName(this.dataservice.getName());
-        copy.setDescription(this.dataservice.getDescription());
-        copy.setOriginalFilePath(this.dataservice.getOriginalFilePath());
-        copy.setConnectionType(this.dataservice.getConnectionType());
-        copy.setPreview(this.dataservice.isPreview());
-        copy.setVersion(this.dataservice.getVersion());
         copy.setLinks(this.dataservice.getLinks());
         copy.setProperties(this.dataservice.getProperties());
 
@@ -96,12 +87,8 @@ public final class RestDataserviceTest {
         Mockito.when(theDataservice.getParent(transaction)).thenReturn(workspace);
 
         this.dataservice = new RestDataservice(BASE_URI, theDataservice, false, transaction);
-        this.dataservice.setName(DATASERVICE_NAME);
+        this.dataservice.setId(DATASERVICE_NAME);
         this.dataservice.setDescription(DESCRIPTION);
-        this.dataservice.setOriginalFilePath(ORIGINAL_FILE);
-        this.dataservice.setConnectionType(CONNECTION_TYPE);
-        this.dataservice.setPreview(false);
-        this.dataservice.setVersion(VERSION);
     }
 
     @Test
@@ -126,9 +113,8 @@ public final class RestDataserviceTest {
     public void shouldConstructEmptyDataservice() {
         final RestDataservice empty = new RestDataservice();
         assertNull(empty.getBaseUri());
-        assertNull(empty.getName());
+        assertNull(empty.getId());
         assertNull(empty.getDescription());
-        assertNull(empty.getOriginalFilePath());
         assertEquals(empty.getProperties().isEmpty(), true);
         assertEquals(empty.getLinks().size(), 0);
     }
@@ -140,26 +126,19 @@ public final class RestDataserviceTest {
     }
 
     @Test
-    public void shouldNotBeEqualWhenDescriptionIsDifferent() {
-        final RestDataservice thatDataservice = copy();
-        thatDataservice.setDescription(this.dataservice.getDescription() + "blah");
-        assertNotEquals(this.dataservice, not(thatDataservice));
-    }
-
-    @Test
     public void shouldNotBeEqualWhenNameIsDifferent() {
         final RestDataservice thatDataservice = copy();
-        thatDataservice.setName(this.dataservice.getName() + "blah");
+        thatDataservice.setId(this.dataservice.getId() + "blah");
         assertNotEquals(this.dataservice, thatDataservice);
     }
 
     @Test
-    public void shouldNotBeEqualWhenOriginalFileIsDifferent() {
-        final RestDataservice thatDataservice = copy();
-        thatDataservice.setOriginalFilePath(this.dataservice.getOriginalFilePath() + "blah");
-        assertNotEquals(this.dataservice, thatDataservice);
+    public void shouldSetName() {
+        final String newName = "blah";
+        this.dataservice.setId(newName);
+        assertEquals(this.dataservice.getId(), newName);
     }
-
+    
     @Test
     public void shouldSetDescription() {
         final String newDescription = "blah";
@@ -167,18 +146,5 @@ public final class RestDataserviceTest {
         assertEquals(this.dataservice.getDescription(), newDescription);
     }
 
-    @Test
-    public void shouldSetName() {
-        final String newName = "blah";
-        this.dataservice.setName(newName);
-        assertEquals(this.dataservice.getName(), newName);
-    }
-
-    @Test
-    public void shouldSetOriginalFilePath() {
-        final String newPath = "blah";
-        this.dataservice.setOriginalFilePath(newPath);
-        assertEquals(this.dataservice.getOriginalFilePath(), newPath);
-    }
 
 }

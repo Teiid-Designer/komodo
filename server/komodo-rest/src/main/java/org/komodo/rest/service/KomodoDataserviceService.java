@@ -437,8 +437,6 @@ public final class KomodoDataserviceService extends KomodoService {
 
             setProperties( uow, dataservice, oldEntity );
 
-            // TODO copy the properties
-
             final RestDataservice entity = entityFactory.create(dataservice, uriInfo.getBaseUri(), uow );
             final Response response = commit( uow, mediaTypes, entity );
             return response;
@@ -583,39 +581,16 @@ public final class KomodoDataserviceService extends KomodoService {
     
     // Sets Dataservice properties using the supplied RestDataservice object
     private void setProperties(final UnitOfWork uow, Dataservice dataService, RestDataservice restDataService) throws KException {
-        //TODO: Complete to include all properties
-        
         // 'New' = requested RestDataservice properties
         String newDescription = restDataService.getDescription();
-        String newConnType = restDataService.getConnectionType();
-        String newFilePath = restDataService.getOriginalFilePath();
-        int newVersion = restDataService.getVersion();
         
         // 'Old' = current Dataservice properties
         String oldDescription = dataService.getDescription(uow);
-        String oldConnType = dataService.getConnectionType(uow);
-        String oldFilePath = dataService.getOriginalFilePath(uow);
-        int oldVersion = dataService.getVersion(uow);
         
         // Description
         if ( !StringUtils.equals(newDescription, oldDescription) ) {
             dataService.setDescription( uow, newDescription );
         } 
-        
-        // ConnectionType
-        if( !StringUtils.isBlank(newConnType) && !StringUtils.equals(newConnType, oldConnType) ) {
-            dataService.setConnectionType(uow, newConnType);
-        }
-        
-        // OriginalFilePath
-        if( !StringUtils.equals(newFilePath,oldFilePath) ) {
-            dataService.setOriginalFilePath(uow, newFilePath);
-        }
-        
-        // Version
-        if( newVersion != oldVersion ) {
-            dataService.setVersion(uow, newVersion);
-        }
     }
 
     /**

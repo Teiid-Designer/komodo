@@ -44,12 +44,7 @@ public class RestDataserviceConverter extends RestEntityConverter<RestDataservic
 
     @Override
     protected void addProperties(ModelImpl model, ModelConverterContext context) throws Exception {
-        model.property(RestDataservice.NAME_LABEL, requiredProperty(String.class));
         model.property(RestDataservice.DESCRIPTION_LABEL, property(String.class));
-        model.property(RestDataservice.FILE_PATH_LABEL, requiredProperty(String.class));
-        model.property(RestDataservice.PREVIEW_LABEL, property(Boolean.class));
-        model.property(RestDataservice.CONNECTION_TYPE_LABEL, requiredProperty(String.class));
-        model.property(RestDataservice.VERSION_LABEL, property(String.class));
 
         model.property(PROPERTIES, context.resolveProperty(RestProperty.class, null));
     }
