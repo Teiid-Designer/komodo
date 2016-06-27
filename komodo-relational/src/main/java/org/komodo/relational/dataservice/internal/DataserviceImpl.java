@@ -28,7 +28,10 @@ import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.Messages;
 import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.dataservice.Dataservice;
-import org.komodo.relational.dataservice.DataserviceManifest;
+import org.komodo.relational.datasource.Datasource;
+import org.komodo.relational.datasource.internal.DatasourceImpl;
+import org.komodo.relational.driver.Driver;
+import org.komodo.relational.driver.internal.DriverImpl;
 import org.komodo.relational.internal.RelationalObjectImpl;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.internal.VdbImpl;
@@ -51,10 +54,10 @@ public class DataserviceImpl extends RelationalObjectImpl implements Dataservice
     /**
      * The allowed child types.
      */
-    protected static final KomodoType[] CHILD_TYPES = new KomodoType[] { Vdb.IDENTIFIER };
+    private static final KomodoType[] CHILD_TYPES = new KomodoType[] {Vdb.IDENTIFIER, Datasource.IDENTIFIER, Driver.IDENTIFIER};
 
     /**
-     * @param uow
+     * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
      *        the repository
@@ -63,20 +66,15 @@ public class DataserviceImpl extends RelationalObjectImpl implements Dataservice
      * @throws KException
      *         if error occurs
      */
-    public DataserviceImpl( final UnitOfWork uow,
+    public DataserviceImpl(final UnitOfWork transaction,
                       final Repository repository,
                       final String path ) throws KException {
-        super(uow, repository, path);
+        super(transaction, repository, path);
     }
 
     @Override
-    public KomodoType getTypeIdentifier(UnitOfWork uow) {
+    public KomodoType getTypeIdentifier(UnitOfWork transaction) {
         return Dataservice.IDENTIFIER;
-    }
-
-    @Override
-    public DataserviceManifest createManifest(UnitOfWork transaction, Properties properties) throws KException {
-        return new DataserviceManifest(transaction, this);
     }
 
     /* (non-Javadoc)
@@ -89,7 +87,7 @@ public class DataserviceImpl extends RelationalObjectImpl implements Dataservice
     }
 
     @Override
-    public DocumentType getDocumentType(UnitOfWork uow) throws KException {
+    public DocumentType getDocumentType(UnitOfWork transaction) throws KException {
         return DocumentType.ZIP;
     }
 
@@ -112,11 +110,24 @@ public class DataserviceImpl extends RelationalObjectImpl implements Dataservice
     @Override
     public KomodoObject getChild( final UnitOfWork transaction,
                                   final String name ) throws KException {
-        // check Vdbs
-        KomodoObject[] kids = getVdbs( transaction, name );
+        KomodoObject[] kids = getVdbs(transaction, name);
 
-        if ( kids.length != 0 ) {
-            return kids[ 0 ];
+        if (kids.length != 0) {
+            return kids[0];
+        }
+
+        // check data sources
+        kids = getDataSources(transaction, name);
+
+        if (kids.length != 0) {
+            return kids[0];
+        }
+
+        // check drivers
+        kids = getDrivers(transaction, name);
+
+        if (kids.length != 0) {
+            return kids[0];
         }
 
         // child does not exist
@@ -139,11 +150,23 @@ public class DataserviceImpl extends RelationalObjectImpl implements Dataservice
         ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( typeName, "typeName" ); //$NON-NLS-1$
 
-        if ( VdbLexicon.Vdb.VIRTUAL_DATABASE.equals( typeName ) ) {
-            final KomodoObject[] vdbs = getVdbs( transaction, name );
+        if (VdbLexicon.Vdb.VIRTUAL_DATABASE.equals(typeName)) {
+            final KomodoObject[] vdbs = getVdbs(transaction, name);
 
-            if ( vdbs.length != 0 ) {
-                return vdbs[ 0 ];
+            if (vdbs.length != 0) {
+                return vdbs[0];
+            }
+        } else if (KomodoLexicon.DataSource.NODE_TYPE.equals(typeName)) {
+            final KomodoObject[] dataSources = getDataSources(transaction, name);
+
+            if (dataSources.length != 0) {
+                return dataSources[0];
+            }
+        } else if (KomodoLexicon.Driver.NODE_TYPE.equals(typeName)) {
+            final KomodoObject[] drivers = getDrivers(transaction, name);
+
+            if (drivers.length != 0) {
+                return drivers[0];
             }
         }
 
@@ -165,10 +188,14 @@ public class DataserviceImpl extends RelationalObjectImpl implements Dataservice
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        final Vdb[] vdbs = getVdbs( transaction, namePatterns );
+        final Vdb[] vdbs = getVdbs(transaction, namePatterns);
+        final Datasource[] datasources = getDataSources(transaction, namePatterns);
+        final Driver[] drivers = getDrivers(transaction, namePatterns);
 
-        final KomodoObject[] result = new KomodoObject[ vdbs.length ];
-        System.arraycopy( vdbs, 0, result, 0, vdbs.length );
+        final KomodoObject[] result = new KomodoObject[vdbs.length + datasources.length + drivers.length];
+        System.arraycopy(vdbs, 0, result, 0, vdbs.length);
+        System.arraycopy(datasources, 0, result, vdbs.length, datasources.length);
+        System.arraycopy(drivers, 0, result, vdbs.length + datasources.length, drivers.length);
 
         return result;
     }
@@ -186,17 +213,18 @@ public class DataserviceImpl extends RelationalObjectImpl implements Dataservice
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        KomodoObject[] result = null;
+        final Vdb[] vdbs = getVdbs(transaction, namePatterns);
+        final Datasource[] datasources = getDataSources(transaction, namePatterns);
+        final Driver[] drivers = getDrivers(transaction, namePatterns);
 
-        if ( VdbLexicon.Vdb.VIRTUAL_DATABASE.equals( type ) ) {
-            result = getVdbs( transaction, namePatterns );
-        } else {
-            result = super.getChildrenOfType(transaction, type, namePatterns);
-        }
+        final KomodoObject[] result = new KomodoObject[vdbs.length + datasources.length + drivers.length];
+        System.arraycopy(vdbs, 0, result, 0, vdbs.length);
+        System.arraycopy(datasources, 0, result, vdbs.length, datasources.length);
+        System.arraycopy(drivers, 0, result, vdbs.length + datasources.length, drivers.length);
 
         return result;
     }
-    
+
     /**
      * {@inheritDoc}
      *
@@ -210,7 +238,8 @@ public class DataserviceImpl extends RelationalObjectImpl implements Dataservice
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state must be NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
 
-        return ( ( getVdbs( transaction, name ).length != 0 ) );
+        return getVdbs(transaction, name).length != 0 || getDataSources(transaction, name).length != 0
+               || getDrivers(transaction, name).length != 0;
     }
 
     /**
@@ -228,8 +257,16 @@ public class DataserviceImpl extends RelationalObjectImpl implements Dataservice
         ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( typeName, "typeName" ); //$NON-NLS-1$
 
-        if ( VdbLexicon.Vdb.VIRTUAL_DATABASE.equals( typeName ) ) {
-            return ( getVdbs( transaction, name ).length != 0 );
+        if (VdbLexicon.Vdb.VIRTUAL_DATABASE.equals(typeName)) {
+            return (getVdbs(transaction, name).length != 0);
+        }
+
+        if (KomodoLexicon.DataSource.NODE_TYPE.equals(typeName)) {
+            return (getDataSources(transaction, name).length != 0);
+        }
+
+        if (KomodoLexicon.Driver.NODE_TYPE.equals(typeName)) {
+            return (getDrivers(transaction, name).length != 0);
         }
 
         return false;
@@ -242,18 +279,27 @@ public class DataserviceImpl extends RelationalObjectImpl implements Dataservice
      */
     @Override
     public boolean hasChildren( final UnitOfWork transaction ) throws KException {
-        if ( super.hasChildren( transaction ) ) {
-            return ( ( getVdbs( transaction ).length != 0 ) );
-        }
-
-        return false;
+        return getVdbs(transaction).length != 0 || getDataSources(transaction).length != 0 || getDrivers(transaction).length != 0;
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.vdb.Vdb#getDescription(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
     @Override
-    public Vdb addVdb( final UnitOfWork uow,
-                       final String vdbName,
-                       final String externalFilePath ) throws KException {
-        return RelationalModelFactory.createVdb( uow, getRepository(), this.getAbsolutePath(), vdbName, externalFilePath );
+    public String getDescription(final UnitOfWork uow) throws KException {
+        return getObjectProperty(uow, PropertyValueType.STRING, "getDescription", KomodoLexicon.LibraryComponent.DESCRIPTION); //$NON-NLS-1$
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.vdb.Vdb#setDescription(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     */
+    @Override
+    public void setDescription(final UnitOfWork uow, final String newDescription) throws KException {
+        setObjectProperty(uow, "setDescription", KomodoLexicon.LibraryComponent.DESCRIPTION, newDescription); //$NON-NLS-1$
     }
 
     @Override
@@ -262,18 +308,44 @@ public class DataserviceImpl extends RelationalObjectImpl implements Dataservice
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        final List< Vdb > result = new ArrayList< Vdb >();
+        final List<Vdb> result = new ArrayList<Vdb>();
 
-        for ( final KomodoObject kobject : super.getChildrenOfType( transaction, VdbLexicon.Vdb.VIRTUAL_DATABASE, namePatterns ) ) {
-            final Vdb vdb = new VdbImpl( transaction, getRepository(), kobject.getAbsolutePath() );
-            result.add( vdb );
+        for (final KomodoObject kobject : super.getChildrenOfType(transaction, VdbLexicon.Vdb.VIRTUAL_DATABASE, namePatterns)) {
+            final Vdb vdb = new VdbImpl(transaction, getRepository(), kobject.getAbsolutePath());
+            result.add(vdb);
         }
 
-        if ( result.isEmpty() ) {
+        if (result.isEmpty()) {
             return Vdb.NO_VDBS;
         }
 
-        return result.toArray( new Vdb[ result.size() ] );
+        return result.toArray(new Vdb[result.size()]);
+    }
+
+    @Override
+    public Vdb addVdb(final UnitOfWork transaction, final String vdbName, final String externalFilePath) throws KException {
+        return RelationalModelFactory.createVdb(transaction, getRepository(), this.getAbsolutePath(), vdbName, externalFilePath);
+    }
+
+    @Override
+    public Datasource[] getDataSources(UnitOfWork transaction, String... namePatterns) throws KException {
+        ArgCheck.isNotNull(transaction, "transaction"); //$NON-NLS-1$
+        ArgCheck.isTrue((transaction.getState() == State.NOT_STARTED), "transaction state is not NOT_STARTED"); //$NON-NLS-1$
+
+        final List<Datasource> result = new ArrayList<Datasource>();
+
+        for (final KomodoObject kobject : super.getChildrenOfType(transaction,
+                                                                  KomodoLexicon.DataSource.NODE_TYPE,
+                                                                  namePatterns)) {
+            final Datasource datasource = new DatasourceImpl(transaction, getRepository(), kobject.getAbsolutePath());
+            result.add(datasource);
+        }
+
+        if (result.isEmpty()) {
+            return Datasource.NO_DATASOURCES;
+        }
+
+        return result.toArray(new Datasource[result.size()]);
     }
 
     /* (non-Javadoc)
@@ -282,32 +354,40 @@ public class DataserviceImpl extends RelationalObjectImpl implements Dataservice
     @Override
     public Vdb getServiceVdb(UnitOfWork uow) throws KException {
         Vdb[] vdbs = getVdbs(uow, getName(uow));
-        if(vdbs.length==0) {
+        if (vdbs.length == 0) {
             return null;
         }
         return vdbs[0];
     }
-    
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.dataservice.Dataservice#getDescription(org.komodo.spi.repository.Repository.UnitOfWork)
-     */
+
     @Override
-    public String getDescription( final UnitOfWork uow ) throws KException {
-        return getObjectProperty(uow, PropertyValueType.STRING, "getDescription", KomodoLexicon.LibraryComponent.DESCRIPTION); //$NON-NLS-1$
+    public Datasource addDatasource(UnitOfWork transaction, String sourceName) throws KException {
+        return RelationalModelFactory.createDatasource(transaction, getRepository(), this.getAbsolutePath(), sourceName);
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @see org.komodo.relational.dataservice.Dataservice#setDescription(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
-     */
     @Override
-    public void setDescription( final UnitOfWork uow,
-                                final String newDescription ) throws KException {
-        setObjectProperty(uow, "setDescription", KomodoLexicon.LibraryComponent.DESCRIPTION, newDescription); //$NON-NLS-1$
+    public Driver[] getDrivers(UnitOfWork transaction, String... namePatterns) throws KException {
+        ArgCheck.isNotNull(transaction, "transaction"); //$NON-NLS-1$
+        ArgCheck.isTrue((transaction.getState() == State.NOT_STARTED), "transaction state is not NOT_STARTED"); //$NON-NLS-1$
+
+        final List<Driver> result = new ArrayList<Driver>();
+
+        for (final KomodoObject kobject : super.getChildrenOfType(transaction, KomodoLexicon.Driver.NODE_TYPE, namePatterns)) {
+            final Driver driver = new DriverImpl(transaction, getRepository(), kobject.getAbsolutePath());
+            result.add(driver);
+        }
+
+        if (result.isEmpty()) {
+            return Driver.NO_DRIVERS;
+        }
+
+        return result.toArray(new Driver[result.size()]);
     }
 
-
+    @Override
+    public Driver addDriver(UnitOfWork transaction, String driverName, byte[] content) throws KException {
+        Driver driver = RelationalModelFactory.createDriver(transaction, getRepository(), this.getAbsolutePath(), driverName);
+        driver.setContent(transaction, content);
+        return driver;
+    }
 }

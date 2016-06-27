@@ -50,6 +50,11 @@ public interface Driver extends RelationalObject, Exportable {
     KomodoType IDENTIFIER = KomodoType.DRIVER;
 
     /**
+     * An empty array of drivers.
+     */
+    Driver[] NO_DRIVERS = new Driver[0];
+
+    /**
      * The resolver of a {@link Driver}.
      */
     public static final TypeResolver<Driver> RESOLVER = new TypeResolver<Driver>() {
