@@ -50,6 +50,7 @@ import org.komodo.rest.relational.KomodoStorageAttributes;
 import org.komodo.rest.relational.RelationalMessages;
 import org.komodo.rest.relational.RestStorageType;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
+import org.komodo.spi.repository.DocumentType;
 import org.komodo.spi.repository.Exportable;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -310,7 +311,7 @@ public class KomodoImportExportService extends KomodoService {
             KomodoObject workspace = repo.komodoWorkspace(uow);
             StorageReference storageRef = new StorageReference(sta.getStorageType(),
                                                                                    parameters,
-                                                                                   sta.getDocumentType());
+                                                                                   new DocumentType(sta.getDocumentType()));
 
             ImportMessages messages = wsMgr.importArtifact(uow, workspace, storageRef);
             if (messages.hasError())

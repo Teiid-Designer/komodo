@@ -67,7 +67,7 @@ public class KomodoStorageAttributes extends AbstractKomodoContentAttribute {
     private Map<String, String> parameters;
 
     @JsonProperty(DOCUMENT_TYPE_LABEL)
-    private DocumentType documentType;
+    private String documentType;
 
     /**
      * Default constructor for deserialization
@@ -107,15 +107,22 @@ public class KomodoStorageAttributes extends AbstractKomodoContentAttribute {
     /**
      * @return the document type
      */
-    public DocumentType getDocumentType() {
+    public String getDocumentType() {
         return documentType;
     }
 
     /**
      * @param documentType the document type
      */
-    public void setDocumentType(DocumentType documentType) {
+    public void setDocumentType(String documentType) {
         this.documentType = documentType;
+    }
+
+    /**
+     * @param documentType the document type
+     */
+    public void setDocumentType(DocumentType documentType) {
+        this.documentType = documentType.toString();
     }
 
     /**

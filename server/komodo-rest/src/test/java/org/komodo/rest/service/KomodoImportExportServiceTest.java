@@ -93,6 +93,7 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
         this.response = request(uri, MediaType.APPLICATION_JSON_TYPE).post(Entity.json(storageAttr));
         final String entity = this.response.readEntity(String.class);
 
+        assertEquals(Response.Status.OK.getStatusCode(), this.response.getStatus());
         ImportExportStatus status = KomodoJsonMarshaller.unmarshall(entity, ImportExportStatus.class);
         assertNotNull(status);
 
@@ -167,7 +168,7 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
         FileInputStream stream = null;
         try {
             stream = new FileInputStream(tmpFile);
-            String tmpFileContent = FileUtils.streamToString(stream);
+            String tmpFileContent = FileUtils.streamToString(stream) + NEW_LINE;
             assertEquals(tmpFileContent, decContent);
         } finally {
             IOUtils.closeQuietly(stream);

@@ -103,7 +103,7 @@ public final class StorageAttributesSerializer extends AbstractContentSerializer
 
         writeContent(out, value);
 
-        DocumentType docType = value.getDocumentType();
+        String docType = value.getDocumentType();
         if (docType != null) {
             out.name(KomodoStorageAttributes.DOCUMENT_TYPE_LABEL);
             out.value(docType.toString());
