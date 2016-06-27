@@ -236,4 +236,31 @@ public interface Dataservice extends Exportable, RelationalObject {
      *         if an error occurs
      */
     Driver addDriver( final UnitOfWork uow, final String driverName, final byte[] content) throws KException;
+
+    /**
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @return the deployment plan for the drivers
+     * @throws KException if an error occurs
+     */
+    String[] getDriverPlan(UnitOfWork transaction) throws KException;
+
+    /**
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @return the deployment plan for the data sources
+     * @throws KException if an error occurs
+     */
+    String[] getDataSourcePlan(UnitOfWork transaction) throws KException;
+
+    /**
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @return the deployment plan for the vdbs
+     * @throws KException if an error occurs
+     */
+    String[] getVdbPlan(UnitOfWork transaction) throws KException;
 }

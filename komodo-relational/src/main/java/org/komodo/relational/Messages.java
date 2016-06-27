@@ -293,6 +293,44 @@ public class Messages implements StringConstants {
 
     }
 
+    public enum DataserviceConveyor {
+
+        /**
+         * An error message indicating the driver cannot be found in the data service
+         */
+        DATA_SERVICE_DRIVER_NOT_FOUND,
+
+        /**
+         * An error message indicating the driver failed to deploy
+         */
+        DATA_SERVICE_DRIVER_FAILED_TO_DEPLOY,
+
+        /**
+         * An error message indicating the data source cannot be found in the data service
+         */
+        DATA_SERVICE_DATA_SOURCE_NOT_FOUND,
+
+        /**
+         * An error message indicating the data source failed to deploy
+         */
+        DATA_SERVICE_DATA_SOURCE_FAILED_TO_DEPLOY,
+
+        /**
+         * An error message indicating the vdb cannot be found in the data service
+         */
+        DATA_SERVICE_VDB_NOT_FOUND,
+
+        /**
+         * An error message indicating the vdb contents cannot be exported from the data service
+         */
+        DATA_SERVICE_VDB_CONTENTS_FAILURE;
+
+        @Override
+        public String toString() {
+            return getEnumName(this) + DOT + name();
+        }
+    }
+
     /**
      * @param enumValue the value
      * @return the name

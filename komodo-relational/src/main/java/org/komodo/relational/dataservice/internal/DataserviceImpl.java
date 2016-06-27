@@ -323,6 +323,20 @@ public class DataserviceImpl extends RelationalObjectImpl implements Dataservice
     }
 
     @Override
+    public String[] getVdbPlan(UnitOfWork transaction) throws KException {
+        // TODO
+        // Should return a property created by the sequencer
+        // ATM return the vdbs as collected
+
+        List<String> vdbNames = new ArrayList<String>();
+        for (Vdb vdb : getVdbs(transaction)) {
+            vdbNames.add(vdb.getName(transaction));
+        }
+
+        return vdbNames.toArray(new String[0]);
+    }
+
+    @Override
     public Vdb addVdb(final UnitOfWork transaction, final String vdbName, final String externalFilePath) throws KException {
         return RelationalModelFactory.createVdb(transaction, getRepository(), this.getAbsolutePath(), vdbName, externalFilePath);
     }
@@ -346,6 +360,20 @@ public class DataserviceImpl extends RelationalObjectImpl implements Dataservice
         }
 
         return result.toArray(new Datasource[result.size()]);
+    }
+
+    @Override
+    public String[] getDataSourcePlan(UnitOfWork transaction) throws KException {
+        // TODO
+        // Should return a property created by the sequencer
+        // ATM return the datasources as collected
+
+        List<String> datasourceNames = new ArrayList<String>();
+        for (Datasource datasource : getDataSources(transaction)) {
+            datasourceNames.add(datasource.getName(transaction));
+        }
+
+        return datasourceNames.toArray(new String[0]);
     }
 
     /* (non-Javadoc)
@@ -382,6 +410,20 @@ public class DataserviceImpl extends RelationalObjectImpl implements Dataservice
         }
 
         return result.toArray(new Driver[result.size()]);
+    }
+
+    @Override
+    public String[] getDriverPlan(UnitOfWork transaction) throws KException {
+        // TODO
+        // Should return a property created by the sequencer
+        // ATM return the drivers as collected
+
+        List<String> driverNames = new ArrayList<String>();
+        for (Driver driver : getDrivers(transaction)) {
+            driverNames.add(driver.getName(transaction));
+        }
+
+        return driverNames.toArray(new String[0]);
     }
 
     @Override

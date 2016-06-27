@@ -57,7 +57,6 @@ public final class ServerDeployVdbCommand extends ServerShellCommand {
     static final String NAME = "server-deploy-vdb"; //$NON-NLS-1$
 
     private static final List< String > VALID_OVERWRITE_ARGS = Arrays.asList( new String[] { "-o", "--overwrite" } ); //$NON-NLS-1$ //$NON-NLS-2$;
-    private static final String VDB_DEPLOYMENT_SUFFIX = "-vdb.xml"; //$NON-NLS-1$
 
     /**
      * @param status
