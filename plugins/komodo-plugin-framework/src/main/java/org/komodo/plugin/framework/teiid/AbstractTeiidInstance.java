@@ -623,6 +623,14 @@ public abstract class AbstractTeiidInstance implements TeiidInstance, StringCons
 
         try {
             deploy(driverName, iStream);
+
+            // Give a 0.5 sec pause for the driver to finish loading.
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                // ignore
+            }
+
         } catch (Exception ex) {
             // Jar deployment failed
             throw ex;

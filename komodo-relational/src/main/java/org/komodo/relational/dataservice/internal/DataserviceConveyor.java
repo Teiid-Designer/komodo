@@ -26,7 +26,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -35,11 +39,15 @@ import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
 import org.komodo.importer.ImportOptions.ExistingNodeOptions;
 import org.komodo.importer.ImportOptions.OptionKeys;
-import org.komodo.importer.Messages;
+import org.komodo.relational.Messages;
 import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.dataservice.DataserviceManifest;
+import org.komodo.relational.datasource.Datasource;
+import org.komodo.relational.driver.Driver;
 import org.komodo.relational.importer.ddl.DdlImporter;
 import org.komodo.relational.importer.vdb.VdbImporter;
+import org.komodo.relational.teiid.Teiid;
+import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
@@ -48,6 +56,13 @@ import org.komodo.spi.repository.Exportable;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
+import org.komodo.spi.runtime.DataSourceDriver;
+import org.komodo.spi.runtime.TeiidDataSource;
+import org.komodo.spi.runtime.TeiidInstance;
+import org.komodo.spi.runtime.TeiidVdb;
+import org.komodo.spi.utils.KeyInValueHashMap;
+import org.komodo.spi.utils.KeyInValueHashMap.KeyFromValueAdapter;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.FileUtils;
 
@@ -75,7 +90,8 @@ public class DataserviceConveyor implements StringConstants {
                 return newName;
         }
 
-        throw new KException(Messages.getString(Messages.IMPORTER.newNameFailure, nodeName));
+        throw new KException(org.komodo.importer.Messages.getString(
+                                                                    org.komodo.importer.Messages.IMPORTER.newNameFailure, nodeName));
     }
 
     protected boolean handleExistingNode(UnitOfWork transaction, KomodoObject parent, ImportOptions importOptions,
@@ -94,12 +110,14 @@ public class DataserviceConveyor implements StringConstants {
         switch (exNodeOption) {
             // RETURN - Return 'false' - do not create a node.  Log an error message
             case RETURN:
-                importMessages.addErrorMessage(Messages.getString(Messages.IMPORTER.nodeExistsReturn));
+                importMessages.addErrorMessage(org.komodo.importer.Messages.getString(
+                                                                                      org.komodo.importer.Messages.IMPORTER.nodeExistsReturn));
                 return false;
             // CREATE_NEW - Return 'true' - will create a new data service with new unique name.  Log a progress message.
             case CREATE_NEW:
                 String newName = determineNewName(transaction, parent, dsName);
-                importMessages.addProgressMessage(Messages.getString(Messages.IMPORTER.nodeExistCreateNew, dsName, newName));
+                importMessages.addProgressMessage(org.komodo.importer.Messages.getString(
+                                                                                         org.komodo.importer.Messages.IMPORTER.nodeExistCreateNew, dsName, newName));
                 importOptions.setOption(OptionKeys.NAME, newName);
                 break;
             // OVERWRITE - Return 'true' - deletes the existing data service so that new one can replace existing.
@@ -174,8 +192,21 @@ public class DataserviceConveyor implements StringConstants {
         importOptions.setOption(OptionKeys.NAME, dsName);
     }
 
+    /**
+     * Import a {@link Dataservice} from the given source {@link InputStream}
+     *
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param srcStream the source stream of the data service
+     * @param parent the parent of the imported data service
+     * @param importOptions options for the import procedure
+     * @param importMessages holder to contain any status messages from the import procedure
+     * @throws KException if error occurs
+     */
     public void dsImport(UnitOfWork transaction, InputStream srcStream, KomodoObject parent, ImportOptions importOptions,
                          ImportMessages importMessages) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotNull(srcStream, "Source Stream");
 
         long timestamp = System.currentTimeMillis();
@@ -188,7 +219,8 @@ public class DataserviceConveyor implements StringConstants {
 
             String dsName = importOptions.getOption(OptionKeys.NAME).toString();
             if (dsName == null)
-                throw new Exception(Messages.getString(Messages.IMPORTER.noNameFailure));
+                throw new Exception(org.komodo.importer.Messages.getString(
+                                                                           org.komodo.importer.Messages.IMPORTER.noNameFailure));
 
             boolean doImport = handleExistingNode(transaction, parent, importOptions, importMessages);
             if (!doImport) {
@@ -258,7 +290,20 @@ public class DataserviceConveyor implements StringConstants {
         }
     }
 
-    public byte[] dsExport(UnitOfWork transaction, DataserviceImpl dataService, Properties exportProperties) throws KException {
+    /**
+     * Export the given data service
+     *
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param dataService the data service to export
+     * @param exportProperties export properties to be used during the export procedure
+     * @return the array of bytes of the exported data service
+     * @throws KException if errors occurs
+     */
+    public byte[] dsExport(UnitOfWork transaction, Dataservice dataService, Properties exportProperties) throws KException {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ZipOutputStream zipStream = null;
 
@@ -334,5 +379,175 @@ public class DataserviceConveyor implements StringConstants {
                 }
             }
         }
+    }
+
+    /**
+     * Index the given array of objects by name
+     *
+     * @param transaction the transaction required to obtain the name of the object
+     * @param objects the objects to be indexed
+     * @return a map of the indexed objects
+     */
+    private <T extends KomodoObject> Map<String, T> index(UnitOfWork transaction, T[] objects) {
+        if (objects == null)
+            return Collections.emptyMap();
+
+        KeyFromValueAdapter<String, T> adapter = new KeyFromValueAdapter<String, T>() {
+            @Override
+            public String getKey(T value) {
+                try {
+                    return value.getName(transaction);
+                } catch (Exception e) {
+                    throw new IllegalStateException(e);
+                }
+            }
+        };
+
+        KeyInValueHashMap<String, T> index = new KeyInValueHashMap<>(adapter);
+
+        for (T object : objects) {
+            index.add(object);
+        }
+
+        return index;
+    }
+
+    /**
+     * Deploy the {@link Dataservice} to the teiid instance
+     *
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param dataservice the data service to be deployed
+     */
+    public DeployStatus deploy(UnitOfWork transaction, Dataservice dataservice, Teiid teiid) {
+        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotNull(dataservice, "data service");
+        ArgCheck.isNotNull(teiid, "teiid");
+
+        DeployStatus status = new DeployStatus();
+        TeiidInstance teiidInstance = teiid.getTeiidInstance(transaction);
+
+        try {
+            String dsName = dataservice.getName(transaction);
+
+            Map<String, Driver> driverIndex = index(transaction, dataservice.getDrivers(transaction));
+            Map<String, Datasource> dataSrcIndex = index(transaction, dataservice.getDataSources(transaction));
+            Map<String, Vdb> vdbIndex = index(transaction, dataservice.getVdbs(transaction));
+
+            //
+            // Deploy the drivers
+            //
+            String[] driverPlan = dataservice.getDriverPlan(transaction);
+            for (String driverName : driverPlan) {
+                Driver driver = driverIndex.get(driverName);
+                if (driver == null) {
+                    String errorMsg = Messages.getString(Messages.DataserviceConveyor.DATA_SERVICE_DRIVER_NOT_FOUND,
+                                                         driverName,
+                                                         dsName);
+                    status.addErrorMessage(errorMsg);
+                    return status;
+                }
+
+                InputStream content = driver.getContent(transaction);
+                DocumentType driverType = driver.getDocumentType(transaction);
+                File driverFile = File.createTempFile(driverName, driverType.toString());
+                FileUtils.write(content, driverFile);
+                teiidInstance.deployDriver(driverName, driverFile);
+
+                DataSourceDriver theDsDriver = null;
+                Collection<DataSourceDriver> drivers = teiidInstance.getDataSourceDrivers();
+                for (DataSourceDriver dsDriver : drivers) {
+                    //
+                    // Could be more than 1 driver deployed, eg. mysql jar provides 2
+                    //
+                    if (dsDriver.getName().startsWith(driverName)) {
+                        theDsDriver = dsDriver;
+                        break;
+                    }
+                }
+
+                if (theDsDriver == null) {
+                    String errorMsg = Messages.getString(Messages.DataserviceConveyor.DATA_SERVICE_DRIVER_FAILED_TO_DEPLOY,
+                                                         driverName,
+                                                         dsName);
+                    status.addErrorMessage(errorMsg);
+                    return status;
+                }
+            }
+
+            //
+            // Deploy the data sources
+            //
+            String[] dataSrcPlan = dataservice.getDataSourcePlan(transaction);
+            for (String dataSrcName : dataSrcPlan) {
+                Datasource dataSrc = dataSrcIndex.get(dataSrcName);
+                if (dataSrc == null) {
+                    String errorMsg = Messages.getString(Messages.DataserviceConveyor.DATA_SERVICE_DATA_SOURCE_NOT_FOUND,
+                                                         dataSrcName,
+                                                         dsName);
+                    status.addErrorMessage(errorMsg);
+                    return status;
+                }
+
+                String jndiName = dataSrc.getJndiName(transaction);
+                String sourceType = dataSrc.getDriverName(transaction);
+                Properties properties = dataSrc.getPropertiesForServerDeployment(transaction, teiidInstance);
+
+                TeiidDataSource teiidDataSrc = teiidInstance.getOrCreateDataSource(dataSrcName,
+                                                                                       jndiName,
+                                                                                       sourceType,
+                                                                                       properties);
+                if (teiidDataSrc == null) {
+                    String errorMsg = Messages.getString(Messages.DataserviceConveyor.DATA_SERVICE_DATA_SOURCE_FAILED_TO_DEPLOY,
+                                                         dataSrcName);
+                    status.addErrorMessage(errorMsg);
+                    return status;
+                }
+            }
+
+            //
+            // Deploy the vdbs
+            //
+            String[] vdbPlan = dataservice.getVdbPlan(transaction);
+            for (String vdbName : vdbPlan) {
+                Vdb vdb = vdbIndex.get(vdbName);
+                if (vdb == null) {
+                    String errorMsg = Messages.getString(Messages.DataserviceConveyor.DATA_SERVICE_VDB_NOT_FOUND,
+                                                         vdbName,
+                                                         dsName);
+                    status.addErrorMessage(errorMsg);
+                    return status;
+                }
+
+                // Get VDB content
+                byte[] vdbXml = vdb.export(transaction, null);
+                if (vdbXml == null || vdbXml.length == 0) {
+                    String errorMsg = Messages.getString(Messages.DataserviceConveyor.DATA_SERVICE_VDB_CONTENTS_FAILURE,
+                                                         vdbName,
+                                                         dsName);
+                    status.addErrorMessage(errorMsg);
+                    return status;
+                }
+
+                String vdbDeploymentName = vdbName + VDB_DEPLOYMENT_SUFFIX;
+                InputStream stream = new ByteArrayInputStream(vdbXml);
+                teiidInstance.deployDynamicVdb(vdbName, stream);
+
+                TeiidVdb teiidVdb = teiidInstance.getVdb(vdbDeploymentName);
+                List<String> vdbErrors = teiidVdb.getValidityErrors();
+                for (String vdbError : vdbErrors) {
+                    status.addErrorMessage(vdbError);
+                }
+
+                if (!vdbErrors.isEmpty())
+                    return status;
+            }
+
+        } catch (Exception ex) {
+            status.addErrorMessage(ex);
+        }
+
+        return status;
     }
 }
