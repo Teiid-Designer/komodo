@@ -75,7 +75,7 @@ public interface Datasource extends Exportable, RelationalObject {
     KomodoType IDENTIFIER = KomodoType.DATASOURCE;
 
     /**
-     * An empty array of teiids.
+     * An empty array of data sources.
      */
     Datasource[] NO_DATASOURCES = new Datasource[0];
 

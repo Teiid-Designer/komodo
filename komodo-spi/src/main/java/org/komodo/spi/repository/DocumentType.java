@@ -64,7 +64,7 @@ public class DocumentType {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((this.type == null) ? 0 : this.type.hashCode());
+        result = prime * result + ((type == null) ? 0 : type.hashCode());
         return result;
     }
 
@@ -77,10 +77,10 @@ public class DocumentType {
         if (getClass() != obj.getClass())
             return false;
         DocumentType other = (DocumentType)obj;
-        if (this.type == null) {
+        if (type == null) {
             if (other.type != null)
                 return false;
-        } else if (!this.type.equals(other.type))
+        } else if (!type.equals(other.type))
             return false;
         return true;
     }

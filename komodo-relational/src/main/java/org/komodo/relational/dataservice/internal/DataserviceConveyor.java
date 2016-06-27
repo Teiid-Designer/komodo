@@ -274,7 +274,7 @@ public class DataserviceConveyor implements StringConstants {
             //
             // Generate manifest for data service
             //
-            DataserviceManifest manifest = dataService.createManifest(transaction, new Properties());
+            DataserviceManifest manifest = new DataserviceManifest(transaction, dataService);
             byte[] manifestBytes = manifest.export(transaction, new Properties());
 
             ZipEntry manZipEntry = new ZipEntry(DataserviceManifest.MANIFEST);

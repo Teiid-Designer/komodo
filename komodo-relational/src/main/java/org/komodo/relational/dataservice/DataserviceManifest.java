@@ -70,7 +70,7 @@ public class DataserviceManifest implements VdbManifest {
     }
 
     @Override
-    public DocumentType getDocumentType(UnitOfWork uow) throws KException {
+    public DocumentType getDocumentType(UnitOfWork transaction) throws KException {
         return DocumentType.XML;
     }
 

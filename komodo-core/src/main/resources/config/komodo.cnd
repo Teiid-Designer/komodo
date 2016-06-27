@@ -193,8 +193,11 @@
 /*
  * A data service known by the workspace.
  */
-[tko:dataService] > nt:unstructured, tko:libraryComponent
+[tko:dataService] > nt:unstructured, mode:hashed, tko:libraryComponent
+  - vdb:description (string)
   + * (tko:vdb) copy
+  + * (tko:dataSource) copy
+  + * (tko:driver) copy
  
 /*
  * The VDB imports grouping node used by the library. Child nodes represent Import VDB definitions.
