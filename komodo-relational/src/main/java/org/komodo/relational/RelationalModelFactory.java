@@ -145,6 +145,22 @@ public final class RelationalModelFactory {
     }
 
     /**
+     * Wraps the given exception in a {@link KException}
+     *
+     * @param e the exception
+     * @return return a {@link KException} from the given {@link Exception}
+     */
+    public static KException handleError( final Exception e ) {
+        assert ( e != null );
+
+        if ( e instanceof KException ) {
+            return ( KException )e;
+        }
+
+        return new KException( e );
+    }
+
+    /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
@@ -1286,16 +1302,6 @@ public final class RelationalModelFactory {
 
         final VirtualProcedure result = new VirtualProcedureImpl( transaction, repository, kobject.getAbsolutePath() );
         return result;
-    }
-
-    private static KException handleError( final Exception e ) {
-        assert ( e != null );
-
-        if ( e instanceof KException ) {
-            return ( KException )e;
-        }
-
-        return new KException( e );
     }
 
     private static void setCreateStatementProperties( final UnitOfWork transaction,

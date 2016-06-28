@@ -222,7 +222,7 @@ public class VdbImpl extends RelationalObjectImpl implements Vdb {
 
         @Override
         public DocumentType getDocumentType(UnitOfWork transaction) throws KException {
-            return DocumentType.XML;
+            return DocumentType.VDB_XML;
         }
     }
 
@@ -1235,6 +1235,6 @@ public class VdbImpl extends RelationalObjectImpl implements Vdb {
 
     @Override
     public DocumentType getDocumentType(UnitOfWork transaction) throws KException {
-        return DocumentType.XML;
+        return DocumentType.VDB_XML;
     }
 }

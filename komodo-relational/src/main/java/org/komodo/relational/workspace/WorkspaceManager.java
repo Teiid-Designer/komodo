@@ -21,8 +21,8 @@
  */
 package org.komodo.relational.workspace;
 
-import java.util.ArrayList;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import org.komodo.core.KomodoLexicon;
@@ -44,6 +44,7 @@ import org.komodo.relational.datasource.internal.DatasourceImpl;
 import org.komodo.relational.driver.Driver;
 import org.komodo.relational.folder.Folder;
 import org.komodo.relational.importer.ddl.DdlImporter;
+import org.komodo.relational.importer.dsource.DatasourceImporter;
 import org.komodo.relational.importer.vdb.VdbImporter;
 import org.komodo.relational.internal.AdapterFactory;
 import org.komodo.relational.internal.TypeResolverRegistry;
@@ -829,9 +830,13 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
             ImportOptions importOptions = new ImportOptions();
             ImportMessages importMessages = new ImportMessages();
 
-            if (DocumentType.XML.equals(storageRef.getDocumentType())) {
+            if (DocumentType.VDB_XML.equals(storageRef.getDocumentType())) {
                 VdbImporter importer = new VdbImporter(getRepository());
                 importer.importVdb(transaction, stream, parent, importOptions, importMessages);
+            }
+            else if (DocumentType.TDS.equals(storageRef.getDocumentType())) {
+                DatasourceImporter importer = new DatasourceImporter(getRepository());
+                importer.importDS(transaction, stream, parent, importOptions, importMessages);
             }
             else if (DocumentType.DDL.equals(storageRef.getDocumentType())) {
                 DdlImporter importer = new DdlImporter(getRepository());

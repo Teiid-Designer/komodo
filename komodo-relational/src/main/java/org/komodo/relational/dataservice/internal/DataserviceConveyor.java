@@ -39,12 +39,14 @@ import org.komodo.importer.ImportMessages;
 import org.komodo.importer.ImportOptions;
 import org.komodo.importer.ImportOptions.ExistingNodeOptions;
 import org.komodo.importer.ImportOptions.OptionKeys;
+import org.komodo.relational.DeployStatus;
 import org.komodo.relational.Messages;
 import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.dataservice.DataserviceManifest;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.driver.Driver;
 import org.komodo.relational.importer.ddl.DdlImporter;
+import org.komodo.relational.importer.dsource.DatasourceImporter;
 import org.komodo.relational.importer.vdb.VdbImporter;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.vdb.Vdb;
@@ -259,10 +261,14 @@ public class DataserviceConveyor implements StringConstants {
                     if (DataserviceManifest.MANIFEST.equals(name)) {
                         DataserviceManifest manifest = new DataserviceManifest(transaction, dataservice);
                         manifest.read(transaction, entryStream);
-                    } else if (name.endsWith(DocumentType.XML.toString())) {
+                    } else if (name.endsWith(DocumentType.VDB_XML.toString())) {
                         VdbImporter importer = new VdbImporter(repository);
                         ImportOptions options = new ImportOptions();
                         importer.importVdb(transaction, entryStream, dataservice, options, importMessages);
+                    } else if (name.endsWith(DocumentType.TDS.toString())) {
+                        DatasourceImporter importer = new DatasourceImporter(repository);
+                        ImportOptions options = new ImportOptions();
+                        importer.importDS(transaction, entryStream, dataservice, options, importMessages);
                     } else if (name.endsWith(DocumentType.DDL.toString())) {
                         DdlImporter importer = new DdlImporter(repository);
                         ImportOptions options = new ImportOptions();
@@ -336,10 +342,9 @@ public class DataserviceConveyor implements StringConstants {
                     continue;
 
                 String name = exportable.getName(transaction);
-                String ext = exportable.getDocumentType(transaction).toString();
                 byte[] content = exportable.export(transaction, new Properties());
 
-                String entryName = name + DOT + ext;
+                String entryName = exportable.getDocumentType(transaction).fileName(name);
                 ZipEntry zipEntry = new ZipEntry(entryName);
 
                 zipStream.putNextEntry(zipEntry);

@@ -375,6 +375,11 @@ public interface StringConstants {
   String VDB_DEPLOYMENT_SUFFIX = "-vdb" + XML_SUFFIX; //$NON-NLS-1$
 
   /**
+   * Datasource Suffix
+   */
+  String DS_SUFFIX = ".tds"; //$NON-NLS-1$
+
+  /**
    * jboss temp directory
    */
   String JBOSS_SERVER_TMP_DIR = "jboss.server.temp.dir";

@@ -922,7 +922,7 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
         parameters.setProperty(StorageConnector.FILE_PATH_PROPERTY, vdbSrcFile.getName());
 
         KomodoObject parent = _repo.komodoWorkspace(getTransaction());
-        StorageReference reference = new StorageReference("file", parameters, DocumentType.XML);
+        StorageReference reference = new StorageReference("file", parameters, DocumentType.VDB_XML);
         wsMgr.importArtifact(getTransaction(), parent, reference);
 
         assertTrue(parent.hasChild(getTransaction(), TestUtilities.SAMPLE_VDB_NAME));

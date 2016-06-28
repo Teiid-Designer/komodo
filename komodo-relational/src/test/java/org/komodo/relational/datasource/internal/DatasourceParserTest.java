@@ -29,6 +29,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.datasource.Datasource;
+import org.komodo.spi.KException;
+import org.komodo.spi.repository.KomodoObject;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class DatasourceParserTest extends RelationalModelTest {
@@ -36,13 +38,17 @@ public final class DatasourceParserTest extends RelationalModelTest {
     private static DatasourceParser datasourceParser;
 
     @BeforeClass
-    public static void oneTimeSetup() throws Exception {
-        datasourceParser = new DatasourceParser( _repo, true );
+    public static void setup() throws Exception {
+        datasourceParser = new DatasourceParser();
     }
-    
+
+    private KomodoObject getWorkspace() throws KException {
+        return _repo.komodoWorkspace(getTransaction());
+    }
+
     @Test( expected = IllegalArgumentException.class )
     public void shouldFailWhenNullRulesFile() throws Exception {
-        datasourceParser.parse(getTransaction(), null);
+        datasourceParser.parse(getTransaction(), getWorkspace(), null);
     }
 
     @Test
@@ -52,7 +58,7 @@ public final class DatasourceParserTest extends RelationalModelTest {
 
         final int numErrors = 6;
         final int numSources = 4;
-        final Datasource[] dataSources = datasourceParser.parse(getTransaction(), testFile);
+        final Datasource[] dataSources = datasourceParser.parse(getTransaction(), getWorkspace(), testFile);
         final List<String> errors = datasourceParser.getErrors();
         
         assertThat( errors.size(), is( numErrors ) );
@@ -73,7 +79,7 @@ public final class DatasourceParserTest extends RelationalModelTest {
         String testFilePath = getClass().getClassLoader().getResource("datasource-valid.xml").getFile();
         final File testFile = new File(testFilePath);
 
-        final String[] dataSourceNames = datasourceParser.validate(getTransaction(), testFile);
+        final String[] dataSourceNames = datasourceParser.validate(testFile);
         final List<String> errors = datasourceParser.getErrors();
         assertThat( errors.size(), is( 0 ) );
         assertThat( dataSourceNames.length, is( 1 ) );
@@ -85,7 +91,7 @@ public final class DatasourceParserTest extends RelationalModelTest {
         String testFilePath = getClass().getClassLoader().getResource("datasource-multipleValid.xml").getFile();
         final File testFile = new File(testFilePath);
 
-        final String[] dataSourceNames = datasourceParser.validate(getTransaction(), testFile);
+        final String[] dataSourceNames = datasourceParser.validate(testFile);
         final List<String> errors = datasourceParser.getErrors();
         assertThat( errors.size(), is( 0 ) );
         assertThat( dataSourceNames.length, is( 3 ) );
@@ -100,7 +106,7 @@ public final class DatasourceParserTest extends RelationalModelTest {
         String testFilePath = getClass().getClassLoader().getResource("datasource-validDashboardDS.xml").getFile();
         final File testFile = new File(testFilePath);
 
-        final String[] dataSourceNames = datasourceParser.validate(getTransaction(), testFile);
+        final String[] dataSourceNames = datasourceParser.validate(testFile);
         final List<String> errors = datasourceParser.getErrors();
         assertThat( errors.size(), is( 0 ) );
         assertThat( dataSourceNames.length, is( 1 ) );
@@ -113,7 +119,7 @@ public final class DatasourceParserTest extends RelationalModelTest {
         String testFilePath = getClass().getClassLoader().getResource("datasource-valid.xml").getFile();
         final File testFile = new File(testFilePath);
 
-        final Datasource[] dataSources = datasourceParser.parse(getTransaction(), testFile);
+        final Datasource[] dataSources = datasourceParser.parse(getTransaction(), getWorkspace(), testFile);
         final List<String> errors = datasourceParser.getErrors();
         assertThat( errors.size(), is( 0 ) );
         assertThat( dataSources.length, is( 1 ) );
@@ -133,7 +139,7 @@ public final class DatasourceParserTest extends RelationalModelTest {
         String testFilePath = getClass().getClassLoader().getResource("datasource-multipleValid.xml").getFile();
         final File testFile = new File(testFilePath);
 
-        final Datasource[] dataSources = datasourceParser.parse(getTransaction(), testFile);
+        final Datasource[] dataSources = datasourceParser.parse(getTransaction(), getWorkspace(), testFile);
         final List<String> errors = datasourceParser.getErrors();
         assertThat( errors.size(), is( 0 ) );
         assertThat( dataSources.length, is( 3 ) );
@@ -177,7 +183,7 @@ public final class DatasourceParserTest extends RelationalModelTest {
         String testFilePath = getClass().getClassLoader().getResource("datasource-validDashboardDS.xml").getFile();
         final File testFile = new File(testFilePath);
 
-        final Datasource[] dataSources = datasourceParser.parse(getTransaction(), testFile);
+        final Datasource[] dataSources = datasourceParser.parse(getTransaction(), getWorkspace(), testFile);
         final List<String> errors = datasourceParser.getErrors();
         assertThat( errors.size(), is( 0 ) );
         assertThat( dataSources.length, is( 1 ) );

@@ -118,14 +118,16 @@ public abstract class AbstractImporter implements StringConstants {
      * Determines how to handle node creation if child to be created already exists.  The ExistingNodeOptions specify the behavior.
      * If no Option is set, then the default behavior is to overwrite any existing nodes.
      * @param transaction the transaction
+     * @param parentObject the parent object
      * @param importOptions the import options
      * @param importMessages the import messages
      * @return 'true' to continue, 'false' to bail
      * @throws KException the exception
      */
     protected abstract boolean handleExistingNode(UnitOfWork transaction,
-    		ImportOptions importOptions,
-    		ImportMessages importMessages) throws KException;
+                                                                                              KomodoObject parentObject,
+                                                                                              ImportOptions importOptions,
+                                                                                              ImportMessages importMessages) throws KException;
 
 
     protected abstract void executeImport(UnitOfWork transaction,
@@ -146,7 +148,7 @@ public abstract class AbstractImporter implements StringConstants {
         // --------------------------------------------------------------
         // Determine whether to continue, based on ImportOptions...
         // --------------------------------------------------------------
-        boolean doImport = handleExistingNode(transaction, importOptions, importMessages);
+        boolean doImport = handleExistingNode(transaction, parentObject, importOptions, importMessages);
         if (! doImport) {
             // Handling existing node advises not to continue
             return;

@@ -49,7 +49,8 @@ public class Messages implements StringConstants {
         newNameFailure,
         nodeCreated,
         nodeCreationFailed,
-        teiidParserException;
+        teiidParserException,
+        dataSourceImported;
 
         @Override
         public String toString() {
