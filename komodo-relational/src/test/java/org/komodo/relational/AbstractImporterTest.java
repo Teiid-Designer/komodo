@@ -54,6 +54,8 @@ public abstract class AbstractImporterTest extends AbstractLocalRepositoryTest {
 
     protected static final String DDL_DIRECTORY = "ddl";
 
+    protected static final String TDS_DIRECTORY = "tds";
+
     protected abstract void runImporter(Repository repository,
                                                 InputStream inputStream,
                                                 KomodoObject parentObject,

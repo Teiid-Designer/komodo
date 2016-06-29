@@ -82,35 +82,36 @@ public class VdbImporter extends AbstractImporter {
 
     @Override
     protected boolean handleExistingNode(UnitOfWork transaction,
-    		ImportOptions importOptions,
-    		ImportMessages importMessages) throws KException {
+                                                                             KomodoObject parentObject,
+                                                                             ImportOptions importOptions,
+                                                                             ImportMessages importMessages) throws KException {
 
-    	// VDB name to create
-    	String vdbName = importOptions.getOption(OptionKeys.NAME).toString();
+        // VDB name to create
+        String vdbName = importOptions.getOption(OptionKeys.NAME).toString();
 
-    	// No node with the requested name - ok to create
-    	if (! getWorkspace(transaction).hasChild(transaction, vdbName))
-    		return true;
+        // No node with the requested name - ok to create
+        if (!parentObject.hasChild(transaction, vdbName))
+            return true;
 
-    	// Option specifying how to handle when node exists with requested name
-    	ExistingNodeOptions exNodeOption = (ExistingNodeOptions)importOptions.getOption(OptionKeys.HANDLE_EXISTING);
+        // Option specifying how to handle when node exists with requested name
+        ExistingNodeOptions exNodeOption = (ExistingNodeOptions)importOptions.getOption(OptionKeys.HANDLE_EXISTING);
 
-    	switch (exNodeOption) {
-    	// RETURN - Return 'false' - do not create a node.  Log an error message
-    	case RETURN:
-    		importMessages.addErrorMessage(Messages.getString(Messages.IMPORTER.nodeExistsReturn));
-    		return false;
-    	// CREATE_NEW - Return 'true' - will create a new VDB with new unique name.  Log a progress message.
-    	case CREATE_NEW:
-    		String newName = determineNewName(transaction, vdbName);
-    		importMessages.addProgressMessage(Messages.getString(Messages.IMPORTER.nodeExistCreateNew, vdbName, newName));
-    		importOptions.setOption(OptionKeys.NAME, newName);
-    		break;
-    	// OVERWRITE - Return 'true' - deletes the existing VDB so that new one can replace existing.
-    	case OVERWRITE:
-    		KomodoObject oldNode = getWorkspace(transaction).getChild(transaction, vdbName);
-    		oldNode.remove(transaction);
-    	}
+        switch (exNodeOption) {
+            // RETURN - Return 'false' - do not create a node.  Log an error message
+            case RETURN:
+                importMessages.addErrorMessage(Messages.getString(Messages.IMPORTER.nodeExistsReturn));
+                return false;
+            // CREATE_NEW - Return 'true' - will create a new VDB with new unique name.  Log a progress message.
+            case CREATE_NEW:
+                String newName = determineNewName(transaction, vdbName);
+                importMessages.addProgressMessage(Messages.getString(Messages.IMPORTER.nodeExistCreateNew, vdbName, newName));
+                importOptions.setOption(OptionKeys.NAME, newName);
+                break;
+            // OVERWRITE - Return 'true' - deletes the existing VDB so that new one can replace existing.
+            case OVERWRITE:
+                KomodoObject oldNode = parentObject.getChild(transaction, vdbName);
+                oldNode.remove(transaction);
+        }
 
     	return true;
     }

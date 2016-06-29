@@ -91,8 +91,9 @@ public class DdlImporter extends AbstractImporter {
 	 */
     @Override
     protected boolean handleExistingNode(UnitOfWork transaction,
-    		ImportOptions importOptions,
-    		ImportMessages importMessages) throws KException {
+                                                                             KomodoObject parentObject,
+                                                                             ImportOptions importOptions,
+                                                                             ImportMessages importMessages) throws KException {
 
     	return true;
     }

@@ -82,7 +82,7 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
 
         KomodoStorageAttributes storageAttr = new KomodoStorageAttributes();
         storageAttr.setStorageType("file");
-        storageAttr.setDocumentType(DocumentType.XML);
+        storageAttr.setDocumentType(DocumentType.VDB_XML);
 
         String portfolioCnt = FileUtils.streamToString(TestUtilities.portfolioExample());
         String content = Base64.getEncoder().encodeToString(portfolioCnt.getBytes());

@@ -139,12 +139,6 @@ public class DriverImpl extends RelationalObjectImpl implements Driver {
     @Override
     public DocumentType getDocumentType(UnitOfWork transaction) throws KException {
         String name = getName(transaction);
-        int dotIndex = name.lastIndexOf(DOT);
-
-        if (dotIndex == -1)
-            return DocumentType.UNKNOWN;
-
-        String suffix = name.substring(dotIndex + 1);
-        return new DocumentType(suffix);
+        return DocumentType.createDocumentType(name);
     }
 }

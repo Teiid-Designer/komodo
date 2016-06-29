@@ -22,12 +22,14 @@
 package org.komodo.relational.datasource.internal;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,12 +59,25 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public class DatasourceParser {
 
+    /**
+     * Parser options for determining behaviour of the parser
+     */
+    public static enum ParserOption {
+
+        /**
+         * Create data sources beneath parent while parsing
+         */
+        CREATE_REPO_SOURCES,
+
+        /**
+         * If a data source already exists beneath parent then replace it
+         */
+        REPLACE_REPO_SOURCE;
+    }
+
     private final String DATASOURCE_SCHEMA_FILE = "datasource.xsd"; //$NON-NLS-1$
 
     private static final KLog LOGGER = KLog.getLogger();
-
-    private final Repository repo;
-    private boolean replaceExisting;
     
     private Handler handler;
     /**
@@ -72,21 +87,15 @@ public class DatasourceParser {
 
     /**
      * Constructs a parser.
-     * @param repo
-     *        the repository (cannot be <code>null</code>)
      * @param replaceExisting 
      *        <code>true</code> to replace sources if sources with same names already exist
-     * @throws Exception if there were problems with the data sources schema file
+     * @throws KException if there were problems with the data sources schema file
      */
-    public DatasourceParser(final Repository repo, final boolean replaceExisting ) throws Exception {
-        ArgCheck.isNotNull( repo, "repo" ); //$NON-NLS-1$
-
-        this.repo = repo;
-        this.replaceExisting = replaceExisting;
+    public DatasourceParser() throws KException {
         initParser( );
     }
     
-    private void initParser( ) throws Exception {
+    private void initParser( ) throws KException {
         InputStream schemaStream = getClass().getClassLoader().getResourceAsStream(DATASOURCE_SCHEMA_FILE);
         File schemaFile = null;
         try {
@@ -102,9 +111,13 @@ public class DatasourceParser {
         factory.setNamespaceAware( true );
         factory.setValidating( true );
 
-        this.parser = factory.newSAXParser();
-        this.parser.setProperty( "http://java.sun.com/xml/jaxp/properties/schemaLanguage", "http://www.w3.org/2001/XMLSchema" ); //$NON-NLS-1$ //$NON-NLS-2$
-        this.parser.setProperty( "http://java.sun.com/xml/jaxp/properties/schemaSource", schemaFile ); //$NON-NLS-1$
+        try {
+            this.parser = factory.newSAXParser();
+            this.parser.setProperty( "http://java.sun.com/xml/jaxp/properties/schemaLanguage", "http://www.w3.org/2001/XMLSchema" ); //$NON-NLS-1$ //$NON-NLS-2$
+            this.parser.setProperty( "http://java.sun.com/xml/jaxp/properties/schemaSource", schemaFile ); //$NON-NLS-1$
+        } catch (Exception ex) {
+            throw RelationalModelFactory.handleError(ex);
+        }
     }
 
     /**
@@ -157,34 +170,114 @@ public class DatasourceParser {
 
     /**
      * @param transaction the transaction (cannot be <code>null</code>)
-     * @param datasourceFile the data sources file (cannot be <code>null</code>)
+     * @param parent the prospective parent of the data sources
+     * @param datasourceStream the data sources input stream (cannot be <code>null</code>)
+     * @param options the options to determine whether to create datasources in the parent's repository
+     *                   see {@link ParserOption}s for details of options
      * @return the Data sources (never <code>null</code>)
-     * @throws Exception if the definition file is <code>null</code> or if there is a problem parsing the file
+     * @throws KException if the definition file is <code>null</code> or if there is a problem parsing the file
      */
-    public Datasource[] parse( final UnitOfWork transaction, final File datasourceFile ) throws Exception {
+    public Datasource[] parse( final UnitOfWork transaction, final KomodoObject parent,
+                                                     final InputStream datasourceStream, EnumSet<ParserOption> options )
+                                                     throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
-        ArgCheck.isNotNull( datasourceFile, "datasourceFile" ); //$NON-NLS-1$
-        
-        this.handler = new Handler(transaction,true);
-        this.parser.parse(datasourceFile, handler);
-        return this.handler.getDatasources();
+        ArgCheck.isNotNull( datasourceStream, "datasourceStream" ); //$NON-NLS-1$
+        ArgCheck.isNotNull( parent, "parent" ); //$NON-NLS-1$
+
+        if (options == null)
+            options = EnumSet.allOf(ParserOption.class);
+
+        this.handler = new Handler(transaction, parent, options);
+        try {
+            this.parser.parse(datasourceStream, handler);
+            return this.handler.getDatasources();
+        } catch (Exception ex) {
+            throw RelationalModelFactory.handleError(ex);
+        }
     }
-    
+
     /**
      * @param transaction the transaction (cannot be <code>null</code>)
+     * @param parent the prospective parent of the data sources
+     * @param datasourceFile the data sources file (cannot be <code>null</code>)
+     * @param options the options to determine whether to create datasources in the parent's repository
+     *                   see {@link ParserOption}s for details of options
+     * @return the Data sources (never <code>null</code>)
+     * @throws KException if the definition file is <code>null</code> or if there is a problem parsing the file
+     */
+    public Datasource[] parse( final UnitOfWork transaction, final KomodoObject parent,
+                                                     final File datasourceFile, EnumSet<ParserOption> options )
+                                                     throws KException {
+        ArgCheck.isNotNull( datasourceFile, "datasourceFile" ); //$NON-NLS-1$
+
+        InputStream fileStream = null;
+        try {
+            fileStream = new FileInputStream(datasourceFile);
+            return parse(transaction, parent, fileStream, options);
+        } catch (Exception ex) {
+            throw RelationalModelFactory.handleError(ex);
+        } finally {
+            if (fileStream != null)
+                try {
+                    fileStream.close();
+                } catch (IOException e) {
+                    // Nothing to do
+                }
+        }
+    }
+
+    /**
+     * @param transaction the transaction (cannot be <code>null</code>)
+     * @param parent the prospective parent of the data sources
      * @param datasourceFile the data sources file (cannot be <code>null</code>)
      * @return the Data sources (never <code>null</code>)
-     * @throws Exception if the definition file is <code>null</code> or if there is a problem parsing the file
+     * @throws KException if the definition file is <code>null</code> or if there is a problem parsing the file
      */
-    public String[] validate( final UnitOfWork transaction, final File datasourceFile ) throws Exception {
-        ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
-        ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+    public Datasource[] parse( final UnitOfWork transaction, final KomodoObject parent,
+                                                     final File datasourceFile ) throws KException {
+        return parse(transaction, parent, datasourceFile, null);
+    }
+
+    /**
+     * @param datasourceStream the data sources stream (cannot be <code>null</code>)
+     * @return the Data sources (never <code>null</code>)
+     * @throws KException if the definition file is <code>null</code> or if there is a problem parsing the file
+     */
+    public String[] validate( final InputStream datasourceStream ) throws KException {
+        ArgCheck.isNotNull( datasourceStream, "datasourceStream" ); //$NON-NLS-1$
+
+        this.handler = new Handler();
+        try {
+            this.parser.parse(datasourceStream, handler);
+            return this.handler.getDatasourceNames();
+        } catch (Exception ex) {
+            throw RelationalModelFactory.handleError(ex);
+        }
+    }
+
+    /**
+     * @param datasourceFile the data sources file (cannot be <code>null</code>)
+     * @return the Data sources (never <code>null</code>)
+     * @throws KException if the definition file is <code>null</code> or if there is a problem parsing the file
+     */
+    public String[] validate( final File datasourceFile ) throws KException {
         ArgCheck.isNotNull( datasourceFile, "datasourceFile" ); //$NON-NLS-1$
-        
-        this.handler = new Handler(transaction,false);
-        this.parser.parse(datasourceFile, handler);
-        return this.handler.getDatasourceNames();
+
+        InputStream fileStream = null;
+        try {
+            fileStream = new FileInputStream(datasourceFile);
+            return validate(fileStream);
+        } catch (Exception ex) {
+            throw RelationalModelFactory.handleError(ex);
+        } finally {
+            if (fileStream != null)
+                try {
+                    fileStream.close();
+                } catch (IOException e) {
+                    // Nothing to do
+                }
+        }
     }
 
     /**
@@ -208,9 +301,10 @@ public class DatasourceParser {
         private String propertyName;
         private String jdbc;
         private UnitOfWork uow;
-        private boolean createRepoSources = false;
+        private KomodoObject parent;
+        private final EnumSet<ParserOption> options;
 
-        public Handler( final UnitOfWork uow, boolean createRepoSources ) {
+        public Handler( final UnitOfWork uow, KomodoObject parent, EnumSet<ParserOption> options) {
             this.elements = new Stack<String>();
             this.fatals = new ArrayList<String>();
             this.errors = new ArrayList<String>();
@@ -220,7 +314,12 @@ public class DatasourceParser {
             this.propertyMap = new HashMap<String, String>();
             this.dataSourceNames = new ArrayList<String>();
             this.uow = uow;
-            this.createRepoSources = createRepoSources;
+            this.parent = parent;
+            this.options = options;
+        }
+
+        public Handler() {
+            this(null, null, EnumSet.noneOf(ParserOption.class));
         }
 
         /**
@@ -252,11 +351,12 @@ public class DatasourceParser {
                                 String qName ) throws SAXException {
 
             if(Datasource.XML_ELEM_DATASOURCE.equals(localName)) {
-                if(createRepoSources) {
+                if(options.contains(ParserOption.CREATE_REPO_SOURCES)) {
                     // Determine if source with same name already exists
                     KomodoObject[] existingSource = null;
                     try {
-                        existingSource = repo.komodoWorkspace(uow).getChildrenOfType(uow, KomodoLexicon.DataSource.NODE_TYPE, datasourceName);
+                        ArgCheck.isNotNull(parent, "parent");
+                        existingSource = parent.getChildrenOfType(uow, KomodoLexicon.DataSource.NODE_TYPE, datasourceName);
                     } catch (KException ex1) {
                         error(new SAXParseException(ex1.getMessage(), null));
                         LOGGER.error("DatasourceParser - error fetching Datasource : ", ex1); //$NON-NLS-1$
@@ -264,14 +364,14 @@ public class DatasourceParser {
 
                     Datasource theDatasource = null;
                     if(existingSource!=null && existingSource.length>0) {
-                        if(replaceExisting) {
+                        if(options.contains(ParserOption.REPLACE_REPO_SOURCE)) {
                             if(deleteDatasource(existingSource[0])) {
-                                theDatasource = createDatasource();
+                                theDatasource = createDatasource(parent);
                                 if(theDatasource!=null) dataSources.add(theDatasource);
                             }
                         }
                     } else {
-                        theDatasource = createDatasource();
+                        theDatasource = createDatasource(parent);
                         if(theDatasource!=null) dataSources.add(theDatasource);
                     }
                 }
@@ -293,7 +393,7 @@ public class DatasourceParser {
 
         private boolean deleteDatasource(KomodoObject source) {
             try {
-                WorkspaceManager.getInstance( repo ).delete(uow, source);
+                WorkspaceManager.getInstance( source.getRepository() ).delete(uow, source);
             } catch (KException ex) {
                 error(new SAXParseException(ex.getMessage(), null));
                 LOGGER.error("DatasourceParser - error deleting existing Datasource : ", ex); //$NON-NLS-1$
@@ -302,10 +402,12 @@ public class DatasourceParser {
             return true;
         }
         
-        private Datasource createDatasource() {
+        private Datasource createDatasource(KomodoObject parent) {
             Datasource theDatasource = null;
             try {
-                theDatasource = RelationalModelFactory.createDatasource(uow, repo, repo.komodoWorkspace( uow ).getAbsolutePath(), datasourceName);
+                String path = parent.getAbsolutePath();
+                Repository repo = parent.getRepository();
+                theDatasource = RelationalModelFactory.createDatasource(uow, repo, path, datasourceName);
                 
                 // Set jdbc from attribute
                 boolean isJdbc = true;

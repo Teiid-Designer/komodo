@@ -23,12 +23,17 @@ package org.komodo.spi.repository;
 
 import org.komodo.spi.constants.StringConstants;
 
-public class DocumentType {
+public class DocumentType implements StringConstants {
 
     /**
-     * XML
+     * VDB-XML
      */
-    public static final DocumentType XML = new DocumentType(StringConstants.XML);
+    public static final DocumentType VDB_XML = new DocumentType(StringConstants.VDB_DEPLOYMENT_SUFFIX);
+
+    /**
+     * TDS
+     */
+    public static final DocumentType TDS = new DocumentType(StringConstants.DS_SUFFIX);
 
     /**
      * ZIP
@@ -56,10 +61,39 @@ public class DocumentType {
         return this.type;
     }
 
+    /**
+     * @param name
+     * @return a file name from the given name and the document type
+     */
+    public String fileName(String name) {
+        if (type.contains(DOT))
+            return name + type;
+
+        return name + DOT + type;
+    }
+
+    public static DocumentType createDocumentType(String name) {
+        if (name == null)
+            return DocumentType.UNKNOWN;
+
+        if (name.endsWith(VDB_DEPLOYMENT_SUFFIX))
+            return DocumentType.VDB_XML;
+
+        if (name.endsWith(DS_SUFFIX))
+            return DocumentType.TDS;
+
+        int dotIndex = name.lastIndexOf(DOT);
+        if (dotIndex == -1)
+            return DocumentType.UNKNOWN;
+
+        String suffix = name.substring(dotIndex + 1);
+        return new DocumentType(suffix);
+    }
+
     public static DocumentType documentType(String docTypeValue) {
         return new DocumentType(docTypeValue);
     }
-    
+
     @Override
     public int hashCode() {
         final int prime = 31;

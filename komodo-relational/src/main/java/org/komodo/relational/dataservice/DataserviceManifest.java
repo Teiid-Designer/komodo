@@ -71,7 +71,7 @@ public class DataserviceManifest implements VdbManifest {
 
     @Override
     public DocumentType getDocumentType(UnitOfWork transaction) throws KException {
-        return DocumentType.XML;
+        return DocumentType.VDB_XML;
     }
 
     private static XMLStreamReader createReader(InputStream srcStream) throws Exception {

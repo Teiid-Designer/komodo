@@ -25,10 +25,12 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.datasource.internal.DatasourceParser;
+import org.komodo.relational.datasource.internal.DatasourceParser.ParserOption;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.CompletionConstants;
 import org.komodo.shell.api.CommandResult;
@@ -87,11 +89,11 @@ public final class UploadDatasourceCommand extends WorkspaceShellCommand {
             }
 
             // Parser validates xml file and obtains dsNames
-            DatasourceParser datasourceParser = new DatasourceParser( getRepository(), overwrite );
+            DatasourceParser datasourceParser = new DatasourceParser();
             
             File dsXmlFile = new File(fileName);
             // Validate the data source XML file and get names
-            String[] dsNames = datasourceParser.validate(getTransaction(), dsXmlFile);
+            String[] dsNames = datasourceParser.validate(dsXmlFile);
             // Collect fatalErrors and Errors
             List<String> parseErrors = datasourceParser.getFatalErrors();
             if(parseErrors.isEmpty()) {
@@ -111,9 +113,15 @@ public final class UploadDatasourceCommand extends WorkspaceShellCommand {
                 }
             }
 
+            EnumSet<ParserOption> options = EnumSet.of(ParserOption.CREATE_REPO_SOURCES);
+            if (overwrite)
+                options.add(ParserOption.REPLACE_REPO_SOURCE);
+
             // Parse creates the sources in the repo.
-            datasourceParser.parse(getTransaction(), dsXmlFile);
-            
+            datasourceParser.parse(getTransaction(),
+                                                       getRepository().komodoWorkspace(getTransaction()),
+                                                       dsXmlFile, options);
+
             // Check again for parse errors
             parseErrors = datasourceParser.getFatalErrors();
             if(parseErrors.isEmpty()) {
