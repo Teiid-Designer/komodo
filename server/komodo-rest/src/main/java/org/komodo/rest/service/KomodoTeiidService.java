@@ -42,6 +42,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 import org.komodo.core.KEngine;
+import org.komodo.relational.DeployStatus;
+import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.teiid.CachedTeiid;
 import org.komodo.relational.teiid.Teiid;
@@ -56,6 +58,7 @@ import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.KomodoService;
 import org.komodo.rest.RestBasicEntity;
 import org.komodo.rest.relational.KomodoFileAttributes;
+import org.komodo.rest.relational.KomodoPathAttribute;
 import org.komodo.rest.relational.KomodoProperties;
 import org.komodo.rest.relational.KomodoStatusObject;
 import org.komodo.rest.relational.KomodoTeiidAttributes;
@@ -69,6 +72,7 @@ import org.komodo.rest.relational.datasource.RestDataSource;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.spi.runtime.DataSourceDriver;
@@ -690,6 +694,114 @@ public class KomodoTeiidService extends KomodoService {
             else
                 status.addAttribute(driverName,
                                     RelationalMessages.getString(RelationalMessages.Info.DRIVER_UNDEPLOYMENT_REQUEST_SENT));
+
+           return commit(uow, mediaTypes, status);
+
+        } catch (final Exception e) {
+            if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
+                uow.rollback();
+            }
+
+            if (e instanceof KomodoRestException) {
+                throw (KomodoRestException)e;
+            }
+
+            return createErrorResponse(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_DRIVER_ERROR);
+        }
+    }
+
+    @SuppressWarnings( "nls" )
+    @POST
+    @Path(V1Constants.DATA_SERVICE_SEGMENT)
+    @Produces( MediaType.APPLICATION_JSON )
+    @Consumes ( { MediaType.APPLICATION_JSON } )
+    @ApiOperation(value = "Deploy the data service to the teiid server")
+    @ApiResponses(value = {
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response addDataservice(final @Context HttpHeaders headers,
+                                   final @Context UriInfo uriInfo,
+                                   final String pathAttribute)
+                                   throws KomodoRestException {
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
+            return notAcceptableMediaTypesBuilder().build();
+
+        //
+        // Error if there is no path attribute defined
+        //
+        KomodoPathAttribute kpa;
+        try {
+            kpa = KomodoJsonMarshaller.unmarshall(pathAttribute, KomodoPathAttribute.class);
+            if (kpa.getPath() == null) {
+                String errorMessage = RelationalMessages.getString(
+                                                                   RelationalMessages.Error.TEIID_SERVICE_DATA_SERVICE_MISSING_PATH);
+                Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
+                return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+            }
+        } catch (Exception ex) {
+            String errorMessage = RelationalMessages.getString(
+                                                               RelationalMessages.Error.TEIID_SERVICE_REQUEST_PARSING_ERROR, ex.getMessage());
+
+            Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
+            return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+        }
+
+        UnitOfWork uow = null;
+
+        try {
+            Teiid teiidNode = getDefaultTeiid();
+
+            uow = createTransaction("deployTeiidDataservice", true); //$NON-NLS-1$
+
+            List<KomodoObject> dataServices = this.repo.searchByPath(uow, kpa.getPath());
+            if (dataServices.size() == 0) {
+                String errorMessage = RelationalMessages.getString(
+                                                                   RelationalMessages.Error.TEIID_SERVICE_NO_DATA_SERVICE_FOUND);
+
+                Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
+                return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+            }
+
+            Dataservice dataService = this.wsMgr.resolve(uow, dataServices.get(0), Dataservice.class);
+            if (dataService == null) {
+                String errorMessage = RelationalMessages.getString(
+                                                                   RelationalMessages.Error.TEIID_SERVICE_NO_DATA_SERVICE_FOUND);
+
+                Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
+                return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+            }
+
+            //
+            // Deploy the data service
+            //
+            DeployStatus deployStatus = dataService.deploy(uow, teiidNode);
+
+            // Await the deployment to end
+            Thread.sleep(500);
+
+            String title = RelationalMessages.getString(RelationalMessages.Info.DATA_SERVICE_DEPLOYMENT_STATUS_TITLE);
+            KomodoStatusObject status = new KomodoStatusObject(title);
+
+            List<String> progressMessages = deployStatus.getProgressMessages();
+            for (int i = 0; i < progressMessages.size(); ++i) {
+                status.addAttribute("ProgressMessage-" + (i + 1), progressMessages.get(i));
+            }
+
+            if (deployStatus.ok())
+                status.addAttribute(dataService.getName(uow),
+                                    RelationalMessages.getString(RelationalMessages.Info.DATA_SERVICE_SUCCESSFULLY_DEPLOYED));
+            else {
+                List<String> errorMessages = deployStatus.getErrorMessages();
+                for (int i = 0; i < errorMessages.size(); ++i) {
+                    status.addAttribute("ErrorMessage-" + (i + 1), errorMessages.get(i));
+                }
+
+                status.addAttribute(dataService.getName(uow),
+                                    RelationalMessages.getString(RelationalMessages.Info.DATA_SERVICE_DEPLOYED_WITH_ERRORS));
+            }
 
            return commit(uow, mediaTypes, status);
 

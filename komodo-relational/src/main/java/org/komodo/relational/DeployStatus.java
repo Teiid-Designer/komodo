@@ -19,17 +19,21 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  */
-package org.komodo.relational.dataservice.internal;
+package org.komodo.relational;
 
 import java.util.ArrayList;
 import java.util.List;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.utils.ArgCheck;
+import org.komodo.utils.StringUtils;
 
 public class DeployStatus implements StringConstants {
 
+    // Progress Messages
+    private List<String> progressMessages = new ArrayList<String>();
+
     // Error Messages
-    private List<String> errorMessages;
+    private List<String> errorMessages = new ArrayList<String>();
 
     public boolean ok() {
         return errorMessages.isEmpty();
@@ -50,9 +54,11 @@ public class DeployStatus implements StringConstants {
         }
 
         String message = exception.getLocalizedMessage();
+        if (message == null || message.isEmpty())
+            message = StringUtils.exceptionToString(exception);
+
         errorMessages.add(message);
     }
-
 
     /**
      * Add an error message
@@ -94,5 +100,27 @@ public class DeployStatus implements StringConstants {
         }
 
         return errorMsgs.toString();
+    }
+
+    /**
+     * Add an progress message
+     * @param message the progress message
+     */
+    public void addProgressMessage(String message) {
+        ArgCheck.isNotNull(message, "progress message"); //$NON-NLS-1$
+
+        if (progressMessages == null) {
+            progressMessages = new ArrayList<String>();
+        }
+
+        progressMessages.add(message);
+    }
+
+    public List<String> getProgressMessages() {
+        if (progressMessages == null) {
+            progressMessages = new ArrayList<String>();
+        }
+
+        return progressMessages;
     }
 }

@@ -273,6 +273,8 @@ public class DataserviceConveyor implements StringConstants {
                         DdlImporter importer = new DdlImporter(repository);
                         ImportOptions options = new ImportOptions();
                         importer.importDdl(transaction, entryStream, dataservice, options, importMessages);
+                    } else if (name.endsWith(DocumentType.JAR.toString())) {
+                        dataservice.addDriver(transaction, name, content);
                     }
 
                 } finally {
@@ -435,16 +437,26 @@ public class DataserviceConveyor implements StringConstants {
 
         try {
             String dsName = dataservice.getName(transaction);
+            status.addProgressMessage("Starting deployment of dataservice " + dsName);
 
             Map<String, Driver> driverIndex = index(transaction, dataservice.getDrivers(transaction));
             Map<String, Datasource> dataSrcIndex = index(transaction, dataservice.getDataSources(transaction));
             Map<String, Vdb> vdbIndex = index(transaction, dataservice.getVdbs(transaction));
+
+            status.addProgressMessage("Indexed drivers = " +
+                                                                OPEN_BRACKET + driverIndex.size() + CLOSE_BRACKET + SPACE +
+                                                               "Indexed data sources = " +
+                                                               OPEN_BRACKET + dataSrcIndex.size() + CLOSE_BRACKET + SPACE +
+                                                               "Indexed vdbs = " +
+                                                               OPEN_BRACKET + vdbIndex.size() + CLOSE_BRACKET);
 
             //
             // Deploy the drivers
             //
             String[] driverPlan = dataservice.getDriverPlan(transaction);
             for (String driverName : driverPlan) {
+                status.addProgressMessage("Starting deployment of driver " + driverName);
+
                 Driver driver = driverIndex.get(driverName);
                 if (driver == null) {
                     String errorMsg = Messages.getString(Messages.DataserviceConveyor.DATA_SERVICE_DRIVER_NOT_FOUND,
@@ -458,6 +470,8 @@ public class DataserviceConveyor implements StringConstants {
                 DocumentType driverType = driver.getDocumentType(transaction);
                 File driverFile = File.createTempFile(driverName, driverType.toString());
                 FileUtils.write(content, driverFile);
+
+                status.addProgressMessage("Written driver file for driver " + driverName + " and deploying to teiid");
                 teiidInstance.deployDriver(driverName, driverFile);
 
                 DataSourceDriver theDsDriver = null;
@@ -479,6 +493,9 @@ public class DataserviceConveyor implements StringConstants {
                     status.addErrorMessage(errorMsg);
                     return status;
                 }
+
+                status.addProgressMessage("Deployed driver " + theDsDriver.getName() +
+                                                                      OPEN_BRACKET + theDsDriver.getClassName() + CLOSE_BRACKET);
             }
 
             //
@@ -486,6 +503,8 @@ public class DataserviceConveyor implements StringConstants {
             //
             String[] dataSrcPlan = dataservice.getDataSourcePlan(transaction);
             for (String dataSrcName : dataSrcPlan) {
+                status.addProgressMessage("Starting deployment of data source " + dataSrcName);
+
                 Datasource dataSrc = dataSrcIndex.get(dataSrcName);
                 if (dataSrc == null) {
                     String errorMsg = Messages.getString(Messages.DataserviceConveyor.DATA_SERVICE_DATA_SOURCE_NOT_FOUND,
@@ -499,6 +518,8 @@ public class DataserviceConveyor implements StringConstants {
                 String sourceType = dataSrc.getDriverName(transaction);
                 Properties properties = dataSrc.getPropertiesForServerDeployment(transaction, teiidInstance);
 
+                status.addProgressMessage("Attempting to deploy data source " + dataSrcName + " to teiid");
+
                 TeiidDataSource teiidDataSrc = teiidInstance.getOrCreateDataSource(dataSrcName,
                                                                                        jndiName,
                                                                                        sourceType,
@@ -509,6 +530,8 @@ public class DataserviceConveyor implements StringConstants {
                     status.addErrorMessage(errorMsg);
                     return status;
                 }
+
+                status.addProgressMessage("Data source deployed " + dataSrcName + " to teiid");
             }
 
             //
@@ -516,6 +539,8 @@ public class DataserviceConveyor implements StringConstants {
             //
             String[] vdbPlan = dataservice.getVdbPlan(transaction);
             for (String vdbName : vdbPlan) {
+                status.addProgressMessage("Starting deployment of vdb " + vdbName);
+
                 Vdb vdb = vdbIndex.get(vdbName);
                 if (vdb == null) {
                     String errorMsg = Messages.getString(Messages.DataserviceConveyor.DATA_SERVICE_VDB_NOT_FOUND,
@@ -537,16 +562,36 @@ public class DataserviceConveyor implements StringConstants {
 
                 String vdbDeploymentName = vdbName + VDB_DEPLOYMENT_SUFFIX;
                 InputStream stream = new ByteArrayInputStream(vdbXml);
-                teiidInstance.deployDynamicVdb(vdbName, stream);
 
+                status.addProgressMessage("Exported vdb " + vdbName + " and deploying to teiid");
+                teiidInstance.deployDynamicVdb(vdbDeploymentName, stream);
+
+                for (TeiidVdb teiidVdb : teiidInstance.getVdbs()) {
+                    System.out.println(teiidVdb.getDeployedName() + SPACE + teiidVdb.getName());
+                }
                 TeiidVdb teiidVdb = teiidInstance.getVdb(vdbDeploymentName);
+                if (teiidVdb == null) {
+                    status.addProgressMessage("Warning: Vdb " + vdbName + " not yet completed deployment");
+                    return status;
+                }
+
+                if (teiidVdb.isActive())
+                    status.addProgressMessage("Vdb " + vdbName + " deployed to teiid and is active");
+
+                if (teiidVdb.isLoading())
+                    status.addProgressMessage("Vdb " + vdbName + " deployed but still loading");
+
                 List<String> vdbErrors = teiidVdb.getValidityErrors();
+                if (vdbErrors.isEmpty())
+                    status.addProgressMessage("Vdb " + vdbName + " deployed and is valid");
+                else
+                    status.addProgressMessage("Vdb " + vdbName + " deployed but has validity errors");
+
                 for (String vdbError : vdbErrors) {
                     status.addErrorMessage(vdbError);
                 }
 
-                if (!vdbErrors.isEmpty())
-                    return status;
+                return status;
             }
 
         } catch (Exception ex) {

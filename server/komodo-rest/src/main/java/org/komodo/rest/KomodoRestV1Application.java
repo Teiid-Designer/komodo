@@ -170,6 +170,11 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         String DATA_SERVICES_SEGMENT = "dataservices"; //$NON-NLS-1$
 
         /**
+         * The name of the URI path segment for a DataService in the Komodo workspace.
+         */
+        String DATA_SERVICE_SEGMENT = "dataservice"; //$NON-NLS-1$
+
+        /**
          * The name of the URI path segment for DataService clone in the Komodo workspace.
          */
         String CLONE_DATA_SERVICE_SEGMENT = "clone"; //$NON-NLS-1$

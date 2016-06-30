@@ -128,6 +128,26 @@ public class TestUtilities implements StringConstants {
     public static final String DATASERVICE_VDB_FILE = "myService-vdb.xml";
 
     /**
+     * US States Dataservice Example Zip
+     */
+    public static final String US_STATES_DATASERVICE_FILE = "usstates-dataservice.zip";
+
+    /**
+     * US States Dataservice Example vdb name
+     */
+    public static final String US_STATES_VDB_NAME = "usstates";
+
+    /**
+     * US States Dataservice Example data source name
+     */
+    public static final String US_STATES_DATA_SOURCE_NAME = "MySqlDS";
+
+    /**
+     * US States Dataservice Example data source name
+     */
+    public static final String US_STATES_DRIVER_NAME = "mysql-connector-java-5.1.39-bin.jar";
+
+    /**
      * Portfolio vdb
      */
     public static final String PORTFOLIO_VDB_FILE = "portfolio-vdb.xml";
@@ -1058,7 +1078,17 @@ public class TestUtilities implements StringConstants {
                                    RESOURCES_DIRECTORY,
                                    DATASERVICE_VDB_FILE);
     }
-    
+
+    /**
+     * @return input stream of portfolio example xml
+     * @throws Exception if error occurs
+     */
+    public static InputStream usStatesDataserviceExample() throws Exception {
+        return getResourceAsStream(TestUtilities.class,
+                                   RESOURCES_DIRECTORY,
+                                   US_STATES_DATASERVICE_FILE);
+    }
+
     /**
      * @return input stream of portfolio example xml
      * @throws Exception if error occurs

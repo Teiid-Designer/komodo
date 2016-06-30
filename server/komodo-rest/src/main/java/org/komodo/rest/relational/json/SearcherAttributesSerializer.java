@@ -28,7 +28,6 @@ import java.lang.reflect.Type;
 import java.util.Map;
 import org.komodo.rest.Messages;
 import org.komodo.rest.relational.KomodoSearcherAttributes;
-import com.google.gson.TypeAdapter;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
@@ -36,9 +35,14 @@ import com.google.gson.stream.JsonWriter;
 /**
  * A GSON serializer/deserializer for {@status KomodoSearchObject}s.
  */
-public final class SearcherAttributesSerializer extends TypeAdapter< KomodoSearcherAttributes > {
+public final class SearcherAttributesSerializer extends PathAttributeSerializer< KomodoSearcherAttributes > {
 
     private static final Type STRING_MAP_TYPE = new TypeToken< Map< String, String > >() {/* nothing to do */}.getType();
+
+    @Override
+    protected KomodoSearcherAttributes createEntity() {
+        return new KomodoSearcherAttributes();
+    }
 
     /**
      * {@inheritDoc}
@@ -47,11 +51,13 @@ public final class SearcherAttributesSerializer extends TypeAdapter< KomodoSearc
      */
     @Override
     public KomodoSearcherAttributes read( final JsonReader in ) throws IOException {
-        final KomodoSearcherAttributes searcherAttr = new KomodoSearcherAttributes();
+        final KomodoSearcherAttributes searcherAttr = createEntity();
         in.beginObject();
 
         while ( in.hasNext() ) {
             final String name = in.nextName();
+
+            readPath(in, name, searcherAttr);
 
             switch ( name ) {
                 case KomodoSearcherAttributes.SEARCH_NAME_LABEL:
@@ -65,9 +71,6 @@ public final class SearcherAttributesSerializer extends TypeAdapter< KomodoSearc
                     break;
                 case KomodoSearcherAttributes.ANCESTOR_LABEL:
                     searcherAttr.setAncestor(in.nextString());
-                    break;
-                case KomodoSearcherAttributes.PATH_LABEL:
-                    searcherAttr.setPath(in.nextString());
                     break;
                 case KomodoSearcherAttributes.CONTAINS_LABEL:
                     searcherAttr.setContains(in.nextString());
@@ -117,8 +120,7 @@ public final class SearcherAttributesSerializer extends TypeAdapter< KomodoSearc
         out.name(KomodoSearcherAttributes.PARENT_LABEL);
         out.value(value.getParent());
 
-        out.name(KomodoSearcherAttributes.PATH_LABEL);
-        out.value(value.getPath());
+        writePath(out, value);
 
         out.name(KomodoSearcherAttributes.TYPE_LABEL);
         out.value(value.getType());

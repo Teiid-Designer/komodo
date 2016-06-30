@@ -46,6 +46,11 @@ public class DocumentType implements StringConstants {
     public static final DocumentType DDL = new DocumentType(StringConstants.DDL);
 
     /**
+     * JAR
+     */
+    public static final DocumentType JAR = new DocumentType(StringConstants.JAR);
+
+    /**
      * UNKNOWN
      */
     public static final DocumentType UNKNOWN = new DocumentType(StringConstants.EMPTY_STRING);
@@ -66,8 +71,11 @@ public class DocumentType implements StringConstants {
      * @return a file name from the given name and the document type
      */
     public String fileName(String name) {
+        if (name.endsWith(DOT + type))
+            return name; // nothing to do
+
         if (type.contains(DOT))
-            return name + type;
+            return name + type; // eg. myVdb -vdb.xml
 
         return name + DOT + type;
     }

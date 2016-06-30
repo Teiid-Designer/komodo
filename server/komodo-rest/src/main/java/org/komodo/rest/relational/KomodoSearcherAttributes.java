@@ -24,12 +24,9 @@ package org.komodo.rest.relational;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import javax.ws.rs.core.MediaType;
-import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
-import org.komodo.rest.KRestEntity;
 import org.komodo.utils.ArgCheck;
 
 
@@ -37,7 +34,7 @@ import org.komodo.utils.ArgCheck;
  * Object to be serialised by GSON that encapsulates a search object
  */
 @JsonSerialize(include=Inclusion.NON_NULL)
-public class KomodoSearcherAttributes implements KRestEntity {
+public class KomodoSearcherAttributes extends KomodoPathAttribute {
 
     /**
      * Label for the search name
@@ -58,11 +55,6 @@ public class KomodoSearcherAttributes implements KRestEntity {
      * Label for the ancestor
      */
     public static final String ANCESTOR_LABEL = "ancestor"; //$NON-NLS-1$
-
-    /**
-     * Label for the path
-     */
-    public static final String PATH_LABEL = "path"; //$NON-NLS-1$
 
     /**
      * Label for the contains
@@ -91,9 +83,6 @@ public class KomodoSearcherAttributes implements KRestEntity {
     @JsonProperty(ANCESTOR_LABEL)
     private String ancestor;
 
-    @JsonProperty(PATH_LABEL)
-    private String path;
-
     @JsonProperty(CONTAINS_LABEL)
     private String contains;
 
@@ -117,18 +106,6 @@ public class KomodoSearcherAttributes implements KRestEntity {
     public KomodoSearcherAttributes(String name) {
         ArgCheck.isNotNull(name);
         this.searchName = name;
-    }
-
-    @Override
-    @JsonIgnore
-    public boolean supports(MediaType mediaType) {
-        return MediaType.APPLICATION_JSON_TYPE.equals(mediaType);
-    }
-
-    @Override
-    @JsonIgnore
-    public Object getXml() {
-        throw new UnsupportedOperationException();
     }
 
     /**
@@ -188,20 +165,6 @@ public class KomodoSearcherAttributes implements KRestEntity {
     }
 
     /**
-     * @return the path
-     */
-    public String getPath() {
-        return this.path;
-    }
-
-    /**
-     * @param path the path to set
-     */
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    /**
      * @return the contains
      */
     public String getContains() {
@@ -254,14 +217,14 @@ public class KomodoSearcherAttributes implements KRestEntity {
     @Override
     public int hashCode() {
         final int prime = 31;
-        int result = 1;
-        result = prime * result + ((this.ancestor == null) ? 0 : this.ancestor.hashCode());
-        result = prime * result + ((this.contains == null) ? 0 : this.contains.hashCode());
-        result = prime * result + ((this.objectName == null) ? 0 : this.objectName.hashCode());
-        result = prime * result + ((this.parent == null) ? 0 : this.parent.hashCode());
-        result = prime * result + ((this.path == null) ? 0 : this.path.hashCode());
-        result = prime * result + ((this.searchName == null) ? 0 : this.searchName.hashCode());
-        result = prime * result + ((this.type == null) ? 0 : this.type.hashCode());
+        int result = super.hashCode();
+        result = prime * result + ((ancestor == null) ? 0 : ancestor.hashCode());
+        result = prime * result + ((contains == null) ? 0 : contains.hashCode());
+        result = prime * result + ((objectName == null) ? 0 : objectName.hashCode());
+        result = prime * result + ((parameters == null) ? 0 : parameters.hashCode());
+        result = prime * result + ((parent == null) ? 0 : parent.hashCode());
+        result = prime * result + ((searchName == null) ? 0 : searchName.hashCode());
+        result = prime * result + ((type == null) ? 0 : type.hashCode());
         return result;
     }
 
@@ -269,58 +232,51 @@ public class KomodoSearcherAttributes implements KRestEntity {
     public boolean equals(Object obj) {
         if (this == obj)
             return true;
-        if (obj == null)
+        if (!super.equals(obj))
             return false;
         if (getClass() != obj.getClass())
             return false;
         KomodoSearcherAttributes other = (KomodoSearcherAttributes)obj;
-        if (this.ancestor == null) {
+        if (ancestor == null) {
             if (other.ancestor != null)
                 return false;
-        } else
-            if (!this.ancestor.equals(other.ancestor))
-                return false;
-        if (this.contains == null) {
+        } else if (!ancestor.equals(other.ancestor))
+            return false;
+        if (contains == null) {
             if (other.contains != null)
                 return false;
-        } else
-            if (!this.contains.equals(other.contains))
-                return false;
-        if (this.objectName == null) {
+        } else if (!contains.equals(other.contains))
+            return false;
+        if (objectName == null) {
             if (other.objectName != null)
                 return false;
-        } else
-            if (!this.objectName.equals(other.objectName))
+        } else if (!objectName.equals(other.objectName))
+            return false;
+        if (parameters == null) {
+            if (other.parameters != null)
                 return false;
-        if (this.parent == null) {
+        } else if (!parameters.equals(other.parameters))
+            return false;
+        if (parent == null) {
             if (other.parent != null)
                 return false;
-        } else
-            if (!this.parent.equals(other.parent))
-                return false;
-        if (this.path == null) {
-            if (other.path != null)
-                return false;
-        } else
-            if (!this.path.equals(other.path))
-                return false;
-        if (this.searchName == null) {
+        } else if (!parent.equals(other.parent))
+            return false;
+        if (searchName == null) {
             if (other.searchName != null)
                 return false;
-        } else
-            if (!this.searchName.equals(other.searchName))
-                return false;
-        if (this.type == null) {
+        } else if (!searchName.equals(other.searchName))
+            return false;
+        if (type == null) {
             if (other.type != null)
                 return false;
-        } else
-            if (!this.type.equals(other.type))
-                return false;
+        } else if (!type.equals(other.type))
+            return false;
         return true;
     }
 
     @Override
     public String toString() {
-        return "KomodoSearcherAttributes [searchName=" + this.searchName + ", type=" + this.type + ", parent=" + this.parent + ", ancestor=" + this.ancestor + ", path=" + this.path + ", contains=" + this.contains + ", objectName=" + this.objectName + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
+        return "KomodoSearcherAttributes [searchName=" + this.searchName + ", type=" + this.type + ", parent=" + this.parent + ", ancestor=" + this.ancestor + ", contains=" + this.contains + ", objectName=" + this.objectName + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
     }
 }

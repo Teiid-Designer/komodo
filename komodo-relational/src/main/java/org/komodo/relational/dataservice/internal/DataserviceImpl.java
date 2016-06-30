@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import org.komodo.core.KomodoLexicon;
+import org.komodo.relational.DeployStatus;
 import org.komodo.relational.Messages;
 import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.dataservice.Dataservice;
@@ -33,6 +34,7 @@ import org.komodo.relational.datasource.internal.DatasourceImpl;
 import org.komodo.relational.driver.Driver;
 import org.komodo.relational.driver.internal.DriverImpl;
 import org.komodo.relational.internal.RelationalObjectImpl;
+import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.internal.VdbImpl;
 import org.komodo.spi.KException;
@@ -431,5 +433,11 @@ public class DataserviceImpl extends RelationalObjectImpl implements Dataservice
         Driver driver = RelationalModelFactory.createDriver(transaction, getRepository(), this.getAbsolutePath(), driverName);
         driver.setContent(transaction, content);
         return driver;
+    }
+
+    @Override
+    public DeployStatus deploy(UnitOfWork uow, Teiid teiid) {
+        DataserviceConveyor conveyor = new DataserviceConveyor(getRepository());
+        return conveyor.deploy(uow, this, teiid);
     }
 }

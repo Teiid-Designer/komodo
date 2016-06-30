@@ -22,12 +22,14 @@
 package org.komodo.relational.dataservice;
 
 import org.komodo.core.KomodoLexicon;
+import org.komodo.relational.DeployStatus;
 import org.komodo.relational.RelationalObject;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.TypeResolver;
 import org.komodo.relational.dataservice.internal.DataserviceImpl;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.driver.Driver;
+import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.ObjectImpl;
@@ -238,13 +240,13 @@ public interface Dataservice extends Exportable, RelationalObject {
     Driver addDriver( final UnitOfWork uow, final String driverName, final byte[] content) throws KException;
 
     /**
-     * @param uow
+     * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not
      *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @return the deployment plan for the drivers
      * @throws KException if an error occurs
      */
-    String[] getDriverPlan(UnitOfWork transaction) throws KException;
+    String[] getDriverPlan(UnitOfWork uow) throws KException;
 
     /**
      * @param uow
@@ -253,7 +255,7 @@ public interface Dataservice extends Exportable, RelationalObject {
      * @return the deployment plan for the data sources
      * @throws KException if an error occurs
      */
-    String[] getDataSourcePlan(UnitOfWork transaction) throws KException;
+    String[] getDataSourcePlan(UnitOfWork uow) throws KException;
 
     /**
      * @param uow
@@ -262,5 +264,13 @@ public interface Dataservice extends Exportable, RelationalObject {
      * @return the deployment plan for the vdbs
      * @throws KException if an error occurs
      */
-    String[] getVdbPlan(UnitOfWork transaction) throws KException;
+    String[] getVdbPlan(UnitOfWork uow) throws KException;
+
+    /**
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @return the deployment status of this data service to the given teiid
+     */
+    DeployStatus deploy(UnitOfWork uow, Teiid teiid);
 }
