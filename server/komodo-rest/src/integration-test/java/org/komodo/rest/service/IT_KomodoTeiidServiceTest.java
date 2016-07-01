@@ -52,6 +52,7 @@ import org.jboss.resteasy.test.TestPortProvider;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -62,8 +63,10 @@ import org.komodo.repository.RepositoryImpl;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.RestLink;
 import org.komodo.rest.relational.KomodoFileAttributes;
+import org.komodo.rest.relational.KomodoPathAttribute;
 import org.komodo.rest.relational.KomodoRestUriBuilder;
 import org.komodo.rest.relational.KomodoStatusObject;
+import org.komodo.rest.relational.KomodoStorageAttributes;
 import org.komodo.rest.relational.KomodoTeiidAttributes;
 import org.komodo.rest.relational.RelationalMessages;
 import org.komodo.rest.relational.RestTeiid;
@@ -77,6 +80,7 @@ import org.komodo.rest.relational.json.KomodoJsonMarshaller;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.constants.SystemConstants;
 import org.komodo.spi.query.TeiidService;
+import org.komodo.spi.repository.DocumentType;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.runtime.DataSourceDriver;
 import org.komodo.spi.runtime.EventManager;
@@ -133,6 +137,13 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         final URI baseUri = URI.create(TestPortProvider.generateBaseUrl());
         BASE_URI = UriBuilder.fromUri(baseUri).path("/vdb-builder/v1").build();
         _uriBuilder = new KomodoRestUriBuilder(BASE_URI);
+    }
+
+    @AfterClass
+    public static void afterAll() throws Exception {
+        if (_kengineDataDir != null) {
+            FileUtils.removeDirectoryAndChildren(_kengineDataDir.toFile());
+        }
     }
 
     private Invocation.Builder request(final URI uri, MediaType... types) {
@@ -568,5 +579,61 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         Thread.sleep(2000);
 
         assertNoMysqlDriver();
+    }
+
+    @Test
+    public void shouldDeployDataService() throws Exception {
+        try {
+            //
+            // Import the data service into the workspace
+            //
+            URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
+                                              .path(V1Constants.IMPORT_EXPORT_SEGMENT)
+                                              .path(V1Constants.IMPORT)
+                                              .build();
+
+            KomodoStorageAttributes storageAttr = new KomodoStorageAttributes();
+            storageAttr.setStorageType("file");
+            storageAttr.setDocumentType(DocumentType.ZIP);
+
+            InputStream usStatesDSStream = TestUtilities.usStatesDataserviceExample();
+            byte[] sampleBytes = TestUtilities.streamToBytes(usStatesDSStream);
+            String content = Base64.getEncoder().encodeToString(sampleBytes);
+            storageAttr.setContent(content);
+
+            this.response = request(uri, MediaType.APPLICATION_JSON_TYPE).post(Entity.json(storageAttr));
+            String entity = this.response.readEntity(String.class);
+            assertEquals(Response.Status.OK.getStatusCode(), this.response.getStatus());
+
+            KomodoPathAttribute pathAttr = new KomodoPathAttribute();
+            String path = RepositoryImpl.WORKSPACE_ROOT + FORWARD_SLASH + "UsStatesService";
+            pathAttr.setPath(path);
+
+            //
+            // Deploy the data service
+            //
+            uri = UriBuilder.fromUri(_uriBuilder.baseUri()).path(V1Constants.TEIID_SEGMENT).path(V1Constants.DATA_SERVICE_SEGMENT).build();
+
+            this.response = request(uri).post(Entity.json(pathAttr));
+            entity = this.response.readEntity(String.class);
+            assertEquals(Response.Status.OK.getStatusCode(), this.response.getStatus());
+
+            KomodoStatusObject status = KomodoJsonMarshaller.unmarshall(entity, KomodoStatusObject.class);
+            assertNotNull(status);
+
+            Map<String, String> attributes = status.getAttributes();
+            for (Map.Entry<String, String> attribute : attributes.entrySet()) {
+                assertFalse("Error occurred in deployment: " + attribute.getValue(),
+                            attribute.getKey().startsWith("ErrorMessage"));
+            }
+        } finally {
+            try {
+                helperInstance.undeployDynamicVdb(TestUtilities.US_STATES_VDB_NAME);
+                helperInstance.deleteDataSource(TestUtilities.US_STATES_DATA_SOURCE_NAME);
+                helperInstance.undeployDriver(MYSQL_DRIVER);
+            } catch (Exception ex) {
+                // Nothing to do
+            }
+        }
     }
 }

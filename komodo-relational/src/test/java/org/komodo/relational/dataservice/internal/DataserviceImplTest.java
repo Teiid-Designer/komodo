@@ -47,6 +47,8 @@ import org.komodo.relational.RelationalModelTest;
 import org.komodo.relational.RelationalObject.Filter;
 import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.dataservice.DataserviceManifest;
+import org.komodo.relational.driver.Driver;
+import org.komodo.relational.importer.dsource.DatasourceImporter;
 import org.komodo.relational.importer.vdb.VdbImporter;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.spi.repository.KomodoObject;
@@ -307,6 +309,37 @@ public final class DataserviceImplTest extends RelationalModelTest {
                            importOptions, importMessages);
         assertFalse(importMessages.hasError());
 
+        commit(State.COMMITTED);
+
+        File dsZip = File.createTempFile("DSZip", DOT + ZIP);
+        dsZip.deleteOnExit();
+        byte[] dsBytes = this.dataservice.export(getTransaction(), new Properties());
+        FileUtils.write(dsBytes, dsZip);
+        TestUtilities.testZipFile(dsZip);
+    }
+
+    @Test
+    public void shouldExportPerfectZip2() throws Exception {
+        ImportMessages importMessages = new ImportMessages();
+        ImportOptions importOptions = new ImportOptions();
+
+        VdbImporter vdbImporter = new VdbImporter(_repo);
+        InputStream usVdbStream = TestUtilities.getResourceAsStream(getClass(), "vdb", "usstates-vdb.xml");
+        vdbImporter.importVdb(getTransaction(),
+                                               usVdbStream, dataservice,
+                                               importOptions, importMessages);
+        assertFalse(importMessages.hasError());
+
+        DatasourceImporter dataSrcImporter = new DatasourceImporter(_repo);
+        InputStream usDataSrcStream = TestUtilities.getResourceAsStream(getClass(), "tds", "mysql-usstates.tds");
+        dataSrcImporter.importDS(getTransaction(),
+                                                 usDataSrcStream, dataservice,
+                                                 importOptions, importMessages);
+
+        InputStream mySqlDriverStream = TestUtilities.mySqlDriver();
+        Driver driver = createDriver(TestUtilities.MYSQL_DRIVER_FILENAME, dataservice);
+        byte[] content = FileUtils.write(mySqlDriverStream);
+        driver.setContent(getTransaction(), content);
         commit(State.COMMITTED);
 
         File dsZip = File.createTempFile("DSZip", DOT + ZIP);

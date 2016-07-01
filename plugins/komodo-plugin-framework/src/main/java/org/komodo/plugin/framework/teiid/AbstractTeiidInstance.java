@@ -53,6 +53,22 @@ import org.komodo.utils.KLog;
 
 public abstract class AbstractTeiidInstance implements TeiidInstance, StringConstants {
 
+    protected class JndiManager implements StringConstants {
+
+        private static final String PREFIX = JAVA + COLON + FORWARD_SLASH;
+
+        public String getName(String name) {
+            if (! name.startsWith(PREFIX))
+                return name;
+
+            name = name.replace(PREFIX, EMPTY_STRING);
+            if (name.startsWith(FORWARD_SLASH))
+                name = name.substring(1);
+
+            return name;
+        }
+    }
+
     protected class TeiidAdminInfoImpl implements TeiidAdminInfo {
 
         @Override
@@ -130,6 +146,8 @@ public abstract class AbstractTeiidInstance implements TeiidInstance, StringCons
                                            "<source name=\"s\" translator-name=\"loopback\"/>" + //$NON-NLS-1$
                                            "<metadata type=\"DDL\"><![CDATA[CREATE FOREIGN TABLE G1 (e1 string, e2 integer);]]> </metadata>" //$NON-NLS-1$
                                            + "</model>" + "</vdb>";
+
+    private final JndiManager manager = new JndiManager();
 
     private TeiidParent parent;
 
@@ -446,6 +464,11 @@ public abstract class AbstractTeiidInstance implements TeiidInstance, StringCons
         }
 
         connect();
+
+        //
+        // Check for jndi name prefix and drop it
+        //
+        dsName = manager.getName(dsName);
 
         // Check if exists, return false
         if (dataSourceExists(dsName)) {

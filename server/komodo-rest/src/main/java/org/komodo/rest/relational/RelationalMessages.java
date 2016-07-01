@@ -59,7 +59,22 @@ public final class RelationalMessages {
         /**
          * Driver successfully deployed
          */
-        DRIVER_SUCCESSFULLY_UNDEPLOYED;
+        DRIVER_SUCCESSFULLY_UNDEPLOYED,
+
+        /**
+         * Data service status title
+         */
+        DATA_SERVICE_DEPLOYMENT_STATUS_TITLE,
+
+        /**
+         * Data service successfully deployed
+         */
+        DATA_SERVICE_SUCCESSFULLY_DEPLOYED,
+
+        /**
+         * Data service deployed with errors
+         */
+        DATA_SERVICE_DEPLOYED_WITH_ERRORS;
 
         /**
          * {@inheritDoc}
@@ -426,6 +441,16 @@ public final class RelationalMessages {
          * An error indicating a teiid credentials failure
          */
         TEIID_SERVICE_DRIVER_ERROR,
+
+        /**
+         * An error indicating a name is missing while deploying a data service
+         */
+        TEIID_SERVICE_DATA_SERVICE_MISSING_PATH,
+
+        /**
+         * No data service could be found while trying to deploy
+         */
+        TEIID_SERVICE_NO_DATA_SERVICE_FOUND,
 
         /**
          * The importexport service lacks at least one storage attribute

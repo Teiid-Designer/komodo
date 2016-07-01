@@ -30,6 +30,7 @@ import org.komodo.rest.RestProperty;
 import org.komodo.rest.json.LinkSerializer;
 import org.komodo.rest.json.RestPropertySerializer;
 import org.komodo.rest.relational.ImportExportStatus;
+import org.komodo.rest.relational.KomodoPathAttribute;
 import org.komodo.rest.relational.KomodoFileAttributes;
 import org.komodo.rest.relational.KomodoSavedSearcher;
 import org.komodo.rest.relational.KomodoSearcherAttributes;
@@ -90,6 +91,7 @@ public final class KomodoJsonMarshaller {
         final GsonBuilder temp = new GsonBuilder().registerTypeAdapter( RestLink.class, new LinkSerializer() )
                                                   .registerTypeAdapter(KomodoStatusObject.class, new StatusObjectSerializer())
                                                   .registerTypeAdapter(KomodoSavedSearcher.class, new SavedSearcherSerializer())
+                                                  .registerTypeAdapter( KomodoPathAttribute.class, new PathAttributeSerializer<KomodoPathAttribute>())
                                                   .registerTypeAdapter(KomodoSearcherAttributes.class, new SearcherAttributesSerializer())
                                                   .registerTypeAdapter(KomodoTeiidAttributes.class, new TeiidAttributesSerializer())
                                                   .registerTypeAdapter( RestProperty.class, new RestPropertySerializer() )
