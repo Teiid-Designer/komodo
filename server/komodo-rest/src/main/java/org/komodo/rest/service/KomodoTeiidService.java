@@ -57,19 +57,20 @@ import org.komodo.rest.KomodoRestException;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.KomodoService;
 import org.komodo.rest.RestBasicEntity;
-import org.komodo.rest.relational.KomodoFileAttributes;
-import org.komodo.rest.relational.KomodoPathAttribute;
 import org.komodo.rest.relational.KomodoProperties;
-import org.komodo.rest.relational.KomodoStatusObject;
-import org.komodo.rest.relational.KomodoTeiidAttributes;
 import org.komodo.rest.relational.RelationalMessages;
-import org.komodo.rest.relational.RestTeiid;
-import org.komodo.rest.relational.RestTeiidStatus;
-import org.komodo.rest.relational.RestTeiidVdbStatus;
-import org.komodo.rest.relational.RestVdb;
-import org.komodo.rest.relational.RestVdbTranslator;
 import org.komodo.rest.relational.datasource.RestDataSource;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
+import org.komodo.rest.relational.request.KomodoFileAttributes;
+import org.komodo.rest.relational.request.KomodoPathAttribute;
+import org.komodo.rest.relational.request.KomodoQueryAttribute;
+import org.komodo.rest.relational.request.KomodoTeiidAttributes;
+import org.komodo.rest.relational.response.KomodoStatusObject;
+import org.komodo.rest.relational.response.RestTeiid;
+import org.komodo.rest.relational.response.RestTeiidStatus;
+import org.komodo.rest.relational.response.RestTeiidVdbStatus;
+import org.komodo.rest.relational.response.RestVdb;
+import org.komodo.rest.relational.response.RestVdbTranslator;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
@@ -817,4 +818,117 @@ public class KomodoTeiidService extends KomodoService {
             return createErrorResponse(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_DRIVER_ERROR);
         }
     }
+
+    @SuppressWarnings( "nls" )
+    @POST
+    @Path(V1Constants.QUERY_SEGMENT)
+    @Produces( MediaType.APPLICATION_JSON )
+    @Consumes ( { MediaType.APPLICATION_JSON } )
+    @ApiOperation(value = "Pass a query to the teiid server")
+    @ApiResponses(value = {
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response query(final @Context HttpHeaders headers,
+                                   final @Context UriInfo uriInfo,
+                                   final String queryAttribute)
+                                   throws KomodoRestException {
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
+            return notAcceptableMediaTypesBuilder().build();
+
+        //
+        // Error if there is no query attribute defined
+        //
+        KomodoQueryAttribute kpa;
+        try {
+            kpa = KomodoJsonMarshaller.unmarshall(queryAttribute, KomodoQueryAttribute.class);
+            if (kpa.getQuery() == null) {
+                String errorMessage = RelationalMessages.getString(
+                                                                   RelationalMessages.Error.TEIID_SERVICE_QUERY_MISSING_QUERY);
+                Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
+                return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+            }
+        } catch (Exception ex) {
+            String errorMessage = RelationalMessages.getString(
+                                                               RelationalMessages.Error.TEIID_SERVICE_REQUEST_PARSING_ERROR, ex.getMessage());
+
+            Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
+            return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+        }
+
+        UnitOfWork uow = null;
+
+        try {
+            Teiid teiidNode = getDefaultTeiid();
+
+            uow = createTransaction("queryTeiidservice", true); //$NON-NLS-1$
+            TeiidInstance teiidInstance = teiidNode.getTeiidInstance(uow);
+
+            teiidNode.getQueryService();
+            
+
+            List<KomodoObject> dataServices = this.repo.searchByPath(uow, kpa.getPath());
+            if (dataServices.size() == 0) {
+                String errorMessage = RelationalMessages.getString(
+                                                                   RelationalMessages.Error.TEIID_SERVICE_NO_DATA_SERVICE_FOUND);
+
+                Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
+                return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+            }
+
+            Dataservice dataService = this.wsMgr.resolve(uow, dataServices.get(0), Dataservice.class);
+            if (dataService == null) {
+                String errorMessage = RelationalMessages.getString(
+                                                                   RelationalMessages.Error.TEIID_SERVICE_NO_DATA_SERVICE_FOUND);
+
+                Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
+                return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+            }
+
+            //
+            // Deploy the data service
+            //
+            DeployStatus deployStatus = dataService.deploy(uow, teiidNode);
+
+            // Await the deployment to end
+            Thread.sleep(500);
+
+            String title = RelationalMessages.getString(RelationalMessages.Info.DATA_SERVICE_DEPLOYMENT_STATUS_TITLE);
+            KomodoStatusObject status = new KomodoStatusObject(title);
+
+            List<String> progressMessages = deployStatus.getProgressMessages();
+            for (int i = 0; i < progressMessages.size(); ++i) {
+                status.addAttribute("ProgressMessage-" + (i + 1), progressMessages.get(i));
+            }
+
+            if (deployStatus.ok())
+                status.addAttribute(dataService.getName(uow),
+                                    RelationalMessages.getString(RelationalMessages.Info.DATA_SERVICE_SUCCESSFULLY_DEPLOYED));
+            else {
+                List<String> errorMessages = deployStatus.getErrorMessages();
+                for (int i = 0; i < errorMessages.size(); ++i) {
+                    status.addAttribute("ErrorMessage-" + (i + 1), errorMessages.get(i));
+                }
+
+                status.addAttribute(dataService.getName(uow),
+                                    RelationalMessages.getString(RelationalMessages.Info.DATA_SERVICE_DEPLOYED_WITH_ERRORS));
+            }
+
+           return commit(uow, mediaTypes, status);
+
+        } catch (final Exception e) {
+            if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
+                uow.rollback();
+            }
+
+            if (e instanceof KomodoRestException) {
+                throw (KomodoRestException)e;
+            }
+
+            return createErrorResponse(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_DRIVER_ERROR);
+        }
+    }
+    
 }

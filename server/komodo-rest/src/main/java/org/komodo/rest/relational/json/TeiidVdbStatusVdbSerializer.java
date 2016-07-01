@@ -26,7 +26,7 @@ import static org.komodo.rest.relational.json.KomodoJsonMarshaller.BUILDER;
 import java.io.IOException;
 import java.util.Arrays;
 import org.komodo.rest.Messages;
-import org.komodo.rest.relational.RestTeiidVdbStatusVdb;
+import org.komodo.rest.relational.response.RestTeiidVdbStatusVdb;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;

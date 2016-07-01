@@ -37,6 +37,7 @@ import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.teiid.CachedTeiid;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
+import org.komodo.rest.relational.response.RestVdb;
 import org.komodo.rest.RestLink;
 import org.komodo.spi.repository.Descriptor;
 import org.komodo.spi.repository.KomodoObject;

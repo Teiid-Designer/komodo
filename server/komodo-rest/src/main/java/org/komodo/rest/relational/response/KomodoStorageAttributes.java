@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  */
-package org.komodo.rest.relational;
+package org.komodo.rest.relational.response;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,6 +28,7 @@ import java.util.Properties;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
+import org.komodo.rest.relational.AbstractKomodoContentAttribute;
 import org.komodo.spi.repository.DocumentType;
 
 

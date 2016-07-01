@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  */
-package org.komodo.rest.relational;
+package org.komodo.rest.relational.response;
 
 import java.util.List;
 import javax.ws.rs.core.MediaType;

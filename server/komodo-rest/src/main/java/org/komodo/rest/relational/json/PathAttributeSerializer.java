@@ -22,7 +22,7 @@
 package org.komodo.rest.relational.json;
 
 import java.io.IOException;
-import org.komodo.rest.relational.KomodoPathAttribute;
+import org.komodo.rest.relational.request.KomodoPathAttribute;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;

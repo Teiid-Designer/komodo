@@ -43,6 +43,7 @@ import org.komodo.repository.DescriptorImpl;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.RestLink;
 import org.komodo.rest.RestLink.LinkType;
+import org.komodo.rest.relational.response.RestVdbTranslator;
 import org.komodo.rest.RestProperty;
 import org.komodo.spi.repository.Descriptor;
 import org.komodo.spi.repository.KomodoType;

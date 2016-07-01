@@ -27,7 +27,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Map;
 import org.komodo.rest.Messages;
-import org.komodo.rest.relational.KomodoStorageAttributes;
+import org.komodo.rest.relational.response.KomodoStorageAttributes;
 import org.komodo.spi.repository.DocumentType;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;

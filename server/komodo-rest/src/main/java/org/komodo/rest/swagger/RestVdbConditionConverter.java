@@ -21,7 +21,7 @@
  */
 package org.komodo.rest.swagger;
 
-import org.komodo.rest.relational.RestVdbCondition;
+import org.komodo.rest.relational.response.RestVdbCondition;
 import org.komodo.spi.repository.KomodoType;
 import io.swagger.converter.ModelConverterContext;
 import io.swagger.models.ModelImpl;

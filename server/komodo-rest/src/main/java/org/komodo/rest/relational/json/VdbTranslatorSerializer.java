@@ -21,7 +21,7 @@
  */
 package org.komodo.rest.relational.json;
 
-import org.komodo.rest.relational.RestVdbTranslator;
+import org.komodo.rest.relational.response.RestVdbTranslator;
 import org.komodo.utils.StringUtils;
 
 /**

@@ -32,7 +32,7 @@ import org.junit.Test;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.rest.RestBasicEntity;
-import org.komodo.rest.relational.RestVdbDataRole;
+import org.komodo.rest.relational.response.RestVdbDataRole;
 import org.komodo.spi.repository.KomodoType;
 import org.mockito.Mockito;
 

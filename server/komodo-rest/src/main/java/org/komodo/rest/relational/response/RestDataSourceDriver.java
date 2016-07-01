@@ -19,32 +19,27 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  */
-package org.komodo.rest.relational;
+package org.komodo.rest.relational.response;
 
-import org.komodo.spi.storage.StorageConnector.Descriptor;
+import org.komodo.spi.runtime.DataSourceDriver;
 
-public class RestStorageTypeDescriptor {
+public class RestDataSourceDriver {
 
     public static final String NAME_LABEL = "name";
 
-    public static final String DESCRIPTION_LABEL = "description";
-
-    public static final String REQUIRED_LABEL = "required";
+    public static final String CLASS_LABEL = "class";
 
     private String name;
 
-    private String description;
+    private String className;
 
-    private boolean required;
-
-    public RestStorageTypeDescriptor() {
+    public RestDataSourceDriver() {
         super();
     }
 
-    public RestStorageTypeDescriptor(Descriptor descriptor) {
-        this.name = descriptor.getName();
-        this.description = descriptor.getDescription();
-        this.required = descriptor.isRequired();
+    public RestDataSourceDriver(DataSourceDriver driver) {
+        this.name = driver.getName();
+        this.className = driver.getClassName();
     }
 
     public String getName() {
@@ -55,19 +50,11 @@ public class RestStorageTypeDescriptor {
         this.name = name;
     }
 
-    public String getDescription() {
-        return description;
+    public String getClassName() {
+        return className;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public boolean isRequired() {
-        return required;
-    }
-
-    public void setRequired(boolean required) {
-        this.required = required;
+    public void setClassName(String className) {
+        this.className = className;
     }
 }

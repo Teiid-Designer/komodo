@@ -26,7 +26,7 @@ import org.jboss.resteasy.util.Encode;
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.vdb.Vdb;
-import org.komodo.rest.relational.RestVdb;
+import org.komodo.rest.relational.response.RestVdb;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyDescriptor;
