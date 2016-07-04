@@ -19,10 +19,7 @@
 
         <!-- First these -->
         <module>komodo-parent</module>
-        
-        <!-- TODO MIGHT NEED THIS LATER -->
-        <!--<module>komodo-assembly-descriptors</module>-->
-        
+
         <module>komodo-modeshape</module>
         <module>komodo-spi</module>
         <module>komodo-utils-logger</module>
@@ -32,6 +29,7 @@
         <module>komodo-core</module>
 
         <!-- For Testing only -->
+        <module>komodo-integration-utils</module>
         <module>komodo-test-utils</module>
         <module>komodo-modeshape-sequencer-teiid-sql-tests</module>
         <module>komodo-core-tests</module>
