@@ -84,9 +84,9 @@ public class TeiidArtifactFactory {
         if (propDef.getRequiresRestart() != null) {
             TeiidPropertyDefinition.RestartType restartType = TeiidPropertyDefinition.RestartType.findRestartType(propDef.getRequiresRestart().name());
             teiidPropDef.setRequiresRestart(restartType);
-        };
+        }
 
-        return null;
+        return teiidPropDef;
     }
 
 }

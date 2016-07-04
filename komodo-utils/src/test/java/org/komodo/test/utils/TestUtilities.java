@@ -128,6 +128,11 @@ public class TestUtilities implements StringConstants {
     public static final String DATASERVICE_VDB_FILE = "myService-vdb.xml";
 
     /**
+     * Sample Dataservice Example Zip
+     */
+    public static final String SAMPLE_DATASERVICE_FILE = "sample-ds.zip";
+
+    /**
      * US States Dataservice Example Zip
      */
     public static final String US_STATES_DATASERVICE_FILE = "usstates-dataservice.zip";
@@ -1080,7 +1085,17 @@ public class TestUtilities implements StringConstants {
     }
 
     /**
-     * @return input stream of portfolio example xml
+     * @return input stream of sample data service example
+     * @throws Exception if error occurs
+     */
+    public static InputStream sampleDataserviceExample() throws Exception {
+        return getResourceAsStream(TestUtilities.class,
+                                   RESOURCES_DIRECTORY,
+                                   SAMPLE_DATASERVICE_FILE);
+    }
+
+    /**
+     * @return input stream of us-states data service example
      * @throws Exception if error occurs
      */
     public static InputStream usStatesDataserviceExample() throws Exception {

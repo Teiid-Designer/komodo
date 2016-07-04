@@ -161,7 +161,7 @@ public final class DataserviceImplTest extends RelationalModelTest {
         final String unkName = "unknown";
         final String name1 = "childVdb1";
         final Vdb vdb1 = this.dataservice.addVdb(getTransaction(), name1, "externalPath1");
-        
+
         assertThat( vdb1, is( notNullValue() ) );
         assertThat( vdb1.getName( getTransaction() ), is( name1 ) );
         assertThat( this.dataservice.getChildren( getTransaction() ).length, is( 1 ) );
@@ -351,7 +351,7 @@ public final class DataserviceImplTest extends RelationalModelTest {
 
     @Test
     public void shouldImportDataService() throws Exception {
-        InputStream importStream = TestUtilities.getResourceAsStream(DataserviceImplTest.class, "dataservice", "sample-ds.zip");
+        InputStream importStream = TestUtilities.sampleDataserviceExample();
         assertNotNull(importStream);
 
         ImportMessages importMessages = new ImportMessages();

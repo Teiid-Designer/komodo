@@ -215,14 +215,15 @@ public class DataserviceImpl extends RelationalObjectImpl implements Dataservice
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        final Vdb[] vdbs = getVdbs(transaction, namePatterns);
-        final Datasource[] datasources = getDataSources(transaction, namePatterns);
-        final Driver[] drivers = getDrivers(transaction, namePatterns);
-
-        final KomodoObject[] result = new KomodoObject[vdbs.length + datasources.length + drivers.length];
-        System.arraycopy(vdbs, 0, result, 0, vdbs.length);
-        System.arraycopy(datasources, 0, result, vdbs.length, datasources.length);
-        System.arraycopy(drivers, 0, result, vdbs.length + datasources.length, drivers.length);
+        KomodoObject[] result = null;
+        if ( VdbLexicon.Vdb.VIRTUAL_DATABASE.equals( type ) )
+            result = getVdbs(transaction, namePatterns);
+        else if (KomodoLexicon.DataSource.NODE_TYPE.equals(type))
+            result = getDataSources(transaction, namePatterns);
+        else if (KomodoLexicon.Driver.NODE_TYPE.equals(type))
+            result = getDrivers(transaction, namePatterns);
+        else
+            result = super.getChildrenOfType(transaction, type, namePatterns);
 
         return result;
     }

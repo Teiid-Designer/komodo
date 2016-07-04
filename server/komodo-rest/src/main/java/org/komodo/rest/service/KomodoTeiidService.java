@@ -323,7 +323,7 @@ public class KomodoTeiidService extends KomodoService {
         try {
             Teiid teiidNode = getDefaultTeiid();
 
-            uow = createTransaction("teiidSetCredentials", true); //$NON-NLS-1$
+            uow = createTransaction("teiidSetCredentials", false); //$NON-NLS-1$
 
             teiidNode.setAdminUser(uow, teiidAttrs.getAdminUser());
             teiidNode.setAdminPassword(uow, teiidAttrs.getAdminPasswd());
@@ -620,7 +620,7 @@ public class KomodoTeiidService extends KomodoService {
         try {
             Teiid teiidNode = getDefaultTeiid();
 
-            uow = createTransaction("deployTeiidDriver", true); //$NON-NLS-1$
+            uow = createTransaction("deployTeiidDriver", false); //$NON-NLS-1$
 
             byte[] content = decrypt(kfa.getContent());
             String tempDir = FileUtils.tempDirectory();
@@ -758,7 +758,7 @@ public class KomodoTeiidService extends KomodoService {
         try {
             Teiid teiidNode = getDefaultTeiid();
 
-            uow = createTransaction("deployTeiidDataservice", true); //$NON-NLS-1$
+            uow = createTransaction("deployTeiidDataservice", false); //$NON-NLS-1$
 
             List<KomodoObject> dataServices = this.repo.searchByPath(uow, kpa.getPath());
             if (dataServices.size() == 0) {

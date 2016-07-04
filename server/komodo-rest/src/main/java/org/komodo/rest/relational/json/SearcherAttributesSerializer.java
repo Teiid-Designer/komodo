@@ -57,7 +57,8 @@ public final class SearcherAttributesSerializer extends PathAttributeSerializer<
         while ( in.hasNext() ) {
             final String name = in.nextName();
 
-            readPath(in, name, searcherAttr);
+            if (readPath(in, name, searcherAttr) != null)
+                continue;
 
             switch ( name ) {
                 case KomodoSearcherAttributes.SEARCH_NAME_LABEL:

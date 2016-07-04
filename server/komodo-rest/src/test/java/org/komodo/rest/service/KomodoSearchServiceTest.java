@@ -498,7 +498,7 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
 
         this.response = request(uri).post(Entity.json(searchAttr));
         final String entity = this.response.readEntity(String.class);
-        // System.out.println("Response:\n" + entity);
+        System.out.println("Response:\n" + entity);
         assertEquals(Response.Status.OK.getStatusCode(), this.response.getStatus());
 
         RestBasicEntity[] entities = KomodoJsonMarshaller.unmarshallArray(entity, RestBasicEntity[].class);

@@ -22,9 +22,8 @@
 package org.komodo.teiid;
 
 import java.util.Set;
-import org.komodo.spi.runtime.version.TeiidVersion;
-import org.komodo.spi.type.DataTypeManager.DataTypeName;
 import org.komodo.plugin.framework.teiid.AbstractDataTypeManager;
+import org.komodo.spi.runtime.version.TeiidVersion;
 import org.teiid.core.types.DataTypeManager;
 
 public class DataTypeManagerImpl extends AbstractDataTypeManager {
