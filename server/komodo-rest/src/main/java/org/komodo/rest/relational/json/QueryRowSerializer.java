@@ -21,31 +21,20 @@
  */
 package org.komodo.rest.relational.json;
 
+import static org.komodo.rest.Messages.Error.UNEXPECTED_JSON_TOKEN;
+import static org.komodo.rest.relational.json.KomodoJsonMarshaller.BUILDER;
 import java.io.IOException;
-import org.komodo.rest.relational.request.KomodoPathAttribute;
+import org.komodo.rest.Messages;
+import org.komodo.rest.relational.response.RestQueryCell;
+import org.komodo.rest.relational.response.RestQueryRow;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
 /**
- * A GSON serializer/deserializer for {@status KomodoArtifactPathAttribute}.
+ * A GSON serializer/deserializer for {@status RestQueryRow}s.
  */
-public class PathAttributeSerializer<T extends KomodoPathAttribute> extends TypeAdapter<T> {
-
-    @SuppressWarnings( "unchecked" )
-    protected T createEntity() {
-        return (T) new KomodoPathAttribute();
-    }
-
-    protected String readPath(JsonReader in, String name, T pathAttr) throws IOException {
-        if (KomodoPathAttribute.PATH_LABEL.equals(name)) {
-            String path = in.nextString();
-            pathAttr.setPath(path);
-            return path;
-        }
-
-        return null;
-    }
+public class QueryRowSerializer extends TypeAdapter<RestQueryRow> {
 
     /**
      * {@inheritDoc}
@@ -53,23 +42,26 @@ public class PathAttributeSerializer<T extends KomodoPathAttribute> extends Type
      * @see com.google.gson.TypeAdapter#read(com.google.gson.stream.JsonReader)
      */
     @Override
-    public T read( final JsonReader in ) throws IOException {
-        final T pathAttr = createEntity();
+    public RestQueryRow read( final JsonReader in ) throws IOException {
+        final RestQueryRow queryRow = new RestQueryRow();
         in.beginObject();
 
         while ( in.hasNext() ) {
             final String name = in.nextName();
-            readPath(in, name, pathAttr);
+
+            switch ( name ) {
+                case RestQueryRow.CELLS_LABEL:
+                    RestQueryCell[] cells = BUILDER.fromJson(in, RestQueryCell[].class);
+                    queryRow.setCells(cells);
+                    break;
+                default:
+                    throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
+            }
         }
 
         in.endObject();
 
-        return pathAttr;
-    }
-
-    protected void writePath(JsonWriter out, T value) throws IOException {
-        out.name(KomodoPathAttribute.PATH_LABEL);
-        out.value(value.getPath());
+        return queryRow;
     }
 
     /**
@@ -78,10 +70,16 @@ public class PathAttributeSerializer<T extends KomodoPathAttribute> extends Type
      * @see com.google.gson.TypeAdapter#write(com.google.gson.stream.JsonWriter, java.lang.Object)
      */
     @Override
-    public void write( final JsonWriter out, final T value ) throws IOException {
+    public void write( final JsonWriter out, final RestQueryRow value ) throws IOException {
 
         out.beginObject();
-        writePath(out, value);
+
+        if (value.getCells() == null || value.getCells().isEmpty())
+            return;
+
+        out.name(RestQueryRow.CELLS_LABEL);
+        BUILDER.toJson(value.getCells().toArray(new RestQueryCell[0]), RestQueryCell[].class, out);
+
         out.endObject();
     }
 

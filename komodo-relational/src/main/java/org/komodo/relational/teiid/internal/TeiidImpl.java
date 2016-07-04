@@ -33,6 +33,7 @@ import org.komodo.core.KomodoLexicon;
 import org.komodo.core.KomodoLexicon.TeiidArchetype;
 import org.komodo.osgi.PluginService;
 import org.komodo.relational.Messages;
+import org.komodo.relational.RelationalModelFactory;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.datasource.internal.DatasourceImpl;
 import org.komodo.relational.internal.RelationalChildRestrictedObject;
@@ -44,6 +45,7 @@ import org.komodo.relational.vdb.internal.VdbImpl;
 import org.komodo.relational.workspace.ServerManager;
 import org.komodo.repository.SynchronousCallback;
 import org.komodo.spi.KException;
+import org.komodo.spi.query.QueryService;
 import org.komodo.spi.query.TeiidService;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
@@ -449,6 +451,25 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
         }
 
         return getTeiidInstance(uow, version);
+    }
+
+    @Override
+    public QueryService getQueryService(UnitOfWork uow) throws KException {
+        ArgCheck.isNotNull( uow, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( uow.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+
+        TeiidVersion version = null;
+        try {
+            version = getVersion(uow);
+            TeiidService teiidService = PluginService.getInstance().getTeiidService(version);
+
+            String user = getJdbcUsername(uow);
+            String passwd = getJdbcPassword(uow);
+
+            return teiidService.getQueryService(user, passwd);
+        } catch (Exception ex) {
+            throw RelationalModelFactory.handleError(ex);
+        }
     }
 
     /**

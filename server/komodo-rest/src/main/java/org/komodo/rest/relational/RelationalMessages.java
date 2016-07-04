@@ -438,7 +438,7 @@ public final class RelationalMessages {
         TEIID_SERVICE_FILE_ATTRIB_NO_CONTENT,
 
         /**
-         * An error indicating a teiid credentials failure
+         * An error indicating a teiid driver failure
          */
         TEIID_SERVICE_DRIVER_ERROR,
 
@@ -451,6 +451,16 @@ public final class RelationalMessages {
          * No data service could be found while trying to deploy
          */
         TEIID_SERVICE_NO_DATA_SERVICE_FOUND,
+
+        /**
+         * No query specified for the query operation
+         */
+        TEIID_SERVICE_QUERY_MISSING_QUERY,
+
+        /**
+         * An error indicating a query failure
+         */
+        TEIID_SERVICE_QUERY_ERROR,
 
         /**
          * The importexport service lacks at least one storage attribute

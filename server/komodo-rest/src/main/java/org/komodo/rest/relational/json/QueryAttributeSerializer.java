@@ -10,7 +10,7 @@
  * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * but WITHOUKomodoQueryAttribute ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
@@ -22,7 +22,7 @@
 package org.komodo.rest.relational.json;
 
 import java.io.IOException;
-import org.komodo.rest.relational.request.KomodoPathAttribute;
+import org.komodo.rest.relational.request.KomodoQueryAttribute;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
@@ -30,22 +30,7 @@ import com.google.gson.stream.JsonWriter;
 /**
  * A GSON serializer/deserializer for {@status KomodoArtifactPathAttribute}.
  */
-public class PathAttributeSerializer<T extends KomodoPathAttribute> extends TypeAdapter<T> {
-
-    @SuppressWarnings( "unchecked" )
-    protected T createEntity() {
-        return (T) new KomodoPathAttribute();
-    }
-
-    protected String readPath(JsonReader in, String name, T pathAttr) throws IOException {
-        if (KomodoPathAttribute.PATH_LABEL.equals(name)) {
-            String path = in.nextString();
-            pathAttr.setPath(path);
-            return path;
-        }
-
-        return null;
-    }
+public class QueryAttributeSerializer extends TypeAdapter<KomodoQueryAttribute> {
 
     /**
      * {@inheritDoc}
@@ -53,23 +38,31 @@ public class PathAttributeSerializer<T extends KomodoPathAttribute> extends Type
      * @see com.google.gson.TypeAdapter#read(com.google.gson.stream.JsonReader)
      */
     @Override
-    public T read( final JsonReader in ) throws IOException {
-        final T pathAttr = createEntity();
+    public KomodoQueryAttribute read( final JsonReader in ) throws IOException {
+        final KomodoQueryAttribute queryAttr = new KomodoQueryAttribute();
         in.beginObject();
 
         while ( in.hasNext() ) {
             final String name = in.nextName();
-            readPath(in, name, pathAttr);
+            switch (name) {
+                case KomodoQueryAttribute.QUERY_LABEL:
+                    queryAttr.setQuery(in.nextString());
+                    break;
+                case KomodoQueryAttribute.TARGET_LABEL:
+                    queryAttr.setTarget(in.nextString());
+                    break;
+                case KomodoQueryAttribute.LIMIT_LABEL:
+                    queryAttr.setLimit(in.nextInt());
+                    break;
+                case KomodoQueryAttribute.OFFSET_LABEL:
+                    queryAttr.setOffset(in.nextInt());
+                    break;
+            }
         }
 
         in.endObject();
 
-        return pathAttr;
-    }
-
-    protected void writePath(JsonWriter out, T value) throws IOException {
-        out.name(KomodoPathAttribute.PATH_LABEL);
-        out.value(value.getPath());
+        return queryAttr;
     }
 
     /**
@@ -78,10 +71,21 @@ public class PathAttributeSerializer<T extends KomodoPathAttribute> extends Type
      * @see com.google.gson.TypeAdapter#write(com.google.gson.stream.JsonWriter, java.lang.Object)
      */
     @Override
-    public void write( final JsonWriter out, final T value ) throws IOException {
-
+    public void write( final JsonWriter out, final KomodoQueryAttribute value ) throws IOException {
         out.beginObject();
-        writePath(out, value);
+
+        out.name(KomodoQueryAttribute.QUERY_LABEL);
+        out.value(value.getQuery());
+
+        out.name(KomodoQueryAttribute.TARGET_LABEL);
+        out.value(value.getTarget());
+
+        out.name(KomodoQueryAttribute.LIMIT_LABEL);
+        out.value(value.getLimit());
+
+        out.name(KomodoQueryAttribute.OFFSET_LABEL);
+        out.value(value.getOffset());
+
         out.endObject();
     }
 

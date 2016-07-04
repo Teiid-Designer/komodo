@@ -54,6 +54,8 @@ import javax.security.auth.x500.X500Principal;
 import javax.security.sasl.Sasl;
 import javax.sql.RowSet;
 import javax.sql.rowset.serial.SerialArray;
+import javax.transaction.Transaction;
+import javax.transaction.xa.Xid;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
@@ -75,6 +77,7 @@ import org.komodo.osgi.storage.StorageServiceProvider;
 import org.komodo.osgi.teiid.TeiidServiceProvider;
 import org.komodo.plugin.framework.AbstractBundleService;
 import org.komodo.plugin.framework.teiid.AbstractDataTypeManager;
+import org.komodo.spi.KException;
 import org.komodo.spi.annotation.AnnotationUtils;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.constants.SystemConstants;
@@ -99,6 +102,9 @@ import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
+import org.xml.sax.XMLReader;
+import org.xml.sax.ext.DefaultHandler2;
+import org.xml.sax.helpers.XMLReaderFactory;
 
 public class PluginService implements StringConstants {
 
@@ -187,6 +193,8 @@ public class PluginService implements StringConstants {
         StringBuffer pkgs = new StringBuffer();
 
         Class<?>[] classes = new Class<?>[] {
+            // org.komodo.spi
+            KException.class,
             // org.komodo.spi.constants
             StringConstants.class,
             // org.komodo.spi.query
@@ -285,7 +293,18 @@ public class PluginService implements StringConstants {
             // javax.xml.validation
             SchemaFactory.class,
             // javax.xml.xpath
-            XPath.class
+            XPath.class,
+
+            /**
+             * The org.xml libraries are not exported by default in osgi
+             * so need to specify the packages needed by teiid
+             */
+            // org.xml.sax
+            XMLReader.class,
+            // org.xml.sax.ext
+            DefaultHandler2.class,
+            // org.xml.sax.helpers
+            XMLReaderFactory.class
         };
 
         for (Class<?> klazz : classes) {
@@ -305,14 +324,20 @@ public class PluginService implements StringConstants {
             XMLEventConsumer.class
         };
 
-        for (Class<?> klazz : streamClasses) {
-            pkgs.append(pkg(klazz))
-                    .append(VERSION_PREFIX)
-                    .append(SPEECH_MARK)
-                    .append(provider.getJavaxXmlStreamVersion())
-                    .append(SPEECH_MARK)
-                    .append(COMMA);
-        }
+        pkgs.append(appendVersionedPackages(provider.getJavaxXmlStreamVersion(), streamClasses));
+
+        //
+        // javax.xml.stream classes need a requirement version
+        // even though they are being provided by the jre
+        //
+        Class<?>[] txClasses = new Class<?>[] {
+            // javax.transaction
+            Transaction.class,
+            // javax.transaction.xa
+            Xid.class
+        };
+
+        pkgs.append(appendVersionedPackages(provider.getJavaxTransactionVersion(), txClasses));
 
         //
         // 3rd party dependencies in the bundles get wired up with a version requirement
@@ -334,6 +359,20 @@ public class PluginService implements StringConstants {
                 .append(SPEECH_MARK);
 
         return pkgs;
+    }
+
+    private String appendVersionedPackages(String version, Class<?>[] pkgClasses) {
+        StringBuffer pkgs = new StringBuffer();
+        for (Class<?> klazz : pkgClasses) {
+            pkgs.append(pkg(klazz))
+                    .append(VERSION_PREFIX)
+                    .append(SPEECH_MARK)
+                    .append(version)
+                    .append(SPEECH_MARK)
+                    .append(COMMA);
+        }
+
+        return pkgs.toString();
     }
 
     private void createDirectory(String path) {

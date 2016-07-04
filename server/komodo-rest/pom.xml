@@ -426,6 +426,31 @@
 				</executions>
 			</plugin>
 
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-resources-credentials</id>
+						<phase>process-test-classes</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.basedir}/lib/jbossas/${version.jbossas.test}/standalone/configuration</outputDirectory>
+							<resources>
+								<resource>
+									<directory>src/test/resources/credentials</directory>
+									<includes>
+										<include>*.properties</include>
+									</includes>
+									<filtering>true</filtering>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
 			<!-- Executes the integration tests -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

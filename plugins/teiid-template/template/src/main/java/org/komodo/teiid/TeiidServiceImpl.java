@@ -72,6 +72,11 @@ public class TeiidServiceImpl extends AbstractTeiidService {
     }
 
     @Override
+    public QueryService getQueryService(String user, String passwd) throws Exception {
+        return new QueryServiceImpl(getDataTypeManager(), user, passwd);
+    }
+
+    @Override
     public void dispose() {
         // Nothing required
     }

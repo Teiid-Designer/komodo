@@ -99,7 +99,7 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
 
         assertTrue(status.isSuccess());
         assertFalse(status.hasDownloadable());
-        assertEquals(XML, status.getType());
+        assertEquals(VDB_DEPLOYMENT_SUFFIX, status.getType());
 
         assertTrue(workspace.hasChild(uow, TestUtilities.PORTFOLIO_VDB_NAME));
     }
@@ -157,7 +157,7 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
 
         assertTrue(status.isSuccess());
         assertTrue(status.hasDownloadable());
-        assertEquals(XML, status.getType());
+        assertEquals(VDB_DEPLOYMENT_SUFFIX, status.getType());
 
         String content = status.getContent();
         assertNotNull(content);
@@ -193,9 +193,7 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
         storageAttr.setDocumentType(DocumentType.ZIP);
 
         String dsName = "myService";
-        InputStream sampleDsStream = TestUtilities.getResourceAsStream(
-                                                                       KomodoImportExportServiceTest.class,
-                                                                      "dataservice", "sample-ds.zip");
+        InputStream sampleDsStream = TestUtilities.sampleDataserviceExample();
 
         byte[] sampleBytes = TestUtilities.streamToBytes(sampleDsStream);
         String content = Base64.getEncoder().encodeToString(sampleBytes);

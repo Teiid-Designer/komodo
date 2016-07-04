@@ -23,6 +23,7 @@ package org.komodo.osgi.teiid;
 
 import java.util.concurrent.TimeUnit;
 import org.komodo.osgi.AbstractProxyService;
+import org.komodo.spi.query.QueryService;
 import org.komodo.spi.query.TeiidService;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.TeiidJdbcInfo;
@@ -104,5 +105,10 @@ public class TeiidProxyService extends AbstractProxyService<TeiidService, TeiidI
 
             return instance;
         }
+    }
+
+    @Override
+    public QueryService getQueryService(String user, String passwd) throws Exception {
+        return getDelegate().getQueryService(user, passwd);
     }
 }

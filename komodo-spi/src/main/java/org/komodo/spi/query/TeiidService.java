@@ -76,4 +76,11 @@ public interface TeiidService extends BundleService {
      * @throws Exception 
      */
     TeiidInstance getTeiidInstance(TeiidParent teiidParent, TeiidJdbcInfo jdbcInfo) throws Exception;
+
+    /**
+     * @param user jdbc username
+     * @param passwd jdbc password
+     * @return the query service for the version of teiid
+     */
+    QueryService getQueryService(String user, String passwd) throws Exception;
 }

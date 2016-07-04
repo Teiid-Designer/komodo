@@ -21,10 +21,13 @@
  */
 package org.komodo.rest;
 
+import org.komodo.spi.constants.StringConstants;
+import org.komodo.utils.StringUtils;
+
 /**
  * An error originating from or caught by the Komodo REST application.
  */
-public class KomodoRestException extends Exception {
+public class KomodoRestException extends Exception implements StringConstants {
 
     private static final long serialVersionUID = 1L;
 
@@ -53,5 +56,21 @@ public class KomodoRestException extends Exception {
      */
     public KomodoRestException(final Throwable cause) {
         super(cause);
+    }
+
+    @Override
+    public String toString() {
+        StringBuffer buf = new StringBuffer(super.toString())
+            .append(NEW_LINE)
+            .append(StringUtils.exceptionToString(this));
+        return buf.toString();
+    }
+
+    @Override
+    public String getMessage() {
+        StringBuffer buf = new StringBuffer(super.getMessage())
+            .append(NEW_LINE)
+            .append(StringUtils.exceptionToString(this));
+        return buf.toString();
     }
 }
