@@ -21,28 +21,29 @@
  */
 package org.komodo.spi.query;
 
-public interface QueryService {
+import java.util.ArrayList;
+import java.util.List;
 
-    /**
-     * Value representing no limit to results returned by a query
-     */
-    int NO_LIMIT = -1;
+public class QSResult {
 
-    /**
-     * Value representing no offset to a set of results returned by a query
-     */
-    int NO_OFFSET = 0;
+    private final List<QSColumn> columns = new ArrayList<QSColumn>();
 
-    /**
-     * Query the given vdb (using jdbc) with the given query
-     *
-     * @param vdb the target vdb
-     * @param query the target query
-     * @param offset the minimum number result to return
-     * @param limit the number of results to return at one time
-     * @return the result of the query
-     * @throws Exception if error occurs 
-     */
-    QSResult query(String vdb, String query, int offet, int limit) throws Exception;
+    private final List<QSRow> rows = new ArrayList<QSRow>();
+
+    public List<QSColumn> getColumns() {
+        return columns;
+    }
+
+    public void addColumn(QSColumn column) {
+        this.columns.add(column);
+    }
+
+    public List<QSRow> getRows() {
+        return rows;
+    }
+
+    public void addRow(QSRow row) {
+        this.rows.add(row);
+    }
 
 }

@@ -33,6 +33,7 @@ import org.komodo.rest.relational.RestVdbPermissionTest;
 import org.komodo.rest.relational.RestVdbTest;
 import org.komodo.rest.relational.RestVdbTranslatorTest;
 import org.komodo.rest.relational.json.DataserviceSerializerTest;
+import org.komodo.rest.relational.json.QueryResultSerializerTest;
 import org.komodo.rest.relational.json.VdbDataRoleSerializerTest;
 import org.komodo.rest.relational.json.VdbImportSerializerTest;
 import org.komodo.rest.relational.json.VdbPermissionSerializerTest;
@@ -57,6 +58,7 @@ import org.komodo.rest.service.KomodoVdbServiceTest;
         RestVdbPermissionTest.class,
         RestVdbTest.class,
         RestVdbTranslatorTest.class,
+        QueryResultSerializerTest.class,
 
         DataserviceSerializerTest.class,
         VdbDataRoleSerializerTest.class,

@@ -22,32 +22,37 @@
 package org.komodo.rest.relational.json;
 
 import static org.komodo.rest.Messages.Error.UNEXPECTED_JSON_TOKEN;
+import static org.komodo.rest.relational.json.KomodoJsonMarshaller.BUILDER;
 import java.io.IOException;
 import org.komodo.rest.Messages;
-import org.komodo.rest.relational.response.RestQueryCell;
+import org.komodo.rest.relational.response.RestQueryColumn;
+import org.komodo.rest.relational.response.RestQueryResult;
+import org.komodo.rest.relational.response.RestQueryRow;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
 /**
- * A GSON serializer/deserializer for {@status RestQueryCell}.
+ * A GSON serializer/deserializer for {@status RestQueryResult}.
  */
-public class QueryCellSerializer extends TypeAdapter<RestQueryCell> {
+public class QueryResultSerializer extends TypeAdapter<RestQueryResult> {
 
     @Override
-    public RestQueryCell read(JsonReader in) throws IOException {
-        final RestQueryCell queryCell = new RestQueryCell();
+    public RestQueryResult read(JsonReader in) throws IOException {
+        final RestQueryResult queryResult = new RestQueryResult();
         in.beginObject();
 
         while ( in.hasNext() ) {
             final String name = in.nextName();
 
             switch ( name ) {
-                case RestQueryCell.VALUE_LABEL:
-                    queryCell.setValue(in.nextString());
+                case RestQueryResult.COLUMNS_LABEL:
+                    RestQueryColumn[] columns = BUILDER.fromJson(in, RestQueryColumn[].class);
+                    queryResult.setColumns(columns);
                     break;
-                case RestQueryCell.TYPE_LABEL:
-                    queryCell.setType(in.nextString());
+                case RestQueryResult.ROWS_LABEL:
+                    RestQueryRow[] rows = BUILDER.fromJson(in, RestQueryRow[].class);
+                    queryResult.setRows(rows);
                     break;
                 default:
                     throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
@@ -56,18 +61,22 @@ public class QueryCellSerializer extends TypeAdapter<RestQueryCell> {
 
         in.endObject();
 
-        return queryCell;
+        return queryResult;
     }
 
     @Override
-    public void write(JsonWriter out, RestQueryCell value) throws IOException {
+    public void write(JsonWriter out, RestQueryResult value) throws IOException {
         out.beginObject();
 
-        out.name(RestQueryCell.VALUE_LABEL);
-        out.value(value.getValue());
+        if (value.getColumns().length > 0) {
+            out.name(RestQueryResult.COLUMNS_LABEL);
+            BUILDER.toJson(value.getColumns(), RestQueryColumn[].class, out);
+        }
 
-        out.name(RestQueryCell.TYPE_LABEL);
-        out.value(value.getType());
+        if (value.getRows().length > 0) {
+            out.name(RestQueryResult.ROWS_LABEL);
+            BUILDER.toJson(value.getRows(), RestQueryRow[].class, out);
+        }
 
         out.endObject();
     }

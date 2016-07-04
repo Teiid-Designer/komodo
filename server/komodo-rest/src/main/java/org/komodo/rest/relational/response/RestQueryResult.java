@@ -22,36 +22,45 @@
 package org.komodo.rest.relational.response;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import javax.ws.rs.core.MediaType;
 import org.komodo.rest.KRestEntity;
+import org.komodo.spi.query.QSColumn;
+import org.komodo.spi.query.QSResult;
 import org.komodo.spi.query.QSRow;
 
-public class RestQueryRow implements KRestEntity {
+public class RestQueryResult implements KRestEntity {
 
     /**
-     * Label for row
+     * Label for columns
      */
-    public static final String ROW_LABEL = "row";
-
-    private List<String> values;
+    public static final String COLUMNS_LABEL = "columns";
 
     /**
-     * Constructor for use when deserializing
+     * Label for rows
      */
-    public RestQueryRow() {
+    public static final String ROWS_LABEL = "rows";
+
+    private List<RestQueryColumn> columns = new ArrayList<>();
+
+    private List<RestQueryRow> rows = new ArrayList<>();
+
+    public RestQueryResult() {
         super();
     }
 
-    public RestQueryRow(QSRow qsRow) {
-        if (qsRow == null)
-            this.values = Collections.emptyList();
-        else {
-            this.values = new ArrayList<>();
-            for (Object value : qsRow.getValues()) {
-                this.values.add(value.toString());
-            }
+    public RestQueryResult(QSResult result) {
+        if (result == null)
+            return;
+
+        for (QSColumn column : result.getColumns()) {
+            columns.add(new RestQueryColumn(column));
+        }
+
+        for (QSRow row : result.getRows()) {
+            rows.add(new RestQueryRow(row));
         }
     }
 
@@ -65,17 +74,25 @@ public class RestQueryRow implements KRestEntity {
         return MediaType.APPLICATION_JSON_TYPE.equals(mediaType);
     }
 
-    public String[] getValues() {
-        return values.toArray(new String[0]);
+    public RestQueryRow[] getRows() {
+        return rows.toArray(new RestQueryRow[0]);
     }
 
-    public void setValues(Object[] values) {
-        if (values == null || values.length == 0)
-            this.values = Collections.emptyList();
+    public void setRows(RestQueryRow[] rows) {
+        this.rows = Arrays.asList(rows);
+    }
 
-        this.values = new ArrayList<String>();
-        for (Object value: values) {
-            this.values.add(value.toString());
+    public RestQueryColumn[] getColumns() {
+        return columns.toArray(new RestQueryColumn[0]);
+    }
+
+    public void setColumns(RestQueryColumn[] columns) {
+        if (columns == null || columns.length == 0)
+            this.columns = Collections.emptyList();
+
+        this.columns = new ArrayList<>();
+        for (RestQueryColumn column : columns) {
+            this.columns.add(column);
         }
     }
 }

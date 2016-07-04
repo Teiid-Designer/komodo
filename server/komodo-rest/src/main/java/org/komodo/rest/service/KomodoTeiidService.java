@@ -66,7 +66,7 @@ import org.komodo.rest.relational.request.KomodoPathAttribute;
 import org.komodo.rest.relational.request.KomodoQueryAttribute;
 import org.komodo.rest.relational.request.KomodoTeiidAttributes;
 import org.komodo.rest.relational.response.KomodoStatusObject;
-import org.komodo.rest.relational.response.RestQueryRow;
+import org.komodo.rest.relational.response.RestQueryResult;
 import org.komodo.rest.relational.response.RestTeiid;
 import org.komodo.rest.relational.response.RestTeiidStatus;
 import org.komodo.rest.relational.response.RestTeiidVdbStatus;
@@ -74,7 +74,7 @@ import org.komodo.rest.relational.response.RestVdb;
 import org.komodo.rest.relational.response.RestVdbTranslator;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
-import org.komodo.spi.query.QSRow;
+import org.komodo.spi.query.QSResult;
 import org.komodo.spi.query.QueryService;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
@@ -874,15 +874,10 @@ public class KomodoTeiidService extends KomodoService {
             LOGGER.debug("Establishing query service for query {0} on vdb {1}", query, vdb);
             QueryService queryService = teiidNode.getQueryService(uow);
 
-            List<QSRow> results = queryService.query(vdb, query, kqa.getOffset(), kqa.getLimit());
+            QSResult result = queryService.query(vdb, query, kqa.getOffset(), kqa.getLimit());
+            RestQueryResult restResult = new RestQueryResult(result);
 
-            final List<RestQueryRow> rowEntities = new ArrayList<>();
-            for (QSRow qsRow : results) {
-                RestQueryRow entity = new RestQueryRow(qsRow);
-                rowEntities.add(entity);
-            }
-
-           return commit(uow, mediaTypes, rowEntities);
+           return commit(uow, mediaTypes, restResult);
 
         } catch (final Exception e) {
             if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {

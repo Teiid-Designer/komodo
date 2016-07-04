@@ -76,7 +76,7 @@ import org.komodo.rest.relational.request.KomodoQueryAttribute;
 import org.komodo.rest.relational.request.KomodoTeiidAttributes;
 import org.komodo.rest.relational.response.KomodoStatusObject;
 import org.komodo.rest.relational.response.KomodoStorageAttributes;
-import org.komodo.rest.relational.response.RestQueryCell;
+import org.komodo.rest.relational.response.RestQueryResult;
 import org.komodo.rest.relational.response.RestQueryRow;
 import org.komodo.rest.relational.response.RestTeiid;
 import org.komodo.rest.relational.response.RestTeiidStatus;
@@ -732,13 +732,13 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         System.out.println("Entity: " + entity);
         assertEquals(Response.Status.OK.getStatusCode(), this.response.getStatus());
 
-        RestQueryRow[] rows = KomodoJsonMarshaller.unmarshallArray(entity, RestQueryRow[].class);
-        assertNotNull(rows);
-        assertEquals(expRowCount, rows.length);
+        RestQueryResult result = KomodoJsonMarshaller.unmarshall(entity, RestQueryResult.class);
+        assertNotNull(result);
+        assertEquals(expRowCount, result.getRows().length);
 
-        RestQueryRow firstRow = rows[0];
-        RestQueryCell cell1 = firstRow.getCells().get(0);
-        assertEquals(new Integer(firstCellValue).toString(), cell1.getValue());
+        RestQueryRow firstRow = result.getRows()[0];
+        String value = firstRow.getValues()[0];
+        assertEquals(new Integer(firstCellValue).toString(), value);
     }
 
     @Test

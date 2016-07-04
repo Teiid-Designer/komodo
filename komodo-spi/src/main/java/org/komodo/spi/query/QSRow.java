@@ -23,43 +23,22 @@ package org.komodo.spi.query;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.komodo.spi.type.DataTypeManager.DataTypeName;
 
 public class QSRow {
 
-    public static class QSCell {
-        private final Object value;
-
-        private final DataTypeName dataType;
-
-        public QSCell(Object value, DataTypeName dataType) {
-            this.value = value;
-            this.dataType = dataType;
-        }
-
-        public Object getValue() {
-            return value;
-        }
-
-        public DataTypeName getDataType() {
-            return dataType;
-        }
-    }
-
-    List<QSCell> cells = new ArrayList<QSCell>();
+    private final List<Object> values = new ArrayList<Object>();
 
     /**
      * @param value
-     * @param dataType
      */
-    public void add(Object value, DataTypeName dataType) {
-        cells.add(new QSCell(value, dataType));
+    public void add(Object value) {
+        values.add(value);
     }
 
     /**
-     * @return the column value for this row
+     * @return the values for this row
      */
-    public List<QSCell> getCells() {
-        return cells;
+    public List<Object> getValues() {
+        return values;
     }
 }

@@ -19,59 +19,33 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
  */
-package org.komodo.rest.relational.response;
+package org.komodo.spi.query;
 
-import org.komodo.spi.query.QSRow.QSCell;
+import org.komodo.spi.type.DataTypeManager.DataTypeName;
 
-public class RestQueryCell {
+public class QSColumn {
 
-    /**
-     * Label for the value
-     */
-    public static final String VALUE_LABEL = "value"; //$NON-NLS-1$
+    private final DataTypeName dataType;
 
-    /**
-     * Label for the value type
-     */
-    public static final String TYPE_LABEL = "type"; //$NON-NLS-1$
+    private final String columnName;
 
-    private String value;
+    private final String columnLabel;
 
-    private String type;
-
-    public RestQueryCell() {
+    public QSColumn(DataTypeName dataType, String columnName, String columnLabel) {
+        this.dataType = dataType;
+        this.columnName = columnName;
+        this.columnLabel = columnLabel;
     }
 
-    public RestQueryCell(QSCell cell) {
-        this.value = cell.getValue().toString();
-        this.type = cell.getDataType().getId();
+    public DataTypeName getDataType() {
+        return dataType;
     }
 
-    /**
-     * @return value
-     */
-    public String getValue() {
-        return value;
+    public String getColumnName() {
+        return columnName;
     }
 
-    /**
-     * @param value
-     */
-    public void setValue(String value) {
-        this.value = value;
-    }
-
-    /**
-     * @return type
-     */
-    public String getType() {
-        return type;
-    }
-
-    /**
-     * @param type
-     */
-    public void setType(String type) {
-        this.type = type;
+    public String getColumnLabel() {
+        return columnLabel;
     }
 }

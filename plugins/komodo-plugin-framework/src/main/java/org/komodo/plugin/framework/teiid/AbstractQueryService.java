@@ -26,8 +26,8 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
+import org.komodo.spi.query.QSColumn;
+import org.komodo.spi.query.QSResult;
 import org.komodo.spi.query.QSRow;
 import org.komodo.spi.query.QueryService;
 import org.komodo.spi.type.DataTypeManager;
@@ -49,8 +49,8 @@ public abstract class AbstractQueryService implements QueryService {
     }
 
     @Override
-    public List<QSRow> query(String vdb, String query, int offset, int limit) throws Exception {
-        List<QSRow> results = new ArrayList<QSRow>();
+    public QSResult query(String vdb, String query, int offset, int limit) throws Exception {
+        QSResult result = new QSResult();
 
         KLog.getLogger().debug("Commencing query execution: {0}", query);
 
@@ -71,36 +71,42 @@ public abstract class AbstractQueryService implements QueryService {
             ResultSetMetaData rsmd = rs.getMetaData();
             int columns = rsmd.getColumnCount();
 
+            //
+            // Populate the columns
+            //
+            for (int i = 1; i <= columns; ++i) {
+                String columnName = rsmd.getColumnName(i);
+                String columnLabel = rsmd.getColumnLabel(i);
+                String colTypeName = rsmd.getColumnTypeName(i);
+                DataTypeName typeName = dataTypeManager.getDataTypeName(colTypeName);
+                QSColumn column = new QSColumn(typeName, columnName, columnLabel);
+                result.addColumn(column);
+            }
+
             int rowNum = 0;
             while (rs.next()) {
                 rowNum++;
 
-                System.out.println("Looping through rows with offset of " + offset + " and limit of " + limit);
                 if (offset > NO_OFFSET && rowNum < offset) {
-                    System.out.println("Not Adding row since rowNum is " + rowNum + " and offset is " + offset);
                     continue;
                 }
 
-                if (limit > NO_LIMIT && results.size() >= limit) {
-                    System.out.println("Bombing out because limit is " + limit + " and rowNum + offset is " + results.size());
+                if (limit > NO_LIMIT && result.getRows().size() >= limit) {
                     break;
                 }
 
                 QSRow row = new QSRow();
-
                 for (int i = 1; i <= columns; ++i) {
                     Object value = rs.getObject(i);
-                    String colTypeName = rsmd.getColumnTypeName(i);
-                    DataTypeName typeName = dataTypeManager.getDataTypeName(colTypeName);
-                    row.add(value, typeName);
+                    row.add(value);
                 }
 
-                results.add(row);
+                result.addRow(row);
             }
 
-            KLog.getLogger().debug("Query executed and returning {0} result rows", results.size());
+            KLog.getLogger().debug("Query executed and returning {0} results", result.getRows().size());
 
-            return results;
+            return result;
         } finally {
             try {
                 if (rs != null)

@@ -21,38 +21,44 @@
  */
 package org.komodo.rest.relational.response;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import javax.ws.rs.core.MediaType;
 import org.komodo.rest.KRestEntity;
-import org.komodo.spi.query.QSRow;
+import org.komodo.spi.query.QSColumn;
 
-public class RestQueryRow implements KRestEntity {
+public class RestQueryColumn implements KRestEntity {
 
     /**
-     * Label for row
+     * Label for name
      */
-    public static final String ROW_LABEL = "row";
+    public static final String NAME_LABEL = "name";
 
-    private List<String> values;
+    /**
+     * Label for label
+     */
+    public static final String LABEL_LABEL = "label";
+
+    /**
+     * Label for type
+     */
+    public static final String TYPE_LABEL = "type";
+
+    private String name;
+
+    private String label;
+
+    private String type;
 
     /**
      * Constructor for use when deserializing
      */
-    public RestQueryRow() {
+    public RestQueryColumn() {
         super();
     }
 
-    public RestQueryRow(QSRow qsRow) {
-        if (qsRow == null)
-            this.values = Collections.emptyList();
-        else {
-            this.values = new ArrayList<>();
-            for (Object value : qsRow.getValues()) {
-                this.values.add(value.toString());
-            }
-        }
+    public RestQueryColumn(QSColumn column) {
+        this.name = column.getColumnName();
+        this.label = column.getColumnLabel();
+        this.type = column.getDataType().getId();
     }
 
     @Override
@@ -65,17 +71,27 @@ public class RestQueryRow implements KRestEntity {
         return MediaType.APPLICATION_JSON_TYPE.equals(mediaType);
     }
 
-    public String[] getValues() {
-        return values.toArray(new String[0]);
+    public String getName() {
+        return name;
     }
 
-    public void setValues(Object[] values) {
-        if (values == null || values.length == 0)
-            this.values = Collections.emptyList();
+    public void setName(String name) {
+        this.name = name;
+    }
 
-        this.values = new ArrayList<String>();
-        for (Object value: values) {
-            this.values.add(value.toString());
-        }
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }
