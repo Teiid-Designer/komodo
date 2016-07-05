@@ -81,6 +81,7 @@ import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.spi.runtime.DataSourceDriver;
 import org.komodo.spi.runtime.TeiidInstance;
+import org.komodo.spi.runtime.TeiidVdb;
 import org.komodo.utils.FileUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -822,12 +823,34 @@ public class KomodoTeiidService extends KomodoService {
         }
     }
 
+    private String extractServiceVdbName(UnitOfWork uow, WorkspaceManager mgr, String dsPath) throws KException {
+        KomodoObject dsObject = repo.getFromWorkspace(uow, dsPath);
+        System.out.println("XXX Get from workspace: " + dsObject);
+        if (dsObject == null)
+            return null; // Not a path in the workspace
+
+        Dataservice dService = mgr.resolve(uow, dsObject, Dataservice.class);
+        System.out.println("XXX Resolving dsObject to dataservice " + dService);
+        if (dService == null)
+            return null; // Not a data service
+
+        Vdb vdb = dService.getServiceVdb(uow);
+        System.out.println("XXX Service vdb for dataservice " + vdb);
+        if (vdb == null)
+            return null;
+
+        return vdb.getVdbName(uow);
+    }
+
     @SuppressWarnings( "nls" )
     @POST
     @Path(V1Constants.QUERY_SEGMENT)
     @Produces( MediaType.APPLICATION_JSON )
     @Consumes ( { MediaType.APPLICATION_JSON } )
-    @ApiOperation(value = "Pass a query to the teiid server")
+    @ApiOperation(value = "Pass a query to the teiid server",
+                                notes = "Syntax of the json request body is of the form " +
+                                "{ query : 'SELECT * ...', target : vdb name on teiid | dataservice path in the workspace, " +
+                                "limit : the limit on records to be returned, offset : the record number to begin with }")
     @ApiResponses(value = {
         @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
         @ApiResponse(code = 403, message = "An error has occurred.")
@@ -853,6 +876,13 @@ public class KomodoTeiidService extends KomodoService {
                 Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
                 return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
             }
+
+            if (kqa.getTarget() == null) {
+                String errorMessage = RelationalMessages.getString(
+                                                                   RelationalMessages.Error.TEIID_SERVICE_QUERY_MISSING_TARGET);
+                Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
+                return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+            }
         } catch (Exception ex) {
             String errorMessage = RelationalMessages.getString(
                                                                RelationalMessages.Error.TEIID_SERVICE_REQUEST_PARSING_ERROR, ex.getMessage());
@@ -864,17 +894,38 @@ public class KomodoTeiidService extends KomodoService {
         UnitOfWork uow = null;
 
         try {
-            String vdb = kqa.getTarget();
+            uow = createTransaction("queryTeiidservice", true); //$NON-NLS-1$
+            Teiid teiidNode = getDefaultTeiid();
+            WorkspaceManager mgr = WorkspaceManager.getInstance(repo);
+            String target = kqa.getTarget();
             String query = kqa.getQuery();
 
-            Teiid teiidNode = getDefaultTeiid();
+            //
+            // Is target a deployed vdb or a dataservice in the workspace that has had its vdbs deployed?
+            //
+            String vdbName = extractServiceVdbName(uow, mgr, target);
+            if (vdbName == null) {
+                //
+                // The target does not reference a data service in the workspace
+                // or the data service has no service vdb. Either way target should
+                // be applied directly to the query.
+                //
+                vdbName = target;
+            }
 
-            uow = createTransaction("queryTeiidservice", true); //$NON-NLS-1$
+            TeiidInstance teiidInstance = teiidNode.getTeiidInstance(uow);
+            TeiidVdb vdb = teiidInstance.getVdb(vdbName);
+            if (vdb == null) {
+                String errorMessage = RelationalMessages.getString(
+                                                                   RelationalMessages.Error.TEIID_SERVICE_QUERY_TARGET_NOT_DEPLOYED);
+                Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
+                return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+            }
 
-            LOGGER.debug("Establishing query service for query {0} on vdb {1}", query, vdb);
+            LOGGER.debug("Establishing query service for query {0} on vdb {1}", query, vdbName);
             QueryService queryService = teiidNode.getQueryService(uow);
 
-            QSResult result = queryService.query(vdb, query, kqa.getOffset(), kqa.getLimit());
+            QSResult result = queryService.query(vdbName, query, kqa.getOffset(), kqa.getLimit());
             RestQueryResult restResult = new RestQueryResult(result);
 
            return commit(uow, mediaTypes, restResult);
@@ -891,5 +942,4 @@ public class KomodoTeiidService extends KomodoService {
             return createErrorResponse(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_QUERY_ERROR);
         }
     }
-    
 }

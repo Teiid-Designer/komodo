@@ -37,6 +37,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import org.apache.tika.io.IOUtils;
 import org.junit.Test;
+import org.komodo.relational.dataservice.Dataservice;
+import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.relational.AbstractKomodoServiceTest;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
@@ -216,6 +218,13 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
         assertTrue(workspace.hasChild(uow, dsName));
         KomodoObject dataservice = workspace.getChild(uow, dsName);
         assertTrue(dataservice.hasChild(uow, TestUtilities.PORTFOLIO_VDB_NAME));
+
+        WorkspaceManager mgr = WorkspaceManager.getInstance(getRestApp().getDefaultRepository());
+        Dataservice ds = mgr.resolve(uow, dataservice, Dataservice.class);
+        assertNotNull(ds);
+
+        String vdbName = ds.getServiceVdbName(uow);
+        assertEquals(TestUtilities.TWEET_EXAMPLE_VDB_NAME, vdbName);
     }
 
     @Test

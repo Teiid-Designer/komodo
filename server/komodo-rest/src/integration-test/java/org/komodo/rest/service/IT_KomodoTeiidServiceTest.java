@@ -805,4 +805,36 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
             }
         }
     }
+
+    @Test
+    public void shouldQueryTeiidUsingDataservice() throws Exception {
+        try {
+            importDataService();
+            renewClient();
+
+            deployDataService();
+            renewClient();
+
+            //
+            // Give the vdb time to become active
+            //
+            Thread.sleep(3000);
+
+            String dsPath = RepositoryImpl.WORKSPACE_ROOT + FORWARD_SLASH + "UsStatesService";
+
+            KomodoQueryAttribute queryAttr = new KomodoQueryAttribute();
+            queryAttr.setQuery("SELECT * FROM state");
+            queryAttr.setTarget(dsPath);
+
+            queryDataService(queryAttr, 59, 1);
+
+        } finally {
+            try {
+                helperInstance.undeployDynamicVdb(TestUtilities.US_STATES_VDB_NAME);
+                helperInstance.deleteDataSource(TestUtilities.US_STATES_DATA_SOURCE_NAME);
+            } catch (Exception ex) {
+                // Nothing to do
+            }
+        }
+    }
 }

@@ -458,6 +458,16 @@ public final class RelationalMessages {
         TEIID_SERVICE_QUERY_MISSING_QUERY,
 
         /**
+         * No target specified for the query operation
+         */
+        TEIID_SERVICE_QUERY_MISSING_TARGET,
+
+        /**
+         * The query target does not appear to have been deployed
+         */
+        TEIID_SERVICE_QUERY_TARGET_NOT_DEPLOYED,
+
+        /**
          * An error indicating a query failure
          */
         TEIID_SERVICE_QUERY_ERROR,

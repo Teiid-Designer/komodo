@@ -61,6 +61,8 @@ public abstract class AbstractQueryService implements QueryService {
         try {
             KLog.getLogger().debug("Initialising SQL connection for vdb {0}", vdb);
             connection = getConnection(vdb, user, password);
+            if (connection == null)
+                throw new Exception("Failed to make a connection to '" + vdb + "' as user '" + user + "'");
 
             statement = connection.createStatement();
 
