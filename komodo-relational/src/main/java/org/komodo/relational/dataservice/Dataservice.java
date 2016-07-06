@@ -171,6 +171,46 @@ public interface Dataservice extends Exportable, RelationalObject {
      *        the name of the VDB to create (cannot be empty)
      * @param externalFilePath
      *        the VDB file path on the local file system (cannot be empty)
+     * @param serviceVdb
+     *        indicator as to whether this is the service vdb or not.
+     * @return the VDB (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    Vdb addVdb(final UnitOfWork transaction,
+               final String vdbName,
+               final String externalFilePath,
+               boolean serviceVdb) throws KException;
+
+    /**
+     * Convenience method for adding a Vdb and setting the service vdb name to
+     * the newly added Vdb's name
+     *
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param vdbName
+     *        the name of the VDB to create (cannot be empty)
+     * @param externalFilePath
+     *        the VDB file path on the local file system (cannot be empty)
+     * @return the VDB (never <code>null</code>)
+     * @throws KException
+     *         if an error occurs
+     */
+    Vdb addServiceVdb(final UnitOfWork transaction,
+                      final String vdbName,
+                      final String externalFilePath) throws KException;
+
+    /**
+     * Convenience method for adding a Vdb that is NOT the service vdb
+     *
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param vdbName
+     *        the name of the VDB to create (cannot be empty)
+     * @param externalFilePath
+     *        the VDB file path on the local file system (cannot be empty)
      * @return the VDB (never <code>null</code>)
      * @throws KException
      *         if an error occurs
@@ -183,11 +223,31 @@ public interface Dataservice extends Exportable, RelationalObject {
      * @param uow
      *        the transaction (cannot be <code>null</code> or have a state that is not
      *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @return the name of the designated service VDB (should not be null)
+     *
+     * @throws KException if an error occurs
+     */
+    String getServiceVdbName(UnitOfWork uow) throws KException;
+
+    /**
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @return the service VDB (may be <code>null</code> if not defined)
      * @throws KException
      *         if an error occurs
      */
     Vdb getServiceVdb( final UnitOfWork uow ) throws KException;
+
+    /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     * @param vdbName
+     *        the new value of the <code>service vdb name</code> property
+     * @throws KException
+     *         if an error occurs
+     */
+    void setServiceVdbName(UnitOfWork uow, String vdbName) throws KException;
 
     /**
      * @param uow

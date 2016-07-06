@@ -51,6 +51,7 @@ import org.komodo.relational.driver.Driver;
 import org.komodo.relational.importer.dsource.DatasourceImporter;
 import org.komodo.relational.importer.vdb.VdbImporter;
 import org.komodo.relational.vdb.Vdb;
+import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
@@ -142,6 +143,7 @@ public final class DataserviceImplTest extends RelationalModelTest {
         assertThat( vdb1.getName( getTransaction() ), is( name1 ) );
         assertThat( vdb2.getName( getTransaction() ), is( name2 ) );
         assertThat( this.dataservice.getVdbs( getTransaction() ).length, is( 2 ) );
+        assertThat( this.dataservice.getServiceVdbName( getTransaction() )==null, is( true ) );
         assertThat( this.dataservice.getServiceVdb( getTransaction() )==null, is( true ) );
         assertThat( this.dataservice.getChildren( getTransaction() )[1], is( instanceOf( Vdb.class ) ) );
 
@@ -161,7 +163,7 @@ public final class DataserviceImplTest extends RelationalModelTest {
         final String unkName = "unknown";
         final String name1 = "childVdb1";
         final Vdb vdb1 = this.dataservice.addVdb(getTransaction(), name1, "externalPath1");
-        
+
         assertThat( vdb1, is( notNullValue() ) );
         assertThat( vdb1.getName( getTransaction() ), is( name1 ) );
         assertThat( this.dataservice.getChildren( getTransaction() ).length, is( 1 ) );
@@ -191,13 +193,14 @@ public final class DataserviceImplTest extends RelationalModelTest {
         final Vdb vdb = this.dataservice.addVdb(getTransaction(), name, "externalPath");
         
         // Add service VDB (same name as dataservice node)
-        final Vdb serviceVDB = this.dataservice.addVdb(getTransaction(), SERVICE_NAME, "externalPath");
+        final Vdb serviceVDB = this.dataservice.addServiceVdb(getTransaction(), SERVICE_NAME, "externalPath");
         
         assertThat( vdb, is( notNullValue() ) );
         assertThat( vdb.getName( getTransaction() ), is( name ) );
         assertThat( serviceVDB, is( notNullValue() ) );
         assertThat( serviceVDB.getName( getTransaction() ), is( SERVICE_NAME ) );
         assertThat( this.dataservice.getVdbs( getTransaction() ).length, is( 2 ) );
+        assertThat( this.dataservice.getServiceVdbName( getTransaction() ), is (SERVICE_NAME) );
         assertThat( this.dataservice.getServiceVdb( getTransaction() )==null, is( false ) );
         assertThat( this.dataservice.getChildren( getTransaction() )[0], is( instanceOf( Vdb.class ) ) );
 
@@ -218,7 +221,7 @@ public final class DataserviceImplTest extends RelationalModelTest {
         final String name2 = "childVdb2";
         this.dataservice.addVdb(getTransaction(), name1, "externalPath1");
         this.dataservice.addVdb(getTransaction(), name2, "externalPath1");
-        this.dataservice.addVdb(getTransaction(), SERVICE_NAME, "externalSvcPath");
+        this.dataservice.addServiceVdb(getTransaction(), SERVICE_NAME, "externalSvcPath");
 
         byte[] dsBytes = this.dataservice.export(getTransaction(), new Properties());
         assertNotNull(dsBytes);
@@ -304,6 +307,11 @@ public final class DataserviceImplTest extends RelationalModelTest {
                            importOptions, importMessages);
         assertFalse(importMessages.hasError());
 
+        //
+        // Designates the twitter vdb as the service vdb
+        //
+        dataservice.setServiceVdbName(getTransaction(), TestUtilities.TWEET_EXAMPLE_VDB_NAME);
+
         importer.importVdb(getTransaction(),
                            TestUtilities.dataserviceVdbExample(), dataservice,
                            importOptions, importMessages);
@@ -330,6 +338,11 @@ public final class DataserviceImplTest extends RelationalModelTest {
                                                importOptions, importMessages);
         assertFalse(importMessages.hasError());
 
+        //
+        // Designates the us states vdb as the service vdb
+        //
+        dataservice.setServiceVdbName(getTransaction(), "usstates");
+
         DatasourceImporter dataSrcImporter = new DatasourceImporter(_repo);
         InputStream usDataSrcStream = TestUtilities.getResourceAsStream(getClass(), "tds", "mysql-usstates.tds");
         dataSrcImporter.importDS(getTransaction(),
@@ -351,7 +364,7 @@ public final class DataserviceImplTest extends RelationalModelTest {
 
     @Test
     public void shouldImportDataService() throws Exception {
-        InputStream importStream = TestUtilities.getResourceAsStream(DataserviceImplTest.class, "dataservice", "sample-ds.zip");
+        InputStream importStream = TestUtilities.sampleDataserviceExample();
         assertNotNull(importStream);
 
         ImportMessages importMessages = new ImportMessages();
@@ -368,5 +381,12 @@ public final class DataserviceImplTest extends RelationalModelTest {
 
         assertTrue(theDataService.hasChild(getTransaction(), TestUtilities.PORTFOLIO_VDB_NAME));
         assertTrue(theDataService.hasChild(getTransaction(), TestUtilities.TWEET_EXAMPLE_VDB_NAME));
+
+        WorkspaceManager mgr = WorkspaceManager.getInstance(_repo);
+        Dataservice ds = mgr.resolve(getTransaction(), theDataService, Dataservice.class);
+        assertNotNull(ds);
+
+        String vdbName = ds.getServiceVdbName(getTransaction());
+        assertEquals(TestUtilities.TWEET_EXAMPLE_VDB_NAME, vdbName);
     }
 }

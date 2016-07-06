@@ -195,6 +195,7 @@
  */
 [tko:dataService] > nt:unstructured, mode:hashed, tko:libraryComponent
   - vdb:description (string)
+  - tko:serviceVdb (string)
   + * (tko:vdb) copy
   + * (tko:dataSource) copy
   + * (tko:driver) copy

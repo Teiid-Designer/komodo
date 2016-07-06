@@ -29,6 +29,7 @@ import org.komodo.relational.teiid.internal.TeiidImpl;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
+import org.komodo.spi.query.QueryService;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
@@ -134,6 +135,13 @@ public interface Teiid extends RelationalObject, TeiidArchetype {
      * @return the teiid instance
      */
     TeiidInstance getTeiidInstance(UnitOfWork uow);
+
+    /**
+     * @param uow the transaction
+     * @return the query service
+     * @throws KException if error occurs
+     */
+    QueryService getQueryService(UnitOfWork uow) throws KException;
 
     /**
      * @param uow

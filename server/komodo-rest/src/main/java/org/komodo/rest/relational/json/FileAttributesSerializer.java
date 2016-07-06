@@ -24,7 +24,7 @@ package org.komodo.rest.relational.json;
 import static org.komodo.rest.Messages.Error.UNEXPECTED_JSON_TOKEN;
 import java.io.IOException;
 import org.komodo.rest.Messages;
-import org.komodo.rest.relational.KomodoFileAttributes;
+import org.komodo.rest.relational.request.KomodoFileAttributes;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 

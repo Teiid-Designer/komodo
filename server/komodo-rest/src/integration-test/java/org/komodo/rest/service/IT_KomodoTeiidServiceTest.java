@@ -28,15 +28,19 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileAttribute;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import javax.ws.rs.client.Client;
@@ -62,21 +66,24 @@ import org.komodo.relational.workspace.ServerManager;
 import org.komodo.repository.RepositoryImpl;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.RestLink;
-import org.komodo.rest.relational.KomodoFileAttributes;
-import org.komodo.rest.relational.KomodoPathAttribute;
 import org.komodo.rest.relational.KomodoRestUriBuilder;
-import org.komodo.rest.relational.KomodoStatusObject;
-import org.komodo.rest.relational.KomodoStorageAttributes;
-import org.komodo.rest.relational.KomodoTeiidAttributes;
 import org.komodo.rest.relational.RelationalMessages;
-import org.komodo.rest.relational.RestTeiid;
-import org.komodo.rest.relational.RestTeiidStatus;
-import org.komodo.rest.relational.RestTeiidVdbStatus;
-import org.komodo.rest.relational.RestTeiidVdbStatusVdb;
-import org.komodo.rest.relational.RestVdb;
-import org.komodo.rest.relational.RestVdbTranslator;
 import org.komodo.rest.relational.datasource.RestDataSource;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
+import org.komodo.rest.relational.request.KomodoFileAttributes;
+import org.komodo.rest.relational.request.KomodoPathAttribute;
+import org.komodo.rest.relational.request.KomodoQueryAttribute;
+import org.komodo.rest.relational.request.KomodoTeiidAttributes;
+import org.komodo.rest.relational.response.KomodoStatusObject;
+import org.komodo.rest.relational.response.KomodoStorageAttributes;
+import org.komodo.rest.relational.response.RestQueryResult;
+import org.komodo.rest.relational.response.RestQueryRow;
+import org.komodo.rest.relational.response.RestTeiid;
+import org.komodo.rest.relational.response.RestTeiidStatus;
+import org.komodo.rest.relational.response.RestTeiidVdbStatus;
+import org.komodo.rest.relational.response.RestTeiidVdbStatusVdb;
+import org.komodo.rest.relational.response.RestVdb;
+import org.komodo.rest.relational.response.RestVdbTranslator;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.constants.SystemConstants;
 import org.komodo.spi.query.TeiidService;
@@ -146,6 +153,18 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         }
     }
 
+    /**
+     * Client must be renewed for each new HTTP REST call
+     *
+     * @throws Exception
+     */
+    private void renewClient() throws Exception {
+        if (this.client != null)
+            this.client.close();
+
+        this.client = ClientBuilder.newClient();
+    }
+
     private Invocation.Builder request(final URI uri, MediaType... types) {
         if (types == null || types.length == 0)
             return this.client.target(uri.toString()).request();
@@ -196,7 +215,7 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
 
     @Before
     public void beforeEach() throws Exception {
-        this.client = ClientBuilder.newClient();
+        renewClient();
 
         this.service = PluginService.getInstance().getDefaultTeiidService();
 
@@ -210,12 +229,38 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
 
     @After
     public void afterEach() throws Exception {
+        //
+        // Refresh the artifacts of this client instance
+        //
+        helperInstance.reconnect();
+
         helperInstance.undeployDynamicVdb(TestUtilities.SAMPLE_VDB_FILE);
 
-        try {
-            helperInstance.undeployDriver(MYSQL_DRIVER);
-        } catch (Exception ex) {
-            // Ignore errors
+        Set<String> undeployDrivers = new HashSet<String>();
+        Collection<DataSourceDriver> drivers = helperInstance.getDataSourceDrivers();
+        for (DataSourceDriver driver : drivers) {
+            if (driver.getName().startsWith(MYSQL_DRIVER)) {
+                String driverName = driver.getName();
+                //
+                // MySQL has 2 drivers so concatenates the class name
+                // to the end of the driver names but means that the driver
+                // cannot be undeployed unless the class name is removed
+                //
+                int endsWithClass = driverName.lastIndexOf(driver.getClassName());
+                if (endsWithClass > -1)
+                    driverName = driverName.substring(0, endsWithClass);
+
+                undeployDrivers.add(driverName);
+            }
+        }
+
+        for (String driver : undeployDrivers) {
+            try {
+                helperInstance.undeployDriver(driver);
+            } catch (Exception ex) {
+                // Flag as a warning that something in the test is going awry
+                ex.printStackTrace();
+            }
         }
 
         Thread.sleep(2000);
@@ -423,6 +468,7 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
 
         int iterations = 3;
         final CountDownLatch latch = new CountDownLatch(iterations);
+        final List<Throwable> assertionFailures = new ArrayList<Throwable>();
 
         for (int i = 0; i < iterations; ++i) {
             Runnable runnable = new Runnable() {
@@ -435,21 +481,34 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
 
                     String entity = response.readEntity(String.class);
                     System.out.println("Response:\n" + entity);
-                    assertEquals(200, response.getStatus());
-                    RestTeiidStatus status = KomodoJsonMarshaller.unmarshall(entity, RestTeiidStatus.class);
-                    assertNotNull(status);
+                    //
+                    // Don't want the thread dying since the latch will never
+                    // countdown and the test will be stuck for 3 minutes
+                    // waiting to timeout.
+                    // Better to add the assertion errors into a bucket and once
+                    // the countdown has been completed, check the bucket for
+                    // errors. Don't really care if there is more than one, just that
+                    // there is one, the test should fail
+                    //
+                    try {
+                        assertEquals(200, response.getStatus());
+                        RestTeiidStatus status = KomodoJsonMarshaller.unmarshall(entity, RestTeiidStatus.class);
+                        assertNotNull(status);
 
-                    assertEquals("DefaultServer", status.getId());
-                    assertEquals("localhost", status.getHost());
-                    assertEquals("8.12.4", status.getVersion());
-                    assertTrue(status.isTeiidInstanceAvailable());
-                    assertTrue(status.isConnected());
-                    assertEquals(1, status.getDataSourceSize());
-                    assertEquals(3, status.getDataSourceDriverSize());
-                    assertEquals(54, status.getTranslatorSize());
-                    assertEquals(1, status.getVdbSize());
-
-                    latch.countDown();
+                        assertEquals("DefaultServer", status.getId());
+                        assertEquals("localhost", status.getHost());
+                        assertEquals("8.12.4", status.getVersion());
+                        assertTrue(status.isTeiidInstanceAvailable());
+                        assertTrue(status.isConnected());
+                        assertEquals(1, status.getDataSourceSize());
+                        assertEquals(3, status.getDataSourceDriverSize());
+                        assertEquals(54, status.getTranslatorSize());
+                        assertEquals(1, status.getVdbSize());
+                    } catch (Throwable ex) {
+                        assertionFailures.add(ex);
+                    } finally {
+                        latch.countDown();
+                    }
                 }
             };
 
@@ -458,6 +517,11 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         }
 
         assertTrue(latch.await(3, TimeUnit.MINUTES));
+        for (Throwable t : assertionFailures) {
+            // Give a clue as to what failed
+            t.printStackTrace();
+        }
+        assertTrue(assertionFailures.isEmpty());
     }
 
     @Test
@@ -567,6 +631,10 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         KomodoStatusObject status = KomodoJsonMarshaller.unmarshall(entity, KomodoStatusObject.class);
         assertNotNull(status);
 
+        Thread.sleep(2000);
+
+        helperInstance.reconnect();
+
         String title = RelationalMessages.getString(RelationalMessages.Info.DRIVER_DEPLOYMENT_STATUS_TITLE);
         assertEquals(title, status.getTitle());
         Map<String, String> attributes = status.getAttributes();
@@ -581,56 +649,189 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         assertNoMysqlDriver();
     }
 
+    private void importDataService() throws Exception, IOException {
+        //
+        // Import the data service into the workspace
+        //
+        URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
+                                          .path(V1Constants.IMPORT_EXPORT_SEGMENT)
+                                          .path(V1Constants.IMPORT)
+                                          .build();
+
+        KomodoStorageAttributes storageAttr = new KomodoStorageAttributes();
+        storageAttr.setStorageType("file");
+        storageAttr.setDocumentType(DocumentType.ZIP);
+
+        InputStream usStatesDSStream = TestUtilities.usStatesDataserviceExample();
+        byte[] sampleBytes = TestUtilities.streamToBytes(usStatesDSStream);
+        String content = Base64.getEncoder().encodeToString(sampleBytes);
+        storageAttr.setContent(content);
+
+        this.response = request(uri, MediaType.APPLICATION_JSON_TYPE).post(Entity.json(storageAttr));
+        assertEquals(Response.Status.OK.getStatusCode(), this.response.getStatus());
+    }
+
+    private void deployDataService() {
+        KomodoPathAttribute pathAttr = new KomodoPathAttribute();
+        String path = RepositoryImpl.WORKSPACE_ROOT + FORWARD_SLASH + "UsStatesService";
+        pathAttr.setPath(path);
+
+        //
+        // Deploy the data service
+        //
+        URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
+                                    .path(V1Constants.TEIID_SEGMENT)
+                                    .path(V1Constants.DATA_SERVICE_SEGMENT)
+                                    .build();
+
+        this.response = request(uri).post(Entity.json(pathAttr));
+        String entity = this.response.readEntity(String.class);
+        assertEquals(Response.Status.OK.getStatusCode(), this.response.getStatus());
+
+        KomodoStatusObject status = KomodoJsonMarshaller.unmarshall(entity, KomodoStatusObject.class);
+        assertNotNull(status);
+
+        Map<String, String> attributes = status.getAttributes();
+        for (Map.Entry<String, String> attribute : attributes.entrySet()) {
+            assertFalse("Error occurred in deployment: " + attribute.getValue(),
+                        attribute.getKey().startsWith("ErrorMessage"));
+        }
+    }
+
     @Test
     public void shouldDeployDataService() throws Exception {
         try {
-            //
-            // Import the data service into the workspace
-            //
-            URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
-                                              .path(V1Constants.IMPORT_EXPORT_SEGMENT)
-                                              .path(V1Constants.IMPORT)
-                                              .build();
+            importDataService();
+            renewClient();
 
-            KomodoStorageAttributes storageAttr = new KomodoStorageAttributes();
-            storageAttr.setStorageType("file");
-            storageAttr.setDocumentType(DocumentType.ZIP);
+            deployDataService();
 
-            InputStream usStatesDSStream = TestUtilities.usStatesDataserviceExample();
-            byte[] sampleBytes = TestUtilities.streamToBytes(usStatesDSStream);
-            String content = Base64.getEncoder().encodeToString(sampleBytes);
-            storageAttr.setContent(content);
-
-            this.response = request(uri, MediaType.APPLICATION_JSON_TYPE).post(Entity.json(storageAttr));
-            String entity = this.response.readEntity(String.class);
-            assertEquals(Response.Status.OK.getStatusCode(), this.response.getStatus());
-
-            KomodoPathAttribute pathAttr = new KomodoPathAttribute();
-            String path = RepositoryImpl.WORKSPACE_ROOT + FORWARD_SLASH + "UsStatesService";
-            pathAttr.setPath(path);
-
-            //
-            // Deploy the data service
-            //
-            uri = UriBuilder.fromUri(_uriBuilder.baseUri()).path(V1Constants.TEIID_SEGMENT).path(V1Constants.DATA_SERVICE_SEGMENT).build();
-
-            this.response = request(uri).post(Entity.json(pathAttr));
-            entity = this.response.readEntity(String.class);
-            assertEquals(Response.Status.OK.getStatusCode(), this.response.getStatus());
-
-            KomodoStatusObject status = KomodoJsonMarshaller.unmarshall(entity, KomodoStatusObject.class);
-            assertNotNull(status);
-
-            Map<String, String> attributes = status.getAttributes();
-            for (Map.Entry<String, String> attribute : attributes.entrySet()) {
-                assertFalse("Error occurred in deployment: " + attribute.getValue(),
-                            attribute.getKey().startsWith("ErrorMessage"));
-            }
         } finally {
             try {
                 helperInstance.undeployDynamicVdb(TestUtilities.US_STATES_VDB_NAME);
                 helperInstance.deleteDataSource(TestUtilities.US_STATES_DATA_SOURCE_NAME);
-                helperInstance.undeployDriver(MYSQL_DRIVER);
+            } catch (Exception ex) {
+                // Nothing to do
+            }
+        }
+    }
+
+    private void queryDataService(KomodoQueryAttribute queryAttr, int expRowCount, int firstCellValue) {
+        URI uri;
+        String entity;
+        //
+        // Query the deployed vdb
+        //
+        uri = UriBuilder.fromUri(_uriBuilder.baseUri())
+                                    .path(V1Constants.TEIID_SEGMENT)
+                                    .path(V1Constants.QUERY_SEGMENT)
+                                    .build();
+
+        this.response = request(uri).post(Entity.json(queryAttr));
+        entity = this.response.readEntity(String.class);
+        System.out.println("Entity: " + entity);
+        assertEquals(Response.Status.OK.getStatusCode(), this.response.getStatus());
+
+        RestQueryResult result = KomodoJsonMarshaller.unmarshall(entity, RestQueryResult.class);
+        assertNotNull(result);
+        assertEquals(expRowCount, result.getRows().length);
+
+        RestQueryRow firstRow = result.getRows()[0];
+        String value = firstRow.getValues()[0];
+        assertEquals(new Integer(firstCellValue).toString(), value);
+    }
+
+    @Test
+    public void shouldQueryTeiid() throws Exception {
+        try {
+            importDataService();
+            renewClient();
+
+            deployDataService();
+            renewClient();
+
+            //
+            // Give the vdb time to become active
+            //
+            Thread.sleep(3000);
+
+            KomodoQueryAttribute queryAttr = new KomodoQueryAttribute();
+            queryAttr.setQuery("SELECT * FROM state");
+            queryAttr.setTarget("usstates");
+
+            queryDataService(queryAttr, 59, 1);
+
+        } finally {
+            try {
+                helperInstance.undeployDynamicVdb(TestUtilities.US_STATES_VDB_NAME);
+                helperInstance.deleteDataSource(TestUtilities.US_STATES_DATA_SOURCE_NAME);
+            } catch (Exception ex) {
+                // Nothing to do
+            }
+        }
+    }
+
+    @Test
+    public void shouldQueryTeiidWithLimitAndOffset() throws Exception {
+        try {
+            importDataService();
+            renewClient();
+
+            deployDataService();
+            renewClient();
+
+            //
+            // Give the vdb time to become active
+            //
+            Thread.sleep(3000);
+
+            KomodoQueryAttribute queryAttr = new KomodoQueryAttribute();
+            queryAttr.setQuery("SELECT * FROM state");
+            queryAttr.setTarget("usstates");
+
+            int offset = 5;
+            int limit = 10;
+            queryAttr.setLimit(limit);
+            queryAttr.setOffset(offset);
+
+            queryDataService(queryAttr, limit, offset);
+
+        } finally {
+            try {
+                helperInstance.undeployDynamicVdb(TestUtilities.US_STATES_VDB_NAME);
+                helperInstance.deleteDataSource(TestUtilities.US_STATES_DATA_SOURCE_NAME);
+            } catch (Exception ex) {
+                // Nothing to do
+            }
+        }
+    }
+
+    @Test
+    public void shouldQueryTeiidUsingDataservice() throws Exception {
+        try {
+            importDataService();
+            renewClient();
+
+            deployDataService();
+            renewClient();
+
+            //
+            // Give the vdb time to become active
+            //
+            Thread.sleep(3000);
+
+            String dsPath = RepositoryImpl.WORKSPACE_ROOT + FORWARD_SLASH + "UsStatesService";
+
+            KomodoQueryAttribute queryAttr = new KomodoQueryAttribute();
+            queryAttr.setQuery("SELECT * FROM state");
+            queryAttr.setTarget(dsPath);
+
+            queryDataService(queryAttr, 59, 1);
+
+        } finally {
+            try {
+                helperInstance.undeployDynamicVdb(TestUtilities.US_STATES_VDB_NAME);
+                helperInstance.deleteDataSource(TestUtilities.US_STATES_DATA_SOURCE_NAME);
             } catch (Exception ex) {
                 // Nothing to do
             }

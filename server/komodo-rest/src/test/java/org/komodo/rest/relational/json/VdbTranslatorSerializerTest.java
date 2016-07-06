@@ -35,7 +35,7 @@ import org.komodo.relational.vdb.Translator;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.repository.DescriptorImpl;
 import org.komodo.rest.RestProperty;
-import org.komodo.rest.relational.RestVdbTranslator;
+import org.komodo.rest.relational.response.RestVdbTranslator;
 import org.komodo.spi.repository.Descriptor;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.PropertyDescriptor;

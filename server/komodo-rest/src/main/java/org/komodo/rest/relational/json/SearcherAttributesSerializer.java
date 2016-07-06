@@ -27,7 +27,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Map;
 import org.komodo.rest.Messages;
-import org.komodo.rest.relational.KomodoSearcherAttributes;
+import org.komodo.rest.relational.request.KomodoSearcherAttributes;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
@@ -57,7 +57,8 @@ public final class SearcherAttributesSerializer extends PathAttributeSerializer<
         while ( in.hasNext() ) {
             final String name = in.nextName();
 
-            readPath(in, name, searcherAttr);
+            if (readPath(in, name, searcherAttr) != null)
+                continue;
 
             switch ( name ) {
                 case KomodoSearcherAttributes.SEARCH_NAME_LABEL:

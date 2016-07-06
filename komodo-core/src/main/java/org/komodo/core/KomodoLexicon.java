@@ -57,6 +57,11 @@ public interface KomodoLexicon extends StringConstants {
          * The name and node type name of the data services grouping node. Value is {@value} .
          */
         String GROUP_NODE = Namespace.PREFIX + COLON + "dataServices"; //$NON-NLS-1$
+
+        /**
+         * The property referencing the name of the service vdb. Value is {@value} .
+         */
+        String SERVICE_VDB = Namespace.PREFIX + COLON + "serviceVdb"; //$NON-NLS-1$
     }
 
     /**

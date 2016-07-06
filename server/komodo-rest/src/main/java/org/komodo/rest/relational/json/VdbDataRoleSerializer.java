@@ -21,7 +21,7 @@
  */
 package org.komodo.rest.relational.json;
 
-import org.komodo.rest.relational.RestVdbDataRole;
+import org.komodo.rest.relational.response.RestVdbDataRole;
 import org.komodo.utils.StringUtils;
 
 /**

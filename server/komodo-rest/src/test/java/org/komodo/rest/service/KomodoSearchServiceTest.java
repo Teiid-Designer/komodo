@@ -35,12 +35,12 @@ import org.junit.Test;
 import org.komodo.rest.RestBasicEntity;
 import org.komodo.rest.relational.AbstractKomodoServiceTest;
 import org.komodo.rest.relational.KomodoProperties;
-import org.komodo.rest.relational.KomodoSavedSearcher;
-import org.komodo.rest.relational.KomodoSearcherAttributes;
 import org.komodo.rest.relational.RestEntityFactory;
-import org.komodo.rest.relational.RestVdb;
-import org.komodo.rest.relational.RestVdbModel;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
+import org.komodo.rest.relational.request.KomodoSearcherAttributes;
+import org.komodo.rest.relational.response.KomodoSavedSearcher;
+import org.komodo.rest.relational.response.RestVdb;
+import org.komodo.rest.relational.response.RestVdbModel;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
@@ -498,7 +498,9 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
 
         this.response = request(uri).post(Entity.json(searchAttr));
         final String entity = this.response.readEntity(String.class);
-        // System.out.println("Response:\n" + entity);
+        System.out.println("Response:\n" + entity);
+        assertEquals(Response.Status.OK.getStatusCode(), this.response.getStatus());
+
         RestBasicEntity[] entities = KomodoJsonMarshaller.unmarshallArray(entity, RestBasicEntity[].class);
         assertEquals(1, entities.length);
 

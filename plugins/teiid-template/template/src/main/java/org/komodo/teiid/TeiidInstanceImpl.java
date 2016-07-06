@@ -32,6 +32,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import org.komodo.plugin.framework.teiid.AbstractTeiidInstance;
+import org.komodo.plugin.framework.teiid.Messages;
 import org.komodo.spi.outcome.Outcome;
 import org.komodo.spi.outcome.OutcomeFactory;
 import org.komodo.spi.runtime.DataSourceDriver;
@@ -44,8 +46,6 @@ import org.komodo.spi.runtime.TeiidPropertyDefinition;
 import org.komodo.spi.runtime.TeiidTranslator;
 import org.komodo.spi.runtime.TeiidVdb;
 import org.komodo.spi.runtime.version.TeiidVersion;
-import org.komodo.plugin.framework.teiid.AbstractTeiidInstance;
-import org.komodo.plugin.framework.teiid.Messages;
 import org.teiid.adminapi.Admin;
 import org.teiid.adminapi.PropertyDefinition;
 import org.teiid.adminapi.Translator;
@@ -265,7 +265,7 @@ public class TeiidInstanceImpl extends AbstractTeiidInstance {
 
         return ((VDBMetaData) vdb).isXmlDeployment();
     }
-    
+
     @Override
     public Collection<TeiidVdb> getVdbs() throws Exception {
         connect();

@@ -215,14 +215,15 @@ public class DataserviceImpl extends RelationalObjectImpl implements Dataservice
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        final Vdb[] vdbs = getVdbs(transaction, namePatterns);
-        final Datasource[] datasources = getDataSources(transaction, namePatterns);
-        final Driver[] drivers = getDrivers(transaction, namePatterns);
-
-        final KomodoObject[] result = new KomodoObject[vdbs.length + datasources.length + drivers.length];
-        System.arraycopy(vdbs, 0, result, 0, vdbs.length);
-        System.arraycopy(datasources, 0, result, vdbs.length, datasources.length);
-        System.arraycopy(drivers, 0, result, vdbs.length + datasources.length, drivers.length);
+        KomodoObject[] result = null;
+        if ( VdbLexicon.Vdb.VIRTUAL_DATABASE.equals( type ) )
+            result = getVdbs(transaction, namePatterns);
+        else if (KomodoLexicon.DataSource.NODE_TYPE.equals(type))
+            result = getDataSources(transaction, namePatterns);
+        else if (KomodoLexicon.Driver.NODE_TYPE.equals(type))
+            result = getDrivers(transaction, namePatterns);
+        else
+            result = super.getChildrenOfType(transaction, type, namePatterns);
 
         return result;
     }
@@ -339,8 +340,22 @@ public class DataserviceImpl extends RelationalObjectImpl implements Dataservice
     }
 
     @Override
+    public Vdb addVdb(final UnitOfWork transaction, final String vdbName, final String externalFilePath, boolean serviceVdb) throws KException {
+        Vdb vdb = RelationalModelFactory.createVdb(transaction, getRepository(), this.getAbsolutePath(), vdbName, externalFilePath);
+        if (serviceVdb)
+            setServiceVdbName(transaction, vdb.getVdbName(transaction));
+
+        return vdb;
+    }
+
+    @Override
+    public Vdb addServiceVdb(final UnitOfWork transaction, final String vdbName, final String externalFilePath) throws KException {
+        return addVdb(transaction, vdbName, externalFilePath, true);
+    }
+
+    @Override
     public Vdb addVdb(final UnitOfWork transaction, final String vdbName, final String externalFilePath) throws KException {
-        return RelationalModelFactory.createVdb(transaction, getRepository(), this.getAbsolutePath(), vdbName, externalFilePath);
+        return addVdb(transaction, vdbName, externalFilePath, false);
     }
 
     @Override
@@ -378,12 +393,36 @@ public class DataserviceImpl extends RelationalObjectImpl implements Dataservice
         return datasourceNames.toArray(new String[0]);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.vdb.Vdb#getServiceVdbName(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public String getServiceVdbName(final UnitOfWork uow) throws KException {
+        return getObjectProperty(uow, PropertyValueType.STRING, "getServiceVdbName", KomodoLexicon.DataService.SERVICE_VDB); //$NON-NLS-1$
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.komodo.relational.vdb.Vdb#setServiceVdbName(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     */
+    @Override
+    public void setServiceVdbName(final UnitOfWork uow, final String vdbName) throws KException {
+        setObjectProperty(uow, "setServiceVdbName", KomodoLexicon.DataService.SERVICE_VDB, vdbName); //$NON-NLS-1$
+    }
+
     /* (non-Javadoc)
      * @see org.komodo.relational.dataservice.Dataservice#getServiceVdb(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
     public Vdb getServiceVdb(UnitOfWork uow) throws KException {
-        Vdb[] vdbs = getVdbs(uow, getName(uow));
+        String serviceName = getServiceVdbName(uow);
+        if (serviceName == null)
+            return null;
+
+        Vdb[] vdbs = getVdbs(uow, serviceName);
         if (vdbs.length == 0) {
             return null;
         }

@@ -58,6 +58,7 @@ import org.komodo.rest.KomodoRestV1Application;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.RestLink;
 import org.komodo.rest.RestLink.LinkType;
+import org.komodo.rest.relational.response.RestVdb;
 import org.komodo.rest.RestProperty;
 import org.komodo.spi.constants.SystemConstants;
 import org.komodo.spi.repository.KomodoType;

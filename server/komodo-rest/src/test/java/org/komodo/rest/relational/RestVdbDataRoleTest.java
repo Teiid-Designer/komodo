@@ -28,6 +28,7 @@ import static org.junit.Assert.assertThat;
 import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
+import org.komodo.rest.relational.response.RestVdbDataRole;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class RestVdbDataRoleTest {

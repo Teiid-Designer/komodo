@@ -21,7 +21,7 @@
  */
 package org.komodo.rest.relational.json;
 
-import org.komodo.rest.relational.RestVdbCondition;
+import org.komodo.rest.relational.response.RestVdbCondition;
 import org.komodo.utils.StringUtils;
 
 /**

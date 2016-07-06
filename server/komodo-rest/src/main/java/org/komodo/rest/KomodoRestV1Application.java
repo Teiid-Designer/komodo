@@ -373,6 +373,11 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
          * The available storage types of the import export service
          */
         String STORAGE_TYPES = "availableStorageTypes";
+
+        /**
+         * The teiid segment for running a query against the teiid server
+         */
+        String QUERY_SEGMENT = "query";
     }
 
     private static final int TIMEOUT = 1;

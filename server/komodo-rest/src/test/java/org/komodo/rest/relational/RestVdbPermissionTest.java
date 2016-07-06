@@ -29,6 +29,9 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
+import org.komodo.rest.relational.response.RestVdbCondition;
+import org.komodo.rest.relational.response.RestVdbMask;
+import org.komodo.rest.relational.response.RestVdbPermission;
 
 @SuppressWarnings( { "javadoc", "nls" } )
 public final class RestVdbPermissionTest {

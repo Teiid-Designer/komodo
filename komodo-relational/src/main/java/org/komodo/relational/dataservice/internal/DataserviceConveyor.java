@@ -169,7 +169,8 @@ public class DataserviceConveyor implements StringConstants {
                     if (bos != null)
                         bos.close();
 
-                    zipStream.close();
+                    if (zipStream != null)
+                        zipStream.close();
                 }
             }
 
@@ -566,9 +567,6 @@ public class DataserviceConveyor implements StringConstants {
                 status.addProgressMessage("Exported vdb " + vdbName + " and deploying to teiid");
                 teiidInstance.deployDynamicVdb(vdbDeploymentName, stream);
 
-                for (TeiidVdb teiidVdb : teiidInstance.getVdbs()) {
-                    System.out.println(teiidVdb.getDeployedName() + SPACE + teiidVdb.getName());
-                }
                 TeiidVdb teiidVdb = teiidInstance.getVdb(vdbDeploymentName);
                 if (teiidVdb == null) {
                     status.addProgressMessage("Warning: Vdb " + vdbName + " not yet completed deployment");

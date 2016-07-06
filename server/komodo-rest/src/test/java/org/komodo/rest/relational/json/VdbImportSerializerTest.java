@@ -29,7 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.VdbImport;
-import org.komodo.rest.relational.RestVdbImport;
+import org.komodo.rest.relational.response.RestVdbImport;
 import org.komodo.spi.repository.KomodoType;
 import org.mockito.Mockito;
 

@@ -22,7 +22,7 @@
 package org.komodo.rest.relational.json;
 
 import java.io.IOException;
-import org.komodo.rest.relational.KomodoPathAttribute;
+import org.komodo.rest.relational.request.KomodoPathAttribute;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
@@ -37,9 +37,14 @@ public class PathAttributeSerializer<T extends KomodoPathAttribute> extends Type
         return (T) new KomodoPathAttribute();
     }
 
-    protected void readPath(JsonReader in, String name, T pathAttr) throws IOException {
-        if (KomodoPathAttribute.PATH_LABEL.equals(name))
-            pathAttr.setPath(in.nextString());
+    protected String readPath(JsonReader in, String name, T pathAttr) throws IOException {
+        if (KomodoPathAttribute.PATH_LABEL.equals(name)) {
+            String path = in.nextString();
+            pathAttr.setPath(path);
+            return path;
+        }
+
+        return null;
     }
 
     /**

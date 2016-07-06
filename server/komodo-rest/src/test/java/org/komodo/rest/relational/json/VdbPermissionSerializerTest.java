@@ -30,7 +30,7 @@ import org.junit.Test;
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.relational.vdb.Permission;
 import org.komodo.relational.vdb.Vdb;
-import org.komodo.rest.relational.RestVdbPermission;
+import org.komodo.rest.relational.response.RestVdbPermission;
 import org.komodo.spi.repository.KomodoType;
 import org.mockito.Mockito;
 

@@ -15,7 +15,6 @@
 
 	<properties>
 		<version.gson>2.2.4</version.gson>
-		<version.resteasy>3.0.11.Final</version.resteasy>
 		<version.guava>16.0.1</version.guava>
 		<version.swagger>1.5.0</version.swagger>
 		<version.jaxrs>2.13</version.jaxrs>
@@ -377,31 +376,76 @@
 							</artifactItems>
 						</configuration>
 					</execution>
+					<execution>
+						<!-- Fetch the integration utils zip so that the resteasy module can be included in the jboss instance -->
+						<id>unpack-resteasy-stage-1</id>
+						<phase>process-sources</phase>
+						<goals>
+							<goal>unpack</goal>
+						</goals>
+						<configuration>
+							<!-- Not required if skipping integration tests -->
+							<skip>${integration.skipTests}</skip>
+							<artifactItems>
+								<artifactItem>
+									<groupId>org.komodo</groupId>
+									<artifactId>komodo-integration-utils</artifactId>
+									<version>${project.version}</version>
+									<classifier>components</classifier>
+									<type>zip</type>
+									<overWrite>true</overWrite>
+									<outputDirectory>${project.build.directory}</outputDirectory>
+									<includes>/${resteasy.module.zip}</includes>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 
-			<!-- Downloads resteasy jaxrs from resteasy for use in integration tests -->
+			<!-- The resteasy-module.zip should be in build directory so unpack it to the jboss instance -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>download-resteasy</id>
+						<id>unpack-resteasy-stage-2</id>
 						<phase>process-sources</phase>
 						<goals>
 							<goal>run</goal>
 						</goals>
 						<configuration>
-							<!-- Not required if skipping integration tests -->
+							Not required if skipping integration tests
 							<skip>${integration.skipTests}</skip>
 							<target>
-								<property name="version.resteasy" value="${version.resteasy}" />
-								<property name="destination.resteasy" value="${project.build.directory}/resteasy" />
-								<property name="destination.jboss.modules"
-									value="${project.basedir}/lib/jbossas/${version.jbossas.test}/modules/system/layers/base" />
-								<ant antfile="${project.basedir}/install-resteasy.xml"
-									target="install" />
+								<unzip src="${project.build.directory}/${resteasy.module.zip}"
+											dest="${project.basedir}/lib/jbossas/${version.jbossas.test}/modules/system/layers/base" />
 							</target>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-resources-credentials</id>
+						<phase>process-test-classes</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.basedir}/lib/jbossas/${version.jbossas.test}/standalone/configuration</outputDirectory>
+							<resources>
+								<resource>
+									<directory>src/test/resources/credentials</directory>
+									<includes>
+										<include>*.properties</include>
+									</includes>
+									<filtering>true</filtering>
+								</resource>
+							</resources>
 						</configuration>
 					</execution>
 				</executions>

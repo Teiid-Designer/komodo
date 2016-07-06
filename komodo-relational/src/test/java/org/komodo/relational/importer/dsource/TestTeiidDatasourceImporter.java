@@ -46,6 +46,8 @@ public class TestTeiidDatasourceImporter  extends AbstractImporterTest {
 
     private static final String TDS_NAME = "MySqlPool";
 
+    private static final String MYSQL_DRIVER_NAME = "mysql-connector-java-5.1.39-bin.jarcom.mysql.jdbc.Driver_5_1";
+
     @Override
     protected void runImporter(Repository repository,
                                                                  File file, KomodoObject parentObject, ImportOptions importOptions,
@@ -172,10 +174,10 @@ public class TestTeiidDatasourceImporter  extends AbstractImporterTest {
 
     // Verifies a MySQL data source node
     private void verifyMySQLUSStatesTDS(KomodoObject dsNode) throws Exception {
-        verifyProperty(dsNode, KomodoLexicon.DataSource.DRIVER_NAME, "mysql");
+        verifyProperty(dsNode, KomodoLexicon.DataSource.DRIVER_NAME, MYSQL_DRIVER_NAME);
         verifyProperty(dsNode, KomodoLexicon.DataSource.JNDI_NAME, "java:/MySqlDS");
         verifyProperty(dsNode, "connection-url", "jdbc:mysql://db4free.net:3306/usstates");
-        verifyProperty(dsNode, "username", "komodo");
+        verifyProperty(dsNode, "user-name", "komodo");
         verifyProperty(dsNode, "password", "XUMz4vBKuA2v");
         verifyProperty(dsNode, KomodoLexicon.DataSource.JDBC, "true");
     }

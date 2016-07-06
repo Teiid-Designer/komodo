@@ -21,8 +21,8 @@
  */
 package org.komodo.rest.relational.json;
 
-import org.komodo.rest.relational.RestVdb;
-import org.komodo.rest.relational.RestVdbModelSource;
+import org.komodo.rest.relational.response.RestVdb;
+import org.komodo.rest.relational.response.RestVdbModelSource;
 
 /**
  * A GSON serializer/deserializer for {@link RestVdb}s.

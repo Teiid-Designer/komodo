@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<!-- Download the resteasy jaxrs jar and install -->
+<project name="download-resteasy" default="download">
+
+	<target name="download">
+
+		<property name="resteasy.dist" value="resteasy-jaxrs-${version.resteasy}"/>
+		<property name="resteasy.dist.zip" value="${resteasy.dist}-all.zip"/>
+		<property name="resteasy.dist.module.zip" value="resteasy-jboss-modules-${version.resteasy}.zip"/>
+
+		<mkdir dir="${destination.resteasy}" />
+
+		<!-- download file -->
+		<get src=" http://download.jboss.org/resteasy/${resteasy.dist.zip}"
+				 dest="${destination.resteasy}" verbose="true" usetimestamp="true" skipexisting="true"/>
+
+		<unzip src="${destination.resteasy}/${resteasy.dist.zip}" dest="${destination.resteasy}"/>
+
+		<move file="${destination.resteasy}/${resteasy.dist}/${resteasy.dist.module.zip}"
+						tofile="${destination.resteasy}/${resteasy.final.module.name.zip}"/>
+	</target>
+
+</project>

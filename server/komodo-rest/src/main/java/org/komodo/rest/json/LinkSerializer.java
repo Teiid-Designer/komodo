@@ -28,7 +28,7 @@ import javax.ws.rs.core.UriBuilder;
 import org.komodo.rest.Messages;
 import org.komodo.rest.RestLink;
 import org.komodo.rest.RestLink.LinkType;
-import org.komodo.rest.relational.RestVdbImport;
+import org.komodo.rest.relational.response.RestVdbImport;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;

@@ -29,6 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.VdbImport;
+import org.komodo.rest.relational.response.RestVdbImport;
 
 @SuppressWarnings( {"javadoc", "nls"} )
 public final class RestVdbImportTest {

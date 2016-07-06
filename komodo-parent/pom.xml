@@ -127,6 +127,10 @@
 		<version.org.jboss.spec.jboss-javaee-6.0>1.0.0.Final</version.org.jboss.spec.jboss-javaee-6.0>
 		<version.arquillian>1.1.9.Final</version.arquillian>
 		<version.arquillian-container>7.5.5.Final-redhat-3</version.arquillian-container>
+
+		<!-- The test version of resteasy when its unpacked -->
+		<version.resteasy>3.0.11.Final</version.resteasy>
+		<resteasy.module.zip>resteasy-module.zip</resteasy.module.zip>
 	</properties>
 
 	<profiles>
@@ -476,6 +480,11 @@
 				<artifactId>komodo-modeshape-sequencer-teiid-sql-tests</artifactId>
 				<version>${project.version}</version>
 				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.komodo</groupId>
+				<artifactId>komodo-integration-utils</artifactId>
+				<version>${project.version}</version>
 			</dependency>
 
 			<!--Inherited from BOM, but changes the default scope to "test" -->

@@ -30,12 +30,10 @@
 			!javax.security.auth.message*,
 			!javax.security.jacc,
 			!javax.servlet*,
-			!javax.transaction*,
 			!javax.xml.bind,
 			!javax.xml.ws,
 			javax.*,
-			sun.*
-			com.sun.*
+			org.xml.sax.*
 		</imported.packages>
 
 	</properties>

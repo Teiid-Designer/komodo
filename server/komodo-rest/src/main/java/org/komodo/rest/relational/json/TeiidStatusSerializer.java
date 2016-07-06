@@ -23,8 +23,8 @@ package org.komodo.rest.relational.json;
 
 import static org.komodo.rest.relational.json.KomodoJsonMarshaller.BUILDER;
 import java.io.IOException;
-import org.komodo.rest.relational.RestDataSourceDriver;
-import org.komodo.rest.relational.RestTeiidStatus;
+import org.komodo.rest.relational.response.RestDataSourceDriver;
+import org.komodo.rest.relational.response.RestTeiidStatus;
 import org.komodo.utils.StringUtils;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
