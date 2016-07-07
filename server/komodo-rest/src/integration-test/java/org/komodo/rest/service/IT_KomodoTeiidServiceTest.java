@@ -301,11 +301,11 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         assertEquals(TeiidVersionProvider.getInstance().getTeiidVersion().toString(), rt.getVersion());
 
         assertEquals(TeiidAdminInfo.DEFAULT_ADMIN_USERNAME, rt.getAdminUser());
-        assertEquals(TeiidAdminInfo.DEFAULT_ADMIN_PASSWORD, rt.getAdminPassword());
+        assertEquals(TeiidAdminInfo.DEFAULT_ADMIN_PASSWORD, rt.getAdminPasswd());
         assertEquals(TeiidAdminInfo.DEFAULT_PORT, rt.getAdminPort());
 
         assertEquals(TeiidJdbcInfo.DEFAULT_JDBC_USERNAME, rt.getJdbcUser());
-        assertEquals(TeiidJdbcInfo.DEFAULT_JDBC_PASSWORD, rt.getJdbcPassword());
+        assertEquals(TeiidJdbcInfo.DEFAULT_JDBC_PASSWORD, rt.getJdbcPasswd());
         assertEquals(TeiidJdbcInfo.DEFAULT_PORT, rt.getJdbcPort());
     }
 
