@@ -111,12 +111,12 @@ public class RestTeiid extends RestBasicEntity {
         setVersion(version != null ? version.toString() : null);
 
         setAdminPort(teiid.getAdminPort(uow));
-        setAdminPassword(teiid.getAdminPassword(uow));
+        setAdminPasswd(teiid.getAdminPassword(uow));
         setAdminUser(teiid.getAdminUser(uow));
         setAdminSecure(teiid.isAdminSecure(uow));
 
         setJdbcPort(teiid.getJdbcPort(uow));
-        setJdbcPassword(teiid.getJdbcPassword(uow));
+        setJdbcPasswd(teiid.getJdbcPassword(uow));
         setJdbcUser(teiid.getJdbcUsername(uow));
         setJdbcSecure(teiid.isJdbcSecure(uow));
     }
@@ -151,12 +151,12 @@ public class RestTeiid extends RestBasicEntity {
         tuples.put(ADMIN_PORT_LABEL, adminPort);
     }
 
-    public String getAdminPassword() {
+    public String getAdminPasswd() {
         Object adminPswd = tuples.get(ADMIN_PSWD_LABEL);
         return adminPswd != null ? adminPswd.toString() : null;
     }
 
-    public void setAdminPassword(String adminPassword) {
+    public void setAdminPasswd(String adminPassword) {
         tuples.put(ADMIN_PSWD_LABEL, adminPassword);
     }
 
@@ -187,12 +187,12 @@ public class RestTeiid extends RestBasicEntity {
         tuples.put(JDBC_PORT_LABEL, jdbcPort);
     }
 
-    public String getJdbcPassword() {
+    public String getJdbcPasswd() {
         Object jdbcPswd = tuples.get(JDBC_PSWD_LABEL);
         return jdbcPswd != null ? jdbcPswd.toString() : null;
     }
 
-    public void setJdbcPassword(String jdbcPassword) {
+    public void setJdbcPasswd(String jdbcPassword) {
         tuples.put(JDBC_PSWD_LABEL, jdbcPassword);
     }
 
