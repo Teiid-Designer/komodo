@@ -21,49 +21,51 @@
 
 		<plugins>
 			<!-- Downloads resteasy jaxrs from resteasy for use in integration tests -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>download-resteasy</id>
-						<phase>process-sources</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<configuration>
-							<!-- Not required if skipping integration tests -->
-							<skip>${integration.skipTests}</skip>
-							<target>
-								<property name="version.resteasy" value="${version.resteasy}" />
-								<property name="destination.resteasy" value="${project.build.directory}/resteasy" />
-								<property name="resteasy.final.module.name.zip" value="${resteasy.module.zip}" />
-								<ant antfile="${project.basedir}/download-resteasy.xml"
-									target="download" />
-							</target>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<configuration>
-					<!-- Not required if skipping integration tests -->
-					<skipAssembly>${integration.skipTests}</skipAssembly>
-					<descriptors>
-						<descriptor>assembly/assemble.xml</descriptor>
-					</descriptors>
-				</configuration>
-				<executions>
-					<execution>
-						<id>make-assembly-zip</id>
-						<phase>package</phase>
-						<goals>
-							<goal>single</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
+			<!-- NOT CURRENTLY REQUIRED SINCE THE REVERSION TO THE RESTEASY VERSION
+			       THAT IS SHIPPED WITH JBOSS AS -->
+<!-- 			<plugin> -->
+<!-- 				<groupId>org.apache.maven.plugins</groupId> -->
+<!-- 				<artifactId>maven-antrun-plugin</artifactId> -->
+<!-- 				<executions> -->
+<!-- 					<execution> -->
+<!-- 						<id>download-resteasy</id> -->
+<!-- 						<phase>process-sources</phase> -->
+<!-- 						<goals> -->
+<!-- 							<goal>run</goal> -->
+<!-- 						</goals> -->
+<!-- 						<configuration> -->
+<!-- 							Not required if skipping integration tests -->
+<!-- 							<skip>${integration.skipTests}</skip> -->
+<!-- 							<target> -->
+<!-- 								<property name="version.resteasy" value="${version.resteasy}" /> -->
+<!-- 								<property name="destination.resteasy" value="${project.build.directory}/resteasy" /> -->
+<!-- 								<property name="resteasy.final.module.name.zip" value="${resteasy.module.zip}" /> -->
+<!-- 								<ant antfile="${project.basedir}/download-resteasy.xml" -->
+<!-- 									target="download" /> -->
+<!-- 							</target> -->
+<!-- 						</configuration> -->
+<!-- 					</execution> -->
+<!-- 				</executions> -->
+<!-- 			</plugin> -->
+<!-- 			<plugin> -->
+<!-- 				<artifactId>maven-assembly-plugin</artifactId> -->
+<!-- 				<configuration> -->
+<!-- 					Not required if skipping integration tests -->
+<!-- 					 <skipAssembly>${integration.skipTests}</skipAssembly> -->
+<!-- 					<descriptors> -->
+<!-- 						<descriptor>assembly/assemble.xml</descriptor> -->
+<!-- 					</descriptors> -->
+<!-- 				</configuration> -->
+<!-- 				<executions> -->
+<!-- 					<execution> -->
+<!-- 						<id>make-assembly-zip</id> -->
+<!-- 						<phase>package</phase> -->
+<!-- 						<goals> -->
+<!-- 							<goal>single</goal> -->
+<!-- 						</goals> -->
+<!-- 					</execution> -->
+<!-- 				</executions> -->
+<!-- 			</plugin> -->
 		</plugins>
 
 		<pluginManagement>

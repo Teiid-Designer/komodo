@@ -27,13 +27,12 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.ServerErrorException;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -94,10 +93,10 @@ public final class KomodoUtilService extends KomodoService {
     /**
      * @param engine
      *        the Komodo Engine (cannot be <code>null</code> and must be started)
-     * @throws ServerErrorException
+     * @throws WebApplicationException
      *         if there is a problem obtaining the {@link WorkspaceManager workspace manager}
      */
-    public KomodoUtilService(final KEngine engine) throws ServerErrorException {
+    public KomodoUtilService(final KEngine engine) throws WebApplicationException {
         super(engine);
     }
 
@@ -270,7 +269,6 @@ public final class KomodoUtilService extends KomodoService {
     @GET
     @Path(V1Constants.SCHEMA_SEGMENT)
     @Produces( MediaType.APPLICATION_JSON )
-    @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Display the schema structure of the teiid vdb",
                             response = String.class)
     @ApiResponses(value = {

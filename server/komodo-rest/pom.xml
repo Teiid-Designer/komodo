@@ -52,13 +52,6 @@
 				<version>${version.guava}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.jboss.resteasy</groupId>
-				<artifactId>resteasy-bom</artifactId>
-				<version>${version.resteasy}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<dependency>
 				<groupId>io.swagger</groupId>
 				<artifactId>swagger-annotations</artifactId>
 				<version>${version.swagger}</version>
@@ -154,11 +147,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-client</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-json-p-provider</artifactId>
+			<artifactId>jaxrs-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
@@ -182,15 +171,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>io.undertow</groupId>
-			<artifactId>undertow-servlet</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-undertow</artifactId>
-			<scope>test</scope>
+  			<groupId>org.jboss.resteasy</groupId>
+  			<artifactId>resteasy-test-tjws</artifactId>
+  			<scope>test</scope>
 		</dependency>
 
 		<dependency>
@@ -376,53 +359,6 @@
 							</artifactItems>
 						</configuration>
 					</execution>
-					<execution>
-						<!-- Fetch the integration utils zip so that the resteasy module can be included in the jboss instance -->
-						<id>unpack-resteasy-stage-1</id>
-						<phase>process-sources</phase>
-						<goals>
-							<goal>unpack</goal>
-						</goals>
-						<configuration>
-							<!-- Not required if skipping integration tests -->
-							<skip>${integration.skipTests}</skip>
-							<artifactItems>
-								<artifactItem>
-									<groupId>org.komodo</groupId>
-									<artifactId>komodo-integration-utils</artifactId>
-									<version>${project.version}</version>
-									<classifier>components</classifier>
-									<type>zip</type>
-									<overWrite>true</overWrite>
-									<outputDirectory>${project.build.directory}</outputDirectory>
-									<includes>/${resteasy.module.zip}</includes>
-								</artifactItem>
-							</artifactItems>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-
-			<!-- The resteasy-module.zip should be in build directory so unpack it to the jboss instance -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>unpack-resteasy-stage-2</id>
-						<phase>process-sources</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<configuration>
-							Not required if skipping integration tests
-							<skip>${integration.skipTests}</skip>
-							<target>
-								<unzip src="${project.build.directory}/${resteasy.module.zip}"
-											dest="${project.basedir}/lib/jbossas/${version.jbossas.test}/modules/system/layers/base" />
-							</target>
-						</configuration>
-					</execution>
 				</executions>
 			</plugin>
 
@@ -538,17 +474,6 @@
 					<artifactId>resteasy-jaxrs</artifactId>
 					<scope>provided</scope>
 				</dependency>
-				<dependency>
-					<groupId>org.jboss.resteasy</groupId>
-					<artifactId>resteasy-client</artifactId>
-					<scope>provided</scope>
-				</dependency>
-				<dependency>
-					<groupId>org.jboss.resteasy</groupId>
-					<artifactId>resteasy-json-p-provider</artifactId>
-					<scope>provided</scope>
-				</dependency>
-
 			</dependencies>
 		</profile>
 

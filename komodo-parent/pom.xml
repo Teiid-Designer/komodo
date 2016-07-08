@@ -128,9 +128,6 @@
 		<version.arquillian>1.1.9.Final</version.arquillian>
 		<version.arquillian-container>7.5.5.Final-redhat-3</version.arquillian-container>
 
-		<!-- The test version of resteasy when its unpacked -->
-		<version.resteasy>3.0.11.Final</version.resteasy>
-		<resteasy.module.zip>resteasy-module.zip</resteasy.module.zip>
 	</properties>
 
 	<profiles>

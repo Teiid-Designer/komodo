@@ -21,18 +21,19 @@
  */
 package org.komodo.rest.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Map;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
+import org.jboss.resteasy.client.ClientRequest;
+import org.jboss.resteasy.client.ClientResponse;
 import org.junit.Assert;
 import org.junit.Test;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.KomodoService;
+import org.komodo.rest.cors.CorsHeaders;
 import org.komodo.rest.relational.AbstractKomodoServiceTest;
 import org.komodo.rest.relational.RelationalMessages;
 import org.komodo.rest.relational.json.KomodoJsonMarshaller;
@@ -67,11 +68,17 @@ public final class KomodoUtilServiceTest extends AbstractKomodoServiceTest {
         URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
                                                     .path(V1Constants.SERVICE_SEGMENT)
                                                     .path(V1Constants.ABOUT).build();
-        this.response = request(uri).get();
-        assertTrue(response.hasEntity());
 
-        final String entity = response.readEntity(String.class);
-        //System.out.println("Response from uri " + uri + ":\n" + entity);
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        addHeader(request, CorsHeaders.ORIGIN, "http://localhost:2772");
+
+        ClientResponse<String> response = request.get(String.class);
+        
+
+        assertNotNull(response.getEntity());
+
+        final String entity = response.getEntity();
+        System.out.println("Response from uri " + uri + ":\n" + entity);
         for (String expected : EXPECTED) {
             assertTrue(entity.contains(expected));
         }
@@ -83,10 +90,12 @@ public final class KomodoUtilServiceTest extends AbstractKomodoServiceTest {
         // get
         URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
                                                     .path("swagger.json").build();
-        this.response = request(uri).get();
-        assertTrue(response.hasEntity());
 
-        final String entity = response.readEntity(String.class);
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+        assertNotNull(response.getEntity());
+
+        final String entity = response.getEntity();
         //System.out.println("Response from uri " + uri + ":\n" + entity);
 
         assertTrue(entity.contains("\"swagger\" : \"2.0\""));
@@ -106,9 +115,12 @@ public final class KomodoUtilServiceTest extends AbstractKomodoServiceTest {
         URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
                                                     .path(V1Constants.SERVICE_SEGMENT)
                                                     .path(V1Constants.SAMPLE_DATA).build();
-        this.response = request(uri).post(null);
 
-        final String entity = response.readEntity(String.class);
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.post(String.class);
+        assertNotNull(response.getEntity());
+
+        final String entity = response.getEntity();
         // System.out.println("Response from uri " + uri + ":\n" + entity);
 
         KomodoStatusObject status = KomodoJsonMarshaller.unmarshall(entity, KomodoStatusObject.class);
@@ -134,9 +146,12 @@ public final class KomodoUtilServiceTest extends AbstractKomodoServiceTest {
         URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
                                                     .path(V1Constants.SERVICE_SEGMENT)
                                                     .path(V1Constants.SAMPLE_DATA).build();
-        this.response = request(uri).post(null);
 
-        final String entity = response.readEntity(String.class);
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.post(String.class);
+        assertNotNull(response.getEntity());
+
+        final String entity = response.getEntity();
         // System.out.println("Response from uri " + uri + ":\n" + entity);
 
         KomodoStatusObject status = KomodoJsonMarshaller.unmarshall(entity, KomodoStatusObject.class);
@@ -164,10 +179,12 @@ public final class KomodoUtilServiceTest extends AbstractKomodoServiceTest {
                                                     .path(V1Constants.SERVICE_SEGMENT)
                                                     .path(V1Constants.SCHEMA_SEGMENT)
                                                     .build();
-        this.response = request(uri).get();
-        assertTrue(response.hasEntity());
 
-        final String entity = response.readEntity(String.class);
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+        assertNotNull(response.getEntity());
+
+        final String entity = response.getEntity();
         System.out.println("Response from uri " + uri + ":\n" + entity);
 
         InputStream schemaStream = getClass().getResourceAsStream("teiid-schema.json");
@@ -188,11 +205,13 @@ public final class KomodoUtilServiceTest extends AbstractKomodoServiceTest {
         URI uri = baseBuilder.clone()
                                          .queryParam(KomodoService.QueryParamKeys.KTYPE, KomodoType.MODEL)
                                          .build();
-        this.response = request(uri).get();
-        assertTrue(response.hasEntity());
 
-        String entity = response.readEntity(String.class);
-        //System.out.println("Response from uri " + uri + ":\n" + entity);
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+        assertNotNull(response.getEntity());
+
+        String entity = response.getEntity();
+        System.out.println("Response from uri " + uri + ":\n" + entity);
 
         assertFalse(entity.contains("\"schema-1\" : {"));
         assertFalse(entity.contains("\"keng__id\" : \"vdb\""));
@@ -213,10 +232,13 @@ public final class KomodoUtilServiceTest extends AbstractKomodoServiceTest {
         uri = baseBuilder.clone()
                                   .queryParam(KomodoService.QueryParamKeys.KTYPE, KomodoType.VDB_DATA_ROLE)
                                   .build();
-        this.response = request(uri).get();
-        assertTrue(response.hasEntity());
 
-        entity = response.readEntity(String.class);
+        request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        response = request.get(String.class);
+        assertNotNull(response.getEntity());
+
+        entity = response.getEntity();
+
         //System.out.println("Response from uri " + uri + ":\n" + entity);
 
         assertFalse(entity.contains("\"schema-1\" : {"));
@@ -238,10 +260,12 @@ public final class KomodoUtilServiceTest extends AbstractKomodoServiceTest {
         uri = baseBuilder.clone().
                                    queryParam(KomodoService.QueryParamKeys.KTYPE, KomodoType.VDB_MASK)
                                    .build();
-        this.response = request(uri).get();
-        assertTrue(response.hasEntity());
 
-        entity = response.readEntity(String.class);
+        request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        response = request.get(String.class);
+        assertNotNull(response.getEntity());
+
+        entity = response.getEntity();
         //System.out.println("Response from uri " + uri + ":\n" + entity);
 
         assertFalse(entity.contains("\"schema-1\" : {"));
@@ -263,10 +287,13 @@ public final class KomodoUtilServiceTest extends AbstractKomodoServiceTest {
         uri = baseBuilder.clone().
                                    queryParam(KomodoService.QueryParamKeys.KTYPE, KomodoType.DATASOURCE)
                                    .build();
-        this.response = request(uri).get();
-        assertTrue(response.hasEntity());
 
-        entity = response.readEntity(String.class);
+        request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        addJsonConsumeContentType(request);
+        response = request.get(String.class);
+        assertNotNull(response.getEntity());
+
+        entity = response.getEntity();
 //        System.out.println("Response from uri " + uri + ":\n" + entity);
 
         assertFalse(entity.contains("\"schema-1\" : {"));
