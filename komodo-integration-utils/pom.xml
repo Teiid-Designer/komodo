@@ -6,6 +6,7 @@
 		<groupId>org.komodo</groupId>
 		<artifactId>komodo-parent</artifactId>
 		<version>0.0.4-SNAPSHOT</version>
+		<relativePath>../komodo-parent/pom.xml</relativePath>
 	</parent>
 
 	<artifactId>komodo-integration-utils</artifactId>
