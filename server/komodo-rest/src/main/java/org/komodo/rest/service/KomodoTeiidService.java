@@ -34,7 +34,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.ServerErrorException;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -99,10 +99,10 @@ public class KomodoTeiidService extends KomodoService {
     /**
      * @param engine
      *        the Komodo Engine (cannot be <code>null</code> and must be started)
-     * @throws ServerErrorException
+     * @throws WebApplicationException
      *         if there is a problem obtaining the {@link WorkspaceManager workspace manager}
      */
-    public KomodoTeiidService(final KEngine engine) throws ServerErrorException {
+    public KomodoTeiidService(final KEngine engine) throws WebApplicationException {
         super(engine);
     }
 
@@ -359,7 +359,6 @@ public class KomodoTeiidService extends KomodoService {
     @GET
     @Path(V1Constants.VDBS_SEGMENT)
     @Produces( MediaType.APPLICATION_JSON )
-    @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Display the collection of vdbs",
                             response = RestVdb[].class)
     @ApiResponses(value = {
@@ -422,7 +421,6 @@ public class KomodoTeiidService extends KomodoService {
     @Path( V1Constants.VDBS_SEGMENT + StringConstants.FORWARD_SLASH +
                   V1Constants.VDB_PLACEHOLDER )
     @Produces( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
-    @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Find vdb by name", response = RestVdb.class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No vdb could be found with name"),
@@ -479,7 +477,6 @@ public class KomodoTeiidService extends KomodoService {
     @GET
     @Path(V1Constants.TRANSLATORS_SEGMENT)
     @Produces( MediaType.APPLICATION_JSON )
-    @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Display the collection of translators",
                             response = RestVdbTranslator[].class)
     @ApiResponses(value = {
@@ -538,7 +535,6 @@ public class KomodoTeiidService extends KomodoService {
     @GET
     @Path(V1Constants.DATA_SOURCES_SEGMENT)
     @Produces( MediaType.APPLICATION_JSON )
-    @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Display the collection of data sources",
                             response = RestDataSource[].class)
     @ApiResponses(value = {

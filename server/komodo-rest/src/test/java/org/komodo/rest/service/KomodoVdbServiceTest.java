@@ -32,10 +32,11 @@ import static org.junit.Assert.fail;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Properties;
-import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
+import org.jboss.resteasy.client.ClientRequest;
+import org.jboss.resteasy.client.ClientResponse;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -55,7 +56,6 @@ import org.komodo.rest.relational.response.RestVdbModel;
 import org.komodo.rest.relational.response.RestVdbModelSource;
 import org.komodo.rest.relational.response.RestVdbPermission;
 import org.komodo.rest.relational.response.RestVdbTranslator;
-import org.komodo.rest.service.KomodoVdbService;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.test.utils.TestUtilities;
 
@@ -71,10 +71,11 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
 
         // get
         URI uri = _uriBuilder.workspaceVdbsUri();
-        this.response = request(uri).get();
-        assertTrue(response.hasEntity());
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+        assertNotNull(response.getEntity());
 
-        final String entities = response.readEntity(String.class);
+        final String entities = response.getEntity();
         assertThat(entities, is(notNullValue()));
 
         // System.out.println("Response:\n" + entities);
@@ -103,10 +104,9 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         loadVdbs();
 
         URI uri = _uriBuilder.workspaceVdbsUri();
-        Builder request = this.client.target(uri.toString()).request(MediaType.APPLICATION_XML);
-        this.response = request.get();
-
-        assertTrue(response.hasEntity());
+        ClientRequest request = request(uri, MediaType.APPLICATION_XML_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+        assertNotNull(response.getEntity());
 
         //
         // Internal server error since the server does not support
@@ -114,17 +114,17 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         //
         assertEquals(500, response.getStatus());
 
-        final String entity = response.readEntity(String.class);
+        final String entity = response.getEntity();
         assertThat(entity, is(notNullValue()));
 
-        assertEquals("No match for accept header", entity);
+        assertTrue(entity.contains("No match for accept header"));
     }
 
     //    @Test
     //    public void shouldDeleteVdb() throws Exception {
     //        final RestVdb restVdb = createVdbs( 1 )[ 0 ];
-    //        this.response = request( _uriBuilder.buildVdbUri( LinkType.DELETE, restVdb.getName() ) ).delete();
-    //        assertThat( this.response.getStatus(), is( Status.NO_CONTENT.getStatusCode() ) );
+    //        response = request( _uriBuilder.buildVdbUri( LinkType.DELETE, restVdb.getName() ) ).delete();
+    //        assertThat( response.getStatus(), is( Status.NO_CONTENT.getStatusCode() ) );
     //    }
 
     @Test
@@ -134,8 +134,12 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         // get
         Properties settings = _uriBuilder.createSettings(SettingNames.VDB_NAME, TestUtilities.PORTFOLIO_VDB_NAME);
         _uriBuilder.addSetting(settings, SettingNames.VDB_PARENT_PATH, _uriBuilder.workspaceVdbsUri());
-        this.response = request(_uriBuilder.vdbUri(LinkType.SELF, settings)).get();
-        final String entity = this.response.readEntity(String.class);
+
+        URI uri = _uriBuilder.vdbUri(LinkType.SELF, settings);
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+
+        final String entity = response.getEntity();
         assertThat(entity, is(notNullValue()));
 
         //System.out.println("Response:\n" + entity);
@@ -153,12 +157,14 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         Properties settings = _uriBuilder.createSettings(SettingNames.VDB_NAME, TestUtilities.PORTFOLIO_VDB_NAME);
         _uriBuilder.addSetting(settings, SettingNames.VDB_PARENT_PATH, _uriBuilder.workspaceVdbsUri());
         URI uri = _uriBuilder.vdbUri(LinkType.SELF, settings);
-        Builder request = this.client.target(uri.toString()).request(MediaType.APPLICATION_XML);
-        this.response = request.get();
-        final String entity = this.response.readEntity(String.class);
+
+        ClientRequest request = request(uri, MediaType.APPLICATION_XML_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+
+        final String entity = response.getEntity();
         assertThat(entity, is(notNullValue()));
 
-        //System.out.println("Response:\n" + entity);
+        System.out.println("Response:\n" + entity);
         assertTrue(entity.contains("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"));
         assertTrue(entity.contains("<vdb name=\"Portfolio\" version=\"1\">"));
         assertTrue(entity.contains("</vdb>"));
@@ -169,9 +175,13 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         loadVdbs();
 
         final String pattern = STAR + "P" + STAR;
-        this.response = request(UriBuilder.fromUri(_uriBuilder.workspaceVdbsUri()).queryParam(KomodoVdbService.QueryParamKeys.PATTERN, pattern).build()).get();
+        URI uri = UriBuilder.fromUri(_uriBuilder.workspaceVdbsUri())
+                                          .queryParam(KomodoVdbService.QueryParamKeys.PATTERN, pattern)
+                                          .build();
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
 
-        final String entities = response.readEntity(String.class);
+        final String entities = response.getEntity();
         assertThat(entities, is(notNullValue()));
 
         //System.out.println("Response:\n" + entities);
@@ -197,8 +207,13 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
 
         final int resultSize = 3;
 
-        this.response = request(UriBuilder.fromUri(_uriBuilder.workspaceVdbsUri()).queryParam(KomodoVdbService.QueryParamKeys.SIZE, resultSize).build()).get();
-        final String entities = response.readEntity(String.class);
+        URI uri = UriBuilder.fromUri(_uriBuilder.workspaceVdbsUri())
+                                            .queryParam(KomodoVdbService.QueryParamKeys.SIZE, resultSize)
+                                            .build();
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+
+        final String entities = response.getEntity();
         assertThat(entities, is(notNullValue()));
 
         //System.out.println("Response:\n" + entities);
@@ -213,8 +228,13 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
 
         final int start = 3;
 
-        this.response = request(UriBuilder.fromUri(_uriBuilder.workspaceVdbsUri()).queryParam(KomodoVdbService.QueryParamKeys.START, start).build()).get();
-        final String entities = response.readEntity(String.class);
+        URI uri = UriBuilder.fromUri(_uriBuilder.workspaceVdbsUri())
+                                        .queryParam(KomodoVdbService.QueryParamKeys.START, start)
+                                        .build();
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+
+        final String entities = response.getEntity();
         assertThat(entities, is(notNullValue()));
 
         //System.out.println("Response:\n" + entities);
@@ -226,20 +246,26 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
     //
     //    @Test
     //    public void shouldNotDeleteVdb() throws Exception {
-    //        this.response = request( _uriBuilder.buildVdbUri( LinkType.DELETE, "vdbDoesNotExist" ) ).delete();
-    //        assertThat( this.response.getStatus(), is( Status.NOT_FOUND.getStatusCode() ) );
+    //        response = request( _uriBuilder.buildVdbUri( LinkType.DELETE, "vdbDoesNotExist" ) ).delete();
+    //        assertThat( response.getStatus(), is( Status.NOT_FOUND.getStatusCode() ) );
     //    }
 
     @Test
     public void shouldNotFindVdb() throws Exception {
-        this.response = request(UriBuilder.fromUri(_uriBuilder.workspaceVdbsUri()).path("blah").build()).get();
-        assertThat(this.response.getStatus(), is(Status.NOT_FOUND.getStatusCode()));
+        URI uri = UriBuilder.fromUri(_uriBuilder.workspaceVdbsUri()).path("blah").build();
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+
+        assertThat(response.getStatus(), is(Status.NOT_FOUND.getStatusCode()));
     }
 
     @Test
-    public void shouldReturnEmptyListWhenNoVdbsInWorkspace() {
-        this.response = request(_uriBuilder.workspaceVdbsUri()).get();
-        final String entity = this.response.readEntity(String.class);
+    public void shouldReturnEmptyListWhenNoVdbsInWorkspace() throws Exception {
+        URI uri = _uriBuilder.workspaceVdbsUri();
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+
+        final String entity = response.getEntity();
         assertThat(entity, is(notNullValue()));
 
         //System.out.println("Response:\n" + entity);
@@ -256,8 +282,9 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         // get
         URI vdbBaseUri = _uriBuilder.workspaceVdbsUri();
         URI uri = _uriBuilder.vdbChildGroupUri(vdbBaseUri, TestUtilities.PORTFOLIO_VDB_NAME, LinkType.MODELS);
-        this.response = request(uri).get();
-        final String entity = this.response.readEntity(String.class);
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+        final String entity = response.getEntity();
         assertThat(entity, is(notNullValue()));
 
         //System.out.println("Response:\n" + entity);
@@ -300,8 +327,9 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         _uriBuilder.addSetting(settings, SettingNames.VDB_PARENT_PATH, _uriBuilder.workspaceVdbsUri());
         _uriBuilder.addSetting(settings, SettingNames.MODEL_NAME, "PersonalValuations");
         URI uri = _uriBuilder.vdbModelUri(LinkType.SELF, settings);
-        this.response = request(uri).get();
-        final String entity = this.response.readEntity(String.class);
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+        final String entity = response.getEntity();
         assertThat(entity, is(notNullValue()));
 
         // System.out.println("Response from uri " + uri + ":\n" + entity);
@@ -327,8 +355,9 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         _uriBuilder.addSetting(settings, SettingNames.VDB_PARENT_PATH, _uriBuilder.workspaceVdbsUri());
         _uriBuilder.addSetting(settings, SettingNames.MODEL_NAME, "PersonalValuations");
         URI uri = _uriBuilder.vdbModelUri(LinkType.SOURCES, settings);
-        this.response = request(uri).get();
-        final String entities = this.response.readEntity(String.class);
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+        final String entities = response.getEntity();
         assertThat(entities, is(notNullValue()));
 
         //System.out.println("Response from uri " + uri + ":\n" + entities);
@@ -356,8 +385,9 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         _uriBuilder.addSetting(settings, SettingNames.VDB_PARENT_PATH, _uriBuilder.workspaceVdbsUri());
         _uriBuilder.addSetting(settings, SettingNames.MODEL_NAME, "twitter");
         URI uri = _uriBuilder.vdbModelUri(LinkType.SOURCES, settings);
-        this.response = request(uri).get();
-        final String entities = this.response.readEntity(String.class);
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+        final String entities = response.getEntity();
         assertThat(entities, is(notNullValue()));
 
         //System.out.println("Response from uri " + uri + ":\n" + entities);
@@ -383,7 +413,7 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         assertNotNull(refLink);
 
         URI href = refLink.getHref();
-        assertTrue(href.toString().endsWith("/v1/workspace/vdbs/twitter/VdbTranslators/rest"));
+        assertTrue(href.toString().endsWith("workspace/vdbs/twitter/VdbTranslators/rest"));
     }
 
     @Test
@@ -396,8 +426,9 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         _uriBuilder.addSetting(settings, SettingNames.MODEL_NAME, "PersonalValuations");
         _uriBuilder.addSetting(settings, SettingNames.SOURCE_NAME, "excelconnector");
         URI uri = _uriBuilder.vdbModelSourceUri(LinkType.SELF, settings);
-        this.response = request(uri).get();
-        final String entity = this.response.readEntity(String.class);
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+        final String entity = response.getEntity();
         assertThat(entity, is(notNullValue()));
 
         //System.out.println("Response from uri " + uri + ":\n" + entity);
@@ -421,8 +452,9 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         // get
         URI vdbBaseUri = _uriBuilder.workspaceVdbsUri();
         URI uri = _uriBuilder.vdbChildGroupUri(vdbBaseUri, TestUtilities.TWEET_EXAMPLE_VDB_NAME, LinkType.TRANSLATORS);
-        this.response = request(uri).get();
-        final String entity = this.response.readEntity(String.class);
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+        final String entity = response.getEntity();
         assertThat(entity, is(notNullValue()));
 
         //System.out.println("Response:\n" + entity);
@@ -448,8 +480,9 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         // get
         URI vdbBaseUri = _uriBuilder.workspaceVdbsUri();
         URI uri = _uriBuilder.vdbChildGroupUri(vdbBaseUri, TestUtilities.PORTFOLIO_VDB_NAME, LinkType.TRANSLATORS);
-        this.response = request(uri).get();
-        final String entity = this.response.readEntity(String.class);
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+        final String entity = response.getEntity();
         assertThat(entity, is(notNullValue()));
 
         //System.out.println("Response:\n" + entity);
@@ -472,8 +505,9 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         _uriBuilder.addSetting(settings, SettingNames.PARENT_PATH, parentUri);
         _uriBuilder.addSetting(settings, SettingNames.TRANSLATOR_NAME, "rest");
         URI uri = _uriBuilder.vdbTranslatorUri(LinkType.SELF, settings);
-        this.response = request(uri).get();
-        final String entity = this.response.readEntity(String.class);
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+        final String entity = response.getEntity();
         assertThat(entity, is(notNullValue()));
 
         System.out.println("Response from uri " + uri + ":\n" + entity);
@@ -496,8 +530,9 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         // get
         URI vdbBaseUri = _uriBuilder.workspaceVdbsUri();
         URI uri = _uriBuilder.vdbChildGroupUri(vdbBaseUri, TestUtilities.ALL_ELEMENTS_EXAMPLE_VDB_NAME, LinkType.IMPORTS);
-        this.response = request(uri).get();
-        final String entity = this.response.readEntity(String.class);
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+        final String entity = response.getEntity();
         assertThat(entity, is(notNullValue()));
 
         //System.out.println("Response:\n" + entity);
@@ -524,8 +559,9 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         // get
         URI vdbBaseUri = _uriBuilder.workspaceVdbsUri();
         URI uri = _uriBuilder.vdbChildGroupUri(vdbBaseUri, TestUtilities.PORTFOLIO_VDB_NAME, LinkType.IMPORTS);
-        this.response = request(uri).get();
-        final String entity = this.response.readEntity(String.class);
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+        final String entity = response.getEntity();
         assertThat(entity, is(notNullValue()));
 
         //System.out.println("Response:\n" + entity);
@@ -544,8 +580,9 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         _uriBuilder.addSetting(settings, SettingNames.VDB_PARENT_PATH, _uriBuilder.workspaceVdbsUri());
         _uriBuilder.addSetting(settings, SettingNames.IMPORT_NAME, "x");
         URI uri = _uriBuilder.vdbImportUri(LinkType.SELF, settings);
-        this.response = request(uri).get();
-        final String entity = this.response.readEntity(String.class);
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+        final String entity = response.getEntity();
         assertThat(entity, is(notNullValue()));
 
         //System.out.println("Response from uri " + uri + ":\n" + entity);
@@ -569,8 +606,9 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         // get
         URI vdbBaseUri = _uriBuilder.workspaceVdbsUri();
         URI uri = _uriBuilder.vdbChildGroupUri(vdbBaseUri, TestUtilities.ALL_ELEMENTS_EXAMPLE_VDB_NAME, LinkType.DATA_ROLES);
-        this.response = request(uri).get();
-        final String entity = this.response.readEntity(String.class);
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+        final String entity = response.getEntity();
         assertThat(entity, is(notNullValue()));
 
         //System.out.println("Response:\n" + entity);
@@ -602,8 +640,9 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         // get
         URI vdbBaseUri = _uriBuilder.workspaceVdbsUri();
         URI uri = _uriBuilder.vdbChildGroupUri(vdbBaseUri, TestUtilities.PORTFOLIO_VDB_NAME, LinkType.DATA_ROLES);
-        this.response = request(uri).get();
-        final String entity = this.response.readEntity(String.class);
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+        final String entity = response.getEntity();
         assertThat(entity, is(notNullValue()));
 
         //System.out.println("Response:\n" + entity);
@@ -622,8 +661,9 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         _uriBuilder.addSetting(settings, SettingNames.VDB_PARENT_PATH, _uriBuilder.workspaceVdbsUri());
         _uriBuilder.addSetting(settings, SettingNames.DATA_ROLE_ID, "roleOne");
         URI uri = _uriBuilder.vdbDataRoleUri(LinkType.SELF, settings);
-        this.response = request(uri).get();
-        final String entity = this.response.readEntity(String.class);
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+        final String entity = response.getEntity();
         assertThat(entity, is(notNullValue()));
 
         //System.out.println("Response from uri " + uri + ":\n" + entity);
@@ -654,8 +694,9 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         _uriBuilder.addSetting(settings, SettingNames.VDB_PARENT_PATH, _uriBuilder.workspaceVdbsUri());
         _uriBuilder.addSetting(settings, SettingNames.DATA_ROLE_ID, "roleOne");
         URI uri = _uriBuilder.vdbDataRoleUri(LinkType.PERMISSIONS, settings);
-        this.response = request(uri).get();
-        final String entity = this.response.readEntity(String.class);
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+        final String entity = response.getEntity();
         assertThat(entity, is(notNullValue()));
 
         //System.out.println("Response:\n" + entity);
@@ -725,8 +766,9 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         _uriBuilder.addSetting(settings, SettingNames.DATA_ROLE_ID, "roleOne");
         _uriBuilder.addSetting(settings, SettingNames.PERMISSION_ID, "myTable.T1");
         URI uri = _uriBuilder.vdbPermissionUri(LinkType.SELF, settings);
-        this.response = request(uri).get();
-        final String entity = this.response.readEntity(String.class);
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+        final String entity = response.getEntity();
         assertThat(entity, is(notNullValue()));
 
         //System.out.println("Response from uri " + uri + ":\n" + entity);
@@ -759,8 +801,9 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         _uriBuilder.addSetting(settings, SettingNames.DATA_ROLE_ID, "roleOne");
         _uriBuilder.addSetting(settings, SettingNames.PERMISSION_ID, "myTable.T2");
         URI uri = _uriBuilder.vdbPermissionUri(LinkType.CONDITIONS, settings);
-        this.response = request(uri).get();
-        final String entity = this.response.readEntity(String.class);
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+        final String entity = response.getEntity();
         assertThat(entity, is(notNullValue()));
 
         //System.out.println("Response:\n" + entity);
@@ -789,8 +832,9 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         _uriBuilder.addSetting(settings, SettingNames.PERMISSION_CHILD_TYPE, LinkType.CONDITIONS.uriName());
         _uriBuilder.addSetting(settings, SettingNames.PERMISSION_CHILD_ID, "col1 = user()");
         URI uri = _uriBuilder.vdbPermissionChildUri(LinkType.SELF, settings);
-        this.response = request(uri).get();
-        final String entity = this.response.readEntity(String.class);
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+        final String entity = response.getEntity();
         assertThat(entity, is(notNullValue()));
 
         //System.out.println("Response:\n" + entity);
@@ -815,8 +859,9 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         _uriBuilder.addSetting(settings, SettingNames.DATA_ROLE_ID, "roleOne");
         _uriBuilder.addSetting(settings, SettingNames.PERMISSION_ID, "myTable.T2.col1");
         URI uri = _uriBuilder.vdbPermissionUri(LinkType.MASKS, settings);
-        this.response = request(uri).get();
-        final String entity = this.response.readEntity(String.class);
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+        final String entity = response.getEntity();
         assertThat(entity, is(notNullValue()));
 
         //System.out.println("Response:\n" + entity);
@@ -845,8 +890,9 @@ public final class KomodoVdbServiceTest extends AbstractKomodoServiceTest {
         _uriBuilder.addSetting(settings, SettingNames.PERMISSION_CHILD_TYPE, LinkType.MASKS.uriName());
         _uriBuilder.addSetting(settings, SettingNames.PERMISSION_CHILD_ID, "col2");
         URI uri = _uriBuilder.vdbPermissionChildUri(LinkType.SELF, settings);
-        this.response = request(uri).get();
-        final String entity = this.response.readEntity(String.class);
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+        final String entity = response.getEntity();
         assertThat(entity, is(notNullValue()));
 
         //System.out.println("Response:\n" + entity);

@@ -37,13 +37,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Invocation;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
-import org.jboss.resteasy.plugins.server.undertow.UndertowJaxrsServer;
+import org.jboss.resteasy.client.ClientRequest;
+import org.jboss.resteasy.plugins.server.tjws.TJWSEmbeddedJaxrsServer;
 import org.jboss.resteasy.test.TestPortProvider;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -58,8 +55,8 @@ import org.komodo.rest.KomodoRestV1Application;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.RestLink;
 import org.komodo.rest.RestLink.LinkType;
-import org.komodo.rest.relational.response.RestVdb;
 import org.komodo.rest.RestProperty;
+import org.komodo.rest.relational.response.RestVdb;
 import org.komodo.spi.constants.SystemConstants;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
@@ -76,9 +73,10 @@ import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 public abstract class AbstractKomodoServiceTest implements V1Constants {
 
     private static Path _kengineDataDir;
-    private static KomodoRestV1Application _restApp;
-    private static UndertowJaxrsServer _server;
+    protected static KomodoRestV1Application _restApp;
+    protected static TJWSEmbeddedJaxrsServer _server;
     protected static KomodoRestUriBuilder _uriBuilder;
+    private static URI _appUri;
 
     @AfterClass
     public static void afterAll() throws Exception {
@@ -134,18 +132,21 @@ public abstract class AbstractKomodoServiceTest implements V1Constants {
         _kengineDataDir = Files.createTempDirectory(null, new FileAttribute[0]);
         System.setProperty(SystemConstants.ENGINE_DATA_DIR, _kengineDataDir.toString());
 
-        _server = new UndertowJaxrsServer().start();
+        _server = new TJWSEmbeddedJaxrsServer();        
+        _server.setPort(TestPortProvider.getPort());
 
         _restApp = new KomodoRestV1Application();
-        _server.deploy(_restApp);
+        _server.getDeployment().setApplication(_restApp);
+        _server.start();
 
         final URI baseUri = URI.create(TestPortProvider.generateBaseUrl());
-        final URI appUri = UriBuilder.fromUri(baseUri).path("/v1").build();
-        _uriBuilder = new KomodoRestUriBuilder(appUri);
+        //
+        // Note this lacks the /v1 context since the embedded server does not
+        // seem to detect context from the application
+        //
+        _appUri = UriBuilder.fromUri(baseUri).build();
+        _uriBuilder = new KomodoRestUriBuilder(_appUri);
     }
-
-    protected Client client;
-    protected Response response;
 
     /**
      *
@@ -156,18 +157,11 @@ public abstract class AbstractKomodoServiceTest implements V1Constants {
 
     @After
     public void afterEach() throws Exception {
-        if (this.response != null) {
-            this.response.close();
-        }
-
-        this.client.close();
-
         _restApp.clearRepository();
     }
 
     @Before
     public void beforeEach() {
-        this.client = ClientBuilder.newClient();
     }
 
     protected KomodoRestV1Application getRestApp() {
@@ -236,11 +230,34 @@ public abstract class AbstractKomodoServiceTest implements V1Constants {
         return searchNames;
     }
 
-    protected Invocation.Builder request(final URI uri, MediaType... types) {
-        if (types == null || types.length == 0)
-            return this.client.target(uri.toString()).request();
+    protected ClientRequest request(final URI uri, MediaType type) {
+        ClientRequest request = new ClientRequest(uri.toString());
+        if (type != null)
+            request.accept(type);
 
-        return this.client.target(uri.toString()).request(types);
+        return request;
+    }
+
+    protected void addJsonConsumeContentType(ClientRequest request) {
+        //
+        // Have to add this as the REST operation has a @Consumes annotation
+        //
+        request.header("Content-Type", MediaType.APPLICATION_JSON);
+    }
+
+    protected void addXmlConsumeContentType(ClientRequest request) {
+        //
+        // Have to add this as the REST operation has a @Consumes annotation
+        //
+        request.header("Content-Type", MediaType.APPLICATION_XML);
+    }
+
+    protected void addBody(ClientRequest request, Object data) {
+        request.body(MediaType.APPLICATION_JSON_TYPE, data);
+    }
+
+    protected void addHeader(ClientRequest request, String name, Object value) {
+        request.getHeadersAsObjects().add(name, value);
     }
 
     protected void assertPortfolio(RestVdb vdb) {
@@ -269,16 +286,16 @@ public abstract class AbstractKomodoServiceTest implements V1Constants {
 
             if (link.getRel().equals(LinkType.SELF)) {
                 linkCounter++;
-                assertTrue(href.startsWith("http://localhost:8081/v1/workspace/vdbs"));
+                assertTrue(href.startsWith(_appUri.toString() + "/workspace/vdbs"));
                 assertTrue(href.endsWith(TestUtilities.PORTFOLIO_VDB_NAME));
             } else if (link.getRel().equals(LinkType.PARENT)) {
                 linkCounter++;
-                assertTrue(href.startsWith("http://localhost:8081/v1/workspace/vdbs"));
+                assertTrue(href.startsWith(_appUri.toString() + "/workspace/vdbs"));
             } else if (link.getRel().equals(LinkType.CHILDREN)) {
                 linkCounter++;
-                assertTrue(href.startsWith("http://localhost:8081/v1/workspace/search"));
+                assertTrue(href.startsWith(_appUri.toString() + "/workspace/search"));
             } else {
-                assertTrue(href.startsWith("http://localhost:8081/v1/workspace/vdbs"));
+                assertTrue(href.startsWith(_appUri.toString() + "/workspace/vdbs"));
 
                 String suffixPrefix = TestUtilities.PORTFOLIO_VDB_NAME + FORWARD_SLASH;
 

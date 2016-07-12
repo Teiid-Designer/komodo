@@ -29,6 +29,9 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import java.net.URI;
 import java.util.Properties;
+import javax.ws.rs.core.MediaType;
+import org.jboss.resteasy.client.ClientRequest;
+import org.jboss.resteasy.client.ClientResponse;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -52,10 +55,12 @@ public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTes
 
         // get
         URI uri = _uriBuilder.workspaceDataservicesUri();
-        this.response = request(uri).get();
-        assertTrue(response.hasEntity());
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
 
-        final String entities = response.readEntity(String.class);
+        assertNotNull(response.getEntity());
+
+        final String entities = response.getEntity();
         assertThat(entities, is(notNullValue()));
 
         // System.out.println("Response:\n" + entities);
@@ -71,9 +76,12 @@ public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTes
     }
     
     @Test
-    public void shouldReturnEmptyListWhenNoDataservicesInWorkspace() {
-        this.response = request(_uriBuilder.workspaceDataservicesUri()).get();
-        final String entity = this.response.readEntity(String.class);
+    public void shouldReturnEmptyListWhenNoDataservicesInWorkspace() throws Exception {
+        URI uri = _uriBuilder.workspaceDataservicesUri();
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+
+        final String entity = response.getEntity();
         assertThat(entity, is(notNullValue()));
 
         //System.out.println("Response:\n" + entity);
@@ -90,8 +98,12 @@ public final class KomodoDataserviceServiceTest extends AbstractKomodoServiceTes
         // get
         Properties settings = _uriBuilder.createSettings(SettingNames.DATA_SERVICE_NAME, DATASERVICE_NAME);
         _uriBuilder.addSetting(settings, SettingNames.DATA_SERVICE_PARENT_PATH, _uriBuilder.workspaceDataservicesUri());
-        this.response = request(_uriBuilder.dataserviceUri(LinkType.SELF, settings)).get();
-        final String entity = this.response.readEntity(String.class);
+
+        URI uri = _uriBuilder.dataserviceUri(LinkType.SELF, settings);
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+
+        final String entity = response.getEntity();
         assertThat(entity, is(notNullValue()));
 
         //System.out.println("Response:\n" + entity);

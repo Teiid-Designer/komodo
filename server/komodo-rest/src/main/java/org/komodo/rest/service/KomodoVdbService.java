@@ -42,12 +42,11 @@ import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GE
 import static org.komodo.rest.relational.RelationalMessages.Error.VDB_SERVICE_GET_VDB_ERROR;
 import java.util.ArrayList;
 import java.util.List;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.ServerErrorException;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -107,10 +106,10 @@ public final class KomodoVdbService extends KomodoService {
     /**
      * @param engine
      *        the Komodo Engine (cannot be <code>null</code> and must be started)
-     * @throws ServerErrorException
+     * @throws WebApplicationException
      *         if there is a problem obtaining the {@link WorkspaceManager workspace manager}
      */
-    public KomodoVdbService( final KEngine engine ) throws ServerErrorException {
+    public KomodoVdbService( final KEngine engine ) throws WebApplicationException {
         super( engine );
     }
 
@@ -129,7 +128,6 @@ public final class KomodoVdbService extends KomodoService {
 //     */
 //    @PUT
 //    @Path( "{vdbName}" )
-//    @Consumes( MediaType.APPLICATION_JSON )
 //    @Produces( MediaType.APPLICATION_JSON )
 //    public Response addOrUpdateVdb( final @Context HttpHeaders headers,
 //                                    final @Context UriInfo uriInfo,
@@ -396,7 +394,6 @@ public final class KomodoVdbService extends KomodoService {
      */
     @GET
     @Produces( MediaType.APPLICATION_JSON )
-    @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Display the collection of vdbs",
                             response = RestVdb[].class)
     @ApiResponses(value = {
@@ -522,7 +519,6 @@ public final class KomodoVdbService extends KomodoService {
     @GET
     @Path( V1Constants.VDB_PLACEHOLDER )
     @Produces( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
-    @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Find vdb by name", response = RestVdb.class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No vdb could be found with name"),
@@ -578,7 +574,6 @@ public final class KomodoVdbService extends KomodoService {
     @Path( V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
                 V1Constants.MODELS_SEGMENT )
     @Produces( MediaType.APPLICATION_JSON )
-    @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Find all models belonging to the vdb", response = RestVdb.class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No vdb could be found with name"),
@@ -645,7 +640,6 @@ public final class KomodoVdbService extends KomodoService {
                 V1Constants.MODELS_SEGMENT + StringConstants.FORWARD_SLASH +
                 V1Constants.MODEL_PLACEHOLDER)
     @Produces( MediaType.APPLICATION_JSON )
-    @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Find the named model belonging to the vdb", response = RestVdbModel.class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No vdb could be found with name"),
@@ -708,7 +702,6 @@ public final class KomodoVdbService extends KomodoService {
     @Path( V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
                 V1Constants.TRANSLATORS_SEGMENT )
     @Produces( MediaType.APPLICATION_JSON )
-    @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Find all translators belonging to the vdb", response = RestVdbTranslator[].class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No vdb could be found with name"),
@@ -775,7 +768,6 @@ public final class KomodoVdbService extends KomodoService {
                 V1Constants.TRANSLATORS_SEGMENT + StringConstants.FORWARD_SLASH +
                 V1Constants.TRANSLATOR_PLACEHOLDER)
     @Produces( MediaType.APPLICATION_JSON )
-    @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Find the named translator belonging to the vdb", response = RestVdbTranslator.class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No vdb could be found with name"),
@@ -855,7 +847,6 @@ public final class KomodoVdbService extends KomodoService {
     @Path( V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
                 V1Constants.IMPORTS_SEGMENT )
     @Produces( MediaType.APPLICATION_JSON )
-    @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Find all imports belonging to the vdb", response = RestVdbImport[].class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No vdb could be found with name"),
@@ -922,7 +913,6 @@ public final class KomodoVdbService extends KomodoService {
                 V1Constants.IMPORTS_SEGMENT + StringConstants.FORWARD_SLASH +
                 V1Constants.IMPORT_PLACEHOLDER)
     @Produces( MediaType.APPLICATION_JSON )
-    @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Find the named vdb import belonging to the vdb", response = RestVdbImport.class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No vdb could be found with name"),
@@ -1002,7 +992,6 @@ public final class KomodoVdbService extends KomodoService {
     @Path( V1Constants.VDB_PLACEHOLDER + StringConstants.FORWARD_SLASH +
                 V1Constants.DATA_ROLES_SEGMENT )
     @Produces( MediaType.APPLICATION_JSON )
-    @Consumes ( { MediaType.APPLICATION_JSON} )
     @ApiOperation(value = "Find all data roles belonging to the vdb", response = RestBasicEntity[].class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No vdb could be found with name"),
@@ -1069,7 +1058,6 @@ public final class KomodoVdbService extends KomodoService {
                 V1Constants.DATA_ROLES_SEGMENT + StringConstants.FORWARD_SLASH +
                 V1Constants.DATA_ROLE_PLACEHOLDER)
     @Produces( MediaType.APPLICATION_JSON )
-    @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Find the named data role belonging to the vdb", response = RestVdbDataRole.class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No vdb could be found with name"),
@@ -1136,7 +1124,6 @@ public final class KomodoVdbService extends KomodoService {
                 V1Constants.MODEL_PLACEHOLDER + StringConstants.FORWARD_SLASH +
                 V1Constants.SOURCES_SEGMENT)
     @Produces( MediaType.APPLICATION_JSON )
-    @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Find all sources of the model belonging to the vdb", response = RestVdbModelSource[].class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No vdb could be found with name"),
@@ -1214,7 +1201,6 @@ public final class KomodoVdbService extends KomodoService {
                 V1Constants.SOURCES_SEGMENT + StringConstants.FORWARD_SLASH +
                 V1Constants.SOURCE_PLACEHOLDER)
     @Produces( MediaType.APPLICATION_JSON )
-    @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Find the named source belonging to the model of the vdb", response = RestVdbModelSource.class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No vdb could be found with name"),
@@ -1313,7 +1299,6 @@ public final class KomodoVdbService extends KomodoService {
                 V1Constants.DATA_ROLE_PLACEHOLDER + StringConstants.FORWARD_SLASH +
                 V1Constants.PERMISSIONS_SEGMENT)
     @Produces( MediaType.APPLICATION_JSON )
-    @Consumes ( { MediaType.APPLICATION_JSON} )
     @ApiOperation(value = "Find all permissions belonging to the vdb data role", response = RestVdbPermission[].class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No vdb or data role could be found with given names"),
@@ -1391,7 +1376,6 @@ public final class KomodoVdbService extends KomodoService {
                 V1Constants.PERMISSIONS_SEGMENT + StringConstants.FORWARD_SLASH +
                 V1Constants.PERMISSION_PLACEHOLDER)
     @Produces( MediaType.APPLICATION_JSON )
-    @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Find the named permission belonging to the data role of the vdb", response = RestVdbPermission.class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No vdb, data role or permission could be found with name"),
@@ -1466,7 +1450,6 @@ public final class KomodoVdbService extends KomodoService {
                 V1Constants.PERMISSION_PLACEHOLDER + StringConstants.FORWARD_SLASH +
                 V1Constants.CONDITIONS_SEGMENT)
     @Produces( MediaType.APPLICATION_JSON )
-    @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Find the conditions belonging to the permission of the data role of the vdb", response = RestVdbPermission.class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No vdb, data role or permission could be found with given names"),
@@ -1550,7 +1533,6 @@ public final class KomodoVdbService extends KomodoService {
                 V1Constants.CONDITIONS_SEGMENT + StringConstants.FORWARD_SLASH +
                 V1Constants.CONDITION_PLACEHOLDER)
     @Produces( MediaType.APPLICATION_JSON )
-    @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Find the condition belonging to the permission of the data role of the vdb", response = RestVdbPermission.class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No vdb, data role, permission or condition could be found with name"),
@@ -1656,7 +1638,6 @@ public final class KomodoVdbService extends KomodoService {
                 V1Constants.PERMISSION_PLACEHOLDER + StringConstants.FORWARD_SLASH +
                 V1Constants.MASKS_SEGMENT)
     @Produces( MediaType.APPLICATION_JSON )
-    @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Find the masks belonging to the permission of the data role of the vdb", response = RestVdbPermission.class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No vdb, data role or permission could be found with given names"),
@@ -1740,7 +1721,6 @@ public final class KomodoVdbService extends KomodoService {
                 V1Constants.MASKS_SEGMENT + StringConstants.FORWARD_SLASH +
                 V1Constants.MASK_PLACEHOLDER)
     @Produces( MediaType.APPLICATION_JSON )
-    @Consumes ( { MediaType.APPLICATION_JSON } )
     @ApiOperation(value = "Find the mask belonging to the permission of the data role of the vdb", response = RestVdbPermission.class)
     @ApiResponses(value = {
         @ApiResponse(code = 404, message = "No vdb, data role, permission or mask could be found with name"),

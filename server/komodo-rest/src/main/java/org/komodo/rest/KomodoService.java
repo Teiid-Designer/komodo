@@ -28,7 +28,7 @@ import java.io.StringWriter;
 import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import javax.ws.rs.ServerErrorException;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -129,7 +129,7 @@ public abstract class KomodoService implements V1Constants {
         try {
             this.wsMgr = WorkspaceManager.getInstance(this.repo);
         } catch (final Exception e) {
-            throw new ServerErrorException(Messages.getString(Messages.Error.KOMODO_ENGINE_WORKSPACE_MGR_ERROR), Status.INTERNAL_SERVER_ERROR);
+            throw new WebApplicationException(new Exception(Messages.getString(Messages.Error.KOMODO_ENGINE_WORKSPACE_MGR_ERROR)), Status.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -267,7 +267,7 @@ public abstract class KomodoService implements V1Constants {
             // callback timeout occurred
             String errorMessage = Messages.getString( COMMIT_TIMEOUT, transaction.getName(), timeout, unit );
             Object responseEntity = createErrorResponseEntity(acceptableMediaTypes, errorMessage);
-            return Response.status( Status.GATEWAY_TIMEOUT )
+            return Response.status( Status.INTERNAL_SERVER_ERROR )
                            .entity(responseEntity)
                            .build();
         }
@@ -297,7 +297,6 @@ public abstract class KomodoService implements V1Constants {
                                                      resourceNotFound.getOperationName() );
             Object responseEntity = createErrorResponseEntity(acceptableMediaTypes, notFoundMsg);
             builder = Response.status( Status.NOT_FOUND ).entity(responseEntity);
-
         } else {
 
             //
@@ -327,7 +326,7 @@ public abstract class KomodoService implements V1Constants {
             // callback timeout occurred
             String errorMessage = Messages.getString( COMMIT_TIMEOUT, transaction.getName(), timeout, unit );
             Object responseEntity = createErrorResponseEntity(acceptableMediaTypes, errorMessage);
-            return Response.status( Status.GATEWAY_TIMEOUT )
+            return Response.status( Status.INTERNAL_SERVER_ERROR )
                            .type( MediaType.TEXT_PLAIN )
                            .entity(responseEntity)
                            .build();
