@@ -809,16 +809,18 @@ public class KomodoTeiidService extends KomodoService {
 
             List<String> progressMessages = deployStatus.getProgressMessages();
             for (int i = 0; i < progressMessages.size(); ++i) {
-                status.addAttribute("ProgressMessage-" + (i + 1), progressMessages.get(i));
+                status.addAttribute("ProgressMessage" + (i + 1), progressMessages.get(i));
             }
 
-            if (deployStatus.ok())
+            if (deployStatus.ok()) {
+                status.addAttribute("deploymentSuccess", Boolean.TRUE.toString());
                 status.addAttribute(dataService.getName(uow),
                                     RelationalMessages.getString(RelationalMessages.Info.DATA_SERVICE_SUCCESSFULLY_DEPLOYED));
-            else {
+            } else {
+                status.addAttribute("deploymentSuccess", Boolean.FALSE.toString());
                 List<String> errorMessages = deployStatus.getErrorMessages();
                 for (int i = 0; i < errorMessages.size(); ++i) {
-                    status.addAttribute("ErrorMessage-" + (i + 1), errorMessages.get(i));
+                    status.addAttribute("ErrorMessage" + (i + 1), errorMessages.get(i));
                 }
 
                 status.addAttribute(dataService.getName(uow),

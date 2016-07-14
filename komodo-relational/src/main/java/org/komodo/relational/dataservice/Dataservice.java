@@ -133,6 +133,9 @@ public interface Dataservice extends Exportable, RelationalObject {
     };
 
     /**
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @return the value of the <code>description</code> property (can be empty)
      * @throws KException
      *         if an error occurs
@@ -164,7 +167,7 @@ public interface Dataservice extends Exportable, RelationalObject {
                    final String... namePatterns ) throws KException;
 
     /**
-     * @param uow
+     * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not
      *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @param vdbName
@@ -186,7 +189,7 @@ public interface Dataservice extends Exportable, RelationalObject {
      * Convenience method for adding a Vdb and setting the service vdb name to
      * the newly added Vdb's name
      *
-     * @param uow
+     * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not
      *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @param vdbName
@@ -233,6 +236,15 @@ public interface Dataservice extends Exportable, RelationalObject {
      * @param uow
      *        the transaction (cannot be <code>null</code> or have a state that is not
      *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @return the version of the dataservice vdb
+     * @throws KException if an error occurs
+     */
+    int getServiceVdbVersion(UnitOfWork uow) throws KException;
+    
+    /**
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @return the service VDB (may be <code>null</code> if not defined)
      * @throws KException
      *         if an error occurs
@@ -240,7 +252,7 @@ public interface Dataservice extends Exportable, RelationalObject {
     Vdb getServiceVdb( final UnitOfWork uow ) throws KException;
 
     /**
-     * @param transaction
+     * @param uow
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param vdbName
      *        the new value of the <code>service vdb name</code> property
@@ -249,6 +261,24 @@ public interface Dataservice extends Exportable, RelationalObject {
      */
     void setServiceVdbName(UnitOfWork uow, String vdbName) throws KException;
 
+    /**
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @return the name of the dataservice view (may be <code>null</code> if not found)
+     * @throws KException if an error occurs
+     */
+    String getServiceViewName(UnitOfWork uow) throws KException;
+    
+    /**
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @return the name of the dataservice view model (may be <code>null</code> if not found)
+     * @throws KException if an error occurs
+     */
+    String getServiceViewModelName(UnitOfWork uow) throws KException;
+    
     /**
      * @param uow
      *        the transaction (cannot be <code>null</code> or have a state that is not
@@ -293,6 +323,8 @@ public interface Dataservice extends Exportable, RelationalObject {
      *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @param driverName
      *        the name of the driver being created (cannot be empty)
+     * @param content 
+     *        the driver content
      * @return the Driver (never <code>null</code>)
      * @throws KException
      *         if an error occurs
@@ -300,7 +332,7 @@ public interface Dataservice extends Exportable, RelationalObject {
     Driver addDriver( final UnitOfWork uow, final String driverName, final byte[] content) throws KException;
 
     /**
-     * @param transaction
+     * @param uow
      *        the transaction (cannot be <code>null</code> or have a state that is not
      *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      * @return the deployment plan for the drivers

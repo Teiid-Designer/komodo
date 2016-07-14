@@ -44,6 +44,27 @@ public final class RestDataservice extends RestBasicEntity {
     public static final String DESCRIPTION_LABEL = KomodoService.encode(KomodoLexicon.LibraryComponent.DESCRIPTION);
 
     /**
+     * Label used to describe dataservice view modelName
+     */
+    public static final String DATASERVICE_VIEW_MODEL_LABEL = "serviceViewModel"; //$NON-NLS-1$
+
+    /**
+     * Label used to describe dataservice viewName
+     */
+    public static final String DATASERVICE_VIEW_LABEL = "serviceView"; //$NON-NLS-1$
+
+    /**
+     * Label used to describe dataservice vdbName
+     */
+    public static final String DATASERVICE_VDB_NAME_LABEL = "serviceVdbName"; //$NON-NLS-1$
+
+    /**
+     * Label used to describe dataservice vdbVersion
+     */
+    public static final String DATASERVICE_VDB_VERSION_LABEL = "serviceVdbVersion"; //$NON-NLS-1$
+
+
+    /**
      * Constructor for use when deserializing
      */
     public RestDataservice() {
@@ -69,7 +90,12 @@ public final class RestDataservice extends RestBasicEntity {
         Properties settings = getUriBuilder().createSettings(SettingNames.DATA_SERVICE_NAME, getId());
         URI parentUri = getUriBuilder().dataserviceParentUri(dataService, uow);
         getUriBuilder().addSetting(settings, SettingNames.DATA_SERVICE_PARENT_PATH, parentUri);
-
+        
+        setServiceVdbName(dataService.getServiceVdbName(uow));
+        setServiceVdbVersion(dataService.getServiceVdbVersion(uow));
+        setServiceViewModel(dataService.getServiceViewModelName(uow));
+        setServiceViewName(dataService.getServiceViewName(uow));
+        
         addLink(new RestLink(LinkType.SELF, getUriBuilder().dataserviceUri(LinkType.SELF, settings)));
         addLink(new RestLink(LinkType.PARENT, getUriBuilder().dataserviceUri(LinkType.PARENT, settings)));
         createChildLink();
@@ -91,5 +117,64 @@ public final class RestDataservice extends RestBasicEntity {
         tuples.put(DESCRIPTION_LABEL, description);
     }
 
+    /**
+     * @return the service view model name (can be empty)
+     */
+    public String getServiceViewModel() {
+        Object modelName = tuples.get(DATASERVICE_VIEW_MODEL_LABEL);
+        return modelName != null ? modelName.toString() : null;
+    }
+
+    /**
+     * @param modelName the view model name to set
+     */
+    public void setServiceViewModel(String modelName) {
+        tuples.put(DATASERVICE_VIEW_MODEL_LABEL, modelName);
+    }
+
+    /**
+     * @return the service view name (can be empty)
+     */
+    public String getServiceViewName() {
+        Object viewName = tuples.get(DATASERVICE_VIEW_LABEL);
+        return viewName != null ? viewName.toString() : null;
+    }
+
+    /**
+     * @param viewName the service view name to set
+     */
+    public void setServiceViewName(String viewName) {
+        tuples.put(DATASERVICE_VIEW_LABEL, viewName);
+    }
+
+    /**
+     * @return the service vdb name (can be empty)
+     */
+    public String getServiceVdbName() {
+        Object serviceVdbName = tuples.get(DATASERVICE_VDB_NAME_LABEL);
+        return serviceVdbName != null ? serviceVdbName.toString() : null;
+    }
+
+    /**
+     * @param serviceVdbName the service vdb name to set 
+     */
+    public void setServiceVdbName(String serviceVdbName) {
+        tuples.put(DATASERVICE_VDB_NAME_LABEL, serviceVdbName);
+    }
+
+    /**
+     * @return the VDB description (can be empty)
+     */
+    public int getServiceVdbVersion() {
+        Object version = tuples.get(DATASERVICE_VDB_VERSION_LABEL);
+        return version != null ? (int)version : 1;
+    }
+
+    /**
+     * @param version the version to set
+     */
+    public void setServiceVdbVersion(int version) {
+        tuples.put(DATASERVICE_VDB_VERSION_LABEL, version);
+    }
 
 }

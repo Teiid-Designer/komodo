@@ -539,6 +539,13 @@ public class DataserviceConveyor implements StringConstants {
             // Deploy the vdbs
             //
             String[] vdbPlan = dataservice.getVdbPlan(transaction);
+            
+            // If no VDBs, return with an error
+            if(vdbPlan.length==0) {
+                status.addErrorMessage("The dataservice contains no VDBs");
+                return status;
+            }
+            
             for (String vdbName : vdbPlan) {
                 status.addProgressMessage("Starting deployment of vdb " + vdbName);
 

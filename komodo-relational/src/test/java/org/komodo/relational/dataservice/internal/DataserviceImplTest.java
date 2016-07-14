@@ -50,6 +50,7 @@ import org.komodo.relational.dataservice.DataserviceManifest;
 import org.komodo.relational.driver.Driver;
 import org.komodo.relational.importer.dsource.DatasourceImporter;
 import org.komodo.relational.importer.vdb.VdbImporter;
+import org.komodo.relational.model.Model;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.spi.repository.KomodoObject;
@@ -213,6 +214,59 @@ public final class DataserviceImplTest extends RelationalModelTest {
         assertThat( this.dataservice.hasChild( getTransaction(), SERVICE_NAME, VdbLexicon.Vdb.VIRTUAL_DATABASE ), is( true ) );
         assertThat( this.dataservice.getChild( getTransaction(), SERVICE_NAME ), is( serviceVDB ) );
         assertThat( this.dataservice.getChild( getTransaction(), SERVICE_NAME, VdbLexicon.Vdb.VIRTUAL_DATABASE ), is( serviceVDB ) );
+    }
+
+    @Test
+    public void shouldGetServiceVdbNameAndVersion() throws Exception {
+        // Add child VDB
+        final String name = "childVdb";
+        this.dataservice.addVdb(getTransaction(), name, "externalPath");
+        
+        // Add service VDB (same name as dataservice node)
+        final Vdb serviceVDB = this.dataservice.addServiceVdb(getTransaction(), "serviceVdbName", "externalPath");
+        serviceVDB.setVersion(getTransaction(), 2);
+        
+        assertThat( serviceVDB, is( notNullValue() ) );
+        assertThat( serviceVDB.getName( getTransaction() ), is( "serviceVdbName" ) );
+        assertThat( serviceVDB.getVersion( getTransaction() ), is( 2 ) );
+        assertThat( this.dataservice.getVdbs( getTransaction() ).length, is( 2 ) );
+        assertThat( this.dataservice.getServiceVdbName( getTransaction() ), is ("serviceVdbName") );
+        assertThat( this.dataservice.getServiceVdbVersion( getTransaction() ), is ( 2 ) );
+        assertThat( this.dataservice.getServiceVdb( getTransaction() )==null, is( false ) );
+    }
+
+    @Test
+    public void shouldGetServiceVdbViewModelAndView() throws Exception {
+        // Add child VDB
+        final String name = "childVdb";
+        this.dataservice.addVdb(getTransaction(), name, "externalPath");
+        
+        // Add service VDB (same name as dataservice node)
+        final String serviceVdbName = "serviceVdbName";
+        final Vdb serviceVDB = this.dataservice.addServiceVdb(getTransaction(), serviceVdbName, "externalPath");
+        serviceVDB.setVersion(getTransaction(), 2);
+        
+        // Add a physical and virtual model to the service VDB
+        Model physModel = serviceVDB.addModel(getTransaction(), "physicalModel");
+        physModel.setModelType(getTransaction(), Model.Type.PHYSICAL);
+        final String serviceViewModel = "serviceViewModel";
+        Model virtualModel = serviceVDB.addModel(getTransaction(), serviceViewModel);
+        virtualModel.setModelType(getTransaction(), Model.Type.VIRTUAL);
+        
+        // Add a view to the virtual model
+        final String serviceView = "serviceView";
+        virtualModel.addView(getTransaction(), serviceView);
+        
+        assertThat( serviceVDB, is( notNullValue() ) );
+        assertThat( serviceVDB.getName( getTransaction() ), is( serviceVdbName ) );
+        assertThat( serviceVDB.getVersion( getTransaction() ), is( 2 ) );
+        assertThat( this.dataservice.getVdbs( getTransaction() ).length, is( 2 ) );
+        assertThat( this.dataservice.getServiceVdbName( getTransaction() ), is ( serviceVdbName ) );
+        assertThat( this.dataservice.getServiceVdbVersion( getTransaction() ), is ( 2 ) );
+        assertThat( this.dataservice.getServiceVdb( getTransaction() )==null, is( false ) );
+
+        assertThat( this.dataservice.getServiceViewModelName( getTransaction() ), is( serviceViewModel ) );
+        assertThat( this.dataservice.getServiceViewName( getTransaction() ), is( serviceView ) );
     }
 
     @Test
