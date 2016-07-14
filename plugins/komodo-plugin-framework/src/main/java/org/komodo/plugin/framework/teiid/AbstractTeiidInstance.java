@@ -21,6 +21,7 @@
  */
 package org.komodo.plugin.framework.teiid;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -29,6 +30,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.sql.Connection;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -169,6 +171,8 @@ public abstract class AbstractTeiidInstance implements TeiidInstance, StringCons
         this.jdbcInfo = jdbcInfo;
     }
 
+    protected abstract AbstractConnectionManager getConnectionManager();
+
     @Override
     public boolean isSound() {
         if (getParent() == null)
@@ -267,7 +271,7 @@ public abstract class AbstractTeiidInstance implements TeiidInstance, StringCons
 
     @Override
     public String getUrl() {
-        return getTeiidAdminInfo().getUrl();
+        return getTeiidJdbcInfo().getUrl();
     }
 
     @Override
@@ -365,7 +369,43 @@ public abstract class AbstractTeiidInstance implements TeiidInstance, StringCons
 
     protected abstract Outcome pingAdmin() throws Exception;
 
-    protected abstract Outcome pingJdbc();
+    protected Outcome pingJdbc() {
+        TeiidJdbcInfo teiidJdbcInfo = getTeiidJdbcInfo();
+        Connection teiidJdbcConnection = null;
+
+        try {
+
+            deploy(PING_VDB, new ByteArrayInputStream(TEST_VDB.getBytes()));
+
+            Thread.sleep(2000);
+
+            try {
+                teiidJdbcConnection = getConnectionManager().getConnection(
+                                                                      PING_VDB_NAME,
+                                                                      getHost(),
+                                                                      teiidJdbcInfo.getPort(),
+                                                                      teiidJdbcInfo.getUsername(),
+                                                                      teiidJdbcInfo.getPassword(),
+                                                                      teiidJdbcInfo.isSecure());
+
+                //pass
+                return OutcomeFactory.getInstance().createOK();
+
+            } catch (Throwable ex) {
+                String msg = Messages.getString(Messages.ExecutionAdmin.instanceDeployUndeployProblemPingingTeiidJdbc, getUrl());
+                return OutcomeFactory.getInstance().createError(msg, new Exception(ex));
+            } finally {
+                if (teiidJdbcConnection != null) {
+                    teiidJdbcConnection.close();
+                }
+
+                undeploy(PING_VDB);
+            }
+        } catch (Exception ex) {
+            String msg = Messages.getString(Messages.ExecutionAdmin.instanceDeployUndeployProblemPingingTeiidJdbc, getUrl());
+            return OutcomeFactory.getInstance().createError(msg, ex);
+        }
+    }
 
     protected abstract boolean isCoherent();
 
@@ -388,6 +428,7 @@ public abstract class AbstractTeiidInstance implements TeiidInstance, StringCons
             switch (connectivityType) {
                 case JDBC:
                     outcome = pingJdbc();
+                    break;
                 case ADMIN:
                 default:
                     outcome = pingAdmin();

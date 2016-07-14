@@ -88,6 +88,7 @@ import org.komodo.spi.repository.DocumentType;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.runtime.DataSourceDriver;
 import org.komodo.spi.runtime.EventManager;
+import org.komodo.spi.runtime.ExecutionAdmin.ConnectivityType;
 import org.komodo.spi.runtime.HostProvider;
 import org.komodo.spi.runtime.TeiidAdminInfo;
 import org.komodo.spi.runtime.TeiidInstance;
@@ -197,6 +198,22 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         return service.getTeiidInstance(parent, jdbcInfo);
     }
 
+    private void setJdbcName(String jdbcUser) throws Exception {
+        URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
+                                            .path(V1Constants.TEIID_SEGMENT)
+                                            .path(V1Constants.TEIID_CREDENTIALS)
+                                            .build();
+
+        KomodoTeiidAttributes teiidAttrs = new KomodoTeiidAttributes();
+        teiidAttrs.setJdbcUser(jdbcUser);
+
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        request.body(MediaType.APPLICATION_JSON_TYPE, teiidAttrs);
+
+        ClientResponse<String> response = request.post(String.class);
+        assertEquals(200, response.getStatus());
+    }
+
     @Before
     public void beforeEach() throws Exception {
         this.service = PluginService.getInstance().getDefaultTeiidService();
@@ -211,6 +228,8 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
 
     @After
     public void afterEach() throws Exception {
+        setJdbcName(TeiidJdbcInfo.DEFAULT_JDBC_USERNAME);
+
         //
         // Refresh the artifacts of this client instance
         //
@@ -758,7 +777,7 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
             //
             // Give the vdb time to become active
             //
-            Thread.sleep(3000);
+            Thread.sleep(5000);
 
             KomodoQueryAttribute queryAttr = new KomodoQueryAttribute();
             queryAttr.setQuery("SELECT * FROM state");
@@ -786,7 +805,7 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
             //
             // Give the vdb time to become active
             //
-            Thread.sleep(3000);
+            Thread.sleep(5000);
 
             KomodoQueryAttribute queryAttr = new KomodoQueryAttribute();
             queryAttr.setQuery("SELECT * FROM state");
@@ -819,7 +838,7 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
             //
             // Give the vdb time to become active
             //
-            Thread.sleep(3000);
+            Thread.sleep(5000);
 
             String dsPath = RepositoryImpl.WORKSPACE_ROOT + FORWARD_SLASH + "UsStatesService";
 
@@ -836,6 +855,62 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
             } catch (Exception ex) {
                 // Nothing to do
             }
+        }
+    }
+
+    private ClientResponse<String> ping(ConnectivityType cType) throws Exception {
+        URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
+                                            .path(V1Constants.TEIID_SEGMENT)
+                                            .path(V1Constants.PING_SEGMENT)
+                                            .queryParam(V1Constants.PING_TYPE_PARAMETER, cType.toString().toLowerCase())
+                                            .build();
+
+        ClientRequest request = request(uri, MediaType.APPLICATION_JSON_TYPE);
+        ClientResponse<String> response = request.get(String.class);
+        assertEquals(200, response.getStatus());
+        return response;
+    }
+
+    private void shouldPing(ConnectivityType cType) throws Exception {
+
+        ClientResponse<String> response = ping(cType);
+        String entity = response.getEntity();
+
+        KomodoStatusObject status = KomodoJsonMarshaller.unmarshall(entity, KomodoStatusObject.class);
+        assertNotNull(status);
+
+        Map<String, String> attributes = status.getAttributes();
+        assertEquals("true", attributes.get("OK"));
+        assertEquals("OK", attributes.get("Message"));
+    }
+
+    @Test
+    public void shouldAdminPing() throws Exception {
+        shouldPing(ConnectivityType.ADMIN);
+    }
+
+    @Test
+    public void shouldJdbcPing() throws Exception {
+        shouldPing(ConnectivityType.JDBC);
+    }
+
+    @Test
+    public void shouldFailJdbcPing() throws Exception {
+        setJdbcName("IamTheWrongJdbcUserName");
+
+        try {
+            ClientResponse<String> response = ping(ConnectivityType.JDBC);
+            String entity = response.getEntity();
+            System.out.println("Entity: " + entity);
+            KomodoStatusObject status = KomodoJsonMarshaller.unmarshall(entity, KomodoStatusObject.class);
+            assertNotNull(status);
+
+            Map<String, String> attributes = status.getAttributes();
+            assertEquals("false", attributes.get("OK"));
+            assertTrue(attributes.get("Message").contains("Unable to establish a jdbc connection to teiid instance"));
+            assertTrue(attributes.get("Exception").contains("The username \"IamTheWrongJdbcUserName\" and/or password and/or payload token could not be authenticated by security domain teiid-security"));
+        } finally {
+            setJdbcName(TeiidJdbcInfo.DEFAULT_JDBC_USERNAME);
         }
     }
 }

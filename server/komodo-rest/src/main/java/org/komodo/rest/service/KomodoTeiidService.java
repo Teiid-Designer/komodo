@@ -34,6 +34,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
@@ -74,12 +75,15 @@ import org.komodo.rest.relational.response.RestVdb;
 import org.komodo.rest.relational.response.RestVdbTranslator;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.outcome.Outcome;
 import org.komodo.spi.query.QSResult;
 import org.komodo.spi.query.QueryService;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.spi.runtime.DataSourceDriver;
+import org.komodo.spi.runtime.ExecutionAdmin;
+import org.komodo.spi.runtime.ExecutionAdmin.ConnectivityType;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.TeiidVdb;
 import org.komodo.utils.FileUtils;
@@ -154,8 +158,10 @@ public class KomodoTeiidService extends KomodoService {
 
     private Response checkTeiidAttributes(String adminUser, String adminPasswd,
                                                                            String jdbcUser, String jdbcPasswd,
+                                                                           Boolean adminSecure, Boolean jdbcSecure,
                                                                            List<MediaType> mediaTypes) {
-        if (adminUser == null || adminPasswd == null || jdbcUser == null || jdbcPasswd == null) {
+        if (adminUser == null && adminPasswd == null && adminSecure == null &&
+            jdbcUser == null && jdbcPasswd == null && jdbcSecure == null) {
             String errorMessage = RelationalMessages.getString(RelationalMessages.Error.TEIID_SERVICE_EMPTY_CREDENTIAL_ERROR);
 
             Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
@@ -310,6 +316,8 @@ public class KomodoTeiidService extends KomodoService {
                                                                                         teiidAttrs.getAdminPasswd(),
                                                                                         teiidAttrs.getJdbcUser(),
                                                                                         teiidAttrs.getJdbcPasswd(),
+                                                                                        teiidAttrs.isAdminSecure(),
+                                                                                        teiidAttrs.isJdbcSecure(),
                                                                                         mediaTypes);
 
             if (response.getStatus() != Status.OK.getStatusCode())
@@ -326,10 +334,23 @@ public class KomodoTeiidService extends KomodoService {
 
             uow = createTransaction("teiidSetCredentials", false); //$NON-NLS-1$
 
-            teiidNode.setAdminUser(uow, teiidAttrs.getAdminUser());
-            teiidNode.setAdminPassword(uow, teiidAttrs.getAdminPasswd());
-            teiidNode.setJdbcUsername(uow, teiidAttrs.getJdbcUser());
-            teiidNode.setJdbcPassword(uow, teiidAttrs.getJdbcPasswd());
+            if (teiidAttrs.getAdminUser() != null)
+                teiidNode.setAdminUser(uow, teiidAttrs.getAdminUser());
+
+            if (teiidAttrs.getAdminPasswd() != null)
+                teiidNode.setAdminPassword(uow, teiidAttrs.getAdminPasswd());
+
+            if (teiidAttrs.isAdminSecure() != null)
+                teiidNode.setAdminSecure(uow, teiidAttrs.isAdminSecure());
+
+            if (teiidAttrs.getJdbcUser() != null)
+                teiidNode.setJdbcUsername(uow, teiidAttrs.getJdbcUser());
+
+            if (teiidAttrs.getJdbcPasswd() != null)
+                teiidNode.setJdbcPassword(uow, teiidAttrs.getJdbcPasswd());
+
+            if (teiidAttrs.isJdbcSecure() != null)
+                teiidNode.setJdbcSecure(uow, teiidAttrs.isJdbcSecure());
 
             RestBasicEntity teiidEntity = entityFactory.create(teiidNode, uriInfo.getBaseUri(), uow);
             return commit(uow, mediaTypes, teiidEntity);
@@ -821,17 +842,14 @@ public class KomodoTeiidService extends KomodoService {
 
     private String extractServiceVdbName(UnitOfWork uow, WorkspaceManager mgr, String dsPath) throws KException {
         KomodoObject dsObject = repo.getFromWorkspace(uow, dsPath);
-        System.out.println("XXX Get from workspace: " + dsObject);
         if (dsObject == null)
             return null; // Not a path in the workspace
 
         Dataservice dService = mgr.resolve(uow, dsObject, Dataservice.class);
-        System.out.println("XXX Resolving dsObject to dataservice " + dService);
         if (dService == null)
             return null; // Not a data service
 
         Vdb vdb = dService.getServiceVdb(uow);
-        System.out.println("XXX Service vdb for dataservice " + vdb);
         if (vdb == null)
             return null;
 
@@ -925,6 +943,77 @@ public class KomodoTeiidService extends KomodoService {
             RestQueryResult restResult = new RestQueryResult(result);
 
            return commit(uow, mediaTypes, restResult);
+
+        } catch (final Exception e) {
+            if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
+                uow.rollback();
+            }
+
+            if (e instanceof KomodoRestException) {
+                throw (KomodoRestException)e;
+            }
+
+            return createErrorResponse(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_QUERY_ERROR);
+        }
+    }
+
+    @SuppressWarnings( "nls" )
+    @GET
+    @Path(V1Constants.PING_SEGMENT)
+    @Produces( MediaType.APPLICATION_JSON )
+    @ApiOperation(value = "Ping the connection to the teiid server")
+    @ApiResponses(value = {
+        @ApiResponse(code = 406, message = "Only JSON is returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response ping(final @Context HttpHeaders headers,
+                                   final @Context UriInfo uriInfo,
+                                   @ApiParam(value = "Execute either an admin or jdbc ping request", required = true)
+                                    @QueryParam(value = PING_TYPE_PARAMETER) String pingType)
+                                   throws KomodoRestException {
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
+            return notAcceptableMediaTypesBuilder().build();
+
+        ConnectivityType pingKind = ExecutionAdmin.ConnectivityType.findType(pingType);
+        if (pingKind == null) {
+            String errorMessage = RelationalMessages.getString(
+                                                                   RelationalMessages.Error.TEIID_SERVICE_PING_MISSING_TYPE);
+            Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
+            return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+        }
+
+        UnitOfWork uow = null;
+
+        try {
+            uow = createTransaction("pingTeiidservice", true); //$NON-NLS-1$
+            Teiid teiidNode = getDefaultTeiid();
+
+            TeiidInstance teiidInstance = teiidNode.getTeiidInstance(uow);
+            Outcome outcome = teiidInstance.ping(pingKind);
+            System.out.println("KomodoTeiidService: pingJdbc: " + outcome.isOK() + "  " + outcome.getMessage());
+
+            KomodoStatusObject status = new KomodoStatusObject("Status");
+            status.addAttribute("OK", Boolean.toString(outcome.isOK()));
+            status.addAttribute("Message", outcome.getMessage());
+            if (outcome.getException() != null) {
+
+                //
+                // Find the narrowest cause of the failure
+                //
+                Throwable ex = outcome.getException();
+                String msg = ex.getLocalizedMessage();
+                while (ex.getCause() != null) {
+                    ex = ex.getCause();
+                    if (ex.getLocalizedMessage() != null)
+                        msg = ex.getLocalizedMessage();
+                }
+
+                status.addAttribute("Exception", msg);
+            }
+
+           return commit(uow, mediaTypes, status);
 
         } catch (final Exception e) {
             if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {

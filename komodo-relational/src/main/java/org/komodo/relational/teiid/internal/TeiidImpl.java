@@ -122,7 +122,18 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
 
         @Override
         public int getPort() {
-            return TeiidImpl.this.getPort();
+            UnitOfWork uow = null;
+            try {
+               uow = getOrCreateTransaction();
+               int port = getJdbcPort(uow);
+               commit(uow);
+               return port;
+            } catch (KException ex) {
+                KEngine.getInstance().getErrorHandler().error(ex);
+                if (uow != null)
+                    uow.rollback();
+                return -1;
+            }
         }
 
         @Override
@@ -463,10 +474,13 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
             version = getVersion(uow);
             TeiidService teiidService = PluginService.getInstance().getTeiidService(version);
 
+            String host = getHost(uow);
+            int port = getJdbcPort(uow);
             String user = getJdbcUsername(uow);
             String passwd = getJdbcPassword(uow);
+            boolean isSecure = isJdbcSecure(uow);
 
-            return teiidService.getQueryService(user, passwd);
+            return teiidService.getQueryService(host, port, user, passwd, isSecure);
         } catch (Exception ex) {
             throw RelationalModelFactory.handleError(ex);
         }

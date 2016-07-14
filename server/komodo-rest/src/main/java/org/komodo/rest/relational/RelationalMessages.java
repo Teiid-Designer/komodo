@@ -473,6 +473,11 @@ public final class RelationalMessages {
         TEIID_SERVICE_QUERY_ERROR,
 
         /**
+         * Error indicating a ping type is missing
+         */
+        TEIID_SERVICE_PING_MISSING_TYPE,
+
+        /**
          * The importexport service lacks at least one storage attribute
          */
         IMPORT_EXPORT_SERVICE_NO_PARAMETERS_ERROR,

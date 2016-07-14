@@ -376,6 +376,16 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
          * The teiid segment for running a query against the teiid server
          */
         String QUERY_SEGMENT = "query";
+
+        /**
+         * The teiid segment for running a ping against the teiid server
+         */
+        String PING_SEGMENT = "ping";
+
+        /**
+         * The name of the URI ping type parameter
+         */
+        String PING_TYPE_PARAMETER = "pingType";
     }
 
     private static final int TIMEOUT = 1;

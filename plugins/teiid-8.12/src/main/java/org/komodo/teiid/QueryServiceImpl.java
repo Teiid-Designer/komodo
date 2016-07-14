@@ -23,34 +23,20 @@ package org.komodo.teiid;
 
 import java.sql.Connection;
 import org.komodo.plugin.framework.teiid.AbstractQueryService;
-import org.komodo.spi.KException;
-import org.komodo.spi.runtime.TeiidInstance;
-import org.komodo.spi.runtime.TeiidJdbcInfo;
 import org.komodo.spi.type.DataTypeManager;
-import org.teiid.jdbc.TeiidDataSource;
 
 public class QueryServiceImpl extends AbstractQueryService {
 
-    public QueryServiceImpl(DataTypeManager dataTypeManager, String user, String password) {
-        super(dataTypeManager, user, password);
+    public QueryServiceImpl(DataTypeManager dataTypeManager,
+                                                    String host, int port,
+                                                    String user, String password,
+                                                    boolean secure) {
+        super(dataTypeManager,host, port, user, password, secure);
     }
 
     @Override
-    protected Connection getConnection(String vdb, String user, String password) throws Exception {
-        TeiidDataSource ds = new TeiidDataSource();
-        ds.setDatabaseName(vdb);
-        ds.setUser(user);
-        ds.setPassword(password);
-        ds.setServerName(TeiidInstance.DEFAULT_HOST);
-        ds.setPortNumber(TeiidJdbcInfo.DEFAULT_PORT);
-
-        //
-        // Ensure any runtime exceptions are always caught and thrown as KExceptions
-        //
-        try {
-            return ds.getConnection();
-        } catch (Throwable t) {
-            throw new KException(t);
-        }
+    protected Connection getConnection(String vdb, String host, int port,
+                                                                           String user, String password, boolean secure) throws Exception {
+        return ConnectionManager.getInstance().getConnection(vdb, host, port, user, password, secure);
     }
 }
