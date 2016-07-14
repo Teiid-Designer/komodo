@@ -28,17 +28,23 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.outcome.Outcome;
 
 /**
  *
  */
-public interface ExecutionAdmin {
+public interface ExecutionAdmin extends StringConstants {
 
     /**
      * VDB name for the ping test
      */
-    String PING_VDB = "ping-vdb.xml"; //$NON-NLS-1$
+    String PING_VDB_NAME = "ping"; //$NON-NLS-1$
+
+    /**
+     * VDB file name for the ping test
+     */
+    String PING_VDB = PING_VDB_NAME + VDB_DEPLOYMENT_SUFFIX;
 
     /**
      * Type of connectivity
@@ -53,6 +59,22 @@ public interface ExecutionAdmin {
          * JDBC connection of the teiid instance
          */
         JDBC;
+
+        /**
+         * @param type
+         * @return the {@link ConnectivityType} for the given type
+         */
+        public static ConnectivityType findType(String type) {
+            if (type == null)
+                return null;
+
+            for (ConnectivityType cType : ConnectivityType.values()) {
+                if (type.equalsIgnoreCase(cType.name()))
+                    return cType;
+            }
+
+            return null;
+        }
     }
     
     /**

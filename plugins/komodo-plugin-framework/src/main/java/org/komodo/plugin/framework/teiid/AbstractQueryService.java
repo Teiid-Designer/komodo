@@ -42,10 +42,20 @@ public abstract class AbstractQueryService implements QueryService {
 
     private final String password;
 
-    public AbstractQueryService(DataTypeManager dataTypeManager, String user, String password) {
+    private final String host;
+
+    private final int port;
+
+    private final boolean secure;
+
+    public AbstractQueryService(DataTypeManager dataTypeManager,
+                                                            String host, int port, String user, String password, boolean isSecure) {
         this.dataTypeManager = dataTypeManager;
+        this.host = host;
+        this.port = port;
         this.user = user;
         this.password = password;
+        this.secure = isSecure;
     }
 
     @Override
@@ -60,7 +70,7 @@ public abstract class AbstractQueryService implements QueryService {
 
         try {
             KLog.getLogger().debug("Initialising SQL connection for vdb {0}", vdb);
-            connection = getConnection(vdb, user, password);
+            connection = getConnection(vdb, host, port, user, password, secure);
             if (connection == null)
                 throw new Exception("Failed to make a connection to '" + vdb + "' as user '" + user + "'");
 
@@ -125,5 +135,6 @@ public abstract class AbstractQueryService implements QueryService {
         }
     }
 
-    protected abstract Connection getConnection(String vdb, String user, String password) throws Exception;
+    protected abstract Connection getConnection(String vdb, String host, int port, String user,
+                                                                                            String password, boolean secure) throws Exception;
 }

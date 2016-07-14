@@ -21,24 +21,21 @@
  */
 package org.komodo.teiid;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.sql.Connection;
 import java.sql.Driver;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import org.komodo.plugin.framework.teiid.AbstractConnectionManager;
 import org.komodo.plugin.framework.teiid.AbstractTeiidInstance;
 import org.komodo.plugin.framework.teiid.Messages;
 import org.komodo.spi.outcome.Outcome;
 import org.komodo.spi.outcome.OutcomeFactory;
 import org.komodo.spi.runtime.DataSourceDriver;
 import org.komodo.spi.runtime.ExecutionConfigurationEvent;
-import org.komodo.spi.runtime.TeiidConnectionInfo;
 import org.komodo.spi.runtime.TeiidDataSource;
 import org.komodo.spi.runtime.TeiidJdbcInfo;
 import org.komodo.spi.runtime.TeiidParent;
@@ -64,6 +61,11 @@ public class TeiidInstanceImpl extends AbstractTeiidInstance {
 
     public TeiidInstanceImpl(TeiidParent parent, final TeiidVersion teiidVersion, TeiidJdbcInfo jdbcInfo) {
         super(parent, teiidVersion, jdbcInfo);
+    }
+
+    @Override
+    protected AbstractConnectionManager getConnectionManager() {
+        return ConnectionManager.getInstance();
     }
 
     @Override
@@ -137,47 +139,9 @@ public class TeiidInstanceImpl extends AbstractTeiidInstance {
 
     @Override
     protected Outcome pingAdmin() throws Exception {
+        disconnect();
+        connect();
         admin.getSessions();
-        return OutcomeFactory.getInstance().createOK();
-    }
-
-    @Override
-    protected Outcome pingJdbc() {
-        String host = getHost();
-        TeiidJdbcInfo teiidJdbcInfo = getTeiidJdbcInfo();
-
-        String protocol = TeiidConnectionInfo.MM;
-        if (teiidJdbcInfo.isSecure())
-            protocol = TeiidConnectionInfo.MMS;
-
-        Connection teiidJdbcConnection = null;
-        String url = "jdbc:teiid:ping@" + protocol + host + ':' + teiidJdbcInfo.getPort(); //$NONNLS1$
-
-        try {
-
-            admin.deploy(PING_VDB, new ByteArrayInputStream(TEST_VDB.getBytes()));
-
-            try {
-                String urlAndCredentials = url + ";user=" + teiidJdbcInfo.getUsername() + ";password="
-                                           + teiidJdbcInfo.getPassword() + ';'; //$NONNLS1$ //$NONNLS2$
-                TeiidDriver teiidDriver = TeiidDriver.getInstance();
-                teiidJdbcConnection = teiidDriver.connect(urlAndCredentials, null);
-                //pass
-            } catch (SQLException ex) {
-                String msg = Messages.getString(Messages.ExecutionAdmin.instanceDeployUndeployProblemPingingTeiidJdbc, url);
-                return OutcomeFactory.getInstance().createError(msg, ex);
-            } finally {
-                admin.undeploy(PING_VDB);
-
-                if (teiidJdbcConnection != null) {
-                    teiidJdbcConnection.close();
-                }
-            }
-        } catch (Exception ex) {
-            String msg = Messages.getString(Messages.ExecutionAdmin.instanceDeployUndeployProblemPingingTeiidJdbc, url);
-            return OutcomeFactory.getInstance().createError(msg, ex);
-        }
-
         return OutcomeFactory.getInstance().createOK();
     }
 

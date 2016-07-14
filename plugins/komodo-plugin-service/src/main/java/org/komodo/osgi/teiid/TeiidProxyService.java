@@ -108,7 +108,7 @@ public class TeiidProxyService extends AbstractProxyService<TeiidService, TeiidI
     }
 
     @Override
-    public QueryService getQueryService(String user, String passwd) throws Exception {
-        return getDelegate().getQueryService(user, passwd);
+    public QueryService getQueryService(String host, int port, String user, String passwd, boolean isSecure) throws Exception {
+        return getDelegate().getQueryService(host, port, user, passwd, isSecure);
     }
 }

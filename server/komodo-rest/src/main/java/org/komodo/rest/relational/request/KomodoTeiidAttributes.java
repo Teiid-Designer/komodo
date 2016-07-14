@@ -46,6 +46,11 @@ public class KomodoTeiidAttributes implements KRestEntity {
     public static final String ADMIN_PASSWD_LABEL = "adminPasswd"; //$NON-NLS-1$
 
     /**
+     * Label for the admin secure flag
+     */
+    public static final String ADMIN_SECURE_LABEL = "adminSecure"; //$NON-NLS-1$
+
+    /**
      * Label for the jdbc user name
      */
     public static final String JDBC_USER_LABEL = "jdbcUser"; //$NON-NLS-1$
@@ -55,17 +60,28 @@ public class KomodoTeiidAttributes implements KRestEntity {
      */
     public static final String JDBC_PASSWD_LABEL = "jdbcPasswd"; //$NON-NLS-1$
 
+    /**
+     * Label for the jdbc secure flag
+     */
+    public static final String JDBC_SECURE_LABEL = "jdbcSecure"; //$NON-NLS-1$
+
     @JsonProperty(ADMIN_USER_LABEL)
     private String adminUser;
 
     @JsonProperty(ADMIN_PASSWD_LABEL)
     private String adminPasswd;
 
+    @JsonProperty(ADMIN_SECURE_LABEL)
+    private Boolean adminSecure;
+
     @JsonProperty(JDBC_USER_LABEL)
     private String jdbcUser;
 
     @JsonProperty(JDBC_PASSWD_LABEL)
     private String jdbcPasswd;
+
+    @JsonProperty(JDBC_SECURE_LABEL)
+    private Boolean jdbcSecure;
 
     /**
      * Default constructor for deserialization
@@ -115,6 +131,20 @@ public class KomodoTeiidAttributes implements KRestEntity {
     }
 
     /**
+     * @return admin secure
+     */
+    public Boolean isAdminSecure() {
+        return adminSecure;
+    }
+
+    /**
+     * @param adminSecure
+     */
+    public void setAdminSecure(boolean adminSecure) {
+        this.adminSecure = adminSecure;
+    }
+
+    /**
      * @return jdbc user
      */
     public String getJdbcUser() {
@@ -142,13 +172,29 @@ public class KomodoTeiidAttributes implements KRestEntity {
         this.jdbcPasswd = jdbcPasswd;
     }
 
+    /**
+     * @return jdbc secure
+     */
+    public Boolean isJdbcSecure() {
+        return jdbcSecure;
+    }
+
+    /**
+     * @param jdbcSecure
+     */
+    public void setJdbcSecure(boolean jdbcSecure) {
+        this.jdbcSecure = jdbcSecure;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((adminPasswd == null) ? 0 : adminPasswd.hashCode());
+        result = prime * result + (adminSecure ? 1231 : 1237);
         result = prime * result + ((adminUser == null) ? 0 : adminUser.hashCode());
         result = prime * result + ((jdbcPasswd == null) ? 0 : jdbcPasswd.hashCode());
+        result = prime * result + (jdbcSecure ? 1231 : 1237);
         result = prime * result + ((jdbcUser == null) ? 0 : jdbcUser.hashCode());
         return result;
     }
@@ -167,6 +213,8 @@ public class KomodoTeiidAttributes implements KRestEntity {
                 return false;
         } else if (!adminPasswd.equals(other.adminPasswd))
             return false;
+        if (adminSecure != other.adminSecure)
+            return false;
         if (adminUser == null) {
             if (other.adminUser != null)
                 return false;
@@ -176,6 +224,8 @@ public class KomodoTeiidAttributes implements KRestEntity {
             if (other.jdbcPasswd != null)
                 return false;
         } else if (!jdbcPasswd.equals(other.jdbcPasswd))
+            return false;
+        if (jdbcSecure != other.jdbcSecure)
             return false;
         if (jdbcUser == null) {
             if (other.jdbcUser != null)
@@ -187,7 +237,7 @@ public class KomodoTeiidAttributes implements KRestEntity {
 
     @Override
     public String toString() {
-        return "KomodoTeiidAttributes [adminUser=" + adminUser + ", adminPasswd=" + adminPasswd + ", jdbcUser=" + jdbcUser
-               + ", jdbcPasswd=" + jdbcPasswd + "]";
+        return "KomodoTeiidAttributes [adminUser=" + adminUser + ", adminPasswd=" + adminPasswd + ", adminSecure=" + adminSecure
+               + ", jdbcUser=" + jdbcUser + ", jdbcPasswd=" + jdbcPasswd + ", jdbcSecure=" + jdbcSecure + "]";
     }
 }
