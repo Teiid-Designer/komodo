@@ -34,6 +34,9 @@ import org.komodo.relational.datasource.internal.DatasourceImpl;
 import org.komodo.relational.driver.Driver;
 import org.komodo.relational.driver.internal.DriverImpl;
 import org.komodo.relational.internal.RelationalObjectImpl;
+import org.komodo.relational.model.Model;
+import org.komodo.relational.model.Model.Type;
+import org.komodo.relational.model.View;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.internal.VdbImpl;
@@ -396,7 +399,7 @@ public class DataserviceImpl extends RelationalObjectImpl implements Dataservice
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.vdb.Vdb#getServiceVdbName(org.komodo.spi.repository.Repository.UnitOfWork)
+     * @see org.komodo.relational.dataservice.Dataservice#getServiceVdbName(org.komodo.spi.repository.Repository.UnitOfWork)
      */
     @Override
     public String getServiceVdbName(final UnitOfWork uow) throws KException {
@@ -406,7 +409,7 @@ public class DataserviceImpl extends RelationalObjectImpl implements Dataservice
     /**
      * {@inheritDoc}
      *
-     * @see org.komodo.relational.vdb.Vdb#setServiceVdbName(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
+     * @see org.komodo.relational.dataservice.Dataservice#setServiceVdbName(org.komodo.spi.repository.Repository.UnitOfWork, java.lang.String)
      */
     @Override
     public void setServiceVdbName(final UnitOfWork uow, final String vdbName) throws KException {
@@ -478,5 +481,61 @@ public class DataserviceImpl extends RelationalObjectImpl implements Dataservice
     public DeployStatus deploy(UnitOfWork uow, Teiid teiid) {
         DataserviceConveyor conveyor = new DataserviceConveyor(getRepository());
         return conveyor.deploy(uow, this, teiid);
+    }
+
+    /* (non-Javadoc)
+     * @see org.komodo.relational.dataservice.Dataservice#getDataserviceView(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public String getServiceViewName(UnitOfWork uow) throws KException {
+        String viewName = null;
+        // Only ONE virtual model should exist in the dataservice vdb.
+        // The returned view name is the first view in the first virtual model found - or null if none found.
+        Vdb serviceVdb = getServiceVdb(uow);
+        if( serviceVdb != null ) {
+            Model[] models = serviceVdb.getModels(uow);
+            for(Model model : models) {
+                Model.Type modelType = model.getModelType(uow);
+                if(modelType == Type.VIRTUAL) {
+                    View[] views = model.getViews(uow);
+                    for(View view : views) {
+                        viewName = view.getName(uow);
+                        break;
+                    }
+                }
+            }
+        }
+        return viewName;
+    }
+
+    /* (non-Javadoc)
+     * @see org.komodo.relational.dataservice.Dataservice#getDataserviceViewModel(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public String getServiceViewModelName(UnitOfWork uow) throws KException {
+        String viewModelName = null;
+        // Only ONE virtual model should exist in the dataservice vdb.
+        // The returned view model is the first virtual model found - or null if none found.
+        Vdb serviceVdb = getServiceVdb(uow);
+        if( serviceVdb != null ) {
+            Model[] models = serviceVdb.getModels(uow);
+            for(Model model : models) {
+                Model.Type modelType = model.getModelType(uow);
+                if(modelType == Type.VIRTUAL) {
+                    viewModelName = model.getName(uow);
+                    break;
+                }
+            }
+        }
+        return viewModelName;
+    }
+
+    /* (non-Javadoc)
+     * @see org.komodo.relational.dataservice.Dataservice#getDataserviceVdbVersion(org.komodo.spi.repository.Repository.UnitOfWork)
+     */
+    @Override
+    public int getServiceVdbVersion(UnitOfWork uow) throws KException {
+        Vdb serviceVdb = getServiceVdb(uow);
+        return serviceVdb != null ? serviceVdb.getVersion(uow) : 1;
     }
 }

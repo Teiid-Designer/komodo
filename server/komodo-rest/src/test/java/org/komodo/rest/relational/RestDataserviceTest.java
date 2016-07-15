@@ -48,6 +48,10 @@ public final class RestDataserviceTest {
     private static final String DATASERVICE_DATA_PATH = "/workspace/dataservices/dataservice1";
     private static final KomodoType kType = KomodoType.DATASERVICE;
     private static final String DESCRIPTION = "my description";
+    private static final String SERVICE_VDB_NAME = "serviceVdbName";
+    private static final int SERVICE_VDB_VERSION = 1;
+    private static final String SERVICE_VIEW_MODEL = "serviceViewModel";
+    private static final String SERVICE_VIEW = "serviceView";
 
     private RestDataservice dataservice;
 
@@ -62,6 +66,10 @@ public final class RestDataserviceTest {
         copy.setHasChildren(dataservice.hasChildren());
         copy.setLinks(this.dataservice.getLinks());
         copy.setProperties(this.dataservice.getProperties());
+        copy.setServiceVdbName(this.dataservice.getServiceVdbName());
+        copy.setServiceVdbVersion(this.dataservice.getServiceVdbVersion());
+        copy.setServiceViewModel(this.dataservice.getServiceViewModel());
+        copy.setServiceViewName(this.dataservice.getServiceViewName());
 
         return copy;
     }
@@ -89,6 +97,10 @@ public final class RestDataserviceTest {
         this.dataservice = new RestDataservice(BASE_URI, theDataservice, false, transaction);
         this.dataservice.setId(DATASERVICE_NAME);
         this.dataservice.setDescription(DESCRIPTION);
+        this.dataservice.setServiceVdbName(SERVICE_VDB_NAME);
+        this.dataservice.setServiceVdbVersion(SERVICE_VDB_VERSION);
+        this.dataservice.setServiceViewModel(SERVICE_VIEW_MODEL);
+        this.dataservice.setServiceViewName(SERVICE_VIEW);
     }
 
     @Test
@@ -144,6 +156,34 @@ public final class RestDataserviceTest {
         final String newDescription = "blah";
         this.dataservice.setDescription(newDescription);
         assertEquals(this.dataservice.getDescription(), newDescription);
+    }
+    
+    @Test
+    public void shouldSetServiceVdbName() {
+        final String newServiceVdb = "blah";
+        this.dataservice.setServiceVdbName(newServiceVdb);
+        assertEquals(this.dataservice.getServiceVdbName(), newServiceVdb);
+    }
+    
+    @Test
+    public void shouldSetServiceVdbVersion() {
+        final int newServiceVdbVersion = 2;
+        this.dataservice.setServiceVdbVersion(newServiceVdbVersion);
+        assertEquals(this.dataservice.getServiceVdbVersion(), newServiceVdbVersion);
+    }
+    
+    @Test
+    public void shouldSetServiceViewModel() {
+        final String newServiceViewModel = "blah";
+        this.dataservice.setServiceViewModel(newServiceViewModel);
+        assertEquals(this.dataservice.getServiceViewModel(), newServiceViewModel);
+    }
+    
+    @Test
+    public void shouldSetServiceView() {
+        final String newServiceView = "blah";
+        this.dataservice.setServiceViewName(newServiceView);
+        assertEquals(this.dataservice.getServiceViewName(), newServiceView);
     }
 
 
