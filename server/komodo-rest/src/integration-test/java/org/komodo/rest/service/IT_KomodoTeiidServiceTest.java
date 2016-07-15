@@ -25,6 +25,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import java.io.File;
@@ -94,6 +95,7 @@ import org.komodo.spi.runtime.TeiidAdminInfo;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.TeiidJdbcInfo;
 import org.komodo.spi.runtime.TeiidParent;
+import org.komodo.spi.runtime.TeiidVdb;
 import org.komodo.spi.runtime.version.TeiidVersionProvider;
 import org.komodo.test.utils.DummyEventManager;
 import org.komodo.test.utils.TestUtilities;
@@ -158,6 +160,8 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
 
 
     private void assertNoMysqlDriver() throws Exception {
+        wait(2);
+
         Collection<DataSourceDriver> drivers = helperInstance.getDataSourceDrivers();
         for (DataSourceDriver driver : drivers) {
             assertFalse(driver.getName().startsWith(MYSQL_DRIVER));
@@ -166,13 +170,16 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
 
     private void assertMysqlDriver() throws Exception {
         boolean found = false;
-        Collection<DataSourceDriver> drivers = helperInstance.getDataSourceDrivers();
-        for (DataSourceDriver driver : drivers) {
-            // Use startswith rather than equals since the
-            // mysql connector gives up 2 drivers rather than just 1
-            if (driver.getName().startsWith(MYSQL_DRIVER)) {
-                found = true;
-                break;
+        for (int i = 0; i < 10 && !found; i++) {
+            wait(3);
+            Collection<DataSourceDriver> drivers = helperInstance.getDataSourceDrivers();
+            for (DataSourceDriver driver : drivers) {
+                // Use startswith rather than equals since the
+                // mysql connector gives up 2 drivers rather than just 1
+                if (driver.getName().startsWith(MYSQL_DRIVER)) {
+                    found = true;
+                    break;
+                }
             }
         }
         assertTrue("Cannot find deployed driver", found);
@@ -214,6 +221,31 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         assertEquals(200, response.getStatus());
     }
 
+    private void waitForVdb(String vdbName) throws Exception {
+        TeiidVdb vdb = null;
+        //
+        // Timeout after 30 seconds
+        //
+        for (int i = 0; vdb == null && i < 10; ++i) {
+            vdb = helperInstance.getVdb(vdbName);
+            if (vdb != null && vdb.isActive())
+                break; // Found it and its active
+
+            if (i >= 10)
+                fail("Timed out waiting for vdb " + vdbName + " to become active");
+
+            wait(3);
+        }
+    }
+
+    private void wait(int seconds) {
+        try {
+            Thread.sleep(seconds * 1000);
+        } catch (Exception ex) {
+            // Nothing required
+        }
+    }
+
     @Before
     public void beforeEach() throws Exception {
         this.service = PluginService.getInstance().getDefaultTeiidService();
@@ -223,7 +255,7 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
 
         // Deploy sample vdb for service to find
         helperInstance.deployDynamicVdb(TestUtilities.SAMPLE_VDB_FILE, TestUtilities.sampleExample());
-        Thread.sleep(2000);
+        waitForVdb(TestUtilities.SAMPLE_VDB_NAME);
     }
 
     @After
@@ -264,7 +296,7 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
             }
         }
 
-        Thread.sleep(2000);
+        wait(2);
 
         if (helperInstance != null)
             helperInstance.disconnect();
@@ -617,8 +649,6 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         String deployMsg = RelationalMessages.getString(RelationalMessages.Info.DRIVER_SUCCESSFULLY_DEPLOYED);
         assertEquals(deployMsg, attributes.values().iterator().next());
 
-        Thread.sleep(2000);
-
         assertMysqlDriver();
     }
 
@@ -631,9 +661,8 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         FileUtils.write(driverBytes, driverFile);
 
         helperInstance.deployDriver(MYSQL_DRIVER, driverFile);
-        Thread.sleep(2000);
-
         assertMysqlDriver();
+
         URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
                                             .path(V1Constants.TEIID_SEGMENT)
                                             .path(V1Constants.TEIID_DRIVER)
@@ -649,7 +678,7 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         KomodoStatusObject status = KomodoJsonMarshaller.unmarshall(entity, KomodoStatusObject.class);
         assertNotNull(status);
 
-        Thread.sleep(2000);
+        wait(2);
 
         helperInstance.reconnect();
 
@@ -661,8 +690,6 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
 
         String deployMsg = RelationalMessages.getString(RelationalMessages.Info.DRIVER_SUCCESSFULLY_UNDEPLOYED);
         assertEquals(deployMsg, attributes.values().iterator().next());
-
-        Thread.sleep(2000);
 
         assertNoMysqlDriver();
     }
@@ -777,7 +804,7 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
             //
             // Give the vdb time to become active
             //
-            Thread.sleep(5000);
+            waitForVdb("usstates");
 
             KomodoQueryAttribute queryAttr = new KomodoQueryAttribute();
             queryAttr.setQuery("SELECT * FROM state");
@@ -805,7 +832,7 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
             //
             // Give the vdb time to become active
             //
-            Thread.sleep(5000);
+            waitForVdb("usstates");
 
             KomodoQueryAttribute queryAttr = new KomodoQueryAttribute();
             queryAttr.setQuery("SELECT * FROM state");
@@ -838,7 +865,7 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
             //
             // Give the vdb time to become active
             //
-            Thread.sleep(5000);
+            waitForVdb("usstates");
 
             String dsPath = RepositoryImpl.WORKSPACE_ROOT + FORWARD_SLASH + "UsStatesService";
 
