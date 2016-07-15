@@ -21,6 +21,7 @@
  ************************************************************************************/
 package org.komodo.spi.runtime;
 
+import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.runtime.ExecutionAdmin.ConnectivityType;
 
 
@@ -30,13 +31,66 @@ import org.komodo.spi.runtime.ExecutionAdmin.ConnectivityType;
 public interface TeiidConnectionInfo {
 
     /**
+     * Teiid JDBC protocol interface
+     */
+    String JDBC_PROTOCOL_PREFIX = "jdbc:teiid:"; //$NON-NLS-1$
+
+    /**
      * Protocol address prefix for secure teiid instance connections
      */
-    public static final String MMS = "mms://"; //$NON-NLS-1$
+    String MMS = "mms://"; //$NON-NLS-1$
+
     /**
      * Protocol address prefix for teiid instance connections
      */
-    public static final String MM = "mm://"; //$NON-NLS-1$
+    String MM = "mm://"; //$NON-NLS-1$
+
+    /**
+     * Generic VDB Name used in teiid jdbc urls
+     */
+    String VDB_GENERIC_NAME = "<vdbname>";
+
+    public static class UrlConstructor implements StringConstants {
+
+        /**
+         * @param vdbName
+         * @param secure
+         * @param host
+         * @param port
+         * @return standard Teiid connection url with the given values
+         */
+        public static String createTeiidConnectionUrl(String vdbName, boolean secure, String host, int port) {
+            if (vdbName == null)
+                vdbName = VDB_GENERIC_NAME;
+
+            String protocol = MM;
+            if (secure)
+                protocol = MMS;
+
+            if (host == null)
+                host = HostProvider.DEFAULT_HOST;
+
+            if (port == -1)
+                port = TeiidJdbcInfo.DEFAULT_PORT;
+
+            StringBuffer buf = new StringBuffer(TeiidConnectionInfo.JDBC_PROTOCOL_PREFIX)
+                                                .append(vdbName)
+                                                .append(AT)
+                                                .append(protocol)
+                                                .append(host)
+                                                .append(COLON)
+                                                .append(port);
+
+            return buf.toString();
+        }
+
+        /**
+         * @return the default teiid connection url
+         */
+        public static String createDefaultTeiidConnectionUrl() {
+            return createTeiidConnectionUrl(null, false, null, -1);
+        }
+    }
 
     /**
      * @return the password (can be <code>null</code> or empty)

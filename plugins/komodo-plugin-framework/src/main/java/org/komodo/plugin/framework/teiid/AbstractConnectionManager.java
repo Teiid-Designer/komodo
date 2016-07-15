@@ -60,13 +60,9 @@ public abstract class AbstractConnectionManager implements StringConstants {
      * @throws Exception
      */
     public Connection getTeiidDriverConnection(String vdb, String host, int port,
-                                                                                       String user, String password, boolean secure) throws Exception {
-            String protocol = TeiidConnectionInfo.MM;
-            if (secure)
-                protocol = TeiidConnectionInfo.MMS;
-        
-            String url = "jdbc:teiid:" + vdb + AMPERSAND + protocol + host + COLON + port; //$NONNLS1$
-        
+                                                                                       String user, String password, boolean secure) throws Exception {        
+            String url = TeiidConnectionInfo.UrlConstructor.createTeiidConnectionUrl(vdb, secure, host, port);
+
             try {
                 String urlAndCredentials = url + ";user=" + user + ";password=" + password + SEMI_COLON; //$NONNLS1$ //$NONNLS2$
                 return getTeiidDriver().connect(urlAndCredentials, null);

@@ -50,6 +50,7 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.runtime.HostProvider;
 import org.komodo.spi.runtime.TeiidAdminInfo;
+import org.komodo.spi.runtime.TeiidConnectionInfo;
 import org.komodo.spi.runtime.TeiidDataSource;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.TeiidJdbcInfo;
@@ -142,7 +143,7 @@ public final class TeiidImplTest extends RelationalModelTest {
     @Test
     public void shouldHaveDefaultTeiidInstanceUrl() throws Exception {
         TeiidInstance teiidInstance = this.teiid.getTeiidInstance(getTransaction());
-        assertThat( teiidInstance.getUrl(), is( "mms://localhost:9999" ) );
+        assertThat( teiidInstance.getUrl(), is( TeiidConnectionInfo.UrlConstructor.createDefaultTeiidConnectionUrl()) );
     }
     
     @Test
