@@ -17,6 +17,7 @@ package org.komodo.relational.commands.tabularresultset;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+
 import org.junit.Test;
 import org.komodo.relational.model.ResultSetColumn;
 import org.komodo.shell.api.CommandResult;
@@ -38,6 +39,15 @@ public final class AddColumnCommandTest extends TabularResultSetCommandTest {
         final ResultSetColumn[] cols = get().getColumns( getTransaction() );
         assertThat( cols.length, is( 1 ) );
         assertThat( cols[ 0 ].getName( getTransaction() ), is( addedColumn ) );
+    }
+
+    @Test( expected = AssertionError.class )
+    public void shouldNotCreateColumnWithNameThatAlreadyExists() throws Exception {
+        final String cmd = "add-column blah";
+        final String[] commands = { cmd,
+                                    cmd };
+
+        execute( commands );
     }
 
 }

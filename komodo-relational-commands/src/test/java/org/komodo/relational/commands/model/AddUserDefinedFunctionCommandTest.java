@@ -16,6 +16,7 @@
 package org.komodo.relational.commands.model;
 
 import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Function;
@@ -55,6 +56,19 @@ public final class AddUserDefinedFunctionCommandTest extends AbstractCommandTest
         assertEquals(1, functions.length);
         assertEquals(true, functions[0] instanceof UserDefinedFunction);
         assertEquals("myUserDefinedFunction", functions[0].getName(getTransaction())); //$NON-NLS-1$
+    }
+
+    @Test( expected = AssertionError.class )
+    public void shouldNotCreateUserDefinedFunctionWithNameThatAlreadyExists() throws Exception {
+        final String cmd = "add-user-defined-function myUserDefinedFunction";
+        final String[] commands = { "create-vdb myVdb vdbPath",
+                                    "cd myVdb",
+                                    "add-model myModel",
+                                    "cd myModel",
+                                    cmd,
+                                    cmd };
+
+        execute( commands );
     }
 
 }

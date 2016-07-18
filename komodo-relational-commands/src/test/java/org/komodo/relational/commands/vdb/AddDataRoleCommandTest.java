@@ -16,6 +16,7 @@
 package org.komodo.relational.commands.vdb;
 
 import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.vdb.DataRole;
@@ -46,6 +47,17 @@ public final class AddDataRoleCommandTest extends AbstractCommandTest {
         DataRole[] dataRoles = vdbs[0].getDataRoles(getTransaction());
         assertEquals(1, dataRoles.length);
         assertEquals("myDataRole", dataRoles[0].getName(getTransaction())); //$NON-NLS-1$
+    }
+
+    @Test( expected = AssertionError.class )
+    public void shouldNotCreateDataRoleWithNameThatAlreadyExists() throws Exception {
+        final String cmd = "add-data-role myDataRole";
+        final String[] commands = { "create-vdb myVdb vdbPath",
+                                    "cd myVdb",
+                                    cmd,
+                                    cmd };
+
+        execute( commands );
     }
 
 }

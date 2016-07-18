@@ -16,6 +16,7 @@
 package org.komodo.relational.commands.table;
 
 import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Index;
@@ -60,6 +61,21 @@ public final class AddIndexCommandTest extends AbstractCommandTest {
         Index[] indexes = tables[0].getIndexes(getTransaction());
         assertEquals(1, indexes.length);
         assertEquals("myIndex", indexes[0].getName(getTransaction())); //$NON-NLS-1$
+    }
+
+    @Test( expected = AssertionError.class )
+    public void shouldNotCreateIndexWithNameThatAlreadyExists() throws Exception {
+        final String cmd = "add-index myIndex";
+        final String[] commands = { "create-vdb myVdb vdbPath",
+                                    "cd myVdb",
+                                    "add-model myModel",
+                                    "cd myModel",
+                                    "add-table myTable",
+                                    "cd myTable",
+                                    cmd,
+                                    cmd };
+
+        execute( commands );
     }
 
 }
