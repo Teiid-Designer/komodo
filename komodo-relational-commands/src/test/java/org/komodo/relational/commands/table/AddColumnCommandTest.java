@@ -16,6 +16,7 @@
 package org.komodo.relational.commands.table;
 
 import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Column;
@@ -61,6 +62,21 @@ public final class AddColumnCommandTest extends AbstractCommandTest {
         Column[] columns = tables[0].getColumns(getTransaction());
         assertEquals(1, columns.length);
         assertEquals("myColumn", columns[0].getName(getTransaction())); //$NON-NLS-1$
+    }
+
+    @Test( expected = AssertionError.class )
+    public void shouldNotCreateColumnWithNameThatAlreadyExists() throws Exception {
+        final String cmd = "add-column myColumn";
+        final String[] commands = { "create-vdb myVdb vdbPath",
+                                    "cd myVdb",
+                                    "add-model myModel",
+                                    "cd myModel",
+                                    "add-table myTable",
+                                    "cd myTable",
+                                    cmd,
+                                    cmd };
+
+        execute( commands );
     }
 
 }

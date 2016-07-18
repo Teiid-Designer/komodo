@@ -16,6 +16,7 @@
 package org.komodo.relational.commands.model;
 
 import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.model.Model;
@@ -53,6 +54,19 @@ public final class AddViewCommandTest extends AbstractCommandTest {
         View[] views = models[0].getViews(getTransaction());
         assertEquals(1, views.length);
         assertEquals("myView", views[0].getName(getTransaction())); //$NON-NLS-1$
+    }
+
+    @Test( expected = AssertionError.class )
+    public void shouldNotCreateViewWithNameThatAlreadyExists() throws Exception {
+        final String cmd = "add-view myView";
+        final String[] commands = { "create-vdb myVdb vdbPath",
+                                    "cd myVdb",
+                                    "add-model myModel",
+                                    "cd myModel",
+                                    cmd,
+                                    cmd };
+
+        execute( commands );
     }
 
 }

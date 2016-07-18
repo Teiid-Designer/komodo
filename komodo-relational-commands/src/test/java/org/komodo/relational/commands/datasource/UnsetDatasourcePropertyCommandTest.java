@@ -15,7 +15,11 @@
  */
 package org.komodo.relational.commands.datasource;
 
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.datasource.Datasource;
@@ -45,6 +49,38 @@ public final class UnsetDatasourcePropertyCommandTest extends AbstractCommandTes
         assertEquals("testSource", datasources[0].getName(getTransaction())); //$NON-NLS-1$
 
         assertEquals(null, datasources[0].getJndiName(getTransaction()));
+    }
+
+    @Test
+    public void shouldUnsetDescription() throws Exception {
+        final String[] commands = { "create-datasource testSource",
+                                    "cd testSource",
+                                    "set-property description blah",
+                                    "unset-property description" };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final WorkspaceManager wkspMgr = WorkspaceManager.getInstance( _repo );
+        final Datasource[] sources = wkspMgr.findDatasources( getTransaction() );
+
+        assertThat( sources.length, is( 1 ) );
+        assertThat( sources[ 0 ].getDescription( getTransaction() ), is( nullValue() ) );
+    }
+
+    @Test
+    public void shouldUnsetExternalLocation() throws Exception {
+        final String[] commands = { "create-datasource testSource",
+                                    "cd testSource",
+                                    "set-property externalLocation /Users/sledge/blah",
+                                    "unset-property externalLocation" };
+        final CommandResult result = execute( commands );
+        assertCommandResultOk( result );
+
+        final WorkspaceManager wkspMgr = WorkspaceManager.getInstance( _repo );
+        final Datasource[] sources = wkspMgr.findDatasources( getTransaction() );
+
+        assertThat( sources.length, is( 1 ) );
+        assertThat( sources[ 0 ].getExternalLocation( getTransaction() ), is( nullValue() ) );
     }
 
 }

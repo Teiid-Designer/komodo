@@ -16,6 +16,7 @@
 package org.komodo.relational.commands.vdb;
 
 import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.vdb.Translator;
@@ -46,6 +47,17 @@ public final class AddTranslatorCommandTest extends AbstractCommandTest {
         Translator[] translators = vdbs[0].getTranslators(getTransaction());
         assertEquals(1, translators.length);
         assertEquals("myTranslator", translators[0].getName(getTransaction())); //$NON-NLS-1$
+    }
+
+    @Test( expected = AssertionError.class )
+    public void shouldNotCreateTranslatorWithNameThatAlreadyExists() throws Exception {
+        final String cmd = "add-translator myTranslator tType";
+        final String[] commands = { "create-vdb myVdb vdbPath",
+                                    "cd myVdb",
+                                    cmd,
+                                    cmd };
+
+        execute( commands );
     }
 
 }
