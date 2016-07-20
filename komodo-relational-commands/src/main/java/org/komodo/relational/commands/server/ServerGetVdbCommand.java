@@ -92,21 +92,22 @@ public final class ServerGetVdbCommand extends ServerShellCommand {
                 return validationResult;
             }
 
-            // Get the VDB - make sure its a dynamic VDB
+            // Check the vdb name to make sure its valid
+            List< String > existingVdbNames = ServerUtils.getVdbNames(getWorkspaceTeiidInstance());
+            if(!existingVdbNames.contains(vdbName)) {
+                return new CommandResultImpl(false, I18n.bind( ServerCommandsI18n.serverVdbNotFound, vdbName ), null);
+            }
+            
+            // Get the VDB - only dynamic VDBs can be handled currently.  exception will be handled for archive vdb
             TeiidVdb vdb = null;
             try {
-                // Check the vdb name to make sure its valid
-                List< String > existingVdbNames = ServerUtils.getVdbNames(getWorkspaceTeiidInstance());
-                if(!existingVdbNames.contains(vdbName)) {
-                    return new CommandResultImpl(false, I18n.bind( ServerCommandsI18n.serverVdbNotFound, vdbName ), null);
-                }
                 // Get the vdb
                 vdb = getWorkspaceTeiidInstance().getVdb(vdbName);
             } catch (Exception ex) {
-                result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.connectionErrorWillDisconnect ), ex );
-                WkspStatusServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();
+                result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.serverGetVdbError, vdbName, ex.getLocalizedMessage() ), null );
                 return result;
             }
+            
             if(vdb == null) {
                 return new CommandResultImpl( false, I18n.bind(ServerCommandsI18n.serverVdbNotFound, vdbName), null );
             }

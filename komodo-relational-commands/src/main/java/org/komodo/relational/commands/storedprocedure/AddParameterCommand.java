@@ -21,6 +21,8 @@
  */
 package org.komodo.relational.commands.storedprocedure;
 
+import org.komodo.relational.commands.RelationalCommandsI18n;
+import org.komodo.relational.model.Parameter;
 import org.komodo.relational.model.StoredProcedure;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
@@ -55,6 +57,13 @@ public final class AddParameterCommand extends StoredProcedureShellCommand {
             final String paramName = requiredArgument( 0, I18n.bind( StoredProcedureCommandsI18n.missingParameterName ) );
 
             final StoredProcedure proc = getStoredProcedure();
+            
+            // Do not allow add if object of type with this name already exists
+            Parameter[] params = proc.getParameters(getTransaction(), paramName);
+            if(params.length>0) {
+                return new CommandResultImpl( false, I18n.bind( RelationalCommandsI18n.cannotAddChildAlreadyExistsError, paramName, Parameter.class.getSimpleName() ), null ); 
+            }
+            
             proc.addParameter( getTransaction(), paramName );
 
             result = new CommandResultImpl( I18n.bind( StoredProcedureCommandsI18n.parameterAdded, paramName ) );

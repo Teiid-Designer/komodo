@@ -21,6 +21,8 @@
  */
 package org.komodo.relational.commands.vdb;
 
+import org.komodo.relational.commands.RelationalCommandsI18n;
+import org.komodo.relational.vdb.Entry;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
@@ -56,6 +58,13 @@ public final class AddEntryCommand extends VdbShellCommand {
             final String entryPath = requiredArgument( 1, I18n.bind( VdbCommandsI18n.missingEntryPath ) );
 
             final Vdb vdb = getVdb();
+            
+            // Do not allow add if object of type with this name already exists
+            Entry[] entries = vdb.getEntries(getTransaction(), entryName);
+            if(entries.length>0) {
+                return new CommandResultImpl( false, I18n.bind( RelationalCommandsI18n.cannotAddChildAlreadyExistsError, entryName, Entry.class.getSimpleName() ), null );
+            }
+            
             vdb.addEntry( getTransaction(), entryName, entryPath );
 
             result = new CommandResultImpl( I18n.bind( VdbCommandsI18n.entryAdded, entryName ) );

@@ -21,6 +21,9 @@
  */
 package org.komodo.relational.commands.workspace;
 
+import javax.xml.validation.Schema;
+import org.komodo.core.KomodoLexicon;
+import org.komodo.relational.commands.RelationalCommandsI18n;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
@@ -58,6 +61,12 @@ public final class CreateSchemaCommand extends WorkspaceShellCommand {
             final String schemaName = requiredArgument( 0, I18n.bind( WorkspaceCommandsI18n.missingSchemaName ) );
 
             final WorkspaceManager mgr = getWorkspaceManager();
+            
+            // Do not allow create if object with this name already exists
+            if(mgr.hasChild(getTransaction(), schemaName, KomodoLexicon.Schema.NODE_TYPE)) {
+                return new CommandResultImpl( false, I18n.bind( RelationalCommandsI18n.cannotCreateChildAlreadyExistsError, schemaName, Schema.class.getSimpleName() ), null );
+            }
+
             mgr.createSchema( getTransaction(), null, schemaName );
 
             result = new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.schemaCreated, schemaName ) );

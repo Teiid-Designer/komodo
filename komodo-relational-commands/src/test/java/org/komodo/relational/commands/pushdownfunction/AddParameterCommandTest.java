@@ -65,4 +65,19 @@ public final class AddParameterCommandTest extends AbstractCommandTest {
         assertEquals("myParameter", params[0].getName(getTransaction())); //$NON-NLS-1$
     }
 
+    @Test( expected = AssertionError.class )
+    public void shouldNotCreateParameterWithNameThatAlreadyExists() throws Exception {
+        final String cmd = "add-parameter myParameter";
+        final String[] commands = { "create-vdb myVdb vdbPath",
+                                    "cd myVdb",
+                                    "add-model myModel",
+                                    "cd myModel",
+                                    "add-pushdown-function myPushdownFunction",
+                                    "cd myPushdownFunction",
+                                    cmd,
+                                    cmd };
+
+        execute( commands );
+    }
+
 }

@@ -21,7 +21,9 @@
  */
 package org.komodo.relational.commands.datarole;
 
+import org.komodo.relational.commands.RelationalCommandsI18n;
 import org.komodo.relational.vdb.DataRole;
+import org.komodo.relational.vdb.Permission;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
@@ -55,6 +57,13 @@ public final class AddPermissionCommand extends DataRoleShellCommand {
             final String permissionName = requiredArgument( 0, I18n.bind( DataRoleCommandsI18n.missingPermissionName ) );
 
             final DataRole dataRole = getDataRole();
+            
+            // Do not allow add if object of type with this name already exists
+            Permission[] permissions = dataRole.getPermissions(getTransaction(), permissionName);
+            if(permissions.length>0) {
+                return new CommandResultImpl( false, I18n.bind( RelationalCommandsI18n.cannotAddChildAlreadyExistsError, permissionName, Permission.class.getSimpleName() ), null ); 
+            }
+            
             dataRole.addPermission( getTransaction(), permissionName );
 
             result = new CommandResultImpl( I18n.bind( DataRoleCommandsI18n.permissionAdded, permissionName ) );

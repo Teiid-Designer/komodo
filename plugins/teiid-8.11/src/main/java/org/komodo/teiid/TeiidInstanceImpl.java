@@ -249,6 +249,21 @@ public class TeiidInstanceImpl extends AbstractTeiidInstance {
     }
 
     @Override
+    public Collection<String> getVdbNames() throws Exception {
+        connect();
+        Collection<? extends VDB> vdbs = admin.getVDBs();
+        if (vdbs.isEmpty())
+            return Collections.emptyList();
+
+        List<String> teiidVdbNames = new ArrayList<String>();
+        for (VDB vdb : vdbs) {
+            teiidVdbNames.add(vdb.getName());
+        }
+
+        return teiidVdbNames;
+    }
+
+    @Override
     public TeiidVdb getVdb(String name) throws Exception {
         connect();
         VDB vdb = admin.getVDB(name, 1);

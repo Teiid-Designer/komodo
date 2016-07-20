@@ -22,8 +22,8 @@
 package org.komodo.relational.commands.datarole;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-
 import org.komodo.relational.vdb.DataRole;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.Arguments;
@@ -61,6 +61,15 @@ public final class DeleteMappedRoleCommand extends DataRoleShellCommand {
             final String mappedRoleName = requiredArgument( 0, I18n.bind( DataRoleCommandsI18n.missingMappedRoleName ) );
 
             final DataRole dataRole = getDataRole();
+            
+            // Determine if mapped role exists before attempting to delete.
+            String[] mappedRoles = dataRole.getMappedRoles(getTransaction());
+            if(mappedRoles.length==0) {
+                return new CommandResultImpl( false, I18n.bind( DataRoleCommandsI18n.deleteMappedRoleNoRolesError, dataRole.getName(getTransaction()) ), null );
+            } else if(!Arrays.asList(mappedRoles).contains(mappedRoleName)) {
+                return new CommandResultImpl( false, I18n.bind( DataRoleCommandsI18n.deleteMappedRoleNoMatchingRoleError, dataRole.getName(getTransaction()), mappedRoleName ), null );
+            }
+                                                                                                                                                                                            
             dataRole.removeMappedRole( getTransaction(), mappedRoleName );
 
             result = new CommandResultImpl( I18n.bind( DataRoleCommandsI18n.mappedRoleDeleted, mappedRoleName ) );
