@@ -136,7 +136,7 @@ public final class ServerDeployVdbCommand extends ServerShellCommand {
 
                 String vdbToDeployName = vdbToDeploy.getName(getTransaction());
                 String vdbDeploymentName = vdbToDeployName + VDB_DEPLOYMENT_SUFFIX;
-                InputStream stream = new ByteArrayInputStream(vdbXml.getBytes());
+                InputStream stream = new ByteArrayInputStream(vdbXml);
                 try {
                     teiidInstance.deployDynamicVdb(vdbDeploymentName, stream);
                 } catch (Exception ex) {
