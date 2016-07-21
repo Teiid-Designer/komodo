@@ -24,11 +24,13 @@ package org.komodo.relational.datasource.internal;
 import java.util.Collection;
 import java.util.Properties;
 import org.komodo.core.KomodoLexicon;
+import org.komodo.relational.DeployStatus;
 import org.komodo.relational.ExcludeQNamesFilter;
 import org.komodo.relational.Messages;
 import org.komodo.relational.Messages.Relational;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.internal.RelationalChildRestrictedObject;
+import org.komodo.relational.teiid.Teiid;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.DocumentType;
@@ -432,6 +434,24 @@ public class DatasourceImpl extends RelationalChildRestrictedObject implements D
         }
     }
     
+    @Override
+    public DeployStatus deploy(UnitOfWork uow, Teiid teiid) {
+        ArgCheck.isNotNull( uow, "transaction" ); //$NON-NLS-1$
+        ArgCheck.isTrue( ( uow.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isNotNull(teiid, "teiid"); //$NON-NLS-1$
+
+        //TODO: Complete this
+        
+        DeployStatus status = new DeployStatus();
+        TeiidInstance teiidInstance = teiid.getTeiidInstance(uow);
+        
+        status.addProgressMessage("Starting deployment of driver "); //$NON-NLS-1$
+        status.addProgressMessage("Starting deployment of datasource "); //$NON-NLS-1$
+        status.addProgressMessage("Data source deployed to teiid"); //$NON-NLS-1$
+        
+        return status;
+    }
+
     @Override
     public boolean addListener( ExecutionConfigurationListener listener ) {
         return false;

@@ -74,7 +74,22 @@ public final class RelationalMessages {
         /**
          * Data service deployed with errors
          */
-        DATA_SERVICE_DEPLOYED_WITH_ERRORS;
+        DATA_SERVICE_DEPLOYED_WITH_ERRORS,
+
+        /**
+         * Data source status title
+         */
+        DATA_SOURCE_DEPLOYMENT_STATUS_TITLE,
+
+        /**
+         * Data source successfully deployed
+         */
+        DATA_SOURCE_SUCCESSFULLY_DEPLOYED,
+
+        /**
+         * Data source deployed with errors
+         */
+        DATA_SOURCE_DEPLOYED_WITH_ERRORS;
 
         /**
          * {@inheritDoc}
@@ -176,6 +191,91 @@ public final class RelationalMessages {
          * An error indicating clone attempt failed because same name already exists
          */
         DATASERVICE_SERVICE_CLONE_ALREADY_EXISTS,
+        
+        /**
+         * An error indicating a JSON document representing the Datasources in the workspace could not be retrieved.
+         */
+        DATASOURCE_SERVICE_GET_DATASOURCES_ERROR,
+
+        /**
+         * An error indicating an error occurred trying to obtain the specified Datasource.
+         */
+        DATASOURCE_SERVICE_GET_DATASOURCE_ERROR,
+
+        /**
+         * An error indicating a request to create a datasource failed
+         */
+        DATASOURCE_SERVICE_CREATE_DATASOURCE_ERROR,
+
+        /**
+         * An error indicating a request to clone a datasource failed
+         */
+        DATASOURCE_SERVICE_CLONE_DATASOURCE_ERROR,
+
+        /**
+         * An error indicating a request to delete a datasource failed
+         */
+        DATASOURCE_SERVICE_DELETE_DATASOURCE_ERROR,
+        
+        /**
+         * An error indicating a request to update a datasource failed
+         */
+        DATASOURCE_SERVICE_UPDATE_DATASOURCE_ERROR,
+
+        /**
+         * An error indicating create attempt was missing a name
+         */
+        DATASOURCE_SERVICE_CREATE_MISSING_NAME,
+ 
+        /**
+         * An error indicating clone attempt was missing a name
+         */
+        DATASOURCE_SERVICE_CLONE_MISSING_NAME,
+ 
+        /**
+         * An error indicating clone attempt was missing a new datasource name
+         */
+        DATASOURCE_SERVICE_CLONE_MISSING_NEW_NAME,
+ 
+        /**
+         * An error indicating the desired new clone name is same as datasource being cloned
+         */
+        DATASOURCE_SERVICE_CLONE_SAME_NAME_ERROR,
+        
+        /**
+         * An error indicating update attempt was missing a name
+         */
+        DATASOURCE_SERVICE_UPDATE_MISSING_NAME,
+        
+        /**
+         * An error indicating that the datasource does not exist
+         */
+        DATASOURCE_SERVICE_UPDATE_SOURCE_DNE,
+        
+        /**
+         * An error indicating update attempt was missing json arg
+         */
+        DATASOURCE_SERVICE_UPDATE_MISSING_JSON,
+ 
+        /**
+         * An error indicating the datasource name is missing from the input JSON document.
+         */
+        DATASOURCE_SERVICE_JSON_MISSING_NAME,
+
+        /**
+         * An error indicating the parameter and JSON datasource name does not match for a datasource being created.
+         */
+        DATASOURCE_SERVICE_SOURCE_NAME_ERROR,
+
+        /**
+         * An error indicating create attempt failed because same name already exists
+         */
+        DATASOURCE_SERVICE_CREATE_ALREADY_EXISTS,
+        
+        /**
+         * An error indicating clone attempt failed because same name already exists
+         */
+        DATASOURCE_SERVICE_CLONE_ALREADY_EXISTS,
         
         /**
          * An error indicating the VDB descriptor JSON representation could not be created.
@@ -451,6 +551,16 @@ public final class RelationalMessages {
          * No data service could be found while trying to deploy
          */
         TEIID_SERVICE_NO_DATA_SERVICE_FOUND,
+
+        /**
+         * An error indicating a name is missing while deploying a data source
+         */
+        TEIID_SERVICE_DATA_SOURCE_MISSING_PATH,
+
+        /**
+         * No data source could be found while trying to deploy
+         */
+        TEIID_SERVICE_NO_DATA_SOURCE_FOUND,
 
         /**
          * No query specified for the query operation

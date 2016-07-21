@@ -64,6 +64,11 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
         DATA_SERVICE_PARENT_PATH,
 
         /**
+         * The path of the parent of a datasource (stored as an URI)
+         */
+        DATA_SOURCE_PARENT_PATH,
+
+        /**
          * Name of the teiid object
          */
         TEIID_NAME,
@@ -261,6 +266,15 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
         return UriBuilder.fromUri(this.baseUri)
                                    .path(WORKSPACE_SEGMENT)
                                    .path(DATA_SERVICES_SEGMENT).build();
+    }
+
+    /**
+     * @return the URI to use when requesting a collection of Datasources in the workspace (never <code>null</code>)
+     */
+    public URI workspaceDatasourcesUri() {
+        return UriBuilder.fromUri(this.baseUri)
+                                   .path(WORKSPACE_SEGMENT)
+                                   .path(DATA_SOURCES_SEGMENT).build();
     }
 
     /**
@@ -769,7 +783,7 @@ public final class KomodoRestUriBuilder implements KomodoRestV1Application.V1Con
             return cachedTeiidUri(parent.getName(uow));
         }
 
-        throw new KException("Data source has an invalid parent");
+        return workspaceDatasourcesUri();
     }
 
     /**

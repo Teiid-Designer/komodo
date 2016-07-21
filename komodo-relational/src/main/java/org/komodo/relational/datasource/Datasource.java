@@ -23,10 +23,12 @@ package org.komodo.relational.datasource;
 
 import java.util.Properties;
 import org.komodo.core.KomodoLexicon;
+import org.komodo.relational.DeployStatus;
 import org.komodo.relational.RelationalObject;
 import org.komodo.relational.RelationalProperties;
 import org.komodo.relational.TypeResolver;
 import org.komodo.relational.datasource.internal.DatasourceImpl;
+import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.ObjectImpl;
 import org.komodo.spi.KException;
@@ -304,5 +306,15 @@ public interface Datasource extends Exportable, RelationalObject {
      * @throws Exception if error occurs
      */
     Properties getPropertiesForServerDeployment(UnitOfWork transaction, TeiidInstance teiidInstance) throws Exception;
+    
+    /**
+     * @param uow
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param teiid 
+     *        the Teiid instance
+     * @return the deployment status of this data source to the given teiid
+     */
+    DeployStatus deploy(UnitOfWork uow, Teiid teiid);
 
 }
