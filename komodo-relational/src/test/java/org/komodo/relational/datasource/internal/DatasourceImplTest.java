@@ -23,10 +23,8 @@ package org.komodo.relational.datasource.internal;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-
 import java.util.Arrays;
 import java.util.Properties;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.komodo.core.KomodoLexicon;
@@ -172,8 +170,9 @@ public final class DatasourceImplTest extends RelationalModelTest {
         this.datasource.setProperty(getTransaction(), "prop1", "prop1Value");
         this.datasource.setProperty(getTransaction(), "prop2", "prop2Value");
 
-        String xmlString = this.datasource.export(getTransaction(), new Properties());
-
+        byte[] xml = this.datasource.export(getTransaction(), new Properties());
+        String xmlString = new String(xml);
+ 
         assertThat( xmlString.contains(DS_NAME), is( true ) );
         assertThat( xmlString.contains("\t"), is( false ) );
         assertThat( xmlString.contains( description ), is( true ) );
@@ -193,7 +192,9 @@ public final class DatasourceImplTest extends RelationalModelTest {
 
         Properties exportProps = new Properties();
         exportProps.put( ExportConstants.USE_TABS_PROP_KEY, true );
-        String xmlString = this.datasource.export(getTransaction(), exportProps);
+
+        byte[] xml = this.datasource.export(getTransaction(), exportProps);
+        String xmlString = new String(xml);
 
         assertThat( xmlString.contains(DS_NAME), is( true ) );
         assertThat( xmlString.contains("\t"), is( true ) );
