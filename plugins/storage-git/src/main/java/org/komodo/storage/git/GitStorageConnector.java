@@ -21,6 +21,7 @@
  */
 package org.komodo.storage.git;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -33,13 +34,23 @@ import java.util.Set;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.RebaseResult;
 import org.eclipse.jgit.api.RebaseResult.Status;
+import org.eclipse.jgit.api.TransportConfigCallback;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.transport.HttpTransport;
+import org.eclipse.jgit.transport.JschConfigSessionFactory;
+import org.eclipse.jgit.transport.OpenSshConfig;
+import org.eclipse.jgit.transport.OpenSshConfig.Host;
+import org.eclipse.jgit.transport.SshSessionFactory;
+import org.eclipse.jgit.transport.SshTransport;
+import org.eclipse.jgit.transport.Transport;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.eclipse.jgit.treewalk.TreeWalk;
+import org.eclipse.jgit.util.FS;
 import org.komodo.spi.repository.Exportable;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.storage.StorageConnector;
@@ -49,6 +60,9 @@ import org.komodo.spi.storage.StorageParent;
 import org.komodo.spi.storage.StorageTree;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.FileUtils;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
 
 public class GitStorageConnector implements StorageConnector {
 
@@ -66,6 +80,42 @@ public class GitStorageConnector implements StorageConnector {
      * The branch to checkout
      */
     public static final String REPO_BRANCH_PROPERTY = "repo-branch-property";
+
+    /**
+     * The ssh private key
+     */
+    public static final String REPO_PRIVATE_KEY = "repo-private-key-property";
+
+    /**
+     * The ssh passphrase
+     */
+    public static final String REPO_PASSPHRASE = "repo-passphrase-property";
+
+    /**
+     * The known hosts key for this repository
+     */
+    public static final String REPO_KNOWN_HOSTS_ID = "repo-known-hosts-property";
+
+    /**
+     * The password property (used by http)
+     */
+    public static final String REPO_USERNAME = "repo-username-property";
+
+    /**
+     * The password property (used by both ssh and http)
+     */
+    public static final String REPO_PASSWORD = "repo-password-property";
+
+    /**
+     * The name of the author to be applied when writing a commit
+     */
+    public static final String AUTHOR_NAME_PROPERTY = "author-name-property";
+
+    /**
+     * The email of the author to be applied when writing a commit
+     */
+    public static final String AUTHOR_EMAIL_PROPERTY = "author-email-property";
+
 
     static final Set<Descriptor> DESCRIPTORS = new HashSet<>();
 
@@ -93,6 +143,129 @@ public class GitStorageConnector implements StorageConnector {
                                      true,
                                      "The relative (to the directory specified by \"repo-dest-property\") path of the file. " +
                                      "It is enough to specify only the name of the file."));
+        DESCRIPTORS.add(
+                        new Descriptor(
+                                      REPO_KNOWN_HOSTS_ID,
+                                      false,
+                                      "If the repository is secured using ssh then a known hosts id is required to satisfy the first security check." +
+                                      "This can be usually be found in the file ~/.ssh/known_hosts after manually connecting to the host using ssh"));
+        DESCRIPTORS.add(
+                        new Descriptor(
+                                      REPO_PRIVATE_KEY,
+                                      false,
+                                      "If the repository is secured using ssh then a private key is required for authenticating " +
+                                      "access to it."));
+        DESCRIPTORS.add(
+                        new Descriptor(
+                                      REPO_PASSPHRASE,
+                                      false,
+                                      "If the repository is secured using ssh then a private key is required for authenticating. If in" + 
+                                      "turn the private key is encrypted with a passphrase then this is also required"));
+        DESCRIPTORS.add(
+                        new Descriptor(
+                                      REPO_USERNAME,
+                                      false,
+                                      "If the repository is secured using http then a username property will be required for authentication"));
+        DESCRIPTORS.add(
+                        new Descriptor(
+                                      REPO_PASSWORD,
+                                      false,
+                                      "If the repository is secured using http (or password ssh rather than key-based ssh) then a password property"
+                                      + "will be required for authentication"));
+        DESCRIPTORS.add(
+                        new Descriptor(
+                                      AUTHOR_NAME_PROPERTY,
+                                      false,
+                                      "Specifies the name of the author for commits made during the write operation"));
+        DESCRIPTORS.add(
+                        new Descriptor(
+                                      AUTHOR_EMAIL_PROPERTY,
+                                      false,
+                                      "Specifies the email address of the author for commits made during the write operation"));
+    }
+
+    /**
+     * {@link JschConfigSessionFactory} that makes no use of local ssh credential files
+     * such as ~/.ssh/id_rsa or ~/.ssh/.known_hosts. All required items are fed in via properties
+     */
+    private class CustomSshSessionFactory extends JschConfigSessionFactory {
+
+        private JSch customJSch;
+
+        //
+        // Overridden to plug in the parameters rather than using credentials from
+        // the host filesystem
+        //
+        @Override
+        protected JSch createDefaultJSch(FS fs) throws JSchException {
+            JSch jSch = new JSch();
+
+            if (!parameters.containsKey(REPO_PRIVATE_KEY))
+                return jSch;
+
+            jSch.removeAllIdentity();
+
+            if (parameters.containsKey(REPO_KNOWN_HOSTS_ID)) {
+                String knownHost = parameters.getProperty(REPO_KNOWN_HOSTS_ID);
+                ByteArrayInputStream stream = new ByteArrayInputStream(knownHost.getBytes());
+                jSch.setKnownHosts(stream);
+            }
+
+            String prvKey = parameters.getProperty(REPO_PRIVATE_KEY);
+            String passphrase = parameters.getProperty(REPO_PASSPHRASE);
+
+            byte[] prvKeyBytes = prvKey != null ? prvKey.getBytes() : null;
+            byte[] pphraseBytes = passphrase != null ? passphrase.getBytes() : null;
+
+            jSch.addIdentity("Identity-" + prvKey.hashCode(), prvKeyBytes, null, pphraseBytes);
+            return jSch;
+        }
+
+        //
+        // Overridden to stop implementation using any credentials stored on the host filesystem
+        //
+        protected JSch getJSch(final OpenSshConfig.Host hc, FS fs) throws JSchException {
+            if (customJSch == null)
+                customJSch = createDefaultJSch(fs);
+
+            return customJSch;
+        }
+
+        @Override
+        protected void configure(Host host, Session session) {
+            if (! parameters.containsKey(REPO_PASSWORD))
+                return;
+
+            //
+            // Should set this if the ssh connection uses passwords rather than public/private key
+            //
+            session.setPassword(parameters.getProperty(REPO_PASSWORD));
+        }
+    }
+
+    private class CustomTransportConfigCallback implements TransportConfigCallback {
+
+        @Override
+        public void configure(Transport transport) {
+            if (transport instanceof SshTransport) {
+                //
+                // SSH requires an ssh session factory
+                //
+                SshTransport sshTransport = (SshTransport) transport;
+                SshSessionFactory sshSessionFactory = new CustomSshSessionFactory();
+                sshTransport.setSshSessionFactory(sshSessionFactory);
+            } else if (transport instanceof HttpTransport) {
+                //
+                // HTTP requires a credentials provider
+                //
+                HttpTransport httpTransport = (HttpTransport) transport;
+                String username = parameters.getProperty(REPO_USERNAME, "no-user-specified");
+                String password = parameters.getProperty(REPO_PASSWORD, "no-password-specified");
+                UsernamePasswordCredentialsProvider provider =
+                        new UsernamePasswordCredentialsProvider(username, password);
+                httpTransport.setCredentialsProvider(provider);
+            }
+        }
     }
 
     private final Properties parameters;
@@ -100,6 +273,8 @@ public class GitStorageConnector implements StorageConnector {
     private final StorageConnectorId id;
 
     private Git git;
+
+    private final CustomTransportConfigCallback transportConfigCallback;
 
     public GitStorageConnector(Properties parameters) {
         ArgCheck.isNotNull(parameters);
@@ -119,6 +294,8 @@ public class GitStorageConnector implements StorageConnector {
                 return getPath();
             }
         };
+
+        this.transportConfigCallback = new CustomTransportConfigCallback();
     }
 
     private void cloneRepository() throws Exception {
@@ -126,7 +303,11 @@ public class GitStorageConnector implements StorageConnector {
         if (destination.exists()) {
             git = Git.open(destination);
         } else {
-            git = Git.cloneRepository().setURI(getPath()).setDirectory(destination).call();
+            git = Git.cloneRepository()
+                            .setURI(getPath())
+                            .setDirectory(destination)
+                            .setTransportConfigCallback(transportConfigCallback)
+                            .call();
         }
     }
 
@@ -187,10 +368,15 @@ public class GitStorageConnector implements StorageConnector {
         ArgCheck.isNotNull(git);
 
         // Fetch latest information from remote
-        git.fetch().call();
+        git.fetch()
+            .setTransportConfigCallback(transportConfigCallback)
+            .call();
 
         // Ensure the original branch is checked out
-        git.checkout().setName(getBranch()).setForce(true).call();
+        git.checkout()
+            .setName(getBranch())
+            .setForce(true)
+            .call();
 
         // Rebase the branch against the remote branch
         RebaseResult rebaseResult = git.rebase().setUpstream("origin" + FORWARD_SLASH + getBranch()).call();
@@ -232,13 +418,19 @@ public class GitStorageConnector implements StorageConnector {
         FileUtils.write(contents, destFile);
 
         // Stage the file for committing
-        git.add().addFilepattern(destination).call();
+        git.add()
+            .addFilepattern(destination)
+            .call();
 
         //
         // Commit the file
         //
+        String author = parameters.getProperty(GitStorageConnector.AUTHOR_NAME_PROPERTY, "anonymous");
+        String authorEmail = parameters.getProperty(GitStorageConnector.AUTHOR_EMAIL_PROPERTY, "anon@komodo.org");
         RevCommit mergeCommit = git.commit()
-                                                                .setMessage("Change to artifact " + artifactName + timestamp)
+                                                                .setAuthor(author, authorEmail)
+                                                                .setCommitter(author, authorEmail)
+                                                                .setMessage("Change to artifact " + artifactName + " at " + timestamp)
                                                                 .call();
 
         //
@@ -266,6 +458,7 @@ public class GitStorageConnector implements StorageConnector {
         // Push the change back to the remote
         //
         git.push()
+            .setTransportConfigCallback(transportConfigCallback)
             .call();
     }
 
@@ -334,7 +527,8 @@ public class GitStorageConnector implements StorageConnector {
 
     @Override
     public void dispose() {
-        git.close();
+        if (git != null)
+            git.close();
     }
 
 }
