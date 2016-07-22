@@ -55,6 +55,11 @@ public class StorageProxyService extends AbstractProxyService<StorageService, St
     }
 
     @Override
+    public String getDescription() throws Exception {
+        return getDelegate().getDescription();
+    }
+
+    @Override
     public Set<Descriptor> getDescriptors() throws Exception {
         return getDelegate().getDescriptors();
     }

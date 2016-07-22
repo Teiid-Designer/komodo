@@ -32,6 +32,8 @@ public class StorageServiceImpl extends AbstractBundleService implements Storage
 
     public static final String STORAGE_ID = "file";
 
+    public static final String DESCRIPTION = "Storage of files directly on server filesystem (provides download capability to clients)";
+
     public StorageServiceImpl(String parentBundle) {
         super(parentBundle);
     }
@@ -39,6 +41,11 @@ public class StorageServiceImpl extends AbstractBundleService implements Storage
     @Override
     public String getStorageId() {
         return STORAGE_ID;
+    }
+
+    @Override
+    public String getDescription() throws Exception {
+        return DESCRIPTION;
     }
 
     @Override

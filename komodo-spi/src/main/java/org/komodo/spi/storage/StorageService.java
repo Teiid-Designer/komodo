@@ -50,6 +50,12 @@ public interface StorageService extends BundleService {
     String getStorageId() throws Exception;
 
     /**
+     * @return the description of this service
+     * @throws Exception
+     */
+    String getDescription() throws Exception;
+
+    /**
      * @return the set of applicable parameters for this storage connector
      * @throws Exception
      */

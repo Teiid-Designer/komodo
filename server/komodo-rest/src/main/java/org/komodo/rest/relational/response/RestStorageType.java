@@ -35,9 +35,13 @@ public class RestStorageType implements KRestEntity {
 
     public static final String DESCRIPTORS_LABEL = "descriptors";
 
+    public static final String DESCRIPTION_LABEL = "description";
+
     private String name;
 
     private List<RestStorageTypeDescriptor> descriptors;
+
+    private String description;
 
     /**
      * Constructor for use when deserializing
@@ -47,8 +51,9 @@ public class RestStorageType implements KRestEntity {
         this.descriptors = Collections.emptyList();
     }
 
-    public RestStorageType(String name, Collection<Descriptor> descriptors) {
+    public RestStorageType(String name, String description, Collection<Descriptor> descriptors) {
         this.name = name;
+        this.description = description;
 
         if (descriptors == null || descriptors.isEmpty())
             this.descriptors = Collections.emptyList();
@@ -77,6 +82,14 @@ public class RestStorageType implements KRestEntity {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public List<RestStorageTypeDescriptor> getDescriptors() {

@@ -53,6 +53,9 @@ public class StorageTypeSerializer extends TypeAdapter< RestStorageType > {
                     case RestStorageType.NAME_LABEL:
                         storageType.setName(in.nextString());
                         break;
+                    case RestStorageType.DESCRIPTION_LABEL:
+                        storageType.setDescription(in.nextString());
+                        break;
                     case RestStorageType.DESCRIPTORS_LABEL:
                         RestStorageTypeDescriptor[] descriptors = BUILDER.fromJson(in, RestStorageTypeDescriptor[].class);
                         storageType.setDescriptors(descriptors);
@@ -80,6 +83,9 @@ public class StorageTypeSerializer extends TypeAdapter< RestStorageType > {
             // Title of object
             out.name(RestStorageType.NAME_LABEL);
             out.value(value.getName());
+
+            out.name(RestStorageType.DESCRIPTION_LABEL);
+            out.value(value.getDescription());
 
             if (value.getDescriptors() == null || value.getDescriptors().isEmpty())
                 return;
