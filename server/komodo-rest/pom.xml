@@ -285,7 +285,8 @@
 				<artifactId>maven-war-plugin</artifactId>
 				<configuration>
 					<warName>${rest-context}</warName>
-					<failOnMissingWebXml>false</failOnMissingWebXml>
+					<failOnMissingWebXml>true</failOnMissingWebXml>
+					<webXml>src\main\webapp\WEB-INF\web.xml</webXml>
 					<!-- Ensure this never gets added to war and deployed since only required 
 						for local testing using tomcat. This works since the tomcat7:run-war uses 
 						the exploded version of the war and not the war archive itself. -->
