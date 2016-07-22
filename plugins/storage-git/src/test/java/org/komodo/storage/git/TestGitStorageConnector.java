@@ -27,7 +27,9 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -289,4 +291,173 @@ public class TestGitStorageConnector implements StringConstants {
         String tree = structure.printTree();
         assertEquals(TREE, tree);
     }
+
+    /**
+     * SECURE.CREDENTIALS="ssh private key, ssh known hosts"
+     * JVM.PROPERTIES="{private.key.file, known.hosts.file"
+     * 
+     * Test meant to be executed explicitly rather than over automated build system. This is due to
+     * ${SECURE.CREDENTIALS} being required for authentication. Such credentials should not be
+     * stored in the source code hence the test is configured to fetch them from a file on the local
+     * filesystem specifed via the JVM properties ${JVM.PROPERTIES}. The credential file needs to be in
+     * a specific format:
+     *
+     * Should be a fully formatted ssh private key file and its associated public key should have been
+     * uploaded to the github account prior to test execution.
+     *
+     * Also requires a known hosts file containing the github host & encrypted key. This can be derived by
+     * manually connecting to github and copying the results from ~/.ssh/known_hosts.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testRemoteRepositorySSH() throws Exception {
+        localTmpDir = new File(tmpDir, "localTmpDir-" + timestamp);
+        Properties parameters = new Properties();
+        parameters.setProperty(GitStorageConnector.REPO_DEST_PROPERTY, localTmpDir.getAbsolutePath());
+        parameters.setProperty(GitStorageConnector.REPO_PATH_PROPERTY, "git@github.com:Teiid-Designer/komodo-unit-testing.git");
+        parameters.setProperty(GitStorageConnector.AUTHOR_NAME_PROPERTY, "bob");
+        parameters.setProperty(GitStorageConnector.AUTHOR_EMAIL_PROPERTY, "bob@komodo.org");
+
+        //
+        // The file location of the private key to use should be attached to
+        // the execution arguments of this test using the private.key.file variable
+        //
+        String privKeyFileLoc = System.getProperty("private.key.file");
+        if (privKeyFileLoc == null) {
+            System.out.println("TEST SKIPPED: PRIVATE KEY FILE NOT SPECIFIED");
+            return; // Dont fail this since the test should be executed explicitly rather than as part of a suite
+        }
+
+        File privKeyFile = new File(privKeyFileLoc);
+        assertTrue(privKeyFile.exists()); // This will fail since the location has been specified but doesn't exist
+
+        String privKey = FileUtils.readSafe(privKeyFile);
+        parameters.setProperty(GitStorageConnector.REPO_PRIVATE_KEY, privKey);
+
+        //
+        // The file location of the known hosts to use should be attached to
+        // the execution arguments of this test using the known.hosts.file variable
+        //
+        String knownHostsFileLoc = System.getProperty("known.hosts.file");
+        if (knownHostsFileLoc == null)
+            fail("Both private.key.file and known.hosts.file are required for this test to be executed successfully");
+
+        File knownHostsFile = new File(knownHostsFileLoc);
+        assertTrue(knownHostsFile.exists());
+
+        String knownHosts = FileUtils.readSafe(knownHostsFile);
+        parameters.setProperty(GitStorageConnector.REPO_KNOWN_HOSTS_ID, knownHosts);
+
+        connector = new GitStorageConnector(parameters);
+        connector.refresh();
+
+        parameters.setProperty(StorageConnector.FILE_PATH_PROPERTY, "README.md");
+        InputStream is = connector.read(parameters);
+        assertNotNull(is);
+
+        UnitOfWork transaction = mock(UnitOfWork.class);
+        when(transaction.getState()).thenReturn(State.NOT_STARTED);
+
+        parameters.setProperty(GitStorageConnector.FILE_PATH_PROPERTY, TEST_VDB_2_XML);
+
+        Exportable artifact = mock(Exportable.class);
+        String sampleExample = TestUtilities.streamToString(TestUtilities.sampleExample());
+        when(artifact.export(transaction, parameters)).thenReturn(sampleExample.getBytes());
+        when(artifact.getName(transaction)).thenReturn(TestUtilities.SAMPLE_VDB_FILE);
+
+        connector.write(artifact, transaction, parameters);
+
+        //
+        // NOW CHECK THAT A COMMIT HAS APPEARED ON GITHUB
+        //
+    }
+
+    /**
+     * SECURE.CREDENTIALS="username/password"
+     * JVM.PROPERTY="credentials.file"
+     * 
+     * Test meant to be executed explicitly rather than over automated build system. This is due to
+     * ${SECURE.CREDENTIALS} being required for authentication. Such credentials should not be
+     * stored in the source code hence the test is configured to fetch them from a file on the local
+     * filesystem specifed via the JVM property ${JVM.PROPERTY}. The credential file needs to be in
+     * a specific format:
+     *
+     * username=blah
+     * password=blah
+     *
+     * @throws Exception
+     */
+    @Test
+  public void testRemoteRepositoryHttp() throws Exception {
+      localTmpDir = new File(tmpDir, "localTmpDir-" + timestamp);
+      Properties parameters = new Properties();
+      parameters.setProperty(GitStorageConnector.REPO_DEST_PROPERTY, localTmpDir.getAbsolutePath());
+      parameters.setProperty(GitStorageConnector.REPO_PATH_PROPERTY, "https://github.com/Teiid-Designer/komodo-unit-testing.git");
+      parameters.setProperty(GitStorageConnector.AUTHOR_NAME_PROPERTY, "bob");
+      parameters.setProperty(GitStorageConnector.AUTHOR_EMAIL_PROPERTY, "bob@komodo.org");
+
+      //
+      // The file location of the username/password to use should be attached to
+      // the execution arguments of this test using the credentials.file variable
+      // The file should be in the format
+      // username=blah
+      // password=blah
+      //
+      String credFileLoc = System.getProperty("credentials.file");
+      if (credFileLoc == null) {
+          System.out.println("TEST SKIPPED: CREDENTIALS FILE NOT SPECIFIED");
+          return; // Dont fail this since the test should be executed explicitly rather than as part of a suite
+      }
+
+      File credFile = new File(credFileLoc);
+      assertTrue(credFile.exists()); // This will fail since the location has been specified but doesn't exist
+      
+      FileReader reader = null;
+      BufferedReader buf = null;
+      try {
+          reader = new FileReader(credFile);
+          buf = new BufferedReader(reader);
+          while (buf.ready()) {
+              String line = buf.readLine();
+              String[] segments = line.split(EQUALS);
+              if (segments == null || segments.length != 2)
+                  continue;
+
+              if (segments[0].equals("username"))
+                  parameters.setProperty(GitStorageConnector.REPO_USERNAME, segments[1]);
+              else if (segments[0].equals("password"))
+                  parameters.setProperty(GitStorageConnector.REPO_PASSWORD, segments[1]);
+          }
+      } finally {
+          if (buf != null) {
+              try {
+                  buf.close();
+              } catch (Exception e) {}
+          }
+      }
+
+      connector = new GitStorageConnector(parameters);
+      connector.refresh();
+
+      parameters.setProperty(StorageConnector.FILE_PATH_PROPERTY, "README.md");
+      InputStream is = connector.read(parameters);
+      assertNotNull(is);
+
+      UnitOfWork transaction = mock(UnitOfWork.class);
+      when(transaction.getState()).thenReturn(State.NOT_STARTED);
+
+      parameters.setProperty(GitStorageConnector.FILE_PATH_PROPERTY, TEST_VDB_2_XML);
+
+      Exportable artifact = mock(Exportable.class);
+      String sampleExample = TestUtilities.streamToString(TestUtilities.sampleExample());
+      when(artifact.export(transaction, parameters)).thenReturn(sampleExample.getBytes());
+      when(artifact.getName(transaction)).thenReturn(TestUtilities.SAMPLE_VDB_FILE);
+
+      connector.write(artifact, transaction, parameters);
+
+      //
+      // NOW CHECK THAT A COMMIT HAS APPEARED ON GITHUB
+      //
+  }
 }
