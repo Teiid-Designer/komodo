@@ -216,7 +216,7 @@ public class KomodoImportExportService extends KomodoService {
 
             byte content[] = new byte[(int)downloadableFile.length()];
             stream.read(content);
-            String encContent = encrypt(content);
+            String encContent = encode(content);
             status.setContent(encContent);
 
             KLog.getLogger().info("Encrypted content of " + downloadableFile.getAbsolutePath() + ": " + encContent + " SIZE: "
@@ -286,7 +286,7 @@ public class KomodoImportExportService extends KomodoService {
                 // Content has been provided so need to outline its location
                 // for the storage connector to utilise
                 //
-                byte[] content = decrypt(sta.getContent());
+                byte[] content = decode(sta.getContent());
                 String tempDir = FileUtils.tempDirectory();
                 String fileName = content.hashCode() + DOT + sta.getDocumentType();
                 cttFile = new File(tempDir, fileName);

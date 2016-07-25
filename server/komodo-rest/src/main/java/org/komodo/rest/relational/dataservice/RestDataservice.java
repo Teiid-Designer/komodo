@@ -41,7 +41,7 @@ public final class RestDataservice extends RestBasicEntity {
     /**
      * Label used to describe description
      */
-    public static final String DESCRIPTION_LABEL = KomodoService.encode(KomodoLexicon.LibraryComponent.DESCRIPTION);
+    public static final String DESCRIPTION_LABEL = KomodoService.protectPrefix(KomodoLexicon.LibraryComponent.DESCRIPTION);
 
     /**
      * Label used to describe dataservice view modelName

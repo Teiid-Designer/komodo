@@ -640,7 +640,7 @@ public class KomodoTeiidService extends KomodoService {
 
             uow = createTransaction("deployTeiidDriver", false); //$NON-NLS-1$
 
-            byte[] content = decrypt(kfa.getContent());
+            byte[] content = decode(kfa.getContent());
             String tempDir = FileUtils.tempDirectory();
             String fileName = content.hashCode() + DOT + kfa.getName();
             File driverFile = new File(tempDir, fileName);

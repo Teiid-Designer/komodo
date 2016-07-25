@@ -137,7 +137,7 @@ public abstract class KomodoService implements V1Constants {
      * @param value the value
      * @return the value encoded for json
      */
-    public static String encode(String value) {
+    public static String protectPrefix(String value) {
         if (value == null)
             return null;
 
@@ -149,7 +149,7 @@ public abstract class KomodoService implements V1Constants {
      * @param value the value
      * @return the value decoded from json transit
      */
-    public static String decode(String value) {
+    public static String unprotectPrefix(String value) {
         if (value == null)
             return null;
 
@@ -159,9 +159,9 @@ public abstract class KomodoService implements V1Constants {
 
     /**
      * @param content
-     * @return a base64 encrypted version of the given content
+     * @return a base64 encoded version of the given content
      */
-    protected String encrypt(byte[] content) {
+    protected String encode(byte[] content) {
         if (content == null)
             return null;
 
@@ -170,9 +170,9 @@ public abstract class KomodoService implements V1Constants {
 
     /**
      * @param content
-     * @return a decrypted version of the given base64-encrypted content
+     * @return a decoded version of the given base64-encoded content
      */
-    protected byte[] decrypt(String content) {
+    protected byte[] decode(String content) {
         if (content == null)
             return null;
 

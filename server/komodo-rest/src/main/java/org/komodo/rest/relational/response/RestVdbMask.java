@@ -45,12 +45,12 @@ public final class RestVdbMask extends RestBasicEntity {
     /**
      * Label used to describe name
      */
-    public static final String NAME_LABEL = KomodoService.encode(VdbLexicon.DataRole.Permission.Mask.MASK);
+    public static final String NAME_LABEL = KomodoService.protectPrefix(VdbLexicon.DataRole.Permission.Mask.MASK);
 
     /**
      * Label used to describe order
      */
-    public static final String ORDER_LABEL = KomodoService.encode(VdbLexicon.DataRole.Permission.Mask.ORDER);
+    public static final String ORDER_LABEL = KomodoService.protectPrefix(VdbLexicon.DataRole.Permission.Mask.ORDER);
 
     /**
      * An empty array of masks.

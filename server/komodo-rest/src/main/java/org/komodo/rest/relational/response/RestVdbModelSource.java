@@ -45,12 +45,12 @@ public final class RestVdbModelSource extends RestBasicEntity {
     /**
      * Label used to describe jndi name
      */
-    public static final String JNDI_NAME_LABEL = KomodoService.encode(VdbLexicon.Source.JNDI_NAME);
+    public static final String JNDI_NAME_LABEL = KomodoService.protectPrefix(VdbLexicon.Source.JNDI_NAME);
 
     /**
      * Label used to describe translator
      */
-    public static final String TRANSLATOR_LABEL = KomodoService.encode(VdbLexicon.Source.TRANSLATOR);
+    public static final String TRANSLATOR_LABEL = KomodoService.protectPrefix(VdbLexicon.Source.TRANSLATOR);
 
     /**
      * Constructor for use when deserializing

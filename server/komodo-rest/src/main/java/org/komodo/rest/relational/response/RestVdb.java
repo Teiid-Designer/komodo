@@ -41,32 +41,32 @@ public final class RestVdb extends RestBasicEntity {
     /**
      * Label used to describe name
      */
-    public static final String NAME_LABEL = KomodoService.encode(VdbLexicon.Vdb.NAME);
+    public static final String NAME_LABEL = KomodoService.protectPrefix(VdbLexicon.Vdb.NAME);
 
     /**
      * Label used to describe description
      */
-    public static final String DESCRIPTION_LABEL = KomodoService.encode(VdbLexicon.Vdb.DESCRIPTION);
+    public static final String DESCRIPTION_LABEL = KomodoService.protectPrefix(VdbLexicon.Vdb.DESCRIPTION);
 
     /**
      * Label used to describe original file path
      */
-    public static final String FILE_PATH_LABEL = KomodoService.encode(VdbLexicon.Vdb.ORIGINAL_FILE);
+    public static final String FILE_PATH_LABEL = KomodoService.protectPrefix(VdbLexicon.Vdb.ORIGINAL_FILE);
 
     /**
      * Label used to describe original file path
      */
-    public static final String PREVIEW_LABEL = KomodoService.encode(VdbLexicon.Vdb.PREVIEW);
+    public static final String PREVIEW_LABEL = KomodoService.protectPrefix(VdbLexicon.Vdb.PREVIEW);
 
     /**
      * Label used to describe original file path
      */
-    public static final String CONNECTION_TYPE_LABEL = KomodoService.encode(VdbLexicon.Vdb.CONNECTION_TYPE);
+    public static final String CONNECTION_TYPE_LABEL = KomodoService.protectPrefix(VdbLexicon.Vdb.CONNECTION_TYPE);
 
     /**
      * Label used to describe original file path
      */
-    public static final String VERSION_LABEL = KomodoService.encode(VdbLexicon.Vdb.VERSION);
+    public static final String VERSION_LABEL = KomodoService.protectPrefix(VdbLexicon.Vdb.VERSION);
 
     /**
      * Constructor for use when deserializing
