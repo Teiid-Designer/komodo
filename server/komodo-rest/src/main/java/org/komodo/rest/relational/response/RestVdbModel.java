@@ -46,22 +46,22 @@ public final class RestVdbModel extends RestBasicEntity {
     /**
      * Label used to describe name
      */
-    public static final String DESCRIPTION_LABEL = KomodoService.encode(VdbLexicon.Model.DESCRIPTION);
+    public static final String DESCRIPTION_LABEL = KomodoService.protectPrefix(VdbLexicon.Model.DESCRIPTION);
 
     /**
      * Label used to describe model type
      */
-    public static final String MODEL_TYPE_LABEL = KomodoService.encode(CoreLexicon.JcrId.MODEL_TYPE);
+    public static final String MODEL_TYPE_LABEL = KomodoService.protectPrefix(CoreLexicon.JcrId.MODEL_TYPE);
 
     /**
      * Label used to describe visible
      */
-    public static final String VISIBLE_LABEL = KomodoService.encode(VdbLexicon.Model.VISIBLE);
+    public static final String VISIBLE_LABEL = KomodoService.protectPrefix(VdbLexicon.Model.VISIBLE);
 
     /**
      * Label used to describe metadata type
      */
-    public static final String METADATA_TYPE_LABEL = KomodoService.encode(VdbLexicon.Model.METADATA_TYPE);
+    public static final String METADATA_TYPE_LABEL = KomodoService.protectPrefix(VdbLexicon.Model.METADATA_TYPE);
 
     /**
      * Constructor for use when deserializing

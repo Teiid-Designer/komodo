@@ -29,12 +29,12 @@ public class DataSourceSchemaProperty {
     /**
      * Label used to describe jndi name
      */
-    public static final String JNDI_NAME_LABEL = KomodoService.encode(KomodoLexicon.DataSource.JNDI_NAME);
+    public static final String JNDI_NAME_LABEL = KomodoService.protectPrefix(KomodoLexicon.DataSource.JNDI_NAME);
 
     /**
      * Label used to describe driver name
      */
-    public static final String DRIVER_NAME_LABEL = KomodoService.encode(KomodoLexicon.DataSource.DRIVER_NAME);
+    public static final String DRIVER_NAME_LABEL = KomodoService.protectPrefix(KomodoLexicon.DataSource.DRIVER_NAME);
 
     public static final String TYPE_LABEL = "keng__type";
 

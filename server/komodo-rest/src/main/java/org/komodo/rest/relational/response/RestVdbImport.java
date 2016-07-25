@@ -53,17 +53,17 @@ public final class RestVdbImport extends RestBasicEntity {
     /**
      * Label used to describe name
      */
-    public static final String NAME_LABEL = KomodoService.encode(VdbLexicon.ImportVdb.IMPORT_VDB);
+    public static final String NAME_LABEL = KomodoService.protectPrefix(VdbLexicon.ImportVdb.IMPORT_VDB);
 
     /**
      * Label used to describe import data policies
      */
-    public static final String IMPORT_POLICIES_LABEL = KomodoService.encode(VdbLexicon.ImportVdb.IMPORT_DATA_POLICIES);
+    public static final String IMPORT_POLICIES_LABEL = KomodoService.protectPrefix(VdbLexicon.ImportVdb.IMPORT_DATA_POLICIES);
 
     /**
      * Label used to describe version
      */
-    public static final String VERSION_LABEL = KomodoService.encode(VdbLexicon.ImportVdb.VERSION);
+    public static final String VERSION_LABEL = KomodoService.protectPrefix(VdbLexicon.ImportVdb.VERSION);
 
     /**
      * And empty array of VDB imports.

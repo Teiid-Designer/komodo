@@ -45,12 +45,12 @@ public final class RestVdbCondition extends RestBasicEntity {
     /**
      * Label used to describe name
      */
-    public static final String NAME_LABEL = KomodoService.encode(VdbLexicon.DataRole.Permission.Condition.CONDITION);
+    public static final String NAME_LABEL = KomodoService.protectPrefix(VdbLexicon.DataRole.Permission.Condition.CONDITION);
 
     /**
      * Label used to describe constraint
      */
-    public static final String CONSTRAINT_LABEL = KomodoService.encode(VdbLexicon.DataRole.Permission.Condition.CONSTRAINT);
+    public static final String CONSTRAINT_LABEL = KomodoService.protectPrefix(VdbLexicon.DataRole.Permission.Condition.CONSTRAINT);
 
     /**
      * An empty array of conditions.

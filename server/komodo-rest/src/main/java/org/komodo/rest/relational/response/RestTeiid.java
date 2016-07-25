@@ -40,52 +40,52 @@ public class RestTeiid extends RestBasicEntity {
     /**
      * Label used to describe teiid version
      */
-    public static final String VERSION_LABEL = KomodoService.encode(KomodoLexicon.Teiid.VERSION);
+    public static final String VERSION_LABEL = KomodoService.protectPrefix(KomodoLexicon.Teiid.VERSION);
 
     /**
      * Label used to describe teiid host property
      */
-    public static final String HOST_LABEL = KomodoService.encode(KomodoLexicon.Teiid.HOST);
+    public static final String HOST_LABEL = KomodoService.protectPrefix(KomodoLexicon.Teiid.HOST);
 
     /**
      * Label used to describe teiid admin port
      */
-    public static final String ADMIN_PORT_LABEL = KomodoService.encode(KomodoLexicon.Teiid.ADMIN_PORT);
+    public static final String ADMIN_PORT_LABEL = KomodoService.protectPrefix(KomodoLexicon.Teiid.ADMIN_PORT);
 
     /**
      * Label used to describe teiid admin password
      */
-    public static final String ADMIN_PSWD_LABEL = KomodoService.encode(KomodoLexicon.Teiid.ADMIN_PSWD);
+    public static final String ADMIN_PSWD_LABEL = KomodoService.protectPrefix(KomodoLexicon.Teiid.ADMIN_PSWD);
 
     /**
      * Label used to describe teiid admin user
      */
-    public static final String ADMIN_USER_LABEL = KomodoService.encode(KomodoLexicon.Teiid.ADMIN_USER);
+    public static final String ADMIN_USER_LABEL = KomodoService.protectPrefix(KomodoLexicon.Teiid.ADMIN_USER);
 
     /**
      * Label used to describe teiid admin secure flag
      */
-    public static final String ADMIN_SECURE_LABEL = KomodoService.encode(KomodoLexicon.Teiid.ADMIN_SECURE);
+    public static final String ADMIN_SECURE_LABEL = KomodoService.protectPrefix(KomodoLexicon.Teiid.ADMIN_SECURE);
 
     /**
      * Label used to describe teiid jdbc port
      */
-    public static final String JDBC_PORT_LABEL = KomodoService.encode(KomodoLexicon.Teiid.JDBC_PORT);
+    public static final String JDBC_PORT_LABEL = KomodoService.protectPrefix(KomodoLexicon.Teiid.JDBC_PORT);
 
     /**
      * Label used to describe teiid jdbc password
      */
-    public static final String JDBC_PSWD_LABEL = KomodoService.encode(KomodoLexicon.Teiid.JDBC_PSWD);
+    public static final String JDBC_PSWD_LABEL = KomodoService.protectPrefix(KomodoLexicon.Teiid.JDBC_PSWD);
 
     /**
      * Label used to describe teiid jdbc user
      */
-    public static final String JDBC_USER_LABEL = KomodoService.encode(KomodoLexicon.Teiid.JDBC_USER);
+    public static final String JDBC_USER_LABEL = KomodoService.protectPrefix(KomodoLexicon.Teiid.JDBC_USER);
 
     /**
      * Label used to describe teiid jdbc secure flag
      */
-    public static final String JDBC_SECURE_LABEL = KomodoService.encode(KomodoLexicon.Teiid.JDBC_SECURE);
+    public static final String JDBC_SECURE_LABEL = KomodoService.protectPrefix(KomodoLexicon.Teiid.JDBC_SECURE);
 
     /**
      * Constructor for use when deserializing

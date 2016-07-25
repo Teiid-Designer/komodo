@@ -41,27 +41,27 @@ public final class RestDataSource extends RestBasicEntity {
     /**
      * Label used to describe jndi name
      */
-    public static final String JNDI_NAME_LABEL = KomodoService.encode(KomodoLexicon.DataSource.JNDI_NAME);
+    public static final String JNDI_NAME_LABEL = KomodoService.protectPrefix(KomodoLexicon.DataSource.JNDI_NAME);
 
     /**
      * Label used to describe driver name
      */
-    public static final String DRIVER_NAME_LABEL = KomodoService.encode(KomodoLexicon.DataSource.DRIVER_NAME);
+    public static final String DRIVER_NAME_LABEL = KomodoService.protectPrefix(KomodoLexicon.DataSource.DRIVER_NAME);
 
     /**
      * Label used to describe profile name
      */
-    public static final String PROFILE_NAME_LABEL = KomodoService.encode(KomodoLexicon.DataSource.PROFILE_NAME);
+    public static final String PROFILE_NAME_LABEL = KomodoService.protectPrefix(KomodoLexicon.DataSource.PROFILE_NAME);
 
     /**
      * Label used to describe jdbc
      */
-    public static final String JDBC_LABEL = KomodoService.encode(KomodoLexicon.DataSource.JDBC);
+    public static final String JDBC_LABEL = KomodoService.protectPrefix(KomodoLexicon.DataSource.JDBC);
 
     /**
      * Label used to describe preview
      */
-    public static final String PREVIEW_LABEL = KomodoService.encode(KomodoLexicon.DataSource.PREVIEW);
+    public static final String PREVIEW_LABEL = KomodoService.protectPrefix(KomodoLexicon.DataSource.PREVIEW);
 
     /**
      * An empty array of data sources.

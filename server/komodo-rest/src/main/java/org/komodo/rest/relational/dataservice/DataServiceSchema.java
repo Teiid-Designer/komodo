@@ -49,7 +49,7 @@ public class DataServiceSchema implements KRestEntity {
     /**
      * Label for the description
      */
-    public static final String DESCRIPTION_LABEL = KomodoService.encode(KomodoLexicon.LibraryComponent.DESCRIPTION);
+    public static final String DESCRIPTION_LABEL = KomodoService.protectPrefix(KomodoLexicon.LibraryComponent.DESCRIPTION);
 
     /**
      * Label for the properties

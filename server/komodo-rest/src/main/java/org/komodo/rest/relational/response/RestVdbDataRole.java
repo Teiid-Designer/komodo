@@ -99,32 +99,32 @@ public final class RestVdbDataRole extends RestBasicEntity {
     /**
      * Label used to describe name
      */
-    public static final String NAME_LABEL = KomodoService.encode(VdbLexicon.DataRole.DATA_ROLE);
+    public static final String NAME_LABEL = KomodoService.protectPrefix(VdbLexicon.DataRole.DATA_ROLE);
 
     /**
      * Label used to describe description
      */
-    public static final String DESCRIPTION_LABEL = KomodoService.encode(VdbLexicon.DataRole.DESCRIPTION);
+    public static final String DESCRIPTION_LABEL = KomodoService.protectPrefix(VdbLexicon.DataRole.DESCRIPTION);
 
     /**
      * Label used to describe allowCreateTempTables
      */
-    public static final String ALLOW_CREATE_TEMP_TABLES_LABEL = KomodoService.encode(VdbLexicon.DataRole.ALLOW_CREATE_TEMP_TABLES);
+    public static final String ALLOW_CREATE_TEMP_TABLES_LABEL = KomodoService.protectPrefix(VdbLexicon.DataRole.ALLOW_CREATE_TEMP_TABLES);
 
     /**
      * Label used to describe anyAuthenticated
      */
-    public static final String ANY_AUTHENTICATED_LABEL = KomodoService.encode(VdbLexicon.DataRole.ANY_AUTHENTICATED);
+    public static final String ANY_AUTHENTICATED_LABEL = KomodoService.protectPrefix(VdbLexicon.DataRole.ANY_AUTHENTICATED);
 
     /**
      * Label used to describe grantAll
      */
-    public static final String GRANT_ALL_LABEL = KomodoService.encode(VdbLexicon.DataRole.GRANT_ALL);
+    public static final String GRANT_ALL_LABEL = KomodoService.protectPrefix(VdbLexicon.DataRole.GRANT_ALL);
 
     /**
      * Label used to describe mapped role names
      */
-    public static final String MAPPED_ROLES_LABEL = KomodoService.encode(VdbLexicon.DataRole.MAPPED_ROLE_NAMES);
+    public static final String MAPPED_ROLES_LABEL = KomodoService.protectPrefix(VdbLexicon.DataRole.MAPPED_ROLE_NAMES);
 
     /**
      * An empty array of data roles.

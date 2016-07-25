@@ -56,12 +56,12 @@ public final class RestVdbTranslator extends RestBasicEntity {
     /**
      * Label used to describe description
      */
-    public static final String DESCRIPTION_LABEL = KomodoService.encode(VdbLexicon.Translator.DESCRIPTION);
+    public static final String DESCRIPTION_LABEL = KomodoService.protectPrefix(VdbLexicon.Translator.DESCRIPTION);
 
     /**
      * Label used to describe type
      */
-    public static final String TYPE_LABEL = KomodoService.encode(VdbLexicon.Translator.TYPE);
+    public static final String TYPE_LABEL = KomodoService.protectPrefix(VdbLexicon.Translator.TYPE);
 
     /**
      * An empty array of translators.

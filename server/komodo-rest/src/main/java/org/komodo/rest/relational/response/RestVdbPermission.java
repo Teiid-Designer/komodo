@@ -70,42 +70,42 @@ public final class RestVdbPermission extends RestBasicEntity {
     /**
      * Label used to describe name
      */
-    public static final String NAME_LABEL = KomodoService.encode(VdbLexicon.DataRole.Permission.PERMISSION);
+    public static final String NAME_LABEL = KomodoService.protectPrefix(VdbLexicon.DataRole.Permission.PERMISSION);
 
     /**
      * Label used to describe allowAlter
      */
-    public static final String ALLOW_ALTER_LABEL = KomodoService.encode(VdbLexicon.DataRole.Permission.ALLOW_ALTER);
+    public static final String ALLOW_ALTER_LABEL = KomodoService.protectPrefix(VdbLexicon.DataRole.Permission.ALLOW_ALTER);
 
     /**
      * Label used to describe allowCreate
      */
-    public static final String ALLOW_CREATE_LABEL = KomodoService.encode(VdbLexicon.DataRole.Permission.ALLOW_CREATE);
+    public static final String ALLOW_CREATE_LABEL = KomodoService.protectPrefix(VdbLexicon.DataRole.Permission.ALLOW_CREATE);
 
     /**
      * Label used to describe allowDelete
      */
-    public static final String ALLOW_DELETE_LABEL = KomodoService.encode(VdbLexicon.DataRole.Permission.ALLOW_DELETE);
+    public static final String ALLOW_DELETE_LABEL = KomodoService.protectPrefix(VdbLexicon.DataRole.Permission.ALLOW_DELETE);
 
     /**
      * Label used to describe allowExecute
      */
-    public static final String ALLOW_EXECUTE_LABEL = KomodoService.encode(VdbLexicon.DataRole.Permission.ALLOW_EXECUTE);
+    public static final String ALLOW_EXECUTE_LABEL = KomodoService.protectPrefix(VdbLexicon.DataRole.Permission.ALLOW_EXECUTE);
 
     /**
      * Label used to describe allowLanguage
      */
-    public static final String ALLOW_LANGUAGE_LABEL = KomodoService.encode(VdbLexicon.DataRole.Permission.ALLOW_LANGUAGE);
+    public static final String ALLOW_LANGUAGE_LABEL = KomodoService.protectPrefix(VdbLexicon.DataRole.Permission.ALLOW_LANGUAGE);
 
     /**
      * Label used to describe allowRead
      */
-    public static final String ALLOW_READ_LABEL = KomodoService.encode(VdbLexicon.DataRole.Permission.ALLOW_READ);
+    public static final String ALLOW_READ_LABEL = KomodoService.protectPrefix(VdbLexicon.DataRole.Permission.ALLOW_READ);
 
     /**
      * Label used to describe allowUpdate
      */
-    public static final String ALLOW_UPDATE_LABEL = KomodoService.encode(VdbLexicon.DataRole.Permission.ALLOW_UPDATE);
+    public static final String ALLOW_UPDATE_LABEL = KomodoService.protectPrefix(VdbLexicon.DataRole.Permission.ALLOW_UPDATE);
 
     /**
      * An empty array of permissions.
