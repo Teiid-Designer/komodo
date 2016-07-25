@@ -520,7 +520,12 @@ public final class RelationalMessages {
         /**
          * An import export service storage types retrieval error
          */
-        IMPORT_EXPORT_SERVICE_STORAGE_TYPES_ERROR;
+        IMPORT_EXPORT_SERVICE_STORAGE_TYPES_ERROR,
+
+        /**
+         * An import export service storage types missing parameter error
+         */
+        IMPORT_EXPORT_SERVICE_MISSING_PARAMETER_ERROR;
 
         /**
          * {@inheritDoc}

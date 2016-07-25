@@ -47,10 +47,17 @@ public interface StorageConnector extends StringConstants {
 
         private String description;
 
-        public Descriptor(String name, boolean required, String description) {
+        private boolean encoded = false;
+
+        public Descriptor(String name, boolean required, boolean encoded, String description) {
             this.name = name;
             this.required = required;
             this.description = description;
+            this.encoded = encoded;
+        }
+
+        public Descriptor(String name, boolean required, String description) {
+            this(name, required, false, description);
         }
 
         public String getName() {
@@ -63,6 +70,10 @@ public interface StorageConnector extends StringConstants {
 
         public String getDescription() {
             return description;
+        }
+
+        public boolean isEncoded() {
+            return encoded;
         }
     }
 

@@ -31,11 +31,15 @@ public class RestStorageTypeDescriptor {
 
     public static final String REQUIRED_LABEL = "required";
 
+    public static final String ENCODED_LABEL = "encoded";
+
     private String name;
 
     private String description;
 
     private boolean required;
+
+    private boolean encoded;
 
     public RestStorageTypeDescriptor() {
         super();
@@ -45,6 +49,7 @@ public class RestStorageTypeDescriptor {
         this.name = descriptor.getName();
         this.description = descriptor.getDescription();
         this.required = descriptor.isRequired();
+        this.encoded = descriptor.isEncoded();
     }
 
     public String getName() {
@@ -69,5 +74,13 @@ public class RestStorageTypeDescriptor {
 
     public void setRequired(boolean required) {
         this.required = required;
+    }
+
+    public boolean isEncoded() {
+        return encoded;
+    }
+
+    public void setEncoded(boolean encoded) {
+        this.encoded = encoded;
     }
 }
