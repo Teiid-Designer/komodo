@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import javax.ws.rs.Consumes;
@@ -61,6 +62,7 @@ import org.komodo.spi.storage.StorageReference;
 import org.komodo.spi.storage.StorageService;
 import org.komodo.utils.FileUtils;
 import org.komodo.utils.KLog;
+import org.komodo.utils.StringUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -79,8 +81,9 @@ public class KomodoImportExportService extends KomodoService {
 
     private Response checkStorageAttributes(KomodoStorageAttributes sta,
                                                                                 List<MediaType> mediaTypes) throws Exception {
+        Map<String, String> parameters = sta.getParameters();
         if (sta == null ||
-            (sta.getStorageType() == null && sta.getArtifactPath() == null && sta.getParameters() == null)) {
+            (sta.getStorageType() == null && sta.getArtifactPath() == null && parameters == null)) {
             String errorMessage = RelationalMessages.getString(
                                                            RelationalMessages.Error.IMPORT_EXPORT_SERVICE_NO_PARAMETERS_ERROR);
 
@@ -95,6 +98,44 @@ public class KomodoImportExportService extends KomodoService {
 
             Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
             return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+        }
+
+        StorageService storageService = PluginService.getInstance().getStorageService(sta.getStorageType());
+
+        //
+        // Check the required descriptors exist
+        //
+        for (Descriptor descriptor: storageService.getDescriptors()) {
+            if (! descriptor.isRequired())
+                continue;
+
+            if (StorageConnector.FILE_PATH_PROPERTY.equals(descriptor.getName()))
+                continue; // This is handled separately in import/export and can be populated if missing
+
+            if (! parameters.containsKey(descriptor.getName())) {
+                String errorMessage = RelationalMessages.getString(
+                                                                   RelationalMessages.Error.IMPORT_EXPORT_SERVICE_MISSING_PARAMETER_ERROR,
+                                                                   descriptor.getName());
+
+                Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
+                return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+            }
+        }
+
+        //
+        // Decode any encoded parameters
+        //
+        for (Descriptor descriptor : storageService.getDescriptors()) {
+            if (! descriptor.isEncoded())
+                continue;
+
+            if (! parameters.containsKey(descriptor.getName()))
+                continue;
+
+            String value = parameters.get(descriptor.getName());
+
+            value = new String(decode(value));
+            sta.setParameter(descriptor.getName(), value);
         }
 
         return Response.ok().build();
@@ -136,13 +177,15 @@ public class KomodoImportExportService extends KomodoService {
         KomodoStorageAttributes sta;
         try {
             sta = KomodoJsonMarshaller.unmarshall(storageAttributes, KomodoStorageAttributes.class);
+
             Response response = checkStorageAttributes(sta, mediaTypes);
             if (response.getStatus() != Status.OK.getStatusCode())
                 return response;
 
         } catch (Exception ex) {
             String errorMessage = RelationalMessages.getString(
-                                                               RelationalMessages.Error.IMPORT_EXPORT_SERVICE_REQUEST_PARSING_ERROR, ex.getMessage());
+                                                               RelationalMessages.Error.IMPORT_EXPORT_SERVICE_REQUEST_PARSING_ERROR,
+                                                               StringUtils.exceptionToString(ex));
 
             Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
             return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
@@ -170,13 +213,16 @@ public class KomodoImportExportService extends KomodoService {
                 return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
             }
 
+            DocumentType documentType = artifact.getDocumentType(uow);
             Properties parameters = sta.convertParameters();
-            if (! parameters.contains(StorageConnector.FILE_PATH_PROPERTY)) {
-                parameters.setProperty(StorageConnector.FILE_PATH_PROPERTY, artifact.getName(uow));
+            if (! parameters.containsKey(StorageConnector.FILE_PATH_PROPERTY)) {
+                String fileName = documentType.fileName(artifact.getName(uow));
+                parameters.setProperty(StorageConnector.FILE_PATH_PROPERTY, fileName);
             }
 
             status.setName(artifact.getName(uow));
-            status.setType(artifact.getDocumentType(uow).toString());
+            status.setType(documentType.toString());
+
             String downloadable = wsMgr.exportArtifact(uow, artifact, sta.getStorageType(), parameters);
 
             //
@@ -271,7 +317,8 @@ public class KomodoImportExportService extends KomodoService {
 
         } catch (Exception ex) {
             String errorMessage = RelationalMessages.getString(
-                                                               RelationalMessages.Error.IMPORT_EXPORT_SERVICE_REQUEST_PARSING_ERROR, ex.getMessage());
+                                                               RelationalMessages.Error.IMPORT_EXPORT_SERVICE_REQUEST_PARSING_ERROR,
+                                                               StringUtils.exceptionToString(ex));
 
             Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
             return Response.status(Status.FORBIDDEN).entity(responseEntity).build();

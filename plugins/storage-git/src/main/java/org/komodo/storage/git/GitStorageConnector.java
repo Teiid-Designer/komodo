@@ -147,18 +147,21 @@ public class GitStorageConnector implements StorageConnector {
                         new Descriptor(
                                       REPO_KNOWN_HOSTS_ID,
                                       false,
+                                      true,
                                       "If the repository is secured using ssh then a known hosts id is required to satisfy the first security check." +
                                       "This can be usually be found in the file ~/.ssh/known_hosts after manually connecting to the host using ssh"));
         DESCRIPTORS.add(
                         new Descriptor(
                                       REPO_PRIVATE_KEY,
                                       false,
+                                      true,
                                       "If the repository is secured using ssh then a private key is required for authenticating " +
                                       "access to it."));
         DESCRIPTORS.add(
                         new Descriptor(
                                       REPO_PASSPHRASE,
                                       false,
+                                      true,
                                       "If the repository is secured using ssh then a private key is required for authenticating. If in" + 
                                       "turn the private key is encrypted with a passphrase then this is also required"));
         DESCRIPTORS.add(
@@ -170,6 +173,7 @@ public class GitStorageConnector implements StorageConnector {
                         new Descriptor(
                                       REPO_PASSWORD,
                                       false,
+                                      true,
                                       "If the repository is secured using http (or password ssh rather than key-based ssh) then a password property"
                                       + "will be required for authentication"));
         DESCRIPTORS.add(
@@ -300,7 +304,8 @@ public class GitStorageConnector implements StorageConnector {
 
     private void cloneRepository() throws Exception {
         File destination = new File(getDestination());
-        if (destination.exists()) {
+        File destGitDir = new File(destination, ".git");
+        if (destGitDir.exists()) {
             git = Git.open(destination);
         } else {
             git = Git.cloneRepository()

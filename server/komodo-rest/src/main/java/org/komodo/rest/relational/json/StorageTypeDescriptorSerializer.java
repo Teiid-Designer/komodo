@@ -52,6 +52,9 @@ public class StorageTypeDescriptorSerializer extends TypeAdapter<RestStorageType
                 case RestStorageTypeDescriptor.REQUIRED_LABEL:
                     storageTypeDescriptor.setRequired(in.nextBoolean());
                     break;
+                case RestStorageTypeDescriptor.ENCODED_LABEL:
+                    storageTypeDescriptor.setEncoded(in.nextBoolean());
+                    break;
                 default:
                     throw new IOException( Messages.getString( UNEXPECTED_JSON_TOKEN, name ) );
             }
@@ -74,6 +77,9 @@ public class StorageTypeDescriptorSerializer extends TypeAdapter<RestStorageType
 
         out.name(RestStorageTypeDescriptor.REQUIRED_LABEL);
         out.value(value.isRequired());
+
+        out.name(RestStorageTypeDescriptor.ENCODED_LABEL);
+        out.value(value.isEncoded());
 
         out.endObject();
     }
