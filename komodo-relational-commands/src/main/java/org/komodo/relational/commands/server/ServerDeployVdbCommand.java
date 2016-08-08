@@ -137,7 +137,12 @@ public final class ServerDeployVdbCommand extends ServerShellCommand {
                 String vdbToDeployName = vdbToDeploy.getName(getTransaction());
                 String vdbDeploymentName = vdbToDeployName + VDB_DEPLOYMENT_SUFFIX;
                 InputStream stream = new ByteArrayInputStream(vdbXml);
-                teiidInstance.deployDynamicVdb(vdbDeploymentName, stream);
+                try {
+                    teiidInstance.deployDynamicVdb(vdbDeploymentName, stream);
+                } catch (Exception ex) {
+                    result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.vdbDeploymentError, ex.getLocalizedMessage() ), null );
+                    return result;
+                }
             } catch (Exception ex) {
                 result = new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.connectionErrorWillDisconnect ), ex );
                 WkspStatusServerManager.getInstance(getWorkspaceStatus()).disconnectDefaultServer();

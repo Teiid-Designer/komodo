@@ -73,4 +73,16 @@ public final class DeleteMappedRoleCommandTest extends AbstractCommandTest {
         assertTabCompletion("delete-mapped-role ", candidates);
     }
 
+    @Test( expected = AssertionError.class )
+    public void shouldFailDeletingMappedRoleThatDoesNotExist() throws Exception {
+        final String[] commands = { "workspace",
+                                    "create-vdb myVdb vdbPath",
+                                    "cd myVdb",
+                                    "add-data-role myDataRole",
+                                    "cd myDataRole",
+                                    "add-mapped-role myMappedRole1",
+                                    "delete-mapped-role bogusMappedRole" };
+        execute( commands );
+    }
+
 }

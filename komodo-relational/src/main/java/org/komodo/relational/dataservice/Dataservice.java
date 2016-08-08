@@ -362,6 +362,8 @@ public interface Dataservice extends Exportable, RelationalObject {
      * @param uow
      *        the transaction (cannot be <code>null</code> or have a state that is not
      *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     * @param teiid 
+     *        the Teiid instance
      * @return the deployment status of this data service to the given teiid
      */
     DeployStatus deploy(UnitOfWork uow, Teiid teiid);

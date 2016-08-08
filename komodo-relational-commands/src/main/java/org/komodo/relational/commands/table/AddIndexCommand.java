@@ -21,6 +21,8 @@
  */
 package org.komodo.relational.commands.table;
 
+import org.komodo.relational.commands.RelationalCommandsI18n;
+import org.komodo.relational.model.Index;
 import org.komodo.relational.model.Table;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
@@ -55,6 +57,13 @@ public final class AddIndexCommand extends TableShellCommand {
             final String indexName = requiredArgument( 0, I18n.bind( TableCommandsI18n.missingIndexName ) );
 
             final Table table = getTable();
+            
+            // Do not allow add if object of type with this name already exists
+            Index[] indxs = table.getIndexes(getTransaction(), indexName);
+            if(indxs.length>0) {
+                return new CommandResultImpl( false, I18n.bind( RelationalCommandsI18n.cannotAddChildAlreadyExistsError, indexName, Index.class.getSimpleName() ), null );
+            }
+            
             table.addIndex( getTransaction(), indexName );
 
             result = new CommandResultImpl( I18n.bind( TableCommandsI18n.indexAdded, indexName ) );

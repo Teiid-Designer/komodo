@@ -21,6 +21,8 @@
  */
 package org.komodo.relational.commands.vdb;
 
+import org.komodo.relational.commands.RelationalCommandsI18n;
+import org.komodo.relational.model.Model;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
@@ -55,6 +57,13 @@ public final class AddModelCommand extends VdbShellCommand {
             final String modelName = requiredArgument( 0, I18n.bind( VdbCommandsI18n.missingModelName ) );
 
             final Vdb vdb = getVdb();
+            
+            // Do not allow add if object of type with this name already exists
+            Model[] models = vdb.getModels(getTransaction(), modelName);
+            if(models.length>0) {
+                return new CommandResultImpl( false, I18n.bind( RelationalCommandsI18n.cannotAddChildAlreadyExistsError, modelName, Model.class.getSimpleName() ), null );
+            }
+            
             vdb.addModel( getTransaction(), modelName );
 
             result = new CommandResultImpl( I18n.bind( VdbCommandsI18n.modelAdded, modelName ) );

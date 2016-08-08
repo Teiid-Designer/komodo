@@ -21,6 +21,8 @@
  */
 package org.komodo.relational.commands.workspace;
 
+import org.komodo.core.KomodoLexicon;
+import org.komodo.relational.commands.RelationalCommandsI18n;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.CommandResultImpl;
@@ -64,6 +66,12 @@ public final class CreateDatasourceCommand extends WorkspaceShellCommand {
             }
             
             final WorkspaceManager mgr = getWorkspaceManager();
+            
+            // Do not allow create if object with this name already exists
+            if(mgr.hasChild(getTransaction(), sourceName, KomodoLexicon.DataSource.NODE_TYPE)) {
+                return new CommandResultImpl( false, I18n.bind( RelationalCommandsI18n.cannotCreateChildAlreadyExistsError, sourceName, Datasource.class.getSimpleName() ), null );
+            }
+
             Datasource datasrc = mgr.createDatasource( getTransaction(), null, sourceName );
             datasrc.setJdbc(getTransaction(), Boolean.parseBoolean( isJdbc ));
 

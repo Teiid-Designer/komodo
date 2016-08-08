@@ -21,6 +21,8 @@
  */
 package org.komodo.relational.commands.view;
 
+import org.komodo.relational.commands.RelationalCommandsI18n;
+import org.komodo.relational.model.Column;
 import org.komodo.relational.model.View;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
@@ -55,6 +57,13 @@ public final class AddColumnCommand extends ViewShellCommand {
             final String columnName = requiredArgument( 0, I18n.bind( ViewCommandsI18n.missingColumnName ) );
 
             final View view = getView();
+            
+            // Do not allow add if object of type with this name already exists
+            Column[] cols = view.getColumns(getTransaction(), columnName);
+            if(cols.length>0) {
+                return new CommandResultImpl( false, I18n.bind( RelationalCommandsI18n.cannotAddChildAlreadyExistsError, columnName, Column.class.getSimpleName() ), null );
+            }
+            
             view.addColumn( getTransaction(), columnName );
 
             result = new CommandResultImpl( I18n.bind( ViewCommandsI18n.columnAdded, columnName ) );

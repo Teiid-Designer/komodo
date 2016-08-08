@@ -21,11 +21,14 @@
  */
 package org.komodo.relational.commands.workspace;
 
+import org.komodo.core.KomodoLexicon.Vdb;
+import org.komodo.relational.commands.RelationalCommandsI18n;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.shell.CommandResultImpl;
 import org.komodo.shell.api.CommandResult;
 import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.utils.i18n.I18n;
+import org.teiid.modeshape.sequencer.vdb.lexicon.VdbLexicon;
 
 /**
  * A shell command to create a VDB.
@@ -57,6 +60,12 @@ public final class CreateVdbCommand extends WorkspaceShellCommand {
             final String extPath = optionalArgument( 1, DEFAULT_PATH );
 
             final WorkspaceManager mgr = getWorkspaceManager();
+            
+            // Do not allow create if object with this name already exists
+            if(mgr.hasChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE)) {
+                return new CommandResultImpl( false, I18n.bind( RelationalCommandsI18n.cannotCreateChildAlreadyExistsError, vdbName, Vdb.class.getSimpleName() ), null );
+            }
+            
             mgr.createVdb( getTransaction(), null, vdbName, extPath );
 
             result = new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.vdbCreated, vdbName ) );

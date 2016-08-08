@@ -33,7 +33,6 @@ import org.komodo.spi.KException;
 import org.komodo.spi.runtime.TeiidDataSource;
 import org.komodo.spi.runtime.TeiidInstance;
 import org.komodo.spi.runtime.TeiidTranslator;
-import org.komodo.spi.runtime.TeiidVdb;
 import org.komodo.utils.StringUtils;
 
 /**
@@ -157,14 +156,10 @@ public class ServerUtils {
     public static List<String> getVdbNames(TeiidInstance teiidInstance) throws Exception {
         assert( teiidInstance != null );
 
-        Collection< TeiidVdb > vdbs = teiidInstance.getVdbs();
-        if(vdbs.isEmpty()) return Collections.emptyList();
+        Collection< String > vdbNames = teiidInstance.getVdbNames();
+        if(vdbNames.isEmpty()) return Collections.emptyList();
         
-        List< String > existingVdbNames = new ArrayList< String >();
-        for ( TeiidVdb vdb : vdbs ) {
-            existingVdbNames.add( vdb.getName() );
-        }
-        return existingVdbNames;
+        return new ArrayList(vdbNames);
     }
 
     /**

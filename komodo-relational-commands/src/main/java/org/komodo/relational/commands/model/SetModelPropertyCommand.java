@@ -66,33 +66,26 @@ public final class SetModelPropertyCommand extends ModelShellCommand {
             final UnitOfWork transaction = getTransaction();
             String errorMsg = null;
 
-            switch ( name ) {
-                case DESCRIPTION:
-                    model.setDescription( transaction, value );
-                    break;
-                case METADATA_TYPE:
-                    model.setMetadataType( transaction, value );
-                    break;
-                case MODEL_TYPE:
-                    if ( Model.Type.PHYSICAL.name().equals( value ) ) {
-                        model.setModelType( transaction, Model.Type.PHYSICAL );
-                    } else if ( Model.Type.VIRTUAL.name().equals( value ) ) {
-                        model.setModelType( transaction, Model.Type.VIRTUAL );
-                    } else {
-                        errorMsg = I18n.bind( ModelCommandsI18n.invalidModelTypePropertyValue, VISIBLE );
-                    }
-                    break;
-                case VISIBLE:
-                    if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
-                        model.setVisible( transaction, Boolean.parseBoolean( value ) );
-                    } else {
-                        errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, VISIBLE );
-                    }
-
-                    break;
-                default:
-                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Model.class.getSimpleName() );
-                    break;
+            if ( DESCRIPTION.equals( name ) ) {
+                model.setDescription( transaction, value );
+            } else if ( METADATA_TYPE.equals( name ) ) {
+                model.setMetadataType( transaction, value );
+            } else if ( MODEL_TYPE.equals( name ) ) {
+                if ( Model.Type.PHYSICAL.name().equalsIgnoreCase( value ) ) {
+                    model.setModelType( transaction, Model.Type.PHYSICAL );
+                } else if ( Model.Type.VIRTUAL.name().equalsIgnoreCase( value ) ) {
+                    model.setModelType( transaction, Model.Type.VIRTUAL );
+                } else {
+                    errorMsg = I18n.bind( ModelCommandsI18n.invalidModelTypePropertyValue, value );
+                }
+            } else if ( VISIBLE.equals( name ) ) {
+                if ( Boolean.TRUE.toString().equals( value ) || Boolean.FALSE.toString().equals( value ) ) {
+                    model.setVisible( transaction, Boolean.parseBoolean( value ) );
+                } else {
+                    errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidBooleanPropertyValue, VISIBLE );
+                }
+            } else {
+                errorMsg = I18n.bind( WorkspaceCommandsI18n.invalidPropertyName, name, Model.class.getSimpleName() );
             }
 
             if ( StringUtils.isBlank( errorMsg ) ) {

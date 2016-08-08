@@ -377,7 +377,7 @@ public interface StringConstants {
   /**
    * Datasource Suffix
    */
-  String DS_SUFFIX = ".tds"; //$NON-NLS-1$
+  String DS_SUFFIX = "tds"; //$NON-NLS-1$
 
   /**
    * jboss temp directory

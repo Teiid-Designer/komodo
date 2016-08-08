@@ -45,6 +45,7 @@ import org.komodo.importer.ImportOptions;
 import org.komodo.importer.ImportOptions.ExistingNodeOptions;
 import org.komodo.importer.ImportOptions.OptionKeys;
 import org.komodo.relational.dataservice.Dataservice;
+import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.importer.vdb.VdbImporter;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
@@ -54,6 +55,7 @@ import org.komodo.rest.cors.CorsInterceptor;
 import org.komodo.rest.cors.OptionsExceptionMapper;
 import org.komodo.rest.json.JsonConstants;
 import org.komodo.rest.service.KomodoDataserviceService;
+import org.komodo.rest.service.KomodoDatasourceService;
 import org.komodo.rest.service.KomodoImportExportService;
 import org.komodo.rest.service.KomodoSearchService;
 import org.komodo.rest.service.KomodoTeiidService;
@@ -181,6 +183,26 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
          * Placeholder added to an URI to allow a specific data service id
          */
         String DATA_SERVICE_PLACEHOLDER = "{dataserviceName}"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for the collection of Datasources in the Komodo workspace.
+         */
+        String DATA_SOURCES_SEGMENT = "datasources"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for a Datasource in the Komodo workspace.
+         */
+        String DATA_SOURCE_SEGMENT = "datasource"; //$NON-NLS-1$
+
+        /**
+         * The name of the URI path segment for Datasource clone in the Komodo workspace.
+         */
+        String CLONE_DATA_SOURCE_SEGMENT = "clone"; //$NON-NLS-1$
+
+        /**
+         * Placeholder added to an URI to allow a specific data source id
+         */
+        String DATA_SOURCE_PLACEHOLDER = "{datasourceName}"; //$NON-NLS-1$
 
         /**
          * The name of the URI path segment for the collection of models of a vdb
@@ -343,16 +365,6 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         String STATUS_SEGMENT = "status"; //$NON-NLS-1$
 
         /**
-         * The name of the URI path segment for the collection of data sources
-         */
-        String DATA_SOURCES_SEGMENT = "DataSources"; //$NON-NLS-1$
-
-        /**
-         * Placeholder added to an URI to allow a specific data source id
-         */
-        String DATA_SOURCE_PLACEHOLDER = "{dataSourceName}"; //$NON-NLS-1$
-
-        /**
          * The name of the resource used for importing and exporting artifacts
          */
         String IMPORT_EXPORT_SEGMENT = "importexport"; //$NON-NLS-1$
@@ -429,6 +441,7 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         objs.add( new KomodoExceptionMapper() );
         objs.add( new KomodoUtilService( this.kengine ) );
         objs.add( new KomodoDataserviceService( this.kengine ) );
+        objs.add( new KomodoDatasourceService( this.kengine ) );
         objs.add( new KomodoVdbService( this.kengine ) );
         objs.add( new KomodoSearchService( this.kengine ));
         objs.add( new KomodoTeiidService( this.kengine ));
@@ -694,5 +707,39 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         uow.commit();
 
         return services;
+    }
+    
+    /**
+     * Create a datasource in the komodo engine
+     *
+     * @param datasourceName the datasource name
+     * @throws Exception if error occurs
+     */
+    public void createDatasource(String datasourceName) throws Exception {
+        Repository repository = this.kengine.getDefaultRepository();
+
+        SynchronousCallback callback = new SynchronousCallback();
+        UnitOfWork uow = repository.createTransaction("Create Datasource", false, callback); //$NON-NLS-1$
+
+        WorkspaceManager wsMgr = WorkspaceManager.getInstance(repository);
+        wsMgr.createDatasource(uow, null, datasourceName);
+
+        uow.commit();
+        callback.await(3, TimeUnit.MINUTES);
+    }
+
+    /**
+     * @return the datasources directly from the kEngine
+     * @throws Exception if error occurs
+     */
+    public Datasource[] getDatasources() throws Exception {
+        Repository repository = this.kengine.getDefaultRepository();
+        WorkspaceManager mgr = WorkspaceManager.getInstance(repository);
+
+        UnitOfWork uow = repository.createTransaction("Find datasources", true, null); //$NON-NLS-1$
+        Datasource[] sources = mgr.findDatasources(uow);
+        uow.commit();
+
+        return sources;
     }
 }

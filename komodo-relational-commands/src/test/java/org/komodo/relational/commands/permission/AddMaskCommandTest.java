@@ -16,6 +16,7 @@
 package org.komodo.relational.commands.permission;
 
 import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
 import org.komodo.relational.vdb.DataRole;
@@ -58,6 +59,21 @@ public final class AddMaskCommandTest extends AbstractCommandTest {
         Mask[] masks = permissions[0].getMasks(getTransaction());
         assertEquals(1, masks.length);
         assertEquals("myMask", masks[0].getName(getTransaction())); //$NON-NLS-1$
+    }
+
+    @Test( expected = AssertionError.class )
+    public void shouldNotCreateMaskWithNameThatAlreadyExists() throws Exception {
+        final String cmd = "add-mask myMask";
+        final String[] commands = { "create-vdb myVdb vdbPath",
+                                    "cd myVdb",
+                                    "add-data-role myDataRole",
+                                    "cd myDataRole",
+                                    "add-permission myPermission",
+                                    "cd myPermission",
+                                    cmd,
+                                    cmd };
+
+        execute( commands );
     }
 
 }

@@ -16,6 +16,7 @@
 package org.komodo.relational.commands.vdb;
 
 import static org.junit.Assert.assertEquals;
+
 import org.junit.Ignore;
 import org.junit.Test;
 import org.komodo.relational.commands.AbstractCommandTest;
@@ -49,6 +50,17 @@ public final class AddEntryCommandTest extends AbstractCommandTest {
         Entry[] entries = vdbs[0].getEntries(getTransaction());
         assertEquals(1, entries.length);
         assertEquals("myEntry", entries[0].getName(getTransaction())); //$NON-NLS-1$
+    }
+
+    @Test( expected = AssertionError.class )
+    public void shouldNotCreateEntryWithNameThatAlreadyExists() throws Exception {
+        final String cmd = "add-entry myEntry entryPath";
+        final String[] commands = { "create-vdb myVdb vdbPath",
+                                    "cd myVdb",
+                                    cmd,
+                                    cmd };
+
+        execute( commands );
     }
 
 }
