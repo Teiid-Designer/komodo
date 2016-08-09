@@ -166,7 +166,7 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
         //
         // Test that the file storage connector really did export the vdb
         //
-        File tmpFile = new File(tmpDirPath, "myVDB");
+        File tmpFile = new File(tmpDirPath, "myVDB" + VDB_DEPLOYMENT_SUFFIX);
         assertTrue(tmpFile.exists());
         tmpFile.deleteOnExit();
 
@@ -277,7 +277,7 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
         //
         // Test that the file storage connector really did export the data service
         //
-        File tmpFile = new File(tmpDirPath, dsName);
+        File tmpFile = new File(tmpDirPath, dsName + DOT + ZIP);
         assertTrue(tmpFile.exists());
         tmpFile.deleteOnExit();
 
