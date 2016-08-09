@@ -363,6 +363,7 @@
 				</executions>
 			</plugin>
 
+			<!-- Adds credentials and ssl support to jboss server -->
 			<plugin>
 				<artifactId>maven-resources-plugin</artifactId>
 				<executions>
@@ -381,6 +382,16 @@
 										<include>*.properties</include>
 									</includes>
 									<filtering>true</filtering>
+								</resource>
+								<resource>
+									<targetPath>${project.basedir}/lib/jbossas/${version.jbossas.test}/standalone/configuration/ssl</targetPath>
+									<directory>src/test/resources/ssl</directory>
+								</resource>
+								<resource>
+									<directory>src/test/resources</directory>
+									<includes>
+										<include>standalone-teiid.xml</include>
+									</includes>
 								</resource>
 							</resources>
 						</configuration>

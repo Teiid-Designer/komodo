@@ -34,6 +34,9 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileAttribute;
+import java.security.GeneralSecurityException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
@@ -43,13 +46,23 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import javax.net.ssl.SSLContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLContextBuilder;
+import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
+import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.jboss.resteasy.test.TestPortProvider;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
@@ -105,7 +118,7 @@ import org.komodo.utils.FileUtils;
 @SuppressWarnings( {"javadoc", "nls"} )
 public final class IT_KomodoTeiidServiceTest implements StringConstants {
 
-    private static final String TEST_PORT = "8080";
+    private static final String TEST_PORT = "8443";
 
     private static final String TEIID_DATA_PATH = RepositoryImpl.SERVERS_ROOT + FORWARD_SLASH + ServerManager.DEFAULT_SERVER_NAME;
 
@@ -138,7 +151,7 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
 
         System.setProperty("org.jboss.resteasy.port", TEST_PORT);
         final URI baseUri = URI.create(TestPortProvider.generateBaseUrl());
-        BASE_URI = UriBuilder.fromUri(baseUri).path("/vdb-builder/v1").build();
+        BASE_URI = UriBuilder.fromUri(baseUri).scheme("https").path("/vdb-builder/v1").build();
         _uriBuilder = new KomodoRestUriBuilder(BASE_URI);
     }
 
@@ -150,14 +163,48 @@ public final class IT_KomodoTeiidServiceTest implements StringConstants {
         }
     }
 
-    private ClientRequest request(final URI uri, MediaType type) {
-      ClientRequest request = new ClientRequest(uri.toString());
-      if (type != null)
-          request.accept(type);
+    /**
+     * Builds an {@link ApacheHttpClient4Executor} which does NOT verify ssl certificates so allows for the
+     * self-signed certificates used in the integration testing.
+     *
+     * @return client executor with no ssl certificate verification
+     *
+     * @throws GeneralSecurityException
+     */
+    private ApacheHttpClient4Executor createSSLTrustingClientExecutor() throws GeneralSecurityException {
+        RegistryBuilder<ConnectionSocketFactory> registryBuilder = RegistryBuilder.<ConnectionSocketFactory>create()
+            .register("http", PlainConnectionSocketFactory.getSocketFactory());
+
+        TrustStrategy trustStrategy = new TrustStrategy() {
+            @Override
+            public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                return true;
+            }
+        };
+
+        SSLContextBuilder sslctxBuilder = new SSLContextBuilder();
+        sslctxBuilder.loadTrustMaterial(null, trustStrategy);
+        SSLContext sslContext = sslctxBuilder.build();
+
+        SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext,
+                                                                                                 SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+        registryBuilder.register("https", sslSocketFactory);
+
+        BasicHttpClientConnectionManager mgr = new BasicHttpClientConnectionManager(registryBuilder.build());
+
+        HttpClientBuilder clientBuilder = HttpClientBuilder.create();
+        clientBuilder.setConnectionManager(mgr);
+
+        return new ApacheHttpClient4Executor(clientBuilder.build());
+    }
+
+    private ClientRequest request(final URI uri, MediaType type) throws Exception {
+        ClientRequest request = new ClientRequest(uri.toString(), createSSLTrustingClientExecutor());
+        if (type != null)
+            request.accept(type);
 
         return request;
     }
-
 
     private void assertNoMysqlDriver() throws Exception {
         wait(2);
