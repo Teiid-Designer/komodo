@@ -42,6 +42,7 @@ import javax.xml.namespace.QName;
 import org.komodo.core.KEngine;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.relational.dataservice.Dataservice;
+import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
 import org.komodo.repository.SynchronousCallback;
@@ -438,6 +439,18 @@ public abstract class KomodoService implements V1Constants {
         return dataservice;
     }
 
+    protected Datasource findDatasource(UnitOfWork uow, String datasourceName) throws KException {
+        if (! this.wsMgr.hasChild( uow, datasourceName, KomodoLexicon.DataSource.NODE_TYPE ) ) {
+            return null;
+        }
+
+        final KomodoObject kobject = this.wsMgr.getChild( uow, datasourceName, KomodoLexicon.DataSource.NODE_TYPE );
+        final Datasource datasource = this.wsMgr.resolve( uow, kobject, Datasource.class );
+
+        LOGGER.debug( "Datasource '{0}' was found", datasourceName ); //$NON-NLS-1$
+        return datasource;
+    }
+
     protected String uri(String... segments) {
         StringBuffer buffer = new StringBuffer();
         for (int i = 0; i < segments.length; ++i) {
@@ -457,6 +470,11 @@ public abstract class KomodoService implements V1Constants {
     protected Response commitNoDataserviceFound(UnitOfWork uow, List<MediaType> mediaTypes, String dataserviceName) throws Exception {
         LOGGER.debug( "Dataservice '{0}' was not found", dataserviceName ); //$NON-NLS-1$
         return commit( uow, mediaTypes, new ResourceNotFound( dataserviceName, Messages.getString( GET_OPERATION_NAME ) ) );
+    }
+
+    protected Response commitNoDatasourceFound(UnitOfWork uow, List<MediaType> mediaTypes, String datasourceName) throws Exception {
+        LOGGER.debug( "Datasource '{0}' was not found", datasourceName ); //$NON-NLS-1$
+        return commit( uow, mediaTypes, new ResourceNotFound( datasourceName, Messages.getString( GET_OPERATION_NAME ) ) );
     }
 
     protected Response commitNoModelFound(UnitOfWork uow, List<MediaType> mediaTypes, String modelName, String vdbName) throws Exception {
