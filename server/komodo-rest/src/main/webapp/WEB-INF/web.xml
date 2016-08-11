@@ -5,7 +5,7 @@
     "http://java.sun.com/dtd/web-app_2_3.dtd">
 
 <web-app>
-	<display-name>VDB-Bench</display-name>
+	<display-name>VDB-Builder</display-name>
 
 	<context-param>
 		<param-name>webmaster</param-name>
@@ -18,13 +18,27 @@
 
 	<security-constraint>
 		<web-resource-collection>
-             <web-resource-name>vdb-builder</web-resource-name>
-             <url-pattern>/*</url-pattern>
-         </web-resource-collection>
+			<web-resource-name>vdb-builder</web-resource-name>
+			<url-pattern>/*</url-pattern>
+		</web-resource-collection>
 
 		<user-data-constraint>
 			<description>Require SSL</description>
 			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
 		</user-data-constraint>
+
+		<auth-constraint>
+			<role-name>user</role-name>
+		</auth-constraint>
+
 	</security-constraint>
+
+	<login-config>
+		<auth-method>BASIC</auth-method>
+		<realm-name>ApplicationRealm</realm-name>
+	</login-config>
+
+	<security-role>
+        <role-name>user</role-name>
+    </security-role>
 </web-app>
