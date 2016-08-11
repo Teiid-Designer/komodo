@@ -73,7 +73,7 @@ public class RelationalValidationTest extends AbstractLocalRepositoryTest {
     }
 
     protected Vdb createVdb( final String vdbName ) throws Exception {
-        final WorkspaceManager mgr = WorkspaceManager.getInstance( _repo );
+        final WorkspaceManager mgr = WorkspaceManager.getInstance(_repo, getTransaction());
         final Vdb vdb = mgr.createVdb( getTransaction(), null, vdbName, VDB_PATH );
 
         assertThat( vdb.getPrimaryType( getTransaction() ).getName(), is( VdbLexicon.Vdb.VIRTUAL_DATABASE ) );

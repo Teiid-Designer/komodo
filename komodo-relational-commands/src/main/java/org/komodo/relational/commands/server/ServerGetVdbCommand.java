@@ -81,7 +81,7 @@ public final class ServerGetVdbCommand extends ServerShellCommand {
             }
 
             // If VDB with same name is in workspace, make sure we can overwrite
-            boolean hasVdb = getWorkspaceManager().hasChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+            boolean hasVdb = getWorkspaceManager(getTransaction()).hasChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
             if ( hasVdb && !overwrite ) {
                 return new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.vdbOverwriteNotEnabled, vdbName ), null );
             }

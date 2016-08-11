@@ -81,8 +81,8 @@ public class DataserviceConveyor implements StringConstants {
         this.repository = repository;
     }
 
-    protected WorkspaceManager getWorkspaceManager() throws KException {
-        return WorkspaceManager.getInstance(repository);
+    protected WorkspaceManager getWorkspaceManager(UnitOfWork transaction) throws KException {
+        return WorkspaceManager.getInstance(repository, transaction);
     }
 
     protected String determineNewName(UnitOfWork transaction, KomodoObject parent, String nodeName) throws KException {
@@ -236,7 +236,7 @@ public class DataserviceConveyor implements StringConstants {
             if (!entries.hasMoreElements())
                 return;
 
-            WorkspaceManager mgr = getWorkspaceManager();
+            WorkspaceManager mgr = getWorkspaceManager(transaction);
             Dataservice dataservice = mgr.createDataservice(transaction, parent, dsName);
 
             while (entries.hasMoreElements()) {
@@ -322,7 +322,7 @@ public class DataserviceConveyor implements StringConstants {
                 return bos.toByteArray();
             }
 
-            WorkspaceManager mgr = WorkspaceManager.getInstance(dataService.getRepository());
+            WorkspaceManager mgr = WorkspaceManager.getInstance(dataService.getRepository(), transaction);
             zipStream = new ZipOutputStream(bos);
 
             //

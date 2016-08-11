@@ -77,7 +77,7 @@ public final class ServerGetDatasourceCommand extends ServerShellCommand {
             }
             
             // If datasource with same name is in workspace, make sure we can overwrite
-            boolean hasDS = getWorkspaceManager().hasChild(getTransaction(), datasourceName, KomodoLexicon.DataSource.NODE_TYPE);
+            boolean hasDS = getWorkspaceManager(getTransaction()).hasChild(getTransaction(), datasourceName, KomodoLexicon.DataSource.NODE_TYPE);
             if( hasDS && !overwrite ) {
                 return new CommandResultImpl( false, I18n.bind(ServerCommandsI18n.datasourceOverwriteNotEnabled, datasourceName), null );
             }
@@ -109,11 +109,11 @@ public final class ServerGetDatasourceCommand extends ServerShellCommand {
 
             // If overwriting, delete existing first
             if(hasDS) {
-                final KomodoObject datasourceToDelete = getWorkspaceManager().getChild(getTransaction(), datasourceName, KomodoLexicon.DataSource.NODE_TYPE);
-                getWorkspaceManager().delete(getTransaction(), datasourceToDelete);
+                final KomodoObject datasourceToDelete = getWorkspaceManager(getTransaction()).getChild(getTransaction(), datasourceName, KomodoLexicon.DataSource.NODE_TYPE);
+                getWorkspaceManager(getTransaction()).delete(getTransaction(), datasourceToDelete);
             }
             // Create the Data Source and set properties
-            Datasource newDatasource = getWorkspaceManager().createDatasource( getTransaction(), null, datasourceName );
+            Datasource newDatasource = getWorkspaceManager(getTransaction()).createDatasource( getTransaction(), null, datasourceName );
             setRepoDatasourceProperties(newDatasource, serverDS.getProperties());
             
             print( MESSAGE_INDENT, I18n.bind(ServerCommandsI18n.datasourceCopyToRepoFinished) );

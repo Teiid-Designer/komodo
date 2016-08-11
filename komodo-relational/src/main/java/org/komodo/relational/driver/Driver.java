@@ -69,7 +69,7 @@ public interface Driver extends RelationalObject, Exportable {
         @Override
         public Driver create(final UnitOfWork transaction, final Repository repository, final KomodoObject parent,
                              final String id, final RelationalProperties properties) throws KException {
-            final WorkspaceManager mgr = WorkspaceManager.getInstance(repository);
+            final WorkspaceManager mgr = WorkspaceManager.getInstance(repository, transaction);
             return mgr.createDriver(transaction, parent, id);
         }
 

@@ -83,7 +83,7 @@ public final class UnsetCustomPropertyCommand extends RelationalShellCommand {
      */
     @Override
     public boolean isValidForCurrentContext() {
-        return (getContext() instanceof RelationalObject) && (!KomodoObjectUtils.isRootChild(getContext()));
+        return (getContext() instanceof RelationalObject) && (!KomodoObjectUtils.isRootChild(getTransaction(), getContext()));
     }
 
     /**

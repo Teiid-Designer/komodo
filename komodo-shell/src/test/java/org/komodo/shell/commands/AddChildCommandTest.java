@@ -49,7 +49,9 @@ public final class AddChildCommandTest extends AbstractCommandTest {
         final CommandResult result = execute( commands );
         assertCommandResultOk( result );
 
-        final KomodoObject root = _repo.komodoWorkspace( getTransaction() ).getParent( getTransaction() );
+        KomodoObject userWorkspace = _repo.komodoWorkspace( getTransaction() );
+        KomodoObject wkspRoot = userWorkspace.getParent( getTransaction() );
+        final KomodoObject root = wkspRoot.getParent( getTransaction() );
         assertThat( root.getChild( getTransaction(), child ), is( notNullValue() ) );
     }
 

@@ -65,7 +65,7 @@ public final class CreateDatasourceCommand extends WorkspaceShellCommand {
                 return new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.invalidDatasourceIndicator, isJdbc ) );
             }
             
-            final WorkspaceManager mgr = getWorkspaceManager();
+            final WorkspaceManager mgr = getWorkspaceManager(getTransaction());
             
             // Do not allow create if object with this name already exists
             if(mgr.hasChild(getTransaction(), sourceName, KomodoLexicon.DataSource.NODE_TYPE)) {

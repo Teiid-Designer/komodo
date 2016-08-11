@@ -73,7 +73,7 @@ public class RestEntityFactory implements V1Constants {
     @SuppressWarnings( "unchecked" )
     public <T extends RestBasicEntity> T create(KomodoObject kObject, URI baseUri,
                                                                  UnitOfWork uow, KomodoProperties properties) throws KException {
-        WorkspaceManager wsMgr = WorkspaceManager.getInstance(kObject.getRepository());
+        WorkspaceManager wsMgr = WorkspaceManager.getInstance(kObject.getRepository(), uow);
         KomodoType kType = kObject.getTypeIdentifier(uow);
 
         switch (kType) {

@@ -37,7 +37,7 @@ public final class UploadDatasourceCommandTest extends AbstractCommandTest {
         final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
-        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo, getTransaction());
         Datasource[] sources = wkspMgr.findDatasources(getTransaction());
 
         assertEquals(1, sources.length);
@@ -58,7 +58,7 @@ public final class UploadDatasourceCommandTest extends AbstractCommandTest {
         final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
-        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo, getTransaction());
         Datasource[] sources = wkspMgr.findDatasources(getTransaction());
 
         assertEquals(1, sources.length);

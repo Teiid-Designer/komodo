@@ -167,7 +167,7 @@ public class WorkspaceStatusImpl implements PropertyProvider, WorkspaceStatus {
         this.commandFactory = new ShellCommandFactoryImpl(this);
 
         if ( transaction == null ) {
-            createTransaction("init"); //$NON-NLS-1$
+            createTransaction("init", Repository.SYSTEM_USER); //$NON-NLS-1$
         } else {
             this.uow = ( ( transaction instanceof WorkspaceStatusTransaction ) ? ( WorkspaceStatusTransaction )transaction
                                                                                : new WorkspaceStatusTransaction( transaction ) );
@@ -183,11 +183,12 @@ public class WorkspaceStatusImpl implements PropertyProvider, WorkspaceStatus {
         this.currentContext = this.rootContext;
 
         this.defaultLabelProvider = new DefaultLabelProvider();
-        this.defaultLabelProvider.setRepository( repo );
+        this.defaultLabelProvider.setRepository(repo, transaction);
+        this.defaultLabelProvider.setWorkspacePath(transaction);
         this.defaultLabelProvider.setPropertyProvider( this );
 
         // Discover other providers
-        discoverProviders();
+        discoverProviders(transaction);
         setLabelProvider(this.currentContext);
     }
 
@@ -245,14 +246,20 @@ public class WorkspaceStatusImpl implements PropertyProvider, WorkspaceStatus {
         return props;
     }
 
-    private void createTransaction(final String source ) throws Exception {
+    private void createTransaction(final String source, String userName) throws Exception {
         final Repository repo = getEngine().getDefaultRepository();
         this.callback = new SynchronousCallback();
-        final UnitOfWork transaction = repo.createTransaction( ( getClass().getSimpleName() + ':' + source + '-' + this.count++ ),
+        final UnitOfWork transaction = repo.createTransaction(userName,
+                                                              ( getClass().getSimpleName() + ':' + source + '-' + this.count++ ),
                                                                false,
                                                                this.callback );
         this.uow = new WorkspaceStatusTransaction( transaction );
         KLog.getLogger().debug( "WorkspaceStatusImpl.createTransaction: " + this.uow.getName() ); //$NON-NLS-1$
+    }
+
+    @Override
+    public KomodoObjectLabelProvider getLabelProvider() {
+        return this.defaultLabelProvider;
     }
 
     @Override
@@ -349,7 +356,7 @@ public class WorkspaceStatusImpl implements PropertyProvider, WorkspaceStatus {
                 throw e;
             }
         } finally {
-            createTransaction( newTxName );
+            createTransaction( newTxName, this.uow.getUserName() );
         }
     }
 
@@ -404,7 +411,7 @@ public class WorkspaceStatusImpl implements PropertyProvider, WorkspaceStatus {
                 throw e;
             }
         } finally {
-            createTransaction( newTxName );
+            createTransaction( newTxName, this.uow.getUserName() );
         }
     }
 
@@ -757,7 +764,7 @@ public class WorkspaceStatusImpl implements PropertyProvider, WorkspaceStatus {
                 String savedPath = value;
 
                 if ( StringUtils.isBlank( savedPath ) ) {
-                    savedPath = DefaultLabelProvider.WORKSPACE_PATH;
+                    savedPath = defaultLabelProvider.getWorkspacePath();
                 }
 
                 try {
@@ -1129,7 +1136,7 @@ public class WorkspaceStatusImpl implements PropertyProvider, WorkspaceStatus {
     }
 
     // Discovers Providers
-    private void discoverProviders( ) {
+    private void discoverProviders(UnitOfWork transaction ) throws Exception {
         final List< ClassLoader > commandClassloaders = new ArrayList< >();
         commandClassloaders.add( Thread.currentThread().getContextClassLoader() );
 
@@ -1172,7 +1179,8 @@ public class WorkspaceStatusImpl implements PropertyProvider, WorkspaceStatus {
             // Label Providers
             for ( final KomodoObjectLabelProvider provider : ServiceLoader.load( KomodoObjectLabelProvider.class, classLoader ) ) {
                 if ( !Modifier.isAbstract( provider.getClass().getModifiers() ) ) {
-                    provider.setRepository(getEngine().getDefaultRepository());
+                    provider.setRepository(getEngine().getDefaultRepository(), transaction);
+                    provider.setWorkspacePath(transaction);
                     provider.setPropertyProvider( this );
                     LOGGER.debug( "WorkspaceStatusImpl: adding LabelProvider \"{0}\"", provider.getClass().getName() ); //$NON-NLS-1$
                     this.alternateLabelProviders.add( provider );
@@ -1191,7 +1199,7 @@ public class WorkspaceStatusImpl implements PropertyProvider, WorkspaceStatus {
         private final UnitOfWork delegate;
 
         WorkspaceStatusTransaction( final UnitOfWork delegate ) {
-            super( delegate.getName(),
+            super( delegate.getUserName(), delegate.getName(),
                    ( ( RepositoryImpl.UnitOfWorkImpl )delegate ).getSession(),
                    delegate.isRollbackOnly(),
                    delegate.getCallback() );

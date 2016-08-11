@@ -111,6 +111,10 @@ public final class KomodoDataserviceService extends KomodoService {
     public Response getDataservices( final @Context HttpHeaders headers,
                                      final @Context UriInfo uriInfo ) throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         UnitOfWork uow = null;
 
@@ -118,14 +122,14 @@ public final class KomodoDataserviceService extends KomodoService {
             final String searchPattern = uriInfo.getQueryParameters().getFirst( QueryParamKeys.PATTERN );
 
             // find Data services
-            uow = createTransaction( "getDataservices", true ); //$NON-NLS-1$
+            uow = createTransaction(principal, "getDataservices", true ); //$NON-NLS-1$
             Dataservice[] dataServices = null;
 
             if ( StringUtils.isBlank( searchPattern ) ) {
-                dataServices = this.wsMgr.findDataservices( uow );
+                dataServices = getWorkspaceManager(uow).findDataservices( uow );
                 LOGGER.debug( "getDataservices:found '{0}' Dataservices", dataServices.length ); //$NON-NLS-1$
             } else {
-                final String[] dataservicePaths = this.wsMgr.findByType( uow, KomodoLexicon.DataService.NODE_TYPE, null, searchPattern, false );
+                final String[] dataservicePaths = getWorkspaceManager(uow).findByType( uow, KomodoLexicon.DataService.NODE_TYPE, null, searchPattern, false );
 
                 if ( dataservicePaths.length == 0 ) {
                     dataServices = Dataservice.NO_DATASERVICES;
@@ -134,7 +138,7 @@ public final class KomodoDataserviceService extends KomodoService {
                     int i = 0;
 
                     for ( final String path : dataservicePaths ) {
-                        dataServices[ i++ ] = this.wsMgr.resolve( uow, new ObjectImpl( this.wsMgr.getRepository(), path, 0 ), Dataservice.class );
+                        dataServices[ i++ ] = getWorkspaceManager(uow).resolve( uow, new ObjectImpl( getWorkspaceManager(uow).getRepository(), path, 0 ), Dataservice.class );
                     }
 
                     LOGGER.debug( "getDataservices:found '{0}' DataServices using pattern '{1}'", dataServices.length, searchPattern ); //$NON-NLS-1$
@@ -238,11 +242,15 @@ public final class KomodoDataserviceService extends KomodoService {
                                     @ApiParam(value = "Id of the dataservice to be fetched", required = true)
                                     final @PathParam( "dataserviceName" ) String dataserviceName) throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         UnitOfWork uow = null;
 
         try {
-            uow = createTransaction( "getDataservice", true ); //$NON-NLS-1$
+            uow = createTransaction(principal, "getDataservice", true ); //$NON-NLS-1$
 
             Dataservice dataservice = findDataservice(uow, dataserviceName);
             if (dataservice == null)
@@ -293,6 +301,10 @@ public final class KomodoDataserviceService extends KomodoService {
                                        final @PathParam( "dataserviceName" ) String dataserviceName,
                                        final String dataserviceJson) throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
             return notAcceptableMediaTypesBuilder().build();
@@ -327,10 +339,10 @@ public final class KomodoDataserviceService extends KomodoService {
         UnitOfWork uow = null;
 
         try {
-            uow = createTransaction( "createDataservice", false ); //$NON-NLS-1$
+            uow = createTransaction(principal, "createDataservice", false ); //$NON-NLS-1$
             
             // Error if the repo already contains a dataservice with the supplied name.
-            if ( this.wsMgr.hasChild( uow, dataserviceName ) ) {
+            if ( getWorkspaceManager(uow).hasChild( uow, dataserviceName ) ) {
                 String errorMessage = RelationalMessages.getString(RelationalMessages.Error.DATASERVICE_SERVICE_CREATE_ALREADY_EXISTS);
 
                 Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
@@ -380,6 +392,10 @@ public final class KomodoDataserviceService extends KomodoService {
                                        final @PathParam( "dataserviceName" ) String dataserviceName,
                                        final String newDataserviceName) throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
             return notAcceptableMediaTypesBuilder().build();
@@ -412,10 +428,10 @@ public final class KomodoDataserviceService extends KomodoService {
         UnitOfWork uow = null;
 
         try {
-            uow = createTransaction( "cloneDataservice", false ); //$NON-NLS-1$
+            uow = createTransaction(principal, "cloneDataservice", false ); //$NON-NLS-1$
             
             // Error if the repo already contains a dataservice with the supplied name.
-            if ( this.wsMgr.hasChild( uow, newDataserviceName ) ) {
+            if ( getWorkspaceManager(uow).hasChild( uow, newDataserviceName ) ) {
                 String errorMessage = RelationalMessages.getString(RelationalMessages.Error.DATASERVICE_SERVICE_CLONE_ALREADY_EXISTS);
 
                 Object responseEntity = createErrorResponseEntity(mediaTypes, errorMessage);
@@ -424,11 +440,11 @@ public final class KomodoDataserviceService extends KomodoService {
             
             // create new Dataservice
             // must be an update
-            final KomodoObject kobject = this.wsMgr.getChild( uow, dataserviceName, KomodoLexicon.DataService.NODE_TYPE );
-            final Dataservice oldDataservice = this.wsMgr.resolve( uow, kobject, Dataservice.class );
+            final KomodoObject kobject = getWorkspaceManager(uow).getChild( uow, dataserviceName, KomodoLexicon.DataService.NODE_TYPE );
+            final Dataservice oldDataservice = getWorkspaceManager(uow).resolve( uow, kobject, Dataservice.class );
             final RestDataservice oldEntity = entityFactory.create(oldDataservice, uriInfo.getBaseUri(), uow );
             
-            final Dataservice dataservice = this.wsMgr.createDataservice( uow, null, newDataserviceName);
+            final Dataservice dataservice = getWorkspaceManager(uow).createDataservice( uow, null, newDataserviceName);
 
             setProperties( uow, dataservice, oldEntity );
 
@@ -475,6 +491,10 @@ public final class KomodoDataserviceService extends KomodoService {
                                        final @PathParam( "dataserviceName" ) String dataserviceName,
                                        final String dataserviceJson) throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
             return notAcceptableMediaTypesBuilder().build();
@@ -500,9 +520,9 @@ public final class KomodoDataserviceService extends KomodoService {
 
         UnitOfWork uow = null;
         try {
-            uow = createTransaction( "updateDataservice", false ); //$NON-NLS-1$
+            uow = createTransaction(principal, "updateDataservice", false ); //$NON-NLS-1$
 
-            final boolean exists = this.wsMgr.hasChild( uow, dataserviceName );
+            final boolean exists = getWorkspaceManager(uow).hasChild( uow, dataserviceName );
             // Error if the specified service does not exist
             if ( !exists ) {
                 String errorMessage = RelationalMessages.getString(DATASERVICE_SERVICE_UPDATE_SERVICE_DNE);
@@ -512,8 +532,8 @@ public final class KomodoDataserviceService extends KomodoService {
             }
 
             // must be an update
-            final KomodoObject kobject = this.wsMgr.getChild( uow, dataserviceName, KomodoLexicon.DataService.NODE_TYPE );
-            final Dataservice dataservice = this.wsMgr.resolve( uow, kobject, Dataservice.class );
+            final KomodoObject kobject = getWorkspaceManager(uow).getChild( uow, dataserviceName, KomodoLexicon.DataService.NODE_TYPE );
+            final Dataservice dataservice = getWorkspaceManager(uow).resolve( uow, kobject, Dataservice.class );
 
             // Transfers the properties from the rest object to the created komodo service.
             setProperties(uow, dataservice, restDataservice);
@@ -552,7 +572,7 @@ public final class KomodoDataserviceService extends KomodoService {
 
         final String dataserviceName = restDataservice.getId();
         try {
-            final Dataservice dataservice = this.wsMgr.createDataservice( uow, null, dataserviceName);
+            final Dataservice dataservice = getWorkspaceManager(uow).createDataservice( uow, null, dataserviceName);
 
             // Transfers the properties from the rest object to the created komodo service.
             setProperties(uow, dataservice, restDataservice);
@@ -610,13 +630,17 @@ public final class KomodoDataserviceService extends KomodoService {
     public Response deleteDataservice( final @Context HttpHeaders headers,
                                        final @Context UriInfo uriInfo,
                                        final @PathParam( "dataserviceName" ) String dataserviceName) throws KomodoRestException {
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
 
         UnitOfWork uow = null;
         try {
-            uow = createTransaction("removeDataserviceFromWorkspace", false); //$NON-NLS-1$
+            uow = createTransaction(principal, "removeDataserviceFromWorkspace", false); //$NON-NLS-1$
 
-            final WorkspaceManager mgr = WorkspaceManager.getInstance( repo );
+            final WorkspaceManager mgr = WorkspaceManager.getInstance( repo, uow );
             KomodoObject dataservice = mgr.getChild(uow, dataserviceName, KomodoLexicon.DataService.NODE_TYPE);
             
             if (dataservice == null)

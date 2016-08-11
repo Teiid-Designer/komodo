@@ -349,6 +349,11 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
     private volatile UnitOfWork currentTransaction = null;
 
     /**
+     * User responsible for creating this teiid object
+     */
+    private final String txUser;
+
+    /**
      * @param uow
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
      * @param repository
@@ -362,6 +367,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
                       final Repository repository,
                       final String path ) throws KException {
         super(uow, repository, path);
+        this.txUser = uow.getUserName();
     }
 
     /**
@@ -371,7 +377,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
      */
     protected UnitOfWork createTransaction() throws KException {
         final SynchronousCallback callback = new SynchronousCallback();
-        final UnitOfWork result = getRepository().createTransaction(
+        final UnitOfWork result = getRepository().createTransaction(txUser,
                                                                     ( getClass().getSimpleName() + System.currentTimeMillis() ),
                                                                         false, callback );
         LOGGER.debug( "createTransaction:created '{0}', rollbackOnly = '{1}'", result.getName(), result.isRollbackOnly() ); //$NON-NLS-1$

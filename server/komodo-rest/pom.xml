@@ -374,6 +374,7 @@
 							<goal>copy-resources</goal>
 						</goals>
 						<configuration>
+							<skip>${integration.skipTests}</skip>
 							<outputDirectory>${project.basedir}/lib/jbossas/${version.jbossas.test}/standalone/configuration</outputDirectory>
 							<resources>
 								<resource>

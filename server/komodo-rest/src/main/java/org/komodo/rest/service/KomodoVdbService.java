@@ -148,8 +148,8 @@ public final class KomodoVdbService extends KomodoService {
 //        UnitOfWork uow = null;
 //
 //        try {
-//            uow = createTransaction( "addOrUpdateVdb", false ); //$NON-NLS-1$
-//            final boolean exists = this.wsMgr.hasChild( uow, vdbName );
+//            uow = createTransaction(principal, "addOrUpdateVdb", false ); //$NON-NLS-1$
+//            final boolean exists = getWorkspaceManager(uow).hasChild( uow, vdbName );
 //            final boolean namesMatch = vdbName.equals( vdbNameJson );
 //
 //            if ( !exists && !namesMatch ) {
@@ -162,8 +162,8 @@ public final class KomodoVdbService extends KomodoService {
 //            }
 //
 //            // must be an update
-//            final KomodoObject kobject = this.wsMgr.getChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
-//            final Vdb vdb = this.wsMgr.resolve( uow, kobject, Vdb.class );
+//            final KomodoObject kobject = getWorkspaceManager(uow).getChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
+//            final Vdb vdb = getWorkspaceManager(uow).resolve( uow, kobject, Vdb.class );
 //
 //            // TODO parse the JSON input to set VDB properties and children
 //
@@ -222,9 +222,9 @@ public final class KomodoVdbService extends KomodoService {
 //        final String vdbName = restVdb.getId();
 //
 //        try {
-//            uow = createTransaction( "createVdb", false ); //$NON-NLS-1$
+//            uow = createTransaction(principal, "createVdb", false ); //$NON-NLS-1$
 //
-//            if ( this.wsMgr.hasChild( uow, vdbName ) ) {
+//            if ( getWorkspaceManager(uow).hasChild( uow, vdbName ) ) {
 //                throw new KomodoRestException( RelationalMessages.getString( VDB_SERVICE_VDB_EXISTS ) );
 //            }
 //
@@ -249,7 +249,7 @@ public final class KomodoVdbService extends KomodoService {
         }
 
         KomodoObject kModel = vdb.getChild(uow, modelName, VdbLexicon.Vdb.DECLARATIVE_MODEL);
-        Model model = this.wsMgr.resolve( uow, kModel, Model.class );
+        Model model = getWorkspaceManager(uow).resolve( uow, kModel, Model.class );
         LOGGER.debug( "Model '{0}' was found", modelName ); //$NON-NLS-1$
         return model;
     }
@@ -310,12 +310,12 @@ public final class KomodoVdbService extends KomodoService {
 //        UnitOfWork uow = null;
 //
 //        try {
-//            uow = createTransaction( "deleteVdb", false ); //$NON-NLS-1$
+//            uow = createTransaction(principal, "deleteVdb", false ); //$NON-NLS-1$
 //
 //            // make sure VDB exists
-//            if ( this.wsMgr.hasChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE ) ) {
-//                final KomodoObject kobject = this.wsMgr.getChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
-//                final Vdb vdb = this.wsMgr.resolve( uow, kobject, Vdb.class );
+//            if ( getWorkspaceManager(uow).hasChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE ) ) {
+//                final KomodoObject kobject = getWorkspaceManager(uow).getChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
+//                final Vdb vdb = getWorkspaceManager(uow).resolve( uow, kobject, Vdb.class );
 //                vdb.remove( uow );
 //
 //                LOGGER.debug( "deleteVdb:VDB '{0}' was deleted", vdbName ); //$NON-NLS-1$
@@ -357,7 +357,7 @@ public final class KomodoVdbService extends KomodoService {
 //                extPath = restVdb.getOriginalFilePath();
 //            }
 //
-//            final Vdb vdb = this.wsMgr.createVdb( uow, null, vdbName, extPath );
+//            final Vdb vdb = getWorkspaceManager(uow).createVdb( uow, null, vdbName, extPath );
 //            LOGGER.debug( "doAddVdb:VDB '{0}' was created", vdbName ); //$NON-NLS-1$
 //
 //            // TODO parse the JSON input to set VDB properties and children
@@ -402,6 +402,10 @@ public final class KomodoVdbService extends KomodoService {
     public Response getVdbs( final @Context HttpHeaders headers,
                              final @Context UriInfo uriInfo ) throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         UnitOfWork uow = null;
 
@@ -409,14 +413,15 @@ public final class KomodoVdbService extends KomodoService {
             final String searchPattern = uriInfo.getQueryParameters().getFirst( QueryParamKeys.PATTERN );
 
             // find VDBs
-            uow = createTransaction( "getVdbs", true ); //$NON-NLS-1$
+            uow = createTransaction(principal, "getVdbs", true ); //$NON-NLS-1$
             Vdb[] vdbs = null;
 
+            WorkspaceManager wsMgr = getWorkspaceManager(uow);
             if ( StringUtils.isBlank( searchPattern ) ) {
-                vdbs = this.wsMgr.findVdbs( uow );
+                vdbs = wsMgr.findVdbs( uow );
                 LOGGER.debug( "getVdbs:found '{0}' VDBs", vdbs.length ); //$NON-NLS-1$
             } else {
-                final String[] vdbPaths = this.wsMgr.findByType( uow, VdbLexicon.Vdb.VIRTUAL_DATABASE, null, searchPattern, false );
+                final String[] vdbPaths = wsMgr.findByType( uow, VdbLexicon.Vdb.VIRTUAL_DATABASE, null, searchPattern, false );
 
                 if ( vdbPaths.length == 0 ) {
                     vdbs = Vdb.NO_VDBS;
@@ -425,7 +430,7 @@ public final class KomodoVdbService extends KomodoService {
                     int i = 0;
 
                     for ( final String path : vdbPaths ) {
-                        vdbs[ i++ ] = this.wsMgr.resolve( uow, new ObjectImpl( this.wsMgr.getRepository(), path, 0 ), Vdb.class );
+                        vdbs[ i++ ] = wsMgr.resolve( uow, new ObjectImpl( wsMgr.getRepository(), path, 0 ), Vdb.class );
                     }
 
                     LOGGER.debug( "getVdbs:found '{0}' VDBs using pattern '{1}'", vdbs.length, searchPattern ); //$NON-NLS-1$
@@ -530,11 +535,15 @@ public final class KomodoVdbService extends KomodoService {
                             @ApiParam(value = "Id of the vdb to be fetched", required = true)
                             final @PathParam( "vdbName" ) String vdbName) throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         UnitOfWork uow = null;
 
         try {
-            uow = createTransaction( "getVdb", true ); //$NON-NLS-1$
+            uow = createTransaction(principal, "getVdb", true ); //$NON-NLS-1$
 
             Vdb vdb = findVdb(uow, vdbName);
             if (vdb == null)
@@ -586,11 +595,15 @@ public final class KomodoVdbService extends KomodoService {
                             @ApiParam(value = "Id of the vdb to be fetched", required = true)
                             final @PathParam( "vdbName" ) String vdbName) throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         UnitOfWork uow = null;
 
         try {
-            uow = createTransaction( "getModels", true ); //$NON-NLS-1$
+            uow = createTransaction(principal, "getModels", true ); //$NON-NLS-1$
 
             Vdb vdb = findVdb(uow, vdbName);
             if (vdb == null)
@@ -654,11 +667,15 @@ public final class KomodoVdbService extends KomodoService {
                             @ApiParam(value = "Id of the model to be fetched", required = true)
                             final @PathParam( "modelName" ) String modelName) throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         UnitOfWork uow = null;
 
         try {
-            uow = createTransaction( "getModel", true ); //$NON-NLS-1$
+            uow = createTransaction(principal, "getModel", true ); //$NON-NLS-1$
 
             Vdb vdb = findVdb(uow, vdbName);
             if (vdb == null)
@@ -714,11 +731,15 @@ public final class KomodoVdbService extends KomodoService {
                             @ApiParam(value = "Id of the vdb to be fetched", required = true)
                             final @PathParam( "vdbName" ) String vdbName) throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         UnitOfWork uow = null;
 
         try {
-            uow = createTransaction( "getTranslators", true ); //$NON-NLS-1$
+            uow = createTransaction(principal, "getTranslators", true ); //$NON-NLS-1$
 
             Vdb vdb = findVdb(uow, vdbName);
             if (vdb == null)
@@ -782,11 +803,15 @@ public final class KomodoVdbService extends KomodoService {
                             @ApiParam(value = "Id of the translator to be fetched", required = true)
                             final @PathParam( "translatorName" ) String translatorName) throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         UnitOfWork uow = null;
 
         try {
-            uow = createTransaction( "getTranslator", true ); //$NON-NLS-1$
+            uow = createTransaction(principal, "getTranslator", true ); //$NON-NLS-1$
 
             Vdb vdb = findVdb(uow, vdbName);
             if (vdb == null)
@@ -859,11 +884,15 @@ public final class KomodoVdbService extends KomodoService {
                             @ApiParam(value = "Id of the vdb to be fetched", required = true)
                             final @PathParam( "vdbName" ) String vdbName) throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         UnitOfWork uow = null;
 
         try {
-            uow = createTransaction( "getImports", true ); //$NON-NLS-1$
+            uow = createTransaction(principal, "getImports", true ); //$NON-NLS-1$
 
             Vdb vdb = findVdb(uow, vdbName);
             if (vdb == null)
@@ -927,11 +956,15 @@ public final class KomodoVdbService extends KomodoService {
                             @ApiParam(value = "Id of the vdb import to be fetched", required = true)
                             final @PathParam( "importName" ) String importName) throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         UnitOfWork uow = null;
 
         try {
-            uow = createTransaction( "getImport", true ); //$NON-NLS-1$
+            uow = createTransaction(principal, "getImport", true ); //$NON-NLS-1$
 
             Vdb vdb = findVdb(uow, vdbName);
             if (vdb == null)
@@ -1004,11 +1037,15 @@ public final class KomodoVdbService extends KomodoService {
                             @ApiParam(value = "Id of the vdb to be fetched", required = true)
                             final @PathParam( "vdbName" ) String vdbName) throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         UnitOfWork uow = null;
 
         try {
-            uow = createTransaction( "getDataRoles", true ); //$NON-NLS-1$
+            uow = createTransaction(principal, "getDataRoles", true ); //$NON-NLS-1$
 
             Vdb vdb = findVdb(uow, vdbName);
             if (vdb == null)
@@ -1072,11 +1109,15 @@ public final class KomodoVdbService extends KomodoService {
                             @ApiParam(value = "Id of the data role to be fetched", required = true)
                             final @PathParam( "dataRoleId" ) String dataRoleId) throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         UnitOfWork uow = null;
 
         try {
-            uow = createTransaction( "getDataRole", true ); //$NON-NLS-1$
+            uow = createTransaction(principal, "getDataRole", true ); //$NON-NLS-1$
 
             Vdb vdb = findVdb(uow, vdbName);
             if (vdb == null)
@@ -1138,11 +1179,15 @@ public final class KomodoVdbService extends KomodoService {
                             @ApiParam(value = "Id of the model to be fetched", required = true)
                             final @PathParam( "modelName" ) String modelName) throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         UnitOfWork uow = null;
 
         try {
-            uow = createTransaction( "getSources", true ); //$NON-NLS-1$
+            uow = createTransaction(principal, "getSources", true ); //$NON-NLS-1$
 
             Vdb vdb = findVdb(uow, vdbName);
             if (vdb == null)
@@ -1218,11 +1263,15 @@ public final class KomodoVdbService extends KomodoService {
                             @ApiParam(value = "Id of the model source to be fetched", required = true)
                             final @PathParam( "sourceName" ) String sourceName) throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         UnitOfWork uow = null;
 
         try {
-            uow = createTransaction( "getSource", true ); //$NON-NLS-1$
+            uow = createTransaction(principal, "getSource", true ); //$NON-NLS-1$
 
             Vdb vdb = findVdb(uow, vdbName);
             if (vdb == null)
@@ -1313,11 +1362,15 @@ public final class KomodoVdbService extends KomodoService {
                             @ApiParam(value = "Id of the data role to be fetched", required = true)
                             final @PathParam( "dataRoleId" ) String dataRoleId) throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         UnitOfWork uow = null;
 
         try {
-            uow = createTransaction( "getPermissions", true ); //$NON-NLS-1$
+            uow = createTransaction(principal, "getPermissions", true ); //$NON-NLS-1$
 
             Vdb vdb = findVdb(uow, vdbName);
             if (vdb == null)
@@ -1391,11 +1444,15 @@ public final class KomodoVdbService extends KomodoService {
                             @ApiParam(value = "Id of the permission to be fetched", required = true)
                             final @PathParam( "permissionId" ) String permissionId) throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         UnitOfWork uow = null;
 
         try {
-            uow = createTransaction( "getPermission", true ); //$NON-NLS-1$
+            uow = createTransaction(principal, "getPermission", true ); //$NON-NLS-1$
 
             Vdb vdb = findVdb(uow, vdbName);
             if (vdb == null)
@@ -1466,11 +1523,15 @@ public final class KomodoVdbService extends KomodoService {
                             @ApiParam(value = "Id of the permission to be fetched", required = true)
                             final @PathParam( "permissionId" ) String permissionId) throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         UnitOfWork uow = null;
 
         try {
-            uow = createTransaction( "getConditions", true ); //$NON-NLS-1$
+            uow = createTransaction(principal, "getConditions", true ); //$NON-NLS-1$
 
             Vdb vdb = findVdb(uow, vdbName);
             if (vdb == null)
@@ -1550,11 +1611,15 @@ public final class KomodoVdbService extends KomodoService {
                             @ApiParam(value = "Id of the condition to be fetched", required = true)
                             final @PathParam( "conditionId" ) String conditionId) throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         UnitOfWork uow = null;
 
         try {
-            uow = createTransaction( "getCondition", true ); //$NON-NLS-1$
+            uow = createTransaction(principal, "getCondition", true ); //$NON-NLS-1$
 
             Vdb vdb = findVdb(uow, vdbName);
             if (vdb == null)
@@ -1654,11 +1719,15 @@ public final class KomodoVdbService extends KomodoService {
                             @ApiParam(value = "Id of the permission to be fetched", required = true)
                             final @PathParam( "permissionId" ) String permissionId) throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         UnitOfWork uow = null;
 
         try {
-            uow = createTransaction( "getMasks", true ); //$NON-NLS-1$
+            uow = createTransaction(principal, "getMasks", true ); //$NON-NLS-1$
 
             Vdb vdb = findVdb(uow, vdbName);
             if (vdb == null)
@@ -1738,11 +1807,15 @@ public final class KomodoVdbService extends KomodoService {
                             @ApiParam(value = "Id of the mask to be fetched", required = true)
                             final @PathParam( "maskId" ) String maskId) throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         UnitOfWork uow = null;
 
         try {
-            uow = createTransaction( "getMask", true ); //$NON-NLS-1$
+            uow = createTransaction(principal, "getMask", true ); //$NON-NLS-1$
 
             Vdb vdb = findVdb(uow, vdbName);
             if (vdb == null)

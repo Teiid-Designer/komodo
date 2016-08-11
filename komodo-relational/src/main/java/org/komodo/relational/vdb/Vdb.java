@@ -103,7 +103,7 @@ public interface Vdb extends Exportable, RelationalObject {
                            final RelationalProperties properties ) throws KException {
             final Object origFilePathValue = properties.getValue( VdbLexicon.Vdb.ORIGINAL_FILE );
             final String origFilePath = origFilePathValue == null ? null : origFilePathValue.toString();
-            final WorkspaceManager mgr = WorkspaceManager.getInstance( repository );
+            final WorkspaceManager mgr = WorkspaceManager.getInstance( repository, transaction );
             return mgr.createVdb( transaction, parent, id, origFilePath );
         }
 

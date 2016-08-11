@@ -583,7 +583,7 @@ public final class VdbImplTest extends RelationalModelTest {
 
         commit(); // commit the import
 
-        final Vdb[] vdbs = WorkspaceManager.getInstance( _repo ).findVdbs( getTransaction() );
+        final Vdb[] vdbs = WorkspaceManager.getInstance( _repo, getTransaction() ).findVdbs( getTransaction() );
         assertThat( vdbs.length, is( 2 ) );
 
         // find the imported VDB

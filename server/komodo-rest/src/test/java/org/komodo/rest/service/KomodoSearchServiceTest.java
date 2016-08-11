@@ -55,7 +55,7 @@ import com.google.gson.JsonParser;
 @SuppressWarnings( {"javadoc", "nls"} )
 public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
 
-    private final static String PORTFOLIO_DATA_PATH = "/tko:komodo/tko:workspace/Portfolio";
+    private final static String PORTFOLIO_DATA_PATH = "/tko:komodo/tko:workspace/" + USER_NAME + "/Portfolio";
 
     @Test
     public void shouldFailNoParameters() throws Exception {
@@ -354,7 +354,7 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
         request.post(String.class);
 
         Repository repository = getRestApp().getDefaultRepository();
-        UnitOfWork uow = repository.createTransaction(
+        UnitOfWork uow = repository.createTransaction(USER_NAME,
                                                       getClass().getSimpleName() + COLON + "FindSavedSearches" + COLON + System.currentTimeMillis(),
                                                       true, null);
 
@@ -382,7 +382,7 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
         request.post(String.class);
 
         Repository repository = getRestApp().getDefaultRepository();
-        UnitOfWork uow = repository.createTransaction(
+        UnitOfWork uow = repository.createTransaction(USER_NAME,
                                                       getClass().getSimpleName() + COLON + "FindSavedSearches" + COLON + System.currentTimeMillis(),
                                                       true, null);
 
@@ -407,7 +407,7 @@ public final class KomodoSearchServiceTest extends AbstractKomodoServiceTest {
         request.delete(String.class);
 
         Repository repository = getRestApp().getDefaultRepository();
-        UnitOfWork uow = repository.createTransaction(
+        UnitOfWork uow = repository.createTransaction(USER_NAME,
                                                       getClass().getSimpleName() + COLON + "FindSavedSearches" + COLON + System.currentTimeMillis(),
                                                       true, null);
 

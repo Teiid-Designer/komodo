@@ -223,7 +223,8 @@ public abstract class AbstractShellCommandReader implements ShellCommandReader {
         }
 
         { // add object type if necessary
-            if ( this.wsStatus.isShowingTypeInPrompt() && DefaultLabelProvider.shouldShowType( kobject ) ) {
+            if ( this.wsStatus.isShowingTypeInPrompt() &&
+                DefaultLabelProvider.shouldShowType( wsStatus.getTransaction(), kobject ) ) {
                 { // add opening paren
                     final TextFormat format = new TextFormat();
                     result.add( new AbstractMap.SimpleEntry< TextFormat, String >( format, " (" ) ); //$NON-NLS-1$

@@ -39,8 +39,6 @@ import org.junit.Rule;
 import org.junit.rules.TestName;
 import org.komodo.repository.LocalRepository;
 import org.komodo.repository.LocalRepository.LocalRepositoryId;
-import org.komodo.repository.ObjectImpl;
-import org.komodo.repository.RepositoryImpl;
 import org.komodo.repository.RepositoryImpl.UnitOfWorkImpl;
 import org.komodo.repository.SynchronousCallback;
 import org.komodo.spi.constants.StringConstants;
@@ -108,8 +106,8 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest im
             UnitOfWork transaction = null;
 
             try {
-                final KomodoObject workspace = new ObjectImpl( _repo, RepositoryImpl.WORKSPACE_ROOT, 0 );
-                transaction = _repo.createTransaction( "verifyInitialRepositoryContent", true, null );
+                transaction = _repo.createTransaction(TEST_USER, "verifyInitialRepositoryContent", true, null );
+                final KomodoObject workspace = _repo.komodoWorkspace(transaction);
                 workspace.getName( transaction );
                 transaction.commit();
             } catch ( final Exception e ) {
@@ -223,7 +221,7 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest im
         }
 
         this.callback = nextCallback;
-        this.uow = _repo.createTransaction( this.name.getMethodName(), this.rollbackOnly, this.callback );
+        this.uow = _repo.createTransaction(TEST_USER, this.name.getMethodName(), this.rollbackOnly, this.callback );
     }
 
     protected void commit( final UnitOfWork.State expectedState ) throws Exception {
@@ -245,7 +243,7 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest im
     }
 
     private UnitOfWork createTransaction( final UnitOfWorkListener callback ) throws Exception {
-        return _repo.createTransaction( ( this.name.getMethodName() + '-' + this.txCount++ ), this.rollbackOnly, callback );
+        return _repo.createTransaction(TEST_USER, ( this.name.getMethodName() + '-' + this.txCount++ ), this.rollbackOnly, callback );
     }
 
     /**

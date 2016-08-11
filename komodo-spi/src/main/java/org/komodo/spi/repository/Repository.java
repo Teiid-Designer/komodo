@@ -32,9 +32,14 @@ import org.komodo.spi.KException;
 public interface Repository {
 
     /**
+     * System user for transactions to be executed internally
+     */
+    String SYSTEM_USER = "SYSTEM";
+
+    /**
      * A repository identifier.
      */
-    public interface Id {
+    interface Id {
 
         /**
          * @return the repository configuration location
@@ -177,6 +182,11 @@ public interface Repository {
         KException getError();
 
         /**
+         * @return the name of the user who initiated the transaction (never <code>null</code>)
+         */
+        String getUserName();
+
+        /**
          * @return the name of the transaction (never <code>null</code>)
          */
         String getName();
@@ -263,6 +273,8 @@ public interface Repository {
     void addObserver( RepositoryObserver observer );
 
     /**
+     * @param userName
+     *       the user name of the transaction initiator
      * @param name
      *        a name for the transaction (cannot be empty)
      * @param rollbackOnly
@@ -273,7 +285,7 @@ public interface Repository {
      * @throws KException
      *         if an error occurs
      */
-    UnitOfWork createTransaction( final String name,
+    UnitOfWork createTransaction(final String userName, final String name,
                                   final boolean rollbackOnly,
                                   final UnitOfWorkListener callback ) throws KException;
 
@@ -547,13 +559,14 @@ public interface Repository {
     KomodoObject komodoLibrary( final UnitOfWork transaction) throws KException;
 
     /**
-     * The komodo workspace in the repository, ie. /tko:komodo/tko:workspace
+     * The komodo user's workspace in the repository, ie. /tko:komodo/tko:workspace/${user}
+     * where ${user} is the user owning the given transaction
      *
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not
      *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
      *
-     * @return the komodo workspace
+     * @return the komodo user workspace
      * @throws KException if an error occurs
      */
     KomodoObject komodoWorkspace( final UnitOfWork transaction) throws KException;

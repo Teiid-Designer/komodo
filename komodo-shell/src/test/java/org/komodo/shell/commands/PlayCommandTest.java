@@ -37,7 +37,7 @@ public final class PlayCommandTest extends AbstractCommandTest {
         final CommandResult result = execute();
 
         assertCommandResultOk( result );
-        assertContextIs( "/tko:komodo/tko:workspace/blah/blahblah" );
+        assertContextIs( "/tko:komodo/tko:workspace/" + TEST_USER + "/blah/blahblah" );
     }
 
     @Test

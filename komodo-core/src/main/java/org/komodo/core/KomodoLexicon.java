@@ -195,6 +195,10 @@ public interface KomodoLexicon extends StringConstants {
          */
         String WORKSPACE = Namespace.PREFIX + COLON + "workspace"; //$NON-NLS-1$
 
+        /**
+         * The name and node type name of Komodo home nodes. Value is {@value} .
+         */
+        String HOME = Namespace.PREFIX + COLON + "home"; //$NON-NLS-1$
     }
 
     /**
@@ -976,6 +980,22 @@ public interface KomodoLexicon extends StringConstants {
          */
         String UNQUALIFIED_NAME = NODE_TYPE.substring( NODE_TYPE.indexOf( ':' ) + 1 );
 
+    }
+
+    /**
+     * The JCR names associated with the Komodo workspace node type.
+     */
+    public interface Home {
+
+        /**
+         * The name and node type name of the Komodo workspace node. Value is {@value} .
+         */
+        String NODE_TYPE = Komodo.HOME;
+
+        /**
+         * The unqualified name of the workspace area. Value is {@value}.
+         */
+        String UNQUALIFIED_NAME = NODE_TYPE.substring( NODE_TYPE.indexOf( ':' ) + 1 );
     }
 
     /**

@@ -59,12 +59,12 @@ public final class DeleteSchemaCommand extends WorkspaceShellCommand {
         try {
             final String schemaName = requiredArgument( 0, I18n.bind( WorkspaceCommandsI18n.missingSchemaName ) );
 
-            final KomodoObject schemaToDelete = getWorkspaceManager().getChild(getTransaction(), schemaName, KomodoLexicon.Schema.NODE_TYPE);
+            final KomodoObject schemaToDelete = getWorkspaceManager(getTransaction()).getChild(getTransaction(), schemaName, KomodoLexicon.Schema.NODE_TYPE);
             
             if(schemaToDelete==null) {
                 return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.schemaNotFound, schemaName ), null );
             } else {
-                getWorkspaceManager().delete(getTransaction(), schemaToDelete);
+                getWorkspaceManager(getTransaction()).delete(getTransaction(), schemaToDelete);
                 return new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.schemaDeleted, schemaName ) );
             }
         } catch ( final Exception e ) {
@@ -123,7 +123,7 @@ public final class DeleteSchemaCommand extends WorkspaceShellCommand {
         final Arguments args = getArguments();
 
         final UnitOfWork uow = getTransaction();
-        final WorkspaceManager mgr = getWorkspaceManager();
+        final WorkspaceManager mgr = getWorkspaceManager(getTransaction());
         final KomodoObject[] schemas = mgr.findSchemas(getTransaction());
         List<String> existingSchemaNames = new ArrayList<String>(schemas.length);
         for(KomodoObject schema : schemas) {

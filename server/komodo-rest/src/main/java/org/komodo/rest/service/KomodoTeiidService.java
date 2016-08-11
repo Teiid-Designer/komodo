@@ -110,12 +110,12 @@ public class KomodoTeiidService extends KomodoService {
         super(engine);
     }
 
-    private synchronized Teiid getDefaultTeiid() throws KException {
+    private synchronized Teiid getDefaultTeiid(SecurityPrincipal principal) throws KException {
         ServerManager serverManager = ServerManager.getInstance(repo);
         UnitOfWork uow = null;
 
         try {
-            uow = createTransaction("getTeiidStatus", false); //$NON-NLS-1$
+            uow = createTransaction(principal, "getTeiidStatus", false); //$NON-NLS-1$
             Teiid teiid = serverManager.getDefaultServer(uow);
             uow.commit();
 
@@ -129,10 +129,10 @@ public class KomodoTeiidService extends KomodoService {
         }
     }
 
-    private CachedTeiid importContent() throws KException, CallbackTimeoutException {
-        Teiid teiid = getDefaultTeiid();
+    private CachedTeiid importContent(SecurityPrincipal principal) throws KException, CallbackTimeoutException {
+        Teiid teiid = getDefaultTeiid(principal);
         SynchronousCallback callback = new SynchronousCallback();
-        UnitOfWork uow = createTransaction("import-teiid-content", false, callback); //$NON-NLS-1$
+        UnitOfWork uow = createTransaction(principal, "import-teiid-content", false, callback); //$NON-NLS-1$
         CachedTeiid cachedTeiid = teiid.importContent(uow);
 
         // Commit the transaction to allow the sequencers to run
@@ -220,13 +220,17 @@ public class KomodoTeiidService extends KomodoService {
     public Response status(final @Context HttpHeaders headers,
                                                    final @Context UriInfo uriInfo) throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         UnitOfWork uow = null;
 
         try {
-            Teiid teiid = getDefaultTeiid();
+            Teiid teiid = getDefaultTeiid(principal);
 
-            uow = createTransaction("getTeiidStatus", true); //$NON-NLS-1$
+            uow = createTransaction(principal, "getTeiidStatus", true); //$NON-NLS-1$
             RestTeiidStatus status = new RestTeiidStatus(uriInfo.getBaseUri(), teiid, uow);
 
             // create response
@@ -266,14 +270,18 @@ public class KomodoTeiidService extends KomodoService {
     public Response vdbs(final @Context HttpHeaders headers,
                                              final @Context UriInfo uriInfo) throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         UnitOfWork uow = null;
         Teiid teiid = null;
 
         try {
-            teiid = getDefaultTeiid();
+            teiid = getDefaultTeiid(principal);
 
-            uow = createTransaction("getTeiidVdbs", true); //$NON-NLS-1$
+            uow = createTransaction(principal, "getTeiidVdbs", true); //$NON-NLS-1$
             RestTeiidVdbStatus status = new RestTeiidVdbStatus(uriInfo.getBaseUri(), teiid, uow);
 
             // create response
@@ -305,6 +313,10 @@ public class KomodoTeiidService extends KomodoService {
                                    final @Context UriInfo uriInfo,
                                    final String credentialAttributes) throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
             return notAcceptableMediaTypesBuilder().build();
@@ -330,9 +342,9 @@ public class KomodoTeiidService extends KomodoService {
         UnitOfWork uow = null;
 
         try {
-            Teiid teiidNode = getDefaultTeiid();
+            Teiid teiidNode = getDefaultTeiid(principal);
 
-            uow = createTransaction("teiidSetCredentials", false); //$NON-NLS-1$
+            uow = createTransaction(principal, "teiidSetCredentials", false); //$NON-NLS-1$
 
             if (teiidAttrs.getAdminUser() != null)
                 teiidNode.setAdminUser(uow, teiidAttrs.getAdminUser());
@@ -388,14 +400,18 @@ public class KomodoTeiidService extends KomodoService {
     public Response getVdbs(final @Context HttpHeaders headers,
                                                    final @Context UriInfo uriInfo) throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         UnitOfWork uow = null;
 
         try {
-            CachedTeiid cachedTeiid = importContent();
+            CachedTeiid cachedTeiid = importContent(principal);
 
             // find VDBs
-            uow = createTransaction("getVdbs", true); //$NON-NLS-1$
+            uow = createTransaction(principal, "getVdbs", true); //$NON-NLS-1$
 
             Vdb[] vdbs = cachedTeiid.getVdbs(uow);
             LOGGER.debug("getVdbs:found '{0}' VDBs", vdbs.length); //$NON-NLS-1$
@@ -453,14 +469,18 @@ public class KomodoTeiidService extends KomodoService {
                             @ApiParam(value = "Id of the vdb to be fetched", required = true)
                             final @PathParam( "vdbName" ) String vdbName) throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         
         UnitOfWork uow = null;
         try {
-            CachedTeiid cachedTeiid = importContent();
+            CachedTeiid cachedTeiid = importContent(principal);
 
             // find VDB
-            uow = createTransaction("getVdb-" + vdbName, true); //$NON-NLS-1$
+            uow = createTransaction(principal, "getVdb-" + vdbName, true); //$NON-NLS-1$
             Vdb vdb = cachedTeiid.getVdb(uow, vdbName);
             if (vdb == null)
                 return commitNoVdbFound(uow, mediaTypes, vdbName);
@@ -506,14 +526,18 @@ public class KomodoTeiidService extends KomodoService {
     public Response getTranslators(final @Context HttpHeaders headers,
                                                    final @Context UriInfo uriInfo) throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         UnitOfWork uow = null;
 
         try {
-            CachedTeiid cachedTeiid = importContent();
+            CachedTeiid cachedTeiid = importContent(principal);
 
             // find translators
-            uow = createTransaction("getTranslators", true); //$NON-NLS-1$
+            uow = createTransaction(principal, "getTranslators", true); //$NON-NLS-1$
 
             Translator[] translators = cachedTeiid.getTranslators(uow);
             LOGGER.debug("getTranslators:found '{0}' Translators", translators.length); //$NON-NLS-1$
@@ -564,14 +588,18 @@ public class KomodoTeiidService extends KomodoService {
     public Response getDataSources(final @Context HttpHeaders headers,
                                                    final @Context UriInfo uriInfo) throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         UnitOfWork uow = null;
 
         try {
-            CachedTeiid cachedTeiid = importContent();
+            CachedTeiid cachedTeiid = importContent(principal);
 
             // find translators
-            uow = createTransaction("getDataSources", true); //$NON-NLS-1$
+            uow = createTransaction(principal, "getDataSources", true); //$NON-NLS-1$
 
             Datasource[] dataSources = cachedTeiid.getDataSources(uow);
             LOGGER.debug("getDataSources:found '{0}' DataSources", dataSources.length); //$NON-NLS-1$
@@ -614,6 +642,10 @@ public class KomodoTeiidService extends KomodoService {
                                    final @Context UriInfo uriInfo,
                                    final String fileAttributes) throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
             return notAcceptableMediaTypesBuilder().build();
@@ -636,9 +668,9 @@ public class KomodoTeiidService extends KomodoService {
         UnitOfWork uow = null;
 
         try {
-            Teiid teiidNode = getDefaultTeiid();
+            Teiid teiidNode = getDefaultTeiid(principal);
 
-            uow = createTransaction("deployTeiidDriver", false); //$NON-NLS-1$
+            uow = createTransaction(principal, "deployTeiidDriver", false); //$NON-NLS-1$
 
             byte[] content = decode(kfa.getContent());
             String tempDir = FileUtils.tempDirectory();
@@ -691,6 +723,10 @@ public class KomodoTeiidService extends KomodoService {
                                    @ApiParam(value = "Name of the driver to be removed", required = true)
                                     final @PathParam( "driverName" ) String driverName) throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
             return notAcceptableMediaTypesBuilder().build();
@@ -698,9 +734,9 @@ public class KomodoTeiidService extends KomodoService {
         UnitOfWork uow = null;
 
         try {
-            Teiid teiidNode = getDefaultTeiid();
+            Teiid teiidNode = getDefaultTeiid(principal);
 
-            uow = createTransaction("unDeployTeiidDriver", true); //$NON-NLS-1$
+            uow = createTransaction(principal, "unDeployTeiidDriver", true); //$NON-NLS-1$
 
             TeiidInstance teiidInstance = teiidNode.getTeiidInstance(uow);
             teiidInstance.undeployDriver(driverName);
@@ -747,6 +783,10 @@ public class KomodoTeiidService extends KomodoService {
                                    final String pathAttribute)
                                    throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
             return notAcceptableMediaTypesBuilder().build();
@@ -774,9 +814,9 @@ public class KomodoTeiidService extends KomodoService {
         UnitOfWork uow = null;
 
         try {
-            Teiid teiidNode = getDefaultTeiid();
+            Teiid teiidNode = getDefaultTeiid(principal);
 
-            uow = createTransaction("deployTeiidDataservice", false); //$NON-NLS-1$
+            uow = createTransaction(principal, "deployTeiidDataservice", false); //$NON-NLS-1$
 
             List<KomodoObject> dataServices = this.repo.searchByPath(uow, kpa.getPath());
             if (dataServices.size() == 0) {
@@ -787,7 +827,7 @@ public class KomodoTeiidService extends KomodoService {
                 return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
             }
 
-            Dataservice dataService = this.wsMgr.resolve(uow, dataServices.get(0), Dataservice.class);
+            Dataservice dataService = getWorkspaceManager(uow).resolve(uow, dataServices.get(0), Dataservice.class);
             if (dataService == null) {
                 String errorMessage = RelationalMessages.getString(
                                                                    RelationalMessages.Error.TEIID_SERVICE_NO_DATA_SERVICE_FOUND);
@@ -857,6 +897,10 @@ public class KomodoTeiidService extends KomodoService {
                                    final String pathAttribute)
                                    throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
             return notAcceptableMediaTypesBuilder().build();
@@ -884,9 +928,9 @@ public class KomodoTeiidService extends KomodoService {
         UnitOfWork uow = null;
 
         try {
-            Teiid teiidNode = getDefaultTeiid();
+            Teiid teiidNode = getDefaultTeiid(principal);
 
-            uow = createTransaction("deployTeiidDatasource", false); //$NON-NLS-1$
+            uow = createTransaction(principal, "deployTeiidDatasource", false); //$NON-NLS-1$
 
             List<KomodoObject> dataSources = this.repo.searchByPath(uow, kpa.getPath());
             if (dataSources.size() == 0) {
@@ -897,7 +941,7 @@ public class KomodoTeiidService extends KomodoService {
                 return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
             }
 
-            Datasource dataSource = this.wsMgr.resolve(uow, dataSources.get(0), Datasource.class);
+            Datasource dataSource = getWorkspaceManager(uow).resolve(uow, dataSources.get(0), Datasource.class);
             if (dataSource == null) {
                 String errorMessage = RelationalMessages.getString(
                                                                    RelationalMessages.Error.TEIID_SERVICE_NO_DATA_SOURCE_FOUND);
@@ -986,6 +1030,10 @@ public class KomodoTeiidService extends KomodoService {
                                    final String queryAttribute)
                                    throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
             return notAcceptableMediaTypesBuilder().build();
@@ -1020,9 +1068,9 @@ public class KomodoTeiidService extends KomodoService {
         UnitOfWork uow = null;
 
         try {
-            uow = createTransaction("queryTeiidservice", true); //$NON-NLS-1$
-            Teiid teiidNode = getDefaultTeiid();
-            WorkspaceManager mgr = WorkspaceManager.getInstance(repo);
+            uow = createTransaction(principal, "queryTeiidservice", true); //$NON-NLS-1$
+            Teiid teiidNode = getDefaultTeiid(principal);
+            WorkspaceManager mgr = getWorkspaceManager(uow);
             String target = kqa.getTarget();
             String query = kqa.getQuery();
 
@@ -1084,6 +1132,10 @@ public class KomodoTeiidService extends KomodoService {
                                     @QueryParam(value = PING_TYPE_PARAMETER) String pingType)
                                    throws KomodoRestException {
 
+        SecurityPrincipal principal = checkSecurityContext(headers);
+        if (principal.hasErrorResponse())
+            return principal.getErrorResponse();
+
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         if (! isAcceptable(mediaTypes, MediaType.APPLICATION_JSON_TYPE))
             return notAcceptableMediaTypesBuilder().build();
@@ -1099,8 +1151,8 @@ public class KomodoTeiidService extends KomodoService {
         UnitOfWork uow = null;
 
         try {
-            uow = createTransaction("pingTeiidservice", true); //$NON-NLS-1$
-            Teiid teiidNode = getDefaultTeiid();
+            uow = createTransaction(principal, "pingTeiidservice", true); //$NON-NLS-1$
+            Teiid teiidNode = getDefaultTeiid(principal);
 
             TeiidInstance teiidInstance = teiidNode.getTeiidInstance(uow);
             Outcome outcome = teiidInstance.ping(pingKind);

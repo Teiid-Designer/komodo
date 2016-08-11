@@ -491,7 +491,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
         KomodoObject vdbNode = _repo.getFromWorkspace(getTransaction(), TestUtilities.TWEET_EXAMPLE_VDB_NAME);
         assertNotNull(vdbNode);
-        WorkspaceManager wkspManager = WorkspaceManager.getInstance(_repo);
+        WorkspaceManager wkspManager = WorkspaceManager.getInstance(_repo, getTransaction());
 
         KomodoObject twitterView = vdbNode.getChild(getTransaction(), TWITTER_VIEW_MODEL);
         Model model = wkspManager.resolve(getTransaction(), twitterView, Model.class);
@@ -890,7 +890,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
         assertNotNull(vdbNode);
 
-        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(getTransaction(), vdbNode, Vdb.class);
+        Vdb vdb = WorkspaceManager.getInstance(_repo, getTransaction()).resolve(getTransaction(), vdbNode, Vdb.class);
 
         assertNotNull(vdb);
         String desc = vdb.getDescription(getTransaction());
@@ -908,7 +908,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         assertEquals(2, vdb.getModels(getTransaction()).length);
 
         assertEquals(1, vdb.getDataRoles(getTransaction()).length);
-        DataRole dataRole = WorkspaceManager.getInstance(_repo).resolve(getTransaction(),  vdb.getDataRoles(getTransaction())[0], DataRole.class);
+        DataRole dataRole = WorkspaceManager.getInstance(_repo, getTransaction()).resolve(getTransaction(),  vdb.getDataRoles(getTransaction())[0], DataRole.class);
     	assertEquals("publishers-only", dataRole.getName(getTransaction()));
     	assertNotNull(dataRole.getProperty(getTransaction(), "vdb:grantAll"));
         assertEquals("true", dataRole.getProperty(getTransaction(), "vdb:grantAll").getValue(getTransaction()).toString());
@@ -916,7 +916,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         assertEquals(2, dataRole.getMappedRoles(getTransaction()).length);
 
         assertEquals(1, vdb.getTranslators(getTransaction()).length);
-        Translator translator = WorkspaceManager.getInstance(_repo).resolve(getTransaction(),  vdb.getTranslators(getTransaction())[0], Translator.class);
+        Translator translator = WorkspaceManager.getInstance(_repo, getTransaction()).resolve(getTransaction(),  vdb.getTranslators(getTransaction())[0], Translator.class);
     	assertEquals("books_db2", translator.getName(getTransaction()));
     	assertEquals("db2", translator.getType(getTransaction()));
     	assertNotNull(translator.getProperty(getTransaction(), "requiresCriteria"));
@@ -955,7 +955,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         assertEquals(importOptions.getOption(OptionKeys.NAME), vdbName);
         assertNotNull(vdbNode);
 
-        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(getTransaction(), vdbNode, Vdb.class);
+        Vdb vdb = WorkspaceManager.getInstance(_repo, getTransaction()).resolve(getTransaction(), vdbNode, Vdb.class);
 
         assertNotNull(vdb);
         String desc = vdb.getDescription(getTransaction());
@@ -1012,7 +1012,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         assertEquals(importOptions.getOption(OptionKeys.NAME), vdbName);
         assertNotNull(vdbNode);
 
-        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(getTransaction(), vdbNode, Vdb.class);
+        Vdb vdb = WorkspaceManager.getInstance(_repo, getTransaction()).resolve(getTransaction(), vdbNode, Vdb.class);
 
         assertNotNull(vdb);
         String desc = vdb.getDescription(getTransaction());
@@ -1049,7 +1049,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         assertEquals(importOptions.getOption(OptionKeys.NAME), vdbName);
         assertNotNull(vdbNode);
 
-        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(getTransaction(), vdbNode, Vdb.class);
+        Vdb vdb = WorkspaceManager.getInstance(_repo, getTransaction()).resolve(getTransaction(), vdbNode, Vdb.class);
 
         assertNotNull(vdb);
         String desc = vdb.getDescription(getTransaction());
@@ -1090,7 +1090,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 		    </data-role>
         */
 
-        DataRole dataRole = WorkspaceManager.getInstance(_repo).resolve(getTransaction(),  vdb.getDataRoles(getTransaction())[0], DataRole.class);
+        DataRole dataRole = WorkspaceManager.getInstance(_repo, getTransaction()).resolve(getTransaction(),  vdb.getDataRoles(getTransaction())[0], DataRole.class);
     	assertEquals("publishers-only", dataRole.getName(getTransaction()));
     	assertNotNull(dataRole.getProperty(getTransaction(), "vdb:grantAll"));
         assertEquals("true", dataRole.getProperty(getTransaction(), "vdb:grantAll").getValue(getTransaction()).toString());
@@ -1124,7 +1124,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         assertEquals(importOptions.getOption(OptionKeys.NAME), vdbName);
         assertNotNull(vdbNode);
 
-        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(getTransaction(), vdbNode, Vdb.class);
+        Vdb vdb = WorkspaceManager.getInstance(_repo, getTransaction()).resolve(getTransaction(), vdbNode, Vdb.class);
 
         assertNotNull(vdb);
         assertEquals("BooksVirtualModelOnly", vdb.getVdbName(getTransaction()));
@@ -1163,7 +1163,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         assertEquals(importOptions.getOption(OptionKeys.NAME), vdbName);
         assertNotNull(vdbNode);
 
-        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(getTransaction(), vdbNode, Vdb.class);
+        Vdb vdb = WorkspaceManager.getInstance(_repo, getTransaction()).resolve(getTransaction(), vdbNode, Vdb.class);
 
         /*
 		    <description>Sample vdb containing only a tranlator override element</description>
@@ -1180,7 +1180,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
         assertEquals(0, vdb.getModels(getTransaction()).length);
         assertEquals(1, vdb.getTranslators(getTransaction()).length);
-        Translator translator = WorkspaceManager.getInstance(_repo).resolve(getTransaction(),  vdb.getTranslators(getTransaction())[0], Translator.class);
+        Translator translator = WorkspaceManager.getInstance(_repo, getTransaction()).resolve(getTransaction(),  vdb.getTranslators(getTransaction())[0], Translator.class);
     	assertEquals("books_db2", translator.getName(getTransaction()));
     	assertEquals("db2", translator.getType(getTransaction()));
 
@@ -1220,7 +1220,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
         assertNotNull(vdbNode);
 
-        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(getTransaction(), vdbNode, Vdb.class);
+        Vdb vdb = WorkspaceManager.getInstance(_repo, getTransaction()).resolve(getTransaction(), vdbNode, Vdb.class);
 
         assertNotNull(vdb);
         String desc = vdb.getDescription(getTransaction());
@@ -1269,7 +1269,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
         assertNotNull(vdbNode);
 
-        Vdb vdb = WorkspaceManager.getInstance(_repo).resolve(getTransaction(), vdbNode, Vdb.class);
+        Vdb vdb = WorkspaceManager.getInstance(_repo, getTransaction()).resolve(getTransaction(), vdbNode, Vdb.class);
 
         assertNotNull(vdb);
         String connType = vdb.getConnectionType(getTransaction());
@@ -1328,7 +1328,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
         assertNotNull(vdbNode);
 
-        WorkspaceManager manager = WorkspaceManager.getInstance(_repo);
+        WorkspaceManager manager = WorkspaceManager.getInstance(_repo, getTransaction());
         Vdb vdb = manager.resolve(getTransaction(), vdbNode, Vdb.class);
 
         assertNotNull(vdb);
@@ -1357,7 +1357,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
      */
     private void importVdb(InputStream vdbStream) throws Exception {
         SynchronousCallback callback = new SynchronousCallback();
-        UnitOfWork uow = _repo.createTransaction("Import Vdb", false, callback); //$NON-NLS-1$
+        UnitOfWork uow = _repo.createTransaction(TEST_USER, "Import Vdb", false, callback); //$NON-NLS-1$
 
         ImportOptions importOptions = new ImportOptions();
         ImportMessages importMessages = new ImportMessages();

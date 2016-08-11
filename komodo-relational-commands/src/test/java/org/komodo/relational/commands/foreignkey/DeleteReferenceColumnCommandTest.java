@@ -60,7 +60,7 @@ public final class DeleteReferenceColumnCommandTest extends AbstractCommandTest 
         final CommandResult result = execute( commands );
         assertCommandResultOk(result);
 
-        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo, getTransaction());
         Vdb[] vdbs = wkspMgr.findVdbs(getTransaction());
 
         assertEquals(1, vdbs.length);
@@ -92,11 +92,11 @@ public final class DeleteReferenceColumnCommandTest extends AbstractCommandTest 
     	ArrayList<CharSequence> candidates=new ArrayList<>();
     	setup("commandFiles","addRefColumns.cmd");
 
-    	candidates.add("/workspace/myVDB1/myModel1/myTable2/myColumn1");
-    	candidates.add("/workspace/myVDB1/myModel1/myTable2/myColumn2");
-    	assertTabCompletion("delete-ref-column /workspace/myVDB1/myModel1/myTable2/myC", candidates);
+    	candidates.add("/workspace/" + TEST_USER + "/myVDB1/myModel1/myTable2/myColumn1");
+    	candidates.add("/workspace/" + TEST_USER + "/myVDB1/myModel1/myTable2/myColumn2");
+    	assertTabCompletion("delete-ref-column /workspace/" + TEST_USER + "/myVDB1/myModel1/myTable2/myC", candidates);
 
-    	candidates.add("/workspace/myVDB1/myModel1/myTable2/MyColumn3");
+    	candidates.add("/workspace/" + TEST_USER + "/myVDB1/myModel1/myTable2/MyColumn3");
     	assertTabCompletion("delete-ref-column ", candidates);
 
     }

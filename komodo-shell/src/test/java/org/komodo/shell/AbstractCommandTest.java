@@ -254,6 +254,7 @@ public abstract class AbstractCommandTest extends AbstractLocalRepositoryTest {
             Assert.fail( "Failed - invalid command: " + e.getMessage() ); //$NON-NLS-1$
         } catch ( Exception e ) {
             Assert.fail( "Failed : " + e.getMessage() ); //$NON-NLS-1$
+            e.printStackTrace();
         }
         return result;
     }

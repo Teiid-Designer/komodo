@@ -65,7 +65,6 @@ import org.komodo.spi.repository.Exportable;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.KomodoType;
 import org.komodo.spi.repository.Repository;
-import org.komodo.spi.repository.Repository.Id;
 import org.komodo.spi.repository.Repository.State;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.RepositoryObserver;
@@ -107,41 +106,118 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
                                                               + " ORDER BY [jcr:path] ASC"; //$NON-NLS-1$
     // @formatter:on
 
-    private static class WskpMgrAdapter implements KeyFromValueAdapter< Repository.Id, WorkspaceManager > {
+    private static class CacheKey {
+        private final Repository.Id repoId;
+
+        private final String user;
+
+        public CacheKey(Repository.Id repoId, String user) {
+            this.repoId = repoId;
+            this.user = user;
+        }
 
         @Override
-        public Id getKey( WorkspaceManager value ) {
-            Repository repository = value.getRepository();
-            return repository.getId();
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((repoId == null) ? 0 : repoId.hashCode());
+            result = prime * result + ((user == null) ? 0 : user.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            CacheKey other = (CacheKey)obj;
+            if (repoId == null) {
+                if (other.repoId != null)
+                    return false;
+            } else if (!repoId.equals(other.repoId))
+                return false;
+            if (user == null) {
+                if (other.user != null)
+                    return false;
+            } else if (!user.equals(other.user))
+                return false;
+            return true;
         }
     }
 
-    private static KeyFromValueAdapter< Repository.Id, WorkspaceManager > adapter = new WskpMgrAdapter();
+    private static class WskpMgrAdapter implements KeyFromValueAdapter< CacheKey, WorkspaceManager > {
 
-    private static KeyInValueHashMap< Repository.Id, WorkspaceManager > instances = new KeyInValueHashMap< Repository.Id, WorkspaceManager >(
-                                                                                                                                             adapter);
+        @Override
+        public CacheKey getKey( WorkspaceManager value ) {
+            Repository repository = value.getRepository();
+            String user = value.getOwner();
+
+            return new CacheKey(repository.getId(), user);
+        }
+    }
+
+    private static KeyFromValueAdapter< CacheKey, WorkspaceManager > adapter = new WskpMgrAdapter();
+
+    private static KeyInValueHashMap< CacheKey, WorkspaceManager > instances = 
+                                                                        new KeyInValueHashMap< CacheKey, WorkspaceManager >(adapter);
+
+    private final String owner;
 
     /**
      * @param repository
      *        the repository whose workspace manager is being requested (cannot be <code>null</code>)
+     * @param owner
+     *        the owner of this workspace manager (cannot be <code>null</code>)
+     *
      * @return the singleton instance for the given repository (never <code>null</code>)
      * @throws KException
      *         if there is an error obtaining the workspace manager
      */
-    public static WorkspaceManager getInstance( Repository repository ) throws KException {
+    public static WorkspaceManager getInstance( Repository repository, String owner ) throws KException {
         WorkspaceManager instance = instances.get(repository.getId());
 
         if ( instance == null ) {
             // We must create a transaction here so that it can be passed on to the constructor. Since the
             // node associated with the WorkspaceManager always exists we don't have to create it.
-            final UnitOfWork uow = repository.createTransaction( "createWorkspaceManager", false, null ); //$NON-NLS-1$
-            instance = new WorkspaceManager( uow, repository );
+            final UnitOfWork uow = repository.createTransaction(owner, "createWorkspaceManager", false, null ); //$NON-NLS-1$
+            instance = new WorkspaceManager(repository, uow);
             uow.commit();
 
             instances.add( instance );
         }
 
         return instance;
+    }
+
+    /**
+     * @param repository
+     *        the repository whose workspace manager is being requested (cannot be <code>null</code>)
+     * @param transaction
+     *        the transaction containing the user name of the owner of this workspace manager
+     *        (if <code>null</code> then this manager is owner by the system user and has the workspace root as its path)
+     *
+     * @return the singleton instance for the given repository (never <code>null</code>)
+     * @throws KException
+     *         if there is an error obtaining the workspace manager
+     */
+    public static WorkspaceManager getInstance( Repository repository, UnitOfWork transaction) throws KException {
+        String owner;
+        if (transaction == null)
+            owner = Repository.SYSTEM_USER;
+        else
+            owner = transaction.getUserName();
+
+        return getInstance(repository, owner);
+    }
+
+    /**
+     * @return the owner of this workspace manager
+     */
+    public String getOwner() {
+        return this.owner;
     }
 
     /**
@@ -184,15 +260,16 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
      *
      * @param repository remove instance with given repository
      */
-    public static void uncacheInstance(final Repository repository) {
+    public static void uncacheInstance(final Repository repository, final String owner) {
         if (repository == null)
             return;
 
-        instances.remove(repository.getId());
+        instances.remove(new CacheKey(repository.getId(), owner));
     }
 
-    private WorkspaceManager(UnitOfWork uow, Repository repository ) throws KException {
-        super( repository, RepositoryImpl.WORKSPACE_ROOT, 0 );
+    private WorkspaceManager(Repository repository, UnitOfWork uow ) throws KException {
+        super( repository, RepositoryImpl.komodoWorkspacePath(uow), 0 );
+        this.owner = uow.getUserName();
 
         repository.addObserver(new RepositoryObserver() {
 
@@ -465,7 +542,7 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
         ArgCheck.isNotEmpty( type, "type" ); //$NON-NLS-1$
 
         if ( StringUtils.isBlank( parentPath ) ) {
-            parentPath = RepositoryImpl.WORKSPACE_ROOT;
+            parentPath = RepositoryImpl.komodoWorkspacePath(transaction);
         }
 
         try {
@@ -518,7 +595,7 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
      */
     public String[] findByType( final UnitOfWork transaction,
                                 final String type) throws KException {
-        return findByType( transaction, type, RepositoryImpl.WORKSPACE_ROOT, null, false );
+        return findByType( transaction, type, RepositoryImpl.komodoWorkspacePath(transaction), null, false );
     }
 
     /**
@@ -536,7 +613,7 @@ public class WorkspaceManager extends ObjectImpl implements RelationalObject {
     public String[] findByType( final UnitOfWork transaction,
                                 final String type,
                                 boolean includeSubTypes) throws KException {
-        return findByType( transaction, type, RepositoryImpl.WORKSPACE_ROOT, null, includeSubTypes );
+        return findByType( transaction, type, RepositoryImpl.komodoWorkspacePath(transaction), null, includeSubTypes );
     }
 
     /**

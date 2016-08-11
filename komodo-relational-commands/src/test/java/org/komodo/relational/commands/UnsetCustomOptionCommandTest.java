@@ -33,7 +33,7 @@ public class UnsetCustomOptionCommandTest extends CustomOptionCommandTest {
 
     @Test
     public void testCustomOptionTable() throws Exception {
-        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo);
+        WorkspaceManager wkspMgr = WorkspaceManager.getInstance(_repo, getTransaction());
         setup("commandFiles","addCustomOptions.cmd");
         final String[] commands = {
             "unset-custom-option myCustomOption1",

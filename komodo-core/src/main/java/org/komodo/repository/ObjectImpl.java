@@ -23,7 +23,6 @@ package org.komodo.repository;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -68,17 +67,6 @@ import org.teiid.modeshape.sequencer.ddl.TeiidDdlLexicon;
 public class ObjectImpl implements KomodoObject, StringConstants {
 
     private static final KLog LOGGER = KLog.getLogger();
-
-    /**
-     * Reserved paths of the repository.
-     */
-    public static final Collection< String > RESERVED_PATHS = Arrays.asList( new String[] { RepositoryImpl.KOMODO_ROOT,
-                                                                                            RepositoryImpl.WORKSPACE_ROOT,
-                                                                                            RepositoryImpl.LIBRARY_ROOT,
-                                                                                            RepositoryImpl.ENV_ROOT,
-                                                                                            RepositoryImpl.SEARCHES_ROOT,
-                                                                                            RepositoryImpl.VALIDATION_ROOT,
-                                                                                            RepositoryImpl.SERVERS_ROOT } );
 
     protected static Descriptor[] getAllDescriptors( final UnitOfWork transaction,
                                                      final KomodoObject kobject ) throws KException {
@@ -214,7 +202,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
     private void internalSetProperty( final UnitOfWork transaction,
                                       final String name,
                                       final Object... values ) throws Exception {
-        if ( RESERVED_PATHS.contains( getAbsolutePath() ) ) {
+        if ( RepositoryImpl.isReservedPath(getAbsolutePath() ) ) {
             throw new KException( Messages.getString( Messages.Komodo.SET_PROPERTY_NOT_ALLOWED,
                                                       getAbsolutePath() ) );
         }
@@ -455,7 +443,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
                          Arrays.asList(descriptorNames));
         }
 
-        if ( RESERVED_PATHS.contains( getAbsolutePath() ) ) {
+        if ( RepositoryImpl.isReservedPath(getAbsolutePath() ) ) {
             throw new KException( Messages.getString( Messages.Komodo.ADD_DESCRIPTOR_NOT_ALLOWED,
                                                       getAbsolutePath() ) );
         }
@@ -838,7 +826,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( propName, "propName" ); //$NON-NLS-1$
 
-        if ( RESERVED_PATHS.contains( getAbsolutePath() ) ) {
+        if ( RepositoryImpl.isReservedPath(getAbsolutePath() ) ) {
             return null;
         }
 
@@ -970,7 +958,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty( name, "name" ); //$NON-NLS-1$
 
-        if ( RESERVED_PATHS.contains( getAbsolutePath() ) ) {
+        if ( RepositoryImpl.isReservedPath(getAbsolutePath() ) ) {
             return null;
         }
 
@@ -999,7 +987,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        if ( RESERVED_PATHS.contains( getAbsolutePath() ) ) {
+        if ( RepositoryImpl.isReservedPath(getAbsolutePath() ) ) {
             return PropertyDescriptor.NO_DESCRIPTORS;
         }
 
@@ -1022,7 +1010,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
 
-        if ( RESERVED_PATHS.contains( getAbsolutePath() ) ) {
+        if ( RepositoryImpl.isReservedPath(getAbsolutePath() ) ) {
             return StringConstants.EMPTY_ARRAY;
         }
 
@@ -1320,7 +1308,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotEmpty(name, "name"); //$NON-NLS-1$
 
-        if ( RESERVED_PATHS.contains( getAbsolutePath() ) ) {
+        if ( RepositoryImpl.isReservedPath(getAbsolutePath() ) ) {
             return false;
         }
 
@@ -1364,7 +1352,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
             LOGGER.debug( "objectimpl-remove: transaction = {0}, path = {1}", transaction.getName(), getAbsolutePath() ); //$NON-NLS-1$
         }
 
-        if ( RESERVED_PATHS.contains( getAbsolutePath() ) ) {
+        if ( RepositoryImpl.isReservedPath(getAbsolutePath() ) ) {
             throw new KException(Messages.getString(Messages.Komodo.REMOVE_NOT_ALLOWED, getAbsolutePath()));
         }
 
@@ -1402,7 +1390,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
                 if (node.hasNode(name)) {
                     final Node childBeingRemoved = node.getNode(name);
 
-                    if ( RESERVED_PATHS.contains( childBeingRemoved.getPath() ) ) {
+                    if ( RepositoryImpl.isReservedPath(childBeingRemoved.getPath() ) ) {
                         throw new KException( Messages.getString( Messages.Komodo.REMOVE_NOT_ALLOWED,
                                                                   childBeingRemoved.getPath() ) );
                     }
@@ -1436,7 +1424,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
                          Arrays.asList(descriptorNames));
         }
 
-        if ( RESERVED_PATHS.contains( getAbsolutePath() ) ) {
+        if ( RepositoryImpl.isReservedPath(getAbsolutePath() ) ) {
             throw new KException( Messages.getString( Messages.Komodo.REMOVE_DESCRIPTOR_NOT_ALLOWED,
                                                       getAbsolutePath() ) );
         }
@@ -1472,7 +1460,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
                           newName );
         }
 
-        if ( RESERVED_PATHS.contains( getAbsolutePath() ) ) {
+        if ( RepositoryImpl.isReservedPath(getAbsolutePath() ) ) {
             throw new KException(Messages.getString(Messages.Komodo.RENAME_NOT_ALLOWED, getAbsolutePath()));
         }
 
@@ -1533,7 +1521,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
                                  final String name,
                                  final Object[] propValues,
                                  final int propertyType ) throws Exception {
-        if ( RESERVED_PATHS.contains( getAbsolutePath() ) ) {
+        if ( RepositoryImpl.isReservedPath(getAbsolutePath() ) ) {
             throw new KException(Messages.getString(Messages.Komodo.SET_PROPERTY_NOT_ALLOWED, getAbsolutePath()));
         }
 
@@ -1563,7 +1551,7 @@ public class ObjectImpl implements KomodoObject, StringConstants {
             LOGGER.debug("setPrimaryType: transaction = {0}, typeName = {1}", transaction.getName(), typeName); //$NON-NLS-1$
         }
 
-        if ( RESERVED_PATHS.contains( getAbsolutePath() ) ) {
+        if ( RepositoryImpl.isReservedPath(getAbsolutePath() ) ) {
             throw new KException(Messages.getString(Messages.Komodo.SET_PRIMARY_TYPE_NOT_ALLOWED, getAbsolutePath()));
         }
 

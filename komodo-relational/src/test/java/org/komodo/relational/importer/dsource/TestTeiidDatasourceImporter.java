@@ -200,7 +200,7 @@ public class TestTeiidDatasourceImporter  extends AbstractImporterTest {
         commitHandleErrors(importMessages);
 
         // Retrieve data source after import
-        WorkspaceManager mgr = WorkspaceManager.getInstance(_repo);
+        WorkspaceManager mgr = WorkspaceManager.getInstance(_repo, getTransaction());
         Datasource[] datasources = mgr.findDatasources(getTransaction());
         assertEquals(1, datasources.length);
 
@@ -226,7 +226,7 @@ public class TestTeiidDatasourceImporter  extends AbstractImporterTest {
         testTdsImport_MySQLUSStates();
         commit();
 
-        WorkspaceManager mgr = WorkspaceManager.getInstance(_repo);
+        WorkspaceManager mgr = WorkspaceManager.getInstance(_repo, getTransaction());
         Datasource[] datasources = mgr.findDatasources(getTransaction());
         assertEquals(1, datasources.length);
 

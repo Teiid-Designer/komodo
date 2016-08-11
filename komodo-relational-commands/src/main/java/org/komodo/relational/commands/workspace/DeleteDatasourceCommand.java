@@ -59,12 +59,12 @@ public final class DeleteDatasourceCommand extends WorkspaceShellCommand {
         try {
             final String sourceName = requiredArgument( 0, I18n.bind( WorkspaceCommandsI18n.missingDatasourceName ) );
 
-            final KomodoObject datasourceToDelete = getWorkspaceManager().getChild(getTransaction(), sourceName, KomodoLexicon.DataSource.NODE_TYPE);
+            final KomodoObject datasourceToDelete = getWorkspaceManager(getTransaction()).getChild(getTransaction(), sourceName, KomodoLexicon.DataSource.NODE_TYPE);
 
             if(datasourceToDelete==null) {
                 return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.datasourceNotFound, sourceName ), null );
             } else {
-                getWorkspaceManager().delete(getTransaction(), datasourceToDelete);
+                getWorkspaceManager(getTransaction()).delete(getTransaction(), datasourceToDelete);
                 return new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.datasourceDeleted, sourceName ) );
             }
         } catch ( final Exception e ) {
@@ -123,7 +123,7 @@ public final class DeleteDatasourceCommand extends WorkspaceShellCommand {
         final Arguments args = getArguments();
 
         final UnitOfWork uow = getTransaction();
-        final WorkspaceManager mgr = getWorkspaceManager();
+        final WorkspaceManager mgr = getWorkspaceManager(getTransaction());
         final KomodoObject[] datasources = mgr.findDatasources(getTransaction());
         List<String> existingDsNames = new ArrayList<String>(datasources.length);
         for(KomodoObject datasource : datasources) {

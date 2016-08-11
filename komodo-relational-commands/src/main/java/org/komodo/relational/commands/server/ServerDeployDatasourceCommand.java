@@ -76,7 +76,7 @@ public final class ServerDeployDatasourceCommand extends ServerShellCommand {
             }
 
             // Make sure datasource object exists in repo
-            if(!getWorkspaceManager().hasChild(getTransaction(), sourceName, KomodoLexicon.DataSource.NODE_TYPE)) {
+            if(!getWorkspaceManager(getTransaction()).hasChild(getTransaction(), sourceName, KomodoLexicon.DataSource.NODE_TYPE)) {
                 return new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.workspaceDatasourceNotFound, sourceName ), null );
             }
 
@@ -87,7 +87,7 @@ public final class ServerDeployDatasourceCommand extends ServerShellCommand {
             }
 
             final TeiidInstance teiidInstance = getWorkspaceTeiidInstance();
-            final KomodoObject datasourceObj = getWorkspaceManager().getChild(getTransaction(), sourceName, KomodoLexicon.DataSource.NODE_TYPE);
+            final KomodoObject datasourceObj = getWorkspaceManager(getTransaction()).getChild(getTransaction(), sourceName, KomodoLexicon.DataSource.NODE_TYPE);
             final Datasource sourceToDeploy = Datasource.RESOLVER.resolve(getTransaction(), datasourceObj);
 
             // Make sure that the sourceType is OK for the connected server.
@@ -204,7 +204,7 @@ public final class ServerDeployDatasourceCommand extends ServerShellCommand {
                               final List< CharSequence > candidates ) throws Exception {
         final Arguments args = getArguments();
 
-        final KomodoObject[] datasources = getWorkspaceManager().findDatasources(getTransaction());
+        final KomodoObject[] datasources = getWorkspaceManager(getTransaction()).findDatasources(getTransaction());
         List<String> existingDatasourceNames = new ArrayList<String>(datasources.length);
         for(KomodoObject datasource : datasources) {
             existingDatasourceNames.add(datasource.getName(getTransaction()));

@@ -45,7 +45,7 @@ public final class ExportCommandTest extends AbstractCommandTest {
 
     private KomodoObject addSchemaExample() throws Exception {
         KomodoObject kWorkspace = _repo.komodoWorkspace(getTransaction());
-        WorkspaceManager manager = WorkspaceManager.getInstance(_repo);
+        WorkspaceManager manager = WorkspaceManager.getInstance(_repo, getTransaction());
         Schema schema = manager.createSchema(getTransaction(), kWorkspace, "TestTweetSchema");  //$NON-NLS-1$
         schema.setRendition(getTransaction(), TWITTER_VIEW_MODEL_DDL);
 

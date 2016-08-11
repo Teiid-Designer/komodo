@@ -110,7 +110,7 @@ public final class RenameCommandTest extends AbstractCommandTest {
     @Test( expected = AssertionError.class )
     public void shouldNotRenameWorkspaceRoot() throws Exception {
         final String reservedPath = this.wsStatus.getCurrentContextLabelProvider()
-                                                 .getDisplayPath( getTransaction(), RepositoryImpl.WORKSPACE_ROOT, null );
+                                                 .getDisplayPath( getTransaction(), RepositoryImpl.komodoWorkspacePath(getTransaction()), null );
         final String[] commands = { ( "cd " + reservedPath ),
                                     "rename blah" };
         execute( commands );

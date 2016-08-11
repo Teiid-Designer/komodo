@@ -107,7 +107,7 @@ public final class UploadDatasourceCommand extends WorkspaceShellCommand {
 
             // If any data sources already exist, overwrite must be specified.
             for( String dsName : dsNames ) {
-                boolean hasSource = getWorkspaceManager().hasChild(getTransaction(), dsName, KomodoLexicon.DataSource.NODE_TYPE);
+                boolean hasSource = getWorkspaceManager(getTransaction()).hasChild(getTransaction(), dsName, KomodoLexicon.DataSource.NODE_TYPE);
                 if ( hasSource && !overwrite ) {
                     return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.datasourceOverwriteDisabled, fileName, dsName ), null );
                 }

@@ -39,7 +39,6 @@ import org.komodo.spi.KException;
 import org.komodo.spi.constants.ExportConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
-import org.komodo.ui.DefaultLabelProvider;
 import org.komodo.utils.StringUtils;
 import org.komodo.utils.i18n.I18n;
 
@@ -98,7 +97,7 @@ public final class ExportDatasourceCommand extends RelationalShellCommand {
 
             // Determine if the Datasource exists
             if ( workspaceContext
-                 && !getWorkspaceManager().hasChild( getTransaction(), datasourceName, KomodoLexicon.DataSource.NODE_TYPE ) ) {
+                 && !getWorkspaceManager(getTransaction()).hasChild( getTransaction(), datasourceName, KomodoLexicon.DataSource.NODE_TYPE ) ) {
                 return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.datasourceNotFound, datasourceName ), null );
             }
 
@@ -153,7 +152,7 @@ public final class ExportDatasourceCommand extends RelationalShellCommand {
         KomodoObject kobject = null;
 
         if ( workspaceContext ) {
-            kobject = getWorkspaceManager().getChild( getTransaction(), datasourceName, KomodoLexicon.DataSource.NODE_TYPE );
+            kobject = getWorkspaceManager(getTransaction()).getChild( getTransaction(), datasourceName, KomodoLexicon.DataSource.NODE_TYPE );
         } else {
             kobject = getContext();
         }
@@ -182,7 +181,7 @@ public final class ExportDatasourceCommand extends RelationalShellCommand {
 
     private boolean isWorkspaceContext() {
         final String path = getContext().getAbsolutePath();
-        return ( DefaultLabelProvider.WORKSPACE_PATH.equals( path ) || DefaultLabelProvider.WORKSPACE_SLASH_PATH.equals( path ) );
+        return getWorkspaceStatus().getLabelProvider().isWorkspacePath(path);
     }
 
     /**
@@ -227,7 +226,7 @@ public final class ExportDatasourceCommand extends RelationalShellCommand {
 
         if ( isWorkspaceContext() ) {
             // arg 0 = vdb name, arg 1 = output file name, arg 2 = overwrite
-            final KomodoObject[] datasources = getWorkspaceManager().findDatasources( getTransaction() );
+            final KomodoObject[] datasources = getWorkspaceManager(getTransaction()).findDatasources( getTransaction() );
 
             if ( args.isEmpty() && ( datasources.length != 0 ) ) {
                 for ( final KomodoObject datasource : datasources ) {

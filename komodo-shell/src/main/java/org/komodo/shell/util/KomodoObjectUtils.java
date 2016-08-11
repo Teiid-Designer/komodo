@@ -24,7 +24,7 @@ package org.komodo.shell.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
+import org.komodo.repository.RepositoryImpl;
 import org.komodo.repository.RepositoryTools;
 import org.komodo.shell.ShellI18n;
 import org.komodo.shell.api.WorkspaceStatus;
@@ -34,6 +34,7 @@ import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.PropertyDescriptor;
 import org.komodo.spi.repository.PropertyDescriptor.Type;
+import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.utils.TextFormat;
 import org.komodo.ui.DefaultLabelProvider;
 import org.komodo.utils.ArgCheck;
@@ -290,31 +291,17 @@ public class KomodoObjectUtils implements StringConstants {
 
     /**
      * Determine if the supplied KomodoObject is one of the root children (tko:komodo/tko:workspace, tko:komodo/tko:library, tko:komodo/tko:environment)
+     * @param transaction 
      *
      * @param kObject
      *        the KomodoObject (cannot be <code>null</code>)
      * @return 'true' if root child, 'false' if not
      */
-    public static boolean isRootChild( final KomodoObject kObject ) {
+    public static boolean isRootChild( UnitOfWork transaction, final KomodoObject kObject ) {
         ArgCheck.isNotNull( kObject, "kobject" ); //$NON-NLS-1$
 
         final String contextPath = kObject.getAbsolutePath();
-
-        // /tko:komodo/workspace
-        if ( DefaultLabelProvider.WORKSPACE_PATH.equals( contextPath ) || DefaultLabelProvider.WORKSPACE_SLASH_PATH.equals( contextPath ) ) {
-            return true;
-        }
-
-        // /tko:komodo/library
-        if ( DefaultLabelProvider.LIB_PATH.equals( contextPath ) || DefaultLabelProvider.LIB_SLASH_PATH.equals( contextPath ) ) {
-            return true;
-        }
-
-        // /tko:komodo/environment
-        if ( DefaultLabelProvider.ENV_PATH.equals( contextPath ) || DefaultLabelProvider.ENV_SLASH_PATH.equals( contextPath ) ) {
-            return true;
-        }
-        return false;
+        return RepositoryImpl.isReservedPath(contextPath);
     }
 
     /**

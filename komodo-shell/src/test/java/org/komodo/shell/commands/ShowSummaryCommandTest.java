@@ -74,9 +74,9 @@ public class ShowSummaryCommandTest extends AbstractCommandTest {
         assertCommandResultOk( result );
 
         String writerOutput = getCommandOutput();
-        assertThat( writerOutput, writerOutput.contains( DefaultLabelProvider.WORKSPACE_DISPLAY_NAME
+        assertThat( writerOutput, writerOutput.contains( DefaultLabelProvider.workspaceDisplayName(getTransaction())
                                                          + " '"
-                                                         + DefaultLabelProvider.WORKSPACE_DISPLAY_PATH
+                                                         + DefaultLabelProvider.workspaceDisplayPath(getTransaction())
                                                          + '\'' ),
                     is( true ) );
     }

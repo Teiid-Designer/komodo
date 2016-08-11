@@ -55,9 +55,14 @@
 
 /*
  * The Komodo workspace keeps track of the Teiid servers, Komodo repositories, Teiid 
- * data sources, dataservices, folders and other resources created and being worked on by the user.
+ * data sources, dataservices, folders and other resources created and being worked by users.
  */
 [tko:workspace] > nt:unstructured
+
+/*
+ * Home directories distinguish the assets of individual users.
+ */
+[tko:home] > nt:unstructured
 
 /*
  * The repository grouping node used by the workspace. Child nodes are Komodo local or 

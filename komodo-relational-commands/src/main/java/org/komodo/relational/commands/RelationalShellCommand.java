@@ -30,6 +30,7 @@ import org.komodo.shell.api.WorkspaceStatus;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository;
+import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.i18n.I18n;
 
 /**
@@ -74,8 +75,8 @@ public abstract class RelationalShellCommand extends BuiltInShellCommand {
         return getWorkspaceStatus().getCurrentContext().getRepository();
     }
 
-    protected WorkspaceManager getWorkspaceManager() throws KException {
-        return WorkspaceManager.getInstance( getRepository() );
+    protected WorkspaceManager getWorkspaceManager(UnitOfWork transaction) throws KException {
+        return WorkspaceManager.getInstance( getRepository(), transaction );
     }
 
 }

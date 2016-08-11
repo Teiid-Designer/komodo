@@ -24,15 +24,19 @@ package org.komodo.rest;
 import static org.komodo.rest.Messages.Error.COMMIT_TIMEOUT;
 import static org.komodo.rest.Messages.Error.RESOURCE_NOT_FOUND;
 import static org.komodo.rest.Messages.General.GET_OPERATION_NAME;
+import static org.komodo.rest.relational.RelationalMessages.Error.SECURITY_FAILURE_ERROR;
 import java.io.StringWriter;
+import java.security.Principal;
 import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.Variant;
 import javax.ws.rs.core.Variant.VariantListBuilder;
 import javax.xml.bind.JAXBContext;
@@ -112,11 +116,37 @@ public abstract class KomodoService implements V1Constants {
         }
     }
 
+    protected class SecurityPrincipal {
+
+        private final String userName;
+
+        private final Response errorResponse;
+
+        public SecurityPrincipal(String userName, Response errorResponse) {
+            this.userName = userName;
+            this.errorResponse = errorResponse;
+        }
+
+        public String getUserName() {
+            return userName;
+        }
+
+        public boolean hasErrorResponse() {
+            return errorResponse != null;
+        }
+
+        public Response getErrorResponse() {
+            return errorResponse;
+        }
+    }
+
+    
     protected final Repository repo;
 
-    protected WorkspaceManager wsMgr;
-
     protected RestEntityFactory entityFactory = new RestEntityFactory();
+
+    @Context
+    protected SecurityContext securityContext;
 
     /**
      * Constructs a Komodo service.
@@ -126,12 +156,6 @@ public abstract class KomodoService implements V1Constants {
      */
     protected KomodoService( final KEngine engine ) {
         this.repo = engine.getDefaultRepository();
-
-        try {
-            this.wsMgr = WorkspaceManager.getInstance(this.repo);
-        } catch (final Exception e) {
-            throw new WebApplicationException(new Exception(Messages.getString(Messages.Error.KOMODO_ENGINE_WORKSPACE_MGR_ERROR)), Status.INTERNAL_SERVER_ERROR);
-        }
     }
 
     /**
@@ -158,6 +182,27 @@ public abstract class KomodoService implements V1Constants {
         return value;
     }
 
+    protected SecurityPrincipal checkSecurityContext(HttpHeaders headers) {
+        try {
+            if (securityContext == null)
+                throw new Exception("No security context available");
+
+            if (!securityContext.isSecure())
+                throw new Exception("Access to REST service should ONLY be via a secure channel");
+
+            Principal userPrincipal = securityContext.getUserPrincipal();
+            if (userPrincipal == null)
+                throw new Exception("No user associated with request");
+
+            return new SecurityPrincipal(userPrincipal.getName(), null);
+        } catch (Exception ex) {
+            return new SecurityPrincipal(null, 
+                                         createErrorResponse(Status.UNAUTHORIZED,
+                                                                                 headers.getAcceptableMediaTypes(),
+                                                                                 ex, SECURITY_FAILURE_ERROR));
+        }        
+    }
+
     /**
      * @param content
      * @return a base64 encoded version of the given content
@@ -178,6 +223,10 @@ public abstract class KomodoService implements V1Constants {
             return null;
 
         return Base64.getDecoder().decode(content);
+    }
+
+    protected WorkspaceManager getWorkspaceManager(UnitOfWork transaction) throws KException {
+        return WorkspaceManager.getInstance(repo, transaction);
     }
 
     protected Object createErrorResponseEntity(List<MediaType> acceptableMediaTypes, String errorMessage) {
@@ -211,7 +260,7 @@ public abstract class KomodoService implements V1Constants {
         return responseEntity;
     }
 
-    protected Response createErrorResponse(List<MediaType> mediaTypes, Throwable ex,
+    protected Response createErrorResponse(Status returnCode, List<MediaType> mediaTypes, Throwable ex,
                                                                        RelationalMessages.Error errorType, Object... errorMsgInputs) {
         String errorMsg = ex.getLocalizedMessage() != null ? ex.getLocalizedMessage() : ex.getClass().getSimpleName();
 
@@ -228,7 +277,12 @@ public abstract class KomodoService implements V1Constants {
             resultMsg = RelationalMessages.getString(errorType, errorMsgInputs, buf.toString());
 
         Object responseEntity = createErrorResponseEntity(mediaTypes, resultMsg);
-        return Response.status(Status.FORBIDDEN).entity(responseEntity).build();
+        return Response.status(returnCode).entity(responseEntity).build();
+    }
+
+    protected Response createErrorResponse(List<MediaType> mediaTypes, Throwable ex,
+                                                                       RelationalMessages.Error errorType, Object... errorMsgInputs) {
+        return createErrorResponse(Status.FORBIDDEN, mediaTypes, ex, errorType, errorMsgInputs);
     }
 
     protected ResponseBuilder notAcceptableMediaTypesBuilder() {
@@ -378,6 +432,8 @@ public abstract class KomodoService implements V1Constants {
     }
 
     /**
+     * @param user
+     *        the user initiating the transaction
      * @param name
      *        the name of the transaction (cannot be empty)
      * @param rollbackOnly
@@ -387,16 +443,18 @@ public abstract class KomodoService implements V1Constants {
      * @throws KException
      *         if there is an error creating the transaction
      */
-    protected UnitOfWork createTransaction( final String name,
+    protected UnitOfWork createTransaction(final SecurityPrincipal user, final String name,
                                             final boolean rollbackOnly, final UnitOfWorkListener callback) throws KException {
-        final UnitOfWork result = this.repo.createTransaction( ( getClass().getSimpleName() + COLON + name + COLON
-                                                                 + System.currentTimeMillis() ),
+        final UnitOfWork result = this.repo.createTransaction( user.getUserName(), 
+                                                               (getClass().getSimpleName() + COLON + name + COLON + System.currentTimeMillis()),
                                                                rollbackOnly, callback );
         LOGGER.debug( "createTransaction:created '{0}', rollbackOnly = '{1}'", result.getName(), result.isRollbackOnly() ); //$NON-NLS-1$
         return result;
     }
 
     /**
+     * @param user
+     *        the user initiating the transaction
      * @param name
      *        the name of the transaction (cannot be empty)
      * @param rollbackOnly
@@ -405,47 +463,47 @@ public abstract class KomodoService implements V1Constants {
      * @throws KException
      *         if there is an error creating the transaction
      */
-    protected UnitOfWork createTransaction( final String name,
+    protected UnitOfWork createTransaction(final SecurityPrincipal user, final String name,
                                             final boolean rollbackOnly ) throws KException {
         final SynchronousCallback callback = new SynchronousCallback();
-        final UnitOfWork result = this.repo.createTransaction( ( getClass().getSimpleName() + COLON + name + COLON
-                                                                 + System.currentTimeMillis() ),
+        final UnitOfWork result = this.repo.createTransaction(user.getUserName(), 
+                                                               (getClass().getSimpleName() + COLON + name + COLON + System.currentTimeMillis()),
                                                                rollbackOnly, callback );
         LOGGER.debug( "createTransaction:created '{0}', rollbackOnly = '{1}'", result.getName(), result.isRollbackOnly() ); //$NON-NLS-1$
         return result;
     }
 
     protected Vdb findVdb(UnitOfWork uow, String vdbName) throws KException {
-        if (! this.wsMgr.hasChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE ) ) {
+        if (! getWorkspaceManager(uow).hasChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE ) ) {
             return null;
         }
 
-        final KomodoObject kobject = this.wsMgr.getChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
-        final Vdb vdb = this.wsMgr.resolve( uow, kobject, Vdb.class );
+        final KomodoObject kobject = getWorkspaceManager(uow).getChild( uow, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE );
+        final Vdb vdb = getWorkspaceManager(uow).resolve( uow, kobject, Vdb.class );
 
         LOGGER.debug( "VDB '{0}' was found", vdbName ); //$NON-NLS-1$
         return vdb;
     }
 
     protected Dataservice findDataservice(UnitOfWork uow, String dataserviceName) throws KException {
-        if (! this.wsMgr.hasChild( uow, dataserviceName, KomodoLexicon.DataService.NODE_TYPE ) ) {
+        if (! getWorkspaceManager(uow).hasChild( uow, dataserviceName, KomodoLexicon.DataService.NODE_TYPE ) ) {
             return null;
         }
 
-        final KomodoObject kobject = this.wsMgr.getChild( uow, dataserviceName, KomodoLexicon.DataService.NODE_TYPE );
-        final Dataservice dataservice = this.wsMgr.resolve( uow, kobject, Dataservice.class );
+        final KomodoObject kobject = getWorkspaceManager(uow).getChild( uow, dataserviceName, KomodoLexicon.DataService.NODE_TYPE );
+        final Dataservice dataservice = getWorkspaceManager(uow).resolve( uow, kobject, Dataservice.class );
 
         LOGGER.debug( "Dataservice '{0}' was found", dataserviceName ); //$NON-NLS-1$
         return dataservice;
     }
 
     protected Datasource findDatasource(UnitOfWork uow, String datasourceName) throws KException {
-        if (! this.wsMgr.hasChild( uow, datasourceName, KomodoLexicon.DataSource.NODE_TYPE ) ) {
+        if (! getWorkspaceManager(uow).hasChild( uow, datasourceName, KomodoLexicon.DataSource.NODE_TYPE ) ) {
             return null;
         }
 
-        final KomodoObject kobject = this.wsMgr.getChild( uow, datasourceName, KomodoLexicon.DataSource.NODE_TYPE );
-        final Datasource datasource = this.wsMgr.resolve( uow, kobject, Datasource.class );
+        final KomodoObject kobject = getWorkspaceManager(uow).getChild( uow, datasourceName, KomodoLexicon.DataSource.NODE_TYPE );
+        final Datasource datasource = getWorkspaceManager(uow).resolve( uow, kobject, Datasource.class );
 
         LOGGER.debug( "Datasource '{0}' was found", datasourceName ); //$NON-NLS-1$
         return datasource;

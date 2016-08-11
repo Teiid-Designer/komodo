@@ -218,7 +218,7 @@ public final class ImportCommand extends ModelShellCommand {
             result = createCommand.execute();
 
             if(result.isOk()) {
-                final KomodoObject[] schemas = getWorkspaceManager().findSchemas(getTransaction());
+                final KomodoObject[] schemas = getWorkspaceManager(getTransaction()).findSchemas(getTransaction());
                 for(KomodoObject schema : schemas) {
                     if(schema.getName(getTransaction()).equals(schemaName)) {
                         resultSchema = schema;

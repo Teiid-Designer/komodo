@@ -76,7 +76,7 @@ public interface Teiid extends RelationalObject, TeiidArchetype {
                              final KomodoObject parent,
                              final String id,
                              final RelationalProperties properties ) throws KException {
-            final WorkspaceManager mgr = WorkspaceManager.getInstance( repository );
+            final WorkspaceManager mgr = WorkspaceManager.getInstance( repository, transaction );
             return mgr.createTeiid( transaction, parent, id );
         }
 

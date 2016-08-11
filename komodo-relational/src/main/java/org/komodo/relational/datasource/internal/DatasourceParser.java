@@ -393,7 +393,7 @@ public class DatasourceParser {
 
         private boolean deleteDatasource(KomodoObject source) {
             try {
-                WorkspaceManager.getInstance( source.getRepository() ).delete(uow, source);
+                WorkspaceManager.getInstance( source.getRepository(), uow ).delete(uow, source);
             } catch (KException ex) {
                 error(new SAXParseException(ex.getMessage(), null));
                 LOGGER.error("DatasourceParser - error deleting existing Datasource : ", ex); //$NON-NLS-1$

@@ -436,7 +436,7 @@ public final class DataserviceImplTest extends RelationalModelTest {
         assertTrue(theDataService.hasChild(getTransaction(), TestUtilities.PORTFOLIO_VDB_NAME));
         assertTrue(theDataService.hasChild(getTransaction(), TestUtilities.TWEET_EXAMPLE_VDB_NAME));
 
-        WorkspaceManager mgr = WorkspaceManager.getInstance(_repo);
+        WorkspaceManager mgr = WorkspaceManager.getInstance(_repo, getTransaction());
         Dataservice ds = mgr.resolve(getTransaction(), theDataService, Dataservice.class);
         assertNotNull(ds);
 

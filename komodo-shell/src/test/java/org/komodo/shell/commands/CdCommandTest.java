@@ -16,9 +16,7 @@
 package org.komodo.shell.commands;
 
 import static org.junit.Assert.assertEquals;
-
 import java.util.ArrayList;
-
 import org.junit.Test;
 import org.komodo.repository.RepositoryImpl;
 import org.komodo.shell.AbstractCommandTest;
@@ -41,7 +39,7 @@ public class CdCommandTest extends AbstractCommandTest {
         final String[] commands = { "cd /workspace" };
         final CommandResult result = execute( commands );
         assertCommandResultOk( result );
-        assertContextIs( RepositoryImpl.WORKSPACE_ROOT );
+        assertContextIs(RepositoryImpl.komodoWorkspacePath(null));
     }
 
     @Test
@@ -53,7 +51,7 @@ public class CdCommandTest extends AbstractCommandTest {
 
     	// Check WorkspaceContext
         String contextPath = wsStatus.getCurrentContextDisplayPath(null);
-        assertEquals("/", contextPath);
+        assertEquals("/workspace", contextPath);
     }
 
     @Test

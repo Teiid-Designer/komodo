@@ -104,7 +104,7 @@ public class ServerManager extends ObjectImpl implements RelationalObject {
         if ( instance == null ) {
             // We must create a transaction here so that it can be passed on to the constructor. Since the
             // node associated with the ServerManager always exists we don't have to create it.
-            final UnitOfWork uow = repository.createTransaction( "createServerManager", false, null ); //$NON-NLS-1$
+            final UnitOfWork uow = repository.createTransaction(Repository.SYSTEM_USER, "createServerManager", false, null ); //$NON-NLS-1$
             instance = new ServerManager( uow, repository );
             uow.commit();
 

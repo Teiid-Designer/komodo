@@ -109,7 +109,7 @@ public interface Datasource extends Exportable, RelationalObject {
                              final KomodoObject parent,
                              final String id,
                              final RelationalProperties properties ) throws KException {
-            final WorkspaceManager mgr = WorkspaceManager.getInstance( repository );
+            final WorkspaceManager mgr = WorkspaceManager.getInstance( repository, transaction );
             return mgr.createDatasource( transaction, parent, id );
         }
     

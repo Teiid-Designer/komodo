@@ -653,7 +653,7 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
 
         ObjectSearcher os = new ObjectSearcher(_repo);
         os.addFromType(JcrConstants.NT_UNSTRUCTURED, "nt");
-        os.addWherePathClause(null, "nt", RepositoryImpl.WORKSPACE_ROOT);
+        os.addWherePathClause(null, "nt", RepositoryImpl.komodoWorkspacePath(getTransaction()));
 
         String expected = "SELECT [jcr:path], [mode:localName] FROM [nt:unstructured] AS nt " +
                                      "WHERE PATH(nt) LIKE '" + workspace.getAbsolutePath() + "'";
@@ -673,12 +673,13 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
         searchObjects = os.searchObjects(getTransaction());
 
         // /tko:komodo/tko:workspace
+        // /tko:komodo/tko:workspace/$USER
         // /tko:komodo/tko:library
         // /tko:komodo/tko:environment
         // /tko:komodo/tko:environment/tko:servers
         // /tko:komodo/tko:environment/tko:servers/DefaultServer
         // /tko:komodo/tko:environment/tko:validation
-        assertEquals(6, searchObjects.size());
+        assertEquals(7, searchObjects.size());
     }
 
     @Test
@@ -693,7 +694,7 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
 
         String alias = JcrNtLexicon.Namespace.PREFIX;
         String fromTypeType = JcrConstants.NT_UNSTRUCTURED;
-        String wherePath = RepositoryImpl.WORKSPACE_ROOT;
+        String wherePath = RepositoryImpl.komodoWorkspacePath(getTransaction());
 
         ObjectSearcher os = new ObjectSearcher(_repo);
         os.addFromType(fromTypeType, alias);
@@ -744,7 +745,7 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
 
         String alias = JcrNtLexicon.Namespace.PREFIX;
         String fromTypeType = JcrConstants.NT_UNSTRUCTURED;
-        String wherePath = RepositoryImpl.WORKSPACE_ROOT;
+        String wherePath = RepositoryImpl.komodoWorkspacePath(getTransaction());
 
         ObjectSearcher os = new ObjectSearcher(_repo);
         os.addFromType(fromTypeType, alias);
@@ -814,7 +815,7 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
 
         String[] aliases = {JcrNtLexicon.Namespace.PREFIX, "ms"};
         String[] fromTypeTypes = {JcrConstants.NT_UNSTRUCTURED, KomodoLexicon.VdbModelSource.NODE_TYPE};
-        String wherePath = RepositoryImpl.WORKSPACE_ROOT;
+        String wherePath = RepositoryImpl.komodoWorkspacePath(getTransaction());
 
         ObjectSearcher os = new ObjectSearcher(_repo);
         os.addFromType(fromTypeTypes[0], aliases[0]);
@@ -872,7 +873,7 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
 
         String alias = JcrNtLexicon.Namespace.PREFIX;
         String fromTypeType = JcrConstants.NT_UNSTRUCTURED;
-        String wherePath = RepositoryImpl.WORKSPACE_ROOT;
+        String wherePath = RepositoryImpl.komodoWorkspacePath(getTransaction());
         String whereProperty = KomodoLexicon.VdbModelSource.JNDI_NAME;
         ComparisonOperator compareOperator = ComparisonOperator.EQUALS;
         String whereValue = "oracle";
@@ -943,7 +944,7 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
 
         String alias = JcrNtLexicon.Namespace.PREFIX;
         String fromTypeType = JcrConstants.NT_UNSTRUCTURED;
-        String wherePath = RepositoryImpl.WORKSPACE_ROOT;
+        String wherePath = RepositoryImpl.komodoWorkspacePath(getTransaction());
         String whereProperty = KomodoLexicon.VdbModelSource.JNDI_NAME;
         ComparisonOperator compareOperator = ComparisonOperator.EQUALS;
         String whereValue = "oracle";

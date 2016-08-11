@@ -76,7 +76,7 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
     @Test
     public void shouldImportVdb() throws Exception {
         Repository repository = getRestApp().getDefaultRepository();
-        UnitOfWork uow = repository.createTransaction(
+        UnitOfWork uow = repository.createTransaction(USER_NAME,
                                                       getClass().getSimpleName() + COLON + "importVdb" + COLON + System.currentTimeMillis(),
                                                       false, null);
 
@@ -150,7 +150,7 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
 
         KomodoStorageAttributes storageAttr = new KomodoStorageAttributes();
         storageAttr.setStorageType("file");
-        storageAttr.setArtifactPath("/tko:komodo/tko:workspace/myVDB");
+        storageAttr.setArtifactPath("/tko:komodo/tko:workspace/" + USER_NAME + "/myVDB");
 
         String tmpDirPath = System.getProperty("java.io.tmpdir");
         storageAttr.setParameter("files-home-path-property", tmpDirPath);
@@ -196,7 +196,7 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
     @Test
     public void shouldImportDataservice() throws Exception {
         Repository repository = getRestApp().getDefaultRepository();
-        UnitOfWork uow = repository.createTransaction(
+        UnitOfWork uow = repository.createTransaction(USER_NAME,
                                                       getClass().getSimpleName() + COLON + "importDataservice" + COLON + System.currentTimeMillis(),
                                                       false, null);
 
@@ -239,7 +239,7 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
         KomodoObject dataservice = workspace.getChild(uow, dsName);
         assertTrue(dataservice.hasChild(uow, TestUtilities.PORTFOLIO_VDB_NAME));
 
-        WorkspaceManager mgr = WorkspaceManager.getInstance(getRestApp().getDefaultRepository());
+        WorkspaceManager mgr = WorkspaceManager.getInstance(getRestApp().getDefaultRepository(), uow);
         Dataservice ds = mgr.resolve(uow, dataservice, Dataservice.class);
         assertNotNull(ds);
 
@@ -252,7 +252,7 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
         loadVdbs();
         String dsName = "myDataService";
 
-        getRestApp().createDataservice(dsName, true);
+        getRestApp().createDataservice(dsName, true, USER_NAME);
 
         URI uri = UriBuilder.fromUri(_uriBuilder.baseUri())
                                             .path(V1Constants.IMPORT_EXPORT_SEGMENT)
@@ -260,7 +260,7 @@ public class KomodoImportExportServiceTest extends AbstractKomodoServiceTest {
 
         KomodoStorageAttributes storageAttr = new KomodoStorageAttributes();
         storageAttr.setStorageType("file");
-        storageAttr.setArtifactPath("/tko:komodo/tko:workspace/" + dsName);
+        storageAttr.setArtifactPath("/tko:komodo/tko:workspace/" + USER_NAME + FORWARD_SLASH + dsName);
 
         String tmpDirPath = System.getProperty("java.io.tmpdir");
         storageAttr.setParameter("files-home-path-property", tmpDirPath);

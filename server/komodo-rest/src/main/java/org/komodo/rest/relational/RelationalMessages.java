@@ -108,6 +108,11 @@ public final class RelationalMessages {
     public enum Error {
 
         /**
+         * An error indicating a failure in authentication or authorization of the REST service
+         */
+        SECURITY_FAILURE_ERROR,
+
+        /**
          * An error indicating a JSON document representing the Dataservices in the workspace could not be retrieved.
          */
         DATASERVICE_SERVICE_GET_DATASERVICES_ERROR,

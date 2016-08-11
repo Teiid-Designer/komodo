@@ -76,7 +76,7 @@ public interface Folder extends RelationalObject {
                               final KomodoObject parent,
                               final String id,
                               final RelationalProperties properties ) throws KException {
-            final WorkspaceManager mgr = WorkspaceManager.getInstance( repository );
+            final WorkspaceManager mgr = WorkspaceManager.getInstance( repository, transaction );
             return mgr.createFolder( transaction, parent, id );
         }
     

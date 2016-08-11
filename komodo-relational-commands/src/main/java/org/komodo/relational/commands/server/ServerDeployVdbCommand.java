@@ -86,12 +86,12 @@ public final class ServerDeployVdbCommand extends ServerShellCommand {
             }
 
             // Return if VDB object not found
-            if(!getWorkspaceManager().hasChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE)) {
+            if(!getWorkspaceManager(getTransaction()).hasChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE)) {
                 return new CommandResultImpl( false, I18n.bind( ServerCommandsI18n.workspaceVdbNotFound, vdbName ), null );
             }
 
             // Find the VDB to deploy
-            final KomodoObject vdbObj = getWorkspaceManager().getChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+            final KomodoObject vdbObj = getWorkspaceManager(getTransaction()).getChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
             final Vdb vdbToDeploy = Vdb.RESOLVER.resolve(getTransaction(), vdbObj);
 
             // Validates that a server is connected
@@ -260,7 +260,7 @@ public final class ServerDeployVdbCommand extends ServerShellCommand {
         final Arguments args = getArguments();
 
         final UnitOfWork uow = getTransaction();
-        final WorkspaceManager mgr = getWorkspaceManager();
+        final WorkspaceManager mgr = getWorkspaceManager(getTransaction());
         final KomodoObject[] vdbs = mgr.findVdbs(uow);
         List<String> existingVdbNames = new ArrayList<String>(vdbs.length);
         for(KomodoObject vdb : vdbs) {

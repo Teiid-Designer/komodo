@@ -255,24 +255,25 @@ public class LocalRepository extends RepositoryImpl {
      *      org.komodo.spi.repository.Repository.UnitOfWorkListener)
      */
     @Override
-    public UnitOfWork createTransaction( final String name,
+    public UnitOfWork createTransaction(final String userName, final String name,
                                          final boolean rollbackOnly,
                                          final UnitOfWorkListener callback ) throws KException {
         ArgCheck.isNotEmpty(name, "name"); //$NON-NLS-1$
         LOGGER.debug("creating transaction {0} with rollbackOnly = {1}", name, rollbackOnly); //$NON-NLS-1$
         final Session session = createSession();
-        final UnitOfWork uow = new LocalRepositoryTransaction(name, session, rollbackOnly, callback);
+        final UnitOfWork uow = new LocalRepositoryTransaction(userName, name, session, rollbackOnly, callback);
         this.sessions.put(session, uow);
         return uow;
     }
 
     class LocalRepositoryTransaction extends RepositoryImpl.UnitOfWorkImpl {
 
-        LocalRepositoryTransaction( final String uowName,
+        LocalRepositoryTransaction(final String userName,
+                                    final String uowName,
                                     final Session uowSession,
                                     final boolean uowRollbackOnly,
                                     final UnitOfWorkListener listener) {
-            super(uowName, uowSession, uowRollbackOnly, listener);
+            super(userName, uowName, uowSession, uowRollbackOnly, listener);
         }
 
         /**

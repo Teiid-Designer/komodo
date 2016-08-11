@@ -95,12 +95,12 @@ public final class WorkspaceManagerTest extends RelationalModelTest {
 
     @Before
     public void obtainWorkspaceManager() throws Exception {
-        wsMgr = WorkspaceManager.getInstance(_repo);
+        wsMgr = WorkspaceManager.getInstance(_repo, getTransaction());
     }
 
     @After
     public void uncacheWorkspaceManager() {
-        WorkspaceManager.uncacheInstance(_repo);
+        WorkspaceManager.uncacheInstance(_repo, getTransaction().getUserName());
         wsMgr = null;
 
         if (myFileDir != null)

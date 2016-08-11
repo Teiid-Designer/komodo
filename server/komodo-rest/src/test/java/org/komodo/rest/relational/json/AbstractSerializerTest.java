@@ -73,6 +73,7 @@ public abstract class AbstractSerializerTest implements JsonConstants {
         repository = Mockito.mock(Repository.class);
         UnitOfWorkListener listener = Matchers.any();
         Mockito.when(repository.createTransaction(Matchers.anyString(),
+                                                  Matchers.anyString(),
                                                   Matchers.anyBoolean(),
                                                   listener)).thenReturn(uow);
     }

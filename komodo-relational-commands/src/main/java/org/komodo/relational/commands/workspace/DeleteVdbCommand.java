@@ -59,12 +59,12 @@ public final class DeleteVdbCommand extends WorkspaceShellCommand {
         try {
             final String vdbName = requiredArgument( 0, I18n.bind( WorkspaceCommandsI18n.missingVdbName ) );
 
-            final KomodoObject vdbToDelete = getWorkspaceManager().getChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+            final KomodoObject vdbToDelete = getWorkspaceManager(getTransaction()).getChild(getTransaction(), vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
 
             if( vdbToDelete==null ) {
                 return new CommandResultImpl( false, I18n.bind( WorkspaceCommandsI18n.vdbNotFound, vdbName ), null );
             } else {
-                getWorkspaceManager().delete(getTransaction(), vdbToDelete);
+                getWorkspaceManager(getTransaction()).delete(getTransaction(), vdbToDelete);
                 return new CommandResultImpl( I18n.bind( WorkspaceCommandsI18n.vdbDeleted, vdbName ) );
             }
         } catch ( final Exception e ) {
@@ -123,7 +123,7 @@ public final class DeleteVdbCommand extends WorkspaceShellCommand {
         final Arguments args = getArguments();
 
         final UnitOfWork uow = getTransaction();
-        final WorkspaceManager mgr = getWorkspaceManager();
+        final WorkspaceManager mgr = getWorkspaceManager(getTransaction());
         final KomodoObject[] vdbs = mgr.findVdbs(uow);
         List<String> existingVdbNames = new ArrayList<String>(vdbs.length);
         for(KomodoObject vdb : vdbs) {
