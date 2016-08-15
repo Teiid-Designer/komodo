@@ -256,23 +256,23 @@ public abstract class AbstractKomodoServiceTest implements V1Constants {
                                                       false, callback);
 
         ObjectSearcher vdbsSearch = new ObjectSearcher(repository);
-        vdbsSearch.addFromType(VdbLexicon.Vdb.VIRTUAL_DATABASE, "vdbs");
+        vdbsSearch.setFromType(VdbLexicon.Vdb.VIRTUAL_DATABASE, "vdbs");
         String vdbSearchName = "Vdbs Search";
         vdbsSearch.write(uow, vdbSearchName);
 
         ObjectSearcher columnsSearch = new ObjectSearcher(repository);
-        columnsSearch.addFromType(TeiidDdlLexicon.CreateTable.TABLE_ELEMENT, "c");
+        columnsSearch.setFromType(TeiidDdlLexicon.CreateTable.TABLE_ELEMENT, "c");
         String columnSearchName = "Columns Search";
         columnsSearch.write(uow, columnSearchName);
 
         ObjectSearcher columnsWithParamSearch = new ObjectSearcher(repository);
-        columnsWithParamSearch.addFromType(TeiidDdlLexicon.CreateTable.TABLE_ELEMENT, "c");
+        columnsWithParamSearch.setFromType(TeiidDdlLexicon.CreateTable.TABLE_ELEMENT, "c");
         columnsWithParamSearch.addWhereCompareClause(null, "c", ModeShapeLexicon.LOCALNAME.getString(), ComparisonOperator.LIKE, "{valueParam}");
         String columnsWithParamSearchName = "Columns Search With Where Parameter";
         columnsWithParamSearch.write(uow, columnsWithParamSearchName);
 
         ObjectSearcher fromParameterSearch = new ObjectSearcher(repository);
-        fromParameterSearch.addFromType("{fromTypeParam}", "c");
+        fromParameterSearch.setFromType("{fromTypeParam}", "c");
         String fromParamSearchName = "From Parameter Search";
         fromParameterSearch.write(uow, fromParamSearchName);
 

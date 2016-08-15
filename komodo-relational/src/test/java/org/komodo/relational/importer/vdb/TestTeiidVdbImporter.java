@@ -1387,7 +1387,7 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
 
         ObjectSearcher os = new ObjectSearcher(_repo);
         String ALIAS = "nt";
-        os.addFromType(JcrConstants.NT_UNSTRUCTURED, ALIAS);
+        os.setFromType(JcrConstants.NT_UNSTRUCTURED, ALIAS);
         String whereSql = "(CONTAINS(nt.*, '*view*'))";
         os.setCustomWhereClause(whereSql);
 

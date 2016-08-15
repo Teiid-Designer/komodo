@@ -173,24 +173,14 @@ public abstract class Clause implements StringConstants {
         //
         // Check that where type alias is valid for set of from types
         //
-        if (getParent().getFromTypes().size() == 1 && StringUtils.isEmpty(alias)) {
-            // Only 1 from type and alias is empty so assume alias of single from type
-            alias = getParent().getFromTypes().iterator().next().getAlias();
-        } else {
-            //
-            // More than 1 from type or alias is not empty
-            //
-            ArgCheck.isNotEmpty(alias);
-
-            boolean aliasTypeFound = false;
-            for (FromType fromType : getParent().getFromTypes()) {
-                if (fromType.getAlias().equals(alias)) {
-                    aliasTypeFound = true;
-                    break;
-                }
+        FromType fromType = getParent().getFromType();
+        if (fromType != null) {
+            if (StringUtils.isEmpty(alias)) {
+                // Only 1 from type and alias is empty so assume alias of single from type
+                alias = fromType.getAlias();
+            } else {
+                ArgCheck.isTrue(fromType.getAlias().equals(alias), "Where clause alias is unknown to from clause");
             }
-
-            ArgCheck.isTrue(aliasTypeFound, "Where clause alias is unknown to from clause"); //$NON-NLS-1$
         }
 
         return alias;

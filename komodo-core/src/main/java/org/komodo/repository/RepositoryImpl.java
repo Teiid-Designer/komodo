@@ -766,7 +766,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
 
         ObjectSearcher searcher = new ObjectSearcher(this);
         String typeAlias = "k1"; // where clauses need an alias so assign one to the type //$NON-NLS-1$
-        searcher.addFromType(type, typeAlias);
+        searcher.setFromType(type, typeAlias);
         searcher.addWhereContainsClause(null, typeAlias, property, keywordCriteria, keywords);
         List<KomodoObject> searchObjects = searcher.searchObjects(transaction);
 
@@ -794,7 +794,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
 
         ObjectSearcher searcher = new ObjectSearcher(this);
         for (String type : types) {
-            searcher.addFromType(type);
+            searcher.setFromType(type);
         }
 
         List<KomodoObject> searchObjects = searcher.searchObjects(transaction);
@@ -822,7 +822,7 @@ public abstract class RepositoryImpl implements Repository, StringConstants {
 
         ObjectSearcher searcher = new ObjectSearcher(this);
         String typeAlias = "k1"; // where clauses need an alias so assign one to the type //$NON-NLS-1$
-        searcher.addFromType(JcrConstants.NT_UNSTRUCTURED, typeAlias);
+        searcher.setFromType(JcrConstants.NT_UNSTRUCTURED, typeAlias);
         searcher.addWherePathClause(null, typeAlias, path);
 
         List<KomodoObject> searchObjects = searcher.searchObjects(transaction);

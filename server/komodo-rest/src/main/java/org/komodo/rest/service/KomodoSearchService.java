@@ -118,7 +118,7 @@ public final class KomodoSearchService extends KomodoService {
         final String ALIAS = "nt";  //$NON-NLS-1$
         ObjectSearcher os = new ObjectSearcher(this.repo);
 
-        os.addFromType(convertType(type), ALIAS);
+        os.setFromType(convertType(type), ALIAS);
 
         LogicalOperator operator = null;
         if (parent != null) {
