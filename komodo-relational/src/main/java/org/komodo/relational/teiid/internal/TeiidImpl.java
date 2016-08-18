@@ -21,6 +21,7 @@
  */
 package org.komodo.relational.teiid.internal;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -893,6 +894,10 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
             if (instTranslators == null)
                 instTranslators = Collections.emptyList();
 
+            Collection<String> instDataSourceTypeNames = teiidInstance.getDataSourceTypeNames();
+            if (instDataSourceTypeNames == null)
+                instDataSourceTypeNames = Collections.emptyList();
+
             //
             // Process the vdbs
             //
@@ -948,11 +953,11 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
                     continue;
 
                 KomodoObject kObject = cachedTeiid.addChild(transaction,
-                                                                                                                  teiidTranslator.getName(),
-                                                                                                                  VdbLexicon.Translator.TRANSLATOR);
+                                                            teiidTranslator.getName(),
+                                                            VdbLexicon.Translator.TRANSLATOR);
                 TranslatorImpl translator = new TranslatorImpl(transaction,
-                                                                                                       getRepository(),
-                                                                                                       kObject.getAbsolutePath());
+                                                               getRepository(),
+                                                               kObject.getAbsolutePath());
                 translator.setDescription(transaction, teiidTranslator.getDescription());
                 String type = teiidTranslator.getType() != null ? teiidTranslator.getType() : teiidTranslator.getName();
                 translator.setType(transaction, type);
@@ -961,7 +966,27 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
                     translator.setProperty(transaction, entry.getKey().toString(), entry.getValue());
                 }
             }
+            
+            for (String teiidDSType : instDataSourceTypeNames) {
+                if (teiidDSType == null)
+                    continue;
 
+                KomodoObject driver = cachedTeiid.addChild(transaction,
+                                                           teiidDSType,
+                                                           KomodoLexicon.Driver.NODE_TYPE);
+
+                byte[] content = new byte[1024];
+                KomodoObject fileNode;
+                if (! driver.hasChild(transaction, JcrLexicon.CONTENT.getString()))
+                    fileNode = driver.addChild(transaction, JcrLexicon.CONTENT.getString(), null);
+                else
+                    fileNode = driver.getChild(transaction, JcrLexicon.CONTENT.getString());
+
+                ByteArrayInputStream stream = new ByteArrayInputStream(content);
+                fileNode.setProperty(transaction, JcrLexicon.DATA.getString(), stream);
+            }
+
+            
         } catch (Exception ex) {
             throw new KException(ex);
         }

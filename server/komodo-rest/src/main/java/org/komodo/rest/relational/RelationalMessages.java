@@ -278,6 +278,11 @@ public final class RelationalMessages {
         DATASOURCE_SERVICE_CLONE_ALREADY_EXISTS,
         
         /**
+         * An error indicating a JSON document representing the Drivers in the workspace could not be retrieved.
+         */
+        DRIVER_SERVICE_GET_DRIVERS_ERROR,
+
+        /**
          * An error indicating the VDB descriptor JSON representation could not be created.
          */
         VDB_DESCRIPTOR_BUILDER_ERROR,
@@ -508,9 +513,24 @@ public final class RelationalMessages {
         TEIID_SERVICE_GET_VDBS_ERROR,
 
         /**
+         * An error when getting datasources
+         */
+        TEIID_SERVICE_GET_DATA_SOURCES_ERROR,
+
+        /**
+         * An error when getting datasource
+         */
+        TEIID_SERVICE_GET_DATA_SOURCE_ERROR,
+
+        /**
          * An error indicating a teiid vdb status error
          */
         TEIID_SERVICE_VDBS_STATUS_ERROR,
+
+        /**
+         * An error when getting drivers
+         */
+        TEIID_SERVICE_GET_DRIVERS_ERROR,
 
         /**
          * An error indicating a timeout occurred whilst conducting an import

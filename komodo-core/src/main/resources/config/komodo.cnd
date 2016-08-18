@@ -116,6 +116,7 @@
  + * (vdb:virtualDatabase) copy
  + * (vdb:translator) copy
  + * (tko:dataSource) copy
+ + * (tko:driver) copy
  - tko:timestamp (long)
 
 /*

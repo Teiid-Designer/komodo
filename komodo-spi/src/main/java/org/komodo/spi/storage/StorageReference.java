@@ -26,6 +26,15 @@ import org.komodo.spi.repository.DocumentType;
 
 public class StorageReference {
 
+    /**
+     * property key for supplied driver name
+     */
+    public static final String DRIVER_NAME_KEY = "driverName";  //$NON-NLS-1$
+    /**
+     * default name for driver
+     */
+    public static final String DRIVER_NAME_DEFAULT = "defaultDriver";  //$NON-NLS-1$
+
     private final String storageType;
 
     private final Properties parameters;

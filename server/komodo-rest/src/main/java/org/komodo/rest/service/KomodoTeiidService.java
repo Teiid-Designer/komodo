@@ -46,6 +46,7 @@ import org.komodo.core.KEngine;
 import org.komodo.relational.DeployStatus;
 import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.datasource.Datasource;
+import org.komodo.relational.driver.Driver;
 import org.komodo.relational.teiid.CachedTeiid;
 import org.komodo.relational.teiid.Teiid;
 import org.komodo.relational.vdb.Translator;
@@ -67,6 +68,7 @@ import org.komodo.rest.relational.request.KomodoPathAttribute;
 import org.komodo.rest.relational.request.KomodoQueryAttribute;
 import org.komodo.rest.relational.request.KomodoTeiidAttributes;
 import org.komodo.rest.relational.response.KomodoStatusObject;
+import org.komodo.rest.relational.response.RestDataSourceDriver;
 import org.komodo.rest.relational.response.RestQueryResult;
 import org.komodo.rest.relational.response.RestTeiid;
 import org.komodo.rest.relational.response.RestTeiidStatus;
@@ -562,7 +564,7 @@ public class KomodoTeiidService extends KomodoService {
         @ApiResponse(code = 403, message = "An error has occurred.")
     })
     public Response getDataSources(final @Context HttpHeaders headers,
-                                                   final @Context UriInfo uriInfo) throws KomodoRestException {
+                                   final @Context UriInfo uriInfo) throws KomodoRestException {
 
         List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
         UnitOfWork uow = null;
@@ -598,7 +600,122 @@ public class KomodoTeiidService extends KomodoService {
                 throw ( KomodoRestException )e;
             }
 
-            return createErrorResponse(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_GET_TRANSLATORS_ERROR);
+            return createErrorResponse(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_GET_DATA_SOURCES_ERROR);
+        }
+    }
+    
+    /**
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @param datasourceName
+     *        the id of the DataSource being retrieved (cannot be empty)
+     * @return the JSON representation of the DataSource (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is a problem finding the specified workspace DataSource or constructing the JSON representation
+     */
+    @GET
+    @Path( V1Constants.DATA_SOURCES_SEGMENT + StringConstants.FORWARD_SLASH + V1Constants.DATA_SOURCE_PLACEHOLDER )
+    @Produces( { MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML } )
+    @ApiOperation(value = "Find dataSource by name", response = RestDataSource.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 404, message = "No dataSource could be found with name"),
+        @ApiResponse(code = 406, message = "Only JSON or XML is returned by this operation"),
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response getDataSource( final @Context HttpHeaders headers,
+                                   final @Context UriInfo uriInfo,
+                                   @ApiParam(value = "Id of the data source to be fetched", required = true)
+                                   final @PathParam( "datasourceName" ) String datasourceName) throws KomodoRestException {
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        
+        UnitOfWork uow = null;
+        try {
+            CachedTeiid cachedTeiid = importContent();
+
+            // find DataSource
+            uow = createTransaction("getDataSource-" + datasourceName, true); //$NON-NLS-1$
+            Datasource dataSource = cachedTeiid.getDataSource(uow, datasourceName);
+            if (dataSource == null)
+                return commitNoDatasourceFound(uow, mediaTypes, datasourceName);
+
+            KomodoProperties properties = new KomodoProperties();
+            final RestDataSource restDataSource = entityFactory.create(dataSource, uriInfo.getBaseUri(), uow, properties);
+            LOGGER.debug("getDataSource:Datasource '{0}' entity was constructed", dataSource.getName(uow)); //$NON-NLS-1$
+            return commit( uow, mediaTypes, restDataSource );
+
+        } catch (CallbackTimeoutException ex) {
+            return createTimeoutResponse(mediaTypes);
+        } catch ( final Throwable e ) {
+            if ( ( uow != null ) && ( uow.getState() != State.ROLLED_BACK ) ) {
+                uow.rollback();
+            }
+
+            if ( e instanceof KomodoRestException ) {
+                throw ( KomodoRestException )e;
+            }
+
+            return createErrorResponse(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_GET_DATA_SOURCE_ERROR, datasourceName);
+        }
+    }
+
+    /**
+     * @param headers
+     *        the request headers (never <code>null</code>)
+     * @param uriInfo
+     *        the request URI information (never <code>null</code>)
+     * @return a JSON document representing all the drivers deployed to teiid (never <code>null</code>)
+     * @throws KomodoRestException
+     *         if there is a problem constructing the JSON document
+     */
+    @GET
+    @Path(V1Constants.DRIVERS_SEGMENT)
+    @Produces( MediaType.APPLICATION_JSON )
+    @ApiOperation(value = "Display the collection of drivers",
+                            response = RestDataSourceDriver[].class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 403, message = "An error has occurred.")
+    })
+    public Response getDrivers(final @Context HttpHeaders headers,
+                               final @Context UriInfo uriInfo) throws KomodoRestException {
+
+        List<MediaType> mediaTypes = headers.getAcceptableMediaTypes();
+        UnitOfWork uow = null;
+
+        try {
+            CachedTeiid cachedTeiid = importContent();
+
+            // find drivers
+            uow = createTransaction("getDrivers", true); //$NON-NLS-1$
+
+            Driver[] drivers = cachedTeiid.getDrivers(uow);
+            LOGGER.debug("getDrivers:found '{0}' Drivers", drivers.length); //$NON-NLS-1$
+
+            final List<RestDataSourceDriver> entities = new ArrayList<>();
+
+            for (final Driver driver : drivers) {
+                RestDataSourceDriver entity = new RestDataSourceDriver();
+                entity.setName(driver.getName(uow));
+                entities.add(entity);
+                LOGGER.debug("getDrivers:Driver '{0}' entity was constructed", driver.getName(uow)); //$NON-NLS-1$
+            }
+
+            // create response
+            return commit(uow, mediaTypes, entities);
+        } catch (CallbackTimeoutException ex) {
+            return createTimeoutResponse(mediaTypes);
+        } catch (Throwable e) {
+            if ((uow != null) && (uow.getState() != State.ROLLED_BACK)) {
+                uow.rollback();
+            }
+
+            if ( e instanceof KomodoRestException ) {
+                throw ( KomodoRestException )e;
+            }
+
+            return createErrorResponse(mediaTypes, e, RelationalMessages.Error.TEIID_SERVICE_GET_DRIVERS_ERROR);
         }
     }
 

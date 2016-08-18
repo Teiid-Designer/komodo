@@ -46,6 +46,7 @@ import org.komodo.importer.ImportOptions.ExistingNodeOptions;
 import org.komodo.importer.ImportOptions.OptionKeys;
 import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.datasource.Datasource;
+import org.komodo.relational.driver.Driver;
 import org.komodo.relational.importer.vdb.VdbImporter;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
@@ -56,6 +57,7 @@ import org.komodo.rest.cors.OptionsExceptionMapper;
 import org.komodo.rest.json.JsonConstants;
 import org.komodo.rest.service.KomodoDataserviceService;
 import org.komodo.rest.service.KomodoDatasourceService;
+import org.komodo.rest.service.KomodoDriverService;
 import org.komodo.rest.service.KomodoImportExportService;
 import org.komodo.rest.service.KomodoSearchService;
 import org.komodo.rest.service.KomodoTeiidService;
@@ -205,6 +207,11 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         String DATA_SOURCE_PLACEHOLDER = "{datasourceName}"; //$NON-NLS-1$
 
         /**
+         * The name of the URI path segment for the collection of Drivers in the Komodo workspace.
+         */
+        String DRIVERS_SEGMENT = "drivers"; //$NON-NLS-1$
+
+        /**
          * The name of the URI path segment for the collection of models of a vdb
          */
         String MODELS_SEGMENT = "Models"; //$NON-NLS-1$
@@ -352,12 +359,12 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         /**
          * The driver property for adding a driver to the teiid server
          */
-        String TEIID_DRIVER = "driver";
+        String TEIID_DRIVER = "driver"; //$NON-NLS-1$
 
         /**
          * Placeholder added to an URI to allow a specific teiid driver id
          */
-        String TEIID_DRIVER_PLACEHOLDER = "{driverName}";
+        String TEIID_DRIVER_PLACEHOLDER = "{driverName}"; //$NON-NLS-1$
 
         /**
          * The teiid status path segment
@@ -382,22 +389,22 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         /**
          * The available storage types of the import export service
          */
-        String STORAGE_TYPES = "availableStorageTypes";
+        String STORAGE_TYPES = "availableStorageTypes"; //$NON-NLS-1$
 
         /**
          * The teiid segment for running a query against the teiid server
          */
-        String QUERY_SEGMENT = "query";
+        String QUERY_SEGMENT = "query"; //$NON-NLS-1$
 
         /**
          * The teiid segment for running a ping against the teiid server
          */
-        String PING_SEGMENT = "ping";
+        String PING_SEGMENT = "ping"; //$NON-NLS-1$
 
         /**
          * The name of the URI ping type parameter
          */
-        String PING_TYPE_PARAMETER = "pingType";
+        String PING_TYPE_PARAMETER = "pingType"; //$NON-NLS-1$
     }
 
     private static final int TIMEOUT = 1;
@@ -442,6 +449,7 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         objs.add( new KomodoUtilService( this.kengine ) );
         objs.add( new KomodoDataserviceService( this.kengine ) );
         objs.add( new KomodoDatasourceService( this.kengine ) );
+        objs.add( new KomodoDriverService( this.kengine ) );
         objs.add( new KomodoVdbService( this.kengine ) );
         objs.add( new KomodoSearchService( this.kengine ));
         objs.add( new KomodoTeiidService( this.kengine ));
@@ -741,5 +749,39 @@ public class KomodoRestV1Application extends Application implements RepositoryOb
         uow.commit();
 
         return sources;
+    }
+    
+    /**
+     * Create a Driver in the komodo engine
+     *
+     * @param driverName the driver name
+     * @throws Exception if error occurs
+     */
+    public void createDriver(String driverName) throws Exception {
+        Repository repository = this.kengine.getDefaultRepository();
+
+        SynchronousCallback callback = new SynchronousCallback();
+        UnitOfWork uow = repository.createTransaction("Create Driver", false, callback); //$NON-NLS-1$
+
+        WorkspaceManager wsMgr = WorkspaceManager.getInstance(repository);
+        wsMgr.createDriver(uow, null, driverName);
+
+        uow.commit();
+        callback.await(3, TimeUnit.MINUTES);
+    }
+
+    /**
+     * @return the drivers directly from the kEngine
+     * @throws Exception if error occurs
+     */
+    public Driver[] getDrivers() throws Exception {
+        Repository repository = this.kengine.getDefaultRepository();
+        WorkspaceManager mgr = WorkspaceManager.getInstance(repository);
+
+        UnitOfWork uow = repository.createTransaction("Find drivers", true, null); //$NON-NLS-1$
+        Driver[] drivers = mgr.findDrivers(uow);
+        uow.commit();
+
+        return drivers;
     }
 }
