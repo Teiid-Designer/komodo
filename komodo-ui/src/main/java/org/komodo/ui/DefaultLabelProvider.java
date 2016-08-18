@@ -150,7 +150,7 @@ public class DefaultLabelProvider implements KomodoObjectLabelProvider {
      * The Komodo workspace area display name. Value is {@value}.
      */
     public static String workspaceDisplayName(UnitOfWork transaction) {
-        if (transaction == null || Repository.SYSTEM_USER.equals(transaction.getUserName()))
+        if (transaction == null || RepositoryImpl.isSystemTx(transaction))
             return KomodoLexicon.Workspace.UNQUALIFIED_NAME;
 
         return KomodoLexicon.Workspace.UNQUALIFIED_NAME + FORWARD_SLASH + transaction.getUserName();
@@ -332,7 +332,7 @@ public class DefaultLabelProvider implements KomodoObjectLabelProvider {
         String wkspPragma = workspaceDisplayName(null) + FORWARD_SLASH;
         String userName = transaction.getUserName();
 
-        if (userName == null || Repository.SYSTEM_USER.equals(userName))
+        if (RepositoryImpl.isSystemTx(transaction))
             return displayPath; // no user name so nothing to do
 
         int wkspIndex = displayPath.indexOf(wkspPragma);

@@ -39,7 +39,7 @@ public final class ServerSetPropertyCommandTest extends AbstractServerCommandTes
         assertCommandResultOk(result);
 
         // Get the teiid server, make sure the port is correct.
-        List<KomodoObject> results = _repo.searchByType(getTransaction(), KomodoLexicon.Teiid.NODE_TYPE);
+        List<KomodoObject> results = _repo.searchByType(sysTx(), KomodoLexicon.Teiid.NODE_TYPE);
         KomodoObject serverObj = results.get(0);
         if(Teiid.RESOLVER.resolvable(getTransaction(), serverObj)) {
             Teiid server = Teiid.RESOLVER.resolve(getTransaction(), serverObj);

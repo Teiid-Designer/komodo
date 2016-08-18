@@ -25,6 +25,7 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
@@ -44,6 +45,7 @@ import org.komodo.repository.SynchronousCallback;
 import org.komodo.spi.constants.StringConstants;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
+import org.komodo.spi.repository.Repository;
 import org.komodo.spi.repository.Repository.State;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.spi.repository.Repository.UnitOfWorkListener;
@@ -153,13 +155,18 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest im
     private boolean rollbackOnly = false;
     private int txCount;
     private UnitOfWork uow;
+    private UnitOfWork sysUow;
     protected SynchronousCallback callback;
+    protected SynchronousCallback sysCallback;
 
     @Before
-    public void createInitialTransaction() throws Exception {
+    public void createInitialTransactions() throws Exception {
         this.callback = new TestTransactionListener();
         this.uow = createTransaction(callback);
-        KLog.getLogger().debug( "\n\n ----- Test {0}: createInitialTransaction() finished", this.name.getMethodName() );
+
+        this.sysCallback = new TestTransactionListener();
+        this.sysUow = createTransaction(Repository.SYSTEM_USER, txId(Repository.SYSTEM_USER, "tx"), false, this.sysCallback);
+        KLog.getLogger().debug( "\n\n ----- Test {0}: createInitialTransactions() finished", this.name.getMethodName() );
     }
 
     @After
@@ -184,6 +191,26 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest im
             }
         }
 
+        //
+        // process sys transaction if necessary
+        //
+        if ( this.sysUow != null ) {
+            switch ( this.sysUow.getState() ) {
+                case NOT_STARTED:
+                case RUNNING:
+                    sysRollback();
+                    break;
+                case COMMITTED:
+                case ERROR:
+                case ROLLED_BACK:
+                default:
+                    break;
+            }
+
+            this.sysUow = null;
+            this.sysCallback = null;
+        }
+
         { // clean repository
             assertNotNull( _repo );
 
@@ -201,24 +228,34 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest im
         }
     }
 
-    private void commit( final UnitOfWork.State expectedState,
-                         final SynchronousCallback nextCallback ) throws Exception {
-        this.uow.commit();
+    protected static void commit( UnitOfWork currTx,
+                                                              SynchronousCallback currCallback,
+                                                              UnitOfWork.State expectedState) throws Exception {
+        currTx.commit();
 
-        assertThat( this.callback.await( TIME_TO_WAIT, TimeUnit.MINUTES ), is( true ) );
-        assertThat( this.uow.getError(), is( nullValue() ) );
-        assertThat( this.uow.getState(), is( expectedState ) );
+        assertThat( currCallback.await( TIME_TO_WAIT, TimeUnit.MINUTES ), is( true ) );
+        assertThat( currTx.getError(), is( nullValue() ) );
+        assertThat( currTx.getState(), is( expectedState ) );
 
-        if ( this.callback instanceof TestTransactionListener ) {
+        if ( currCallback instanceof TestTransactionListener ) {
             final boolean respond = ( UnitOfWork.State.COMMITTED == expectedState );
 
             if ( !respond ) {
                 assertThat( expectedState, is( UnitOfWork.State.ERROR ) );
             }
 
-            assertThat( ( ( TestTransactionListener )this.callback ).respondCallbackReceived(), is( respond ) );
-            assertThat( ( ( TestTransactionListener )this.callback ).errorCallbackReceived(), is( !respond ) );
+            assertThat( ( ( TestTransactionListener )currCallback ).respondCallbackReceived(), is( respond ) );
+            assertThat( ( ( TestTransactionListener )currCallback ).errorCallbackReceived(), is( !respond ) );
         }
+    }
+
+    protected static void commit(UnitOfWork currTx, UnitOfWork.State expectedState) throws Exception {
+        assertTrue(currTx.getCallback() instanceof SynchronousCallback);
+        commit(currTx, (SynchronousCallback) currTx.getCallback(), expectedState);
+    }
+
+    private void commit( final UnitOfWork.State expectedState, final SynchronousCallback nextCallback ) throws Exception {
+        commit(this.uow, this.callback, expectedState);
 
         this.callback = nextCallback;
         this.uow = _repo.createTransaction(TEST_USER, this.name.getMethodName(), this.rollbackOnly, this.callback );
@@ -233,6 +270,22 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest im
         commit(UnitOfWork.State.COMMITTED);
     }
 
+    protected void sysCommit( final UnitOfWork.State expectedState, final SynchronousCallback nextCallback ) throws Exception {
+        commit(this.sysUow, this.sysCallback, expectedState);
+
+        this.sysCallback = nextCallback;
+        this.sysUow = createTransaction(Repository.SYSTEM_USER, txId(Repository.SYSTEM_USER, "sysTx"), false, sysCallback);
+    }
+
+    protected void sysCommit( final UnitOfWork.State expectedState ) throws Exception {
+        final SynchronousCallback nextCallback = new TestTransactionListener();
+        sysCommit( expectedState, nextCallback );
+    }
+
+    protected void sysCommit() throws Exception {
+        sysCommit(UnitOfWork.State.COMMITTED);
+    }
+
     protected void useCustomCallback( final SynchronousCallback callback,
                                       final boolean commitCurrentTransaction ) throws Exception {
         if ( commitCurrentTransaction ) {
@@ -242,8 +295,32 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest im
         }
     }
 
+    protected static UnitOfWork createTransaction( String user, String txName, boolean rollback, final UnitOfWorkListener callback ) throws Exception {
+        return _repo.createTransaction(user, txName , rollback, callback);
+    }
+
     private UnitOfWork createTransaction( final UnitOfWorkListener callback ) throws Exception {
-        return _repo.createTransaction(TEST_USER, ( this.name.getMethodName() + '-' + this.txCount++ ), this.rollbackOnly, callback );
+        return createTransaction(TEST_USER, (this.name.getMethodName() + '-' + this.txCount++), this.rollbackOnly, callback);
+    }
+
+    protected static String txId(String... components) {
+        StringBuffer buf = new StringBuffer();
+
+        assertNotNull(components);
+        for (int i = 0; i < components.length; ++i) {
+            buf.append(components[i]);
+            if (i < (components.length - 1))
+                buf.append(HYPHEN);
+        }
+
+        return buf.toString();
+    }
+
+    /**
+     * System Transaction can search from workspace root rather than just inside home directory
+     */
+    protected UnitOfWork sysTx() throws Exception {
+        return this.sysUow;
     }
 
     /**
@@ -255,25 +332,41 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest im
         return this.uow;
     }
 
-    private void rollback( final SynchronousCallback nextCallback ) throws Exception {
-        this.uow.rollback();
+    protected static void rollback( UnitOfWork currTx, SynchronousCallback currCallback) throws Exception {
+        currTx.rollback();
 
-        assertThat( this.callback.await( TIME_TO_WAIT, TimeUnit.MINUTES ), is( true ) );
-        assertThat( this.uow.getError(), is( nullValue() ) );
-        assertThat( this.uow.getState(), is( UnitOfWork.State.ROLLED_BACK ) );
+        assertThat( currCallback.await( TIME_TO_WAIT, TimeUnit.MINUTES ), is( true ) );
+        assertThat( currTx.getError(), is( nullValue() ) );
+        assertThat( currTx.getState(), is( UnitOfWork.State.ROLLED_BACK ) );
 
-        if ( this.callback instanceof TestTransactionListener ) {
-            assertThat( ( ( TestTransactionListener )this.callback ).respondCallbackReceived(), is( true ) );
-            assertThat( ( ( TestTransactionListener )this.callback ).errorCallbackReceived(), is( false ) );
+        if ( currCallback instanceof TestTransactionListener ) {
+            assertThat( ( ( TestTransactionListener )currCallback ).respondCallbackReceived(), is( true ) );
+            assertThat( ( ( TestTransactionListener )currCallback ).errorCallbackReceived(), is( false ) );
         }
+    }
+
+    private void rollback( final SynchronousCallback nextCallback ) throws Exception {
+        rollback(this.uow, this.callback);
 
         // create new transaction
         this.callback = nextCallback;
         this.uow = createTransaction( this.callback );
     }
 
+    private void sysRollback( final SynchronousCallback nextCallback ) throws Exception {
+        rollback(this.sysUow, this.sysCallback);
+
+        // create new transaction
+        this.sysCallback = nextCallback;
+        this.sysUow = createTransaction( this.sysCallback );
+    }
+
     protected void rollback() throws Exception {
         rollback( new TestTransactionListener() );
+    }
+
+    protected void sysRollback() throws Exception {
+        sysRollback( new TestTransactionListener() );
     }
 
     protected Session session(UnitOfWork uow) throws Exception {
@@ -347,10 +440,14 @@ public abstract class AbstractLocalRepositoryTest extends AbstractLoggingTest im
         return sb.toString();
     }
 
-    protected class TestTransactionListener extends SynchronousCallback {
+    protected static class TestTransactionListener extends SynchronousCallback {
 
         private boolean errorCallback = false;
         private boolean successCallback = false;
+
+        public TestTransactionListener() {
+            // Nothing to do
+        }
 
         protected boolean errorCallbackReceived() {
             return this.errorCallback;

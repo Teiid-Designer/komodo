@@ -43,6 +43,7 @@ import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.internal.TranslatorImpl;
 import org.komodo.relational.vdb.internal.VdbImpl;
 import org.komodo.relational.workspace.ServerManager;
+import org.komodo.repository.RepositoryImpl;
 import org.komodo.repository.SynchronousCallback;
 import org.komodo.spi.KException;
 import org.komodo.spi.query.QueryService;
@@ -848,6 +849,7 @@ public class TeiidImpl extends RelationalChildRestrictedObject implements Teiid,
     public CachedTeiid importContent(UnitOfWork transaction) throws KException {
         ArgCheck.isNotNull( transaction, "transaction" ); //$NON-NLS-1$
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
+        ArgCheck.isTrue(RepositoryImpl.isSystemTx(transaction), "transaction should be owned by " + Repository.SYSTEM_USER);
 
         KomodoObject teiidCache = getRepository().komodoTeiidCache(transaction);
 

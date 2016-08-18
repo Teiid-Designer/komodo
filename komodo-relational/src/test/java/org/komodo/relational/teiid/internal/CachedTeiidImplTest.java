@@ -39,6 +39,7 @@ import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.vdb.internal.VdbImpl;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Repository.UnitOfWork;
+import org.komodo.spi.repository.Repository.UnitOfWork.State;
 import org.komodo.spi.runtime.HostProvider;
 import org.komodo.spi.runtime.TeiidAdminInfo;
 import org.komodo.spi.runtime.TeiidJdbcInfo;
@@ -92,12 +93,17 @@ public final class CachedTeiidImplTest extends RelationalModelTest {
         this.teiid.setJdbcPassword(getTransaction(), JDBC_PASSWORD);
         this.teiid.setJdbcPort(getTransaction(), JDBC_PORT);
         this.teiid.setJdbcSecure(getTransaction(), JDBC_SECURE);
+        commit(State.COMMITTED);
     }
 
     @Test
     public void shouldCloneTeiidInstance() throws Exception {
-        CachedTeiid cTeiid = RelationalModelFactory.createCachedTeiid(getTransaction(), _repo, this.teiid);
+        //
+        // Cannot only be created by sys
+        //
+        CachedTeiid cTeiid = RelationalModelFactory.createCachedTeiid(sysTx(), _repo, this.teiid);;
         assertNotNull(cTeiid);
+        sysCommit();
 
         assertEquals(HOST, cTeiid.getHost(getTransaction()));
         assertEquals(TEIID_VERSION, cTeiid.getVersion(getTransaction()));
@@ -113,10 +119,12 @@ public final class CachedTeiidImplTest extends RelationalModelTest {
         KomodoObject teiidCache = _repo.komodoTeiidCache(getTransaction());
         KomodoObject[] teiids = teiidCache.getChildrenOfType(getTransaction(), KomodoLexicon.CachedTeiid.NODE_TYPE);
         assertEquals(1, teiids.length);
+        commit(State.COMMITTED);
 
         // Try creating a second time
-        cTeiid = RelationalModelFactory.createCachedTeiid(getTransaction(), _repo, this.teiid);
+        cTeiid = RelationalModelFactory.createCachedTeiid(sysTx(), _repo, this.teiid);
         assertNotNull(cTeiid);
+        sysCommit();
 
         teiids = teiidCache.getChildrenOfType(getTransaction(), KomodoLexicon.CachedTeiid.NODE_TYPE);
         assertEquals(1, teiids.length); // Should only be 1 since if it exists it deletes it.
@@ -124,8 +132,9 @@ public final class CachedTeiidImplTest extends RelationalModelTest {
 
     @Test
     public void shouldSequencerVdb() throws Exception {
-        CachedTeiid cachedTeiid = RelationalModelFactory.createCachedTeiid(getTransaction(), _repo, this.teiid);
+        CachedTeiid cachedTeiid = RelationalModelFactory.createCachedTeiid(sysTx(), _repo, this.teiid);
         assertNotNull(cachedTeiid);
+        sysCommit();
 
         String vdbName = TestUtilities.PORTFOLIO_VDB_NAME;
         InputStream stream = TestUtilities.portfolioExample();
@@ -135,16 +144,15 @@ public final class CachedTeiidImplTest extends RelationalModelTest {
         tempFile.deleteOnExit();
         Files.write(Paths.get(tempFile.getPath()), content.getBytes());
 
-        UnitOfWork transaction = getTransaction();
-        KomodoObject kobject = cachedTeiid.addChild(transaction, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
-        Vdb vdb = new VdbImpl( transaction, _repo, kobject.getAbsolutePath());
-        vdb.setOriginalFilePath(transaction, tempFile.getAbsolutePath());
-        vdb.setVdbName( transaction, vdbName );
+        UnitOfWork sysTx = sysTx();
+        KomodoObject kobject = cachedTeiid.addChild(sysTx, vdbName, VdbLexicon.Vdb.VIRTUAL_DATABASE);
+        Vdb vdb = new VdbImpl( sysTx, _repo, kobject.getAbsolutePath());
+        vdb.setOriginalFilePath(sysTx, tempFile.getAbsolutePath());
+        vdb.setVdbName( sysTx, vdbName );
 
-        KomodoObject fileNode = vdb.addChild(transaction, JcrLexicon.CONTENT.getString(), null);
-        fileNode.setProperty(transaction, JcrLexicon.DATA.getString(), content);
-
-        commit();
+        KomodoObject fileNode = vdb.addChild(sysTx, JcrLexicon.CONTENT.getString(), null);
+        fileNode.setProperty(sysTx, JcrLexicon.DATA.getString(), content);
+        sysCommit();
 
         Model[] models = vdb.getModels(getTransaction());
         assertEquals(5, models.length);

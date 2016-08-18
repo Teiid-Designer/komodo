@@ -196,8 +196,8 @@ public class TestLocalRepositoryPersistence extends AbstractLoggingTest implemen
         assertFalse(callback.hasError());
 
         // Find the workspace to confirm what we expect to happen
-        uow = _repo.createTransaction(TEST_USER, "test-search-type", true, null);
-        List<KomodoObject> results = _repo.searchByType(uow, KomodoLexicon.Home.NODE_TYPE);
+        uow = _repo.createTransaction(RepositoryImpl.SYSTEM_USER, "test-search-type", true, null);
+        List<KomodoObject> results = _repo.searchByType(uow, KomodoLexicon.Workspace.NODE_TYPE);
         assertEquals(1, results.size());
         assertEquals(RepositoryImpl.komodoWorkspacePath(uow), results.iterator().next().getAbsolutePath());
         uow.commit();
@@ -210,11 +210,11 @@ public class TestLocalRepositoryPersistence extends AbstractLoggingTest implemen
         assertNotNull(_repo);
 
         // Find the root and workspace to confirm repo was persisted
-        uow = _repo.createTransaction(TEST_USER, "test-search-type", true, null);
+        uow = _repo.createTransaction(RepositoryImpl.SYSTEM_USER, "test-search-type", true, null);
         results = _repo.searchByType(uow, KomodoLexicon.Komodo.NODE_TYPE);
         assertEquals(1, results.size());
 
-        results = _repo.searchByType(uow, KomodoLexicon.Home.NODE_TYPE);
+        results = _repo.searchByType(uow, KomodoLexicon.Workspace.NODE_TYPE);
         assertEquals(1, results.size());
         assertEquals(RepositoryImpl.komodoWorkspacePath(uow), results.iterator().next().getAbsolutePath());
         uow.commit();
@@ -315,7 +315,7 @@ public class TestLocalRepositoryPersistence extends AbstractLoggingTest implemen
         initLocalRepository(LocalRepository.class, PRODUCTION_REPOSITORY_CONFIG);
         assertNotNull(_repo);
 
-        UnitOfWork uow = _repo.createTransaction(TEST_USER, "test-search-type", true, null);
+        UnitOfWork uow = _repo.createTransaction(RepositoryImpl.SYSTEM_USER, "test-search-type", true, null);
         List<KomodoObject> results = _repo.searchByType(uow, JcrConstants.NT_UNSTRUCTURED);
         assertTrue(results.size() > 0);
 

@@ -110,12 +110,12 @@ public class KomodoTeiidService extends KomodoService {
         super(engine);
     }
 
-    private synchronized Teiid getDefaultTeiid(SecurityPrincipal principal) throws KException {
+    private synchronized Teiid getDefaultTeiid() throws KException {
         ServerManager serverManager = ServerManager.getInstance(repo);
         UnitOfWork uow = null;
 
         try {
-            uow = createTransaction(principal, "getTeiidStatus", false); //$NON-NLS-1$
+            uow = createTransaction(SYSTEM_USER, "getTeiidStatus", false); //$NON-NLS-1$
             Teiid teiid = serverManager.getDefaultServer(uow);
             uow.commit();
 
@@ -129,10 +129,10 @@ public class KomodoTeiidService extends KomodoService {
         }
     }
 
-    private CachedTeiid importContent(SecurityPrincipal principal) throws KException, CallbackTimeoutException {
-        Teiid teiid = getDefaultTeiid(principal);
+    private CachedTeiid importContent() throws KException, CallbackTimeoutException {
+        Teiid teiid = getDefaultTeiid();
         SynchronousCallback callback = new SynchronousCallback();
-        UnitOfWork uow = createTransaction(principal, "import-teiid-content", false, callback); //$NON-NLS-1$
+        UnitOfWork uow = createTransaction(SYSTEM_USER, "import-teiid-content", false, callback); //$NON-NLS-1$
         CachedTeiid cachedTeiid = teiid.importContent(uow);
 
         // Commit the transaction to allow the sequencers to run
@@ -228,7 +228,7 @@ public class KomodoTeiidService extends KomodoService {
         UnitOfWork uow = null;
 
         try {
-            Teiid teiid = getDefaultTeiid(principal);
+            Teiid teiid = getDefaultTeiid();
 
             uow = createTransaction(principal, "getTeiidStatus", true); //$NON-NLS-1$
             RestTeiidStatus status = new RestTeiidStatus(uriInfo.getBaseUri(), teiid, uow);
@@ -279,7 +279,7 @@ public class KomodoTeiidService extends KomodoService {
         Teiid teiid = null;
 
         try {
-            teiid = getDefaultTeiid(principal);
+            teiid = getDefaultTeiid();
 
             uow = createTransaction(principal, "getTeiidVdbs", true); //$NON-NLS-1$
             RestTeiidVdbStatus status = new RestTeiidVdbStatus(uriInfo.getBaseUri(), teiid, uow);
@@ -342,7 +342,7 @@ public class KomodoTeiidService extends KomodoService {
         UnitOfWork uow = null;
 
         try {
-            Teiid teiidNode = getDefaultTeiid(principal);
+            Teiid teiidNode = getDefaultTeiid();
 
             uow = createTransaction(principal, "teiidSetCredentials", false); //$NON-NLS-1$
 
@@ -408,7 +408,7 @@ public class KomodoTeiidService extends KomodoService {
         UnitOfWork uow = null;
 
         try {
-            CachedTeiid cachedTeiid = importContent(principal);
+            CachedTeiid cachedTeiid = importContent();
 
             // find VDBs
             uow = createTransaction(principal, "getVdbs", true); //$NON-NLS-1$
@@ -477,7 +477,7 @@ public class KomodoTeiidService extends KomodoService {
         
         UnitOfWork uow = null;
         try {
-            CachedTeiid cachedTeiid = importContent(principal);
+            CachedTeiid cachedTeiid = importContent();
 
             // find VDB
             uow = createTransaction(principal, "getVdb-" + vdbName, true); //$NON-NLS-1$
@@ -534,7 +534,7 @@ public class KomodoTeiidService extends KomodoService {
         UnitOfWork uow = null;
 
         try {
-            CachedTeiid cachedTeiid = importContent(principal);
+            CachedTeiid cachedTeiid = importContent();
 
             // find translators
             uow = createTransaction(principal, "getTranslators", true); //$NON-NLS-1$
@@ -596,7 +596,7 @@ public class KomodoTeiidService extends KomodoService {
         UnitOfWork uow = null;
 
         try {
-            CachedTeiid cachedTeiid = importContent(principal);
+            CachedTeiid cachedTeiid = importContent();
 
             // find translators
             uow = createTransaction(principal, "getDataSources", true); //$NON-NLS-1$
@@ -668,7 +668,7 @@ public class KomodoTeiidService extends KomodoService {
         UnitOfWork uow = null;
 
         try {
-            Teiid teiidNode = getDefaultTeiid(principal);
+            Teiid teiidNode = getDefaultTeiid();
 
             uow = createTransaction(principal, "deployTeiidDriver", false); //$NON-NLS-1$
 
@@ -734,7 +734,7 @@ public class KomodoTeiidService extends KomodoService {
         UnitOfWork uow = null;
 
         try {
-            Teiid teiidNode = getDefaultTeiid(principal);
+            Teiid teiidNode = getDefaultTeiid();
 
             uow = createTransaction(principal, "unDeployTeiidDriver", true); //$NON-NLS-1$
 
@@ -814,7 +814,7 @@ public class KomodoTeiidService extends KomodoService {
         UnitOfWork uow = null;
 
         try {
-            Teiid teiidNode = getDefaultTeiid(principal);
+            Teiid teiidNode = getDefaultTeiid();
 
             uow = createTransaction(principal, "deployTeiidDataservice", false); //$NON-NLS-1$
 
@@ -928,7 +928,7 @@ public class KomodoTeiidService extends KomodoService {
         UnitOfWork uow = null;
 
         try {
-            Teiid teiidNode = getDefaultTeiid(principal);
+            Teiid teiidNode = getDefaultTeiid();
 
             uow = createTransaction(principal, "deployTeiidDatasource", false); //$NON-NLS-1$
 
@@ -1069,7 +1069,7 @@ public class KomodoTeiidService extends KomodoService {
 
         try {
             uow = createTransaction(principal, "queryTeiidservice", true); //$NON-NLS-1$
-            Teiid teiidNode = getDefaultTeiid(principal);
+            Teiid teiidNode = getDefaultTeiid();
             WorkspaceManager mgr = getWorkspaceManager(uow);
             String target = kqa.getTarget();
             String query = kqa.getQuery();
@@ -1152,7 +1152,7 @@ public class KomodoTeiidService extends KomodoService {
 
         try {
             uow = createTransaction(principal, "pingTeiidservice", true); //$NON-NLS-1$
-            Teiid teiidNode = getDefaultTeiid(principal);
+            Teiid teiidNode = getDefaultTeiid();
 
             TeiidInstance teiidInstance = teiidNode.getTeiidInstance(uow);
             Outcome outcome = teiidInstance.ping(pingKind);

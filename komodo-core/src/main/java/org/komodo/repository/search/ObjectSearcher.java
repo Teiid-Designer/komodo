@@ -31,10 +31,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
-import org.komodo.core.Messages;
 import org.komodo.core.KomodoLexicon.Search;
+import org.komodo.core.Messages;
+import org.komodo.repository.RepositoryImpl;
 import org.komodo.spi.KException;
 import org.komodo.spi.constants.StringConstants;
+import org.komodo.spi.lexicon.TeiidSqlConstants;
 import org.komodo.spi.query.LogicalOperator;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
@@ -46,7 +48,6 @@ import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
 import org.modeshape.jcr.ModeShapeLexicon;
 import org.modeshape.jcr.api.JcrConstants;
-import org.komodo.spi.lexicon.TeiidSqlConstants;
 
 /**
  * Finder class for searching a repository
@@ -447,9 +448,17 @@ public class ObjectSearcher implements TeiidSqlConstants.Reserved, StringConstan
         }
     }
 
-            if (iterator.hasNext()) {
-                buffer.append(COMMA);
-                buffer.append(SPACE);
+    private void appendWhereClause(StringBuffer buffer) {
+        if (customWhereClause != null)
+            buffer.append(customWhereClause);
+        else {
+            List<Clause> whereClauses = getWhereClauses();
+            for (int i = 0; i < whereClauses.size(); i++) {
+                Clause clause = whereClauses.get(i);
+                buffer.append(clause.clauseString(i));
+
+                if (i < whereClauses.size() - 1)
+                    buffer.append(SPACE);
             }
         }
     }
@@ -458,42 +467,82 @@ public class ObjectSearcher implements TeiidSqlConstants.Reserved, StringConstan
      * Create the Where clause
      *
      * @param buffer
+     * @param uow 
      */
-    private void createWhere(StringBuffer buffer) {
+    private void createWhere(StringBuffer buffer, UnitOfWork uow) {
         ArgCheck.isNotNull(getFromType(), "At least 1 from clause is required"); //$NON-NLS-1$
 
-        if (isEmpty(whereClauses) && customWhereClause == null)
+        //
+        // If the uow is null then no need to add the user workspace
+        // where class so free to return
+        //
+        if ((uow == null || RepositoryImpl.isSystemTx(uow)) && isEmpty(whereClauses) && customWhereClause == null)
             return;
 
-        buffer.append(SPACE);
-        buffer.append(WHERE);
-        buffer.append(SPACE);
+        //
+        // If uow not a system transaction then find the user's workspace and limit
+        // the search to its descendents by including a parent clause
+        //
+        boolean isUserTx = uow != null && ! RepositoryImpl.isSystemTx(uow);
+        String wkspPath = RepositoryImpl.komodoWorkspacePath(uow);
 
-        if (whereClauses != null && ! whereClauses.isEmpty()) {
-            for (int i = 0; i < whereClauses.size(); i++) {
-                Clause clause = whereClauses.get(i);
-                buffer.append(clause.clauseString(i));
+        buffer.append(SPACE)
+                    .append(WHERE)
+                    .append(SPACE);
 
-                if (i < whereClauses.size() - 1)
-                    buffer.append(SPACE);
+        if (isUserTx) {
+            // ISDESCENDANTNODE('wkspPath')
+            buffer.append("ISDESCENDANTNODE")
+                        .append(OPEN_BRACKET);
+
+            if (getFromType().getAlias() != null && ! EMPTY_STRING.equals(getFromType().getAlias())) {
+                buffer.append(QUOTE_MARK)
+                            .append(getFromType().getAlias())
+                            .append(QUOTE_MARK)
+                            .append(COMMA)
+                            .append(SPACE);
             }
-        } else
-            buffer.append(customWhereClause);
+
+            buffer.append(QUOTE_MARK)
+                        .append(wkspPath)
+                        .append(QUOTE_MARK)
+                        .append(CLOSE_BRACKET);
+
+            // AND (
+            if (hasWhere()) {
+                buffer.append(SPACE)
+                            .append(AND)
+                            .append(SPACE)
+                            .append(OPEN_BRACKET)
+                            .append(SPACE);
+            }
+        }
+
+        appendWhereClause(buffer);
+
+        if (isUserTx && hasWhere()) {
+            buffer.append(SPACE)
+                        .append(CLOSE_BRACKET);
+        }
     }
 
-    private String createStatement() {
+    private String createStatement(UnitOfWork uow) {
         StringBuffer buffer = new StringBuffer();
 
         createSelect(buffer);
         createFrom(buffer);
-        createWhere(buffer);
+        createWhere(buffer, uow);
 
         return buffer.toString();
     }
 
+    public String toString(UnitOfWork uow) {
+        return createStatement(uow);
+    }
+
     @Override
     public String toString() {
-        return createStatement();
+        return toString(null);
     }
 
     @Override
@@ -582,7 +631,7 @@ public class ObjectSearcher implements TeiidSqlConstants.Reserved, StringConstan
      * @throws KException if error occurs
      */
     public List<KomodoObject> searchObjects(final UnitOfWork uow) throws KException {
-        String statement = createStatement();
+        String statement = createStatement(uow);
         List<KomodoObject> objects = searchObjects(uow, statement);
         return objects;
     }

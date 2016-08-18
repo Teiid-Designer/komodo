@@ -27,18 +27,18 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.util.List;
+import org.junit.Before;
 import org.junit.Test;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.core.KomodoLexicon.Search;
 import org.komodo.core.KomodoLexicon.Search.WhereClause;
 import org.komodo.repository.RepositoryImpl;
-import org.komodo.repository.RepositoryTools;
 import org.komodo.spi.KException;
-import org.komodo.spi.lexicon.TeiidSqlLexicon;
 import org.komodo.spi.query.LogicalOperator;
 import org.komodo.spi.repository.KomodoObject;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.Repository.KeywordCriteria;
+import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.test.utils.AbstractLocalRepositoryTest;
 import org.modeshape.jcr.JcrNtLexicon;
 import org.modeshape.jcr.api.JcrConstants;
@@ -48,6 +48,7 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
 
     private static final String TEIIDSQL = "TeiidSQL";
     private static final String DDL = "DDL";
+    private String userWksp;
 
     private KomodoObject[] createTestData() throws Exception {
         // Create the komodo workspace
@@ -71,6 +72,11 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
         return testNodes;
     }
 
+    @Before
+    public void setup() {
+        this.userWksp = RepositoryImpl.komodoWorkspacePath(getTransaction());
+    }
+
     @Test
     public void shouldHaveRepository() {
         try {
@@ -85,7 +91,7 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
     public void noParameters() {
         try {
             ObjectSearcher os = new ObjectSearcher(_repo);
-            os.toString();
+            os.toString(getTransaction());
             fail("ObjectSearcher should require at least 1 From Clause");
         } catch (Exception ex) {
             assertTrue(ex instanceof IllegalArgumentException);
@@ -93,7 +99,7 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
 
         try {
             ObjectSearcher os = new ObjectSearcher(_repo);
-            os.toString();
+            os.toString(getTransaction());
             fail("ObjectSearcher should require at least 1 From Clause");
         } catch (Exception ex) {
             assertTrue(ex instanceof IllegalArgumentException);
@@ -102,10 +108,11 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
 
     @Test
     public void oneFrom() throws Exception {
-        String expected = "SELECT [jcr:path], [mode:localName] FROM [tko:workspace], [tko:library]";
+        String expected = "SELECT [jcr:path], [mode:localName] FROM [tko:workspace] " +
+                                        "WHERE ISDESCENDANTNODE('" + userWksp + "')";
         ObjectSearcher os = new ObjectSearcher(_repo);
         os.setFromType(KomodoLexicon.Komodo.WORKSPACE, null);
-        assertEquals(expected, os.toString());
+        assertEquals(expected, os.toString(getTransaction()));
     }
 
     @Test
@@ -113,7 +120,7 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
         try {
             ObjectSearcher os = new ObjectSearcher(_repo);
             os.addWhereSetClause(null, "p1", "property1", (String[]) null);
-            os.toString();
+            os.toString(getTransaction());
             fail("Type cannot be null");
         } catch (Exception ex) {
             assertTrue(ex instanceof IllegalArgumentException);
@@ -125,7 +132,7 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
         try {
             ObjectSearcher os = new ObjectSearcher(_repo);
             os.addWhereSetClause(null, null, "property1", "value1");
-            os.toString();
+            os.toString(getTransaction());
             fail("Alias cannot be null if there are no from clauses yet!");
         } catch (Exception ex) {
             assertTrue(ex instanceof IllegalArgumentException);
@@ -138,7 +145,7 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
             ObjectSearcher os = new ObjectSearcher(_repo);
             os.setFromType(KomodoLexicon.Komodo.WORKSPACE);
             os.addWhereSetClause(null, null, "property1", "value1");
-            os.toString();
+            os.toString(getTransaction());
         } catch (Exception ex) {
             ex.printStackTrace();
             assertTrue(ex instanceof IllegalArgumentException);
@@ -148,13 +155,15 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
     @Test
     public void addWhereClauseWithNullAliasWithOneFrom() throws Exception {
         String expected = "SELECT [jcr:path], [mode:localName] FROM [nt:unstructured] AS p1 " +
-                                     "WHERE p1.[property1] IN ('value1')";
+                                        "WHERE ISDESCENDANTNODE('p1', '" + userWksp + "') AND ( " +
+                                        "p1.[property1] IN ('value1')" +
+                                        " )";
 
         ObjectSearcher os = new ObjectSearcher(_repo);
         os.setFromType(JcrConstants.NT_UNSTRUCTURED, "p1");
         os.addWhereSetClause(null, null, "property1", "value1");
 
-        assertEquals(expected, os.toString());
+        assertEquals(expected, os.toString(getTransaction()));
     }
 
     @Test
@@ -163,7 +172,7 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
             ObjectSearcher os = new ObjectSearcher(_repo);
             os.setFromType(KomodoLexicon.Komodo.WORKSPACE);
             os.addWhereSetClause(null, "p2", "property1", "value1");
-            os.toString();
+            os.toString(getTransaction());
             fail("Alias of where clause must refer to existing alias");
         } catch (Exception ex) {
             assertTrue(ex instanceof IllegalArgumentException);
@@ -173,7 +182,7 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
             ObjectSearcher os = new ObjectSearcher(_repo);
             os.setFromType(KomodoLexicon.Komodo.WORKSPACE, "p1");
             os.addWhereSetClause(null, "p2", "property1", "value1");
-            os.toString();
+            os.toString(getTransaction());
             fail("Alias of where clause must refer to existing alias");
         } catch (Exception ex) {
             assertTrue(ex instanceof IllegalArgumentException);
@@ -183,112 +192,132 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
     @Test
     public void addWhereClauseTwoPropertyValues() throws Exception {
         String expected = "SELECT [jcr:path], [mode:localName] FROM [nt:unstructured] AS p1 " +
-                                    "WHERE p1.[property1] IN ('value1', 'value2')";
+                                        "WHERE ISDESCENDANTNODE('p1', '" + userWksp + "') AND ( " +
+                                        "p1.[property1] IN ('value1', 'value2')" +
+                                        " )";
         ObjectSearcher os = new ObjectSearcher(_repo);
         os.setFromType(JcrConstants.NT_UNSTRUCTURED, "p1");
         os.addWhereSetClause(null, "p1", "property1", "value1", "value2");
 
-        assertEquals(expected, os.toString());
+        assertEquals(expected, os.toString(getTransaction()));
     }
 
     @Test
     public void addWhereClauseWildcardProperty() throws Exception {
         String expected = "SELECT [jcr:path], [mode:localName] FROM [nt:unstructured] AS p1 " +
-                                     "WHERE p1.* IN ('value1', 'value2')";
+                                         "WHERE ISDESCENDANTNODE('p1', '" + userWksp + "') AND ( " +
+                                         "p1.* IN ('value1', 'value2')" +
+                                         " )";
         ObjectSearcher os = new ObjectSearcher(_repo);
         os.setFromType(JcrConstants.NT_UNSTRUCTURED, "p1");
         os.addWhereSetClause(null, "p1", STAR, "value1", "value2");
 
-        assertEquals(expected, os.toString());
+        assertEquals(expected, os.toString(getTransaction()));
     }
 
     @Test
     public void addWhereClauseTwoDifferentProperties() throws Exception {
         String expected = "SELECT [jcr:path], [mode:localName] FROM [nt:unstructured] AS p1 " +
-                                     "WHERE p1.[property1] IN ('value1', 'value2') " +
-                                     "OR p1.[name] IN ('bob', 'bryan')";
+                                         "WHERE ISDESCENDANTNODE('p1', '" + userWksp + "') AND ( " +
+                                         "p1.[property1] IN ('value1', 'value2') " +
+                                         "OR p1.[name] IN ('bob', 'bryan')" +
+                                         " )";
         ObjectSearcher os = new ObjectSearcher(_repo);
         os.setFromType(JcrConstants.NT_UNSTRUCTURED, "p1");
         os.addWhereSetClause(null, "p1", "property1", "value1", "value2");
         os.addWhereSetClause(LogicalOperator.OR, "p1", "name", "bob", "bryan");
 
-        assertEquals(expected, os.toString());
+        assertEquals(expected, os.toString(getTransaction()));
     }
 
     @Test
     public void addWhereClauseOneSetPropertyOneContainsProperty() throws Exception {
         String expected = "SELECT [jcr:path], [mode:localName] FROM [nt:unstructured] AS p1 " +
-                                     "WHERE p1.[property1] IN ('value1', 'value2') " +
-                                     "OR CONTAINS(p1.[name], 'bob')";
+                                         "WHERE ISDESCENDANTNODE('p1', '" + userWksp + "') AND ( " +
+                                         "p1.[property1] IN ('value1', 'value2') " +
+                                         "OR CONTAINS(p1.[name], 'bob')" +
+                                         " )";
         ObjectSearcher os = new ObjectSearcher(_repo);
         os.setFromType(JcrConstants.NT_UNSTRUCTURED, "p1");
         os.addWhereSetClause(null, "p1", "property1", "value1", "value2");
         os.addWhereContainsClause(LogicalOperator.OR, "p1", "name", "bob");
 
-        assertEquals(expected, os.toString());
+        assertEquals(expected, os.toString(getTransaction()));
     }
 
     @Test
     public void addWhereClauseContainsWildcardProperty() throws Exception {
         String expected = "SELECT [jcr:path], [mode:localName] FROM [nt:unstructured] AS p1 " +
-                                     "WHERE p1.* IN ('value1', 'value2')";
+                                         "WHERE ISDESCENDANTNODE('p1', '" + userWksp + "') AND ( " +
+                                         "p1.* IN ('value1', 'value2')" +
+                                         " )";
         ObjectSearcher os = new ObjectSearcher(_repo);
         os.setFromType(JcrConstants.NT_UNSTRUCTURED, "p1");
         os.addWhereSetClause(null, "p1", STAR, "value1", "value2");
 
-        assertEquals(expected, os.toString());
+        assertEquals(expected, os.toString(getTransaction()));
     }
 
     @Test
     public void addWhereClauseContainsPropertyWithTwoKeywords() throws Exception {
         String expected = "SELECT [jcr:path], [mode:localName] FROM [nt:unstructured] AS p1 " +
-                                     "WHERE p1.[property1] IN ('value1', 'value2') " +
-                                     "OR CONTAINS(p1.[name], 'bob OR chris')";
+                                    "WHERE ISDESCENDANTNODE('p1', '" + userWksp + "') AND ( " +
+                                     "p1.[property1] IN ('value1', 'value2') " +
+                                     "OR CONTAINS(p1.[name], 'bob OR chris')" +
+                                     " )";
         ObjectSearcher os = new ObjectSearcher(_repo);
         os.setFromType(JcrConstants.NT_UNSTRUCTURED, "p1");
         os.addWhereSetClause(null, "p1", "property1", "value1", "value2");
         os.addWhereContainsClause(LogicalOperator.OR, "p1", "name", KeywordCriteria.ANY, "bob", "chris");
 
-        assertEquals(expected, os.toString());
+        assertEquals(expected, os.toString(getTransaction()));
     }
 
     @Test
     public void addWhereClauseComparisonProperty() throws Exception {
         String expected = "SELECT [jcr:path], [mode:localName] FROM [nt:unstructured] AS p1 " +
-                                     "WHERE p1.[property1] = 'value1'";
+                                        "WHERE ISDESCENDANTNODE('p1', '" + userWksp + "') AND ( " +
+                                        "p1.[property1] = 'value1'" +
+                                        " )";
         ObjectSearcher os = new ObjectSearcher(_repo);
         os.setFromType(JcrConstants.NT_UNSTRUCTURED, "p1");
         os.addWhereCompareClause(null, "p1", "property1", ComparisonOperator.EQUALS, "value1");
 
-        assertEquals(expected, os.toString());
+        assertEquals(expected, os.toString(getTransaction()));
     }
 
     @Test
     public void addWhereClauseComparisonProperty2() throws Exception {
         String expected = "SELECT [jcr:path], [mode:localName] FROM [nt:unstructured] AS p1 " +
-                                     "WHERE p1.[property1] LIKE 'value%1'";
+                                        "WHERE ISDESCENDANTNODE('p1', '" + userWksp + "') AND ( " +
+                                        "p1.[property1] LIKE 'value%1'" +
+                                        " )";
         ObjectSearcher os = new ObjectSearcher(_repo);
         os.setFromType(JcrConstants.NT_UNSTRUCTURED, "p1");
         os.addWhereCompareClause(null, "p1", "property1", ComparisonOperator.LIKE, "value%1");
 
-        assertEquals(expected, os.toString());
+        assertEquals(expected, os.toString(getTransaction()));
     }
 
     @Test
     public void addWhereClauseComparisonWithFunction() throws Exception {
         String expected = "SELECT [jcr:path], [mode:localName] FROM [nt:unstructured] AS p1 " +
-                                     "WHERE LOWER(NAME(p1)) LIKE 'value%1'";
+                                        "WHERE ISDESCENDANTNODE('p1', '" + userWksp + "') AND ( " +
+                                        "LOWER(NAME(p1)) LIKE 'value%1'" +
+                                        " )";
         ObjectSearcher os = new ObjectSearcher(_repo);
         os.setFromType(JcrConstants.NT_UNSTRUCTURED, "p1");
         os.addWhereCompareClause(null, null, "NAME(p1)", ComparisonOperator.LIKE, "value%1", true);
 
-        assertEquals(expected, os.toString());
+        assertEquals(expected, os.toString(getTransaction()));
     }
 
     @Test
     public void addWhereParanthesisClause() throws Exception {
         String expected = "SELECT [jcr:path], [mode:localName] FROM [nt:unstructured] AS p1 " +
-                                    "WHERE (p1.[property1] LIKE 'value%1' OR p1.[property1] LIKE 'value%2')";
+                                        "WHERE ISDESCENDANTNODE('p1', '" + userWksp + "') AND ( " +
+                                        "(p1.[property1] LIKE 'value%1' OR p1.[property1] LIKE 'value%2')" +
+                                        " )";
         ObjectSearcher os = new ObjectSearcher(_repo);
         os.setFromType(JcrConstants.NT_UNSTRUCTURED, "p1");
 
@@ -297,7 +326,7 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
 
         os.addWhereParanthesisClause(null, clause1, clause2);
 
-        assertEquals(expected, os.toString());
+        assertEquals(expected, os.toString(getTransaction()));
     }
 
     @Test
@@ -340,8 +369,10 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
         os.addWhereContainsClause(null, "nt", KomodoLexicon.VdbModel.MODEL_DEFINITION, DDL);
 
         String expected = "SELECT [jcr:path], [mode:localName] FROM [nt:unstructured] AS nt " +
-                                     "WHERE CONTAINS(nt.[vdb:modelDefinition], 'DDL')";
-        assertEquals(expected, os.toString());
+                                         "WHERE ISDESCENDANTNODE('nt', '" + workspace.getAbsolutePath() + "') AND ( " +
+                                         "CONTAINS(nt.[vdb:modelDefinition], 'DDL')" +
+                                         " )";
+        assertEquals(expected, os.toString(getTransaction()));
 
         List<KomodoObject> searchObjects = os.searchObjects(getTransaction());
         assertEquals(testNodes.length, searchObjects.size());
@@ -393,9 +424,11 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
                                      OPEN_SQUARE_BRACKET +
                                      KomodoLexicon.VdbModelSource.NODE_TYPE +
                                      CLOSE_SQUARE_BRACKET +
-                                     " WHERE [" + JcrConstants.JCR_PATH + "] LIKE '" +
-                                     testModel1.getAbsolutePath() + "/%'";
-        assertEquals(expected, os.toString());
+                                     " WHERE ISDESCENDANTNODE('" + userWksp + "') AND ( " +
+                                     "[" + JcrConstants.JCR_PATH + "] LIKE '" +
+                                     testModel1.getAbsolutePath() + "/%'" +
+                                     " )";
+        assertEquals(expected, os.toString(getTransaction()));
 
         List<KomodoObject> searchObjects = os.searchObjects(getTransaction());
         assertEquals(sourceTotal, searchObjects.size());
@@ -456,10 +489,12 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
                                      OPEN_SQUARE_BRACKET +
                                      KomodoLexicon.VdbModelSource.NODE_TYPE +
                                      CLOSE_SQUARE_BRACKET +
-                                     " WHERE [" + JcrConstants.JCR_PATH + "] LIKE '" +
+                                     " WHERE ISDESCENDANTNODE('" + userWksp + "') AND ( " +
+                                     "[" + JcrConstants.JCR_PATH + "] LIKE '" +
                                      testModel1.getAbsolutePath() + "/%'" +
-                                     " AND ISCHILDNODE('" + testModel1.getAbsolutePath() + "')";
-        assertEquals(expected, os.toString());
+                                     " AND ISCHILDNODE('" + testModel1.getAbsolutePath() + "')" +
+                                     " )";
+        assertEquals(expected, os.toString(getTransaction()));
         System.out.println(expected);
 
         List<KomodoObject> searchObjects = os.searchObjects(getTransaction());
@@ -483,9 +518,11 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
                                      OPEN_SQUARE_BRACKET +
                                      KomodoLexicon.VdbModelSource.NODE_TYPE +
                                      CLOSE_SQUARE_BRACKET +
-                                     " WHERE [" + JcrConstants.JCR_PATH + "] LIKE '" +
-                                     testModel1.getAbsolutePath() + "/%'";
-        assertEquals(expected, os.toString());
+                                     " WHERE ISDESCENDANTNODE('" + userWksp + "') AND ( " +
+                                     "[" + JcrConstants.JCR_PATH + "] LIKE '" +
+                                     testModel1.getAbsolutePath() + "/%'" +
+                                     " )";
+        assertEquals(expected, os.toString(getTransaction()));
         System.out.println(expected);
 
         searchObjects = os.searchObjects(getTransaction());
@@ -533,8 +570,10 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
                                                      DDL, TEIIDSQL);
 
         String expected = "SELECT [jcr:path], [mode:localName] FROM [nt:unstructured] AS nt " +
-                                     "WHERE CONTAINS(nt.[vdb:modelDefinition], '" + DDL + " OR " + TEIIDSQL + "')";
-        assertEquals(expected, os.toString());
+                                        "WHERE ISDESCENDANTNODE('nt', '" + userWksp + "') AND ( " +
+                                        "CONTAINS(nt.[vdb:modelDefinition], '" + DDL + " OR " + TEIIDSQL + "')" +
+                                        " )";
+        assertEquals(expected, os.toString(getTransaction()));
 
         commit(); // must commit for search queries to work
 
@@ -599,8 +638,10 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
         os.addWhereParanthesisClause(null, clause1, clause2);
 
         String expected = "SELECT [jcr:path], [mode:localName] FROM [nt:unstructured] AS nt " +
-                                     "WHERE (nt.[vdb:modelDefinition] LIKE 'DDL' OR LOWER(nt.[vdb:modelDefinition]) LIKE 'teiidsql')";
-        assertEquals(expected, os.toString());
+                                        "WHERE ISDESCENDANTNODE('nt', '" + userWksp + "') AND ( " +
+                                        "(nt.[vdb:modelDefinition] LIKE 'DDL' OR LOWER(nt.[vdb:modelDefinition]) LIKE 'teiidsql')" +
+                                        " )";
+        assertEquals(expected, os.toString(getTransaction()));
 
         commit(); // must commit for search queries to work
 
@@ -637,10 +678,17 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
         os.addWherePathClause(null, "nt", RepositoryImpl.komodoWorkspacePath(getTransaction()));
 
         String expected = "SELECT [jcr:path], [mode:localName] FROM [nt:unstructured] AS nt " +
-                                     "WHERE PATH(nt) LIKE '" + workspace.getAbsolutePath() + "'";
-        assertEquals(expected, os.toString());
+                                        "WHERE ISDESCENDANTNODE('nt', '" + userWksp + "') AND ( " +
+                                        "PATH(nt) LIKE '" + workspace.getAbsolutePath() + "'" +
+                                        " )";
+        assertEquals(expected, os.toString(getTransaction()));
 
-        List<KomodoObject> searchObjects = os.searchObjects(getTransaction());
+        //
+        // This will only work with a sys transaction since a user transaction
+        // only searches from their user home directory and below
+        //
+        UnitOfWork sysTx = sysTx();
+        List<KomodoObject> searchObjects = os.searchObjects(sysTx);
         assertEquals(1, searchObjects.size());
 
         assertEquals(workspace.getAbsolutePath(), searchObjects.iterator().next().getAbsolutePath());
@@ -651,7 +699,7 @@ public class TestObjectSearcher extends AbstractLocalRepositoryTest {
         os = new ObjectSearcher(_repo);
         os.setFromType(JcrConstants.NT_UNSTRUCTURED, "nt");
         os.addWherePathClause(null, "nt", "/tko:komodo/%");
-        searchObjects = os.searchObjects(getTransaction());
+        searchObjects = os.searchObjects(sysTx);
 
         // /tko:komodo/tko:workspace
         // /tko:komodo/tko:workspace/$USER

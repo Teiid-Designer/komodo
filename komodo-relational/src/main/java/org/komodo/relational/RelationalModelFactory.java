@@ -93,6 +93,7 @@ import org.komodo.relational.vdb.internal.PermissionImpl;
 import org.komodo.relational.vdb.internal.TranslatorImpl;
 import org.komodo.relational.vdb.internal.VdbImpl;
 import org.komodo.relational.vdb.internal.VdbImportImpl;
+import org.komodo.repository.RepositoryImpl;
 import org.komodo.repository.RepositoryTools;
 import org.komodo.spi.KException;
 import org.komodo.spi.repository.KomodoObject;
@@ -1019,6 +1020,7 @@ public final class RelationalModelFactory {
     /**
      * @param transaction
      *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     *        AND should be owned by {@link Repository#SYSTEM_USER}
      * @param repository
      *        the repository where the model object will be created (cannot be <code>null</code>)
      * @param srcTeiid
@@ -1034,6 +1036,7 @@ public final class RelationalModelFactory {
         ArgCheck.isTrue( ( transaction.getState() == State.NOT_STARTED ), "transaction state is not NOT_STARTED" ); //$NON-NLS-1$
         ArgCheck.isNotNull( repository, "repository" ); //$NON-NLS-1$
         ArgCheck.isNotNull( srcTeiid, "srcTeiid" ); //$NON-NLS-1$
+        ArgCheck.isTrue(RepositoryImpl.isSystemTx(transaction), "transaction should be owned by " + Repository.SYSTEM_USER);
 
         KomodoObject teiidCache = repository.komodoTeiidCache( transaction );
         final String id = srcTeiid.getName(transaction);

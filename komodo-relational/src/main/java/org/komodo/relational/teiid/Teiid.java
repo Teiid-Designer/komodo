@@ -247,9 +247,14 @@ public interface Teiid extends RelationalObject, TeiidArchetype {
 
     /**
      * Import the teiid content into the teiid cache
+     *
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not {@link State#NOT_STARTED})
+     *        AND should be owned by {@link Repository#SYSTEM_USER}
+     *
      * @return the cached teiid node
      *
      * @throws KException
      */
-    CachedTeiid importContent(UnitOfWork uow) throws KException;
+    CachedTeiid importContent(UnitOfWork transaction) throws KException;
 }

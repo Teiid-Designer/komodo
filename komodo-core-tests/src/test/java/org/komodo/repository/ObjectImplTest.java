@@ -293,17 +293,18 @@ public final class ObjectImplTest extends AbstractLocalRepositoryTest {
     public void shouldNotHavePropertyWhenReservedPath() throws Exception {
         final String propertyName = "jcr:primaryType";
 
-        for ( final String reservedPath : RepositoryImpl.getReservedPaths(getTransaction()) ) {
+        UnitOfWork sysTx = sysTx();
+        for ( final String reservedPath : RepositoryImpl.getReservedPaths(sysTx) ) {
             final KomodoObject kobject = new ObjectImpl( _repo, reservedPath, 0 );
 
-            final Property property = kobject.getProperty( getTransaction(), propertyName );
+            final Property property = kobject.getProperty( sysTx, propertyName );
             assertThat( property, is( nullValue() ) );
 
-            final Property rawProperty = kobject.getRawProperty( getTransaction(), propertyName );
+            final Property rawProperty = kobject.getRawProperty( sysTx, propertyName );
             assertThat( rawProperty, is( nullValue() ) );
 
-            assertThat( kobject.hasProperty( getTransaction(), propertyName ), is( false ) );
-            assertThat( kobject.hasRawProperty( getTransaction(), propertyName ), is( false ) );
+            assertThat( kobject.hasProperty( sysTx, propertyName ), is( false ) );
+            assertThat( kobject.hasRawProperty( sysTx, propertyName ), is( false ) );
         }
     }
 
@@ -311,33 +312,36 @@ public final class ObjectImplTest extends AbstractLocalRepositoryTest {
     public void shouldNotHavePropertyDescriptorWhenReservedPath() throws Exception {
         final String propertyName = "jcr:primaryType";
 
-        for ( final String reservedPath : RepositoryImpl.getReservedPaths(getTransaction()) ) {
+        UnitOfWork sysTx = sysTx();
+        for ( final String reservedPath : RepositoryImpl.getReservedPaths(sysTx) ) {
             final KomodoObject kobject = new ObjectImpl( _repo, reservedPath, 0 );
-            final PropertyDescriptor descriptor = kobject.getPropertyDescriptor( getTransaction(), propertyName );
+            final PropertyDescriptor descriptor = kobject.getPropertyDescriptor( sysTx, propertyName );
             assertThat( descriptor, is( nullValue() ) );
         }
     }
 
     @Test
     public void shouldNotHavePropertyDescriptorsWhenReservedPath() throws Exception {
-        for ( final String reservedPath : RepositoryImpl.getReservedPaths(getTransaction()) ) {
+        UnitOfWork sysTx = sysTx();
+        for ( final String reservedPath : RepositoryImpl.getReservedPaths(sysTx) ) {
             final KomodoObject kobject = new ObjectImpl( _repo, reservedPath, 0 );
-            final PropertyDescriptor[] descriptors = kobject.getPropertyDescriptors( getTransaction() );
+            final PropertyDescriptor[] descriptors = kobject.getPropertyDescriptors( sysTx );
             assertThat( descriptors.length, is( 0 ) );
 
-            final PropertyDescriptor[] rawDescriptors = kobject.getRawPropertyDescriptors( getTransaction() );
+            final PropertyDescriptor[] rawDescriptors = kobject.getRawPropertyDescriptors( sysTx );
             assertThat( rawDescriptors.length, is( 0 ) );
         }
     }
 
     @Test
     public void shouldNotHavePropertyNamesWhenReservedPath() throws Exception {
-        for ( final String reservedPath : RepositoryImpl.getReservedPaths(getTransaction()) ) {
+        UnitOfWork sysTx = sysTx();
+        for ( final String reservedPath : RepositoryImpl.getReservedPaths(sysTx) ) {
             final KomodoObject kobject = new ObjectImpl( _repo, reservedPath, 0 );
-            final String[] names = kobject.getPropertyNames( getTransaction() );
+            final String[] names = kobject.getPropertyNames( sysTx );
             assertThat( names.length, is( 0 ) );
 
-            final String[] rawNames = kobject.getRawPropertyNames( getTransaction() );
+            final String[] rawNames = kobject.getRawPropertyNames( sysTx );
             assertThat( rawNames.length, is( 0 ) );
         }
     }
@@ -355,15 +359,15 @@ public final class ObjectImplTest extends AbstractLocalRepositoryTest {
     public void testRemoveThenAdd() throws Exception {
         String name = "testNode";
 
-        UnitOfWork transaction1 = _repo.createTransaction(TEST_USER, "create-node-to-remove", false, null);
+        UnitOfWork transaction1 = getTransaction();
         KomodoObject wkspNode = _repo.komodoWorkspace(transaction1);
         assertNotNull(wkspNode);
         KomodoObject testNode = wkspNode.addChild(transaction1, name, null);
         assertNotNull(testNode);
         String testNodePath = testNode.getAbsolutePath();
-        transaction1.commit();
+        commit();
 
-        UnitOfWork transaction2 = _repo.createTransaction(TEST_USER, "node-removal", false, null);
+        UnitOfWork transaction2 = getTransaction();
         wkspNode = _repo.komodoWorkspace(transaction2);
         assertNotNull(wkspNode);
         testNode = _repo.getFromWorkspace(transaction2, testNodePath);

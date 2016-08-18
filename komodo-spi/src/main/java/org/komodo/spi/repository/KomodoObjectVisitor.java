@@ -21,12 +21,19 @@
  */
 package org.komodo.spi.repository;
 
+import org.komodo.spi.repository.Repository.OperationType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 
 /**
  *
  */
 public interface KomodoObjectVisitor {
+
+    /**
+     * @return whether this visitor is to be used for writing to the
+     *                  artifacts it visits or only reading them
+     */
+    OperationType getRequestType();
 
     /**
      * Visit the given object

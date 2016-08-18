@@ -37,6 +37,33 @@ public interface Repository {
     String SYSTEM_USER = "SYSTEM";
 
     /**
+     * The nature of the operation being conducted
+     * and to be vetted by the security system
+     */
+    enum OperationType {
+        /**
+         * Can read a node's attributes and get its children
+         */
+        READ_OPERATION,
+
+        /**
+         * Can add/remove children from a node but
+         * cannot modify the node itself
+         */
+        CHILD_OPERATION,
+
+        /**
+         * Can modify a node's attributes
+         */
+        MODIFY_OPERATION,
+
+        /**
+         * Can a node be removed
+         */
+        REMOVE_OPERATION
+    }
+
+    /**
      * A repository identifier.
      */
     interface Id {
@@ -239,6 +266,20 @@ public interface Repository {
         void respond( final Object results );
 
     }
+
+    /**
+     * Tests whether the given object can be acted upon by the transaction
+     *
+     * @param transaction
+     *        the transaction (cannot be <code>null</code> or have a state that is not
+     *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     *
+     * @param object the object to be acted upon
+     * @param requestType the nature of the request being submitted, eg. read-only or writeable.
+     *
+     * @throws KException if security failure occurs
+     */
+    void checkSecurity(UnitOfWork transaction, KomodoObject object, OperationType requestType) throws KException;
 
     /**
      * @param transaction

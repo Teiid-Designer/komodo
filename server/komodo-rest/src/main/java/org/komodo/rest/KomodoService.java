@@ -49,6 +49,7 @@ import org.komodo.relational.dataservice.Dataservice;
 import org.komodo.relational.datasource.Datasource;
 import org.komodo.relational.vdb.Vdb;
 import org.komodo.relational.workspace.WorkspaceManager;
+import org.komodo.repository.RepositoryImpl;
 import org.komodo.repository.SynchronousCallback;
 import org.komodo.rest.KomodoRestV1Application.V1Constants;
 import org.komodo.rest.RestBasicEntity.ResourceNotFound;
@@ -116,7 +117,7 @@ public abstract class KomodoService implements V1Constants {
         }
     }
 
-    protected class SecurityPrincipal {
+    protected static class SecurityPrincipal {
 
         private final String userName;
 
@@ -140,6 +141,7 @@ public abstract class KomodoService implements V1Constants {
         }
     }
 
+    protected final static SecurityPrincipal SYSTEM_USER = new SecurityPrincipal(RepositoryImpl.SYSTEM_USER, null);
     
     protected final Repository repo;
 

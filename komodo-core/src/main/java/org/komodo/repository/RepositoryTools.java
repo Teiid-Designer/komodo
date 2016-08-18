@@ -29,6 +29,7 @@ import org.komodo.spi.repository.KomodoObjectVisitor;
 import org.komodo.spi.repository.Property;
 import org.komodo.spi.repository.PropertyDescriptor.Type;
 import org.komodo.spi.repository.Repository;
+import org.komodo.spi.repository.Repository.OperationType;
 import org.komodo.spi.repository.Repository.UnitOfWork;
 import org.komodo.utils.ArgCheck;
 import org.komodo.utils.StringUtils;
@@ -275,6 +276,11 @@ public class RepositoryTools implements StringConstants {
             }
 
             return indent.toString();
+        }
+
+        @Override
+        public OperationType getRequestType() {
+            return OperationType.READ_OPERATION;
         }
 
         @Override

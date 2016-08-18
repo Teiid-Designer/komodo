@@ -298,6 +298,7 @@ public class ServerManager extends ObjectImpl implements RelationalObject {
      * @param uow
      *        the transaction (cannot be <code>null</code> or have a state that is not
      *        {@link org.komodo.spi.repository.Repository.UnitOfWork.State#NOT_STARTED})
+     *        AND should be owned by {@link Repository#SYSTEM_USER}
      * @param srcTeiid the source teiid model
      * @return the teiid object (never <code>null</code>)
      * @throws KException

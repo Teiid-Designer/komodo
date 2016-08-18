@@ -28,6 +28,7 @@ import org.komodo.repository.ObjectImplTest;
 import org.komodo.repository.search.TestObjectSearcher;
 import org.komodo.repository.test.TestLocalRepository;
 import org.komodo.repository.test.TestLocalRepositoryPersistence;
+import org.komodo.repository.test.TestMultiUsers;
 import org.komodo.repository.validation.RuleFactoryTest;
 import org.komodo.repository.validation.ValidationManagerImplTest;
 
@@ -40,7 +41,8 @@ import org.komodo.repository.validation.ValidationManagerImplTest;
     TestLocalRepositoryPersistence.class,
     ValidationManagerImplTest.class,
     RuleFactoryTest.class,
-    TestObjectOperations.class
+    TestObjectOperations.class,
+    TestMultiUsers.class
     } )
 public class AllTests {
     // nothing to do

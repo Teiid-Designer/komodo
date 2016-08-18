@@ -455,19 +455,14 @@ public class TestTeiidVdbImporter extends AbstractImporterTest {
         executeImporter(vdbStream, workspace, importOptions, importMessages);
 
     	// Commit the transaction and handle any import exceptions
+        SynchronousCallback importCallback = this.callback;
+        commit(State.ERROR);
 
-        SynchronousCallback testCallback = this.callback;
-        this.getTransaction().commit();
-
-        assertTrue(this.callback.await( TIME_TO_WAIT, TimeUnit.MINUTES ));
-        assertEquals(State.ERROR, getTransaction().getState());
-
-        if ( testCallback.hasError() ) {
-            importMessages.addErrorMessage( testCallback.error() );
+        if ( importCallback.hasError() ) {
+            importMessages.addErrorMessage( importCallback.error() );
         }
 
     	// Retrieve vdb after import
-        createInitialTransaction();
         KomodoObject vdbNode = workspace.getChild(getTransaction(), TestUtilities.TWEET_EXAMPLE_VDB_NAME, VdbLexicon.Vdb.VIRTUAL_DATABASE);
         assertNotNull(vdbNode);
 

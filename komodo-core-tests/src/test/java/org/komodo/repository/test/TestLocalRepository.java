@@ -372,26 +372,21 @@ public class TestLocalRepository extends AbstractLocalRepositoryTest {
 
     @Test
     public void shouldTraverseUserWorkspace() throws Exception {
-        KomodoObject komodoUserWksp = _repo.komodoWorkspace(getTransaction());
-        assertNotNull(komodoUserWksp);
+        UnitOfWork sysTx = sysTx();
+        KomodoObject komodoWksp = _repo.komodoWorkspace(sysTx);
+        assertNotNull(komodoWksp);
         String komodoRootPath = FORWARD_SLASH + KomodoLexicon.Komodo.NODE_TYPE;
-        String komodoWkspRootPath = komodoRootPath + FORWARD_SLASH + KomodoLexicon.Komodo.WORKSPACE;
-        String komodoUserWkspPath = komodoWkspRootPath + FORWARD_SLASH + TEST_USER;
+        String komodoWkspPath = komodoRootPath + FORWARD_SLASH + KomodoLexicon.Komodo.WORKSPACE;
 
-        assertEquals(komodoUserWkspPath, komodoUserWksp.getAbsolutePath());
-        verifyJcrNode(komodoUserWksp);
+        assertEquals(komodoWkspPath, komodoWksp.getAbsolutePath());
+        verifyJcrNode(komodoWksp);
 
-        KomodoObject wkspRoot = komodoUserWksp.getParent(getTransaction());
-        assertNotNull(wkspRoot);
-        assertEquals(komodoWkspRootPath, wkspRoot.getAbsolutePath());
-        verifyJcrNode(wkspRoot);
-
-        KomodoObject komodoRoot = wkspRoot.getParent(getTransaction());
+        KomodoObject komodoRoot = komodoWksp.getParent(sysTx);
         assertNotNull(komodoRoot);
         assertEquals(komodoRootPath, komodoRoot.getAbsolutePath());
         verifyJcrNode(komodoRoot);
 
-        final KomodoObject nullParent = komodoRoot.getParent( getTransaction() );
+        final KomodoObject nullParent = komodoRoot.getParent(sysTx);
         assertThat( nullParent, is( nullValue() ) );
     }
 

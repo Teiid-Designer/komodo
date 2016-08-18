@@ -22,8 +22,8 @@
 package org.komodo.shell.commands;
 
 import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.komodo.core.KomodoLexicon;
 import org.komodo.shell.AbstractCommandTest;
@@ -43,19 +43,7 @@ public final class AddChildCommandTest extends AbstractCommandTest {
     }
 
     @Test
-    public void shouldAllowAtRoot() throws Exception {
-        final String child = "blah";
-        final String[] commands = { "add-child " + child };
-        final CommandResult result = execute( commands );
-        assertCommandResultOk( result );
-
-        KomodoObject userWorkspace = _repo.komodoWorkspace( getTransaction() );
-        KomodoObject wkspRoot = userWorkspace.getParent( getTransaction() );
-        final KomodoObject root = wkspRoot.getParent( getTransaction() );
-        assertThat( root.getChild( getTransaction(), child ), is( notNullValue() ) );
-    }
-
-    @Test
+    @Ignore("Security now locks this down until such time as the library start to be really used")
     public void shouldAddChildAtLibrary() throws Exception {
         final String childName = "blah";
         final String[] commands = { "library", "add-child " + childName };

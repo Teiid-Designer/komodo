@@ -131,6 +131,7 @@ public class RelationalModelTest extends AbstractLocalRepositoryTest {
 
         assertThat( teiid.getPrimaryType( getTransaction() ).getName(), is( KomodoLexicon.Teiid.NODE_TYPE ) );
         assertThat( teiid.getName( getTransaction() ), is( teiidName ) );
+        commit();
         return teiid;
     }
 
